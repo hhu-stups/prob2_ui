@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import de.prob2.ui.modeline.*?>
+<?import javafx.scene.layout.*?>
+
+<SplitPane dividerPositions="0.29797979797979796" xmlns="http://javafx.com/javafx/8.0.40"
+	xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.AnimationPerspective">
+	<items>
+		<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0"
+			prefWidth="100.0">
+			<children>
+				<Accordion layoutX="-28.0" layoutY="128.0" prefHeight="398.0"
+					prefWidth="174.0" AnchorPane.bottomAnchor="0.0"
+					AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+					AnchorPane.topAnchor="0.0">
+					<panes>
+						<TitledPane animated="false" text="untitled 1">
+							<content>
+								<AnchorPane minHeight="0.0" minWidth="0.0"
+									prefHeight="180.0" prefWidth="200.0" />
+							</content>
+						</TitledPane>
+						<TitledPane animated="false" text="untitled 2">
+							<content>
+								<AnchorPane minHeight="0.0" minWidth="0.0"
+									prefHeight="180.0" prefWidth="200.0" />
+							</content>
+						</TitledPane>
+						<TitledPane animated="false" text="untitled 3">
+							<content>
+								<AnchorPane minHeight="0.0" minWidth="0.0"
+									prefHeight="180.0" prefWidth="200.0" />
+							</content>
+						</TitledPane>
+					</panes>
+				</Accordion>
+			</children>
+		</AnchorPane>
+		<AnchorPane>
+			<ModelineController></ModelineController>
+			<children>
+				<Button fx:id="foo" layoutX="179.0" layoutY="186.0"
+					mnemonicParsing="false" text="Button" />
+			</children>
+		</AnchorPane>
+	</items>
+</SplitPane>

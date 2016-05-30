@@ -1,0 +1,8 @@
+/bin/
+ProB.log.*.log
+prob_log.txt
+.gradle
+.settings
+build
+.classpath
+.project
