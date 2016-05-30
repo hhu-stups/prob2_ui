@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 
 import de.prob.MainModule;
+import de.prob2.ui.modeline.ModelineController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.MenuBar;
 import javafx.util.Callback;
@@ -15,6 +16,7 @@ public class ProB2Module extends AbstractModule {
 	protected void configure() {
 		bind(MenuBar.class).asEagerSingleton();
 		install(new MainModule());
+		bind(ModelineController.class);
 		bind(Database.class).toInstance(new Database());
 	}
 

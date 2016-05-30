@@ -7,7 +7,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -62,8 +61,6 @@ public class MainController implements Initializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-
 
 	}
 
