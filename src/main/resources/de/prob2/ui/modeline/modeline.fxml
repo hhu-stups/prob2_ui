@@ -21,13 +21,13 @@
 			<children>
 				<HBox prefHeight="12.0" prefWidth="432.0" VBox.vgrow="ALWAYS">
 					<children>
-						<Label text="Perform a command" textFill="#868686">
+						<Label text="%modeline.perform.command" textFill="#868686">
 							<font>
 								<Font size="12.0" />
 							</font>
 						</Label>
 						<Label alignment="CENTER_RIGHT" prefHeight="13.0" prefWidth="315.0"
-							text="[↑↓] to navigate [↵] to select [esc] to dismiss"
+							text="%modeline.instructions"
 							textAlignment="RIGHT" textFill="#868686" HBox.hgrow="ALWAYS">
 							<font>
 								<Font size="12.0" />

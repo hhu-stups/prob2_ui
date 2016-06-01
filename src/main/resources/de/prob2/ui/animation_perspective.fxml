@@ -39,10 +39,10 @@
 			</children>
 		</AnchorPane>
 		<AnchorPane>
-			<ModelineController></ModelineController>
 			<children>
-				<Button fx:id="foo" layoutX="179.0" layoutY="186.0"
-					mnemonicParsing="false" text="Button" />
+				<ModelineController></ModelineController>
+				<Button fx:id="someButton" layoutX="179.0" layoutY="186.0"
+					mnemonicParsing="false" text="%Button" />
 			</children>
 		</AnchorPane>
 	</items>

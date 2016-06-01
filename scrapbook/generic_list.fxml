@@ -4,15 +4,13 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="rootContainer" maxHeight="-Infinity"
+
+<BorderPane fx:id="genericListContainer" maxHeight="-Infinity"
 	maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
 	prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.40"
-	xmlns:fx="http://javafx.com/fxml/1">
+	xmlns:fx="http://javafx.com/fxml/1" >
 	<center>
-		<StackPane fx:id="mainArea" prefHeight="150.0" prefWidth="200.0"
-			BorderPane.alignment="CENTER">
-			<fx:include fx:id="embeddedView" source="animation_perspective.fxml" />
-		</StackPane>
+		<ListView fx:id="list" prefHeight="200.0" prefWidth="200.0"
+			BorderPane.alignment="CENTER" />
 	</center>
-	
 </BorderPane>

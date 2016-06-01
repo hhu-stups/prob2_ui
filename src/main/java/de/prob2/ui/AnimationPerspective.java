@@ -13,11 +13,13 @@ import javafx.scene.control.Button;
 
 public class AnimationPerspective implements Initializable {
 
+	@SuppressWarnings("unused")
 	private final Api api;
 
 	@FXML
-	Button foo;
+	Button someButton;
 
+	@SuppressWarnings("unused")
 	private FXMLLoader loader;
 
 	@Inject
@@ -29,9 +31,14 @@ public class AnimationPerspective implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		foo.setText(api.getVersion().toString());
-		foo.setOnAction(e -> {
-			System.out.println("proc");
+
+		someButton.setOnAction(e -> {
+			try {
+				// StateSpace stateSpace = api.b_load("scheduler.mch");
+				System.out.println("click");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 		});
 	}
 
