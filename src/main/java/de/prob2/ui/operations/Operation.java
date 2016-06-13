@@ -1,0 +1,33 @@
+package de.prob2.ui.operations;
+
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+
+public class Operation {
+	public final String name;
+	public final List<String> params;
+	public final String id;
+	public final String enablement;
+
+	public Operation(final String id, final String name, final List<String> params, final boolean isEnabled,
+			final boolean hasTimeout) {
+		this.id = id;
+		this.name = name;
+		this.params = params;
+		enablement = isEnabled ? "enabled" : hasTimeout ? "timeout" : "notEnabled";
+	}
+
+	@Override
+	public String toString() {
+		return name + "(" + StringUtils.join(params, ", ") + ")";
+	}
+	
+	public boolean isEnabled() {
+		if(enablement.equals("enabled")) 
+			return true;
+		
+		return false;
+	}
+
+}

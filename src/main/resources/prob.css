@@ -1,0 +1,86 @@
+.icons{
+    -fx-font-family: FontAwesome;
+}
+
+#searchButton {
+    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-28-search.png");
+    -fx-background-size: 15px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 50%;
+}
+
+#backButton {
+    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-171-step-backward.png");
+    -fx-background-size: 10px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 50%;
+}
+
+#forwardButton {
+    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-179-step-forward.png");
+    -fx-background-size: 10px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 50%;
+}
+
+#randomButton {
+    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-84-random.png");
+    -fx-background-size: 20px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 30%;
+}
+
+.aToZ {
+    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-405-sort-by-alphabet.png");
+    -fx-background-size: 18px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 50%;
+}
+
+.zToA {
+    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-406-sort-by-alphabet-alt.png");
+    -fx-background-size: 18px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 50%;
+}
+
+ 
+ .back {
+ 	-fx-image: url("glyphicons_free/glyphicons/png/glyphicons-211-arrow-left.png");
+ }
+ 
+ .forward {
+ 	-fx-image: url("glyphicons_free/glyphicons/png/glyphicons-212-arrow-right.png");
+ }
+ 
+#searchicon {
+    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-28-search.png");
+}
+
+.eyeopen {
+    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-52-eye-open.png");
+}
+
+.eyeclosed {
+    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-53-eye-close.png");
+}
+
+.reverse {
+	-fx-image: url("glyphicons_free/glyphicons/png/glyphicons-404-sorting.png")
+}
+
+.sort_by_alphabet {
+    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-405-sort-by-alphabet.png");
+}
+
+.sort_by_alphabet_descending {
+    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-406-sort-by-alphabet-alt.png");
+}
+
+.sort_by_order {
+    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-407-sort-by-order.png");
+    -fx-background-size: 18px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 50%;
+}
+	
