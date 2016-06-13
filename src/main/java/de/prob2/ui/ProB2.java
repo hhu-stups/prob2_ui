@@ -44,7 +44,7 @@ public class ProB2 extends Application {
 		Parent root = loader.getRoot();
 
 		Scene mainScene = new Scene(root, 1024, 768);
-
+		mainScene.getStylesheets().add("prob.css");
 		stage.setTitle("ProB 2.0");
 		stage.setScene(mainScene);
 

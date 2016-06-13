@@ -1,11 +1,12 @@
-plugins {
-	id "edu.sc.seis.macAppBundle" version "2.1.6"
-}
+//plugins {
+//	id "edu.sc.seis.macAppBundle" version "2.1.6"
+//}
 
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
 
-
+sourceCompatibility="1.8"
+targetCompatibility="1.8"
 
 repositories {
     mavenCentral()
@@ -20,14 +21,14 @@ repositories {
     }
 }
 
-macAppBundle {
-	mainClassName = "de.prob2.ui.ProB2"
-	appName="ProB 2.0"
-	icon = "prob2.icns"
-	bundleJRE = true
-	javaProperties.put("apple.laf.useScreenMenuBar", "true")
-	backgroundImage = "doc/macbackground.png"
-}
+//macAppBundle {
+//	mainClassName = "de.prob2.ui.ProB2"
+//	appName="ProB 2.0"
+//	icon = "prob2.icns"
+//	bundleJRE = true
+//	javaProperties.put("apple.laf.useScreenMenuBar", "true")
+//	backgroundImage = "doc/macbackground.png"
+//}
 
 
 

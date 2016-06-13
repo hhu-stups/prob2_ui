@@ -1,37 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
-<?import de.prob2.ui.modeline.*?>
+<?import de.prob2.ui.states.*?>
 <?import javafx.scene.layout.*?>
 
-<SplitPane dividerPositions="0.29797979797979796" xmlns="http://javafx.com/javafx/8.0.40"
-	xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.AnimationPerspective">
+<SplitPane dividerPositions="0.29797979797979796" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.AnimationPerspective">
 	<items>
-		<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0"
-			prefWidth="100.0">
+		<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
 			<children>
-				<Accordion layoutX="-28.0" layoutY="128.0" prefHeight="398.0"
-					prefWidth="174.0" AnchorPane.bottomAnchor="0.0"
-					AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-					AnchorPane.topAnchor="0.0">
+				<Accordion fx:id="small" layoutX="-28.0" layoutY="128.0" prefHeight="398.0" prefWidth="174.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 					<panes>
-						<TitledPane animated="false" text="untitled 1">
+						<TitledPane fx:id="ops" animated="false" text="untitled 1">
 							<content>
-								<AnchorPane minHeight="0.0" minWidth="0.0"
-									prefHeight="180.0" prefWidth="200.0" />
+								<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
 							</content>
 						</TitledPane>
-						<TitledPane animated="false" text="untitled 2">
+						<TitledPane fx:id="historyp" animated="false" text="untitled 2">
 							<content>
-								<AnchorPane minHeight="0.0" minWidth="0.0"
-									prefHeight="180.0" prefWidth="200.0" />
+								<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
 							</content>
 						</TitledPane>
-						<TitledPane animated="false" text="untitled 3">
+						<TitledPane fx:id="statesp" animated="false" text="untitled 3">
 							<content>
-								<AnchorPane minHeight="0.0" minWidth="0.0"
-									prefHeight="180.0" prefWidth="200.0" />
+								<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
 							</content>
 						</TitledPane>
 					</panes>
@@ -40,8 +36,7 @@
 		</AnchorPane>
 		<AnchorPane>
 			<children>
-				<ModelineController></ModelineController>
-
+				<StatesView></StatesView>
 			</children>
 		</AnchorPane>
 	</items>
