@@ -23,16 +23,7 @@ public class AnimationPerspective implements Initializable {
 
 	@SuppressWarnings("unused")
 	private FXMLLoader loader;
-	
-	@FXML
-	private TitledPane ops;
-	
-	@FXML
-	private TitledPane statesp;
-	
-	@FXML
-	private TitledPane historyp;
-	
+		
 	@FXML
 	private Accordion small;
 
@@ -55,22 +46,7 @@ public class AnimationPerspective implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		Parent opsview = null;
-		Parent statesview = null;
-		Parent historyview = null;
-//		try {
-//			opsview = FXMLLoader.load(getClass().getResource("operations/ops_view.fxml"));
-//			statesview = FXMLLoader.load(getClass().getResource("states/states_view.fxml"));
-//			historyview = FXMLLoader.load(getClass().getResource("history/history_view.fxml"));
-//		} catch (IOException e) {
-//			throw new IllegalStateException(e);
-//		}
 
-		ops = (TitledPane) opsview;
-		statesp = (TitledPane) statesview;
-		historyp = (TitledPane) historyview;
-		
-		
 		
 		small.getPanes().clear();
 		small.getPanes().addAll(opsController, historyController);

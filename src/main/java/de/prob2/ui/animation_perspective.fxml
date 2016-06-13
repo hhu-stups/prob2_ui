@@ -35,9 +35,7 @@
 			</children>
 		</AnchorPane>
 		<AnchorPane>
-			<children>
-				<StatesView></StatesView>
-			</children>
+			<StatesView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
 		</AnchorPane>
 	</items>
 </SplitPane>
