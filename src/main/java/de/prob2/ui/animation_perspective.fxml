@@ -41,8 +41,7 @@
 		<AnchorPane>
 			<children>
 				<ModelineController></ModelineController>
-				<Button fx:id="someButton" layoutX="179.0" layoutY="186.0"
-					mnemonicParsing="false" text="%Button" />
+
 			</children>
 		</AnchorPane>
 	</items>

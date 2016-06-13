@@ -16,9 +16,6 @@ public class AnimationPerspective implements Initializable {
 	@SuppressWarnings("unused")
 	private final Api api;
 
-	@FXML
-	Button someButton;
-
 	@SuppressWarnings("unused")
 	private FXMLLoader loader;
 
@@ -32,14 +29,6 @@ public class AnimationPerspective implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
-		someButton.setOnAction(e -> {
-			try {
-				// StateSpace stateSpace = api.b_load("scheduler.mch");
-				System.out.println("click");
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
-		});
 	}
 
 }

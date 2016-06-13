@@ -10,7 +10,6 @@ import com.google.inject.Provides;
 import de.prob.MainModule;
 import de.prob2.ui.modeline.ModelineController;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.MenuBar;
 import javafx.util.Callback;
 
 public class ProB2Module extends AbstractModule {
@@ -20,7 +19,7 @@ public class ProB2Module extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(MenuBar.class).asEagerSingleton();
+		// bind(MenuBar.class).asEagerSingleton();
 		install(new MainModule());
 		bind(ModelineController.class);
 		bind(ResourceBundle.class).toInstance(bundle);

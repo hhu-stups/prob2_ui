@@ -1,0 +1,71 @@
+package de.prob2.ui.menu;
+
+import java.io.File;
+import java.io.IOException;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import com.google.inject.Inject;
+
+import de.be4.classicalb.core.parser.exceptions.BException;
+import de.prob.scripting.Api;
+import de.prob.statespace.Animations;
+import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
+import de.prob2.ui.events.OpenFileEvent;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.MenuBar;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Window;
+
+public class MenuController extends MenuBar {
+
+	private Api api;
+	private EventBus bus;
+	private Animations animations;
+
+	@FXML
+	private void handleOpen(ActionEvent event) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open File");
+		fileChooser.getExtensionFilters().addAll(
+				//new ExtensionFilter("All Files", "*.*"),
+				new ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")
+		// new ExtensionFilter("EventB Files", "*.eventb", "*.bum", "*.buc"),
+		// new ExtensionFilter("CSP Files", "*.cspm")
+		);
+		bus.post(fileChooser);
+	}
+
+	@Subscribe
+	public void showFileDialogHandler(FileChooser chooser) {
+		Window stage = this.getScene().getWindow();
+		File selectedFile = chooser.showOpenDialog(stage);
+		if (selectedFile != null) {
+			String extensionFilter = chooser.getSelectedExtensionFilter().getDescription();
+			bus.post(new OpenFileEvent(selectedFile, extensionFilter));
+		}
+	}
+
+	
+
+	@Inject
+	public MenuController(FXMLLoader loader, Api api, EventBus bus, Animations animations) {
+		this.api = api;
+		this.bus = bus;
+		this.animations = animations;
+		bus.register(this);
+		try {
+			loader.setLocation(getClass().getResource("menu.fxml"));
+			loader.setRoot(this);
+			loader.setController(this);
+			loader.load();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+}

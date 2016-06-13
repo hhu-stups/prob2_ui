@@ -1,8 +1,8 @@
 package de.prob2.ui;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
 
+import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -13,18 +13,18 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
 public class ProB2 extends Application {
 
 	private Injector injector;
-	private MenuBar menuBar;
 
 	private final LinkedHashMap<String, Menu> menus = new LinkedHashMap<>();
 
 	public static void main(String... args) {
+
+		
+		
 		Platform.setImplicitExit(true);
 		launch(args);
 	}
@@ -34,7 +34,7 @@ public class ProB2 extends Application {
 
 		ProB2Module module = new ProB2Module();
 		this.injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
-		menuBar = injector.getInstance(MenuBar.class);
+		// menuBar = injector.getInstance(MenuBar.class);
 
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(getClass().getResource("main.fxml"));
@@ -53,31 +53,31 @@ public class ProB2 extends Application {
 			System.exit(0);
 		});
 
-		configureMenus();
-		addMenus();
+		// configureMenus();
+		// addMenus();
 
 		stage.show();
 	}
 
-	private void addMenus() {
-		Collection<Menu> values = menus.values();
-		menuBar.getMenus().addAll(values);
-	}
-
-	private void configureMenus() {
-		createFileMenu();
-		createMenu("Edit");
-		createMenu("Help");
-	}
-
-	private void createFileMenu() {
-		Menu file = new Menu("File");
-		file.getItems().add(new MenuItem("Exit"));
-		menus.put("File", file);
-	}
-
-	private void createMenu(String string) {
-		menus.put(string, new Menu(string));
-	}
+	// private void addMenus() {
+	// Collection<Menu> values = menus.values();
+	// menuBar.getMenus().addAll(values);
+	// }
+	//
+	// private void configureMenus() {
+	// createFileMenu();
+	// createMenu("Edit");
+	// createMenu("Help");
+	// }
+	//
+	// private void createFileMenu() {
+	// Menu file = new Menu("File");
+	// file.getItems().add(new MenuItem("Exit"));
+	// menus.put("File", file);
+	// }
+	//
+	// private void createMenu(String string) {
+	// menus.put(string, new Menu(string));
+	// }
 
 }
