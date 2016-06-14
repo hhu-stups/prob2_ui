@@ -27,10 +27,10 @@
 						<AnchorPane prefHeight="35.0" prefWidth="246.0">
 							<children>
 								<Button fx:id="searchButton" alignment="CENTER"
-									contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
-									onAction="#handleSearchButton" prefWidth="35.0"
-									stylesheets="@../../../../prob.css" AnchorPane.bottomAnchor="0.0"
-									AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+										contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
+										onAction="#handleSearchButton" prefWidth="35.0"
+										stylesheets="@../../../../prob.css" AnchorPane.bottomAnchor="0.0"
+										AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
 									<opaqueInsets>
 										<Insets />
 									</opaqueInsets>
@@ -44,9 +44,9 @@
 						<AnchorPane prefHeight="27.0" prefWidth="246.0">
 							<children>
 								<Button fx:id="backButton" layoutX="60.0" layoutY="1.0"
-									mnemonicParsing="false" onAction="#handleBackButton" prefWidth="25.0"
-									stylesheets="@../../../../prob.css" AnchorPane.bottomAnchor="0.0"
-									AnchorPane.leftAnchor="51.0" AnchorPane.topAnchor="0.0" />
+										mnemonicParsing="false" onAction="#handleBackButton" prefWidth="25.0"
+										stylesheets="@../../../../prob.css" AnchorPane.bottomAnchor="0.0"
+										AnchorPane.leftAnchor="51.0" AnchorPane.topAnchor="0.0" />
 								<Button fx:id="forwardButton" layoutX="86.0" layoutY="1.0"
 									mnemonicParsing="false" onAction="#handleForwardButton"
 									prefWidth="25.0" stylesheets="@../../../../prob.css"
@@ -63,9 +63,9 @@
 									AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0"
 									AnchorPane.topAnchor="0.0" />
 								<MenuButton fx:id="randomButton" layoutX="34.0"
-									layoutY="1.0" mnemonicParsing="false" prefWidth="50.0"
-									stylesheets="@../../../../prob.css" AnchorPane.bottomAnchor="0.0"
-									AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+											layoutY="1.0" mnemonicParsing="false" prefWidth="50.0"
+											stylesheets="@../../../../prob.css" AnchorPane.bottomAnchor="0.0"
+											AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
 									<items>
 										<MenuItem fx:id="oneRandomEvent" mnemonicParsing="false"
 											onAction="#random" text="Execute 1 Event" />
