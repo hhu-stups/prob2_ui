@@ -33,14 +33,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 public class StatesView extends AnchorPane implements Initializable, ITraceChangesListener {
-	
-	private @FXML TreeTableView<StateTreeItem<?>> tv;
 	private @FXML TreeTableColumn<StateTreeItem<?>, String> tvName;
 	private @FXML TreeTableColumn<StateTreeItem<?>, String> tvValue;
 	private @FXML TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
@@ -183,7 +180,7 @@ public class StatesView extends AnchorPane implements Initializable, ITraceChang
 			return;
 		}
 		
-		this.updateChildren(trace, this.tvChildrenItem, currentModel);
+		this.updateChildren(trace, root, currentModel);
 	}
 	
 	@Override
