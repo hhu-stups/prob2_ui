@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Accordion;
+import javafx.scene.paint.Color;
 
 public class AnimationPerspective implements Initializable {
 
@@ -35,7 +36,6 @@ public class AnimationPerspective implements Initializable {
 		this.loader = loader;
 		this.opsController = opsController;
 		this.historyController = historyController;
-
 	}
 
 	@Override
