@@ -58,23 +58,21 @@
 }
 
 .eyeopen {
-    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-52-eye-open.png");
+    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-52-eye-open.png");
+    -fx-background-size: 20px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 50%;
 }
 
 .eyeclosed {
-    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-53-eye-close.png");
+    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-53-eye-close.png");
+    -fx-background-size: 20px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 50%;
 }
 
 .reverse {
 	-fx-image: url("glyphicons_free/glyphicons/png/glyphicons-404-sorting.png")
-}
-
-.sort_by_alphabet {
-    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-405-sort-by-alphabet.png");
-}
-
-.sort_by_alphabet_descending {
-    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-406-sort-by-alphabet-alt.png");
 }
 
 .sort_by_order {
