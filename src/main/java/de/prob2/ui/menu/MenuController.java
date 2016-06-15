@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.scripting.Api;
@@ -21,6 +22,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
 
+@Singleton
 public class MenuController extends MenuBar {
 
 	private Api api;
@@ -50,14 +52,11 @@ public class MenuController extends MenuBar {
 		}
 	}
 
-	
-
 	@Inject
 	public MenuController(FXMLLoader loader, Api api, EventBus bus, Animations animations) {
 		this.api = api;
 		this.bus = bus;
 		this.animations = animations;
-		bus.register(this);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);
@@ -66,6 +65,7 @@ public class MenuController extends MenuBar {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		bus.register(this);
 	}
 
 }
