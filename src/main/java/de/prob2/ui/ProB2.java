@@ -1,8 +1,5 @@
 package de.prob2.ui;
 
-import java.util.LinkedHashMap;
-
-import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -12,19 +9,14 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Menu;
 import javafx.stage.Stage;
 
 public class ProB2 extends Application {
 
 	private Injector injector;
 
-	private final LinkedHashMap<String, Menu> menus = new LinkedHashMap<>();
-
 	public static void main(String... args) {
 
-		
-		
 		Platform.setImplicitExit(true);
 		launch(args);
 	}

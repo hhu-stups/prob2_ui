@@ -8,11 +8,8 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.scripting.Api;
 import de.prob.statespace.Animations;
-import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
 import de.prob2.ui.events.OpenFileEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,9 +22,7 @@ import javafx.stage.Window;
 @Singleton
 public class MenuController extends MenuBar {
 
-	private Api api;
 	private EventBus bus;
-	private Animations animations;
 
 	@FXML
 	private void handleOpen(ActionEvent event) {
@@ -54,9 +49,7 @@ public class MenuController extends MenuBar {
 
 	@Inject
 	public MenuController(FXMLLoader loader, Api api, EventBus bus, Animations animations) {
-		this.api = api;
 		this.bus = bus;
-		this.animations = animations;
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);

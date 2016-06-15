@@ -13,7 +13,6 @@ import java.util.UUID;
 
 import com.google.inject.Inject;
 
-import de.prob.Main;
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
 import de.prob.model.representation.AbstractElement;
@@ -21,10 +20,8 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.BEvent;
 import de.prob.model.representation.Machine;
 import de.prob.model.representation.ModelElementList;
-import de.prob.scripting.Api;
 import de.prob.statespace.Animations;
 import de.prob.statespace.ITraceChangesListener;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import javafx.application.Platform;
@@ -43,19 +40,30 @@ import javafx.scene.control.ToggleButton;
 
 public class OperationsView extends TitledPane implements ITraceChangesListener {
 
-
-	@FXML 	private ListView<Operation> opsListView;
-	@FXML	private Button backButton;
-	@FXML	private Button forwardButton;
-	@FXML	private Button searchButton;
-	@FXML	private Button sortButton;
-	@FXML	private ToggleButton disabledOpsToggle;	
-	@FXML	private TextField filterEvents;
-	@FXML   private TextField randomText;
-	@FXML   private MenuItem oneRandomEvent;
-	@FXML   private MenuItem fiveRandomEvents;
-	@FXML   private MenuItem tenRandomEvents;
-	@FXML   private Button randomEventsButton;
+	@FXML
+	private ListView<Operation> opsListView;
+	@FXML
+	private Button backButton;
+	@FXML
+	private Button forwardButton;
+	@FXML
+	private Button searchButton;
+	@FXML
+	private Button sortButton;
+	@FXML
+	private ToggleButton disabledOpsToggle;
+	@FXML
+	private TextField filterEvents;
+	@FXML
+	private TextField randomText;
+	@FXML
+	private MenuItem oneRandomEvent;
+	@FXML
+	private MenuItem fiveRandomEvents;
+	@FXML
+	private MenuItem tenRandomEvents;
+	@FXML
+	private Button randomEventsButton;
 
 	private Trace currentTrace;
 	private AbstractModel currentModel;
@@ -66,12 +74,12 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 	private String filter = "";
 	Comparator<Operation> sorter = new ModelOrder(new ArrayList<String>());
 	private Animations animations;
-	
+
 	@Inject
 	public OperationsView(Animations ANIMATIONS, FXMLLoader loader) {
 		this.animations = ANIMATIONS;
 		animations.registerAnimationChangeListener(this);
-		
+
 		try {
 			loader.setLocation(getClass().getResource("ops_view.fxml"));
 			loader.setRoot(this);
@@ -80,25 +88,24 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
 
 	@FXML
-	public void initialize(){
+	public void initialize() {
 		opsListView.setCellFactory(new TransitionTransformer());
-		
+
 		opsListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Operation>() {
-		    @Override
-		    public void changed(ObservableValue<? extends Operation> observable, Operation oldValue, Operation newValue) {
-		    	if(newValue != null && newValue.isEnabled()) {
-		    		animations.traceChange(currentTrace.add(newValue.id));
-		    		System.out.println("Selected item: " + newValue);
-		    	}
-		    }
+			@Override
+			public void changed(ObservableValue<? extends Operation> observable, Operation oldValue,
+					Operation newValue) {
+				if (newValue != null && newValue.isEnabled()) {
+					animations.traceChange(currentTrace.add(newValue.id));
+					System.out.println("Selected item: " + newValue);
+				}
+			}
 		});
 	}
-	
 
 	@FXML
 	private void handleDisabledOpsToggle() {
@@ -106,24 +113,24 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 			disabledOpsToggle.getStyleClass().add("eyeclosed");
 			showNotEnabled = false;
 			animations.traceChange(currentTrace);
-			
+
 		} else {
 			disabledOpsToggle.getStyleClass().remove("eyeclosed");
 			showNotEnabled = true;
 			animations.traceChange(currentTrace);
 		}
 	}
-	
+
 	@FXML
 	private void handleBackButton() {
 		animations.traceChange(currentTrace.back());
 	}
-	
+
 	@FXML
 	private void handleForwardButton() {
 		animations.traceChange(currentTrace.forward());
 	}
-	
+
 	@FXML
 	private void handleSearchButton() {
 		filter = filterEvents.getText();
@@ -131,7 +138,7 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 		opsList.clear();
 		opsList.addAll(applyFilter(filter));
 	}
-	
+
 	private List<Operation> applyFilter(final String filter) {
 		List<Operation> newOps = new ArrayList<Operation>();
 		for (Operation op : events) {
@@ -141,7 +148,7 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 		}
 		return newOps;
 	}
-	
+
 	@FXML
 	private void handleSortButton() {
 		String oldMode = getSortMode();
@@ -166,7 +173,7 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 		opsList.clear();
 		opsList.addAll(applyFilter(filter));
 	}
-	
+
 	public String getSortMode() {
 		if (sorter instanceof ModelOrder) {
 			return "normal";
@@ -179,17 +186,16 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 		}
 		return "other";
 	}
-	
 
 	@FXML
 	public void random(ActionEvent event) {
-		if(event.getSource().equals(oneRandomEvent)) {
+		if (event.getSource().equals(oneRandomEvent)) {
 			animations.traceChange(currentTrace.randomAnimation(1));
-		} else if(event.getSource().equals(fiveRandomEvents)) {
+		} else if (event.getSource().equals(fiveRandomEvents)) {
 			animations.traceChange(currentTrace.randomAnimation(5));
-		} else if(event.getSource().equals(tenRandomEvents)) {
+		} else if (event.getSource().equals(tenRandomEvents)) {
 			animations.traceChange(currentTrace.randomAnimation(10));
-		} else if(event.getSource().equals(randomEventsButton) || event.getSource().equals(randomText)) {
+		} else if (event.getSource().equals(randomEventsButton) || event.getSource().equals(randomText)) {
 			try {
 				int steps = Integer.parseInt(randomText.getText());
 				animations.traceChange(currentTrace.randomAnimation(steps));
@@ -197,12 +203,13 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
-	
+
 	@Override
 	public void changed(List<Trace> t) {
-		if (t == null || t.isEmpty()) return;
+		if (t == null || t.isEmpty())
+			return;
 		Trace trace = t.get(0);
 		if (trace == null) {
 			currentTrace = null;
@@ -221,7 +228,7 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 		Set<Transition> operations = currentTrace.getNextTransitions(true);
 		Set<String> notEnabled = new HashSet<String>(opNames);
 		Set<String> withTimeout = currentTrace.getCurrentState().getTransitionsWithTimeout();
-		for(Transition transition: operations){
+		for (Transition transition : operations) {
 			String id = transition.getId();
 			String name = extractPrettyName(transition.getName());
 			notEnabled.remove(name);
@@ -243,13 +250,13 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 		}
 		backButton.setDisable(!currentTrace.canGoBack());
 		forwardButton.setDisable(!currentTrace.canGoForward());
-		
+
 		Platform.runLater(() -> {
 			ObservableList<Operation> opsList = opsListView.getItems();
 			opsList.clear();
 			opsList.addAll(applyFilter(filter));
 		});
-		
+
 	}
 
 	private void updateModel(final Trace trace) {
@@ -268,8 +275,7 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 						paramList.add(eParam.getName());
 					}
 				} else if (e instanceof de.prob.model.classicalb.Operation) {
-					paramList.addAll(((de.prob.model.classicalb.Operation) e)
-							.getParameters());
+					paramList.addAll(((de.prob.model.classicalb.Operation) e).getParameters());
 				}
 				opToParams.put(e.getName(), paramList);
 			}
@@ -288,27 +294,26 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 		}
 		return name;
 	}
-	
+
 	@Override
 	public void removed(List<UUID> t) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void animatorStatus(Set<UUID> busy) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	private class EventComparator {
 
 		private String stripString(final String param) {
 			return param.replaceAll("\\{", "").replaceAll("\\}", "");
 		}
 
-		public int compareParams(final List<String> params1,
-				final List<String> params2) {
+		public int compareParams(final List<String> params1, final List<String> params2) {
 			for (int i = 0; i < params1.size(); i++) {
 				String p1 = stripString(params1.get(i));
 				String p2 = stripString(params2.get(i));
@@ -321,7 +326,7 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 		}
 	}
 
-	private class ModelOrder extends EventComparator implements	Comparator<Operation> {
+	private class ModelOrder extends EventComparator implements Comparator<Operation> {
 
 		private final List<String> ops;
 
@@ -331,14 +336,13 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 
 		@Override
 		public int compare(final Operation o1, final Operation o2) {
-			if (ops.contains(o1.name) && ops.contains(o2.name)
-					&& ops.indexOf(o1.name) == ops.indexOf(o2.name)) {
+			if (ops.contains(o1.name) && ops.contains(o2.name) && ops.indexOf(o1.name) == ops.indexOf(o2.name)) {
 				return compareParams(o1.params, o2.params);
 			}
 			return ops.indexOf(o1.name) - ops.indexOf(o2.name);
 		}
 	}
-	
+
 	private class AtoZ extends EventComparator implements Comparator<Operation> {
 
 		@Override
@@ -362,5 +366,5 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 		}
 
 	}
-	
+
 }
