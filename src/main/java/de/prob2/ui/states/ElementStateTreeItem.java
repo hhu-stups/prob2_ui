@@ -1,26 +1,31 @@
 package de.prob2.ui.states;
 
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
-import de.prob.statespace.Trace;
+
+import java.util.Map;
 
 public class ElementStateTreeItem extends StateTreeItem<AbstractElement> {
-	public ElementStateTreeItem(final Trace trace, final AbstractElement element) {
+	public ElementStateTreeItem(
+		final AbstractElement element,
+		final Map<IEvalElement, AbstractEvalResult> values,
+		final Map<IEvalElement, AbstractEvalResult> previousValues
+	) {
 		super(element.toString(), "", "", element);
-		this.update(trace);
+		this.update(values, previousValues);
 	}
 	
 	@Override
-	public void update(final Trace trace) {
-		this.value.set(
-			this.getContents() instanceof AbstractFormulaElement
-			? StatesView.stringRep(trace.getCurrentState().eval(((AbstractFormulaElement)this.getContents()).getFormula()))
-			: ""
-		);
-		this.previousValue.set(
-			this.getContents() instanceof AbstractFormulaElement && trace.canGoBack()
-			? StatesView.stringRep(trace.getPreviousState().eval(((AbstractFormulaElement)this.getContents()).getFormula()))
-			: ""
-		);
+	public void update(
+		final Map<IEvalElement, AbstractEvalResult> values,
+		final Map<IEvalElement, AbstractEvalResult> previousValues
+	) {
+		if (this.getContents() instanceof AbstractFormulaElement) {
+			IEvalElement formula = ((AbstractFormulaElement)this.getContents()).getFormula();
+			this.value.set(StatesView.stringRep(values.get(formula)));
+			this.previousValue.set(previousValues == null ? "" : StatesView.stringRep(previousValues.get(formula)));
+		}
 	}
 }
