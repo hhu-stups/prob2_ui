@@ -61,8 +61,7 @@ public class MenuController extends MenuBar {
 	}
 
 	@Inject
-	public MenuController(FXMLLoader loader, Api api, EventBus bus, Animations animations, ModelcheckingView mcheckController) {
-
+	public MenuController(FXMLLoader loader, Api api, EventBus bus, ModelcheckingView mcheckController) {
 		this.bus = bus;
 		this.mcheckScene = new Scene(mcheckController);
 		try {
