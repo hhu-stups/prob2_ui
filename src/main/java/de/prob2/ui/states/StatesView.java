@@ -28,7 +28,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -156,7 +155,6 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 		treeItem.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
 	}
 
-
 	private void updateChildren(
 		final TreeItem<StateTreeItem<?>> treeItem,
 		final AbstractElement element
@@ -219,16 +217,16 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	@Override
 	public void animatorStatus(boolean busy) {}
 
+	public void editBlacklistButtonAction() {
+		this.editBlacklistStage.show();
+	}
+
 	@FXML
 	public void initialize() {
 		this.animations.registerAnimationChangeListener(this);
 
 		this.currentValues = null;
 		this.previousValues = null;
-		
-		this.tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
-		this.tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
-		this.tvPreviousValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("previousValue"));
 
 		this.tvChildrenItem.setValue(new ElementClassStateTreeItem(Machine.class));
 
@@ -271,12 +269,5 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 
 		this.knownAbstractElementSubclasses.add(Action.class);
 		this.childrenClassBlacklist.add(Action.class);
-
-		this.editBlacklistButton.setOnAction(event -> {
-			this.editBlacklistStage.show();
-			// Cleanup code to run when the window is closed should not go here,
-			// otherwise it will not run properly when exceptions occur.
-			// Put it below in the close request event handler instead.
-		});
 	}
 }

@@ -5,6 +5,7 @@
 <?import javafx.scene.control.TreeItem?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.control.cell.TreeItemPropertyValueFactory?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -22,19 +23,28 @@
 			<HBox fillHeight="false" prefHeight="38.0" prefWidth="600.0"
 				spacing="5">
 				<Button fx:id="editBlacklistButton" alignment="CENTER_RIGHT"
-					text="Edit Class Blacklist" />
+					text="Edit Class Blacklist" onAction="#editBlacklistButtonAction"/>
 			</HBox>
 		</top>
 		<center>
 			<TreeTableView fx:id="tv" prefHeight="400.0"
 				prefWidth="600.0">
 				<columns>
-					<TreeTableColumn fx:id="tvName" editable="false"
-						prefWidth="250.0" sortable="false" text="Name" />
-					<TreeTableColumn fx:id="tvValue" editable="false"
-						prefWidth="200.0" sortable="false" text="Value" />
-					<TreeTableColumn fx:id="tvPreviousValue" editable="false"
-						prefWidth="200.0" sortable="false" text="Previous Value" />
+					<TreeTableColumn fx:id="tvName" editable="false" prefWidth="250.0" sortable="false" text="Name">
+						<cellValueFactory>
+							<TreeItemPropertyValueFactory property="name"/>
+						</cellValueFactory>
+					</TreeTableColumn>
+					<TreeTableColumn fx:id="tvValue" editable="false" prefWidth="200.0" sortable="false" text="Value">
+						<cellValueFactory>
+							<TreeItemPropertyValueFactory property="value"/>
+						</cellValueFactory>
+					</TreeTableColumn>
+					<TreeTableColumn fx:id="tvPreviousValue" editable="false" prefWidth="200.0" sortable="false" text="Previous Value">
+						<cellValueFactory>
+							<TreeItemPropertyValueFactory property="previousValue"/>
+						</cellValueFactory>
+					</TreeTableColumn>
 				</columns>
 				<TreeItem fx:id="tvChildrenItem" expanded="true" />
 			</TreeTableView>
