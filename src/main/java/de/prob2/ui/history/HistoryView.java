@@ -3,27 +3,26 @@ package de.prob2.ui.history;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.UUID;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.statespace.Animations;
-import de.prob.statespace.ITraceChangesListener;
+import static de.prob2.ui.history.HistoryStatus.*;
+
+import de.prob.statespace.AnimationSelector;
+import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
-import javafx.scene.Group;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
@@ -31,20 +30,12 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 
-public class HistoryView extends TitledPane implements Initializable, ITraceChangesListener {
+public class HistoryView extends TitledPane implements Initializable, IAnimationChangeListener {
 
 	@FXML
-	private ListView<Object> lv_history;
+	private ListView<HistoryItem> lv_history;
 
 	@FXML
 	private ToggleButton tb_reverse;
@@ -54,16 +45,18 @@ public class HistoryView extends TitledPane implements Initializable, ITraceChan
 
 	@FXML
 	private Button btforward;
-	
+
 	@FXML
 	private Button btshowgraph;
 
 	private boolean rootatbottom = true;
 
-	private Animations animations;
+	private ObservableList<HistoryItem> history = FXCollections.observableArrayList();
+
+	private AnimationSelector animations;
 
 	@Inject
-	public HistoryView(FXMLLoader loader, Animations animations) {
+	public HistoryView(FXMLLoader loader, AnimationSelector animations) {
 		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
 
@@ -80,10 +73,14 @@ public class HistoryView extends TitledPane implements Initializable, ITraceChan
 	public void initialize(URL location, ResourceBundle resources) {
 
 		animations.registerAnimationChangeListener(this);
+
+		lv_history.setCellFactory(new HistoryItemTransformer());
+				
+		lv_history.setItems(history);
+		
+		
 		lv_history.setOnMouseClicked(e -> {
-
-			animations.traceChange(animations.getTraces().get(0).gotoPosition(getCurrentIndex()));
-
+			animations.traceChange(animations.getCurrentTrace().gotoPosition(getCurrentIndex()));
 		});
 
 		lv_history.setOnMouseMoved(e -> {
@@ -91,73 +88,24 @@ public class HistoryView extends TitledPane implements Initializable, ITraceChan
 		});
 
 		tb_reverse.setOnAction(e -> {
-			Collections.reverse(lv_history.getItems());
+			Collections.reverse(history);
 			rootatbottom = !rootatbottom;
-			animations.traceChange(animations.getTraces().get(0).gotoPosition(getCurrentIndex()));
 		});
 
 		btprevious.setOnAction(e -> {
-			animations.traceChange(animations.getTraces().get(0).back());
+			animations.traceChange(animations.getCurrentTrace().back());
 		});
 
 		btforward.setOnAction(e -> {
-			animations.traceChange(animations.getTraces().get(0).forward());
+			animations.traceChange(animations.getCurrentTrace().forward());
 		});
-		
-	}
 
-	private String extractPrettyName(final String name) {
-		if ("$setup_constants".equals(name)) {
-			return "SETUP_CONSTANTS";
-		}
-		if ("$initialise_machine".equals(name)) {
-			return "INITIALISATION";
-		}
-		return name;
-	}
 
-	@Override
-	public void changed(List<Trace> t) {
-		if (lv_history == null) {
-			return;
-		}
-		lv_history.getItems().clear();
-		if (t == null || t.isEmpty()) {
-			return;
-		}
-		try {
-
-			int currentPos = t.get(0).getCurrent().getIndex();
-			List<Transition> opList = t.get(0).getTransitionList();
-			int startpos = 0;
-			int endpos = opList.size();
-
-			lv_history.getItems().add("---root---");
-			t.get(0).getStateSpace().evaluateTransitions(opList.subList(startpos, endpos), FormulaExpand.truncate);
-
-			for (int i = startpos; i < endpos; i++) {
-				Text rep = new Text(opList.get(i).getPrettyRep());
-				if (i > currentPos) {
-					rep.setFont(Font.font("ARIAL", FontPosture.ITALIC, 12));
-					rep.setFill(Color.GRAY);
-				} else if (i == currentPos) {
-					rep.setFont(Font.font("ARIAL", FontWeight.BOLD, 12));
-				}
-				lv_history.getItems().add(rep);
-			}
-
-			if (rootatbottom) {
-				Collections.reverse(lv_history.getItems());
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	private int getCurrentIndex() {
-		int currentPos = lv_history.getSelectionModel().getSelectedIndex();
-		int length = lv_history.getItems().size();
+		int currentPos = lv_history.getSelectionModel().getSelectedIndex() + 1;
+		int length = lv_history.getItems().size() + 2;
 		int index = 0;
 		if (rootatbottom) {
 			index = length - 2 - currentPos;
@@ -169,13 +117,33 @@ public class HistoryView extends TitledPane implements Initializable, ITraceChan
 	}
 
 	@Override
-	public void removed(List<UUID> t) {
-		// TODO Auto-generated method stub
+	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
 
+		history.clear();
+		int currentPos = currentTrace.getCurrent().getIndex();
+		List<Transition> transitionList = currentTrace.getTransitionList();
+		
+		for (int i = 0; i < transitionList.size(); i++) {
+			HistoryStatus status = PAST;
+			if (i == currentPos)
+				status = PRESENT;
+			if (i > currentPos)
+				status = FUTURE;
+			history.add(new HistoryItem(transitionList.get(i), status));
+		}
+		
+
+		//
+		// currentTrace.getStateSpace().evaluateTransitions(opList.subList(startpos,
+		// endpos), FormulaExpand.truncate);
+		//
+		 if (rootatbottom) {
+			 Collections.reverse(history);
+		 }
 	}
 
 	@Override
-	public void animatorStatus(Set<UUID> busy) {
+	public void animatorStatus(boolean busy) {
 		// TODO Auto-generated method stub
 
 	}

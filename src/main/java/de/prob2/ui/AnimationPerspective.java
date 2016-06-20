@@ -13,7 +13,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Accordion;
-import javafx.scene.paint.Color;
 
 public class AnimationPerspective implements Initializable {
 
