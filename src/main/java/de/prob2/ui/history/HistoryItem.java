@@ -11,5 +11,5 @@ public class HistoryItem {
 		this.transition = transition;
 		this.status = status;
 	}
-
+	
 }

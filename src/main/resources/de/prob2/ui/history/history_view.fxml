@@ -19,7 +19,6 @@
                </cursor></ListView>
             <HBox alignment="TOP_RIGHT" layoutX="58.0" layoutY="26.0" prefHeight="0.0" prefWidth="526.0" AnchorPane.bottomAnchor="389.6" AnchorPane.leftAnchor="58.0" AnchorPane.rightAnchor="3.6000000000000227" AnchorPane.topAnchor="26.0">
                <children>
-                  <Button fx:id="btshowgraph" mnemonicParsing="false" text="Show History as Graph" />
                   <Button fx:id="btprevious" mnemonicParsing="false" prefHeight="23.0" prefWidth="33.0">
                      <graphic>
                         <ImageView fitHeight="15.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true" styleClass="back" />

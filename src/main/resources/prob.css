@@ -81,4 +81,23 @@
     -fx-background-repeat: no-repeat;
     -fx-background-position: 50%;
 }
+
+#past {
+	-fx-font-family: ARIAL;
+	-fx-font-weight: normal;
+	-fx-font-size: 12px;
+}
+
+#present {
+	-fx-font-family: ARIAL;
+	-fx-font-weight: bold;
+	-fx-font-size: 12px;
+}
+
+#future {
+	-fx-font-family: ARIAL;
+	-fx-fill: GRAY;
+	-fx-font-style: italic;
+	-fx-font-size: 12px;
+}
 	

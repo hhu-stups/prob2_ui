@@ -19,14 +19,15 @@ public class HistoryItemTransformer implements Callback<ListView<HistoryItem>, L
 			if (item != null) {
 				String content = item.transition.getPrettyRep();
 				Text text = new Text(content);
+				text.setId("past");
+				text.setDisable(true);
 
 				switch (item.status) {
 				case FUTURE:
-					text.setFont(Font.font("ARIAL", FontPosture.ITALIC, 12));
-					text.setFill(Color.GRAY);
+					text.setId("future");
 					break;
 				case PRESENT:
-					text.setFont(Font.font("ARIAL", FontWeight.BOLD, 12));
+					text.setId("present");
 					break;
 				default:
 					break;
