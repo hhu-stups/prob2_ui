@@ -6,7 +6,6 @@ import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.Lighting;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 public class TransitionTransformer implements Callback<ListView<Operation>, ListCell<Operation>> {
