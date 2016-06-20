@@ -3,6 +3,7 @@ package de.prob2.ui.history;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -19,15 +20,26 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
+import javafx.scene.Group;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Scale;
+import javafx.stage.Stage;
 
 public class HistoryView extends TitledPane implements Initializable, ITraceChangesListener {
 
@@ -42,6 +54,9 @@ public class HistoryView extends TitledPane implements Initializable, ITraceChan
 
 	@FXML
 	private Button btforward;
+	
+	@FXML
+	private Button btshowgraph;
 
 	private boolean rootatbottom = true;
 
@@ -88,6 +103,32 @@ public class HistoryView extends TitledPane implements Initializable, ITraceChan
 		btforward.setOnAction(e -> {
 			animations.traceChange(animations.getTraces().get(0).forward());
 		});
+		
+		
+		btshowgraph.setOnAction(e -> {
+			String url = getClass().getResource("/glyphicons_free/glyphicons/png/glyphicons-9-film.png").toString();
+			ScrollPane pane = new ScrollPane();
+			Stage stage = new Stage();
+			ImageView graph = new ImageView(new Image(url));
+			graph.setFitHeight(1000);
+			graph.setFitWidth(1000);
+			graph.setOnMouseClicked(graphe -> {
+				if(graphe.getButton() == MouseButton.PRIMARY) {
+					graph.setFitHeight(graph.getFitHeight() * 2);
+					graph.setFitWidth(graph.getFitWidth() * 2);
+				} else if(graphe.getButton() == MouseButton.SECONDARY) {
+					graph.setFitHeight(graph.getFitHeight() * 0.5);
+					graph.setFitWidth(graph.getFitWidth() * 0.5);
+				}
+			    pane.setContent(graph); 
+			});
+			
+			pane.setContent(graph); 
+			stage.setTitle("Dotty");
+			Scene scene = new Scene(pane, 800, 600);
+			stage.setScene(scene);
+			stage.show();
+		});
 
 	}
 
@@ -115,9 +156,6 @@ public class HistoryView extends TitledPane implements Initializable, ITraceChan
 			int currentPos = t.get(0).getCurrent().getIndex();
 			List<Transition> opList = t.get(0).getTransitionList();
 			int startpos = 0;
-			// int startpos = currentPos > 50 ? currentPos - 50 : 0;
-			// int endpos = opList.size() > currentPos + 20 ? currentPos + 20 :
-			// opList.size();
 			int endpos = opList.size();
 
 			lv_history.getItems().add("---root---");
