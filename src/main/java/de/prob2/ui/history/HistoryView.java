@@ -8,11 +8,14 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.domainobjects.FormulaExpand;
+import static de.prob2.ui.history.HistoryStatus.*;
+
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -26,17 +29,12 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class HistoryView extends TitledPane implements Initializable, IAnimationChangeListener {
 
 	@FXML
-	private ListView<Object> lv_history;
+	private ListView<HistoryItem> lv_history;
 
 	@FXML
 	private ToggleButton tb_reverse;
@@ -51,6 +49,8 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 	private Button btshowgraph;
 
 	private boolean rootatbottom = true;
+
+	private ObservableList<HistoryItem> history = FXCollections.observableArrayList();
 
 	private AnimationSelector animations;
 
@@ -72,9 +72,13 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 	public void initialize(URL location, ResourceBundle resources) {
 
 		animations.registerAnimationChangeListener(this);
-		lv_history.setOnMouseClicked(e -> {
 
-			animations.traceChange(animations.getTraces().get(0).gotoPosition(getCurrentIndex()));
+		lv_history.setCellFactory(new HistoryItemTransformer());
+
+		lv_history.setItems(history);
+
+		lv_history.setOnMouseClicked(e -> {
+			animations.traceChange(animations.getCurrentTrace().gotoPosition(getCurrentIndex()));
 
 		});
 
@@ -85,15 +89,15 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 		tb_reverse.setOnAction(e -> {
 			Collections.reverse(lv_history.getItems());
 			rootatbottom = !rootatbottom;
-			animations.traceChange(animations.getTraces().get(0).gotoPosition(getCurrentIndex()));
+			animations.traceChange(animations.getCurrentTrace().gotoPosition(getCurrentIndex()));
 		});
 
 		btprevious.setOnAction(e -> {
-			animations.traceChange(animations.getTraces().get(0).back());
+			animations.traceChange(animations.getCurrentTrace().back());
 		});
 
 		btforward.setOnAction(e -> {
-			animations.traceChange(animations.getTraces().get(0).forward());
+			animations.traceChange(animations.getCurrentTrace().forward());
 		});
 
 		btshowgraph.setOnAction(e -> {
@@ -138,33 +142,46 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 
 	@Override
 	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-		if (lv_history == null) {
-			return;
-		}
-		lv_history.getItems().clear();
+		// if (lv_history == null) {
+		// return;
+		// }
+		// lv_history.getItems().clear();
 
+		history.clear();
 		int currentPos = currentTrace.getCurrent().getIndex();
-		List<Transition> opList = currentTrace.getTransitionList();
-		int startpos = 0;
-		int endpos = opList.size();
 
-		lv_history.getItems().add("---root---");
-		currentTrace.getStateSpace().evaluateTransitions(opList.subList(startpos, endpos), FormulaExpand.truncate);
-
-		for (int i = startpos; i < endpos; i++) {
-			Text rep = new Text(opList.get(i).getPrettyRep());
-			if (i > currentPos) {
-				rep.setFont(Font.font("ARIAL", FontPosture.ITALIC, 12));
-				rep.setFill(Color.GRAY);
-			} else if (i == currentPos) {
-				rep.setFont(Font.font("ARIAL", FontWeight.BOLD, 12));
-			}
-			lv_history.getItems().add(rep);
+		List<Transition> transitionList = currentTrace.getTransitionList();
+		for (int i = 0; i < transitionList.size(); i++) {
+			HistoryStatus status = PAST;
+			if (i == currentPos)
+				status = PRESENT;
+			if (i < currentPos)
+				status = FUTURE;
+			history.add(new HistoryItem(transitionList.get(i), status));
 		}
 
-		if (rootatbottom) {
-			Collections.reverse(lv_history.getItems());
-		}
+		// List<Transition> opList = currentTrace.getTransitionList();
+		// int startpos = 0;
+		// int endpos = opList.size();
+		//
+		// lv_history.getItems().add("---root---");
+		// currentTrace.getStateSpace().evaluateTransitions(opList.subList(startpos,
+		// endpos), FormulaExpand.truncate);
+		// //
+		// for (int i = startpos; i < endpos; i++) {
+		// Text rep = new Text(opList.get(i).getPrettyRep());
+		// if (i > currentPos) {
+		// rep.setFont(Font.font("ARIAL", FontPosture.ITALIC, 12));
+		// rep.setFill(Color.GRAY);
+		// } else if (i == currentPos) {
+		// rep.setFont(Font.font("ARIAL", FontWeight.BOLD, 12));
+		// }
+		// lv_history.getItems().add(rep);
+		// }
+		//
+		// if (rootatbottom) {
+		// Collections.reverse(lv_history.getItems());
+		// }
 	}
 
 	@Override
