@@ -36,6 +36,11 @@ public class MenuController extends MenuBar {
 		);
 		bus.post(fileChooser);
 	}
+	
+	@FXML
+	private void handleModelCheck(ActionEvent event) {
+		
+	}
 
 	@Subscribe
 	public void showFileDialogHandler(FileChooser chooser) {
