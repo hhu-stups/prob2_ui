@@ -10,7 +10,7 @@ import com.google.inject.Inject;
 
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.scripting.Api;
-import de.prob.statespace.Animations;
+import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.events.OpenFileEvent;
@@ -21,11 +21,11 @@ import javafx.scene.control.MenuBar;
 public class OpenFileCommand implements Command {
 
 	private Api api;
-	private Animations animations;
+	private AnimationSelector animations;
 	private EventBus bus;
 
 	@Inject
-	public OpenFileCommand(EventBus bus, Api api, Animations animations) {
+	public OpenFileCommand(EventBus bus, Api api, AnimationSelector animations) {
 		this.bus = bus;
 		this.api = api;
 		this.animations = animations;
@@ -51,7 +51,7 @@ public class OpenFileCommand implements Command {
 			break;
 		}
 	}
-	
+
 	@Override
 	public Collection<ModelineExtension> getModelineContribution() {
 		// TODO Auto-generated method stub

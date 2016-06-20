@@ -12,7 +12,9 @@ import java.util.UUID;
 import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.Animations;
+import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.ITraceChangesListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -41,7 +43,7 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 
-public class HistoryView extends TitledPane implements Initializable, ITraceChangesListener {
+public class HistoryView extends TitledPane implements Initializable, IAnimationChangeListener {
 
 	@FXML
 	private ListView<Object> lv_history;
@@ -60,10 +62,10 @@ public class HistoryView extends TitledPane implements Initializable, ITraceChan
 
 	private boolean rootatbottom = true;
 
-	private Animations animations;
+	private AnimationSelector animations;
 
 	@Inject
-	public HistoryView(FXMLLoader loader, Animations animations) {
+	public HistoryView(FXMLLoader loader, AnimationSelector animations) {
 		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
 
@@ -113,72 +115,23 @@ public class HistoryView extends TitledPane implements Initializable, ITraceChan
 			graph.setFitHeight(1000);
 			graph.setFitWidth(1000);
 			graph.setOnMouseClicked(graphe -> {
-				if(graphe.getButton() == MouseButton.PRIMARY) {
+				if (graphe.getButton() == MouseButton.PRIMARY) {
 					graph.setFitHeight(graph.getFitHeight() * 2);
 					graph.setFitWidth(graph.getFitWidth() * 2);
-				} else if(graphe.getButton() == MouseButton.SECONDARY) {
+				} else if (graphe.getButton() == MouseButton.SECONDARY) {
 					graph.setFitHeight(graph.getFitHeight() * 0.5);
 					graph.setFitWidth(graph.getFitWidth() * 0.5);
 				}
-			    pane.setContent(graph); 
+				pane.setContent(graph);
 			});
-			
-			pane.setContent(graph); 
+
+			pane.setContent(graph);
 			stage.setTitle("Dotty");
 			Scene scene = new Scene(pane, 800, 600);
 			stage.setScene(scene);
 			stage.show();
 		});
 
-	}
-
-	private String extractPrettyName(final String name) {
-		if ("$setup_constants".equals(name)) {
-			return "SETUP_CONSTANTS";
-		}
-		if ("$initialise_machine".equals(name)) {
-			return "INITIALISATION";
-		}
-		return name;
-	}
-
-	@Override
-	public void changed(List<Trace> t) {
-		if (lv_history == null) {
-			return;
-		}
-		lv_history.getItems().clear();
-		if (t == null || t.isEmpty()) {
-			return;
-		}
-		try {
-
-			int currentPos = t.get(0).getCurrent().getIndex();
-			List<Transition> opList = t.get(0).getTransitionList();
-			int startpos = 0;
-			int endpos = opList.size();
-
-			lv_history.getItems().add("---root---");
-			t.get(0).getStateSpace().evaluateTransitions(opList.subList(startpos, endpos), FormulaExpand.truncate);
-
-			for (int i = startpos; i < endpos; i++) {
-				Text rep = new Text(opList.get(i).getPrettyRep());
-				if (i > currentPos) {
-					rep.setFont(Font.font("ARIAL", FontPosture.ITALIC, 12));
-					rep.setFill(Color.GRAY);
-				} else if (i == currentPos) {
-					rep.setFont(Font.font("ARIAL", FontWeight.BOLD, 12));
-				}
-				lv_history.getItems().add(rep);
-			}
-
-			if (rootatbottom) {
-				Collections.reverse(lv_history.getItems());
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	private int getCurrentIndex() {
@@ -195,13 +148,38 @@ public class HistoryView extends TitledPane implements Initializable, ITraceChan
 	}
 
 	@Override
-	public void removed(List<UUID> t) {
-		// TODO Auto-generated method stub
+	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
+		if (lv_history == null) {
+			return;
+		}
+		lv_history.getItems().clear();
 
+		int currentPos = currentTrace.getCurrent().getIndex();
+		List<Transition> opList = currentTrace.getTransitionList();
+		int startpos = 0;
+		int endpos = opList.size();
+
+		lv_history.getItems().add("---root---");
+		currentTrace.getStateSpace().evaluateTransitions(opList.subList(startpos, endpos), FormulaExpand.truncate);
+
+		for (int i = startpos; i < endpos; i++) {
+			Text rep = new Text(opList.get(i).getPrettyRep());
+			if (i > currentPos) {
+				rep.setFont(Font.font("ARIAL", FontPosture.ITALIC, 12));
+				rep.setFill(Color.GRAY);
+			} else if (i == currentPos) {
+				rep.setFont(Font.font("ARIAL", FontWeight.BOLD, 12));
+			}
+			lv_history.getItems().add(rep);
+		}
+
+		if (rootatbottom) {
+			Collections.reverse(lv_history.getItems());
+		}
 	}
 
 	@Override
-	public void animatorStatus(Set<UUID> busy) {
+	public void animatorStatus(boolean busy) {
 		// TODO Auto-generated method stub
 
 	}

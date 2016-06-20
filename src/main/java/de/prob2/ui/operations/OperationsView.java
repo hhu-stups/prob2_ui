@@ -20,8 +20,8 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.BEvent;
 import de.prob.model.representation.Machine;
 import de.prob.model.representation.ModelElementList;
-import de.prob.statespace.Animations;
-import de.prob.statespace.ITraceChangesListener;
+import de.prob.statespace.AnimationSelector;
+import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import javafx.application.Platform;
@@ -38,7 +38,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 
-public class OperationsView extends TitledPane implements ITraceChangesListener {
+public class OperationsView extends TitledPane implements IAnimationChangeListener {
 
 	@FXML
 	private ListView<Operation> opsListView;
@@ -73,10 +73,10 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 	private boolean showNotEnabled = true;
 	private String filter = "";
 	Comparator<Operation> sorter = new ModelOrder(new ArrayList<String>());
-	private Animations animations;
+	private AnimationSelector animations;
 
 	@Inject
-	public OperationsView(Animations ANIMATIONS, FXMLLoader loader) {
+	public OperationsView(AnimationSelector ANIMATIONS, FXMLLoader loader) {
 		this.animations = ANIMATIONS;
 		animations.registerAnimationChangeListener(this);
 
@@ -206,59 +206,6 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 
 	}
 
-	@Override
-	public void changed(List<Trace> t) {
-		if (t == null || t.isEmpty())
-			return;
-		Trace trace = t.get(0);
-		if (trace == null) {
-			currentTrace = null;
-			currentModel = null;
-			opNames = new ArrayList<String>();
-			if (sorter instanceof ModelOrder) {
-				sorter = new ModelOrder(opNames);
-			}
-		}
-
-		if (trace.getModel() != currentModel) {
-			updateModel(trace);
-		}
-		currentTrace = trace;
-		events = new ArrayList<Operation>();
-		Set<Transition> operations = currentTrace.getNextTransitions(true);
-		Set<String> notEnabled = new HashSet<String>(opNames);
-		Set<String> withTimeout = currentTrace.getCurrentState().getTransitionsWithTimeout();
-		for (Transition transition : operations) {
-			String id = transition.getId();
-			String name = extractPrettyName(transition.getName());
-			notEnabled.remove(name);
-			List<String> params = transition.getParams();
-			Operation operation = new Operation(id, name, params, true, withTimeout.contains(name));
-			events.add(operation);
-		}
-		if (showNotEnabled) {
-			for (String s : notEnabled) {
-				if (!s.equals("INITIALISATION")) {
-					events.add(new Operation(s, s, opToParams.get(s), false, withTimeout.contains(s)));
-				}
-			}
-		}
-		try {
-			Collections.sort(events, sorter);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		backButton.setDisable(!currentTrace.canGoBack());
-		forwardButton.setDisable(!currentTrace.canGoForward());
-
-		Platform.runLater(() -> {
-			ObservableList<Operation> opsList = opsListView.getItems();
-			opsList.clear();
-			opsList.addAll(applyFilter(filter));
-		});
-
-	}
-
 	private void updateModel(final Trace trace) {
 		currentModel = trace.getModel();
 		AbstractElement mainComponent = trace.getStateSpace().getMainComponent();
@@ -293,18 +240,6 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 			return "INITIALISATION";
 		}
 		return name;
-	}
-
-	@Override
-	public void removed(List<UUID> t) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void animatorStatus(Set<UUID> busy) {
-		// TODO Auto-generated method stub
-
 	}
 
 	private class EventComparator {
@@ -364,6 +299,63 @@ public class OperationsView extends TitledPane implements ITraceChangesListener 
 			}
 			return -1 * o1.name.compareTo(o2.name);
 		}
+
+	}
+
+	@Override
+	public void traceChange(Trace trace, boolean currentAnimationChanged) {
+
+		if (trace == null) {
+			currentTrace = null;
+			currentModel = null;
+			opNames = new ArrayList<String>();
+			if (sorter instanceof ModelOrder) {
+				sorter = new ModelOrder(opNames);
+			}
+		}
+
+		if (trace.getModel() != currentModel) {
+			updateModel(trace);
+		}
+		currentTrace = trace;
+		events = new ArrayList<Operation>();
+		Set<Transition> operations = currentTrace.getNextTransitions(true);
+		Set<String> notEnabled = new HashSet<String>(opNames);
+		Set<String> withTimeout = currentTrace.getCurrentState().getTransitionsWithTimeout();
+		for (Transition transition : operations) {
+			String id = transition.getId();
+			String name = extractPrettyName(transition.getName());
+			notEnabled.remove(name);
+			List<String> params = transition.getParams();
+			Operation operation = new Operation(id, name, params, true, withTimeout.contains(name));
+			events.add(operation);
+		}
+		if (showNotEnabled) {
+			for (String s : notEnabled) {
+				if (!s.equals("INITIALISATION")) {
+					events.add(new Operation(s, s, opToParams.get(s), false, withTimeout.contains(s)));
+				}
+			}
+		}
+		try {
+			Collections.sort(events, sorter);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		backButton.setDisable(!currentTrace.canGoBack());
+		forwardButton.setDisable(!currentTrace.canGoForward());
+
+		Platform.runLater(() -> {
+			ObservableList<Operation> opsList = opsListView.getItems();
+			opsList.clear();
+			opsList.addAll(applyFilter(filter));
+		});
+
+	}
+
+	@Override
+	public void animatorStatus(boolean busy) {
+		// TODO Auto-generated method stub
 
 	}
 
