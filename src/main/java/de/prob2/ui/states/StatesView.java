@@ -1,16 +1,13 @@
 package de.prob2.ui.states;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.sun.javafx.collections.ObservableSetWrapper;
-
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EnumerationWarning;
 import de.prob.animator.domainobjects.EvalResult;
@@ -20,6 +17,7 @@ import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Action;
+import de.prob.model.representation.Machine;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
@@ -27,7 +25,6 @@ import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
@@ -35,12 +32,12 @@ import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-public class StatesView extends AnchorPane implements Initializable, IAnimationChangeListener {
-	private @FXML TreeTableColumn<StateTreeItem<?>, String> tvName;
-	private @FXML TreeTableColumn<StateTreeItem<?>, String> tvValue;
-	private @FXML TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
-	private @FXML TreeItem<StateTreeItem<?>> tvChildrenItem;
-	private @FXML Button editBlacklistButton;
+public class StatesView extends AnchorPane implements IAnimationChangeListener {
+	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvName;
+	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvValue;
+	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
+	@FXML private TreeItem<StateTreeItem<?>> tvChildrenItem;
+	@FXML private Button editBlacklistButton;
 
 	private Stage editBlacklistStage;
 	private BlacklistView editBlacklistStageController;
@@ -112,7 +109,6 @@ public class StatesView extends AnchorPane implements Initializable, IAnimationC
 	}
 
 	private void updateElements(
-		final Trace trace,
 		final TreeItem<StateTreeItem<?>> treeItem,
 		final List<? extends AbstractElement> elements
 	) {
@@ -137,7 +133,7 @@ public class StatesView extends AnchorPane implements Initializable, IAnimationC
 				treeItem.getChildren().add(childItem);
 			}
 
-			this.updateChildren(trace, childItem, e);
+			this.updateChildren(childItem, e);
 		}
 
 		Iterator<TreeItem<StateTreeItem<?>>> it = treeItem.getChildren().iterator();
@@ -161,7 +157,6 @@ public class StatesView extends AnchorPane implements Initializable, IAnimationC
 	}
 
 	private void updateChildren(
-		final Trace trace,
 		final TreeItem<StateTreeItem<?>> treeItem,
 		final AbstractElement element
 	) {
@@ -185,7 +180,7 @@ public class StatesView extends AnchorPane implements Initializable, IAnimationC
 				treeItem.getChildren().add(childItem);
 			}
 
-			this.updateElements(trace, childItem, element.getChildren().get(clazz));
+			this.updateElements(childItem, element.getChildren().get(clazz));
 		}
 
 		Iterator<TreeItem<StateTreeItem<?>>> it = treeItem.getChildren().iterator();
@@ -206,16 +201,25 @@ public class StatesView extends AnchorPane implements Initializable, IAnimationC
 		treeItem.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
 	}
 
-	private void updateModel(final Trace trace, final TreeItem<StateTreeItem<?>> root) {
-		if (trace == null) {
-			return;
+	@Override
+	public void traceChange(Trace trace, boolean currentAnimationChanged) {
+		try {
+			this.trace = trace;
+			this.currentValues = this.trace.getCurrentState().getValues();
+			this.previousValues = this.trace.canGoBack() ? this.trace.getPreviousState().getValues() : null;
+			this.updateElements(this.tvChildrenItem, this.trace.getModel().getChildrenOfType(Machine.class));
+		} catch (Exception e) {
+			// Otherwise the exception gets lost somewhere deep in a
+			// ProB log file, without a traceback.
+			e.printStackTrace();
 		}
-
-		this.updateChildren(trace, root, trace.getModel());
 	}
 
 	@Override
-	public void initialize(final URL location, final ResourceBundle resources) {
+	public void animatorStatus(boolean busy) {}
+
+	@FXML
+	public void initialize() {
 		this.animations.registerAnimationChangeListener(this);
 
 		this.currentValues = null;
@@ -225,7 +229,7 @@ public class StatesView extends AnchorPane implements Initializable, IAnimationC
 		this.tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
 		this.tvPreviousValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("previousValue"));
 
-		this.tvChildrenItem.setValue(new SimpleStateTreeItem("Children"));
+		this.tvChildrenItem.setValue(new ElementClassStateTreeItem(Machine.class));
 
 		FXMLLoader editBlacklistStageLoader = new FXMLLoader(this.getClass().getResource("blacklist_view.fxml"));
 		try {
@@ -241,7 +245,9 @@ public class StatesView extends AnchorPane implements Initializable, IAnimationC
 
 		this.childrenClassBlacklist.addListener(
 			(SetChangeListener.Change<? extends Class<? extends AbstractElement>> change) -> {
-				this.updateModel(this.trace, this.tvChildrenItem);
+				if (this.trace != null) {
+					this.updateElements(this.tvChildrenItem, this.trace.getModel().getChildrenOfType(Machine.class));
+				}
 			}
 		);
 		this.knownAbstractElementSubclasses.addListener(
@@ -271,24 +277,5 @@ public class StatesView extends AnchorPane implements Initializable, IAnimationC
 			// otherwise it will not run properly when exceptions occur.
 			// Put it below in the close request event handler instead.
 		});
-	}
-
-	@Override
-	public void traceChange(Trace trace, boolean currentAnimationChanged) {
-		try {
-			this.trace = trace;
-			this.currentValues = this.trace.getCurrentState().getValues();
-			this.previousValues = this.trace.canGoBack() ? this.trace.getPreviousState().getValues() : null;
-			this.updateModel(this.trace, this.tvChildrenItem);
-		} catch (Exception e) {
-			// Otherwise the exception gets lost somewhere deep in a
-			// ProB log file, without a traceback.
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void animatorStatus(boolean busy) {
-		// TODO Auto-generated method stub
 	}
 }
