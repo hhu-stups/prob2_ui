@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.UUID;
 
 import com.google.inject.Inject;
 import com.sun.javafx.collections.ObservableSetWrapper;
@@ -23,9 +21,7 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.Action;
 import de.prob.model.representation.ModelElementList;
 import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.Animations;
 import de.prob.statespace.IAnimationChangeListener;
-import de.prob.statespace.ITraceChangesListener;
 import de.prob.statespace.Trace;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
@@ -45,7 +41,7 @@ public class StatesView extends AnchorPane implements Initializable, IAnimationC
 	private @FXML TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
 	private @FXML TreeItem<StateTreeItem<?>> tvChildrenItem;
 	private @FXML Button editBlacklistButton;
-	
+
 	private Stage editBlacklistStage;
 	private BlacklistView editBlacklistStageController;
 
@@ -68,7 +64,7 @@ public class StatesView extends AnchorPane implements Initializable, IAnimationC
 			e.printStackTrace();
 		}
 	}
-	
+
 	static String stringRep(final AbstractEvalResult res) {
 		if (res instanceof IdentifierNotInitialised) {
 			return "";
