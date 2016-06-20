@@ -3,27 +3,20 @@ package de.prob2.ui.history;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.UUID;
 
 import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.Animations;
 import de.prob.statespace.IAnimationChangeListener;
-import de.prob.statespace.ITraceChangesListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
-import javafx.scene.Group;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
@@ -33,14 +26,11 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 
 public class HistoryView extends TitledPane implements Initializable, IAnimationChangeListener {
@@ -56,7 +46,7 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 
 	@FXML
 	private Button btforward;
-	
+
 	@FXML
 	private Button btshowgraph;
 
@@ -105,8 +95,7 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 		btforward.setOnAction(e -> {
 			animations.traceChange(animations.getTraces().get(0).forward());
 		});
-		
-		
+
 		btshowgraph.setOnAction(e -> {
 			String url = getClass().getResource("/glyphicons_free/glyphicons/png/glyphicons-9-film.png").toString();
 			ScrollPane pane = new ScrollPane();

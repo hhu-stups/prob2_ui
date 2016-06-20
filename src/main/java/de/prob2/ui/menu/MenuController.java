@@ -9,7 +9,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.scripting.Api;
-import de.prob.statespace.Animations;
 import de.prob2.ui.events.OpenFileEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -48,7 +47,7 @@ public class MenuController extends MenuBar {
 	}
 
 	@Inject
-	public MenuController(FXMLLoader loader, Api api, EventBus bus, Animations animations) {
+	public MenuController(FXMLLoader loader, Api api, EventBus bus) {
 		this.bus = bus;
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
