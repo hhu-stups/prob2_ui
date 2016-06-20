@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" text="Dotty" type="TitledPane" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+  <content>
+    <AnchorPane prefHeight="180.0" prefWidth="200.0">
+         <children>
+            <VBox layoutX="20.4" layoutY="20.4" prefHeight="50.0" prefWidth="183.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <Button fx:id="btshowhistory" mnemonicParsing="false" prefHeight="31.0" prefWidth="183.0" text="Show History as Graph" />
+               </children>
+            </VBox>
+         </children></AnchorPane>
+  </content>
+</fx:root>

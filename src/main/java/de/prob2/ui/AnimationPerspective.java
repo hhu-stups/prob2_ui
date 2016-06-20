@@ -6,6 +6,7 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 
 import de.prob.scripting.Api;
+import de.prob2.ui.dotty.DottyView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.operations.OperationsView;
 import javafx.fxml.FXML;
@@ -28,21 +29,24 @@ public class AnimationPerspective implements Initializable {
 	private OperationsView opsController;
 
 	private HistoryView historyController;
+	
+	private DottyView dottyController;
 
 	@Inject
 	public AnimationPerspective(Api api, FXMLLoader loader, OperationsView opsController,
-			HistoryView historyController) {
+			HistoryView historyController, DottyView dottyController) {
 		this.api = api;
 		this.loader = loader;
 		this.opsController = opsController;
 		this.historyController = historyController;
+		this.dottyController = dottyController;
 	}
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
 		small.getPanes().clear();
-		small.getPanes().addAll(opsController, historyController);
+		small.getPanes().addAll(opsController, historyController, dottyController);
 
 	}
 

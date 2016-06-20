@@ -104,32 +104,6 @@ public class HistoryView extends TitledPane implements Initializable, ITraceChan
 			animations.traceChange(animations.getTraces().get(0).forward());
 		});
 		
-		
-		btshowgraph.setOnAction(e -> {
-			String url = getClass().getResource("/glyphicons_free/glyphicons/png/glyphicons-9-film.png").toString();
-			ScrollPane pane = new ScrollPane();
-			Stage stage = new Stage();
-			ImageView graph = new ImageView(new Image(url));
-			graph.setFitHeight(1000);
-			graph.setFitWidth(1000);
-			graph.setOnMouseClicked(graphe -> {
-				if(graphe.getButton() == MouseButton.PRIMARY) {
-					graph.setFitHeight(graph.getFitHeight() * 2);
-					graph.setFitWidth(graph.getFitWidth() * 2);
-				} else if(graphe.getButton() == MouseButton.SECONDARY) {
-					graph.setFitHeight(graph.getFitHeight() * 0.5);
-					graph.setFitWidth(graph.getFitWidth() * 0.5);
-				}
-			    pane.setContent(graph); 
-			});
-			
-			pane.setContent(graph); 
-			stage.setTitle("Dotty");
-			Scene scene = new Scene(pane, 800, 600);
-			stage.setScene(scene);
-			stage.show();
-		});
-
 	}
 
 	private String extractPrettyName(final String name) {
