@@ -22,7 +22,9 @@ import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.Action;
 import de.prob.model.representation.ModelElementList;
+import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.Animations;
+import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.ITraceChangesListener;
 import de.prob.statespace.Trace;
 import javafx.collections.ObservableSet;
@@ -37,7 +39,7 @@ import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-public class StatesView extends AnchorPane implements Initializable, ITraceChangesListener {
+public class StatesView extends AnchorPane implements Initializable, IAnimationChangeListener {
 	private @FXML TreeTableColumn<StateTreeItem<?>, String> tvName;
 	private @FXML TreeTableColumn<StateTreeItem<?>, String> tvValue;
 	private @FXML TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
@@ -46,18 +48,17 @@ public class StatesView extends AnchorPane implements Initializable, ITraceChang
 	
 	private Stage editBlacklistStage;
 	private BlacklistView editBlacklistStageController;
-	
+
 	private Trace trace;
 	private ObservableSet<Class<? extends AbstractElement>> childrenClassBlacklist;
 	private ObservableSet<Class<? extends AbstractElement>> knownAbstractElementSubclasses;
-	private Animations animations;
-	
-	
+	private AnimationSelector animations;
+
 	@Inject
-	public StatesView(FXMLLoader loader, Animations animations) {
+	public StatesView(FXMLLoader loader, AnimationSelector animations) {
 		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
-		
+
 		try {
 			loader.setLocation(getClass().getResource("states_view.fxml"));
 			loader.setRoot(this);
@@ -81,27 +82,28 @@ public class StatesView extends AnchorPane implements Initializable, ITraceChang
 			return res.getClass() + " toString: " + res;
 		}
 	}
-	
+
 	static String formatClassName(Class<?> clazz, boolean plural) {
 		String shortName = clazz.getSimpleName();
 		if (plural) {
 			if (shortName.endsWith("y")) {
-				shortName = shortName.substring(0, shortName.length()-1) + "ies";
+				shortName = shortName.substring(0, shortName.length() - 1) + "ies";
 			} else {
 				shortName += "s";
 			}
 		}
 		return shortName;
 	}
-	
+
 	static String formatClassName(Class<?> clazz) {
 		return formatClassName(clazz, false);
 	}
-	
-	private void updateElements(final Trace trace, final TreeItem<StateTreeItem<?>> treeItem, final List<? extends AbstractElement> elements) {
+
+	private void updateElements(final Trace trace, final TreeItem<StateTreeItem<?>> treeItem,
+			final List<? extends AbstractElement> elements) {
 		for (AbstractElement e : elements) {
 			TreeItem<StateTreeItem<?>> childItem = null;
-			
+
 			for (TreeItem<StateTreeItem<?>> ti : treeItem.getChildren()) {
 				StateTreeItem<?> sti = ti.getValue();
 				if (sti.getContents().equals(e)) {
@@ -110,36 +112,39 @@ public class StatesView extends AnchorPane implements Initializable, ITraceChang
 					break;
 				}
 			}
-			
+
 			if (childItem == null) {
 				childItem = new TreeItem<>(new ElementStateTreeItem(trace, e));
 				treeItem.getChildren().add(childItem);
 			}
-			
+
 			this.updateChildren(trace, childItem, e);
 		}
-		
+
 		Iterator<TreeItem<StateTreeItem<?>>> it = treeItem.getChildren().iterator();
 		while (it.hasNext()) {
 			TreeItem<StateTreeItem<?>> ti = it.next();
 			StateTreeItem<?> sti = ti.getValue();
-			if (!(sti instanceof ElementStateTreeItem) || !elements.contains(((ElementStateTreeItem) sti).getContents())) {
+			if (!(sti instanceof ElementStateTreeItem)
+					|| !elements.contains(((ElementStateTreeItem) sti).getContents())) {
 				it.remove();
 			}
 		}
-		
+
 		treeItem.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
 	}
-	
-	private void updateChildren(final Trace trace, final TreeItem<StateTreeItem<?>> treeItem, final AbstractElement element) {
-		Map<Class<? extends AbstractElement>, ModelElementList<? extends AbstractElement>> children = element.getChildren();
+
+	private void updateChildren(final Trace trace, final TreeItem<StateTreeItem<?>> treeItem,
+			final AbstractElement element) {
+		Map<Class<? extends AbstractElement>, ModelElementList<? extends AbstractElement>> children = element
+				.getChildren();
 		this.knownAbstractElementSubclasses.addAll(children.keySet());
 		for (Class<? extends AbstractElement> clazz : children.keySet()) {
 			System.out.println(clazz);
 			if (this.childrenClassBlacklist.contains(clazz)) {
 				continue;
 			}
-			
+
 			TreeItem<StateTreeItem<?>> childItem = null;
 			for (TreeItem<StateTreeItem<?>> ti : treeItem.getChildren()) {
 				StateTreeItem<?> sti = ti.getValue();
@@ -148,27 +153,29 @@ public class StatesView extends AnchorPane implements Initializable, ITraceChang
 					break;
 				}
 			}
-			
+
 			if (childItem == null) {
 				childItem = new TreeItem<>(new ElementClassStateTreeItem(clazz));
 				treeItem.getChildren().add(childItem);
 			}
-			
+
 			this.updateElements(trace, childItem, children.get(clazz));
 		}
-		
+
 		Iterator<TreeItem<StateTreeItem<?>>> it = treeItem.getChildren().iterator();
 		while (it.hasNext()) {
 			TreeItem<StateTreeItem<?>> ti = it.next();
 			StateTreeItem<?> sti = ti.getValue();
-			if (!(sti instanceof ElementClassStateTreeItem) || !children.containsKey(((ElementClassStateTreeItem) sti).getContents()) || this.childrenClassBlacklist.contains(((ElementClassStateTreeItem) sti).getContents())) {
+			if (!(sti instanceof ElementClassStateTreeItem)
+					|| !children.containsKey(((ElementClassStateTreeItem) sti).getContents())
+					|| this.childrenClassBlacklist.contains(((ElementClassStateTreeItem) sti).getContents())) {
 				it.remove();
 			}
 		}
-		
+
 		treeItem.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
 	}
-	
+
 	private void updateModel(final Trace trace, final TreeItem<StateTreeItem<?>> root) {
 		AbstractModel currentModel;
 		if (trace == null) {
@@ -179,20 +186,20 @@ public class StatesView extends AnchorPane implements Initializable, ITraceChang
 		} catch (NullPointerException e) {
 			return;
 		}
-		
+
 		this.updateChildren(trace, root, currentModel);
 	}
-	
+
 	@Override
 	public void initialize(final URL location, final ResourceBundle resources) {
 		animations.registerAnimationChangeListener(this);
-		
+
 		this.tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 		this.tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
 		this.tvPreviousValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("previousValue"));
-		
+
 		this.tvChildrenItem.setValue(new SimpleStateTreeItem("Children"));
-		
+
 		FXMLLoader editBlacklistStageLoader = new FXMLLoader(this.getClass().getResource("blacklist_view.fxml"));
 		try {
 			this.editBlacklistStage = editBlacklistStageLoader.load();
@@ -201,61 +208,57 @@ public class StatesView extends AnchorPane implements Initializable, ITraceChang
 			return;
 		}
 		this.editBlacklistStageController = editBlacklistStageLoader.getController();
-		
+
 		this.childrenClassBlacklist = this.editBlacklistStageController.childrenClassBlacklist;
 		this.knownAbstractElementSubclasses = new ObservableSetWrapper<>(new HashSet<>());
-		
-		this.childrenClassBlacklist.addListener((SetChangeListener.Change<? extends Class<? extends AbstractElement>> change) -> {
-			this.updateModel(this.trace, this.tvChildrenItem);
-		});
-		this.knownAbstractElementSubclasses.addListener((SetChangeListener.Change<? extends Class<? extends AbstractElement>> change) -> {
-			List<Class<? extends AbstractElement>> l = this.editBlacklistStageController.list.getItems();
-			Class<? extends AbstractElement> added = change.getElementAdded();
-			Class<? extends AbstractElement> removed = change.getElementRemoved();
-			
-			if (change.wasAdded() && !l.contains(added)) {
-				l.add(added);
-				l.sort((a, b) -> a.getCanonicalName().compareTo(b.getCanonicalName()));
-			} else if (change.wasRemoved() && l.contains(removed)) {
-				if (this.childrenClassBlacklist.contains(removed)) {
-					this.childrenClassBlacklist.remove(removed);
-				}
-				l.remove(removed);
-			}
-		});
-		
+
+		this.childrenClassBlacklist
+				.addListener((SetChangeListener.Change<? extends Class<? extends AbstractElement>> change) -> {
+					this.updateModel(this.trace, this.tvChildrenItem);
+				});
+		this.knownAbstractElementSubclasses
+				.addListener((SetChangeListener.Change<? extends Class<? extends AbstractElement>> change) -> {
+					List<Class<? extends AbstractElement>> l = this.editBlacklistStageController.list.getItems();
+					Class<? extends AbstractElement> added = change.getElementAdded();
+					Class<? extends AbstractElement> removed = change.getElementRemoved();
+
+					if (change.wasAdded() && !l.contains(added)) {
+						l.add(added);
+						l.sort((a, b) -> a.getCanonicalName().compareTo(b.getCanonicalName()));
+					} else if (change.wasRemoved() && l.contains(removed)) {
+						if (this.childrenClassBlacklist.contains(removed)) {
+							this.childrenClassBlacklist.remove(removed);
+						}
+						l.remove(removed);
+					}
+				});
+
 		this.knownAbstractElementSubclasses.add(Action.class);
 		this.childrenClassBlacklist.add(Action.class);
-		
+
 		this.editBlacklistButton.setOnAction(event -> {
 			this.editBlacklistStage.show();
-			// Cleanup code to run when the window is closed should not go here - otherwise it will not run properly when exceptions occur. Put it below in the close request event handler instead.
+			// Cleanup code to run when the window is closed should not go here
+			// - otherwise it will not run properly when exceptions occur. Put
+			// it below in the close request event handler instead.
 		});
 	}
-	
+
 	@Override
-	public void changed(final List<Trace> traces) {
+	public void traceChange(Trace trace, boolean currentAnimationChanged) {
 		try {
-			if (traces.isEmpty()) {
-				return;
-			}
-			assert traces.size() == 1 && traces.get(0).getUUID().equals(this.trace.getUUID());
-			this.trace = traces.get(0);
+			this.trace = trace;
 			this.updateModel(this.trace, this.tvChildrenItem);
 		} catch (Exception e) {
-			// Otherwise the exception gets lost somewhere deep in a ProB log file, without a traceback
+			// Otherwise the exception gets lost somewhere deep in a ProB log
+			// file, without a traceback
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
-	public void removed(final List<UUID> traceUUIDs) {
-		assert traceUUIDs.size() == 1 && traceUUIDs.get(0).equals(this.trace.getUUID());
-		this.trace = null;
-	}
-	
-	@Override
-	public void animatorStatus(final Set<UUID> busy) {
-		
+	public void animatorStatus(boolean busy) {
+		// TODO Auto-generated method stub
+
 	}
 }
