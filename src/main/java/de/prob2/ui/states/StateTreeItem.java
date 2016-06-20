@@ -1,9 +1,12 @@
 package de.prob2.ui.states;
 
-import de.prob.statespace.Trace;
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.IEvalElement;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
+import java.util.Map;
 
 public abstract class StateTreeItem<T> implements Comparable<StateTreeItem<?>> {
 	protected StringProperty name;
@@ -70,5 +73,8 @@ public abstract class StateTreeItem<T> implements Comparable<StateTreeItem<?>> {
 		return this.getName().compareTo(o.getName());
 	}
 	
-	public void update(final Trace trace) {}
+	public void update(
+		final Map<IEvalElement, AbstractEvalResult> values,
+		final Map<IEvalElement, AbstractEvalResult> previousValues
+	) {}
 }
