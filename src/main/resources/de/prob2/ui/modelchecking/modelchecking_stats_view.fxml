@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
@@ -8,23 +9,26 @@
 
 <fx:root text="Model Check Stats" type="TitledPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
    <content>
-      <AnchorPane prefHeight="500.0" prefWidth="300.0">
-         <children>
-            <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.0" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="2.0">
+      <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER">
+         <content>
+            <AnchorPane prefHeight="500.0" prefWidth="300.0">
                <children>
-                  <AnchorPane style="-fx-background-color: #eeeeee; -fx-background-radius: 5 5 5 5;">
+                  <VBox fx:id="statsBox" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="4.0" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="2.0">
                      <children>
-                        <Label text="No Model Checking Job done" textFill="#8a8a8a" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
-                           <font>
-                              <Font name="System Bold" size="13.0" />
-                           </font>
-                        </Label>
+                        <AnchorPane style="-fx-background-color: #eeeeee; -fx-background-radius: 5 5 5 5;">
+                           <children>
+                              <Label text="No Model Checking Job done" textFill="#8a8a8a" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
+                                 <font>
+                                    <Font name="System Bold" size="13.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </AnchorPane>
                      </children>
-                  </AnchorPane>
-                  <AnchorPane prefHeight="445.0" prefWidth="300.0" />
+                  </VBox>
                </children>
-            </VBox>
-         </children>
-      </AnchorPane>
+            </AnchorPane>
+         </content>
+      </ScrollPane>
    </content>
 </fx:root>
