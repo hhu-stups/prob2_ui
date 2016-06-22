@@ -6,15 +6,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<TitledPane prefHeight="500.0" prefWidth="300.0" text="Model Check Stats" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root text="Model Check Stats" type="TitledPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
    <content>
-      <AnchorPane>
+      <AnchorPane prefHeight="500.0" prefWidth="300.0">
          <children>
-            <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.0" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="2.0">
                <children>
                   <AnchorPane style="-fx-background-color: #eeeeee; -fx-background-radius: 5 5 5 5;">
                      <children>
-                        <Label prefHeight="16.0" prefWidth="284.0" text="No Model Checking Job done" textFill="#8a8a8a" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
+                        <Label text="No Model Checking Job done" textFill="#8a8a8a" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
                            <font>
                               <Font name="System Bold" size="13.0" />
                            </font>
@@ -27,4 +27,4 @@
          </children>
       </AnchorPane>
    </content>
-</TitledPane>
+</fx:root>
