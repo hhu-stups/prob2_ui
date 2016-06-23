@@ -11,7 +11,7 @@
 
 <SplitPane dividerPositions="0.29797979797979796" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.AnimationPerspective">
 	<items>
-		<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+		<AnchorPane minHeight="0.0" minWidth="300.0" prefHeight="160.0" prefWidth="100.0">
 			<children>
 				<Accordion fx:id="small" layoutX="-28.0" layoutY="128.0" prefHeight="398.0" prefWidth="174.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 					<panes>

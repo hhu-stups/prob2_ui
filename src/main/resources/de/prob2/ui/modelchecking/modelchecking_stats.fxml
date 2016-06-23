@@ -9,15 +9,14 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
-<fx:root type="AnchorPane" prefHeight="400.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root prefHeight="400.0" prefWidth="300.0" type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox spacing="13.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
          <children>
             <HBox prefHeight="12.0" prefWidth="202.0" spacing="7.0">
                <children>
                   <Label text="Time Elapsed:" />
-                  <Label text="\%time" />
+                  <Label fx:id="elapsedTime" />
                </children>
             </HBox>
             <VBox spacing="3.0">
@@ -25,19 +24,19 @@
                   <HBox prefHeight="12.0" prefWidth="202.0" spacing="7.0">
                      <children>
                         <Label text="Processed Nodes:" />
-                        <Label text="\%processedNodes" />
+                        <Label fx:id="processedNodes" />
                      </children>
                   </HBox>
                   <HBox prefHeight="12.0" prefWidth="202.0" spacing="7.0">
                      <children>
                         <Label text="Total Nodes:" />
-                        <Label text="\%totalNodes" />
+                        <Label fx:id="totalNodes" />
                      </children>
                   </HBox>
                   <HBox prefHeight="12.0" prefWidth="202.0" spacing="7.0">
                      <children>
                         <Label text="Total Transitions:" />
-                        <Label text="\%totalTransitions" />
+                        <Label fx:id="totalTransitions" />
                      </children>
                   </HBox>
                </children>

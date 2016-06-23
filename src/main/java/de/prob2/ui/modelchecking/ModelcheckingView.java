@@ -27,7 +27,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-public class ModelcheckingView extends AnchorPane implements IModelCheckListener {
+public class ModelcheckingView extends AnchorPane {
 
 	@FXML
 	private CheckBox findDeadlocks;
@@ -43,11 +43,12 @@ public class ModelcheckingView extends AnchorPane implements IModelCheckListener
 	private CheckBox searchForNewErrors;
 
 	private AnimationSelector animations;
-	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
+	private ModelCheckStats mStatsController;
 	
 	@Inject
-	public ModelcheckingView(AnimationSelector ANIMATIONS, FXMLLoader loader) {
+	public ModelcheckingView(AnimationSelector ANIMATIONS, FXMLLoader loader, ModelCheckStats mStatsController) {
 		this.animations = ANIMATIONS;
+		this.mStatsController = mStatsController;
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_view.fxml"));
 			loader.setRoot(this);
@@ -69,8 +70,8 @@ public class ModelcheckingView extends AnchorPane implements IModelCheckListener
 		}
 		ModelCheckingOptions options = getOptions();
 		StateSpace currentStateSpace = animations.getCurrentTrace().getStateSpace();
-		ModelChecker checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, this));
-		jobs.put(checker.getJobId(), checker);
+		ModelChecker checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, mStatsController));
+		mStatsController.addJob(checker.getJobId(), checker);
 		checker.start();
 
 		// AbstractElement main = currentStateSpace.getMainComponent();
@@ -102,75 +103,5 @@ public class ModelcheckingView extends AnchorPane implements IModelCheckListener
 		stage.close();
 	}
 
-	@Override
-	public void updateStats(final String id, final long timeElapsed,
-			final IModelCheckingResult result, final StateSpaceStats stats) {
-		// results.put(id, result);
-		boolean hasStats = stats != null;
-
-		if (hasStats) {
-			int nrProcessedNodes = stats.getNrProcessedNodes();
-			int nrTotalNodes = stats.getNrTotalNodes();
-			int percent = nrProcessedNodes * 100 / nrTotalNodes;
-			System.out.println("elapsed Time: " + timeElapsed + "processed Nodes: " + nrProcessedNodes
-					+ " total Nodes: " + nrTotalNodes + " percent: " + percent);
-			// submit(WebUtils.wrap("cmd", "ModelChecking.updateJob", "id", id,
-			// "stats", hasStats, "processedNodes", nrProcessedNodes,
-			// "totalNodes", nrTotalNodes, "totalTransitions",
-			// stats.getNrTotalTransitions(), "percent", percent, "time",
-			// timeElapsed));
-		}
-		// else {
-		// submit(WebUtils.wrap("cmd", "ModelChecking.updateJob", "id", id,
-		// "stats", hasStats, "percent", 100, "time", timeElapsed));
-		// }
-		System.out.println("updated Stats");
-	}
-
-	@Override
-	public void isFinished(final String id, final long timeElapsed,
-			final IModelCheckingResult result, final StateSpaceStats stats) {
-//		results.put(id, result);
-
-		String res = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
-				: result instanceof ITraceDescription ? "danger" : "warning";
-		boolean hasTrace = result instanceof ITraceDescription;
-		ModelChecker modelChecker = jobs.get(id);
-		ComputeCoverageResult coverage = null;
-		
-		if (modelChecker != null) {
-			coverage = modelChecker.getCoverage();
-		}
-
-		jobs.remove(id);
-		if (coverage != null) {
-			Number numNodes = coverage.getTotalNumberOfNodes();
-			Number numTrans = coverage.getTotalNumberOfTransitions();
-//
-//			String nodeStats = WebUtils.toJson(extractNodeStats(coverage
-//					.getNodes()));
-//			List<Map<String, String>> transStats = extractNodeStats(coverage
-//					.getOps());
-//			List<String> uncovered = coverage.getUncovered();
-//			for (String transition : uncovered) {
-//				transStats.add(WebUtils.wrap("name", transition, "value", "0"));
-//			}
-//			String transitionStats = WebUtils.toJson(transStats);
-//			submit(WebUtils.wrap("cmd", "ModelChecking.finishJob", "id", id,
-//					"time", timeElapsed, "stats", true, "processedNodes",
-//					numNodes, "totalNodes", numNodes, "totalTransitions",
-//					numTrans, "result", res, "hasTrace", hasTrace, "message",
-//					result.getMessage(), "nodeStats", nodeStats, "transStats",
-//					transitionStats));
-		} 
-//		else {
-//			Map<String, String> wrap = WebUtils.wrap("cmd",
-//					"ModelChecking.finishJob", "id", id, "time", timeElapsed,
-//					"stats", false, "result", res, "hasTrace", hasTrace,
-//					"message", result.getMessage());
-//			submit(wrap);
-//		}
-
-		System.out.println("is finished");
-	}
+	
 }

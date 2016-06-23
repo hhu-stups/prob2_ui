@@ -101,3 +101,17 @@
 	-fx-font-size: 12px;
 }
 	
+.mcheckSuccess {
+	-fx-background-color: #d0ebd0;
+	-fx-background-radius: 5 5 5 5;
+}
+
+.mcheckDanger {
+	-fx-background-color: #ebd1d1;
+	-fx-background-radius: 5 5 5 5;
+}
+
+.mcheckNoCheck {
+	-fx-background-color:  #eeeeee;
+	-fx-background-radius: 5 5 5 5;
+}
