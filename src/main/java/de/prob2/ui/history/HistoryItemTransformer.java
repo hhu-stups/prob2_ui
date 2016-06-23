@@ -17,7 +17,11 @@ public class HistoryItemTransformer implements Callback<ListView<HistoryItem>, L
 		protected void updateItem(HistoryItem item, boolean empty) {
 			super.updateItem(item, empty);
 			if (item != null) {
-				String content = item.transition.getPrettyRep();
+				String content = "---root---";
+				
+				if (!item.root) {
+					content = item.transition.getPrettyRep();
+				}
 				Text text = new Text(content);
 				text.setId("past");
 				text.setDisable(true);

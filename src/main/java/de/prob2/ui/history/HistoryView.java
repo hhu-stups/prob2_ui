@@ -104,8 +104,8 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 	}
 
 	private int getCurrentIndex() {
-		int currentPos = lv_history.getSelectionModel().getSelectedIndex() + 1;
-		int length = lv_history.getItems().size() + 2;
+		int currentPos = lv_history.getSelectionModel().getSelectedIndex();
+		int length = lv_history.getItems().size();
 		int index = 0;
 		if (rootatbottom) {
 			index = length - 2 - currentPos;
@@ -123,6 +123,12 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 		int currentPos = currentTrace.getCurrent().getIndex();
 		List<Transition> transitionList = currentTrace.getTransitionList();
 		
+		if (currentPos == -1) {
+			history.add(new HistoryItem(PRESENT));
+		} else {
+			history.add(new HistoryItem(PAST));
+		}
+		
 		for (int i = 0; i < transitionList.size(); i++) {
 			HistoryStatus status = PAST;
 			if (i == currentPos)
@@ -131,12 +137,7 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 				status = FUTURE;
 			history.add(new HistoryItem(transitionList.get(i), status));
 		}
-		
 
-		//
-		// currentTrace.getStateSpace().evaluateTransitions(opList.subList(startpos,
-		// endpos), FormulaExpand.truncate);
-		//
 		 if (rootatbottom) {
 			 Collections.reverse(history);
 		 }
