@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
 import static de.prob2.ui.history.HistoryStatus.*;
@@ -14,6 +16,7 @@ import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.events.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -55,11 +58,14 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 
 	private AnimationSelector animations;
 
+	private EventBus bus;
+	
 	@Inject
-	public HistoryView(FXMLLoader loader, AnimationSelector animations) {
+	public HistoryView(FXMLLoader loader, AnimationSelector animations, EventBus bus) {
 		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
-
+		
+		this.bus = bus;
 		try {
 			loader.setLocation(getClass().getResource("history_view.fxml"));
 			loader.setRoot(this);
@@ -68,10 +74,11 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		bus.register(this);
 	}
 
 	public void initialize(URL location, ResourceBundle resources) {
-
+		
 		animations.registerAnimationChangeListener(this);
 
 		lv_history.setCellFactory(new HistoryItemTransformer());
@@ -80,8 +87,9 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 		
 		
 		lv_history.setOnMouseClicked(e -> {
-			animations.traceChange(animations.getCurrentTrace().gotoPosition(getCurrentIndex()));
+			bus.post(new TraceChangeEvent(getCurrentIndex()));
 		});
+		
 
 		lv_history.setOnMouseMoved(e -> {
 			lv_history.setCursor(Cursor.HAND);
@@ -93,14 +101,30 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 		});
 
 		btprevious.setOnAction(e -> {
-			animations.traceChange(animations.getCurrentTrace().back());
+			bus.post(new TraceChangeEvent(TraceChangeDirection.BACK));
 		});
 
 		btforward.setOnAction(e -> {
-			animations.traceChange(animations.getCurrentTrace().forward());
+			bus.post(new TraceChangeEvent(TraceChangeDirection.FORWARD));
 		});
 
 
+	}
+	
+	@Subscribe
+	public void changeTracePosition(TraceChangeEvent event) {
+		switch(event.getDirection()) {
+			case BACK:
+				animations.traceChange(animations.getCurrentTrace().back());
+				break;
+			case FORWARD:
+				animations.traceChange(animations.getCurrentTrace().forward());
+				break;
+			default:
+				animations.traceChange(animations.getCurrentTrace().gotoPosition(event.getIndex()));
+				break;
+		}
+		
 	}
 
 	private int getCurrentIndex() {
