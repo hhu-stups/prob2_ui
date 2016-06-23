@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<fx:root prefHeight="400.0" prefWidth="300.0" type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <VBox spacing="13.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+         <children>
+            <HBox prefHeight="12.0" prefWidth="202.0" spacing="7.0">
+               <children>
+                  <Label text="Time Elapsed:" />
+                  <Label fx:id="elapsedTime" />
+               </children>
+            </HBox>
+            <VBox spacing="3.0">
+               <children>
+                  <HBox prefHeight="12.0" prefWidth="202.0" spacing="7.0">
+                     <children>
+                        <Label text="Processed Nodes:" />
+                        <Label fx:id="processedNodes" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="12.0" prefWidth="202.0" spacing="7.0">
+                     <children>
+                        <Label text="Total Nodes:" />
+                        <Label fx:id="totalNodes" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="12.0" prefWidth="202.0" spacing="7.0">
+                     <children>
+                        <Label text="Total Transitions:" />
+                        <Label fx:id="totalTransitions" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <AnchorPane>
+               <children>
+                  <Label alignment="CENTER" prefHeight="16.0" prefWidth="352.0" text="Node Stats" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                     <font>
+                        <Font name="System Bold" size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+            <GridPane>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="162.0" minWidth="10.0" prefWidth="160.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="136.0" minWidth="10.0" prefWidth="120.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
+                     <children>
+                        <Label text="Status" AnchorPane.leftAnchor="10.0">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;" GridPane.columnIndex="1">
+                     <children>
+                        <Label text="# of Nodes" AnchorPane.leftAnchor="10.0">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.rowIndex="1">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="deadlocked" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.rowIndex="2">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="invariant_violated" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="0" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="0" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="0" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="0" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="0" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="23.0" prefWidth="124.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="0" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.rowIndex="3">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="invariant_not_checked" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.rowIndex="6">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="total" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.rowIndex="5">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="live" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.rowIndex="4">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="open" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+               </children>
+            </GridPane>
+            <AnchorPane>
+               <children>
+                  <Label alignment="CENTER" prefHeight="16.0" prefWidth="352.0" text="Transitions Stats" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                     <font>
+                        <Font name="System Bold" size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+            <GridPane>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="162.0" minWidth="10.0" prefWidth="160.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="136.0" minWidth="10.0" prefWidth="120.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="-Infinity" prefHeight="20.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="-Infinity" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
+                     <children>
+                        <Label text="Transition Name" AnchorPane.leftAnchor="10.0">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;" GridPane.columnIndex="1">
+                     <children>
+                        <Label text="# of Transitions" AnchorPane.leftAnchor="10.0">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.rowIndex="1">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="--" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="18.0" prefWidth="145.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 0.5;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <children>
+                        <Label layoutX="14.0" layoutY="6.0" text="0" AnchorPane.leftAnchor="10.0" />
+                     </children>
+                  </AnchorPane>
+               </children>
+            </GridPane>
+         </children>
+      </VBox>
+   </children>
+</fx:root>

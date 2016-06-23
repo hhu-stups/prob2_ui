@@ -18,6 +18,13 @@
 				<MenuItem mnemonicParsing="false" text="Delete" />
 			</items>
 		</Menu>
+		<Menu mnemonicParsing="false" text="%menu.verify">
+			<items>
+				<MenuItem mnemonicParsing="false" text="%menu.verify.items.modelcheck"
+					onAction="#handleModelCheck" />
+				<MenuItem mnemonicParsing="false" text="Close" />
+			</items>
+		</Menu>
 		<Menu mnemonicParsing="false" text="Help">
 			<items>
 				<MenuItem mnemonicParsing="false" text="About" />

@@ -10,18 +10,22 @@ import com.google.inject.Singleton;
 
 import de.prob.scripting.Api;
 import de.prob2.ui.events.OpenFileEvent;
+import de.prob2.ui.modelchecking.ModelcheckingView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.MenuBar;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 
 @Singleton
 public class MenuController extends MenuBar {
 
 	private EventBus bus;
+	private Scene mcheckScene;
 
 	@FXML
 	private void handleOpen(ActionEvent event) {
@@ -35,6 +39,16 @@ public class MenuController extends MenuBar {
 		);
 		bus.post(fileChooser);
 	}
+	
+	@FXML
+	private void handleModelCheck(ActionEvent event) {
+		Window stage = this.getScene().getWindow();
+		Stage mcheckStage = new Stage();
+        mcheckStage.setTitle("Model Check");
+        mcheckStage.initOwner(stage);
+		mcheckStage.setScene(mcheckScene);
+        mcheckStage.showAndWait();
+	}
 
 	@Subscribe
 	public void showFileDialogHandler(FileChooser chooser) {
@@ -47,8 +61,9 @@ public class MenuController extends MenuBar {
 	}
 
 	@Inject
-	public MenuController(FXMLLoader loader, Api api, EventBus bus) {
+	public MenuController(FXMLLoader loader, Api api, EventBus bus, ModelcheckingView mcheckController) {
 		this.bus = bus;
+		this.mcheckScene = new Scene(mcheckController);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);
