@@ -4,14 +4,20 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" text="Dotty" type="TitledPane" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
   <content>
     <AnchorPane prefHeight="180.0" prefWidth="200.0">
          <children>
-            <VBox layoutX="20.4" layoutY="20.4" prefHeight="50.0" prefWidth="183.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <VBox layoutX="40.4" layoutY="43.4" prefHeight="310.0" prefWidth="225.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="33.0">
                <children>
-                  <Button fx:id="btshowhistory" mnemonicParsing="false" prefHeight="31.0" prefWidth="183.0" text="Show History as Graph" />
+                  <Button fx:id="btshowhistory" mnemonicParsing="false" prefHeight="31.0" prefWidth="225.0" text="Show History as Graph" />
+                  <Button fx:id="btshowexpression" mnemonicParsing="false" prefHeight="37.0" prefWidth="225.0" text="Show Mathematical Expression as Graph">
+                     <font>
+                        <Font size="10.0" />
+                     </font>
+                  </Button>
                </children>
             </VBox>
          </children></AnchorPane>

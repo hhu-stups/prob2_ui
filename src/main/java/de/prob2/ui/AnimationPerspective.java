@@ -10,6 +10,7 @@ import de.prob2.ui.dotty.DottyView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.modelchecking.ModelCheckStatsView;
 import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.preferences.PreferencesView;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -30,24 +31,23 @@ public class AnimationPerspective implements Initializable {
 	private HistoryView historyController;
 	private DottyView dottyController;
 	private ModelCheckStatsView modelCheckStatsController;
+	private PreferencesView preferencesController;
 
 	@Inject
 	public AnimationPerspective(Api api, FXMLLoader loader, OperationsView opsController,
-			HistoryView historyController, DottyView dottyController, ModelCheckStatsView modelCheckStatsController) {
+			HistoryView historyController, DottyView dottyController, ModelCheckStatsView modelCheckStatsController, PreferencesView preferencesController) {
 		this.api = api;
 		this.loader = loader;
 		this.opsController = opsController;
 		this.historyController = historyController;
 		this.dottyController = dottyController;
 		this.modelCheckStatsController = modelCheckStatsController;
+		this.preferencesController = preferencesController;
 	}
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-
 		small.getPanes().clear();
-		small.getPanes().addAll(opsController, historyController, dottyController, modelCheckStatsController);
-
+		small.getPanes().addAll(opsController, historyController, dottyController, modelCheckStatsController, preferencesController);
 	}
-
 }

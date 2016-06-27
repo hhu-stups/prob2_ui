@@ -14,6 +14,9 @@
 
 # Gradle
 .gradle/
+gradle-wrapper.*
+gradlew
+gradlew.bat
 
 # ProB
 ProB.log.*.log
