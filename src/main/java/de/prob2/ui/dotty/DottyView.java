@@ -15,19 +15,26 @@ import de.prob.statespace.Trace;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 public class DottyView extends TitledPane implements Initializable, ITraceChangesListener {
 
 	@FXML
 	private Button btshowhistory;
+	
+	@FXML
+	private Button btshowexpression;
 	
 	private Animations animations;
 	
@@ -72,8 +79,28 @@ public class DottyView extends TitledPane implements Initializable, ITraceChange
 			stage.setScene(scene);
 			stage.show();
 		});
+		
+		btshowexpression.setOnAction(e -> {
+			Group root = new Group();
+	        
+			Stage stage = new Stage();
+			
+			FormulaGraph g = new FormulaGraph(100, 100, "DATA");
+			g.add(new FormulaNode("BOO"));
+			g.add(new FormulaNode("FOO"));
+			g.add(new FormulaNode("TESTEST"));
+
+			root.getChildren().add(g);
+			
+			stage.setTitle("Mathematical Expression");
+			Scene scene = new Scene(root, 800, 600);
+			stage.setScene(scene);
+			stage.show();
+			
+		});
 
 	}
+	
 
 	@Override
 	public void changed(List<Trace> t) {

@@ -1,5 +1,9 @@
 package de.prob2.ui.history;
 
+import static de.prob2.ui.history.HistoryStatus.FUTURE;
+import static de.prob2.ui.history.HistoryStatus.PAST;
+import static de.prob2.ui.history.HistoryStatus.PRESENT;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -10,30 +14,22 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
-import static de.prob2.ui.history.HistoryStatus.*;
-
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.events.*;
+import de.prob2.ui.events.TraceChangeDirection;
+import de.prob2.ui.events.TraceChangeEvent;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
-import javafx.stage.Stage;
 
 public class HistoryView extends TitledPane implements Initializable, IAnimationChangeListener {
 
@@ -48,10 +44,7 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 
 	@FXML
 	private Button btforward;
-
-	@FXML
-	private Button btshowgraph;
-
+	
 	private boolean rootatbottom = true;
 
 	private ObservableList<HistoryItem> history = FXCollections.observableArrayList();
