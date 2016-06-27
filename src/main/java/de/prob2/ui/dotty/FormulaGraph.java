@@ -1,6 +1,10 @@
 package de.prob2.ui.dotty;
 
+import java.util.List;
+
 import javafx.scene.layout.Region;
+import javafx.scene.shape.Line;
+
 
 public class FormulaGraph extends Region {
 
@@ -12,7 +16,11 @@ public class FormulaGraph extends Region {
 		this.getChildren().add(root);
 	}
 	
+	
+	
+	
 	public void add(FormulaNode node) {
+		//has to be changed
 		FormulaNode current = root;
 		while(current.next != null) {
 			current = current.next;
@@ -24,13 +32,16 @@ public class FormulaGraph extends Region {
 	}
 	
 	public void show() {
+		//has to be changed
 		FormulaNode current = root;
 		this.getChildren().add(root);
 		while(current.next != null) {
+			Line edge = new Line(current.getRight(), current.getY(), current.next.getLeft(), current.next.getY());
 			current = current.next;
-			System.out.println(current);
+			this.getChildren().add(edge);
 			this.getChildren().add(current);
 		}
 	}
+
 	
 }
