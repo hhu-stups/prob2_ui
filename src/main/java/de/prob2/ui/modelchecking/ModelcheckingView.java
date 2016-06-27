@@ -1,22 +1,13 @@
 package de.prob2.ui.modelchecking;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.command.ComputeCoverageCommand.ComputeCoverageResult;
 import de.prob.check.ConsistencyChecker;
-import de.prob.check.IModelCheckListener;
-import de.prob.check.IModelCheckingResult;
-import de.prob.check.LTLOk;
-import de.prob.check.ModelCheckOk;
 import de.prob.check.ModelChecker;
 import de.prob.check.ModelCheckingOptions;
-import de.prob.check.StateSpaceStats;
 import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -44,6 +35,7 @@ public class ModelcheckingView extends AnchorPane {
 
 	private AnimationSelector animations;
 	private ModelCheckStats mStatsController;
+	private ModelChecker checker;
 	
 	@Inject
 	public ModelcheckingView(AnimationSelector ANIMATIONS, FXMLLoader loader, ModelCheckStats mStatsController) {
@@ -70,7 +62,8 @@ public class ModelcheckingView extends AnchorPane {
 		}
 		ModelCheckingOptions options = getOptions();
 		StateSpace currentStateSpace = animations.getCurrentTrace().getStateSpace();
-		ModelChecker checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, mStatsController));
+		checker = new ModelChecker(
+				new ConsistencyChecker(currentStateSpace, options, null, mStatsController));
 		mStatsController.addJob(checker.getJobId(), checker);
 		checker.start();
 
@@ -99,6 +92,7 @@ public class ModelcheckingView extends AnchorPane {
 
 	@FXML
 	void cancel(ActionEvent event) {
+		checker.cancel();
 		Stage stage = (Stage) this.getScene().getWindow();
 		stage.close();
 	}
