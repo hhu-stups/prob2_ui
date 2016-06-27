@@ -14,10 +14,10 @@ public class FormulaNode extends Region {
 	
 	private Ellipse ellipse;
 	private Text text;
-	//public List<FormulaNode> next;
-	public FormulaNode next;
+	public List<FormulaNode> next;
+	//public FormulaNode next;
 	
-	public FormulaNode(double centerX, double centerY, String data) {
+	public FormulaNode(double centerX, double centerY, String data, List<FormulaNode> list) {
 		//has to be changed a little
 		text = new Text(centerX, centerY, data);
 		double width = text.getLayoutBounds().getWidth();
@@ -25,19 +25,19 @@ public class FormulaNode extends Region {
 		text.setX(text.getX() - width/2);
 		text.setY(text.getY() + height/2);
 		ellipse = new Ellipse(centerX, centerY, width, height);
-		//next = new ArrayList<FormulaNode>();
-		next = null;
+		next = list;
+		//next = null;
 		show();
 	}
 	
-	public FormulaNode(String data) {
+	public FormulaNode(String data, List<FormulaNode> list) {
 		
 		text = new Text(data);
 		double width = text.getLayoutBounds().getWidth();
 		double height = text.getLayoutBounds().getHeight();
 		ellipse = new Ellipse(width, height);
-		//next = new ArrayList<FormulaNode>();
-		next = null;
+		next = list;
+		//next = null;
 	}
 	
 	public void setPosition(double x, double y) {

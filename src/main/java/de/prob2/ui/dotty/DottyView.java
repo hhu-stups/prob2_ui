@@ -2,6 +2,7 @@ package de.prob2.ui.dotty;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -85,10 +86,28 @@ public class DottyView extends TitledPane implements Initializable, ITraceChange
 	        
 			Stage stage = new Stage();
 			
-			FormulaGraph g = new FormulaGraph(100, 100, "DATA");
+			/*FormulaGraph g = new FormulaGraph(100, 100, "DATA");
 			g.add(new FormulaNode("BOO"));
 			g.add(new FormulaNode("FOO"));
-			g.add(new FormulaNode("TESTEST"));
+			g.add(new FormulaNode("TESTEST"));*/
+			
+			List<FormulaNode> nodes3 = new ArrayList<FormulaNode>();
+			nodes3.add(new FormulaNode("HUI", new ArrayList<FormulaNode>()));
+			
+			List<FormulaNode> nodes2 = new ArrayList<FormulaNode>();
+			nodes2.add(new FormulaNode("BOO", new ArrayList<FormulaNode>()));
+			nodes2.add(new FormulaNode("BOO", nodes3));
+			
+			List<FormulaNode> nodes = new ArrayList<FormulaNode>();
+			nodes.add(new FormulaNode("BOO", nodes2));
+			nodes.add(new FormulaNode("FOO", new ArrayList<FormulaNode>()));
+			nodes.add(new FormulaNode("BAR", new ArrayList<FormulaNode>()));
+			nodes.add(new FormulaNode("TESTEST", new ArrayList<FormulaNode>()));
+
+			
+			FormulaNode main = new FormulaNode(100, 400, "DATA", nodes);
+			
+			FormulaGraph g = new FormulaGraph(main);
 
 			root.getChildren().add(g);
 			
