@@ -115,3 +115,8 @@
 	-fx-background-color:  #eeeeee;
 	-fx-background-radius: 5 5 5 5;
 }
+
+.gridViewRow {
+	-fx-border-color: transparent transparent grey transparent;
+	-fx-border-width: 0.5;
+}

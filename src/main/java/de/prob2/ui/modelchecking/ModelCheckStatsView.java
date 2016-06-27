@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
@@ -50,6 +51,8 @@ public class ModelCheckStatsView extends TitledPane{
 			if(!statsBox.getChildren().contains(modelCheckStats))
 				statsBox.getChildren().add(modelCheckStats);
 		});
+		Accordion accordion = ((Accordion) this.getParent());
+		accordion.setExpandedPane(this);
 	}
 	
 }

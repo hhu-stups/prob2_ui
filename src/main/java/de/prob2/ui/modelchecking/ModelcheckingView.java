@@ -1,22 +1,13 @@
 package de.prob2.ui.modelchecking;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.command.ComputeCoverageCommand.ComputeCoverageResult;
 import de.prob.check.ConsistencyChecker;
-import de.prob.check.IModelCheckListener;
-import de.prob.check.IModelCheckingResult;
-import de.prob.check.LTLOk;
-import de.prob.check.ModelCheckOk;
 import de.prob.check.ModelChecker;
 import de.prob.check.ModelCheckingOptions;
-import de.prob.check.StateSpaceStats;
 import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
