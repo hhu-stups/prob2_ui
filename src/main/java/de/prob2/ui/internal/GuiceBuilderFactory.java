@@ -22,7 +22,6 @@ public class GuiceBuilderFactory implements BuilderFactory {
 
 	@Override
 	public Builder<?> getBuilder(Class<?> type) {
-		System.out.println("Requesting " + type.getSimpleName());
 		if (isGuiceResponsibleForType(type)) {
 			Object instance = injector.getInstance(type);
 			return wrapInstanceInBuilder(instance);
