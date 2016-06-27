@@ -30,7 +30,6 @@ public class Stat {
 		aP.getStyleClass().add("gridViewRow");
 		Label l = new Label();
 		l.setText(s);
-//		l.setAlignment(Pos.CENTER_LEFT);
 		aP.getChildren().add(l);
 		AnchorPane.setLeftAnchor(l, 10.0);
 		AnchorPane.setTopAnchor(l, 6.0);

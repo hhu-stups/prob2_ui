@@ -50,7 +50,7 @@
                   </Label>
                </children>
             </AnchorPane>
-            <GridPane fx:id="nodeStats">
+            <GridPane>
                <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="160.0" prefWidth="160.0" />
                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="136.0" prefWidth="120.0" />
@@ -78,6 +78,12 @@
                      </children>
                   </AnchorPane>
                </children>
+            </GridPane>
+            <GridPane fx:id="nodeStats">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
             </GridPane>
             <AnchorPane>
                <children>

@@ -13,7 +13,7 @@
          <content>
             <AnchorPane prefHeight="500.0" prefWidth="300.0">
                <children>
-                  <VBox fx:id="statsBox" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="4.0" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="2.0">
+                  <VBox fx:id="statsBox" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="4.0" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="4.0">
                      <children>
                         <AnchorPane fx:id="resultBackground" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="46.0" styleClass="mcheckNoCheck" stylesheets="@../../../../prob.css">
                            <children>

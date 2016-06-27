@@ -67,7 +67,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			int nrTotalTransitions = stats.getNrTotalTransitions();	
 			int percent = nrProcessedNodes * 100 / nrTotalNodes;
 			Platform.runLater(() -> {
-				processedNodes.setText("" + nrProcessedNodes + "(" + percent + " %)");
+				processedNodes.setText("" + nrProcessedNodes + " (" + percent + " %)");
 				totalNodes.setText("" + nrTotalNodes);
 				totalTransitions.setText("" + nrTotalTransitions);
 			});
@@ -89,7 +89,11 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result,
 			final StateSpaceStats stats) {
 		// results.put(id, result);
-
+		
+		Platform.runLater(() -> {
+			elapsedTime.setText("" + timeElapsed);
+		});	
+		
 		String res = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
 				: result instanceof ITraceDescription ? "danger" : "warning";
 		System.out.println(res);
@@ -106,12 +110,14 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			Number numNodes = coverage.getTotalNumberOfNodes();
 			Number numTrans = coverage.getTotalNumberOfTransitions();
 			
-			showNodeStats(coverage.getNodes());
-			System.out.println(coverage.getNodes());
+			Platform.runLater(() -> {
+//				processedNodes.setText("" + nrProcessedNodes + "(" + percent + " %)");
+				totalNodes.setText("" + numNodes);
+				totalTransitions.setText("" + numTrans);
+			});
 			
-//			 String nodeStats = WebUtils.toJson(extractNodeStats(coverage
-//			 .getNodes()));
-//			// List<Map<String, String>> transStats = extractNodeStats(coverage
+			showNodeStats(coverage.getNodes());
+			// List<Map<String, String>> transStats = extractNodeStats(coverage
 			// .getOps());
 			// List<String> uncovered = coverage.getUncovered();
 			// for (String transition : uncovered) {
@@ -137,23 +143,24 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	}
 
 	private void showNodeStats(List<String> stats) {
-//		List<Map<String, String>> extracted = new ArrayList<Map<String, String>>();
+		Platform.runLater(() -> {
+			nodeStats.getChildren().clear();
+		});
 		for (String stat : stats) {
 			String woPre = stat.startsWith("'") ? stat.substring(1) : stat;
 			String woSuf = woPre.endsWith("'") ? woPre.substring(0,
 					woPre.length() - 1) : woPre;
 			String[] split = woSuf.split(":");
+			Stat nodeStat = null;
 			if (split.length == 2) {
-//				extracted.add(WebUtils
-//						.wrap("name", split[0], "value", split[1]));
-				Stat nodeStat = new Stat(split[0], split[1]);
-				Node[] nodeStatFX = nodeStat.toFX();
-				nodeStats.addRow(stats.indexOf(stat)+1, nodeStatFX);
+				nodeStat = new Stat(split[0], split[1]);
 			} else if (split.length == 1) {
-				Stat nodeStat = new Stat(split[0], null);
-				nodeStats.addRow(stats.indexOf(stat)+1, nodeStat.toFX());
-//				extracted.add(WebUtils.wrap("name", split[0]));
+				nodeStat = new Stat(split[0], null);
 			}
+			Node[] nodeStatFX = nodeStat.toFX();
+			Platform.runLater(() -> {
+				nodeStats.addRow(stats.indexOf(stat)+1, nodeStatFX);
+			});
 		}
 	}
 
