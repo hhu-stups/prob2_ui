@@ -34,6 +34,8 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	private Label totalTransitions;
     @FXML
     private GridPane nodeStats;
+    @FXML
+    private GridPane transStats;
 
 	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
 
@@ -116,7 +118,8 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 				totalTransitions.setText("" + numTrans);
 			});
 			
-			showNodeStats(coverage.getNodes());
+			showStats(coverage.getNodes(), nodeStats);
+			showStats(coverage.getOps(), transStats);
 			// List<Map<String, String>> transStats = extractNodeStats(coverage
 			// .getOps());
 			// List<String> uncovered = coverage.getUncovered();
@@ -142,24 +145,24 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		System.out.println("is finished");
 	}
 
-	private void showNodeStats(List<String> stats) {
+	private void showStats(List<String> packedStats, GridPane grid) {
 		Platform.runLater(() -> {
-			nodeStats.getChildren().clear();
+			grid.getChildren().clear();
 		});
-		for (String stat : stats) {
-			String woPre = stat.startsWith("'") ? stat.substring(1) : stat;
+		for (String pStat : packedStats) {
+			String woPre = pStat.startsWith("'") ? pStat.substring(1) : pStat;
 			String woSuf = woPre.endsWith("'") ? woPre.substring(0,
 					woPre.length() - 1) : woPre;
 			String[] split = woSuf.split(":");
-			Stat nodeStat = null;
+			Stat stat = null;
 			if (split.length == 2) {
-				nodeStat = new Stat(split[0], split[1]);
+				stat = new Stat(split[0], split[1]);
 			} else if (split.length == 1) {
-				nodeStat = new Stat(split[0], null);
+				stat = new Stat(split[0], null);
 			}
-			Node[] nodeStatFX = nodeStat.toFX();
+			Node[] statFX = stat.toFX();
 			Platform.runLater(() -> {
-				nodeStats.addRow(stats.indexOf(stat)+1, nodeStatFX);
+				grid.addRow(packedStats.indexOf(pStat)+1, statFX);
 			});
 		}
 	}

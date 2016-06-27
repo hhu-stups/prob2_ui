@@ -47,6 +47,11 @@ public class ModelCheckStatsView extends TitledPane{
 				resultBackground.getStyleClass().add("mcheckDanger");
 				resultLabel.setText("Invalidation violation found!");
 				resultLabel.setTextFill(Color.web("#b95050"));
+			} else if(res == "warning") {
+				resultBackground.getStyleClass().clear();;
+				resultBackground.getStyleClass().add("mcheckWarning");
+				resultLabel.setText("Model checking not completed.");
+				resultLabel.setTextFill(Color.web("#96904e"));
 			}
 			if(!statsBox.getChildren().contains(modelCheckStats))
 				statsBox.getChildren().add(modelCheckStats);

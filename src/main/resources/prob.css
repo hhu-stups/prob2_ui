@@ -111,6 +111,11 @@
 	-fx-background-radius: 5 5 5 5;
 }
 
+.mcheckWarning {
+	-fx-background-color:  #f1efcd;
+	-fx-background-radius: 5 5 5 5;
+}
+
 .mcheckNoCheck {
 	-fx-background-color:  #eeeeee;
 	-fx-background-radius: 5 5 5 5;

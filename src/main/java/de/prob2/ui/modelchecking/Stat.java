@@ -17,13 +17,13 @@ public class Stat {
 
 	public Node[] toFX() {
 		Node[] nodes = new Node[2];
-		nodes[0] = toFX(name);
-		nodes[1] = toFX(value);
+		nodes[0] = toFX(name, "left");
+		nodes[1] = toFX(value, "right");
 		
 		return nodes;
 	}
 
-	private Node toFX(String s) {
+	private Node toFX(String s, String alignment) {
 		AnchorPane aP = new AnchorPane();
 		aP.setMinHeight(30.0);
 		aP.getStylesheets().add("prob.css");
@@ -31,9 +31,13 @@ public class Stat {
 		Label l = new Label();
 		l.setText(s);
 		aP.getChildren().add(l);
-		AnchorPane.setLeftAnchor(l, 10.0);
 		AnchorPane.setTopAnchor(l, 6.0);
 		AnchorPane.setBottomAnchor(l, 7.5);
+		if(alignment.equals("left")) {
+			AnchorPane.setLeftAnchor(l, 10.0);
+		} else if(alignment.equals("right")) {
+			AnchorPane.setRightAnchor(l, 10.0);
+		}
 	
 		return aP;
 	}
