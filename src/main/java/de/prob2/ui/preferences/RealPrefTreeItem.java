@@ -1,15 +1,15 @@
 package de.prob2.ui.preferences;
 
-public class SimplePrefTreeItem extends PrefTreeItem {
-	public SimplePrefTreeItem(String name, String value, String defaultValue, String description) {
+public class RealPrefTreeItem extends PrefTreeItem {
+	public RealPrefTreeItem(String name, String value, String defaultValue, String description) {
 		super(name, value, defaultValue, description);
 	}
 
-	public SimplePrefTreeItem(String name) {
+	public RealPrefTreeItem(String name) {
 		this(name, "", "", "");
 	}
 
-	public SimplePrefTreeItem() {
+	public RealPrefTreeItem() {
 		this("");
 	}
 
