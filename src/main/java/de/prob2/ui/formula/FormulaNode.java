@@ -1,4 +1,4 @@
-package de.prob2.ui.dotty;
+package de.prob2.ui.formula;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +12,10 @@ import javafx.scene.text.Text;
 
 public class FormulaNode extends Region {
 	
+	
 	private Ellipse ellipse;
 	private Text text;
 	public List<FormulaNode> next;
-	//public FormulaNode next;
 	
 	public FormulaNode(double centerX, double centerY, String data, List<FormulaNode> list) {
 		//has to be changed a little
@@ -26,7 +26,6 @@ public class FormulaNode extends Region {
 		text.setY(text.getY() + height/2);
 		ellipse = new Ellipse(centerX, centerY, width, height);
 		next = list;
-		//next = null;
 		show();
 	}
 	
@@ -37,6 +36,15 @@ public class FormulaNode extends Region {
 		double height = text.getLayoutBounds().getHeight();
 		ellipse = new Ellipse(width, height);
 		next = list;
+		//next = null;
+	}
+	
+	public FormulaNode(String data) {
+		
+		text = new Text(data);
+		double width = text.getLayoutBounds().getWidth();
+		double height = text.getLayoutBounds().getHeight();
+		ellipse = new Ellipse(width, height);
 		//next = null;
 	}
 	
@@ -84,5 +92,6 @@ public class FormulaNode extends Region {
 	public String toString() {
 		return text.getText();
 	}
+	
 
 }

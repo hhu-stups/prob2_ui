@@ -3,16 +3,23 @@ package de.prob2.ui.dotty;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.UUID;
 
 import com.google.inject.Inject;
 
+import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.Animations;
+import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.ITraceChangesListener;
 import de.prob.statespace.Trace;
+import de.prob2.ui.formula.FormulaGenerator;
+import de.prob2.ui.formula.FormulaGraph;
+import de.prob2.ui.formula.FormulaNode;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -29,7 +36,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-public class DottyView extends TitledPane implements Initializable, ITraceChangesListener {
+public class DottyView extends TitledPane implements Initializable, IAnimationChangeListener {
 
 	@FXML
 	private Button btshowhistory;
@@ -37,10 +44,10 @@ public class DottyView extends TitledPane implements Initializable, ITraceChange
 	@FXML
 	private Button btshowexpression;
 	
-	private Animations animations;
+	private AnimationSelector animations;
 	
 	@Inject
-	public DottyView(FXMLLoader loader, Animations animations) {
+	public DottyView(FXMLLoader loader, AnimationSelector animations) {
 		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
 
@@ -83,14 +90,13 @@ public class DottyView extends TitledPane implements Initializable, ITraceChange
 		
 		btshowexpression.setOnAction(e -> {
 			Group root = new Group();
-	        
 			Stage stage = new Stage();
 			
 			/*FormulaGraph g = new FormulaGraph(100, 100, "DATA");
 			g.add(new FormulaNode("BOO"));
 			g.add(new FormulaNode("FOO"));
 			g.add(new FormulaNode("TESTEST"));*/
-			
+			/*
 			List<FormulaNode> nodes3 = new ArrayList<FormulaNode>();
 			nodes3.add(new FormulaNode("HUI", new ArrayList<FormulaNode>()));
 			
@@ -103,13 +109,23 @@ public class DottyView extends TitledPane implements Initializable, ITraceChange
 			nodes.add(new FormulaNode("FOO", new ArrayList<FormulaNode>()));
 			nodes.add(new FormulaNode("BAR", new ArrayList<FormulaNode>()));
 			nodes.add(new FormulaNode("TESTEST", new ArrayList<FormulaNode>()));
+			FormulaGenerator generator = new FormulaGenerator(animations);
+			//generator.
 
+			System.out.println(generator.calculateData());
 			
 			FormulaNode main = new FormulaNode(100, 400, "DATA", nodes);
 			
-			FormulaGraph g = new FormulaGraph(main);
+			FormulaGraph g = new FormulaGraph(main);*/
 
-			root.getChildren().add(g);
+			//root.getChildren().add(g);
+			
+			FormulaGenerator generator = new FormulaGenerator(animations);
+			Map<String, String[]> params = new HashMap<String, String[]>();
+			params.put("formula", new String[]{"1 > 2 => 3 > 4"});
+		
+			generator.setFormula(params);
+			generator.draw();
 			
 			stage.setTitle("Mathematical Expression");
 			Scene scene = new Scene(root, 800, 600);
@@ -121,20 +137,15 @@ public class DottyView extends TitledPane implements Initializable, ITraceChange
 	}
 	
 
+
 	@Override
-	public void changed(List<Trace> t) {
+	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void removed(List<UUID> t) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void animatorStatus(Set<UUID> busy) {
+	public void animatorStatus(boolean busy) {
 		// TODO Auto-generated method stub
 		
 	}
