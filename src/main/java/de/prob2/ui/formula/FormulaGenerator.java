@@ -5,10 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.apache.commons.lang.StringEscapeUtils;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 
 import de.prob.animator.command.ExpandFormulaCommand;
@@ -116,11 +112,11 @@ public class FormulaGenerator implements IAnimationChangeListener {
 
 	@Override
 	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-		this.currentTrace = currentTrace;
+		/*this.currentTrace = currentTrace;
 		if (currentTrace != null
 				&& currentTrace.getStateSpace().equals(currentStateSpace)) {
 			sendRefresh();
-		}
+		}*/
 		
 	}
 	

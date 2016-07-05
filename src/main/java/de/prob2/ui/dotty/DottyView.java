@@ -13,27 +13,18 @@ import java.util.UUID;
 import com.google.inject.Inject;
 
 import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.Animations;
 import de.prob.statespace.IAnimationChangeListener;
-import de.prob.statespace.ITraceChangesListener;
 import de.prob.statespace.Trace;
-import de.prob2.ui.formula.FormulaGenerator;
-import de.prob2.ui.formula.FormulaGraph;
-import de.prob2.ui.formula.FormulaNode;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 public class DottyView extends TitledPane implements Initializable, IAnimationChangeListener {
