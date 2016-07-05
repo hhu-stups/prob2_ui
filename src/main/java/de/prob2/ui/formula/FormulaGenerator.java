@@ -22,6 +22,9 @@ import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 
 
@@ -30,6 +33,7 @@ public class FormulaGenerator implements IAnimationChangeListener {
 	private Trace currentTrace;
 	private IEvalElement formula;
 	private FormulaId setFormula;
+	private FormulaGraph graph;
 	private final StateSpace currentStateSpace;
 	private final Set<String> collapsedNodes = new CopyOnWriteArraySet<String>();
 	
@@ -47,27 +51,20 @@ public class FormulaGenerator implements IAnimationChangeListener {
 		}
 	}
 	
-	public String calculateData() {
+	public ExpandedFormula calculateData() {
 		if (setFormula != null) {
 			ExpandFormulaCommand cmd = new ExpandFormulaCommand(setFormula,
 					currentTrace.getCurrentState());
 			currentStateSpace.execute(cmd);
 			ExpandedFormula result = cmd.getResult();
 			result.collapseNodes(new HashSet<String>(collapsedNodes));
-			
-			GsonBuilder b = new GsonBuilder();
-			Gson gson = b.create();
-			
-			String json = gson.toJson(result.getFields());
-			String j = json.replaceAll("\\\\u", "\\u");
-			return j;
+			return result;
 		}
-		return "";
+		return null;
 	}
 	
 	
 	public void setFormula(final Map<String, String[]> params) {
-		//String data = "";
 		parse(params);
 		if (formula == null) {
 			System.out.println("Formula = null");
@@ -83,8 +80,10 @@ public class FormulaGenerator implements IAnimationChangeListener {
 					formula);
 			currentStateSpace.execute(cmd);
 			setFormula = cmd.getFormulaId();
-			//System.out.println(setFormula.getFormula());
-			//data = calculateData();
+			ExpandedFormula data = calculateData();
+			graph = new FormulaGraph(new FormulaNode(100, 400, data));
+			draw();
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -125,8 +124,14 @@ public class FormulaGenerator implements IAnimationChangeListener {
 		
 	}
 	
-	public void draw() {
-		
+	private void draw() {
+		Group root = new Group();
+		Stage stage = new Stage();
+		root.getChildren().add(graph);
+		stage.setTitle("Mathematical Expression");
+		Scene scene = new Scene(root, 800, 600);
+		stage.setScene(scene);
+		stage.show();
 	}
 	
 	@Deprecated

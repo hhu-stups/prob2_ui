@@ -89,49 +89,12 @@ public class DottyView extends TitledPane implements Initializable, IAnimationCh
 		});
 		
 		btshowexpression.setOnAction(e -> {
-			Group root = new Group();
-			Stage stage = new Stage();
-			
-			/*FormulaGraph g = new FormulaGraph(100, 100, "DATA");
-			g.add(new FormulaNode("BOO"));
-			g.add(new FormulaNode("FOO"));
-			g.add(new FormulaNode("TESTEST"));*/
-			/*
-			List<FormulaNode> nodes3 = new ArrayList<FormulaNode>();
-			nodes3.add(new FormulaNode("HUI", new ArrayList<FormulaNode>()));
-			
-			List<FormulaNode> nodes2 = new ArrayList<FormulaNode>();
-			nodes2.add(new FormulaNode("BOO", new ArrayList<FormulaNode>()));
-			nodes2.add(new FormulaNode("BOO", nodes3));
-			
-			List<FormulaNode> nodes = new ArrayList<FormulaNode>();
-			nodes.add(new FormulaNode("BOO", nodes2));
-			nodes.add(new FormulaNode("FOO", new ArrayList<FormulaNode>()));
-			nodes.add(new FormulaNode("BAR", new ArrayList<FormulaNode>()));
-			nodes.add(new FormulaNode("TESTEST", new ArrayList<FormulaNode>()));
-			FormulaGenerator generator = new FormulaGenerator(animations);
-			//generator.
-
-			System.out.println(generator.calculateData());
-			
-			FormulaNode main = new FormulaNode(100, 400, "DATA", nodes);
-			
-			FormulaGraph g = new FormulaGraph(main);*/
-
-			//root.getChildren().add(g);
-			
+				
 			FormulaGenerator generator = new FormulaGenerator(animations);
 			Map<String, String[]> params = new HashMap<String, String[]>();
-			params.put("formula", new String[]{"1 > 2 => 3 > 4"});
-		
-			generator.setFormula(params);
-			generator.draw();
-			
-			stage.setTitle("Mathematical Expression");
-			Scene scene = new Scene(root, 800, 600);
-			stage.setScene(scene);
-			stage.show();
-			
+			//params.put("formula", new String[]{"active /\\ (ready \\/ waiting) = {} & card(active) <= 1"});
+			params.put("formula", new String[]{"1 < 2 <=> 3 < 4 & 4 < 5 & 5 < 6"});
+			generator.setFormula(params);					
 		});
 
 	}
