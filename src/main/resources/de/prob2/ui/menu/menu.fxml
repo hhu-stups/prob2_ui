@@ -1,34 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
-
-<fx:root type="javafx.scene.control.MenuBar"  xmlns:fx="http://javafx.com/fxml" BorderPane.alignment="CENTER">
-	<menus>
-		<Menu mnemonicParsing="false" text="%menu.file">
-			<items>
-				<MenuItem mnemonicParsing="false" text="%menu.file.items.open"
-					onAction="#handleOpen" />
-				<MenuItem mnemonicParsing="false" text="Close" />
-			</items>
-		</Menu>
-		<Menu mnemonicParsing="false" text="Edit">
-			<items>
-				<MenuItem mnemonicParsing="false" text="Delete" />
-			</items>
-		</Menu>
-		<Menu mnemonicParsing="false" text="%menu.verify">
-			<items>
-				<MenuItem mnemonicParsing="false" text="%menu.verify.items.modelcheck"
-					onAction="#handleModelCheck" />
-				<MenuItem mnemonicParsing="false" text="Close" />
-			</items>
-		</Menu>
-		<Menu mnemonicParsing="false" text="Help">
-			<items>
-				<MenuItem mnemonicParsing="false" text="About" />
-			</items>
-		</Menu>
-	</menus>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.BorderPane?>
+<fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml" BorderPane.alignment="CENTER">
+	<Menu mnemonicParsing="false" text="%menu.file">
+		<MenuItem mnemonicParsing="false" text="%menu.file.items.open" onAction="#handleOpen"/>
+		<MenuItem mnemonicParsing="false" text="Close"/>
+	</Menu>
+	<Menu mnemonicParsing="false" text="Edit">
+		<MenuItem mnemonicParsing="false" text="Delete"/>
+	</Menu>
+	<Menu mnemonicParsing="false" text="%menu.verify">
+		<MenuItem mnemonicParsing="false" text="%menu.verify.items.modelcheck" onAction="#handleModelCheck"/>
+		<MenuItem mnemonicParsing="false" text="Close"/>
+	</Menu>
+	<Menu mnemonicParsing="false" text="Help">
+		<MenuItem mnemonicParsing="false" text="About"/>
+	</Menu>
 </fx:root>
