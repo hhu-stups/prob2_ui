@@ -78,6 +78,7 @@ public class MenuController extends MenuBar {
 		}
 		bus.register(this);
 		
+		/*
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
@@ -111,6 +112,7 @@ public class MenuController extends MenuBar {
 			// Make this the global menu bar
 			tk.setGlobalMenuBar(this);
 		}
+		*/
 	}
 
 }
