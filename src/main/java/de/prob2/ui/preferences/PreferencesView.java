@@ -23,6 +23,7 @@ import javafx.util.converter.DefaultStringConverter;
 public class PreferencesView extends TitledPane implements IAnimationChangeListener {
 	@FXML private TreeTableView<PrefTreeItem> tv;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvName;
+	@FXML private TreeTableColumn<PrefTreeItem, String> tvChanged;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
@@ -49,6 +50,8 @@ public class PreferencesView extends TitledPane implements IAnimationChangeListe
 	@FXML
 	public void initialize() {
 		tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
+		
+		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
 		
 		tvValue.setCellFactory(col -> {
 			TreeTableCell<PrefTreeItem, String> cell = new TextFieldTreeTableCell<>(new DefaultStringConverter());
@@ -118,7 +121,7 @@ public class PreferencesView extends TitledPane implements IAnimationChangeListe
 				}
 			}
 			if (item == null) {
-				item = new TreeItem<>(new RealPrefTreeItem(pref.name, "", pref.defaultValue, pref.description));
+				item = new TreeItem<>(new RealPrefTreeItem(pref.name, "", "", pref.defaultValue, pref.description));
 				category.getChildren().add(item);
 			}
 			item.getValue().updateValue(this.preferences);
