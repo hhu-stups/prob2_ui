@@ -12,6 +12,7 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
 import de.prob2.ui.events.OpenFileEvent;
 import de.prob2.ui.modelchecking.ModelcheckingView;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,6 +31,7 @@ public class MenuController extends MenuBar {
 
 	private EventBus bus;
 	private Scene mcheckScene;
+	private Window window;
 
 	@FXML
 	private void handleOpen(ActionEvent event) {
@@ -46,22 +48,32 @@ public class MenuController extends MenuBar {
 	
 	@FXML
 	private void handleModelCheck(ActionEvent event) {
-		Window stage = this.getScene().getWindow();
 		Stage mcheckStage = new Stage();
         mcheckStage.setTitle("Model Check");
-        mcheckStage.initOwner(stage);
+        mcheckStage.initOwner(this.window);
 		mcheckStage.setScene(mcheckScene);
         mcheckStage.showAndWait();
 	}
 
 	@Subscribe
 	public void showFileDialogHandler(FileChooser chooser) {
-		Window stage = this.getScene().getWindow();
-		File selectedFile = chooser.showOpenDialog(stage);
+		File selectedFile = chooser.showOpenDialog(this.window);
 		if (selectedFile != null) {
 			String extensionFilter = chooser.getSelectedExtensionFilter().getDescription();
 			bus.post(new OpenFileEvent(selectedFile, extensionFilter));
 		}
+	}
+	
+	@FXML
+	public void initialize() {
+		this.sceneProperty().addListener(observable -> {
+			Scene scene = ((ReadOnlyObjectProperty<Scene>)observable).get();
+			if (scene != null) {
+				scene.windowProperty().addListener(observable1 -> {
+					this.window = ((ReadOnlyObjectProperty<Window>)observable1).get();
+				});
+			}
+		});
 	}
 
 	@Inject
@@ -78,7 +90,6 @@ public class MenuController extends MenuBar {
 		}
 		bus.register(this);
 		
-		/*
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
@@ -112,7 +123,6 @@ public class MenuController extends MenuBar {
 			// Make this the global menu bar
 			tk.setGlobalMenuBar(this);
 		}
-		*/
 	}
 
 }
