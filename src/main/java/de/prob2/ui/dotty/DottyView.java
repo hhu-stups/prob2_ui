@@ -40,10 +40,7 @@ public class DottyView extends TitledPane implements Initializable, IAnimationCh
 
 	@FXML
 	private Button btshowhistory;
-	
-	@FXML
-	private Button btshowexpression;
-	
+		
 	private AnimationSelector animations;
 	
 	@Inject
@@ -88,15 +85,6 @@ public class DottyView extends TitledPane implements Initializable, IAnimationCh
 			stage.show();
 		});
 		
-		btshowexpression.setOnAction(e -> {
-				
-			FormulaGenerator generator = new FormulaGenerator(animations);
-			Map<String, String[]> params = new HashMap<String, String[]>();
-			//params.put("formula", new String[]{"active /\\ (ready \\/ waiting) = {} & card(active) <= 1"});
-			params.put("formula", new String[]{"1 < 2 <=> 3 < 4 & 4 < 5 & 5 < 6"});
-			generator.setFormula(params);					
-		});
-
 	}
 	
 

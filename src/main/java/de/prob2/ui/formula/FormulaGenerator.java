@@ -129,7 +129,7 @@ public class FormulaGenerator implements IAnimationChangeListener {
 		Stage stage = new Stage();
 		root.getChildren().add(graph);
 		stage.setTitle("Mathematical Expression");
-		Scene scene = new Scene(root, 800, 600);
+		Scene scene = new Scene(root, 1024, 768);
 		stage.setScene(scene);
 		stage.show();
 	}
