@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 
 import de.prob.animator.command.ComputeCoverageCommand.ComputeCoverageResult;
@@ -15,6 +16,7 @@ import de.prob.check.ModelCheckOk;
 import de.prob.check.ModelChecker;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
+import de.prob2.ui.events.ModelCheckStatsEvent;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -39,11 +41,11 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 
 	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
 
-	private ModelCheckStatsView mCheckView;
+	private EventBus bus;
 
 	@Inject
-	public ModelCheckStats(FXMLLoader loader, ModelCheckStatsView mCheckView) {
-		this.mCheckView = mCheckView;
+	public ModelCheckStats(FXMLLoader loader, EventBus bus) {
+		this.bus = bus;
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stats.fxml"));
 			loader.setRoot(this);
@@ -141,7 +143,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		// "message", result.getMessage());
 		// submit(wrap);
 		// }
-		mCheckView.showStats(this, res);
+		bus.post(new ModelCheckStatsEvent(this, res));
 		System.out.println("is finished");
 	}
 

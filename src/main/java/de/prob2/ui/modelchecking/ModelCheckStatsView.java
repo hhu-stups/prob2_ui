@@ -2,8 +2,11 @@ package de.prob2.ui.modelchecking;
 
 import java.io.IOException;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
+import de.prob2.ui.events.ModelCheckStatsEvent;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,7 +27,8 @@ public class ModelCheckStatsView extends TitledPane{
     private Label resultLabel;
 	
 	@Inject
-	public ModelCheckStatsView(FXMLLoader loader) {
+	public ModelCheckStatsView(FXMLLoader loader, EventBus bus) {
+		bus.register(this);
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stats_view.fxml"));
 			loader.setRoot(this);
@@ -35,7 +39,10 @@ public class ModelCheckStatsView extends TitledPane{
 		}	
 	}
 
-	public void showStats(ModelCheckStats modelCheckStats, String res) {
+	@Subscribe
+	public void showStats(ModelCheckStatsEvent event) {
+		String res = event.getResult();
+		ModelCheckStats stats = event.getModelCheckStats();
 		Platform.runLater(() -> {
 			if(res == "success") {
 				resultBackground.getStyleClass().clear();;
@@ -53,8 +60,8 @@ public class ModelCheckStatsView extends TitledPane{
 				resultLabel.setText("Model checking not completed.");
 				resultLabel.setTextFill(Color.web("#96904e"));
 			}
-			if(!statsBox.getChildren().contains(modelCheckStats))
-				statsBox.getChildren().add(modelCheckStats);
+			if(!statsBox.getChildren().contains(stats))
+				statsBox.getChildren().add(stats);
 		});
 		Accordion accordion = ((Accordion) this.getParent());
 		accordion.setExpandedPane(this);
