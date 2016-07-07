@@ -77,7 +77,7 @@ public class FormulaGenerator implements IAnimationChangeListener {
 			currentStateSpace.execute(cmd);
 			setFormula = cmd.getFormulaId();
 			ExpandedFormula data = calculateData();
-			graph = new FormulaGraph(new FormulaNode(100, 400, data));
+			graph = new FormulaGraph(new FormulaNode(25, 350, data));
 			draw();
 		
 		} catch (Exception e) {

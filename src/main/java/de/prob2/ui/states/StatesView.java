@@ -226,8 +226,8 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	public void showExpression() {
 		FormulaGenerator generator = new FormulaGenerator(animations);
 		Map<String, String[]> params = new HashMap<String, String[]>();
-		//params.put("formula", new String[]{"active /\\ (ready \\/ waiting) = {} & card(active) <= 1"});
-		params.put("formula", new String[]{"1 < 2 <=> 3 < 4 & 4 < 5 & 5 < 6"});
+		params.put("formula", new String[]{"active /\\ (ready \\/ waiting) = {} & card(active) <= 1"});
+		//params.put("formula", new String[]{"1 < 2 <=> 3 < 4 & 4 < 5 & 6 < 5"});
 		generator.setFormula(params);	
 	}
 

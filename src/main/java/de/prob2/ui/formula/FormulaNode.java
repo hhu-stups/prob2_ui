@@ -8,12 +8,14 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Ellipse;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 
 public class FormulaNode extends Region {
 		
-	private Ellipse ellipse;
+	//private Ellipse ellipse;
+	private Rectangle rectangle;
 	private Text text;
 	private Color color;
 	public List<FormulaNode> next;
@@ -23,7 +25,7 @@ public class FormulaNode extends Region {
 		text = new Text(data.getLabel());
 		double width = text.getLayoutBounds().getWidth();
 		double height = text.getLayoutBounds().getHeight();
-		ellipse = new Ellipse(width, height);
+		rectangle = new Rectangle(width + 10, height * 2);
 		color = calculateColor(data);
 		if(data.getChildren() == null || data.getChildren().isEmpty()) {
 			return;
@@ -44,35 +46,36 @@ public class FormulaNode extends Region {
 	public void setPosition(double x, double y) {
 		double width = text.getLayoutBounds().getWidth();
 		double height = text.getLayoutBounds().getHeight();
-		text.setX(x);
-		text.setY(y + height/2);
-		ellipse.setCenterX(x + width/2);
-		ellipse.setCenterY(y);
+		text.setX(x + 5);
+		text.setY(y);
+		rectangle.setX(x);
+		rectangle.setY(y - height);
+		
 		draw();
 	}
 	
 	public double getLeft() {
-		return ellipse.getCenterX() - ellipse.getRadiusX();
+		return rectangle.getX();
 	}
 	
 	public double getRight() {
-		return ellipse.getCenterX() + ellipse.getRadiusX();
+		return rectangle.getX() + rectangle.getWidth();
 	}
 	
 	public double getX() {
-		return ellipse.getCenterX();
+		return getLeft();
 	}
 
 	public double getY() {
-		return ellipse.getCenterY();
+		return rectangle.getY() + 0.5 * rectangle.getHeight();
 	}
 	
 	
 	private void draw() {
 		text.setFill(Color.BLACK);
-		ellipse.setStroke(Color.BLACK);
+		rectangle.setStroke(Color.BLACK);
 		setFill(color);
-		this.getChildren().add(ellipse);
+		this.getChildren().add(rectangle);
 		this.getChildren().add(text);
 	}
 	
@@ -85,7 +88,7 @@ public class FormulaNode extends Region {
 	
 	
 	private void setFill(Paint value) {
-		ellipse.setFill(value);
+		rectangle.setFill(value);
 	}
 	
 	public String toString() {

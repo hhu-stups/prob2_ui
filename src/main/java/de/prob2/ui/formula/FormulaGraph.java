@@ -20,7 +20,7 @@ public class FormulaGraph extends Region {
 			for(int i = 0; i < current.next.size(); i++) {
 				double median = (current.next.size()-1)/2.0;
 				FormulaNode children = current.next.get(i);
-				children.setPosition(current.getRight() + 100, current.getY() + (i - median) * 25 * node.next.size() * depth(current));
+				children.setPosition(current.getRight() + 25, current.getY() + (i - median) * 15 * node.next.size() * depth(current));
 				Line edge = new Line(current.getRight(), current.getY(), children.getLeft(), children.getY());
 				this.getChildren().add(edge);
 				draw(children);				
