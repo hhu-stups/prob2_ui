@@ -2,13 +2,8 @@ package de.prob2.ui.dotty;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.UUID;
+
 
 import com.google.inject.Inject;
 
@@ -32,11 +27,8 @@ public class DottyView extends TitledPane implements Initializable, IAnimationCh
 	@FXML
 	private Button btshowhistory;
 		
-	private AnimationSelector animations;
-	
 	@Inject
 	public DottyView(FXMLLoader loader, AnimationSelector animations) {
-		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
 
 		try {

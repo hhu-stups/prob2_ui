@@ -7,7 +7,6 @@ import de.prob.animator.domainobjects.ExpandedFormula;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
@@ -47,7 +46,6 @@ public class FormulaNode extends Region {
 
 	
 	public void setPosition(double x, double y) {
-		double width = text.getLayoutBounds().getWidth();
 		double height = text.getLayoutBounds().getHeight();
 		text.setX(x + 5);
 		text.setY(y);
