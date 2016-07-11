@@ -71,6 +71,7 @@ public class ModelCheckStatsView extends TitledPane {
 			}
 			if (!statsBox.getChildren().contains(stats))
 				statsBox.getChildren().add(stats);
+			
 			if (res.equals("success") && errorFound) {
 				Alert alert = new Alert(AlertType.WARNING);
 				alert.setTitle("Note");

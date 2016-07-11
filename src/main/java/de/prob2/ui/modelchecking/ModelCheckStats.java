@@ -17,7 +17,6 @@ import de.prob.check.ModelChecker;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob2.ui.events.ModelCheckStatsEvent;
-import de.prob2.ui.events.OpenFileEvent;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -42,7 +41,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 
 	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
 	Map<String, IModelCheckingResult> results = new HashMap<String, IModelCheckingResult>();
-	private boolean errorFound;
 
 	private EventBus bus;
 
