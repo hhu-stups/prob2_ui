@@ -26,6 +26,20 @@ public class MenuController extends MenuBar {
 
 	private EventBus bus;
 	private Scene mcheckScene;
+	
+	@FXML
+	private void handleLoadDefault(){
+		
+	}
+	
+	@FXML
+	private void handleLoadPerspective(){
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open File");
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("FXML Files", "*.fxml"));
+		Window stage = this.getScene().getWindow();
+		File selectedFile = fileChooser.showOpenDialog(stage);
+	}
 
 	@FXML
 	private void handleOpen(ActionEvent event) {
