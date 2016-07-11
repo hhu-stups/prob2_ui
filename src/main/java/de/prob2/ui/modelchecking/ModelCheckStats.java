@@ -40,6 +40,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
     private GridPane transStats;
 
 	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
+	Map<String, IModelCheckingResult> results = new HashMap<String, IModelCheckingResult>();
 
 	private EventBus bus;
 
@@ -59,7 +60,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	@Override
 	public void updateStats(final String id, final long timeElapsed, final IModelCheckingResult result,
 			final StateSpaceStats stats) {
-		// results.put(id, result);
+		results.put(id, result);
 		Platform.runLater(() -> {
 			elapsedTime.setText("" + timeElapsed);
 		});	
@@ -87,12 +88,13 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		// "stats", hasStats, "percent", 100, "time", timeElapsed));
 		// }
 		System.out.println("updated Stats");
+		System.out.println(results);
 	}
 
 	@Override
 	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result,
 			final StateSpaceStats stats) {
-		// results.put(id, result);
+		results.put(id, result);
 		
 		Platform.runLater(() -> {
 			elapsedTime.setText("" + timeElapsed);
@@ -142,7 +144,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		// "message", result.getMessage());
 		// submit(wrap);
 		// }
-		bus.post(new ModelCheckStatsEvent(this, res));
+		bus.post(new ModelCheckStatsEvent(this, res, result.getMessage()));
 		System.out.println("is finished");
 	}
 

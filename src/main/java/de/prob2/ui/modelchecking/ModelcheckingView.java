@@ -64,7 +64,6 @@ public class ModelcheckingView extends AnchorPane {
 		StateSpace currentStateSpace = animations.getCurrentTrace().getStateSpace();
 		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, mStatsController));
 		mStatsController.addJob(checker.getJobId(), checker);
-		System.out.println(checker);
 		checker.start();
 
 		// AbstractElement main = currentStateSpace.getMainComponent();

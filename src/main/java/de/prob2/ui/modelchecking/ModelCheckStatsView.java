@@ -42,22 +42,23 @@ public class ModelCheckStatsView extends TitledPane{
 	@Subscribe
 	public void showStats(ModelCheckStatsEvent event) {
 		String res = event.getResult();
+		String message = event.getMessage();
 		ModelCheckStats stats = event.getModelCheckStats();
 		Platform.runLater(() -> {
 			if(res == "success") {
 				resultBackground.getStyleClass().clear();;
 				resultBackground.getStyleClass().add("mcheckSuccess");
-				resultLabel.setText("Model Checking complete. No error nodes found.");
+				resultLabel.setText(message);
 				resultLabel.setTextFill(Color.web("#5e945e"));
 			} else if(res == "danger") {
 				resultBackground.getStyleClass().clear();;
 				resultBackground.getStyleClass().add("mcheckDanger");
-				resultLabel.setText("Invalidation violation found!");
+				resultLabel.setText(message);
 				resultLabel.setTextFill(Color.web("#b95050"));
 			} else if(res == "warning") {
 				resultBackground.getStyleClass().clear();;
 				resultBackground.getStyleClass().add("mcheckWarning");
-				resultLabel.setText("Model checking not completed.");
+				resultLabel.setText(message);
 				resultLabel.setTextFill(Color.web("#96904e"));
 			}
 			if(!statsBox.getChildren().contains(stats))
