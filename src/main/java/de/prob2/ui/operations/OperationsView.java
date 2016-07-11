@@ -303,7 +303,6 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 
 	@Override
 	public void traceChange(Trace trace, boolean currentAnimationChanged) {
-
 		if (trace == null) {
 			currentTrace = null;
 			currentModel = null;
@@ -311,6 +310,7 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 			if (sorter instanceof ModelOrder) {
 				sorter = new ModelOrder(opNames);
 			}
+			return;
 		}
 
 		if (trace.getModel() != currentModel) {
