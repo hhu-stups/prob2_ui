@@ -64,12 +64,15 @@ public class FormulaGenerator implements IAnimationChangeListener {
 		parse(params);
 		if (formula == null) {
 			System.out.println("Formula = null");
+			return;
 		}
 		if (currentTrace == null) {
 			System.out.println("CurrentTrace = null");
+			return;
 		}
 		if (!(formula instanceof EventB || formula instanceof ClassicalB)) {
 			System.out.println("ERROR");
+			return;
 		}
 		try {
 			InsertFormulaForVisualizationCommand cmd = new InsertFormulaForVisualizationCommand(

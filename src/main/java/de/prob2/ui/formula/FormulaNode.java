@@ -17,7 +17,7 @@ public class FormulaNode extends Region {
 	private Rectangle rectangle;
 	private Text text;
 	private Color color;
-	public List<FormulaNode> next;
+	List<FormulaNode> next;
 	
 	public FormulaNode(ExpandedFormula data) {
 		next = new ArrayList<FormulaNode>();

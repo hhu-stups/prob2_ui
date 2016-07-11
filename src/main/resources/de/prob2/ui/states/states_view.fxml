@@ -24,7 +24,7 @@
 				spacing="5">
 				<Button fx:id="editBlacklistButton" alignment="CENTER_RIGHT"
 					text="Edit Class Blacklist" onAction="#editBlacklistButtonAction"/>
-				<Button fx:id="btshowexpression" mnemonicParsing="false" text="Show Mathematical Expression as Graph" onAction="#showExpression" />
+				<!--<Button fx:id="btshowexpression" mnemonicParsing="false" text="Show Mathematical Expression as Graph" onAction="#showExpression" />-->
 			</HBox>
 		</top>
 		<center>
