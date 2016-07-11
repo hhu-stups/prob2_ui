@@ -30,7 +30,6 @@ public class ProB2Module extends AbstractModule {
 		bind(StatesView.class);
 		bind(ResourceBundle.class).toInstance(bundle);
 		bind(OpenFileCommand.class).asEagerSingleton();
-		bind(ModelCheckStatsView.class).asEagerSingleton();
 	}
 
 	@Provides

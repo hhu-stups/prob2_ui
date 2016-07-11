@@ -36,7 +36,7 @@ public class ModelcheckingView extends AnchorPane {
 	private AnimationSelector animations;
 	private ModelCheckStats mStatsController;
 	private ModelChecker checker;
-	
+
 	@Inject
 	public ModelcheckingView(AnimationSelector ANIMATIONS, FXMLLoader loader, ModelCheckStats mStatsController) {
 		this.animations = ANIMATIONS;
@@ -62,8 +62,7 @@ public class ModelcheckingView extends AnchorPane {
 		}
 		ModelCheckingOptions options = getOptions();
 		StateSpace currentStateSpace = animations.getCurrentTrace().getStateSpace();
-		checker = new ModelChecker(
-				new ConsistencyChecker(currentStateSpace, options, null, mStatsController));
+		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, mStatsController));
 		mStatsController.addJob(checker.getJobId(), checker);
 		checker.start();
 
@@ -86,6 +85,7 @@ public class ModelcheckingView extends AnchorPane {
 		options = options.checkAssertions(findBAViolations.isSelected());
 		options = options.checkGoal(findGoal.isSelected());
 		options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
+		options = options.recheckExisting(!searchForNewErrors.isSelected());
 
 		return options;
 	}
@@ -97,5 +97,4 @@ public class ModelcheckingView extends AnchorPane {
 		stage.close();
 	}
 
-	
 }
