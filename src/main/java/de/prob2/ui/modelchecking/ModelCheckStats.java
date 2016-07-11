@@ -122,8 +122,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			
 			showStats(coverage.getNodes(), nodeStats);
 			showStats(coverage.getOps(), transStats);
-			// List<Map<String, String>> transStats = extractNodeStats(coverage
-			// .getOps());
+			
 			// List<String> uncovered = coverage.getUncovered();
 			// for (String transition : uncovered) {
 			// transStats.add(WebUtils.wrap("name", transition, "value", "0"));
