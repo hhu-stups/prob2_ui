@@ -8,6 +8,7 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
@@ -55,29 +56,14 @@ public class PreferencesView extends TitledPane implements IAnimationChangeListe
 		
 		tvValue.setCellFactory(col -> {
 			TreeTableCell<PrefTreeItem, String> cell = new TextFieldTreeTableCell<>(new DefaultStringConverter());
-			// TODO Make value cell in header rows not editable
-			/*
-			cell.editableProperty().addListener(observable -> {
-				System.out.println("Editability changed on " + observable);
-			});
-			cell.tableRowProperty().addListener(observable -> {
-				TreeTableRow<PrefTreeItem> row = ((ReadOnlyObjectProperty<TreeTableRow<PrefTreeItem>>)observable).get();
-				row.treeItemProperty().addListener(observable1 -> {
+			// FIXME When first starting the application, the root "Preferences" item is editable, don't ask why
+			// After loading a model, the headers are read-only like they should be
+			cell.tableRowProperty().addListener((observable, from, to) -> {
+				to.treeItemProperty().addListener(observable1 -> {
 					TreeItem<PrefTreeItem> ti = ((ReadOnlyObjectProperty<TreeItem<PrefTreeItem>>)observable1).get();
 					cell.setEditable(ti != null && ti.getValue() != null && ti.getValue() instanceof RealPrefTreeItem);
-					if (ti == null) {
-						System.out.println(cell + " not editable because TreeItem is null");
-					} else if (ti.getValue() == null) {
-						System.out.println(cell + " not editable because TreeItem value is null");
-					} else if (ti.getValue() instanceof RealPrefTreeItem) {
-						System.out.println(cell + " (" + ti.getValue().getName() + ") editable");
-					} else {
-						System.out.println(cell + " (" + ti.getValue().getName() + ") not editable because value is not a RealPrefTreeItem");
-					}
-					System.out.println(cell.isEditable());
 				});
 			});
-			*/
 			return cell;
 		});
 		tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
