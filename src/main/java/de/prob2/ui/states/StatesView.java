@@ -130,7 +130,6 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 				if (sti.getContents().equals(e)) {
 					childItem = ti;
 					childItem.getValue().update(this.currentValues, this.previousValues);
-					//System.out.println(childItem.getValue().getValue());
 					break;
 				}
 			}
@@ -265,6 +264,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			if(selectedItem instanceof ElementStateTreeItem && !((ElementStateTreeItem) selectedItem).getValue().equals("")) {
 				showExpression((AbstractFormulaElement)(((ElementStateTreeItem) selectedItem).getContents()));
 			}
+			tv.getSelectionModel().clearSelection();
 		});
 		
 		FXMLLoader editBlacklistStageLoader = new FXMLLoader(this.getClass().getResource("blacklist_view.fxml"));

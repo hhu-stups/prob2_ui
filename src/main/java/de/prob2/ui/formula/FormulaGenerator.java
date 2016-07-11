@@ -20,6 +20,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.stage.Stage;
 
 
@@ -124,9 +125,9 @@ public class FormulaGenerator implements IAnimationChangeListener {
 	}
 	
 	private void draw() {
-		Group root = new Group();
+		ScrollPane root = new ScrollPane();
 		Stage stage = new Stage();
-		root.getChildren().add(graph);
+		root.setContent(graph);
 		stage.setTitle("Mathematical Expression");
 		Scene scene = new Scene(root, 1024, 768);
 		stage.setScene(scene);
