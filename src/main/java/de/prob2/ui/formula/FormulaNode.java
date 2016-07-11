@@ -13,11 +13,10 @@ import javafx.scene.text.Text;
 
 public class FormulaNode extends Region {
 		
-	//private Ellipse ellipse;
 	private Rectangle rectangle;
 	private Text text;
 	private Color color;
-	public List<FormulaNode> next;
+	List<FormulaNode> next;
 	
 	public FormulaNode(ExpandedFormula data) {
 		next = new ArrayList<FormulaNode>();
