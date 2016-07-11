@@ -51,17 +51,14 @@ public class ModelCheckStatsView extends TitledPane {
 			resultText.setText(message);
 			if (res == "success") {
 				resultBackground.getStyleClass().clear();
-				;
 				resultBackground.getStyleClass().add("mcheckSuccess");
 				resultText.setFill(Color.web("#5e945e"));
 			} else if (res == "danger") {
 				resultBackground.getStyleClass().clear();
-				;
 				resultBackground.getStyleClass().add("mcheckDanger");
 				resultText.setFill(Color.web("#b95050"));
 			} else if (res == "warning") {
 				resultBackground.getStyleClass().clear();
-				;
 				resultBackground.getStyleClass().add("mcheckWarning");
 				resultText.setFill(Color.web("#96904e"));
 			}

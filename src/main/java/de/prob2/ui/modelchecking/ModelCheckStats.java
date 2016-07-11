@@ -89,7 +89,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		// "stats", hasStats, "percent", 100, "time", timeElapsed));
 		// }
 		System.out.println("updated Stats");
-		System.out.println(results);
 	}
 
 	@Override
