@@ -7,6 +7,7 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
 import de.prob2.ui.events.ModelCheckStatsEvent;
+import de.prob2.ui.events.OpenFileEvent;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -27,6 +28,8 @@ public class ModelCheckStatsView extends TitledPane {
 	private AnchorPane resultBackground;
 	@FXML
 	private Text resultText;
+	
+	private boolean errorFound;
 
 	@Inject
 	public ModelCheckStatsView(FXMLLoader loader, EventBus bus) {
@@ -45,8 +48,12 @@ public class ModelCheckStatsView extends TitledPane {
 	public void showStats(ModelCheckStatsEvent event) {
 		String res = event.getResult();
 		String message = event.getMessage();
-		String note = event.getNote();
 		ModelCheckStats stats = event.getModelCheckStats();
+		
+		if (res.equals("danger")) {
+			errorFound = true;
+		}
+		
 		Platform.runLater(() -> {
 			resultText.setText(message);
 			if (res == "success") {
@@ -64,15 +71,28 @@ public class ModelCheckStatsView extends TitledPane {
 			}
 			if (!statsBox.getChildren().contains(stats))
 				statsBox.getChildren().add(stats);
-			if (note != null) {
+			if (res.equals("success") && errorFound) {
 				Alert alert = new Alert(AlertType.WARNING);
 				alert.setTitle("Note");
-				alert.setHeaderText(note);
+				alert.setHeaderText("Some previously explored nodes do contain errors."
+						+ "\nTurn off \u0027Search for New Errors\u0027 and re-run the model checker to find the errors.");
 				alert.showAndWait();
 				return;
 			}
 		});
 		Accordion accordion = ((Accordion) this.getParent());
 		accordion.setExpandedPane(this);
+	}
+	
+	@Subscribe
+	public void resetView(OpenFileEvent event) {
+		errorFound = false;
+		resultText.setText("No Model Checking Job done.");
+		resultBackground.getStyleClass().clear();
+		resultBackground.getStyleClass().add("mcheckNoCheck");
+		resultText.setFill(Color.web("#8a8a8a"));
+		if(statsBox.getChildren().size() > 1) {
+			statsBox.getChildren().remove(1);
+		}
 	}
 }

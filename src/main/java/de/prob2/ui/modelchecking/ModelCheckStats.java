@@ -17,6 +17,7 @@ import de.prob.check.ModelChecker;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob2.ui.events.ModelCheckStatsEvent;
+import de.prob2.ui.events.OpenFileEvent;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -77,17 +78,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 				totalNodes.setText("" + nrTotalNodes);
 				totalTransitions.setText("" + nrTotalTransitions);
 			});
-
-			// submit(WebUtils.wrap("cmd", "ModelChecking.updateJob", "id", id,
-			// "stats", hasStats, "processedNodes", nrProcessedNodes,
-			// "totalNodes", nrTotalNodes, "totalTransitions",
-			// stats.getNrTotalTransitions(), "percent", percent, "time",
-			// timeElapsed));
 		}
-		// else {
-		// submit(WebUtils.wrap("cmd", "ModelChecking.updateJob", "id", id,
-		// "stats", hasStats, "percent", 100, "time", timeElapsed));
-		// }
 		System.out.println("updated Stats");
 	}
 
@@ -96,7 +87,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			final StateSpaceStats stats) {
 		results.put(id, result);
 		String message = result.getMessage();
-		String note = null;
 
 		Platform.runLater(() -> {
 			elapsedTime.setText("" + timeElapsed);
@@ -104,13 +94,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 
 		String res = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
 				: result instanceof ITraceDescription ? "danger" : "warning";
-		if (res.equals("danger")) {
-			errorFound = true;
-		}
-		if (res.equals("success") && errorFound) {
-			note = "Some previously explored nodes do contain errors."
-					+ "\nTurn off \u0027Search for New Errors\u0027 and re-run the model checker to find the errors.";
-		}
 		boolean hasTrace = result instanceof ITraceDescription;
 		ModelChecker modelChecker = jobs.get(id);
 		ComputeCoverageResult coverage = null;
@@ -125,8 +108,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			Number numTrans = coverage.getTotalNumberOfTransitions();
 
 			Platform.runLater(() -> {
-				// processedNodes.setText("" + nrProcessedNodes + "(" + percent
-				// + " %)");
 				totalNodes.setText("" + numNodes);
 				totalTransitions.setText("" + numTrans);
 			});
@@ -139,21 +120,8 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			// transStats.add(WebUtils.wrap("name", transition, "value", "0"));
 			// }
 			// String transitionStats = WebUtils.toJson(transStats);
-			// submit(WebUtils.wrap("cmd", "ModelChecking.finishJob", "id", id,
-			// "time", timeElapsed, "stats", true, "processedNodes",
-			// numNodes, "totalNodes", numNodes, "totalTransitions",
-			// numTrans, "result", res, "hasTrace", hasTrace, "message",
-			// result.getMessage(), "nodeStats", nodeStats, "transStats",
-			// transitionStats));
 		}
-		// else {
-		// Map<String, String> wrap = WebUtils.wrap("cmd",
-		// "ModelChecking.finishJob", "id", id, "time", timeElapsed,
-		// "stats", false, "result", res, "hasTrace", hasTrace,
-		// "message", result.getMessage());
-		// submit(wrap);
-		// }
-		bus.post(new ModelCheckStatsEvent(this, res, message, note));
+		bus.post(new ModelCheckStatsEvent(this, res, message));
 		System.out.println("is finished");
 	}
 
