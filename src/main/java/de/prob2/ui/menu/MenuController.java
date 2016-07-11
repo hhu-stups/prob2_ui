@@ -38,7 +38,7 @@ public class MenuController extends MenuBar {
 			loader.setLocation(getClass().getResource("../main.fxml"));
 			loader.load();
 			Parent root = loader.getRoot();
-			Scene scene = new Scene(root);
+			Scene scene = new Scene(root,stage.getHeight(),stage.getWidth());
 			((Stage) stage).setScene(scene);
 		} catch (IOException e) {
 			System.err.println("Failed to load FXML-File!");
@@ -53,17 +53,18 @@ public class MenuController extends MenuBar {
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("FXML Files", "*.fxml"));
 		Window stage = this.getScene().getWindow();
 		File selectedFile = fileChooser.showOpenDialog(stage);
-		try {
-			FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
-			loader.setLocation(new URL("file://" + selectedFile.getPath()));
-			loader.load();
-			Parent root = loader.getRoot();
-			Scene scene = new Scene(root);
-			((Stage) stage).setScene(scene);
-		} catch (IOException e) {
-			System.err.println("Failed to load FXML-File!");
-			e.printStackTrace();
-		}
+		if (selectedFile!=null)
+			try {
+				FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
+				loader.setLocation(new URL("file://" + selectedFile.getPath()));
+				loader.load();
+				Parent root = loader.getRoot();
+				Scene scene = new Scene(root,stage.getHeight(),stage.getWidth());
+				((Stage) stage).setScene(scene);
+			} catch (IOException e) {
+				System.err.println("Failed to load FXML-File!");
+				e.printStackTrace();
+			}
 	}
 
 	@FXML
