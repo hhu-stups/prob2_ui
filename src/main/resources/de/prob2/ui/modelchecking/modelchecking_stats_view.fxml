@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <fx:root text="Model Check Stats" type="TitledPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
    <content>
       <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER">
          <content>
-            <AnchorPane prefHeight="500.0" prefWidth="300.0">
+            <AnchorPane prefHeight="500.0">
                <children>
-                  <VBox fx:id="statsBox" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="4.0" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="4.0">
+                  <VBox fx:id="statsBox" maxWidth="-Infinity" prefHeight="200.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="4.0" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="4.0">
                      <children>
-                        <AnchorPane fx:id="resultBackground" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="46.0" styleClass="mcheckNoCheck" stylesheets="@../../../../prob.css">
+                        <AnchorPane fx:id="resultBackground" styleClass="mcheckNoCheck" stylesheets="@../../../../prob.css">
                            <children>
-                              <Label fx:id="resultLabel" layoutY="-6.0" minHeight="37.0" prefHeight="88.0" prefWidth="262.0" text="No Model Checking Job done." textFill="#8a8a8a" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="0.0">
+                              <Text fx:id="resultText" fill="#8a8a8a" strokeType="OUTSIDE" strokeWidth="0.0" text="No Model Checking Job done." wrappingWidth="240.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
                                  <font>
                                     <Font name="System Bold" size="13.0" />
                                  </font>
-                              </Label>
+                              </Text>
                            </children>
                         </AnchorPane>
                      </children>

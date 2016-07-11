@@ -1,6 +1,7 @@
 package de.prob2.ui.states;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -21,13 +22,18 @@ import de.prob.model.representation.Machine;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
+import de.prob2.ui.formula.FormulaGenerator;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -37,6 +43,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
 	@FXML private TreeItem<StateTreeItem<?>> tvChildrenItem;
 	@FXML private Button editBlacklistButton;
+	@FXML private TreeTableView<ElementStateTreeItem> tv;
 
 	private Stage editBlacklistStage;
 	private BlacklistView editBlacklistStageController;
@@ -168,10 +175,12 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			TreeItem<StateTreeItem<?>> childItem = null;
 			for (TreeItem<StateTreeItem<?>> ti : treeItem.getChildren()) {
 				StateTreeItem<?> sti = ti.getValue();
+
 				if (sti.getContents().equals(clazz)) {
 					childItem = ti;
 					break;
 				}
+
 			}
 
 			if (childItem == null) {
@@ -220,6 +229,11 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	public void editBlacklistButtonAction() {
 		this.editBlacklistStage.show();
 	}
+	
+	public void showExpression(AbstractFormulaElement formula) {
+		FormulaGenerator generator = new FormulaGenerator(animations);
+		generator.setFormula(formula.getFormula());
+	}
 
 	@FXML
 	public void initialize() {
@@ -229,7 +243,18 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 		this.previousValues = null;
 
 		this.tvChildrenItem.setValue(new ElementClassStateTreeItem(Machine.class));
-
+		
+		tv.setOnMouseClicked(e-> {
+			if(tv.getSelectionModel().getSelectedItem() == null) {
+				return;
+			}
+			StateTreeItem<?> selectedItem = tv.getSelectionModel().getSelectedItem().getValue();
+			if(selectedItem instanceof ElementStateTreeItem && !((ElementStateTreeItem) selectedItem).getValue().equals("")) {
+				showExpression((AbstractFormulaElement)(((ElementStateTreeItem) selectedItem).getContents()));
+			}
+			tv.getSelectionModel().clearSelection();
+		});
+		
 		FXMLLoader editBlacklistStageLoader = new FXMLLoader(this.getClass().getResource("blacklist_view.fxml"));
 		try {
 			this.editBlacklistStage = editBlacklistStageLoader.load();
@@ -266,7 +291,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 				}
 			}
 		);
-
+		
 		this.knownAbstractElementSubclasses.add(Action.class);
 		this.childrenClassBlacklist.add(Action.class);
 	}

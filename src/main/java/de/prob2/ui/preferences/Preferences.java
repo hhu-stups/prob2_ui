@@ -23,20 +23,6 @@ public class Preferences {
 		return cmd.getPreferences();
 	}
 
-	public Map<String, Map<String, ProBPreference>> getPreferencesTree() {
-		Map<String, Map<String, ProBPreference>> tree = new HashMap<>();
-
-		for (ProBPreference pref : this.getPreferences()) {
-			if (!tree.containsKey(pref.category)) {
-				tree.put(pref.category, new HashMap<>());
-			}
-
-			tree.get(pref.category).put(pref.name, pref);
-		}
-
-		return tree;
-	}
-
 	public String getPreferenceValue(String name) {
 		GetPreferenceCommand cmd = new GetPreferenceCommand(name);
 		this.stateSpace.execute(cmd);

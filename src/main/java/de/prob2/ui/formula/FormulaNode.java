@@ -3,90 +3,97 @@ package de.prob2.ui.formula;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.prob.animator.domainobjects.ExpandedFormula;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Ellipse;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 
 public class FormulaNode extends Region {
-	
-	
-	private Ellipse ellipse;
+		
+	private Rectangle rectangle;
 	private Text text;
-	public List<FormulaNode> next;
+	private Color color;
+	List<FormulaNode> next;
 	
-	public FormulaNode(double centerX, double centerY, String data, List<FormulaNode> list) {
-		//has to be changed a little
-		text = new Text(centerX, centerY, data);
+	public FormulaNode(ExpandedFormula data) {
+		next = new ArrayList<FormulaNode>();
+		text = new Text(data.getLabel());
+		if(data.getValue() instanceof String) {
+			text.setText(text.getText() + " = " + data.getValue());		
+		}
 		double width = text.getLayoutBounds().getWidth();
 		double height = text.getLayoutBounds().getHeight();
-		text.setX(text.getX() - width/2);
-		text.setY(text.getY() + height/2);
-		ellipse = new Ellipse(centerX, centerY, width, height);
-		next = list;
-		show();
-	}
-	
-	public FormulaNode(String data, List<FormulaNode> list) {
+		rectangle = new Rectangle(width + 10, height * 2);
+		color = calculateColor(data);
+		if(data.getChildren() == null || data.getChildren().isEmpty()) {
+			return;
+		}
+		for(int i = 0; i < data.getChildren().size(); i++) {
+			next.add(new FormulaNode(data.getChildren().get(i)));
+		}
 		
-		text = new Text(data);
-		double width = text.getLayoutBounds().getWidth();
-		double height = text.getLayoutBounds().getHeight();
-		ellipse = new Ellipse(width, height);
-		next = list;
-		//next = null;
+	}
+		
+	public FormulaNode(double centerX, double centerY, ExpandedFormula data) {
+		this(data);
+		setPosition(centerX, centerY);
 	}
 	
-	public FormulaNode(String data) {
-		
-		text = new Text(data);
-		double width = text.getLayoutBounds().getWidth();
-		double height = text.getLayoutBounds().getHeight();
-		ellipse = new Ellipse(width, height);
-		//next = null;
-	}
+
 	
 	public void setPosition(double x, double y) {
-		//Can be improved
-		double width = text.getLayoutBounds().getWidth();
 		double height = text.getLayoutBounds().getHeight();
-		text.setX(x);
-		text.setY(y + height/2);
-		ellipse.setCenterX(x + width/2);
-		ellipse.setCenterY(y);
-		show();
+		text.setX(x + 5);
+		text.setY(y);
+		rectangle.setX(x);
+		rectangle.setY(y - height);
+		
+		draw();
 	}
 	
 	public double getLeft() {
-		return ellipse.getCenterX() - ellipse.getRadiusX();
+		return rectangle.getX();
 	}
 	
 	public double getRight() {
-		return ellipse.getCenterX() + ellipse.getRadiusX();
+		return rectangle.getX() + rectangle.getWidth();
 	}
 	
 	public double getX() {
-		return ellipse.getCenterX();
+		return getLeft();
 	}
 
 	public double getY() {
-		return ellipse.getCenterY();
+		return rectangle.getY() + 0.5 * rectangle.getHeight();
 	}
 	
 	
-	public void show() {
+	private void draw() {
 		text.setFill(Color.BLACK);
-		ellipse.setStroke(Color.BLACK);
-		setFill(Color.WHITE);
-		this.getChildren().add(ellipse);
+		if(color == Color.GRAY) {
+			text.setFill(Color.WHITE);
+		}
+		rectangle.setStroke(Color.BLACK);
+		setFill(color);
+		this.getChildren().add(rectangle);
 		this.getChildren().add(text);
 	}
-
-
-	public void setFill(Paint value) {
-		ellipse.setFill(value);
+	
+	private Color calculateColor(ExpandedFormula data) {
+		if(data.getValue() instanceof String) {
+			return Color.GRAY;
+		} else if((Boolean) data.getValue() == false) {
+			return Color.ORANGERED;
+		}
+		return Color.LIME;
+	}
+	
+	
+	private void setFill(Paint value) {
+		rectangle.setFill(value);
 	}
 	
 	public String toString() {

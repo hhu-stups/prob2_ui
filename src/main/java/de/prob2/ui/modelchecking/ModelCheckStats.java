@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 
 import de.prob.animator.command.ComputeCoverageCommand.ComputeCoverageResult;
@@ -15,6 +16,7 @@ import de.prob.check.ModelCheckOk;
 import de.prob.check.ModelChecker;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
+import de.prob2.ui.events.ModelCheckStatsEvent;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -32,18 +34,19 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	private Label totalNodes;
 	@FXML
 	private Label totalTransitions;
-    @FXML
-    private GridPane nodeStats;
-    @FXML
-    private GridPane transStats;
+	@FXML
+	private GridPane nodeStats;
+	@FXML
+	private GridPane transStats;
 
 	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
+	Map<String, IModelCheckingResult> results = new HashMap<String, IModelCheckingResult>();
 
-	private ModelCheckStatsView mCheckView;
+	private EventBus bus;
 
 	@Inject
-	public ModelCheckStats(FXMLLoader loader, ModelCheckStatsView mCheckView) {
-		this.mCheckView = mCheckView;
+	public ModelCheckStats(FXMLLoader loader, EventBus bus) {
+		this.bus = bus;
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stats.fxml"));
 			loader.setRoot(this);
@@ -57,48 +60,38 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	@Override
 	public void updateStats(final String id, final long timeElapsed, final IModelCheckingResult result,
 			final StateSpaceStats stats) {
-		// results.put(id, result);
+		results.put(id, result);
 		Platform.runLater(() -> {
 			elapsedTime.setText("" + timeElapsed);
-		});	
+		});
 		boolean hasStats = stats != null;
 
 		if (hasStats) {
 			int nrProcessedNodes = stats.getNrProcessedNodes();
 			int nrTotalNodes = stats.getNrTotalNodes();
-			int nrTotalTransitions = stats.getNrTotalTransitions();	
+			int nrTotalTransitions = stats.getNrTotalTransitions();
 			int percent = nrProcessedNodes * 100 / nrTotalNodes;
 			Platform.runLater(() -> {
 				processedNodes.setText("" + nrProcessedNodes + " (" + percent + " %)");
 				totalNodes.setText("" + nrTotalNodes);
 				totalTransitions.setText("" + nrTotalTransitions);
 			});
-
-			// submit(WebUtils.wrap("cmd", "ModelChecking.updateJob", "id", id,
-			// "stats", hasStats, "processedNodes", nrProcessedNodes,
-			// "totalNodes", nrTotalNodes, "totalTransitions",
-			// stats.getNrTotalTransitions(), "percent", percent, "time",
-			// timeElapsed));
 		}
-		// else {
-		// submit(WebUtils.wrap("cmd", "ModelChecking.updateJob", "id", id,
-		// "stats", hasStats, "percent", 100, "time", timeElapsed));
-		// }
 		System.out.println("updated Stats");
 	}
 
 	@Override
 	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result,
 			final StateSpaceStats stats) {
-		// results.put(id, result);
-		
+		results.put(id, result);
+		String message = result.getMessage();
+
 		Platform.runLater(() -> {
 			elapsedTime.setText("" + timeElapsed);
-		});	
-		
+		});
+
 		String res = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
 				: result instanceof ITraceDescription ? "danger" : "warning";
-		System.out.println(res);
 		boolean hasTrace = result instanceof ITraceDescription;
 		ModelChecker modelChecker = jobs.get(id);
 		ComputeCoverageResult coverage = null;
@@ -111,37 +104,22 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		if (coverage != null) {
 			Number numNodes = coverage.getTotalNumberOfNodes();
 			Number numTrans = coverage.getTotalNumberOfTransitions();
-			
+
 			Platform.runLater(() -> {
-//				processedNodes.setText("" + nrProcessedNodes + "(" + percent + " %)");
 				totalNodes.setText("" + numNodes);
 				totalTransitions.setText("" + numTrans);
 			});
-			
+
 			showStats(coverage.getNodes(), nodeStats);
 			showStats(coverage.getOps(), transStats);
-			// List<Map<String, String>> transStats = extractNodeStats(coverage
-			// .getOps());
+
 			// List<String> uncovered = coverage.getUncovered();
 			// for (String transition : uncovered) {
 			// transStats.add(WebUtils.wrap("name", transition, "value", "0"));
 			// }
 			// String transitionStats = WebUtils.toJson(transStats);
-			// submit(WebUtils.wrap("cmd", "ModelChecking.finishJob", "id", id,
-			// "time", timeElapsed, "stats", true, "processedNodes",
-			// numNodes, "totalNodes", numNodes, "totalTransitions",
-			// numTrans, "result", res, "hasTrace", hasTrace, "message",
-			// result.getMessage(), "nodeStats", nodeStats, "transStats",
-			// transitionStats));
 		}
-		// else {
-		// Map<String, String> wrap = WebUtils.wrap("cmd",
-		// "ModelChecking.finishJob", "id", id, "time", timeElapsed,
-		// "stats", false, "result", res, "hasTrace", hasTrace,
-		// "message", result.getMessage());
-		// submit(wrap);
-		// }
-		mCheckView.showStats(this, res);
+		bus.post(new ModelCheckStatsEvent(this, res, message));
 		System.out.println("is finished");
 	}
 
@@ -151,8 +129,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		});
 		for (String pStat : packedStats) {
 			String woPre = pStat.startsWith("'") ? pStat.substring(1) : pStat;
-			String woSuf = woPre.endsWith("'") ? woPre.substring(0,
-					woPre.length() - 1) : woPre;
+			String woSuf = woPre.endsWith("'") ? woPre.substring(0, woPre.length() - 1) : woPre;
 			String[] split = woSuf.split(":");
 			Stat stat = null;
 			if (split.length == 2) {
@@ -162,7 +139,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			}
 			Node[] statFX = stat.toFX();
 			Platform.runLater(() -> {
-				grid.addRow(packedStats.indexOf(pStat)+1, statFX);
+				grid.addRow(packedStats.indexOf(pStat) + 1, statFX);
 			});
 		}
 	}
