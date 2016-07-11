@@ -6,11 +6,13 @@ public class ModelCheckStatsEvent {
 	private ModelCheckStats modelCheckStats;
 	private String result;
 	private String message;
+	private String note;
 
-	public ModelCheckStatsEvent(ModelCheckStats modelCheckStats, String result, String message) {
+	public ModelCheckStatsEvent(ModelCheckStats modelCheckStats, String result, String message, String note) {
 		this.modelCheckStats = modelCheckStats;
 		this.result = result;
 		this.message = message;
+		this.note = note;
 	}
 
 	public ModelCheckStats getModelCheckStats() {
@@ -23,5 +25,9 @@ public class ModelCheckStatsEvent {
 	
 	public String getMessage() {
 		return message;
+	}
+	
+	public String getNote() {
+		return note;
 	}
 }

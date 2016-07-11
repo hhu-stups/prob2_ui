@@ -34,13 +34,14 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	private Label totalNodes;
 	@FXML
 	private Label totalTransitions;
-    @FXML
-    private GridPane nodeStats;
-    @FXML
-    private GridPane transStats;
+	@FXML
+	private GridPane nodeStats;
+	@FXML
+	private GridPane transStats;
 
 	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
 	Map<String, IModelCheckingResult> results = new HashMap<String, IModelCheckingResult>();
+	private boolean errorFound;
 
 	private EventBus bus;
 
@@ -63,13 +64,13 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		results.put(id, result);
 		Platform.runLater(() -> {
 			elapsedTime.setText("" + timeElapsed);
-		});	
+		});
 		boolean hasStats = stats != null;
 
 		if (hasStats) {
 			int nrProcessedNodes = stats.getNrProcessedNodes();
 			int nrTotalNodes = stats.getNrTotalNodes();
-			int nrTotalTransitions = stats.getNrTotalTransitions();	
+			int nrTotalTransitions = stats.getNrTotalTransitions();
 			int percent = nrProcessedNodes * 100 / nrTotalNodes;
 			Platform.runLater(() -> {
 				processedNodes.setText("" + nrProcessedNodes + " (" + percent + " %)");
@@ -95,14 +96,22 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result,
 			final StateSpaceStats stats) {
 		results.put(id, result);
-		
+		String message = result.getMessage();
+		String note = null;
+
 		Platform.runLater(() -> {
 			elapsedTime.setText("" + timeElapsed);
-		});	
-		
+		});
+
 		String res = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
 				: result instanceof ITraceDescription ? "danger" : "warning";
-		System.out.println(res);
+		if (res.equals("danger")) {
+			errorFound = true;
+		}
+		if (res.equals("success") && errorFound) {
+			note = "Some previously explored nodes do contain errors."
+					+ "\nTurn off \u0027Search for New Errors\u0027 and re-run the model checker to find the errors.";
+		}
 		boolean hasTrace = result instanceof ITraceDescription;
 		ModelChecker modelChecker = jobs.get(id);
 		ComputeCoverageResult coverage = null;
@@ -115,16 +124,17 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		if (coverage != null) {
 			Number numNodes = coverage.getTotalNumberOfNodes();
 			Number numTrans = coverage.getTotalNumberOfTransitions();
-			
+
 			Platform.runLater(() -> {
-//				processedNodes.setText("" + nrProcessedNodes + "(" + percent + " %)");
+				// processedNodes.setText("" + nrProcessedNodes + "(" + percent
+				// + " %)");
 				totalNodes.setText("" + numNodes);
 				totalTransitions.setText("" + numTrans);
 			});
-			
+
 			showStats(coverage.getNodes(), nodeStats);
 			showStats(coverage.getOps(), transStats);
-			
+
 			// List<String> uncovered = coverage.getUncovered();
 			// for (String transition : uncovered) {
 			// transStats.add(WebUtils.wrap("name", transition, "value", "0"));
@@ -144,7 +154,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		// "message", result.getMessage());
 		// submit(wrap);
 		// }
-		bus.post(new ModelCheckStatsEvent(this, res, result.getMessage()));
+		bus.post(new ModelCheckStatsEvent(this, res, message, note));
 		System.out.println("is finished");
 	}
 
@@ -154,8 +164,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		});
 		for (String pStat : packedStats) {
 			String woPre = pStat.startsWith("'") ? pStat.substring(1) : pStat;
-			String woSuf = woPre.endsWith("'") ? woPre.substring(0,
-					woPre.length() - 1) : woPre;
+			String woSuf = woPre.endsWith("'") ? woPre.substring(0, woPre.length() - 1) : woPre;
 			String[] split = woSuf.split(":");
 			Stat stat = null;
 			if (split.length == 2) {
@@ -165,7 +174,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			}
 			Node[] statFX = stat.toFX();
 			Platform.runLater(() -> {
-				grid.addRow(packedStats.indexOf(pStat)+1, statFX);
+				grid.addRow(packedStats.indexOf(pStat) + 1, statFX);
 			});
 		}
 	}
