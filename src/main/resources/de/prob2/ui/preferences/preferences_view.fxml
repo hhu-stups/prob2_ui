@@ -8,10 +8,10 @@
 <fx:root type="TitledPane" text="Preferences" maxHeight="Infinity" maxWidth="Infinity"
 	minHeight="-Infinity" minWidth="-Infinity"
 	xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
-	<TreeTableView fx:id="tv" prefHeight="400.0"
-		prefWidth="600.0">
+	<TreeTableView fx:id="tv" prefHeight="400.0" prefWidth="600.0" editable="true">
 		<columns>
-			<TreeTableColumn fx:id="tvName" editable="false" prefWidth="150.0" sortable="false" text="Name"/>
+			<TreeTableColumn fx:id="tvName" editable="false" prefWidth="150.0" text="Name"/>
+			<TreeTableColumn fx:id="tvChanged" editable="false" prefWidth="20.0" text="*"/>
 			<TreeTableColumn fx:id="tvValue" editable="true" prefWidth="100.0" sortable="false" text="Value"/>
 			<TreeTableColumn fx:id="tvDefaultValue" editable="false" prefWidth="100.0" sortable="false" text="Default Value"/>
 			<TreeTableColumn fx:id="tvDescription" editable="false" prefWidth="100.0" sortable="false" text="Description"/>

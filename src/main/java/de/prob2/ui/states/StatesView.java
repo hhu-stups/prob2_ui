@@ -1,6 +1,7 @@
 package de.prob2.ui.states;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -21,6 +22,7 @@ import de.prob.model.representation.Machine;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
+import de.prob2.ui.formula.FormulaGenerator;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
@@ -219,6 +221,14 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 
 	public void editBlacklistButtonAction() {
 		this.editBlacklistStage.show();
+	}
+	
+	public void showExpression() {
+		FormulaGenerator generator = new FormulaGenerator(animations);
+		Map<String, String[]> params = new HashMap<String, String[]>();
+		params.put("formula", new String[]{"active /\\ (ready \\/ waiting) = {} & card(active) <= 1"});
+		//params.put("formula", new String[]{"1 < 2 <=> 3 < 4 & 4 < 5 & 6 < 5"});
+		generator.setFormula(params);	
 	}
 
 	@FXML

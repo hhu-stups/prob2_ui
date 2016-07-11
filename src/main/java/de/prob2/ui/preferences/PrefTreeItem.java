@@ -12,6 +12,14 @@ public abstract class PrefTreeItem {
 	public String getName() {
 		return this.name.get();
 	}
+	
+	protected StringProperty changed;
+	public ReadOnlyStringProperty changedProperty() {
+		return this.changed;
+	}
+	public String getChanged() {
+		return this.changed.get();
+	}
 
 	protected StringProperty value;
 	public ReadOnlyStringProperty valueProperty() {
@@ -37,9 +45,10 @@ public abstract class PrefTreeItem {
 		return this.description.get();
 	}
 
-	public PrefTreeItem(String name, String value, String defaultValue, String description) {
+	public PrefTreeItem(String name, String changed, String value, String defaultValue, String description) {
 		super();
 		this.name = new SimpleStringProperty(name);
+		this.changed = new SimpleStringProperty(changed);
 		this.value = new SimpleStringProperty(value);
 		this.defaultValue = new SimpleStringProperty(defaultValue);
 		this.description = new SimpleStringProperty(description);

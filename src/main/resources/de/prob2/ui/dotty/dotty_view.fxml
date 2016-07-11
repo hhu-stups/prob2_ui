@@ -13,11 +13,6 @@
             <VBox layoutX="40.4" layoutY="43.4" prefHeight="310.0" prefWidth="225.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="33.0">
                <children>
                   <Button fx:id="btshowhistory" mnemonicParsing="false" prefHeight="31.0" prefWidth="225.0" text="Show History as Graph" />
-                  <Button fx:id="btshowexpression" mnemonicParsing="false" prefHeight="37.0" prefWidth="225.0" text="Show Mathematical Expression as Graph">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Button>
                </children>
             </VBox>
          </children></AnchorPane>
