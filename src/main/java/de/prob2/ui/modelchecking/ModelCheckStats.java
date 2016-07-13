@@ -1,10 +1,12 @@
 package de.prob2.ui.modelchecking;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Joiner;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 
@@ -14,7 +16,10 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLOk;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.ModelChecker;
+import de.prob.check.ModelCheckingOptions;
+import de.prob.check.ModelCheckingOptions.Options;
 import de.prob.check.StateSpaceStats;
+import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.ITraceDescription;
 import de.prob2.ui.events.ModelCheckStatsEvent;
 import javafx.application.Platform;
@@ -24,8 +29,11 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
 
 public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
+	@FXML
+	private Text titelText;
 	@FXML
 	private Label elapsedTime;
 	@FXML
@@ -39,7 +47,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	@FXML
 	private GridPane transStats;
 
-	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
+	private Map<String, MCheckJob> jobs = new HashMap<String, MCheckJob>();
 	Map<String, IModelCheckingResult> results = new HashMap<String, IModelCheckingResult>();
 
 	private EventBus bus;
@@ -93,11 +101,28 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		String res = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
 				: result instanceof ITraceDescription ? "danger" : "warning";
 		boolean hasTrace = result instanceof ITraceDescription;
-		ModelChecker modelChecker = jobs.get(id);
+		ModelChecker modelChecker = jobs.get(id).getChecker();
+		ModelCheckingOptions options = jobs.get(id).getOptions();
 		ComputeCoverageResult coverage = null;
+		Boolean searchForNewErrors = true;
 
 		if (modelChecker != null) {
 			coverage = modelChecker.getCoverage();
+			AbstractElement main = modelChecker.getStateSpace().getMainComponent();
+			List<String> optsList = new ArrayList<String>();
+			for (Options opts : options.getPrologOptions()) {
+				optsList.add(opts.getDescription());
+				if (opts.getDescription().equals("recheck existing states")) {
+					searchForNewErrors = false;
+				}
+			}
+			Platform.runLater(() -> {
+				String name = main == null ? "Model Check" : main.toString();
+				if (!optsList.isEmpty()) {
+					name += " with " + Joiner.on(", ").join(optsList);
+				}
+				titelText.setText(name);
+			});
 		}
 
 		jobs.remove(id);
@@ -119,8 +144,9 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			// }
 			// String transitionStats = WebUtils.toJson(transStats);
 		}
-		bus.post(new ModelCheckStatsEvent(this, res, message));
+		bus.post(new ModelCheckStatsEvent(this, res, message, searchForNewErrors));
 		System.out.println("is finished");
+		System.out.println(modelChecker.getStateSpace().getMainComponent().toString());
 	}
 
 	private void showStats(List<String> packedStats, GridPane grid) {
@@ -144,7 +170,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		}
 	}
 
-	void addJob(String jobId, ModelChecker checker) {
-		jobs.put(jobId, checker);
+	void addJob(String jobId, MCheckJob mCheckJob) {
+		jobs.put(jobId, mCheckJob);
 	}
 }

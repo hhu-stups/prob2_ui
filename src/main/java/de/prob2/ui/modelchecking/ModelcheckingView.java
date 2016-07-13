@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.google.inject.Inject;
 
+import de.prob.animator.command.ModelCheckingJob;
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.ModelChecker;
 import de.prob.check.ModelCheckingOptions;
@@ -63,18 +64,8 @@ public class ModelcheckingView extends AnchorPane {
 		ModelCheckingOptions options = getOptions();
 		StateSpace currentStateSpace = animations.getCurrentTrace().getStateSpace();
 		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, mStatsController));
-		mStatsController.addJob(checker.getJobId(), checker);
+		mStatsController.addJob(checker.getJobId(), new MCheckJob(checker, options));
 		checker.start();
-
-		// AbstractElement main = currentStateSpace.getMainComponent();
-		// String name = main == null ? "Model Check" : main.toString();
-		// List<String> ss = new ArrayList<String>();
-		// for (Options opts : options.getPrologOptions()) {
-		// ss.add(opts.getDescription());
-		// }
-		// if (!ss.isEmpty()) {
-		// name += " with " + Joiner.on(", ").join(ss);
-		// }
 	}
 
 	private ModelCheckingOptions getOptions() {
