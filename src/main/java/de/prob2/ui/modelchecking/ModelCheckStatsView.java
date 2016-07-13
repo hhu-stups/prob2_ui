@@ -29,7 +29,7 @@ public class ModelCheckStatsView extends TitledPane {
 	@FXML
 	private Text resultText;
 	
-	private boolean errorFound;
+	private boolean errorFoundBefore;
 
 	@Inject
 	public ModelCheckStatsView(FXMLLoader loader, EventBus bus) {
@@ -49,9 +49,13 @@ public class ModelCheckStatsView extends TitledPane {
 		String res = event.getResult();
 		String message = event.getMessage();
 		ModelCheckStats stats = event.getModelCheckStats();
+		Boolean searchForNewErrors = event.getSearchForNewErrors();
 		
+//		if(!searchForNewErrors) {
+//			errorFoundBefore = false;
+//		} 
 		if (res.equals("danger")) {
-			errorFound = true;
+			errorFoundBefore = true;
 		}
 		
 		Platform.runLater(() -> {
@@ -72,7 +76,7 @@ public class ModelCheckStatsView extends TitledPane {
 			if (!statsBox.getChildren().contains(stats))
 				statsBox.getChildren().add(stats);
 			
-			if (res.equals("success") && errorFound) {
+			if (res.equals("success") && errorFoundBefore && searchForNewErrors) {
 				Alert alert = new Alert(AlertType.WARNING);
 				alert.setTitle("Note");
 				alert.setHeaderText("Some previously explored nodes do contain errors."
@@ -87,7 +91,7 @@ public class ModelCheckStatsView extends TitledPane {
 	
 	@Subscribe
 	public void resetView(OpenFileEvent event) {
-		errorFound = false;
+		errorFoundBefore = false;
 		resultText.setText("No Model Checking Job done.");
 		resultBackground.getStyleClass().clear();
 		resultBackground.getStyleClass().add("mcheckNoCheck");
