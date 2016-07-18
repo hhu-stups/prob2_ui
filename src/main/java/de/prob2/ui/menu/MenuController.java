@@ -7,13 +7,11 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.codecentric.centerdevice.MenuToolkit;
-import de.prob.scripting.Api;
 import de.prob2.ui.events.OpenFileEvent;
 import de.prob2.ui.modelchecking.ModelcheckingDialog;
+import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.BlacklistStage;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,6 +29,7 @@ import javafx.stage.Window;
 public class MenuController extends MenuBar {
 	private EventBus bus;
 	private BlacklistStage blacklistStage;
+	private PreferencesStage preferencesStage;
 	private Scene mcheckScene;
 	private Window window;
 
@@ -39,10 +38,10 @@ public class MenuController extends MenuBar {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
 		fileChooser.getExtensionFilters().addAll(
-				//new ExtensionFilter("All Files", "*.*"),
+				// new ExtensionFilter("All Files", "*.*"),
 				new ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")
-		// new ExtensionFilter("EventB Files", "*.eventb", "*.bum", "*.buc"),
-		// new ExtensionFilter("CSP Files", "*.cspm")
+				// new ExtensionFilter("EventB Files", "*.eventb", "*.bum", "*.buc"),
+				// new ExtensionFilter("CSP Files", "*.cspm")
 		);
 		bus.post(fileChooser);
 	}
@@ -53,12 +52,17 @@ public class MenuController extends MenuBar {
 	}
 	
 	@FXML
+	private void handlePreferences(ActionEvent event) {
+		this.preferencesStage.show();
+	}
+	
+	@FXML
 	private void handleModelCheck(ActionEvent event) {
 		Stage mcheckStage = new Stage();
-        mcheckStage.setTitle("Model Check");
-        mcheckStage.initOwner(this.window);
+		mcheckStage.setTitle("Model Check");
+		mcheckStage.initOwner(this.window);
 		mcheckStage.setScene(mcheckScene);
-        mcheckStage.showAndWait();
+		mcheckStage.showAndWait();
 	}
 
 	@Subscribe
@@ -72,11 +76,10 @@ public class MenuController extends MenuBar {
 	
 	@FXML
 	public void initialize() {
-		this.sceneProperty().addListener(observable -> {
-			Scene scene = ((ReadOnlyObjectProperty<Scene>)observable).get();
-			if (scene != null) {
-				scene.windowProperty().addListener(observable1 -> {
-					this.window = ((ReadOnlyObjectProperty<Window>)observable1).get();
+		this.sceneProperty().addListener((observable, from, to) -> {
+			if (to != null) {
+				to.windowProperty().addListener((observable1, from1, to1) -> {
+					this.window = to1;
 				});
 			}
 		});
@@ -85,13 +88,14 @@ public class MenuController extends MenuBar {
 	@Inject
 	public MenuController(
 		FXMLLoader loader,
-		Api api,
 		EventBus bus,
 		BlacklistStage blacklistStage,
+		PreferencesStage preferencesStage,
 		ModelcheckingDialog mcheckController
 	) {
 		this.bus = bus;
 		this.blacklistStage = blacklistStage;
+		this.preferencesStage = preferencesStage;
 		this.mcheckScene = new Scene(mcheckController);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));

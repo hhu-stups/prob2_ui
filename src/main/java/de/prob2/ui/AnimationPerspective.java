@@ -1,22 +1,16 @@
 package de.prob2.ui;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
-
 import de.prob.scripting.Api;
 import de.prob2.ui.dotty.DottyView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
-import de.prob2.ui.preferences.PreferencesView;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Accordion;
 
-public class AnimationPerspective implements Initializable {
+public class AnimationPerspective {
 
 	@SuppressWarnings("unused")
 	private final Api api;
@@ -31,23 +25,27 @@ public class AnimationPerspective implements Initializable {
 	private HistoryView historyController;
 	private DottyView dottyController;
 	private ModelcheckingController modelCheckStatsController;
-	private PreferencesView preferencesController;
 
 	@Inject
-	public AnimationPerspective(Api api, FXMLLoader loader, OperationsView opsController,
-			HistoryView historyController, DottyView dottyController, ModelcheckingController modelCheckStatsController, PreferencesView preferencesController) {
+	public AnimationPerspective(
+		Api api,
+		FXMLLoader loader,
+		OperationsView opsController,
+		HistoryView historyController,
+		DottyView dottyController,
+		ModelcheckingController modelCheckStatsController
+	) {
 		this.api = api;
 		this.loader = loader;
 		this.opsController = opsController;
 		this.historyController = historyController;
 		this.dottyController = dottyController;
 		this.modelCheckStatsController = modelCheckStatsController;
-		this.preferencesController = preferencesController;
 	}
 
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
+	@FXML
+	public void initialize() {
 		small.getPanes().clear();
-		small.getPanes().addAll(opsController, historyController, dottyController, modelCheckStatsController, preferencesController);
+		small.getPanes().addAll(opsController, historyController, dottyController, modelCheckStatsController);
 	}
 }

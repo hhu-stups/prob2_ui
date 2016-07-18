@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TreeItem?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<fx:root type="Stage" title="Preferences" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene>
+			<TreeTableView fx:id="tv" prefHeight="400.0" prefWidth="600.0" editable="true">
+				<columns>
+					<TreeTableColumn fx:id="tvName" editable="false" prefWidth="400.0" text="Name"/>
+					<TreeTableColumn fx:id="tvChanged" editable="false" prefWidth="20.0" text="*"/>
+					<TreeTableColumn fx:id="tvValue" editable="true" prefWidth="100.0" sortable="false" text="Value"/>
+					<TreeTableColumn fx:id="tvDefaultValue" editable="false" prefWidth="100.0" sortable="false" text="Default Value"/>
+					<TreeTableColumn fx:id="tvDescription" editable="false" prefWidth="1000.0" sortable="false" text="Description"/>
+				</columns>
+				<TreeItem expanded="true"/>
+			</TreeTableView>
+		</Scene>
+	</scene>
+</fx:root>

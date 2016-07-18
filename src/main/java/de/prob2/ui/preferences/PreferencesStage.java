@@ -3,25 +3,26 @@ package de.prob2.ui.preferences;
 import java.io.IOException;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TitledPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.stage.Stage;
 import javafx.util.converter.DefaultStringConverter;
 
-public class PreferencesView extends TitledPane implements IAnimationChangeListener {
+@Singleton
+public class PreferencesStage extends Stage implements IAnimationChangeListener {
 	@FXML private TreeTableView<PrefTreeItem> tv;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvName;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvChanged;
@@ -34,14 +35,14 @@ public class PreferencesView extends TitledPane implements IAnimationChangeListe
 	private Preferences preferences;
 
 	@Inject
-	public PreferencesView(FXMLLoader loader, AnimationSelector animations) {
+	public PreferencesStage(FXMLLoader loader, AnimationSelector animations) {
 		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
-
+		
+		loader.setLocation(this.getClass().getResource("preferences_stage.fxml"));
+		loader.setRoot(this);
+		loader.setController(this);
 		try {
-			loader.setLocation(getClass().getResource("preferences_view.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -59,9 +60,8 @@ public class PreferencesView extends TitledPane implements IAnimationChangeListe
 			// FIXME When first starting the application, the root "Preferences" item is editable, don't ask why
 			// After loading a model, the headers are read-only like they should be
 			cell.tableRowProperty().addListener((observable, from, to) -> {
-				to.treeItemProperty().addListener(observable1 -> {
-					TreeItem<PrefTreeItem> ti = ((ReadOnlyObjectProperty<TreeItem<PrefTreeItem>>)observable1).get();
-					cell.setEditable(ti != null && ti.getValue() != null && ti.getValue() instanceof RealPrefTreeItem);
+				to.treeItemProperty().addListener((observable1, from1, to1) -> {
+					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem);
 				});
 			});
 			return cell;
