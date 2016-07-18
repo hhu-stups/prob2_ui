@@ -69,7 +69,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		jobs.put(jobId, checker);
 		statsBox.setVisible(true);
 		resultBackground.setVisible(false);
-		System.out.println(jobs.size());
 	}
 
 	@Override
@@ -92,9 +91,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 				totalTransitions.setText("" + nrTotalTransitions);
 			});
 		}
-
-
-		System.out.println(jobs.size());
 		System.out.println("updated Stats");
 	}
 
@@ -102,7 +98,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result,
 			final StateSpaceStats stats) {
 
-		System.out.println(jobs.size());
 		results.put(id, result);
 
 		Platform.runLater(() -> {
@@ -142,9 +137,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			// }
 			// String transitionStats = WebUtils.toJson(transStats);
 		}
-
-
-		System.out.println(jobs.size());
 		System.out.println("is finished");
 	}
 
