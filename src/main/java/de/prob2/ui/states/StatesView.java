@@ -1,14 +1,11 @@
 package de.prob2.ui.states;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
-import com.sun.javafx.collections.ObservableSetWrapper;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EnumerationWarning;
 import de.prob.animator.domainobjects.EvalResult;
@@ -23,47 +20,43 @@ import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob2.ui.formula.FormulaGenerator;
-import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 
 public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvName;
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvValue;
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
 	@FXML private TreeItem<StateTreeItem<?>> tvChildrenItem;
-	@FXML private Button editBlacklistButton;
-	@FXML private TreeTableView<ElementStateTreeItem> tv;
-
-	private Stage editBlacklistStage;
-	private BlacklistView editBlacklistStageController;
-
+	@FXML private TreeTableView<StateTreeItem<?>> tv;
+	
+	private final ClassBlacklist classBlacklist;
+	
 	private Trace trace;
-	private ObservableSet<Class<? extends AbstractElement>> childrenClassBlacklist;
-	private ObservableSet<Class<? extends AbstractElement>> knownAbstractElementSubclasses;
 	private Map<IEvalElement, AbstractEvalResult> currentValues;
 	private Map<IEvalElement, AbstractEvalResult> previousValues;
-	private AnimationSelector animations;
+	private final AnimationSelector animations;
 
 	@Inject
-	public StatesView(FXMLLoader loader, AnimationSelector animations) {
+	public StatesView(
+		final FXMLLoader loader,
+		final AnimationSelector animations,
+		final ClassBlacklist classBlacklist
+	) {
 		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
-
+		
+		this.classBlacklist = classBlacklist;
+		
+		loader.setLocation(getClass().getResource("states_view.fxml"));
+		loader.setRoot(this);
+		loader.setController(this);
 		try {
-			loader.setLocation(getClass().getResource("states_view.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -166,9 +159,9 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 		final TreeItem<StateTreeItem<?>> treeItem,
 		final AbstractElement element
 	) {
-		this.knownAbstractElementSubclasses.addAll(element.getChildren().keySet());
+		this.classBlacklist.getKnownClasses().addAll(element.getChildren().keySet());
 		for (Class<? extends AbstractElement> clazz : element.getChildren().keySet()) {
-			if (this.childrenClassBlacklist.contains(clazz)) {
+			if (this.classBlacklist.getBlacklist().contains(clazz)) {
 				continue;
 			}
 
@@ -197,7 +190,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			StateTreeItem<?> sti = ti.getValue();
 			if (sti instanceof ElementClassStateTreeItem) {
 				Class<? extends AbstractElement> clazz = ((ElementClassStateTreeItem) sti).getContents();
-				if (!element.getChildren().containsKey(clazz) || this.childrenClassBlacklist.contains(clazz)) {
+				if (!element.getChildren().containsKey(clazz) || this.classBlacklist.getBlacklist().contains(clazz)) {
 					this.unsubscribeAllChildren(element.getChildren().get(clazz));
 					it.remove();
 				}
@@ -225,10 +218,6 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 
 	@Override
 	public void animatorStatus(boolean busy) {}
-
-	public void editBlacklistButtonAction() {
-		this.editBlacklistStage.show();
-	}
 	
 	public void showExpression(AbstractFormulaElement formula) {
 		FormulaGenerator generator = new FormulaGenerator(animations);
@@ -244,8 +233,8 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 
 		this.tvChildrenItem.setValue(new ElementClassStateTreeItem(Machine.class));
 		
-		tv.setOnMouseClicked(e-> {
-			if(tv.getSelectionModel().getSelectedItem() == null) {
+		tv.setOnMouseClicked(e -> {
+			if (tv.getSelectionModel().getSelectedItem() == null) {
 				return;
 			}
 			StateTreeItem<?> selectedItem = tv.getSelectionModel().getSelectedItem().getValue();
@@ -255,44 +244,15 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			tv.getSelectionModel().clearSelection();
 		});
 		
-		FXMLLoader editBlacklistStageLoader = new FXMLLoader(this.getClass().getResource("blacklist_view.fxml"));
-		try {
-			this.editBlacklistStage = editBlacklistStageLoader.load();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		}
-		this.editBlacklistStageController = editBlacklistStageLoader.getController();
-
-		this.childrenClassBlacklist = this.editBlacklistStageController.childrenClassBlacklist;
-		this.knownAbstractElementSubclasses = new ObservableSetWrapper<>(new HashSet<>());
-
-		this.childrenClassBlacklist.addListener(
+		this.classBlacklist.getBlacklist().addListener(
 			(SetChangeListener.Change<? extends Class<? extends AbstractElement>> change) -> {
 				if (this.trace != null) {
 					this.updateElements(this.tvChildrenItem, this.trace.getModel().getChildrenOfType(Machine.class));
 				}
 			}
 		);
-		this.knownAbstractElementSubclasses.addListener(
-			(SetChangeListener.Change<? extends Class<? extends AbstractElement>> change) -> {
-				List<Class<? extends AbstractElement>> l = this.editBlacklistStageController.list.getItems();
-				Class<? extends AbstractElement> added = change.getElementAdded();
-				Class<? extends AbstractElement> removed = change.getElementRemoved();
-
-				if (change.wasAdded() && !l.contains(added)) {
-					l.add(added);
-					l.sort((a, b) -> a.getCanonicalName().compareTo(b.getCanonicalName()));
-				} else if (change.wasRemoved() && l.contains(removed)) {
-					if (this.childrenClassBlacklist.contains(removed)) {
-						this.childrenClassBlacklist.remove(removed);
-					}
-					l.remove(removed);
-				}
-			}
-		);
 		
-		this.knownAbstractElementSubclasses.add(Action.class);
-		this.childrenClassBlacklist.add(Action.class);
+		this.classBlacklist.getKnownClasses().add(Action.class);
+		this.classBlacklist.getBlacklist().add(Action.class);
 	}
 }
