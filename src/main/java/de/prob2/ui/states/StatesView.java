@@ -33,7 +33,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvValue;
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
 	@FXML private TreeItem<StateTreeItem<?>> tvChildrenItem;
-	@FXML private TreeTableView<ElementStateTreeItem> tv;
+	@FXML private TreeTableView<StateTreeItem<?>> tv;
 	
 	private final ClassBlacklist classBlacklist;
 	
