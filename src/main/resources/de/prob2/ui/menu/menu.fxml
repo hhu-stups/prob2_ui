@@ -5,8 +5,8 @@
 <?import javafx.scene.layout.BorderPane?>
 <fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml" BorderPane.alignment="CENTER">
 	<Menu mnemonicParsing="false" text="%menu.file">
-		<MenuItem text="%menu.file.items.open" onAction="#handleOpen"/>
-		<MenuItem text="Close"/>
+		<MenuItem text="%menu.file.items.open" accelerator="Shortcut+O" onAction="#handleOpen"/>
+		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"/>
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.edit">
 		<MenuItem text="%menu.edit.items.editBlacklist" onAction="#handleEditBlacklist"/>
@@ -14,9 +14,8 @@
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.verify">
 		<MenuItem text="%menu.verify.items.modelcheck" onAction="#handleModelCheck"/>
-		<MenuItem text="Close"/>
 	</Menu>
-	<Menu mnemonicParsing="false" text="Help">
-		<MenuItem text="About"/>
+	<Menu mnemonicParsing="false" text="%menu.help">
+		<MenuItem text="%menu.help.items.about"/>
 	</Menu>
 </fx:root>
