@@ -44,7 +44,7 @@ public class BlacklistStage extends Stage {
 	public BlacklistStage(final FXMLLoader loader, final ClassBlacklist classBlacklist) {
 		this.classBlacklist = classBlacklist;
 		
-		loader.setLocation(this.getClass().getResource("blacklist_view.fxml"));
+		loader.setLocation(this.getClass().getResource("blacklist_stage.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
 		try {
