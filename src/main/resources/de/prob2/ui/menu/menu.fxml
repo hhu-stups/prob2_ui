@@ -5,17 +5,17 @@
 <?import javafx.scene.layout.BorderPane?>
 <fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml" BorderPane.alignment="CENTER">
 	<Menu mnemonicParsing="false" text="%menu.file">
-		<MenuItem mnemonicParsing="false" text="%menu.file.items.open" onAction="#handleOpen"/>
-		<MenuItem mnemonicParsing="false" text="Close"/>
+		<MenuItem text="%menu.file.items.open" onAction="#handleOpen"/>
+		<MenuItem text="Close"/>
 	</Menu>
-	<Menu mnemonicParsing="false" text="Edit">
-		<MenuItem mnemonicParsing="false" text="Delete"/>
+	<Menu mnemonicParsing="false" text="%menu.edit">
+		<MenuItem text="%menu.edit.items.editBlacklist" onAction="#handleEditBlacklist"/>
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.verify">
-		<MenuItem mnemonicParsing="false" text="%menu.verify.items.modelcheck" onAction="#handleModelCheck"/>
-		<MenuItem mnemonicParsing="false" text="Close"/>
+		<MenuItem text="%menu.verify.items.modelcheck" onAction="#handleModelCheck"/>
+		<MenuItem text="Close"/>
 	</Menu>
 	<Menu mnemonicParsing="false" text="Help">
-		<MenuItem mnemonicParsing="false" text="About"/>
+		<MenuItem text="About"/>
 	</Menu>
 </fx:root>

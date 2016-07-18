@@ -12,6 +12,7 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
 import de.prob2.ui.events.OpenFileEvent;
 import de.prob2.ui.modelchecking.ModelcheckingView;
+import de.prob2.ui.states.BlacklistStage;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,8 +29,8 @@ import javafx.stage.Window;
 
 @Singleton
 public class MenuController extends MenuBar {
-
 	private EventBus bus;
+	private BlacklistStage blacklistStage;
 	private Scene mcheckScene;
 	private Window window;
 
@@ -44,6 +45,11 @@ public class MenuController extends MenuBar {
 		// new ExtensionFilter("CSP Files", "*.cspm")
 		);
 		bus.post(fileChooser);
+	}
+	
+	@FXML
+	private void handleEditBlacklist(ActionEvent event) {
+		this.blacklistStage.show();
 	}
 	
 	@FXML
@@ -77,8 +83,15 @@ public class MenuController extends MenuBar {
 	}
 
 	@Inject
-	public MenuController(FXMLLoader loader, Api api, EventBus bus, ModelcheckingView mcheckController) {
+	public MenuController(
+		FXMLLoader loader,
+		Api api,
+		EventBus bus,
+		BlacklistStage blacklistStage,
+		ModelcheckingView mcheckController
+	) {
 		this.bus = bus;
+		this.blacklistStage = blacklistStage;
 		this.mcheckScene = new Scene(mcheckController);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
