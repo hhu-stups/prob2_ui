@@ -7,9 +7,9 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
-
 import de.prob.MainModule;
 import de.prob2.ui.commands.OpenFileCommand;
+import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modeline.ModelineController;
 import de.prob2.ui.states.ClassBlacklist;
@@ -24,9 +24,10 @@ public class ProB2Module extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		// bind(MenuBar.class).asEagerSingleton();
-		bind(EventBus.class).asEagerSingleton();
 		install(new MainModule());
+		
+		bind(EventBus.class).asEagerSingleton();
+		bind(MenuController.class);
 		bind(ModelineController.class);
 		bind(ClassBlacklist.class);
 		bind(StatesView.class);
