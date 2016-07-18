@@ -11,7 +11,7 @@ import com.google.inject.Singleton;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
 import de.prob2.ui.events.OpenFileEvent;
-import de.prob2.ui.modelchecking.ModelcheckingView;
+import de.prob2.ui.modelchecking.ModelcheckingDialog;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -77,7 +77,7 @@ public class MenuController extends MenuBar {
 	}
 
 	@Inject
-	public MenuController(FXMLLoader loader, Api api, EventBus bus, ModelcheckingView mcheckController) {
+	public MenuController(FXMLLoader loader, Api api, EventBus bus, ModelcheckingDialog mcheckController) {
 		this.bus = bus;
 		this.mcheckScene = new Scene(mcheckController);
 		try {

@@ -10,7 +10,7 @@ import com.google.inject.Provides;
 
 import de.prob.MainModule;
 import de.prob2.ui.commands.OpenFileCommand;
-import de.prob2.ui.modelchecking.ModelCheckStatsView;
+import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modeline.ModelineController;
 import de.prob2.ui.states.StatesView;
 import javafx.fxml.FXMLLoader;
@@ -30,6 +30,7 @@ public class ProB2Module extends AbstractModule {
 		bind(StatesView.class);
 		bind(ResourceBundle.class).toInstance(bundle);
 		bind(OpenFileCommand.class).asEagerSingleton();
+		bind(ModelcheckingController.class).asEagerSingleton();
 	}
 
 	@Provides

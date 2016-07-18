@@ -1,13 +1,10 @@
 package de.prob2.ui.modelchecking;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Joiner;
-import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 
 import de.prob.animator.command.ComputeCoverageCommand.ComputeCoverageResult;
@@ -16,12 +13,8 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLOk;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.ModelChecker;
-import de.prob.check.ModelCheckingOptions;
-import de.prob.check.ModelCheckingOptions.Options;
 import de.prob.check.StateSpaceStats;
-import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.ITraceDescription;
-import de.prob2.ui.events.ModelCheckStatsEvent;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,11 +22,21 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
+	// @FXML
+	// private Text titelText;
+	// @FXML
+	// private ImageView titelImage;
 	@FXML
-	private Text titelText;
+	private AnchorPane resultBackground;
+	@FXML
+	private Text resultText;
+	@FXML
+	private VBox statsBox;
 	@FXML
 	private Label elapsedTime;
 	@FXML
@@ -47,14 +50,11 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	@FXML
 	private GridPane transStats;
 
-	private Map<String, MCheckJob> jobs = new HashMap<String, MCheckJob>();
-	Map<String, IModelCheckingResult> results = new HashMap<String, IModelCheckingResult>();
-
-	private EventBus bus;
+	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
+	private Map<String, IModelCheckingResult> results = new HashMap<String, IModelCheckingResult>();
 
 	@Inject
-	public ModelCheckStats(FXMLLoader loader, EventBus bus) {
-		this.bus = bus;
+	public ModelCheckStats(FXMLLoader loader) {
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stats.fxml"));
 			loader.setRoot(this);
@@ -65,16 +65,23 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		}
 	}
 
+	void addJob(String jobId, ModelChecker checker) {
+		jobs.put(jobId, checker);
+		statsBox.setVisible(true);
+		resultBackground.setVisible(false);
+		System.out.println(jobs.size());
+	}
+
 	@Override
 	public void updateStats(final String id, final long timeElapsed, final IModelCheckingResult result,
 			final StateSpaceStats stats) {
 		results.put(id, result);
+
 		Platform.runLater(() -> {
 			elapsedTime.setText("" + timeElapsed);
 		});
-		boolean hasStats = stats != null;
 
-		if (hasStats) {
+		if (stats != null) {
 			int nrProcessedNodes = stats.getNrProcessedNodes();
 			int nrTotalNodes = stats.getNrTotalNodes();
 			int nrTotalTransitions = stats.getNrTotalTransitions();
@@ -85,14 +92,18 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 				totalTransitions.setText("" + nrTotalTransitions);
 			});
 		}
+
+
+		System.out.println(jobs.size());
 		System.out.println("updated Stats");
 	}
 
 	@Override
 	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result,
 			final StateSpaceStats stats) {
+
+		System.out.println(jobs.size());
 		results.put(id, result);
-		String message = result.getMessage();
 
 		Platform.runLater(() -> {
 			elapsedTime.setText("" + timeElapsed);
@@ -100,32 +111,19 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 
 		String res = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
 				: result instanceof ITraceDescription ? "danger" : "warning";
+		String message = result.getMessage();
+		showResult(res, message);
+
 		boolean hasTrace = result instanceof ITraceDescription;
-		ModelChecker modelChecker = jobs.get(id).getChecker();
-		ModelCheckingOptions options = jobs.get(id).getOptions();
+		ModelChecker modelChecker = jobs.get(id);
 		ComputeCoverageResult coverage = null;
-		Boolean searchForNewErrors = true;
 
 		if (modelChecker != null) {
 			coverage = modelChecker.getCoverage();
-			AbstractElement main = modelChecker.getStateSpace().getMainComponent();
-			List<String> optsList = new ArrayList<String>();
-			for (Options opts : options.getPrologOptions()) {
-				optsList.add(opts.getDescription());
-				if (opts.getDescription().equals("recheck existing states")) {
-					searchForNewErrors = false;
-				}
-			}
-			Platform.runLater(() -> {
-				String name = main == null ? "Model Check" : main.toString();
-				if (!optsList.isEmpty()) {
-					name += " with " + Joiner.on(", ").join(optsList);
-				}
-				titelText.setText(name);
-			});
 		}
 
 		jobs.remove(id);
+
 		if (coverage != null) {
 			Number numNodes = coverage.getTotalNumberOfNodes();
 			Number numTrans = coverage.getTotalNumberOfTransitions();
@@ -144,10 +142,52 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			// }
 			// String transitionStats = WebUtils.toJson(transStats);
 		}
-		bus.post(new ModelCheckStatsEvent(this, res, message, searchForNewErrors));
+
+
+		System.out.println(jobs.size());
 		System.out.println("is finished");
-		System.out.println(modelChecker.getStateSpace().getMainComponent().toString());
 	}
+
+	private void showResult(String res, String message) {
+		resultBackground.setVisible(true);
+		resultText.setText(message);
+		switch (res) {
+		case "success":
+			resultBackground.getStyleClass().clear();
+			resultBackground.getStyleClass().add("mcheckSuccess");
+			resultText.setFill(Color.web("#5e945e"));
+			break;
+		case "danger":
+			resultBackground.getStyleClass().clear();
+			resultBackground.getStyleClass().add("mcheckDanger");
+			resultText.setFill(Color.web("#b95050"));
+			break;
+		case "warning":
+			resultBackground.getStyleClass().clear();
+			resultBackground.getStyleClass().add("mcheckWarning");
+			resultText.setFill(Color.web("#96904e"));
+			break;
+		}
+	}
+
+	// private Image selectImage(String res) {
+	// Image image = null;
+	// switch (res) {
+	// case "success":
+	// image = new Image(
+	// getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-199-ok-circle.png"));
+	// break;
+	// case "danger":
+	// image = new Image(
+	// getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-198-remove-circle.png"));
+	// break;
+	// case "warning":
+	// image = new Image(
+	// getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-505-alert.png"));
+	// break;
+	// }
+	// return image;
+	// }
 
 	private void showStats(List<String> packedStats, GridPane grid) {
 		Platform.runLater(() -> {
@@ -170,7 +210,26 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		}
 	}
 
-	void addJob(String jobId, MCheckJob mCheckJob) {
-		jobs.put(jobId, mCheckJob);
+	@Override
+	public String toString() {
+//		ModelChecker modelChecker = jobs.get(id).getChecker();
+//		ModelCheckingOptions options = jobs.get(id).getOptions();
+//		AbstractElement main = modelChecker.getStateSpace().getMainComponent();
+//		List<String> optsList = new ArrayList<String>();
+//		for (Options opts : options.getPrologOptions()) {
+//			optsList.add(opts.getDescription());
+//			if (opts.getDescription().equals("recheck existing states")) {
+//				searchForNewErrors = false;
+//			}
+//		}
+//		// Platform.runLater(() -> {
+//		// String name = main == null ? "Model Check" : main.toString();
+//		// if (!optsList.isEmpty()) {
+//		// name += " with " + Joiner.on(", ").join(optsList);
+//		// }
+//		// titelText.setText(name);
+//		// titelImage.setImage(selectImage(res));
+//		// });
+		return super.toString();
 	}
 }
