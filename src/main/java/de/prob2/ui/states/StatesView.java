@@ -35,23 +35,24 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	@FXML private TreeItem<StateTreeItem<?>> tvChildrenItem;
 	@FXML private TreeTableView<StateTreeItem<?>> tv;
 	
+	private final AnimationSelector animationSelector;
 	private final ClassBlacklist classBlacklist;
+	private final FormulaGenerator formulaGenerator;
 	
-	private Trace trace;
 	private Map<IEvalElement, AbstractEvalResult> currentValues;
 	private Map<IEvalElement, AbstractEvalResult> previousValues;
-	private final AnimationSelector animations;
 
 	@Inject
 	public StatesView(
-		final FXMLLoader loader,
-		final AnimationSelector animations,
-		final ClassBlacklist classBlacklist
+		final AnimationSelector animationSelector,
+		final ClassBlacklist classBlacklist,
+		final FormulaGenerator formulaGenerator,
+		final FXMLLoader loader
 	) {
-		this.animations = animations;
-		animations.registerAnimationChangeListener(this);
-		
+		this.animationSelector = animationSelector;
+		animationSelector.registerAnimationChangeListener(this);
 		this.classBlacklist = classBlacklist;
+		this.formulaGenerator = formulaGenerator;
 		
 		loader.setLocation(getClass().getResource("states_view.fxml"));
 		loader.setRoot(this);
@@ -91,29 +92,30 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 		return shortName;
 	}
 
-	private void unsubscribeAllChildren(final AbstractElement element) {
+	private void unsubscribeAllChildren(final Trace trace, final AbstractElement element) {
 		if (element instanceof AbstractFormulaElement) {
-			((AbstractFormulaElement)element).unsubscribe(this.trace.getStateSpace());
+			((AbstractFormulaElement)element).unsubscribe(trace.getStateSpace());
 		}
 
 		for (final Class<? extends AbstractElement> clazz : element.getChildren().keySet()) {
-			this.unsubscribeAllChildren(element.getChildren().get(clazz));
+			this.unsubscribeAllChildren(trace, element.getChildren().get(clazz));
 		}
 	}
 
-	private void unsubscribeAllChildren(final List<? extends AbstractElement> elements) {
+	private void unsubscribeAllChildren(final Trace trace, final List<? extends AbstractElement> elements) {
 		for (AbstractElement e : elements) {
-			this.unsubscribeAllChildren(e);
+			this.unsubscribeAllChildren(trace, e);
 		}
 	}
 
 	private void updateElements(
+		final Trace trace,
 		final TreeItem<StateTreeItem<?>> treeItem,
 		final List<? extends AbstractElement> elements
 	) {
 		for (AbstractElement e : elements) {
 			if (e instanceof AbstractFormulaElement) {
-				((AbstractFormulaElement)e).subscribe(this.trace.getStateSpace());
+				((AbstractFormulaElement)e).subscribe(trace.getStateSpace());
 			}
 
 			TreeItem<StateTreeItem<?>> childItem = null;
@@ -132,7 +134,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 				treeItem.getChildren().add(childItem);
 			}
 
-			this.updateChildren(childItem, e);
+			this.updateChildren(trace, childItem, e);
 		}
 
 		Iterator<TreeItem<StateTreeItem<?>>> it = treeItem.getChildren().iterator();
@@ -144,7 +146,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 				if (!elements.contains(element)) {
 					it.remove();
 					if (element instanceof AbstractFormulaElement) {
-						((AbstractFormulaElement)element).unsubscribe(this.trace.getStateSpace());
+						((AbstractFormulaElement)element).unsubscribe(trace.getStateSpace());
 					}
 				}
 			} else {
@@ -156,6 +158,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	}
 
 	private void updateChildren(
+		final Trace trace,
 		final TreeItem<StateTreeItem<?>> treeItem,
 		final AbstractElement element
 	) {
@@ -181,7 +184,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 				treeItem.getChildren().add(childItem);
 			}
 
-			this.updateElements(childItem, element.getChildren().get(clazz));
+			this.updateElements(trace, childItem, element.getChildren().get(clazz));
 		}
 
 		Iterator<TreeItem<StateTreeItem<?>>> it = treeItem.getChildren().iterator();
@@ -191,7 +194,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			if (sti instanceof ElementClassStateTreeItem) {
 				Class<? extends AbstractElement> clazz = ((ElementClassStateTreeItem) sti).getContents();
 				if (!element.getChildren().containsKey(clazz) || this.classBlacklist.getBlacklist().contains(clazz)) {
-					this.unsubscribeAllChildren(element.getChildren().get(clazz));
+					this.unsubscribeAllChildren(trace, element.getChildren().get(clazz));
 					it.remove();
 				}
 			} else {
@@ -205,10 +208,9 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	@Override
 	public void traceChange(Trace trace, boolean currentAnimationChanged) {
 		try {
-			this.trace = trace;
-			this.currentValues = this.trace.getCurrentState().getValues();
-			this.previousValues = this.trace.canGoBack() ? this.trace.getPreviousState().getValues() : null;
-			this.updateElements(this.tvChildrenItem, this.trace.getModel().getChildrenOfType(Machine.class));
+			this.currentValues = trace.getCurrentState().getValues();
+			this.previousValues = trace.canGoBack() ? trace.getPreviousState().getValues() : null;
+			this.updateElements(trace, this.tvChildrenItem, trace.getModel().getChildrenOfType(Machine.class));
 		} catch (Exception e) {
 			// Otherwise the exception gets lost somewhere deep in a
 			// ProB log file, without a traceback.
@@ -220,13 +222,12 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	public void animatorStatus(boolean busy) {}
 	
 	public void showExpression(AbstractFormulaElement formula) {
-		FormulaGenerator generator = new FormulaGenerator(animations);
-		generator.setFormula(formula.getFormula());
+		formulaGenerator.setFormula(formula.getFormula());
 	}
 
 	@FXML
 	public void initialize() {
-		this.animations.registerAnimationChangeListener(this);
+		this.animationSelector.registerAnimationChangeListener(this);
 
 		this.currentValues = null;
 		this.previousValues = null;
@@ -246,8 +247,12 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 		
 		this.classBlacklist.getBlacklist().addListener(
 			(SetChangeListener.Change<? extends Class<? extends AbstractElement>> change) -> {
-				if (this.trace != null) {
-					this.updateElements(this.tvChildrenItem, this.trace.getModel().getChildrenOfType(Machine.class));
+				if (this.animationSelector.getCurrentTrace() != null) {
+					this.updateElements(
+						this.animationSelector.getCurrentTrace(),
+						this.tvChildrenItem,
+						this.animationSelector.getCurrentTrace().getModel().getChildrenOfType(Machine.class)
+					);
 				}
 			}
 		);

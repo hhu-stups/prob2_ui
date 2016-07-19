@@ -1,18 +1,10 @@
 package de.prob2.ui.dotty;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
-
 
 import com.google.inject.Inject;
-
-import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.IAnimationChangeListener;
-import de.prob.statespace.Trace;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -22,15 +14,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
-public class DottyView extends TitledPane implements Initializable, IAnimationChangeListener {
-
+public class DottyView extends TitledPane {
 	@FXML
 	private Button btshowhistory;
 		
 	@Inject
-	public DottyView(FXMLLoader loader, AnimationSelector animations) {
-		animations.registerAnimationChangeListener(this);
-
+	public DottyView(FXMLLoader loader) {
 		try {
 			loader.setLocation(getClass().getResource("dotty_view.fxml"));
 			loader.setRoot(this);
@@ -41,8 +30,8 @@ public class DottyView extends TitledPane implements Initializable, IAnimationCh
 		}
 	}
 	
-	public void initialize(URL location, ResourceBundle resources) {
-		
+	@FXML
+	public void initialize() {
 		btshowhistory.setOnAction(e -> {
 			String url = getClass().getResource("/glyphicons_free/glyphicons/png/glyphicons-9-film.png").toString();
 			ScrollPane pane = new ScrollPane();
@@ -69,21 +58,4 @@ public class DottyView extends TitledPane implements Initializable, IAnimationCh
 		});
 		
 	}
-	
-
-
-	@Override
-	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void animatorStatus(boolean busy) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	
-
 }

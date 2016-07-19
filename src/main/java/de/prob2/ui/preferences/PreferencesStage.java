@@ -29,15 +29,17 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
-
-	private AnimationSelector animations;
-	private Trace trace;
+	
+	private final AnimationSelector animationSelector;
 	private Preferences preferences;
 
 	@Inject
-	private PreferencesStage(FXMLLoader loader, AnimationSelector animations) {
-		this.animations = animations;
-		animations.registerAnimationChangeListener(this);
+	private PreferencesStage(
+		final AnimationSelector animationSelector,
+		final FXMLLoader loader
+	) {
+		this.animationSelector = animationSelector;
+		this.animationSelector.registerAnimationChangeListener(this);
 		
 		loader.setLocation(this.getClass().getResource("preferences_stage.fxml"));
 		loader.setRoot(this);
@@ -116,8 +118,7 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 
 	@Override
 	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-		this.trace = currentTrace;
-		this.preferences = new Preferences(this.trace.getStateSpace());
+		this.preferences = new Preferences(currentTrace.getStateSpace());
 		this.updatePreferences();
 	}
 
