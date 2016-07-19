@@ -41,7 +41,7 @@ public class BlacklistStage extends Stage {
 	@FXML ListView<Class<? extends AbstractElement>> list;
 	
 	@Inject
-	public BlacklistStage(final FXMLLoader loader, final ClassBlacklist classBlacklist) {
+	private BlacklistStage(final FXMLLoader loader, final ClassBlacklist classBlacklist) {
 		this.classBlacklist = classBlacklist;
 		
 		loader.setLocation(this.getClass().getResource("blacklist_stage.fxml"));

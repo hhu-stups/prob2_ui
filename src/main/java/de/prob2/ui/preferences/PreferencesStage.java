@@ -35,7 +35,7 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 	private Preferences preferences;
 
 	@Inject
-	public PreferencesStage(FXMLLoader loader, AnimationSelector animations) {
+	private PreferencesStage(FXMLLoader loader, AnimationSelector animations) {
 		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
 		

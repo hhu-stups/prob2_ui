@@ -86,7 +86,7 @@ public class MenuController extends MenuBar {
 	}
 
 	@Inject
-	public MenuController(
+	private MenuController(
 		FXMLLoader loader,
 		EventBus bus,
 		BlacklistStage blacklistStage,

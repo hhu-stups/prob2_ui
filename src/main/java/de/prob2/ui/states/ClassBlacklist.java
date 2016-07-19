@@ -14,7 +14,7 @@ public class ClassBlacklist {
 	private final ObservableSet<Class<? extends AbstractElement>> knownClasses;
 	
 	@Inject
-	public ClassBlacklist() {
+	private ClassBlacklist() {
 		super();
 		this.blacklist = new ObservableSetWrapper<>(new HashSet<>());
 		this.knownClasses = new ObservableSetWrapper<>(new HashSet<>());
