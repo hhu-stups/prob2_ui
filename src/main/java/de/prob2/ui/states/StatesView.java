@@ -209,14 +209,18 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 
 	@Override
 	public void traceChange(Trace trace, boolean currentAnimationChanged) {
-		try {
-			this.currentValues = trace.getCurrentState().getValues();
-			this.previousValues = trace.canGoBack() ? trace.getPreviousState().getValues() : null;
-			this.updateElements(trace, this.tvChildrenItem, trace.getModel().getChildrenOfType(Machine.class));
-		} catch (Exception e) {
-			// Otherwise the exception gets lost somewhere deep in a
-			// ProB log file, without a traceback.
-			e.printStackTrace();
+		if (trace == null) {
+			this.tvChildrenItem.getChildren().clear();
+		} else {
+			try {
+				this.currentValues = trace.getCurrentState().getValues();
+				this.previousValues = trace.canGoBack() ? trace.getPreviousState().getValues() : null;
+				this.updateElements(trace, this.tvChildrenItem, trace.getModel().getChildrenOfType(Machine.class));
+			} catch (Exception e) {
+				// Otherwise the exception gets lost somewhere deep in a
+				// ProB log file, without a traceback.
+				e.printStackTrace();
+			}
 		}
 	}
 
