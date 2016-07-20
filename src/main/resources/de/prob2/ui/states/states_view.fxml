@@ -5,7 +5,7 @@
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.AnchorPane?>
-<fx:root type="AnchorPane" maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="AnchorPane" minWidth="240" xmlns:fx="http://javafx.com/fxml/1">
 	<TreeTableView fx:id="tv" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxWidth="Infinity">
 		<columnResizePolicy>
 			<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
