@@ -14,7 +14,7 @@ public class TransitionTransformer implements Callback<ListView<Operation>, List
 		ImageView imEnabled = new ImageView(
 				new Image(getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-174-play.png")));
 		ImageView imNotEnabled = new ImageView(
-				new Image(getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-200-ban-circle.png")));
+				new Image(getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-192-minus-sign.png")));
 		
 		public OperationsCell() {
 			Lighting lighting = new Lighting();

@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import com.google.inject.Inject;
 
-import de.prob.check.ConsistencyChecker;
-import de.prob.check.ModelChecker;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
@@ -18,7 +16,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-public class ModelcheckingView extends AnchorPane {
+public class ModelcheckingDialog extends AnchorPane {
 
 	@FXML
 	private CheckBox findDeadlocks;
@@ -34,15 +32,14 @@ public class ModelcheckingView extends AnchorPane {
 	private CheckBox searchForNewErrors;
 
 	private AnimationSelector animations;
-	private ModelCheckStats mStatsController;
-	private ModelChecker checker;
+	private ModelcheckingController modelcheckController;
 
 	@Inject
-	public ModelcheckingView(AnimationSelector ANIMATIONS, FXMLLoader loader, ModelCheckStats mStatsController) {
+	public ModelcheckingDialog(AnimationSelector ANIMATIONS, FXMLLoader loader, ModelcheckingController modelcheckController) {
 		this.animations = ANIMATIONS;
-		this.mStatsController = mStatsController;
+		this.modelcheckController = modelcheckController;
 		try {
-			loader.setLocation(getClass().getResource("modelchecking_view.fxml"));
+			loader.setLocation(getClass().getResource("modelchecking_dialog.fxml"));
 			loader.setRoot(this);
 			loader.setController(this);
 			loader.load();
@@ -62,19 +59,7 @@ public class ModelcheckingView extends AnchorPane {
 		}
 		ModelCheckingOptions options = getOptions();
 		StateSpace currentStateSpace = animations.getCurrentTrace().getStateSpace();
-		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, mStatsController));
-		mStatsController.addJob(checker.getJobId(), checker);
-		checker.start();
-
-		// AbstractElement main = currentStateSpace.getMainComponent();
-		// String name = main == null ? "Model Check" : main.toString();
-		// List<String> ss = new ArrayList<String>();
-		// for (Options opts : options.getPrologOptions()) {
-		// ss.add(opts.getDescription());
-		// }
-		// if (!ss.isEmpty()) {
-		// name += " with " + Joiner.on(", ").join(ss);
-		// }
+		modelcheckController.startModelchecking(options, currentStateSpace);
 	}
 
 	private ModelCheckingOptions getOptions() {
@@ -92,7 +77,7 @@ public class ModelcheckingView extends AnchorPane {
 
 	@FXML
 	void cancel(ActionEvent event) {
-		checker.cancel();
+		modelcheckController.cancelModelchecking();
 		Stage stage = (Stage) this.getScene().getWindow();
 		stage.close();
 	}

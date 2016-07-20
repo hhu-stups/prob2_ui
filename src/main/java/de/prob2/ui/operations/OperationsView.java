@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.inject.Inject;
-
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
 import de.prob.model.representation.AbstractElement;
@@ -64,7 +63,6 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 	@FXML
 	private Button randomEventsButton;
 
-	private Trace currentTrace;
 	private AbstractModel currentModel;
 	private List<String> opNames = new ArrayList<String>();;
 	private Map<String, List<String>> opToParams = new HashMap<String, List<String>>();
@@ -72,12 +70,15 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 	private boolean showNotEnabled = true;
 	private String filter = "";
 	Comparator<Operation> sorter = new ModelOrder(new ArrayList<String>());
-	private AnimationSelector animations;
+	private final AnimationSelector animations;
 
 	@Inject
-	public OperationsView(AnimationSelector ANIMATIONS, FXMLLoader loader) {
-		this.animations = ANIMATIONS;
-		animations.registerAnimationChangeListener(this);
+	public OperationsView(
+		final AnimationSelector animations,
+		final FXMLLoader loader
+	) {
+		this.animations = animations;
+		this.animations.registerAnimationChangeListener(this);
 
 		try {
 			loader.setLocation(getClass().getResource("ops_view.fxml"));
@@ -99,7 +100,7 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 			public void changed(ObservableValue<? extends Operation> observable, Operation oldValue,
 					Operation newValue) {
 				if (newValue != null && newValue.isEnabled()) {
-					animations.traceChange(currentTrace.add(newValue.id));
+					animations.traceChange(animations.getCurrentTrace().add(newValue.id));
 					System.out.println("Selected item: " + newValue);
 				}
 			}
@@ -111,23 +112,23 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 		if (disabledOpsToggle.isSelected()) {
 			disabledOpsToggle.getStyleClass().add("eyeclosed");
 			showNotEnabled = false;
-			animations.traceChange(currentTrace);
+			animations.traceChange(animations.getCurrentTrace());
 
 		} else {
 			disabledOpsToggle.getStyleClass().remove("eyeclosed");
 			showNotEnabled = true;
-			animations.traceChange(currentTrace);
+			animations.traceChange(animations.getCurrentTrace());
 		}
 	}
 
 	@FXML
 	private void handleBackButton() {
-		animations.traceChange(currentTrace.back());
+		animations.traceChange(animations.getCurrentTrace().back());
 	}
 
 	@FXML
 	private void handleForwardButton() {
-		animations.traceChange(currentTrace.forward());
+		animations.traceChange(animations.getCurrentTrace().forward());
 	}
 
 	@FXML
@@ -189,15 +190,15 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 	@FXML
 	public void random(ActionEvent event) {
 		if (event.getSource().equals(oneRandomEvent)) {
-			animations.traceChange(currentTrace.randomAnimation(1));
+			animations.traceChange(animations.getCurrentTrace().randomAnimation(1));
 		} else if (event.getSource().equals(fiveRandomEvents)) {
-			animations.traceChange(currentTrace.randomAnimation(5));
+			animations.traceChange(animations.getCurrentTrace().randomAnimation(5));
 		} else if (event.getSource().equals(tenRandomEvents)) {
-			animations.traceChange(currentTrace.randomAnimation(10));
+			animations.traceChange(animations.getCurrentTrace().randomAnimation(10));
 		} else if (event.getSource().equals(randomEventsButton) || event.getSource().equals(randomText)) {
 			try {
 				int steps = Integer.parseInt(randomText.getText());
-				animations.traceChange(currentTrace.randomAnimation(steps));
+				animations.traceChange(animations.getCurrentTrace().randomAnimation(steps));
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
 			}
@@ -304,7 +305,6 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 	@Override
 	public void traceChange(Trace trace, boolean currentAnimationChanged) {
 		if (trace == null) {
-			currentTrace = null;
 			currentModel = null;
 			opNames = new ArrayList<String>();
 			if (sorter instanceof ModelOrder) {
@@ -316,11 +316,10 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 		if (trace.getModel() != currentModel) {
 			updateModel(trace);
 		}
-		currentTrace = trace;
 		events = new ArrayList<Operation>();
-		Set<Transition> operations = currentTrace.getNextTransitions(true);
+		Set<Transition> operations = trace.getNextTransitions(true);
 		Set<String> notEnabled = new HashSet<String>(opNames);
-		Set<String> withTimeout = currentTrace.getCurrentState().getTransitionsWithTimeout();
+		Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		for (Transition transition : operations) {
 			String id = transition.getId();
 			String name = extractPrettyName(transition.getName());
@@ -341,8 +340,8 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		backButton.setDisable(!currentTrace.canGoBack());
-		forwardButton.setDisable(!currentTrace.canGoForward());
+		backButton.setDisable(!trace.canGoBack());
+		forwardButton.setDisable(!trace.canGoForward());
 
 		Platform.runLater(() -> {
 			ObservableList<Operation> opsList = opsListView.getItems();
@@ -353,9 +352,5 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 	}
 
 	@Override
-	public void animatorStatus(boolean busy) {
-		// TODO Auto-generated method stub
-
-	}
-
+	public void animatorStatus(boolean busy) {}
 }
