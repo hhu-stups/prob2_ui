@@ -5,14 +5,11 @@
 <?import de.prob2.ui.menu.MenuController?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="rootContainer" maxHeight="-Infinity"
-	maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+<BorderPane fx:id="rootContainer" maxHeight="Infinity"
+	maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
 	prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
-		<StackPane fx:id="mainArea" prefHeight="150.0" prefWidth="200.0"
-			BorderPane.alignment="CENTER">
-			<fx:include fx:id="embeddedView" source="animation_perspective.fxml" />
-		</StackPane>
+		<fx:include fx:id="embeddedView" source="new_animation_perspective.fxml" />
 	</center>
 	<top>
 		<MenuController/>

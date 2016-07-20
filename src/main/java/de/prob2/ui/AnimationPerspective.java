@@ -7,6 +7,7 @@ import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.TitledPane;
 
 public class AnimationPerspective {
 
@@ -34,6 +35,10 @@ public class AnimationPerspective {
 	@FXML
 	public void initialize() {
 		small.getPanes().clear();
-		small.getPanes().addAll(opsController, historyController, dottyController, modelCheckStatsController);
+		small.getPanes().addAll(
+				new TitledPane("Operations",opsController),
+				new TitledPane("History",historyController),
+				new TitledPane("Dotty",dottyController),
+				new TitledPane("Model Check",modelCheckStatsController));
 	}
 }

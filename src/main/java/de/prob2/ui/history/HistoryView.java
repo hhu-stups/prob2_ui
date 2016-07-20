@@ -30,8 +30,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.AnchorPane;
 
-public class HistoryView extends TitledPane implements Initializable, IAnimationChangeListener {
+public class HistoryView extends AnchorPane implements Initializable, IAnimationChangeListener {
 
 	@FXML
 	private ListView<HistoryItem> lv_history;

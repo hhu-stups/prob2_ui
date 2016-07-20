@@ -35,8 +35,9 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.AnchorPane;
 
-public class OperationsView extends TitledPane implements IAnimationChangeListener {
+public class OperationsView extends AnchorPane implements IAnimationChangeListener {
 
 	@FXML
 	private ListView<Operation> opsListView;

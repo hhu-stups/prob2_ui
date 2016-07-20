@@ -12,9 +12,10 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class DottyView extends TitledPane {
+public class DottyView extends VBox {
 	@FXML
 	private Button btshowhistory;
 		
