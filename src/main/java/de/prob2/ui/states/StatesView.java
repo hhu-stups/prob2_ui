@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EnumerationWarning;
 import de.prob.animator.domainobjects.EvalResult;
@@ -28,6 +29,7 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.AnchorPane;
 
+@Singleton
 public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvName;
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvValue;
@@ -43,7 +45,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	private Map<IEvalElement, AbstractEvalResult> previousValues;
 
 	@Inject
-	public StatesView(
+	private StatesView(
 		final AnimationSelector animationSelector,
 		final ClassBlacklist classBlacklist,
 		final FormulaGenerator formulaGenerator,
@@ -207,14 +209,18 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 
 	@Override
 	public void traceChange(Trace trace, boolean currentAnimationChanged) {
-		try {
-			this.currentValues = trace.getCurrentState().getValues();
-			this.previousValues = trace.canGoBack() ? trace.getPreviousState().getValues() : null;
-			this.updateElements(trace, this.tvChildrenItem, trace.getModel().getChildrenOfType(Machine.class));
-		} catch (Exception e) {
-			// Otherwise the exception gets lost somewhere deep in a
-			// ProB log file, without a traceback.
-			e.printStackTrace();
+		if (trace == null) {
+			this.tvChildrenItem.getChildren().clear();
+		} else {
+			try {
+				this.currentValues = trace.getCurrentState().getValues();
+				this.previousValues = trace.canGoBack() ? trace.getPreviousState().getValues() : null;
+				this.updateElements(trace, this.tvChildrenItem, trace.getModel().getChildrenOfType(Machine.class));
+			} catch (Exception e) {
+				// Otherwise the exception gets lost somewhere deep in a
+				// ProB log file, without a traceback.
+				e.printStackTrace();
+			}
 		}
 	}
 

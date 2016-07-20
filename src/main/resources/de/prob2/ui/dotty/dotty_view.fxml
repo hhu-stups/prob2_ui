@@ -8,6 +8,6 @@
 
 <fx:root maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" type="VBox" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Button fx:id="btshowhistory" mnemonicParsing="false" text="Show History as Graph" />
+      <Button fx:id="btshowhistory" mnemonicParsing="false" text="Show History as Graph" maxWidth="Infinity" VBox.vgrow="ALWAYS"/>
    </children>
 </fx:root>

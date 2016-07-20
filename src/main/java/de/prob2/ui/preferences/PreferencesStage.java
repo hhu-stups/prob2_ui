@@ -6,12 +6,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
+import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
@@ -23,6 +26,7 @@ import javafx.util.converter.DefaultStringConverter;
 
 @Singleton
 public class PreferencesStage extends Stage implements IAnimationChangeListener {
+	@FXML private Button applyButton;
 	@FXML private TreeTableView<PrefTreeItem> tv;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvName;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvChanged;
@@ -31,15 +35,22 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
 	private final AnimationSelector animationSelector;
-	private Preferences preferences;
+	private final Api api;
+	private final Preferences preferences;
 
 	@Inject
 	private PreferencesStage(
 		final AnimationSelector animationSelector,
+		final Api api,
+		final Preferences preferences,
 		final FXMLLoader loader
 	) {
 		this.animationSelector = animationSelector;
 		this.animationSelector.registerAnimationChangeListener(this);
+		this.api = api;
+		this.preferences = preferences;
+		Trace currentTrace = this.animationSelector.getCurrentTrace();
+		this.preferences.setStateSpace(currentTrace == null ? null : currentTrace.getStateSpace());
 		
 		loader.setLocation(this.getClass().getResource("preferences_stage.fxml"));
 		loader.setRoot(this);
@@ -115,11 +126,17 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 			item.getValue().updateValue(this.preferences);
 		}
 	}
+	
+	@FXML
+	private void handleApplyChanges(final ActionEvent event) {
+		this.preferences.apply();
+	}
 
 	@Override
 	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-		this.preferences = new Preferences(currentTrace.getStateSpace());
+		this.preferences.setStateSpace(currentTrace.getStateSpace());
 		this.updatePreferences();
+		this.applyButton.setDisable(currentTrace == null);
 	}
 
 	@Override

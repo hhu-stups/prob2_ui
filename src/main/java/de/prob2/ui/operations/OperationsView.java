@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
 import de.prob.model.representation.AbstractElement;
@@ -37,8 +38,8 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 
+@Singleton
 public class OperationsView extends AnchorPane implements IAnimationChangeListener {
-
 	@FXML
 	private ListView<Operation> opsListView;
 	@FXML
@@ -74,7 +75,7 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 	private final AnimationSelector animations;
 
 	@Inject
-	public OperationsView(
+	private OperationsView(
 		final AnimationSelector animations,
 		final FXMLLoader loader
 	) {

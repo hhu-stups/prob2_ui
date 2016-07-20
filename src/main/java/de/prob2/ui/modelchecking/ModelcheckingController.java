@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
-
+import com.google.inject.Singleton;
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.ModelChecker;
 import de.prob.check.ModelCheckingOptions;
@@ -19,6 +19,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 
+@Singleton
 public class ModelcheckingController extends ScrollPane {
 
 	@FXML
@@ -28,7 +29,7 @@ public class ModelcheckingController extends ScrollPane {
 	private ModelChecker checker;
 
 	@Inject
-	public ModelcheckingController(FXMLLoader loader, EventBus bus) {
+	private ModelcheckingController(FXMLLoader loader, EventBus bus) {
 		bus.register(this);
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stats_view.fxml"));
