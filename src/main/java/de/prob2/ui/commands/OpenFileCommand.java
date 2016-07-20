@@ -7,7 +7,7 @@ import java.util.Map;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
-
+import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
@@ -18,6 +18,7 @@ import de.prob2.ui.modeline.ModelineExtension;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 
+@Singleton
 public class OpenFileCommand implements Command {
 
 	private Api api;
@@ -25,7 +26,7 @@ public class OpenFileCommand implements Command {
 	private EventBus bus;
 
 	@Inject
-	public OpenFileCommand(EventBus bus, Api api, AnimationSelector animations) {
+	private OpenFileCommand(EventBus bus, Api api, AnimationSelector animations) {
 		this.bus = bus;
 		this.api = api;
 		this.animations = animations;

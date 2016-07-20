@@ -14,6 +14,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
+import com.google.inject.Singleton;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
@@ -31,6 +32,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 
+@Singleton
 public class HistoryView extends TitledPane implements Initializable, IAnimationChangeListener {
 
 	@FXML
@@ -54,7 +56,7 @@ public class HistoryView extends TitledPane implements Initializable, IAnimation
 	private EventBus bus;
 	
 	@Inject
-	public HistoryView(FXMLLoader loader, AnimationSelector animations, EventBus bus) {
+	private HistoryView(FXMLLoader loader, AnimationSelector animations, EventBus bus) {
 		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
 		

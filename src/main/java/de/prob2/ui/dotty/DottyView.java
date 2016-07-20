@@ -3,6 +3,7 @@ package de.prob2.ui.dotty;
 import java.io.IOException;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -14,12 +15,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
+@Singleton
 public class DottyView extends TitledPane {
 	@FXML
 	private Button btshowhistory;
 		
 	@Inject
-	public DottyView(FXMLLoader loader) {
+	private DottyView(FXMLLoader loader) {
 		try {
 			loader.setLocation(getClass().getResource("dotty_view.fxml"));
 			loader.setRoot(this);

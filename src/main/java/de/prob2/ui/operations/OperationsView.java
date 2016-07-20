@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
 import de.prob.model.representation.AbstractElement;
@@ -36,6 +37,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 
+@Singleton
 public class OperationsView extends TitledPane implements IAnimationChangeListener {
 
 	@FXML
@@ -73,7 +75,7 @@ public class OperationsView extends TitledPane implements IAnimationChangeListen
 	private final AnimationSelector animations;
 
 	@Inject
-	public OperationsView(
+	private OperationsView(
 		final AnimationSelector animations,
 		final FXMLLoader loader
 	) {
