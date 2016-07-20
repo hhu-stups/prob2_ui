@@ -11,7 +11,7 @@
 <?import javafx.scene.control.TitledPane?>
 <SplitPane dividerPositions="0.3" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.AnimationPerspective">
 	<!--dividerPositions="0.3"-->
-	<AnchorPane minWidth="150.0">
+	<AnchorPane minWidth="200.0">
 		<Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<!--layoutX="-28.0" layoutY="128.0" prefHeight="398.0" prefWidth="174.0"-->
 			<panes>
