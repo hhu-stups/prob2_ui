@@ -6,19 +6,22 @@
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <fx:root type="AnchorPane" maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns:fx="http://javafx.com/fxml/1">
-	<TreeTableView fx:id="tv" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+	<TreeTableView fx:id="tv" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxWidth="Infinity">
+		<columnResizePolicy>
+			<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+		</columnResizePolicy>
 		<columns>
-			<TreeTableColumn fx:id="tvName" editable="false" minWidth="80.0" sortable="false" text="Name">
+			<TreeTableColumn fx:id="tvName" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="Name">
 				<cellValueFactory>
 					<TreeItemPropertyValueFactory property="name"/>
 				</cellValueFactory>
 			</TreeTableColumn>
-			<TreeTableColumn fx:id="tvValue" editable="false" minWidth="80.0" sortable="false" text="Value">
+			<TreeTableColumn fx:id="tvValue" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="Value">
 				<cellValueFactory>
 					<TreeItemPropertyValueFactory property="value"/>
 				</cellValueFactory>
 			</TreeTableColumn>
-			<TreeTableColumn fx:id="tvPreviousValue" editable="false" minWidth="80.0" sortable="false" text="Previous Value">
+			<TreeTableColumn fx:id="tvPreviousValue" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="Previous Value">
 				<cellValueFactory>
 					<TreeItemPropertyValueFactory property="previousValue"/>
 				</cellValueFactory>
