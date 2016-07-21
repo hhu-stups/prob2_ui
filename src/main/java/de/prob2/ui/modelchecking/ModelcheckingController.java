@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
-
+import com.google.inject.Singleton;
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.ModelChecker;
 import de.prob.check.ModelCheckingOptions;
@@ -14,10 +14,13 @@ import de.prob2.ui.events.OpenFileEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 
-public class ModelcheckingController extends TitledPane {
+@Singleton
+public class ModelcheckingController extends ScrollPane {
 
 	@FXML
 	private AnchorPane statsPane;
@@ -26,7 +29,7 @@ public class ModelcheckingController extends TitledPane {
 	private ModelChecker checker;
 
 	@Inject
-	public ModelcheckingController(FXMLLoader loader, EventBus bus) {
+	private ModelcheckingController(FXMLLoader loader, EventBus bus) {
 		bus.register(this);
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stats_view.fxml"));
@@ -49,8 +52,8 @@ public class ModelcheckingController extends TitledPane {
 		stats.addJob(checker.getJobId(), checker);
 		
 		showStats(stats);
-		Accordion accordion = ((Accordion) this.getParent());
-		accordion.setExpandedPane(this);
+		//Accordion accordion = ((Accordion) this.getParent());
+		//accordion.setExpandedPane(this);
 		
 		checker.start();
 		//TODO add ModelCheckingHistoryList

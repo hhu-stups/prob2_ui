@@ -8,49 +8,31 @@ import com.google.inject.Inject;
 import de.prob.animator.command.ExpandFormulaCommand;
 import de.prob.animator.command.InsertFormulaForVisualizationCommand;
 import de.prob.animator.domainobjects.ExpandedFormula;
-import de.prob.animator.domainobjects.FormulaId;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.IAnimationChangeListener;
-import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.stage.Stage;
 
-
-
-public class FormulaGenerator implements IAnimationChangeListener {
-
-	private Trace currentTrace;
+public class FormulaGenerator {
 	private IEvalElement formula;
-	private FormulaId setFormula;
 	private FormulaGraph graph;
-	private final StateSpace currentStateSpace;
 	private final Set<String> collapsedNodes = new CopyOnWriteArraySet<>();
 	
-	private final AnimationSelector animations;
+	private final AnimationSelector animationSelector;
 	
 	@Inject
-	public FormulaGenerator(final AnimationSelector animations) {
-		this.animations = animations;
-		currentTrace = animations.getCurrentTrace();
-		if (currentTrace == null) {
-			currentStateSpace = null;
-		} else {
-			currentStateSpace = currentTrace.getStateSpace();
-			this.animations.registerAnimationChangeListener(this);
-		}
+	public FormulaGenerator(final AnimationSelector animationSelector) {
+		this.animationSelector = animationSelector;
 	}
 	
 	public void setFormula(final IEvalElement formula) {
 		try {
 			InsertFormulaForVisualizationCommand cmd1 = new InsertFormulaForVisualizationCommand(formula);
-			currentStateSpace.execute(cmd1);
-			setFormula = cmd1.getFormulaId();
+			animationSelector.getCurrentTrace().getStateSpace().execute(cmd1);
 			
-			ExpandFormulaCommand cmd2 = new ExpandFormulaCommand(setFormula, currentTrace.getCurrentState());
-			currentStateSpace.execute(cmd2);
+			ExpandFormulaCommand cmd2 = new ExpandFormulaCommand(cmd1.getFormulaId(), animationSelector.getCurrentTrace().getCurrentState());
+			animationSelector.getCurrentTrace().getStateSpace().execute(cmd2);
 			ExpandedFormula data = cmd2.getResult();
 			data.collapseNodes(new HashSet<>(collapsedNodes));
 			
@@ -78,10 +60,4 @@ public class FormulaGenerator implements IAnimationChangeListener {
 		stage.setScene(scene);
 		stage.show();
 	}
-	
-	@Override
-	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {}
-	
-	@Override
-	public void animatorStatus(boolean busy) {}
 }

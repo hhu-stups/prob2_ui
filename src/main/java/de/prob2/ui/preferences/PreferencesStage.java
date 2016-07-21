@@ -3,45 +3,59 @@ package de.prob2.ui.preferences;
 import java.io.IOException;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
+import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
-import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.stage.Stage;
 import javafx.util.converter.DefaultStringConverter;
 
-public class PreferencesView extends TitledPane implements IAnimationChangeListener {
+@Singleton
+public class PreferencesStage extends Stage implements IAnimationChangeListener {
+	@FXML private Button applyButton;
 	@FXML private TreeTableView<PrefTreeItem> tv;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvName;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvChanged;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
-
-	private AnimationSelector animations;
-	private Trace trace;
-	private Preferences preferences;
+	
+	private final AnimationSelector animationSelector;
+	private final Api api;
+	private final Preferences preferences;
 
 	@Inject
-	public PreferencesView(FXMLLoader loader, AnimationSelector animations) {
-		this.animations = animations;
-		animations.registerAnimationChangeListener(this);
-
+	private PreferencesStage(
+		final AnimationSelector animationSelector,
+		final Api api,
+		final Preferences preferences,
+		final FXMLLoader loader
+	) {
+		this.animationSelector = animationSelector;
+		this.animationSelector.registerAnimationChangeListener(this);
+		this.api = api;
+		this.preferences = preferences;
+		Trace currentTrace = this.animationSelector.getCurrentTrace();
+		this.preferences.setStateSpace(currentTrace == null ? null : currentTrace.getStateSpace());
+		
+		loader.setLocation(this.getClass().getResource("preferences_stage.fxml"));
+		loader.setRoot(this);
+		loader.setController(this);
 		try {
-			loader.setLocation(getClass().getResource("preferences_view.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -59,9 +73,8 @@ public class PreferencesView extends TitledPane implements IAnimationChangeListe
 			// FIXME When first starting the application, the root "Preferences" item is editable, don't ask why
 			// After loading a model, the headers are read-only like they should be
 			cell.tableRowProperty().addListener((observable, from, to) -> {
-				to.treeItemProperty().addListener(observable1 -> {
-					TreeItem<PrefTreeItem> ti = ((ReadOnlyObjectProperty<TreeItem<PrefTreeItem>>)observable1).get();
-					cell.setEditable(ti != null && ti.getValue() != null && ti.getValue() instanceof RealPrefTreeItem);
+				to.treeItemProperty().addListener((observable1, from1, to1) -> {
+					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem);
 				});
 			});
 			return cell;
@@ -113,12 +126,17 @@ public class PreferencesView extends TitledPane implements IAnimationChangeListe
 			item.getValue().updateValue(this.preferences);
 		}
 	}
+	
+	@FXML
+	private void handleApplyChanges(final ActionEvent event) {
+		this.preferences.apply();
+	}
 
 	@Override
 	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-		this.trace = currentTrace;
-		this.preferences = new Preferences(this.trace.getStateSpace());
+		this.preferences.setStateSpace(currentTrace.getStateSpace());
 		this.updatePreferences();
+		this.applyButton.setDisable(currentTrace == null);
 	}
 
 	@Override

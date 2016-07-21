@@ -1,41 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.dotty.DottyView?>
+<?import de.prob2.ui.history.HistoryView?>
+<?import de.prob2.ui.modelchecking.ModelcheckingController?>
+<?import de.prob2.ui.operations.OperationsView?>
+<?import de.prob2.ui.states.StatesView?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import de.prob2.ui.states.*?>
-<?import javafx.scene.layout.*?>
-
-<SplitPane dividerPositions="0.29797979797979796" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.AnimationPerspective">
-	<items>
-		<AnchorPane minHeight="0.0" minWidth="300.0" prefHeight="160.0" prefWidth="100.0">
-			<children>
-				<Accordion fx:id="small" layoutX="-28.0" layoutY="128.0" prefHeight="398.0" prefWidth="174.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-					<panes>
-						<TitledPane fx:id="ops" animated="false" text="untitled 1">
-							<content>
-								<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-							</content>
-						</TitledPane>
-						<TitledPane fx:id="historyp" animated="false" text="untitled 2">
-							<content>
-								<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-							</content>
-						</TitledPane>
-						<TitledPane fx:id="statesp" animated="false" text="untitled 3">
-							<content>
-								<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-							</content>
-						</TitledPane>
-					</panes>
-				</Accordion>
-			</children>
-		</AnchorPane>
-		<AnchorPane>
-			<StatesView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-		</AnchorPane>
-	</items>
+<?import javafx.scene.control.TitledPane?>
+<SplitPane dividerPositions="0.3" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.AnimationPerspective">
+	<!--dividerPositions="0.3"-->
+	<AnchorPane minWidth="200.0">
+		<Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<!--layoutX="-28.0" layoutY="128.0" prefHeight="398.0" prefWidth="174.0"-->
+			<panes>
+				<TitledPane text="Operations">
+					<OperationsView/>
+				</TitledPane>
+				<TitledPane text="History">
+					<HistoryView/>
+				</TitledPane>
+				<TitledPane text="Dotty">
+					<DottyView/>
+				</TitledPane>
+				<TitledPane text="Model Check Stats">
+					<ModelcheckingController/>
+				</TitledPane>
+			</panes>
+		</Accordion>
+	</AnchorPane>
+	<StatesView/>
 </SplitPane>

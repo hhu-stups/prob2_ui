@@ -2,20 +2,24 @@ package de.prob2.ui.menu;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
+import de.prob2.ui.ProB2;
+
 import de.prob2.ui.events.OpenFileEvent;
 import de.prob2.ui.modelchecking.ModelcheckingDialog;
-import javafx.beans.property.ReadOnlyObjectProperty;
+import de.prob2.ui.preferences.PreferencesStage;
+import de.prob2.ui.states.BlacklistStage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -28,31 +32,79 @@ import javafx.stage.Window;
 
 @Singleton
 public class MenuController extends MenuBar {
-
 	private EventBus bus;
+	private BlacklistStage blacklistStage;
+	private PreferencesStage preferencesStage;
 	private Scene mcheckScene;
 	private Window window;
+
+	@FXML
+	private void handleLoadDefault(){
+		Window stage = this.getScene().getWindow();
+		try {
+			FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
+			loader.setLocation(getClass().getResource("../main.fxml"));
+			loader.load();
+			Parent root = loader.getRoot();
+			Scene scene = new Scene(root,stage.getHeight(),stage.getWidth());
+			((Stage) stage).setScene(scene);
+		} catch (IOException e) {
+			System.err.println("Failed to load FXML-File!");
+			e.printStackTrace();
+		}
+	}
+	
+	@FXML
+	private void handleLoadPerspective(){
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open File");
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("FXML Files", "*.fxml"));
+		Window stage = this.getScene().getWindow();
+		File selectedFile = fileChooser.showOpenDialog(stage);
+		if (selectedFile!=null)
+			try {
+				FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
+				loader.setLocation(new URL("file://" + selectedFile.getPath()));
+				loader.load();
+				Parent root = loader.getRoot();
+				Scene scene = new Scene(root,stage.getHeight(),stage.getWidth());
+				((Stage) stage).setScene(scene);
+			} catch (IOException e) {
+				System.err.println("Failed to load FXML-File!");
+				e.printStackTrace();
+			}
+	}
 
 	@FXML
 	private void handleOpen(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
 		fileChooser.getExtensionFilters().addAll(
-				//new ExtensionFilter("All Files", "*.*"),
+				// new ExtensionFilter("All Files", "*.*"),
 				new ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")
-		// new ExtensionFilter("EventB Files", "*.eventb", "*.bum", "*.buc"),
-		// new ExtensionFilter("CSP Files", "*.cspm")
+				// new ExtensionFilter("EventB Files", "*.eventb", "*.bum", "*.buc"),
+				// new ExtensionFilter("CSP Files", "*.cspm")
 		);
 		bus.post(fileChooser);
 	}
 	
 	@FXML
+	private void handleEditBlacklist(ActionEvent event) {
+		this.blacklistStage.show();
+	}
+	
+	@FXML
+	private void handlePreferences(ActionEvent event) {
+		this.preferencesStage.show();
+	}
+	
+	@FXML
 	private void handleModelCheck(ActionEvent event) {
 		Stage mcheckStage = new Stage();
-        mcheckStage.setTitle("Model Check");
-        mcheckStage.initOwner(this.window);
+		mcheckStage.setTitle("Model Check");
+		mcheckStage.initOwner(this.window);
 		mcheckStage.setScene(mcheckScene);
-        mcheckStage.showAndWait();
+		mcheckStage.showAndWait();
 	}
 
 	@Subscribe
@@ -66,19 +118,26 @@ public class MenuController extends MenuBar {
 	
 	@FXML
 	public void initialize() {
-		this.sceneProperty().addListener(observable -> {
-			Scene scene = ((ReadOnlyObjectProperty<Scene>)observable).get();
-			if (scene != null) {
-				scene.windowProperty().addListener(observable1 -> {
-					this.window = ((ReadOnlyObjectProperty<Window>)observable1).get();
+		this.sceneProperty().addListener((observable, from, to) -> {
+			if (to != null) {
+				to.windowProperty().addListener((observable1, from1, to1) -> {
+					this.window = to1;
 				});
 			}
 		});
 	}
 
 	@Inject
-	public MenuController(FXMLLoader loader, Api api, EventBus bus, ModelcheckingDialog mcheckController) {
+	private MenuController(
+		FXMLLoader loader,
+		EventBus bus,
+		BlacklistStage blacklistStage,
+		PreferencesStage preferencesStage,
+		ModelcheckingDialog mcheckController
+	) {
 		this.bus = bus;
+		this.blacklistStage = blacklistStage;
+		this.preferencesStage = preferencesStage;
 		this.mcheckScene = new Scene(mcheckController);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
