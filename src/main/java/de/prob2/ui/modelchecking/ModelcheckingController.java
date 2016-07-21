@@ -66,6 +66,10 @@ public class ModelcheckingController extends ScrollPane {
 	private void showStats(ModelCheckStats stats) {
 		statsPane.getChildren().clear();
 		statsPane.getChildren().add(stats);
+		AnchorPane.setTopAnchor(stats, 0.0);
+		AnchorPane.setRightAnchor(stats, 0.0);
+		AnchorPane.setBottomAnchor(stats, 0.0);
+		AnchorPane.setLeftAnchor(stats, 0.0);
 	}
 
 	@Subscribe

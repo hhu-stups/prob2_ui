@@ -65,6 +65,13 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		}
 	}
 
+	@FXML
+	public void initialize() {
+		Platform.runLater(() -> {
+			resultText.wrappingWidthProperty().bind(resultBackground.widthProperty().subtract(50.0));
+		});
+	}
+
 	void addJob(String jobId, ModelChecker checker) {
 		jobs.put(jobId, checker);
 		statsBox.setVisible(true);
@@ -204,24 +211,25 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 
 	@Override
 	public String toString() {
-//		ModelChecker modelChecker = jobs.get(id).getChecker();
-//		ModelCheckingOptions options = jobs.get(id).getOptions();
-//		AbstractElement main = modelChecker.getStateSpace().getMainComponent();
-//		List<String> optsList = new ArrayList<String>();
-//		for (Options opts : options.getPrologOptions()) {
-//			optsList.add(opts.getDescription());
-//			if (opts.getDescription().equals("recheck existing states")) {
-//				searchForNewErrors = false;
-//			}
-//		}
-//		// Platform.runLater(() -> {
-//		// String name = main == null ? "Model Check" : main.toString();
-//		// if (!optsList.isEmpty()) {
-//		// name += " with " + Joiner.on(", ").join(optsList);
-//		// }
-//		// titelText.setText(name);
-//		// titelImage.setImage(selectImage(res));
-//		// });
+		// ModelChecker modelChecker = jobs.get(id).getChecker();
+		// ModelCheckingOptions options = jobs.get(id).getOptions();
+		// AbstractElement main =
+		// modelChecker.getStateSpace().getMainComponent();
+		// List<String> optsList = new ArrayList<String>();
+		// for (Options opts : options.getPrologOptions()) {
+		// optsList.add(opts.getDescription());
+		// if (opts.getDescription().equals("recheck existing states")) {
+		// searchForNewErrors = false;
+		// }
+		// }
+		// // Platform.runLater(() -> {
+		// // String name = main == null ? "Model Check" : main.toString();
+		// // if (!optsList.isEmpty()) {
+		// // name += " with " + Joiner.on(", ").join(optsList);
+		// // }
+		// // titelText.setText(name);
+		// // titelImage.setImage(selectImage(res));
+		// // });
 		return super.toString();
 	}
 }
