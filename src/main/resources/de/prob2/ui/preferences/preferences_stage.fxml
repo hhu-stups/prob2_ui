@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TreeItem?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.control.TreeTableView?>
@@ -22,7 +23,7 @@
 					</HBox>
 				</top>
 				<center>
-					<TreeTableView fx:id="tv" prefHeight="400.0" prefWidth="600.0" editable="true">
+					<TreeTableView fx:id="tv" prefHeight="400.0" prefWidth="600.0" editable="true" showRoot="false">
 						<columns>
 							<TreeTableColumn fx:id="tvName" editable="false" minWidth="80.0" prefWidth="320.0" text="Name"/>
 							<TreeTableColumn fx:id="tvChanged" editable="false" resizable="false" prefWidth="20.0" text="*"/>
@@ -30,6 +31,9 @@
 							<TreeTableColumn fx:id="tvDefaultValue" editable="false" minWidth="40.0" prefWidth="80.0" sortable="false" text="Default Value"/>
 							<TreeTableColumn fx:id="tvDescription" editable="false" minWidth="80.0" prefWidth="640.0" sortable="false" text="Description"/>
 						</columns>
+						<placeholder>
+							<Label text="No model loaded"/>
+						</placeholder>
 						<TreeItem expanded="true"/>
 					</TreeTableView>
 				</center>

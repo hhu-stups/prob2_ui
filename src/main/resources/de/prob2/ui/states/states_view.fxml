@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.cell.TreeItemPropertyValueFactory?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TreeItem?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <fx:root type="AnchorPane" minWidth="240" xmlns:fx="http://javafx.com/fxml/1">
-	<TreeTableView fx:id="tv" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxWidth="Infinity">
+	<TreeTableView fx:id="tv" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxWidth="Infinity" showRoot="false">
 		<columnResizePolicy>
 			<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 		</columnResizePolicy>
@@ -27,6 +28,9 @@
 				</cellValueFactory>
 			</TreeTableColumn>
 		</columns>
-		<TreeItem fx:id="tvChildrenItem" expanded="true" />
+		<placeholder>
+			<Label text="No model loaded"/>
+		</placeholder>
+		<TreeItem fx:id="tvRootItem" expanded="true" />
 	</TreeTableView>
 </fx:root>

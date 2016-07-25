@@ -31,11 +31,11 @@ import javafx.scene.layout.AnchorPane;
 
 @Singleton
 public class StatesView extends AnchorPane implements IAnimationChangeListener {
+	@FXML private TreeTableView<StateTreeItem<?>> tv;
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvName;
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvValue;
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
-	@FXML private TreeItem<StateTreeItem<?>> tvChildrenItem;
-	@FXML private TreeTableView<StateTreeItem<?>> tv;
+	@FXML private TreeItem<StateTreeItem<?>> tvRootItem;
 	
 	private final AnimationSelector animationSelector;
 	private final ClassBlacklist classBlacklist;
@@ -210,12 +210,12 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 	@Override
 	public void traceChange(Trace trace, boolean currentAnimationChanged) {
 		if (trace == null) {
-			this.tvChildrenItem.getChildren().clear();
+			this.tvRootItem.getChildren().clear();
 		} else {
 			try {
 				this.currentValues = trace.getCurrentState().getValues();
 				this.previousValues = trace.canGoBack() ? trace.getPreviousState().getValues() : null;
-				this.updateElements(trace, this.tvChildrenItem, trace.getModel().getChildrenOfType(Machine.class));
+				this.updateElements(trace, this.tvRootItem, trace.getModel().getChildrenOfType(Machine.class));
 			} catch (Exception e) {
 				// Otherwise the exception gets lost somewhere deep in a
 				// ProB log file, without a traceback.
@@ -238,14 +238,14 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 		this.currentValues = null;
 		this.previousValues = null;
 
-		this.tvChildrenItem.setValue(new ElementClassStateTreeItem(Machine.class));
+		this.tvRootItem.setValue(new ElementClassStateTreeItem(Machine.class));
 		
 		tv.setOnMouseClicked(e -> {
 			if (tv.getSelectionModel().getSelectedItem() == null) {
 				return;
 			}
 			StateTreeItem<?> selectedItem = tv.getSelectionModel().getSelectedItem().getValue();
-			if(selectedItem instanceof ElementStateTreeItem && !((ElementStateTreeItem) selectedItem).getValue().equals("")) {
+			if(selectedItem instanceof ElementStateTreeItem && !selectedItem.getValue().equals("")) {
 				showExpression((AbstractFormulaElement)(((ElementStateTreeItem) selectedItem).getContents()));
 			}
 			tv.getSelectionModel().clearSelection();
@@ -256,7 +256,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 				if (this.animationSelector.getCurrentTrace() != null) {
 					this.updateElements(
 						this.animationSelector.getCurrentTrace(),
-						this.tvChildrenItem,
+						this.tvRootItem,
 						this.animationSelector.getCurrentTrace().getModel().getChildrenOfType(Machine.class)
 					);
 				}
