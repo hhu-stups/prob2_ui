@@ -15,11 +15,13 @@
 		<Scene>
 			<BorderPane>
 				<top>
-					<HBox>
+					<HBox spacing="5.0">
 						<padding>
 							<Insets top="5.0" bottom="5.0" left="5.0" right="5.0"/>
 						</padding>
 						<Button fx:id="applyButton" text="Apply Changes" disable="true" onAction="#handleApplyChanges"/>
+						<Button fx:id="resetButton" text="Reset All to Defaults" disable="true" onAction="#handleResetAll"/>
+						<Label fx:id="applyWarning" text="There are unapplied preference changes" visible="false" style="-fx-text-fill: red"/>
 					</HBox>
 				</top>
 				<center>
