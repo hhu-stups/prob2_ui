@@ -9,12 +9,26 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.Pane?>
-<SplitPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.AnimationPerspective">
-    <OperationsView/>
-    <HistoryView/>
-    <DottyView/>
-    <ModelcheckingController/>
+
+<fx:root type="SplitPane" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+    <AnchorPane minWidth="280.0">
+        <Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <!--layoutX="-28.0" layoutY="128.0" prefHeight="398.0" prefWidth="174.0"-->
+            <panes>
+                <TitledPane text="Operations">
+                    <OperationsView/>
+                </TitledPane>
+                <TitledPane text="History">
+                    <HistoryView/>
+                </TitledPane>
+                <TitledPane text="Dotty">
+                    <DottyView/>
+                </TitledPane>
+                <TitledPane text="Model Check Stats">
+                    <ModelcheckingController/>
+                </TitledPane>
+            </panes>
+        </Accordion>
+    </AnchorPane>
     <StatesView/>
-</SplitPane>
+</fx:root>
