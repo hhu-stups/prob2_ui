@@ -5,7 +5,6 @@ import com.google.inject.Singleton;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.SplitPane;
-
 import java.io.IOException;
 
 @Singleton
@@ -21,4 +20,7 @@ public class NewAnimationPerspective extends SplitPane{
             e.printStackTrace();
         }
     }
+
+    @FXML
+    public void initialize(){}
 }
