@@ -1,11 +1,14 @@
 package de.prob2.ui.preferences;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public abstract class PrefTreeItem {
-	protected StringProperty name;
+	protected final StringProperty name;
 	public ReadOnlyStringProperty nameProperty() {
 		return this.name;
 	}
@@ -13,23 +16,31 @@ public abstract class PrefTreeItem {
 		return this.name.get();
 	}
 	
-	protected StringProperty changed;
+	protected final StringProperty changed;
 	public ReadOnlyStringProperty changedProperty() {
 		return this.changed;
 	}
 	public String getChanged() {
 		return this.changed.get();
 	}
-
-	protected StringProperty value;
+	
+	protected final StringProperty value;
 	public ReadOnlyStringProperty valueProperty() {
 		return this.value;
 	}
 	public String getValue() {
 		return this.value.get();
 	}
+	
+	protected final ObjectProperty<Class<?>> valueType;
+	public ReadOnlyObjectProperty<Class<?>> valueTypeProperty() {
+		return this.valueType;
+	}
+	public Class<?> getValueType() {
+		return this.valueType.get();
+	}
 
-	protected StringProperty defaultValue;
+	protected final StringProperty defaultValue;
 	public ReadOnlyStringProperty defaultValueProperty() {
 		return this.defaultValue;
 	}
@@ -37,7 +48,7 @@ public abstract class PrefTreeItem {
 		return this.defaultValue.get();
 	}
 
-	protected StringProperty description;
+	protected final StringProperty description;
 	public ReadOnlyStringProperty descriptionProperty() {
 		return this.description;
 	}
@@ -45,11 +56,19 @@ public abstract class PrefTreeItem {
 		return this.description.get();
 	}
 
-	public PrefTreeItem(String name, String changed, String value, String defaultValue, String description) {
+	public PrefTreeItem(
+		final String name,
+		final String changed,
+		final String value,
+		final Class<?> valueType,
+		final String defaultValue,
+		final String description
+	) {
 		super();
 		this.name = new SimpleStringProperty(name);
 		this.changed = new SimpleStringProperty(changed);
 		this.value = new SimpleStringProperty(value);
+		this.valueType = new SimpleObjectProperty<>(valueType);
 		this.defaultValue = new SimpleStringProperty(defaultValue);
 		this.description = new SimpleStringProperty(description);
 	}
