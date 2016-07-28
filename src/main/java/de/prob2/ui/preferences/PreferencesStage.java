@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
-import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
@@ -74,8 +73,6 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 		
 		tvValue.setCellFactory(col -> {
 			TreeTableCell<PrefTreeItem, String> cell = new TextFieldTreeTableCell<>(new DefaultStringConverter());
-			// FIXME When first starting the application, the root "Preferences" item is editable, don't ask why
-			// After loading a model, the headers are read-only like they should be
 			cell.tableRowProperty().addListener((observable, from, to) -> {
 				to.treeItemProperty().addListener((observable1, from1, to1) -> {
 					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem);
@@ -85,9 +82,6 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 		});
 		tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
 		tvValue.setOnEditCommit(event -> {
-			if (preferences == null) {
-				return;
-			}
 			try {
 				this.preferences.setPreferenceValue(event.getRowValue().getValue().getName(), event.getNewValue());
 			} catch (final ProBError exc) {
@@ -145,7 +139,7 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 
 	@Override
 	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-		this.preferences.setStateSpace(currentTrace.getStateSpace());
+		this.preferences.setStateSpace(currentTrace == null ? null : currentTrace.getStateSpace());
 		this.updatePreferences();
 		this.resetButton.setDisable(currentTrace == null);
 	}
