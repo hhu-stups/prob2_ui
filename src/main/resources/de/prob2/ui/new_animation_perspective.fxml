@@ -15,16 +15,16 @@
         <Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <panes>
                 <TitledPane text="Operations">
-                    <OperationsView/>
+                    <OperationsView fx:id="operations"/>
                 </TitledPane>
                 <TitledPane text="History">
-                    <HistoryView/>
+                    <HistoryView fx:id="history"/>
                 </TitledPane>
                 <TitledPane text="Dotty">
-                    <DottyView/>
+                    <DottyView fx:id="dotty"/>
                 </TitledPane>
                 <TitledPane text="Model Check Stats">
-                    <ModelcheckingController/>
+                    <ModelcheckingController fx:id="modelcheck"/>
                 </TitledPane>
             </panes>
         </Accordion>
