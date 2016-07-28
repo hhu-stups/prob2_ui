@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
@@ -17,24 +16,46 @@ import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 public class Preferences {
 	private final AnimationSelector animationSelector;
 	private final Api api;
 	private final EventBus eventBus;
+	private final BooleanProperty changesApplied;
 	private StateSpace stateSpace;
 	
 	@Inject
 	private Preferences(
 		final AnimationSelector animationSelector,
 		final Api api,
-		final EventBus eventBus,
-		final Injector injector
+		final EventBus eventBus
 	) {
 		this.animationSelector = animationSelector;
 		this.api = api;
 		this.eventBus = eventBus;
+		this.changesApplied = new SimpleBooleanProperty(true);
 		this.stateSpace = null;
+	}
+	
+	/**
+	 * A property indicating whether all changes have been applied.
+	 * 
+	 * @return a property indicating whether all changes have been applied
+	 */
+	public ReadOnlyBooleanProperty changesAppliedProperty() {
+		return this.changesApplied;
+	}
+	
+	/**
+	 * Get whether all changes have been applied.
+	 * 
+	 * @return whether all changes have been applied
+	 */
+	public boolean getChangesApplied() {
+		return this.changesApplied.get();
 	}
 	
 	/**
@@ -56,6 +77,7 @@ public class Preferences {
 	 */
 	public void setStateSpace(StateSpace stateSpace) {
 		this.stateSpace = stateSpace;
+		this.changesApplied.set(true);
 	}
 	
 	/**
@@ -112,6 +134,7 @@ public class Preferences {
 	public void setPreferenceValue(String name, String value) {
 		this.checkStateSpace();
 		this.stateSpace.execute(new SetPreferenceCommand(name, value));
+		this.changesApplied.set(false);
 	}
 	
 	/**
@@ -137,5 +160,6 @@ public class Preferences {
 		Trace newTrace = new Trace(newSpace);
 		this.animationSelector.addNewAnimation(newTrace);
 		this.animationSelector.removeTrace(oldTrace);
+		this.changesApplied.set(true);
 	}
 }

@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
@@ -27,6 +28,8 @@ import javafx.util.converter.DefaultStringConverter;
 @Singleton
 public class PreferencesStage extends Stage implements IAnimationChangeListener {
 	@FXML private Button applyButton;
+	@FXML private Button resetButton;
+	@FXML private Label applyWarning;
 	@FXML private TreeTableView<PrefTreeItem> tv;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvName;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvChanged;
@@ -35,19 +38,16 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
 	private final AnimationSelector animationSelector;
-	private final Api api;
 	private final Preferences preferences;
 
 	@Inject
 	private PreferencesStage(
 		final AnimationSelector animationSelector,
-		final Api api,
 		final Preferences preferences,
 		final FXMLLoader loader
 	) {
 		this.animationSelector = animationSelector;
 		this.animationSelector.registerAnimationChangeListener(this);
-		this.api = api;
 		this.preferences = preferences;
 		Trace currentTrace = this.animationSelector.getCurrentTrace();
 		this.preferences.setStateSpace(currentTrace == null ? null : currentTrace.getStateSpace());
@@ -64,6 +64,10 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 
 	@FXML
 	public void initialize() {
+		applyButton.disableProperty().bind(this.preferences.changesAppliedProperty());
+		resetButton.setDisable(this.animationSelector.getCurrentTrace() == null);
+		applyWarning.visibleProperty().bind(this.preferences.changesAppliedProperty().not());
+		
 		tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 		
 		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
@@ -131,12 +135,19 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 	private void handleApplyChanges(final ActionEvent event) {
 		this.preferences.apply();
 	}
+	
+	@FXML
+	private void handleResetAll(final ActionEvent event) {
+		for (ProBPreference pref : this.preferences.getPreferences()) {
+			this.preferences.setPreferenceValue(pref.name, pref.defaultValue);
+		}
+	}
 
 	@Override
 	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
 		this.preferences.setStateSpace(currentTrace.getStateSpace());
 		this.updatePreferences();
-		this.applyButton.setDisable(currentTrace == null);
+		this.resetButton.setDisable(currentTrace == null);
 	}
 
 	@Override

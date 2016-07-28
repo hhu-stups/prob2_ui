@@ -9,9 +9,7 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.codecentric.centerdevice.MenuToolkit;
-import de.prob.scripting.Api;
 import de.prob2.ui.ProB2;
-
 import de.prob2.ui.events.OpenFileEvent;
 import de.prob2.ui.modelchecking.ModelcheckingDialog;
 import de.prob2.ui.preferences.PreferencesStage;
@@ -59,16 +57,15 @@ public class MenuController extends MenuBar {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("FXML Files", "*.fxml"));
-		Window stage = this.getScene().getWindow();
-		File selectedFile = fileChooser.showOpenDialog(stage);
+		File selectedFile = fileChooser.showOpenDialog(window);
 		if (selectedFile!=null)
 			try {
 				FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
 				loader.setLocation(new URL("file://" + selectedFile.getPath()));
 				loader.load();
 				Parent root = loader.getRoot();
-				Scene scene = new Scene(root,stage.getHeight(),stage.getWidth());
-				((Stage) stage).setScene(scene);
+				Scene scene = new Scene(root, window.getHeight(), window.getWidth());
+				((Stage) window).setScene(scene);
 			} catch (IOException e) {
 				System.err.println("Failed to load FXML-File!");
 				e.printStackTrace();
