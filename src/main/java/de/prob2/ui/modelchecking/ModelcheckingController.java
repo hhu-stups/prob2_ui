@@ -57,6 +57,7 @@ public class ModelcheckingController extends ScrollPane {
 	public void initialize() {
 		showStats(new ModelCheckStats(new FXMLLoader()));
 		historyList = historyBox.getChildren();
+		
 	}
 
 	void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {
@@ -68,8 +69,6 @@ public class ModelcheckingController extends ScrollPane {
 		historyList.add(toHistoryItem(options));
 
 		checker.start();
-
-		// TODO add ModelCheckingHistoryList
 	}
 
 	private Node toHistoryItem(ModelCheckingOptions options) {

@@ -68,7 +68,9 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	@FXML
 	public void initialize() {
 		Platform.runLater(() -> {
-			resultText.wrappingWidthProperty().bind(resultBackground.widthProperty().subtract(50.0));
+			resultText.wrappingWidthProperty().bind(resultBackground.widthProperty().subtract(40.0));
+			System.out.println("* " + resultText.getWrappingWidth());
+			System.out.println("* " + resultBackground.getWidth());
 		});
 	}
 
@@ -114,7 +116,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		String res = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
 				: result instanceof ITraceDescription ? "danger" : "warning";
 		String message = result.getMessage();
-		showResult(res, message);
 
 		boolean hasTrace = result instanceof ITraceDescription;
 		ModelChecker modelChecker = jobs.get(id);
@@ -144,12 +145,15 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			// }
 			// String transitionStats = WebUtils.toJson(transStats);
 		}
+		showResult(res, message);
 		System.out.println("is finished");
 	}
 
 	private void showResult(String res, String message) {
 		resultBackground.setVisible(true);
 		resultText.setText(message);
+		System.out.println(resultText.getWrappingWidth());
+		System.out.println(resultBackground.getWidth());
 		switch (res) {
 		case "success":
 			resultBackground.getStyleClass().clear();
