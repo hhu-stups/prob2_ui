@@ -36,13 +36,7 @@ public class FormulaNode extends Region {
 		}
 		
 	}
-		
-	public FormulaNode(double centerX, double centerY, ExpandedFormula data) {
-		this(data);
-		setPosition(centerX, centerY);
-	}
 	
-
 	
 	public void setPosition(double x, double y) {
 		double height = text.getLayoutBounds().getHeight();

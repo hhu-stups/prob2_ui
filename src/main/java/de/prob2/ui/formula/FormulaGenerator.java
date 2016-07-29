@@ -54,7 +54,8 @@ public class FormulaGenerator implements IAnimationChangeListener {
 			ExpandedFormula data = cmd2.getResult();
 			data.collapseNodes(new HashSet<>(collapsedNodes));
 			
-			graph = new FormulaGraph(new FormulaNode(25, 350, data));
+			//graph = new FormulaGraph(new FormulaNode(25, 350, data));
+			graph = new FormulaGraph(new FormulaNode(data));
 			draw();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -70,11 +71,12 @@ public class FormulaGenerator implements IAnimationChangeListener {
 	}
 	
 	private void draw() {
-		ScrollPane root = new ScrollPane();
+		ScrollPane root = new ScrollPane(graph);
+		//root.setPrefSize(graph.getPrefWidth(), graph.getPrefHeight()+100);
 		Stage stage = new Stage();
-		root.setContent(graph);
 		stage.setTitle("Mathematical Expression");
 		Scene scene = new Scene(root, 1024, 768);
+		//Scene scene = new Scene(root);
 		stage.setScene(scene);
 		stage.show();
 	}
