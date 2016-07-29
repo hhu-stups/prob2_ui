@@ -32,11 +32,11 @@ public abstract class PrefTreeItem {
 		return this.value.get();
 	}
 	
-	protected final ObjectProperty<Class<?>> valueType;
-	public ReadOnlyObjectProperty<Class<?>> valueTypeProperty() {
+	protected final ObjectProperty<PreferenceType> valueType;
+	public ReadOnlyObjectProperty<PreferenceType> valueTypeProperty() {
 		return this.valueType;
 	}
-	public Class<?> getValueType() {
+	public PreferenceType getValueType() {
 		return this.valueType.get();
 	}
 
@@ -56,11 +56,11 @@ public abstract class PrefTreeItem {
 		return this.description.get();
 	}
 
-	public PrefTreeItem(
+	protected PrefTreeItem(
 		final String name,
 		final String changed,
 		final String value,
-		final Class<?> valueType,
+		final PreferenceType valueType,
 		final String defaultValue,
 		final String description
 	) {

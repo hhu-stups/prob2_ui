@@ -15,54 +15,69 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 	@Override
 	public void startEdit() {
 		final PrefTreeItem item = this.getTreeTableRow().getItem();
-		final Class<?> valueType = item.getValueType();
+		final PreferenceType valueType = item.getValueType();
 		if (valueType == null) {
 			return;
 		}
 		
 		super.startEdit();
 		
-		if (!this.isEditing() || boolean.class.equals(valueType)) {
+		if (!this.isEditing() || "bool".equals(valueType.getType())) {
 			return;
 		}
 		
 		this.setText(null);
-		if (int.class.equals(valueType)) {
-			final Spinner<Integer> spinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.parseInt(item.getValue())));
-			spinner.setEditable(true);
-			spinner.getEditor().setOnAction(event -> {
-				this.commitEdit(spinner.getEditor().getText());
-			});
-			spinner.getEditor().setOnKeyReleased(event -> {
-				if (event.getCode() == KeyCode.ESCAPE) {
-					this.cancelEdit();
-				}
-			});
-			this.setGraphic(spinner);
-			spinner.getEditor().requestFocus();
-			spinner.getEditor().selectAll();
-		} else if (String.class.equals(valueType)) {
-			final TextField textField = new TextField(item.getValue());
-			textField.setOnAction(event -> {
-				this.commitEdit(textField.getText());
-			});
-			textField.setOnKeyReleased(event -> {
-				if (event.getCode() == KeyCode.ESCAPE) {
-					this.cancelEdit();
-				}
-			});
-			this.setGraphic(textField);
-			textField.requestFocus();
-			textField.selectAll();
-		} else {
-			throw new IllegalArgumentException("Unsupported value type: " + valueType);
+		switch (valueType.getType()) {
+			case "int":
+			case "nat":
+			case "nat1":
+			case "neg":
+				final Spinner<Integer> spinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(
+					"nat1".equals(valueType.getType()) ? 1 : "nat".equals(valueType.getType()) ? 0 : Integer.MIN_VALUE, // min: 1 for nat1, 0 for nat, MIN_VALUE otherwise
+					"neg".equals(valueType.getType()) ? 0 : Integer.MAX_VALUE, // max: 0 for neg, MAX_VALUE otherwise
+					Integer.parseInt(item.getValue())
+				));
+				spinner.setEditable(true);
+				spinner.getEditor().setOnAction(event -> {
+					this.commitEdit(spinner.getEditor().getText());
+				});
+				spinner.getEditor().setOnKeyReleased(event -> {
+					if (event.getCode() == KeyCode.ESCAPE) {
+						this.cancelEdit();
+					}
+				});
+				this.setGraphic(spinner);
+				spinner.getEditor().requestFocus();
+				spinner.getEditor().selectAll();
+				break;
+			
+			case "path":
+				// TODO
+			
+			case "[]":
+				// TODO
+			
+			case "string":
+			default:
+				final TextField textField = new TextField(item.getValue());
+				textField.setOnAction(event -> {
+					this.commitEdit(textField.getText());
+				});
+				textField.setOnKeyReleased(event -> {
+					if (event.getCode() == KeyCode.ESCAPE) {
+						this.cancelEdit();
+					}
+				});
+				this.setGraphic(textField);
+				textField.requestFocus();
+				textField.selectAll();
 		}
 	}
 	
 	@Override
 	public void cancelEdit() {
 		super.cancelEdit();
-		if (!boolean.class.equals(this.getTreeTableRow().getItem().getValueType())) {
+		if (!"bool".equals(this.getTreeTableRow().getItem().getValueType().getType())) {
 			this.setGraphic(null);
 			this.setText(this.getTreeTableRow().getItem().getValue());
 		}
@@ -73,7 +88,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 		super.updateItem(item, empty);
 		if (this.getTreeTableRow() != null && this.getTreeTableRow().getItem() != null) {
 			final PrefTreeItem pti = this.getTreeTableRow().getItem();
-			if (boolean.class.equals(pti.getValueType())) {
+			if (pti.getValueType() != null && "bool".equals(pti.getValueType().getType())) {
 				if (this.getGraphic() instanceof CheckBox) {
 					((CheckBox)this.getGraphic()).setSelected("true".equals(pti.getValue()));
 				} else {

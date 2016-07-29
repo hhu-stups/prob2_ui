@@ -137,26 +137,6 @@ public class Preferences {
 		this.changesApplied.set(false);
 	}
 	
-	public Class<?> guessType(final String name) {
-		final String value = this.getPreferenceValue(name);
-		
-		if ("false".equals(value) || "true".equals(value)) {
-			return boolean.class;
-		}
-		
-		boolean valid = true;
-		try {
-			Integer.parseInt(value);
-		} catch (final NumberFormatException exc) {
-			valid = false;
-		}
-		if (valid) {
-			return int.class;
-		}
-		
-		return String.class;
-	}
-	
 	/**
 	 * Reload the current model and apply all preference changes.
 	 *

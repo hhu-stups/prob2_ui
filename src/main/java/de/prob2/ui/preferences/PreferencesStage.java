@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
+import de.prob.prolog.term.ListPrologTerm;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
@@ -116,7 +117,18 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 				}
 			}
 			if (item == null) {
-				item = new TreeItem<>(new RealPrefTreeItem(pref.name, "", "", null, pref.defaultValue, pref.description));
+				final PreferenceType type;
+				if (pref.type instanceof ListPrologTerm) {
+					final ListPrologTerm values = (ListPrologTerm)pref.type;
+					final String[] arr = new String[values.size()];
+					for (int i = 0; i < values.size(); i++) {
+						arr[i] = values.get(i).getFunctor();
+					}
+					type = new PreferenceType(arr);
+				} else {
+					type = new PreferenceType(pref.type.getFunctor());
+				}
+				item = new TreeItem<>(new RealPrefTreeItem(pref.name, "", "", type, pref.defaultValue, pref.description));
 				category.getChildren().add(item);
 			}
 			item.getValue().updateValue(this.preferences);
