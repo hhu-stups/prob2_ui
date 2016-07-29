@@ -54,11 +54,9 @@ public class FormulaGenerator {
 	
 	private void draw() {
 		ScrollPane root = new ScrollPane(graph);
-		//root.setPrefSize(graph.getPrefWidth(), graph.getPrefHeight()+100);
 		Stage stage = new Stage();
 		stage.setTitle("Mathematical Expression");
 		Scene scene = new Scene(root, 1024, 768);
-		//Scene scene = new Scene(root);
 		stage.setScene(scene);
 		stage.show();
 	}

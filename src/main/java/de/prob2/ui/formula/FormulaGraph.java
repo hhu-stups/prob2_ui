@@ -18,6 +18,9 @@ public class FormulaGraph extends Region {
 	}
 	
 	private double calculateY() {
+		if(calculateHeight(0)/2 < 400) {
+			return 400;
+		}
 		return calculateHeight(0)/2;
 	}
 		
@@ -27,10 +30,7 @@ public class FormulaGraph extends Region {
 		}
 		return Math.max(1,maxChildren(level)) * calculateHeight(level + 1);
 	}
-	
-	//letzter Sohn: 40
-	//vorletzter Sohn: Maximum der Kinder auf dem nächsten Level * Breite auf dem Level
-		
+			
 	private void draw(FormulaNode node, int level) {
 		FormulaNode current = node;
 		this.getChildren().add(current);
@@ -38,7 +38,6 @@ public class FormulaGraph extends Region {
 			for(int i = 0; i < current.next.size(); i++) {
 				double median = (current.next.size()-1)/2.0;
 				FormulaNode children = current.next.get(i);
-				//children.setPosition(current.getRight() + 25, current.getY() + (i - median) * (15 * depth(node)  * maxChildren(level) + calculateWidth(current.next.get(i), level)));
 				children.setPosition(current.getRight() + 25 + maxWidth(level + 1) - children.getNodeWidth(), current.getY() + (i - median) * calculateHeight(level+1));
 				Line edge = new Line(current.getRight(), current.getY(), children.getLeft(), children.getY());
 				this.getChildren().add(edge);
@@ -96,9 +95,5 @@ public class FormulaGraph extends Region {
 		}
 		return result;
 	}
-	
-	
-	
-	
 
 }
