@@ -8,11 +8,7 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.EnumerationWarning;
-import de.prob.animator.domainobjects.EvalResult;
-import de.prob.animator.domainobjects.EvaluationErrorResult;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Action;
@@ -65,35 +61,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			e.printStackTrace();
 		}
 	}
-
-	static String stringRep(final AbstractEvalResult res) {
-		if (res == null) {
-			return "null";
-		} else if (res instanceof IdentifierNotInitialised) {
-			return "(not initialized)";
-		} else if (res instanceof EvalResult) {
-			return ((EvalResult) res).getValue();
-		} else if (res instanceof EvaluationErrorResult) {
-			return ((EvaluationErrorResult) res).getResult();
-		} else if (res instanceof EnumerationWarning) {
-			return "?(∞)";
-		} else {
-			return res.getClass() + " toString: " + res;
-		}
-	}
-
-	static String formatClassName(Class<?> clazz, boolean plural) {
-		String shortName = clazz.getSimpleName();
-		if (plural) {
-			if (shortName.endsWith("y")) {
-				shortName = shortName.substring(0, shortName.length() - 1) + "ies";
-			} else {
-				shortName += "s";
-			}
-		}
-		return shortName;
-	}
-
+	
 	private void unsubscribeAllChildren(final Trace trace, final AbstractElement element) {
 		if (element instanceof AbstractFormulaElement) {
 			((AbstractFormulaElement)element).unsubscribe(trace.getStateSpace());
