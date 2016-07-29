@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 
 public class ProB2 extends Application {
 
-	private Injector injector;
+	public static Injector injector;
 
 	public static void main(String... args) {
 

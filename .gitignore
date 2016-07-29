@@ -10,13 +10,11 @@
 # IntelliJ IDEA
 /.idea/
 /build/
+/classes/
 *.iml
 
 # Gradle
 .gradle/
-gradle-wrapper.*
-gradlew
-gradlew.bat
 
 # ProB
 ProB.log.*.log

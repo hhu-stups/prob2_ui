@@ -2,7 +2,7 @@ package de.prob2.ui.preferences;
 
 public class CategoryPrefTreeItem extends PrefTreeItem {
 	public CategoryPrefTreeItem(String name) {
-		super(name, "", "", "", "");
+		super(name, "", "", null, "", "");
 	}
 
 	public CategoryPrefTreeItem() {

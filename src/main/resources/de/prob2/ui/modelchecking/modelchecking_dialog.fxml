@@ -38,7 +38,7 @@
             <CheckBox fx:id="findBAViolations" alignment="CENTER" mnemonicParsing="false" prefHeight="18.0" prefWidth="334.0" text="Find B ASSERTION Violations" />
             <CheckBox fx:id="findGoal" alignment="CENTER" mnemonicParsing="false" prefHeight="18.0" prefWidth="308.0" text="Find GOAL (from DEFINITIONS)" />
             <CheckBox fx:id="stopAtFullCoverage" alignment="CENTER" mnemonicParsing="false" prefHeight="18.0" prefWidth="287.0" text="Stop when all OPERATIONS Covered" />
-            <CheckBox fx:id="searchForNewErrors" alignment="CENTER" disable="true" mnemonicParsing="false" prefHeight="18.0" prefWidth="326.0" selected="true" text="Search for New Errors" />
+            <CheckBox fx:id="searchForNewErrors" alignment="CENTER" mnemonicParsing="false" prefHeight="18.0" prefWidth="326.0" selected="true" text="Search for New Errors" />
          </children>
       </VBox>
       <Label layoutX="10.0" layoutY="49.0" text="Search Strategy:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="30.0" />

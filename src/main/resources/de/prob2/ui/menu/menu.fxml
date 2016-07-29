@@ -3,19 +3,24 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.BorderPane?>
+
 <fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml" BorderPane.alignment="CENTER">
 	<Menu mnemonicParsing="false" text="%menu.file">
-		<MenuItem mnemonicParsing="false" text="%menu.file.items.open" onAction="#handleOpen"/>
-		<MenuItem mnemonicParsing="false" text="Close"/>
+		<MenuItem text="%menu.file.items.open" accelerator="Shortcut+O" onAction="#handleOpen"/>
+		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"/>
 	</Menu>
-	<Menu mnemonicParsing="false" text="Edit">
-		<MenuItem mnemonicParsing="false" text="Delete"/>
+	<Menu mnemonicParsing="false" text="%menu.edit">
+		<MenuItem text="%menu.edit.items.editBlacklist" onAction="#handleEditBlacklist"/>
+		<MenuItem text="%menu.edit.items.preferences" onAction="#handlePreferences"/>
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.verify">
-		<MenuItem mnemonicParsing="false" text="%menu.verify.items.modelcheck" onAction="#handleModelCheck"/>
-		<MenuItem mnemonicParsing="false" text="Close"/>
+		<MenuItem text="%menu.verify.items.modelcheck" onAction="#handleModelCheck"/>
 	</Menu>
-	<Menu mnemonicParsing="false" text="Help">
-		<MenuItem mnemonicParsing="false" text="About"/>
+	<Menu mnemonicParsing="false" text="%menu.perspectives">
+		<MenuItem mnemonicParsing="false" text="%menu.perspectives.default" onAction="#handleLoadDefault" />
+		<MenuItem mnemonicParsing="false" text="%menu.perspectives.load" onAction="#handleLoadPerspective" />
+	</Menu>
+	<Menu mnemonicParsing="false" text="%menu.help">
+		<MenuItem text="%menu.help.items.about"/>
 	</Menu>
 </fx:root>
