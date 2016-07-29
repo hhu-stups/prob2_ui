@@ -25,6 +25,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -33,7 +34,7 @@ public class MenuController extends MenuBar {
 	private EventBus bus;
 	private BlacklistStage blacklistStage;
 	private PreferencesStage preferencesStage;
-	private Scene mcheckScene;
+	private Stage mcheckStage;
 	private Window window;
 
 	@FXML
@@ -88,20 +89,18 @@ public class MenuController extends MenuBar {
 	@FXML
 	private void handleEditBlacklist(ActionEvent event) {
 		this.blacklistStage.show();
+		this.blacklistStage.toFront();
 	}
 	
 	@FXML
 	private void handlePreferences(ActionEvent event) {
 		this.preferencesStage.show();
+		this.preferencesStage.toFront();
 	}
 	
 	@FXML
 	private void handleModelCheck(ActionEvent event) {
-		Stage mcheckStage = new Stage();
-		mcheckStage.setTitle("Model Check");
-		mcheckStage.initOwner(this.window);
-		mcheckStage.setScene(mcheckScene);
-		mcheckStage.showAndWait();
+		this.mcheckStage.showAndWait();
 	}
 
 	@Subscribe
@@ -119,6 +118,7 @@ public class MenuController extends MenuBar {
 			if (to != null) {
 				to.windowProperty().addListener((observable1, from1, to1) -> {
 					this.window = to1;
+					this.mcheckStage.initOwner(this.window);
 				});
 			}
 		});
@@ -135,7 +135,10 @@ public class MenuController extends MenuBar {
 		this.bus = bus;
 		this.blacklistStage = blacklistStage;
 		this.preferencesStage = preferencesStage;
-		this.mcheckScene = new Scene(mcheckController);
+		this.mcheckStage = new Stage();
+		this.mcheckStage.setTitle("Model Check");
+		this.mcheckStage.setScene(new Scene(mcheckController));
+		this.mcheckStage.initModality(Modality.WINDOW_MODAL);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);
