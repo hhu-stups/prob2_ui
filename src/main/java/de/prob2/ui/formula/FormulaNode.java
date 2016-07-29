@@ -17,6 +17,8 @@ public class FormulaNode extends Region {
 	private Text text;
 	private Color color;
 	List<FormulaNode> next;
+	private double width;
+	private double height;
 	
 	public FormulaNode(ExpandedFormula data) {
 		next = new ArrayList<FormulaNode>();
@@ -24,8 +26,8 @@ public class FormulaNode extends Region {
 		if(data.getValue() instanceof String) {
 			text.setText(text.getText() + " = " + data.getValue());		
 		}
-		double width = text.getLayoutBounds().getWidth();
-		double height = text.getLayoutBounds().getHeight();
+		width = text.getLayoutBounds().getWidth();
+		height = text.getLayoutBounds().getHeight();
 		rectangle = new Rectangle(width + 10, height * 2);
 		color = calculateColor(data);
 		if(data.getChildren() == null || data.getChildren().isEmpty()) {
@@ -37,9 +39,16 @@ public class FormulaNode extends Region {
 		
 	}
 	
+	public double getNodeWidth() {
+		return width;
+	}
+	
+	public double getNodeHeight() {
+		return height;
+	}
+	
 	
 	public void setPosition(double x, double y) {
-		double height = text.getLayoutBounds().getHeight();
 		text.setX(x + 5);
 		text.setY(y);
 		rectangle.setX(x);

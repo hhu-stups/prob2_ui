@@ -13,29 +13,24 @@ public class FormulaGraph extends Region {
 	
 	public FormulaGraph(FormulaNode node) {
 		 root = node;
-		 root.setPosition(25, calculateY());
+		 root.setPosition(25, calculateY()+20);
 		 draw(root, 0);
 	}
 	
 	private double calculateY() {
-		double width = calculateWidth(root, 0);
-		if (width < 800) {
-			return 400;
+		return calculateHeight(0)/2;
+	}
+		
+	private double calculateHeight(int level) {
+		if(level == depth(root)) {
+			return 40;
 		}
-		return width/2;
+		return Math.max(1,maxChildren(level)) * calculateHeight(level + 1);
 	}
 	
-	private double calculateWidth(FormulaNode root, int level) {
-		if(root.next == null) {
-			return 15;
-		}
-		double result = 0;
-		for(int i = 0; i < root.next.size(); i++) {
-			result = result + depth(root) * maxChildren(level) + calculateWidth(root.next.get(i), level + 1);
-		}
-		return result + 15;
-	}
-	
+	//letzter Sohn: 40
+	//vorletzter Sohn: Maximum der Kinder auf dem nächsten Level * Breite auf dem Level
+		
 	private void draw(FormulaNode node, int level) {
 		FormulaNode current = node;
 		this.getChildren().add(current);
@@ -43,7 +38,8 @@ public class FormulaGraph extends Region {
 			for(int i = 0; i < current.next.size(); i++) {
 				double median = (current.next.size()-1)/2.0;
 				FormulaNode children = current.next.get(i);
-				children.setPosition(current.getRight() + 25, current.getY() + (i - median) * (15 * depth(node)  * maxChildren(level) + calculateWidth(current.next.get(i), level)));
+				//children.setPosition(current.getRight() + 25, current.getY() + (i - median) * (15 * depth(node)  * maxChildren(level) + calculateWidth(current.next.get(i), level)));
+				children.setPosition(current.getRight() + 25 + maxWidth(level + 1) - children.getNodeWidth(), current.getY() + (i - median) * calculateHeight(level+1));
 				Line edge = new Line(current.getRight(), current.getY(), children.getLeft(), children.getY());
 				this.getChildren().add(edge);
 				draw(children, level + 1);				
@@ -60,6 +56,18 @@ public class FormulaGraph extends Region {
 			max = Math.max(max, depth(root.next.get(i)));
 		}
 		return max + 1;
+	}
+	
+	private int breadth(int level) {
+		return getAllNodesOnLevel(level).size();
+	}
+	
+	private double maxWidth(int level) {
+		double result = 0;
+		for(FormulaNode node: getAllNodesOnLevel(level)) {
+			result = Math.max(result, node.getNodeWidth());
+		}
+		return result;
 	}
 	
 	private int maxChildren(int level) {
