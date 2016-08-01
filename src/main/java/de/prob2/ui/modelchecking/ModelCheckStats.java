@@ -28,7 +28,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
+public class ModelCheckStats extends AnchorPane {
 	@FXML
 	private AnchorPane resultBackground;
 	@FXML
@@ -51,6 +51,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
 	private Map<String, IModelCheckingResult> results = new HashMap<String, IModelCheckingResult>();
 	private ModelcheckingController modelcheckingController;
+	private String result = "warning";
 
 	@Inject
 	public ModelCheckStats(FXMLLoader loader, ModelcheckingController modelcheckingController) {
@@ -88,7 +89,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		resultBackground.setVisible(false);
 	}
 
-	@Override
 	public void updateStats(final String id, final long timeElapsed, final IModelCheckingResult result,
 			final StateSpaceStats stats) {
 		results.put(id, result);
@@ -111,17 +111,15 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 		System.out.println("updated Stats");
 	}
 
-	@Override
 	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result,
 			final StateSpaceStats stats) {
-
 		results.put(id, result);
 
 		Platform.runLater(() -> {
 			elapsedTime.setText("" + timeElapsed);
 		});
 
-		String res = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
+		this.result = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
 				: result instanceof ITraceDescription ? "danger" : "warning";
 		String message = result.getMessage();
 
@@ -153,15 +151,15 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			// }
 			// String transitionStats = WebUtils.toJson(transStats);
 		}
-		showResult(res, message);
+		showResult(message);
 		System.out.println("is finished");
 	}
 
-	private void showResult(String res, String message) {
+	private void showResult(String message) {
 		resultBackground.setVisible(true);
 		resultText.setText(message);
 		resultText.setWrappingWidth(this.modelcheckingController.widthProperty().doubleValue() - 60);
-		switch (res) {
+		switch (this.result) {
 		case "success":
 			resultBackground.getStyleClass().clear();
 			resultBackground.getStyleClass().add("mcheckSuccess");
@@ -179,25 +177,6 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 			break;
 		}
 	}
-
-	// private Image selectImage(String res) {
-	// Image image = null;
-	// switch (res) {
-	// case "success":
-	// image = new Image(
-	// getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-199-ok-circle.png"));
-	// break;
-	// case "danger":
-	// image = new Image(
-	// getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-198-remove-circle.png"));
-	// break;
-	// case "warning":
-	// image = new Image(
-	// getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-505-alert.png"));
-	// break;
-	// }
-	// return image;
-	// }
 
 	private void showStats(List<String> packedStats, GridPane grid) {
 		Platform.runLater(() -> {
@@ -218,5 +197,9 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 				grid.addRow(packedStats.indexOf(pStat) + 1, statFX);
 			});
 		}
+	}
+
+	public String getResult() {
+		return result;
 	}
 }

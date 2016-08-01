@@ -19,5 +19,9 @@ public class HistoryItem {
 	public ModelCheckStats getStats() {
 		return this.stats;
 	}
+	
+	public String getResult() {
+		return stats.getResult();
+	}
 
 }
