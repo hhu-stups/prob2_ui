@@ -73,6 +73,7 @@ public class NewAnimationPerspective extends SplitPane{
                 operationsTP.setContent(operations);
                 accordion.getPanes().add(0,operationsTP);
             }
+            t.consume();
         });
         history.setOnDragDetected((MouseEvent t) -> {
             if (!this.getChildren().contains(history)){
@@ -84,6 +85,7 @@ public class NewAnimationPerspective extends SplitPane{
                 historyTP.setContent(history);
                 accordion.getPanes().add(1,historyTP);
             }
+            t.consume();
         });
         dotty.setOnDragDetected((MouseEvent t) -> {
             if (!this.getChildren().contains(dotty)){
@@ -95,6 +97,7 @@ public class NewAnimationPerspective extends SplitPane{
                 dottyTP.setContent(dotty);
                 accordion.getPanes().add(2,dottyTP);
             }
+            t.consume();
         });
         modelcheck.setOnDragDetected((MouseEvent t) -> {
             if (!this.getChildren().contains(modelcheck)){
@@ -106,6 +109,7 @@ public class NewAnimationPerspective extends SplitPane{
                 modelcheckTP.setContent(modelcheck);
                 accordion.getPanes().add(3,modelcheckTP);
             }
+            t.consume();
         });
         test.setOnDragDetected((MouseEvent t) -> {
             if (!this.getChildren().contains(test)){
@@ -117,6 +121,7 @@ public class NewAnimationPerspective extends SplitPane{
                 testTP.setContent(test);
                 accordion.getPanes().add(4,testTP);
             }
+            t.consume();
         });
     }
 
