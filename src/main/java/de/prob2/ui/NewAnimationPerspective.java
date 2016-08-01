@@ -29,17 +29,16 @@ public class NewAnimationPerspective extends SplitPane{
     private Parent root;
 
     @Inject
-    private NewAnimationPerspective() {
+    public NewAnimationPerspective() {
         try {
-            FXMLLoader loader = new FXMLLoader();
+            FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
             loader.setLocation(getClass().getResource("new_animation_perspective.fxml"));
             loader.setRoot(this);
             loader.setController(this);
             loader.load();
-            parentProperty().addListener((ObservableValue<? extends Parent> ov, Parent previousParent, Parent nextParent)-> {
+            /*parentProperty().addListener((ObservableValue<? extends Parent> ov, Parent previousParent, Parent nextParent)-> {
                 root = nextParent;
-                onDrag();
-            });
+                onDrag();*/
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -48,9 +47,9 @@ public class NewAnimationPerspective extends SplitPane{
     @FXML
     public void initialize() {}
 
-    private void onDrag() {
+    /*private void onDrag() {
         this.setOnDragDetected((MouseEvent t) -> {
             System.out.println("dragged");
         });
-    }
+    }*/
 }
