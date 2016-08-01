@@ -11,25 +11,32 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.check.ConsistencyChecker;
+import de.prob.check.IModelCheckListener;
+import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelChecker;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingOptions.Options;
+import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.events.OpenFileEvent;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 @Singleton
-public class ModelcheckingController extends ScrollPane {
+public class ModelcheckingController extends ScrollPane implements IModelCheckListener {
 
 	@FXML
 	private AnchorPane statsPane;
@@ -38,7 +45,9 @@ public class ModelcheckingController extends ScrollPane {
 
 	// private boolean errorFoundBefore;
 	private ModelChecker checker;
-	private ObservableList<Node> historyList;
+	private ObservableList<Node> historyNodeList;
+	private ModelCheckStats currentStats;
+	private ModelCheckingOptions currentOptions;
 
 	@Inject
 	private ModelcheckingController(FXMLLoader loader, EventBus bus) {
@@ -56,36 +65,64 @@ public class ModelcheckingController extends ScrollPane {
 	@FXML
 	public void initialize() {
 		showStats(new ModelCheckStats(new FXMLLoader(), this));
-		historyList = historyBox.getChildren();
-		
+		historyNodeList = historyBox.getChildren();
 	}
 
 	void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {
-		ModelCheckStats stats = new ModelCheckStats(new FXMLLoader(), this);
-		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, stats));
-		stats.addJob(checker.getJobId(), checker);
-
-		showStats(stats);
-		historyList.add(toHistoryItem(options));
-
-		checker.start();
+		currentOptions = options;
+		currentStats = new ModelCheckStats(new FXMLLoader(), this);
+		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, this));
+		currentStats.addJob(checker.getJobId(), checker);
+		showStats(currentStats);
+		checker.start();	
 	}
 
-	private Node toHistoryItem(ModelCheckingOptions options) {
+	private Node toHistoryNode(HistoryItem item) {
 		AnchorPane background = new AnchorPane();
+		background.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent mouseEvent) {
+				showStats(item.getStats());
+			}
+		});
 		background.getStyleClass().add("historyItemBackground");
 		HBox box = new HBox();
+		box.setSpacing(5);
 		background.getChildren().add(box);
 		AnchorPane.setTopAnchor(box, 2.0);
 		AnchorPane.setRightAnchor(box, 4.0);
 		AnchorPane.setBottomAnchor(box, 2.0);
 		AnchorPane.setLeftAnchor(box, 4.0);
-		Text text = new Text(toPrettyString(options));
+		ImageView imView = new ImageView(selectImage(item.getResult()));
+		imView.setFitHeight(15);
+		imView.setFitWidth(15);
+		Text text = new Text(toPrettyString(item.getOptions()));
 		Platform.runLater(() -> {
-			text.wrappingWidthProperty().bind(background.widthProperty().subtract(15.0));
+			text.wrappingWidthProperty().bind(this.widthProperty().subtract(65.0));
 		});
+		box.getChildren().add(imView);
 		box.getChildren().add(text);
 		return background;
+	}
+	
+	private Image selectImage(String res) {
+		Image image = null;
+		switch (res) {
+		case "success":
+			image = new Image(
+					getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-199-ok-circle.png"));
+			break;
+		case "danger":
+			image = new Image(
+					getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-198-remove-circle.png"));
+			break;
+		case "warning":
+			image = new Image(
+					getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-505-alert.png"));
+			break;
+		}
+		System.out.println("*** " + res);
+		return image;
 	}
 
 	private String toPrettyString(ModelCheckingOptions options) {
@@ -119,6 +156,22 @@ public class ModelcheckingController extends ScrollPane {
 	@Subscribe
 	public void resetView(OpenFileEvent event) {
 		showStats(new ModelCheckStats(new FXMLLoader(), this));
+		historyNodeList.clear();
+	}
+
+	@Override
+	public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
+		currentStats.updateStats(jobId, timeElapsed, result, stats);
+	}
+
+	@Override
+	public void isFinished(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
+		currentStats.isFinished(jobId, timeElapsed, result, stats);
+		HistoryItem historyItem = new HistoryItem(currentOptions, currentStats);
+		Node historyNode = toHistoryNode(historyItem);
+		Platform.runLater(() -> {
+			historyNodeList.add(historyNode);
+		});
 	}
 
 	// TODO remove the following method, find a better way to do this
@@ -128,9 +181,9 @@ public class ModelcheckingController extends ScrollPane {
 	// String res = event.getResult();
 	// Boolean searchForNewErrors = event.getSearchForNewErrors();
 	//
-	//// if(!searchForNewErrors) {
-	//// errorFoundBefore = false;
-	//// }
+	// if(!searchForNewErrors) {
+	// errorFoundBefore = false;
+	// }
 	// if (res.equals("danger")) {
 	// errorFoundBefore = true;
 	// }

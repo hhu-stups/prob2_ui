@@ -22,7 +22,7 @@ public class PreferenceType {
 		Objects.requireNonNull(values);
 		
 		this.type = "[]";
-		this.values = Arrays.copyOf(values, values.length);
+		this.values = values.clone();
 	}
 	
 	public String getType() {
@@ -30,11 +30,11 @@ public class PreferenceType {
 	}
 	
 	public String[] getValues() {
-		return this.values;
+		return this.values == null ? null : this.values.clone();
 	}
 	
 	public boolean equals(final Object obj) {
-		if (!this.getClass().equals(obj.getClass())) {
+		if (obj == null || !this.getClass().equals(obj.getClass())) {
 			return false;
 		}
 		
