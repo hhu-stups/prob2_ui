@@ -17,13 +17,13 @@
                 <TitledPane text="Operations" fx:id="operationsTP">
                     <OperationsView fx:id="operations"/>
                 </TitledPane>
-                <TitledPane text="History">
+                <TitledPane text="History" fx:id="historyTP">
                     <HistoryView fx:id="history"/>
                 </TitledPane>
-                <TitledPane text="Dotty">
+                <TitledPane text="Dotty" fx:id="dottyTP">
                     <DottyView fx:id="dotty"/>
                 </TitledPane>
-                <TitledPane text="Model Check Stats">
+                <TitledPane text="Model Check Stats" fx:id="modelcheckTP">
                     <ModelcheckingController fx:id="modelcheck"/>
                 </TitledPane>
             </panes>

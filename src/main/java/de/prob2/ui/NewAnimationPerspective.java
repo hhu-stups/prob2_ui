@@ -27,9 +27,15 @@ public class NewAnimationPerspective extends SplitPane{
     @FXML
     private HistoryView history;
     @FXML
+    private TitledPane historyTP;
+    @FXML
     private DottyView dotty;
     @FXML
+    private TitledPane dottyTP;
+    @FXML
     private ModelcheckingController modelcheck;
+    @FXML
+    private TitledPane modelcheckTP;
     @FXML
     private Accordion accordion;
     private Parent root;
@@ -51,25 +57,48 @@ public class NewAnimationPerspective extends SplitPane{
         }
     }
 
-        @FXML
+    @FXML
     public void initialize() {}
 
     private void onDrag() {
         operations.setOnDragDetected((MouseEvent t) -> {
             if (!this.getChildren().contains(operations)){
-                this.getChildren().add(operations);
+                this.getItems().add(operations);
                 accordion.getPanes().remove(operationsTP);
+                removeEmptyAccordion();
             }
             System.out.println("operations dragged");
         });
         history.setOnDragDetected((MouseEvent t) -> {
+            if (!this.getChildren().contains(history)){
+                this.getItems().add(history);
+                accordion.getPanes().remove(historyTP);
+                removeEmptyAccordion();
+            }
             System.out.println("history dragged");
         });
         modelcheck.setOnDragDetected((MouseEvent t) -> {
+            if (!this.getChildren().contains(modelcheck)){
+                this.getItems().add(modelcheck);
+                accordion.getPanes().remove(modelcheckTP);
+                removeEmptyAccordion();
+            }
             System.out.println("modelcheck dragged");
         });
         dotty.setOnDragDetected((MouseEvent t) -> {
+            if (!this.getChildren().contains(dotty)){
+                this.getItems().add(dotty);
+                accordion.getPanes().remove(dottyTP);
+                removeEmptyAccordion();
+            }
             System.out.println("dotty dragged");
         });
+    }
+
+    void removeEmptyAccordion(){
+        //System.out.println(accordion.getPanes().size());
+        if (accordion.getPanes().size()==0){
+            this.getItems().remove(0);
+        }
     }
 }
