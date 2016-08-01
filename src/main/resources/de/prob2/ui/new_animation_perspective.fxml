@@ -28,11 +28,11 @@
                 <TitledPane text="Model Check Stats" fx:id="modelcheckTP">
                     <ModelcheckingController fx:id="modelcheck"/>
                 </TitledPane>
-                <TitledPane text="Test" fx:id="testTP">
+                <!--<TitledPane text="Test" fx:id="testTP">
                     <FlowPane fx:id="test">
                             <Label text="Test"/>
                     </FlowPane>
-                </TitledPane>
+                </TitledPane>-->
             </panes>
         </Accordion>
     </AnchorPane>

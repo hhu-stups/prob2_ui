@@ -36,10 +36,10 @@ public class NewAnimationPerspective extends SplitPane{
     private ModelcheckingController modelcheck;
     @FXML
     private TitledPane modelcheckTP;
-    @FXML
+    /*@FXML
     private FlowPane test;
     @FXML
-    private TitledPane testTP;
+    private TitledPane testTP;*/
     @FXML
     private Accordion accordion;
 
@@ -51,16 +51,18 @@ public class NewAnimationPerspective extends SplitPane{
             loader.setRoot(this);
             loader.setController(this);
             loader.load();
-            parentProperty().addListener((ObservableValue<? extends Parent> ov, Parent previousParent, Parent nextParent)-> {
+            /*parentProperty().addListener((ObservableValue<? extends Parent> ov, Parent previousParent, Parent nextParent)-> {
                 onDrag();
-            });
+            });*/
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @FXML
-    public void initialize() {}
+    public void initialize() {
+        this.setDividerPositions(0.3);
+    }
 
     private void onDrag() {
         operations.setOnDragDetected((MouseEvent t) -> {
@@ -111,7 +113,7 @@ public class NewAnimationPerspective extends SplitPane{
             }
             t.consume();
         });
-        test.setOnDragDetected((MouseEvent t) -> {
+        /*test.setOnDragDetected((MouseEvent t) -> {
             if (!this.getChildren().contains(test)){
                 this.getItems().add(test);
                 accordion.getPanes().remove(testTP);
@@ -122,7 +124,7 @@ public class NewAnimationPerspective extends SplitPane{
                 accordion.getPanes().add(4,testTP);
             }
             t.consume();
-        });
+        });*/
     }
 
     private void removeAccordion(){
