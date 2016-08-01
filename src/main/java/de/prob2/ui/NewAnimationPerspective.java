@@ -62,35 +62,57 @@ public class NewAnimationPerspective extends SplitPane{
             if (!this.getChildren().contains(operations)){
                 this.getItems().add(operations);
                 accordion.getPanes().remove(operationsTP);
-                removeEmptyAccordion();
+                removeAccordion();
+            } else {
+                addAccordion();
+                operationsTP.setContent(operations);
+                accordion.getPanes().add(0,operationsTP);
             }
         });
         history.setOnDragDetected((MouseEvent t) -> {
             if (!this.getChildren().contains(history)){
                 this.getItems().add(history);
                 accordion.getPanes().remove(historyTP);
-                removeEmptyAccordion();
-            }
-        });
-        modelcheck.setOnDragDetected((MouseEvent t) -> {
-            if (!this.getChildren().contains(modelcheck)){
-                this.getItems().add(modelcheck);
-                accordion.getPanes().remove(modelcheckTP);
-                removeEmptyAccordion();
+                removeAccordion();
+            } else {
+                addAccordion();
+                historyTP.setContent(history);
+                accordion.getPanes().add(1,historyTP);
             }
         });
         dotty.setOnDragDetected((MouseEvent t) -> {
             if (!this.getChildren().contains(dotty)){
                 this.getItems().add(dotty);
                 accordion.getPanes().remove(dottyTP);
-                removeEmptyAccordion();
+                removeAccordion();
+            } else {
+                addAccordion();
+                dottyTP.setContent(dotty);
+                accordion.getPanes().add(2,dottyTP);
+            }
+        });
+        modelcheck.setOnDragDetected((MouseEvent t) -> {
+            if (!this.getChildren().contains(modelcheck)){
+                this.getItems().add(modelcheck);
+                accordion.getPanes().remove(modelcheckTP);
+                removeAccordion();
+            } else {
+                addAccordion();
+                modelcheckTP.setContent(modelcheck);
+                accordion.getPanes().add(3,modelcheckTP);
             }
         });
     }
 
-    void removeEmptyAccordion(){
+    void removeAccordion(){
         if (accordion.getPanes().size()==0){
             this.getItems().remove(0);
+        }
+    }
+
+    void addAccordion(){
+        if (!this.getChildren().contains(accordion)){
+            this.getItems().add(0,accordion);
         }
     }
 }
