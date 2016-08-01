@@ -14,6 +14,7 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.FlowPane;
 
 import java.io.IOException;
 
@@ -35,6 +36,10 @@ public class NewAnimationPerspective extends SplitPane{
     private ModelcheckingController modelcheck;
     @FXML
     private TitledPane modelcheckTP;
+    @FXML
+    private FlowPane test;
+    @FXML
+    private TitledPane testTP;
     @FXML
     private Accordion accordion;
 
@@ -100,6 +105,17 @@ public class NewAnimationPerspective extends SplitPane{
                 addAccordion();
                 modelcheckTP.setContent(modelcheck);
                 accordion.getPanes().add(3,modelcheckTP);
+            }
+        });
+        test.setOnDragDetected((MouseEvent t) -> {
+            if (!this.getChildren().contains(test)){
+                this.getItems().add(test);
+                accordion.getPanes().remove(testTP);
+                removeAccordion();
+            } else {
+                addAccordion();
+                testTP.setContent(test);
+                accordion.getPanes().add(4,testTP);
             }
         });
     }
