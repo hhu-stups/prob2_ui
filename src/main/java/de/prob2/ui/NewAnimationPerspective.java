@@ -6,7 +6,6 @@ import de.prob2.ui.dotty.DottyView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -38,7 +37,6 @@ public class NewAnimationPerspective extends SplitPane{
     private TitledPane modelcheckTP;
     @FXML
     private Accordion accordion;
-    private Parent root;
 
     @Inject
     public NewAnimationPerspective() {
@@ -49,7 +47,6 @@ public class NewAnimationPerspective extends SplitPane{
             loader.setController(this);
             loader.load();
             parentProperty().addListener((ObservableValue<? extends Parent> ov, Parent previousParent, Parent nextParent)-> {
-                root = nextParent;
                 onDrag();
             });
         } catch (IOException e) {
@@ -67,7 +64,6 @@ public class NewAnimationPerspective extends SplitPane{
                 accordion.getPanes().remove(operationsTP);
                 removeEmptyAccordion();
             }
-            System.out.println("operations dragged");
         });
         history.setOnDragDetected((MouseEvent t) -> {
             if (!this.getChildren().contains(history)){
@@ -75,7 +71,6 @@ public class NewAnimationPerspective extends SplitPane{
                 accordion.getPanes().remove(historyTP);
                 removeEmptyAccordion();
             }
-            System.out.println("history dragged");
         });
         modelcheck.setOnDragDetected((MouseEvent t) -> {
             if (!this.getChildren().contains(modelcheck)){
@@ -83,7 +78,6 @@ public class NewAnimationPerspective extends SplitPane{
                 accordion.getPanes().remove(modelcheckTP);
                 removeEmptyAccordion();
             }
-            System.out.println("modelcheck dragged");
         });
         dotty.setOnDragDetected((MouseEvent t) -> {
             if (!this.getChildren().contains(dotty)){
@@ -91,12 +85,10 @@ public class NewAnimationPerspective extends SplitPane{
                 accordion.getPanes().remove(dottyTP);
                 removeEmptyAccordion();
             }
-            System.out.println("dotty dragged");
         });
     }
 
     void removeEmptyAccordion(){
-        //System.out.println(accordion.getPanes().size());
         if (accordion.getPanes().size()==0){
             this.getItems().remove(0);
         }
