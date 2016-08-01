@@ -43,7 +43,7 @@ public class NewAnimationPerspective extends SplitPane{
     private TitledPane testTP;
     @FXML
     private Accordion accordion;
-
+    private boolean invisibleItems;
     @Inject
     public NewAnimationPerspective() {
         try {
@@ -52,9 +52,9 @@ public class NewAnimationPerspective extends SplitPane{
             loader.setRoot(this);
             loader.setController(this);
             loader.load();
-            /*parentProperty().addListener((ObservableValue<? extends Parent> ov, Parent previousParent, Parent nextParent)-> {
+            parentProperty().addListener((ObservableValue<? extends Parent> ov, Parent previousParent, Parent nextParent)-> {
                 onDrag();
-            });*/
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -74,28 +74,41 @@ public class NewAnimationPerspective extends SplitPane{
 
     private void dragAction(Node node, TitledPane nodeTP){
         node.setOnDragDetected((MouseEvent t) -> {
-            if (!this.getChildren().contains(node)){
+            if (!this.getItems().contains(node)){
                 this.getItems().add(node);
-                accordion.getPanes().remove(nodeTP);
+                //accordion.getPanes().remove(nodeTP);
+                nodeTP.setVisible(false);
                 this.removeAccordion();
             } else {
                 this.addAccordion();
                 nodeTP.setContent(node);
-                accordion.getPanes().add(0,nodeTP);
+                this.getItems().remove(node);
+                //accordion.getPanes().add(0,nodeTP);
+                nodeTP.setVisible(true);
             }
             t.consume();
         });
     }
 
     private void removeAccordion(){
-        if (accordion.getPanes().size()==0){
-            this.getItems().remove(0);
+        invisibleItems = true;
+        for (TitledPane pane : accordion.getPanes()){
+            if (pane.isVisible()){
+                invisibleItems=false;
+            }
+        }
+        if (invisibleItems){
+            //this.getItems().remove(0);
+            accordion.setVisible(false);
+            this.getDividers().remove(0);
         }
     }
 
     private void addAccordion(){
-        if (!this.getChildren().contains(accordion)){
-            this.getItems().add(0,accordion);
+        if (invisibleItems){
+            //this.getItems().add(0,accordion);
+            accordion.setVisible(true);
+            this.getDividers().add(0,new Divider());
         }
     }
 }
