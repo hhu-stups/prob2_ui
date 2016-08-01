@@ -2,7 +2,9 @@ package de.prob2.ui.modelchecking;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.base.Joiner;
 import com.google.common.eventbus.EventBus;
@@ -19,10 +21,12 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.events.OpenFileEvent;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -38,7 +42,7 @@ public class ModelcheckingController extends ScrollPane {
 
 	// private boolean errorFoundBefore;
 	private ModelChecker checker;
-	private ObservableList<Node> historyList;
+	private ObservableList<Node> historyNodeList;
 
 	@Inject
 	private ModelcheckingController(FXMLLoader loader, EventBus bus) {
@@ -56,8 +60,7 @@ public class ModelcheckingController extends ScrollPane {
 	@FXML
 	public void initialize() {
 		showStats(new ModelCheckStats(new FXMLLoader(), this));
-		historyList = historyBox.getChildren();
-		
+		historyNodeList = historyBox.getChildren();
 	}
 
 	void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {
@@ -66,13 +69,20 @@ public class ModelcheckingController extends ScrollPane {
 		stats.addJob(checker.getJobId(), checker);
 
 		showStats(stats);
-		historyList.add(toHistoryItem(options));
-
+		HistoryItem historyItem = new HistoryItem(options, stats);
+		Node historyNode = toHistoryNode(historyItem);
+		historyNodeList.add(historyNode);
 		checker.start();
 	}
 
-	private Node toHistoryItem(ModelCheckingOptions options) {
+	private Node toHistoryNode(HistoryItem item) {
 		AnchorPane background = new AnchorPane();
+		background.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent mouseEvent) {
+				showStats(item.getStats());
+			}
+		});
 		background.getStyleClass().add("historyItemBackground");
 		HBox box = new HBox();
 		background.getChildren().add(box);
@@ -80,9 +90,9 @@ public class ModelcheckingController extends ScrollPane {
 		AnchorPane.setRightAnchor(box, 4.0);
 		AnchorPane.setBottomAnchor(box, 2.0);
 		AnchorPane.setLeftAnchor(box, 4.0);
-		Text text = new Text(toPrettyString(options));
+		Text text = new Text(toPrettyString(item.getOptions()));
 		Platform.runLater(() -> {
-			text.wrappingWidthProperty().bind(background.widthProperty().subtract(15.0));
+			text.wrappingWidthProperty().bind(this.widthProperty().subtract(50.0));
 		});
 		box.getChildren().add(text);
 		return background;
@@ -128,9 +138,9 @@ public class ModelcheckingController extends ScrollPane {
 	// String res = event.getResult();
 	// Boolean searchForNewErrors = event.getSearchForNewErrors();
 	//
-	//// if(!searchForNewErrors) {
-	//// errorFoundBefore = false;
-	//// }
+	// if(!searchForNewErrors) {
+	// errorFoundBefore = false;
+	// }
 	// if (res.equals("danger")) {
 	// errorFoundBefore = true;
 	// }
