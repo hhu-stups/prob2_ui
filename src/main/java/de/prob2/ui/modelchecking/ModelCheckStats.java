@@ -16,6 +16,8 @@ import de.prob.check.ModelChecker;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -27,10 +29,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
-	// @FXML
-	// private Text titelText;
-	// @FXML
-	// private ImageView titelImage;
 	@FXML
 	private AnchorPane resultBackground;
 	@FXML
@@ -52,9 +50,11 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 
 	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
 	private Map<String, IModelCheckingResult> results = new HashMap<String, IModelCheckingResult>();
+	private ModelcheckingController modelcheckingController;
 
 	@Inject
-	public ModelCheckStats(FXMLLoader loader) {
+	public ModelCheckStats(FXMLLoader loader, ModelcheckingController modelcheckingController) {
+		this.modelcheckingController = modelcheckingController;
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stats.fxml"));
 			loader.setRoot(this);
@@ -68,9 +68,17 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	@FXML
 	public void initialize() {
 		Platform.runLater(() -> {
-			resultText.wrappingWidthProperty().bind(resultBackground.widthProperty().subtract(40.0));
-			System.out.println("* " + resultText.getWrappingWidth());
-			System.out.println("* " + resultBackground.getWidth());
+			this.modelcheckingController.widthProperty().addListener(new ChangeListener<Number>() {
+				@Override
+				public void changed(ObservableValue<? extends Number> observableValue, Number oldValue,
+						Number newValue) {
+					if (newValue == null) {
+						resultText.setWrappingWidth(0);
+						return;
+					}
+					resultText.setWrappingWidth(newValue.doubleValue() - 60);
+				}
+			});
 		});
 	}
 
@@ -152,8 +160,7 @@ public class ModelCheckStats extends AnchorPane implements IModelCheckListener {
 	private void showResult(String res, String message) {
 		resultBackground.setVisible(true);
 		resultText.setText(message);
-		System.out.println(resultText.getWrappingWidth());
-		System.out.println(resultBackground.getWidth());
+		resultText.setWrappingWidth(this.modelcheckingController.widthProperty().doubleValue() - 60);
 		switch (res) {
 		case "success":
 			resultBackground.getStyleClass().clear();

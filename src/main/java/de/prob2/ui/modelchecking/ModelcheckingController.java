@@ -55,13 +55,13 @@ public class ModelcheckingController extends ScrollPane {
 
 	@FXML
 	public void initialize() {
-		showStats(new ModelCheckStats(new FXMLLoader()));
+		showStats(new ModelCheckStats(new FXMLLoader(), this));
 		historyList = historyBox.getChildren();
 		
 	}
 
 	void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {
-		ModelCheckStats stats = new ModelCheckStats(new FXMLLoader());
+		ModelCheckStats stats = new ModelCheckStats(new FXMLLoader(), this);
 		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, stats));
 		stats.addJob(checker.getJobId(), checker);
 
@@ -118,7 +118,7 @@ public class ModelcheckingController extends ScrollPane {
 
 	@Subscribe
 	public void resetView(OpenFileEvent event) {
-		showStats(new ModelCheckStats(new FXMLLoader()));
+		showStats(new ModelCheckStats(new FXMLLoader(), this));
 	}
 
 	// TODO remove the following method, find a better way to do this
