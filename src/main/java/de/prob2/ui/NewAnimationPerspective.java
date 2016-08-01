@@ -52,9 +52,9 @@ public class NewAnimationPerspective extends SplitPane{
             loader.setRoot(this);
             loader.setController(this);
             loader.load();
-            parentProperty().addListener((ObservableValue<? extends Parent> ov, Parent previousParent, Parent nextParent)-> {
+            /*parentProperty().addListener((ObservableValue<? extends Parent> ov, Parent previousParent, Parent nextParent)-> {
                 onDrag();
-            });
+            });*/
         } catch (IOException e) {
             e.printStackTrace();
         }
