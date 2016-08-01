@@ -125,3 +125,7 @@
 	-fx-border-color: transparent transparent grey transparent;
 	-fx-border-width: 0.5;
 }
+
+.historyItemBackground {
+	-fx-background-color: lightgrey;
+}
