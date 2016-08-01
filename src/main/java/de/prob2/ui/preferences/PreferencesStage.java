@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
-import de.prob.scripting.Api;
+import de.prob.prolog.term.ListPrologTerm;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
@@ -20,10 +20,8 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.stage.Stage;
-import javafx.util.converter.DefaultStringConverter;
 
 @Singleton
 public class PreferencesStage extends Stage implements IAnimationChangeListener {
@@ -73,9 +71,7 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
 		
 		tvValue.setCellFactory(col -> {
-			TreeTableCell<PrefTreeItem, String> cell = new TextFieldTreeTableCell<>(new DefaultStringConverter());
-			// FIXME When first starting the application, the root "Preferences" item is editable, don't ask why
-			// After loading a model, the headers are read-only like they should be
+			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell<>();
 			cell.tableRowProperty().addListener((observable, from, to) -> {
 				to.treeItemProperty().addListener((observable1, from1, to1) -> {
 					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem);
@@ -85,9 +81,6 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 		});
 		tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
 		tvValue.setOnEditCommit(event -> {
-			if (preferences == null) {
-				return;
-			}
 			try {
 				this.preferences.setPreferenceValue(event.getRowValue().getValue().getName(), event.getNewValue());
 			} catch (final ProBError exc) {
@@ -124,7 +117,18 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 				}
 			}
 			if (item == null) {
-				item = new TreeItem<>(new RealPrefTreeItem(pref.name, "", "", pref.defaultValue, pref.description));
+				final PreferenceType type;
+				if (pref.type instanceof ListPrologTerm) {
+					final ListPrologTerm values = (ListPrologTerm)pref.type;
+					final String[] arr = new String[values.size()];
+					for (int i = 0; i < values.size(); i++) {
+						arr[i] = values.get(i).getFunctor();
+					}
+					type = new PreferenceType(arr);
+				} else {
+					type = new PreferenceType(pref.type.getFunctor());
+				}
+				item = new TreeItem<>(new RealPrefTreeItem(pref.name, "", "", type, pref.defaultValue, pref.description));
 				category.getChildren().add(item);
 			}
 			item.getValue().updateValue(this.preferences);
@@ -145,7 +149,7 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 
 	@Override
 	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-		this.preferences.setStateSpace(currentTrace.getStateSpace());
+		this.preferences.setStateSpace(currentTrace == null ? null : currentTrace.getStateSpace());
 		this.updatePreferences();
 		this.resetButton.setDisable(currentTrace == null);
 	}

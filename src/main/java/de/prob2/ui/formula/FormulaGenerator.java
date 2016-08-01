@@ -12,6 +12,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.AnimationSelector;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
 public class FormulaGenerator {
@@ -36,7 +37,8 @@ public class FormulaGenerator {
 			ExpandedFormula data = cmd2.getResult();
 			data.collapseNodes(new HashSet<>(collapsedNodes));
 			
-			graph = new FormulaGraph(new FormulaNode(25, 350, data));
+			graph = new FormulaGraph(new FormulaNode(data));
+			graph.autosize();
 			draw();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -52,11 +54,29 @@ public class FormulaGenerator {
 	}
 	
 	private void draw() {
-		ScrollPane root = new ScrollPane();
+		ScrollPane root = new ScrollPane(graph);
 		Stage stage = new Stage();
-		root.setContent(graph);
 		stage.setTitle("Mathematical Expression");
 		Scene scene = new Scene(root, 1024, 768);
+		root.setOnMouseClicked(e -> {
+			if(e.getButton() == MouseButton.PRIMARY) {
+				
+				graph.setPrefHeight(graph.getPrefHeight() * 2);
+				graph.setPrefWidth(graph.getPrefWidth() * 2);
+				graph.setScaleX(graph.getScaleX() * 2);
+				graph.setScaleY(graph.getScaleY() * 2);
+
+			} else if(e.getButton() == MouseButton.SECONDARY) {
+				graph.setPrefHeight(graph.getPrefHeight() * 0.5);
+				graph.setPrefWidth(graph.getPrefWidth() * 0.5);
+				
+				graph.setScaleX(graph.getScaleX() * 0.5);
+				graph.setScaleY(graph.getScaleY() * 0.5);
+			}
+			root.setContent(graph);
+			//scene.setRoot(root);
+			//stage.show();
+		});
 		stage.setScene(scene);
 		stage.show();
 	}

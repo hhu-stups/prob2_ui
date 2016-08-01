@@ -8,11 +8,7 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.EnumerationWarning;
-import de.prob.animator.domainobjects.EvalResult;
-import de.prob.animator.domainobjects.EvaluationErrorResult;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Action;
@@ -24,9 +20,14 @@ import de.prob2.ui.formula.FormulaGenerator;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.input.KeyCharacterCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
 
 @Singleton
@@ -65,35 +66,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			e.printStackTrace();
 		}
 	}
-
-	static String stringRep(final AbstractEvalResult res) {
-		if (res == null) {
-			return "null";
-		} else if (res instanceof IdentifierNotInitialised) {
-			return "(not initialized)";
-		} else if (res instanceof EvalResult) {
-			return ((EvalResult) res).getValue();
-		} else if (res instanceof EvaluationErrorResult) {
-			return ((EvaluationErrorResult) res).getResult();
-		} else if (res instanceof EnumerationWarning) {
-			return "?(∞)";
-		} else {
-			return res.getClass() + " toString: " + res;
-		}
-	}
-
-	static String formatClassName(Class<?> clazz, boolean plural) {
-		String shortName = clazz.getSimpleName();
-		if (plural) {
-			if (shortName.endsWith("y")) {
-				shortName = shortName.substring(0, shortName.length() - 1) + "ies";
-			} else {
-				shortName += "s";
-			}
-		}
-		return shortName;
-	}
-
+	
 	private void unsubscribeAllChildren(final Trace trace, final AbstractElement element) {
 		if (element instanceof AbstractFormulaElement) {
 			((AbstractFormulaElement)element).unsubscribe(trace.getStateSpace());
@@ -237,22 +210,25 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 
 		this.currentValues = null;
 		this.previousValues = null;
-
-		this.tvRootItem.setValue(new ElementClassStateTreeItem(Machine.class));
 		
-		tv.setOnMouseClicked(e -> {
-			if (tv.getSelectionModel().getSelectedItem() == null) {
-				return;
-			}
-			StateTreeItem<?> selectedItem = tv.getSelectionModel().getSelectedItem().getValue();
-			if(selectedItem instanceof ElementStateTreeItem && !selectedItem.getValue().equals("")) {
-				showExpression((AbstractFormulaElement)(((ElementStateTreeItem) selectedItem).getContents()));
-			}
-			tv.getSelectionModel().clearSelection();
+		tv.setRowFactory(view -> {
+			final TreeTableRow<StateTreeItem<?>> row = new TreeTableRow<>();
+			final MenuItem showExpressionItem = new MenuItem("Show Expression");
+			showExpressionItem.setDisable(true);
+			row.itemProperty().addListener((observable, from, to) -> {
+				showExpressionItem.setDisable(to == null || !(to instanceof ElementStateTreeItem && to.getContents() instanceof AbstractFormulaElement));
+			});
+			showExpressionItem.setOnAction(event -> {
+				showExpression((AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents());
+			});
+			row.setContextMenu(new ContextMenu(showExpressionItem));
+			return row;
 		});
 		
+		this.tvRootItem.setValue(new ElementClassStateTreeItem(Machine.class));
+		
 		this.classBlacklist.getBlacklist().addListener(
-			(SetChangeListener.Change<? extends Class<? extends AbstractElement>> change) -> {
+			(SetChangeListener<? super Class<? extends AbstractElement>>)change -> {
 				if (this.animationSelector.getCurrentTrace() != null) {
 					this.updateElements(
 						this.animationSelector.getCurrentTrace(),
