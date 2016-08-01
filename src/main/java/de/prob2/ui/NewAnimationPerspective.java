@@ -81,7 +81,7 @@ public class NewAnimationPerspective extends SplitPane{
             } else {
                 this.addAccordion();
                 nodeTP.setContent(node);
-                accordion.getPanes().add(nodeTP);
+                accordion.getPanes().add(0,nodeTP);
             }
             t.consume();
         });
