@@ -12,9 +12,9 @@
 
 <fx:root type="SplitPane" xmlns:fx="http://javafx.com/fxml">
     <AnchorPane minWidth="280.0">
-        <Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Accordion fx:id="accordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <panes>
-                <TitledPane text="Operations">
+                <TitledPane text="Operations" fx:id="operationsTP">
                     <OperationsView fx:id="operations"/>
                 </TitledPane>
                 <TitledPane text="History">
