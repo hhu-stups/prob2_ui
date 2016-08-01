@@ -67,9 +67,9 @@ public class NewAnimationPerspective extends SplitPane{
             if (!this.getChildren().contains(operations)){
                 this.getItems().add(operations);
                 accordion.getPanes().remove(operationsTP);
-                removeAccordion();
+                this.removeAccordion();
             } else {
-                addAccordion();
+                this.addAccordion();
                 operationsTP.setContent(operations);
                 accordion.getPanes().add(0,operationsTP);
             }
@@ -78,9 +78,9 @@ public class NewAnimationPerspective extends SplitPane{
             if (!this.getChildren().contains(history)){
                 this.getItems().add(history);
                 accordion.getPanes().remove(historyTP);
-                removeAccordion();
+                this.removeAccordion();
             } else {
-                addAccordion();
+                this.addAccordion();
                 historyTP.setContent(history);
                 accordion.getPanes().add(1,historyTP);
             }
@@ -89,9 +89,9 @@ public class NewAnimationPerspective extends SplitPane{
             if (!this.getChildren().contains(dotty)){
                 this.getItems().add(dotty);
                 accordion.getPanes().remove(dottyTP);
-                removeAccordion();
+                this.removeAccordion();
             } else {
-                addAccordion();
+                this.addAccordion();
                 dottyTP.setContent(dotty);
                 accordion.getPanes().add(2,dottyTP);
             }
@@ -100,9 +100,9 @@ public class NewAnimationPerspective extends SplitPane{
             if (!this.getChildren().contains(modelcheck)){
                 this.getItems().add(modelcheck);
                 accordion.getPanes().remove(modelcheckTP);
-                removeAccordion();
+                this.removeAccordion();
             } else {
-                addAccordion();
+                this.addAccordion();
                 modelcheckTP.setContent(modelcheck);
                 accordion.getPanes().add(3,modelcheckTP);
             }
@@ -111,22 +111,22 @@ public class NewAnimationPerspective extends SplitPane{
             if (!this.getChildren().contains(test)){
                 this.getItems().add(test);
                 accordion.getPanes().remove(testTP);
-                removeAccordion();
+                this.removeAccordion();
             } else {
-                addAccordion();
+                this.addAccordion();
                 testTP.setContent(test);
                 accordion.getPanes().add(4,testTP);
             }
         });
     }
 
-    void removeAccordion(){
+    private void removeAccordion(){
         if (accordion.getPanes().size()==0){
             this.getItems().remove(0);
         }
     }
 
-    void addAccordion(){
+    private void addAccordion(){
         if (!this.getChildren().contains(accordion)){
             this.getItems().add(0,accordion);
         }
