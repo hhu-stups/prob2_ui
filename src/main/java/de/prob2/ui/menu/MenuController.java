@@ -138,7 +138,7 @@ public class MenuController extends MenuBar {
 		this.mcheckStage = new Stage();
 		this.mcheckStage.setTitle("Model Check");
 		this.mcheckStage.setScene(new Scene(mcheckController));
-		this.mcheckStage.initModality(Modality.WINDOW_MODAL);
+		this.mcheckStage.initModality(Modality.NONE);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);
