@@ -25,6 +25,7 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
@@ -79,13 +80,23 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 
 	private Node toHistoryNode(HistoryItem item) {
 		AnchorPane background = new AnchorPane();
+		VBox.setMargin(background, new Insets(2.5, 5, 2.5, 5));
 		background.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent mouseEvent) {
 				showStats(item.getStats());
+				for(Node node: historyNodeList) {
+					node.getStyleClass().remove("historyItemBackgroundSelected");
+					node.getStyleClass().add("historyItemBackground");
+				}
+				background.getStyleClass().add("historyItemBackgroundSelected");
 			}
 		});
-		background.getStyleClass().add("historyItemBackground");
+		for(Node node: historyNodeList) {
+			node.getStyleClass().remove("historyItemBackgroundSelected");
+			node.getStyleClass().add("historyItemBackground");
+		}
+		background.getStyleClass().add("historyItemBackgroundSelected");
 		HBox box = new HBox();
 		box.setSpacing(5);
 		background.getChildren().add(box);
@@ -121,7 +132,6 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 					getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-505-alert.png"));
 			break;
 		}
-		System.out.println("*** " + res);
 		return image;
 	}
 

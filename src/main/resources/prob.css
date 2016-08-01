@@ -129,3 +129,8 @@
 .historyItemBackground {
 	-fx-background-color: lightgrey;
 }
+
+.historyItemBackgroundSelected {
+	-fx-background-color: lightgrey;
+	-fx-border-color: grey;
+}

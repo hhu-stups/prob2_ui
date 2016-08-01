@@ -10,7 +10,7 @@
 			<children>
 				<AnchorPane>
 					<children>
-						<VBox fx:id="historyBox" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0" />
+						<VBox fx:id="historyBox" style="-fx-border-color: grey;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
 					</children>
 				</AnchorPane>
 				<AnchorPane fx:id="statsPane" />
