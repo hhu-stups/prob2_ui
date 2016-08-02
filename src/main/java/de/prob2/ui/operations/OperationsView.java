@@ -112,14 +112,14 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 		if (disabledOpsToggle.isSelected()) {
 			disabledOpsToggle.getStyleClass().add("eyeclosed");
 			showNotEnabled = false;
-			if(trace != null) {
+			if (trace != null) {
 				animations.traceChange(trace);
 			}
 
 		} else {
 			disabledOpsToggle.getStyleClass().remove("eyeclosed");
 			showNotEnabled = true;
-			if(trace != null) {
+			if (trace != null) {
 				animations.traceChange(trace);
 			}
 		}
@@ -127,12 +127,18 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 
 	@FXML
 	private void handleBackButton() {
-		animations.traceChange(animations.getCurrentTrace().back());
+		Trace trace = animations.getCurrentTrace();
+		if (trace != null) {
+			animations.traceChange(trace.back());
+		}
 	}
 
 	@FXML
 	private void handleForwardButton() {
-		animations.traceChange(animations.getCurrentTrace().forward());
+		Trace trace = animations.getCurrentTrace();
+		if (trace != null) {
+			animations.traceChange(trace.forward());
+		}
 	}
 
 	@FXML
@@ -193,21 +199,23 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 
 	@FXML
 	public void random(ActionEvent event) {
-		if (event.getSource().equals(oneRandomEvent)) {
-			animations.traceChange(animations.getCurrentTrace().randomAnimation(1));
-		} else if (event.getSource().equals(fiveRandomEvents)) {
-			animations.traceChange(animations.getCurrentTrace().randomAnimation(5));
-		} else if (event.getSource().equals(tenRandomEvents)) {
-			animations.traceChange(animations.getCurrentTrace().randomAnimation(10));
-		} else if (event.getSource().equals(randomEventsButton) || event.getSource().equals(randomText)) {
-			try {
-				int steps = Integer.parseInt(randomText.getText());
-				animations.traceChange(animations.getCurrentTrace().randomAnimation(steps));
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
+		Trace trace = animations.getCurrentTrace();
+		if (trace != null) {
+			if (event.getSource().equals(oneRandomEvent)) {
+				animations.traceChange(trace.randomAnimation(1));
+			} else if (event.getSource().equals(fiveRandomEvents)) {
+				animations.traceChange(trace.randomAnimation(5));
+			} else if (event.getSource().equals(tenRandomEvents)) {
+				animations.traceChange(trace.randomAnimation(10));
+			} else if (event.getSource().equals(randomEventsButton) || event.getSource().equals(randomText)) {
+				try {
+					int steps = Integer.parseInt(randomText.getText());
+					animations.traceChange(trace.randomAnimation(steps));
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				}
 			}
 		}
-
 	}
 
 	private void updateModel(final Trace trace) {

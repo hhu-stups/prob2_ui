@@ -86,7 +86,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 
 	private Node toHistoryNode(HistoryItem item) {
 		ContextMenu cm = createContextMenu(item);
-		
+
 		AnchorPane background = new AnchorPane();
 		VBox.setMargin(background, new Insets(2.5, 5, 2.5, 5));
 		background.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -98,14 +98,14 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 				}
 				if (event.getButton().equals(MouseButton.SECONDARY)) {
 					cm.show(background, event.getScreenX(), event.getScreenY());
-					if(!item.getResult().equals("danger")) {
+					if (!item.getResult().equals("danger")) {
 						cm.getItems().get(0).setDisable(true);
 					}
 				}
 			}
 		});
 		updateSelectedItem(background);
-		
+
 		HBox box = new HBox();
 		box.setSpacing(5);
 		background.getChildren().add(box);
@@ -113,7 +113,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		AnchorPane.setRightAnchor(box, 4.0);
 		AnchorPane.setBottomAnchor(box, 2.0);
 		AnchorPane.setLeftAnchor(box, 4.0);
-		
+
 		ImageView imView = new ImageView(selectImage(item.getResult()));
 		imView.setFitHeight(15);
 		imView.setFitWidth(15);
@@ -123,7 +123,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		});
 		box.getChildren().add(imView);
 		box.getChildren().add(text);
-		
+
 		return background;
 	}
 
@@ -181,7 +181,9 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	}
 
 	void cancelModelchecking() {
-		checker.cancel();
+		if (checker != null) {
+			checker.cancel();
+		}
 	}
 
 	private void showStats(ModelCheckStats stats) {
