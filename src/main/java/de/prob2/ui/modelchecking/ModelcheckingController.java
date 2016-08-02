@@ -18,18 +18,23 @@ import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingOptions.Options;
 import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
+import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.events.OpenFileEvent;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -44,15 +49,16 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	@FXML
 	private VBox historyBox;
 
-	// private boolean errorFoundBefore;
 	private ModelChecker checker;
 	private ObservableList<Node> historyNodeList;
 	private ModelCheckStats currentStats;
 	private ModelCheckingOptions currentOptions;
+	private AnimationSelector animations;
 
 	@Inject
-	private ModelcheckingController(FXMLLoader loader, EventBus bus) {
+	private ModelcheckingController(final AnimationSelector animations, FXMLLoader loader, EventBus bus) {
 		bus.register(this);
+		this.animations = animations;
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stats_view.fxml"));
 			loader.setRoot(this);
@@ -75,28 +81,28 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, this));
 		currentStats.addJob(checker.getJobId(), checker);
 		showStats(currentStats);
-		checker.start();	
+		checker.start();
 	}
 
 	private Node toHistoryNode(HistoryItem item) {
+		ContextMenu cm = createContextMenu(item);
+		
 		AnchorPane background = new AnchorPane();
 		VBox.setMargin(background, new Insets(2.5, 5, 2.5, 5));
 		background.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
-			public void handle(MouseEvent mouseEvent) {
-				showStats(item.getStats());
-				for(Node node: historyNodeList) {
-					node.getStyleClass().remove("historyItemBackgroundSelected");
-					node.getStyleClass().add("historyItemBackground");
+			public void handle(MouseEvent event) {
+				if (event.getButton().equals(MouseButton.PRIMARY)) {
+					showStats(item.getStats());
+					updateSelectedItem(background);
 				}
-				background.getStyleClass().add("historyItemBackgroundSelected");
+				if (event.getButton().equals(MouseButton.SECONDARY) && item.getResult().equals("danger")) {
+					cm.show(background, event.getScreenX(), event.getScreenY());
+				}
 			}
 		});
-		for(Node node: historyNodeList) {
-			node.getStyleClass().remove("historyItemBackgroundSelected");
-			node.getStyleClass().add("historyItemBackground");
-		}
-		background.getStyleClass().add("historyItemBackgroundSelected");
+		updateSelectedItem(background);
+		
 		HBox box = new HBox();
 		box.setSpacing(5);
 		background.getChildren().add(box);
@@ -104,18 +110,40 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		AnchorPane.setRightAnchor(box, 4.0);
 		AnchorPane.setBottomAnchor(box, 2.0);
 		AnchorPane.setLeftAnchor(box, 4.0);
+		
 		ImageView imView = new ImageView(selectImage(item.getResult()));
 		imView.setFitHeight(15);
 		imView.setFitWidth(15);
 		Text text = new Text(toPrettyString(item.getOptions()));
 		Platform.runLater(() -> {
-			text.wrappingWidthProperty().bind(this.widthProperty().subtract(65.0));
+			text.wrappingWidthProperty().bind(this.widthProperty().subtract(70.0));
 		});
 		box.getChildren().add(imView);
 		box.getChildren().add(text);
+		
 		return background;
 	}
-	
+
+	private ContextMenu createContextMenu(HistoryItem item) {
+		ContextMenu cm = new ContextMenu();
+		MenuItem mItem = new MenuItem("Show Trace To Error State");
+		mItem.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent event) {
+				animations.addNewAnimation(item.getStats().getTrace());
+			}
+		});
+		cm.getItems().add(mItem);
+		return cm;
+	}
+
+	protected void updateSelectedItem(Node selected) {
+		for (Node node : historyNodeList) {
+			node.getStyleClass().remove("historyItemBackgroundSelected");
+			node.getStyleClass().add("historyItemBackground");
+		}
+		selected.getStyleClass().add("historyItemBackgroundSelected");
+	}
+
 	private Image selectImage(String res) {
 		Image image = null;
 		switch (res) {
@@ -136,7 +164,6 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	}
 
 	private String toPrettyString(ModelCheckingOptions options) {
-		// ModelChecker modelChecker = jobs.get(id).getChecker();
 		ModelChecker modelChecker = checker;
 		AbstractElement main = modelChecker.getStateSpace().getMainComponent();
 		List<String> optsList = new ArrayList<String>();
@@ -183,31 +210,4 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 			historyNodeList.add(historyNode);
 		});
 	}
-
-	// TODO remove the following method, find a better way to do this
-	// @Subscribe
-	// public void showStats(ModelCheckStatsEvent event) {
-	//
-	// String res = event.getResult();
-	// Boolean searchForNewErrors = event.getSearchForNewErrors();
-	//
-	// if(!searchForNewErrors) {
-	// errorFoundBefore = false;
-	// }
-	// if (res.equals("danger")) {
-	// errorFoundBefore = true;
-	// }
-	//
-	// Platform.runLater(() -> {
-	// if (res.equals("success") && errorFoundBefore && searchForNewErrors) {
-	// Alert alert = new Alert(AlertType.WARNING);
-	// alert.setTitle("Note");
-	// alert.setHeaderText("Some previously explored nodes do contain errors."
-	// + "\nTurn off \u0027Search for New Errors\u0027 and re-run the model
-	// checker to find the errors.");
-	// alert.showAndWait();
-	// return;
-	// }
-	// });
-	// }
 }
