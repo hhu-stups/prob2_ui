@@ -46,7 +46,7 @@ public class MenuController extends MenuBar {
 			loader.load();
 			Parent root = loader.getRoot();
 			Scene scene = new Scene(root,stage.getHeight(),stage.getWidth());
-			((Stage) stage).setScene(scene);
+			((Stage) window).setScene(scene);
 		} catch (IOException e) {
 			System.err.println("Failed to load FXML-File!");
 			e.printStackTrace();

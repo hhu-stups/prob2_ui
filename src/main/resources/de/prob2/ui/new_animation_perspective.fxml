@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.dotty.DottyView?>
+<?import de.prob2.ui.history.HistoryView?>
+<?import de.prob2.ui.modelchecking.ModelcheckingController?>
+<?import de.prob2.ui.operations.OperationsView?>
+<?import de.prob2.ui.states.StatesView?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TitledPane?>
+
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.control.Label?>
+<fx:root type="SplitPane" xmlns:fx="http://javafx.com/fxml">
+    <AnchorPane minWidth="280.0">
+        <Accordion fx:id="accordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <panes>
+                <TitledPane text="Operations" fx:id="operationsTP">
+                    <OperationsView fx:id="operations"/>
+                </TitledPane>
+                <TitledPane text="History" fx:id="historyTP">
+                    <HistoryView fx:id="history"/>
+                </TitledPane>
+                <TitledPane text="Dotty" fx:id="dottyTP">
+                    <DottyView fx:id="dotty"/>
+                </TitledPane>
+                <TitledPane text="Model Check Stats" fx:id="modelcheckTP">
+                    <ModelcheckingController fx:id="modelcheck"/>
+                </TitledPane>
+                <!--<TitledPane text="Test" fx:id="testTP">
+                    <FlowPane fx:id="test">
+                            <Label text="Test"/>
+                    </FlowPane>
+                </TitledPane>-->
+            </panes>
+        </Accordion>
+    </AnchorPane>
+    <StatesView/>
+</fx:root>
