@@ -37,7 +37,9 @@ public class FormulaNode extends Region {
 			next.add(new FormulaNode(data.getChildren().get(i)));
 		}
 		
+		
 	}
+		
 	
 	public double getNodeWidth() {
 		return width;
