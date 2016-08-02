@@ -15,6 +15,8 @@ import de.prob.check.ModelCheckOk;
 import de.prob.check.ModelChecker;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
+import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -52,6 +54,7 @@ public class ModelCheckStats extends AnchorPane {
 	private Map<String, IModelCheckingResult> results = new HashMap<String, IModelCheckingResult>();
 	private ModelcheckingController modelcheckingController;
 	private String result = "warning";
+	private Trace trace;
 
 	@Inject
 	public ModelCheckStats(FXMLLoader loader, ModelcheckingController modelcheckingController) {
@@ -123,14 +126,12 @@ public class ModelCheckStats extends AnchorPane {
 				: result instanceof ITraceDescription ? "danger" : "warning";
 		String message = result.getMessage();
 
-		boolean hasTrace = result instanceof ITraceDescription;
 		ModelChecker modelChecker = jobs.get(id);
 		ComputeCoverageResult coverage = null;
-
+		
 		if (modelChecker != null) {
 			coverage = modelChecker.getCoverage();
 		}
-
 		jobs.remove(id);
 
 		if (coverage != null) {
@@ -150,6 +151,13 @@ public class ModelCheckStats extends AnchorPane {
 			// transStats.add(WebUtils.wrap("name", transition, "value", "0"));
 			// }
 			// String transitionStats = WebUtils.toJson(transStats);
+		}
+		
+		boolean hasTrace = result instanceof ITraceDescription;
+		if(hasTrace) {
+			StateSpace s = modelChecker.getStateSpace();
+			trace = ((ITraceDescription) result).getTrace(s);
+			
 		}
 		showResult(message);
 		System.out.println("is finished");
@@ -201,5 +209,9 @@ public class ModelCheckStats extends AnchorPane {
 
 	public String getResult() {
 		return result;
+	}
+	
+	public Trace getTrace() {
+		return trace;
 	}
 }

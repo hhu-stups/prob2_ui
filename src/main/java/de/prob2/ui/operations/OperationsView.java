@@ -75,10 +75,7 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 	private final AnimationSelector animations;
 
 	@Inject
-	private OperationsView(
-		final AnimationSelector animations,
-		final FXMLLoader loader
-	) {
+	private OperationsView(final AnimationSelector animations, final FXMLLoader loader) {
 		this.animations = animations;
 		this.animations.registerAnimationChangeListener(this);
 
@@ -354,5 +351,6 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 	}
 
 	@Override
-	public void animatorStatus(boolean busy) {}
+	public void animatorStatus(boolean busy) {
+	}
 }
