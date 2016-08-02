@@ -96,8 +96,11 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 					showStats(item.getStats());
 					updateSelectedItem(background);
 				}
-				if (event.getButton().equals(MouseButton.SECONDARY) && item.getResult().equals("danger")) {
+				if (event.getButton().equals(MouseButton.SECONDARY)) {
 					cm.show(background, event.getScreenX(), event.getScreenY());
+					if(!item.getResult().equals("danger")) {
+						cm.getItems().get(0).setDisable(true);
+					}
 				}
 			}
 		});
