@@ -108,15 +108,20 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 
 	@FXML
 	private void handleDisabledOpsToggle() {
+		Trace trace = animations.getCurrentTrace();
 		if (disabledOpsToggle.isSelected()) {
 			disabledOpsToggle.getStyleClass().add("eyeclosed");
 			showNotEnabled = false;
-			animations.traceChange(animations.getCurrentTrace());
+			if(trace != null) {
+				animations.traceChange(trace);
+			}
 
 		} else {
 			disabledOpsToggle.getStyleClass().remove("eyeclosed");
 			showNotEnabled = true;
-			animations.traceChange(animations.getCurrentTrace());
+			if(trace != null) {
+				animations.traceChange(trace);
+			}
 		}
 	}
 
