@@ -46,7 +46,7 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 
 	@FXML
 	private Button btforward;
-	
+
 	private boolean rootatbottom = true;
 
 	private ObservableList<HistoryItem> history = FXCollections.observableArrayList();
@@ -54,12 +54,12 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 	private AnimationSelector animations;
 
 	private EventBus bus;
-	
+
 	@Inject
 	private HistoryView(FXMLLoader loader, AnimationSelector animations, EventBus bus) {
 		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
-		
+
 		this.bus = bus;
 		try {
 			loader.setLocation(getClass().getResource("history_view.fxml"));
@@ -73,18 +73,16 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 	}
 
 	public void initialize(URL location, ResourceBundle resources) {
-		
+
 		animations.registerAnimationChangeListener(this);
 
 		lv_history.setCellFactory(new HistoryItemTransformer());
-				
+
 		lv_history.setItems(history);
-		
-		
+
 		lv_history.setOnMouseClicked(e -> {
 			bus.post(new TraceChangeEvent(getCurrentIndex()));
 		});
-		
 
 		lv_history.setOnMouseMoved(e -> {
 			lv_history.setCursor(Cursor.HAND);
@@ -96,30 +94,33 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 		});
 
 		btprevious.setOnAction(e -> {
-			bus.post(new TraceChangeEvent(TraceChangeDirection.BACK));
+			if (animations.getCurrentTrace() != null) {
+				bus.post(new TraceChangeEvent(TraceChangeDirection.BACK));
+			}
 		});
 
 		btforward.setOnAction(e -> {
-			bus.post(new TraceChangeEvent(TraceChangeDirection.FORWARD));
+			if (animations.getCurrentTrace() != null) {
+				bus.post(new TraceChangeEvent(TraceChangeDirection.FORWARD));
+			}
 		});
 
-
 	}
-	
+
 	@Subscribe
 	public void changeTracePosition(TraceChangeEvent event) {
-		switch(event.getDirection()) {
-			case BACK:
-				animations.traceChange(animations.getCurrentTrace().back());
-				break;
-			case FORWARD:
-				animations.traceChange(animations.getCurrentTrace().forward());
-				break;
-			default:
-				animations.traceChange(animations.getCurrentTrace().gotoPosition(event.getIndex()));
-				break;
+		switch (event.getDirection()) {
+		case BACK:
+			animations.traceChange(animations.getCurrentTrace().back());
+			break;
+		case FORWARD:
+			animations.traceChange(animations.getCurrentTrace().forward());
+			break;
+		default:
+			animations.traceChange(animations.getCurrentTrace().gotoPosition(event.getIndex()));
+			break;
 		}
-		
+
 	}
 
 	private int getCurrentIndex() {
@@ -141,13 +142,13 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 		history.clear();
 		int currentPos = currentTrace.getCurrent().getIndex();
 		List<Transition> transitionList = currentTrace.getTransitionList();
-		
+
 		if (currentPos == -1) {
 			history.add(new HistoryItem(PRESENT));
 		} else {
 			history.add(new HistoryItem(PAST));
 		}
-		
+
 		for (int i = 0; i < transitionList.size(); i++) {
 			HistoryStatus status = PAST;
 			if (i == currentPos)
@@ -157,9 +158,9 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 			history.add(new HistoryItem(transitionList.get(i), status));
 		}
 
-		 if (rootatbottom) {
-			 Collections.reverse(history);
-		 }
+		if (rootatbottom) {
+			Collections.reverse(history);
+		}
 	}
 
 	@Override

@@ -11,13 +11,12 @@ import de.prob.animator.command.InsertFormulaForVisualizationCommand;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.AnimationSelector;
-
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
-
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 
@@ -29,6 +28,7 @@ public class FormulaGenerator {
 	private final AnimationSelector animationSelector;
 	
 	private double zoomFactor = 1;
+	
 	
 	@Inject
 	public FormulaGenerator(final AnimationSelector animationSelector) {
@@ -65,8 +65,8 @@ public class FormulaGenerator {
 	
 	private void draw() {
 		Group group = new Group();
-		group.getChildren().add(graph);
 		ScrollPane root = new ScrollPane(group);
+		group.getChildren().add(graph);
 		
 		Stage stage = new Stage();
 		stage.setTitle("Mathematical Expression");
@@ -80,14 +80,20 @@ public class FormulaGenerator {
 			graph.setCursor(Cursor.OPEN_HAND);
 			
 		});*/
-		group.setOnMouseClicked(e-> {
-			System.out.println("boo");
-		});
+		
+	
+
 		graph.setOnMouseClicked(e -> {
+			double Xpos;
+			double Ypos;
+			double oldWidth = graph.getWidth();
+			double oldHeight = graph.getHeight();
 			ScrollBar vBar = (ScrollBar) root.getChildrenUnmodifiable().get(1);
 			ScrollBar hBar = (ScrollBar) root.getChildrenUnmodifiable().get(2);
-			double Xpos = e.getX()*zoomFactor/graph.getWidth();
-			double Ypos = e.getY()*zoomFactor/graph.getHeight();
+
+
+
+
 			if(e.getButton() == MouseButton.PRIMARY) {
 				graph.setPrefHeight(graph.getHeight() * 1.3);
 				graph.setPrefWidth(graph.getWidth() * 1.3);
@@ -98,11 +104,30 @@ public class FormulaGenerator {
 				graph.setPrefWidth(graph.getWidth() * 0.8);
 				zoomFactor *= 0.8;
 				group.getTransforms().add(new Scale(0.8, 0.8));
+				
 			}
 			group.getChildren().clear();
 			group.getChildren().add(graph);
+
+			Xpos = e.getX()*zoomFactor/graph.getWidth();
+			Ypos = e.getY()*zoomFactor/graph.getHeight();
+
+			
 			root.setHvalue(Xpos);
 			root.setVvalue(Ypos);
+			
+			/*if(e.getX()/oldWidth > 0.9) {
+				root.setHvalue(2);
+			}
+			if(e.getY()/oldHeight > 0.9) {
+				root.setVvalue(2);
+			}*/
+			
+			
+
+			
+
+			System.out.println("Real value: " + root.getHvalue() + " " + root.getVvalue());
 		});
 		
 		stage.setScene(scene);
