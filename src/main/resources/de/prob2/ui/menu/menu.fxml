@@ -13,6 +13,9 @@
 		<MenuItem text="%menu.edit.items.editBlacklist" onAction="#handleEditBlacklist"/>
 		<MenuItem text="%menu.edit.items.preferences" onAction="#handlePreferences"/>
 	</Menu>
+		<Menu mnemonicParsing="false" text="%menu.formula">
+		<MenuItem text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput"/>
+	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.verify">
 		<MenuItem text="%menu.verify.items.modelcheck" onAction="#handleModelCheck"/>
 	</Menu>

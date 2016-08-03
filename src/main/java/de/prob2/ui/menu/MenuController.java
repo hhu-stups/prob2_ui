@@ -3,17 +3,24 @@ package de.prob2.ui.menu;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.codecentric.centerdevice.MenuToolkit;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.model.representation.AbstractFormulaElement;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.events.OpenFileEvent;
+import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.modelchecking.ModelcheckingDialog;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.BlacklistStage;
+import de.prob2.ui.states.ElementStateTreeItem;
+import de.prob2.ui.states.StateTreeItem;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +30,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
@@ -36,6 +44,7 @@ public class MenuController extends MenuBar {
 	private PreferencesStage preferencesStage;
 	private Stage mcheckStage;
 	private Window window;
+	private FormulaGenerator formulaGenerator;
 
 	@FXML
 	private void handleLoadDefault(){
@@ -98,6 +107,20 @@ public class MenuController extends MenuBar {
 		this.preferencesStage.toFront();
 	}
 	
+	@FXML 
+	private void handleFormulaInput(ActionEvent event) {
+		TextInputDialog dialog = new TextInputDialog();
+		dialog.setTitle("Enter Formula for Visualization");
+		dialog.setHeaderText("Enter Formula for Vistualization");
+		dialog.setContentText("Enter Formula: ");
+		Optional<String> result = dialog.showAndWait();
+		if (result.isPresent()){
+			//StateSpace abstractStateSpace = new StateSpace();
+			//IEvalElement formula = new StateSpace().getModel().parseFormula(result.get());
+		    //formulaGenerator.setFormula(formula);
+		}
+	}
+	
 	@FXML
 	private void handleModelCheck(ActionEvent event) {
 		this.mcheckStage.showAndWait();
@@ -130,11 +153,13 @@ public class MenuController extends MenuBar {
 		EventBus bus,
 		BlacklistStage blacklistStage,
 		PreferencesStage preferencesStage,
-		ModelcheckingDialog mcheckController
+		ModelcheckingDialog mcheckController,
+		FormulaGenerator formulaGenerator
 	) {
 		this.bus = bus;
 		this.blacklistStage = blacklistStage;
 		this.preferencesStage = preferencesStage;
+		this.formulaGenerator = formulaGenerator;
 		this.mcheckStage = new Stage();
 		this.mcheckStage.setTitle("Model Check");
 		this.mcheckStage.setScene(new Scene(mcheckController));
