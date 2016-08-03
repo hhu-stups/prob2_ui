@@ -34,6 +34,7 @@ public class FormulaGenerator {
 	
 	private Group group;
 	private ScrollPane root;
+	private Stage stage;
 	
 	
 	@Inject
@@ -127,11 +128,14 @@ public class FormulaGenerator {
 	}
 	
 	private void draw() {
+		if(stage != null) { 
+			stage.close();
+		}
 		group = new Group();
 		root = new ScrollPane(group);
 		group.getChildren().add(graph);
 		
-		Stage stage = new Stage();
+		stage = new Stage();
 		stage.setTitle("Mathematical Expression");
 		Scene scene = new Scene(root, 1024, 768);
 		
