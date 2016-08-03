@@ -11,7 +11,7 @@ import de.prob.animator.command.InsertFormulaForVisualizationCommand;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.AnimationSelector;
-
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
@@ -64,9 +64,9 @@ public class FormulaGenerator {
 	}
 	
 	private void draw() {
-		StackPane sp = new StackPane();
-		ScrollPane root = new ScrollPane(sp);
-		sp.getChildren().add(graph);
+		Group group = new Group();
+		ScrollPane root = new ScrollPane(group);
+		group.getChildren().add(graph);
 		
 		Stage stage = new Stage();
 		stage.setTitle("Mathematical Expression");
@@ -80,6 +80,8 @@ public class FormulaGenerator {
 			graph.setCursor(Cursor.OPEN_HAND);
 			
 		});*/
+		
+	
 
 		graph.setOnMouseClicked(e -> {
 			double Xpos;
@@ -89,7 +91,6 @@ public class FormulaGenerator {
 			ScrollBar vBar = (ScrollBar) root.getChildrenUnmodifiable().get(1);
 			ScrollBar hBar = (ScrollBar) root.getChildrenUnmodifiable().get(2);
 
-			
 
 
 
@@ -97,16 +98,17 @@ public class FormulaGenerator {
 				graph.setPrefHeight(graph.getHeight() * 1.3);
 				graph.setPrefWidth(graph.getWidth() * 1.3);
 				zoomFactor *= 1.3;
-				sp.getTransforms().add(new Scale(1.3, 1.3));			
+				group.getTransforms().add(new Scale(1.3, 1.3));			
 			} else if(e.getButton() == MouseButton.SECONDARY) {
 				graph.setPrefHeight(graph.getHeight() * 0.8);
 				graph.setPrefWidth(graph.getWidth() * 0.8);
 				zoomFactor *= 0.8;
-				sp.getTransforms().add(new Scale(0.8, 0.8));
+				group.getTransforms().add(new Scale(0.8, 0.8));
 				
 			}
-			sp.getChildren().clear();
-			sp.getChildren().add(graph);
+			group.getChildren().clear();
+			group.getChildren().add(graph);
+
 			Xpos = e.getX()*zoomFactor/graph.getWidth();
 			Ypos = e.getY()*zoomFactor/graph.getHeight();
 
