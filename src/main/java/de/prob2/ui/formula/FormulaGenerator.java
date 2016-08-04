@@ -11,6 +11,9 @@ import de.prob.animator.command.InsertFormulaForVisualizationCommand;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.AnimationSelector;
+import de.prob.statespace.StateSpace;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 public class FormulaGenerator {
 	
@@ -26,17 +29,28 @@ public class FormulaGenerator {
 		try {
 			InsertFormulaForVisualizationCommand cmd1 = new InsertFormulaForVisualizationCommand(formula);
 			animationSelector.getCurrentTrace().getStateSpace().execute(cmd1);
-			
 			ExpandFormulaCommand cmd2 = new ExpandFormulaCommand(cmd1.getFormulaId(), animationSelector.getCurrentTrace().getCurrentState());
 			animationSelector.getCurrentTrace().getStateSpace().execute(cmd2);
 			ExpandedFormula data = cmd2.getResult();
 			data.collapseNodes(new HashSet<>(collapsedNodes));
-			
 			FormulaGraph graph = new FormulaGraph(new FormulaNode(data));
 			FormulaView fview = new FormulaView(graph);
 			fview.show();
 		} catch (Exception e) {
-			e.printStackTrace();
+			 Alert alert = new Alert(AlertType.ERROR);
+			 alert.setTitle("Error while parsing formula");
+			 alert.setHeaderText("The formula can not be parsed and visualize.");
+			 alert.showAndWait();
+		}
+	}
+	
+	public IEvalElement parse(String params) {
+		try {
+			StateSpace currentStateSpace = animationSelector.getCurrentTrace().getStateSpace();
+			IEvalElement formula = currentStateSpace.getModel().parseFormula(params);
+			return formula;
+		} catch (Exception e) {
+			return null;
 		}
 	}
 	
