@@ -31,36 +31,90 @@
 /************************************************************************************
  * ListView																			*
  ************************************************************************************/
+.list-cell:odd {
+	-fx-background: white;
 }
+.list-cell:empty:hover {
+    -fx-background-color: white;
 }
+.list-cell:hover {
+	-fx-background-color: #ededed;
 }
+.list-cell:pressed {
+	-fx-text-fill: white;
 }
 
+/************************************************************************************
+ * Menu																				*
+ ************************************************************************************/
+.context-menu {
+ 	-fx-background-color: #444444aa;
+ 	-fx-background-radius: 3;
 }
+.context-menu .menu-item > .label {
+	-fx-text-fill: white;
+}
+.context-menu .menu-item:focused {
+     -fx-background-color: #aaaaaadd;
 }
 
  
+/************************************************************************************
+ * SplitView																		*
+ ************************************************************************************/
+.split-pane > .split-pane-divider {
+    -fx-padding: 0.0 0.16em 0.0 0.16em; /* 0 3 0 3 */
+}
+/* horizontal the two nodes are placed to the left/right of each other. */
+.split-pane:horizontal > .split-pane-divider {
+   -fx-background-color: -fx-box-border, #555555;
+}
+/* vertical the two nodes are placed on top of each other. */
+.split-pane:vertical > .split-pane-divider {
+   -fx-background-color: -fx-box-border, #555555;
 }
 
+/************************************************************************************
+ * Titled Pane																		*
+ ************************************************************************************/
+.titled-pane > .title {
+    -fx-background-color: #bbbbbb;
+}
+.titled-pane > .title > .arrow-button > .arrow {
+    -fx-background-color: #555555;
+    -fx-background-insets: 1.0 0.0 -1.0 0.0, 0.0;
+    -fx-padding: 0.25em 0.3125em 0.25em 0.3125em; /* 3 3.75 3 3.75 */
+    -fx-shape: "M 0 0 h 7 l -3.5 4 z";
 }
 
+/************************************************************************************
+ * TreeTableView																	*
+ ************************************************************************************/
+.tree-table-view .column-header {
+	-fx-background-color: #bbbbbb;
 }
 
-.reverse {
-	-fx-image: url("glyphicons_free/glyphicons/png/glyphicons-404-sorting.png")
-}
 
 
+
+
+/************************************************************************************
+ * Specific Styles																	*
+ ************************************************************************************/
+#searchicon {
+    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-28-search.png");
 }
 
 #past {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: normal;
+	-fx-font-size: 12.0px;
 }
 
 #present {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: bold;
+	-fx-font-size: 12.0px;
 }
 
 #future {
@@ -72,18 +126,22 @@
 	
 .mcheckSuccess {
 	-fx-background-color: #d0ebd0;
+	-fx-background-radius: 5.0 5.0 5.0 5.0;
 }
 
 .mcheckDanger {
 	-fx-background-color: #ebd1d1;
+	-fx-background-radius: 5.0 5.0 5.0 5.0;
 }
 
 .mcheckWarning {
 	-fx-background-color:  #f1efcd;
+	-fx-background-radius: 5.0 5.0 5.0 5.0;
 }
 
 .mcheckNoCheck {
 	-fx-background-color:  #eeeeee;
+	-fx-background-radius: 5.0 5.0 5.0 5.0;
 }
 
 .gridViewRow {
@@ -95,7 +153,16 @@
 	-fx-background-color: lightgrey;
 }
 
+.historyItemBackground:hover {
+	-fx-background-color: grey;
+}
+
 .historyItemBackgroundSelected {
 	-fx-background-color: lightgrey;
+	-fx-border-color: grey;
+}
+
+.historyItemBackgroundSelected:hover {
+	-fx-background-color: grey;
 	-fx-border-color: grey;
 }
