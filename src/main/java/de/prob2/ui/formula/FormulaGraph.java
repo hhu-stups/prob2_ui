@@ -2,7 +2,6 @@ package de.prob2.ui.formula;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Line;
 
@@ -15,10 +14,8 @@ public class FormulaGraph extends Region {
 		 root = node;
 		 root.setPosition(25, calculateY()+20);
 		 draw(root, 0);
-		 
 	}
-		
-	
+			
 	private double calculateY() {
 		if(calculateHeight(0)/2 < 400) {
 			return 400;

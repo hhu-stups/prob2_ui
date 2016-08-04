@@ -10,17 +10,12 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.codecentric.centerdevice.MenuToolkit;
-import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.model.representation.AbstractFormulaElement;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.events.OpenFileEvent;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.modelchecking.ModelcheckingDialog;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.BlacklistStage;
-import de.prob2.ui.states.ElementStateTreeItem;
-import de.prob2.ui.states.StateTreeItem;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -115,9 +110,7 @@ public class MenuController extends MenuBar {
 		dialog.setContentText("Enter Formula: ");
 		Optional<String> result = dialog.showAndWait();
 		if (result.isPresent()){
-			//StateSpace abstractStateSpace = new StateSpace();
-			//IEvalElement formula = new StateSpace().getModel().parseFormula(result.get());
-		    //formulaGenerator.setFormula(formula);
+			formulaGenerator.setFormula(formulaGenerator.parse(result.get()));
 		}
 	}
 	

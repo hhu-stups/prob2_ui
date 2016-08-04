@@ -46,11 +46,11 @@ public class OpenFileCommand implements Command {
 					bus.post(e);
 					return;
 				}
-				Trace newTrace = new Trace(newSpace);
-				animations.addNewAnimation(newTrace);
 				if (currentTrace != null) {
 					animations.removeTrace(currentTrace);
 				}
+				Trace newTrace = new Trace(newSpace);
+				animations.addNewAnimation(newTrace);
 				break;
 			
 			default:

@@ -36,8 +36,6 @@ public class FormulaNode extends Region {
 		for(int i = 0; i < data.getChildren().size(); i++) {
 			next.add(new FormulaNode(data.getChildren().get(i)));
 		}
-		
-		
 	}
 		
 	
@@ -55,7 +53,6 @@ public class FormulaNode extends Region {
 		text.setY(y);
 		rectangle.setX(x);
 		rectangle.setY(y - height);
-		
 		draw();
 	}
 	
