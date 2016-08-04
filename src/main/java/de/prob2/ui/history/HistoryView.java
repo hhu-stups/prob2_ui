@@ -137,12 +137,5 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 	}
 
 	@Override
-<<<<<<< HEAD
-	public void animatorStatus(boolean busy) {
-		// TODO Auto-generated method stub
-	}
-
-=======
 	public void animatorStatus(boolean busy) {}
->>>>>>> master
 }

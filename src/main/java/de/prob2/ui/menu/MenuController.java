@@ -7,11 +7,8 @@ import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-<<<<<<< HEAD
 
-=======
 import de.be4.classicalb.core.parser.exceptions.BException;
->>>>>>> master
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
