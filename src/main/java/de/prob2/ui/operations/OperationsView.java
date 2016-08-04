@@ -13,6 +13,8 @@ import java.util.Set;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
 import de.prob.model.representation.AbstractElement;
@@ -109,20 +111,23 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 	@FXML
 	private void handleDisabledOpsToggle() {
 		Trace trace = animations.getCurrentTrace();
+		FontAwesomeIconView icon = null;
 		if (disabledOpsToggle.isSelected()) {
-			disabledOpsToggle.getStyleClass().add("eyeclosed");
+			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE_SLASH);
 			showNotEnabled = false;
 			if (trace != null) {
 				animations.traceChange(trace);
 			}
-
 		} else {
-			disabledOpsToggle.getStyleClass().remove("eyeclosed");
+			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE);
 			showNotEnabled = true;
 			if (trace != null) {
 				animations.traceChange(trace);
 			}
 		}
+		icon.setSize("15");
+		icon.setStyleClass("icon-dark");
+		disabledOpsToggle.setGraphic(icon);
 	}
 
 	@FXML
@@ -162,26 +167,24 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 	@FXML
 	private void handleSortButton() {
 		String oldMode = getSortMode();
+		FontAwesomeIconView icon = null;
 		if ("normal".equals(oldMode)) {
 			sorter = new AtoZ();
-			sortButton.getStyleClass().remove("aToZ");
-			sortButton.getStyleClass().remove("sort_by_order");
-			sortButton.getStyleClass().add("zToA");
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
 		} else if ("aToZ".equals(oldMode)) {
 			sorter = new ZtoA();
-			sortButton.getStyleClass().remove("aToZ");
-			sortButton.getStyleClass().remove("zToA");
-			sortButton.getStyleClass().add("sort_by_order");
+			icon = new FontAwesomeIconView(FontAwesomeIcon.LONG_ARROW_DOWN);
 		} else if ("zToA".equals(oldMode)) {
 			sorter = new ModelOrder(opNames);
-			sortButton.getStyleClass().remove("zToA");
-			sortButton.getStyleClass().remove("sort_by_order");
-			sortButton.getStyleClass().add("aToZ");
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
 		}
 		Collections.sort(events, sorter);
 		ObservableList<Operation> opsList = opsListView.getItems();
 		opsList.clear();
 		opsList.addAll(applyFilter(filter));
+		icon.setSize("15");
+		icon.setStyleClass("icon-dark");
+		sortButton.setGraphic(icon);
 	}
 
 	public String getSortMode() {

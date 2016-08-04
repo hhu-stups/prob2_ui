@@ -1,124 +1,89 @@
-.icons{
-    -fx-font-family: FontAwesome;
+.root {
+	-fx-base: #e5e5e5;
 }
 
-#searchButton {
-    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-28-search.png");
-    -fx-background-size: 15px;
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: 50%;
+/************************************************************************************
+ * Buttons & Icons																	*
+ ************************************************************************************/
+.button, .toggle-button, .menu-button {
+	-fx-background-color: transparent;
+}
+.menu-button > .arrow-button > .arrow {
+    -fx-background-color: #444444;
+    -fx-opacity: 0.8;
+}
+.button-dark {
+	-fx-background-color: #444444;
+	-fx-background-radius: 100.0%;
+	-fx-opacity: 0.8;
 }
 
-#backButton {
-    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-171-step-backward.png");
-    -fx-background-size: 10px;
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: 50%;
+.icon-dark {
+	-fx-fill: #444444;
+	-fx-opacity: 0.8;
 }
 
-#forwardButton {
-    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-179-step-forward.png");
-    -fx-background-size: 10px;
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: 50%;
+.button-dark:hover, .icon-dark:hover, .menu-button:hover > .arrow-button > .arrow, 
+.menu-button:hover .icon-dark  {
+	-fx-opacity: 1.0;
 }
 
-#randomButton {
-    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-84-random.png");
-    -fx-background-size: 20px;
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: 30%;
+/************************************************************************************
+ * ListView																			*
+ ************************************************************************************/
+}
+}
+}
 }
 
-.aToZ {
-    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-405-sort-by-alphabet.png");
-    -fx-background-size: 18px;
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: 50%;
 }
-
-.zToA {
-    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-406-sort-by-alphabet-alt.png");
-    -fx-background-size: 18px;
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: 50%;
 }
 
  
- .back {
- 	-fx-image: url("glyphicons_free/glyphicons/png/glyphicons-211-arrow-left.png");
- }
- 
- .forward {
- 	-fx-image: url("glyphicons_free/glyphicons/png/glyphicons-212-arrow-right.png");
- }
- 
-#searchicon {
-    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-28-search.png");
 }
 
-.eyeopen {
-    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-52-eye-open.png");
-    -fx-background-size: 20px;
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: 50%;
 }
 
-.eyeclosed {
-    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-53-eye-close.png");
-    -fx-background-size: 20px;
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: 50%;
 }
 
 .reverse {
 	-fx-image: url("glyphicons_free/glyphicons/png/glyphicons-404-sorting.png")
 }
 
-.sort_by_order {
-    -fx-background-image: url("glyphicons_free/glyphicons/png/glyphicons-407-sort-by-order.png");
-    -fx-background-size: 18px;
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: 50%;
+
 }
 
 #past {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: normal;
-	-fx-font-size: 12px;
 }
 
 #present {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: bold;
-	-fx-font-size: 12px;
 }
 
 #future {
 	-fx-font-family: ARIAL;
 	-fx-fill: GRAY;
 	-fx-font-style: italic;
-	-fx-font-size: 12px;
+	-fx-font-size: 12.0px;
 }
 	
 .mcheckSuccess {
 	-fx-background-color: #d0ebd0;
-	-fx-background-radius: 5 5 5 5;
 }
 
 .mcheckDanger {
 	-fx-background-color: #ebd1d1;
-	-fx-background-radius: 5 5 5 5;
 }
 
 .mcheckWarning {
 	-fx-background-color:  #f1efcd;
-	-fx-background-radius: 5 5 5 5;
 }
 
 .mcheckNoCheck {
 	-fx-background-color:  #eeeeee;
-	-fx-background-radius: 5 5 5 5;
 }
 
 .gridViewRow {

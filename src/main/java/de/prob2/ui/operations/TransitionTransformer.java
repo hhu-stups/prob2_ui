@@ -1,39 +1,21 @@
 package de.prob2.ui.operations;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.Lighting;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 public class TransitionTransformer implements Callback<ListView<Operation>, ListCell<Operation>> {
 
 	public class OperationsCell extends ListCell<Operation> {
-		ImageView imEnabled = new ImageView(
-				new Image(getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-174-play.png")));
-		ImageView imNotEnabled = new ImageView(
-				new Image(getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-192-minus-sign.png")));
+		FontAwesomeIconView iconEnabled = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
+		FontAwesomeIconView iconNotEnabled = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
 		
 		public OperationsCell() {
-			Lighting lighting = new Lighting();
-			lighting.setSpecularConstant(1.5);
-			lighting.setSpecularExponent(0.0);
-			ColorAdjust green = new ColorAdjust();
-			green.setInput(lighting);
-			green.setHue(0.6);
-			green.setSaturation(1);
-			imEnabled.setEffect(green);
-			imEnabled.setFitWidth(13);
-			imEnabled.setFitHeight(13);
-			ColorAdjust red = new ColorAdjust();
-			red.setInput(lighting);
-			red.setHue(0.0);
-			red.setSaturation(1);
-			imNotEnabled.setEffect(red);
-			imNotEnabled.setFitWidth(13);
-			imNotEnabled.setFitHeight(13);
+			iconEnabled.setFill(Color.LIMEGREEN);
+			iconNotEnabled.setFill(Color.RED);
 		}
 		
 		@Override
@@ -42,9 +24,11 @@ public class TransitionTransformer implements Callback<ListView<Operation>, List
 			if(item != null &! empty) {
 				setText(item.toString());
 				if(item.isEnabled()) {
-					setGraphic(imEnabled);
+					setGraphic(iconEnabled);
+					setDisable(false);
 				} else {
-					setGraphic(imNotEnabled);
+					setGraphic(iconNotEnabled);
+					setDisable(true);
 				}
 			} else {
 				setGraphic(null);
