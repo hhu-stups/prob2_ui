@@ -107,11 +107,15 @@
 									onAction="#random" text="Execute 5 Events" />
 								<MenuItem fx:id="tenRandomEvents" mnemonicParsing="false"
 									onAction="#random" text="Execute 10 Events" />
-								<CustomMenuItem mnemonicParsing="false"
-									text="Unspecified Action">
+								<CustomMenuItem fx:id="someRandomEvents"
+									mnemonicParsing="false">
 									<content>
-										<TextField fx:id="randomText" onKeyPressed="#randomInput"
-											promptText="# of Events" />
+										<AnchorPane>
+											<children>
+												<TextField fx:id="randomText" onAction="#random"
+													promptText="# of Events" />
+											</children>
+										</AnchorPane>
 									</content>
 								</CustomMenuItem>
 							</items>

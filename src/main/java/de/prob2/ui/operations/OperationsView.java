@@ -34,6 +34,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
+import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
@@ -66,6 +67,8 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 	private MenuItem fiveRandomEvents;
 	@FXML
 	private MenuItem tenRandomEvents;
+	@FXML
+	private CustomMenuItem someRandomEvents;
 
 	private AbstractModel currentModel;
 	private List<String> opNames = new ArrayList<String>();;
@@ -204,27 +207,19 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 	public void random(ActionEvent event) {
 		Trace trace = animations.getCurrentTrace();
 		if (trace != null) {
-			if (event.getSource().equals(oneRandomEvent)) {
-				animations.traceChange(trace.randomAnimation(1));
-			} else if (event.getSource().equals(fiveRandomEvents)) {
-				animations.traceChange(trace.randomAnimation(5));
-			} else if (event.getSource().equals(tenRandomEvents)) {
-				animations.traceChange(trace.randomAnimation(10));
-			}
-		}
-	}
-
-	@FXML
-	public void randomInput(KeyEvent event) {
-		Trace trace = animations.getCurrentTrace();
-		if (trace != null) {
-			if (event.getCharacter().equals(KeyCode.ENTER)) {
+			if (event.getSource().equals(randomText)) {
 				try {
 					int steps = Integer.parseInt(randomText.getText());
 					animations.traceChange(trace.randomAnimation(steps));
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				}
+			} else if (event.getSource().equals(oneRandomEvent)) {
+				animations.traceChange(trace.randomAnimation(1));
+			} else if (event.getSource().equals(fiveRandomEvents)) {
+				animations.traceChange(trace.randomAnimation(5));
+			} else if (event.getSource().equals(tenRandomEvents)) {
+				animations.traceChange(trace.randomAnimation(10));
 			}
 		}
 	}
