@@ -15,6 +15,7 @@ public class FormulaView extends Stage {
 	private FormulaGraph graph;
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
+	private double dragFactor = 0.84;
 	
 	public FormulaView(FormulaGraph data) {
 		super();
@@ -37,8 +38,8 @@ public class FormulaView extends Stage {
 		
 		graph.setOnMouseDragged(e-> {
 			graph.setCursor(Cursor.MOVE);
-			root.setHvalue(root.getHvalue() + (-e.getSceneX() + oldMousePositionX)/graph.getWidth());
-			root.setVvalue(root.getVvalue() + (-e.getSceneY() + oldMousePositionY)/graph.getHeight());
+			root.setHvalue(root.getHvalue() + (-e.getSceneX() + oldMousePositionX)/(graph.getWidth() * dragFactor));
+			root.setVvalue(root.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(graph.getHeight() * dragFactor));
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
 
@@ -49,9 +50,11 @@ public class FormulaView extends Stage {
 			}
 
 			if(e.getButton() == MouseButton.PRIMARY) {
-				graph.getTransforms().add(new Scale(1.3, 1.3));			
+				graph.getTransforms().add(new Scale(1.3, 1.3));	
+				dragFactor *= 1.3;
 			} else if(e.getButton() == MouseButton.SECONDARY) {
 				graph.getTransforms().add(new Scale(0.8, 0.8));
+				dragFactor *= 0.8;
 				
 			}
 			
