@@ -5,11 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.base.Joiner;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
@@ -20,7 +17,6 @@ import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.events.OpenFileEvent;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -56,8 +52,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	private AnimationSelector animations;
 
 	@Inject
-	private ModelcheckingController(final AnimationSelector animations, FXMLLoader loader, EventBus bus) {
-		bus.register(this);
+	private ModelcheckingController(final AnimationSelector animations, FXMLLoader loader) {
 		this.animations = animations;
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stats_view.fxml"));
@@ -195,8 +190,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		AnchorPane.setLeftAnchor(stats, 0.0);
 	}
 
-	@Subscribe
-	public void resetView(OpenFileEvent event) {
+	public void resetView() {
 		showStats(new ModelCheckStats(new FXMLLoader(), this));
 		historyNodeList.clear();
 	}
