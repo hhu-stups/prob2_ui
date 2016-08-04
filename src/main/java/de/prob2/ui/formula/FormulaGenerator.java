@@ -30,7 +30,7 @@ public class FormulaGenerator {
 		try {
 			InsertFormulaForVisualizationCommand cmd1 = new InsertFormulaForVisualizationCommand(formula);
 			Trace currentTrace = animationSelector.getCurrentTrace();
-			if(!currentTrace.canGoBack()) {
+			if(!currentTrace.getCurrentState().isInitialised()) {
 				showFormulaViewError(FormulaViewErrorType.NOT_INITIALIZE_ERROR);
 				return;
 			}
@@ -50,7 +50,7 @@ public class FormulaGenerator {
 	private void showFormulaViewError(FormulaViewErrorType error) {
 		Alert alert = new Alert(AlertType.ERROR);
 		alert.setTitle("Error while trying to visualize expression");
-		alert.setHeaderText("The statespace is not initialized.");
+		alert.setHeaderText("The current state is not initialized.");
 		if(error == FormulaViewErrorType.PARSING_ERROR) {
 			alert.setHeaderText("The formula cannot be parsed and visualize.");
 		}
