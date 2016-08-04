@@ -17,5 +17,6 @@
 .gradle/
 
 # ProB
-ProB.log.*.log
+*.log
+*.log.*
 prob_log.txt
