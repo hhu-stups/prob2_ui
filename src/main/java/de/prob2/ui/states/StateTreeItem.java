@@ -8,7 +8,7 @@ import javafx.beans.property.StringProperty;
 
 import java.util.Map;
 
-public abstract class StateTreeItem<T> implements Comparable<StateTreeItem<?>> {
+public abstract class StateTreeItem<T> {
 	protected StringProperty name;
 	public ReadOnlyStringProperty nameProperty() {
 		return this.name;
@@ -56,21 +56,6 @@ public abstract class StateTreeItem<T> implements Comparable<StateTreeItem<?>> {
 	
 	public StateTreeItem() {
 		this("", "", "");
-	}
-	
-	@Override
-	public boolean equals(final Object obj) {
-		if (!(obj instanceof StateTreeItem)) {
-			return false;
-		}
-		
-		StateTreeItem sti = (StateTreeItem)obj;
-		return this.getContents().equals(sti.getContents());
-	}
-	
-	@Override
-	public int compareTo(StateTreeItem<?> o) {
-		return this.getName().compareTo(o.getName());
 	}
 	
 	public void update(

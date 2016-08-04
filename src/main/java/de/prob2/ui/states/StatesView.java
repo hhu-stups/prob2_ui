@@ -26,8 +26,6 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.input.KeyCharacterCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
 
 @Singleton
@@ -129,7 +127,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			}
 		}
 
-		treeItem.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
+		treeItem.getChildren().sort((a, b) -> a.getValue().getName().compareTo(b.getValue().getName()));
 	}
 
 	private void updateChildren(
@@ -177,7 +175,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			}
 		}
 
-		treeItem.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
+		treeItem.getChildren().sort((a, b) -> a.getValue().getName().compareTo(b.getValue().getName()));
 	}
 
 	@Override
