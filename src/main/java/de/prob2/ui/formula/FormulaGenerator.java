@@ -31,7 +31,7 @@ public class FormulaGenerator {
 			InsertFormulaForVisualizationCommand cmd1 = new InsertFormulaForVisualizationCommand(formula);
 			Trace currentTrace = animationSelector.getCurrentTrace();
 			if(!currentTrace.canGoBack()) {
-				showNotInitializeError();
+				showFormulaViewError(FormulaViewErrorType.NOT_INITIALIZE_ERROR);
 				return;
 			}
 			currentTrace.getStateSpace().execute(cmd1);
@@ -43,23 +43,20 @@ public class FormulaGenerator {
 			FormulaView fview = new FormulaView(graph);
 			fview.show();
 		} catch (Exception e) {
-			showParsingError();
+			showFormulaViewError(FormulaViewErrorType.PARSING_ERROR);
 		}
 	}
 	
-	private void showNotInitializeError() {
-		 Alert alert = new Alert(AlertType.ERROR);
-		 alert.setTitle("Error while parsing formula");
-		 alert.setHeaderText("The statespace is not initialized.");
-		 alert.showAndWait();
+	private void showFormulaViewError(FormulaViewErrorType error) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Error while trying to visualize expression");
+		alert.setHeaderText("The statespace is not initialized.");
+		if(error == FormulaViewErrorType.PARSING_ERROR) {
+			alert.setHeaderText("The formula cannot be parsed and visualize.");
+		}
+		alert.showAndWait();
 	}
 	
-	private void showParsingError() {
-		 Alert alert = new Alert(AlertType.ERROR);
-		 alert.setTitle("Error while parsing formula");
-		 alert.setHeaderText("The formula cannot be parsed and visualize.");
-		 alert.showAndWait();
-	}
 	
 	public IEvalElement parse(String params) {
 		try {
