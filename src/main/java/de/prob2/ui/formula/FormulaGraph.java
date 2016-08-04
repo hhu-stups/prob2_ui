@@ -2,7 +2,6 @@ package de.prob2.ui.formula;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Line;
 

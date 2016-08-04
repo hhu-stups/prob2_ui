@@ -1,0 +1,66 @@
+package de.prob2.ui.formula;
+
+import javafx.scene.Cursor;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseButton;
+import javafx.scene.transform.Scale;
+import javafx.stage.Stage;
+
+public class FormulaView extends Stage {
+	
+	private Group group;
+	private ScrollPane root;
+	private FormulaGraph graph;
+	private double oldMousePositionX = -1;
+	private double oldMousePositionY = -1;
+	
+	public FormulaView(FormulaGraph data) {
+		super();
+		graph = data;
+		setEventListeners();
+		group = new Group();
+		root = new ScrollPane(group);
+		group.getChildren().add(graph);
+		Scene scene = new Scene(root, 1024, 768);
+		this.setTitle("Mathematical Expression");
+		this.setScene(scene);
+	}
+	
+	private void setEventListeners() {
+		graph.setOnMouseMoved(e-> {
+			graph.setCursor(Cursor.HAND);
+			oldMousePositionX = e.getSceneX();
+			oldMousePositionY = e.getSceneY();
+		});
+		
+		graph.setOnMouseDragged(e-> {
+			graph.setCursor(Cursor.MOVE);
+			root.setHvalue(root.getHvalue() + (-e.getSceneX() + oldMousePositionX)/graph.getWidth());
+			root.setVvalue(root.getVvalue() + (-e.getSceneY() + oldMousePositionY)/graph.getHeight());
+			oldMousePositionX = e.getSceneX();
+			oldMousePositionY = e.getSceneY();
+
+		});
+		graph.setOnMouseClicked(e -> {
+			if(e.getClickCount() < 2) {
+				return;
+			}
+
+			if(e.getButton() == MouseButton.PRIMARY) {
+				graph.getTransforms().add(new Scale(1.3, 1.3));			
+			} else if(e.getButton() == MouseButton.SECONDARY) {
+				graph.getTransforms().add(new Scale(0.8, 0.8));
+				
+			}
+			
+			group.getChildren().clear();
+			group.getChildren().add(graph);
+			double Xpos = e.getX()/graph.getWidth();
+			double Ypos = e.getY()/graph.getHeight();
+			root.setHvalue(Xpos);
+			root.setVvalue(Ypos);
+		});
+	}
+}
