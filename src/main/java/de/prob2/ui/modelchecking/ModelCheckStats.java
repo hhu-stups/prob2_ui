@@ -8,7 +8,6 @@ import java.util.Map;
 import com.google.inject.Inject;
 
 import de.prob.animator.command.ComputeCoverageCommand.ComputeCoverageResult;
-import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLOk;
 import de.prob.check.ModelCheckOk;

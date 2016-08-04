@@ -160,12 +160,13 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 		if (rootatbottom) {
 			Collections.reverse(history);
 		}
+		btprevious.setDisable(!currentTrace.canGoBack());
+		btforward.setDisable(!currentTrace.canGoForward());
 	}
 
 	@Override
 	public void animatorStatus(boolean busy) {
 		// TODO Auto-generated method stub
-
 	}
 
 }

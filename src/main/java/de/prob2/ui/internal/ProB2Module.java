@@ -7,6 +7,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+
 import de.prob.MainModule;
 import de.prob2.ui.commands.OpenFileCommand;
 import de.prob2.ui.dotty.DottyView;

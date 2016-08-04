@@ -1,7 +1,5 @@
 package de.prob2.ui.events;
 
-import de.prob.statespace.Trace;
-
 public class TraceChangeEvent {
 
 	private int index;

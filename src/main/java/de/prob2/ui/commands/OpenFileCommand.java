@@ -8,6 +8,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;

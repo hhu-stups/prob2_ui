@@ -9,6 +9,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.events.OpenFileEvent;

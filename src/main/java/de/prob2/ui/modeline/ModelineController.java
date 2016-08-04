@@ -3,8 +3,8 @@ package de.prob2.ui.modeline;
 import java.io.IOException;
 
 import com.google.inject.Inject;
-
 import com.google.inject.Singleton;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.Pane;
 

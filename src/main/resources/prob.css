@@ -96,15 +96,10 @@
 
 
 
-
-
 /************************************************************************************
  * Specific Styles																	*
  ************************************************************************************/
-#searchicon {
-    -fx-image: url("glyphicons_free/glyphicons/png/glyphicons-28-search.png");
-}
-
+/* ============= HISTORY VIEW ================== */
 #past {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: normal;
@@ -123,7 +118,8 @@
 	-fx-font-style: italic;
 	-fx-font-size: 12.0px;
 }
-	
+
+/* ============= MODELCHECKING VIEW ================== */	
 .mcheckSuccess {
 	-fx-background-color: #d0ebd0;
 	-fx-background-radius: 5.0 5.0 5.0 5.0;

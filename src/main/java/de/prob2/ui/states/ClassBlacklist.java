@@ -5,6 +5,7 @@ import java.util.HashSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.sun.javafx.collections.ObservableSetWrapper;
+
 import de.prob.model.representation.AbstractElement;
 import javafx.collections.ObservableSet;
 
