@@ -5,15 +5,21 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+<<<<<<< HEAD
 
+=======
+import de.be4.classicalb.core.parser.exceptions.BException;
+>>>>>>> master
 import de.codecentric.centerdevice.MenuToolkit;
+import de.prob.scripting.Api;
+import de.prob.statespace.AnimationSelector;
+import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 import de.prob2.ui.ProB2;
-import de.prob2.ui.events.OpenFileEvent;
 import de.prob2.ui.formula.FormulaGenerator;
+import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modelchecking.ModelcheckingDialog;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.BlacklistStage;
@@ -22,25 +28,27 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
 @Singleton
 public class MenuController extends MenuBar {
-	private EventBus bus;
-	private BlacklistStage blacklistStage;
-	private PreferencesStage preferencesStage;
-	private Stage mcheckStage;
+	private final Api api;
+	private final AnimationSelector animationSelector;
+	private final BlacklistStage blacklistStage;
+	private final PreferencesStage preferencesStage;
+	private final ModelcheckingController modelcheckingController;
+	private final Stage mcheckStage;
+	private final FormulaGenerator formulaGenerator;
 	private Window window;
-	private FormulaGenerator formulaGenerator;
 
 	@FXML
 	private void handleLoadDefault(){
@@ -62,7 +70,7 @@ public class MenuController extends MenuBar {
 	private void handleLoadPerspective(){
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
-		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("FXML Files", "*.fxml"));
+		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("FXML Files", "*.fxml"));
 		File selectedFile = fileChooser.showOpenDialog(window);
 		if (selectedFile!=null)
 			try {
@@ -80,15 +88,42 @@ public class MenuController extends MenuBar {
 
 	@FXML
 	private void handleOpen(ActionEvent event) {
-		FileChooser fileChooser = new FileChooser();
+		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
 		fileChooser.getExtensionFilters().addAll(
-				// new ExtensionFilter("All Files", "*.*"),
-				new ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")
-				// new ExtensionFilter("EventB Files", "*.eventb", "*.bum", "*.buc"),
-				// new ExtensionFilter("CSP Files", "*.cspm")
+				// new FileChooser.ExtensionFilter("All Files", "*.*"),
+				new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")//,
+				// new FileChooser.ExtensionFilter("EventB Files", "*.eventb", "*.bum", "*.buc"),
+				// new FileChooser.ExtensionFilter("CSP Files", "*.cspm")
 		);
-		bus.post(fileChooser);
+		
+		final File selectedFile = fileChooser.showOpenDialog(this.window);
+		if (selectedFile == null) {
+			return;
+		}
+		
+		switch (fileChooser.getSelectedExtensionFilter().getDescription()) {
+			case "Classical B Files":
+				final StateSpace newSpace;
+				try {
+					newSpace = this.api.b_load(selectedFile.getAbsolutePath());
+				} catch (IOException | BException e) {
+					e.printStackTrace();
+					new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait();
+					return;
+				}
+				
+				final Trace currentTrace = this.animationSelector.getCurrentTrace();
+				if (currentTrace != null) {
+					this.animationSelector.removeTrace(currentTrace);
+				}
+				this.animationSelector.addNewAnimation(new Trace(newSpace));
+				modelcheckingController.resetView();
+				break;
+			
+			default:
+				throw new IllegalStateException("Unknown file type selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
+		}
 	}
 	
 	@FXML
@@ -119,15 +154,6 @@ public class MenuController extends MenuBar {
 	private void handleModelCheck(ActionEvent event) {
 		this.mcheckStage.showAndWait();
 	}
-
-	@Subscribe
-	public void showFileDialogHandler(FileChooser chooser) {
-		File selectedFile = chooser.showOpenDialog(this.window);
-		if (selectedFile != null) {
-			String extensionFilter = chooser.getSelectedExtensionFilter().getDescription();
-			bus.post(new OpenFileEvent(selectedFile, extensionFilter));
-		}
-	}
 	
 	@FXML
 	public void initialize() {
@@ -143,20 +169,24 @@ public class MenuController extends MenuBar {
 
 	@Inject
 	private MenuController(
-		FXMLLoader loader,
-		EventBus bus,
-		BlacklistStage blacklistStage,
-		PreferencesStage preferencesStage,
-		ModelcheckingDialog mcheckController,
-		FormulaGenerator formulaGenerator
+		final FXMLLoader loader,
+		final Api api,
+		final AnimationSelector animationSelector,
+		final BlacklistStage blacklistStage,
+		final PreferencesStage preferencesStage,
+		final ModelcheckingDialog modelcheckingDialog,
+		final ModelcheckingController modelcheckingController,
+		final FormulaGenerator formulaGenerator
 	) {
-		this.bus = bus;
+		this.api = api;
+		this.animationSelector = animationSelector;
 		this.blacklistStage = blacklistStage;
 		this.preferencesStage = preferencesStage;
 		this.formulaGenerator = formulaGenerator;
+		this.modelcheckingController = modelcheckingController;
 		this.mcheckStage = new Stage();
 		this.mcheckStage.setTitle("Model Check");
-		this.mcheckStage.setScene(new Scene(mcheckController));
+		this.mcheckStage.setScene(new Scene(modelcheckingDialog));
 		this.mcheckStage.initModality(Modality.NONE);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
@@ -166,7 +196,6 @@ public class MenuController extends MenuBar {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		bus.register(this);
 		
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			// Mac-specific menu stuff

@@ -38,6 +38,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 
 @Singleton
@@ -64,8 +66,6 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 	private MenuItem fiveRandomEvents;
 	@FXML
 	private MenuItem tenRandomEvents;
-	@FXML
-	private Button randomEventsButton;
 
 	private AbstractModel currentModel;
 	private List<String> opNames = new ArrayList<String>();;
@@ -210,7 +210,15 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 				animations.traceChange(trace.randomAnimation(5));
 			} else if (event.getSource().equals(tenRandomEvents)) {
 				animations.traceChange(trace.randomAnimation(10));
-			} else if (event.getSource().equals(randomEventsButton) || event.getSource().equals(randomText)) {
+			}
+		}
+	}
+
+	@FXML
+	public void randomInput(KeyEvent event) {
+		Trace trace = animations.getCurrentTrace();
+		if (trace != null) {
+			if (event.getCharacter().equals(KeyCode.ENTER)) {
 				try {
 					int steps = Integer.parseInt(randomText.getText());
 					animations.traceChange(trace.randomAnimation(steps));
