@@ -14,10 +14,8 @@ public class FormulaGraph extends Region {
 		 root = node;
 		 root.setPosition(25, calculateY()+20);
 		 draw(root, 0);
-		 
 	}
-		
-	
+			
 	private double calculateY() {
 		if(calculateHeight(0)/2 < 400) {
 			return 400;
