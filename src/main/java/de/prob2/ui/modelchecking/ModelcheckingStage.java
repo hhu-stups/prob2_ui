@@ -13,7 +13,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 public class ModelcheckingStage extends Stage {
@@ -35,7 +34,8 @@ public class ModelcheckingStage extends Stage {
 	private ModelcheckingController modelcheckController;
 
 	@Inject
-	public ModelcheckingStage(AnimationSelector ANIMATIONS, FXMLLoader loader, ModelcheckingController modelcheckController) {
+	public ModelcheckingStage(AnimationSelector ANIMATIONS, FXMLLoader loader,
+			ModelcheckingController modelcheckController) {
 		this.animations = ANIMATIONS;
 		this.modelcheckController = modelcheckController;
 		try {

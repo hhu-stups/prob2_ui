@@ -15,6 +15,7 @@ import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.ProB2;
+import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modelchecking.ModelcheckingStage;
@@ -32,7 +33,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -46,6 +46,7 @@ public class MenuController extends MenuBar {
 	private final Stage mcheckStage;
 	private final FormulaGenerator formulaGenerator;
 	private Window window;
+	private DottyStage dottyStage;
 
 	@FXML
 	private void handleLoadDefault() {
@@ -153,6 +154,11 @@ public class MenuController extends MenuBar {
 	private void handleModelCheck(ActionEvent event) {
 		this.mcheckStage.showAndWait();
 	}
+	
+	@FXML
+	private void handleDotty(ActionEvent event) {
+		this.dottyStage.showAndWait();
+	}
 
 	@FXML
 	public void initialize() {
@@ -169,14 +175,16 @@ public class MenuController extends MenuBar {
 	@Inject
 	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector,
 			final BlacklistStage blacklistStage, final PreferencesStage preferencesStage,
-			final ModelcheckingStage modelcheckingDialog, final ModelcheckingController modelcheckingController,					final FormulaGenerator formulaGenerator) {
+			final ModelcheckingStage modelcheckingStage, final ModelcheckingController modelcheckingController,
+			final FormulaGenerator formulaGenerator, final DottyStage dottyStage) {
 		this.api = api;
 		this.animationSelector = animationSelector;
 		this.blacklistStage = blacklistStage;
 		this.preferencesStage = preferencesStage;
 		this.formulaGenerator = formulaGenerator;
 		this.modelcheckingController = modelcheckingController;
-		this.mcheckStage = modelcheckingDialog;
+		this.mcheckStage = modelcheckingStage;
+		this.dottyStage = dottyStage;
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);
