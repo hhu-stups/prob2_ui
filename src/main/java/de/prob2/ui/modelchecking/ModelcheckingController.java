@@ -7,6 +7,9 @@ import java.util.List;
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
@@ -28,8 +31,6 @@ import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -109,14 +110,12 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		AnchorPane.setBottomAnchor(box, 2.0);
 		AnchorPane.setLeftAnchor(box, 4.0);
 
-		ImageView imView = new ImageView(selectImage(item.getResult()));
-		imView.setFitHeight(15);
-		imView.setFitWidth(15);
+		FontAwesomeIconView iconView = selectIcon(item.getResult());
 		Text text = new Text(toPrettyString(item.getOptions()));
 		Platform.runLater(() -> {
 			text.wrappingWidthProperty().bind(this.widthProperty().subtract(70.0));
 		});
-		box.getChildren().add(imView);
+		box.getChildren().add(iconView);
 		box.getChildren().add(text);
 
 		return background;
@@ -142,23 +141,21 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		selected.getStyleClass().add("historyItemBackgroundSelected");
 	}
 
-	private Image selectImage(String res) {
-		Image image = null;
+	private FontAwesomeIconView selectIcon(String res) {
+		FontAwesomeIcon icon = null;
 		switch (res) {
 		case "success":
-			image = new Image(
-					getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-199-ok-circle.png"));
+			icon = FontAwesomeIcon.CHECK_CIRCLE_ALT;
 			break;
 		case "danger":
-			image = new Image(
-					getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-198-remove-circle.png"));
+			icon = FontAwesomeIcon.TIMES_CIRCLE_ALT;
 			break;
-		case "warning":
-			image = new Image(
-					getClass().getResourceAsStream("/glyphicons_free/glyphicons/png/glyphicons-505-alert.png"));
-			break;
+		default:
+			icon = FontAwesomeIcon.EXCLAMATION_TRIANGLE;
 		}
-		return image;
+		FontAwesomeIconView iconView = new FontAwesomeIconView(icon);
+		iconView.setSize("15");
+		return iconView;
 	}
 
 	private String toPrettyString(ModelCheckingOptions options) {

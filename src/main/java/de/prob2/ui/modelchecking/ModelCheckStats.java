@@ -175,7 +175,7 @@ public class ModelCheckStats extends AnchorPane {
 		case "danger":
 			resultBackground.getStyleClass().clear();
 			resultBackground.getStyleClass().add("mcheckDanger");
-			resultText.setFill(Color.web("#b95050"));
+			resultText.setFill(Color.web("#b95050ff"));
 			break;
 		case "warning":
 			resultBackground.getStyleClass().clear();

@@ -49,7 +49,10 @@
  ************************************************************************************/
 .context-menu {
  	-fx-background-color: #444444aa;
- 	-fx-background-radius: 3;
+ 	-fx-background-radius: 3.0 3.0 3.0 3.0;
+ 	-fx-background-insets: 0.0, 1.0;
+    -fx-padding: 0.333333em 0.083333em 0.333333em 0.083333em; /* 4 1 8 1 */
+    -fx-effect: dropshadow( gaussian , rgba(0.0,0.0,0.0,0.2) , 12.0, 0.0 , 0.0 , 8.0 );
 }
 .context-menu .menu-item > .label {
 	-fx-text-fill: white;
@@ -57,7 +60,22 @@
 .context-menu .menu-item:focused {
      -fx-background-color: #aaaaaadd;
 }
-
+.context-menu .menu-item:hover {
+     -fx-background-color: #aaaaaadd;
+}
+.context-menu .menu-item:disabled > .label {
+	-fx-text-fill: #cccccc;
+	-fx-opacity: 1.0;
+}
+.context-menu .menu-item:disabled {
+	-fx-opacity: 1.0;
+}
+.context-menu .menu-item:disabled:focused {
+	-fx-background-color: transparent;
+}
+.context-menu .menu-item:disabled:hover {
+	-fx-background-color: transparent;
+}
  
 /************************************************************************************
  * SplitView																		*
@@ -121,22 +139,22 @@
 
 /* ============= MODELCHECKING VIEW ================== */	
 .mcheckSuccess {
-	-fx-background-color: #d0ebd0;
+	-fx-background-color: #00ff0022;
 	-fx-background-radius: 5.0 5.0 5.0 5.0;
 }
 
 .mcheckDanger {
-	-fx-background-color: #ebd1d1;
+	-fx-background-color: #ff000022;
 	-fx-background-radius: 5.0 5.0 5.0 5.0;
 }
 
 .mcheckWarning {
-	-fx-background-color:  #f1efcd;
+	-fx-background-color: #ffff0022;
 	-fx-background-radius: 5.0 5.0 5.0 5.0;
 }
 
 .mcheckNoCheck {
-	-fx-background-color:  #eeeeee;
+	-fx-background-color:  #dddddd;
 	-fx-background-radius: 5.0 5.0 5.0 5.0;
 }
 
@@ -146,19 +164,19 @@
 }
 
 .historyItemBackground {
-	-fx-background-color: lightgrey;
+	-fx-background-color: #aaaaaaaa;
 }
 
 .historyItemBackground:hover {
-	-fx-background-color: grey;
+	-fx-background-color: #aaaaaa;
 }
 
 .historyItemBackgroundSelected {
-	-fx-background-color: lightgrey;
+	-fx-background-color: #aaaaaaaa;
 	-fx-border-color: grey;
 }
 
 .historyItemBackgroundSelected:hover {
-	-fx-background-color: grey;
+	-fx-background-color: #aaaaaa;
 	-fx-border-color: grey;
 }
