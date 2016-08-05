@@ -128,7 +128,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			}
 		}
 
-		treeItem.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
+		treeItem.getChildren().sort((a, b) -> a.getValue().getName().compareTo(b.getValue().getName()));
 	}
 
 	private void updateChildren(
@@ -176,7 +176,7 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			}
 		}
 
-		treeItem.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
+		treeItem.getChildren().sort((a, b) -> a.getValue().getName().compareTo(b.getValue().getName()));
 	}
 
 	@Override
