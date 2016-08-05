@@ -8,7 +8,6 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 
 import de.prob.MainModule;
-import de.prob2.ui.dotty.DottyView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.modelchecking.ModelcheckingController;
@@ -33,7 +32,6 @@ public class ProB2Module extends AbstractModule {
 		bind(ResourceBundle.class).toInstance(bundle);
 		
 		// Controllers
-		bind(DottyView.class);
 		bind(HistoryView.class);
 		bind(MenuController.class);
 		bind(ModelcheckingController.class);
