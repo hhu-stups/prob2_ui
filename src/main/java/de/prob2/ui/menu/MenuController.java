@@ -17,7 +17,7 @@ import de.prob2.ui.ProB2;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.groovy.GroovyConsole;
-import de.prob2.ui.modelchecking.ModelcheckingDialog;
+import de.prob2.ui.modelchecking.ModelcheckingStage;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.BlacklistStage;
 import javafx.event.ActionEvent;
@@ -172,31 +172,23 @@ public class MenuController extends MenuBar {
 	}
 
 	@Inject
-	private MenuController(
-		final FXMLLoader loader,
-		final Api api,
-		final AnimationSelector animationSelector,
-		final BlacklistStage blacklistStage,
-		final PreferencesStage preferencesStage,
-		final ModelcheckingDialog modelcheckingDialog,
-		final ModelcheckingController modelcheckingController,
-		final FormulaGenerator formulaGenerator,
-		final GroovyConsole groovyConsole
-	) {
+
+	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector,
+			final BlacklistStage blacklistStage, final PreferencesStage preferencesStage,
+			final ModelcheckingStage modelcheckingDialog, final ModelcheckingController modelcheckingController,
+			final FormulaGenerator formulaGenerator, final GroovyConsole groovyConsole) {
 		this.api = api;
 		this.animationSelector = animationSelector;
 		this.blacklistStage = blacklistStage;
 		this.preferencesStage = preferencesStage;
 		this.formulaGenerator = formulaGenerator;
 		this.modelcheckingController = modelcheckingController;
-		this.mcheckStage = new Stage();
-		this.mcheckStage.setTitle("Model Check");
-		this.mcheckStage.setScene(new Scene(modelcheckingDialog));
-		this.mcheckStage.initModality(Modality.NONE);
+
 		this.groovyConsoleStage = new Stage();
 		this.groovyConsoleStage.setTitle("Groovy Console");
 		this.groovyConsoleStage.setScene(new Scene(groovyConsole));
 		this.groovyConsoleStage.initModality(Modality.NONE);
+		this.mcheckStage = modelcheckingDialog;
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);

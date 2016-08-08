@@ -16,7 +16,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-public class ModelcheckingDialog extends AnchorPane {
+public class ModelcheckingStage extends Stage {
 
 	@FXML
 	private CheckBox findDeadlocks;
@@ -35,11 +35,11 @@ public class ModelcheckingDialog extends AnchorPane {
 	private ModelcheckingController modelcheckController;
 
 	@Inject
-	public ModelcheckingDialog(AnimationSelector ANIMATIONS, FXMLLoader loader, ModelcheckingController modelcheckController) {
+	public ModelcheckingStage(AnimationSelector ANIMATIONS, FXMLLoader loader, ModelcheckingController modelcheckController) {
 		this.animations = ANIMATIONS;
 		this.modelcheckController = modelcheckController;
 		try {
-			loader.setLocation(getClass().getResource("modelchecking_dialog.fxml"));
+			loader.setLocation(getClass().getResource("modelchecking_stage.fxml"));
 			loader.setRoot(this);
 			loader.setController(this);
 			loader.load();
