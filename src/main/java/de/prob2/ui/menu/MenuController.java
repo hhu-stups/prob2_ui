@@ -16,6 +16,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.modelchecking.ModelcheckingController;
+import de.prob2.ui.groovy.GroovyConsole;
 import de.prob2.ui.modelchecking.ModelcheckingDialog;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.BlacklistStage;
@@ -44,6 +45,7 @@ public class MenuController extends MenuBar {
 	private final ModelcheckingController modelcheckingController;
 	private final Stage mcheckStage;
 	private final FormulaGenerator formulaGenerator;
+	private final Stage groovyConsoleStage;
 	private Window window;
 
 	@FXML
@@ -152,6 +154,12 @@ public class MenuController extends MenuBar {
 	}
 	
 	@FXML
+	public void handleGroovyConsole(ActionEvent event) {
+		this.groovyConsoleStage.show();
+		this.groovyConsoleStage.toFront();
+	}
+	
+	@FXML
 	public void initialize() {
 		this.sceneProperty().addListener((observable, from, to) -> {
 			if (to != null) {
@@ -172,7 +180,8 @@ public class MenuController extends MenuBar {
 		final PreferencesStage preferencesStage,
 		final ModelcheckingDialog modelcheckingDialog,
 		final ModelcheckingController modelcheckingController,
-		final FormulaGenerator formulaGenerator
+		final FormulaGenerator formulaGenerator,
+		final GroovyConsole groovyConsole
 	) {
 		this.api = api;
 		this.animationSelector = animationSelector;
@@ -184,6 +193,10 @@ public class MenuController extends MenuBar {
 		this.mcheckStage.setTitle("Model Check");
 		this.mcheckStage.setScene(new Scene(modelcheckingDialog));
 		this.mcheckStage.initModality(Modality.NONE);
+		this.groovyConsoleStage = new Stage();
+		this.groovyConsoleStage.setTitle("Groovy Console");
+		this.groovyConsoleStage.setScene(new Scene(groovyConsole));
+		this.groovyConsoleStage.initModality(Modality.NONE);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);
