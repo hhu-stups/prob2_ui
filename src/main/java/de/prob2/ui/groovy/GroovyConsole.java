@@ -43,10 +43,14 @@ public class GroovyConsole extends AnchorPane {
 	}
 	
 	private void setListeners() {
-		
+				
 		tagroovy.addEventFilter(MouseEvent.ANY, e-> {
+			if(e.isMiddleButtonDown()) {
+				return;
+			}
 			tagroovy.deselect();
 			goToLastPos();
+			
 		});
 				
 		tagroovy.setOnKeyPressed(e-> {
