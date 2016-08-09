@@ -8,6 +8,8 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 
 import de.prob.MainModule;
+import de.prob2.ui.dotty.DottyView;
+import de.prob2.ui.groovy.GroovyConsole;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.modelchecking.ModelcheckingController;
@@ -38,6 +40,7 @@ public class ProB2Module extends AbstractModule {
 		bind(ModelineController.class);
 		bind(OperationsView.class);
 		bind(StatesView.class);
+		bind(GroovyConsole.class);
 	}
 
 	@Provides

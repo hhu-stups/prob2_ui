@@ -18,6 +18,7 @@ import de.prob2.ui.ProB2;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.modelchecking.ModelcheckingController;
+import de.prob2.ui.groovy.GroovyConsole;
 import de.prob2.ui.modelchecking.ModelcheckingStage;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.BlacklistStage;
@@ -45,6 +46,7 @@ public class MenuController extends MenuBar {
 	private final ModelcheckingController modelcheckingController;
 	private final Stage mcheckStage;
 	private final FormulaGenerator formulaGenerator;
+	private final Stage groovyConsoleStage;
 	private Window window;
 	private DottyStage dottyStage;
 
@@ -161,6 +163,11 @@ public class MenuController extends MenuBar {
 		this.dottyStage.showAndWait();
 	}
 
+	public void handleGroovyConsole(ActionEvent event) {
+		this.groovyConsoleStage.show();
+		this.groovyConsoleStage.toFront();
+	}
+	
 	@FXML
 	public void initialize() {
 		this.sceneProperty().addListener((observable, from, to) -> {
@@ -174,10 +181,11 @@ public class MenuController extends MenuBar {
 	}
 
 	@Inject
+
 	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector,
 			final BlacklistStage blacklistStage, final PreferencesStage preferencesStage,
 			final ModelcheckingStage modelcheckingStage, final ModelcheckingController modelcheckingController,
-			final FormulaGenerator formulaGenerator, final DottyStage dottyStage) {
+			final FormulaGenerator formulaGenerator, final DottyStage dottyStage, final GroovyConsole groovyConsole) {
 		this.api = api;
 		this.animationSelector = animationSelector;
 		this.blacklistStage = blacklistStage;
@@ -186,6 +194,10 @@ public class MenuController extends MenuBar {
 		this.modelcheckingController = modelcheckingController;
 		this.mcheckStage = modelcheckingStage;
 		this.dottyStage = dottyStage;
+		this.groovyConsoleStage = new Stage();
+		this.groovyConsoleStage.setTitle("Groovy Console");
+		this.groovyConsoleStage.setScene(new Scene(groovyConsole));
+		this.groovyConsoleStage.initModality(Modality.NONE);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);

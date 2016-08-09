@@ -26,6 +26,9 @@
 	<Menu mnemonicParsing="false" text="%menu.verify">
 		<MenuItem text="%menu.verify.items.modelcheck" onAction="#handleModelCheck" />
 	</Menu>
+		<Menu mnemonicParsing="false" text="%menu.consoles">
+		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole"/>
+	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.perspectives">
 		<MenuItem mnemonicParsing="false" text="%menu.perspectives.default"
 			onAction="#handleLoadDefault" />
