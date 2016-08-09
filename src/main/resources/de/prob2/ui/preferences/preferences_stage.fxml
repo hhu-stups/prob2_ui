@@ -13,7 +13,7 @@
 <fx:root type="Stage" fx:id="stage" title="Preferences" minHeight="160.0" minWidth="320.0" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
-			<BorderPane>
+			<BorderPane stylesheets="@../../../../prob.css">
 				<center>
 					<TreeTableView fx:id="tv" prefHeight="400.0" prefWidth="600.0" editable="true" showRoot="false">
 						<columns>

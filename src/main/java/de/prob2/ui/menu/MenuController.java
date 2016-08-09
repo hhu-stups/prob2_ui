@@ -153,6 +153,7 @@ public class MenuController extends MenuBar {
 	@FXML
 	private void handleModelCheck(ActionEvent event) {
 		this.mcheckStage.showAndWait();
+		this.mcheckStage.toFront();
 	}
 	
 	@FXML

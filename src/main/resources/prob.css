@@ -44,13 +44,13 @@
 	-fx-background-color: none;
 }
 .check-box:selected > .box > .mark {
-	-fx-background-color: white;
+	-fx-background-color: #444444;
 }
 .check-box:hover > .box > .mark {
-	-fx-background-color: #ffffff33;
+	-fx-background-color: #44444433;
 }
 .check-box:selected:hover > .box > .mark {
-	-fx-background-color: #ffffffaa;
+	-fx-background-color: #444444aa;
 }
 
 /************************************************************************************
@@ -218,6 +218,15 @@
 .dark-highlight {
 	-fx-background-color: #bbbbbb;
 	-fx-padding: 1.0em;
+}
+.dark .check-box:selected > .box > .mark {
+	-fx-background-color: white;
+}
+.dark .check-box:hover > .box > .mark {
+	-fx-background-color: #ffffff33;
+}
+.dark .check-box:selected:hover > .box > .mark {
+	-fx-background-color: #ffffffaa;
 }
  
 /* ============= HISTORY VIEW ================== */
