@@ -10,7 +10,7 @@
 <fx:root type="Stage" title="Dotty" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene width="800" height="600">
-			<ScrollPane fx:id="pane">
+			<ScrollPane fx:id="pane" stylesheets="@../../../../prob.css">
 				<content>
 					<ImageView fx:id="graph" fitHeight="1000" fitWidth="1000">
 						<image>

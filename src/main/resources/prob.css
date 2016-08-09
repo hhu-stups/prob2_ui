@@ -113,7 +113,42 @@
 .context-menu .menu-item:disabled:hover {
 	-fx-background-color: transparent;
 }
- 
+
+/************************************************************************************
+ * ScrollBar																		*
+ ************************************************************************************/
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+.scroll-bar > .thumb {
+    -fx-background-color: #999999; 
+    -fx-background-insets: 2, 3, 4;
+    -fx-background-radius: 5em;
+}
+.scroll-bar:hover > .thumb {
+    -fx-background-color: #666666;
+}
+.scroll-bar:vertical > .increment-button,
+.scroll-bar:vertical > .decrement-button {
+    -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;     
+    -fx-color: transparent;
+    -fx-padding: 0em 0.08em -0.3em 0.08em;
+}
+.scroll-bar:horizontal > .increment-button,
+.scroll-bar:horizontal > .decrement-button {
+    -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;     
+    -fx-color: transparent;
+    -fx-padding: 0.08em -0.3em 0.08em 0em;
+}
+.scroll-pane > .corner {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0 1 1 0;
+}
+.scroll-bar > .decrement-button > .decrement-arrow,
+.scroll-bar > .increment-button > .increment-arrow {
+	-fx-shape: " ";
+}
+
 /************************************************************************************
  * SplitView																		*
  ************************************************************************************/
@@ -168,16 +203,16 @@
         linear-gradient(#bbbbbb 0%, #d4d4d4 50%);*/
     -fx-background-color: 
     	linear-gradient(#d0d0d0, #b4b4b4),
-        linear-gradient(#dadada 0%, #b7b7b7 20%, #b4b4b4 100%), 
+        linear-gradient(#dadada 0.0%, #b7b7b7 20.0%, #b4b4b4 100.0%), 
         #bbbbbb;
-    -fx-background-radius: 8,7,6;
-    -fx-background-insets: 0,1,2;
+    -fx-background-radius: 8.0,7.0,6.0;
+    -fx-background-insets: 0.0,1.0,2.0;
     -fx-text-fill: #444444;
 }
 .dark > .button:hover {
 	-fx-background-color: 
     	linear-gradient(#d0d0d0, #b4b4b4),
-        linear-gradient(#dadada 0%, #b7b7b7 20%, #b4b4b4 100%), 
+        linear-gradient(#dadada 0.0%, #b7b7b7 20.0%, #b4b4b4 100.0%), 
         #aaaaaa;
 }
 .dark-highlight {
