@@ -29,6 +29,43 @@
 }
 
 /************************************************************************************
+ * CheckBox																			*
+ ************************************************************************************/
+.check-box {
+	-fx-background-color: transparent;
+	-fx-text-fill: #444444;
+}
+.check-box > .box {
+	-fx-background-color: transparent;
+	-fx-border-radius: 5.0;
+	-fx-border-color: #444444;
+}
+.check-box > .box > .mark {
+	-fx-background-color: none;
+}
+.check-box:selected > .box > .mark {
+	-fx-background-color: white;
+}
+.check-box:hover > .box > .mark {
+	-fx-background-color: #ffffff33;
+}
+.check-box:selected:hover > .box > .mark {
+	-fx-background-color: #ffffffaa;
+}
+
+/************************************************************************************
+ * ChoiceBox																			*
+ ************************************************************************************/
+.choice-box {
+	-fx-background-color: #bbbbbb;	
+	-fx-text-fill: #444444;
+}
+
+.choice-box > .open-button > .arrow {
+	-fx-background-color: #444444;
+}
+ 
+/************************************************************************************
  * ListView																			*
  ************************************************************************************/
 .list-cell:odd {
@@ -64,7 +101,7 @@
      -fx-background-color: #aaaaaadd;
 }
 .context-menu .menu-item:disabled > .label {
-	-fx-text-fill: #cccccc;
+	-fx-text-fill: #bcbcbc;
 	-fx-opacity: 1.0;
 }
 .context-menu .menu-item:disabled {
@@ -117,6 +154,37 @@
 /************************************************************************************
  * Specific Styles																	*
  ************************************************************************************/
+.dark {
+	-fx-background-color: #999999;
+}
+.dark > .label {
+	-fx-text-fill: #444444;
+	-fx-font-weight: bold;
+}
+.dark > .button {
+	/*-fx-background-color: 
+        linear-gradient(#d0d0d0, #b4b4b4),
+        linear-gradient(#dadada 0%, #b7b7b7 20%, #b4b4b4 100%),
+        linear-gradient(#bbbbbb 0%, #d4d4d4 50%);*/
+    -fx-background-color: 
+    	linear-gradient(#d0d0d0, #b4b4b4),
+        linear-gradient(#dadada 0%, #b7b7b7 20%, #b4b4b4 100%), 
+        #bbbbbb;
+    -fx-background-radius: 8,7,6;
+    -fx-background-insets: 0,1,2;
+    -fx-text-fill: #444444;
+}
+.dark > .button:hover {
+	-fx-background-color: 
+    	linear-gradient(#d0d0d0, #b4b4b4),
+        linear-gradient(#dadada 0%, #b7b7b7 20%, #b4b4b4 100%), 
+        #aaaaaa;
+}
+.dark-highlight {
+	-fx-background-color: #bbbbbb;
+	-fx-padding: 1.0em;
+}
+ 
 /* ============= HISTORY VIEW ================== */
 #past {
 	-fx-font-family: ARIAL;
