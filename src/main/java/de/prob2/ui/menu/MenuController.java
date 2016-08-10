@@ -17,8 +17,8 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
-import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.groovy.GroovyConsole;
+import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modelchecking.ModelcheckingStage;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.BlacklistStage;
@@ -34,6 +34,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 

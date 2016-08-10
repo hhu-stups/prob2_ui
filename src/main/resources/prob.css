@@ -47,24 +47,51 @@
 	-fx-background-color: #444444;
 }
 .check-box:hover > .box > .mark {
-	-fx-background-color: #44444433;
+	-fx-background-color: #44444444;
 }
 .check-box:selected:hover > .box > .mark {
-	-fx-background-color: #444444aa;
+	-fx-background-color: #e0e0e0aa;
 }
 
 /************************************************************************************
- * ChoiceBox																			*
+ * ChoiceBox																		*
  ************************************************************************************/
 .choice-box {
-	-fx-background-color: #bbbbbb;	
+	-fx-background-color: #cccccc;	
 	-fx-text-fill: #444444;
 }
 
 .choice-box > .open-button > .arrow {
 	-fx-background-color: #444444;
 }
- 
+
+/************************************************************************************
+ * ComboBox																			*
+ ************************************************************************************/
+.combo-box {
+	-fx-background-color: #cccccc;	
+	-fx-text-fill: #444444;
+}
+.combo-box-popup > .list-view {
+    -fx-background-color: #444444aa;
+ 	-fx-background-radius: 3.0 3.0 3.0 3.0;
+    -fx-background-insets: 0, 1;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 12, 0.0 , 0 , 8 );
+} 
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
+    -fx-background: transparent;
+}
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover {
+	    -fx-background: -fx-accent;
+     -fx-background-color: #aaaaaadd;
+}
+.combo-box-popup  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected,
+.combo-box-popup  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
+    -fx-background: -fx-accent;
+    -fx-background-color: -fx-background, -fx-cell-focus-inner-border, -fx-background;
+    -fx-background-insets: 0, 1, 2;
+}
+  
 /************************************************************************************
  * ListView																			*
  ************************************************************************************/
@@ -76,9 +103,6 @@
 }
 .list-cell:hover {
 	-fx-background-color: #ededed;
-}
-.list-cell:pressed {
-	-fx-text-fill: white;
 }
 
 /************************************************************************************
@@ -150,6 +174,20 @@
 }
 
 /************************************************************************************
+ * Spinner																			*
+ ************************************************************************************/
+.spinner .increment-arrow-button {
+    -fx-background-color: -fx-outer-border, #cccccc;
+}
+.spinner .decrement-arrow-button {
+    -fx-background-color: -fx-outer-border, #cccccc;
+}
+.spinner .increment-arrow-button .increment-arrow,
+.spinner .decrement-arrow-button .decrement-arrow {
+    -fx-background-color: #444444;
+}
+
+/************************************************************************************
  * SplitView																		*
  ************************************************************************************/
 .split-pane > .split-pane-divider {
@@ -190,36 +228,28 @@
  * Specific Styles																	*
  ************************************************************************************/
 .dark {
-	-fx-background-color: #999999;
+	-fx-background-color: #adadad;
 }
 .dark > .label {
 	-fx-text-fill: #444444;
 	-fx-font-weight: bold;
 }
-.dark > .button {
-	/*-fx-background-color: 
-        linear-gradient(#d0d0d0, #b4b4b4),
-        linear-gradient(#dadada 0%, #b7b7b7 20%, #b4b4b4 100%),
-        linear-gradient(#bbbbbb 0%, #d4d4d4 50%);*/
-    -fx-background-color: 
-    	linear-gradient(#d0d0d0, #b4b4b4),
-        linear-gradient(#dadada 0.0%, #b7b7b7 20.0%, #b4b4b4 100.0%), 
-        #bbbbbb;
-    -fx-background-radius: 8.0,7.0,6.0;
+.dark .button {
+    -fx-background-color: transparent;
+    -fx-border-color: #444444;
+    -fx-border-radius: 6.0;
     -fx-background-insets: 0.0,1.0,2.0;
     -fx-text-fill: #444444;
+    -fx-font-weight: bold;
 }
-.dark > .button:hover {
-	-fx-background-color: 
-    	linear-gradient(#d0d0d0, #b4b4b4),
-        linear-gradient(#dadada 0.0%, #b7b7b7 20.0%, #b4b4b4 100.0%), 
-        #aaaaaa;
+.dark .button:hover {
+    -fx-text-fill: #eaeaea;
 }
 .dark-highlight {
-	-fx-background-color: #bbbbbb;
+	-fx-background-color: #cccccc;
 	-fx-padding: 1.0em;
 }
-.dark .check-box:selected > .box > .mark {
+/*.dark .check-box:selected > .box > .mark {
 	-fx-background-color: white;
 }
 .dark .check-box:hover > .box > .mark {
@@ -227,7 +257,7 @@
 }
 .dark .check-box:selected:hover > .box > .mark {
 	-fx-background-color: #ffffffaa;
-}
+}*/
  
 /* ============= HISTORY VIEW ================== */
 #past {
