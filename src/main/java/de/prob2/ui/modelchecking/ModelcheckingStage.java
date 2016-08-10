@@ -13,7 +13,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 public class ModelcheckingStage extends Stage {
@@ -35,7 +34,8 @@ public class ModelcheckingStage extends Stage {
 	private ModelcheckingController modelcheckController;
 
 	@Inject
-	public ModelcheckingStage(AnimationSelector ANIMATIONS, FXMLLoader loader, ModelcheckingController modelcheckController) {
+	public ModelcheckingStage(AnimationSelector ANIMATIONS, FXMLLoader loader,
+			ModelcheckingController modelcheckController) {
 		this.animations = ANIMATIONS;
 		this.modelcheckController = modelcheckController;
 		try {
@@ -54,6 +54,7 @@ public class ModelcheckingStage extends Stage {
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Specification file missing");
 			alert.setHeaderText("No specification file loaded. Cannot run model checker.");
+			alert.getDialogPane().getStylesheets().add("prob.css");
 			alert.showAndWait();
 			return;
 		}
@@ -78,8 +79,8 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	void cancel(ActionEvent event) {
 		modelcheckController.cancelModelchecking();
-		Stage stage = (Stage) this.getScene().getWindow();
-		stage.close();
+//		Stage stage = (Stage) this.getScene().getWindow();
+//		stage.close();
 	}
 
 }

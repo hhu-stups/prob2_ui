@@ -10,36 +10,52 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" fx:id="stage" title="Preferences" minHeight="160.0" minWidth="320.0" xmlns:fx="http://javafx.com/fxml/1">
+
+<fx:root type="Stage" fx:id="stage" title="Preferences"
+	minHeight="160.0" minWidth="320.0" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
-			<BorderPane>
+			<BorderPane stylesheets="@../../../../prob.css"
+				styleClass="dark">
 				<center>
-					<TreeTableView fx:id="tv" prefHeight="400.0" prefWidth="600.0" editable="true" showRoot="false">
+					<TreeTableView fx:id="tv" prefHeight="400.0"
+						prefWidth="600.0" editable="true" showRoot="false">
 						<columns>
-							<TreeTableColumn fx:id="tvName" editable="false" minWidth="80.0" prefWidth="320.0" text="Name"/>
-							<TreeTableColumn fx:id="tvChanged" editable="false" resizable="false" prefWidth="20.0" text="*"/>
-							<TreeTableColumn fx:id="tvValue" editable="true" minWidth="40.0" prefWidth="120.0" sortable="false" text="Value"/>
-							<TreeTableColumn fx:id="tvDefaultValue" editable="false" minWidth="40.0" prefWidth="120.0" sortable="false" text="Default Value"/>
-							<TreeTableColumn fx:id="tvDescription" editable="false" minWidth="80.0" prefWidth="640.0" sortable="false" text="Description"/>
+							<TreeTableColumn fx:id="tvName" editable="false"
+								minWidth="80.0" prefWidth="320.0" text="Name" />
+							<TreeTableColumn fx:id="tvChanged" editable="false"
+								resizable="false" prefWidth="20.0" text="*" />
+							<TreeTableColumn fx:id="tvValue" editable="true"
+								minWidth="40.0" prefWidth="120.0" sortable="false" text="Value" />
+							<TreeTableColumn fx:id="tvDefaultValue" editable="false"
+								minWidth="40.0" prefWidth="120.0" sortable="false" text="Default Value" />
+							<TreeTableColumn fx:id="tvDescription" editable="false"
+								minWidth="80.0" prefWidth="640.0" sortable="false" text="Description" />
 						</columns>
 						<placeholder>
-							<Label text="No model loaded"/>
+							<Label text="No model loaded" />
 						</placeholder>
-						<TreeItem expanded="true"/>
+						<TreeItem expanded="true" />
 					</TreeTableView>
 				</center>
 				<bottom>
 					<HBox spacing="5.0">
 						<padding>
-							<Insets top="5.0" bottom="5.0" left="5.0" right="5.0"/>
+							<Insets top="5.0" bottom="5.0" left="5.0" right="5.0" />
 						</padding>
-						<Button fx:id="undoButton" text="Undo Changes" disable="true" HBox.hgrow="NEVER" onAction="#handleUndoChanges"/>
-						<Button fx:id="resetButton" text="Restore Defaults" disable="true" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults"/>
-						<Label fx:id="applyWarning" text="There are unapplied preference changes" visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" style="-fx-text-fill: red"/>
-						<Button fx:id="okButton" text="OK" disable="true" HBox.hgrow="NEVER" onAction="#handleOk"/>
-						<Button fx:id="cancelButton" text="Cancel" HBox.hgrow="NEVER" onAction="#handleCancel"/>
-						<Button fx:id="applyButton" text="Apply" disable="true" HBox.hgrow="NEVER" onAction="#handleApply"/>
+						<Button fx:id="undoButton" text="Undo Changes" disable="true"
+							HBox.hgrow="NEVER" onAction="#handleUndoChanges" />
+						<Button fx:id="resetButton" text="Restore Defaults"
+							disable="true" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults" />
+						<Label fx:id="applyWarning" text="There are unapplied preference changes"
+							visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity"
+							style="-fx-text-fill: red" alignment="CENTER"/>
+						<Button fx:id="okButton" text="OK" disable="true"
+							HBox.hgrow="NEVER" onAction="#handleOk" />
+						<Button fx:id="cancelButton" text="Cancel" HBox.hgrow="NEVER"
+							onAction="#handleCancel" />
+						<Button fx:id="applyButton" text="Apply" disable="true"
+							HBox.hgrow="NEVER" onAction="#handleApply" />
 					</HBox>
 				</bottom>
 			</BorderPane>

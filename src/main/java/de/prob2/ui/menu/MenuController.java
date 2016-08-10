@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
@@ -14,9 +15,10 @@ import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.ProB2;
+import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
-import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.groovy.GroovyConsole;
+import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modelchecking.ModelcheckingStage;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.BlacklistStage;
@@ -47,30 +49,31 @@ public class MenuController extends MenuBar {
 	private final FormulaGenerator formulaGenerator;
 	private final Stage groovyConsoleStage;
 	private Window window;
+	private DottyStage dottyStage;
 
 	@FXML
-	private void handleLoadDefault(){
+	private void handleLoadDefault() {
 		Window stage = this.getScene().getWindow();
 		try {
 			FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
 			loader.setLocation(getClass().getResource("../main.fxml"));
 			loader.load();
 			Parent root = loader.getRoot();
-			Scene scene = new Scene(root,stage.getHeight(),stage.getWidth());
+			Scene scene = new Scene(root, stage.getHeight(), stage.getWidth());
 			((Stage) window).setScene(scene);
 		} catch (IOException e) {
 			System.err.println("Failed to load FXML-File!");
 			e.printStackTrace();
 		}
 	}
-	
+
 	@FXML
-	private void handleLoadPerspective(){
+	private void handleLoadPerspective() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
 		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("FXML Files", "*.fxml"));
 		File selectedFile = fileChooser.showOpenDialog(window);
-		if (selectedFile!=null)
+		if (selectedFile != null)
 			try {
 				FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
 				loader.setLocation(new URL("file://" + selectedFile.getPath()));
@@ -90,70 +93,79 @@ public class MenuController extends MenuBar {
 		fileChooser.setTitle("Open File");
 		fileChooser.getExtensionFilters().addAll(
 				// new FileChooser.ExtensionFilter("All Files", "*.*"),
-				new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")//,
-				// new FileChooser.ExtensionFilter("EventB Files", "*.eventb", "*.bum", "*.buc"),
-				// new FileChooser.ExtensionFilter("CSP Files", "*.cspm")
+				new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")// ,
+		// new FileChooser.ExtensionFilter("EventB Files", "*.eventb", "*.bum",
+		// "*.buc"),
+		// new FileChooser.ExtensionFilter("CSP Files", "*.cspm")
 		);
-		
+
 		final File selectedFile = fileChooser.showOpenDialog(this.window);
 		if (selectedFile == null) {
 			return;
 		}
-		
+
 		switch (fileChooser.getSelectedExtensionFilter().getDescription()) {
-			case "Classical B Files":
-				final StateSpace newSpace;
-				try {
-					newSpace = this.api.b_load(selectedFile.getAbsolutePath());
-				} catch (IOException | BException e) {
-					e.printStackTrace();
-					new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait();
-					return;
-				}
-				
-				final Trace currentTrace = this.animationSelector.getCurrentTrace();
-				if (currentTrace != null) {
-					this.animationSelector.removeTrace(currentTrace);
-				}
-				this.animationSelector.addNewAnimation(new Trace(newSpace));
-				modelcheckingController.resetView();
-				break;
-			
-			default:
-				throw new IllegalStateException("Unknown file type selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
+		case "Classical B Files":
+			final StateSpace newSpace;
+			try {
+				newSpace = this.api.b_load(selectedFile.getAbsolutePath());
+			} catch (IOException | BException e) {
+				e.printStackTrace();
+				Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+				alert.getDialogPane().getStylesheets().add("prob.css");
+				alert.showAndWait();
+				return;
+			}
+
+			final Trace currentTrace = this.animationSelector.getCurrentTrace();
+			if (currentTrace != null) {
+				this.animationSelector.removeTrace(currentTrace);
+			}
+			this.animationSelector.addNewAnimation(new Trace(newSpace));
+			modelcheckingController.resetView();
+			break;
+
+		default:
+			throw new IllegalStateException(
+					"Unknown file type selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
 		}
 	}
-	
+
 	@FXML
 	private void handleEditBlacklist(ActionEvent event) {
 		this.blacklistStage.show();
 		this.blacklistStage.toFront();
 	}
-	
+
 	@FXML
 	private void handlePreferences(ActionEvent event) {
 		this.preferencesStage.show();
 		this.preferencesStage.toFront();
 	}
-	
-	@FXML 
+
+	@FXML
 	private void handleFormulaInput(ActionEvent event) {
 		TextInputDialog dialog = new TextInputDialog();
 		dialog.setTitle("Enter Formula for Visualization");
 		dialog.setHeaderText("Enter Formula for Vistualization");
 		dialog.setContentText("Enter Formula: ");
 		Optional<String> result = dialog.showAndWait();
-		if (result.isPresent()){
+		if (result.isPresent()) {
 			formulaGenerator.setFormula(formulaGenerator.parse(result.get()));
 		}
 	}
-	
+
 	@FXML
 	private void handleModelCheck(ActionEvent event) {
 		this.mcheckStage.showAndWait();
+		this.mcheckStage.toFront();
 	}
 	
 	@FXML
+	private void handleDotty(ActionEvent event) {
+		this.dottyStage.showAndWait();
+	}
+
 	public void handleGroovyConsole(ActionEvent event) {
 		this.groovyConsoleStage.show();
 		this.groovyConsoleStage.toFront();
@@ -175,20 +187,20 @@ public class MenuController extends MenuBar {
 
 	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector,
 			final BlacklistStage blacklistStage, final PreferencesStage preferencesStage,
-			final ModelcheckingStage modelcheckingDialog, final ModelcheckingController modelcheckingController,
-			final FormulaGenerator formulaGenerator, final GroovyConsole groovyConsole) {
+			final ModelcheckingStage modelcheckingStage, final ModelcheckingController modelcheckingController,
+			final FormulaGenerator formulaGenerator, final DottyStage dottyStage, final GroovyConsole groovyConsole) {
 		this.api = api;
 		this.animationSelector = animationSelector;
 		this.blacklistStage = blacklistStage;
 		this.preferencesStage = preferencesStage;
 		this.formulaGenerator = formulaGenerator;
 		this.modelcheckingController = modelcheckingController;
-
+		this.mcheckStage = modelcheckingStage;
+		this.dottyStage = dottyStage;
 		this.groovyConsoleStage = new Stage();
 		this.groovyConsoleStage.setTitle("Groovy Console");
 		this.groovyConsoleStage.setScene(new Scene(groovyConsole));
 		this.groovyConsoleStage.initModality(Modality.NONE);
-		this.mcheckStage = modelcheckingDialog;
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);
@@ -197,37 +209,32 @@ public class MenuController extends MenuBar {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
 			MenuToolkit tk = MenuToolkit.toolkit();
-			
+
 			// Create Mac-style application menu
 			Menu applicationMenu = tk.createDefaultApplicationMenu("ProB 2");
 			this.getMenus().add(0, applicationMenu);
 			tk.setApplicationMenu(applicationMenu);
-			
+
 			// Move About menu item from Help to application menu
-			Menu helpMenu = this.getMenus().get(this.getMenus().size()-1);
-			MenuItem aboutItem = helpMenu.getItems().get(helpMenu.getItems().size()-1);
+			Menu helpMenu = this.getMenus().get(this.getMenus().size() - 1);
+			MenuItem aboutItem = helpMenu.getItems().get(helpMenu.getItems().size() - 1);
 			aboutItem.setText("About ProB 2");
 			helpMenu.getItems().remove(aboutItem);
 			applicationMenu.getItems().set(0, aboutItem);
-			
+
 			// Create Mac-style Window menu
 			Menu windowMenu = new Menu("Window");
-			windowMenu.getItems().addAll(
-				tk.createMinimizeMenuItem(),
-				tk.createZoomMenuItem(),
-				tk.createCycleWindowsItem(),
-				new SeparatorMenuItem(),
-				tk.createBringAllToFrontItem(),
-				new SeparatorMenuItem()
-			);
+			windowMenu.getItems().addAll(tk.createMinimizeMenuItem(), tk.createZoomMenuItem(),
+					tk.createCycleWindowsItem(), new SeparatorMenuItem(), tk.createBringAllToFrontItem(),
+					new SeparatorMenuItem());
 			tk.autoAddWindowMenuItems(windowMenu);
-			this.getMenus().add(this.getMenus().size()-1, windowMenu);
-			
+			this.getMenus().add(this.getMenus().size() - 1, windowMenu);
+
 			// Make this the global menu bar
 			tk.setGlobalMenuBar(this);
 		}

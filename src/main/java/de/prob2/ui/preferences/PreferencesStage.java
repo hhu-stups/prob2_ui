@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
@@ -96,7 +97,9 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 				this.preferences.setPreferenceValue(event.getRowValue().getValue().getName(), event.getNewValue());
 			} catch (final ProBError exc) {
 				exc.printStackTrace();
-				new Alert(Alert.AlertType.ERROR, "The entered preference value is not valid.\n" + exc.getMessage()).show();
+				Alert alert = new Alert(Alert.AlertType.ERROR, "The entered preference value is not valid.\n" + exc.getMessage());
+				alert.getDialogPane().getStylesheets().add("prob.css");
+				alert.show();
 			}
 			this.updatePreferences();
 		});
@@ -180,7 +183,9 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 			return true;
 		} catch (BException | IOException e) {
 			e.printStackTrace();
-			new Alert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e).showAndWait();
+			Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
 			return false;
 		}
 	}

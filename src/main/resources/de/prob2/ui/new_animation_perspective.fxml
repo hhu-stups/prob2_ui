@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.dotty.DottyView?>
 <?import de.prob2.ui.history.HistoryView?>
 <?import de.prob2.ui.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.operations.OperationsView?>
@@ -21,9 +20,6 @@
                 </TitledPane>
                 <TitledPane text="History" fx:id="historyTP">
                     <HistoryView fx:id="history"/>
-                </TitledPane>
-                <TitledPane text="Dotty" fx:id="dottyTP">
-                    <DottyView fx:id="dotty"/>
                 </TitledPane>
                 <TitledPane text="Model Check Stats" fx:id="modelcheckTP">
                     <ModelcheckingController fx:id="modelcheck"/>

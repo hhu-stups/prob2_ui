@@ -1,12 +1,12 @@
 package de.prob2.ui.states;
 
+import java.util.Map;
+
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-
-import java.util.Map;
 
 public abstract class StateTreeItem<T> {
 	protected StringProperty name;

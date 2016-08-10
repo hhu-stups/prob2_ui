@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.google.inject.Inject;
+
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;

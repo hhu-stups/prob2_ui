@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
@@ -131,6 +132,8 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 		if (rootatbottom) {
 			Collections.reverse(history);
 		}
+		btprevious.setDisable(!currentTrace.canGoBack());
+		btforward.setDisable(!currentTrace.canGoForward());
 	}
 
 	@Override
