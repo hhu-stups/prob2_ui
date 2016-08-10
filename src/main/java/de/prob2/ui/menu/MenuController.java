@@ -111,7 +111,9 @@ public class MenuController extends MenuBar {
 				newSpace = this.api.b_load(selectedFile.getAbsolutePath());
 			} catch (IOException | BException e) {
 				e.printStackTrace();
-				new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait();
+				Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+				alert.getDialogPane().getStylesheets().add("prob.css");
+				alert.showAndWait();
 				return;
 			}
 

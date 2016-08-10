@@ -25,6 +25,7 @@ public class FormulaView extends Stage {
 		root = new ScrollPane(group);
 		group.getChildren().add(graph);
 		Scene scene = new Scene(root, 1024, 768);
+		scene.getStylesheets().add("prob.css");
 		this.setTitle("Mathematical Expression");
 		this.setScene(scene);
 	}

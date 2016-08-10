@@ -54,6 +54,7 @@ public class FormulaGenerator {
 		if(error == FormulaViewErrorType.PARSING_ERROR) {
 			alert.setHeaderText("The formula cannot be parsed and visualize.");
 		}
+		alert.getDialogPane().getStylesheets().add("prob.css");
 		alert.showAndWait();
 	}
 	

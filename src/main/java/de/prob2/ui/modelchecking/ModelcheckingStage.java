@@ -54,6 +54,7 @@ public class ModelcheckingStage extends Stage {
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Specification file missing");
 			alert.setHeaderText("No specification file loaded. Cannot run model checker.");
+			alert.getDialogPane().getStylesheets().add("prob.css");
 			alert.showAndWait();
 			return;
 		}
