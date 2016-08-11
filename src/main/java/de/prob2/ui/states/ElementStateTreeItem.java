@@ -1,5 +1,7 @@
 package de.prob2.ui.states;
 
+import java.util.Map;
+
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EnumerationWarning;
 import de.prob.animator.domainobjects.EvalResult;
@@ -8,8 +10,6 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
-
-import java.util.Map;
 
 public class ElementStateTreeItem extends StateTreeItem<AbstractElement> {
 	private static String stringRep(final AbstractEvalResult res) {

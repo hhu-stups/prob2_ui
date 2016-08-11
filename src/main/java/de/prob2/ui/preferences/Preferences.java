@@ -1,16 +1,18 @@
 package de.prob2.ui.preferences;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 
-import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
+
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
-import de.prob.animator.command.GetPreferenceCommand;
-import de.prob.animator.command.SetPreferenceCommand;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
@@ -19,24 +21,33 @@ import de.prob.statespace.Trace;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableMap;
 
 public class Preferences {
 	private final AnimationSelector animationSelector;
 	private final Api api;
-	private final EventBus eventBus;
+	private final ObservableMap<String, ProBPreference> cachedPreferences;
+	private final ObservableMap<String, String> cachedPreferenceValues;
+	private final ObservableMap<String, String> changedPreferences;
 	private final BooleanProperty changesApplied;
 	private StateSpace stateSpace;
 	
 	@Inject
 	private Preferences(
 		final AnimationSelector animationSelector,
-		final Api api,
-		final EventBus eventBus
+		final Api api
 	) {
 		this.animationSelector = animationSelector;
 		this.api = api;
-		this.eventBus = eventBus;
+		this.cachedPreferences = FXCollections.observableHashMap();
+		this.cachedPreferenceValues = FXCollections.observableHashMap();
+		this.changedPreferences = FXCollections.observableHashMap();
 		this.changesApplied = new SimpleBooleanProperty(true);
+		this.changedPreferences.addListener((MapChangeListener<? super String, ? super String>)change -> {
+			this.changesApplied.set(change.getMap().isEmpty());
+		});
 		this.stateSpace = null;
 	}
 	
@@ -75,9 +86,23 @@ public class Preferences {
 	 * 
 	 * @param stateSpace the {@link StateSpace} to use
 	 */
-	public void setStateSpace(StateSpace stateSpace) {
+	public void setStateSpace(final StateSpace stateSpace) {
 		this.stateSpace = stateSpace;
-		this.changesApplied.set(true);
+		this.changedPreferences.clear();
+		if (this.stateSpace == null) {
+			this.cachedPreferences.clear();
+			this.cachedPreferenceValues.clear();
+		} else {
+			final GetDefaultPreferencesCommand cmd1 = new GetDefaultPreferencesCommand();
+			this.stateSpace.execute(cmd1);
+			for (ProBPreference pref : cmd1.getPreferences()) {
+				this.cachedPreferences.put(pref.name, pref);
+			}
+			
+			final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
+			this.stateSpace.execute(cmd2);
+			this.cachedPreferenceValues.putAll(cmd2.getPreferences());
+		}
 	}
 	
 	/**
@@ -85,14 +110,14 @@ public class Preferences {
 	 * The returned {@link ProBPreference} objects do not include the current values of the preferences. To get these values, use {@link #getPreferenceValue(String)} or {@link #getPreferenceValues()}.
 	 * 
 	 * @return information about all available preferences
+	 * 
 	 * @see #getPreferenceValue(String)
 	 * @see #getPreferenceValues()
 	 */
-	public List<ProBPreference> getPreferences() {
+	public Collection<ProBPreference> getPreferences() {
 		this.checkStateSpace();
-		GetDefaultPreferencesCommand cmd = new GetDefaultPreferencesCommand();
-		this.stateSpace.execute(cmd);
-		return cmd.getPreferences();
+		
+		return Collections.unmodifiableSet(new HashSet<>(this.cachedPreferences.values()));
 	}
 	
 	/**
@@ -100,27 +125,30 @@ public class Preferences {
 	 * 
 	 * @param name the preference to get the value for
 	 * @return the preference's current value
+	 * 
 	 * @see #getPreferenceValues()
 	 */
-	public String getPreferenceValue(String name) {
+	public String getPreferenceValue(final String name) {
+		Objects.requireNonNull(name);
 		this.checkStateSpace();
-		GetPreferenceCommand cmd = new GetPreferenceCommand(name);
-		this.stateSpace.execute(cmd);
-		return cmd.getValue();
+		
+		return this.changedPreferences.containsKey(name) ? this.changedPreferences.get(name) : this.cachedPreferenceValues.get(name);
 	}
 	
 	/**
 	 * Get the current values of all preferences.
 	 * 
 	 * @return the current values of all preferences
+	 * 
 	 * @see #getPreferenceValue(String)
 	 * @see #getPreferences()
 	 */
 	public Map<String, String> getPreferenceValues() {
 		this.checkStateSpace();
-		GetCurrentPreferencesCommand cmd = new GetCurrentPreferencesCommand();
-		this.stateSpace.execute(cmd);
-		return cmd.getPreferences();
+		
+		final Map<String, String> prefs = new HashMap<>(this.cachedPreferenceValues);
+		prefs.putAll(this.changedPreferences);
+		return Collections.unmodifiableMap(prefs);
 	}
 	
 	/**
@@ -129,37 +157,60 @@ public class Preferences {
 	 * 
 	 * @param name the preference to set
 	 * @param value the value to set the preference to
+	 * 
 	 * @see #apply()
 	 */
 	public void setPreferenceValue(String name, String value) {
+		Objects.requireNonNull(name);
+		Objects.requireNonNull(value);
 		this.checkStateSpace();
-		this.stateSpace.execute(new SetPreferenceCommand(name, value));
-		this.changesApplied.set(false);
+		
+		this.changedPreferences.put(name, value);
+		if (value.equals(this.cachedPreferenceValues.get(name))) {
+			this.changedPreferences.remove(name);
+		}
+	}
+	
+	/**
+	 * Get a read-only observable map containing all preferences and their values that were changed since the last {@link #apply()}.
+	 *
+	 * @return a read-only observable map containing all changed preferences and their values
+	 */
+	public ObservableMap<String, String> getChangedPreferences() {
+		return FXCollections.unmodifiableObservableMap(this.changedPreferences);
 	}
 	
 	/**
 	 * Reload the current model and apply all preference changes.
 	 *
+	 * @throws BException when thrown by {@link Api#b_load(String, Map)}
+	 * @throws IOException when thrown by {@link Api#b_load(String, Map)}
 	 * @throws IllegalStateException if there is no current trace
+	 * 
 	 * @see #setPreferenceValue(String, String)
+	 * @see #rollback()
 	 */
-	public void apply() {
-		Map<String, String> savedPrefs = this.getPreferenceValues();
-		Trace oldTrace = this.animationSelector.getCurrentTrace();
+	public void apply() throws BException, IOException {
+		final Trace oldTrace = this.animationSelector.getCurrentTrace();
 		if (oldTrace == null) {
 			throw new IllegalStateException("Cannot apply preferences without a current trace");
 		}
-		String filename = oldTrace.getModel().getModelFile().getAbsolutePath();
-		StateSpace newSpace;
-		try {
-			newSpace = api.b_load(filename, savedPrefs);
-		} catch (IOException | BException e) {
-			this.eventBus.post(e);
-			return;
-		}
-		Trace newTrace = new Trace(newSpace);
-		this.animationSelector.addNewAnimation(newTrace);
+		final Map<String, String> newPrefs = this.getPreferenceValues();
+		final String filename = oldTrace.getModel().getModelFile().getAbsolutePath();
+		final StateSpace newSpace = api.b_load(filename, newPrefs);
+		final Trace newTrace = new Trace(newSpace);
 		this.animationSelector.removeTrace(oldTrace);
-		this.changesApplied.set(true);
+		this.animationSelector.addNewAnimation(newTrace);
+	}
+	
+	/**
+	 * Rollback all preference changes made since the last model reload.
+	 * 
+	 * @see #apply()
+	 */
+	public void rollback() {
+		this.checkStateSpace();
+		
+		this.changedPreferences.clear();
 	}
 }

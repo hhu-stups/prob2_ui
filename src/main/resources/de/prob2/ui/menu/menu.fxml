@@ -4,23 +4,38 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.BorderPane?>
 
-<fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml" BorderPane.alignment="CENTER">
+<fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml"
+	BorderPane.alignment="CENTER">
 	<Menu mnemonicParsing="false" text="%menu.file">
-		<MenuItem text="%menu.file.items.open" accelerator="Shortcut+O" onAction="#handleOpen"/>
-		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"/>
+		<MenuItem text="%menu.file.items.open" accelerator="Shortcut+O"
+			onAction="#handleOpen" />
+		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W" />
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.edit">
-		<MenuItem text="%menu.edit.items.editBlacklist" onAction="#handleEditBlacklist"/>
-		<MenuItem text="%menu.edit.items.preferences" onAction="#handlePreferences"/>
+		<MenuItem text="%menu.edit.items.editBlacklist" onAction="#handleEditBlacklist" />
+		<MenuItem text="%menu.edit.items.preferences" onAction="#handlePreferences" />
+	</Menu>
+	<Menu mnemonicParsing="false" text="%menu.formula">
+		<MenuItem text="%menu.formula.items.enterFormulaForVisualization"
+			onAction="#handleFormulaInput" />
+	</Menu>
+	<Menu mnemonicParsing="false" text="%menu.dotty">
+		<MenuItem text="%menu.dotty.items.showHistoryAsGraph"
+			onAction="#handleDotty" />
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.verify">
-		<MenuItem text="%menu.verify.items.modelcheck" onAction="#handleModelCheck"/>
+		<MenuItem text="%menu.verify.items.modelcheck" onAction="#handleModelCheck" />
+	</Menu>
+		<Menu mnemonicParsing="false" text="%menu.consoles">
+		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole"/>
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.perspectives">
-		<MenuItem mnemonicParsing="false" text="%menu.perspectives.default" onAction="#handleLoadDefault" />
-		<MenuItem mnemonicParsing="false" text="%menu.perspectives.load" onAction="#handleLoadPerspective" />
+		<MenuItem mnemonicParsing="false" text="%menu.perspectives.default"
+			onAction="#handleLoadDefault" />
+		<MenuItem mnemonicParsing="false" text="%menu.perspectives.load"
+			onAction="#handleLoadPerspective" />
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.help">
-		<MenuItem text="%menu.help.items.about"/>
+		<MenuItem text="%menu.help.items.about" />
 	</Menu>
 </fx:root>

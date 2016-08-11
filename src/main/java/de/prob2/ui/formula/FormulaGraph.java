@@ -16,7 +16,7 @@ public class FormulaGraph extends Region {
 		 root.setPosition(25, calculateY()+20);
 		 draw(root, 0);
 	}
-	
+			
 	private double calculateY() {
 		if(calculateHeight(0)/2 < 400) {
 			return 400;
@@ -39,8 +39,10 @@ public class FormulaGraph extends Region {
 				double median = (current.next.size()-1)/2.0;
 				FormulaNode children = current.next.get(i);
 				children.setPosition(current.getRight() + 25 + maxWidth(level + 1) - children.getNodeWidth(), current.getY() + (i - median) * calculateHeight(level+1));
-				Line edge = new Line(current.getRight(), current.getY(), children.getLeft(), children.getY());
-				this.getChildren().add(edge);
+				Line edge1 = new Line(current.getRight(), current.getY(), current.getRight() + 25, children.getY());
+				Line edge2 = new Line(current.getRight() + 25, children.getY(), children.getLeft(), children.getY());
+				this.getChildren().add(edge1);
+				this.getChildren().add(edge2);
 				draw(children, level + 1);				
 			}
 		}

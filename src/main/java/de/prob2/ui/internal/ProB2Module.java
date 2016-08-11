@@ -3,13 +3,12 @@ package de.prob2.ui.internal;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+
 import de.prob.MainModule;
-import de.prob2.ui.commands.OpenFileCommand;
-import de.prob2.ui.dotty.DottyView;
+import de.prob2.ui.groovy.GroovyConsole;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.modelchecking.ModelcheckingController;
@@ -30,19 +29,17 @@ public class ProB2Module extends AbstractModule {
 		install(new MainModule());
 		
 		// General stuff
-		bind(EventBus.class).asEagerSingleton();
 		bind(ClassBlacklist.class);
-		bind(OpenFileCommand.class);
 		bind(ResourceBundle.class).toInstance(bundle);
 		
 		// Controllers
-		bind(DottyView.class);
 		bind(HistoryView.class);
 		bind(MenuController.class);
 		bind(ModelcheckingController.class);
 		bind(ModelineController.class);
 		bind(OperationsView.class);
 		bind(StatesView.class);
+		bind(GroovyConsole.class);
 	}
 
 	@Provides

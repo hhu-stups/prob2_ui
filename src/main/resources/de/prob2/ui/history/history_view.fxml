@@ -1,38 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Tooltip?>
 
-<fx:root type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
-    <children>
-        <ListView fx:id="lv_history" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0">
-            <cursor>
-              <Cursor fx:constant="DEFAULT" />
-            </cursor></ListView>
-        <HBox alignment="TOP_RIGHT" layoutX="58.0" layoutY="26.0" AnchorPane.bottomAnchor="389.6" AnchorPane.leftAnchor="58.0" AnchorPane.rightAnchor="3.6000000000000227" AnchorPane.topAnchor="26.0">
-           <children>
-               <Button fx:id="btprevious" mnemonicParsing="false" prefHeight="23.0" prefWidth="33.0">
-                 <graphic>
-                    <ImageView fitHeight="15.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true" styleClass="back" />
-                 </graphic>
-               </Button>
-               <Button fx:id="btforward" mnemonicParsing="false" prefHeight="23.0" prefWidth="33.0">
-                 <graphic>
-                    <ImageView fitHeight="13.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true" styleClass="forward" />
-                 </graphic>
-               </Button>
-               <ToggleButton fx:id="tb_reverse" mnemonicParsing="false" prefHeight="23.0" prefWidth="33.0">
-                <graphic>
-                    <ImageView fitHeight="13.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true" styleClass="reverse" />
-                </graphic>
-               </ToggleButton>
-           </children>
-        </HBox>
-    </children>
+<fx:root stylesheets="@../../../../prob.css" type="AnchorPane"
+	xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+	<children>
+		<ListView fx:id="lv_history" AnchorPane.bottomAnchor="0.0"
+			AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+			AnchorPane.topAnchor="30.0">
+			<cursor>
+				<Cursor fx:constant="DEFAULT" />
+			</cursor>
+		</ListView>
+		<Button fx:id="btprevious" maxHeight="-Infinity" maxWidth="-Infinity"
+			minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+			prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="4.0"
+			AnchorPane.topAnchor="4.0">
+			<graphic>
+				<FontAwesomeIconView StyleClass="icon-dark"
+					glyphName="CHEVRON_LEFT" size="15" />
+			</graphic>
+			<tooltip>
+				<Tooltip text="Back"></Tooltip>
+			</tooltip>
+		</Button>
+		<Button fx:id="btforward" maxHeight="-Infinity" maxWidth="-Infinity"
+			minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+			prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="30.0"
+			AnchorPane.topAnchor="4.0">
+			<graphic>
+				<FontAwesomeIconView StyleClass="icon-dark"
+					glyphName="CHEVRON_RIGHT" size="15" />
+			</graphic>
+			<tooltip>
+				<Tooltip text="Forward" />
+			</tooltip>
+		</Button>
+		<ToggleButton fx:id="tb_reverse" maxHeight="-Infinity"
+			maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+			mnemonicParsing="false" prefHeight="26.0" prefWidth="26.0"
+			AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="4.0">
+			<graphic>
+				<FontAwesomeIconView StyleClass="icon-dark"
+					glyphName="SORT" size="15" />
+			</graphic>
+			<tooltip>
+				<Tooltip text="Sort" />
+			</tooltip>
+		</ToggleButton>
+	</children>
 </fx:root>
