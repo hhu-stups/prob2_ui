@@ -77,7 +77,7 @@
 							AnchorPane.topAnchor="2.0">
 							<graphic>
 								<FontAwesomeIconView StyleClass="icon-dark"
-									glyphName="SORT_ALPHA_ASC" size="15" />
+									glyphName="SORT" size="15" />
 							</graphic>
 							<tooltip>
 								<Tooltip text="Sort" />
