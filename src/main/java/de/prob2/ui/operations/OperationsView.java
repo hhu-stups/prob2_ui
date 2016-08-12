@@ -171,13 +171,13 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 		FontAwesomeIconView icon = null;
 		if ("normal".equals(oldMode)) {
 			sorter = new AtoZ();
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
 		} else if ("aToZ".equals(oldMode)) {
 			sorter = new ZtoA();
-			icon = new FontAwesomeIconView(FontAwesomeIcon.LONG_ARROW_DOWN);
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
 		} else if ("zToA".equals(oldMode)) {
 			sorter = new ModelOrder(opNames);
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT);
 		}
 		Collections.sort(events, sorter);
 		ObservableList<Operation> opsList = opsListView.getItems();

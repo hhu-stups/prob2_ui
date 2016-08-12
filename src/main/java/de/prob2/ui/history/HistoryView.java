@@ -43,12 +43,12 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 	private ObservableList<HistoryItem> history = FXCollections.observableArrayList();
 
 	private AnimationSelector animations;
-	
+
 	@Inject
 	private HistoryView(FXMLLoader loader, AnimationSelector animations) {
 		this.animations = animations;
 		animations.registerAnimationChangeListener(this);
-		
+
 		try {
 			loader.setLocation(getClass().getResource("history_view.fxml"));
 			loader.setRoot(this);
@@ -68,7 +68,9 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 		lv_history.setItems(history);
 
 		lv_history.setOnMouseClicked(e -> {
-			animations.traceChange(animations.getCurrentTrace().gotoPosition(getCurrentIndex()));
+			if (animations.getCurrentTrace() != null) {
+				animations.traceChange(animations.getCurrentTrace().gotoPosition(getCurrentIndex()));
+			}
 		});
 
 		lv_history.setOnMouseMoved(e -> {
@@ -93,7 +95,7 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 		});
 
 	}
-	
+
 	private int getCurrentIndex() {
 		int currentPos = lv_history.getSelectionModel().getSelectedIndex();
 		int length = lv_history.getItems().size();
@@ -137,5 +139,6 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 	}
 
 	@Override
-	public void animatorStatus(boolean busy) {}
+	public void animatorStatus(boolean busy) {
+	}
 }

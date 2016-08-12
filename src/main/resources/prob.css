@@ -91,7 +91,22 @@
     -fx-background-color: -fx-background, -fx-cell-focus-inner-border, -fx-background;
     -fx-background-insets: 0, 1, 2;
 }
-  
+
+/************************************************************************************
+ * DialogPane																		*
+ ************************************************************************************/
+.dialog-pane .button {
+    -fx-background-color: transparent;
+    -fx-border-color: #444444;
+    -fx-border-radius: 6.0;
+    -fx-background-insets: 0.0,1.0,2.0;
+    -fx-text-fill: #444444;
+    -fx-font-weight: bold;
+}
+.dialog-pane .button:hover {
+	-fx-text-fill: #666666;
+}
+
 /************************************************************************************
  * ListView																			*
  ************************************************************************************/
@@ -234,8 +249,7 @@
 	-fx-text-fill: #444444;
 	-fx-font-weight: bold;
 }
-.dark .button,
-.dialog-pane .button {
+.dark .button {
     -fx-background-color: transparent;
     -fx-border-color: #444444;
     -fx-border-radius: 6.0;
@@ -245,9 +259,6 @@
 }
 .dark .button:hover {
     -fx-text-fill: #eaeaea;
-}
-.dialog-pane .button:hover {
-	-fx-text-fill: #999999;
 }
 .dark-highlight {
 	-fx-background-color: #cccccc;

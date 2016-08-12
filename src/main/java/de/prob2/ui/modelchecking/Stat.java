@@ -2,6 +2,7 @@ package de.prob2.ui.modelchecking;
 
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 
 public class Stat {
@@ -29,11 +30,13 @@ public class Stat {
 		aP.getStyleClass().add("gridViewRow");
 		Label l = new Label();
 		l.setText(s);
+		l.setTooltip(new Tooltip(s));
 		aP.getChildren().add(l);
 		AnchorPane.setTopAnchor(l, 6.0);
 		AnchorPane.setBottomAnchor(l, 7.5);
 		if(alignment.equals("left")) {
 			AnchorPane.setLeftAnchor(l, 10.0);
+			AnchorPane.setRightAnchor(l, 0.0);
 		} else if(alignment.equals("right")) {
 			AnchorPane.setRightAnchor(l, 10.0);
 		}

@@ -149,6 +149,7 @@ public class MenuController extends MenuBar {
 		dialog.setTitle("Enter Formula for Visualization");
 		dialog.setHeaderText("Enter Formula for Vistualization");
 		dialog.setContentText("Enter Formula: ");
+		dialog.getDialogPane().getStylesheets().add("prob.css");
 		Optional<String> result = dialog.showAndWait();
 		if (result.isPresent()) {
 			formulaGenerator.setFormula(formulaGenerator.parse(result.get()));
