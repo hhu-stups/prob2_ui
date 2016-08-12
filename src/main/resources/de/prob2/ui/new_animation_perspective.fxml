@@ -3,6 +3,7 @@
 <?import de.prob2.ui.history.HistoryView?>
 <?import de.prob2.ui.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.operations.OperationsView?>
+<?import de.prob2.ui.animations.AnimationsView?>
 <?import de.prob2.ui.states.StatesView?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
@@ -23,6 +24,9 @@
                 </TitledPane>
                 <TitledPane text="Model Check Stats" fx:id="modelcheckTP">
                     <ModelcheckingController fx:id="modelcheck"/>
+                </TitledPane>
+                <TitledPane text="Animations" fx:id="animationsTP">
+                    <AnimationsView fx:id="animations"/>
                 </TitledPane>
                 <!--<TitledPane text="Test" fx:id="testTP">
                     <FlowPane fx:id="test">
