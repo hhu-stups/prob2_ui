@@ -1,5 +1,5 @@
 .root {
-	-fx-base: #e5e5e5;
+	-fx-base: #f5f5f5;
 }
 
 /************************************************************************************
@@ -234,7 +234,12 @@
  * TreeTableView																	*
  ************************************************************************************/
 .tree-table-view .column-header {
-	-fx-background-color: #bbbbbb;
+	-fx-background-color: #fafafa;
+	-fx-border-color: transparent transparent #444444 #444444;
+	-fx-border-width: 0.0 0.0 2.0 0.0;
+}
+.with-border .column-header {
+		-fx-border-width: 0.0 0.0 2.0 0.2;
 }
 
 
@@ -311,7 +316,7 @@
 }
 
 .mcheckNoCheck {
-	-fx-background-color:  #dddddd;
+	-fx-background-color:  #eeeeee;
 	-fx-background-radius: 5.0 5.0 5.0 5.0;
 }
 
