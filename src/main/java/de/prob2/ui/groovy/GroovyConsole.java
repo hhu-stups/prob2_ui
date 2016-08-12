@@ -172,10 +172,12 @@ public class GroovyConsole extends AnchorPane {
 			}
 		}
 		int posOfEnter = tagroovy.getText().lastIndexOf("\n");
-		if(posOfEnter + 3 > tagroovy.getText().length()-1) {
+		if(posOfEnter + 4 + currentPosInLine > tagroovy.getText().length()) {
 			return;
 		}
-		currentLine = tagroovy.getText().substring(posOfEnter + 3, tagroovy.getText().length()-1);
+		currentLine = tagroovy.getText().substring(posOfEnter + 3, posOfEnter + 3 + currentPosInLine);
+		currentLine += tagroovy.getText().substring(posOfEnter+ 4 + currentPosInLine, tagroovy.getText().length());
+
 	}
 
 	
