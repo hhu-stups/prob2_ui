@@ -90,6 +90,7 @@ public class GroovyConsole extends AnchorPane {
 				currentLine += e.getText();
 				charCounterInLine++;
 				currentPosInLine++;
+				posInList = instructions.size();
 				return;
 			}
 		});
@@ -117,15 +118,18 @@ public class GroovyConsole extends AnchorPane {
 					return;
 				}
 				if(posInList == instructions.size()) {
-					//String lastinstruction = instructions.get(instructions.size()-1);
-					instructions.add(currentLine);
+					String lastinstruction = instructions.get(instructions.size()-1);
+					if(!lastinstruction.equals(currentLine)) {
+						instructions.add(currentLine);
+					}
+					//
 				}
 				posInList = Math.max(posInList - 1, 0);
 			} else {
-				if(posInList == instructions.size() - 1) { 
+				posInList = Math.min(posInList+1, instructions.size());
+				if(posInList == instructions.size()) { 
 					return;
 				}
-				posInList = Math.min(posInList+1, instructions.size()-1);
 			}
 			
 			tagroovy.setText(tagroovy.getText().substring(0, posOfEnter + 3));
