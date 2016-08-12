@@ -74,7 +74,7 @@ public class GroovyConsole extends AnchorPane {
 			if(e.getCode().equals(KeyCode.ENTER)) {
 				charCounterInLine = 0;
 				currentPosInLine = 0;
-				posInList++;
+				posInList = instructions.size()+1;
 				e.consume();
 				tagroovy.appendText("\n >");
 				instructions.add(currentLine);
@@ -110,18 +110,15 @@ public class GroovyConsole extends AnchorPane {
 				e.consume();
 			}
 		} else if(e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
+			int posOfEnter = tagroovy.getText().lastIndexOf("\n");
 			if(e.getCode().equals(KeyCode.UP)) {
 				e.consume();
 				if(posInList == 0) { 
 					return;
 				}
-				if(posInList == instructions.size() - 1 && instructions.get(posInList) != currentLine) {
-					//String lastinstruction = 
-					if(instructions.get(instructions.size()-1).equals("")) {
-						instructions.set(instructions.size()-1, currentLine);
-					} else {
-						instructions.add(currentLine);
-					}
+				if(posInList == instructions.size()) {
+					//String lastinstruction = instructions.get(instructions.size()-1);
+					instructions.add(currentLine);
 				}
 				posInList = Math.max(posInList - 1, 0);
 			} else {
@@ -130,12 +127,13 @@ public class GroovyConsole extends AnchorPane {
 				}
 				posInList = Math.min(posInList+1, instructions.size()-1);
 			}
-			int posOfEnter = tagroovy.getText().lastIndexOf("\n");
+			
 			tagroovy.setText(tagroovy.getText().substring(0, posOfEnter + 3));
 			currentLine = instructions.get(posInList);
 			charCounterInLine = currentLine.length();
 			currentPosInLine = charCounterInLine;
 			tagroovy.appendText(currentLine);
+
 		} else if(e.getCode().equals(KeyCode.RIGHT)) {
 			if(currentPosInLine < charCounterInLine) {
 				currentPosInLine++;
@@ -165,16 +163,16 @@ public class GroovyConsole extends AnchorPane {
 				charCounterInLine = Math.max(charCounterInLine - 1, 0);		
 			} else {
 				e.consume();
+				return;
 			}
 		} else {
 			if(currentPosInLine < charCounterInLine) {
 				charCounterInLine = Math.max(charCounterInLine - 1, 0);
+			} else if(currentPosInLine == charCounterInLine) {
+				return;
 			}
 		}
 		int posOfEnter = tagroovy.getText().lastIndexOf("\n");
-		if(posOfEnter + 4 + currentPosInLine > tagroovy.getText().length()) {
-			return;
-		}
 		currentLine = tagroovy.getText().substring(posOfEnter + 3, posOfEnter + 3 + currentPosInLine);
 		currentLine += tagroovy.getText().substring(posOfEnter+ 4 + currentPosInLine, tagroovy.getText().length());
 
