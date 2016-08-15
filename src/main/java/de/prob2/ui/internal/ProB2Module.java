@@ -8,6 +8,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 
 import de.prob.MainModule;
+import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.groovy.GroovyConsole;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MenuController;
@@ -40,6 +41,7 @@ public class ProB2Module extends AbstractModule {
 		bind(OperationsView.class);
 		bind(StatesView.class);
 		bind(GroovyConsole.class);
+		bind(AnimationsView.class);
 	}
 
 	@Provides

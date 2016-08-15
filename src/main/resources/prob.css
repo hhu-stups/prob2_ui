@@ -241,8 +241,9 @@
 }
 
 /************************************************************************************
- * TreeTableView																	*
+ * TableView, TreeTableView															*
  ************************************************************************************/
+.table-view .column-header,
 .tree-table-view .column-header {
 	-fx-background-color: #fafafa;
 	-fx-border-color: transparent transparent #444444 #444444;
