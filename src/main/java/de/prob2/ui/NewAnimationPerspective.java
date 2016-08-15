@@ -21,6 +21,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import org.apache.commons.lang.ObjectUtils;
 
 @Singleton
 public class NewAnimationPerspective extends BorderPane {
@@ -111,8 +112,10 @@ public class NewAnimationPerspective extends BorderPane {
         node.setOnDragDetected((MouseEvent t) -> {
             System.out.println("dragged");
             if (vBox.getChildren().contains(node)){
-                this.setRight(node);
-                vBox.getChildren().remove(node);
+                if (this.getRight()== null) {
+                    this.setRight(node);
+                    vBox.getChildren().remove(node);
+                }
                 //accordion.getPanes().remove(nodeTP);
                 //nodeTP.setVisible(false);
                 //this.removeAccordion();
