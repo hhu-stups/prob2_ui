@@ -11,6 +11,7 @@ import de.prob2.ui.operations.OperationsView;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Accordion;
@@ -18,6 +19,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
@@ -103,48 +105,63 @@ public class NewAnimationPerspective extends BorderPane {
 	}
 
 	private void onDrag() {
-		this.dragAction(operations, operationsTP);
-		this.dragAction(history, historyTP);
-		this.dragAction(modelcheck, modelcheckTP);
+        //this.dragAction(operations, operationsTP);
+        //this.dragAction(history, historyTP);
+        //this.dragAction(modelcheck, modelcheckTP);
+        this.setOnMouseEntered(t -> this.setCursor(Cursor.OPEN_HAND));
+        this.setOnMousePressed(t -> this.setCursor(Cursor.CLOSED_HAND));
+        this.setOnMouseReleased(t -> this.setCursor(Cursor.DEFAULT));
+        this.setOnDragDetected(t -> {
+            operations.setOnDragDetected(s -> {
+                addGesture(operations);
+            });
+            history.setOnDragDetected(s -> {
+                addGesture(history);
+            });
+            modelcheck.setOnDragDetected(s -> {
+                addGesture(modelcheck);
+            });
+            System.out.println("dragged");
+        });
 	}
 
-    private void dragAction(Node node, TitledPane nodeTP){
-        node.setOnDragDetected((MouseEvent t) -> {
-            System.out.println(node.getClass().toString()+" dragged");
-            if (vBox.getChildren().contains(node)){
-                if (this.getRight() == null) {
-                    this.setRight(node);
-                    vBox.getChildren().remove(node);
-                } else if (this.getLeft() == null){
-                    this.setLeft(node);
-                    vBox.getChildren().remove(node);
-                } else if (this.getBottom() == null){
-                    this.setBottom(node);
-                    vBox.getChildren().remove(node);
-                }
-                //accordion.getPanes().remove(nodeTP);
-                //nodeTP.setVisible(false);
-                //this.removeAccordion();
-            } else {
-                //this.addAccordion();
-                //nodeTP.setContent(node);
-                vBox.getChildren().add(node);
-                this.getChildren().remove(node);
-                //accordion.getPanes().add(0,nodeTP);
-                //nodeTP.setVisible(true);
+    /*private void dragAction(Node node, TitledPane nodeTP){
+
+    }*/
+
+    private void addGesture(final Node node){
+        System.out.println(node.getClass().toString()+" dragged");
+        if (vBox.getChildren().contains(node)){
+            if (this.getRight() == null) {
+                this.setRight(node);
+                vBox.getChildren().remove(node);
+            } else if (this.getLeft() == null){
+                this.setLeft(node);
+                vBox.getChildren().remove(node);
+            } else if (this.getBottom() == null){
+                this.setBottom(node);
+                vBox.getChildren().remove(node);
             }
-            /*this.setOnMouseDragOver((MouseEvent) -> {
-                if (!this.getItems().contains(node)) {
-                    this.getItems().add(node);
-                    //accordion.getPanes().remove(nodeTP);
-                    nodeTP.setVisible(false);
+            //accordion.getPanes().remove(nodeTP);
+            //nodeTP.setVisible(false);
+            //this.removeAccordion();
+        } else {
+            //this.addAccordion();
+            //nodeTP.setContent(node);
+            vBox.getChildren().add(node);
+            this.getChildren().remove(node);
+            //accordion.getPanes().add(0,nodeTP);
+            //nodeTP.setVisible(true);
+        }
+        /*this.setOnMouseDragOver((MouseEvent) -> {
+            if (!this.getItems().contains(node)) {
+                this.getItems().add(node);
+                //accordion.getPanes().remove(nodeTP);
+                nodeTP.setVisible(false);
 
-                }
-            });*/
-            t.consume();
-        });
+            }
+        });*/
     }
-
     /*private void removeAccordion(){
         invisibleItems = true;
         for (TitledPane pane : accordion.getPanes()){
