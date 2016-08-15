@@ -29,20 +29,14 @@ public class NewAnimationPerspective extends SplitPane{
     private HistoryView history;
     @FXML
     private TitledPane historyTP;
-    //@FXML
-    //private DottyView dotty;
-    //@FXML
-    //private TitledPane dottyTP;
     @FXML
     private ModelcheckingController modelcheck;
     @FXML
     private TitledPane modelcheckTP;
-    @FXML
+    /*@FXML
     private FlowPane test;
     @FXML
-    private TitledPane testTP;
-    @FXML
-    private Accordion accordion;
+    private TitledPane testTP;*/
     private boolean invisibleItems;
     @Inject
     public NewAnimationPerspective() {
@@ -114,9 +108,9 @@ public class NewAnimationPerspective extends SplitPane{
                 this.getItems().add(node);
                 //accordion.getPanes().remove(nodeTP);
                 nodeTP.setVisible(false);
-                this.removeAccordion();
+                //this.removeAccordion();
             } else {
-                this.addAccordion();
+                //this.addAccordion();
                 nodeTP.setContent(node);
                 this.getItems().remove(node);
                 //accordion.getPanes().add(0,nodeTP);
@@ -126,7 +120,7 @@ public class NewAnimationPerspective extends SplitPane{
         });
     }
 
-    private void removeAccordion(){
+    /*private void removeAccordion(){
         invisibleItems = true;
         for (TitledPane pane : accordion.getPanes()){
             if (pane.isVisible()){
@@ -146,7 +140,7 @@ public class NewAnimationPerspective extends SplitPane{
             accordion.setVisible(true);
             this.getDividers().add(0,new Divider());
         }
-    }
+    }*/
 /*private void dragAction(Node node, TitledPane nodeTP) {
 		node.setOnDragDetected((MouseEvent t) -> {
 			if (!this.getChildren().contains(node)) {

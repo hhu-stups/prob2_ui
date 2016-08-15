@@ -11,8 +11,9 @@
 
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
 <fx:root type="SplitPane" xmlns:fx="http://javafx.com/fxml">
-    <AnchorPane minWidth="280.0">
+    <!--<AnchorPane minWidth="280.0">
         <Accordion fx:id="accordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <panes>
                 <TitledPane text="Operations" fx:id="operationsTP">
@@ -24,13 +25,20 @@
                 <TitledPane text="Model Check Stats" fx:id="modelcheckTP">
                     <ModelcheckingController fx:id="modelcheck"/>
                 </TitledPane>
-                <!--<TitledPane text="Test" fx:id="testTP">
+                <TitledPane text="Test" fx:id="testTP">
                     <FlowPane fx:id="test">
                             <Label text="Test"/>
                     </FlowPane>
-                </TitledPane>-->
+                </TitledPane>
             </panes>
         </Accordion>
-    </AnchorPane>
+    </AnchorPane>-->
+    <VBox>
+        <children>
+            <OperationsView fx:id="operations"/>
+            <HistoryView fx:id="history"/>
+            <ModelcheckingController fx:id="modelcheck"/>
+        </children>
+    </VBox>
     <StatesView/>
 </fx:root>
