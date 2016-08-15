@@ -110,10 +110,16 @@ public class NewAnimationPerspective extends BorderPane {
 
     private void dragAction(Node node, TitledPane nodeTP){
         node.setOnDragDetected((MouseEvent t) -> {
-            System.out.println("dragged");
+            System.out.println(node.getClass().toString()+" dragged");
             if (vBox.getChildren().contains(node)){
-                if (this.getRight()== null) {
+                if (this.getRight() == null) {
                     this.setRight(node);
+                    vBox.getChildren().remove(node);
+                } else if (this.getLeft() == null){
+                    this.setLeft(node);
+                    vBox.getChildren().remove(node);
+                } else if (this.getBottom() == null){
+                    this.setBottom(node);
                     vBox.getChildren().remove(node);
                 }
                 //accordion.getPanes().remove(nodeTP);
