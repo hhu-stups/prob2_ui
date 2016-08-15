@@ -136,7 +136,7 @@ public class NewAnimationPerspective extends SplitPane{
         if (invisibleItems){
             //this.getItems().remove(0);
             accordion.setVisible(false);
-            this.getDividers().remove(0);
+            //this.getDividers().remove(0);
         }
     }
 
