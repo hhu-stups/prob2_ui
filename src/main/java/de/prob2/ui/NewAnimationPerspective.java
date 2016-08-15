@@ -16,11 +16,14 @@ import javafx.scene.Parent;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
 
 @Singleton
-public class NewAnimationPerspective extends SplitPane{
+public class NewAnimationPerspective extends BorderPane {
     @FXML
     private OperationsView operations;
     @FXML
@@ -33,6 +36,8 @@ public class NewAnimationPerspective extends SplitPane{
     private ModelcheckingController modelcheck;
     @FXML
     private TitledPane modelcheckTP;
+    @FXML
+    private VBox vBox;
     /*@FXML
     private FlowPane test;
     @FXML
@@ -93,7 +98,7 @@ public class NewAnimationPerspective extends SplitPane{
 
 	@FXML
 	public void initialize() {
-		this.setDividerPositions(0.3);
+		//this.setDividerPositions(0.3);
 	}
 
 	private void onDrag() {
@@ -104,18 +109,29 @@ public class NewAnimationPerspective extends SplitPane{
 
     private void dragAction(Node node, TitledPane nodeTP){
         node.setOnDragDetected((MouseEvent t) -> {
-            if (!this.getItems().contains(node)){
-                this.getItems().add(node);
+            System.out.println("dragged");
+            if (vBox.getChildren().contains(node)){
+                this.setRight(node);
+                vBox.getChildren().remove(node);
                 //accordion.getPanes().remove(nodeTP);
-                nodeTP.setVisible(false);
+                //nodeTP.setVisible(false);
                 //this.removeAccordion();
             } else {
                 //this.addAccordion();
-                nodeTP.setContent(node);
-                this.getItems().remove(node);
+                //nodeTP.setContent(node);
+                vBox.getChildren().add(node);
+                this.getChildren().remove(node);
                 //accordion.getPanes().add(0,nodeTP);
-                nodeTP.setVisible(true);
+                //nodeTP.setVisible(true);
             }
+            /*this.setOnMouseDragOver((MouseEvent) -> {
+                if (!this.getItems().contains(node)) {
+                    this.getItems().add(node);
+                    //accordion.getPanes().remove(nodeTP);
+                    nodeTP.setVisible(false);
+
+                }
+            });*/
             t.consume();
         });
     }

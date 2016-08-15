@@ -8,11 +8,11 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.TitledPane?>
-
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
-<fx:root type="SplitPane" xmlns:fx="http://javafx.com/fxml">
+<fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml">
     <!--<AnchorPane minWidth="280.0">
         <Accordion fx:id="accordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <panes>
@@ -33,12 +33,16 @@
             </panes>
         </Accordion>
     </AnchorPane>-->
-    <VBox>
-        <children>
-            <OperationsView fx:id="operations"/>
-            <HistoryView fx:id="history"/>
-            <ModelcheckingController fx:id="modelcheck"/>
-        </children>
-    </VBox>
-    <StatesView/>
+    <left>
+        <VBox fx:id="vBox">
+            <children>
+                <OperationsView fx:id="operations"/>
+                <HistoryView fx:id="history"/>
+                <ModelcheckingController fx:id="modelcheck"/>
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <StatesView/>
+    </center>
 </fx:root>
