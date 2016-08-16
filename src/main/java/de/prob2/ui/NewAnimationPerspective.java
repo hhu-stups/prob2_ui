@@ -12,45 +12,50 @@ import de.prob2.ui.operations.OperationsView;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import org.apache.commons.lang.ObjectUtils;
 
 @Singleton
 public class NewAnimationPerspective extends BorderPane {
     @FXML
     private OperationsView operations;
-    @FXML
-    private TitledPane operationsTP;
+    //@FXML
+    //private TitledPane operationsTP;
     @FXML
     private HistoryView history;
-    @FXML
-    private TitledPane historyTP;
+    //@FXML
+    //private TitledPane historyTP;
     @FXML
     private ModelcheckingController modelcheck;
-    @FXML
-    private TitledPane modelcheckTP;
+    //@FXML
+    //private TitledPane modelcheckTP;
     @FXML
     private AnimationsView animations;
-    @FXML
-    private TitledPane animationsTP;
+    //@FXML
+    //private TitledPane animationsTP;
     @FXML
     private VBox vBox;
     /*@FXML
     private FlowPane test;
     @FXML
     private TitledPane testTP;*/
-    private boolean invisibleItems;
+    //private boolean invisibleItems;
+    private ImageView snapImage = new ImageView();
     @Inject
     public NewAnimationPerspective() {
         try {
@@ -128,7 +133,9 @@ public class NewAnimationPerspective extends BorderPane {
             modelcheck.setOnDragDetected(s -> {
                 addGesture(modelcheck);
             });
-
+            animations.setOnDragDetected(s -> {
+                addGesture(animations);
+            });
             System.out.println("dragged");
         });
 	}
@@ -138,37 +145,54 @@ public class NewAnimationPerspective extends BorderPane {
     }*/
 
     private void addGesture(final Node node){
-        System.out.println(node.getClass().toString()+" dragged");
-        if (vBox.getChildren().contains(node)){
-            if (this.getRight() == null) {
-                this.setRight(node);
-                vBox.getChildren().remove(node);
-            } else if (this.getLeft() == null){
-                this.setLeft(node);
-                vBox.getChildren().remove(node);
-            } else if (this.getBottom() == null){
-                this.setBottom(node);
-                vBox.getChildren().remove(node);
-            }
-            //accordion.getPanes().remove(nodeTP);
-            //nodeTP.setVisible(false);
-            //this.removeAccordion();
-        } else {
-            //this.addAccordion();
-            //nodeTP.setContent(node);
-            vBox.getChildren().add(node);
-            this.getChildren().remove(node);
-            //accordion.getPanes().add(0,nodeTP);
-            //nodeTP.setVisible(true);
-        }
-        /*this.setOnMouseDragOver((MouseEvent) -> {
-            if (!this.getItems().contains(node)) {
-                this.getItems().add(node);
-                //accordion.getPanes().remove(nodeTP);
-                nodeTP.setVisible(false);
-
-            }
+        /*node.setOnMouseDragged(t -> {
+            Point2D localPoint = this.getScene().sceneToLocal(new Point2D(t.getSceneX(), t.getSceneY()));
+            snapImage.relocate(
+                    (int)(localPoint.getX() - snapImage.getBoundsInLocal().getWidth() / 2),
+                    (int)(localPoint.getY() - snapImage.getBoundsInLocal().getHeight() / 2)
+            );
+            t.consume();
         });*/
+
+        //node.setOnDragDetected(t -> {
+            System.out.println(node.getClass().toString() + " dragged");
+            SnapshotParameters snapParams = new SnapshotParameters();
+            snapParams.setFill(Color.TRANSPARENT);
+            snapImage.setImage(node.snapshot(snapParams, null));
+            if (vBox.getChildren().contains(node)) {
+                if (this.getRight() == null) {
+                    this.setRight(node);
+                    vBox.getChildren().remove(node);
+                } else if (this.getTop() == null) {
+                    this.setTop(node);
+                    vBox.getChildren().remove(node);
+                } else if (this.getBottom() == null) {
+                    this.setBottom(node);
+                    vBox.getChildren().remove(node);
+                } else if (this.getLeft() == null) {
+                    this.setLeft(node);
+                    vBox.getChildren().remove(node);
+                }
+                //accordion.getPanes().remove(nodeTP);
+                //nodeTP.setVisible(false);
+                //this.removeAccordion();
+            } else {
+                //this.addAccordion();
+                //nodeTP.setContent(node);
+                vBox.getChildren().add(node);
+                this.getChildren().remove(node);
+                //accordion.getPanes().add(0,nodeTP);
+                //nodeTP.setVisible(true);
+            }
+            /*this.setOnMouseDragOver((MouseEvent) -> {
+                if (!this.getItems().contains(node)) {
+                    this.getItems().add(node);
+                    //accordion.getPanes().remove(nodeTP);
+                    nodeTP.setVisible(false);
+
+                }
+            });*/
+        //});
     }
     /*private void removeAccordion(){
         invisibleItems = true;
