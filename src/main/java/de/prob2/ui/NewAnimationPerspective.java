@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
@@ -40,6 +41,10 @@ public class NewAnimationPerspective extends BorderPane {
     @FXML
     private TitledPane modelcheckTP;
     @FXML
+    private AnimationsView animations;
+    @FXML
+    private TitledPane animationsTP;
+    @FXML
     private VBox vBox;
     /*@FXML
     private FlowPane test;
@@ -72,7 +77,9 @@ public class NewAnimationPerspective extends BorderPane {
 	@FXML
 	private TitledPane historyTP;
 	@FXML
-	private TitledPane dottyTP;
+	private AnimationsView animations;
+	@FXML
+	private TitledPane animationsTP;
 	@FXML
 	private ModelcheckingController modelcheck;
 	@FXML
@@ -121,6 +128,7 @@ public class NewAnimationPerspective extends BorderPane {
             modelcheck.setOnDragDetected(s -> {
                 addGesture(modelcheck);
             });
+
             System.out.println("dragged");
         });
 	}
