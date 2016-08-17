@@ -252,8 +252,14 @@
 .with-border .column-header {
 		-fx-border-width: 0.0 0.0 2.0 0.2;
 }
-
-
+.table-row-cell:odd {
+    -fx-background: white;
+    -fx-border-color: #eeeeee transparent #eeeeee transparent;
+	-fx-border-width: 0.4 0 0.4 0;
+}
+.table-view .table-cell {
+    -fx-border-color: transparent;
+}
 
 /************************************************************************************
  * Specific Styles																	*
