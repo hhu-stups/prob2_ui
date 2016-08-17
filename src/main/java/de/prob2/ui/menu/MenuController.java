@@ -118,9 +118,9 @@ public class MenuController extends MenuBar {
 			}
 
 			final Trace currentTrace = this.animationSelector.getCurrentTrace();
-			if (currentTrace != null) {
-				this.animationSelector.removeTrace(currentTrace);
-			}
+//			if (currentTrace != null) {
+//				this.animationSelector.removeTrace(currentTrace);
+//			}
 			this.animationSelector.addNewAnimation(new Trace(newSpace));
 			modelcheckingController.resetView();
 			break;
