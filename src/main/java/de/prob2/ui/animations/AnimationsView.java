@@ -14,15 +14,22 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Callback;
 
 @Singleton
 public class AnimationsView extends AnchorPane implements IAnimationChangeListener {
@@ -58,12 +65,32 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 		tracelength.setCellValueFactory(new PropertyValueFactory<>("steps"));
 		animationsTable.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Animation>() {
 			@Override
-			public void changed(ObservableValue<? extends Animation> observable,Animation oldValue,
+			public void changed(ObservableValue<? extends Animation> observable, Animation oldValue,
 					Animation newValue) {
-				if(newValue != null) {
+				if (newValue != null) {
 					Trace trace = newValue.getTrace();
 					animations.changeCurrentAnimation(trace);
 				}
+			}
+		});
+		animationsTable.setRowFactory(new Callback<TableView<Animation>, TableRow<Animation>>() {
+			@Override
+			public TableRow<Animation> call(TableView<Animation> tableView) {
+				final TableRow<Animation> row = new TableRow<>();
+				final ContextMenu contextMenu = new ContextMenu();
+				final MenuItem removeMenuItem = new MenuItem("Remove Trace");
+				removeMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+					@Override
+					public void handle(ActionEvent event) {
+						Animation a = row.getItem();
+						animations.removeTrace(a.getTrace());
+						animationsTable.getItems().remove(a);
+					}
+				});
+				contextMenu.getItems().add(removeMenuItem);
+				row.contextMenuProperty()
+						.bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(contextMenu));
+				return row;
 			}
 		});
 	}
