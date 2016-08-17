@@ -90,6 +90,7 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 				contextMenu.getItems().add(removeMenuItem);
 				row.contextMenuProperty()
 						.bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(contextMenu));
+				
 				return row;
 			}
 		});
