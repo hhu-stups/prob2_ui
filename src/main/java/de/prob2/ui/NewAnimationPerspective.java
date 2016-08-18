@@ -52,7 +52,6 @@ public class NewAnimationPerspective extends BorderPane {
     private VBox vBox;
     @FXML
     private Accordion accordion;
-    //private boolean invisibleItems;
     private ImageView snapImage = new ImageView();
     @Inject
     public NewAnimationPerspective() {
@@ -69,45 +68,6 @@ public class NewAnimationPerspective extends BorderPane {
             e.printStackTrace();
         }
     }
-
-/*public class NewAnimationPerspective extends SplitPane {
-	@FXML
-	private OperationsView operations;
-	@FXML
-	private TitledPane operationsTP;
-	@FXML
-	private HistoryView history;
-	@FXML
-	private TitledPane historyTP;
-	@FXML
-	private AnimationsView animations;
-	@FXML
-	private TitledPane animationsTP;
-	@FXML
-	private ModelcheckingController modelcheck;
-	@FXML
-	private TitledPane modelcheckTP;
-	@FXML
-	private FlowPane test;
-	@FXML
-	private TitledPane testTP;
-	@FXML
-	private Accordion accordion;
-
-	@Inject
-	public NewAnimationPerspective() {
-		try {
-			FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
-			loader.setLocation(getClass().getResource("new_animation_perspective.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
-			loader.load();
-			parentProperty().addListener((ObservableValue<? extends Parent>
-			ov, Parent previousParent, Parent nextParent)-> { onDrag(); });
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}*/
 
 	@FXML
 	public void initialize() {
