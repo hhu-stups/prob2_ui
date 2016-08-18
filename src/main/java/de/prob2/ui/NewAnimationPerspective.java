@@ -10,6 +10,7 @@ import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -32,6 +33,8 @@ import org.apache.commons.lang.ObjectUtils;
 
 @Singleton
 public class NewAnimationPerspective extends BorderPane {
+    // TODO (real) DragDrop/Docking
+    // TODO reverting to accordion
     @FXML
     private OperationsView operations;
     @FXML
@@ -72,6 +75,11 @@ public class NewAnimationPerspective extends BorderPane {
 	@FXML
 	public void initialize() {
 		//this.setDividerPositions(0.3);
+        double initialSize = 250;
+        operations.setPrefSize(initialSize,initialSize);
+        history.setPrefSize(initialSize,initialSize);
+        modelcheck.setPrefSize(initialSize,initialSize);
+        animations.setPrefSize(initialSize,initialSize);
 	}
 
 	private void onDrag() {
@@ -93,26 +101,32 @@ public class NewAnimationPerspective extends BorderPane {
 	}
 
     private void dragAction(final Node node, final TitledPane nodeTP){
-        System.out.println(node.getClass().toString() + " dragged");
+        System.out.println(node.getClass().toString() + " dragged, isResizable() = "+node.isResizable());
         //SnapshotParameters snapParams = new SnapshotParameters();
         //snapParams.setFill(Color.TRANSPARENT);
         //snapImage.setImage(node.snapshot(snapParams, null));
         if (vBox.getChildren().contains(node)) {
             if (this.getRight() == null) {
+                node.resize(0,0);
                 this.setRight(node);
             } else if (this.getTop() == null) {
+                node.resize(0,0);
                 this.setTop(node);
             } else if (this.getBottom() == null) {
+                node.resize(0,0);
                 this.setBottom(node);
             } else if (this.getLeft() == null) {
+                node.resize(0,0);
                 this.setLeft(node);
             }
             //nodeTP.setContent(null);
             //accordion.getPanes().remove(nodeTP);
             vBox.getChildren().remove(node);
+            System.out.println("Width = "+node.getBoundsInParent().getWidth()+", Height = "+node.getBoundsInParent().getHeight());
         } else {
             //this.addAccordion();
             //nodeTP.setContent(node);
+            node.resize(0,0);
             vBox.getChildren().add(node);
             this.getChildren().remove(node);
         }
