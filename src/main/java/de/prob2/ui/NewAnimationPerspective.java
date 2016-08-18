@@ -34,26 +34,24 @@ import org.apache.commons.lang.ObjectUtils;
 public class NewAnimationPerspective extends BorderPane {
     @FXML
     private OperationsView operations;
-    //@FXML
-    //private TitledPane operationsTP;
+    @FXML
+    private TitledPane operationsTP;
     @FXML
     private HistoryView history;
-    //@FXML
-    //private TitledPane historyTP;
+    @FXML
+    private TitledPane historyTP;
     @FXML
     private ModelcheckingController modelcheck;
-    //@FXML
-    //private TitledPane modelcheckTP;
+    @FXML
+    private TitledPane modelcheckTP;
     @FXML
     private AnimationsView animations;
-    //@FXML
-    //private TitledPane animationsTP;
+    @FXML
+    private TitledPane animationsTP;
     @FXML
     private VBox vBox;
-    /*@FXML
-    private FlowPane test;
     @FXML
-    private TitledPane testTP;*/
+    private Accordion accordion;
     //private boolean invisibleItems;
     private ImageView snapImage = new ImageView();
     @Inject
@@ -117,128 +115,46 @@ public class NewAnimationPerspective extends BorderPane {
 	}
 
 	private void onDrag() {
-        //this.dragAction(operations, operationsTP);
-        //this.dragAction(history, historyTP);
-        //this.dragAction(modelcheck, modelcheckTP);
         this.setOnMouseEntered(t -> this.setCursor(Cursor.OPEN_HAND));
         this.setOnMousePressed(t -> this.setCursor(Cursor.CLOSED_HAND));
         this.setOnMouseReleased(t -> this.setCursor(Cursor.DEFAULT));
-        this.setOnDragDetected(t -> {
-            operations.setOnDragDetected(s -> {
-                addGesture(operations);
-            });
-            history.setOnDragDetected(s -> {
-                addGesture(history);
-            });
-            modelcheck.setOnDragDetected(s -> {
-                addGesture(modelcheck);
-            });
-            animations.setOnDragDetected(s -> {
-                addGesture(animations);
-            });
-            System.out.println("dragged");
+        operations.setOnDragDetected(s -> {
+            dragAction(operations,operationsTP);
+        });
+        history.setOnDragDetected(s -> {
+            dragAction(history,historyTP);
+        });
+        modelcheck.setOnDragDetected(s -> {
+            dragAction(modelcheck,modelcheckTP);
+        });
+        animations.setOnDragDetected(s -> {
+            dragAction(animations,animationsTP);
         });
 	}
 
-    /*private void dragAction(Node node, TitledPane nodeTP){
-
-    }*/
-
-    private void addGesture(final Node node){
-        /*node.setOnMouseDragged(t -> {
-            Point2D localPoint = this.getScene().sceneToLocal(new Point2D(t.getSceneX(), t.getSceneY()));
-            snapImage.relocate(
-                    (int)(localPoint.getX() - snapImage.getBoundsInLocal().getWidth() / 2),
-                    (int)(localPoint.getY() - snapImage.getBoundsInLocal().getHeight() / 2)
-            );
-            t.consume();
-        });*/
-
-        //node.setOnDragDetected(t -> {
-            System.out.println(node.getClass().toString() + " dragged");
-            SnapshotParameters snapParams = new SnapshotParameters();
-            snapParams.setFill(Color.TRANSPARENT);
-            snapImage.setImage(node.snapshot(snapParams, null));
-            if (vBox.getChildren().contains(node)) {
-                if (this.getRight() == null) {
-                    this.setRight(node);
-                    vBox.getChildren().remove(node);
-                } else if (this.getTop() == null) {
-                    this.setTop(node);
-                    vBox.getChildren().remove(node);
-                } else if (this.getBottom() == null) {
-                    this.setBottom(node);
-                    vBox.getChildren().remove(node);
-                } else if (this.getLeft() == null) {
-                    this.setLeft(node);
-                    vBox.getChildren().remove(node);
-                }
-                //accordion.getPanes().remove(nodeTP);
-                //nodeTP.setVisible(false);
-                //this.removeAccordion();
-            } else {
-                //this.addAccordion();
-                //nodeTP.setContent(node);
-                vBox.getChildren().add(node);
-                this.getChildren().remove(node);
-                //accordion.getPanes().add(0,nodeTP);
-                //nodeTP.setVisible(true);
+    private void dragAction(final Node node, final TitledPane nodeTP){
+        System.out.println(node.getClass().toString() + " dragged");
+        //SnapshotParameters snapParams = new SnapshotParameters();
+        //snapParams.setFill(Color.TRANSPARENT);
+        //snapImage.setImage(node.snapshot(snapParams, null));
+        if (vBox.getChildren().contains(node)) {
+            if (this.getRight() == null) {
+                this.setRight(node);
+            } else if (this.getTop() == null) {
+                this.setTop(node);
+            } else if (this.getBottom() == null) {
+                this.setBottom(node);
+            } else if (this.getLeft() == null) {
+                this.setLeft(node);
             }
-            /*this.setOnMouseDragOver((MouseEvent) -> {
-                if (!this.getItems().contains(node)) {
-                    this.getItems().add(node);
-                    //accordion.getPanes().remove(nodeTP);
-                    nodeTP.setVisible(false);
-
-                }
-            });*/
-        //});
-    }
-    /*private void removeAccordion(){
-        invisibleItems = true;
-        for (TitledPane pane : accordion.getPanes()){
-            if (pane.isVisible()){
-                invisibleItems=false;
-            }
-        }
-        if (invisibleItems){
-            //this.getItems().remove(0);
-            accordion.setVisible(false);
-            //this.getDividers().remove(0);
+            //nodeTP.setContent(null);
+            //accordion.getPanes().remove(nodeTP);
+            vBox.getChildren().remove(node);
+        } else {
+            //this.addAccordion();
+            //nodeTP.setContent(node);
+            vBox.getChildren().add(node);
+            this.getChildren().remove(node);
         }
     }
-
-    private void addAccordion(){
-        if (invisibleItems){
-            //this.getItems().add(0,accordion);
-            accordion.setVisible(true);
-            this.getDividers().add(0,new Divider());
-        }
-    }*/
-/*private void dragAction(Node node, TitledPane nodeTP) {
-		node.setOnDragDetected((MouseEvent t) -> {
-			if (!this.getChildren().contains(node)) {
-				this.getItems().add(node);
-				accordion.getPanes().remove(nodeTP);
-				this.removeAccordion();
-			} else {
-				this.addAccordion();
-				nodeTP.setContent(node);
-				accordion.getPanes().add(0, nodeTP);
-			}
-			t.consume();
-		});
-	}
-
-	private void removeAccordion() {
-		if (accordion.getPanes().size() == 0) {
-			this.getItems().remove(0);
-		}
-	}
-
-	private void addAccordion() {
-		if (!this.getChildren().contains(accordion)) {
-			this.getItems().add(0, accordion);
-		}
-	}*/
 }

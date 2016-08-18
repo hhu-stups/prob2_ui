@@ -14,30 +14,26 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 <fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml">
-    <!--<AnchorPane minWidth="280.0">
-        <Accordion fx:id="accordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-            <panes>
-                <TitledPane text="Operations" fx:id="operationsTP">
-                    <OperationsView fx:id="operations"/>
-                </TitledPane>
-                <TitledPane text="History" fx:id="historyTP">
-                    <HistoryView fx:id="history"/>
-                </TitledPane>
-                <TitledPane text="Model Check Stats" fx:id="modelcheckTP">
-                    <ModelcheckingController fx:id="modelcheck"/>
-                </TitledPane>
-                <TitledPane text="Test" fx:id="testTP">
-                <TitledPane text="Animations" fx:id="animationsTP">
-                    <AnimationsView fx:id="animations"/>
-                </TitledPane>
-                <TitledPane text="Test" fx:id="testTP">
-                    <FlowPane fx:id="test">
-                            <Label text="Test"/>
-                    </FlowPane>
-                </TitledPane>
-            </panes>
-        </Accordion>
-    </AnchorPane>-->
+    <!--<left>
+        <AnchorPane minWidth="280.0">
+            <Accordion fx:id="accordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <panes>
+                    <TitledPane text="Operations" fx:id="operationsTP">
+                        <OperationsView fx:id="operations"/>
+                    </TitledPane>
+                    <TitledPane text="History" fx:id="historyTP">
+                        <HistoryView fx:id="history"/>
+                    </TitledPane>
+                    <TitledPane text="Model Check Stats" fx:id="modelcheckTP">
+                        <ModelcheckingController fx:id="modelcheck"/>
+                    </TitledPane>
+                    <TitledPane text="Animations" fx:id="animationsTP">
+                        <AnimationsView fx:id="animations"/>
+                    </TitledPane>
+                </panes>
+            </Accordion>
+        </AnchorPane>
+    </left>-->
     <left>
         <VBox fx:id="vBox">
             <children>
