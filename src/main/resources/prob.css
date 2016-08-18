@@ -243,6 +243,10 @@
 /************************************************************************************
  * TableView, TreeTableView															*
  ************************************************************************************/
+.table-view {
+    -fx-table-cell-border-color: transparent;
+    -fx-accent: transparent;
+}
 .table-view .column-header,
 .tree-table-view .column-header {
 	-fx-background-color: #fafafa;
@@ -252,18 +256,34 @@
 .with-border .column-header {
 		-fx-border-width: 0.0 0.0 2.0 0.2;
 }
+.table-row-cell,
 .table-row-cell:odd {
     -fx-background: white;
-    -fx-border-color: #eeeeee transparent #eeeeee transparent;
-	-fx-border-width: 0.4 0 0.4 0;
+    -fx-border-color: transparent;
+	-fx-border-width: 0.0;
+}
+.table-row-cell:empty:hover {
+    -fx-background-color: white;
+}
+.table-row-cell:focus {
+	-fx-font-weight: bold;
+}
+.table-row-cell:hover {
+	-fx-background-color: #ededed;
 }
 .table-view .table-cell {
     -fx-border-color: transparent;
+    -fx-padding: 0.2em 0.166667em 0.166667em 1em;
 }
 
 /************************************************************************************
  * Specific Styles																	*
  ************************************************************************************/
+.center {
+    -fx-alignment: center;
+}
+
+/* ============= DARK ================== */
 .dark {
 	-fx-background-color: #adadad;
 }
