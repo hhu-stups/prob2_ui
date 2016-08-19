@@ -78,7 +78,7 @@ public class GroovyConsole extends AnchorPane {
 			}
 			
 			if(!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
-				handleAddChar(e);
+				handleInsertChar(e);
 				return;
 			}
 			
@@ -95,8 +95,8 @@ public class GroovyConsole extends AnchorPane {
 		currentPosInLine = charCounterInLine;
 	}
 	
-	private void handleAddChar(KeyEvent e) {
-		currentLine += e.getText();
+	private void handleInsertChar(KeyEvent e) {
+		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText().charAt(0)).toString();
 		charCounterInLine++;
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
@@ -129,13 +129,14 @@ public class GroovyConsole extends AnchorPane {
 		if(e.getCode().equals(KeyCode.LEFT)) {
 			handleLeft(e);
 		} else if(e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
+			boolean needReturn;
 			if(e.getCode().equals(KeyCode.UP)) {
-				boolean needReturn = handleUp(e);
-				if(needReturn) {
-					return;
-				}
+				needReturn = handleUp(e);
 			} else {
-				handleDown(e);				
+				needReturn = handleDown(e);				
+			}
+			if(needReturn) {
+				return;
 			}
 			setTextAfterArrowKey();
 		} else if(e.getCode().equals(KeyCode.RIGHT)) {
@@ -168,8 +169,12 @@ public class GroovyConsole extends AnchorPane {
 		return false;
 	}
 	
-	private void handleDown(KeyEvent e) {
+	private boolean handleDown(KeyEvent e) {
+		if(posInList == instructions.size() - 1) {
+			return true;
+		}
 		posInList = Math.min(posInList+1, instructions.size() - 1);
+		return false;
 	}
 	
 	private void handleLeft(KeyEvent e) {
