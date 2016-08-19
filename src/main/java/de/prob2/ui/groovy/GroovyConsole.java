@@ -24,7 +24,8 @@ public class GroovyConsole extends AnchorPane {
 	private int currentPosInLine = 0;
 	private final KeyCode[] rest = {KeyCode.ESCAPE,KeyCode.SCROLL_LOCK,KeyCode.PAUSE,KeyCode.NUM_LOCK,KeyCode.INSERT,KeyCode.CONTEXT_MENU,KeyCode.CAPS};
 	private List<String> instructions;
-	private int posInList = 0;
+	private int posInList = -1;
+	private int numberOfInstructions = 0;
 	private String currentLine ="";
 	
 	@FXML
@@ -72,13 +73,7 @@ public class GroovyConsole extends AnchorPane {
 				return;
 			}
 			if(e.getCode().equals(KeyCode.ENTER)) {
-				charCounterInLine = 0;
-				currentPosInLine = 0;
-				posInList = instructions.size()+1;
-				e.consume();
-				tagroovy.appendText("\n >");
-				instructions.add(currentLine);
-				currentLine ="";
+				handleEnter(e);
 				return;
 			}
 			
@@ -90,10 +85,32 @@ public class GroovyConsole extends AnchorPane {
 				currentLine += e.getText();
 				charCounterInLine++;
 				currentPosInLine++;
-				posInList = instructions.size();
+				posInList = instructions.size() - 1;
 				return;
 			}
 		});
+	}
+	
+	private void handleEnter(KeyEvent e) {
+		charCounterInLine = 0;
+		currentPosInLine = 0;
+		e.consume();
+		tagroovy.appendText("\n >");
+		if(instructions.size() == 0) {
+			if(!currentLine.equals("")) {
+				instructions.add(currentLine);
+			}
+		} else {
+			String lastinstruction = instructions.get(instructions.size()-1);
+			if(!(lastinstruction.equals(""))) {
+				instructions.add(currentLine);
+			} else if(!currentLine.equals("")) {
+				instructions.set(instructions.size() - 1, currentLine);
+			}
+		}
+		posInList = instructions.size() - 1;
+		currentLine = "";
+		numberOfInstructions++;
 	}
 	
 	private void goToLastPos() {
@@ -111,32 +128,35 @@ public class GroovyConsole extends AnchorPane {
 				e.consume();
 			}
 		} else if(e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
-			int posOfEnter = tagroovy.getText().lastIndexOf("\n");
+
 			if(e.getCode().equals(KeyCode.UP)) {
 				e.consume();
-				if(posInList == 0) { 
+				if(posInList == -1) { 
 					return;
 				}
-				if(posInList == instructions.size()) {
+				if(posInList == instructions.size() - 1) {
 					String lastinstruction = instructions.get(instructions.size()-1);
-					if(!lastinstruction.equals(currentLine)) {
-						instructions.add(currentLine);
+					if(!lastinstruction.equals("")) {
+						if(!lastinstruction.equals(currentLine)) {
+							if(numberOfInstructions == instructions.size()) {
+								instructions.add(currentLine);
+								setTextAfterArrowKey();
+								return;
+							} else {
+								instructions.set(numberOfInstructions, currentLine);
+							}
+						}
+					} else {
+						instructions.set(instructions.size() - 1, currentLine);
 					}
-					//
 				}
 				posInList = Math.max(posInList - 1, 0);
+				
 			} else {
-				posInList = Math.min(posInList+1, instructions.size());
-				if(posInList == instructions.size()) { 
-					return;
-				}
+				posInList = Math.min(posInList+1, instructions.size() - 1);
 			}
-			
-			tagroovy.setText(tagroovy.getText().substring(0, posOfEnter + 3));
-			currentLine = instructions.get(posInList);
-			charCounterInLine = currentLine.length();
-			currentPosInLine = charCounterInLine;
-			tagroovy.appendText(currentLine);
+			setTextAfterArrowKey();
+
 
 		} else if(e.getCode().equals(KeyCode.RIGHT)) {
 			if(currentPosInLine < charCounterInLine) {
@@ -144,6 +164,15 @@ public class GroovyConsole extends AnchorPane {
 			}
 			
 		}
+	}
+	
+	private void setTextAfterArrowKey() {
+		int posOfEnter = tagroovy.getText().lastIndexOf("\n");
+		tagroovy.setText(tagroovy.getText().substring(0, posOfEnter + 3));
+		currentLine = instructions.get(posInList);
+		charCounterInLine = currentLine.length();
+		currentPosInLine = charCounterInLine;
+		tagroovy.appendText(currentLine);
 	}
 	
 	private boolean handleRest(KeyEvent e) {
