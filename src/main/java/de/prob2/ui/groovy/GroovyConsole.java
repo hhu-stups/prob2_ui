@@ -77,18 +77,29 @@ public class GroovyConsole extends AnchorPane {
 				return;
 			}
 			
-			if(handleRest(e)) {
+			if(!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
+				handleAddChar(e);
 				return;
 			}
 			
-			if(!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
-				currentLine += e.getText();
-				charCounterInLine++;
-				currentPosInLine++;
-				posInList = instructions.size() - 1;
+			if(handleRest(e)) {
 				return;
 			}
+
 		});
+	}
+	
+	private void goToLastPos() {
+		tagroovy.setText(tagroovy.getText());
+		tagroovy.positionCaret(tagroovy.getLength());
+		currentPosInLine = charCounterInLine;
+	}
+	
+	private void handleAddChar(KeyEvent e) {
+		currentLine += e.getText();
+		charCounterInLine++;
+		currentPosInLine++;
+		posInList = instructions.size() - 1;
 	}
 	
 	private void handleEnter(KeyEvent e) {
@@ -101,6 +112,7 @@ public class GroovyConsole extends AnchorPane {
 				instructions.add(currentLine);
 			}
 		} else {
+			//add Instruction if last Instruction is not "", otherwise replace it
 			String lastinstruction = instructions.get(instructions.size()-1);
 			if(!(lastinstruction.equals(""))) {
 				instructions.add(currentLine);
@@ -111,58 +123,67 @@ public class GroovyConsole extends AnchorPane {
 		posInList = instructions.size() - 1;
 		currentLine = "";
 		numberOfInstructions++;
-	}
-	
-	private void goToLastPos() {
-		tagroovy.setText(tagroovy.getText());
-		tagroovy.positionCaret(tagroovy.getLength());
-		currentPosInLine = charCounterInLine;
-	}
-	
+	}	
 	
 	private void handleArrowKeys(KeyEvent e) {
 		if(e.getCode().equals(KeyCode.LEFT)) {
-			if(currentPosInLine > 0) {
-				currentPosInLine = Math.max(currentPosInLine - 1, 0);
-			} else {
-				e.consume();
-			}
+			handleLeft(e);
 		} else if(e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
-
 			if(e.getCode().equals(KeyCode.UP)) {
-				e.consume();
-				if(posInList == -1) { 
+				boolean needReturn = handleUp(e);
+				if(needReturn) {
 					return;
 				}
-				if(posInList == instructions.size() - 1) {
-					String lastinstruction = instructions.get(instructions.size()-1);
-					if(!lastinstruction.equals("")) {
-						if(!lastinstruction.equals(currentLine)) {
-							if(numberOfInstructions == instructions.size()) {
-								instructions.add(currentLine);
-								setTextAfterArrowKey();
-								return;
-							} else {
-								instructions.set(numberOfInstructions, currentLine);
-							}
-						}
-					} else {
-						instructions.set(instructions.size() - 1, currentLine);
-					}
-				}
-				posInList = Math.max(posInList - 1, 0);
-				
 			} else {
-				posInList = Math.min(posInList+1, instructions.size() - 1);
+				handleDown(e);				
 			}
 			setTextAfterArrowKey();
-
-
 		} else if(e.getCode().equals(KeyCode.RIGHT)) {
-			if(currentPosInLine < charCounterInLine) {
-				currentPosInLine++;
+			handleRight(e);
+		}
+	}
+	
+	private boolean handleUp(KeyEvent e) {
+		e.consume();
+		if(posInList == -1) { 
+			return true;
+		}
+		if(posInList == instructions.size() - 1) {
+			String lastinstruction = instructions.get(instructions.size()-1);
+			if(!lastinstruction.equals("")) {
+				if(!lastinstruction.equals(currentLine)) {
+					if(numberOfInstructions == instructions.size()) {
+						instructions.add(currentLine);
+						setTextAfterArrowKey();
+						return true;
+					} else {
+						instructions.set(numberOfInstructions, currentLine);
+					}
+				}
+			} else {
+				instructions.set(instructions.size() - 1, currentLine);
 			}
-			
+		}
+		posInList = Math.max(posInList - 1, 0);
+		return false;
+	}
+	
+	private void handleDown(KeyEvent e) {
+		posInList = Math.min(posInList+1, instructions.size() - 1);
+	}
+	
+	private void handleLeft(KeyEvent e) {
+		//handleLeft
+		if(currentPosInLine > 0) {
+			currentPosInLine = Math.max(currentPosInLine - 1, 0);
+		} else {
+			e.consume();
+		}
+	}
+	
+	private void handleRight(KeyEvent e) {
+		if(currentPosInLine < charCounterInLine) {
+			currentPosInLine++;
 		}
 	}
 	
@@ -183,33 +204,49 @@ public class GroovyConsole extends AnchorPane {
 		return false;
 	}
 	
-
-	
 	private void handleDeletion(KeyEvent e) {
+		boolean needReturn = false;
 		if(!tagroovy.getSelectedText().equals("")) {
 			e.consume();
 			return;
 		}
 		if(e.getCode().equals(KeyCode.BACK_SPACE)) {
-			if(currentPosInLine > 0) {
-				currentPosInLine = Math.max(currentPosInLine - 1, 0);
-				charCounterInLine = Math.max(charCounterInLine - 1, 0);		
-			} else {
-				e.consume();
+			needReturn = handleBackspace(e);
+			if(needReturn) {
 				return;
 			}
 		} else {
-			if(currentPosInLine < charCounterInLine) {
-				charCounterInLine = Math.max(charCounterInLine - 1, 0);
-			} else if(currentPosInLine == charCounterInLine) {
+			needReturn = handleDelete(e);
+			if(needReturn) {
 				return;
 			}
 		}
+		updateTextAreaAfterDeletion();
+	}
+	
+	private boolean handleBackspace(KeyEvent e) {
+		if(currentPosInLine > 0) {
+			currentPosInLine = Math.max(currentPosInLine - 1, 0);
+			charCounterInLine = Math.max(charCounterInLine - 1, 0);		
+		} else {
+			e.consume();
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean handleDelete(KeyEvent e) {
+		if(currentPosInLine < charCounterInLine) {
+			charCounterInLine = Math.max(charCounterInLine - 1, 0);
+		} else if(currentPosInLine == charCounterInLine) {
+			return true;
+		}
+		return false;
+	}
+	
+	private void updateTextAreaAfterDeletion() {
 		int posOfEnter = tagroovy.getText().lastIndexOf("\n");
 		currentLine = tagroovy.getText().substring(posOfEnter + 3, posOfEnter + 3 + currentPosInLine);
 		currentLine += tagroovy.getText().substring(posOfEnter+ 4 + currentPosInLine, tagroovy.getText().length());
-
 	}
-
-	
 }
