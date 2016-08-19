@@ -1,25 +1,16 @@
 package de.prob2.ui.groovy;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.inject.Inject;
-
-import de.prob.statespace.AnimationSelector;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 
-
-public class GroovyConsole extends AnchorPane {
+public class GroovyConsole extends TextArea {
 	
-	private AnimationSelector animations;
 	private int charCounterInLine = 0;
 	private int currentPosInLine = 0;
 	private final KeyCode[] rest = {KeyCode.ESCAPE,KeyCode.SCROLL_LOCK,KeyCode.PAUSE,KeyCode.NUM_LOCK,KeyCode.INSERT,KeyCode.CONTEXT_MENU,KeyCode.CAPS};
@@ -28,38 +19,26 @@ public class GroovyConsole extends AnchorPane {
 	private int numberOfInstructions = 0;
 	private String currentLine ="";
 	
-	@FXML
-	private TextArea tagroovy;
-	
-	@Inject
-	private GroovyConsole(FXMLLoader loader, AnimationSelector animations) {
-		this.animations = animations;
-		try {
-			loader.setLocation(getClass().getResource("groovy_console_view.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
-			loader.load();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		tagroovy.appendText("Prob 2.0 Groovy Console \n >");
+
+	public GroovyConsole() {
+		super();
+		this.appendText("Prob 2.0 Groovy Console \n >");
 		this.instructions = new ArrayList<String>();
 		setListeners();
-
 	}
 	
 	private void setListeners() {
-				
-		tagroovy.addEventFilter(MouseEvent.ANY, e-> {
+		
+		this.addEventFilter(MouseEvent.ANY, e-> {
 			if(e.isMiddleButtonDown()) {
 				return;
 			}
-			tagroovy.deselect();
+			this.deselect();
 			goToLastPos();
 			
 		});
 				
-		tagroovy.setOnKeyPressed(e-> {
+		this.setOnKeyPressed(e-> {
 			if(e.getCode().isArrowKey()) {
 				handleArrowKeys(e);
 				return;
@@ -90,8 +69,8 @@ public class GroovyConsole extends AnchorPane {
 	}
 	
 	private void goToLastPos() {
-		tagroovy.setText(tagroovy.getText());
-		tagroovy.positionCaret(tagroovy.getLength());
+		this.setText(this.getText());
+		this.positionCaret(this.getLength());
 		currentPosInLine = charCounterInLine;
 	}
 	
@@ -106,7 +85,7 @@ public class GroovyConsole extends AnchorPane {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		e.consume();
-		tagroovy.appendText("\n >");
+		this.appendText("\n >");
 		if(instructions.size() == 0) {
 			if(!currentLine.equals("")) {
 				instructions.add(currentLine);
@@ -194,12 +173,12 @@ public class GroovyConsole extends AnchorPane {
 	}
 	
 	private void setTextAfterArrowKey() {
-		int posOfEnter = tagroovy.getText().lastIndexOf("\n");
-		tagroovy.setText(tagroovy.getText().substring(0, posOfEnter + 3));
+		int posOfEnter = this.getText().lastIndexOf("\n");
+		this.setText(this.getText().substring(0, posOfEnter + 3));
 		currentLine = instructions.get(posInList);
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
-		tagroovy.appendText(currentLine);
+		this.appendText(currentLine);
 	}
 	
 	private boolean handleRest(KeyEvent e) {
@@ -212,7 +191,7 @@ public class GroovyConsole extends AnchorPane {
 	
 	private void handleDeletion(KeyEvent e) {
 		boolean needReturn = false;
-		if(!tagroovy.getSelectedText().equals("")) {
+		if(!this.getSelectedText().equals("")) {
 			e.consume();
 			return;
 		}
@@ -251,8 +230,9 @@ public class GroovyConsole extends AnchorPane {
 	}
 	
 	private void updateTextAreaAfterDeletion() {
-		int posOfEnter = tagroovy.getText().lastIndexOf("\n");
-		currentLine = tagroovy.getText().substring(posOfEnter + 3, posOfEnter + 3 + currentPosInLine);
-		currentLine += tagroovy.getText().substring(posOfEnter+ 4 + currentPosInLine, tagroovy.getText().length());
+		int posOfEnter = this.getText().lastIndexOf("\n");
+		currentLine = this.getText().substring(posOfEnter + 3, posOfEnter + 3 + currentPosInLine);
+		currentLine += this.getText().substring(posOfEnter+ 4 + currentPosInLine, this.getText().length());
 	}
+
 }
