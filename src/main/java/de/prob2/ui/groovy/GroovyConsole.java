@@ -35,7 +35,7 @@ public class GroovyConsole extends AnchorPane {
 	private GroovyConsole(FXMLLoader loader, AnimationSelector animations) {
 		this.animations = animations;
 		try {
-			loader.setLocation(getClass().getResource("groovy_console.fxml"));
+			loader.setLocation(getClass().getResource("groovy_console_view.fxml"));
 			loader.setRoot(this);
 			loader.setController(this);
 			loader.load();
@@ -110,19 +110,20 @@ public class GroovyConsole extends AnchorPane {
 		if(instructions.size() == 0) {
 			if(!currentLine.equals("")) {
 				instructions.add(currentLine);
+				numberOfInstructions++;
 			}
 		} else {
 			//add Instruction if last Instruction is not "", otherwise replace it
 			String lastinstruction = instructions.get(instructions.size()-1);
 			if(!(lastinstruction.equals(""))) {
 				instructions.add(currentLine);
+				numberOfInstructions++;
 			} else if(!currentLine.equals("")) {
 				instructions.set(instructions.size() - 1, currentLine);
 			}
 		}
 		posInList = instructions.size() - 1;
 		currentLine = "";
-		numberOfInstructions++;
 	}	
 	
 	private void handleArrowKeys(KeyEvent e) {
