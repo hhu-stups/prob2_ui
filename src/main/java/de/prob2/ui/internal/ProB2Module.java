@@ -8,6 +8,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 
 import de.prob.MainModule;
+import de.prob.scripting.ScriptEngineProvider;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.groovy.GroovyConsoleView;
 import de.prob2.ui.history.HistoryView;
@@ -32,6 +33,7 @@ public class ProB2Module extends AbstractModule {
 		// General stuff
 		bind(ClassBlacklist.class);
 		bind(ResourceBundle.class).toInstance(bundle);
+		bind(ScriptEngineProvider.class);
 		
 		// Controllers
 		bind(HistoryView.class);

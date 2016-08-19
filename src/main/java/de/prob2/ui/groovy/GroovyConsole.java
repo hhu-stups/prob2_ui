@@ -126,6 +126,7 @@ public class GroovyConsole extends TextArea {
 	
 	private boolean handleUp(KeyEvent e) {
 		e.consume();
+		
 		if(posInList == -1) { 
 			return true;
 		}
@@ -133,7 +134,7 @@ public class GroovyConsole extends TextArea {
 			String lastinstruction = instructions.get(instructions.size()-1);
 			if(!lastinstruction.equals("")) {
 				if(!lastinstruction.equals(currentLine)) {
-					if(numberOfInstructions == instructions.size()) {
+					if(posInList == instructions.size() - 1) {
 						instructions.add(currentLine);
 						setTextAfterArrowKey();
 						return true;
