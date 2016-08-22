@@ -326,6 +326,10 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 			if (sorter instanceof ModelOrder) {
 				sorter = new ModelOrder(opNames);
 			}
+			Platform.runLater(() -> {
+				ObservableList<Operation> opsList = opsListView.getItems();
+				opsList.clear();
+			});
 			return;
 		}
 
@@ -364,7 +368,6 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 			opsList.clear();
 			opsList.addAll(applyFilter(filter));
 		});
-
 	}
 
 	@Override
