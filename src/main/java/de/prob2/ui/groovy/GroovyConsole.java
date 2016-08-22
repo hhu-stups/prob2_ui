@@ -53,7 +53,9 @@ public class GroovyConsole extends TextArea {
 		this.addEventHandler(KeyEvent.KEY_PRESSED, e-> {
 			if(paste.match(e) || copy.match(e) || cut.match(e)) {
 				charCounterInLine--;
-				currentPosInLine--;
+				if(charCounterInLine > 0) {
+					currentPosInLine--;
+				}
 				return;
 			}
 		});
