@@ -1,17 +1,18 @@
 package de.prob2.ui.groovy;
 
 import java.io.IOException;
+
 import com.google.inject.Inject;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.AnchorPane;
 
-
 public class GroovyConsoleView extends AnchorPane {
-	
+
 	@FXML
 	private GroovyConsole groovyConsole;
-	
+
 	@Inject
 	private GroovyConsoleView(FXMLLoader loader, GroovyInterpreter interpreter) {
 		try {

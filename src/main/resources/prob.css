@@ -265,15 +265,15 @@
 .table-row-cell:empty:hover {
     -fx-background-color: white;
 }
-.table-row-cell:focus {
-	-fx-font-weight: bold;
-}
 .table-row-cell:hover {
 	-fx-background-color: #ededed;
 }
 .table-view .table-cell {
     -fx-border-color: transparent;
     -fx-padding: 0.2em 0.166667em 0.166667em 1em;
+}
+.table-row-cell:focused .table-cell {
+	-fx-font-weight: bold;
 }
 
 /************************************************************************************

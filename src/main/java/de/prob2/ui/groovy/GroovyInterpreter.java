@@ -1,9 +1,12 @@
 package de.prob2.ui.groovy;
 
 import javax.script.ScriptEngine;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
+
 import de.prob.scripting.ScriptEngineProvider;
 
 
