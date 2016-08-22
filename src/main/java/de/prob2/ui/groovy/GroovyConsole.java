@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.inject.Inject;
+
+import de.prob.scripting.ScriptEngineProvider;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -18,13 +21,17 @@ public class GroovyConsole extends TextArea {
 	private int posInList = -1;
 	private int numberOfInstructions = 0;
 	private String currentLine ="";
+	private GroovyInterpreter interpreter;
 	
-
 	public GroovyConsole() {
 		super();
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		this.instructions = new ArrayList<String>();
 		setListeners();
+	}
+	
+	public void setInterpreter(GroovyInterpreter interpreter) {
+		this.interpreter = interpreter;
 	}
 	
 	private void setListeners() {
@@ -85,7 +92,7 @@ public class GroovyConsole extends TextArea {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		e.consume();
-		this.appendText("\n >");
+		
 		if(instructions.size() == 0) {
 			if(!currentLine.equals("")) {
 				instructions.add(currentLine);
@@ -103,6 +110,9 @@ public class GroovyConsole extends TextArea {
 		}
 		posInList = instructions.size() - 1;
 		currentLine = "";
+		this.appendText("\n" + interpreter.exec(instructions.get(instructions.size() - 1)));
+		this.appendText("\n >");
+		
 	}	
 	
 	private void handleArrowKeys(KeyEvent e) {

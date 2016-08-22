@@ -14,15 +14,17 @@ public class GroovyConsoleView extends AnchorPane {
 	
 	private AnimationSelector animations;
 	
-	private ScriptEngineProvider provider;
+	//private ScriptEngineProvider provider;
+	
+	private GroovyInterpreter interpreter;
 
 	@FXML
 	private GroovyConsole groovyConsole;
 	
 	@Inject
-	private GroovyConsoleView(FXMLLoader loader, AnimationSelector animations, ScriptEngineProvider provider) {
+	private GroovyConsoleView(FXMLLoader loader, AnimationSelector animations, GroovyInterpreter interpreter) {
 		this.animations = animations;
-		this.provider = provider;
+		//this.provider = provider;
 		try {
 			loader.setLocation(getClass().getResource("groovy_console_view.fxml"));
 			loader.setRoot(this);
@@ -31,5 +33,7 @@ public class GroovyConsoleView extends AnchorPane {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		groovyConsole.setInterpreter(interpreter);
+		//this.interpreter = interpreter;
 	}
 }
