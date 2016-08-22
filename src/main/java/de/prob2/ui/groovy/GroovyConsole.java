@@ -11,7 +11,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-
+//STRG + V
 public class GroovyConsole extends TextArea {
 	
 	private int charCounterInLine = 0;
@@ -82,6 +82,9 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void handleInsertChar(KeyEvent e) {
+		if(e.getText().equals("")) {
+			return;
+		}
 		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText().charAt(0)).toString();
 		charCounterInLine++;
 		currentPosInLine++;

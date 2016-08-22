@@ -35,7 +35,7 @@ public class ProB2Module extends AbstractModule {
 		bind(ClassBlacklist.class);
 		bind(ResourceBundle.class).toInstance(bundle);
 		bind(ScriptEngineProvider.class);
-		bind(GroovyInterpreter.class);
+
 		// Controllers
 		bind(HistoryView.class);
 		bind(MenuController.class);
@@ -43,7 +43,6 @@ public class ProB2Module extends AbstractModule {
 		bind(ModelineController.class);
 		bind(OperationsView.class);
 		bind(StatesView.class);
-		bind(GroovyConsoleView.class);
 		bind(AnimationsView.class);
 	}
 

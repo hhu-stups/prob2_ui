@@ -5,7 +5,10 @@ import javax.script.ScriptEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
+
+import de.prob.scripting.Api;
 import de.prob.scripting.ScriptEngineProvider;
+import de.prob.statespace.AnimationSelector;
 
 
 public class GroovyInterpreter {
@@ -13,11 +16,14 @@ public class GroovyInterpreter {
 			.getLogger(GroovyInterpreter.class);
 
 	private final ScriptEngine engine;
+	private final AnimationSelector animations;
+	private final Api api;
 
 	@Inject
-	public GroovyInterpreter(/*final UUID id,*/ final ScriptEngineProvider sep) {
+	public GroovyInterpreter(/*final UUID id,*/ final ScriptEngineProvider sep, final AnimationSelector animations, final Api api) {
 		engine = sep.get();
-		
+		this.animations = animations;
+		this.api = api;
 	}
 
 	public String exec(String instruction) {
@@ -30,8 +36,7 @@ public class GroovyInterpreter {
 			Object eval = engine.eval(instruction);
 			resultString = eval.toString();
 			logger.trace("Evaled {} to {}", instruction, resultString);
-			System.out.println(resultString);
-
+			
 		} catch (Exception e) {
 			resultString = e.getMessage();
 		}

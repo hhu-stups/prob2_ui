@@ -190,7 +190,7 @@ public class MenuController extends MenuBar {
 	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector,
 			final BlacklistStage blacklistStage, final PreferencesStage preferencesStage,
 			final ModelcheckingStage modelcheckingStage, final ModelcheckingController modelcheckingController,
-			final FormulaGenerator formulaGenerator, final DottyStage dottyStage, final GroovyConsoleView groovyConsoleView, final ScriptEngineProvider sep) {
+			final FormulaGenerator formulaGenerator, final DottyStage dottyStage, final GroovyConsoleView groovyConsoleView) {
 		this.api = api;
 		this.animationSelector = animationSelector;
 		this.blacklistStage = blacklistStage;
@@ -203,6 +203,7 @@ public class MenuController extends MenuBar {
 		this.groovyConsoleStage.setTitle("Groovy Console");
 		this.groovyConsoleStage.setScene(new Scene(groovyConsoleView));
 		this.groovyConsoleStage.initModality(Modality.NONE);
+		this.groovyConsoleStage.setResizable(false);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);
