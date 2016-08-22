@@ -113,6 +113,11 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 	}
 	
 	private void updatePreferences() {
+		if (!this.preferences.hasStateSpace()) {
+			this.tv.getRoot().getChildren().clear();
+			return;
+		}
+		
 		for (ProBPreference pref : this.preferences.getPreferences()) {
 			TreeItem<PrefTreeItem> category = null;
 			for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
