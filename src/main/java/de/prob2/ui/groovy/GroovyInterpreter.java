@@ -1,6 +1,5 @@
 package de.prob2.ui.groovy;
 
-
 import javax.script.ScriptEngine;
 
 import org.slf4j.Logger;
@@ -18,9 +17,8 @@ public class GroovyInterpreter {
 	private final ScriptEngine engine;
 
 	@Inject
-	public GroovyInterpreter(/*final UUID id,*/ final ScriptEngineProvider sep) {
+	public GroovyInterpreter(final ScriptEngineProvider sep) {
 		engine = sep.get();
-		
 	}
 
 	public String exec(String instruction) {
@@ -33,8 +31,7 @@ public class GroovyInterpreter {
 			Object eval = engine.eval(instruction);
 			resultString = eval.toString();
 			logger.trace("Evaled {} to {}", instruction, resultString);
-			System.out.println(resultString);
-
+			
 		} catch (Exception e) {
 			resultString = e.getMessage();
 		}
