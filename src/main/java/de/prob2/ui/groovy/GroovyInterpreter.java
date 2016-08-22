@@ -16,26 +16,26 @@ public class GroovyInterpreter {
 
 	@Inject
 	public GroovyInterpreter(/*final UUID id,*/ final ScriptEngineProvider sep) {
-		
 		engine = sep.get();
 		
 	}
 
-	public void exec(String instruction) {
-
+	public String exec(String instruction) {
+		String resultString = "";
 		logger.trace("Exec");
 		try {
 			StringBuffer console = new StringBuffer();
 			engine.put("__console", console);
 			logger.trace("Eval {} on {}", instruction, engine.toString());
 			Object eval = engine.eval(instruction);
-			String resultString = eval.toString();
+			resultString = eval.toString();
 			logger.trace("Evaled {} to {}", instruction, resultString);
-			
+			System.out.println(resultString);
 
 		} catch (Exception e) {
-			System.err.println("ERROR");
+			resultString = e.getMessage();
 		}
+		return resultString;
 
 	}
 
