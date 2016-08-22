@@ -119,7 +119,6 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			animationsTable.getFocusModel().focus(currentIndex);
 			previousSize = animationsList.size();
 		});
-		System.out.println(currentAnimationChanged);
 	}
 
 	@Override
