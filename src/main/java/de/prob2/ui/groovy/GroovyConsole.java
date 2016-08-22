@@ -10,7 +10,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-//STRG + V
+
 public class GroovyConsole extends TextArea {
 	
 	private int charCounterInLine = 0;
@@ -37,8 +37,8 @@ public class GroovyConsole extends TextArea {
 	@Override
 	public void paste() {
 		int oldlength = this.getText().length();
-		super.paste();
 		int posOfEnter = this.getText().lastIndexOf("\n"); 
+		super.paste();
 		int diff = this.getText().length() - oldlength - 1;
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		charCounterInLine += diff;
