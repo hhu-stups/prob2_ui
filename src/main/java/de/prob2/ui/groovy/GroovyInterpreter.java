@@ -1,14 +1,10 @@
 package de.prob2.ui.groovy;
 
-
 import javax.script.ScriptEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
-
-import de.prob.scripting.Api;
 import de.prob.scripting.ScriptEngineProvider;
-import de.prob.statespace.AnimationSelector;
 
 
 public class GroovyInterpreter {
@@ -16,14 +12,10 @@ public class GroovyInterpreter {
 			.getLogger(GroovyInterpreter.class);
 
 	private final ScriptEngine engine;
-	private final AnimationSelector animations;
-	private final Api api;
 
 	@Inject
-	public GroovyInterpreter(/*final UUID id,*/ final ScriptEngineProvider sep, final AnimationSelector animations, final Api api) {
+	public GroovyInterpreter(final ScriptEngineProvider sep) {
 		engine = sep.get();
-		this.animations = animations;
-		this.api = api;
 	}
 
 	public String exec(String instruction) {

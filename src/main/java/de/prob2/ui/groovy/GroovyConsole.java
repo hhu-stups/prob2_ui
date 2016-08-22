@@ -3,10 +3,6 @@ package de.prob2.ui.groovy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.google.inject.Inject;
-
-import de.prob.scripting.ScriptEngineProvider;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -23,6 +19,7 @@ public class GroovyConsole extends TextArea {
 	private String currentLine ="";
 	private GroovyInterpreter interpreter;
 	
+
 	public GroovyConsole() {
 		super();
 		this.appendText("Prob 2.0 Groovy Console \n >");
