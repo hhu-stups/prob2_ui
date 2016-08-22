@@ -37,9 +37,9 @@ public class GroovyConsole extends TextArea {
 	@Override
 	public void paste() {
 		int oldlength = this.getText().length();
-		int posOfEnter = this.getText().lastIndexOf("\n"); 
+		int posOfEnter = this.getText().lastIndexOf("\n");
 		super.paste();
-		int diff = this.getText().length() - oldlength - 1;
+		int diff = this.getText().length() - oldlength;
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		charCounterInLine += diff;
 		currentPosInLine += diff;
@@ -48,11 +48,23 @@ public class GroovyConsole extends TextArea {
 	private void setListeners() {
 		
 		KeyCombination paste = new KeyCodeCombination(KeyCode.V, KeyCodeCombination.CONTROL_ANY);
+		KeyCombination copy = new KeyCodeCombination(KeyCode.C, KeyCodeCombination.CONTROL_ANY);
+		KeyCombination cut = new KeyCodeCombination(KeyCode.X, KeyCodeCombination.CONTROL_ANY);
 		this.addEventHandler(KeyEvent.KEY_PRESSED, e-> {
-			if(paste.match(e)) {
+			if(paste.match(e) || copy.match(e) || cut.match(e)) {
+				charCounterInLine--;
+				currentPosInLine--;
 				return;
 			}
 		});
+				
+		/*this.addEventFilter(MouseEvent.MOUSE_DRAGGED, e-> {
+			if(e.isMiddleButtonDown()) {
+				return;
+			}
+			this.deselect();
+			goToLastPos();
+		});*/
 		
 		this.addEventFilter(MouseEvent.ANY, e-> {
 			if(e.isMiddleButtonDown()) {
@@ -158,7 +170,6 @@ public class GroovyConsole extends TextArea {
 	
 	private boolean handleUp(KeyEvent e) {
 		e.consume();
-		
 		if(posInList == -1) { 
 			return true;
 		}
