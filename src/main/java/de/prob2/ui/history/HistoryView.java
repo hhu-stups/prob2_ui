@@ -1,14 +1,11 @@
 package de.prob2.ui.history;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
@@ -17,15 +14,51 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.text.Text;
 
 @Singleton
-public class HistoryView extends AnchorPane implements Initializable, IAnimationChangeListener {
+public class HistoryView extends AnchorPane implements IAnimationChangeListener {
+	private static class TransitionCell extends ListCell<HistoryItem> {
+		@Override
+		protected void updateItem(HistoryItem item, boolean empty) {
+			super.updateItem(item, empty);
+			if (item == null) {
+				setGraphic(new Text());
+			} else {
+				String content;
+				if (item.root) {
+					content = "---root---";
+				} else {
+					content = item.transition.getPrettyRep();
+				}
+				
+				Text text = new Text(content);
+				text.setDisable(true);
+				
+				switch (item.status) {
+					case PAST:
+						text.setId("past");
+						break;
+					
+					case FUTURE:
+						text.setId("future");
+						break;
+					
+					default:
+						text.setId("present");
+						break;
+				}
+				setGraphic(text);
+			}
+		}
+	}
+	
 	@FXML
 	private ListView<HistoryItem> lv_history;
 
@@ -59,11 +92,12 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 		}
 	}
 
-	public void initialize(URL location, ResourceBundle resources) {
+	@FXML
+	public void initialize() {
 
 		animations.registerAnimationChangeListener(this);
 
-		lv_history.setCellFactory(new HistoryItemTransformer());
+		lv_history.setCellFactory(item -> new TransitionCell());
 
 		lv_history.setItems(history);
 
@@ -99,38 +133,38 @@ public class HistoryView extends AnchorPane implements Initializable, IAnimation
 	private int getCurrentIndex() {
 		int currentPos = lv_history.getSelectionModel().getSelectedIndex();
 		int length = lv_history.getItems().size();
-		int index = 0;
 		if (rootatbottom) {
-			index = length - 2 - currentPos;
+			return length - 2 - currentPos;
 		} else {
-			index = currentPos - 1;
+			return currentPos - 1;
 		}
-		return index;
 
 	}
 
 	@Override
 	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-
 		history.clear();
 		int currentPos = currentTrace.getCurrent().getIndex();
 		List<Transition> transitionList = currentTrace.getTransitionList();
-
+		
 		if (currentPos == -1) {
 			history.add(new HistoryItem(HistoryStatus.PRESENT));
 		} else {
 			history.add(new HistoryItem(HistoryStatus.PAST));
 		}
-
+		
 		for (int i = 0; i < transitionList.size(); i++) {
-			HistoryStatus status = HistoryStatus.PAST;
-			if (i == currentPos)
-				status = HistoryStatus.PRESENT;
-			if (i > currentPos)
+			HistoryStatus status;
+			if (i < currentPos) {
+				status = HistoryStatus.PAST;
+			} else if (i > currentPos) {
 				status = HistoryStatus.FUTURE;
+			} else {
+				status = HistoryStatus.PRESENT;
+			}
 			history.add(new HistoryItem(transitionList.get(i), status));
 		}
-
+		
 		if (rootatbottom) {
 			Collections.reverse(history);
 		}
