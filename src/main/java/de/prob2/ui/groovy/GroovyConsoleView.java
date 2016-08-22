@@ -1,9 +1,9 @@
 package de.prob2.ui.groovy;
 
 import java.io.IOException;
+
 import com.google.inject.Inject;
 
-import de.prob.scripting.ScriptEngineProvider;
 import de.prob.statespace.AnimationSelector;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

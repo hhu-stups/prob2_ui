@@ -15,8 +15,6 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -28,6 +26,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
 
@@ -43,6 +42,8 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 	private TableColumn<Animation, String> tracelength;
 
 	private final AnimationSelector animations;
+	private int currentIndex;
+	private int previousSize = 0;
 
 	@Inject
 	private AnimationsView(final AnimationSelector animations, final FXMLLoader loader) {
@@ -63,16 +64,6 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 		machine.setCellValueFactory(new PropertyValueFactory<>("modelName"));
 		lastop.setCellValueFactory(new PropertyValueFactory<>("lastOperation"));
 		tracelength.setCellValueFactory(new PropertyValueFactory<>("steps"));
-		animationsTable.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Animation>() {
-			@Override
-			public void changed(ObservableValue<? extends Animation> observable, Animation oldValue,
-					Animation newValue) {
-				if (newValue != null) {
-					Trace trace = newValue.getTrace();
-					animations.changeCurrentAnimation(trace);
-				}
-			}
-		});
 		animationsTable.setRowFactory(new Callback<TableView<Animation>, TableRow<Animation>>() {
 			@Override
 			public TableRow<Animation> call(TableView<Animation> tableView) {
@@ -90,7 +81,14 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 				contextMenu.getItems().add(removeMenuItem);
 				row.contextMenuProperty()
 						.bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(contextMenu));
-				
+				row.setOnMouseClicked(new EventHandler<MouseEvent>() {
+					@Override
+					public void handle(MouseEvent event) {
+						currentIndex = row.getIndex();
+						Trace trace = row.getItem().getTrace();
+						animations.changeCurrentAnimation(trace);
+					}
+				});
 				return row;
 			}
 		});
@@ -116,7 +114,12 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			ObservableList<Animation> animationsList = animationsTable.getItems();
 			animationsList.clear();
 			animationsList.addAll(animList);
+			if(previousSize < animationsList.size()) currentIndex = animationsList.size()-1;
+			else if(previousSize > animationsList.size() && currentIndex > 0) currentIndex--;
+			animationsTable.getFocusModel().focus(currentIndex);
+			previousSize = animationsList.size();
 		});
+		System.out.println(currentAnimationChanged);
 	}
 
 	@Override
