@@ -26,6 +26,7 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 @Singleton
 public class PreferencesStage extends Stage implements IAnimationChangeListener {
@@ -150,6 +151,11 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 	}
 	
 	@FXML
+	private void handleClose(final WindowEvent event) {
+		this.handleCancel(null);
+	}
+	
+	@FXML
 	private void handleUndoChanges(final ActionEvent event) {
 		this.preferences.rollback();
 		this.updatePreferences();
@@ -172,7 +178,9 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 	
 	@FXML
 	private void handleCancel(final ActionEvent event) {
-		this.handleUndoChanges(event);
+		if (this.preferences.hasStateSpace()) {
+			this.handleUndoChanges(event);
+		}
 		this.stage.close();
 	}
 	

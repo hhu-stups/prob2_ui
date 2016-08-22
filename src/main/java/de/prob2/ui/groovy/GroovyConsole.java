@@ -6,9 +6,11 @@ import java.util.List;
 
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-
+//STRG + V
 public class GroovyConsole extends TextArea {
 	
 	private int charCounterInLine = 0;
@@ -20,6 +22,7 @@ public class GroovyConsole extends TextArea {
 	private String currentLine ="";
 	private GroovyInterpreter interpreter;
 	
+
 	public GroovyConsole() {
 		super();
 		this.appendText("Prob 2.0 Groovy Console \n >");
@@ -31,7 +34,25 @@ public class GroovyConsole extends TextArea {
 		this.interpreter = interpreter;
 	}
 	
+	@Override
+	public void paste() {
+		int oldlength = this.getText().length();
+		super.paste();
+		int posOfEnter = this.getText().lastIndexOf("\n"); 
+		int diff = this.getText().length() - oldlength - 1;
+		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
+		charCounterInLine += diff;
+		currentPosInLine += diff;
+	}
+	
 	private void setListeners() {
+		
+		KeyCombination paste = new KeyCodeCombination(KeyCode.V, KeyCodeCombination.CONTROL_ANY);
+		this.addEventHandler(KeyEvent.KEY_PRESSED, e-> {
+			if(paste.match(e)) {
+				return;
+			}
+		});
 		
 		this.addEventFilter(MouseEvent.ANY, e-> {
 			if(e.isMiddleButtonDown()) {
@@ -39,10 +60,11 @@ public class GroovyConsole extends TextArea {
 			}
 			this.deselect();
 			goToLastPos();
-			
 		});
+		
 				
 		this.setOnKeyPressed(e-> {
+			
 			if(e.getCode().isArrowKey()) {
 				handleArrowKeys(e);
 				return;
@@ -79,6 +101,9 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void handleInsertChar(KeyEvent e) {
+		if(e.getText().equals("")) {
+			return;
+		}
 		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText().charAt(0)).toString();
 		charCounterInLine++;
 		currentPosInLine++;

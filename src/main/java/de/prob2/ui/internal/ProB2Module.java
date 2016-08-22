@@ -8,10 +8,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 
 import de.prob.MainModule;
-import de.prob.scripting.ScriptEngineProvider;
 import de.prob2.ui.animations.AnimationsView;
-import de.prob2.ui.groovy.GroovyConsoleView;
-import de.prob2.ui.groovy.GroovyInterpreter;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.modelchecking.ModelcheckingController;
@@ -34,8 +31,7 @@ public class ProB2Module extends AbstractModule {
 		// General stuff
 		bind(ClassBlacklist.class);
 		bind(ResourceBundle.class).toInstance(bundle);
-		bind(ScriptEngineProvider.class);
-		bind(GroovyInterpreter.class);
+
 		// Controllers
 		bind(HistoryView.class);
 		bind(MenuController.class);
@@ -43,7 +39,6 @@ public class ProB2Module extends AbstractModule {
 		bind(ModelineController.class);
 		bind(OperationsView.class);
 		bind(StatesView.class);
-		bind(GroovyConsoleView.class);
 		bind(AnimationsView.class);
 	}
 

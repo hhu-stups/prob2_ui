@@ -11,8 +11,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 
-<fx:root type="Stage" fx:id="stage" title="Preferences"
-	minHeight="160.0" minWidth="320.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" fx:id="stage" title="Preferences" minHeight="160.0" minWidth="320.0" onCloseRequest="#handleClose" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
 			<BorderPane stylesheets="@../../../../prob.css"
