@@ -69,8 +69,14 @@
  * ComboBox																			*
  ************************************************************************************/
 .combo-box {
-	-fx-background-color: #cccccc;	
+	-fx-background-color: transparent;	
 	-fx-text-fill: #444444;
+	-fx-border-radius: 5.0;
+	-fx-border-color: #444444;
+}
+.combo-box:hover {
+	-fx-background-color: #44444411;	
+	-fx-background-radius: 5.0;
 }
 .combo-box-popup > .list-view {
     -fx-background-color: #444444aa;
@@ -281,6 +287,13 @@
 }
 .table-row-cell:focused .table-cell {
 	-fx-font-weight: bold;
+}
+.table-view .column-header-background,
+.tree-table-view > .column-header-background {
+    -fx-background-color: #fafafa;
+	-fx-border-color: transparent transparent #444444 transparent;
+	-fx-border-width: 0.0 0.0 2.0 0.0;
+    -fx-padding: 0 0 -0.2em 0;
 }
 
 /************************************************************************************
