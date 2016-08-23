@@ -38,7 +38,7 @@ public class GroovyConsole extends TextArea {
 	
 	@Override
 	public void paste() {
-		if(this.getLength() - this.getCaretPosition() > charCounterInLine) {
+		if(this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
 			goToLastPos();
 		}
 		int oldlength = this.getText().length();
@@ -48,7 +48,6 @@ public class GroovyConsole extends TextArea {
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		charCounterInLine += diff;
 		currentPosInLine += diff;
-		correctPosInLine();
 	}
 	
 	@Override
@@ -57,7 +56,7 @@ public class GroovyConsole extends TextArea {
 		correctPosInLine();
 		goToLastPos();
 	}
-	
+		
 	@Override
 	public void cut() {
 		super.cut();
@@ -106,7 +105,7 @@ public class GroovyConsole extends TextArea {
 		
 		this.addEventFilter(MouseEvent.ANY, e-> {
 			if(e.getButton() == MouseButton.PRIMARY) {
-				if(this.getLength() - this.getCaretPosition() < charCounterInLine) {
+				if(this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
 					currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 				}
 			}
@@ -156,7 +155,6 @@ public class GroovyConsole extends TextArea {
 			}
 		}
 		if((e.isShortcutDown() || e.isAltDown())) {
-			e.consume();
 			return;
 		}
 		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText()).toString();
@@ -246,7 +244,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleLeft(KeyEvent e) {
 		//handleLeft
-		if(currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
+		if(currentPosInLine > 0 && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine = Math.max(currentPosInLine - 1, 0);
 		} else {
 			e.consume();
@@ -255,7 +253,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleRight(KeyEvent e) {
 		//handleRight
-		if(currentPosInLine < charCounterInLine && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
+		if(currentPosInLine < charCounterInLine && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine++;
 		} else {
 			e.consume();
@@ -281,7 +279,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleDeletion(KeyEvent e) {
 		boolean needReturn = false;
-		if(!this.getSelectedText().equals("") || this.getLength() - this.getCaretPosition() > charCounterInLine || (e.isShortcutDown() || e.isAltDown())) {
+		if(!this.getSelectedText().equals("") || this.getLength()  - this.getCaretPosition() > charCounterInLine || (e.isShortcutDown() || e.isAltDown())) {
 			e.consume();
 			return;
 		}
