@@ -6,8 +6,6 @@ import java.util.List;
 
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
@@ -43,23 +41,31 @@ public class GroovyConsole extends TextArea {
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		charCounterInLine += diff;
 		currentPosInLine += diff;
+		correctPosInLine();
 	}
 	
+	@Override
+	public void copy() {
+		super.copy();
+		correctPosInLine();
+	}
+	
+	@Override
+	public void cut() {
+		super.cut();
+		correctPosInLine();
+	}
+	
+	private void correctPosInLine() {
+		charCounterInLine--;
+		if(charCounterInLine > 0) {
+			currentPosInLine--;
+		}
+	}
+	
+	
 	private void setListeners() {
-		
-		KeyCombination paste = new KeyCodeCombination(KeyCode.V, KeyCodeCombination.CONTROL_ANY);
-		KeyCombination copy = new KeyCodeCombination(KeyCode.C, KeyCodeCombination.CONTROL_ANY);
-		KeyCombination cut = new KeyCodeCombination(KeyCode.X, KeyCodeCombination.CONTROL_ANY);
-		this.addEventHandler(KeyEvent.KEY_PRESSED, e-> {
-			if(paste.match(e) || copy.match(e) || cut.match(e)) {
-				charCounterInLine--;
-				if(charCounterInLine > 0) {
-					currentPosInLine--;
-				}
-				return;
-			}
-		});
-				
+						
 		/*this.addEventFilter(MouseEvent.MOUSE_DRAGGED, e-> {
 			if(e.isMiddleButtonDown()) {
 				return;
