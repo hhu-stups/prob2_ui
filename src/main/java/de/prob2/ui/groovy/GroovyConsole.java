@@ -40,13 +40,17 @@ public class GroovyConsole extends TextArea {
 		if(this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
 			goToLastPos();
 		}
-		int oldlength = this.getText().length();
-		int posOfEnter = this.getText().lastIndexOf("\n");
+		String oldText = this.getText();
+		int posOfEnter = oldText.lastIndexOf("\n");
 		super.paste();
-		int diff = this.getText().length() - oldlength;
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
-		charCounterInLine += diff;
-		currentPosInLine += diff;
+		if(currentLine.indexOf("\n") != -1) {
+			this.setText(oldText);
+			goToLastPos();
+			return;
+		}
+		charCounterInLine += currentLine.length();
+		currentPosInLine += currentLine.length();
 	}
 	
 	@Override
@@ -92,7 +96,6 @@ public class GroovyConsole extends TextArea {
 		this.setScrollTop(Double.MAX_VALUE);
 	}*/
 	
-	//Enter (One Instruction -> more than 1 Line)
 	//Arrow Keys: Left and Right
 	private void setListeners() {
 		this.addEventFilter(KeyEvent.ANY, e-> {
