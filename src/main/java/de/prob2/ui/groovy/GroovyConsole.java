@@ -3,11 +3,10 @@ package de.prob2.ui.groovy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
+
 
 public class GroovyConsole extends TextArea {
 	
@@ -23,14 +22,19 @@ public class GroovyConsole extends TextArea {
 
 	public GroovyConsole() {
 		super();
+		//MenuItem undo = new MenuItem("Undo");
+		//undo.setDisable(true);
+		//this.getContextMenu().getItems().add(undo);
 		this.instructions = new ArrayList<String>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
+		System.out.println(this.isUndoable());
 		setListeners();
 	}
 	
 	public void setInterpreter(GroovyInterpreter interpreter) {
 		this.interpreter = interpreter;
 	}
+	
 	
 	@Override
 	public void paste() {
@@ -81,11 +85,25 @@ public class GroovyConsole extends TextArea {
 		if(currentPosInLine != 0) {
 			currentPosInLine++;
 		}
-	}	
+	}
 	
 	//Undo
 	private void setListeners() {
-				
+		/*this.addEventFilter(KeyEvent.ANY, e-> {
+			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
+				e.consume();
+				return;
+			}
+		});
+		
+		this.addEventFilter(MouseEvent.ANY, e-> {
+			if(e.getButton() == MouseButton.SECONDARY) {
+				System.out.println("boo");
+				e.consume();
+				return;
+			}
+		});*/
+		
 		this.setOnKeyPressed(e-> {
 			if(e.getCode().isArrowKey()) {
 				handleArrowKeys(e);
@@ -113,7 +131,6 @@ public class GroovyConsole extends TextArea {
 			if(handleRest(e)) {
 				return;
 			}
-
 		});
 	}
 	
@@ -123,12 +140,16 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void handleInsertChar(KeyEvent e) {
-		if(e.getText().equals("") || (!e.isControlDown() && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
+		if(e.getText().equals("") || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
 			goToLastPos();
 			if(e.getText().equals("")) {
 				e.consume();
 				return;
 			}
+		}
+		if((e.isShortcutDown() || e.isAltDown())) {
+			e.consume();
+			return;
 		}
 		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText()).toString();
 		charCounterInLine++;
@@ -249,7 +270,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleDeletion(KeyEvent e) {
 		boolean needReturn = false;
-		if(!this.getSelectedText().equals("") || this.getLength() - this.getCaretPosition() > charCounterInLine || e.isControlDown()) {
+		if(!this.getSelectedText().equals("") || this.getLength() - this.getCaretPosition() > charCounterInLine || (e.isShortcutDown() || e.isAltDown())) {
 			e.consume();
 			return;
 		}
