@@ -7,6 +7,8 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 
 public class GroovyConsole extends TextArea {
@@ -26,7 +28,6 @@ public class GroovyConsole extends TextArea {
 		this.setContextMenu(new ContextMenu());
 		this.instructions = new ArrayList<String>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
-		System.out.println(this.isUndoable());
 		setListeners();
 	}
 	
@@ -61,7 +62,8 @@ public class GroovyConsole extends TextArea {
 	public void cut() {
 		super.cut();
 		correctPosInLine();
-	}	
+	}
+	
 	
 	private void correctPosInLine() {
 		if(charCounterInLine > 0) {
@@ -86,11 +88,27 @@ public class GroovyConsole extends TextArea {
 		}
 	}
 	
+	/*@Override
+	public void selectPositionCaret(int pos) {
+		super.selectPositionCaret(pos);
+		this.setScrollTop(Double.MAX_VALUE);
+	}*/
+	
+	//Enter (One Instruction -> more than 1 Line)
+	//Arrow Keys: Left and Right
 	private void setListeners() {
 		this.addEventFilter(KeyEvent.ANY, e-> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
 				return;
+			}
+		});
+		
+		this.addEventFilter(MouseEvent.ANY, e-> {
+			if(e.getButton() == MouseButton.PRIMARY) {
+				if(this.getLength() - this.getCaretPosition() < charCounterInLine) {
+					currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
+				}
 			}
 		});
 		
@@ -228,7 +246,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleLeft(KeyEvent e) {
 		//handleLeft
-		if(currentPosInLine > 0) {
+		if(currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine = Math.max(currentPosInLine - 1, 0);
 		} else {
 			e.consume();
@@ -236,8 +254,11 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void handleRight(KeyEvent e) {
-		if(currentPosInLine < charCounterInLine) {
+		//handleRight
+		if(currentPosInLine < charCounterInLine && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine++;
+		} else {
+			e.consume();
 		}
 	}
 	
