@@ -6,6 +6,6 @@
 
 <fx:root type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <GroovyConsole fx:id="groovyConsole" prefHeight="512.0" prefWidth="1024.0"/>
+      <GroovyConsole fx:id="groovyConsole" prefHeight="512.0" prefWidth="1024.0" />
    </children>
 </fx:root>

@@ -23,8 +23,8 @@ public class GroovyConsole extends TextArea {
 
 	public GroovyConsole() {
 		super();
-		this.appendText("Prob 2.0 Groovy Console \n >");
 		this.instructions = new ArrayList<String>();
+		this.appendText("Prob 2.0 Groovy Console \n >");
 		setListeners();
 	}
 	
@@ -38,6 +38,7 @@ public class GroovyConsole extends TextArea {
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		super.paste();
 		int diff = this.getText().length() - oldlength;
+
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		charCounterInLine += diff;
 		currentPosInLine += diff;
@@ -54,37 +55,50 @@ public class GroovyConsole extends TextArea {
 	public void cut() {
 		super.cut();
 		correctPosInLine();
-	}
+	}	
 	
 	private void correctPosInLine() {
-		charCounterInLine--;
 		if(charCounterInLine > 0) {
+			charCounterInLine--;
 			currentPosInLine--;
 		}
 	}
 	
+	@Override
+	public void selectForward() {
+		//do nothing, but stay at correct position
+		if(currentPosInLine != charCounterInLine) {
+			currentPosInLine--;
+		}
+	}
+	
+	@Override
+	public void selectBackward() {
+		//do nothing, but stay at correct position
+		if(currentPosInLine != 0) {
+			currentPosInLine++;
+		}
+	}
+	
+	
+	/*@Override
+	public void deselect() {
+		super.deselect();
+		goToLastPos();
+	}*/
+	
 	
 	private void setListeners() {
-						
-		/*this.addEventFilter(MouseEvent.MOUSE_DRAGGED, e-> {
-			if(e.isMiddleButtonDown()) {
-				return;
-			}
-			this.deselect();
-			goToLastPos();
-		});*/
-		
 		this.addEventFilter(MouseEvent.ANY, e-> {
 			if(e.isMiddleButtonDown()) {
 				return;
 			}
-			this.deselect();
-			goToLastPos();
+			//this.deselect();
 		});
 		
 				
 		this.setOnKeyPressed(e-> {
-			
+			//this.
 			if(e.getCode().isArrowKey()) {
 				handleArrowKeys(e);
 				return;
@@ -115,7 +129,7 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void goToLastPos() {
-		this.setText(this.getText());
+		//this.setText(this.getText());
 		this.positionCaret(this.getLength());
 		currentPosInLine = charCounterInLine;
 	}
@@ -124,10 +138,11 @@ public class GroovyConsole extends TextArea {
 		if(e.getText().equals("")) {
 			return;
 		}
-		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText().charAt(0)).toString();
+		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText()).toString();
 		charCounterInLine++;
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
+
 	}
 	
 	private void handleEnter(KeyEvent e) {
@@ -136,10 +151,8 @@ public class GroovyConsole extends TextArea {
 		e.consume();
 		
 		if(instructions.size() == 0) {
-			if(!currentLine.equals("")) {
-				instructions.add(currentLine);
-				numberOfInstructions++;
-			}
+			instructions.add(currentLine);
+			numberOfInstructions++;
 		} else {
 			//add Instruction if last Instruction is not "", otherwise replace it
 			String lastinstruction = instructions.get(instructions.size()-1);
@@ -152,7 +165,7 @@ public class GroovyConsole extends TextArea {
 		}
 		posInList = instructions.size() - 1;
 		currentLine = "";
-		this.appendText("\n" + interpreter.exec(instructions.get(instructions.size() - 1)));
+		this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
 		this.appendText("\n >");
 		
 	}	
