@@ -21,11 +21,12 @@ public class GroovyInterpreter {
 		engine = sep.get();
 	}
 
-	public String exec(String instruction) {
+	public Pair exec(String instruction) {
 		String resultString = "";
+		StringBuffer console = new StringBuffer();
 		logger.trace("Exec");
 		try {
-			StringBuffer console = new StringBuffer();
+			
 			engine.put("__console", console);
 			logger.trace("Eval {} on {}", instruction, engine.toString());
 			Object eval = engine.eval(instruction);
@@ -35,8 +36,7 @@ public class GroovyInterpreter {
 		} catch (Exception e) {
 			resultString = e.getMessage();
 		}
-		return resultString;
-
+		return new Pair(console.toString(), resultString);
 	}
 
 	private String extractTrace(final StackTraceElement[] stackTrace) {
