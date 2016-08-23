@@ -3,9 +3,12 @@ package de.prob2.ui.groovy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 
 public class GroovyConsole extends TextArea {
@@ -22,12 +25,9 @@ public class GroovyConsole extends TextArea {
 
 	public GroovyConsole() {
 		super();
-		//MenuItem undo = new MenuItem("Undo");
-		//undo.setDisable(true);
-		//this.getContextMenu().getItems().add(undo);
+		this.setContextMenu(new ContextMenu());
 		this.instructions = new ArrayList<String>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
-		System.out.println(this.isUndoable());
 		setListeners();
 	}
 	
@@ -38,7 +38,7 @@ public class GroovyConsole extends TextArea {
 	
 	@Override
 	public void paste() {
-		if(this.getLength() - this.getCaretPosition() > charCounterInLine) {
+		if(this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
 			goToLastPos();
 		}
 		int oldlength = this.getText().length();
@@ -48,7 +48,6 @@ public class GroovyConsole extends TextArea {
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		charCounterInLine += diff;
 		currentPosInLine += diff;
-		correctPosInLine();
 	}
 	
 	@Override
@@ -57,12 +56,13 @@ public class GroovyConsole extends TextArea {
 		correctPosInLine();
 		goToLastPos();
 	}
-	
+		
 	@Override
 	public void cut() {
 		super.cut();
 		correctPosInLine();
-	}	
+	}
+	
 	
 	private void correctPosInLine() {
 		if(charCounterInLine > 0) {
@@ -87,9 +87,16 @@ public class GroovyConsole extends TextArea {
 		}
 	}
 	
-	//Undo
+	/*@Override
+	public void selectPositionCaret(int pos) {
+		super.selectPositionCaret(pos);
+		this.setScrollTop(Double.MAX_VALUE);
+	}*/
+	
+	//Enter (One Instruction -> more than 1 Line)
+	//Arrow Keys: Left and Right
 	private void setListeners() {
-		/*this.addEventFilter(KeyEvent.ANY, e-> {
+		this.addEventFilter(KeyEvent.ANY, e-> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
 				return;
@@ -97,12 +104,12 @@ public class GroovyConsole extends TextArea {
 		});
 		
 		this.addEventFilter(MouseEvent.ANY, e-> {
-			if(e.getButton() == MouseButton.SECONDARY) {
-				System.out.println("boo");
-				e.consume();
-				return;
+			if(e.getButton() == MouseButton.PRIMARY) {
+				if(this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
+					currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
+				}
 			}
-		});*/
+		});
 		
 		this.setOnKeyPressed(e-> {
 			if(e.getCode().isArrowKey()) {
@@ -148,7 +155,6 @@ public class GroovyConsole extends TextArea {
 			}
 		}
 		if((e.isShortcutDown() || e.isAltDown())) {
-			e.consume();
 			return;
 		}
 		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText()).toString();
@@ -238,7 +244,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleLeft(KeyEvent e) {
 		//handleLeft
-		if(currentPosInLine > 0) {
+		if(currentPosInLine > 0 && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine = Math.max(currentPosInLine - 1, 0);
 		} else {
 			e.consume();
@@ -246,8 +252,11 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void handleRight(KeyEvent e) {
-		if(currentPosInLine < charCounterInLine) {
+		//handleRight
+		if(currentPosInLine < charCounterInLine && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine++;
+		} else {
+			e.consume();
 		}
 	}
 	
@@ -270,7 +279,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleDeletion(KeyEvent e) {
 		boolean needReturn = false;
-		if(!this.getSelectedText().equals("") || this.getLength() - this.getCaretPosition() > charCounterInLine || (e.isShortcutDown() || e.isAltDown())) {
+		if(!this.getSelectedText().equals("") || this.getLength()  - this.getCaretPosition() > charCounterInLine || (e.isShortcutDown() || e.isAltDown())) {
 			e.consume();
 			return;
 		}
