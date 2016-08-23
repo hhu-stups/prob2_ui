@@ -3,6 +3,7 @@ package de.prob2.ui.groovy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -22,9 +23,7 @@ public class GroovyConsole extends TextArea {
 
 	public GroovyConsole() {
 		super();
-		//MenuItem undo = new MenuItem("Undo");
-		//undo.setDisable(true);
-		//this.getContextMenu().getItems().add(undo);
+		this.setContextMenu(new ContextMenu());
 		this.instructions = new ArrayList<String>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		System.out.println(this.isUndoable());
@@ -87,22 +86,13 @@ public class GroovyConsole extends TextArea {
 		}
 	}
 	
-	//Undo
 	private void setListeners() {
-		/*this.addEventFilter(KeyEvent.ANY, e-> {
+		this.addEventFilter(KeyEvent.ANY, e-> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
 				return;
 			}
 		});
-		
-		this.addEventFilter(MouseEvent.ANY, e-> {
-			if(e.getButton() == MouseButton.SECONDARY) {
-				System.out.println("boo");
-				e.consume();
-				return;
-			}
-		});*/
 		
 		this.setOnKeyPressed(e-> {
 			if(e.getCode().isArrowKey()) {
