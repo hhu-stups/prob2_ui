@@ -94,7 +94,6 @@ public class GroovyConsole extends TextArea {
 	//Undo
 	//Delete line
 	//Cut
-	//Backspace, Enter
 	private void setListeners() {
 		/*this.addEventFilter(MouseEvent.ANY, e-> {
 			if(e.isMiddleButtonDown()) {
@@ -267,7 +266,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleDeletion(KeyEvent e) {
 		boolean needReturn = false;
-		if(!this.getSelectedText().equals("")) {
+		if(!this.getSelectedText().equals("") || this.getLength() - this.getCaretPosition() > charCounterInLine) {
 			e.consume();
 			return;
 		}
