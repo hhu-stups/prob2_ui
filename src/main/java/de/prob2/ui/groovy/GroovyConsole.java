@@ -34,11 +34,13 @@ public class GroovyConsole extends TextArea {
 	
 	@Override
 	public void paste() {
+		if(this.getLength() - this.getCaretPosition() > charCounterInLine) {
+			goToLastPos();
+		}
 		int oldlength = this.getText().length();
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		super.paste();
 		int diff = this.getText().length() - oldlength;
-
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		charCounterInLine += diff;
 		currentPosInLine += diff;
@@ -49,6 +51,7 @@ public class GroovyConsole extends TextArea {
 	public void copy() {
 		super.copy();
 		correctPosInLine();
+		goToLastPos();
 	}
 	
 	@Override
@@ -88,19 +91,23 @@ public class GroovyConsole extends TextArea {
 	}*/
 	
 	
+	//Undo
+	//Delete line
+	//Cut
+	//Backspace, Enter
 	private void setListeners() {
-		this.addEventFilter(MouseEvent.ANY, e-> {
+		/*this.addEventFilter(MouseEvent.ANY, e-> {
 			if(e.isMiddleButtonDown()) {
 				return;
 			}
+			goToLastPos();
 			//this.deselect();
-		});
-		
+		});*/
 				
 		this.setOnKeyPressed(e-> {
-			//this.
 			if(e.getCode().isArrowKey()) {
 				handleArrowKeys(e);
+				this.setScrollTop(Double.MAX_VALUE);
 				return;
 			}
 			if(e.getCode().isNavigationKey()) {
@@ -129,14 +136,17 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void goToLastPos() {
-		//this.setText(this.getText());
 		this.positionCaret(this.getLength());
 		currentPosInLine = charCounterInLine;
 	}
 	
 	private void handleInsertChar(KeyEvent e) {
-		if(e.getText().equals("")) {
-			return;
+		if(e.getText().equals("") || (!e.isControlDown() && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
+			goToLastPos();
+			if(e.getText().equals("")) {
+				e.consume();
+				return;
+			}
 		}
 		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText()).toString();
 		charCounterInLine++;
@@ -215,6 +225,7 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private boolean handleDown(KeyEvent e) {
+		e.consume();
 		if(posInList == instructions.size() - 1) {
 			return true;
 		}
