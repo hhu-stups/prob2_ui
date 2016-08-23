@@ -81,27 +81,10 @@ public class GroovyConsole extends TextArea {
 		if(currentPosInLine != 0) {
 			currentPosInLine++;
 		}
-	}
-	
-	
-	/*@Override
-	public void deselect() {
-		super.deselect();
-		goToLastPos();
-	}*/
-	
+	}	
 	
 	//Undo
-	//Delete line
-	//Cut
 	private void setListeners() {
-		/*this.addEventFilter(MouseEvent.ANY, e-> {
-			if(e.isMiddleButtonDown()) {
-				return;
-			}
-			goToLastPos();
-			//this.deselect();
-		});*/
 				
 		this.setOnKeyPressed(e-> {
 			if(e.getCode().isArrowKey()) {
@@ -266,7 +249,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleDeletion(KeyEvent e) {
 		boolean needReturn = false;
-		if(!this.getSelectedText().equals("") || this.getLength() - this.getCaretPosition() > charCounterInLine) {
+		if(!this.getSelectedText().equals("") || this.getLength() - this.getCaretPosition() > charCounterInLine || e.isControlDown()) {
 			e.consume();
 			return;
 		}
