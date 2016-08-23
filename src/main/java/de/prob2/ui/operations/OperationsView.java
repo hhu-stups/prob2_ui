@@ -105,8 +105,8 @@ public class OperationsView extends AnchorPane {
 			}
 		});
 		
-		backButton.disableProperty().bind(currentTrace.canGoBackProperty());
-		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty());
+		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
+		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 		
 		currentTrace.addListener((observable, from, to) -> {
 			update(to);
