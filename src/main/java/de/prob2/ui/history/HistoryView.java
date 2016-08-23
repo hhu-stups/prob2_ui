@@ -6,12 +6,8 @@ import java.util.List;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.IAnimationChangeListener;
-import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
@@ -23,7 +19,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 
 @Singleton
-public class HistoryView extends AnchorPane implements IAnimationChangeListener {
+public class HistoryView extends AnchorPane {
 	private static class TransitionCell extends ListCell<HistoryItem> {
 		@Override
 		protected void updateItem(HistoryItem item, boolean empty) {
@@ -70,22 +66,17 @@ public class HistoryView extends AnchorPane implements IAnimationChangeListener 
 
 	@FXML
 	private Button btforward;
-
-	private boolean rootatbottom = true;
-
-	private ObservableList<HistoryItem> history = FXCollections.observableArrayList();
-
-	private AnimationSelector animations;
+	
+	private final CurrentTrace currentTrace;
 
 	@Inject
-	private HistoryView(FXMLLoader loader, AnimationSelector animations) {
-		this.animations = animations;
-		animations.registerAnimationChangeListener(this);
-
+	private HistoryView(FXMLLoader loader, CurrentTrace currentTrace) {
+		this.currentTrace = currentTrace;
+		
+		loader.setLocation(getClass().getResource("history_view.fxml"));
+		loader.setRoot(this);
+		loader.setController(this);
 		try {
-			loader.setLocation(getClass().getResource("history_view.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -94,16 +85,44 @@ public class HistoryView extends AnchorPane implements IAnimationChangeListener 
 
 	@FXML
 	public void initialize() {
-
-		animations.registerAnimationChangeListener(this);
+		currentTrace.addListener((observable, from, to) -> {
+			lv_history.getItems().clear();
+			if (to != null) {
+				int currentPos = to.getCurrent().getIndex();
+				
+				if (currentPos == -1) {
+					lv_history.getItems().add(new HistoryItem(HistoryStatus.PRESENT));
+				} else {
+					lv_history.getItems().add(new HistoryItem(HistoryStatus.PAST));
+				}
+				
+				List<Transition> transitionList = to.getTransitionList();
+				for (int i = 0; i < transitionList.size(); i++) {
+					HistoryStatus status;
+					if (i < currentPos) {
+						status = HistoryStatus.PAST;
+					} else if (i > currentPos) {
+						status = HistoryStatus.FUTURE;
+					} else {
+						status = HistoryStatus.PRESENT;
+					}
+					lv_history.getItems().add(new HistoryItem(transitionList.get(i), status));
+				}
+			}
+			
+			if (tb_reverse.isSelected()) {
+				Collections.reverse(lv_history.getItems());
+			}
+		});
+		
+		btprevious.disableProperty().bind(currentTrace.canGoBackProperty().not());
+		btforward.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 
 		lv_history.setCellFactory(item -> new TransitionCell());
 
-		lv_history.setItems(history);
-
 		lv_history.setOnMouseClicked(e -> {
-			if (animations.getCurrentTrace() != null) {
-				animations.traceChange(animations.getCurrentTrace().gotoPosition(getCurrentIndex()));
+			if (currentTrace.exists()) {
+				currentTrace.set(currentTrace.get().gotoPosition(getCurrentIndex()));
 			}
 		});
 
@@ -112,67 +131,29 @@ public class HistoryView extends AnchorPane implements IAnimationChangeListener 
 		});
 
 		tb_reverse.setOnAction(e -> {
-			Collections.reverse(history);
-			rootatbottom = !rootatbottom;
+			Collections.reverse(lv_history.getItems());
 		});
 
 		btprevious.setOnAction(e -> {
-			if (animations.getCurrentTrace() != null) {
-				animations.traceChange(animations.getCurrentTrace().back());
+			if (currentTrace.exists()) {
+				currentTrace.set(currentTrace.back());
 			}
 		});
 
 		btforward.setOnAction(e -> {
-			if (animations.getCurrentTrace() != null) {
-				animations.traceChange(animations.getCurrentTrace().forward());
+			if (currentTrace.exists()) {
+				currentTrace.set(currentTrace.forward());
 			}
 		});
-
 	}
 
 	private int getCurrentIndex() {
 		int currentPos = lv_history.getSelectionModel().getSelectedIndex();
 		int length = lv_history.getItems().size();
-		if (rootatbottom) {
+		if (tb_reverse.isSelected()) {
 			return length - 2 - currentPos;
 		} else {
 			return currentPos - 1;
 		}
-
-	}
-
-	@Override
-	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-		history.clear();
-		int currentPos = currentTrace.getCurrent().getIndex();
-		List<Transition> transitionList = currentTrace.getTransitionList();
-		
-		if (currentPos == -1) {
-			history.add(new HistoryItem(HistoryStatus.PRESENT));
-		} else {
-			history.add(new HistoryItem(HistoryStatus.PAST));
-		}
-		
-		for (int i = 0; i < transitionList.size(); i++) {
-			HistoryStatus status;
-			if (i < currentPos) {
-				status = HistoryStatus.PAST;
-			} else if (i > currentPos) {
-				status = HistoryStatus.FUTURE;
-			} else {
-				status = HistoryStatus.PRESENT;
-			}
-			history.add(new HistoryItem(transitionList.get(i), status));
-		}
-		
-		if (rootatbottom) {
-			Collections.reverse(history);
-		}
-		btprevious.setDisable(!currentTrace.canGoBack());
-		btforward.setDisable(!currentTrace.canGoForward());
-	}
-
-	@Override
-	public void animatorStatus(boolean busy) {
 	}
 }

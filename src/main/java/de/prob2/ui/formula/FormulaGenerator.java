@@ -5,37 +5,33 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.google.inject.Inject;
-
 import de.prob.animator.command.ExpandFormulaCommand;
 import de.prob.animator.command.InsertFormulaForVisualizationCommand;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 
 public class FormulaGenerator {
 	
 	private final Set<String> collapsedNodes = new CopyOnWriteArraySet<>();
-	private final AnimationSelector animationSelector;
+	private final CurrentTrace currentTrace;
 
 	@Inject
-	public FormulaGenerator(final AnimationSelector animationSelector) {
-		this.animationSelector = animationSelector;
+	public FormulaGenerator(final CurrentTrace currentTrace) {
+		this.currentTrace = currentTrace;
 	}
 	
 	public void setFormula(final IEvalElement formula) {
 		try {
 			InsertFormulaForVisualizationCommand cmd1 = new InsertFormulaForVisualizationCommand(formula);
-			Trace currentTrace = animationSelector.getCurrentTrace();
-			if(!currentTrace.getCurrentState().isInitialised()) {
+			if(!currentTrace.get().getCurrentState().isInitialised()) {
 				showFormulaViewError(FormulaViewErrorType.NOT_INITIALIZE_ERROR);
 				return;
 			}
 			currentTrace.getStateSpace().execute(cmd1);
-			ExpandFormulaCommand cmd2 = new ExpandFormulaCommand(cmd1.getFormulaId(), currentTrace.getCurrentState());
+			ExpandFormulaCommand cmd2 = new ExpandFormulaCommand(cmd1.getFormulaId(), currentTrace.get().getCurrentState());
 			currentTrace.getStateSpace().execute(cmd2);
 			ExpandedFormula data = cmd2.getResult();
 			data.collapseNodes(new HashSet<>(collapsedNodes));
@@ -61,8 +57,7 @@ public class FormulaGenerator {
 	
 	public IEvalElement parse(String params) {
 		try {
-			StateSpace currentStateSpace = animationSelector.getCurrentTrace().getStateSpace();
-			IEvalElement formula = currentStateSpace.getModel().parseFormula(params);
+			IEvalElement formula = currentTrace.getModel().parseFormula(params);
 			return formula;
 		} catch (Exception e) {
 			return null;
