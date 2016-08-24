@@ -18,6 +18,7 @@ import de.prob2.ui.ProB2;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.groovy.GroovyConsoleView;
+import de.prob2.ui.groovy.GroovyObjectView;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modelchecking.ModelcheckingStage;
 import de.prob2.ui.preferences.PreferencesStage;
@@ -48,6 +49,7 @@ public class MenuController extends MenuBar {
 	private final Stage mcheckStage;
 	private final FormulaGenerator formulaGenerator;
 	private final Stage groovyConsoleStage;
+	private final Stage groovyObjectStage;
 	private Window window;
 	private DottyStage dottyStage;
 
@@ -167,9 +169,16 @@ public class MenuController extends MenuBar {
 		this.dottyStage.showAndWait();
 	}
 
+	@FXML
 	public void handleGroovyConsole(ActionEvent event) {
 		this.groovyConsoleStage.show();
 		this.groovyConsoleStage.toFront();
+	}
+	
+	@FXML
+	public void handleGroovyObjects(ActionEvent event) {
+		this.groovyObjectStage.show();
+		this.groovyObjectStage.toFront();
 	}
 	
 	@FXML
@@ -189,7 +198,7 @@ public class MenuController extends MenuBar {
 	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector,
 			final BlacklistStage blacklistStage, final PreferencesStage preferencesStage,
 			final ModelcheckingStage modelcheckingStage, final ModelcheckingController modelcheckingController,
-			final FormulaGenerator formulaGenerator, final DottyStage dottyStage, final GroovyConsoleView groovyConsoleView) {
+			final FormulaGenerator formulaGenerator, final DottyStage dottyStage, final GroovyConsoleView groovyConsoleView, final GroovyObjectView groovyObjectView) {
 		this.api = api;
 		this.animationSelector = animationSelector;
 		this.blacklistStage = blacklistStage;
@@ -203,6 +212,11 @@ public class MenuController extends MenuBar {
 		this.groovyConsoleStage.setScene(new Scene(groovyConsoleView));
 		this.groovyConsoleStage.initModality(Modality.NONE);
 		this.groovyConsoleStage.setResizable(false);
+		this.groovyObjectStage = new Stage();
+		this.groovyObjectStage.setTitle("Groovy Objects View");
+		this.groovyObjectStage.setScene(new Scene(groovyObjectView));
+		this.groovyObjectStage.initModality(Modality.NONE);
+		this.groovyObjectStage.setResizable(true);
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);

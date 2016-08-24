@@ -28,6 +28,7 @@
 	</Menu>
 		<Menu mnemonicParsing="false" text="%menu.consoles">
 		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole"/>
+		<MenuItem text="%menu.consoles.items.groovy.objects" onAction="#handleGroovyObjects"/>
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.perspectives">
 		<MenuItem mnemonicParsing="false" text="%menu.perspectives.default"
