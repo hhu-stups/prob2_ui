@@ -11,8 +11,8 @@
 			<AnchorPane prefHeight="480.0" prefWidth="320.0"
 				stylesheets="@../../../../prob.css" styleClass="dark">
 				<ListView fx:id="list" editable="true"
-					AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0"
-					AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" styleClass="dark-highlight" />
+					AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0"
+					AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0" styleClass="dark-highlight" />
 			</AnchorPane>
 		</Scene>
 	</scene>
