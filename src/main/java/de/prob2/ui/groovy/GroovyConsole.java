@@ -3,6 +3,7 @@ package de.prob2.ui.groovy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
@@ -75,6 +76,18 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	@Override
+	public void forward() {
+		super.forward();
+		this.setScrollTop(Double.MIN_VALUE);
+	}
+	
+	@Override
+	public void backward() {
+		super.backward();
+		this.setScrollTop(Double.MIN_VALUE);
+	}
+	
+	@Override
 	public void selectForward() {
 		//do nothing, but stay at correct position
 		if(currentPosInLine != charCounterInLine) {
@@ -87,16 +100,10 @@ public class GroovyConsole extends TextArea {
 		//do nothing, but stay at correct position
 		if(currentPosInLine != 0) {
 			currentPosInLine++;
+			
 		}
 	}
 	
-	/*@Override
-	public void selectPositionCaret(int pos) {
-		super.selectPositionCaret(pos);
-		this.setScrollTop(Double.MAX_VALUE);
-	}*/
-	
-	//Arrow Keys: Left and Right
 	private void setListeners() {
 		this.addEventFilter(KeyEvent.ANY, e-> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
