@@ -14,7 +14,6 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -26,6 +25,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
@@ -79,14 +79,18 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 					}
 				});
 				contextMenu.getItems().add(removeMenuItem);
-				row.contextMenuProperty()
-						.bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(contextMenu));
 				row.setOnMouseClicked(new EventHandler<MouseEvent>() {
 					@Override
 					public void handle(MouseEvent event) {
-						currentIndex = row.getIndex();
-						Trace trace = row.getItem().getTrace();
-						animations.changeCurrentAnimation(trace);
+						if (event.getButton().equals(MouseButton.PRIMARY)) {
+							currentIndex = row.getIndex();
+							Trace trace = row.getItem().getTrace();
+							animations.changeCurrentAnimation(trace);
+						}
+						if (event.getButton().equals(MouseButton.SECONDARY) && !row.isEmpty()) {
+							contextMenu.show(row, event.getScreenX(), event.getScreenY());
+						}
+						
 					}
 				});
 				return row;
