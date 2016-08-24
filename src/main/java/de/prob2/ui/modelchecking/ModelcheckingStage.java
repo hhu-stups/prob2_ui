@@ -51,7 +51,7 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	void startModelCheck(ActionEvent event) {
-		if (currentTrace.exists()) {
+		if (!currentTrace.exists()) {
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Specification file missing");
 			alert.setHeaderText("No specification file loaded. Cannot run model checker.");
