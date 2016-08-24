@@ -6,15 +6,16 @@ import java.util.ResourceBundle;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
-
 import de.prob.MainModule;
 import de.prob2.ui.animations.AnimationsView;
-import de.prob2.ui.groovy.GroovyConsole;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modeline.ModelineController;
 import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.prob2fx.CurrentModel;
+import de.prob2.ui.prob2fx.CurrentStateSpace;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
 import javafx.fxml.FXMLLoader;
@@ -31,8 +32,11 @@ public class ProB2Module extends AbstractModule {
 		
 		// General stuff
 		bind(ClassBlacklist.class);
+		bind(CurrentModel.class);
+		bind(CurrentStateSpace.class);
+		bind(CurrentTrace.class);
 		bind(ResourceBundle.class).toInstance(bundle);
-		
+
 		// Controllers
 		bind(HistoryView.class);
 		bind(MenuController.class);
@@ -40,7 +44,6 @@ public class ProB2Module extends AbstractModule {
 		bind(ModelineController.class);
 		bind(OperationsView.class);
 		bind(StatesView.class);
-		bind(GroovyConsole.class);
 		bind(AnimationsView.class);
 	}
 

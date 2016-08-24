@@ -12,7 +12,8 @@
 <?import javafx.stage.Stage?>
 
 <fx:root type="Stage" fx:id="stage" title="Preferences"
-	minHeight="160.0" minWidth="320.0" xmlns:fx="http://javafx.com/fxml/1">
+	minHeight="160.0" minWidth="320.0" onCloseRequest="#handleClose"
+	xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
 			<BorderPane stylesheets="@../../../../prob.css"
@@ -30,7 +31,8 @@
 							<TreeTableColumn fx:id="tvDefaultValue" editable="false"
 								minWidth="40.0" prefWidth="120.0" sortable="false" text="Default Value" />
 							<TreeTableColumn fx:id="tvDescription" editable="false"
-								minWidth="80.0" prefWidth="640.0" sortable="false" text="Description" />
+								styleClass="left" minWidth="80.0" prefWidth="900.0" sortable="false"
+								text="Description" />
 						</columns>
 						<placeholder>
 							<Label text="No model loaded" />
@@ -49,7 +51,7 @@
 							disable="true" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults" />
 						<Label fx:id="applyWarning" text="There are unapplied preference changes"
 							visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity"
-							style="-fx-text-fill: red" alignment="CENTER"/>
+							style="-fx-text-fill: red" alignment="CENTER" />
 						<Button fx:id="okButton" text="OK" disable="true"
 							HBox.hgrow="NEVER" onAction="#handleOk" />
 						<Button fx:id="cancelButton" text="Cancel" HBox.hgrow="NEVER"
