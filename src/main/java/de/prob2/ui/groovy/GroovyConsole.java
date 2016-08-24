@@ -3,7 +3,6 @@ package de.prob2.ui.groovy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
@@ -77,14 +76,21 @@ public class GroovyConsole extends TextArea {
 	
 	@Override
 	public void forward() {
-		super.forward();
-		this.setScrollTop(Double.MIN_VALUE);
+		if(currentPosInLine < charCounterInLine && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
+			currentPosInLine++;
+			super.forward();
+			this.setScrollTop(Double.MIN_VALUE);
+		}
 	}
 	
 	@Override
 	public void backward() {
-		super.backward();
-		this.setScrollTop(Double.MIN_VALUE);
+		//handleLeft
+		if(currentPosInLine > 0 && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
+			currentPosInLine = Math.max(currentPosInLine - 1, 0);
+			super.backward();
+			this.setScrollTop(Double.MIN_VALUE);
+		}
 	}
 	
 	@Override
@@ -121,11 +127,16 @@ public class GroovyConsole extends TextArea {
 		});
 		
 		this.setOnKeyPressed(e-> {
-			if(e.getCode().isArrowKey()) {
+			if(e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
 				handleArrowKeys(e);
 				this.setScrollTop(Double.MAX_VALUE);
 				return;
 			}
+			
+			if(e.getCode().isArrowKey()) {
+				return;
+			}
+			
 			if(e.getCode().isNavigationKey()) {
 				e.consume();
 				return;
@@ -196,22 +207,16 @@ public class GroovyConsole extends TextArea {
 	}	
 	
 	private void handleArrowKeys(KeyEvent e) {
-		if(e.getCode().equals(KeyCode.LEFT)) {
-			handleLeft(e);
-		} else if(e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
-			boolean needReturn;
-			if(e.getCode().equals(KeyCode.UP)) {
-				needReturn = handleUp(e);
-			} else {
-				needReturn = handleDown(e);				
-			}
-			if(needReturn) {
-				return;
-			}
-			setTextAfterArrowKey();
-		} else if(e.getCode().equals(KeyCode.RIGHT)) {
-			handleRight(e);
+		boolean needReturn;
+		if(e.getCode().equals(KeyCode.UP)) {
+			needReturn = handleUp(e);
+		} else {
+			needReturn = handleDown(e);				
 		}
+		if(needReturn) {
+			return;
+		}
+		setTextAfterArrowKey();
 	}
 	
 	private boolean handleUp(KeyEvent e) {
@@ -244,24 +249,6 @@ public class GroovyConsole extends TextArea {
 		}
 		posInList = Math.min(posInList+1, instructions.size() - 1);
 		return false;
-	}
-	
-	private void handleLeft(KeyEvent e) {
-		//handleLeft
-		if(currentPosInLine > 0 && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
-			currentPosInLine = Math.max(currentPosInLine - 1, 0);
-		} else {
-			e.consume();
-		}
-	}
-	
-	private void handleRight(KeyEvent e) {
-		//handleRight
-		if(currentPosInLine < charCounterInLine && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
-			currentPosInLine++;
-		} else {
-			e.consume();
-		}
 	}
 	
 	private void setTextAfterArrowKey() {
