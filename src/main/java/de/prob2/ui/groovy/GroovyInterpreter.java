@@ -21,17 +21,17 @@ public class GroovyInterpreter {
 		engine = sep.get();
 	}
 
-	public Pair exec(String instruction) {
+	public Pair exec(Instruction instruction) {
 		String resultString = "";
 		StringBuffer console = new StringBuffer();
 		logger.trace("Exec");
 		try {
 			
 			engine.put("__console", console);
-			logger.trace("Eval {} on {}", instruction, engine.toString());
-			Object eval = engine.eval(instruction);
+			logger.trace("Eval {} on {}", instruction.getInstruction(), engine.toString());
+			Object eval = engine.eval(instruction.getInstruction());
 			resultString = eval.toString();
-			logger.trace("Evaled {} to {}", instruction, resultString);
+			logger.trace("Evaled {} to {}", instruction.getInstruction(), resultString);
 			
 		} catch (Exception e) {
 			resultString = e.getMessage();

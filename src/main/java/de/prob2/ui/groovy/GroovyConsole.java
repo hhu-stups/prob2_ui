@@ -16,9 +16,8 @@ public class GroovyConsole extends TextArea {
 	private int charCounterInLine = 0;
 	private int currentPosInLine = 0;
 	private final KeyCode[] rest = {KeyCode.ESCAPE,KeyCode.SCROLL_LOCK,KeyCode.PAUSE,KeyCode.NUM_LOCK,KeyCode.INSERT,KeyCode.CONTEXT_MENU,KeyCode.CAPS};
-	private List<String> instructions;
+	private List<Instruction> instructions;
 	private int posInList = -1;
-	private int numberOfInstructions = 0;
 	private String currentLine ="";
 	private GroovyInterpreter interpreter;
 	
@@ -26,7 +25,7 @@ public class GroovyConsole extends TextArea {
 	public GroovyConsole() {
 		super();
 		this.setContextMenu(new ContextMenu());
-		this.instructions = new ArrayList<String>();
+		this.instructions = new ArrayList<Instruction>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		setListeners();
 	}
@@ -41,13 +40,17 @@ public class GroovyConsole extends TextArea {
 		if(this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
 			goToLastPos();
 		}
-		int oldlength = this.getText().length();
-		int posOfEnter = this.getText().lastIndexOf("\n");
+		String oldText = this.getText();
+		int posOfEnter = oldText.lastIndexOf("\n");
 		super.paste();
-		int diff = this.getText().length() - oldlength;
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
-		charCounterInLine += diff;
-		currentPosInLine += diff;
+		if(currentLine.indexOf("\n") != -1) {
+			this.setText(oldText);
+			goToLastPos();
+			return;
+		}
+		charCounterInLine += currentLine.length();
+		currentPosInLine += currentLine.length();
 	}
 	
 	@Override
@@ -93,7 +96,6 @@ public class GroovyConsole extends TextArea {
 		this.setScrollTop(Double.MAX_VALUE);
 	}*/
 	
-	//Enter (One Instruction -> more than 1 Line)
 	//Arrow Keys: Left and Right
 	private void setListeners() {
 		this.addEventFilter(KeyEvent.ANY, e-> {
@@ -170,23 +172,20 @@ public class GroovyConsole extends TextArea {
 		e.consume();
 		
 		if(instructions.size() == 0) {
-			instructions.add(currentLine);
-			numberOfInstructions++;
+			instructions.add(new Instruction(currentLine, InstructionOption.ENTER));
 		} else {
 			//add Instruction if last Instruction is not "", otherwise replace it
-			String lastinstruction = instructions.get(instructions.size()-1);
-			if(!(lastinstruction.equals(""))) {
-				instructions.add(currentLine);
-				numberOfInstructions++;
+			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
+			if(!(lastinstruction.equals("")) && !lastinstruction.equals(currentLine)) {
+				instructions.add(new Instruction(currentLine, InstructionOption.ENTER));
 			} else if(!currentLine.equals("")) {
-				instructions.set(instructions.size() - 1, currentLine);
+				instructions.set(instructions.size() - 1, new Instruction(currentLine, InstructionOption.ENTER));
 			}
 		}
 		posInList = instructions.size() - 1;
 		currentLine = "";
 		this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
 		this.appendText("\n >");
-		
 	}	
 	
 	private void handleArrowKeys(KeyEvent e) {
@@ -214,19 +213,17 @@ public class GroovyConsole extends TextArea {
 			return true;
 		}
 		if(posInList == instructions.size() - 1) {
-			String lastinstruction = instructions.get(instructions.size()-1);
-			if(!lastinstruction.equals("")) {
-				if(!lastinstruction.equals(currentLine)) {
-					if(posInList == instructions.size() - 1) {
-						instructions.add(currentLine);
+			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
+			if(!lastinstruction.equals(currentLine)) {
+				if(posInList == instructions.size() - 1) {
+					if(instructions.get(posInList).getOption() == InstructionOption.UP) {
+						instructions.set(instructions.size() - 1, new Instruction(currentLine, InstructionOption.UP));
+					} else {
+						instructions.add(new Instruction(currentLine, InstructionOption.UP));
 						setTextAfterArrowKey();
 						return true;
-					} else {
-						instructions.set(numberOfInstructions, currentLine);
 					}
 				}
-			} else {
-				instructions.set(instructions.size() - 1, currentLine);
 			}
 		}
 		posInList = Math.max(posInList - 1, 0);
@@ -263,7 +260,7 @@ public class GroovyConsole extends TextArea {
 	private void setTextAfterArrowKey() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		this.setText(this.getText().substring(0, posOfEnter + 3));
-		currentLine = instructions.get(posInList);
+		currentLine = instructions.get(posInList).getInstruction();
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
 		this.appendText(currentLine);

@@ -3,10 +3,8 @@ package de.prob2.ui.modelchecking;
 import java.io.IOException;
 
 import com.google.inject.Inject;
-
 import de.prob.check.ModelCheckingOptions;
-import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.StateSpace;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,14 +27,17 @@ public class ModelcheckingStage extends Stage {
 	private CheckBox stopAtFullCoverage;
 	@FXML
 	private CheckBox searchForNewErrors;
-
-	private AnimationSelector animations;
+	
+	private CurrentTrace currentTrace;
 	private ModelcheckingController modelcheckController;
 
 	@Inject
-	public ModelcheckingStage(AnimationSelector ANIMATIONS, FXMLLoader loader,
-			ModelcheckingController modelcheckController) {
-		this.animations = ANIMATIONS;
+	public ModelcheckingStage(
+		CurrentTrace currentTrace,
+		FXMLLoader loader,
+		ModelcheckingController modelcheckController
+	) {
+		this.currentTrace = currentTrace;
 		this.modelcheckController = modelcheckController;
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stage.fxml"));
@@ -50,7 +51,7 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	void startModelCheck(ActionEvent event) {
-		if (animations.getCurrentTrace() == null) {
+		if (currentTrace.exists()) {
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Specification file missing");
 			alert.setHeaderText("No specification file loaded. Cannot run model checker.");
@@ -58,9 +59,7 @@ public class ModelcheckingStage extends Stage {
 			alert.showAndWait();
 			return;
 		}
-		ModelCheckingOptions options = getOptions();
-		StateSpace currentStateSpace = animations.getCurrentTrace().getStateSpace();
-		modelcheckController.startModelchecking(options, currentStateSpace);
+		modelcheckController.startModelchecking(getOptions(), currentTrace.getStateSpace());
 	}
 
 	private ModelCheckingOptions getOptions() {

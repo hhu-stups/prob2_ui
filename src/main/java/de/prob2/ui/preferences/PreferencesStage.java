@@ -4,16 +4,11 @@ import java.io.IOException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob.prolog.term.ListPrologTerm;
-import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.IAnimationChangeListener;
-import de.prob.statespace.Trace;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,7 +24,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 @Singleton
-public class PreferencesStage extends Stage implements IAnimationChangeListener {
+public class PreferencesStage extends Stage {
 	@FXML private Stage stage;
 	@FXML private Button undoButton;
 	@FXML private Button resetButton;
@@ -44,22 +39,18 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
-	private final AnimationSelector animationSelector;
+	private final CurrentTrace currentTrace;
 	private final Preferences preferences;
-	private final BooleanProperty traceIsNull;
 
 	@Inject
 	private PreferencesStage(
-		final AnimationSelector animationSelector,
+		final CurrentTrace currentTrace,
 		final Preferences preferences,
 		final FXMLLoader loader
 	) {
-		this.animationSelector = animationSelector;
-		this.animationSelector.registerAnimationChangeListener(this);
+		this.currentTrace = currentTrace;
 		this.preferences = preferences;
-		final Trace currentTrace = this.animationSelector.getCurrentTrace();
-		this.preferences.setStateSpace(currentTrace == null ? null : currentTrace.getStateSpace());
-		this.traceIsNull = new SimpleBooleanProperty(currentTrace == null);
+		this.preferences.setStateSpace(currentTrace.exists() ? currentTrace.getStateSpace() : null);
 		
 		loader.setLocation(this.getClass().getResource("preferences_stage.fxml"));
 		loader.setRoot(this);
@@ -74,9 +65,9 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 	@FXML
 	public void initialize() {
 		this.undoButton.disableProperty().bind(this.preferences.changesAppliedProperty());
-		this.resetButton.disableProperty().bind(this.traceIsNull);
+		this.resetButton.disableProperty().bind(this.currentTrace.existsProperty().not());
 		this.applyWarning.visibleProperty().bind(this.preferences.changesAppliedProperty().not());
-		this.okButton.disableProperty().bind(this.traceIsNull);
+		this.okButton.disableProperty().bind(this.currentTrace.existsProperty().not());
 		this.applyButton.disableProperty().bind(this.preferences.changesAppliedProperty());
 		
 		tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
@@ -110,6 +101,11 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 		tvDescription.setCellValueFactory(new TreeItemPropertyValueFactory<>("description"));
 		
 		tv.getRoot().setValue(new CategoryPrefTreeItem("Preferences"));
+		
+		this.currentTrace.addListener((observable, from, to) -> {
+			this.preferences.setStateSpace(to == null ? null : to.getStateSpace());
+			this.updatePreferences();
+		});
 	}
 	
 	private void updatePreferences() {
@@ -202,14 +198,4 @@ public class PreferencesStage extends Stage implements IAnimationChangeListener 
 			return false;
 		}
 	}
-
-	@Override
-	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-		this.preferences.setStateSpace(currentTrace == null ? null : currentTrace.getStateSpace());
-		this.updatePreferences();
-		this.traceIsNull.set(currentTrace == null);
-	}
-
-	@Override
-	public void animatorStatus(boolean busy) {}
 }

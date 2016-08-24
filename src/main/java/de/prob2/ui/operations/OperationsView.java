@@ -12,7 +12,6 @@ import java.util.Set;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.model.eventb.Event;
@@ -22,10 +21,9 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.BEvent;
 import de.prob.model.representation.Machine;
 import de.prob.model.representation.ModelElementList;
-import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -42,7 +40,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 
 @Singleton
-public class OperationsView extends AnchorPane implements IAnimationChangeListener {
+public class OperationsView extends AnchorPane {
 	@FXML
 	private ListView<Operation> opsListView;
 	@FXML
@@ -75,17 +73,16 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 	private boolean showNotEnabled = true;
 	private String filter = "";
 	Comparator<Operation> sorter = new ModelOrder(new ArrayList<String>());
-	private final AnimationSelector animations;
+	private final CurrentTrace currentTrace;
 
 	@Inject
-	private OperationsView(final AnimationSelector animations, final FXMLLoader loader) {
-		this.animations = animations;
-		this.animations.registerAnimationChangeListener(this);
-
+	private OperationsView(final CurrentTrace currentTrace, final FXMLLoader loader) {
+		this.currentTrace = currentTrace;
+		
+		loader.setLocation(getClass().getResource("ops_view.fxml"));
+		loader.setRoot(this);
+		loader.setController(this);
 		try {
-			loader.setLocation(getClass().getResource("ops_view.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -102,30 +99,80 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 			public void changed(ObservableValue<? extends Operation> observable, Operation oldValue,
 					Operation newValue) {
 				if (newValue != null && newValue.isEnabled()) {
-					animations.traceChange(animations.getCurrentTrace().add(newValue.id));
+					currentTrace.set(currentTrace.get().add(newValue.id));
 					System.out.println("Selected item: " + newValue);
 				}
 			}
+		});
+		
+		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
+		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
+		
+		currentTrace.addListener((observable, from, to) -> {
+			update(to);
+		});
+	}
+	
+	private void update(Trace trace) {
+		if (trace == null) {
+			currentModel = null;
+			opNames = new ArrayList<String>();
+			if (sorter instanceof ModelOrder) {
+				sorter = new ModelOrder(opNames);
+			}
+			Platform.runLater(() -> {
+				ObservableList<Operation> opsList = opsListView.getItems();
+				opsList.clear();
+			});
+			return;
+		}
+		
+		if (trace.getModel() != currentModel) {
+			updateModel(trace);
+		}
+		events = new ArrayList<Operation>();
+		Set<Transition> operations = trace.getNextTransitions(true);
+		Set<String> notEnabled = new HashSet<String>(opNames);
+		Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
+		for (Transition transition : operations) {
+			String id = transition.getId();
+			String name = extractPrettyName(transition.getName());
+			notEnabled.remove(name);
+			List<String> params = transition.getParams();
+			Operation operation = new Operation(id, name, params, true, withTimeout.contains(name));
+			events.add(operation);
+		}
+		if (showNotEnabled) {
+			for (String s : notEnabled) {
+				if (!s.equals("INITIALISATION")) {
+					events.add(new Operation(s, s, opToParams.get(s), false, withTimeout.contains(s)));
+				}
+			}
+		}
+		try {
+			Collections.sort(events, sorter);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		Platform.runLater(() -> {
+			ObservableList<Operation> opsList = opsListView.getItems();
+			opsList.clear();
+			opsList.addAll(applyFilter(filter));
 		});
 	}
 
 	@FXML
 	private void handleDisabledOpsToggle() {
-		Trace trace = animations.getCurrentTrace();
 		FontAwesomeIconView icon = null;
 		if (disabledOpsToggle.isSelected()) {
 			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE_SLASH);
 			showNotEnabled = false;
-			if (trace != null) {
-				animations.traceChange(trace);
-			}
 		} else {
 			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE);
 			showNotEnabled = true;
-			if (trace != null) {
-				animations.traceChange(trace);
-			}
 		}
+		update(currentTrace.get());
 		icon.setSize("15");
 		icon.setStyleClass("icon-dark");
 		disabledOpsToggle.setGraphic(icon);
@@ -133,17 +180,15 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 
 	@FXML
 	private void handleBackButton() {
-		Trace trace = animations.getCurrentTrace();
-		if (trace != null) {
-			animations.traceChange(trace.back());
+		if (currentTrace.exists()) {
+			currentTrace.set(currentTrace.back());
 		}
 	}
 
 	@FXML
 	private void handleForwardButton() {
-		Trace trace = animations.getCurrentTrace();
-		if (trace != null) {
-			animations.traceChange(trace.forward());
+		if (currentTrace.exists()) {
+			currentTrace.set(currentTrace.forward());
 		}
 	}
 
@@ -203,21 +248,20 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 
 	@FXML
 	public void random(ActionEvent event) {
-		Trace trace = animations.getCurrentTrace();
-		if (trace != null) {
+		if (currentTrace.exists()) {
 			if (event.getSource().equals(randomText)) {
 				try {
 					int steps = Integer.parseInt(randomText.getText());
-					animations.traceChange(trace.randomAnimation(steps));
+					currentTrace.set(currentTrace.get().randomAnimation(steps));
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				}
 			} else if (event.getSource().equals(oneRandomEvent)) {
-				animations.traceChange(trace.randomAnimation(1));
+				currentTrace.set(currentTrace.get().randomAnimation(1));
 			} else if (event.getSource().equals(fiveRandomEvents)) {
-				animations.traceChange(trace.randomAnimation(5));
+				currentTrace.set(currentTrace.get().randomAnimation(5));
 			} else if (event.getSource().equals(tenRandomEvents)) {
-				animations.traceChange(trace.randomAnimation(10));
+				currentTrace.set(currentTrace.get().randomAnimation(10));
 			}
 		}
 	}
@@ -316,61 +360,5 @@ public class OperationsView extends AnchorPane implements IAnimationChangeListen
 			return -1 * o1.name.compareTo(o2.name);
 		}
 
-	}
-
-	@Override
-	public void traceChange(Trace trace, boolean currentAnimationChanged) {
-		if (trace == null) {
-			currentModel = null;
-			opNames = new ArrayList<String>();
-			if (sorter instanceof ModelOrder) {
-				sorter = new ModelOrder(opNames);
-			}
-			Platform.runLater(() -> {
-				ObservableList<Operation> opsList = opsListView.getItems();
-				opsList.clear();
-			});
-			return;
-		}
-
-		if (trace.getModel() != currentModel) {
-			updateModel(trace);
-		}
-		events = new ArrayList<Operation>();
-		Set<Transition> operations = trace.getNextTransitions(true);
-		Set<String> notEnabled = new HashSet<String>(opNames);
-		Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
-		for (Transition transition : operations) {
-			String id = transition.getId();
-			String name = extractPrettyName(transition.getName());
-			notEnabled.remove(name);
-			List<String> params = transition.getParams();
-			Operation operation = new Operation(id, name, params, true, withTimeout.contains(name));
-			events.add(operation);
-		}
-		if (showNotEnabled) {
-			for (String s : notEnabled) {
-				if (!s.equals("INITIALISATION")) {
-					events.add(new Operation(s, s, opToParams.get(s), false, withTimeout.contains(s)));
-				}
-			}
-		}
-		try {
-			Collections.sort(events, sorter);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		backButton.setDisable(!trace.canGoBack());
-		forwardButton.setDisable(!trace.canGoForward());
-
-		Platform.runLater(() -> {
-			ObservableList<Operation> opsList = opsListView.getItems();
-			opsList.clear();
-			opsList.addAll(applyFilter(filter));
-		});
-	}
-
-	@Override
-	public void animatorStatus(boolean busy) {
 	}
 }
