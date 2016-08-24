@@ -4,11 +4,15 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" minHeight="160.0" minWidth="160.0" title="Visible Value Types" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" minHeight="160.0" minWidth="160.0"
+	title="Visible Value Types" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
-			<AnchorPane prefHeight="480.0" prefWidth="320.0" stylesheets="@../../../../prob.css">
-				<ListView fx:id="list" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+			<AnchorPane prefHeight="480.0" prefWidth="320.0"
+				stylesheets="@../../../../prob.css" styleClass="dark">
+				<ListView fx:id="list" editable="true"
+					AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0"
+					AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0" styleClass="dark-highlight" />
 			</AnchorPane>
 		</Scene>
 	</scene>

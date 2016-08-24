@@ -57,7 +57,7 @@
  * ChoiceBox																		*
  ************************************************************************************/
 .choice-box {
-	-fx-background-color: #cccccc;	
+	-fx-background-color: #dddddd;	
 	-fx-text-fill: #444444;
 }
 
@@ -327,8 +327,12 @@
     -fx-text-fill: #eaeaea;
 }
 .dark-highlight {
-	-fx-background-color: #cccccc;
+	-fx-background-color: #dddddd;
 	-fx-padding: 1.0em;
+}
+.dark-highlight .list-cell {
+	-fx-background-color: #dddddd;
+	-fx-padding: 0.0em 0.0em 0.5em;
 }
 /*.dark .check-box:selected > .box > .mark {
 	-fx-background-color: white;
