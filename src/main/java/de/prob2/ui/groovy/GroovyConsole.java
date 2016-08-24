@@ -43,37 +43,30 @@ public class GroovyConsole extends TextArea {
 		String oldText = this.getText();
 		int posOfEnter = oldText.lastIndexOf("\n");
 		super.paste();
+		int diff = this.getLength() - oldText.length();
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		if(currentLine.indexOf("\n") != -1) {
+			currentLine ="";
 			this.setText(oldText);
 			goToLastPos();
 			return;
 		}
-		charCounterInLine += currentLine.length();
-		currentPosInLine += currentLine.length();
+		charCounterInLine += diff;
+		currentPosInLine += diff;
 	}
 	
 	@Override
 	public void copy() {
 		super.copy();
-		correctPosInLine();
 		goToLastPos();
 	}
 		
 	@Override
 	public void cut() {
 		super.cut();
-		correctPosInLine();
 	}
 	
-	
-	private void correctPosInLine() {
-		if(charCounterInLine > 0) {
-			charCounterInLine--;
-			currentPosInLine--;
-		}
-	}
-	
+		
 	@Override
 	public void forward() {
 		if(currentPosInLine < charCounterInLine && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
@@ -110,6 +103,7 @@ public class GroovyConsole extends TextArea {
 		}
 	}
 	
+	//
 	private void setListeners() {
 		this.addEventFilter(KeyEvent.ANY, e-> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
