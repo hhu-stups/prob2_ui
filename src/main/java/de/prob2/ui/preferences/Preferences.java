@@ -25,14 +25,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 
-public class Preferences {
+public final class Preferences {
 	private final AnimationSelector animationSelector;
 	private final Api api;
+	private StateSpace stateSpace;
 	private final ObservableMap<String, ProBPreference> cachedPreferences;
 	private final ObservableMap<String, String> cachedPreferenceValues;
 	private final ObservableMap<String, String> changedPreferences;
 	private final BooleanProperty changesApplied;
-	private StateSpace stateSpace;
 	
 	@Inject
 	private Preferences(
@@ -70,19 +70,38 @@ public class Preferences {
 	}
 	
 	/**
-	 * Ensure that {@link #stateSpace} is not {@link null}.
+	 * Ensure that {@link #stateSpace} is not {@code null}.
 	 * 
-	 * @throws IllegalStateException if {@link #stateSpace} is {@link null}
+	 * @throws IllegalStateException if {@link #stateSpace} is {@code null}
 	 */
 	private void checkStateSpace() {
-		if (this.stateSpace == null) {
+		if (!this.hasStateSpace()) {
 			throw new IllegalStateException("Cannot use Preferences without setting a StateSpace first");
 		}
 	}
 	
 	/**
+	 * Get the {@link StateSpace} currently used by this instance.
+	 * If this method returns {@code null}, this instance has no {@link StateSpace}, and most methods will throw an {@link IllegalStateException} when called.
+	 * 
+	 * @return the {@link StateSpace} currently used by this instance
+	 */
+	public StateSpace getStateSpace() {
+		return this.stateSpace;
+	}
+	
+	/**
+	 * Return whether this instance has a {@link StateSpace}. This is equivalent to {@code this.getStateSpace() != null}.
+	 * 
+	 * @return whether this instance has a {@link StateSpace}
+	 */
+	public boolean hasStateSpace() {
+		return this.stateSpace != null;
+	}
+	
+	/**
 	 * Set a {@link StateSpace} to be used by this instance.
-	 * This method must be called before any of the other methods are used and will throw an {@link IllegalStateException} otherwise.
+	 * This method must be called with a non-null {@code stateSpace} before most of the other methods can be used, and will throw an {@link IllegalStateException} otherwise.
 	 * 
 	 * @param stateSpace the {@link StateSpace} to use
 	 */

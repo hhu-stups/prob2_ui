@@ -7,17 +7,15 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Action;
 import de.prob.model.representation.Machine;
-import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob2.ui.formula.FormulaGenerator;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,14 +28,14 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.AnchorPane;
 
 @Singleton
-public class StatesView extends AnchorPane implements IAnimationChangeListener {
+public class StatesView extends AnchorPane {
 	@FXML private TreeTableView<StateTreeItem<?>> tv;
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvName;
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvValue;
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
 	@FXML private TreeItem<StateTreeItem<?>> tvRootItem;
 	
-	private final AnimationSelector animationSelector;
+	private final CurrentTrace currentTrace;
 	private final ClassBlacklist classBlacklist;
 	private final FormulaGenerator formulaGenerator;
 	
@@ -46,13 +44,12 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 
 	@Inject
 	private StatesView(
-		final AnimationSelector animationSelector,
+		final CurrentTrace currentTrace,
 		final ClassBlacklist classBlacklist,
 		final FormulaGenerator formulaGenerator,
 		final FXMLLoader loader
 	) {
-		this.animationSelector = animationSelector;
-		animationSelector.registerAnimationChangeListener(this);
+		this.currentTrace = currentTrace;
 		this.classBlacklist = classBlacklist;
 		this.formulaGenerator = formulaGenerator;
 		
@@ -91,7 +88,12 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 			if (e instanceof AbstractFormulaElement) {
 				((AbstractFormulaElement)e).subscribe(trace.getStateSpace());
 			}
-
+		}
+		
+		this.currentValues = trace.getCurrentState().getValues();
+		this.previousValues = trace.canGoBack() ? trace.getPreviousState().getValues() : null;
+		
+		for (AbstractElement e : elements) {
 			TreeItem<StateTreeItem<?>> childItem = null;
 
 			for (TreeItem<StateTreeItem<?>> ti : treeItem.getChildren()) {
@@ -178,26 +180,10 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 
 		treeItem.getChildren().sort((a, b) -> a.getValue().getName().compareTo(b.getValue().getName()));
 	}
-
-	@Override
-	public void traceChange(Trace trace, boolean currentAnimationChanged) {
-		if (trace == null) {
-			this.tvRootItem.getChildren().clear();
-		} else {
-			try {
-				this.currentValues = trace.getCurrentState().getValues();
-				this.previousValues = trace.canGoBack() ? trace.getPreviousState().getValues() : null;
-				this.updateElements(trace, this.tvRootItem, trace.getModel().getChildrenOfType(Machine.class));
-			} catch (Exception e) {
-				// Otherwise the exception gets lost somewhere deep in a
-				// ProB log file, without a traceback.
-				e.printStackTrace();
-			}
-		}
+	
+	private void updateRoot(final Trace trace) {
+		this.updateElements(trace, this.tvRootItem, trace.getModel().getChildrenOfType(Machine.class));
 	}
-
-	@Override
-	public void animatorStatus(boolean busy) {}
 	
 	public void showExpression(AbstractFormulaElement formula) {
 		formulaGenerator.setFormula(formula.getFormula());
@@ -205,8 +191,6 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 
 	@FXML
 	public void initialize() {
-		this.animationSelector.registerAnimationChangeListener(this);
-
 		this.currentValues = null;
 		this.previousValues = null;
 		
@@ -228,17 +212,22 @@ public class StatesView extends AnchorPane implements IAnimationChangeListener {
 		
 		this.classBlacklist.getBlacklist().addListener(
 			(SetChangeListener<? super Class<? extends AbstractElement>>)change -> {
-				if (this.animationSelector.getCurrentTrace() != null) {
-					this.updateElements(
-						this.animationSelector.getCurrentTrace(),
-						this.tvRootItem,
-						this.animationSelector.getCurrentTrace().getModel().getChildrenOfType(Machine.class)
-					);
+				if (this.currentTrace.exists()) {
+					this.updateRoot(this.currentTrace.get());
 				}
 			}
 		);
 		
+		// Hide Action objects by default (they display as source code condensed into a single line otherwise)
 		this.classBlacklist.getKnownClasses().add(Action.class);
 		this.classBlacklist.getBlacklist().add(Action.class);
+		
+		this.currentTrace.addListener((observable, from, to) -> {
+			if (to == null) {
+				this.tvRootItem.getChildren().clear();
+			} else {
+				this.updateRoot(to);
+			}
+		});
 	}
 }
