@@ -87,29 +87,37 @@ public class NewAnimationPerspective extends BorderPane {
         this.setOnMouseEntered(s -> this.setCursor(Cursor.OPEN_HAND));
         this.setOnMousePressed(s -> this.setCursor(Cursor.CLOSED_HAND));
         this.setOnMouseReleased(s -> this.setCursor(Cursor.DEFAULT));
+        this.setOnDragOver(t -> {
+            System.out.println("Drag over");
+        });
         operations.setOnDragEntered(t ->{
             System.out.println("Drag entered");
             //db = t.getDragboard();
+            t.consume();
         });
         operations.setOnDragDropped(t -> {
             System.out.println("Drag dropped");
+            t.consume();
         });
         operations.setOnDragExited(t -> {
             System.out.println("Drag exited");
             dragDropped(operations,operationsTP);
+            t.consume();
         });
         operations.setOnDragDetected(s -> {
             System.out.println("Drag detected");
-            dragDropped(operations,operationsTP);
+            operations.startFullDrag();
+            //dragDropped(operations,operationsTP);
+            s.consume();
         });
         history.setOnDragDetected(s -> {
-            dragDropped(history,historyTP);
+            //dragDropped(history,historyTP);
         });
         modelcheck.setOnDragDetected(s -> {
-            dragDropped(modelcheck,modelcheckTP);
+            //dragDropped(modelcheck,modelcheckTP);
         });
         animations.setOnDragDetected(s -> {
-            dragDropped(animations,animationsTP);
+            //dragDropped(animations,animationsTP);
         });
 	}
 
@@ -133,13 +141,9 @@ public class NewAnimationPerspective extends BorderPane {
                 node.resize(0,0);
                 this.setLeft(node);
             }
-            //nodeTP.setContent(null);
-            //accordion.getPanes().remove(nodeTP);
             vBox.getChildren().remove(node);
             System.out.println("Width = "+node.getBoundsInParent().getWidth()+", Height = "+node.getBoundsInParent().getHeight());
         } else {
-            //this.addAccordion();
-            //nodeTP.setContent(node);
             node.resize(0,0);
             vBox.getChildren().add(node);
             this.getChildren().remove(node);
