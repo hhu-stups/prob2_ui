@@ -23,6 +23,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -55,7 +56,7 @@ public class NewAnimationPerspective extends BorderPane {
     private VBox vBox;
     @FXML
     private Accordion accordion;
-    private ImageView snapImage = new ImageView();
+    private Dragboard db;
     @Inject
     public NewAnimationPerspective() {
         try {
@@ -83,28 +84,41 @@ public class NewAnimationPerspective extends BorderPane {
 	}
 
 	private void onDrag() {
-        this.setOnMouseEntered(t -> this.setCursor(Cursor.OPEN_HAND));
-        this.setOnMousePressed(t -> this.setCursor(Cursor.CLOSED_HAND));
-        this.setOnMouseReleased(t -> this.setCursor(Cursor.DEFAULT));
+        this.setOnMouseEntered(s -> this.setCursor(Cursor.OPEN_HAND));
+        this.setOnMousePressed(s -> this.setCursor(Cursor.CLOSED_HAND));
+        this.setOnMouseReleased(s -> this.setCursor(Cursor.DEFAULT));
+        operations.setOnDragEntered(t ->{
+            System.out.println("Drag entered");
+            //db = t.getDragboard();
+        });
+        operations.setOnDragDropped(t -> {
+            System.out.println("Drag dropped");
+        });
+        operations.setOnDragExited(t -> {
+            System.out.println("Drag exited");
+            dragDropped(operations,operationsTP);
+        });
         operations.setOnDragDetected(s -> {
-            dragAction(operations,operationsTP);
+            System.out.println("Drag detected");
+            dragDropped(operations,operationsTP);
         });
         history.setOnDragDetected(s -> {
-            dragAction(history,historyTP);
+            dragDropped(history,historyTP);
         });
         modelcheck.setOnDragDetected(s -> {
-            dragAction(modelcheck,modelcheckTP);
+            dragDropped(modelcheck,modelcheckTP);
         });
         animations.setOnDragDetected(s -> {
-            dragAction(animations,animationsTP);
+            dragDropped(animations,animationsTP);
         });
 	}
 
-    private void dragAction(final Node node, final TitledPane nodeTP){
+    private void dragDropped(final Node node, final TitledPane nodeTP){
         System.out.println(node.getClass().toString() + " dragged, isResizable() = "+node.isResizable());
-        //SnapshotParameters snapParams = new SnapshotParameters();
-        //snapParams.setFill(Color.TRANSPARENT);
-        //snapImage.setImage(node.snapshot(snapParams, null));
+        SnapshotParameters snapParams = new SnapshotParameters();
+        snapParams.setFill(Color.TRANSPARENT);
+        db = node.startDragAndDrop(TransferMode.ANY);
+        db.setDragView(node.snapshot(snapParams, null));
         if (vBox.getChildren().contains(node)) {
             if (this.getRight() == null) {
                 node.resize(0,0);
