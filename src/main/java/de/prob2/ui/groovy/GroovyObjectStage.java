@@ -46,7 +46,7 @@ public class GroovyObjectStage extends Stage {
 		values.clear();
 		int i = 0;
 		for(String s : binding.keySet()) {
-			String clazz = binding.values().toArray()[i].getClass().toString();
+			Class <? extends Object> clazz = binding.values().toArray()[i].getClass();
 			values.add(new GroovyObjectItem(s,clazz));
 			i++;
 		}
@@ -57,7 +57,7 @@ public class GroovyObjectStage extends Stage {
 	@FXML
 	public void initialize() {
 		objects.setCellValueFactory(new PropertyValueFactory<>("name"));
-		classes.setCellValueFactory(new PropertyValueFactory<>("clazz"));
+		classes.setCellValueFactory(new PropertyValueFactory<>("clazzname"));
 		tv_objects.setItems(values);
 	}
 	

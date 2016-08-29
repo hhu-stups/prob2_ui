@@ -5,11 +5,13 @@ import javafx.beans.property.SimpleStringProperty;
 public class GroovyObjectItem {
 	
 	private final SimpleStringProperty name;
-	private final SimpleStringProperty clazz;
+	private final Class<? extends Object> clazz;
+	private final SimpleStringProperty clazzname;
 	
-	public GroovyObjectItem(String name, String clazz) {
+	public GroovyObjectItem(String name, Class<? extends Object> clazz) {
 		this.name = new SimpleStringProperty(name);
-		this.clazz = new SimpleStringProperty(clazz);
+		this.clazz = clazz;
+		this.clazzname = new SimpleStringProperty(clazz.getName());
 	}
 	
 	public String getName() {
@@ -20,12 +22,12 @@ public class GroovyObjectItem {
 		this.name.set(name);
 	}
 	
-	public String getClazz() {
-		return clazz.get();
+	public String getClazzname() {
+		return clazzname.get();
 	}
 	
-	public void setClass(String clazz) {
-		this.clazz.set(clazz);
+	public void setClass(String clazzname) {
+		this.clazzname.set(clazzname);
 	}
 
 }
