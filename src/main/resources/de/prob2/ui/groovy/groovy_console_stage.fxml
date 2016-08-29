@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import de.prob2.ui.groovy.GroovyConsole?>
+
+<fx:root type="Stage" title="Groovy Console" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+   	<scene>
+		<Scene width="800" height="600">
+    	  <GroovyConsole fx:id="groovyConsole" prefHeight="512.0" prefWidth="1024.0" />
+        </Scene>
+   	</scene>
+</fx:root>

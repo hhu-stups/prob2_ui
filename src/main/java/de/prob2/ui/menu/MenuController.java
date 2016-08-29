@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
@@ -17,11 +16,11 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
-import de.prob2.ui.groovy.GroovyConsoleView;
-import de.prob2.ui.groovy.GroovyObjectView;
+import de.prob2.ui.groovy.GroovyConsoleStage;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modelchecking.ModelcheckingStage;
 import de.prob2.ui.preferences.PreferencesStage;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.BlacklistStage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -43,30 +42,31 @@ import javafx.stage.Window;
 public class MenuController extends MenuBar {
 	private final Api api;
 	private final AnimationSelector animationSelector;
+	private final CurrentTrace currentTrace;
 	private final BlacklistStage blacklistStage;
 	private final PreferencesStage preferencesStage;
 	private final ModelcheckingController modelcheckingController;
 	private final Stage mcheckStage;
 	private final FormulaGenerator formulaGenerator;
-	private final Stage groovyConsoleStage;
-	private final Stage groovyObjectStage;
+	private final GroovyConsoleStage groovyConsoleStage;
 	private Window window;
 	private DottyStage dottyStage;
+	
+	@FXML private MenuItem enterFormulaForVisualization;
 
 	@FXML
 	private void handleLoadDefault() {
-		Window stage = this.getScene().getWindow();
+		FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
+		loader.setLocation(getClass().getResource("../main.fxml"));
 		try {
-			FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
-			loader.setLocation(getClass().getResource("../main.fxml"));
 			loader.load();
-			Parent root = loader.getRoot();
-			Scene scene = new Scene(root, stage.getHeight(), stage.getWidth());
-			((Stage) window).setScene(scene);
 		} catch (IOException e) {
 			System.err.println("Failed to load FXML-File!");
 			e.printStackTrace();
 		}
+		Parent root = loader.getRoot();
+		Scene scene = new Scene(root, window.getHeight(), window.getWidth());
+		((Stage) window).setScene(scene);
 	}
 
 	@FXML
@@ -149,12 +149,12 @@ public class MenuController extends MenuBar {
 	private void handleFormulaInput(ActionEvent event) {
 		TextInputDialog dialog = new TextInputDialog();
 		dialog.setTitle("Enter Formula for Visualization");
-		dialog.setHeaderText("Enter Formula for Vistualization");
+		dialog.setHeaderText("Enter Formula for Visualization");
 		dialog.setContentText("Enter Formula: ");
 		dialog.getDialogPane().getStylesheets().add("prob.css");
 		Optional<String> result = dialog.showAndWait();
 		if (result.isPresent()) {
-			formulaGenerator.setFormula(formulaGenerator.parse(result.get()));
+			formulaGenerator.parseAndShowFormula(result.get());
 		}
 	}
 
@@ -175,11 +175,6 @@ public class MenuController extends MenuBar {
 		this.groovyConsoleStage.toFront();
 	}
 	
-	@FXML
-	public void handleGroovyObjects(ActionEvent event) {
-		this.groovyObjectStage.show();
-		this.groovyObjectStage.toFront();
-	}
 	
 	@FXML
 	public void initialize() {
@@ -191,32 +186,26 @@ public class MenuController extends MenuBar {
 				});
 			}
 		});
+		
+		this.enterFormulaForVisualization.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 
 	@Inject
 
-	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector,
+	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector, final CurrentTrace currentTrace,
 			final BlacklistStage blacklistStage, final PreferencesStage preferencesStage,
 			final ModelcheckingStage modelcheckingStage, final ModelcheckingController modelcheckingController,
-			final FormulaGenerator formulaGenerator, final DottyStage dottyStage, final GroovyConsoleView groovyConsoleView, final GroovyObjectView groovyObjectView) {
+			final FormulaGenerator formulaGenerator, final DottyStage dottyStage, final GroovyConsoleStage groovyConsoleStage) {
 		this.api = api;
 		this.animationSelector = animationSelector;
+		this.currentTrace = currentTrace;
 		this.blacklistStage = blacklistStage;
 		this.preferencesStage = preferencesStage;
 		this.formulaGenerator = formulaGenerator;
 		this.modelcheckingController = modelcheckingController;
 		this.mcheckStage = modelcheckingStage;
 		this.dottyStage = dottyStage;
-		this.groovyConsoleStage = new Stage();
-		this.groovyConsoleStage.setTitle("Groovy Console");
-		this.groovyConsoleStage.setScene(new Scene(groovyConsoleView));
-		this.groovyConsoleStage.initModality(Modality.NONE);
-		this.groovyConsoleStage.setResizable(false);
-		this.groovyObjectStage = new Stage();
-		this.groovyObjectStage.setTitle("Groovy Objects View");
-		this.groovyObjectStage.setScene(new Scene(groovyObjectView));
-		this.groovyObjectStage.initModality(Modality.NONE);
-		this.groovyObjectStage.setResizable(true);
+		this.groovyConsoleStage = groovyConsoleStage;
 		try {
 			loader.setLocation(getClass().getResource("menu.fxml"));
 			loader.setRoot(this);

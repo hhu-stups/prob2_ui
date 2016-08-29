@@ -4,9 +4,11 @@
 
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
+apply plugin: 'application'
 
 sourceCompatibility="1.8"
 targetCompatibility="1.8"
+
 
 repositories {
 	mavenCentral()
@@ -22,7 +24,7 @@ repositories {
 }
 
 //macAppBundle {
-//	mainClassName = "de.prob2.ui.ProB2"
+	mainClassName = "de.prob2.ui.ProB2"
 //	appName="ProB 2.0"
 //	icon = "prob2.icns"
 //	bundleJRE = true
