@@ -25,7 +25,6 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -41,6 +40,10 @@ import javafx.scene.paint.Color;
 
 @Singleton
 public class OperationsView extends AnchorPane {
+	private static enum SortMode {
+		MODEL_ORDER, A_TO_Z, Z_TO_A
+	}
+	
 	private static final class OperationsCell extends ListCell<Operation> {
 		private static final FontAwesomeIconView iconEnabled;
 		private static final FontAwesomeIconView iconNotEnabled;
@@ -70,6 +73,32 @@ public class OperationsView extends AnchorPane {
 				setText(null);
 			}
 		}
+	}
+	
+	private static String extractPrettyName(final String name) {
+		if ("$setup_constants".equals(name)) {
+			return "SETUP_CONSTANTS";
+		}
+		if ("$initialise_machine".equals(name)) {
+			return "INITIALISATION";
+		}
+		return name;
+	}
+	
+	private static String stripString(final String param) {
+		return param.replaceAll("\\{", "").replaceAll("\\}", "");
+	}
+	
+	private static int compareParams(final List<String> params1, final List<String> params2) {
+		for (int i = 0; i < params1.size(); i++) {
+			String p1 = stripString(params1.get(i));
+			String p2 = stripString(params2.get(i));
+			if (p1.compareTo(p2) != 0) {
+				return p1.compareTo(p2);
+			}
+			
+		}
+		return 0;
 	}
 	
 	@FXML
@@ -103,9 +132,9 @@ public class OperationsView extends AnchorPane {
 	private List<Operation> events = new ArrayList<>();
 	private boolean showNotEnabled = true;
 	private String filter = "";
-	Comparator<Operation> sorter = new ModelOrder(new ArrayList<>());
+	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
-
+	
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final FXMLLoader loader) {
 		this.currentTrace = currentTrace;
@@ -120,7 +149,7 @@ public class OperationsView extends AnchorPane {
 		}
 
 	}
-
+	
 	@FXML
 	public void initialize() {
 		opsListView.setCellFactory(lv -> new OperationsCell());
@@ -144,12 +173,8 @@ public class OperationsView extends AnchorPane {
 		if (trace == null) {
 			currentModel = null;
 			opNames = new ArrayList<>();
-			if (sorter instanceof ModelOrder) {
-				sorter = new ModelOrder(opNames);
-			}
 			Platform.runLater(() -> {
-				ObservableList<Operation> opsList = opsListView.getItems();
-				opsList.clear();
+				opsListView.getItems().clear();
 			});
 			return;
 		}
@@ -176,19 +201,13 @@ public class OperationsView extends AnchorPane {
 				}
 			}
 		}
-		try {
-			Collections.sort(events, sorter);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		doSort();
 		
 		Platform.runLater(() -> {
-			ObservableList<Operation> opsList = opsListView.getItems();
-			opsList.clear();
-			opsList.addAll(applyFilter(filter));
+			opsListView.getItems().setAll(applyFilter(filter));
 		});
 	}
-
+	
 	@FXML
 	private void handleDisabledOpsToggle() {
 		FontAwesomeIconView icon = null;
@@ -204,29 +223,27 @@ public class OperationsView extends AnchorPane {
 		icon.setStyleClass("icon-dark");
 		disabledOpsToggle.setGraphic(icon);
 	}
-
+	
 	@FXML
 	private void handleBackButton() {
 		if (currentTrace.exists()) {
 			currentTrace.set(currentTrace.back());
 		}
 	}
-
+	
 	@FXML
 	private void handleForwardButton() {
 		if (currentTrace.exists()) {
 			currentTrace.set(currentTrace.forward());
 		}
 	}
-
+	
 	@FXML
 	private void handleSearchButton() {
 		filter = filterEvents.getText();
-		ObservableList<Operation> opsList = opsListView.getItems();
-		opsList.clear();
-		opsList.addAll(applyFilter(filter));
+		opsListView.getItems().setAll(applyFilter(filter));
 	}
-
+	
 	private List<Operation> applyFilter(final String filter) {
 		List<Operation> newOps = new ArrayList<>();
 		for (Operation op : events) {
@@ -236,43 +253,77 @@ public class OperationsView extends AnchorPane {
 		}
 		return newOps;
 	}
-
+	
+	private void doSort() {
+		final Comparator<Operation> comparator;
+		switch (sortMode) {
+			case MODEL_ORDER:
+				comparator = (o1, o2) -> {
+					if (o1.name.equals(o2.name)) {
+						return compareParams(o1.params, o2.params);
+					} else {
+						return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
+					}
+				};
+				break;
+			
+			case A_TO_Z:
+				comparator = (o1, o2) -> {
+					if (o1.name.equals(o2.name)) {
+						return compareParams(o1.params, o2.params);
+					} else {
+						return o1.name.compareTo(o2.name);
+					}
+				};
+				break;
+			
+			case Z_TO_A:
+				comparator = (o1, o2) -> {
+					if (o1.name.equals(o2.name)) {
+						return -compareParams(o1.params, o2.params);
+					} else {
+						return -o1.name.compareTo(o2.name);
+					}
+				};
+				break;
+			
+			default:
+				throw new IllegalStateException("Unhandled sort mode: " + sortMode);
+		}
+		
+		Collections.sort(events, comparator);
+	}
+	
 	@FXML
 	private void handleSortButton() {
-		String oldMode = getSortMode();
 		FontAwesomeIconView icon = null;
-		if ("normal".equals(oldMode)) {
-			sorter = new AtoZ();
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
-		} else if ("aToZ".equals(oldMode)) {
-			sorter = new ZtoA();
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
-		} else if ("zToA".equals(oldMode)) {
-			sorter = new ModelOrder(opNames);
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT);
+		switch (sortMode) {
+			case MODEL_ORDER:
+				sortMode = SortMode.A_TO_Z;
+				icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
+				break;
+			
+			case A_TO_Z:
+				sortMode = SortMode.Z_TO_A;
+				icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
+				break;
+			
+			case Z_TO_A:
+				sortMode = SortMode.MODEL_ORDER;
+				icon = new FontAwesomeIconView(FontAwesomeIcon.SORT);
+				break;
+			
+			default:
+				throw new IllegalStateException("Unhandled sort mode: " + sortMode);
 		}
-		Collections.sort(events, sorter);
-		ObservableList<Operation> opsList = opsListView.getItems();
-		opsList.clear();
-		opsList.addAll(applyFilter(filter));
+		
+		doSort();
+		opsListView.getItems().setAll(applyFilter(filter));
 		icon.setSize("15");
 		icon.setStyleClass("icon-dark");
 		sortButton.setGraphic(icon);
 	}
-
-	public String getSortMode() {
-		if (sorter instanceof ModelOrder) {
-			return "normal";
-		}
-		if (sorter instanceof AtoZ) {
-			return "aToZ";
-		}
-		if (sorter instanceof ZtoA) {
-			return "zToA";
-		}
-		return "other";
-	}
-
+	
 	@FXML
 	public void random(ActionEvent event) {
 		if (currentTrace.exists()) {
@@ -314,78 +365,5 @@ public class OperationsView extends AnchorPane {
 				opToParams.put(e.getName(), paramList);
 			}
 		}
-		if (sorter instanceof ModelOrder) {
-			sorter = new ModelOrder(opNames);
-		}
-	}
-
-	private String extractPrettyName(final String name) {
-		if ("$setup_constants".equals(name)) {
-			return "SETUP_CONSTANTS";
-		}
-		if ("$initialise_machine".equals(name)) {
-			return "INITIALISATION";
-		}
-		return name;
-	}
-
-	private abstract static class EventComparator implements Comparator<Operation> {
-
-		private String stripString(final String param) {
-			return param.replaceAll("\\{", "").replaceAll("\\}", "");
-		}
-
-		public int compareParams(final List<String> params1, final List<String> params2) {
-			for (int i = 0; i < params1.size(); i++) {
-				String p1 = stripString(params1.get(i));
-				String p2 = stripString(params2.get(i));
-				if (p1.compareTo(p2) != 0) {
-					return p1.compareTo(p2);
-				}
-
-			}
-			return 0;
-		}
-	}
-
-	private static final class ModelOrder extends EventComparator {
-
-		private final List<String> ops;
-
-		public ModelOrder(final List<String> ops) {
-			this.ops = ops;
-		}
-
-		@Override
-		public int compare(final Operation o1, final Operation o2) {
-			if (ops.contains(o1.name) && ops.contains(o2.name) && ops.indexOf(o1.name) == ops.indexOf(o2.name)) {
-				return compareParams(o1.params, o2.params);
-			}
-			return ops.indexOf(o1.name) - ops.indexOf(o2.name);
-		}
-	}
-
-	private static final class AtoZ extends EventComparator {
-
-		@Override
-		public int compare(final Operation o1, final Operation o2) {
-			if (o1.name.compareTo(o2.name) == 0) {
-				return compareParams(o1.params, o2.params);
-			}
-			return o1.name.compareTo(o2.name);
-		}
-
-	}
-
-	private static final class ZtoA extends EventComparator {
-
-		@Override
-		public int compare(final Operation o1, final Operation o2) {
-			if (o1.name.compareTo(o2.name) == 0) {
-				return compareParams(o1.params, o2.params);
-			}
-			return -o1.name.compareTo(o2.name);
-		}
-
 	}
 }
