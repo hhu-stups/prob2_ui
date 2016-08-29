@@ -24,6 +24,9 @@ public class GroovyObjectStage extends Stage {
 	@FXML
 	TableColumn<GroovyObjectItem, String> objects;
 	
+	@FXML
+	TableColumn<GroovyObjectItem, String> classes;
+	
 	ObservableList<GroovyObjectItem> values = FXCollections.observableArrayList();
 	
 	@Inject
@@ -41,8 +44,11 @@ public class GroovyObjectStage extends Stage {
 	public void showObjects(ScriptEngine engine) {
 		Bindings binding = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 		values.clear();
+		int i = 0;
 		for(String s : binding.keySet()) {
-			values.add(new GroovyObjectItem(s));
+			String clazz = binding.values().toArray()[i].getClass().toString();
+			values.add(new GroovyObjectItem(s,clazz));
+			i++;
 		}
 		tv_objects.refresh();
 		this.show();
@@ -51,6 +57,7 @@ public class GroovyObjectStage extends Stage {
 	@FXML
 	public void initialize() {
 		objects.setCellValueFactory(new PropertyValueFactory<>("name"));
+		classes.setCellValueFactory(new PropertyValueFactory<>("clazz"));
 		tv_objects.setItems(values);
 	}
 	
