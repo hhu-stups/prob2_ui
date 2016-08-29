@@ -1,5 +1,19 @@
 .root {
 	-fx-base: #f5f5f5;
+	-prob-blue: #08396B;
+	-prob-grey: #555560;
+	-prob-orange: #B77300;
+	-prob-aqua: #037875;
+	-almostwhite: #fafafa;
+}
+
+/************************************************************************************
+ * Accordion																		*
+ ************************************************************************************/
+.accordion {
+	-fx-background-color: -prob-grey;
+	-fx-padding: 1em 0 0 0;
+	-fx-border-width: 0.0;
 }
 
 /************************************************************************************
@@ -228,23 +242,36 @@
 }
 /* horizontal the two nodes are placed to the left/right of each other. */
 .split-pane:horizontal > .split-pane-divider {
-   -fx-background-color: -fx-box-border, #555555;
+   -fx-background-color: -prob-grey;
 }
 /* vertical the two nodes are placed on top of each other. */
 .split-pane:vertical > .split-pane-divider {
-   -fx-background-color: -fx-box-border, #555555;
+   -fx-background-color: -prob-grey;
 }
 
 /************************************************************************************
  * Titled Pane																		*
  ************************************************************************************/
+.titled-pane {
+    -fx-text-fill: -almostwhite;
+}
 .titled-pane > .title {
-    -fx-background-color: #bbbbbb;
+    -fx-background-color: -prob-grey;
+    -fx-padding: 1em;
+}
+.titled-pane > .title:hover {
+    -fx-background-color: -prob-orange;
 }
 .titled-pane > .title > .arrow-button > .arrow {
-    -fx-background-color: #555555;
+    -fx-background-color: -almostwhite;
     -fx-background-insets: 1.0 0.0 -1.0 0.0, 0.0;
     -fx-padding: 0.25em 0.3125em 0.25em 0.3125em; 
+}
+.titled-pane > *.content {
+    -fx-border-color: -prob-grey;
+}
+.titled-pane:focused > .title > .arrow-button > .arrow {
+    -fx-effect: none;
 }
 
 /************************************************************************************
@@ -254,13 +281,16 @@
     -fx-table-cell-border-color: transparent;
     -fx-accent: transparent;
 }
+.tree-table-view {
+	-fx-border-width: 0;
+}
 .table-view .column-header,
 .tree-table-view .column-header,
 .table-view .filler,
 .tree-table-view .filler {
-	-fx-background-color: #fafafa;
-	-fx-border-color: transparent transparent #444444 #444444;
-	-fx-border-width: 0.0 0.0 2.0 0.0;
+	-fx-background-color: transparent;
+	/*-fx-border-color: transparent transparent #444444 #444444;
+	-fx-border-width: 0.0 0.0 2.0 0.0;*/
 }
 .with-border .column-header {
 	-fx-border-width: 0.0 0.0 2.0 0.2;
@@ -290,10 +320,14 @@
 }
 .table-view .column-header-background,
 .tree-table-view > .column-header-background {
-    -fx-background-color: #fafafa;
-	-fx-border-color: transparent transparent #444444 transparent;
+    -fx-background-color: white;
+	-fx-border-color: transparent transparent -prob-grey transparent;
 	-fx-border-width: 0.0 0.0 2.0 0.0;
-    -fx-padding: 0 0 -0.2em 0;
+    -fx-padding: 0.4em;
+}
+.tree-table-view .column-header .label,
+.table-view .column-header .label {
+	-fx-text-fill: -prob-grey;
 }
 
 /************************************************************************************
