@@ -64,7 +64,7 @@ public class MenuController extends MenuBar {
 			e.printStackTrace();
 		}
 		Parent root = loader.getRoot();
-		Scene scene = new Scene(root, window.getHeight(), window.getWidth());
+		Scene scene = new Scene(root, window.getWidth(), window.getHeight());
 		((Stage) window).setScene(scene);
 	}
 
