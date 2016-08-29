@@ -55,18 +55,17 @@ public class MenuController extends MenuBar {
 
 	@FXML
 	private void handleLoadDefault() {
-		Window stage = this.getScene().getWindow();
+		FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
+		loader.setLocation(getClass().getResource("../main.fxml"));
 		try {
-			FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
-			loader.setLocation(getClass().getResource("../main.fxml"));
 			loader.load();
-			Parent root = loader.getRoot();
-			Scene scene = new Scene(root, stage.getHeight(), stage.getWidth());
-			((Stage) window).setScene(scene);
 		} catch (IOException e) {
 			System.err.println("Failed to load FXML-File!");
 			e.printStackTrace();
 		}
+		Parent root = loader.getRoot();
+		Scene scene = new Scene(root, window.getHeight(), window.getWidth());
+		((Stage) window).setScene(scene);
 	}
 
 	@FXML
