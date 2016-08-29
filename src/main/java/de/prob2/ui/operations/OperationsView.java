@@ -25,22 +25,53 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 
 @Singleton
 public class OperationsView extends AnchorPane {
+	private static final class OperationsCell extends ListCell<Operation> {
+		private static final FontAwesomeIconView iconEnabled;
+		private static final FontAwesomeIconView iconNotEnabled;
+		
+		static {
+			iconEnabled = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
+			iconEnabled.setFill(Color.LIMEGREEN);
+			
+			iconNotEnabled = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
+			iconNotEnabled.setFill(Color.RED);
+		}
+		
+		@Override
+		protected void updateItem(Operation item, boolean empty) {
+			super.updateItem(item, empty);
+			if (item != null && !empty) {
+				setText(item.toString());
+				if (item.isEnabled()) {
+					setGraphic(iconEnabled);
+					setDisable(false);
+				} else {
+					setGraphic(iconNotEnabled);
+					setDisable(true);
+				}
+			} else {
+				setGraphic(null);
+				setText(null);
+			}
+		}
+	}
+	
 	@FXML
 	private ListView<Operation> opsListView;
 	@FXML
@@ -67,12 +98,12 @@ public class OperationsView extends AnchorPane {
 	private CustomMenuItem someRandomEvents;
 
 	private AbstractModel currentModel;
-	private List<String> opNames = new ArrayList<String>();;
-	private Map<String, List<String>> opToParams = new HashMap<String, List<String>>();
-	private List<Operation> events = new ArrayList<Operation>();
+	private List<String> opNames = new ArrayList<>();
+	private Map<String, List<String>> opToParams = new HashMap<>();
+	private List<Operation> events = new ArrayList<>();
 	private boolean showNotEnabled = true;
 	private String filter = "";
-	Comparator<Operation> sorter = new ModelOrder(new ArrayList<String>());
+	Comparator<Operation> sorter = new ModelOrder(new ArrayList<>());
 	private final CurrentTrace currentTrace;
 
 	@Inject
@@ -92,16 +123,12 @@ public class OperationsView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		opsListView.setCellFactory(new TransitionTransformer());
+		opsListView.setCellFactory(lv -> new OperationsCell());
 
-		opsListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Operation>() {
-			@Override
-			public void changed(ObservableValue<? extends Operation> observable, Operation oldValue,
-					Operation newValue) {
-				if (newValue != null && newValue.isEnabled()) {
-					currentTrace.set(currentTrace.get().add(newValue.id));
-					System.out.println("Selected item: " + newValue);
-				}
+		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null && newValue.isEnabled()) {
+				currentTrace.set(currentTrace.get().add(newValue.id));
+				System.out.println("Selected item: " + newValue);
 			}
 		});
 		
@@ -116,7 +143,7 @@ public class OperationsView extends AnchorPane {
 	private void update(Trace trace) {
 		if (trace == null) {
 			currentModel = null;
-			opNames = new ArrayList<String>();
+			opNames = new ArrayList<>();
 			if (sorter instanceof ModelOrder) {
 				sorter = new ModelOrder(opNames);
 			}
@@ -130,9 +157,9 @@ public class OperationsView extends AnchorPane {
 		if (trace.getModel() != currentModel) {
 			updateModel(trace);
 		}
-		events = new ArrayList<Operation>();
+		events = new ArrayList<>();
 		Set<Transition> operations = trace.getNextTransitions(true);
-		Set<String> notEnabled = new HashSet<String>(opNames);
+		Set<String> notEnabled = new HashSet<>(opNames);
 		Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		for (Transition transition : operations) {
 			String id = transition.getId();
@@ -201,7 +228,7 @@ public class OperationsView extends AnchorPane {
 	}
 
 	private List<Operation> applyFilter(final String filter) {
-		List<Operation> newOps = new ArrayList<Operation>();
+		List<Operation> newOps = new ArrayList<>();
 		for (Operation op : events) {
 			if (op.name.startsWith(filter)) {
 				newOps.add(op);
@@ -269,14 +296,14 @@ public class OperationsView extends AnchorPane {
 	private void updateModel(final Trace trace) {
 		currentModel = trace.getModel();
 		AbstractElement mainComponent = trace.getStateSpace().getMainComponent();
-		opNames = new ArrayList<String>();
-		opToParams = new HashMap<String, List<String>>();
+		opNames = new ArrayList<>();
+		opToParams = new HashMap<>();
 		if (mainComponent instanceof Machine) {
 			ModelElementList<BEvent> events = mainComponent.getChildrenOfType(BEvent.class);
 			for (BEvent e : events) {
 				opNames.add(e.getName());
 
-				List<String> paramList = new ArrayList<String>();
+				List<String> paramList = new ArrayList<>();
 				if (e instanceof Event) {
 					for (EventParameter eParam : ((Event) e).getParameters()) {
 						paramList.add(eParam.getName());
@@ -302,7 +329,7 @@ public class OperationsView extends AnchorPane {
 		return name;
 	}
 
-	private class EventComparator {
+	private abstract static class EventComparator implements Comparator<Operation> {
 
 		private String stripString(final String param) {
 			return param.replaceAll("\\{", "").replaceAll("\\}", "");
@@ -321,7 +348,7 @@ public class OperationsView extends AnchorPane {
 		}
 	}
 
-	private class ModelOrder extends EventComparator implements Comparator<Operation> {
+	private static final class ModelOrder extends EventComparator {
 
 		private final List<String> ops;
 
@@ -338,7 +365,7 @@ public class OperationsView extends AnchorPane {
 		}
 	}
 
-	private class AtoZ extends EventComparator implements Comparator<Operation> {
+	private static final class AtoZ extends EventComparator {
 
 		@Override
 		public int compare(final Operation o1, final Operation o2) {
@@ -350,14 +377,14 @@ public class OperationsView extends AnchorPane {
 
 	}
 
-	private class ZtoA extends EventComparator implements Comparator<Operation> {
+	private static final class ZtoA extends EventComparator {
 
 		@Override
 		public int compare(final Operation o1, final Operation o2) {
 			if (o1.name.compareTo(o2.name) == 0) {
 				return compareParams(o1.params, o2.params);
 			}
-			return -1 * o1.name.compareTo(o2.name);
+			return -o1.name.compareTo(o2.name);
 		}
 
 	}

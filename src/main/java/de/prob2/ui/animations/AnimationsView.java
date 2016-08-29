@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.AnimationSelector;
@@ -15,8 +14,6 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ContextMenu;
@@ -26,9 +23,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.util.Callback;
 
 @Singleton
 public class AnimationsView extends AnchorPane implements IAnimationChangeListener {
@@ -64,44 +59,35 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 		machine.setCellValueFactory(new PropertyValueFactory<>("modelName"));
 		lastop.setCellValueFactory(new PropertyValueFactory<>("lastOperation"));
 		tracelength.setCellValueFactory(new PropertyValueFactory<>("steps"));
-		animationsTable.setRowFactory(new Callback<TableView<Animation>, TableRow<Animation>>() {
-			@Override
-			public TableRow<Animation> call(TableView<Animation> tableView) {
-				final TableRow<Animation> row = new TableRow<>();
-				final ContextMenu contextMenu = new ContextMenu();
-				final MenuItem removeMenuItem = new MenuItem("Remove Trace");
-				removeMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-					@Override
-					public void handle(ActionEvent event) {
-						Animation a = row.getItem();
-						animations.removeTrace(a.getTrace());
-						animationsTable.getItems().remove(a);
-					}
-				});
-				contextMenu.getItems().add(removeMenuItem);
-				row.setOnMouseClicked(new EventHandler<MouseEvent>() {
-					@Override
-					public void handle(MouseEvent event) {
-						if (event.getButton().equals(MouseButton.PRIMARY)) {
-							currentIndex = row.getIndex();
-							Trace trace = row.getItem().getTrace();
-							animations.changeCurrentAnimation(trace);
-						}
-						if (event.getButton().equals(MouseButton.SECONDARY) && !row.isEmpty()) {
-							contextMenu.show(row, event.getScreenX(), event.getScreenY());
-						}
-						
-					}
-				});
-				return row;
-			}
+		animationsTable.setRowFactory(tableView -> {
+			final TableRow<Animation> row = new TableRow<>();
+			final ContextMenu contextMenu = new ContextMenu();
+			final MenuItem removeMenuItem = new MenuItem("Remove Trace");
+			removeMenuItem.setOnAction(event -> {
+				Animation a = row.getItem();
+				animations.removeTrace(a.getTrace());
+				animationsTable.getItems().remove(a);
+			});
+			contextMenu.getItems().add(removeMenuItem);
+			row.setOnMouseClicked(event -> {
+				if (event.getButton().equals(MouseButton.PRIMARY)) {
+					currentIndex = row.getIndex();
+					Trace trace = row.getItem().getTrace();
+					animations.changeCurrentAnimation(trace);
+				}
+				if (event.getButton().equals(MouseButton.SECONDARY) && !row.isEmpty()) {
+					contextMenu.show(row, event.getScreenX(), event.getScreenY());
+				}
+				
+			});
+			return row;
 		});
 	}
 
 	@Override
 	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
 		List<Trace> traces = animations.getTraces();
-		List<Animation> animList = new ArrayList<Animation>();
+		List<Animation> animList = new ArrayList<>();
 		for (Trace t : traces) {
 			AbstractModel model = t.getModel();
 			AbstractElement mainComponent = t.getStateSpace().getMainComponent();

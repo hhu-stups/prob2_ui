@@ -16,17 +16,14 @@ public class ProB2 extends Application {
 	public static Injector injector;
 
 	public static void main(String... args) {
-
 		Platform.setImplicitExit(true);
 		launch(args);
 	}
 
 	@Override
 	public void start(Stage stage) throws Exception {
-
 		ProB2Module module = new ProB2Module();
-		this.injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
-		// menuBar = injector.getInstance(MenuBar.class);
+		ProB2.injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(getClass().getResource("main.fxml"));
@@ -45,31 +42,6 @@ public class ProB2 extends Application {
 			System.exit(0);
 		});
 
-		// configureMenus();
-		// addMenus();
-
 		stage.show();
 	}
-
-	// private void addMenus() {
-	// Collection<Menu> values = menus.values();
-	// menuBar.getMenus().addAll(values);
-	// }
-	//
-	// private void configureMenus() {
-	// createFileMenu();
-	// createMenu("Edit");
-	// createMenu("Help");
-	// }
-	//
-	// private void createFileMenu() {
-	// Menu file = new Menu("File");
-	// file.getItems().add(new MenuItem("Exit"));
-	// menus.put("File", file);
-	// }
-	//
-	// private void createMenu(String string) {
-	// menus.put(string, new Menu(string));
-	// }
-
 }

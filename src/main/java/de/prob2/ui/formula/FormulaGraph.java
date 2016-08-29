@@ -12,9 +12,9 @@ public class FormulaGraph extends Region {
 	private FormulaNode root;
 	
 	public FormulaGraph(FormulaNode node) {
-		 root = node;
-		 root.setPosition(25, calculateY()+20);
-		 draw(root, 0);
+		root = node;
+		root.setPosition(25, calculateY()+20);
+		draw(root, 0);
 	}
 			
 	private double calculateY() {
@@ -43,7 +43,7 @@ public class FormulaGraph extends Region {
 				Line edge2 = new Line(current.getRight() + 25, children.getY(), children.getLeft(), children.getY());
 				this.getChildren().add(edge1);
 				this.getChildren().add(edge2);
-				draw(children, level + 1);				
+				draw(children, level + 1);
 			}
 		}
 	}
@@ -79,14 +79,14 @@ public class FormulaGraph extends Region {
 		List<FormulaNode> nodesOnLevel = getAllNodesOnLevel(level);
 		int max = 0;
 		
-		for(int i = 0; i < nodesOnLevel.size(); i++) {
-			max = Math.max(max, nodesOnLevel.get(i).next.size());
+		for (FormulaNode aNodesOnLevel : nodesOnLevel) {
+			max = Math.max(max, aNodesOnLevel.next.size());
 		}
 		return max;
 	}
 	
 	private List<FormulaNode> getAllNodesOnLevel (int level) {
-		List<FormulaNode> result = new ArrayList<FormulaNode>();
+		List<FormulaNode> result = new ArrayList<>();
 		if(level == 0) {
 			result.add(root);
 			return result;

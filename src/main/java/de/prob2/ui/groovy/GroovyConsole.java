@@ -25,7 +25,7 @@ public class GroovyConsole extends TextArea {
 	public GroovyConsole() {
 		super();
 		this.setContextMenu(new ContextMenu());
-		this.instructions = new ArrayList<Instruction>();
+		this.instructions = new ArrayList<>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		setListeners();
 	}
@@ -45,7 +45,7 @@ public class GroovyConsole extends TextArea {
 		super.paste();
 		int diff = this.getLength() - oldText.length();
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
-		if(currentLine.indexOf("\n") != -1) {
+		if(currentLine.contains("\n")) {
 			currentLine ="";
 			this.setText(oldText);
 			goToLastPos();
