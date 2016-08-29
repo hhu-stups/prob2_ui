@@ -186,7 +186,7 @@ public class StatesView extends AnchorPane {
 	}
 	
 	public void showExpression(AbstractFormulaElement formula) {
-		formulaGenerator.setFormula(formula.getFormula());
+		formulaGenerator.showFormula(formula.getFormula());
 	}
 
 	@FXML

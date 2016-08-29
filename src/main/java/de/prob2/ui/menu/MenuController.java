@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
@@ -21,6 +20,7 @@ import de.prob2.ui.groovy.GroovyConsoleStage;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modelchecking.ModelcheckingStage;
 import de.prob2.ui.preferences.PreferencesStage;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.BlacklistStage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -42,6 +42,7 @@ import javafx.stage.Window;
 public class MenuController extends MenuBar {
 	private final Api api;
 	private final AnimationSelector animationSelector;
+	private final CurrentTrace currentTrace;
 	private final BlacklistStage blacklistStage;
 	private final PreferencesStage preferencesStage;
 	private final ModelcheckingController modelcheckingController;
@@ -50,6 +51,8 @@ public class MenuController extends MenuBar {
 	private final GroovyConsoleStage groovyConsoleStage;
 	private Window window;
 	private DottyStage dottyStage;
+	
+	@FXML private MenuItem enterFormulaForVisualization;
 
 	@FXML
 	private void handleLoadDefault() {
@@ -146,12 +149,12 @@ public class MenuController extends MenuBar {
 	private void handleFormulaInput(ActionEvent event) {
 		TextInputDialog dialog = new TextInputDialog();
 		dialog.setTitle("Enter Formula for Visualization");
-		dialog.setHeaderText("Enter Formula for Vistualization");
+		dialog.setHeaderText("Enter Formula for Visualization");
 		dialog.setContentText("Enter Formula: ");
 		dialog.getDialogPane().getStylesheets().add("prob.css");
 		Optional<String> result = dialog.showAndWait();
 		if (result.isPresent()) {
-			formulaGenerator.setFormula(formulaGenerator.parse(result.get()));
+			formulaGenerator.parseAndShowFormula(result.get());
 		}
 	}
 
@@ -183,16 +186,19 @@ public class MenuController extends MenuBar {
 				});
 			}
 		});
+		
+		this.enterFormulaForVisualization.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 
 	@Inject
 
-	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector,
+	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector, final CurrentTrace currentTrace,
 			final BlacklistStage blacklistStage, final PreferencesStage preferencesStage,
 			final ModelcheckingStage modelcheckingStage, final ModelcheckingController modelcheckingController,
 			final FormulaGenerator formulaGenerator, final DottyStage dottyStage, final GroovyConsoleStage groovyConsoleStage) {
 		this.api = api;
 		this.animationSelector = animationSelector;
+		this.currentTrace = currentTrace;
 		this.blacklistStage = blacklistStage;
 		this.preferencesStage = preferencesStage;
 		this.formulaGenerator = formulaGenerator;

@@ -16,8 +16,7 @@
 		<MenuItem text="%menu.edit.items.preferences" onAction="#handlePreferences" />
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.formula">
-		<MenuItem text="%menu.formula.items.enterFormulaForVisualization"
-			onAction="#handleFormulaInput" />
+		<MenuItem fx:id="enterFormulaForVisualization" text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.dotty">
 		<MenuItem text="%menu.dotty.items.showHistoryAsGraph"
