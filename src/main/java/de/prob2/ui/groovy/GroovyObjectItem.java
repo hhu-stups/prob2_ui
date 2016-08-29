@@ -1,6 +1,12 @@
 package de.prob2.ui.groovy;
 
+import java.io.IOException;
+
 import javafx.beans.property.SimpleStringProperty;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 
 public class GroovyObjectItem {
 	
@@ -28,6 +34,21 @@ public class GroovyObjectItem {
 	
 	public void setClass(String clazzname) {
 		this.clazzname.set(clazzname);
+	}
+	
+	public void show() {
+		Stage stage = new Stage();
+		stage.setTitle(clazz.toString());
+		AnchorPane root = null;
+		try {
+			root = FXMLLoader.load(getClass().getResource("groovy_class_view.fxml"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Scene scene = new Scene(root, 800, 600);
+		stage.setScene(scene);
+		stage.show();
 	}
 
 }

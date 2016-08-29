@@ -11,12 +11,21 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 public class GroovyObjectStage extends Stage {
+	
+	/*private static class GroovyObjectCell extends TableCell<GroovyObjectItem, String> {
+		
+		protected void updateItem() {
+			
+		}
+		
+	}*/
 	
 	@FXML
 	TableView<GroovyObjectItem> tv_objects;
@@ -59,6 +68,14 @@ public class GroovyObjectStage extends Stage {
 		objects.setCellValueFactory(new PropertyValueFactory<>("name"));
 		classes.setCellValueFactory(new PropertyValueFactory<>("clazzname"));
 		tv_objects.setItems(values);
+		
+		tv_objects.setOnMouseClicked(e-> {
+			int currentPos = tv_objects.getSelectionModel().getSelectedIndex();
+			if(currentPos >= 0) {
+				values.get(currentPos).show();
+			}
+			tv_objects.getSelectionModel().clearSelection();
+		});
 	}
 	
 }
