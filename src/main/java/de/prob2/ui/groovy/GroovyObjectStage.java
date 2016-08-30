@@ -11,7 +11,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -30,10 +29,11 @@ public class GroovyObjectStage extends Stage {
 	
 	private ObservableList<GroovyObjectItem> values = FXCollections.observableArrayList();
 	
-	private GroovyClassView classview;
+	private FXMLLoader loader;
 	
 	@Inject
-	private GroovyObjectStage(FXMLLoader loader, GroovyClassView classview) {
+	private GroovyObjectStage(FXMLLoader loader) {
+		this.loader = loader;
 		try {
 			loader.setLocation(getClass().getResource("groovy_object_stage.fxml"));
 			loader.setRoot(this);
@@ -42,7 +42,6 @@ public class GroovyObjectStage extends Stage {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		this.classview = classview;
 	}
 	
 	public void showObjects(ScriptEngine engine) {
@@ -51,7 +50,7 @@ public class GroovyObjectStage extends Stage {
 		int i = 0;
 		for(String s : binding.keySet()) {
 			Class <? extends Object> clazz = binding.values().toArray()[i].getClass();
-			values.add(new GroovyObjectItem(s,clazz, classview));
+			values.add(new GroovyObjectItem(s,clazz, new GroovyClassView(loader)));
 			i++;
 		}
 		tv_objects.refresh();

@@ -14,8 +14,9 @@ public class GroovyObjectItem {
 	public GroovyObjectItem(String name, Class<? extends Object> clazz, GroovyClassView classview) {
 		this.name = new SimpleStringProperty(name);
 		this.clazz = clazz;
-		this.clazzname = new SimpleStringProperty(clazz.getName());
+		this.clazzname = new SimpleStringProperty(clazz.getSimpleName());
 		this.classview = classview;
+		classview.setClass(clazz);
 	}
 	
 	public String getName() {
@@ -36,8 +37,9 @@ public class GroovyObjectItem {
 	
 	public void show() {
 		Stage stage = new Stage();
-		stage.setTitle(clazz.toString());
+		stage.setTitle(clazz.getSimpleName());
 		Scene scene = new Scene(classview, 800, 600);
+		classview.showMethods();
 		stage.setScene(scene);
 		stage.show();
 	}
