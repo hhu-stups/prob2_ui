@@ -45,29 +45,22 @@ public class OperationsView extends AnchorPane {
 	}
 	
 	private static final class OperationsCell extends ListCell<Operation> {
-		private static final FontAwesomeIconView iconEnabled;
-		private static final FontAwesomeIconView iconNotEnabled;
-		
-		static {
-			iconEnabled = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
-			iconEnabled.setFill(Color.LIMEGREEN);
-			
-			iconNotEnabled = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
-			iconNotEnabled.setFill(Color.RED);
-		}
-		
 		@Override
 		protected void updateItem(Operation item, boolean empty) {
 			super.updateItem(item, empty);
 			if (item != null && !empty) {
 				setText(item.toString());
+				final FontAwesomeIconView icon;
 				if (item.isEnabled()) {
-					setGraphic(iconEnabled);
+					icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
+					icon.setFill(Color.LIMEGREEN);
 					setDisable(false);
 				} else {
-					setGraphic(iconNotEnabled);
+					icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
+					icon.setFill(Color.RED);
 					setDisable(true);
 				}
+				setGraphic(icon);
 			} else {
 				setGraphic(null);
 				setText(null);
