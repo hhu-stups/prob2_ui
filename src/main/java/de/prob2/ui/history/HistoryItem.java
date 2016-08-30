@@ -6,20 +6,13 @@ public class HistoryItem {
 
 	public final HistoryStatus status;
 	public final Transition transition;
-	public final boolean root;
 	
 	public HistoryItem(HistoryStatus status) {
-		this.status = status;
-		this.transition = null;
-		this.root = true;
+		this(null, status);
 	}
 
 	public HistoryItem(Transition transition, HistoryStatus status) {
 		this.transition = transition;
 		this.status = status;
-		this.root = false;
 	}
-
-
-	
 }
