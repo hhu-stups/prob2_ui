@@ -34,7 +34,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -65,7 +64,7 @@ public class MenuController extends MenuBar {
 			e.printStackTrace();
 		}
 		Parent root = loader.getRoot();
-		Scene scene = new Scene(root, window.getHeight(), window.getWidth());
+		Scene scene = new Scene(root, window.getWidth(), window.getHeight());
 		((Stage) window).setScene(scene);
 	}
 
@@ -119,10 +118,6 @@ public class MenuController extends MenuBar {
 				return;
 			}
 
-			final Trace currentTrace = this.animationSelector.getCurrentTrace();
-//			if (currentTrace != null) {
-//				this.animationSelector.removeTrace(currentTrace);
-//			}
 			this.animationSelector.addNewAnimation(new Trace(newSpace));
 			modelcheckingController.resetView();
 			break;
