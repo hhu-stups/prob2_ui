@@ -10,9 +10,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 
-public class GroovyClassView extends AnchorPane {
+public class GroovyClassStage extends Stage {
 	
 	private Class <? extends Object> clazz;
 	
@@ -70,8 +70,8 @@ public class GroovyClassView extends AnchorPane {
 	
 	private ObservableList<GroovyClassItem> attributes = FXCollections.observableArrayList();
 	
-	public GroovyClassView(FXMLLoader loader) {
-		loader.setLocation(getClass().getResource("groovy_class_view.fxml"));
+	public GroovyClassStage(FXMLLoader loader) {
+		loader.setLocation(getClass().getResource("groovy_class_stage.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
 		try {

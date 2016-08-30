@@ -61,13 +61,13 @@ public class GroovyObjectStage extends Stage {
 		int i = 0;
 		for(String s : bindingGlobal.keySet()) {
 			Class <? extends Object> clazz = bindingGlobal.values().toArray()[i].getClass();
-			values.add(new GroovyObjectItem(s,clazz, new GroovyClassView(loader)));
+			values.add(new GroovyObjectItem(s,clazz, new GroovyClassStage(loader)));
 			i++;
 		}
 		i = 0;
 		for(String s : bindingEngine.keySet()) {
 			Class <? extends Object> clazz = bindingEngine.values().toArray()[i].getClass();
-			values.add(new GroovyObjectItem(s,clazz, new GroovyClassView(loader)));
+			values.add(new GroovyObjectItem(s,clazz, new GroovyClassStage(loader)));
 			i++;
 		}
 		tv_objects.refresh();
