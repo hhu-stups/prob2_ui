@@ -1,5 +1,6 @@
 package de.prob2.ui.groovy;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -13,6 +14,7 @@ public class GroovyClassItem {
 	private final SimpleStringProperty modifier;
 	private final SimpleStringProperty declarer;
 	private final SimpleStringProperty exception;
+	private SimpleStringProperty value;
 	
 
 	public GroovyClassItem(Method m) {
@@ -32,6 +34,24 @@ public class GroovyClassItem {
 		}
 		exception = exception.substring(0,Math.max(0,exception.length()-2));
 		this.exception = new SimpleStringProperty(exception);
+		this.value = new SimpleStringProperty();
+	}
+	
+	public GroovyClassItem(Field f) {
+		this.name = new SimpleStringProperty(f.getName());
+		this.params = new SimpleStringProperty();
+		this.type = new SimpleStringProperty(f.getType().getSimpleName());
+		this.modifier = new SimpleStringProperty(Modifier.toString(f.getModifiers()));
+		this.declarer = new SimpleStringProperty(f.getDeclaringClass().getSimpleName());
+		this.exception = new SimpleStringProperty();
+		this.value = null;
+		try {
+			this.value = new SimpleStringProperty(f.get(null).toString());
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public String getName() {
@@ -80,6 +100,14 @@ public class GroovyClassItem {
 	
 	public void setException(String exception) {
 		this.exception.set(exception);
+	}
+	
+	public String getValue() {
+		return value.get();
+	}
+	
+	public void setValue(String value) {
+		this.value.set(value);
 	}
 	
 }

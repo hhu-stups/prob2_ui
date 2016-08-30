@@ -6,7 +6,6 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import com.google.inject.Inject;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -42,6 +41,17 @@ public class GroovyObjectStage extends Stage {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		this.setOnCloseRequest(e-> {
+			close();
+		});
+	}
+	
+	@Override
+	public void close() {
+		for(GroovyObjectItem item : values) {
+			item.close();
+		}
+		super.close();
 	}
 	
 	public void showObjects(ScriptEngine engine) {

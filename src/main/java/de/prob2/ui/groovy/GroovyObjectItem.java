@@ -10,6 +10,7 @@ public class GroovyObjectItem {
 	private final Class<? extends Object> clazz;
 	private final SimpleStringProperty clazzname;
 	private GroovyClassView classview;
+	private Stage stage;
 	
 	public GroovyObjectItem(String name, Class<? extends Object> clazz, GroovyClassView classview) {
 		this.name = new SimpleStringProperty(name);
@@ -17,6 +18,8 @@ public class GroovyObjectItem {
 		this.clazzname = new SimpleStringProperty(clazz.getSimpleName());
 		this.classview = classview;
 		classview.setClass(clazz);
+		stage = new Stage();
+		
 	}
 	
 	public String getName() {
@@ -36,12 +39,19 @@ public class GroovyObjectItem {
 	}
 	
 	public void show() {
-		Stage stage = new Stage();
+		if(!classview.getStyleClass().isEmpty()) {
+			stage.toFront();
+			return;
+		}
 		stage.setTitle(clazz.getSimpleName());
 		Scene scene = new Scene(classview, 800, 600);
-		classview.showMethods();
+		classview.showMethodsAndFields();
 		stage.setScene(scene);
 		stage.show();
+	}
+	
+	public void close() {
+		stage.close();
 	}
 
 }
