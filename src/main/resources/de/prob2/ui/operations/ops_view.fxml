@@ -15,9 +15,9 @@
 <fx:root minHeight="200.0" minWidth="200.0" type="AnchorPane"
 	xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
 	<children>
-		<VBox prefHeight="200.0" prefWidth="100.0"
-			AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="2.0"
-			AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="2.0">
+		<VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0"
+			AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="5.0"
+			AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
 			<children>
 				<AnchorPane prefHeight="35.0" prefWidth="246.0">
 					<children>
@@ -26,7 +26,7 @@
 							maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
 							mnemonicParsing="false" onAction="#handleSearchButton"
 							prefHeight="26.0" prefWidth="26.0" stylesheets="@../../../../prob.css"
-							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.0"
+							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0"
 							AnchorPane.topAnchor="2.0">
 							<graphic>
 								<FontAwesomeIconView fill="#e5e5e5"
@@ -35,7 +35,7 @@
 						</Button>
 						<TextField fx:id="filterEvents" onAction="#handleSearchButton"
 							promptText="Filter Events" AnchorPane.bottomAnchor="0.0"
-							AnchorPane.leftAnchor="32.0" AnchorPane.rightAnchor="0.0"
+							AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="0.0"
 							AnchorPane.topAnchor="2.0" />
 					</children>
 				</AnchorPane>
@@ -59,7 +59,7 @@
 							maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
 							minWidth="-Infinity" mnemonicParsing="false" onAction="#handleForwardButton"
 							prefHeight="26.0" prefWidth="26.0" stylesheets="@../../../../prob.css"
-							AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="31.0"
+							AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="40.0"
 							AnchorPane.topAnchor="2.0">
 							<graphic>
 								<FontAwesomeIconView StyleClass="icon-dark"
@@ -73,7 +73,7 @@
 							maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
 							minWidth="-Infinity" mnemonicParsing="false" onAction="#handleSortButton"
 							prefHeight="26.0" prefWidth="26.0" stylesheets="@../../../../prob.css"
-							AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="71.0"
+							AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="80.0"
 							AnchorPane.topAnchor="2.0">
 							<graphic>
 								<FontAwesomeIconView StyleClass="icon-dark"
@@ -88,7 +88,7 @@
 							minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
 							onAction="#handleDisabledOpsToggle" prefHeight="26.0" prefWidth="26.0"
 							stylesheets="@../../../../prob.css" AnchorPane.bottomAnchor="2.0"
-							AnchorPane.rightAnchor="45.0" AnchorPane.topAnchor="2.0">
+							AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="2.0">
 							<graphic>
 								<FontAwesomeIconView StyleClass="icon-dark"
 									glyphName="EYE" size="15" />

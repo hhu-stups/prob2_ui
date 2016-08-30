@@ -1,10 +1,14 @@
 .root {
-	-fx-base: #f5f5f5;
+	-fx-base: white;
 	-prob-blue: #08396B;
 	-prob-grey: #555560;
+	-prob-grey-20: #55556033;
+	-prob-grey-66: #555560aa;
 	-prob-orange: #B77300;
 	-prob-aqua: #037875;
-	-almostwhite: #fafafa;
+	-almostwhite: #efefef;
+	-fx-focus-color: -prob-aqua;
+	-fx-accent: -prob-aqua;
 }
 
 /************************************************************************************
@@ -27,17 +31,19 @@
     -fx-opacity: 0.8;
 }
 .button-dark {
-	-fx-background-color: #444444;
+	-fx-background-color: -prob-grey;
 	-fx-background-radius: 100.0%;
+	-fx-opacity: 1.0;
+}
+.button-dark:hover {
 	-fx-opacity: 0.8;
 }
-
 .icon-dark {
-	-fx-fill: #444444;
+	-fx-fill: -prob-grey;
 	-fx-opacity: 0.8;
 }
 
-.button-dark:hover, .icon-dark:hover, .menu-button:hover > .arrow-button > .arrow, 
+.icon-dark:hover, .menu-button:hover > .arrow-button > .arrow, 
 .menu-button:hover .icon-dark  {
 	-fx-opacity: 1.0;
 }
@@ -47,24 +53,24 @@
  ************************************************************************************/
 .check-box {
 	-fx-background-color: transparent;
-	-fx-text-fill: #444444;
+	-fx-text-fill: -prob-grey;
 }
 .check-box > .box {
 	-fx-background-color: transparent;
 	-fx-border-radius: 5.0;
-	-fx-border-color: #444444;
+	-fx-border-color: -prob-grey;
 }
 .check-box > .box > .mark {
 	-fx-background-color: none;
 }
 .check-box:selected > .box > .mark {
-	-fx-background-color: #444444;
+	-fx-background-color: -prob-grey;
 }
 .check-box:hover > .box > .mark {
-	-fx-background-color: #44444433;
+	-fx-background-color: -prob-grey-20;
 }
 .check-box:selected:hover > .box > .mark {
-	-fx-background-color: #444444aa;
+	-fx-background-color: -prob-grey-66;
 }
 
 /************************************************************************************
@@ -72,11 +78,11 @@
  ************************************************************************************/
 .choice-box {
 	-fx-background-color: #dddddd;	
-	-fx-text-fill: #444444;
+	-fx-text-fill: -prob-grey;
 }
 
 .choice-box > .open-button > .arrow {
-	-fx-background-color: #444444;
+	-fx-background-color: -prob-grey;
 }
 
 /************************************************************************************
@@ -84,16 +90,16 @@
  ************************************************************************************/
 .combo-box {
 	-fx-background-color: transparent;	
-	-fx-text-fill: #444444;
+	-fx-text-fill: -prob-grey;
 	-fx-border-radius: 5.0;
-	-fx-border-color: #444444;
+	-fx-border-color: -prob-grey;
 }
 .combo-box:hover {
-	-fx-background-color: #44444411;	
+	-fx-background-color: -prob-grey-20;	
 	-fx-background-radius: 5.0;
 }
 .combo-box-popup > .list-view {
-    -fx-background-color: #444444aa;
+    -fx-background-color: -prob-grey-66;
  	-fx-background-radius: 3.0 3.0 3.0 3.0;
     -fx-background-insets: 0.0, 1.0;
     -fx-effect: dropshadow( gaussian , rgba(0.0,0.0,0.0,0.2) , 12.0, 0.0 , 0.0 , 8.0 );
@@ -117,10 +123,10 @@
  ************************************************************************************/
 .dialog-pane .button {
     -fx-background-color: transparent;
-    -fx-border-color: #444444;
+    -fx-border-color: -prob-grey;
     -fx-border-radius: 6.0;
     -fx-background-insets: 0.0,1.0,2.0;
-    -fx-text-fill: #444444;
+    -fx-text-fill: -prob-grey;
     -fx-font-weight: bold;
 }
 .dialog-pane .button:hover {
@@ -144,7 +150,7 @@
  * Menu, ContextMenu, MenuBar														*
  ************************************************************************************/
 .context-menu {
- 	-fx-background-color: #444444aa;
+ 	-fx-background-color: -prob-grey-20;
  	-fx-background-radius: 3.0 3.0 3.0 3.0;
  	-fx-background-insets: 0.0, 1.0;
     -fx-padding: 0.333333em 0.083333em 0.333333em 0.083333em; /* 4 1 8 1 */
@@ -231,7 +237,7 @@
 }
 .spinner .increment-arrow-button .increment-arrow,
 .spinner .decrement-arrow-button .decrement-arrow {
-    -fx-background-color: #444444;
+    -fx-background-color: -prob-grey;
 }
 
 /************************************************************************************
@@ -242,7 +248,7 @@
 }
 /* horizontal the two nodes are placed to the left/right of each other. */
 .split-pane:horizontal > .split-pane-divider {
-   -fx-background-color: -prob-grey;
+   -fx-background-color: -prob-aqua;
 }
 /* vertical the two nodes are placed on top of each other. */
 .split-pane:vertical > .split-pane-divider {
@@ -260,7 +266,7 @@
     -fx-padding: 1em;
 }
 .titled-pane > .title:hover {
-    -fx-background-color: -prob-orange;
+    -fx-background-color: -prob-aqua;
 }
 .titled-pane > .title > .arrow-button > .arrow {
     -fx-background-color: -almostwhite;
@@ -346,15 +352,15 @@
 	-fx-background-color: #adadad;
 }
 .dark > .label {
-	-fx-text-fill: #444444;
+	-fx-text-fill: -prob-grey;
 	-fx-font-weight: bold;
 }
 .dark .button {
     -fx-background-color: transparent;
-    -fx-border-color: #444444;
+    -fx-border-color: -prob-grey;
     -fx-border-radius: 6.0;
     -fx-background-insets: 0.0,1.0,2.0;
-    -fx-text-fill: #444444;
+    -fx-text-fill: -prob-grey;
     -fx-font-weight: bold;
 }
 .dark .button:hover {
