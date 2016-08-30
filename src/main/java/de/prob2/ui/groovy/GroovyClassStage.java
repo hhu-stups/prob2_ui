@@ -122,7 +122,11 @@ public class GroovyClassStage extends Stage {
 	
 	private void showClassAttributes() {
 		attributes.clear();
-		attributes.add(new GroovyClassItem("Package", clazz.getPackage().getName()));
+		String packagename = "default";
+		if(clazz.getPackage() != null) {
+			packagename = clazz.getPackage().getName();
+		}
+		attributes.add(new GroovyClassItem("Package", packagename));
 		attributes.add(new GroovyClassItem("Class Name", clazz.getName()));
 		String interfaces = "";
 		String superclasses ="";
@@ -131,9 +135,11 @@ public class GroovyClassStage extends Stage {
 		}
 		interfaces = interfaces.substring(0, Math.max(0,interfaces.length() - 2));
 		attributes.add(new GroovyClassItem("Interfaces", interfaces));
-		do {
-			superclasses += clazz.getSuperclass().getSimpleName() + ", ";
-		} while(!(clazz.getSuperclass() instanceof Object));
+		Class <? extends Object> tmp = clazz;
+		do{
+			superclasses += tmp.getSuperclass().getSimpleName() + ", ";
+			tmp = tmp.getSuperclass();
+		} while(!tmp.getName().equals("java.lang.Object"));
 		superclasses = superclasses.substring(0, Math.max(0,superclasses.length() - 2));
 		attributes.add(new GroovyClassItem("Superclasses", superclasses));
 		attributes.add(new GroovyClassItem("isPrimitive", new Boolean(clazz.isPrimitive()).toString()));
