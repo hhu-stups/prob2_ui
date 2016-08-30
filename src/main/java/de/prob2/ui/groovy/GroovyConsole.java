@@ -143,7 +143,7 @@ public class GroovyConsole extends TextArea {
 				handleEnter(e);
 				return;
 			}
-			
+						
 			if(!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
 				handleInsertChar(e);
 				return;
@@ -152,6 +152,7 @@ public class GroovyConsole extends TextArea {
 			if(handleRest(e)) {
 				return;
 			}
+			
 		});
 	}
 	
@@ -162,12 +163,15 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleInsertChar(KeyEvent e) {
 		if(e.getText().equals("") || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
-			goToLastPos();
+			if(!(e.getCode().equals(KeyCode.UNDEFINED) || e.getCode().equals(KeyCode.ALT_GRAPH))) {
+				goToLastPos();
+			}
 			if(e.getText().equals("")) {
 				e.consume();
 				return;
 			}
 		}
+	
 		if((e.isShortcutDown() || e.isAltDown())) {
 			return;
 		}
