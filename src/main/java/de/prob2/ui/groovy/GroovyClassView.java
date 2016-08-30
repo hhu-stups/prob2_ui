@@ -17,47 +17,58 @@ public class GroovyClassView extends AnchorPane {
 	private Class <? extends Object> clazz;
 	
 	@FXML
-	private TableView<GroovyClassItem> tv_methods;
+	private TableView<GroovyClassPropertyItem> tv_methods;
 	
 	@FXML
-	private TableView<GroovyClassItem> tv_fields;
+	private TableView<GroovyClassPropertyItem> tv_fields;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> fnames;
+	private TableView<GroovyClassItem> tv_class;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> fvalues;
+	private TableColumn<GroovyClassItem, String> cattributes;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> ftypes;
+	private TableColumn<GroovyClassItem, String> cvalues;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> fmodifiers;
+	private TableColumn<GroovyClassPropertyItem, String> fnames;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> fdeclarers;
+	private TableColumn<GroovyClassPropertyItem, String> fvalues;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> mnames;
+	private TableColumn<GroovyClassPropertyItem, String> ftypes;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> mparams;
+	private TableColumn<GroovyClassPropertyItem, String> fmodifiers;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> mtypes;
+	private TableColumn<GroovyClassPropertyItem, String> fdeclarers;
+	
+	@FXML
+	private TableColumn<GroovyClassPropertyItem, String> mnames;
+	
+	@FXML
+	private TableColumn<GroovyClassPropertyItem, String> mparams;
+	
+	@FXML
+	private TableColumn<GroovyClassPropertyItem, String> mtypes;
 		
 	@FXML
-	private TableColumn<GroovyClassItem, String> mmodifiers;
+	private TableColumn<GroovyClassPropertyItem, String> mmodifiers;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> mdeclarers;
+	private TableColumn<GroovyClassPropertyItem, String> mdeclarers;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> mexceptions;
+	private TableColumn<GroovyClassPropertyItem, String> mexceptions;
 	
-	private ObservableList<GroovyClassItem> methods = FXCollections.observableArrayList();
+	private ObservableList<GroovyClassPropertyItem> methods = FXCollections.observableArrayList();
 	
-	private ObservableList<GroovyClassItem> fields = FXCollections.observableArrayList();
+	private ObservableList<GroovyClassPropertyItem> fields = FXCollections.observableArrayList();
+	
+	private ObservableList<GroovyClassItem> attributes = FXCollections.observableArrayList();
 	
 	public GroovyClassView(FXMLLoader loader) {
 		loader.setLocation(getClass().getResource("groovy_class_view.fxml"));
@@ -87,22 +98,47 @@ public class GroovyClassView extends AnchorPane {
 		ftypes.setCellValueFactory(new PropertyValueFactory<>("type"));
 		fmodifiers.setCellValueFactory(new PropertyValueFactory<>("modifier"));
 		fdeclarers.setCellValueFactory(new PropertyValueFactory<>("declarer"));
+		cattributes.setCellValueFactory(new PropertyValueFactory<>("attribute"));
+		cvalues.setCellValueFactory(new PropertyValueFactory<>("value"));
 		
 		tv_methods.setItems(methods);
 		tv_fields.setItems(fields);
+		tv_class.setItems(attributes);
 	}
 	
 	public void showMethodsAndFields() {
 		methods.clear();
 		fields.clear();
 		for(Method m: clazz.getMethods()) {
-			methods.add(new GroovyClassItem(m));
+			methods.add(new GroovyClassPropertyItem(m));
 		}
 		for(Field f : clazz.getFields()) {
-			fields.add(new GroovyClassItem(f));
+			fields.add(new GroovyClassPropertyItem(f));
 		}
+		showClassAttributes();
 		tv_methods.refresh();
 		tv_fields.refresh();
+	}
+	
+	private void showClassAttributes() {
+		attributes.clear();
+		attributes.add(new GroovyClassItem("Package", clazz.getPackage().getName()));
+		attributes.add(new GroovyClassItem("Class Name", clazz.getName()));
+		String interfaces = "";
+		String superclasses ="";
+		for(Class<? extends Object> c : clazz.getInterfaces()) {
+			interfaces += c.getSimpleName() + ", ";
+		}
+		interfaces = interfaces.substring(0, Math.max(0,interfaces.length() - 2));
+		attributes.add(new GroovyClassItem("Interfaces", interfaces));
+		do {
+			superclasses += clazz.getSuperclass().getSimpleName() + ", ";
+		} while(!(clazz.getSuperclass() instanceof Object));
+		superclasses = superclasses.substring(0, Math.max(0,superclasses.length() - 2));
+		attributes.add(new GroovyClassItem("Superclasses", superclasses));
+		attributes.add(new GroovyClassItem("isPrimitive", new Boolean(clazz.isPrimitive()).toString()));
+		attributes.add(new GroovyClassItem("isArray", new Boolean(clazz.isArray()).toString()));
+		tv_class.refresh();
 	}
 
 }
