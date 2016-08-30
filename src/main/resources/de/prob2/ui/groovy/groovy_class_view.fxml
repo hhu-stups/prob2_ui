@@ -15,14 +15,13 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView layoutX="6.0" prefHeight="304.0" prefWidth="593.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TableView fx:id="tv_fields" layoutX="6.0" prefHeight="304.0" prefWidth="593.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columns>
-                            <TableColumn prefWidth="106.0" text="Name" />
-                            <TableColumn prefWidth="97.0" text="Value" />
-                              <TableColumn prefWidth="75.0" text="Type" />
-                              <TableColumn prefWidth="92.0" text="Origin" />
-                              <TableColumn prefWidth="103.0" text="Modifier" />
-                              <TableColumn prefWidth="126.0" text="Declarer" />
+                            <TableColumn fx:id="fnames" prefWidth="106.0" text="Name" />
+                            <TableColumn fx:id="fvalues" prefWidth="97.0" text="Value" />
+                              <TableColumn fx:id="ftypes" prefWidth="75.0" text="Type" />
+                              <TableColumn fx:id ="fmodifiers" prefWidth="103.0" text="Modifier" />
+                              <TableColumn fx:id ="fdeclarers" prefWidth="126.0" text="Declarer" />
                           </columns>
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -38,12 +37,12 @@
                      <children>
                         <TableView fx:id="tv_methods" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columns>
-                            <TableColumn fx:id ="names" prefWidth="75.0" text="Name" />
-                            <TableColumn fx:id="params" prefWidth="92.0" text="Params" />
-                              <TableColumn fx:id ="types" prefWidth="66.0" text="Type" />
-                              <TableColumn fx:id = "modifiers" prefWidth="79.0" text="Modifier" />
-                              <TableColumn fx:id ="declarers" prefWidth="87.0" text="Declarer" />
-                              <TableColumn fx:id = "exceptions" prefWidth="123.0" text="Exception" />
+                            <TableColumn fx:id ="mnames" prefWidth="75.0" text="Name" />
+                            <TableColumn fx:id="mparams" prefWidth="92.0" text="Params" />
+                              <TableColumn fx:id ="mtypes" prefWidth="66.0" text="Type" />
+                              <TableColumn fx:id = "mmodifiers" prefWidth="79.0" text="Modifier" />
+                              <TableColumn fx:id ="mdeclarers" prefWidth="87.0" text="Declarer" />
+                              <TableColumn fx:id = "mexceptions" prefWidth="123.0" text="Exception" />
                           </columns>
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

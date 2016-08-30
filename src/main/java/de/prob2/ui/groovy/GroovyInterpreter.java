@@ -42,5 +42,9 @@ public class GroovyInterpreter {
 
 		return new Pair(console.toString(), resultString);
 	}
+	
+	public void closeObjectStage() {
+		groovyObjectStage.close();
+	}
 
 }

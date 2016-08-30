@@ -307,5 +307,9 @@ public class GroovyConsole extends TextArea {
 		currentLine = this.getText().substring(posOfEnter + 3, posOfEnter + 3 + currentPosInLine);
 		currentLine += this.getText().substring(posOfEnter+ 4 + currentPosInLine, this.getText().length());
 	}
+	
+	public void closeObjectStage() {
+		interpreter.closeObjectStage();
+	}
 
 }

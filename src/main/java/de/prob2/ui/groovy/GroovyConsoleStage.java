@@ -24,5 +24,8 @@ public class GroovyConsoleStage extends Stage {
 			e.printStackTrace();
 		}
 		groovyConsole.setInterpreter(interpreter);
+		this.setOnCloseRequest(e-> {
+			groovyConsole.closeObjectStage();
+		});
 	}
 }

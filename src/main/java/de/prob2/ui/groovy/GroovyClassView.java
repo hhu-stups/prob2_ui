@@ -1,6 +1,7 @@
 package de.prob2.ui.groovy;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,24 +20,44 @@ public class GroovyClassView extends AnchorPane {
 	private TableView<GroovyClassItem> tv_methods;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> names;
+	private TableView<GroovyClassItem> tv_fields;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> params;
+	private TableColumn<GroovyClassItem, String> fnames;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> types;
+	private TableColumn<GroovyClassItem, String> fvalues;
+	
+	@FXML
+	private TableColumn<GroovyClassItem, String> ftypes;
+	
+	@FXML
+	private TableColumn<GroovyClassItem, String> fmodifiers;
+	
+	@FXML
+	private TableColumn<GroovyClassItem, String> fdeclarers;
+	
+	@FXML
+	private TableColumn<GroovyClassItem, String> mnames;
+	
+	@FXML
+	private TableColumn<GroovyClassItem, String> mparams;
+	
+	@FXML
+	private TableColumn<GroovyClassItem, String> mtypes;
 		
 	@FXML
-	private TableColumn<GroovyClassItem, String> modifiers;
+	private TableColumn<GroovyClassItem, String> mmodifiers;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> declarers;
+	private TableColumn<GroovyClassItem, String> mdeclarers;
 	
 	@FXML
-	private TableColumn<GroovyClassItem, String> exceptions;
+	private TableColumn<GroovyClassItem, String> mexceptions;
 	
 	private ObservableList<GroovyClassItem> methods = FXCollections.observableArrayList();
+	
+	private ObservableList<GroovyClassItem> fields = FXCollections.observableArrayList();
 	
 	public GroovyClassView(FXMLLoader loader) {
 		loader.setLocation(getClass().getResource("groovy_class_view.fxml"));
@@ -55,22 +76,33 @@ public class GroovyClassView extends AnchorPane {
 	
 	@FXML
 	public void initialize() {
-		names.setCellValueFactory(new PropertyValueFactory<>("name"));
-		params.setCellValueFactory(new PropertyValueFactory<>("params"));
-		types.setCellValueFactory(new PropertyValueFactory<>("type"));
-		modifiers.setCellValueFactory(new PropertyValueFactory<>("modifier"));
-		declarers.setCellValueFactory(new PropertyValueFactory<>("declarer"));
-		exceptions.setCellValueFactory(new PropertyValueFactory<>("exception"));
+		mnames.setCellValueFactory(new PropertyValueFactory<>("name"));
+		mparams.setCellValueFactory(new PropertyValueFactory<>("params"));
+		mtypes.setCellValueFactory(new PropertyValueFactory<>("type"));
+		mmodifiers.setCellValueFactory(new PropertyValueFactory<>("modifier"));
+		mdeclarers.setCellValueFactory(new PropertyValueFactory<>("declarer"));
+		mexceptions.setCellValueFactory(new PropertyValueFactory<>("exception"));
+		fnames.setCellValueFactory(new PropertyValueFactory<>("name"));
+		fvalues.setCellValueFactory(new PropertyValueFactory<>("value"));
+		ftypes.setCellValueFactory(new PropertyValueFactory<>("type"));
+		fmodifiers.setCellValueFactory(new PropertyValueFactory<>("modifier"));
+		fdeclarers.setCellValueFactory(new PropertyValueFactory<>("declarer"));
+		
 		tv_methods.setItems(methods);
-
+		tv_fields.setItems(fields);
 	}
 	
-	public void showMethods() {
+	public void showMethodsAndFields() {
 		methods.clear();
+		fields.clear();
 		for(Method m: clazz.getMethods()) {
 			methods.add(new GroovyClassItem(m));
 		}
+		for(Field f : clazz.getFields()) {
+			fields.add(new GroovyClassItem(f));
+		}
 		tv_methods.refresh();
+		tv_fields.refresh();
 	}
 
 }
