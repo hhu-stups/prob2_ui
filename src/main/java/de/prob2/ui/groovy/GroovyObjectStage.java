@@ -18,28 +18,22 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 public class GroovyObjectStage extends Stage {
-	
-	/*private static class GroovyObjectCell extends TableCell<GroovyObjectItem, String> {
 		
-		protected void updateItem() {
-			
-		}
-		
-	}*/
+	@FXML
+	private TableView<GroovyObjectItem> tv_objects;
 	
 	@FXML
-	TableView<GroovyObjectItem> tv_objects;
+	private TableColumn<GroovyObjectItem, String> objects;
 	
 	@FXML
-	TableColumn<GroovyObjectItem, String> objects;
+	private TableColumn<GroovyObjectItem, String> classes;
 	
-	@FXML
-	TableColumn<GroovyObjectItem, String> classes;
+	private ObservableList<GroovyObjectItem> values = FXCollections.observableArrayList();
 	
-	ObservableList<GroovyObjectItem> values = FXCollections.observableArrayList();
+	private GroovyClassView classview;
 	
 	@Inject
-	private GroovyObjectStage(FXMLLoader loader) {
+	private GroovyObjectStage(FXMLLoader loader, GroovyClassView classview) {
 		try {
 			loader.setLocation(getClass().getResource("groovy_object_stage.fxml"));
 			loader.setRoot(this);
@@ -48,6 +42,7 @@ public class GroovyObjectStage extends Stage {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		this.classview = classview;
 	}
 	
 	public void showObjects(ScriptEngine engine) {
@@ -56,7 +51,7 @@ public class GroovyObjectStage extends Stage {
 		int i = 0;
 		for(String s : binding.keySet()) {
 			Class <? extends Object> clazz = binding.values().toArray()[i].getClass();
-			values.add(new GroovyObjectItem(s,clazz));
+			values.add(new GroovyObjectItem(s,clazz, classview));
 			i++;
 		}
 		tv_objects.refresh();

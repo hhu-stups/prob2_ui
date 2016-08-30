@@ -72,7 +72,6 @@ public class HistoryView extends AnchorPane {
 	@Inject
 	private HistoryView(FXMLLoader loader, CurrentTrace currentTrace) {
 		this.currentTrace = currentTrace;
-		
 		loader.setLocation(getClass().getResource("history_view.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
