@@ -3,10 +3,13 @@ package de.prob2.ui.groovy;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collection;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -24,6 +27,12 @@ public class GroovyClassStage extends Stage {
 	
 	@FXML
 	private TableView<GroovyClassItem> tv_class;
+	
+	@FXML
+	private TableView<CollectionDataItem> tv_collection_data;
+	
+	@FXML
+	private Tab tab_collection_data;
 	
 	@FXML
 	private TableColumn<GroovyClassItem, String> cattributes;
@@ -64,11 +73,19 @@ public class GroovyClassStage extends Stage {
 	@FXML
 	private TableColumn<GroovyClassPropertyItem, String> mexceptions;
 	
+	@FXML
+	private TableColumn<CollectionDataItem, String> cdindices;
+	
+	@FXML
+	private TableColumn<CollectionDataItem, String> cdvalues;
+	
 	private ObservableList<GroovyClassPropertyItem> methods = FXCollections.observableArrayList();
 	
 	private ObservableList<GroovyClassPropertyItem> fields = FXCollections.observableArrayList();
 	
 	private ObservableList<GroovyClassItem> attributes = FXCollections.observableArrayList();
+	
+	private ObservableList<CollectionDataItem> collection_data = FXCollections.observableArrayList();
 	
 	public GroovyClassStage(FXMLLoader loader) {
 		loader.setLocation(getClass().getResource("groovy_class_stage.fxml"));
@@ -85,6 +102,8 @@ public class GroovyClassStage extends Stage {
 		this.clazz = clazz;
 	}
 	
+	
+	
 	@FXML
 	public void initialize() {
 		mnames.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -100,24 +119,38 @@ public class GroovyClassStage extends Stage {
 		fdeclarers.setCellValueFactory(new PropertyValueFactory<>("declarer"));
 		cattributes.setCellValueFactory(new PropertyValueFactory<>("attribute"));
 		cvalues.setCellValueFactory(new PropertyValueFactory<>("value"));
+		cdindices.setCellValueFactory(new PropertyValueFactory<>("index"));
+		cdvalues.setCellValueFactory(new PropertyValueFactory<>("value"));
 		
 		tv_methods.setItems(methods);
 		tv_fields.setItems(fields);
 		tv_class.setItems(attributes);
+		tv_collection_data.setItems(collection_data);
 	}
 	
-	public void showMethodsAndFields() {
+	public void showMethodsAndFields(Object object) {
 		methods.clear();
 		fields.clear();
+		collection_data.clear();
 		for(Method m: clazz.getMethods()) {
 			methods.add(new GroovyClassPropertyItem(m));
 		}
 		for(Field f : clazz.getFields()) {
 			fields.add(new GroovyClassPropertyItem(f));
 		}
+		int i = 0;
+		if(Collection.class.isAssignableFrom(clazz)) {
+			for(Object o: (Collection<? extends Object>) object) {
+				collection_data.add(new CollectionDataItem(i,o));
+				i++;
+			}
+		} else {
+			tab_collection_data.setDisable(true);
+		}
 		showClassAttributes();
 		tv_methods.refresh();
 		tv_fields.refresh();
+		tv_collection_data.refresh();
 	}
 	
 	private void showClassAttributes() {
