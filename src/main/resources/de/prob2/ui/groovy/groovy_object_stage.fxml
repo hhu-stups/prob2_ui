@@ -14,6 +14,7 @@
     	     <columns>
     	        <TableColumn fx:id="objects" editable="true" prefWidth="89.0" text="Objects" />
     	        <TableColumn fx:id="classes" editable="true" prefWidth="89.0" text="Class" />
+    	        <TableColumn fx:id="values" editable="true" prefWidth="89.0" text="Value" />
     	     </columns>
     	     <columnResizePolicy>
     	        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
