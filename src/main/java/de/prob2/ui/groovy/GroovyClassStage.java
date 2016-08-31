@@ -49,6 +49,9 @@ public class GroovyClassStage extends Stage {
 	private TableColumn<GroovyClassPropertyItem, String> ftypes;
 	
 	@FXML
+	private TableColumn<GroovyClassPropertyItem, String> forigins;
+	
+	@FXML
 	private TableColumn<GroovyClassPropertyItem, String> fmodifiers;
 	
 	@FXML
@@ -62,6 +65,9 @@ public class GroovyClassStage extends Stage {
 	
 	@FXML
 	private TableColumn<GroovyClassPropertyItem, String> mtypes;
+	
+	@FXML
+	private TableColumn<GroovyClassPropertyItem, String> morigins;
 		
 	@FXML
 	private TableColumn<GroovyClassPropertyItem, String> mmodifiers;
@@ -86,7 +92,9 @@ public class GroovyClassStage extends Stage {
 	
 	private ObservableList<CollectionDataItem> collection_data = FXCollections.observableArrayList();
 	
-	public GroovyClassStage(FXMLLoader loader) {
+	private MetaPropertiesHandler groovyHandler;
+	
+	public GroovyClassStage(FXMLLoader loader, MetaPropertiesHandler groovyHandler) {
 		loader.setLocation(getClass().getResource("groovy_class_stage.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
@@ -95,6 +103,7 @@ public class GroovyClassStage extends Stage {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		this.groovyHandler = groovyHandler;
 	}
 	
 	public void setClass(Class <? extends Object> clazz) {
@@ -108,12 +117,14 @@ public class GroovyClassStage extends Stage {
 		mnames.setCellValueFactory(new PropertyValueFactory<>("name"));
 		mparams.setCellValueFactory(new PropertyValueFactory<>("params"));
 		mtypes.setCellValueFactory(new PropertyValueFactory<>("type"));
+		morigins.setCellValueFactory(new PropertyValueFactory<>("origin"));
 		mmodifiers.setCellValueFactory(new PropertyValueFactory<>("modifier"));
 		mdeclarers.setCellValueFactory(new PropertyValueFactory<>("declarer"));
 		mexceptions.setCellValueFactory(new PropertyValueFactory<>("exception"));
 		fnames.setCellValueFactory(new PropertyValueFactory<>("name"));
 		fvalues.setCellValueFactory(new PropertyValueFactory<>("value"));
 		ftypes.setCellValueFactory(new PropertyValueFactory<>("type"));
+		forigins.setCellValueFactory(new PropertyValueFactory<>("origin"));
 		fmodifiers.setCellValueFactory(new PropertyValueFactory<>("modifier"));
 		fdeclarers.setCellValueFactory(new PropertyValueFactory<>("declarer"));
 		cattributes.setCellValueFactory(new PropertyValueFactory<>("attribute"));
@@ -131,12 +142,15 @@ public class GroovyClassStage extends Stage {
 		methods.clear();
 		fields.clear();
 		collection_data.clear();
+		
 		for(Method m: clazz.getMethods()) {
 			methods.add(new GroovyClassPropertyItem(m));
 		}
 		for(Field f : clazz.getFields()) {
 			fields.add(new GroovyClassPropertyItem(f));
 		}
+		groovyHandler.handleProperties(object, fields);
+		groovyHandler.handleMethods(object, methods);
 		handleCollections(object);
 		showClassAttributes();
 		tv_methods.refresh();
