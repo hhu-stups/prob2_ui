@@ -1,5 +1,5 @@
-language: java
 language: groovy
+language: java
 jdk:
 - oraclejdk8
 script:
