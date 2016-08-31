@@ -1,7 +1,6 @@
 package de.prob2.ui.groovy;
 
 import java.io.IOException;
-
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -68,9 +67,8 @@ public class GroovyObjectStage extends Stage {
 	private void fillList(Bindings binding) {
 		int i = 0;
 		for(String s : binding.keySet()) {
-			Class <? extends Object> clazz = binding.values().toArray()[i].getClass();
-			String value = binding.values().toArray()[i].toString();
-			items.add(new GroovyObjectItem(s,clazz,value, new GroovyClassStage(loader)));
+			Object object = binding.values().toArray()[i];
+			items.add(new GroovyObjectItem(s,object, new GroovyClassStage(loader)));
 			i++;
 		}	
 	}

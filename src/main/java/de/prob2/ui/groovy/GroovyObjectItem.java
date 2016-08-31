@@ -8,14 +8,16 @@ public class GroovyObjectItem {
 	private final Class<? extends Object> clazz;
 	private final SimpleStringProperty clazzname;
 	private final SimpleStringProperty value;
+	private Object object;
 	private GroovyClassStage classstage;
 	
-	public GroovyObjectItem(String name, Class<? extends Object> clazz, String value, GroovyClassStage classstage) {
+	public GroovyObjectItem(String name, Object object, GroovyClassStage classstage) {
 		this.name = new SimpleStringProperty(name);
-		this.clazz = clazz;
+		this.object = object;
+		this.clazz = object.getClass();
 		this.clazzname = new SimpleStringProperty(clazz.getSimpleName());
 		this.classstage = classstage;
-		this.value = new SimpleStringProperty(value);
+		this.value = new SimpleStringProperty(object.toString());
 		classstage.setClass(clazz);
 	}
 	
@@ -45,7 +47,7 @@ public class GroovyObjectItem {
 	
 	public void show() {
 		classstage.setTitle(clazz.getSimpleName());
-		classstage.showMethodsAndFields();
+		classstage.showMethodsAndFields(object);
 		classstage.show();
 		classstage.toFront();
 	}
