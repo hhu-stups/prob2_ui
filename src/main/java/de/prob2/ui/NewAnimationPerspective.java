@@ -56,7 +56,7 @@ public class NewAnimationPerspective extends BorderPane {
     private VBox vBox;
     @FXML
     private Accordion accordion;
-    private Dragboard db;
+    private boolean dragged;
     @Inject
     public NewAnimationPerspective() {
         try {
@@ -75,7 +75,6 @@ public class NewAnimationPerspective extends BorderPane {
 
 	@FXML
 	public void initialize() {
-		//this.setDividerPositions(0.3);
         double initialSize = 250;
         operations.setPrefSize(initialSize,initialSize);
         history.setPrefSize(initialSize,initialSize);
@@ -84,49 +83,38 @@ public class NewAnimationPerspective extends BorderPane {
 	}
 
 	private void onDrag() {
-        this.setOnMouseEntered(s -> this.setCursor(Cursor.OPEN_HAND));
-        this.setOnMousePressed(s -> this.setCursor(Cursor.CLOSED_HAND));
-        this.setOnMouseReleased(s -> this.setCursor(Cursor.DEFAULT));
-        this.setOnDragOver(t -> {
-            System.out.println("Drag over");
-        });
-        operations.setOnDragEntered(t ->{
+        registerDrag(operations,operationsTP);
+        registerDrag(history,historyTP);
+        registerDrag(modelcheck,modelcheckTP);
+        registerDrag(animations,animationsTP);
+	}
+
+    private void registerDrag(final Node node, final TitledPane nodeTP){
+        node.setOnMouseEntered(s -> this.setCursor(Cursor.OPEN_HAND));
+        node.setOnMousePressed(s -> this.setCursor(Cursor.CLOSED_HAND));
+        node.setOnMouseDragEntered(s -> {
+            dragged = true;
             System.out.println("Drag entered");
-            //db = t.getDragboard();
-            t.consume();
-        });
-        operations.setOnDragDropped(t -> {
-            System.out.println("Drag dropped");
-            t.consume();
-        });
-        operations.setOnDragExited(t -> {
-            System.out.println("Drag exited");
-            dragDropped(operations,operationsTP);
-            t.consume();
-        });
-        operations.setOnDragDetected(s -> {
-            System.out.println("Drag detected");
-            operations.startFullDrag();
-            //dragDropped(operations,operationsTP);
             s.consume();
         });
-        history.setOnDragDetected(s -> {
-            //dragDropped(history,historyTP);
+        node.setOnMouseReleased(s -> {
+            this.setCursor(Cursor.DEFAULT);
+            if (dragged){
+                dragDropped(node,nodeTP);
+                System.out.println("Drag released");
+            }
+            dragged = false;
+            s.consume();
         });
-        modelcheck.setOnDragDetected(s -> {
-            //dragDropped(modelcheck,modelcheckTP);
+        node.setOnDragDetected(s -> {
+            System.out.println("Drag detected");
+            operations.startFullDrag();
+            s.consume();
         });
-        animations.setOnDragDetected(s -> {
-            //dragDropped(animations,animationsTP);
-        });
-	}
+    }
 
     private void dragDropped(final Node node, final TitledPane nodeTP){
         System.out.println(node.getClass().toString() + " dragged, isResizable() = "+node.isResizable());
-        SnapshotParameters snapParams = new SnapshotParameters();
-        snapParams.setFill(Color.TRANSPARENT);
-        db = node.startDragAndDrop(TransferMode.ANY);
-        db.setDragView(node.snapshot(snapParams, null));
         if (vBox.getChildren().contains(node)) {
             if (this.getRight() == null) {
                 node.resize(0,0);
