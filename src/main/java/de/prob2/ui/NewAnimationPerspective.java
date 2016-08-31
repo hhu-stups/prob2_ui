@@ -54,8 +54,8 @@ public class NewAnimationPerspective extends BorderPane {
     private TitledPane animationsTP;
     @FXML
     private VBox vBox;
-    @FXML
-    private Accordion accordion;
+    /*@FXML
+    private Accordion accordion;*/
     private boolean dragged;
     @Inject
     public NewAnimationPerspective() {
@@ -65,9 +65,7 @@ public class NewAnimationPerspective extends BorderPane {
             loader.setRoot(this);
             loader.setController(this);
             loader.load();
-            parentProperty().addListener((ObservableValue<? extends Parent> ov, Parent previousParent, Parent nextParent)-> {
-                onDrag();
-            });
+            onDrag();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,6 +73,7 @@ public class NewAnimationPerspective extends BorderPane {
 
 	@FXML
 	public void initialize() {
+        //System.out.println(this.getChildren().contains(accordion));
         double initialSize = 250;
         operations.setPrefSize(initialSize,initialSize);
         history.setPrefSize(initialSize,initialSize);
@@ -130,5 +129,22 @@ public class NewAnimationPerspective extends BorderPane {
             vBox.getChildren().add(node);
             this.getChildren().remove(node);
         }
+        /*if (accordion.getPanes().contains(nodeTP)) {
+            if (this.getRight() == null) {
+                this.setRight(node);
+            } else if (this.getTop() == null) {
+                this.setTop(node);
+            } else if (this.getBottom() == null) {
+                this.setBottom(node);
+            } else if (this.getLeft() == null) {
+                this.setLeft(node);
+            }
+            nodeTP.setContent(null);
+            accordion.getPanes().remove(nodeTP);
+        } else {
+            accordion.getPanes().add(nodeTP);
+            nodeTP.setContent(node);
+            this.getChildren().remove(node);
+        }*/
     }
 }
