@@ -3,7 +3,7 @@
 	-prob-blue: #08396B;
 	-prob-grey: #555560;
 	-prob-grey-20: #55556033;
-	-prob-grey-66: #555560aa;
+	-prob-grey-75: #555560BF;
 	-prob-orange: #B77300;
 	-prob-aqua: #037875;
 	-almostwhite: #efefef;
@@ -16,7 +16,7 @@
  ************************************************************************************/
 .accordion {
 	-fx-background-color: -prob-grey;
-	-fx-padding: 1em 0 0 0;
+	-fx-padding: 1.0em 0.0 0.0 0.0;
 	-fx-border-width: 0.0;
 }
 
@@ -70,7 +70,7 @@
 	-fx-background-color: -prob-grey-20;
 }
 .check-box:selected:hover > .box > .mark {
-	-fx-background-color: -prob-grey-66;
+	-fx-background-color: -prob-grey-75;
 }
 
 /************************************************************************************
@@ -99,7 +99,7 @@
 	-fx-background-radius: 5.0;
 }
 .combo-box-popup > .list-view {
-    -fx-background-color: -prob-grey-66;
+    -fx-background-color: -prob-grey-75;
  	-fx-background-radius: 3.0 3.0 3.0 3.0;
     -fx-background-insets: 0.0, 1.0;
     -fx-effect: dropshadow( gaussian , rgba(0.0,0.0,0.0,0.2) , 12.0, 0.0 , 0.0 , 8.0 );
@@ -136,6 +136,12 @@
 /************************************************************************************
  * ListView																			*
  ************************************************************************************/
+.list-view {
+	-fx-focus-color: transparent;
+	-fx-faint-focus-color: transparent;
+	-fx-border-color: -prob-grey;
+	-fx-border-width: 0.2em 0 0 0;
+}
 .list-cell:odd {
 	-fx-background: white;
 }
@@ -150,7 +156,7 @@
  * Menu, ContextMenu, MenuBar														*
  ************************************************************************************/
 .context-menu {
- 	-fx-background-color: -prob-grey-20;
+ 	-fx-background-color: -prob-grey-75;
  	-fx-background-radius: 3.0 3.0 3.0 3.0;
  	-fx-background-insets: 0.0, 1.0;
     -fx-padding: 0.333333em 0.083333em 0.333333em 0.083333em; /* 4 1 8 1 */
@@ -263,7 +269,7 @@
 }
 .titled-pane > .title {
     -fx-background-color: -prob-grey;
-    -fx-padding: 1em;
+    -fx-padding: 1.0em;
 }
 .titled-pane > .title:hover {
     -fx-background-color: -prob-aqua;
@@ -288,7 +294,7 @@
     -fx-accent: transparent;
 }
 .tree-table-view {
-	-fx-border-width: 0;
+	-fx-border-width: 0.0;
 }
 .table-view .column-header,
 .tree-table-view .column-header,
@@ -344,7 +350,7 @@
 }
 .left, .left .label {
 	-fx-alignment: center-left;
-	-fx-padding: 0 0 0 0.5em;
+	-fx-padding: 0.0 0.0 0.0 0.5em;
 }
 
 /* ============= DARK ================== */
@@ -399,7 +405,7 @@
 
 #future {
 	-fx-font-family: ARIAL;
-	-fx-fill: GRAY;
+	-fx-fill: -prob-grey-75;
 	-fx-font-style: italic;
 	-fx-font-size: 12.0px;
 }
