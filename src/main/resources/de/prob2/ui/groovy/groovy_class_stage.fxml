@@ -36,9 +36,10 @@
        	              <children>
         	                <TableView fx:id="tv_fields" layoutX="6.0" prefHeight="304.0" prefWidth="593.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         	                  <columns>
-        		                    <TableColumn fx:id="fnames" prefWidth="106.0" text="Name" />
-           	                 <TableColumn fx:id="fvalues" prefWidth="97.0" text="Value" />
-           	                   <TableColumn fx:id="ftypes" prefWidth="75.0" text="Type" />
+        		                  <TableColumn fx:id="fnames" prefWidth="106.0" text="Name" />
+           	                	  <TableColumn fx:id="fvalues" prefWidth="97.0" text="Value" />
+           	                      <TableColumn fx:id="ftypes" prefWidth="75.0" text="Type" />
+           	                      <TableColumn fx:id="forigins" prefWidth="75.0" text="Origin" />
             	                  <TableColumn fx:id="fmodifiers" prefWidth="103.0" text="Modifier" />
             	                  <TableColumn fx:id="fdeclarers" prefWidth="126.0" text="Declarer" />
             		              </columns>
@@ -59,6 +60,7 @@
 	                            <TableColumn fx:id="mnames" prefWidth="75.0" text="Name" />
 	                            <TableColumn fx:id="mparams" prefWidth="92.0" text="Params" />
 	                              <TableColumn fx:id="mtypes" prefWidth="66.0" text="Type" />
+	                              <TableColumn fx:id="morigins" prefWidth="66.0" text="Origin" />
 	                              <TableColumn fx:id="mmodifiers" prefWidth="79.0" text="Modifier" />
 	                              <TableColumn fx:id="mdeclarers" prefWidth="87.0" text="Declarer" />
 	                              <TableColumn fx:id="mexceptions" prefWidth="123.0" text="Exception" />

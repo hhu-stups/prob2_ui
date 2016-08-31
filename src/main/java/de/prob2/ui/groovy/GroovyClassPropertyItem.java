@@ -4,6 +4,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.codehaus.groovy.reflection.CachedClass;
+
+import groovy.lang.MetaMethod;
+import groovy.lang.PropertyValue;
 import javafx.beans.property.SimpleStringProperty;
 
 public class GroovyClassPropertyItem {
@@ -11,8 +15,9 @@ public class GroovyClassPropertyItem {
 	private final SimpleStringProperty name;
 	private final SimpleStringProperty params;
 	private final SimpleStringProperty type;
+	private final SimpleStringProperty origin;
 	private final SimpleStringProperty modifier;
-	private final SimpleStringProperty declarer;
+	private SimpleStringProperty declarer;
 	private final SimpleStringProperty exception;
 	private SimpleStringProperty value;
 	
@@ -27,6 +32,7 @@ public class GroovyClassPropertyItem {
 		parameter = parameter.substring(0,Math.max(0,parameter.length()-2));
 		this.params = new SimpleStringProperty(parameter);
 		this.type = new SimpleStringProperty(m.getReturnType().getSimpleName());
+		this.origin = new SimpleStringProperty("JAVA");
 		this.modifier = new SimpleStringProperty(Modifier.toString(m.getModifiers()));
 		this.declarer = new SimpleStringProperty(m.getDeclaringClass().getSimpleName());
 		for(Class<? extends Object> c: m.getExceptionTypes()) {
@@ -41,6 +47,7 @@ public class GroovyClassPropertyItem {
 		this.name = new SimpleStringProperty(f.getName());
 		this.params = new SimpleStringProperty();
 		this.type = new SimpleStringProperty(f.getType().getSimpleName());
+		this.origin = new SimpleStringProperty("JAVA");
 		this.modifier = new SimpleStringProperty(Modifier.toString(f.getModifiers()));
 		this.declarer = new SimpleStringProperty(f.getDeclaringClass().getSimpleName());
 		this.exception = new SimpleStringProperty();
@@ -52,6 +59,36 @@ public class GroovyClassPropertyItem {
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public GroovyClassPropertyItem(PropertyValue p) {
+		this.name = new SimpleStringProperty(p.getName());
+		this.params = new SimpleStringProperty();
+		this.type = new SimpleStringProperty(p.getType().getSimpleName());
+		this.origin = new SimpleStringProperty("GROOVY");
+		this.modifier = new SimpleStringProperty(Modifier.toString(p.getType().getModifiers()));
+		this.declarer = new SimpleStringProperty("n/a");
+		if(p.getType().getDeclaringClass() != null) {
+			this.declarer = new SimpleStringProperty(p.getType().getDeclaringClass().getSimpleName());
+		}
+		this.exception = new SimpleStringProperty();
+		this.value = new SimpleStringProperty(p.getValue().toString());
+	}
+	
+	public GroovyClassPropertyItem(MetaMethod m) {
+		this.name = new SimpleStringProperty(m.getName());
+		String parameter ="";
+		for(CachedClass c : m.getParameterTypes()) {
+			parameter += c.getName()+ ", ";
+		}
+		parameter = parameter.substring(0,Math.max(0,parameter.length()-2));
+		this.params = new SimpleStringProperty(parameter);
+		this.type = new SimpleStringProperty(m.getReturnType().getSimpleName());
+		this.origin = new SimpleStringProperty("GROOVY");
+		this.modifier = new SimpleStringProperty(Modifier.toString(m.getModifiers()));
+		this.declarer = new SimpleStringProperty(m.getDeclaringClass().getName());
+		this.exception = new SimpleStringProperty();
+		this.value = new SimpleStringProperty();
 	}
 	
 	public String getName() {
@@ -76,6 +113,14 @@ public class GroovyClassPropertyItem {
 	
 	public void setType(String type) {
 		this.type.set(type);
+	}
+	
+	public String getOrigin() {
+		return origin.get();
+	}
+	
+	public void setOrigin(String origin) {
+		this.type.set(origin);
 	}
 		
 	public String getModifier() {

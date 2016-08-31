@@ -14,6 +14,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
+
 public class GroovyObjectStage extends Stage {
 		
 	@FXML
@@ -32,8 +33,10 @@ public class GroovyObjectStage extends Stage {
 	
 	private FXMLLoader loader;
 	
+	private MetaPropertiesHandler groovyHandler;
+	
 	@Inject
-	private GroovyObjectStage(FXMLLoader loader) {
+	private GroovyObjectStage(FXMLLoader loader, MetaPropertiesHandler groovyHandler) {
 		this.loader = loader;
 		try {
 			loader.setLocation(getClass().getResource("groovy_object_stage.fxml"));
@@ -46,6 +49,8 @@ public class GroovyObjectStage extends Stage {
 		this.setOnCloseRequest(e-> {
 			close();
 		});
+		this.groovyHandler = groovyHandler;
+
 	}
 	
 	@Override
@@ -68,7 +73,7 @@ public class GroovyObjectStage extends Stage {
 		int i = 0;
 		for(String s : binding.keySet()) {
 			Object object = binding.values().toArray()[i];
-			items.add(new GroovyObjectItem(s,object, new GroovyClassStage(loader)));
+			items.add(new GroovyObjectItem(s,object, new GroovyClassStage(loader, groovyHandler)));
 			i++;
 		}	
 	}
