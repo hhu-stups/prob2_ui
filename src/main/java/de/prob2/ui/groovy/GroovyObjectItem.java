@@ -1,25 +1,24 @@
 package de.prob2.ui.groovy;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 public class GroovyObjectItem {
 	
 	private final SimpleStringProperty name;
 	private final Class<? extends Object> clazz;
 	private final SimpleStringProperty clazzname;
-	private GroovyClassView classview;
-	private Stage stage;
+	private final SimpleStringProperty value;
+	private Object object;
+	private GroovyClassStage classstage;
 	
-	public GroovyObjectItem(String name, Class<? extends Object> clazz, GroovyClassView classview) {
+	public GroovyObjectItem(String name, Object object, GroovyClassStage classstage) {
 		this.name = new SimpleStringProperty(name);
-		this.clazz = clazz;
+		this.object = object;
+		this.clazz = object.getClass();
 		this.clazzname = new SimpleStringProperty(clazz.getSimpleName());
-		this.classview = classview;
-		classview.setClass(clazz);
-		stage = new Stage();
-		
+		this.classstage = classstage;
+		this.value = new SimpleStringProperty(object.toString());
+		classstage.setClass(clazz);
 	}
 	
 	public String getName() {
@@ -38,20 +37,23 @@ public class GroovyObjectItem {
 		this.clazzname.set(clazzname);
 	}
 	
+	public String getValue() {
+		return value.get();
+	}
+	
+	public void setValue(String value) {
+		this.value.set(value);
+	}
+	
 	public void show() {
-		if(!classview.getStyleClass().isEmpty()) {
-			stage.toFront();
-			return;
-		}
-		stage.setTitle(clazz.getSimpleName());
-		Scene scene = new Scene(classview, 800, 600);
-		classview.showMethodsAndFields();
-		stage.setScene(scene);
-		stage.show();
+		classstage.setTitle(clazz.getSimpleName());
+		classstage.showMethodsAndFields(object);
+		classstage.show();
+		classstage.toFront();
 	}
 	
 	public void close() {
-		stage.close();
+		classstage.close();
 	}
 
 }

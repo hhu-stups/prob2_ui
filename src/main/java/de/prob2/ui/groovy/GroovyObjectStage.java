@@ -1,7 +1,6 @@
 package de.prob2.ui.groovy;
 
 import java.io.IOException;
-
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -26,7 +25,10 @@ public class GroovyObjectStage extends Stage {
 	@FXML
 	private TableColumn<GroovyObjectItem, String> classes;
 	
-	private ObservableList<GroovyObjectItem> values = FXCollections.observableArrayList();
+	@FXML
+	private TableColumn<GroovyObjectItem, String> values;
+	
+	private ObservableList<GroovyObjectItem> items = FXCollections.observableArrayList();
 	
 	private FXMLLoader loader;
 	
@@ -48,42 +50,41 @@ public class GroovyObjectStage extends Stage {
 	
 	@Override
 	public void close() {
-		for(GroovyObjectItem item : values) {
+		for(GroovyObjectItem item : items) {
 			item.close();
 		}
 		super.close();
 	}
 	
 	public void showObjects(ScriptEngine engine) {
-		Bindings bindingGlobal = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
-		Bindings bindingEngine = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-		values.clear();
-		int i = 0;
-		for(String s : bindingGlobal.keySet()) {
-			Class <? extends Object> clazz = bindingGlobal.values().toArray()[i].getClass();
-			values.add(new GroovyObjectItem(s,clazz, new GroovyClassView(loader)));
-			i++;
-		}
-		i = 0;
-		for(String s : bindingEngine.keySet()) {
-			Class <? extends Object> clazz = bindingEngine.values().toArray()[i].getClass();
-			values.add(new GroovyObjectItem(s,clazz, new GroovyClassView(loader)));
-			i++;
-		}
+		items.clear();
+		fillList(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
+		fillList(engine.getBindings(ScriptContext.ENGINE_SCOPE));
 		tv_objects.refresh();
 		this.show();
+	}
+	
+	private void fillList(Bindings binding) {
+		int i = 0;
+		for(String s : binding.keySet()) {
+			Object object = binding.values().toArray()[i];
+			items.add(new GroovyObjectItem(s,object, new GroovyClassStage(loader)));
+			i++;
+		}	
 	}
 	
 	@FXML
 	public void initialize() {
 		objects.setCellValueFactory(new PropertyValueFactory<>("name"));
 		classes.setCellValueFactory(new PropertyValueFactory<>("clazzname"));
-		tv_objects.setItems(values);
+		values.setCellValueFactory(new PropertyValueFactory<>("value"));
+		
+		tv_objects.setItems(items);
 		
 		tv_objects.setOnMouseClicked(e-> {
 			int currentPos = tv_objects.getSelectionModel().getSelectedIndex();
 			if(currentPos >= 0) {
-				values.get(currentPos).show();
+				items.get(currentPos).show();
 			}
 			tv_objects.getSelectionModel().clearSelection();
 		});
