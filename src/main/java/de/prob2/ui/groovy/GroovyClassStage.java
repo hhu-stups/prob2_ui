@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -138,19 +137,32 @@ public class GroovyClassStage extends Stage {
 		for(Field f : clazz.getFields()) {
 			fields.add(new GroovyClassPropertyItem(f));
 		}
+		handleCollections(object);
+		showClassAttributes();
+		tv_methods.refresh();
+		tv_fields.refresh();
+		tv_collection_data.refresh();
+	}
+	
+	private void handleCollections(Object object) {
 		int i = 0;
-		if(Collection.class.isAssignableFrom(clazz)) {
-			for(Object o: (Collection<? extends Object>) object) {
+		if(clazz.isArray()) {
+			Object[] objects = (Object[]) object;
+			for(i = 0; i < objects.length; i++) {
+				String value ="";
+				if(objects[i] != null) {
+					value = objects[i].toString();
+				}
+				collection_data.add(new CollectionDataItem(i,value));
+			}
+		} else if(Collection.class.isAssignableFrom(object.getClass())) {
+			for(Object o: (Iterable<? extends Object>) object) {
 				collection_data.add(new CollectionDataItem(i,o));
 				i++;
 			}
 		} else {
 			tab_collection_data.setDisable(true);
 		}
-		showClassAttributes();
-		tv_methods.refresh();
-		tv_fields.refresh();
-		tv_collection_data.refresh();
 	}
 	
 	private void showClassAttributes() {
