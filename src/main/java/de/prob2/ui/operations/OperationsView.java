@@ -25,22 +25,75 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 
 @Singleton
 public class OperationsView extends AnchorPane {
+	private static enum SortMode {
+		MODEL_ORDER, A_TO_Z, Z_TO_A
+	}
+	
+	private static final class OperationsCell extends ListCell<Operation> {
+		@Override
+		protected void updateItem(Operation item, boolean empty) {
+			super.updateItem(item, empty);
+			if (item != null && !empty) {
+				setText(item.toString());
+				final FontAwesomeIconView icon;
+				if (item.isEnabled()) {
+					icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
+					icon.setFill(Color.LIMEGREEN);
+					setDisable(false);
+				} else {
+					icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
+					icon.setFill(Color.RED);
+					setDisable(true);
+				}
+				setGraphic(icon);
+			} else {
+				setGraphic(null);
+				setText(null);
+			}
+		}
+	}
+	
+	private static String extractPrettyName(final String name) {
+		if ("$setup_constants".equals(name)) {
+			return "SETUP_CONSTANTS";
+		}
+		if ("$initialise_machine".equals(name)) {
+			return "INITIALISATION";
+		}
+		return name;
+	}
+	
+	private static String stripString(final String param) {
+		return param.replaceAll("\\{", "").replaceAll("\\}", "");
+	}
+	
+	private static int compareParams(final List<String> params1, final List<String> params2) {
+		for (int i = 0; i < params1.size(); i++) {
+			String p1 = stripString(params1.get(i));
+			String p2 = stripString(params2.get(i));
+			if (p1.compareTo(p2) != 0) {
+				return p1.compareTo(p2);
+			}
+			
+		}
+		return 0;
+	}
+	
 	@FXML
 	private ListView<Operation> opsListView;
 	@FXML
@@ -67,14 +120,14 @@ public class OperationsView extends AnchorPane {
 	private CustomMenuItem someRandomEvents;
 
 	private AbstractModel currentModel;
-	private List<String> opNames = new ArrayList<String>();;
-	private Map<String, List<String>> opToParams = new HashMap<String, List<String>>();
-	private List<Operation> events = new ArrayList<Operation>();
+	private List<String> opNames = new ArrayList<>();
+	private Map<String, List<String>> opToParams = new HashMap<>();
+	private List<Operation> events = new ArrayList<>();
 	private boolean showNotEnabled = true;
 	private String filter = "";
-	Comparator<Operation> sorter = new ModelOrder(new ArrayList<String>());
+	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
-
+	
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final FXMLLoader loader) {
 		this.currentTrace = currentTrace;
@@ -89,19 +142,15 @@ public class OperationsView extends AnchorPane {
 		}
 
 	}
-
+	
 	@FXML
 	public void initialize() {
-		opsListView.setCellFactory(new TransitionTransformer());
+		opsListView.setCellFactory(lv -> new OperationsCell());
 
-		opsListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Operation>() {
-			@Override
-			public void changed(ObservableValue<? extends Operation> observable, Operation oldValue,
-					Operation newValue) {
-				if (newValue != null && newValue.isEnabled()) {
-					currentTrace.set(currentTrace.get().add(newValue.id));
-					System.out.println("Selected item: " + newValue);
-				}
+		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null && newValue.isEnabled()) {
+				currentTrace.set(currentTrace.get().add(newValue.id));
+				System.out.println("Selected item: " + newValue);
 			}
 		});
 		
@@ -116,13 +165,9 @@ public class OperationsView extends AnchorPane {
 	private void update(Trace trace) {
 		if (trace == null) {
 			currentModel = null;
-			opNames = new ArrayList<String>();
-			if (sorter instanceof ModelOrder) {
-				sorter = new ModelOrder(opNames);
-			}
+			opNames = new ArrayList<>();
 			Platform.runLater(() -> {
-				ObservableList<Operation> opsList = opsListView.getItems();
-				opsList.clear();
+				opsListView.getItems().clear();
 			});
 			return;
 		}
@@ -130,9 +175,9 @@ public class OperationsView extends AnchorPane {
 		if (trace.getModel() != currentModel) {
 			updateModel(trace);
 		}
-		events = new ArrayList<Operation>();
+		events = new ArrayList<>();
 		Set<Transition> operations = trace.getNextTransitions(true);
-		Set<String> notEnabled = new HashSet<String>(opNames);
+		Set<String> notEnabled = new HashSet<>(opNames);
 		Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		for (Transition transition : operations) {
 			String id = transition.getId();
@@ -149,19 +194,13 @@ public class OperationsView extends AnchorPane {
 				}
 			}
 		}
-		try {
-			Collections.sort(events, sorter);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		doSort();
 		
 		Platform.runLater(() -> {
-			ObservableList<Operation> opsList = opsListView.getItems();
-			opsList.clear();
-			opsList.addAll(applyFilter(filter));
+			opsListView.getItems().setAll(applyFilter(filter));
 		});
 	}
-
+	
 	@FXML
 	private void handleDisabledOpsToggle() {
 		FontAwesomeIconView icon = null;
@@ -177,31 +216,29 @@ public class OperationsView extends AnchorPane {
 		icon.setStyleClass("icon-dark");
 		disabledOpsToggle.setGraphic(icon);
 	}
-
+	
 	@FXML
 	private void handleBackButton() {
 		if (currentTrace.exists()) {
 			currentTrace.set(currentTrace.back());
 		}
 	}
-
+	
 	@FXML
 	private void handleForwardButton() {
 		if (currentTrace.exists()) {
 			currentTrace.set(currentTrace.forward());
 		}
 	}
-
+	
 	@FXML
 	private void handleSearchButton() {
 		filter = filterEvents.getText();
-		ObservableList<Operation> opsList = opsListView.getItems();
-		opsList.clear();
-		opsList.addAll(applyFilter(filter));
+		opsListView.getItems().setAll(applyFilter(filter));
 	}
-
+	
 	private List<Operation> applyFilter(final String filter) {
-		List<Operation> newOps = new ArrayList<Operation>();
+		List<Operation> newOps = new ArrayList<>();
 		for (Operation op : events) {
 			if (op.name.startsWith(filter)) {
 				newOps.add(op);
@@ -209,43 +246,77 @@ public class OperationsView extends AnchorPane {
 		}
 		return newOps;
 	}
-
+	
+	private void doSort() {
+		final Comparator<Operation> comparator;
+		switch (sortMode) {
+			case MODEL_ORDER:
+				comparator = (o1, o2) -> {
+					if (o1.name.equals(o2.name)) {
+						return compareParams(o1.params, o2.params);
+					} else {
+						return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
+					}
+				};
+				break;
+			
+			case A_TO_Z:
+				comparator = (o1, o2) -> {
+					if (o1.name.equals(o2.name)) {
+						return compareParams(o1.params, o2.params);
+					} else {
+						return o1.name.compareTo(o2.name);
+					}
+				};
+				break;
+			
+			case Z_TO_A:
+				comparator = (o1, o2) -> {
+					if (o1.name.equals(o2.name)) {
+						return -compareParams(o1.params, o2.params);
+					} else {
+						return -o1.name.compareTo(o2.name);
+					}
+				};
+				break;
+			
+			default:
+				throw new IllegalStateException("Unhandled sort mode: " + sortMode);
+		}
+		
+		Collections.sort(events, comparator);
+	}
+	
 	@FXML
 	private void handleSortButton() {
-		String oldMode = getSortMode();
 		FontAwesomeIconView icon = null;
-		if ("normal".equals(oldMode)) {
-			sorter = new AtoZ();
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
-		} else if ("aToZ".equals(oldMode)) {
-			sorter = new ZtoA();
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
-		} else if ("zToA".equals(oldMode)) {
-			sorter = new ModelOrder(opNames);
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT);
+		switch (sortMode) {
+			case MODEL_ORDER:
+				sortMode = SortMode.A_TO_Z;
+				icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
+				break;
+			
+			case A_TO_Z:
+				sortMode = SortMode.Z_TO_A;
+				icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
+				break;
+			
+			case Z_TO_A:
+				sortMode = SortMode.MODEL_ORDER;
+				icon = new FontAwesomeIconView(FontAwesomeIcon.SORT);
+				break;
+			
+			default:
+				throw new IllegalStateException("Unhandled sort mode: " + sortMode);
 		}
-		Collections.sort(events, sorter);
-		ObservableList<Operation> opsList = opsListView.getItems();
-		opsList.clear();
-		opsList.addAll(applyFilter(filter));
+		
+		doSort();
+		opsListView.getItems().setAll(applyFilter(filter));
 		icon.setSize("15");
 		icon.setStyleClass("icon-dark");
 		sortButton.setGraphic(icon);
 	}
-
-	public String getSortMode() {
-		if (sorter instanceof ModelOrder) {
-			return "normal";
-		}
-		if (sorter instanceof AtoZ) {
-			return "aToZ";
-		}
-		if (sorter instanceof ZtoA) {
-			return "zToA";
-		}
-		return "other";
-	}
-
+	
 	@FXML
 	public void random(ActionEvent event) {
 		if (currentTrace.exists()) {
@@ -269,14 +340,14 @@ public class OperationsView extends AnchorPane {
 	private void updateModel(final Trace trace) {
 		currentModel = trace.getModel();
 		AbstractElement mainComponent = trace.getStateSpace().getMainComponent();
-		opNames = new ArrayList<String>();
-		opToParams = new HashMap<String, List<String>>();
+		opNames = new ArrayList<>();
+		opToParams = new HashMap<>();
 		if (mainComponent instanceof Machine) {
 			ModelElementList<BEvent> events = mainComponent.getChildrenOfType(BEvent.class);
 			for (BEvent e : events) {
 				opNames.add(e.getName());
 
-				List<String> paramList = new ArrayList<String>();
+				List<String> paramList = new ArrayList<>();
 				if (e instanceof Event) {
 					for (EventParameter eParam : ((Event) e).getParameters()) {
 						paramList.add(eParam.getName());
@@ -287,78 +358,5 @@ public class OperationsView extends AnchorPane {
 				opToParams.put(e.getName(), paramList);
 			}
 		}
-		if (sorter instanceof ModelOrder) {
-			sorter = new ModelOrder(opNames);
-		}
-	}
-
-	private String extractPrettyName(final String name) {
-		if ("$setup_constants".equals(name)) {
-			return "SETUP_CONSTANTS";
-		}
-		if ("$initialise_machine".equals(name)) {
-			return "INITIALISATION";
-		}
-		return name;
-	}
-
-	private class EventComparator {
-
-		private String stripString(final String param) {
-			return param.replaceAll("\\{", "").replaceAll("\\}", "");
-		}
-
-		public int compareParams(final List<String> params1, final List<String> params2) {
-			for (int i = 0; i < params1.size(); i++) {
-				String p1 = stripString(params1.get(i));
-				String p2 = stripString(params2.get(i));
-				if (p1.compareTo(p2) != 0) {
-					return p1.compareTo(p2);
-				}
-
-			}
-			return 0;
-		}
-	}
-
-	private class ModelOrder extends EventComparator implements Comparator<Operation> {
-
-		private final List<String> ops;
-
-		public ModelOrder(final List<String> ops) {
-			this.ops = ops;
-		}
-
-		@Override
-		public int compare(final Operation o1, final Operation o2) {
-			if (ops.contains(o1.name) && ops.contains(o2.name) && ops.indexOf(o1.name) == ops.indexOf(o2.name)) {
-				return compareParams(o1.params, o2.params);
-			}
-			return ops.indexOf(o1.name) - ops.indexOf(o2.name);
-		}
-	}
-
-	private class AtoZ extends EventComparator implements Comparator<Operation> {
-
-		@Override
-		public int compare(final Operation o1, final Operation o2) {
-			if (o1.name.compareTo(o2.name) == 0) {
-				return compareParams(o1.params, o2.params);
-			}
-			return o1.name.compareTo(o2.name);
-		}
-
-	}
-
-	private class ZtoA extends EventComparator implements Comparator<Operation> {
-
-		@Override
-		public int compare(final Operation o1, final Operation o2) {
-			if (o1.name.compareTo(o2.name) == 0) {
-				return compareParams(o1.params, o2.params);
-			}
-			return -1 * o1.name.compareTo(o2.name);
-		}
-
 	}
 }

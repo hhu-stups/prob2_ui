@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
-
 import de.prob.animator.command.ComputeCoverageCommand.ComputeCoverageResult;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLOk;
@@ -17,8 +16,6 @@ import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -49,8 +46,8 @@ public class ModelCheckStats extends AnchorPane {
 	@FXML
 	private GridPane transStats;
 
-	private Map<String, ModelChecker> jobs = new HashMap<String, ModelChecker>();
-	private Map<String, IModelCheckingResult> results = new HashMap<String, IModelCheckingResult>();
+	private Map<String, ModelChecker> jobs = new HashMap<>();
+	private Map<String, IModelCheckingResult> results = new HashMap<>();
 	private ModelcheckingController modelcheckingController;
 	private String result = "warning";
 	private Trace trace;
@@ -71,16 +68,12 @@ public class ModelCheckStats extends AnchorPane {
 	@FXML
 	public void initialize() {
 		Platform.runLater(() -> {
-			this.modelcheckingController.widthProperty().addListener(new ChangeListener<Number>() {
-				@Override
-				public void changed(ObservableValue<? extends Number> observableValue, Number oldValue,
-						Number newValue) {
-					if (newValue == null) {
-						resultText.setWrappingWidth(0);
-						return;
-					}
-					resultText.setWrappingWidth(newValue.doubleValue() - 60);
+			this.modelcheckingController.widthProperty().addListener((observableValue, oldValue, newValue) -> {
+				if (newValue == null) {
+					resultText.setWrappingWidth(0);
+					return;
 				}
+				resultText.setWrappingWidth(newValue.doubleValue() - 60);
 			});
 		});
 	}
@@ -144,12 +137,6 @@ public class ModelCheckStats extends AnchorPane {
 
 			showStats(coverage.getNodes(), nodeStats);
 			showStats(coverage.getOps(), transStats);
-
-			// List<String> uncovered = coverage.getUncovered();
-			// for (String transition : uncovered) {
-			// transStats.add(WebUtils.wrap("name", transition, "value", "0"));
-			// }
-			// String transitionStats = WebUtils.toJson(transStats);
 		}
 		
 		boolean hasTrace = result instanceof ITraceDescription;

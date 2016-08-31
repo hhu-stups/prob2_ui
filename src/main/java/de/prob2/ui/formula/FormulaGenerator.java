@@ -1,75 +1,65 @@
 package de.prob2.ui.formula;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import de.prob.animator.command.ExpandFormulaCommand;
 import de.prob.animator.command.InsertFormulaForVisualizationCommand;
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.exception.ProBError;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 
-public class FormulaGenerator {
-	
-	private final Set<String> collapsedNodes = new CopyOnWriteArraySet<>();
+@Singleton
+public final class FormulaGenerator {
 	private final CurrentTrace currentTrace;
-
+	
 	@Inject
-	public FormulaGenerator(final CurrentTrace currentTrace) {
+	private FormulaGenerator(final CurrentTrace currentTrace) {
 		this.currentTrace = currentTrace;
 	}
 	
-	public void setFormula(final IEvalElement formula) {
+	private ExpandedFormula expandFormula(final IEvalElement formula) {
+		final InsertFormulaForVisualizationCommand insertCmd = new InsertFormulaForVisualizationCommand(formula);
+		currentTrace.getStateSpace().execute(insertCmd);
+		
+		final ExpandFormulaCommand expandCmd = new ExpandFormulaCommand(insertCmd.getFormulaId(), currentTrace.get().getCurrentState());
+		currentTrace.getStateSpace().execute(expandCmd);
+		
+		return expandCmd.getResult();
+	}
+	
+	public void showFormula(final IEvalElement formula) {
 		try {
-			InsertFormulaForVisualizationCommand cmd1 = new InsertFormulaForVisualizationCommand(formula);
-			if(!currentTrace.get().getCurrentState().isInitialised()) {
-				showFormulaViewError(FormulaViewErrorType.NOT_INITIALIZE_ERROR);
-				return;
+			if (!currentTrace.get().getCurrentState().isInitialised()) {
+				// noinspection ThrowCaughtLocally
+				throw new EvaluationException("Formula evaluation is only possible in an initialized state");
 			}
-			currentTrace.getStateSpace().execute(cmd1);
-			ExpandFormulaCommand cmd2 = new ExpandFormulaCommand(cmd1.getFormulaId(), currentTrace.get().getCurrentState());
-			currentTrace.getStateSpace().execute(cmd2);
-			ExpandedFormula data = cmd2.getResult();
-			data.collapseNodes(new HashSet<>(collapsedNodes));
-			FormulaGraph graph = new FormulaGraph(new FormulaNode(data));
-			FormulaView fview = new FormulaView(graph);
+			
+			ExpandedFormula expanded = expandFormula(formula);
+			FormulaView fview = new FormulaView(new FormulaGraph(new FormulaNode(expanded)));
 			fview.show();
-		} catch (Exception e) {
-			showFormulaViewError(FormulaViewErrorType.PARSING_ERROR);
+		} catch (EvaluationException | ProBError e) {
+			e.printStackTrace();
+			final Alert alert = new Alert(Alert.AlertType.ERROR, "Could not visualize formula:\n" + e);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
 		}
 	}
 	
-	private void showFormulaViewError(FormulaViewErrorType error) {
-		Alert alert = new Alert(AlertType.ERROR);
-		alert.setTitle("Error while trying to visualize expression");
-		alert.setHeaderText("The current state is not initialized.");
-		if(error == FormulaViewErrorType.PARSING_ERROR) {
-			alert.setHeaderText("The formula cannot be parsed and visualize.");
-		}
-		alert.getDialogPane().getStylesheets().add("prob.css");
-		alert.showAndWait();
-	}
-	
-	
-	public IEvalElement parse(String params) {
+	public void parseAndShowFormula(final String formula) {
+		final IEvalElement parsed;
 		try {
-			IEvalElement formula = currentTrace.getModel().parseFormula(params);
-			return formula;
-		} catch (Exception e) {
-			return null;
+			parsed = currentTrace.getModel().parseFormula(formula);
+		} catch (EvaluationException e) {
+			e.printStackTrace();
+			final Alert alert = new Alert(Alert.AlertType.ERROR, "Could not parse formula:\n" + e);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
+			return;
 		}
-	}
-	
-	public void collapseNode(final String id) {
-		collapsedNodes.add(id);
-	}
-
-	public void expandNode(final String id) {
-		collapsedNodes.remove(id);
+		showFormula(parsed);
 	}
 }
 

@@ -25,7 +25,7 @@ public class GroovyConsole extends TextArea {
 	public GroovyConsole() {
 		super();
 		this.setContextMenu(new ContextMenu());
-		this.instructions = new ArrayList<Instruction>();
+		this.instructions = new ArrayList<>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		setListeners();
 	}
@@ -45,7 +45,7 @@ public class GroovyConsole extends TextArea {
 		super.paste();
 		int diff = this.getLength() - oldText.length();
 		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
-		if(currentLine.indexOf("\n") != -1) {
+		if(currentLine.contains("\n")) {
 			currentLine ="";
 			this.setText(oldText);
 			goToLastPos();
@@ -143,7 +143,7 @@ public class GroovyConsole extends TextArea {
 				handleEnter(e);
 				return;
 			}
-			
+						
 			if(!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
 				handleInsertChar(e);
 				return;
@@ -152,6 +152,7 @@ public class GroovyConsole extends TextArea {
 			if(handleRest(e)) {
 				return;
 			}
+			
 		});
 	}
 	
@@ -162,12 +163,15 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleInsertChar(KeyEvent e) {
 		if(e.getText().equals("") || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
-			goToLastPos();
+			if(!(e.getCode().equals(KeyCode.UNDEFINED) || e.getCode().equals(KeyCode.ALT_GRAPH))) {
+				goToLastPos();
+			}
 			if(e.getText().equals("")) {
 				e.consume();
 				return;
 			}
 		}
+	
 		if((e.isShortcutDown() || e.isAltDown())) {
 			return;
 		}
@@ -306,6 +310,10 @@ public class GroovyConsole extends TextArea {
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		currentLine = this.getText().substring(posOfEnter + 3, posOfEnter + 3 + currentPosInLine);
 		currentLine += this.getText().substring(posOfEnter+ 4 + currentPosInLine, this.getText().length());
+	}
+	
+	public void closeObjectStage() {
+		interpreter.closeObjectStage();
 	}
 
 }

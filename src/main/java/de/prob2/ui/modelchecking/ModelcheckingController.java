@@ -7,7 +7,6 @@ import java.util.List;
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.check.ConsistencyChecker;
@@ -22,8 +21,6 @@ import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -32,7 +29,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -85,18 +81,15 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 
 		AnchorPane background = new AnchorPane();
 		VBox.setMargin(background, new Insets(2.5, 5, 2.5, 5));
-		background.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				if (event.getButton().equals(MouseButton.PRIMARY)) {
-					showStats(item.getStats());
-					updateSelectedItem(background);
-				}
-				if (event.getButton().equals(MouseButton.SECONDARY)) {
-					cm.show(background, event.getScreenX(), event.getScreenY());
-					if (!item.getResult().equals("danger")) {
-						cm.getItems().get(0).setDisable(true);
-					}
+		background.setOnMouseClicked(event -> {
+			if (event.getButton().equals(MouseButton.PRIMARY)) {
+				showStats(item.getStats());
+				updateSelectedItem(background);
+			}
+			if (event.getButton().equals(MouseButton.SECONDARY)) {
+				cm.show(background, event.getScreenX(), event.getScreenY());
+				if (!item.getResult().equals("danger")) {
+					cm.getItems().get(0).setDisable(true);
 				}
 			}
 		});
@@ -124,10 +117,8 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	private ContextMenu createContextMenu(HistoryItem item) {
 		ContextMenu cm = new ContextMenu();
 		MenuItem mItem = new MenuItem("Show Trace To Error State");
-		mItem.setOnAction(new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent event) {
-				animations.addNewAnimation(item.getStats().getTrace());
-			}
+		mItem.setOnAction(event -> {
+			animations.addNewAnimation(item.getStats().getTrace());
 		});
 		cm.getItems().add(mItem);
 		return cm;
@@ -161,7 +152,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	private String toPrettyString(ModelCheckingOptions options) {
 		ModelChecker modelChecker = checker;
 		AbstractElement main = modelChecker.getStateSpace().getMainComponent();
-		List<String> optsList = new ArrayList<String>();
+		List<String> optsList = new ArrayList<>();
 		for (Options opts : options.getPrologOptions()) {
 			optsList.add(opts.getDescription());
 		}

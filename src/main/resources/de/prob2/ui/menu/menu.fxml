@@ -16,8 +16,7 @@
 		<MenuItem text="%menu.edit.items.preferences" onAction="#handlePreferences" />
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.formula">
-		<MenuItem text="%menu.formula.items.enterFormulaForVisualization"
-			onAction="#handleFormulaInput" />
+		<MenuItem fx:id="enterFormulaForVisualization" text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.dotty">
 		<MenuItem text="%menu.dotty.items.showHistoryAsGraph"
@@ -28,7 +27,6 @@
 	</Menu>
 		<Menu mnemonicParsing="false" text="%menu.consoles">
 		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole"/>
-		<MenuItem text="%menu.consoles.items.groovy.objects" onAction="#handleGroovyObjects"/>
 	</Menu>
 	<Menu mnemonicParsing="false" text="%menu.perspectives">
 		<MenuItem mnemonicParsing="false" text="%menu.perspectives.default"

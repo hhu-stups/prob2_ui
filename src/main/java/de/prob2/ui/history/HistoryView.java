@@ -27,15 +27,15 @@ public class HistoryView extends AnchorPane {
 			if (item == null) {
 				setGraphic(new Text());
 			} else {
-				String content;
-				if (item.root) {
-					content = "---root---";
+				Text text;
+				if (item.transition == null) {
+					// Root item has no transition
+					text = new Text("---root---");
 				} else {
-					content = item.transition.getPrettyRep();
+					// Evaluate the transition so the pretty rep includes argument list and result
+					item.transition.evaluate();
+					text = new Text(item.transition.getPrettyRep());
 				}
-				
-				Text text = new Text(content);
-				text.setDisable(true);
 				
 				switch (item.status) {
 					case PAST:
@@ -72,7 +72,6 @@ public class HistoryView extends AnchorPane {
 	@Inject
 	private HistoryView(FXMLLoader loader, CurrentTrace currentTrace) {
 		this.currentTrace = currentTrace;
-		
 		loader.setLocation(getClass().getResource("history_view.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
