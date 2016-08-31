@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 
 import org.codehaus.groovy.reflection.CachedClass;
 
+import groovy.lang.GroovyRuntimeException;
 import groovy.lang.MetaMethod;
 import groovy.lang.PropertyValue;
 import javafx.beans.property.SimpleStringProperty;
@@ -72,7 +73,14 @@ public class GroovyClassPropertyItem {
 			this.declarer = new SimpleStringProperty(p.getType().getDeclaringClass().getSimpleName());
 		}
 		this.exception = new SimpleStringProperty();
-		this.value = new SimpleStringProperty(p.getValue().toString());
+		this.value = new SimpleStringProperty();
+		try {
+			if(p.getValue() != null) {
+				this.value = new SimpleStringProperty(p.getValue().toString());
+			}
+		} catch(GroovyRuntimeException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public GroovyClassPropertyItem(MetaMethod m) {
