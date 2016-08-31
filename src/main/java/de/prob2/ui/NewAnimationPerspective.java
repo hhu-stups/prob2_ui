@@ -94,45 +94,39 @@ public class NewAnimationPerspective extends BorderPane {
         node.setOnMousePressed(s -> this.setCursor(Cursor.CLOSED_HAND));
         node.setOnMouseDragEntered(s -> {
             dragged = true;
-            System.out.println("Drag entered");
+            //System.out.println("Drag entered");
             s.consume();
         });
         node.setOnMouseReleased(s -> {
             this.setCursor(Cursor.DEFAULT);
             if (dragged){
                 dragDropped(node,nodeTP);
-                System.out.println("Drag released");
+                //System.out.println("Drag released");
             }
             dragged = false;
             s.consume();
         });
         node.setOnDragDetected(s -> {
-            System.out.println("Drag detected");
+            //System.out.println("Drag detected");
             operations.startFullDrag();
             s.consume();
         });
     }
 
     private void dragDropped(final Node node, final TitledPane nodeTP){
-        System.out.println(node.getClass().toString() + " dragged, isResizable() = "+node.isResizable());
+        //System.out.println(node.getClass().toString() + " dragged, isResizable() = "+node.isResizable());
         if (vBox.getChildren().contains(node)) {
             if (this.getRight() == null) {
-                node.resize(0,0);
                 this.setRight(node);
             } else if (this.getTop() == null) {
-                node.resize(0,0);
                 this.setTop(node);
             } else if (this.getBottom() == null) {
-                node.resize(0,0);
                 this.setBottom(node);
             } else if (this.getLeft() == null) {
-                node.resize(0,0);
                 this.setLeft(node);
             }
             vBox.getChildren().remove(node);
-            System.out.println("Width = "+node.getBoundsInParent().getWidth()+", Height = "+node.getBoundsInParent().getHeight());
         } else {
-            node.resize(0,0);
             vBox.getChildren().add(node);
             this.getChildren().remove(node);
         }
