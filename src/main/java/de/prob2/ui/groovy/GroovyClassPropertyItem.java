@@ -78,7 +78,7 @@ public class GroovyClassPropertyItem {
 			if(p.getValue() != null) {
 				this.value = new SimpleStringProperty(p.getValue().toString());
 			}
-		} catch(GroovyRuntimeException e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
