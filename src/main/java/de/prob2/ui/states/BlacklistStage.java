@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractElement;
+import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.SetChangeListener;
@@ -42,7 +43,7 @@ public class BlacklistStage extends Stage {
 	@FXML ListView<Class<? extends AbstractElement>> list;
 	
 	@Inject
-	private BlacklistStage(final FXMLLoader loader, final ClassBlacklist classBlacklist) {
+	private BlacklistStage(final FXMLLoader loader, final CurrentStage currentStage, final ClassBlacklist classBlacklist) {
 		this.classBlacklist = classBlacklist;
 		
 		loader.setLocation(this.getClass().getResource("blacklist_stage.fxml"));
@@ -53,6 +54,8 @@ public class BlacklistStage extends Stage {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		currentStage.register(this);
 	}
 	
 	@FXML

@@ -4,6 +4,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import de.prob2.ui.internal.ProB2Module;
+import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -41,6 +42,8 @@ public class ProB2 extends Application {
 			Platform.exit();
 			System.exit(0);
 		});
+		
+		injector.getInstance(CurrentStage.class).register(stage);
 
 		stage.show();
 	}

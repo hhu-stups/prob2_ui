@@ -1,10 +1,12 @@
 package de.prob2.ui.groovy;
 
 import java.io.IOException;
+import java.util.Map;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import com.google.inject.Inject;
+import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -32,11 +34,11 @@ public class GroovyObjectStage extends Stage {
 	private ObservableList<GroovyObjectItem> items = FXCollections.observableArrayList();
 	
 	private FXMLLoader loader;
-	
+	private CurrentStage currentStage;
 	private MetaPropertiesHandler groovyHandler;
 	
 	@Inject
-	private GroovyObjectStage(FXMLLoader loader, MetaPropertiesHandler groovyHandler) {
+	private GroovyObjectStage(FXMLLoader loader, CurrentStage currentStage, MetaPropertiesHandler groovyHandler) {
 		this.loader = loader;
 		try {
 			loader.setLocation(getClass().getResource("groovy_object_stage.fxml"));
@@ -50,7 +52,9 @@ public class GroovyObjectStage extends Stage {
 			close();
 		});
 		this.groovyHandler = groovyHandler;
-
+		this.currentStage = currentStage;
+		
+		currentStage.register(this);
 	}
 	
 	@Override
@@ -70,12 +74,11 @@ public class GroovyObjectStage extends Stage {
 	}
 	
 	private void fillList(Bindings binding) {
-		int i = 0;
-		for(String s : binding.keySet()) {
-			Object object = binding.values().toArray()[i];
-			items.add(new GroovyObjectItem(s,object, new GroovyClassStage(loader, groovyHandler)));
-			i++;
-		}	
+		for (final Map.Entry<String, Object> entry : binding.entrySet()) {
+			GroovyClassStage stage = new GroovyClassStage(loader, groovyHandler);
+			currentStage.register(stage);
+			items.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), stage));
+		}
 	}
 	
 	@FXML
