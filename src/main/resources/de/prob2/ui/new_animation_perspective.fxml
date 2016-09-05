@@ -6,13 +6,11 @@
 <?import de.prob2.ui.animations.AnimationsView?>
 <?import de.prob2.ui.states.StatesView?>
 <?import javafx.scene.control.Accordion?>
-<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.VBox?>
 <fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml">
-    <!--<left>
+    <left>
         <AnchorPane minWidth="280.0">
             <Accordion fx:id="accordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <panes>
@@ -31,16 +29,6 @@
                 </panes>
             </Accordion>
         </AnchorPane>
-    </left>-->
-    <left>
-        <VBox fx:id="vBox">
-            <children>
-                <OperationsView fx:id="operations"/>
-                <HistoryView fx:id="history"/>
-                <ModelcheckingController fx:id="modelcheck"/>
-                <AnimationsView fx:id="animations"/>
-            </children>
-        </VBox>
     </left>
     <center>
         <StatesView/>
