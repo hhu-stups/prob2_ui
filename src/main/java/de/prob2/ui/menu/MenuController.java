@@ -237,7 +237,7 @@ public class MenuController extends MenuBar {
 			e.printStackTrace();
 		}
 
-		if (false && System.getProperty("os.name", "").toLowerCase().contains("mac")) {
+		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
 			MenuToolkit tk = MenuToolkit.toolkit();
