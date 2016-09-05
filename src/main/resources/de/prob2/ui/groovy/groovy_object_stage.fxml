@@ -2,24 +2,25 @@
 
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<?import javafx.scene.layout.AnchorPane?>
-
-
 <fx:root type="Stage" title="Groovy Objects" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene height="400.0" width="600.0">
-    	  <TableView fx:id="tv_objects" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
-    	     <columns>
-    	        <TableColumn fx:id="objects" editable="true" prefWidth="89.0" text="Objects" />
-    	        <TableColumn fx:id="classes" editable="true" prefWidth="89.0" text="Class" />
-    	        <TableColumn fx:id="values" editable="true" prefWidth="89.0" text="Value" />
-    	     </columns>
-    	     <columnResizePolicy>
-    	        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-    	     </columnResizePolicy>
-    	  </TableView>
-      </Scene>
-    </scene>
+			<!-- TableView does not extend Pane, so we have to wrap it in a StackPane so we can add the menu bar to it on Mac. -->
+			<StackPane>
+				<TableView fx:id="tv_objects" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
+					<columns>
+						<TableColumn fx:id="objects" editable="true" prefWidth="89.0" text="Objects" />
+						<TableColumn fx:id="classes" editable="true" prefWidth="89.0" text="Class" />
+						<TableColumn fx:id="values" editable="true" prefWidth="89.0" text="Value" />
+					</columns>
+					<columnResizePolicy>
+						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+					</columnResizePolicy>
+				</TableView>
+			</StackPane>
+		</Scene>
+	</scene>
 </fx:root>
