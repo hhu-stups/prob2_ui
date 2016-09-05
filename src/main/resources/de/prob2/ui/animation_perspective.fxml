@@ -1,34 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.dotty.DottyView?>
 <?import de.prob2.ui.history.HistoryView?>
 <?import de.prob2.ui.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.operations.OperationsView?>
+<?import de.prob2.ui.animations.AnimationsView?>
 <?import de.prob2.ui.states.StatesView?>
 <?import javafx.scene.control.Accordion?>
-<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.TitledPane?>
-<SplitPane dividerPositions="0.3" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.AnimationPerspective">
-	<!--dividerPositions="0.3"-->
-	<AnchorPane minWidth="280.0">
-		<Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-			<!--layoutX="-28.0" layoutY="128.0" prefHeight="398.0" prefWidth="174.0"-->
-			<panes>
-				<TitledPane text="Operations">
-					<OperationsView/>
-				</TitledPane>
-				<TitledPane text="History">
-					<HistoryView/>
-				</TitledPane>
-				<TitledPane text="Dotty">
-					<DottyView/>
-				</TitledPane>
-				<TitledPane text="Model Check Stats">
-					<ModelcheckingController/>
-				</TitledPane>
-			</panes>
-		</Accordion>
-	</AnchorPane>
-	<StatesView/>
-</SplitPane>
+<?import javafx.scene.layout.BorderPane?>
+<fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml">
+	<left>
+		<AnchorPane minWidth="280.0">
+			<Accordion fx:id="accordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+				<panes>
+					<TitledPane text="Operations" fx:id="operationsTP">
+						<OperationsView fx:id="operations"/>
+					</TitledPane>
+					<TitledPane text="History" fx:id="historyTP">
+						<HistoryView fx:id="history"/>
+					</TitledPane>
+					<TitledPane text="Model Check Stats" fx:id="modelcheckTP">
+						<ModelcheckingController fx:id="modelcheck"/>
+					</TitledPane>
+					<TitledPane text="Animations" fx:id="animationsTP">
+						<AnimationsView fx:id="animations"/>
+					</TitledPane>
+				</panes>
+			</Accordion>
+		</AnchorPane>
+	</left>
+	<center>
+		<StatesView/>
+	</center>
+</fx:root>

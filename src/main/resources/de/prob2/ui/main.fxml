@@ -4,14 +4,14 @@
 <?import java.lang.*?>
 <?import de.prob2.ui.menu.MenuController?>
 <?import javafx.scene.layout.*?>
-<?import de.prob2.ui.NewAnimationPerspective?>
+<?import de.prob2.ui.AnimationPerspective?>
 
 <BorderPane fx:id="rootContainer" maxHeight="Infinity"
 			maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
 			prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
 		<!--<fx:include fx:id="embeddedView" source="animation_perspective.fxml" />-->
-		<NewAnimationPerspective fx:id="embeddedView"/>
+		<AnimationPerspective fx:id="embeddedView"/>
 	</center>
 	<top>
 		<MenuController/>
