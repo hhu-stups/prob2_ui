@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.google.inject.Inject;
 import de.prob.check.ModelCheckingOptions;
+import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -34,6 +35,7 @@ public class ModelcheckingStage extends Stage {
 	@Inject
 	public ModelcheckingStage(
 		CurrentTrace currentTrace,
+		CurrentStage currentStage,
 		FXMLLoader loader,
 		ModelcheckingController modelcheckController
 	) {
@@ -47,6 +49,8 @@ public class ModelcheckingStage extends Stage {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		currentStage.register(this);
 	}
 
 	@FXML

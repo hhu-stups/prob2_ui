@@ -3,7 +3,8 @@ package de.prob2.ui.dotty;
 import java.io.IOException;
 
 import com.google.inject.Inject;
-
+import com.google.inject.Singleton;
+import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ScrollPane;
@@ -11,14 +12,15 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
-public class DottyStage extends Stage {
+@Singleton
+public final class DottyStage extends Stage {
 	@FXML
 	ImageView graph;
 	@FXML
 	ScrollPane pane;
 
 	@Inject
-	public DottyStage(FXMLLoader loader) {
+	private DottyStage(FXMLLoader loader, CurrentStage currentStage) {
 		try {
 			loader.setLocation(getClass().getResource("dotty_stage.fxml"));
 			loader.setRoot(this);
@@ -27,6 +29,8 @@ public class DottyStage extends Stage {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		currentStage.register(this);
 	}
 
 	@FXML

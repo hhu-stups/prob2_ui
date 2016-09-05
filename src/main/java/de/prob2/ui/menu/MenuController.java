@@ -20,6 +20,7 @@ import de.prob2.ui.groovy.GroovyConsoleStage;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modelchecking.ModelcheckingStage;
 import de.prob2.ui.preferences.PreferencesStage;
+import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.BlacklistStage;
 import javafx.event.ActionEvent;
@@ -41,15 +42,18 @@ import javafx.stage.Window;
 public class MenuController extends MenuBar {
 	private final Api api;
 	private final AnimationSelector animationSelector;
+	private final CurrentStage currentStage;
 	private final CurrentTrace currentTrace;
-	private final BlacklistStage blacklistStage;
-	private final PreferencesStage preferencesStage;
-	private final ModelcheckingController modelcheckingController;
-	private final Stage mcheckStage;
 	private final FormulaGenerator formulaGenerator;
+	private final ModelcheckingController modelcheckingController;
+	
+	private final BlacklistStage blacklistStage;
+	private final DottyStage dottyStage;
+	private final Stage mcheckStage;
+	private final PreferencesStage preferencesStage;
 	private final GroovyConsoleStage groovyConsoleStage;
+	
 	private Window window;
-	private DottyStage dottyStage;
 	
 	@FXML private MenuItem enterFormulaForVisualization;
 
@@ -127,6 +131,14 @@ public class MenuController extends MenuBar {
 					"Unknown file type selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
 		}
 	}
+	
+	@FXML
+	private void handleClose(final ActionEvent event) {
+		final Stage stage = this.currentStage.get();
+		if (stage != null) {
+			stage.close();
+		}
+	}
 
 	@FXML
 	private void handleEditBlacklist(ActionEvent event) {
@@ -187,30 +199,45 @@ public class MenuController extends MenuBar {
 
 	@Inject
 
-	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector, final CurrentTrace currentTrace,
-			final BlacklistStage blacklistStage, final PreferencesStage preferencesStage,
-			final ModelcheckingStage modelcheckingStage, final ModelcheckingController modelcheckingController,
-			final FormulaGenerator formulaGenerator, final DottyStage dottyStage, final GroovyConsoleStage groovyConsoleStage) {
+	private MenuController(
+		final FXMLLoader loader,
+		
+		final Api api,
+		final AnimationSelector animationSelector,
+		final CurrentStage currentStage,
+		final CurrentTrace currentTrace,
+		final FormulaGenerator formulaGenerator,
+		final ModelcheckingController modelcheckingController,
+		
+		final BlacklistStage blacklistStage,
+		final DottyStage dottyStage,
+		final GroovyConsoleStage groovyConsoleStage,
+		final ModelcheckingStage modelcheckingStage,
+		final PreferencesStage preferencesStage
+	) {
 		this.api = api;
 		this.animationSelector = animationSelector;
+		this.currentStage = currentStage;
 		this.currentTrace = currentTrace;
-		this.blacklistStage = blacklistStage;
-		this.preferencesStage = preferencesStage;
 		this.formulaGenerator = formulaGenerator;
 		this.modelcheckingController = modelcheckingController;
-		this.mcheckStage = modelcheckingStage;
+		
+		this.blacklistStage = blacklistStage;
 		this.dottyStage = dottyStage;
 		this.groovyConsoleStage = groovyConsoleStage;
+		this.mcheckStage = modelcheckingStage;
+		this.preferencesStage = preferencesStage;
+		
+		loader.setLocation(getClass().getResource("menu.fxml"));
+		loader.setRoot(this);
+		loader.setController(this);
 		try {
-			loader.setLocation(getClass().getResource("menu.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
+		if (false && System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
 			MenuToolkit tk = MenuToolkit.toolkit();
@@ -229,9 +256,14 @@ public class MenuController extends MenuBar {
 
 			// Create Mac-style Window menu
 			Menu windowMenu = new Menu("Window");
-			windowMenu.getItems().addAll(tk.createMinimizeMenuItem(), tk.createZoomMenuItem(),
-					tk.createCycleWindowsItem(), new SeparatorMenuItem(), tk.createBringAllToFrontItem(),
-					new SeparatorMenuItem());
+			windowMenu.getItems().addAll(
+				tk.createMinimizeMenuItem(),
+				tk.createZoomMenuItem(),
+				tk.createCycleWindowsItem(),
+				new SeparatorMenuItem(),
+				tk.createBringAllToFrontItem(),
+				new SeparatorMenuItem()
+			);
 			tk.autoAddWindowMenuItems(windowMenu);
 			this.getMenus().add(this.getMenus().size() - 1, windowMenu);
 

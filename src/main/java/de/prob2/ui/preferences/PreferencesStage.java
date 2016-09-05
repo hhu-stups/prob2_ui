@@ -8,6 +8,7 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob.prolog.term.ListPrologTerm;
+import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -46,7 +47,8 @@ public class PreferencesStage extends Stage {
 	private PreferencesStage(
 		final CurrentTrace currentTrace,
 		final Preferences preferences,
-		final FXMLLoader loader
+		final FXMLLoader loader,
+		final CurrentStage currentStage
 	) {
 		this.currentTrace = currentTrace;
 		this.preferences = preferences;
@@ -60,6 +62,8 @@ public class PreferencesStage extends Stage {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		currentStage.register(this);
 	}
 
 	@FXML
