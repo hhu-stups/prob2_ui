@@ -18,15 +18,13 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 
 @Singleton
 public class NewAnimationPerspective extends BorderPane {
     // TODO improve DragDrop/Docking
-    // TODO drag image
+    // FIXME drag view model checking
     // TODO? revert to SplitPane
     @FXML
     private OperationsView operations;
@@ -98,7 +96,7 @@ public class NewAnimationPerspective extends BorderPane {
             }
             dragged = false;
             snapshot.setImage(null);
-            this.getChildren().remove(snapshot);
+            ((BorderPane) this.getParent()).getChildren().remove(snapshot);
             mouseEvent.consume();
         });
         node.setOnDragDetected(mouseEvent -> {
@@ -106,9 +104,9 @@ public class NewAnimationPerspective extends BorderPane {
             SnapshotParameters snapParams = new SnapshotParameters();
             snapParams.setFill(Color.TRANSPARENT);
             snapshot.setImage(node.snapshot(snapParams,null));
-            snapshot.setFitWidth(50);
+            snapshot.setFitWidth(100);
             snapshot.setPreserveRatio(true);
-            this.getChildren().add(snapshot);
+            ((BorderPane) this.getParent()).getChildren().add(snapshot);
             mouseEvent.consume();
         });
     }
