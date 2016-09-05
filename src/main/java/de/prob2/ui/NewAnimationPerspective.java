@@ -11,12 +11,17 @@ import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 
 @Singleton
 public class NewAnimationPerspective extends BorderPane {
@@ -75,23 +80,36 @@ public class NewAnimationPerspective extends BorderPane {
 	}
 
     private void registerDrag(final Node node, final TitledPane nodeTP){
-        node.setOnMouseEntered(s -> this.setCursor(Cursor.OPEN_HAND));
-        node.setOnMousePressed(s -> this.setCursor(Cursor.CLOSED_HAND));
-        node.setOnMouseDragEntered(s -> {
+        node.setOnMouseEntered(mouseEvent -> this.setCursor(Cursor.OPEN_HAND));
+        node.setOnMousePressed(mouseEvent -> this.setCursor(Cursor.CLOSED_HAND));
+        node.setOnMouseDragEntered(mouseEvent -> {
             dragged = true;
-            s.consume();
+            mouseEvent.consume();
         });
-        node.setOnMouseReleased(s -> {
+        node.setOnMouseDragged(mouseEvent -> {
+            Point2D position = this.getParent().sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
+            snapshot.relocate(position.getX(), position.getY());
+            mouseEvent.consume();
+        });
+        node.setOnMouseReleased(mouseEvent -> {
             this.setCursor(Cursor.DEFAULT);
             if (dragged){
                 dragDropped(node,nodeTP);
             }
             dragged = false;
-            s.consume();
+            snapshot.setImage(null);
+            this.getChildren().remove(snapshot);
+            mouseEvent.consume();
         });
-        node.setOnDragDetected(s -> {
+        node.setOnDragDetected(mouseEvent -> {
             node.startFullDrag();
-            s.consume();
+            SnapshotParameters snapParams = new SnapshotParameters();
+            snapParams.setFill(Color.TRANSPARENT);
+            snapshot.setImage(node.snapshot(snapParams,null));
+            snapshot.setFitWidth(50);
+            snapshot.setPreserveRatio(true);
+            this.getChildren().add(snapshot);
+            mouseEvent.consume();
         });
     }
 
