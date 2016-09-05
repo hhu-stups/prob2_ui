@@ -22,7 +22,6 @@ import de.prob2.ui.modelchecking.ModelcheckingStage;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.states.BlacklistStage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -34,6 +33,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -47,7 +47,6 @@ public class MenuController extends MenuBar {
 	private final FormulaGenerator formulaGenerator;
 	private final ModelcheckingController modelcheckingController;
 	
-	private final BlacklistStage blacklistStage;
 	private final DottyStage dottyStage;
 	private final Stage mcheckStage;
 	private final PreferencesStage preferencesStage;
@@ -55,7 +54,10 @@ public class MenuController extends MenuBar {
 	
 	private Window window;
 	
+	@FXML private Menu windowMenu;
+	@FXML private MenuItem preferencesItem;
 	@FXML private MenuItem enterFormulaForVisualization;
+	@FXML private MenuItem aboutItem;
 
 	@FXML
 	private void handleLoadDefault() {
@@ -139,13 +141,7 @@ public class MenuController extends MenuBar {
 			stage.close();
 		}
 	}
-
-	@FXML
-	private void handleEditBlacklist(ActionEvent event) {
-		this.blacklistStage.show();
-		this.blacklistStage.toFront();
-	}
-
+	
 	@FXML
 	private void handlePreferences(ActionEvent event) {
 		this.preferencesStage.show();
@@ -209,7 +205,6 @@ public class MenuController extends MenuBar {
 		final FormulaGenerator formulaGenerator,
 		final ModelcheckingController modelcheckingController,
 		
-		final BlacklistStage blacklistStage,
 		final DottyStage dottyStage,
 		final GroovyConsoleStage groovyConsoleStage,
 		final ModelcheckingStage modelcheckingStage,
@@ -222,7 +217,6 @@ public class MenuController extends MenuBar {
 		this.formulaGenerator = formulaGenerator;
 		this.modelcheckingController = modelcheckingController;
 		
-		this.blacklistStage = blacklistStage;
 		this.dottyStage = dottyStage;
 		this.groovyConsoleStage = groovyConsoleStage;
 		this.mcheckStage = modelcheckingStage;
@@ -240,22 +234,33 @@ public class MenuController extends MenuBar {
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
-			MenuToolkit tk = MenuToolkit.toolkit();
+			final MenuToolkit tk = MenuToolkit.toolkit();
 
+			// Remove About menu item from Help
+			aboutItem.getParentMenu().getItems().remove(aboutItem);
+			aboutItem.setText("About ProB 2");
+			
+			// Remove Preferences menu item from Edit
+			preferencesItem.getParentMenu().getItems().remove(preferencesItem);
+			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
+			
 			// Create Mac-style application menu
-			Menu applicationMenu = tk.createDefaultApplicationMenu("ProB 2");
+			final Menu applicationMenu = tk.createDefaultApplicationMenu("ProB 2");
 			this.getMenus().add(0, applicationMenu);
 			tk.setApplicationMenu(applicationMenu);
+			applicationMenu.getItems().setAll(
+				aboutItem,
+				new SeparatorMenuItem(),
+				preferencesItem,
+				new SeparatorMenuItem(),
+				tk.createHideMenuItem("ProB 2"),
+				tk.createHideOthersMenuItem(),
+				tk.createUnhideAllMenuItem(),
+				new SeparatorMenuItem(),
+				tk.createQuitMenuItem("ProB 2")
+			);
 
-			// Move About menu item from Help to application menu
-			Menu helpMenu = this.getMenus().get(this.getMenus().size() - 1);
-			MenuItem aboutItem = helpMenu.getItems().get(helpMenu.getItems().size() - 1);
-			aboutItem.setText("About ProB 2");
-			helpMenu.getItems().remove(aboutItem);
-			applicationMenu.getItems().set(0, aboutItem);
-
-			// Create Mac-style Window menu
-			Menu windowMenu = new Menu("Window");
+			// Add Mac-style items to Window menu
 			windowMenu.getItems().addAll(
 				tk.createMinimizeMenuItem(),
 				tk.createZoomMenuItem(),

@@ -105,7 +105,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 	@Override
 	public void startEdit() {
 		final PrefTreeItem item = this.getTreeTableRow().getItem();
-		final PreferenceType valueType = item.getValueType();
+		final ProBPreferenceType valueType = item.getValueType();
 		// If there is no valueType, this is a category row, which can't be edited.
 		if (valueType == null) {
 			return;

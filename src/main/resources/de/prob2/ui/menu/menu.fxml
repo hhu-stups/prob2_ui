@@ -10,8 +10,7 @@
 		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W" onAction="#handleClose" />
 	</Menu>
 	<Menu text="%menu.edit">
-		<MenuItem text="%menu.edit.items.editBlacklist" onAction="#handleEditBlacklist" />
-		<MenuItem text="%menu.edit.items.preferences" onAction="#handlePreferences" />
+		<MenuItem fx:id="preferencesItem" text="%menu.edit.items.preferences" onAction="#handlePreferences" />
 	</Menu>
 	<Menu text="%menu.formula">
 		<MenuItem fx:id="enterFormulaForVisualization" text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />
@@ -29,7 +28,10 @@
 		<MenuItem text="%menu.perspectives.default" onAction="#handleLoadDefault" />
 		<MenuItem text="%menu.perspectives.load" onAction="#handleLoadPerspective" />
 	</Menu>
+	<Menu fx:id="windowMenu" text="%menu.window">
+		
+	</Menu>
 	<Menu text="%menu.help">
-		<MenuItem text="%menu.help.items.about" />
+		<MenuItem fx:id="aboutItem" text="%menu.help.items.about" />
 	</Menu>
 </fx:root>
