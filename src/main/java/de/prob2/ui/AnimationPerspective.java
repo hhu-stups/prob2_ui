@@ -55,7 +55,7 @@ public class AnimationPerspective extends BorderPane {
 			loader.setRoot(this);
 			loader.setController(this);
 			loader.load();
-			onDrag();
+			//onDrag();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
