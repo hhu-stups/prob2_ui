@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.image.Image?>
-
 <fx:root type="Stage" title="Dotty" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene width="800" height="600">
-			<ScrollPane fx:id="pane" stylesheets="@../../../../prob.css">
-				<content>
+			<!-- ScrollPane *obviously* does not extend Pane, so we have to wrap it in a StackPane so we can add the menu bar to it on Mac. -->
+			<StackPane>
+				<ScrollPane fx:id="pane" stylesheets="@../../../../prob.css">
 					<ImageView fx:id="graph" fitHeight="1000" fitWidth="1000">
-						<image>
-							<Image url="@/glyphicons_free/glyphicons/png/glyphicons-9-film.png" />
-						</image>
+						<Image url="@/glyphicons_free/glyphicons/png/glyphicons-9-film.png"/>
 					</ImageView>
-				</content>
-			</ScrollPane>
+				</ScrollPane>
+			</StackPane>
 		</Scene>
 	</scene>
 </fx:root>
