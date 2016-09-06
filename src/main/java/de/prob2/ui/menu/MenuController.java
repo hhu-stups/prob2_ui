@@ -270,7 +270,6 @@ public class MenuController extends MenuBar {
 				new SeparatorMenuItem()
 			);
 			tk.autoAddWindowMenuItems(windowMenu);
-			this.getMenus().add(this.getMenus().size() - 1, windowMenu);
 
 			// Make this the global menu bar
 			tk.setGlobalMenuBar(this);
