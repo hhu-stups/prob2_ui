@@ -22,7 +22,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 
 @Singleton
-public class AnimationPerspective extends BorderPane {
+public final class AnimationPerspective extends BorderPane {
 	// TODO improve DragDrop/Docking
 	// FIXME drag view model checking
 	// TODO? revert to SplitPane
@@ -47,15 +47,14 @@ public class AnimationPerspective extends BorderPane {
 
 	private boolean dragged;
 	private ImageView snapshot = new ImageView();
+	
 	@Inject
-	public AnimationPerspective() {
+	private AnimationPerspective(FXMLLoader loader) {
+		loader.setLocation(getClass().getResource("animation_perspective.fxml"));
+		loader.setRoot(this);
+		loader.setController(this);
 		try {
-			FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
-			loader.setLocation(getClass().getResource("animation_perspective.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
 			loader.load();
-			//onDrag();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

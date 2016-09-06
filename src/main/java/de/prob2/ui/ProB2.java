@@ -13,9 +13,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class ProB2 extends Application {
-
-	public static Injector injector;
-
 	public static void main(String... args) {
 		Platform.setImplicitExit(true);
 		launch(args);
@@ -24,7 +21,7 @@ public class ProB2 extends Application {
 	@Override
 	public void start(Stage stage) throws Exception {
 		ProB2Module module = new ProB2Module();
-		ProB2.injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
+		Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(getClass().getResource("main.fxml"));
