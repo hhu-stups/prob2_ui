@@ -1,55 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.paint.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.effect.*?>
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
-
-<fx:root type="javafx.scene.layout.Pane" xmlns:fx="http://javafx.com/fxml"   prefHeight="86.0" prefWidth="468.0"  >
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.Reflection?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<fx:root type="javafx.scene.layout.Pane" xmlns:fx="http://javafx.com/fxml" prefHeight="86.0" prefWidth="468.0">
 	<opaqueInsets>
-		<Insets />
+		<Insets/>
 	</opaqueInsets>
 	<effect>
-		<Reflection />
+		<Reflection/>
 	</effect>
-	<children>
-		<VBox prefHeight="62.0" prefWidth="472.0">
-			<children>
-				<HBox prefHeight="12.0" prefWidth="432.0" VBox.vgrow="ALWAYS">
-					<children>
-						<Label text="%modeline.perform.command" textFill="#868686">
-							<font>
-								<Font size="12.0" />
-							</font>
-						</Label>
-						<Label alignment="CENTER_RIGHT" prefHeight="13.0" prefWidth="315.0"
-							text="%modeline.instructions"
-							textAlignment="RIGHT" textFill="#868686" HBox.hgrow="ALWAYS">
-							<font>
-								<Font size="12.0" />
-							</font>
-						</Label>
-					</children>
-					<VBox.margin>
-						<Insets left="20.0" right="20.0" top="10.0" />
-					</VBox.margin>
-				</HBox>
-				<TextField prefHeight="27.0" prefWidth="387.0">
-					<VBox.margin>
-						<Insets left="20.0" right="20.0" />
-					</VBox.margin>
-				</TextField>
-				<ListView prefHeight="200.0" prefWidth="200.0" visible="false">
-					<VBox.margin>
-						<Insets left="20.0" right="20.0" top="5.0" />
-					</VBox.margin>
-				</ListView>
-			</children>
-		</VBox>
-	</children>
+	<VBox prefHeight="62.0" prefWidth="472.0">
+		<HBox prefHeight="12.0" prefWidth="432.0" VBox.vgrow="ALWAYS">
+			<VBox.margin>
+				<Insets left="20.0" right="20.0" top="10.0"/>
+			</VBox.margin>
+			<Label text="%modeline.perform.command" textFill="#868686">
+				<font>
+					<Font size="12.0"/>
+				</font>
+			</Label>
+			<Label alignment="CENTER_RIGHT" prefHeight="13.0" prefWidth="315.0"
+				text="%modeline.instructions"
+				textAlignment="RIGHT" textFill="#868686" HBox.hgrow="ALWAYS">
+				<font>
+					<Font size="12.0"/>
+				</font>
+			</Label>
+		</HBox>
+		<TextField prefHeight="27.0" prefWidth="387.0">
+			<VBox.margin>
+				<Insets left="20.0" right="20.0"/>
+			</VBox.margin>
+		</TextField>
+		<ListView prefHeight="200.0" prefWidth="200.0" visible="false">
+			<VBox.margin>
+				<Insets left="20.0" right="20.0" top="5.0"/>
+			</VBox.margin>
+		</ListView>
+	</VBox>
 </fx:root>
 

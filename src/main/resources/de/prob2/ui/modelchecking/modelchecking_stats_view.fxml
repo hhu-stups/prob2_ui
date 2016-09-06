@@ -5,16 +5,10 @@
 <?import javafx.scene.layout.VBox?>
 
 <fx:root fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" stylesheets="@../../../../prob.css" type="ScrollPane" vbarPolicy="ALWAYS" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
-	<content>
-		<VBox>
-			<children>
-				<AnchorPane>
-					<children>
-						<VBox fx:id="historyBox" style="-fx-border-color: grey;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
-					</children>
-				</AnchorPane>
-				<AnchorPane fx:id="statsPane" />
-			</children>
-		</VBox>
-	</content>
+	<VBox>
+		<AnchorPane>
+			<VBox fx:id="historyBox" style="-fx-border-color: grey;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0"/>
+		</AnchorPane>
+		<AnchorPane fx:id="statsPane"/>
+	</VBox>
 </fx:root>
