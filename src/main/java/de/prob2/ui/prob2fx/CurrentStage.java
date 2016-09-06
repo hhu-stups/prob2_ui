@@ -9,6 +9,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.stage.Stage;
 
+/**
+ * <p>A singleton read-only property holding the current foreground {@link Stage}. If there is no JavaFX Stage in the foreground, the value is {@code null}.</p>
+ * <p>This class keeps track of the current stage using listeners on {@link Stage#focusedProperty()}. Because it is not possible to listen on this property for every stage automatically, stages must be manually registered using the {@link #register(Stage)} method. If a non-registered Stage is in the foreground, the property value is {@code null}, as if the foreground window was not a JavaFX Stage.</p>
+ */
 @Singleton
 public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 	private final ObjectProperty<Stage> stage;
@@ -53,10 +57,6 @@ public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 	@Override
 	public void removeListener(final InvalidationListener listener) {
 		this.stage.removeListener(listener);
-	}
-	
-	private void set(final Stage stage) {
-		this.stage.set(stage);
 	}
 	
 	public void register(final Stage stage) {

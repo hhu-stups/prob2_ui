@@ -6,6 +6,7 @@ import de.prob.animator.IAnimator;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
+import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -32,6 +33,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	private final BooleanProperty exists;
 	private final BooleanProperty animatorBusy;
 	
+	private final CurrentState currentState;
 	private final CurrentStateSpace stateSpace;
 	private final CurrentModel model;
 	
@@ -47,6 +49,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	@Inject
 	private CurrentTrace(
 		final AnimationSelector animationSelector,
+		final CurrentState currentState,
 		final CurrentStateSpace currentStateSpace,
 		final CurrentModel currentModel
 	) {
@@ -77,6 +80,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 			}
 		});
 		
+		this.currentState = currentState;
 		this.stateSpace = currentStateSpace;
 		this.model = currentModel;
 		
@@ -91,6 +95,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
+				this.currentState.set(null);
 				this.stateSpace.set(null);
 				this.model.set(null);
 				
@@ -104,6 +109,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 			} else {
 				this.animationSelector.traceChange(to);
 				
+				this.currentState.set(to.getCurrentState());
 				this.stateSpace.set(to.getStateSpace());
 				this.model.set(to.getModel());
 				
@@ -161,6 +167,24 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	 */
 	public void setAnimatorBusy(final boolean busy) {
 		this.animatorBusyProperty().set(busy);
+	}
+	
+	/**
+	 * A {@link CurrentState} holding the current {@link Trace}'s {@link State}.
+	 *
+	 * @return a {@link CurrentState} holding the current {@link Trace}'s {@link State}
+	 */
+	public CurrentState currentStateProperty() {
+		return this.currentState;
+	}
+	
+	/**
+	 * Get the current {@link Trace}'s {@link State}.
+	 *
+	 * @return the current {@link Trace}'s {@link State}
+	 */
+	public State getCurrentState() {
+		return this.currentStateProperty().get();
 	}
 	
 	/**

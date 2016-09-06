@@ -24,10 +24,14 @@ public final class FormulaGenerator {
 	}
 	
 	private ExpandedFormula expandFormula(final IEvalElement formula) {
+		if (!currentTrace.getCurrentState().isInitialised()) {
+			throw new EvaluationException("Formula evaluation is only possible in an initialized state");
+		}
+		
 		final InsertFormulaForVisualizationCommand insertCmd = new InsertFormulaForVisualizationCommand(formula);
 		currentTrace.getStateSpace().execute(insertCmd);
 		
-		final ExpandFormulaCommand expandCmd = new ExpandFormulaCommand(insertCmd.getFormulaId(), currentTrace.get().getCurrentState());
+		final ExpandFormulaCommand expandCmd = new ExpandFormulaCommand(insertCmd.getFormulaId(), currentTrace.getCurrentState());
 		currentTrace.getStateSpace().execute(expandCmd);
 		
 		return expandCmd.getResult();
@@ -35,11 +39,6 @@ public final class FormulaGenerator {
 	
 	public void showFormula(final IEvalElement formula) {
 		try {
-			if (!currentTrace.get().getCurrentState().isInitialised()) {
-				// noinspection ThrowCaughtLocally
-				throw new EvaluationException("Formula evaluation is only possible in an initialized state");
-			}
-			
 			ExpandedFormula expanded = expandFormula(formula);
 			FormulaView fview = new FormulaView(new FormulaGraph(new FormulaNode(expanded)));
 			currentStage.register(fview);

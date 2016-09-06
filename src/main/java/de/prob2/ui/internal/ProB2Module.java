@@ -15,6 +15,7 @@ import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modeline.ModelineController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentModel;
+import de.prob2.ui.prob2fx.CurrentState;
 import de.prob2.ui.prob2fx.CurrentStateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
@@ -33,6 +34,7 @@ public class ProB2Module extends AbstractModule {
 		// General stuff
 		bind(ClassBlacklist.class);
 		bind(CurrentModel.class);
+		bind(CurrentState.class);
 		bind(CurrentStateSpace.class);
 		bind(CurrentTrace.class);
 		bind(FormulaGenerator.class);

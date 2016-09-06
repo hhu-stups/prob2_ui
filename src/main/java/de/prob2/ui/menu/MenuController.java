@@ -190,7 +190,7 @@ public class MenuController extends MenuBar {
 			}
 		});
 		
-		this.enterFormulaForVisualization.disableProperty().bind(currentTrace.existsProperty().not());
+		this.enterFormulaForVisualization.disableProperty().bind(currentTrace.currentStateProperty().initializedProperty().not());
 	}
 
 	@Inject
