@@ -108,7 +108,6 @@ public class GroovyConsole extends TextArea {
 		this.addEventFilter(KeyEvent.ANY, e-> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
-				return;
 			}
 		});
 		
@@ -120,39 +119,21 @@ public class GroovyConsole extends TextArea {
 			}
 		});
 		
-		this.setOnKeyPressed(e-> {
-			if(e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
+		this.setOnKeyPressed(e -> {
+			if (e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
 				handleArrowKeys(e);
 				this.setScrollTop(Double.MAX_VALUE);
-				return;
-			}
-			
-			if(e.getCode().isArrowKey()) {
-				return;
-			}
-			
-			if(e.getCode().isNavigationKey()) {
+			} else if (e.getCode().isArrowKey()) {
+			} else if (e.getCode().isNavigationKey()) {
 				e.consume();
-				return;
-			}
-			if(e.getCode().equals(KeyCode.BACK_SPACE) || e.getCode().equals(KeyCode.DELETE)) {
+			} else if (e.getCode().equals(KeyCode.BACK_SPACE) || e.getCode().equals(KeyCode.DELETE)) {
 				handleDeletion(e);
-				return;
-			}
-			if(e.getCode().equals(KeyCode.ENTER)) {
+			} else if (e.getCode().equals(KeyCode.ENTER)) {
 				handleEnter(e);
-				return;
-			}
-						
-			if(!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
+			} else if (!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
 				handleInsertChar(e);
-				return;
+			} else if (handleRest(e)) {
 			}
-			
-			if(handleRest(e)) {
-				return;
-			}
-			
 		});
 	}
 	
@@ -172,7 +153,7 @@ public class GroovyConsole extends TextArea {
 			}
 		}
 	
-		if((e.isShortcutDown() || e.isAltDown())) {
+		if (e.isShortcutDown() || e.isAltDown()) {
 			return;
 		}
 		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText()).toString();
@@ -187,12 +168,12 @@ public class GroovyConsole extends TextArea {
 		currentPosInLine = 0;
 		e.consume();
 		
-		if(instructions.size() == 0) {
+		if(instructions.isEmpty()) {
 			instructions.add(new Instruction(currentLine, InstructionOption.ENTER));
 		} else {
 			//add Instruction if last Instruction is not "", otherwise replace it
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
-			if(!(lastinstruction.equals("")) && !lastinstruction.equals(currentLine)) {
+			if(!lastinstruction.equals("") && !lastinstruction.equals(currentLine)) {
 				instructions.add(new Instruction(currentLine, InstructionOption.ENTER));
 			} else if(!currentLine.equals("")) {
 				instructions.set(instructions.size() - 1, new Instruction(currentLine, InstructionOption.ENTER));
@@ -268,7 +249,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleDeletion(KeyEvent e) {
 		boolean needReturn = false;
-		if(!this.getSelectedText().equals("") || this.getLength()  - this.getCaretPosition() > charCounterInLine || (e.isShortcutDown() || e.isAltDown())) {
+		if(!this.getSelectedText().equals("") || this.getLength() - this.getCaretPosition() > charCounterInLine || e.isShortcutDown() || e.isAltDown()) {
 			e.consume();
 			return;
 		}

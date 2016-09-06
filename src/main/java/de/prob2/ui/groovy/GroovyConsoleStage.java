@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 
 import com.google.inject.Singleton;
 import de.prob2.ui.prob2fx.CurrentStage;
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
@@ -17,6 +18,7 @@ public final class GroovyConsoleStage extends Stage {
 	private GroovyConsole groovyConsole;
 
 	@Inject
+	@SuppressWarnings(value = "UR_UNINIT_READ", justification = "Field values are injected by FXMLLoader")
 	private GroovyConsoleStage(FXMLLoader loader, CurrentStage currentStage, GroovyInterpreter interpreter) {
 		try {
 			loader.setLocation(getClass().getResource("groovy_console_stage.fxml"));
@@ -27,7 +29,7 @@ public final class GroovyConsoleStage extends Stage {
 			e.printStackTrace();
 		}
 		groovyConsole.setInterpreter(interpreter);
-		this.setOnCloseRequest(e-> {
+		this.setOnCloseRequest(e -> {
 			groovyConsole.closeObjectStage();
 		});
 		

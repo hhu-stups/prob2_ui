@@ -3,13 +3,13 @@ package de.prob2.ui.groovy;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.codehaus.groovy.reflection.CachedClass;
-
-import groovy.lang.GroovyRuntimeException;
 import groovy.lang.MetaMethod;
 import groovy.lang.PropertyValue;
 import javafx.beans.property.SimpleStringProperty;
+import org.codehaus.groovy.reflection.CachedClass;
 
 public class GroovyClassPropertyItem {
 	
@@ -25,22 +25,20 @@ public class GroovyClassPropertyItem {
 
 	public GroovyClassPropertyItem(Method m) {
 		this.name = new SimpleStringProperty(m.getName());
-		String parameter ="";
-		String exception = "";
-		for(Class<? extends Object> c : m.getParameterTypes()) {
-			parameter += c.getSimpleName() + ", ";
+		final List<String> parameterNames = new ArrayList<>();
+		for (Class<?> c : m.getParameterTypes()) {
+			parameterNames.add(c.getSimpleName());
 		}
-		parameter = parameter.substring(0,Math.max(0,parameter.length()-2));
-		this.params = new SimpleStringProperty(parameter);
+		this.params = new SimpleStringProperty(String.join(", ", parameterNames));
 		this.type = new SimpleStringProperty(m.getReturnType().getSimpleName());
 		this.origin = new SimpleStringProperty("JAVA");
 		this.modifier = new SimpleStringProperty(Modifier.toString(m.getModifiers()));
 		this.declarer = new SimpleStringProperty(m.getDeclaringClass().getSimpleName());
-		for(Class<? extends Object> c: m.getExceptionTypes()) {
-			exception += c.getSimpleName() + ", ";
+		final List<String> exceptionNames = new ArrayList<>();
+		for (Class<?> c : m.getExceptionTypes()) {
+			exceptionNames.add(c.getSimpleName());
 		}
-		exception = exception.substring(0,Math.max(0,exception.length()-2));
-		this.exception = new SimpleStringProperty(exception);
+		this.exception = new SimpleStringProperty(String.join(", ", exceptionNames));
 		this.value = new SimpleStringProperty();
 	}
 	
@@ -55,9 +53,7 @@ public class GroovyClassPropertyItem {
 		this.value = null;
 		try {
 			this.value = new SimpleStringProperty(f.get(null).toString());
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 	}
@@ -85,12 +81,11 @@ public class GroovyClassPropertyItem {
 	
 	public GroovyClassPropertyItem(MetaMethod m) {
 		this.name = new SimpleStringProperty(m.getName());
-		String parameter ="";
-		for(CachedClass c : m.getParameterTypes()) {
-			parameter += c.getName()+ ", ";
+		final List<String> parameterNames = new ArrayList<>();
+		for (CachedClass c : m.getParameterTypes()) {
+			parameterNames.add(c.getName());
 		}
-		parameter = parameter.substring(0,Math.max(0,parameter.length()-2));
-		this.params = new SimpleStringProperty(parameter);
+		this.params = new SimpleStringProperty(String.join(", ", parameterNames));
 		this.type = new SimpleStringProperty(m.getReturnType().getSimpleName());
 		this.origin = new SimpleStringProperty("GROOVY");
 		this.modifier = new SimpleStringProperty(Modifier.toString(m.getModifiers()));

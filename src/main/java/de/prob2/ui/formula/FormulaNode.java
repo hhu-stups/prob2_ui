@@ -75,7 +75,7 @@ public class FormulaNode extends Region {
 	
 	private void draw() {
 		text.setFill(Color.BLACK);
-		if(color == Color.GRAY) {
+		if (color.equals(Color.GRAY)) {
 			text.setFill(Color.WHITE);
 		}
 		rectangle.setStroke(Color.BLACK);

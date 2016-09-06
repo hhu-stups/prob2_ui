@@ -32,15 +32,14 @@ public class FormulaGraph extends Region {
 	}
 			
 	private void draw(FormulaNode node, int level) {
-		FormulaNode current = node;
-		this.getChildren().add(current);
-		if(current.next != null) {
-			for(int i = 0; i < current.next.size(); i++) {
-				double median = (current.next.size()-1)/2.0;
-				FormulaNode children = current.next.get(i);
-				children.setPosition(current.getRight() + 25 + maxWidth(level + 1) - children.getNodeWidth(), current.getY() + (i - median) * calculateHeight(level+1));
-				Line edge1 = new Line(current.getRight(), current.getY(), current.getRight() + 25, children.getY());
-				Line edge2 = new Line(current.getRight() + 25, children.getY(), children.getLeft(), children.getY());
+		this.getChildren().add(node);
+		if(node.next != null) {
+			for(int i = 0; i < node.next.size(); i++) {
+				double median = (node.next.size()-1)/2.0;
+				FormulaNode children = node.next.get(i);
+				children.setPosition(node.getRight() + 25 + maxWidth(level + 1) - children.getNodeWidth(), node.getY() + (i - median) * calculateHeight(level+1));
+				Line edge1 = new Line(node.getRight(), node.getY(), node.getRight() + 25, children.getY());
+				Line edge2 = new Line(node.getRight() + 25, children.getY(), children.getLeft(), children.getY());
 				this.getChildren().add(edge1);
 				this.getChildren().add(edge2);
 				draw(children, level + 1);

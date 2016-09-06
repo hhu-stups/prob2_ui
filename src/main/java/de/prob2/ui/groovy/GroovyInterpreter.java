@@ -31,7 +31,7 @@ public class GroovyInterpreter {
 				return new Pair("", "result");
 			}
 			engine.put("__console", console);
-			logger.trace("Eval {} on {}", instruction.getInstruction(), engine.toString());
+			logger.trace("Eval {} on {}", instruction.getInstruction(), engine);
 			Object eval = engine.eval(instruction.getInstruction());
 			resultString = eval.toString();
 			logger.trace("Evaled {} to {}", instruction.getInstruction(), resultString);

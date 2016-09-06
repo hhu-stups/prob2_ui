@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.Optional;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
@@ -13,7 +14,6 @@ import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob2.ui.ProB2;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.groovy.GroovyConsoleStage;
@@ -39,7 +39,8 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 @Singleton
-public class MenuController extends MenuBar {
+public final class MenuController extends MenuBar {
+	private final Injector injector;
 	private final Api api;
 	private final AnimationSelector animationSelector;
 	private final CurrentStage currentStage;
@@ -61,7 +62,7 @@ public class MenuController extends MenuBar {
 
 	@FXML
 	private void handleLoadDefault() {
-		FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
+		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(getClass().getResource("../main.fxml"));
 		try {
 			loader.load();
@@ -82,7 +83,7 @@ public class MenuController extends MenuBar {
 		File selectedFile = fileChooser.showOpenDialog(window);
 		if (selectedFile != null)
 			try {
-				FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
+				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 				loader.setLocation(new URL("file://" + selectedFile.getPath()));
 				loader.load();
 				Parent root = loader.getRoot();
@@ -198,6 +199,7 @@ public class MenuController extends MenuBar {
 	private MenuController(
 		final FXMLLoader loader,
 		
+		final Injector injector,
 		final Api api,
 		final AnimationSelector animationSelector,
 		final CurrentStage currentStage,
@@ -210,6 +212,7 @@ public class MenuController extends MenuBar {
 		final ModelcheckingStage modelcheckingStage,
 		final PreferencesStage preferencesStage
 	) {
+		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
 		this.currentStage = currentStage;

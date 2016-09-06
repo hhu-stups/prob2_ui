@@ -5,7 +5,7 @@ import javafx.beans.property.SimpleStringProperty;
 public class GroovyObjectItem {
 	
 	private final SimpleStringProperty name;
-	private final Class<? extends Object> clazz;
+	private final Class<?> clazz;
 	private final SimpleStringProperty clazzname;
 	private final SimpleStringProperty value;
 	private Object object;
