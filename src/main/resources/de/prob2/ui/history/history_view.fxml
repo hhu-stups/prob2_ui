@@ -12,7 +12,7 @@
 		AnchorPane.topAnchor="40.0"/>
 	<Button fx:id="btprevious" maxHeight="-Infinity" maxWidth="-Infinity"
 		minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-		prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="4.0"
+		prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="10.0"
 		AnchorPane.topAnchor="10.0">
 		<graphic>
 			<FontAwesomeIconView StyleClass="icon-dark" glyphName="CHEVRON_LEFT" size="15"/>
@@ -23,7 +23,7 @@
 	</Button>
 	<Button fx:id="btforward" maxHeight="-Infinity" maxWidth="-Infinity"
 		minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-		prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="30.0"
+		prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="50.0"
 		AnchorPane.topAnchor="10.0">
 		<graphic>
 			<FontAwesomeIconView StyleClass="icon-dark" glyphName="CHEVRON_RIGHT" size="15"/>
@@ -35,7 +35,7 @@
 	<ToggleButton fx:id="tb_reverse" maxHeight="-Infinity"
 		maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
 		mnemonicParsing="false" prefHeight="26.0" prefWidth="26.0"
-		AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="10.0">
+		AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
 		<graphic>
 			<FontAwesomeIconView StyleClass="icon-dark" glyphName="SORT" size="15"/>
 		</graphic>
