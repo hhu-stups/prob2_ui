@@ -6,7 +6,7 @@
 	-prob-grey-75: #555560BF;
 	-prob-orange: #B77300;
 	-prob-aqua: #037875;
-	-almostwhite: #efefef;
+	-prob-white: #efefef;
 	-fx-focus-color: -prob-aqua;
 	-fx-accent: -prob-aqua;
 }
@@ -265,7 +265,7 @@
  * Titled Pane																		*
  ************************************************************************************/
 .titled-pane {
-    -fx-text-fill: -almostwhite;
+    -fx-text-fill: -prob-white;
 }
 .titled-pane > .title {
     -fx-background-color: -prob-grey;
@@ -275,7 +275,7 @@
     -fx-background-color: -prob-aqua;
 }
 .titled-pane > .title > .arrow-button > .arrow {
-    -fx-background-color: -almostwhite;
+    -fx-background-color: -prob-white;
     -fx-background-insets: 1.0 0.0 -1.0 0.0, 0.0;
     -fx-padding: 0.25em 0.3125em 0.25em 0.3125em; 
 }
@@ -355,7 +355,7 @@
 
 /* ============= DARK ================== */
 .dark {
-	-fx-background-color: #adadad;
+	-fx-background-color: -prob-grey-20;
 }
 .dark > .label {
 	-fx-text-fill: -prob-grey;
@@ -370,7 +370,8 @@
     -fx-font-weight: bold;
 }
 .dark .button:hover {
-    -fx-text-fill: #eaeaea;
+    -fx-text-fill: -prob-white;
+    -fx-border-color: -prob-white;
 }
 .dark-highlight {
 	-fx-background-color: #dddddd;
