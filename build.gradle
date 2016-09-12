@@ -1,6 +1,6 @@
-//plugins {
-//	id "edu.sc.seis.macAppBundle" version "2.1.6"
-//}
+plugins {
+	id "edu.sc.seis.macAppBundle" version "2.1.6"
+}
 
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
@@ -8,7 +8,6 @@ apply plugin: 'application'
 
 sourceCompatibility="1.8"
 targetCompatibility="1.8"
-
 
 repositories {
 	mavenCentral()
@@ -23,19 +22,28 @@ repositories {
 	}
 }
 
-//macAppBundle {
-	mainClassName = "de.prob2.ui.ProB2"
-//	appName="ProB 2.0"
-//	icon = "prob2.icns"
-//	bundleJRE = true
-//	javaProperties.put("apple.laf.useScreenMenuBar", "true")
-//	backgroundImage = "doc/macbackground.png"
-//}
+mainClassName = "de.prob2.ui.ProB2"
 
+macAppBundle {
+	appName = "ProB 2.0"
+	icon = "prob2.icns"
+	bundleJRE = true
+}
+
+macAppBundle.mainClassName = mainClassName
+
+if (hasProperty("macAppJRE")) {
+	// Used to set a custom JRE to bundle at the command line: -PmacAppJRE=/path/to/the/jre
+	macAppBundle.jreHome = macAppJRE
+}
+
+sourceSets.main.java.srcDirs = []
+sourceSets.main.groovy.srcDirs += ["src/main/java"]
 
 
 dependencies {
+	compile 'org.codehaus.groovy:groovy-all:2.4.7'
 	compile 'de.hhu.stups:de.prob2.kernel:2.0.2'
-	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.3'
+	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.4'
 	compile 'de.jensd:fontawesomefx:8.9'
 }

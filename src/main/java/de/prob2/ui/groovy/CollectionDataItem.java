@@ -8,7 +8,7 @@ public class CollectionDataItem {
 	private final SimpleStringProperty value;
 	
 	public CollectionDataItem(int index, Object value) {
-		this.index = new SimpleStringProperty(new Integer(index).toString());
+		this.index = new SimpleStringProperty(Integer.toString(index));
 		this.value = new SimpleStringProperty(value.toString());
 	}
 	
@@ -17,7 +17,7 @@ public class CollectionDataItem {
 	}
 	
 	public void setIndex(int index) {
-		this.index.set(new Integer(index).toString());
+		this.index.set(Integer.toString(index));
 	}
 	
 	public String getValue() {

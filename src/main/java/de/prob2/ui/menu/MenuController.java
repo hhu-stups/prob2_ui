@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.Optional;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
@@ -13,15 +14,14 @@ import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob2.ui.ProB2;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.groovy.GroovyConsoleStage;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modelchecking.ModelcheckingStage;
 import de.prob2.ui.preferences.PreferencesStage;
+import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.states.BlacklistStage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -33,29 +33,36 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
 @Singleton
-public class MenuController extends MenuBar {
+public final class MenuController extends MenuBar {
+	private final Injector injector;
 	private final Api api;
 	private final AnimationSelector animationSelector;
+	private final CurrentStage currentStage;
 	private final CurrentTrace currentTrace;
-	private final BlacklistStage blacklistStage;
-	private final PreferencesStage preferencesStage;
-	private final ModelcheckingController modelcheckingController;
-	private final Stage mcheckStage;
 	private final FormulaGenerator formulaGenerator;
-	private final GroovyConsoleStage groovyConsoleStage;
-	private Window window;
-	private DottyStage dottyStage;
+	private final ModelcheckingController modelcheckingController;
 	
+	private final DottyStage dottyStage;
+	private final Stage mcheckStage;
+	private final PreferencesStage preferencesStage;
+	private final GroovyConsoleStage groovyConsoleStage;
+	
+	private Window window;
+	
+	@FXML private Menu windowMenu;
+	@FXML private MenuItem preferencesItem;
 	@FXML private MenuItem enterFormulaForVisualization;
+	@FXML private MenuItem aboutItem;
 
 	@FXML
 	private void handleLoadDefault() {
-		FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
+		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(getClass().getResource("../main.fxml"));
 		try {
 			loader.load();
@@ -76,7 +83,7 @@ public class MenuController extends MenuBar {
 		File selectedFile = fileChooser.showOpenDialog(window);
 		if (selectedFile != null)
 			try {
-				FXMLLoader loader = ProB2.injector.getInstance(FXMLLoader.class);
+				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 				loader.setLocation(new URL("file://" + selectedFile.getPath()));
 				loader.load();
 				Parent root = loader.getRoot();
@@ -127,13 +134,15 @@ public class MenuController extends MenuBar {
 					"Unknown file type selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
 		}
 	}
-
+	
 	@FXML
-	private void handleEditBlacklist(ActionEvent event) {
-		this.blacklistStage.show();
-		this.blacklistStage.toFront();
+	private void handleClose(final ActionEvent event) {
+		final Stage stage = this.currentStage.get();
+		if (stage != null) {
+			stage.close();
+		}
 	}
-
+	
 	@FXML
 	private void handlePreferences(ActionEvent event) {
 		this.preferencesStage.show();
@@ -182,29 +191,44 @@ public class MenuController extends MenuBar {
 			}
 		});
 		
-		this.enterFormulaForVisualization.disableProperty().bind(currentTrace.existsProperty().not());
+		this.enterFormulaForVisualization.disableProperty().bind(currentTrace.currentStateProperty().initializedProperty().not());
 	}
 
 	@Inject
 
-	private MenuController(final FXMLLoader loader, final Api api, final AnimationSelector animationSelector, final CurrentTrace currentTrace,
-			final BlacklistStage blacklistStage, final PreferencesStage preferencesStage,
-			final ModelcheckingStage modelcheckingStage, final ModelcheckingController modelcheckingController,
-			final FormulaGenerator formulaGenerator, final DottyStage dottyStage, final GroovyConsoleStage groovyConsoleStage) {
+	private MenuController(
+		final FXMLLoader loader,
+		
+		final Injector injector,
+		final Api api,
+		final AnimationSelector animationSelector,
+		final CurrentStage currentStage,
+		final CurrentTrace currentTrace,
+		final FormulaGenerator formulaGenerator,
+		final ModelcheckingController modelcheckingController,
+		
+		final DottyStage dottyStage,
+		final GroovyConsoleStage groovyConsoleStage,
+		final ModelcheckingStage modelcheckingStage,
+		final PreferencesStage preferencesStage
+	) {
+		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
+		this.currentStage = currentStage;
 		this.currentTrace = currentTrace;
-		this.blacklistStage = blacklistStage;
-		this.preferencesStage = preferencesStage;
 		this.formulaGenerator = formulaGenerator;
 		this.modelcheckingController = modelcheckingController;
-		this.mcheckStage = modelcheckingStage;
+		
 		this.dottyStage = dottyStage;
 		this.groovyConsoleStage = groovyConsoleStage;
+		this.mcheckStage = modelcheckingStage;
+		this.preferencesStage = preferencesStage;
+		
+		loader.setLocation(getClass().getResource("menu.fxml"));
+		loader.setRoot(this);
+		loader.setController(this);
 		try {
-			loader.setLocation(getClass().getResource("menu.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -213,27 +237,42 @@ public class MenuController extends MenuBar {
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
-			MenuToolkit tk = MenuToolkit.toolkit();
+			final MenuToolkit tk = MenuToolkit.toolkit();
 
+			// Remove About menu item from Help
+			aboutItem.getParentMenu().getItems().remove(aboutItem);
+			aboutItem.setText("About ProB 2");
+			
+			// Remove Preferences menu item from Edit
+			preferencesItem.getParentMenu().getItems().remove(preferencesItem);
+			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
+			
 			// Create Mac-style application menu
-			Menu applicationMenu = tk.createDefaultApplicationMenu("ProB 2");
+			final Menu applicationMenu = tk.createDefaultApplicationMenu("ProB 2");
 			this.getMenus().add(0, applicationMenu);
 			tk.setApplicationMenu(applicationMenu);
+			applicationMenu.getItems().setAll(
+				aboutItem,
+				new SeparatorMenuItem(),
+				preferencesItem,
+				new SeparatorMenuItem(),
+				tk.createHideMenuItem("ProB 2"),
+				tk.createHideOthersMenuItem(),
+				tk.createUnhideAllMenuItem(),
+				new SeparatorMenuItem(),
+				tk.createQuitMenuItem("ProB 2")
+			);
 
-			// Move About menu item from Help to application menu
-			Menu helpMenu = this.getMenus().get(this.getMenus().size() - 1);
-			MenuItem aboutItem = helpMenu.getItems().get(helpMenu.getItems().size() - 1);
-			aboutItem.setText("About ProB 2");
-			helpMenu.getItems().remove(aboutItem);
-			applicationMenu.getItems().set(0, aboutItem);
-
-			// Create Mac-style Window menu
-			Menu windowMenu = new Menu("Window");
-			windowMenu.getItems().addAll(tk.createMinimizeMenuItem(), tk.createZoomMenuItem(),
-					tk.createCycleWindowsItem(), new SeparatorMenuItem(), tk.createBringAllToFrontItem(),
-					new SeparatorMenuItem());
+			// Add Mac-style items to Window menu
+			windowMenu.getItems().addAll(
+				tk.createMinimizeMenuItem(),
+				tk.createZoomMenuItem(),
+				tk.createCycleWindowsItem(),
+				new SeparatorMenuItem(),
+				tk.createBringAllToFrontItem(),
+				new SeparatorMenuItem()
+			);
 			tk.autoAddWindowMenuItems(windowMenu);
-			this.getMenus().add(this.getMenus().size() - 1, windowMenu);
 
 			// Make this the global menu bar
 			tk.setGlobalMenuBar(this);

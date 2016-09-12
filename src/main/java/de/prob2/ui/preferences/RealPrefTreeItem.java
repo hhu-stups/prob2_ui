@@ -5,7 +5,7 @@ public class RealPrefTreeItem extends PrefTreeItem {
 		final String name,
 		final String changed,
 		final String value,
-		final PreferenceType valueType,
+		final ProBPreferenceType valueType,
 		final String defaultValue,
 		final String description
 	) {
@@ -13,7 +13,7 @@ public class RealPrefTreeItem extends PrefTreeItem {
 	}
 	
 	@Override
-	public void updateValue(final Preferences prefs) {
+	public void updateValue(final ProBPreferences prefs) {
 		this.value.set(prefs.getPreferenceValue(this.getName()));
 		this.changed.set(this.value.get().equals(this.defaultValue.get()) ? "" : "*");
 	}

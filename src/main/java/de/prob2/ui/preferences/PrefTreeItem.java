@@ -32,11 +32,11 @@ public abstract class PrefTreeItem {
 		return this.value.get();
 	}
 	
-	protected final ObjectProperty<PreferenceType> valueType;
-	public ReadOnlyObjectProperty<PreferenceType> valueTypeProperty() {
+	protected final ObjectProperty<ProBPreferenceType> valueType;
+	public ReadOnlyObjectProperty<ProBPreferenceType> valueTypeProperty() {
 		return this.valueType;
 	}
-	public PreferenceType getValueType() {
+	public ProBPreferenceType getValueType() {
 		return this.valueType.get();
 	}
 
@@ -60,7 +60,7 @@ public abstract class PrefTreeItem {
 		final String name,
 		final String changed,
 		final String value,
-		final PreferenceType valueType,
+		final ProBPreferenceType valueType,
 		final String defaultValue,
 		final String description
 	) {
@@ -73,5 +73,5 @@ public abstract class PrefTreeItem {
 		this.description = new SimpleStringProperty(description);
 	}
 
-	public void updateValue(final Preferences prefs) {}
+	public void updateValue(final ProBPreferences prefs) {}
 }

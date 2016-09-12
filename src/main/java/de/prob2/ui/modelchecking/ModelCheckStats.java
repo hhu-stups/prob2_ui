@@ -154,21 +154,26 @@ public class ModelCheckStats extends AnchorPane {
 		resultText.setText(message);
 		resultText.setWrappingWidth(this.modelcheckingController.widthProperty().doubleValue() - 60);
 		switch (this.result) {
-		case "success":
-			resultBackground.getStyleClass().clear();
-			resultBackground.getStyleClass().add("mcheckSuccess");
-			resultText.setFill(Color.web("#5e945e"));
-			break;
-		case "danger":
-			resultBackground.getStyleClass().clear();
-			resultBackground.getStyleClass().add("mcheckDanger");
-			resultText.setFill(Color.web("#b95050ff"));
-			break;
-		case "warning":
-			resultBackground.getStyleClass().clear();
-			resultBackground.getStyleClass().add("mcheckWarning");
-			resultText.setFill(Color.web("#96904e"));
-			break;
+			case "success":
+				resultBackground.getStyleClass().clear();
+				resultBackground.getStyleClass().add("mcheckSuccess");
+				resultText.setFill(Color.web("#5e945e"));
+				break;
+			
+			case "danger":
+				resultBackground.getStyleClass().clear();
+				resultBackground.getStyleClass().add("mcheckDanger");
+				resultText.setFill(Color.web("#b95050ff"));
+				break;
+			
+			case "warning":
+				resultBackground.getStyleClass().clear();
+				resultBackground.getStyleClass().add("mcheckWarning");
+				resultText.setFill(Color.web("#96904e"));
+				break;
+			
+			default:
+				throw new IllegalArgumentException("Unknown result: " + this.result);
 		}
 	}
 
@@ -180,11 +185,13 @@ public class ModelCheckStats extends AnchorPane {
 			String woPre = pStat.startsWith("'") ? pStat.substring(1) : pStat;
 			String woSuf = woPre.endsWith("'") ? woPre.substring(0, woPre.length() - 1) : woPre;
 			String[] split = woSuf.split(":");
-			Stat stat = null;
+			Stat stat;
 			if (split.length == 2) {
 				stat = new Stat(split[0], split[1]);
 			} else if (split.length == 1) {
 				stat = new Stat(split[0], null);
+			} else {
+				throw new IllegalArgumentException(String.format("Invalid number of splits (%d, should be 1 or 2) for packed stat: %s", split.length, pStat));
 			}
 			Node[] statFX = stat.toFX();
 			Platform.runLater(() -> {

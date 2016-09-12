@@ -8,23 +8,30 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
+import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.scene.control.Alert;
 
 @Singleton
 public final class FormulaGenerator {
 	private final CurrentTrace currentTrace;
+	private final CurrentStage currentStage;
 	
 	@Inject
-	private FormulaGenerator(final CurrentTrace currentTrace) {
+	private FormulaGenerator(final CurrentTrace currentTrace, final CurrentStage currentStage) {
 		this.currentTrace = currentTrace;
+		this.currentStage = currentStage;
 	}
 	
 	private ExpandedFormula expandFormula(final IEvalElement formula) {
+		if (!currentTrace.getCurrentState().isInitialised()) {
+			throw new EvaluationException("Formula evaluation is only possible in an initialized state");
+		}
+		
 		final InsertFormulaForVisualizationCommand insertCmd = new InsertFormulaForVisualizationCommand(formula);
 		currentTrace.getStateSpace().execute(insertCmd);
 		
-		final ExpandFormulaCommand expandCmd = new ExpandFormulaCommand(insertCmd.getFormulaId(), currentTrace.get().getCurrentState());
+		final ExpandFormulaCommand expandCmd = new ExpandFormulaCommand(insertCmd.getFormulaId(), currentTrace.getCurrentState());
 		currentTrace.getStateSpace().execute(expandCmd);
 		
 		return expandCmd.getResult();
@@ -32,13 +39,9 @@ public final class FormulaGenerator {
 	
 	public void showFormula(final IEvalElement formula) {
 		try {
-			if (!currentTrace.get().getCurrentState().isInitialised()) {
-				// noinspection ThrowCaughtLocally
-				throw new EvaluationException("Formula evaluation is only possible in an initialized state");
-			}
-			
 			ExpandedFormula expanded = expandFormula(formula);
 			FormulaView fview = new FormulaView(new FormulaGraph(new FormulaNode(expanded)));
+			currentStage.register(fview);
 			fview.show();
 		} catch (EvaluationException | ProBError e) {
 			e.printStackTrace();

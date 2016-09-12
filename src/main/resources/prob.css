@@ -105,17 +105,17 @@
     -fx-effect: dropshadow( gaussian , rgba(0.0,0.0,0.0,0.2) , 12.0, 0.0 , 0.0 , 8.0 );
 } 
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
-    -fx-background: transparent;
+	-fx-background: transparent;
 }
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover {
-	    -fx-background: -fx-accent;
-     -fx-background-color: #aaaaaadd;
+	-fx-background: -fx-accent;
+	-fx-background-color: #aaaaaadd;
 }
 .combo-box-popup  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected,
 .combo-box-popup  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
-    -fx-background: -fx-accent;
-    -fx-background-color: -fx-background, -fx-cell-focus-inner-border, -fx-background;
-    -fx-background-insets: 0.0, 1.0, 2.0;
+	-fx-background: -fx-accent;
+	-fx-background-color: -fx-background, -fx-cell-focus-inner-border, -fx-background;
+	-fx-background-insets: 0.0, 1.0, 2.0;
 }
 
 /************************************************************************************
@@ -146,7 +146,7 @@
 	-fx-background: white;
 }
 .list-cell:empty:hover {
-    -fx-background-color: white;
+	-fx-background-color: white;
 }
 .list-cell:hover {
 	-fx-background-color: #ededed;
@@ -167,10 +167,10 @@
 	-fx-text-fill: white;
 }
 .context-menu .menu-item:focused {
-     -fx-background-color: #aaaaaadd;
+	-fx-background-color: #aaaaaadd;
 }
 .context-menu .menu-item:hover {
-     -fx-background-color: #aaaaaadd;
+	-fx-background-color: #aaaaaadd;
 }
 .context-menu .menu-item:disabled > .label {
 	-fx-text-fill: #bcbcbc;
@@ -200,27 +200,27 @@
  * ScrollBar, ScrollPane															*
  ************************************************************************************/
 .scroll-bar {
-    -fx-background-color: transparent;
+	-fx-background-color: transparent;
 }
 .scroll-bar > .thumb {
-    -fx-background-color: #999999; 
-    -fx-background-insets: 2.0, 3.0, 4.0;
-    -fx-background-radius: 5.0em;
+	-fx-background-color: #999999; 
+	-fx-background-insets: 2.0, 3.0, 4.0;
+	-fx-background-radius: 5.0em;
 }
 .scroll-bar:hover > .thumb {
-    -fx-background-color: #666666;
+	-fx-background-color: #666666;
 }
 .scroll-bar:vertical > .increment-button,
 .scroll-bar:vertical > .decrement-button {
-    -fx-background-color: transparent;     
-    -fx-color: transparent;
-    -fx-padding: 0.0em 0.08em -0.3em 0.08em;
+	-fx-background-color: transparent;     
+	-fx-color: transparent;
+	-fx-padding: 0.0em 0.08em -0.3em 0.08em;
 }
 .scroll-bar:horizontal > .increment-button,
 .scroll-bar:horizontal > .decrement-button {
-    -fx-background-color: transparent;     
-    -fx-color: transparent;
-    -fx-padding: 0.08em -0.3em 0.08em 0.0em;
+	-fx-background-color: transparent;     
+	-fx-color: transparent;
+	-fx-padding: 0.08em -0.3em 0.08em 0.0em;
 }
 .scroll-bar > .decrement-button > .decrement-arrow,
 .scroll-bar > .increment-button > .increment-arrow {
@@ -228,18 +228,18 @@
 	-fx-shape: " ";
 }
 .scroll-pane > .corner {
-    -fx-background-color: transparent;
-    -fx-background-insets: 0.0 1.0 1.0 0.0;
+	-fx-background-color: transparent;
+	-fx-background-insets: 0.0 1.0 1.0 0.0;
 }
 
 /************************************************************************************
  * Spinner																			*
  ************************************************************************************/
 .spinner .increment-arrow-button {
-    -fx-background-color: -fx-outer-border, #cccccc;
+	-fx-background-color: -fx-outer-border, #cccccc;
 }
 .spinner .decrement-arrow-button {
-    -fx-background-color: -fx-outer-border, #cccccc;
+	-fx-background-color: -fx-outer-border, #cccccc;
 }
 .spinner .increment-arrow-button .increment-arrow,
 .spinner .decrement-arrow-button .decrement-arrow {
@@ -250,7 +250,7 @@
  * SplitView																		*
  ************************************************************************************/
 .split-pane > .split-pane-divider {
-    -fx-padding: 0.0 0.15em 0.0 0.15em; /* 0 3 0 3 */
+	-fx-padding: 0.0 0.15em 0.0 0.15em; /* 0 3 0 3 */
 }
 /* horizontal the two nodes are placed to the left/right of each other. */
 .split-pane:horizontal > .split-pane-divider {
@@ -290,8 +290,8 @@
  * TableView, TreeTableView															*
  ************************************************************************************/
 .table-view {
-    -fx-table-cell-border-color: transparent;
-    -fx-accent: transparent;
+	-fx-table-cell-border-color: transparent;
+	-fx-accent: transparent;
 }
 .tree-table-view {
 	-fx-border-width: 0.0;
@@ -309,23 +309,23 @@
 }
 .table-view > .virtual-flow > .corner,
 .tree-table-view > .virtual-flow > .corner {
-    -fx-background-color: white;
+	-fx-background-color: white;
 }
 .table-row-cell,
 .table-row-cell:odd {
-    -fx-background: white;
-    -fx-border-color: transparent;
+	-fx-background: white;
+	-fx-border-color: transparent;
 	-fx-border-width: 0.0;
 }
 .table-row-cell:empty:hover {
-    -fx-background-color: white;
+	-fx-background-color: white;
 }
 .table-row-cell:hover {
 	-fx-background-color: #ededed;
 }
 .table-view .table-cell {
-    -fx-border-color: transparent;
-    -fx-padding: 0.2em 0.166667em 0.166667em 1.0em;
+	-fx-border-color: transparent;
+	-fx-padding: 0.2em 0.166667em 0.166667em 1.0em;
 }
 .table-row-cell:focused .table-cell {
 	-fx-font-weight: bold;
@@ -346,7 +346,7 @@
  * Specific Styles																	*
  ************************************************************************************/
 .center {
-    -fx-alignment: center;
+	-fx-alignment: center;
 }
 .left, .left .label {
 	-fx-alignment: center-left;
@@ -395,20 +395,20 @@
 #past {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: normal;
-	-fx-font-size: 12.0px;
+	-fx-font-size: 12px;
 }
 
 #present {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: bold;
-	-fx-font-size: 12.0px;
+	-fx-font-size: 12px;
 }
 
 #future {
 	-fx-font-family: ARIAL;
 	-fx-fill: -prob-grey-75;
 	-fx-font-style: italic;
-	-fx-font-size: 12.0px;
+	-fx-font-size: 12px;
 }
 
 /* ============= MODELCHECKING VIEW ================== */	

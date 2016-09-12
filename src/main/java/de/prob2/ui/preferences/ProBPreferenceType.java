@@ -3,11 +3,11 @@ package de.prob2.ui.preferences;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class PreferenceType {
+public class ProBPreferenceType {
 	private final String type;
 	private final String[] values;
 	
-	public PreferenceType(final String type) {
+	public ProBPreferenceType(final String type) {
 		Objects.requireNonNull(type);
 		
 		if ("[]".equals(type)) {
@@ -18,7 +18,7 @@ public class PreferenceType {
 		this.values = null;
 	}
 	
-	public PreferenceType(final String[] values) {
+	public ProBPreferenceType(final String[] values) {
 		Objects.requireNonNull(values);
 		
 		this.type = "[]";
@@ -38,7 +38,7 @@ public class PreferenceType {
 			return false;
 		}
 		
-		final PreferenceType casted = (PreferenceType)obj;
+		final ProBPreferenceType casted = (ProBPreferenceType)obj;
 		return Objects.equals(this.getType(), casted.getType()) && Arrays.equals(this.getValues(), casted.getValues());
 	}
 	
@@ -47,6 +47,6 @@ public class PreferenceType {
 	}
 	
 	public String toString() {
-		return String.format("PreferenceType(%s)", this.getValues() == null ? this.getType() : Arrays.toString(this.getValues()));
+		return String.format("%s(%s)", this.getClass().getSimpleName(), this.getValues() == null ? this.getType() : Arrays.toString(this.getValues()));
 	}
 }

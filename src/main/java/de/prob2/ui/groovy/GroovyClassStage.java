@@ -3,7 +3,10 @@ package de.prob2.ui.groovy;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -16,7 +19,7 @@ import javafx.stage.Stage;
 
 public class GroovyClassStage extends Stage {
 	
-	private Class <? extends Object> clazz;
+	private Class<?> clazz;
 	
 	@FXML
 	private TableView<GroovyClassPropertyItem> tv_methods;
@@ -106,7 +109,7 @@ public class GroovyClassStage extends Stage {
 		this.groovyHandler = groovyHandler;
 	}
 	
-	public void setClass(Class <? extends Object> clazz) {
+	public void setClass(Class<?> clazz) {
 		this.clazz = clazz;
 	}
 	
@@ -159,18 +162,18 @@ public class GroovyClassStage extends Stage {
 	}
 	
 	private void handleCollections(Object object) {
-		int i = 0;
-		if(clazz.isArray()) {
+		if (clazz.isArray()) {
 			Object[] objects = (Object[]) object;
-			for(i = 0; i < objects.length; i++) {
-				String value ="";
-				if(objects[i] != null) {
+			for (int i = 0; i < objects.length; i++) {
+				String value = "";
+				if (objects[i] != null) {
 					value = objects[i].toString();
 				}
 				collection_data.add(new CollectionDataItem(i,value));
 			}
-		} else if(Collection.class.isAssignableFrom(object.getClass())) {
-			for(Object o: (Iterable<? extends Object>) object) {
+		} else if (object instanceof Collection<?>) {
+			int i = 0;
+			for (Object o : (Iterable<?>)object) {
 				collection_data.add(new CollectionDataItem(i,o));
 				i++;
 			}
@@ -182,27 +185,27 @@ public class GroovyClassStage extends Stage {
 	private void showClassAttributes() {
 		attributes.clear();
 		String packagename = "default";
-		if(clazz.getPackage() != null) {
+		if (clazz.getPackage() != null) {
 			packagename = clazz.getPackage().getName();
 		}
 		attributes.add(new GroovyClassItem("Package", packagename));
 		attributes.add(new GroovyClassItem("Class Name", clazz.getName()));
-		String interfaces = "";
-		String superclasses ="";
-		for(Class<? extends Object> c : clazz.getInterfaces()) {
-			interfaces += c.getSimpleName() + ", ";
+		
+		final List<String> interfaceNames = new ArrayList<>();
+		for (Class<?> c : clazz.getInterfaces()) {
+			interfaceNames.add(c.getSimpleName());
 		}
-		interfaces = interfaces.substring(0, Math.max(0,interfaces.length() - 2));
-		attributes.add(new GroovyClassItem("Interfaces", interfaces));
-		Class <? extends Object> tmp = clazz;
-		do{
-			superclasses += tmp.getSuperclass().getSimpleName() + ", ";
+		attributes.add(new GroovyClassItem("Interfaces", String.join(", ", interfaceNames)));
+		
+		final List<String> superclassNames = new ArrayList<>();
+		Class<?> tmp = clazz;
+		while (!Object.class.equals(tmp)) {
+			superclassNames.add(tmp.getSuperclass().getSimpleName());
 			tmp = tmp.getSuperclass();
-		} while(!tmp.getName().equals("java.lang.Object"));
-		superclasses = superclasses.substring(0, Math.max(0,superclasses.length() - 2));
-		attributes.add(new GroovyClassItem("Superclasses", superclasses));
-		attributes.add(new GroovyClassItem("isPrimitive", new Boolean(clazz.isPrimitive()).toString()));
-		attributes.add(new GroovyClassItem("isArray", new Boolean(clazz.isArray()).toString()));
+		}
+		attributes.add(new GroovyClassItem("Superclasses", String.join(", ", superclassNames)));
+		attributes.add(new GroovyClassItem("isPrimitive", Boolean.toString(clazz.isPrimitive())));
+		attributes.add(new GroovyClassItem("isArray", Boolean.toString(clazz.isArray())));
 		tv_class.refresh();
 	}
 

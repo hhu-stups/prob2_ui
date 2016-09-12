@@ -25,7 +25,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 
-public final class Preferences {
+public final class ProBPreferences {
 	private final AnimationSelector animationSelector;
 	private final Api api;
 	private StateSpace stateSpace;
@@ -35,7 +35,7 @@ public final class Preferences {
 	private final BooleanProperty changesApplied;
 	
 	@Inject
-	private Preferences(
+	private ProBPreferences(
 		final AnimationSelector animationSelector,
 		final Api api
 	) {
@@ -76,7 +76,7 @@ public final class Preferences {
 	 */
 	private void checkStateSpace() {
 		if (!this.hasStateSpace()) {
-			throw new IllegalStateException("Cannot use Preferences without setting a StateSpace first");
+			throw new IllegalStateException("Cannot use ProBPreferences without setting a StateSpace first");
 		}
 	}
 	
