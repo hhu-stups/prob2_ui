@@ -24,6 +24,7 @@ import javafx.scene.paint.Color;
 @Singleton
 public final class AnimationPerspective extends BorderPane {
 	// TODO improve DragDrop/Docking
+	// TODO remove accordion, if just one element left; add accordion if second object dragged left
 	// FIXME drag view model checking
 	// TODO? revert to SplitPane
 	@FXML
