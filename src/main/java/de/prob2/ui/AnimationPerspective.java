@@ -1,6 +1,7 @@
 package de.prob2.ui;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -20,6 +21,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
+import spock.lang.Title;
 
 @Singleton
 public final class AnimationPerspective extends BorderPane {
@@ -48,6 +50,7 @@ public final class AnimationPerspective extends BorderPane {
 
 	private boolean dragged;
 	private ImageView snapshot = new ImageView();
+	private HashMap<Node, TitledPane> nodeMap = new HashMap<Node, TitledPane>();
 	
 	@Inject
 	private AnimationPerspective(FXMLLoader loader) {
@@ -68,16 +71,20 @@ public final class AnimationPerspective extends BorderPane {
 		history.setPrefSize(initialSize,initialSize);
 		modelcheck.setPrefSize(initialSize,initialSize);
 		animations.setPrefSize(initialSize,initialSize);
+		nodeMap.put(operations,operationsTP);
+		nodeMap.put(history,historyTP);
+		nodeMap.put(modelcheck,modelcheckTP);
+		nodeMap.put(animations,animationsTP);
+		onDrag();
 	}
 
 	private void onDrag() {
-		registerDrag(operations,operationsTP);
-		registerDrag(history,historyTP);
-		registerDrag(modelcheck,modelcheckTP);
-		registerDrag(animations,animationsTP);
+		for (Node node:nodeMap.keySet()){
+			registerDrag(node);
+		}
 	}
 
-	private void registerDrag(final Node node, final TitledPane nodeTP){
+	private void registerDrag(final Node node){
 		node.setOnMouseEntered(mouseEvent -> this.setCursor(Cursor.OPEN_HAND));
 		node.setOnMousePressed(mouseEvent -> this.setCursor(Cursor.CLOSED_HAND));
 		node.setOnMouseDragEntered(mouseEvent -> {
@@ -92,7 +99,7 @@ public final class AnimationPerspective extends BorderPane {
 		node.setOnMouseReleased(mouseEvent -> {
 			this.setCursor(Cursor.DEFAULT);
 			if (dragged){
-				dragDropped(node,nodeTP);
+				dragDropped(node);
 			}
 			dragged = false;
 			snapshot.setImage(null);
@@ -111,8 +118,9 @@ public final class AnimationPerspective extends BorderPane {
 		});
 	}
 
-	private void dragDropped(final Node node, final TitledPane nodeTP){
+	private void dragDropped(final Node node){
 		//System.out.println(node.getClass().toString() + " dragged, isResizable() = "+node.isResizable());
+		TitledPane nodeTP = nodeMap.get(node);
 		if (accordion.getPanes().contains(nodeTP)) {
 			if (this.getRight() == null) {
 				this.setRight(node);
@@ -126,7 +134,15 @@ public final class AnimationPerspective extends BorderPane {
 			nodeTP.setContent(null);
 			accordion.getPanes().remove(nodeTP);
 			accordion.setExpandedPane(accordion.getPanes().get(0));
+			/*if (accordion.getPanes().size()==1){
+				this.setLeft(node);
+				this.getChildren().remove(accordion);
+			}*/
 		} else {
+			/*if (!this.getChildren().contains(accordion)){
+				accordion.getPanes().add(nodeMap.get(this.getLeft()));
+				this.setLeft(accordion);
+			}*/
 			accordion.getPanes().add(nodeTP);
 			nodeTP.setContent(node);
 			accordion.setExpandedPane(nodeTP);
