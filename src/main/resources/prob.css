@@ -6,7 +6,9 @@
 	-prob-grey-75: #555560BF;
 	-prob-orange: #B77300;
 	-prob-aqua: #037875;
-	-prob-white: #efefef;
+	-prob-white: #EFEFEF;
+	-prob-white-20: #EFEFEF33;
+	-prob-white-75: #EFEFEFBF;
 	-fx-focus-color: -prob-aqua;
 	-fx-accent: -prob-aqua;
 }
@@ -78,8 +80,10 @@
  * ChoiceBox																		*
  ************************************************************************************/
 .choice-box {
-	-fx-background-color: #dddddd;	
+	-fx-background-color: transparent;	
 	-fx-text-fill: -prob-grey;
+	-fx-border-radius: 5.0;
+	-fx-border-color: -prob-grey;
 }
 
 .choice-box > .open-button > .arrow {
@@ -267,6 +271,7 @@
  ************************************************************************************/
 .text-field {
 	-fx-background-color: white;
+	-fx-background-radius: 0.9em;
 	-fx-border-color: -prob-grey-75;
 	-fx-border-width: 0.1em;
 	-fx-border-radius: 0.8em;
@@ -364,15 +369,12 @@
 	-fx-padding: 0.0 0.0 0.0 0.5em;
 }
 
-/* ============= DARK ================== */
-.dark {
-	-fx-background-color: -prob-grey-20;
-}
-.dark > .label {
+/* =============== DIALOG ================== */
+.dialog > .label {
 	-fx-text-fill: -prob-grey;
 	-fx-font-weight: bold;
 }
-.dark .button {
+.dialog .button {
     -fx-background-color: transparent;
     -fx-border-color: -prob-grey;
     -fx-border-radius: 6.0;
@@ -380,27 +382,40 @@
     -fx-text-fill: -prob-grey;
     -fx-font-weight: bold;
 }
-.dark .button:hover {
-    -fx-text-fill: -prob-white;
-    -fx-border-color: -prob-white;
+.dialog .button:hover {
+    -fx-text-fill: -prob-grey-75;
+    -fx-border-color: -prob-grey-75;
 }
-.dark-highlight {
-	-fx-background-color: #dddddd;
+
+/* =============== DARK =================== */
+.dark {
+	-fx-background-color: -prob-grey;
+	-fx-border-color: -prob-aqua;
+	-fx-border-width: 0.2em 0.0 0.0 0.0;
 	-fx-padding: 1.0em;
 }
-.dark-highlight .list-cell {
-	-fx-background-color: #dddddd;
+.dark .list-cell {
+	-fx-background-color: -prob-grey-75;
 	-fx-padding: 0.0em 0.0em 0.5em;
 }
-/*.dark .check-box:selected > .box > .mark {
-	-fx-background-color: white;
+.dark .check-box {
+	-fx-background-color: transparent;
+	-fx-text-fill: -prob-white;
+}
+.dark .check-box > .box {
+	-fx-background-color: transparent;
+	-fx-border-radius: 5.0;
+	-fx-border-color: -prob-white;
+}
+.dark .check-box:selected > .box > .mark {
+	-fx-background-color: -prob-white;
 }
 .dark .check-box:hover > .box > .mark {
-	-fx-background-color: #ffffff33;
+	-fx-background-color: -prob-white-20;
 }
 .dark .check-box:selected:hover > .box > .mark {
-	-fx-background-color: #ffffffaa;
-}*/
+	-fx-background-color: -prob-white-75;
+}
  
 /* ============= HISTORY VIEW ================== */
 #past {
