@@ -14,6 +14,7 @@
 <?import javafx.stage.Stage?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.AnchorPane?>
 
 <fx:root type="Stage" fx:id="stage" title="Preferences"
 	minHeight="160.0" minWidth="320.0" onCloseRequest="#handleClose"
@@ -68,7 +69,15 @@
 						</BorderPane>
 					</Tab>
 					<Tab text="States View">
-						<ListView fx:id="blacklistView" editable="true" styleClass="without-border"/>
+						<AnchorPane>
+							<ListView fx:id="blacklistView" editable="true"
+								AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="0.0"
+								AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+								<padding>
+									<Insets top="25" right="25" bottom="5" left="25" />
+								</padding>
+							</ListView>
+						</AnchorPane>
 					</Tab>
 				</TabPane>
 			</StackPane>
