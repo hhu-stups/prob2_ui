@@ -191,14 +191,22 @@
 	-fx-background-color: transparent;
 }
 .menu-bar {
-	-fx-background-color: #bbbbbb;
-	-fx-border-color: transparent transparent #444444 #444444;
+	-fx-background-color: white;
+	-fx-border-color: -prob-aqua;
 	-fx-border-width: 0.0 0.0 1.8 0.0;
+}
+.menu-bar > .container > .menu-button > .label {
+	-fx-text-fill: -prob-grey;
+}
+.menu-bar > .container > .menu-button:hover,
+.menu-bar > .container > .menu-button:focused,
+.menu-bar > .container > .menu-button:showing {
+    -fx-background-color: -prob-aqua;
 }
 .menu-bar > .container > .menu-button:hover > .label,
 .menu-bar > .container > .menu-button:focused > .label,
-.menu-bar > .container > .menu-button:showing  > .label {
-    -fx-text-fill: #666666;
+.menu-bar > .container > .menu-button:showing > .label{
+    -fx-text-fill: -prob-white;
 }
 
 /************************************************************************************
