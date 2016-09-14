@@ -14,33 +14,33 @@
 
 <fx:root minHeight="200.0" minWidth="200.0" type="AnchorPane"
 	xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
-	<VBox prefHeight="200.0" prefWidth="100.0"
-		AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="2.0"
-		AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="2.0">
+	<VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0"
+		AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
 		<AnchorPane prefHeight="35.0" prefWidth="246.0">
 			<Button fx:id="searchButton" StyleClass="button-dark"
 				alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
 				maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
 				mnemonicParsing="false" onAction="#handleSearchButton"
 				prefHeight="26.0" prefWidth="26.0" stylesheets="@../../../../prob.css"
-				AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.0"
-				AnchorPane.topAnchor="2.0">
+				AnchorPane.leftAnchor="10.0"
+				AnchorPane.topAnchor="10.0">
 				<graphic>
 					<FontAwesomeIconView fill="#e5e5e5"
 						glyphName="SEARCH" size="15"/>
 				</graphic>
 			</Button>
 			<TextField fx:id="filterEvents" onAction="#handleSearchButton"
-				promptText="Filter Events" AnchorPane.bottomAnchor="0.0"
-				AnchorPane.leftAnchor="32.0" AnchorPane.rightAnchor="0.0"
-				AnchorPane.topAnchor="2.0"/>
+				promptText="Filter Events" AnchorPane.bottomAnchor="10.0"
+				AnchorPane.leftAnchor="45.0" AnchorPane.rightAnchor="10.0"
+				AnchorPane.topAnchor="10.0" prefHeight="26.0"/>
 		</AnchorPane>
 		<AnchorPane prefHeight="27.0" prefWidth="246.0">
 			<Button fx:id="backButton" layoutX="39.0" layoutY="2.0"
 				maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
 				minWidth="-Infinity" mnemonicParsing="false" onAction="#handleBackButton"
 				prefHeight="26.0" prefWidth="26.0" stylesheets="@../../../../prob.css"
-				AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="5.0"
+				AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="10.0"
 				AnchorPane.topAnchor="2.0">
 				<graphic>
 					<FontAwesomeIconView StyleClass="icon-dark"
@@ -54,7 +54,7 @@
 				maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
 				minWidth="-Infinity" mnemonicParsing="false" onAction="#handleForwardButton"
 				prefHeight="26.0" prefWidth="26.0" stylesheets="@../../../../prob.css"
-				AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="31.0"
+				AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="50.0"
 				AnchorPane.topAnchor="2.0">
 				<graphic>
 					<FontAwesomeIconView StyleClass="icon-dark"
@@ -68,7 +68,7 @@
 				maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
 				minWidth="-Infinity" mnemonicParsing="false" onAction="#handleSortButton"
 				prefHeight="26.0" prefWidth="26.0" stylesheets="@../../../../prob.css"
-				AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="71.0"
+				AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="90.0"
 				AnchorPane.topAnchor="2.0">
 				<graphic>
 					<FontAwesomeIconView StyleClass="icon-dark"
@@ -83,7 +83,7 @@
 				minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
 				onAction="#handleDisabledOpsToggle" prefHeight="26.0" prefWidth="26.0"
 				stylesheets="@../../../../prob.css" AnchorPane.bottomAnchor="2.0"
-				AnchorPane.rightAnchor="45.0" AnchorPane.topAnchor="2.0">
+				AnchorPane.rightAnchor="55.0" AnchorPane.topAnchor="2.0">
 				<graphic>
 					<FontAwesomeIconView StyleClass="icon-dark"
 						glyphName="EYE" size="15"/>
@@ -93,7 +93,7 @@
 				layoutY="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
 				minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
 				prefHeight="26.0" prefWidth="45.0" stylesheets="@../../../../prob.css"
-				AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0"
+				AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="5.0"
 				AnchorPane.topAnchor="0.0">
 				<items>
 					<MenuItem fx:id="oneRandomEvent" mnemonicParsing="false"
