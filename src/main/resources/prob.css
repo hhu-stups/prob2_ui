@@ -242,14 +242,21 @@
  * Spinner																			*
  ************************************************************************************/
 .spinner .increment-arrow-button {
-	-fx-background-color: -fx-outer-border, #cccccc;
+	-fx-background-color: -prob-grey-75, white;
 }
 .spinner .decrement-arrow-button {
-	-fx-background-color: -fx-outer-border, #cccccc;
+	-fx-background-color: -prob-grey-75, white;
 }
 .spinner .increment-arrow-button .increment-arrow,
 .spinner .decrement-arrow-button .decrement-arrow {
     -fx-background-color: -prob-grey;
+}
+.spinner .text-field {
+	-fx-border-radius: 4 0 0 4;
+}
+.spinner .increment-arrow-button:pressed,
+.spinner .decrement-arrow-button:pressed {
+	-fx-background-color: -prob-aqua;
 }
 
 /************************************************************************************

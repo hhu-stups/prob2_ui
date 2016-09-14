@@ -51,9 +51,9 @@
 								</TreeTableView>
 							</center>
 							<bottom>
-								<HBox spacing="5.0">
+								<HBox spacing="10.0">
 									<padding>
-										<Insets top="5.0" bottom="5.0" left="5.0" right="5.0" />
+										<Insets top="10.0" bottom="10.0" left="10.0" right="10.0" />
 									</padding>
 									<Button fx:id="undoButton" text="Undo Changes" disable="true"
 										HBox.hgrow="NEVER" onAction="#handleUndoChanges" />
@@ -61,7 +61,8 @@
 										disable="true" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults" />
 									<Label fx:id="applyWarning" text="There are unapplied preference changes"
 										visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity"
-										maxHeight="Infinity" style="-fx-text-fill: red" alignment="CENTER" />
+										maxHeight="Infinity" style="-fx-text-fill: -prob-orange; -fx-font-weight: bold"
+										alignment="CENTER" />
 									<Button fx:id="applyButton" text="Apply Changes"
 										disable="true" HBox.hgrow="NEVER" onAction="#handleApply" />
 								</HBox>
