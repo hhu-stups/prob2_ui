@@ -417,7 +417,7 @@
 	-fx-padding: 0.0 0.0 0.0 0.5em;
 }
 
-/* =============== DIALOG ================== */
+/* ===================== DIALOG ====================== */
 .dialog > .label {
 	-fx-text-fill: -prob-grey;
 	-fx-font-weight: bold;
@@ -435,7 +435,7 @@
     -fx-border-color: -prob-grey-75;
 }
 
-/* =============== DARK =================== */
+/* ====================== DARK ======================= */
 .dark {
 	-fx-background-color: -prob-grey;
 	-fx-border-color: -prob-aqua;
@@ -465,12 +465,7 @@
 	-fx-background-color: -prob-white-75;
 }
 
-/* ============ WITHOUT BORDER ================= */
-.without-border {
-	-fx-border-width: 0;
-}
-
-/* ============= HISTORY VIEW ================== */
+/* ================== HISTORY VIEW =================== */
 #past {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: normal;
@@ -490,7 +485,27 @@
 	-fx-font-size: 12.0px;
 }
 
-/* ============= MODELCHECKING VIEW ================== */	
+/* ================= OPERATIONS VIEW ================= */
+.errored {
+	-fx-border-width: 0 0 0 0.3em; 
+	-fx-border-color: -prob-orange;
+	-fx-text-fill: -prob-orange;
+	-fx-padding: 0.4em 0 0.4em 1.0em;
+}
+.unexplored {
+	-fx-border-width: 0 0 0 0.3em; 
+	-fx-border-color: -prob-aqua;
+	-fx-text-fill: -prob-aqua;
+	-fx-padding: 0.4em 0 0.4em 1.0em;
+}
+.normal {
+	-fx-border-width: 0 0 0 0.3em; 
+	-fx-border-color: transparent;
+	-fx-text-fill: black;
+	-fx-padding: 0.4em 0 0.4em 1.0em;
+}
+
+/* ================ MODELCHECKING VIEW =============== */	
 .mcheckSuccess {
 	-fx-background-color: #00ff0022;
 	-fx-background-radius: 5.0 5.0 5.0 5.0;
