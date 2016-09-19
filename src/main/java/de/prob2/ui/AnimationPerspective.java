@@ -1,11 +1,7 @@
 package de.prob2.ui;
 
-import java.io.IOException;
-import java.util.HashMap;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.modelchecking.ModelcheckingController;
@@ -22,6 +18,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 @Singleton
 public final class AnimationPerspective extends BorderPane {
@@ -75,7 +74,7 @@ public final class AnimationPerspective extends BorderPane {
 
 	@FXML
 	public void initialize() {
-		double initialHeight = 200;
+		/*double initialHeight = 200;
 		double initialWidth = 280;
 		operations.setPrefSize(initialWidth,initialHeight);
 		history.setPrefSize(initialWidth,initialHeight);
@@ -86,7 +85,7 @@ public final class AnimationPerspective extends BorderPane {
 		nodeMap.put(modelcheck,modelcheckTP);
 		nodeMap.put(animations,animationsTP);
 		leftAccordion.setExpandedPane(operationsTP);
-		onDrag();
+		onDrag();*/
 	}
 
 	private void onDrag() {

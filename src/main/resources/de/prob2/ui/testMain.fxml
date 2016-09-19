@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.AnimationPerspective?>
+<?import de.prob2.ui.menu.MenuController?>
+<?import javafx.scene.layout.BorderPane?>
+
+<?import de.prob2.ui.states.StatesView?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TitledPane?>
+<?import de.prob2.ui.operations.OperationsView?>
+<?import de.prob2.ui.history.HistoryView?>
+<?import de.prob2.ui.modelchecking.ModelcheckingController?>
+<?import de.prob2.ui.animations.AnimationsView?>
+<BorderPane fx:id="rootContainer" maxHeight="Infinity"
+			maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
+			prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
+	<center>
+		<BorderPane>
+			<left>
+				<AnchorPane minWidth="280.0">
+					<Accordion fx:id="leftAccordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+						<panes>
+							<TitledPane text="Operations" fx:id="operationsTP">
+								<OperationsView fx:id="operations"/>
+							</TitledPane>
+							<TitledPane text="Model Check Stats" fx:id="modelcheckTP">
+								<ModelcheckingController fx:id="modelcheck"/>
+							</TitledPane>
+							<TitledPane text="Animations" fx:id="animationsTP">
+								<AnimationsView fx:id="animations"/>
+							</TitledPane>
+						</panes>
+					</Accordion>
+				</AnchorPane>
+			</left>
+			<center>
+				<StatesView/>
+			</center>
+			<right>
+				<Accordion>
+					<panes>
+						<TitledPane text="History" fx:id="historyTP" expanded="true" collapsible="false">
+							<HistoryView fx:id="history"/>
+						</TitledPane>
+					</panes>
+				</Accordion>
+			</right>
+		</BorderPane>
+	</center>
+	<top>
+		<MenuController/>
+	</top>
+</BorderPane>

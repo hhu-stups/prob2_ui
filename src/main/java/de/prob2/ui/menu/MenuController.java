@@ -88,7 +88,7 @@ public final class MenuController extends MenuBar {
 				loader.setLocation(new URL("file://" + selectedFile.getPath()));
 				loader.load();
 				Parent root = loader.getRoot();
-				Scene scene = new Scene(root, window.getHeight(), window.getWidth());
+				Scene scene = new Scene(root, window.getWidth(), window.getHeight());
 				scene.getStylesheets().add("prob.css");
 				((Stage) window).setScene(scene);
 			} catch (IOException e) {
