@@ -70,15 +70,16 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			});
 			contextMenu.getItems().add(removeMenuItem);
 			row.setOnMouseClicked(event -> {
-				if (event.getButton().equals(MouseButton.PRIMARY)) {
-					currentIndex = row.getIndex();
-					Trace trace = row.getItem().getTrace();
-					animations.changeCurrentAnimation(trace);
+				if (!row.isEmpty()) {
+					if (event.getButton().equals(MouseButton.PRIMARY)) {
+						currentIndex = row.getIndex();
+						Trace trace = row.getItem().getTrace();
+						animations.changeCurrentAnimation(trace);
+					}
+					if (event.getButton().equals(MouseButton.SECONDARY)) {
+						contextMenu.show(row, event.getScreenX(), event.getScreenY());
+					}
 				}
-				if (event.getButton().equals(MouseButton.SECONDARY) && !row.isEmpty()) {
-					contextMenu.show(row, event.getScreenX(), event.getScreenY());
-				}
-				
 			});
 			return row;
 		});
@@ -104,8 +105,10 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			ObservableList<Animation> animationsList = animationsTable.getItems();
 			animationsList.clear();
 			animationsList.addAll(animList);
-			if(previousSize < animationsList.size()) currentIndex = animationsList.size()-1;
-			else if(previousSize > animationsList.size() && currentIndex > 0) currentIndex--;
+			if (previousSize < animationsList.size())
+				currentIndex = animationsList.size() - 1;
+			else if (previousSize > animationsList.size() && currentIndex > 0)
+				currentIndex--;
 			animationsTable.getFocusModel().focus(currentIndex);
 			previousSize = animationsList.size();
 		});
