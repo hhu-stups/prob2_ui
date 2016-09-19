@@ -25,7 +25,7 @@ repositories {
 mainClassName = "de.prob2.ui.ProB2"
 
 macAppBundle {
-	appName = "ProB 2.0"
+	dmgName = "ProB-2.0-for-MacOS"
 	icon = "prob2.icns"
 	bundleJRE = true
 }
