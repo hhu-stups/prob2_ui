@@ -167,16 +167,22 @@ public class GroovyConsole extends TextArea {
 		if(getCurrentLine().equals("")) {
 			this.appendText("\n" + "null");
 		} else {
-			if(instructions.isEmpty() || !instructions.get(instructions.size() - 1).getInstruction().equals("")) {
+			Instruction lastInstruction = null;
+			if(!instructions.isEmpty()) {
+				lastInstruction = instructions.get(instructions.size() - 1);
+			}
+			if(instructions.isEmpty() || lastInstruction.getOption() == InstructionOption.ENTER) {
 				instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
 			} else {
-				instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.UP));
+				instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.ENTER));
 			}
 			posInList = instructions.size() - 1;
 			this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
 		}
 		this.appendText("\n >");
-	}	
+	}
+	
+
 	
 	private void handleArrowKeys(KeyEvent e) {
 		boolean needReturn;
@@ -198,15 +204,13 @@ public class GroovyConsole extends TextArea {
 		}
 		if(posInList == instructions.size() - 1) {
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
-			if(!lastinstruction.equals(getCurrentLine())) {
-				if(posInList == instructions.size() - 1) {
-					if(instructions.get(posInList).getOption() == InstructionOption.UP) {
-						instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.UP));
-					} else {
-						instructions.add(new Instruction(getCurrentLine(), InstructionOption.UP));
-						setTextAfterArrowKey();
-						return true;
-					}
+			if(!lastinstruction.equals(getCurrentLine()) && posInList == instructions.size() - 1) {
+				if(instructions.get(posInList).getOption() == InstructionOption.UP) {
+					instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.UP));
+				} else {
+					instructions.add(new Instruction(getCurrentLine(), InstructionOption.UP));
+					setTextAfterArrowKey();
+					return true;
 				}
 			}
 		}
