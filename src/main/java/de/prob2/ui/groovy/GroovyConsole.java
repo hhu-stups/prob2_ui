@@ -18,7 +18,6 @@ public class GroovyConsole extends TextArea {
 	private final KeyCode[] rest = {KeyCode.ESCAPE,KeyCode.SCROLL_LOCK,KeyCode.PAUSE,KeyCode.NUM_LOCK,KeyCode.INSERT,KeyCode.CONTEXT_MENU,KeyCode.CAPS};
 	private List<Instruction> instructions;
 	private int posInList = -1;
-	private String currentLine ="";
 	private GroovyInterpreter interpreter;
 	
 
@@ -44,9 +43,8 @@ public class GroovyConsole extends TextArea {
 		int posOfEnter = oldText.lastIndexOf("\n");
 		super.paste();
 		int diff = this.getLength() - oldText.length();
-		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
+		String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		if(currentLine.contains("\n")) {
-			currentLine ="";
 			this.setText(oldText);
 			goToLastPos();
 			return;
@@ -156,7 +154,6 @@ public class GroovyConsole extends TextArea {
 		if (e.isShortcutDown() || e.isAltDown()) {
 			return;
 		}
-		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText()).toString();
 		charCounterInLine++;
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
@@ -167,20 +164,18 @@ public class GroovyConsole extends TextArea {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		e.consume();
-		
 		if(instructions.isEmpty()) {
-			instructions.add(new Instruction(currentLine, InstructionOption.ENTER));
+			instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
 		} else {
 			//add Instruction if last Instruction is not "", otherwise replace it
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
-			if(!lastinstruction.equals("") && !lastinstruction.equals(currentLine)) {
-				instructions.add(new Instruction(currentLine, InstructionOption.ENTER));
-			} else if(!currentLine.equals("")) {
-				instructions.set(instructions.size() - 1, new Instruction(currentLine, InstructionOption.ENTER));
+			if(!lastinstruction.equals("") && !lastinstruction.equals(getCurrentLine())) {
+				instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
+			} else if(!getCurrentLine().equals("")) {
+				instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.ENTER));
 			}
 		}
 		posInList = instructions.size() - 1;
-		currentLine = "";
 		this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
 		this.appendText("\n >");
 	}	
@@ -205,12 +200,12 @@ public class GroovyConsole extends TextArea {
 		}
 		if(posInList == instructions.size() - 1) {
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
-			if(!lastinstruction.equals(currentLine)) {
+			if(!lastinstruction.equals(getCurrentLine())) {
 				if(posInList == instructions.size() - 1) {
 					if(instructions.get(posInList).getOption() == InstructionOption.UP) {
-						instructions.set(instructions.size() - 1, new Instruction(currentLine, InstructionOption.UP));
+						instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.UP));
 					} else {
-						instructions.add(new Instruction(currentLine, InstructionOption.UP));
+						instructions.add(new Instruction(getCurrentLine(), InstructionOption.UP));
 						setTextAfterArrowKey();
 						return true;
 					}
@@ -233,7 +228,7 @@ public class GroovyConsole extends TextArea {
 	private void setTextAfterArrowKey() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		this.setText(this.getText().substring(0, posOfEnter + 3));
-		currentLine = instructions.get(posInList).getInstruction();
+		String currentLine = instructions.get(posInList).getInstruction();
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
 		this.appendText(currentLine);
@@ -264,7 +259,6 @@ public class GroovyConsole extends TextArea {
 				return;
 			}
 		}
-		updateTextAreaAfterDeletion();
 	}
 	
 	private boolean handleBackspace(KeyEvent e) {
@@ -287,12 +281,11 @@ public class GroovyConsole extends TextArea {
 		return false;
 	}
 	
-	private void updateTextAreaAfterDeletion() {
+	private String getCurrentLine() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
-		currentLine = this.getText().substring(posOfEnter + 3, posOfEnter + 3 + currentPosInLine);
-		currentLine += this.getText().substring(posOfEnter+ 4 + currentPosInLine, this.getText().length());
+		return this.getText().substring(posOfEnter + 3, this.getText().length());
 	}
-	
+		
 	public void closeObjectStage() {
 		interpreter.closeObjectStage();
 	}
