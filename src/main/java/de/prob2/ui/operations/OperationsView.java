@@ -50,20 +50,34 @@ public class OperationsView extends AnchorPane {
 			super.updateItem(item, empty);
 			if (item != null && !empty) {
 				setText(item.toString());
+				setGraphicTextGap(10.0);
 				final FontAwesomeIconView icon;
 				if (item.isEnabled()) {
 					icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
 					icon.setFill(Color.LIMEGREEN);
 					setDisable(false);
+					if (!item.explored) {
+						getStyleClass().clear();
+						getStyleClass().add("unexplored");
+					} else if (item.errored) {
+						getStyleClass().clear();
+						getStyleClass().add("errored");
+					} else {
+						getStyleClass().clear();
+						getStyleClass().add("normal");
+					}
 				} else {
 					icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
 					icon.setFill(Color.RED);
 					setDisable(true);
+					getStyleClass().clear();
+					getStyleClass().add("normal");
 				}
 				setGraphic(icon);
 			} else {
 				setGraphic(null);
 				setText(null);
+				getStyleClass().clear();
 			}
 		}
 	}
@@ -184,13 +198,16 @@ public class OperationsView extends AnchorPane {
 			String name = extractPrettyName(transition.getName());
 			notEnabled.remove(name);
 			List<String> params = transition.getParams();
-			Operation operation = new Operation(id, name, params, true, withTimeout.contains(name));
+			boolean explored = transition.getDestination().isExplored();
+			boolean errored = explored && !transition.getDestination().isInvariantOk()? true : false;
+			System.out.println(name + " " + errored);
+			Operation operation = new Operation(id, name, params, true, withTimeout.contains(name), explored, errored);
 			events.add(operation);
 		}
 		if (showNotEnabled) {
 			for (String s : notEnabled) {
 				if (!s.equals("INITIALISATION")) {
-					events.add(new Operation(s, s, opToParams.get(s), false, withTimeout.contains(s)));
+					events.add(new Operation(s, s, opToParams.get(s), false, withTimeout.contains(s), false, false));
 				}
 			}
 		}
