@@ -1,6 +1,4 @@
 language: groovy
-addons:
-  sonarqube: true
 jdk:
 - oraclejdk8
 branches:
@@ -11,8 +9,11 @@ script:
 - ./gradlew check
 - ./gradlew distZip
 - sonar-scanner -Dsonar.login=$SONAR_TOKEN
+sudo: false
+
 
 addons:
+  sonarqube: true
   apt:
     packages:
     - oracle-java8-installer
