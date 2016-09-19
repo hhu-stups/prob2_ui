@@ -164,21 +164,18 @@ public class GroovyConsole extends TextArea {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		e.consume();
-		int posOfEnter = this.getText().lastIndexOf("\n");
-		String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		if(instructions.isEmpty()) {
-			instructions.add(new Instruction(currentLine, InstructionOption.ENTER));
+			instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
 		} else {
 			//add Instruction if last Instruction is not "", otherwise replace it
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
-			if(!lastinstruction.equals("") && !lastinstruction.equals(currentLine)) {
-				instructions.add(new Instruction(currentLine, InstructionOption.ENTER));
-			} else if(!currentLine.equals("")) {
-				instructions.set(instructions.size() - 1, new Instruction(currentLine, InstructionOption.ENTER));
+			if(!lastinstruction.equals("") && !lastinstruction.equals(getCurrentLine())) {
+				instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
+			} else if(!getCurrentLine().equals("")) {
+				instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.ENTER));
 			}
 		}
 		posInList = instructions.size() - 1;
-		currentLine = "";
 		this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
 		this.appendText("\n >");
 	}	
@@ -203,14 +200,12 @@ public class GroovyConsole extends TextArea {
 		}
 		if(posInList == instructions.size() - 1) {
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
-			int posOfEnter = this.getText().lastIndexOf("\n");
-			String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
-			if(!lastinstruction.equals(currentLine)) {
+			if(!lastinstruction.equals(getCurrentLine())) {
 				if(posInList == instructions.size() - 1) {
 					if(instructions.get(posInList).getOption() == InstructionOption.UP) {
-						instructions.set(instructions.size() - 1, new Instruction(currentLine, InstructionOption.UP));
+						instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.UP));
 					} else {
-						instructions.add(new Instruction(currentLine, InstructionOption.UP));
+						instructions.add(new Instruction(getCurrentLine(), InstructionOption.UP));
 						setTextAfterArrowKey();
 						return true;
 					}
@@ -284,6 +279,11 @@ public class GroovyConsole extends TextArea {
 			return true;
 		}
 		return false;
+	}
+	
+	private String getCurrentLine() {
+		int posOfEnter = this.getText().lastIndexOf("\n");
+		return this.getText().substring(posOfEnter + 3, this.getText().length());
 	}
 		
 	public void closeObjectStage() {
