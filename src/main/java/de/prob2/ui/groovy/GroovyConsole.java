@@ -164,19 +164,17 @@ public class GroovyConsole extends TextArea {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		e.consume();
-		if(instructions.isEmpty()) {
-			instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
+		if(getCurrentLine().equals("")) {
+			this.appendText("\n" + "null");
 		} else {
-			//add Instruction if last Instruction is not "", otherwise replace it
-			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
-			if(!lastinstruction.equals("") && !lastinstruction.equals(getCurrentLine())) {
+			if(instructions.isEmpty() || !instructions.get(instructions.size() - 1).getInstruction().equals("")) {
 				instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
-			} else if(!getCurrentLine().equals("")) {
-				instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.ENTER));
+			} else {
+				instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.UP));
 			}
+			posInList = instructions.size() - 1;
+			this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
 		}
-		posInList = instructions.size() - 1;
-		this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
 		this.appendText("\n >");
 	}	
 	
