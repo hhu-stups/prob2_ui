@@ -29,6 +29,7 @@ public final class AnimationPerspective extends BorderPane {
 
 	// FIXME "expanded" empty accordions
 	// FIXME drag view model checking
+	// FIXME dragging not always working
 
 	// TODO? revert to SplitPane
 	@FXML
@@ -89,7 +90,7 @@ public final class AnimationPerspective extends BorderPane {
 	}
 
 	private void onDrag() {
-		for (Node node:nodeMap.keySet()){
+		for (Node node : nodeMap.keySet()){
 			registerDrag(node);
 		}
 	}
@@ -131,27 +132,29 @@ public final class AnimationPerspective extends BorderPane {
 	private void dragDropped(final Node node, MouseEvent mouseEvent){
 		TitledPane nodeTP = nodeMap.get(node);
 		Accordion oldParent = (Accordion) nodeTP.getParent();
-		nodeTP.setCollapsible(false);
+		Point2D position = this.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
 
-		if (!rightAccordion.getPanes().contains(nodeTP)) {
-			rightAccordion.getPanes().add(nodeTP);
+		boolean middleX = position.getX() > this.getScene().getWidth()/3 && position.getX() <= 2*this.getScene().getWidth()/3;
+		boolean middleY = position.getY() > this.getScene().getHeight()/3 && position.getY() <= 2*this.getScene().getHeight()/3;
+
+		boolean right = position.getX() > this.getScene().getWidth()/2;
+		boolean top = position.getY() < this.getScene().getHeight()/2;
+		boolean bottom = !top;
+		boolean left = !right;
+
+		if (right && middleY && !rightAccordion.getPanes().contains(nodeTP)) {
+			nodeTP.setCollapsible(false);
 			switchParent(oldParent,rightAccordion,nodeTP);
-		} else if (!topAccordion.getPanes().contains(nodeTP)) {
+		} else if (top && middleX && !topAccordion.getPanes().contains(nodeTP)) {
 			nodeTP.setCollapsible(true);
-			topAccordion.getPanes().add(nodeTP);
 			switchParent(oldParent,topAccordion,nodeTP);
-		} else if (!bottomAccordion.getPanes().contains(nodeTP)) {
+		} else if (bottom && middleX && !bottomAccordion.getPanes().contains(nodeTP)) {
 			nodeTP.setCollapsible(true);
-			bottomAccordion.getPanes().add(nodeTP);
 			switchParent(oldParent,bottomAccordion,nodeTP);
-		} else {
-			leftAccordion.getPanes().add(nodeTP);
+		} else if (left && middleY && !leftAccordion.getPanes().contains(nodeTP)){
+			nodeTP.setCollapsible(false);
 			switchParent(oldParent,leftAccordion,nodeTP);
 		}
-
-		Point2D position = this.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
-		System.out.println("X = " + position.getX() + "; Y = " + position.getY());
-		System.out.println(this.getScene().getWidth() + ":" +this.getScene().getHeight());
 	}
 
 	private void switchParent(Accordion oldParent, Accordion newParent, TitledPane nodeTP){
@@ -163,12 +166,14 @@ public final class AnimationPerspective extends BorderPane {
 			}
 		}
 
-		if (newParent.getPanes().size()>1){
+		if (newParent.getPanes().size()>=1){
 			for (TitledPane panes:newParent.getPanes()){
 				panes.setCollapsible(true);
 				panes.setExpanded(false);
 			}
+			nodeTP.setCollapsible(true);
 		}
+		newParent.getPanes().add(nodeTP);
 		newParent.setExpandedPane(nodeTP);
 	}
 }
