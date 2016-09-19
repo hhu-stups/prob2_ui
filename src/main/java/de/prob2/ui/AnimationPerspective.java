@@ -21,14 +21,16 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
-import spock.lang.Title;
 
 @Singleton
 public final class AnimationPerspective extends BorderPane {
 	// TODO improve DragDrop/Docking
 	// TODO remove accordion, if just one element left; add accordion if second object dragged left
+
 	// FIXME drag view model checking
+
 	// TODO? revert to SplitPane
+	// TODO? accordion in every direction?
 	@FXML
 	private OperationsView operations;
 	@FXML
@@ -66,11 +68,12 @@ public final class AnimationPerspective extends BorderPane {
 
 	@FXML
 	public void initialize() {
-		double initialSize = 250;
-		operations.setPrefSize(initialSize,initialSize);
-		history.setPrefSize(initialSize,initialSize);
-		modelcheck.setPrefSize(initialSize,initialSize);
-		animations.setPrefSize(initialSize,initialSize);
+		double initialHeight = 200;
+		double initialWidth = 280;
+		operations.setPrefSize(initialWidth,initialHeight);
+		history.setPrefSize(initialWidth,initialHeight);
+		modelcheck.setPrefSize(initialWidth,initialHeight);
+		animations.setPrefSize(initialWidth,initialHeight);
 		nodeMap.put(operations,operationsTP);
 		nodeMap.put(history,historyTP);
 		nodeMap.put(modelcheck,modelcheckTP);
@@ -92,7 +95,7 @@ public final class AnimationPerspective extends BorderPane {
 			mouseEvent.consume();
 		});
 		node.setOnMouseDragged(mouseEvent -> {
-			Point2D position = this.getParent().sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
+			Point2D position = this.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
 			snapshot.relocate(position.getX(), position.getY());
 			mouseEvent.consume();
 		});
@@ -111,7 +114,7 @@ public final class AnimationPerspective extends BorderPane {
 			SnapshotParameters snapParams = new SnapshotParameters();
 			snapParams.setFill(Color.TRANSPARENT);
 			snapshot.setImage(node.snapshot(snapParams,null));
-			snapshot.setFitWidth(100);
+			snapshot.setFitWidth(200);
 			snapshot.setPreserveRatio(true);
 			((BorderPane) this.getParent()).getChildren().add(snapshot);
 			mouseEvent.consume();
