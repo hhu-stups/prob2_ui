@@ -24,12 +24,13 @@ import java.util.HashMap;
 
 @Singleton
 public final class AnimationPerspective extends BorderPane {
-	// TODO improve DragDrop/Docking
+	// FIXME detached history view not showing history
+	// FIXME switching from detached history view to default eliminating states view
 
-	// FIXME "expanded" empty accordions
-	// FIXME drag view model checking
-	// FIXME dragging not always working
-
+	// FIXME? "expanded" empty accordions
+	// FIXME? drag view model checking
+	// FIXME? dragging not always working
+	// TODO? improve DragDrop/Docking
 	// TODO? revert to SplitPane
 	@FXML
 	private OperationsView operations;

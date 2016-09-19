@@ -26,6 +26,7 @@
 	</Menu>
 	<Menu text="%menu.perspectives">
 		<MenuItem text="%menu.perspectives.default" onAction="#handleLoadDefault" />
+		<MenuItem text="%menu.perspectives.detached" onAction="#handleLoadDetached"/>
 		<MenuItem text="%menu.perspectives.load" onAction="#handleLoadPerspective" />
 	</Menu>
 	<Menu fx:id="windowMenu" text="%menu.window">

@@ -65,15 +65,25 @@ public final class MenuController extends MenuBar {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(getClass().getResource("../main.fxml"));
 		try {
-			loader.load();
+			Parent root = loader.load();
+			window.getScene().setRoot(root);
 		} catch (IOException e) {
 			System.err.println("Failed to load FXML-File!");
 			e.printStackTrace();
 		}
-		Parent root = loader.getRoot();
-		Scene scene = new Scene(root, window.getWidth(), window.getHeight());
-		scene.getStylesheets().add("prob.css");
-		((Stage) window).setScene(scene);
+	}
+
+	@FXML
+	private void handleLoadDetached() {
+		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
+		loader.setLocation(getClass().getResource("../detached.fxml"));
+		try {
+			Parent root = loader.load();
+			window.getScene().setRoot(root);
+		} catch (IOException e) {
+			System.err.println("Failed to load FXML-File!");
+			e.printStackTrace();
+		}
 	}
 
 	@FXML
@@ -86,11 +96,8 @@ public final class MenuController extends MenuBar {
 			try {
 				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 				loader.setLocation(new URL("file://" + selectedFile.getPath()));
-				loader.load();
-				Parent root = loader.getRoot();
-				Scene scene = new Scene(root, window.getWidth(), window.getHeight());
-				scene.getStylesheets().add("prob.css");
-				((Stage) window).setScene(scene);
+				Parent root = loader.load();
+				window.getScene().setRoot(root);
 			} catch (IOException e) {
 				System.err.println("Failed to load FXML-File!");
 				e.printStackTrace();

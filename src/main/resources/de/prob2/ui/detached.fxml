@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import de.prob2.ui.AnimationPerspective?>
+		
 <?import de.prob2.ui.menu.MenuController?>
 <?import javafx.scene.layout.BorderPane?>
 
@@ -38,9 +37,9 @@
 				<StatesView/>
 			</center>
 			<right>
-				<Accordion>
+				<Accordion expandedPane="$historyTP">
 					<panes>
-						<TitledPane text="History" fx:id="historyTP" expanded="true" collapsible="false">
+						<TitledPane text="History" fx:id="historyTP" collapsible="false">
 							<HistoryView fx:id="history"/>
 						</TitledPane>
 					</panes>
