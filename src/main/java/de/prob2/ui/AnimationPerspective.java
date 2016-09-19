@@ -129,63 +129,46 @@ public final class AnimationPerspective extends BorderPane {
 	}
 
 	private void dragDropped(final Node node, MouseEvent mouseEvent){
-		//System.out.println(node.getClass().toString() + " dragged, isResizable() = "+node.isResizable());
 		TitledPane nodeTP = nodeMap.get(node);
-		Accordion accordion = (Accordion) nodeTP.getParent();
+		Accordion oldParent = (Accordion) nodeTP.getParent();
 		nodeTP.setCollapsible(false);
-		/*if (accordion.getPanes().contains(nodeTP)) {
-			if (this.getRight() == null) {
-				this.setRight(node);
-			} else if (this.getTop() == null) {
-				this.setTop(node);
-			} else if (this.getBottom() == null) {
-				this.setBottom(node);
-			} else if (this.getLeft() == null) {
-				this.setLeft(node);
-			}*/
-		if (rightAccordion.getPanes().isEmpty()) {
+
+		if (!rightAccordion.getPanes().contains(nodeTP)) {
 			rightAccordion.getPanes().add(nodeTP);
-		} else if (topAccordion.getPanes().isEmpty()) {
+			switchParent(oldParent,rightAccordion,nodeTP);
+		} else if (!topAccordion.getPanes().contains(nodeTP)) {
 			nodeTP.setCollapsible(true);
 			topAccordion.getPanes().add(nodeTP);
-		} else if (bottomAccordion.getPanes().isEmpty()) {
+			switchParent(oldParent,topAccordion,nodeTP);
+		} else if (!bottomAccordion.getPanes().contains(nodeTP)) {
 			nodeTP.setCollapsible(true);
 			bottomAccordion.getPanes().add(nodeTP);
+			switchParent(oldParent,bottomAccordion,nodeTP);
 		} else {
 			leftAccordion.getPanes().add(nodeTP);
-		}
-
-		accordion.getPanes().remove(nodeTP);
-
-		nodeTP.setExpanded(true);
-		if (((Accordion) nodeTP.getParent()).getPanes().size()>1){
-			nodeTP.setCollapsible(true);
-		}
-
-		leftAccordion.getPanes().get(0).setExpanded(true);
-
-		if (leftAccordion.getPanes().size()==1){
-			leftAccordion.getPanes().get(0).setCollapsible(false);
-		} else {
-			leftAccordion.getPanes().get(0).setCollapsible(true);
+			switchParent(oldParent,leftAccordion,nodeTP);
 		}
 
 		Point2D position = this.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
 		System.out.println("X = " + position.getX() + "; Y = " + position.getY());
 		System.out.println(this.getScene().getWidth() + ":" +this.getScene().getHeight());
-			/*if (accordion.getPanes().size()==1){
-				this.setLeft(node);
-				this.getChildren().remove(accordion);
-			}*/
-		/*} else {
-			if (!this.getChildren().contains(accordion)){
-				accordion.getPanes().add(nodeMap.get(this.getLeft()));
-				this.setLeft(accordion);
+	}
+
+	private void switchParent(Accordion oldParent, Accordion newParent, TitledPane nodeTP){
+		oldParent.getPanes().remove(nodeTP);
+		if (!oldParent.getPanes().isEmpty()) {
+			oldParent.setExpandedPane(oldParent.getPanes().get(0));
+			if (oldParent.getPanes().size()==1){
+				oldParent.getPanes().get(0).setCollapsible(false);
 			}
-			accordion.getPanes().add(nodeTP);
-			nodeTP.setContent(node);
-			accordion.setExpandedPane(nodeTP);
-			this.getChildren().remove(node);
-		}*/
+		}
+
+		if (newParent.getPanes().size()>1){
+			for (TitledPane panes:newParent.getPanes()){
+				panes.setCollapsible(true);
+				panes.setExpanded(false);
+			}
+		}
+		newParent.setExpandedPane(nodeTP);
 	}
 }
