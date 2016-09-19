@@ -3,6 +3,7 @@ language: java
 jdk:
 - oraclejdk8
 script:
+- ./gradlew tasks --all
 - ./gradlew check
 - ./gradlew distZip
 - ls -al build/distributions
