@@ -19,6 +19,7 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 
@@ -27,6 +28,7 @@ public final class AnimationPerspective extends BorderPane {
 	// TODO improve DragDrop/Docking
 	// TODO remove accordion, if just one element left; add accordion if second object dragged left
 
+	// FIXME "expanded" empty accordions
 	// FIXME drag view model checking
 
 	// TODO? revert to SplitPane
@@ -48,7 +50,13 @@ public final class AnimationPerspective extends BorderPane {
 	@FXML
 	private TitledPane animationsTP;
 	@FXML
-	private Accordion accordion;
+	private Accordion leftAccordion;
+	@FXML
+	private Accordion rightAccordion;
+	@FXML
+	private Accordion topAccordion;
+	@FXML
+	private Accordion bottomAccordion;
 
 	private boolean dragged;
 	private ImageView snapshot = new ImageView();
@@ -78,6 +86,7 @@ public final class AnimationPerspective extends BorderPane {
 		nodeMap.put(history,historyTP);
 		nodeMap.put(modelcheck,modelcheckTP);
 		nodeMap.put(animations,animationsTP);
+		leftAccordion.setExpandedPane(operationsTP);
 		onDrag();
 	}
 
@@ -102,7 +111,7 @@ public final class AnimationPerspective extends BorderPane {
 		node.setOnMouseReleased(mouseEvent -> {
 			this.setCursor(Cursor.DEFAULT);
 			if (dragged){
-				dragDropped(node);
+				dragDropped(node,mouseEvent);
 			}
 			dragged = false;
 			snapshot.setImage(null);
@@ -121,10 +130,11 @@ public final class AnimationPerspective extends BorderPane {
 		});
 	}
 
-	private void dragDropped(final Node node){
+	private void dragDropped(final Node node, MouseEvent mouseEvent){
 		//System.out.println(node.getClass().toString() + " dragged, isResizable() = "+node.isResizable());
 		TitledPane nodeTP = nodeMap.get(node);
-		if (accordion.getPanes().contains(nodeTP)) {
+		Accordion accordion = (Accordion) nodeTP.getParent();
+		/*if (accordion.getPanes().contains(nodeTP)) {
 			if (this.getRight() == null) {
 				this.setRight(node);
 			} else if (this.getTop() == null) {
@@ -133,23 +143,43 @@ public final class AnimationPerspective extends BorderPane {
 				this.setBottom(node);
 			} else if (this.getLeft() == null) {
 				this.setLeft(node);
-			}
-			nodeTP.setContent(null);
-			accordion.getPanes().remove(nodeTP);
-			accordion.setExpandedPane(accordion.getPanes().get(0));
+			}*/
+		if (rightAccordion.getPanes().isEmpty()) {
+			nodeTP.setCollapsible(false);
+			rightAccordion.getPanes().add(nodeTP);
+		} else if (topAccordion.getPanes().isEmpty()) {
+			nodeTP.setCollapsible(true);
+			topAccordion.getPanes().add(nodeTP);
+		} else if (bottomAccordion.getPanes().isEmpty()) {
+			nodeTP.setCollapsible(true);
+			bottomAccordion.getPanes().add(nodeTP);
+		} else {
+			nodeTP.setCollapsible(false);
+			leftAccordion.getPanes().add(nodeTP);
+		}
+
+		accordion.getPanes().remove(nodeTP);
+		accordion = (Accordion) nodeTP.getParent();
+		if (accordion.getPanes().size()>1){
+			nodeTP.setCollapsible(true);
+		}
+		accordion.setExpandedPane(nodeTP);
+		Point2D position = this.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
+		System.out.println("X = " + position.getX() + "; Y = " + position.getY());
+		System.out.println(this.getScene().getWidth() + ":" +this.getScene().getHeight());
 			/*if (accordion.getPanes().size()==1){
 				this.setLeft(node);
 				this.getChildren().remove(accordion);
 			}*/
-		} else {
-			/*if (!this.getChildren().contains(accordion)){
+		/*} else {
+			if (!this.getChildren().contains(accordion)){
 				accordion.getPanes().add(nodeMap.get(this.getLeft()));
 				this.setLeft(accordion);
-			}*/
+			}
 			accordion.getPanes().add(nodeTP);
 			nodeTP.setContent(node);
 			accordion.setExpandedPane(nodeTP);
 			this.getChildren().remove(node);
-		}
+		}*/
 	}
 }
