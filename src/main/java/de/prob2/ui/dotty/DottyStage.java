@@ -2,8 +2,13 @@ package de.prob2.ui.dotty;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,6 +24,8 @@ public final class DottyStage extends Stage {
 	@FXML
 	ScrollPane pane;
 
+	private Logger logger = LoggerFactory.getLogger(DottyStage.class);
+
 	@Inject
 	private DottyStage(FXMLLoader loader, CurrentStage currentStage) {
 		try {
@@ -27,9 +34,9 @@ public final class DottyStage extends Stage {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
-		
+
 		currentStage.register(this);
 	}
 

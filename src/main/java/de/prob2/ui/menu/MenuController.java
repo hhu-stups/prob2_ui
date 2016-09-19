@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
@@ -47,18 +51,24 @@ public final class MenuController extends MenuBar {
 	private final CurrentTrace currentTrace;
 	private final FormulaGenerator formulaGenerator;
 	private final ModelcheckingController modelcheckingController;
-	
+
 	private final DottyStage dottyStage;
 	private final Stage mcheckStage;
 	private final PreferencesStage preferencesStage;
 	private final GroovyConsoleStage groovyConsoleStage;
-	
+
 	private Window window;
-	
-	@FXML private Menu windowMenu;
-	@FXML private MenuItem preferencesItem;
-	@FXML private MenuItem enterFormulaForVisualization;
-	@FXML private MenuItem aboutItem;
+
+	@FXML
+	private Menu windowMenu;
+	@FXML
+	private MenuItem preferencesItem;
+	@FXML
+	private MenuItem enterFormulaForVisualization;
+	@FXML
+	private MenuItem aboutItem;
+
+	private Logger logger = LoggerFactory.getLogger(MenuController.class);
 
 	@FXML
 	private void handleLoadDefault() {
@@ -67,8 +77,7 @@ public final class MenuController extends MenuBar {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			System.err.println("Failed to load FXML-File!");
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 		Parent root = loader.getRoot();
 		Scene scene = new Scene(root, window.getWidth(), window.getHeight());
@@ -92,8 +101,7 @@ public final class MenuController extends MenuBar {
 				scene.getStylesheets().add("prob.css");
 				((Stage) window).setScene(scene);
 			} catch (IOException e) {
-				System.err.println("Failed to load FXML-File!");
-				e.printStackTrace();
+				logger.error("loading fxml failed", e);
 			}
 	}
 
@@ -120,7 +128,7 @@ public final class MenuController extends MenuBar {
 			try {
 				newSpace = this.api.b_load(selectedFile.getAbsolutePath());
 			} catch (IOException | BException e) {
-				e.printStackTrace();
+				logger.error("loading file failed", e);
 				Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
 				alert.getDialogPane().getStylesheets().add("prob.css");
 				alert.showAndWait();
@@ -136,7 +144,7 @@ public final class MenuController extends MenuBar {
 					"Unknown file type selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
 		}
 	}
-	
+
 	@FXML
 	private void handleClose(final ActionEvent event) {
 		final Stage stage = this.currentStage.get();
@@ -144,7 +152,7 @@ public final class MenuController extends MenuBar {
 			stage.close();
 		}
 	}
-	
+
 	@FXML
 	private void handlePreferences(ActionEvent event) {
 		this.preferencesStage.show();
@@ -169,7 +177,7 @@ public final class MenuController extends MenuBar {
 		this.mcheckStage.showAndWait();
 		this.mcheckStage.toFront();
 	}
-	
+
 	@FXML
 	private void handleDotty(ActionEvent event) {
 		this.dottyStage.showAndWait();
@@ -180,8 +188,7 @@ public final class MenuController extends MenuBar {
 		this.groovyConsoleStage.show();
 		this.groovyConsoleStage.toFront();
 	}
-	
-	
+
 	@FXML
 	public void initialize() {
 		this.sceneProperty().addListener((observable, from, to) -> {
@@ -192,28 +199,28 @@ public final class MenuController extends MenuBar {
 				});
 			}
 		});
-		
-		this.enterFormulaForVisualization.disableProperty().bind(currentTrace.currentStateProperty().initializedProperty().not());
+
+		this.enterFormulaForVisualization.disableProperty()
+				.bind(currentTrace.currentStateProperty().initializedProperty().not());
 	}
 
 	@Inject
 
 	private MenuController(
-		final FXMLLoader loader,
-		
-		final Injector injector,
-		final Api api,
-		final AnimationSelector animationSelector,
-		final CurrentStage currentStage,
-		final CurrentTrace currentTrace,
-		final FormulaGenerator formulaGenerator,
-		final ModelcheckingController modelcheckingController,
-		
-		final DottyStage dottyStage,
-		final GroovyConsoleStage groovyConsoleStage,
-		final ModelcheckingStage modelcheckingStage,
-		final PreferencesStage preferencesStage
-	) {
+			final FXMLLoader loader,
+
+	final Injector injector,
+			final Api api,
+			final AnimationSelector animationSelector,
+			final CurrentStage currentStage,
+			final CurrentTrace currentTrace,
+			final FormulaGenerator formulaGenerator,
+			final ModelcheckingController modelcheckingController,
+
+	final DottyStage dottyStage,
+			final GroovyConsoleStage groovyConsoleStage,
+			final ModelcheckingStage modelcheckingStage,
+			final PreferencesStage preferencesStage) {
 		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
@@ -221,19 +228,19 @@ public final class MenuController extends MenuBar {
 		this.currentTrace = currentTrace;
 		this.formulaGenerator = formulaGenerator;
 		this.modelcheckingController = modelcheckingController;
-		
+
 		this.dottyStage = dottyStage;
 		this.groovyConsoleStage = groovyConsoleStage;
 		this.mcheckStage = modelcheckingStage;
 		this.preferencesStage = preferencesStage;
-		
+
 		loader.setLocation(getClass().getResource("menu.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
 		try {
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
@@ -244,36 +251,34 @@ public final class MenuController extends MenuBar {
 			// Remove About menu item from Help
 			aboutItem.getParentMenu().getItems().remove(aboutItem);
 			aboutItem.setText("About ProB 2");
-			
+
 			// Remove Preferences menu item from Edit
 			preferencesItem.getParentMenu().getItems().remove(preferencesItem);
 			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
-			
+
 			// Create Mac-style application menu
 			final Menu applicationMenu = tk.createDefaultApplicationMenu("ProB 2");
 			this.getMenus().add(0, applicationMenu);
 			tk.setApplicationMenu(applicationMenu);
 			applicationMenu.getItems().setAll(
-				aboutItem,
-				new SeparatorMenuItem(),
-				preferencesItem,
-				new SeparatorMenuItem(),
-				tk.createHideMenuItem("ProB 2"),
-				tk.createHideOthersMenuItem(),
-				tk.createUnhideAllMenuItem(),
-				new SeparatorMenuItem(),
-				tk.createQuitMenuItem("ProB 2")
-			);
+					aboutItem,
+					new SeparatorMenuItem(),
+					preferencesItem,
+					new SeparatorMenuItem(),
+					tk.createHideMenuItem("ProB 2"),
+					tk.createHideOthersMenuItem(),
+					tk.createUnhideAllMenuItem(),
+					new SeparatorMenuItem(),
+					tk.createQuitMenuItem("ProB 2"));
 
 			// Add Mac-style items to Window menu
 			windowMenu.getItems().addAll(
-				tk.createMinimizeMenuItem(),
-				tk.createZoomMenuItem(),
-				tk.createCycleWindowsItem(),
-				new SeparatorMenuItem(),
-				tk.createBringAllToFrontItem(),
-				new SeparatorMenuItem()
-			);
+					tk.createMinimizeMenuItem(),
+					tk.createZoomMenuItem(),
+					tk.createCycleWindowsItem(),
+					new SeparatorMenuItem(),
+					tk.createBringAllToFrontItem(),
+					new SeparatorMenuItem());
 			tk.autoAddWindowMenuItems(windowMenu);
 
 			// Make this the global menu bar

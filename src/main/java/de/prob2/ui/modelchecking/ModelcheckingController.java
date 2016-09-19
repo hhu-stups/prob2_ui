@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.check.ConsistencyChecker;
@@ -47,6 +51,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	private ModelCheckStats currentStats;
 	private ModelCheckingOptions currentOptions;
 	private AnimationSelector animations;
+	private Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
 
 	@Inject
 	private ModelcheckingController(final AnimationSelector animations, FXMLLoader loader) {
@@ -57,7 +62,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 	}
 

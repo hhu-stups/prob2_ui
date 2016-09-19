@@ -4,8 +4,12 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
@@ -32,29 +36,30 @@ public class HistoryView extends AnchorPane {
 					// Root item has no transition
 					text = new Text("---root---");
 				} else {
-					// Evaluate the transition so the pretty rep includes argument list and result
+					// Evaluate the transition so the pretty rep includes
+					// argument list and result
 					item.transition.evaluate();
 					text = new Text(item.transition.getPrettyRep());
 				}
-				
+
 				switch (item.status) {
-					case PAST:
-						text.setId("past");
-						break;
-					
-					case FUTURE:
-						text.setId("future");
-						break;
-					
-					default:
-						text.setId("present");
-						break;
+				case PAST:
+					text.setId("past");
+					break;
+
+				case FUTURE:
+					text.setId("future");
+					break;
+
+				default:
+					text.setId("present");
+					break;
 				}
 				setGraphic(text);
 			}
 		}
 	}
-	
+
 	@FXML
 	private ListView<HistoryItem> lv_history;
 
@@ -66,8 +71,10 @@ public class HistoryView extends AnchorPane {
 
 	@FXML
 	private Button btforward;
-	
+
 	private final CurrentTrace currentTrace;
+
+	private Logger logger = LoggerFactory.getLogger(HistoryView.class);
 
 	@Inject
 	private HistoryView(FXMLLoader loader, CurrentTrace currentTrace) {
@@ -78,7 +85,7 @@ public class HistoryView extends AnchorPane {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 	}
 
@@ -88,13 +95,13 @@ public class HistoryView extends AnchorPane {
 			lv_history.getItems().clear();
 			if (to != null) {
 				int currentPos = to.getCurrent().getIndex();
-				
+
 				if (currentPos == -1) {
 					lv_history.getItems().add(new HistoryItem(HistoryStatus.PRESENT));
 				} else {
 					lv_history.getItems().add(new HistoryItem(HistoryStatus.PAST));
 				}
-				
+
 				List<Transition> transitionList = to.getTransitionList();
 				for (int i = 0; i < transitionList.size(); i++) {
 					HistoryStatus status;
@@ -108,12 +115,12 @@ public class HistoryView extends AnchorPane {
 					lv_history.getItems().add(new HistoryItem(transitionList.get(i), status));
 				}
 			}
-			
+
 			if (tb_reverse.isSelected()) {
 				Collections.reverse(lv_history.getItems());
 			}
 		});
-		
+
 		btprevious.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		btforward.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 

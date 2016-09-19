@@ -2,9 +2,12 @@ package de.prob2.ui.groovy;
 
 import java.io.IOException;
 
-import com.google.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.prob2fx.CurrentStage;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import javafx.fxml.FXML;
@@ -16,6 +19,7 @@ public final class GroovyConsoleStage extends Stage {
 
 	@FXML
 	private GroovyConsole groovyConsole;
+	private Logger logger = LoggerFactory.getLogger(GroovyConsoleStage.class);
 
 	@Inject
 	@SuppressWarnings(value = "UR_UNINIT_READ", justification = "Field values are injected by FXMLLoader")
@@ -26,13 +30,13 @@ public final class GroovyConsoleStage extends Stage {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 		groovyConsole.setInterpreter(interpreter);
 		this.setOnCloseRequest(e -> {
 			groovyConsole.closeObjectStage();
 		});
-		
+
 		currentStage.register(this);
 	}
 }

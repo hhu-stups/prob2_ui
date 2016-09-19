@@ -2,7 +2,11 @@ package de.prob2.ui.modelchecking;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
+
 import de.prob.check.ModelCheckingOptions;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -28,17 +32,18 @@ public class ModelcheckingStage extends Stage {
 	private CheckBox stopAtFullCoverage;
 	@FXML
 	private CheckBox searchForNewErrors;
-	
+
 	private CurrentTrace currentTrace;
 	private ModelcheckingController modelcheckController;
 
+	private Logger logger = LoggerFactory.getLogger(ModelcheckingStage.class);
+
 	@Inject
 	public ModelcheckingStage(
-		CurrentTrace currentTrace,
-		CurrentStage currentStage,
-		FXMLLoader loader,
-		ModelcheckingController modelcheckController
-	) {
+			CurrentTrace currentTrace,
+			CurrentStage currentStage,
+			FXMLLoader loader,
+			ModelcheckingController modelcheckController) {
 		this.currentTrace = currentTrace;
 		this.modelcheckController = modelcheckController;
 		try {
@@ -47,9 +52,9 @@ public class ModelcheckingStage extends Stage {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
-		
+
 		currentStage.register(this);
 	}
 
@@ -82,8 +87,8 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	void cancel(ActionEvent event) {
 		modelcheckController.cancelModelchecking();
-//		Stage stage = (Stage) this.getScene().getWindow();
-//		stage.close();
+		// Stage stage = (Stage) this.getScene().getWindow();
+		// stage.close();
 	}
 
 }

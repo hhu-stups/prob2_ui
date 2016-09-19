@@ -10,8 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.model.eventb.Event;
@@ -43,7 +47,7 @@ public class OperationsView extends AnchorPane {
 	private static enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
-	
+
 	private static final class OperationsCell extends ListCell<Operation> {
 		@Override
 		protected void updateItem(Operation item, boolean empty) {
@@ -81,7 +85,7 @@ public class OperationsView extends AnchorPane {
 			}
 		}
 	}
-	
+
 	private static String extractPrettyName(final String name) {
 		if ("$setup_constants".equals(name)) {
 			return "SETUP_CONSTANTS";
@@ -91,11 +95,11 @@ public class OperationsView extends AnchorPane {
 		}
 		return name;
 	}
-	
+
 	private static String stripString(final String param) {
 		return param.replaceAll("\\{", "").replaceAll("\\}", "");
 	}
-	
+
 	private static int compareParams(final List<String> params1, final List<String> params2) {
 		for (int i = 0; i < params1.size(); i++) {
 			String p1 = stripString(params1.get(i));
@@ -103,11 +107,11 @@ public class OperationsView extends AnchorPane {
 			if (p1.compareTo(p2) != 0) {
 				return p1.compareTo(p2);
 			}
-			
+
 		}
 		return 0;
 	}
-	
+
 	@FXML
 	private ListView<Operation> opsListView;
 	@FXML
@@ -141,22 +145,24 @@ public class OperationsView extends AnchorPane {
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
-	
+
+	private Logger logger = LoggerFactory.getLogger(OperationsView.class);
+
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final FXMLLoader loader) {
 		this.currentTrace = currentTrace;
-		
+
 		loader.setLocation(getClass().getResource("ops_view.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
 		try {
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 
 	}
-	
+
 	@FXML
 	public void initialize() {
 		opsListView.setCellFactory(lv -> new OperationsCell());
@@ -164,18 +170,18 @@ public class OperationsView extends AnchorPane {
 		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue != null && newValue.isEnabled()) {
 				currentTrace.set(currentTrace.get().add(newValue.id));
-				System.out.println("Selected item: " + newValue);
+				logger.debug("Selected item: " + newValue);
 			}
 		});
-		
+
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
-		
+
 		currentTrace.addListener((observable, from, to) -> {
 			update(to);
 		});
 	}
-	
+
 	private void update(Trace trace) {
 		if (trace == null) {
 			currentModel = null;
@@ -185,7 +191,7 @@ public class OperationsView extends AnchorPane {
 			});
 			return;
 		}
-		
+
 		if (trace.getModel() != currentModel) {
 			updateModel(trace);
 		}
@@ -199,8 +205,8 @@ public class OperationsView extends AnchorPane {
 			notEnabled.remove(name);
 			List<String> params = transition.getParams();
 			boolean explored = transition.getDestination().isExplored();
-			boolean errored = explored && !transition.getDestination().isInvariantOk()? true : false;
-			System.out.println(name + " " + errored);
+			boolean errored = explored && !transition.getDestination().isInvariantOk() ? true : false;
+			logger.debug("{} {}", name, errored);
 			Operation operation = new Operation(id, name, params, true, withTimeout.contains(name), explored, errored);
 			events.add(operation);
 		}
@@ -212,12 +218,12 @@ public class OperationsView extends AnchorPane {
 			}
 		}
 		doSort();
-		
+
 		Platform.runLater(() -> {
 			opsListView.getItems().setAll(applyFilter(filter));
 		});
 	}
-	
+
 	@FXML
 	private void handleDisabledOpsToggle() {
 		FontAwesomeIconView icon = null;
@@ -233,27 +239,27 @@ public class OperationsView extends AnchorPane {
 		icon.setStyleClass("icon-dark");
 		disabledOpsToggle.setGraphic(icon);
 	}
-	
+
 	@FXML
 	private void handleBackButton() {
 		if (currentTrace.exists()) {
 			currentTrace.set(currentTrace.back());
 		}
 	}
-	
+
 	@FXML
 	private void handleForwardButton() {
 		if (currentTrace.exists()) {
 			currentTrace.set(currentTrace.forward());
 		}
 	}
-	
+
 	@FXML
 	private void handleSearchButton() {
 		filter = filterEvents.getText();
 		opsListView.getItems().setAll(applyFilter(filter));
 	}
-	
+
 	private List<Operation> applyFilter(final String filter) {
 		List<Operation> newOps = new ArrayList<>();
 		for (Operation op : events) {
@@ -263,86 +269,88 @@ public class OperationsView extends AnchorPane {
 		}
 		return newOps;
 	}
-	
+
 	private void doSort() {
 		final Comparator<Operation> comparator;
 		switch (sortMode) {
-			case MODEL_ORDER:
-				comparator = (o1, o2) -> {
-					if (o1.name.equals(o2.name)) {
-						return compareParams(o1.params, o2.params);
-					} else {
-						return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
-					}
-				};
-				break;
-			
-			case A_TO_Z:
-				comparator = (o1, o2) -> {
-					if (o1.name.equals(o2.name)) {
-						return compareParams(o1.params, o2.params);
-					} else {
-						return o1.name.compareTo(o2.name);
-					}
-				};
-				break;
-			
-			case Z_TO_A:
-				comparator = (o1, o2) -> {
-					if (o1.name.equals(o2.name)) {
-						return -compareParams(o1.params, o2.params);
-					} else {
-						return -o1.name.compareTo(o2.name);
-					}
-				};
-				break;
-			
-			default:
-				throw new IllegalStateException("Unhandled sort mode: " + sortMode);
+		case MODEL_ORDER:
+			comparator = (o1, o2) -> {
+				if (o1.name.equals(o2.name)) {
+					return compareParams(o1.params, o2.params);
+				} else {
+					return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
+				}
+			};
+			break;
+
+		case A_TO_Z:
+			comparator = (o1, o2) -> {
+				if (o1.name.equals(o2.name)) {
+					return compareParams(o1.params, o2.params);
+				} else {
+					return o1.name.compareTo(o2.name);
+				}
+			};
+			break;
+
+		case Z_TO_A:
+			comparator = (o1, o2) -> {
+				if (o1.name.equals(o2.name)) {
+					return -compareParams(o1.params, o2.params);
+				} else {
+					return -o1.name.compareTo(o2.name);
+				}
+			};
+			break;
+
+		default:
+			throw new IllegalStateException("Unhandled sort mode: " + sortMode);
 		}
-		
+
 		Collections.sort(events, comparator);
 	}
-	
+
 	@FXML
 	private void handleSortButton() {
 		FontAwesomeIconView icon = null;
 		switch (sortMode) {
-			case MODEL_ORDER:
-				sortMode = SortMode.A_TO_Z;
-				icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
-				break;
-			
-			case A_TO_Z:
-				sortMode = SortMode.Z_TO_A;
-				icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
-				break;
-			
-			case Z_TO_A:
-				sortMode = SortMode.MODEL_ORDER;
-				icon = new FontAwesomeIconView(FontAwesomeIcon.SORT);
-				break;
-			
-			default:
-				throw new IllegalStateException("Unhandled sort mode: " + sortMode);
+		case MODEL_ORDER:
+			sortMode = SortMode.A_TO_Z;
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
+			break;
+
+		case A_TO_Z:
+			sortMode = SortMode.Z_TO_A;
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
+			break;
+
+		case Z_TO_A:
+			sortMode = SortMode.MODEL_ORDER;
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT);
+			break;
+
+		default:
+			throw new IllegalStateException("Unhandled sort mode: " + sortMode);
 		}
-		
+
 		doSort();
 		opsListView.getItems().setAll(applyFilter(filter));
 		icon.setSize("15");
 		icon.setStyleClass("icon-dark");
 		sortButton.setGraphic(icon);
 	}
-	
+
 	@FXML
 	public void random(ActionEvent event) {
 		if (currentTrace.exists()) {
 			if (event.getSource().equals(randomText)) {
+				// FIXME We should not just throw an exception! I think it is
+				// possible to add a validator function
 				try {
 					int steps = Integer.parseInt(randomText.getText());
 					currentTrace.set(currentTrace.get().randomAnimation(steps));
 				} catch (NumberFormatException e) {
-					e.printStackTrace();
+					logger.error("invalid number", e);
 				}
 			} else if (event.getSource().equals(oneRandomEvent)) {
 				currentTrace.set(currentTrace.get().randomAnimation(1));
