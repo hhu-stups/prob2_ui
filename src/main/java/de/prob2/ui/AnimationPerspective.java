@@ -26,13 +26,11 @@ import javafx.scene.paint.Color;
 @Singleton
 public final class AnimationPerspective extends BorderPane {
 	// TODO improve DragDrop/Docking
-	// TODO remove accordion, if just one element left; add accordion if second object dragged left
 
 	// FIXME "expanded" empty accordions
 	// FIXME drag view model checking
 
 	// TODO? revert to SplitPane
-	// TODO? accordion in every direction?
 	@FXML
 	private OperationsView operations;
 	@FXML
@@ -134,6 +132,7 @@ public final class AnimationPerspective extends BorderPane {
 		//System.out.println(node.getClass().toString() + " dragged, isResizable() = "+node.isResizable());
 		TitledPane nodeTP = nodeMap.get(node);
 		Accordion accordion = (Accordion) nodeTP.getParent();
+		nodeTP.setCollapsible(false);
 		/*if (accordion.getPanes().contains(nodeTP)) {
 			if (this.getRight() == null) {
 				this.setRight(node);
@@ -145,7 +144,6 @@ public final class AnimationPerspective extends BorderPane {
 				this.setLeft(node);
 			}*/
 		if (rightAccordion.getPanes().isEmpty()) {
-			nodeTP.setCollapsible(false);
 			rightAccordion.getPanes().add(nodeTP);
 		} else if (topAccordion.getPanes().isEmpty()) {
 			nodeTP.setCollapsible(true);
@@ -154,16 +152,24 @@ public final class AnimationPerspective extends BorderPane {
 			nodeTP.setCollapsible(true);
 			bottomAccordion.getPanes().add(nodeTP);
 		} else {
-			nodeTP.setCollapsible(false);
 			leftAccordion.getPanes().add(nodeTP);
 		}
 
 		accordion.getPanes().remove(nodeTP);
-		accordion = (Accordion) nodeTP.getParent();
-		if (accordion.getPanes().size()>1){
+
+		nodeTP.setExpanded(true);
+		if (((Accordion) nodeTP.getParent()).getPanes().size()>1){
 			nodeTP.setCollapsible(true);
 		}
-		accordion.setExpandedPane(nodeTP);
+
+		leftAccordion.getPanes().get(0).setExpanded(true);
+
+		if (leftAccordion.getPanes().size()==1){
+			leftAccordion.getPanes().get(0).setCollapsible(false);
+		} else {
+			leftAccordion.getPanes().get(0).setCollapsible(true);
+		}
+
 		Point2D position = this.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
 		System.out.println("X = " + position.getX() + "; Y = " + position.getY());
 		System.out.println(this.getScene().getWidth() + ":" +this.getScene().getHeight());
