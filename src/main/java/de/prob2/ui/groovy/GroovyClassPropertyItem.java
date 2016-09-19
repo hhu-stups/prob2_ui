@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-
+import groovy.lang.GroovyRuntimeException;
 import groovy.lang.MetaMethod;
 import groovy.lang.PropertyValue;
 import javafx.beans.property.SimpleStringProperty;
@@ -57,7 +57,7 @@ public class GroovyClassPropertyItem {
 			e.printStackTrace();
 		}
 	}
-	
+		
 	public GroovyClassPropertyItem(PropertyValue p) {
 		this.name = new SimpleStringProperty(p.getName());
 		this.params = new SimpleStringProperty();
@@ -74,10 +74,12 @@ public class GroovyClassPropertyItem {
 			if(p.getValue() != null) {
 				this.value = new SimpleStringProperty(p.getValue().toString());
 			}
-		} catch(Exception e) {
+		} catch(GroovyRuntimeException e) {
 			e.printStackTrace();
 		}
 	}
+	
+
 	
 	public GroovyClassPropertyItem(MetaMethod m) {
 		this.name = new SimpleStringProperty(m.getName());

@@ -18,7 +18,6 @@ public class GroovyConsole extends TextArea {
 	private final KeyCode[] rest = {KeyCode.ESCAPE,KeyCode.SCROLL_LOCK,KeyCode.PAUSE,KeyCode.NUM_LOCK,KeyCode.INSERT,KeyCode.CONTEXT_MENU,KeyCode.CAPS};
 	private List<Instruction> instructions;
 	private int posInList = -1;
-	private String currentLine ="";
 	private GroovyInterpreter interpreter;
 	
 
@@ -44,9 +43,8 @@ public class GroovyConsole extends TextArea {
 		int posOfEnter = oldText.lastIndexOf("\n");
 		super.paste();
 		int diff = this.getLength() - oldText.length();
-		currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
+		String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		if(currentLine.contains("\n")) {
-			currentLine ="";
 			this.setText(oldText);
 			goToLastPos();
 			return;
@@ -156,7 +154,6 @@ public class GroovyConsole extends TextArea {
 		if (e.isShortcutDown() || e.isAltDown()) {
 			return;
 		}
-		currentLine = new StringBuilder(currentLine).insert(currentPosInLine, e.getText()).toString();
 		charCounterInLine++;
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
@@ -167,7 +164,8 @@ public class GroovyConsole extends TextArea {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		e.consume();
-		
+		int posOfEnter = this.getText().lastIndexOf("\n");
+		String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		if(instructions.isEmpty()) {
 			instructions.add(new Instruction(currentLine, InstructionOption.ENTER));
 		} else {
@@ -205,6 +203,8 @@ public class GroovyConsole extends TextArea {
 		}
 		if(posInList == instructions.size() - 1) {
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
+			int posOfEnter = this.getText().lastIndexOf("\n");
+			String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 			if(!lastinstruction.equals(currentLine)) {
 				if(posInList == instructions.size() - 1) {
 					if(instructions.get(posInList).getOption() == InstructionOption.UP) {
@@ -233,7 +233,7 @@ public class GroovyConsole extends TextArea {
 	private void setTextAfterArrowKey() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		this.setText(this.getText().substring(0, posOfEnter + 3));
-		currentLine = instructions.get(posInList).getInstruction();
+		String currentLine = instructions.get(posInList).getInstruction();
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
 		this.appendText(currentLine);
@@ -264,7 +264,6 @@ public class GroovyConsole extends TextArea {
 				return;
 			}
 		}
-		updateTextAreaAfterDeletion();
 	}
 	
 	private boolean handleBackspace(KeyEvent e) {
@@ -286,13 +285,7 @@ public class GroovyConsole extends TextArea {
 		}
 		return false;
 	}
-	
-	private void updateTextAreaAfterDeletion() {
-		int posOfEnter = this.getText().lastIndexOf("\n");
-		currentLine = this.getText().substring(posOfEnter + 3, posOfEnter + 3 + currentPosInLine);
-		currentLine += this.getText().substring(posOfEnter+ 4 + currentPosInLine, this.getText().length());
-	}
-	
+		
 	public void closeObjectStage() {
 		interpreter.closeObjectStage();
 	}
