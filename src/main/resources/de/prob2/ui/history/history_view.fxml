@@ -6,7 +6,7 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
-<fx:root stylesheets="@../../../../prob.css" type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root stylesheets="@../../../../prob.css" type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1" minWidth="100">
 	<ListView fx:id="lv_history" AnchorPane.bottomAnchor="0.0"
 		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 		AnchorPane.topAnchor="50.0"/>
