@@ -37,6 +37,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
 //@Singleton
 public class ModelcheckingController extends ScrollPane implements IModelCheckListener {
@@ -52,10 +53,13 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	private ModelCheckingOptions currentOptions;
 	private AnimationSelector animations;
 	private Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
+	private final Stage mcheckStage;
 
 	@Inject
-	private ModelcheckingController(final AnimationSelector animations, FXMLLoader loader) {
+	private ModelcheckingController(final AnimationSelector animations, final ModelcheckingStage modelcheckingStage,
+			FXMLLoader loader) {
 		this.animations = animations;
+		this.mcheckStage = modelcheckingStage;
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stats_view.fxml"));
 			loader.setRoot(this);
@@ -70,6 +74,13 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	public void initialize() {
 		showStats(new ModelCheckStats(new FXMLLoader(), this));
 		historyNodeList = historyBox.getChildren();
+	}
+
+	@FXML
+	private void addModelCheck() {
+		((ModelcheckingStage) this.mcheckStage).setModelcheckController(this);
+		this.mcheckStage.showAndWait();
+		this.mcheckStage.toFront();
 	}
 
 	void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {

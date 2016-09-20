@@ -125,10 +125,9 @@ public class ModelCheckStats extends AnchorPane {
 
 		ModelChecker modelChecker = jobs.get(id);
 		jobs.remove(id);
-		ComputeCoverageResult coverage = null;
 
 		if (modelChecker != null) {
-			coverage = modelChecker.getCoverage();
+			ComputeCoverageResult coverage = modelChecker.getCoverage();
 			if (coverage != null) {
 				Number numNodes = coverage.getTotalNumberOfNodes();
 				Number numTrans = coverage.getTotalNumberOfTransitions();

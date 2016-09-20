@@ -22,7 +22,6 @@ import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.groovy.GroovyConsoleStage;
 import de.prob2.ui.modelchecking.ModelcheckingController;
-import de.prob2.ui.modelchecking.ModelcheckingStage;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -53,7 +52,6 @@ public final class MenuController extends MenuBar {
 	private final ModelcheckingController modelcheckingController;
 
 	private final DottyStage dottyStage;
-	private final Stage mcheckStage;
 	private final PreferencesStage preferencesStage;
 	private final GroovyConsoleStage groovyConsoleStage;
 
@@ -181,12 +179,6 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	private void handleModelCheck(ActionEvent event) {
-		this.mcheckStage.showAndWait();
-		this.mcheckStage.toFront();
-	}
-
-	@FXML
 	private void handleDotty(ActionEvent event) {
 		this.dottyStage.showAndWait();
 	}
@@ -203,7 +195,6 @@ public final class MenuController extends MenuBar {
 			if (to != null) {
 				to.windowProperty().addListener((observable1, from1, to1) -> {
 					this.window = to1;
-					this.mcheckStage.initOwner(this.window);
 				});
 			}
 		});
@@ -213,22 +204,13 @@ public final class MenuController extends MenuBar {
 	}
 
 	@Inject
+	private MenuController(final FXMLLoader loader,
 
-	private MenuController(
-			final FXMLLoader loader,
-
-	final Injector injector,
-			final Api api,
-			final AnimationSelector animationSelector,
-			final CurrentStage currentStage,
-			final CurrentTrace currentTrace,
-			final FormulaGenerator formulaGenerator,
+	final Injector injector, final Api api, final AnimationSelector animationSelector, final CurrentStage currentStage,
+			final CurrentTrace currentTrace, final FormulaGenerator formulaGenerator,
 			final ModelcheckingController modelcheckingController,
 
-	final DottyStage dottyStage,
-			final GroovyConsoleStage groovyConsoleStage,
-			final ModelcheckingStage modelcheckingStage,
-			final PreferencesStage preferencesStage) {
+	final DottyStage dottyStage, final GroovyConsoleStage groovyConsoleStage, final PreferencesStage preferencesStage) {
 		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
@@ -236,10 +218,8 @@ public final class MenuController extends MenuBar {
 		this.currentTrace = currentTrace;
 		this.formulaGenerator = formulaGenerator;
 		this.modelcheckingController = modelcheckingController;
-
 		this.dottyStage = dottyStage;
 		this.groovyConsoleStage = groovyConsoleStage;
-		this.mcheckStage = modelcheckingStage;
 		this.preferencesStage = preferencesStage;
 
 		loader.setLocation(getClass().getResource("menu.fxml"));
@@ -268,24 +248,13 @@ public final class MenuController extends MenuBar {
 			final Menu applicationMenu = tk.createDefaultApplicationMenu("ProB 2");
 			this.getMenus().add(0, applicationMenu);
 			tk.setApplicationMenu(applicationMenu);
-			applicationMenu.getItems().setAll(
-					aboutItem,
-					new SeparatorMenuItem(),
-					preferencesItem,
-					new SeparatorMenuItem(),
-					tk.createHideMenuItem("ProB 2"),
-					tk.createHideOthersMenuItem(),
-					tk.createUnhideAllMenuItem(),
-					new SeparatorMenuItem(),
-					tk.createQuitMenuItem("ProB 2"));
+			applicationMenu.getItems().setAll(aboutItem, new SeparatorMenuItem(), preferencesItem,
+					new SeparatorMenuItem(), tk.createHideMenuItem("ProB 2"), tk.createHideOthersMenuItem(),
+					tk.createUnhideAllMenuItem(), new SeparatorMenuItem(), tk.createQuitMenuItem("ProB 2"));
 
 			// Add Mac-style items to Window menu
-			windowMenu.getItems().addAll(
-					tk.createMinimizeMenuItem(),
-					tk.createZoomMenuItem(),
-					tk.createCycleWindowsItem(),
-					new SeparatorMenuItem(),
-					tk.createBringAllToFrontItem(),
+			windowMenu.getItems().addAll(tk.createMinimizeMenuItem(), tk.createZoomMenuItem(),
+					tk.createCycleWindowsItem(), new SeparatorMenuItem(), tk.createBringAllToFrontItem(),
 					new SeparatorMenuItem());
 			tk.autoAddWindowMenuItems(windowMenu);
 
