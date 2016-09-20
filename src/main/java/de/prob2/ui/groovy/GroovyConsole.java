@@ -60,11 +60,6 @@ public class GroovyConsole extends TextArea {
 		goToLastPos();
 	}
 		
-	@Override
-	public void cut() {
-		super.cut();
-	}
-	
 		
 	@Override
 	public void forward() {
@@ -111,10 +106,8 @@ public class GroovyConsole extends TextArea {
 		});
 		
 		this.addEventFilter(MouseEvent.ANY, e-> {
-			if(e.getButton() == MouseButton.PRIMARY) {
-				if(this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
-					currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
-				}
+			if(e.getButton() == MouseButton.PRIMARY && (this.getLength() - 1 - this.getCaretPosition() < charCounterInLine)) {
+				currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 			}
 		});
 		
@@ -131,7 +124,8 @@ public class GroovyConsole extends TextArea {
 				handleEnter(e);
 			} else if (!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
 				handleInsertChar(e);
-			} else if (handleRest(e)) {
+			} else {
+				handleRest(e);
 			}
 		});
 	}
@@ -233,12 +227,10 @@ public class GroovyConsole extends TextArea {
 		this.appendText(currentLine);
 	}
 	
-	private boolean handleRest(KeyEvent e) {
+	private void handleRest(KeyEvent e) {
 		if(Arrays.asList(REST).contains(e.getCode())) {
 			e.consume();
-			return true;
 		}
-		return false;
 	}
 	
 	private void handleDeletion(KeyEvent e) {
@@ -275,6 +267,7 @@ public class GroovyConsole extends TextArea {
 		if(currentPosInLine < charCounterInLine) {
 			charCounterInLine = Math.max(charCounterInLine - 1, 0);
 		} else if(currentPosInLine == charCounterInLine) {
+			e.consume();
 			return true;
 		}
 		return false;
