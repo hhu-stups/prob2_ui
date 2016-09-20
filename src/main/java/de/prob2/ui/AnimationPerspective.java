@@ -29,11 +29,6 @@ import java.util.HashMap;
 
 @Singleton
 public final class AnimationPerspective extends BorderPane {
-	// FIXME? "expanded" empty accordions
-	// FIXME? drag view model checking
-	// FIXME? dragging not always working
-	// TODO? improve DragDrop/Docking
-	// TODO? revert to SplitPane
 	@FXML
 	private OperationsView operations;
 	@FXML
