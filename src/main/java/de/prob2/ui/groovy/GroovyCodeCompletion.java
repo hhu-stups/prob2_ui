@@ -5,36 +5,50 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ListView;
 import javafx.scene.shape.Path;
+import javafx.stage.Popup;
 
 public class GroovyCodeCompletion {
 	
-	private ContextMenu suggestions;
+	private Popup popup;
 	
-	private ScrollPane sp;
+	private ListView<String> lv_suggestions;
+
 	
+	//Trying with ListView
 	public GroovyCodeCompletion() {
-		//sp = new ScrollPane();
-		suggestions = new ContextMenu(new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"));
-		//sp.setContextMenu(suggestions);
+		popup = new Popup();
+		lv_suggestions = new ListView<String>();
+		lv_suggestions.getItems().add("boo");
+		lv_suggestions.getItems().add("boo");
+		lv_suggestions.getItems().add("boo");
+		lv_suggestions.getItems().add("boo");
+		lv_suggestions.getItems().add("boo");
+		lv_suggestions.getItems().add("boo");
+		lv_suggestions.setMaxHeight(200);
+		lv_suggestions.setMaxWidth(400);
+		lv_suggestions.setPrefHeight(200);
+		lv_suggestions.setPrefWidth(400);
+		popup.getContent().add(lv_suggestions);
+		
+		
 	}
 	
 	public void activate(GroovyConsole console) {
 		Point2D point = findCaretPosition(findCaret(console));
 		double x = point.getX() + 10;
 		double y = point.getY() + 10;
-		suggestions.show(console, x, y);
+		popup.show(console, x, y);
+		
 	}
 	
 	public void deactivate() {
-		suggestions.hide();
+		popup.hide();
 	}
 	
 	public boolean isVisible() {
-		return suggestions.isShowing();
+		return popup.isShowing();
 	}
 	
 	
