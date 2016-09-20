@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.model.representation.AbstractElement;
@@ -40,6 +43,8 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 	private int currentIndex;
 	private int previousSize = 0;
 
+	private Logger logger = LoggerFactory.getLogger(AnimationsView.class);
+
 	@Inject
 	private AnimationsView(final AnimationSelector animations, final FXMLLoader loader) {
 		this.animations = animations;
@@ -50,7 +55,7 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 	}
 

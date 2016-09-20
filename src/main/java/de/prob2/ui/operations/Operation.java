@@ -28,7 +28,7 @@ public class Operation {
 	}
 	
 	public boolean isEnabled() {
-		return enablement.equals("enabled");
+		return "enabled".equals(enablement);
 	}
 
 }

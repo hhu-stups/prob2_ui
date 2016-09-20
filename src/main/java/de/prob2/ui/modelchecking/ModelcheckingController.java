@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.check.ConsistencyChecker;
@@ -47,6 +51,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	private ModelCheckStats currentStats;
 	private ModelCheckingOptions currentOptions;
 	private AnimationSelector animations;
+	private Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
 
 	@Inject
 	private ModelcheckingController(final AnimationSelector animations, FXMLLoader loader) {
@@ -57,7 +62,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 	}
 
@@ -88,7 +93,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 			}
 			if (event.getButton().equals(MouseButton.SECONDARY)) {
 				cm.show(background, event.getScreenX(), event.getScreenY());
-				if (!item.getResult().equals("danger")) {
+				if (!"danger".equals(item.getResult())) {
 					cm.getItems().get(0).setDisable(true);
 				}
 			}
@@ -133,7 +138,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	}
 
 	private FontAwesomeIconView selectIcon(String res) {
-		FontAwesomeIcon icon = null;
+		FontAwesomeIcon icon;
 		switch (res) {
 		case "success":
 			icon = FontAwesomeIcon.CHECK_CIRCLE_ALT;

@@ -34,10 +34,10 @@ public class Stat {
 		aP.getChildren().add(l);
 		AnchorPane.setTopAnchor(l, 6.0);
 		AnchorPane.setBottomAnchor(l, 7.5);
-		if(alignment.equals("left")) {
+		if("left".equals(alignment)) {
 			AnchorPane.setLeftAnchor(l, 10.0);
 			AnchorPane.setRightAnchor(l, 0.0);
-		} else if(alignment.equals("right")) {
+		} else if("right".equals(alignment)) {
 			AnchorPane.setRightAnchor(l, 10.0);
 		}
 	

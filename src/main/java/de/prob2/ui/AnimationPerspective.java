@@ -2,6 +2,9 @@ package de.prob2.ui;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -47,7 +50,9 @@ public final class AnimationPerspective extends BorderPane {
 
 	private boolean dragged;
 	private ImageView snapshot = new ImageView();
-	
+
+	private Logger logger = LoggerFactory.getLogger(AnimationPerspective.class);
+
 	@Inject
 	private AnimationPerspective(FXMLLoader loader) {
 		loader.setLocation(getClass().getResource("animation_perspective.fxml"));
@@ -56,27 +61,27 @@ public final class AnimationPerspective extends BorderPane {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 	}
 
 	@FXML
 	public void initialize() {
 		double initialSize = 250;
-		operations.setPrefSize(initialSize,initialSize);
-		history.setPrefSize(initialSize,initialSize);
-		modelcheck.setPrefSize(initialSize,initialSize);
-		animations.setPrefSize(initialSize,initialSize);
+		operations.setPrefSize(initialSize, initialSize);
+		history.setPrefSize(initialSize, initialSize);
+		modelcheck.setPrefSize(initialSize, initialSize);
+		animations.setPrefSize(initialSize, initialSize);
 	}
 
 	private void onDrag() {
-		registerDrag(operations,operationsTP);
-		registerDrag(history,historyTP);
-		registerDrag(modelcheck,modelcheckTP);
-		registerDrag(animations,animationsTP);
+		registerDrag(operations, operationsTP);
+		registerDrag(history, historyTP);
+		registerDrag(modelcheck, modelcheckTP);
+		registerDrag(animations, animationsTP);
 	}
 
-	private void registerDrag(final Node node, final TitledPane nodeTP){
+	private void registerDrag(final Node node, final TitledPane nodeTP) {
 		node.setOnMouseEntered(mouseEvent -> this.setCursor(Cursor.OPEN_HAND));
 		node.setOnMousePressed(mouseEvent -> this.setCursor(Cursor.CLOSED_HAND));
 		node.setOnMouseDragEntered(mouseEvent -> {
@@ -84,14 +89,15 @@ public final class AnimationPerspective extends BorderPane {
 			mouseEvent.consume();
 		});
 		node.setOnMouseDragged(mouseEvent -> {
-			Point2D position = this.getParent().sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
+			Point2D position = this.getParent()
+					.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
 			snapshot.relocate(position.getX(), position.getY());
 			mouseEvent.consume();
 		});
 		node.setOnMouseReleased(mouseEvent -> {
 			this.setCursor(Cursor.DEFAULT);
-			if (dragged){
-				dragDropped(node,nodeTP);
+			if (dragged) {
+				dragDropped(node, nodeTP);
 			}
 			dragged = false;
 			snapshot.setImage(null);
@@ -102,7 +108,7 @@ public final class AnimationPerspective extends BorderPane {
 			node.startFullDrag();
 			SnapshotParameters snapParams = new SnapshotParameters();
 			snapParams.setFill(Color.TRANSPARENT);
-			snapshot.setImage(node.snapshot(snapParams,null));
+			snapshot.setImage(node.snapshot(snapParams, null));
 			snapshot.setFitWidth(100);
 			snapshot.setPreserveRatio(true);
 			((BorderPane) this.getParent()).getChildren().add(snapshot);
@@ -110,8 +116,9 @@ public final class AnimationPerspective extends BorderPane {
 		});
 	}
 
-	private void dragDropped(final Node node, final TitledPane nodeTP){
-		//System.out.println(node.getClass().toString() + " dragged, isResizable() = "+node.isResizable());
+	private void dragDropped(final Node node, final TitledPane nodeTP) {
+		// System.out.println(node.getClass().toString() + " dragged,
+		// isResizable() = "+node.isResizable());
 		if (accordion.getPanes().contains(nodeTP)) {
 			if (this.getRight() == null) {
 				this.setRight(node);

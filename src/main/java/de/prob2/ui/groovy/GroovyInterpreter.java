@@ -23,10 +23,10 @@ public class GroovyInterpreter {
 
 	public Pair exec(Instruction instruction) {
 		String resultString = "";
-		StringBuffer console = new StringBuffer();
+		StringBuilder console = new StringBuilder();
 		logger.trace("Exec");
 		try {
-			if(instruction.getInstruction().equals("inspect")) {
+			if("inspect".equals(instruction.getInstruction())) {
 				groovyObjectStage.showObjects(engine);
 				return new Pair("", "result");
 			}
@@ -37,6 +37,7 @@ public class GroovyInterpreter {
 			logger.trace("Evaled {} to {}", instruction.getInstruction(), resultString);
 			
 		} catch (Exception e) {
+			logger.debug("Groovy Evaluation failed",e);
 			resultString = e.getMessage();
 		}
 
