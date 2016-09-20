@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -98,6 +101,8 @@ public class GroovyClassStage extends Stage {
 	
 	private MetaPropertiesHandler groovyHandler;
 	
+	private Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
+	
 	public GroovyClassStage(FXMLLoader loader, MetaPropertiesHandler groovyHandler) {
 		loader.setLocation(getClass().getResource("groovy_class_stage.fxml"));
 		loader.setRoot(this);
@@ -105,7 +110,7 @@ public class GroovyClassStage extends Stage {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 		this.groovyHandler = groovyHandler;
 	}
