@@ -7,14 +7,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.shape.Path;
 
 public class GroovyCodeCompletion {
 	
 	private ContextMenu suggestions;
 	
+	private ScrollPane sp;
+	
 	public GroovyCodeCompletion() {
-		suggestions = new ContextMenu(new MenuItem("boo"));
+		//sp = new ScrollPane();
+		suggestions = new ContextMenu(new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"));
+		//sp.setContextMenu(suggestions);
 	}
 	
 	public void activate(GroovyConsole console) {
@@ -22,6 +27,14 @@ public class GroovyCodeCompletion {
 		double x = point.getX() + 10;
 		double y = point.getY() + 10;
 		suggestions.show(console, x, y);
+	}
+	
+	public void deactivate() {
+		suggestions.hide();
+	}
+	
+	public boolean isVisible() {
+		return suggestions.isShowing();
 	}
 	
 	
@@ -43,18 +56,22 @@ public class GroovyCodeCompletion {
 	private Point2D findCaretPosition(Node node) {
 		double x = 0;
 		double y = 0;
+		if(node == null) {
+			return null;
+		}
 		for (Node n = node; n != null; n=n.getParent()) {
 			Bounds parentBounds = n.getBoundsInParent();
 			x += parentBounds.getMinX();
 			y += parentBounds.getMinY();
 		}
-		Scene scene = node.getScene();
-		x += scene.getX() + scene.getWindow().getX();
-		y += scene.getY() + scene.getWindow().getY();
-		x = Math.min(scene.getWindow().getX() + scene.getWindow().getWidth() - 20, x);
-		y = Math.min(scene.getWindow().getY() + scene.getWindow().getHeight() - 20, y);
-		Point2D point = new Point2D(x, y);
-		return point;
+		if(node.getScene() != null) {
+			Scene scene = node.getScene();
+			x += scene.getX() + scene.getWindow().getX();
+			y += scene.getY() + scene.getWindow().getY();
+			x = Math.min(scene.getWindow().getX() + scene.getWindow().getWidth() - 20, x);
+			y = Math.min(scene.getWindow().getY() + scene.getWindow().getHeight() - 20, y);
+		}
+		return new Point2D(x,y);
 	}
 
 }
