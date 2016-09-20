@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -49,6 +52,8 @@ public class StatesView extends AnchorPane {
 	private Map<IEvalElement, AbstractEvalResult> currentValues;
 	private Map<IEvalElement, AbstractEvalResult> previousValues;
 
+	private Logger logger = LoggerFactory.getLogger(StatesView.class);
+
 	@Inject
 	private StatesView(final CurrentTrace currentTrace, final ClassBlacklist classBlacklist,
 			final FormulaGenerator formulaGenerator, final FXMLLoader loader) {
@@ -62,7 +67,7 @@ public class StatesView extends AnchorPane {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 	}
 
@@ -203,7 +208,8 @@ public class StatesView extends AnchorPane {
 				showExpression((AbstractFormulaElement) ((ElementStateTreeItem) row.getItem()).getContents());
 			});
 			row.contextMenuProperty()
-					.bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(new ContextMenu(showExpressionItem)));
+					.bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null)
+							.otherwise(new ContextMenu(showExpressionItem)));
 			return row;
 		});
 

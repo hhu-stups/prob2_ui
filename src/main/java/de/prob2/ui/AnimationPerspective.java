@@ -1,5 +1,10 @@
 package de.prob2.ui;
 
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob2.ui.animations.AnimationsView;
@@ -24,8 +29,9 @@ import java.util.HashMap;
 
 @Singleton
 public final class AnimationPerspective extends BorderPane {
-	// FIXME detached history view not showing history
-	// FIXME switching from detached history view to default eliminating states view
+	// FIXME detached history view (DHV) not showing history (whenever Default is loaded manually first, sometimes just by loading DHV)
+	// FIXME Default not showing any custom components, whenever DHV is loaded manually first
+	// FIXME switching from DHV to Default eliminating states view
 
 	// FIXME? "expanded" empty accordions
 	// FIXME? drag view model checking
@@ -59,8 +65,10 @@ public final class AnimationPerspective extends BorderPane {
 
 	private boolean dragged;
 	private ImageView snapshot = new ImageView();
+
 	private HashMap<Node, TitledPane> nodeMap = new HashMap<Node, TitledPane>();
-	
+	private Logger logger = LoggerFactory.getLogger(AnimationPerspective.class);
+
 	@Inject
 	private AnimationPerspective(FXMLLoader loader) {
 		loader.setLocation(getClass().getResource("animation_perspective.fxml"));
@@ -69,7 +77,7 @@ public final class AnimationPerspective extends BorderPane {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 	}
 
@@ -95,7 +103,7 @@ public final class AnimationPerspective extends BorderPane {
 		}
 	}
 
-	private void registerDrag(final Node node){
+	private void registerDrag(final Node node) {
 		node.setOnMouseEntered(mouseEvent -> this.setCursor(Cursor.OPEN_HAND));
 		node.setOnMousePressed(mouseEvent -> this.setCursor(Cursor.CLOSED_HAND));
 		node.setOnMouseDragEntered(mouseEvent -> {

@@ -2,6 +2,9 @@ package de.prob2.ui.modeline;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -11,6 +14,8 @@ import javafx.scene.layout.Pane;
 @Singleton
 public class ModelineController extends Pane {
 
+	private Logger logger = LoggerFactory.getLogger(ModelineController.class);
+
 	@Inject
 	private ModelineController(FXMLLoader loader) {
 		try {
@@ -18,7 +23,7 @@ public class ModelineController extends Pane {
 			loader.setRoot(this);
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
 	}
 

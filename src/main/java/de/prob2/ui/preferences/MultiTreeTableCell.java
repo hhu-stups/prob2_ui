@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javafx.collections.FXCollections;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
@@ -24,6 +27,9 @@ import javafx.stage.FileChooser;
 public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S, String> {
 	// Valid values for named list-like types.
 	private static final Map<String, String[]> VALID_TYPE_VALUES;
+	
+	private Logger logger = LoggerFactory.getLogger(MultiTreeTableCell.class);
+
 	
 	static {
 		final Map<String, String[]> validTypeValues = new HashMap<>();
@@ -242,7 +248,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 					try {
 						color = Color.web(pti.getValue());
 					} catch (final IllegalArgumentException exc) {
-						exc.printStackTrace();
+						logger.error("Invalid color",exc);
 						color = Color.color(1.0, 0.0, 1.0);
 					}
 					if (this.getGraphic() instanceof ColorPicker) {

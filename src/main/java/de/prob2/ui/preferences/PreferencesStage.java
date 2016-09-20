@@ -3,8 +3,12 @@ package de.prob2.ui.preferences;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
@@ -37,82 +41,96 @@ public final class PreferencesStage extends Stage {
 		@Override
 		public Class<? extends AbstractElement> fromString(final String s) {
 			final Class<?> clazz;
-			
+
 			try {
 				clazz = Class.forName(s);
 			} catch (ClassNotFoundException e) {
 				throw new IllegalArgumentException(e);
 			}
-			
+
 			return clazz.asSubclass(AbstractElement.class);
 		}
-		
+
 		@Override
 		public String toString(final Class<? extends AbstractElement> clazz) {
 			return clazz == null ? "null" : clazz.getSimpleName();
 		}
 	};
-	
-	@FXML private Stage stage;
-	@FXML private Button undoButton;
-	@FXML private Button resetButton;
-	@FXML private Button applyButton;
-	@FXML private Label applyWarning;
-	@FXML private TreeTableView<PrefTreeItem> tv;
-	@FXML private TreeTableColumn<PrefTreeItem, String> tvName;
-	@FXML private TreeTableColumn<PrefTreeItem, String> tvChanged;
-	@FXML private TreeTableColumn<PrefTreeItem, String> tvValue;
-	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
-	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
-	@FXML private ListView<Class<? extends AbstractElement>> blacklistView;
-	
+
+	@FXML
+	private Stage stage;
+	@FXML
+	private Button undoButton;
+	@FXML
+	private Button resetButton;
+	@FXML
+	private Button applyButton;
+	@FXML
+	private Label applyWarning;
+	@FXML
+	private TreeTableView<PrefTreeItem> tv;
+	@FXML
+	private TreeTableColumn<PrefTreeItem, String> tvName;
+	@FXML
+	private TreeTableColumn<PrefTreeItem, String> tvChanged;
+	@FXML
+	private TreeTableColumn<PrefTreeItem, String> tvValue;
+	@FXML
+	private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
+	@FXML
+	private TreeTableColumn<PrefTreeItem, String> tvDescription;
+	@FXML
+	private ListView<Class<? extends AbstractElement>> blacklistView;
+
 	private final ClassBlacklist classBlacklist;
 	private final CurrentTrace currentTrace;
 	private final ProBPreferences preferences;
 
+	private Logger logger = LoggerFactory.getLogger(ListView.class);
+
 	@Inject
 	private PreferencesStage(
-		final ClassBlacklist classBlacklist,
-		final CurrentTrace currentTrace,
-		final ProBPreferences preferences,
-		final FXMLLoader loader,
-		final CurrentStage currentStage
-	) {
+			final ClassBlacklist classBlacklist,
+			final CurrentTrace currentTrace,
+			final ProBPreferences preferences,
+			final FXMLLoader loader,
+			final CurrentStage currentStage) {
 		this.classBlacklist = classBlacklist;
 		this.currentTrace = currentTrace;
 		this.preferences = preferences;
 		this.preferences.setStateSpace(currentTrace.exists() ? currentTrace.getStateSpace() : null);
-		
+
 		loader.setLocation(this.getClass().getResource("preferences_stage.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
 		try {
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
 		}
-		
+
 		currentStage.register(this);
 	}
 
 	@FXML
 	public void initialize() {
 		// ProB Preferences
-		
+
 		this.undoButton.disableProperty().bind(this.preferences.changesAppliedProperty());
 		this.resetButton.disableProperty().bind(this.currentTrace.existsProperty().not());
 		this.applyWarning.visibleProperty().bind(this.preferences.changesAppliedProperty().not());
 		this.applyButton.disableProperty().bind(this.preferences.changesAppliedProperty());
-		
+
 		tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
-		
+
 		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
-		
+
 		tvValue.setCellFactory(col -> {
 			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell<>();
 			cell.tableRowProperty().addListener((observable, from, to) -> {
 				to.treeItemProperty().addListener((observable1, from1, to1) -> {
-					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem);
+					cell.setEditable(
+							to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem);
 				});
 			});
 			return cell;
@@ -122,30 +140,31 @@ public final class PreferencesStage extends Stage {
 			try {
 				this.preferences.setPreferenceValue(event.getRowValue().getValue().getName(), event.getNewValue());
 			} catch (final ProBError exc) {
-				exc.printStackTrace();
-				Alert alert = new Alert(Alert.AlertType.ERROR, "The entered preference value is not valid.\n" + exc.getMessage());
+				logger.error("Invalid preference", exc);
+				Alert alert = new Alert(Alert.AlertType.ERROR,
+						"The entered preference value is not valid.\n" + exc.getMessage());
 				alert.getDialogPane().getStylesheets().add("prob.css");
 				alert.show();
 			}
 			this.updatePreferences();
 		});
-		
+
 		tvDefaultValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("defaultValue"));
-		
+
 		tvDescription.setCellValueFactory(new TreeItemPropertyValueFactory<>("description"));
-		
+
 		tv.getRoot().setValue(new CategoryPrefTreeItem("Preferences"));
-		
+
 		this.currentTrace.addListener((observable, from, to) -> {
 			this.preferences.setStateSpace(to == null ? null : to.getStateSpace());
 			this.updatePreferences();
 		});
-		
+
 		// States View
-		
+
 		this.blacklistView.setCellFactory(CheckBoxListCell.forListView(clazz -> {
 			final BooleanProperty prop = new SimpleBooleanProperty(!this.classBlacklist.getBlacklist().contains(clazz));
-			
+
 			prop.addListener((changed, from, to) -> {
 				if (to) {
 					this.classBlacklist.getBlacklist().remove(clazz);
@@ -153,39 +172,41 @@ public final class PreferencesStage extends Stage {
 					this.classBlacklist.getBlacklist().add(clazz);
 				}
 			});
-			
-			this.classBlacklist.getBlacklist().addListener((SetChangeListener<? super Class<? extends AbstractElement>>)change -> {
+
+			this.classBlacklist.getBlacklist()
+					.addListener((SetChangeListener<? super Class<? extends AbstractElement>>) change -> {
 				if (clazz.equals(change.getElementAdded()) || clazz.equals(change.getElementRemoved())) {
 					prop.set(change.wasRemoved());
 				}
 			});
-			
+
 			return prop;
-		}, ELEMENT_CLASS_STRING_CONVERTER));
-		
-		this.classBlacklist.getKnownClasses().addListener((SetChangeListener<? super Class<? extends AbstractElement>>)change -> {
-			final List<Class<? extends AbstractElement>> items = this.blacklistView.getItems();
-			final Class<? extends AbstractElement> added = change.getElementAdded();
-			final Class<? extends AbstractElement> removed = change.getElementRemoved();
-			
-			if (change.wasAdded() && !items.contains(added)) {
-				items.add(added);
-				items.sort((left, right) -> left.getSimpleName().compareTo(right.getSimpleName()));
-			} else if (change.wasRemoved() && items.contains(removed)) {
-				if (this.classBlacklist.getBlacklist().contains(removed)) {
-					this.classBlacklist.getBlacklist().remove(removed);
-				}
-				items.remove(removed);
-			}
-		});
+		} , ELEMENT_CLASS_STRING_CONVERTER));
+
+		this.classBlacklist.getKnownClasses()
+				.addListener((SetChangeListener<? super Class<? extends AbstractElement>>) change -> {
+					final List<Class<? extends AbstractElement>> items = this.blacklistView.getItems();
+					final Class<? extends AbstractElement> added = change.getElementAdded();
+					final Class<? extends AbstractElement> removed = change.getElementRemoved();
+
+					if (change.wasAdded() && !items.contains(added)) {
+						items.add(added);
+						items.sort((left, right) -> left.getSimpleName().compareTo(right.getSimpleName()));
+					} else if (change.wasRemoved() && items.contains(removed)) {
+						if (this.classBlacklist.getBlacklist().contains(removed)) {
+							this.classBlacklist.getBlacklist().remove(removed);
+						}
+						items.remove(removed);
+					}
+				});
 	}
-	
+
 	private void updatePreferences() {
 		if (!this.preferences.hasStateSpace()) {
 			this.tv.getRoot().getChildren().clear();
 			return;
 		}
-		
+
 		for (ProBPreference pref : this.preferences.getPreferences()) {
 			TreeItem<PrefTreeItem> category = null;
 			for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
@@ -197,7 +218,7 @@ public final class PreferencesStage extends Stage {
 				category = new TreeItem<>(new CategoryPrefTreeItem(pref.category));
 				this.tv.getRoot().getChildren().add(category);
 			}
-			
+
 			TreeItem<PrefTreeItem> item = null;
 			for (TreeItem<PrefTreeItem> ti : category.getChildren()) {
 				if (ti.getValue().getName().equals(pref.name)) {
@@ -207,7 +228,7 @@ public final class PreferencesStage extends Stage {
 			if (item == null) {
 				final ProBPreferenceType type;
 				if (pref.type instanceof ListPrologTerm) {
-					final ListPrologTerm values = (ListPrologTerm)pref.type;
+					final ListPrologTerm values = (ListPrologTerm) pref.type;
 					final String[] arr = new String[values.size()];
 					for (int i = 0; i < values.size(); i++) {
 						arr[i] = values.get(i).getFunctor();
@@ -216,13 +237,14 @@ public final class PreferencesStage extends Stage {
 				} else {
 					type = new ProBPreferenceType(pref.type.getFunctor());
 				}
-				item = new TreeItem<>(new RealPrefTreeItem(pref.name, "", "", type, pref.defaultValue, pref.description));
+				item = new TreeItem<>(
+						new RealPrefTreeItem(pref.name, "", "", type, pref.defaultValue, pref.description));
 				category.getChildren().add(item);
 			}
 			item.getValue().updateValue(this.preferences);
 		}
 	}
-	
+
 	@FXML
 	private void handleClose() {
 		if (this.preferences.hasStateSpace()) {
@@ -230,13 +252,13 @@ public final class PreferencesStage extends Stage {
 		}
 		this.stage.close();
 	}
-	
+
 	@FXML
 	private void handleUndoChanges() {
 		this.preferences.rollback();
 		this.updatePreferences();
 	}
-	
+
 	@FXML
 	private void handleRestoreDefaults() {
 		for (ProBPreference pref : this.preferences.getPreferences()) {
@@ -244,14 +266,14 @@ public final class PreferencesStage extends Stage {
 		}
 		this.updatePreferences();
 	}
-	
+
 	@FXML
 	private boolean handleApply() {
 		try {
 			this.preferences.apply();
 			return true;
 		} catch (BException | IOException e) {
-			e.printStackTrace();
+			logger.error("Application of changes failed", e);
 			Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e);
 			alert.getDialogPane().getStylesheets().add("prob.css");
 			alert.showAndWait();

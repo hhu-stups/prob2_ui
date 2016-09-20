@@ -3,6 +3,7 @@ package de.prob2.ui.groovy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
@@ -15,7 +16,7 @@ public class GroovyConsole extends TextArea {
 	
 	private int charCounterInLine = 0;
 	private int currentPosInLine = 0;
-	private final KeyCode[] rest = {KeyCode.ESCAPE,KeyCode.SCROLL_LOCK,KeyCode.PAUSE,KeyCode.NUM_LOCK,KeyCode.INSERT,KeyCode.CONTEXT_MENU,KeyCode.CAPS};
+	private static final KeyCode[] REST = {KeyCode.ESCAPE,KeyCode.SCROLL_LOCK,KeyCode.PAUSE,KeyCode.NUM_LOCK,KeyCode.INSERT,KeyCode.CONTEXT_MENU,KeyCode.CAPS};
 	private List<Instruction> instructions;
 	private int posInList = -1;
 	private GroovyInterpreter interpreter;
@@ -40,7 +41,7 @@ public class GroovyConsole extends TextArea {
 			goToLastPos();
 		}
 		String oldText = this.getText();
-		int posOfEnter = oldText.lastIndexOf("\n");
+		int posOfEnter = oldText.lastIndexOf('\n');
 		super.paste();
 		int diff = this.getLength() - oldText.length();
 		String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
@@ -141,11 +142,11 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void handleInsertChar(KeyEvent e) {
-		if(e.getText().equals("") || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
+		if(e.getText().isEmpty() || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
 			if(!(e.getCode().equals(KeyCode.UNDEFINED) || e.getCode().equals(KeyCode.ALT_GRAPH))) {
 				goToLastPos();
 			}
-			if(e.getText().equals("")) {
+			if(e.getText().isEmpty()) {
 				e.consume();
 				return;
 			}
@@ -171,6 +172,7 @@ public class GroovyConsole extends TextArea {
 			if(!instructions.isEmpty()) {
 				lastInstruction = instructions.get(instructions.size() - 1);
 			}
+			// FIXME The logic is confusing! Please refactor!
 			if(instructions.isEmpty() || lastInstruction.getOption() == InstructionOption.ENTER) {
 				instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
 			} else {
@@ -237,7 +239,7 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private boolean handleRest(KeyEvent e) {
-		if(Arrays.asList(rest).contains(e.getCode())) {
+		if(Arrays.asList(REST).contains(e.getCode())) {
 			e.consume();
 			return true;
 		}
@@ -245,8 +247,8 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void handleDeletion(KeyEvent e) {
-		boolean needReturn = false;
-		if(!this.getSelectedText().equals("") || this.getLength() - this.getCaretPosition() > charCounterInLine || e.isShortcutDown() || e.isAltDown()) {
+		boolean needReturn;
+		if(!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > charCounterInLine || e.isShortcutDown() || e.isAltDown()) {
 			e.consume();
 			return;
 		}
