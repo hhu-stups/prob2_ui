@@ -198,7 +198,7 @@ public class StatesView extends AnchorPane {
 
 		tv.setRowFactory(view -> {
 			final TreeTableRow<StateTreeItem<?>> row = new TreeTableRow<>();
-			final MenuItem showExpressionItem = new MenuItem("Show Expression");
+			final MenuItem showExpressionItem = new MenuItem("Visualize Expression");
 			showExpressionItem.setDisable(true);
 			row.itemProperty().addListener((observable, from, to) -> {
 				showExpressionItem.setDisable(to == null
