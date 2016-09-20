@@ -13,7 +13,7 @@
 		<AnchorPane>
 			<children>
 				<VBox fx:id="historyBox" style="-fx-border-color: grey;"
-					AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0"
+					AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="5.0"
 					AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="32.0" />
 				<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
 					AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="-4.0"
