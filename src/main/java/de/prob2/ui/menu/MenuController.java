@@ -101,7 +101,7 @@ public final class MenuController extends MenuBar {
 		fileChooser.setTitle("Open File");
 		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("FXML Files", "*.fxml"));
 		File selectedFile = fileChooser.showOpenDialog(window);
-		if (selectedFile != null)
+		if (selectedFile != null) {
 			try {
 				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 				loader.setLocation(new URL("file://" + selectedFile.getPath()));
@@ -110,6 +110,7 @@ public final class MenuController extends MenuBar {
 			} catch (IOException e) {
 				logger.error("loading fxml failed", e);
 			}
+		}
 	}
 
 	@FXML

@@ -38,7 +38,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
-@Singleton
+//@Singleton
 public class ModelcheckingController extends ScrollPane implements IModelCheckListener {
 
 	@FXML

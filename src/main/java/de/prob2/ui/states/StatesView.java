@@ -32,7 +32,7 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.AnchorPane;
 
-@Singleton
+//@Singleton
 public class StatesView extends AnchorPane {
 	@FXML
 	private TreeTableView<StateTreeItem<?>> tv;

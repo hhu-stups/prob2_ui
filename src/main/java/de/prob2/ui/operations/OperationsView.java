@@ -42,7 +42,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 
-@Singleton
+//@Singleton
 public class OperationsView extends AnchorPane {
 	private static enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A

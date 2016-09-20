@@ -28,7 +28,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
-@Singleton
+//@Singleton
 public class AnimationsView extends AnchorPane implements IAnimationChangeListener {
 	@FXML
 	private TableView<Animation> animationsTable;

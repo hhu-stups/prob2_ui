@@ -29,9 +29,8 @@ import java.util.HashMap;
 
 @Singleton
 public final class AnimationPerspective extends BorderPane {
-	// FIXME detached history view (DHV) not showing history (whenever Default is loaded manually first, sometimes just by loading DHV)
-	// FIXME Default not showing any custom components, whenever DHV is loaded manually first
-	// FIXME switching from DHV to Default eliminating states view
+	// FIXME removing "Singletons" solved disappearing components, but kills model checking -> fix model checking
+	// FIXME loaded machine model, loading new perspective -> machine not shown/not selected (can be solved by opening a second machine model and reselecting the previous one)
 
 	// FIXME? "expanded" empty accordions
 	// FIXME? drag view model checking
@@ -97,7 +96,7 @@ public final class AnimationPerspective extends BorderPane {
 		onDrag();*/
 	}
 
-	private void onDrag() {
+	/*private void onDrag() {
 		for (Node node : nodeMap.keySet()){
 			registerDrag(node);
 		}
@@ -183,5 +182,5 @@ public final class AnimationPerspective extends BorderPane {
 		}
 		newParent.getPanes().add(nodeTP);
 		newParent.setExpandedPane(nodeTP);
-	}
+	}*/
 }

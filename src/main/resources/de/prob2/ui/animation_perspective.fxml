@@ -30,7 +30,7 @@
 			</Accordion>
 		</AnchorPane>
 	</left>
-	<top>
+	<!--<top>
 		<Accordion fx:id="topAccordion"/>
 	</top>
 	<bottom>
@@ -38,7 +38,7 @@
 	</bottom>
 	<right>
 		<Accordion fx:id="rightAccordion"/>
-	</right>
+	</right>-->
 	<center>
 		<StatesView/>
 	</center>
