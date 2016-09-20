@@ -33,12 +33,11 @@ public final class GroovyObjectStage extends Stage {
 
 	private FXMLLoader loader;
 	private CurrentStage currentStage;
-	private MetaPropertiesHandler groovyHandler;
-
+	
 	private Logger logger = LoggerFactory.getLogger(GroovyObjectStage.class);
 
 	@Inject
-	private GroovyObjectStage(FXMLLoader loader, CurrentStage currentStage, MetaPropertiesHandler groovyHandler) {
+	private GroovyObjectStage(FXMLLoader loader, CurrentStage currentStage) {
 		this.loader = loader;
 		try {
 			loader.setLocation(getClass().getResource("groovy_object_stage.fxml"));
@@ -48,10 +47,6 @@ public final class GroovyObjectStage extends Stage {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		this.setOnCloseRequest(e -> {
-			close();
-		});
-		this.groovyHandler = groovyHandler;
 		this.currentStage = currentStage;
 
 		currentStage.register(this);
@@ -75,7 +70,7 @@ public final class GroovyObjectStage extends Stage {
 
 	private void fillList(Bindings binding) {
 		for (final Map.Entry<String, Object> entry : binding.entrySet()) {
-			GroovyClassStage stage = new GroovyClassStage(loader, groovyHandler);
+			GroovyClassStage stage = new GroovyClassStage(loader);
 			currentStage.register(stage);
 			items.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), stage));
 		}

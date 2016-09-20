@@ -57,11 +57,9 @@ public class GroovyClassStage extends Stage {
 	private ObservableList<GroovyClassItem> attributes = FXCollections.observableArrayList();
 	private ObservableList<CollectionDataItem> collectionData = FXCollections.observableArrayList();
 	
-	private MetaPropertiesHandler groovyHandler;
-	
 	private Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
 	
-	public GroovyClassStage(FXMLLoader loader, MetaPropertiesHandler groovyHandler) {
+	public GroovyClassStage(FXMLLoader loader) {
 		loader.setLocation(getClass().getResource("groovy_class_stage.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
@@ -70,7 +68,6 @@ public class GroovyClassStage extends Stage {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		this.groovyHandler = groovyHandler;
 	}
 	
 	public void setClass(Class<?> clazz) {
@@ -110,21 +107,25 @@ public class GroovyClassStage extends Stage {
 		fields.clear();
 		collectionData.clear();
 		
-		for(Method m : clazz.getMethods()) {
+		for (Method m : clazz.getMethods()) {
 			methods.add(new GroovyClassPropertyItem(m));
 		}
-		for(Field f : clazz.getFields()) {
+		
+		for (Field f : clazz.getFields()) {
 			fields.add(new GroovyClassPropertyItem(f));
 		}
-		groovyHandler.handleProperties(object, fields);
-		groovyHandler.handleMethods(object, methods);
-		if(clazz.isArray()) {
+		
+		MetaPropertiesHandler.handleProperties(object, fields);
+		MetaPropertiesHandler.handleMethods(object, methods);
+		
+		if (clazz.isArray()) {
 			handleArrays(object);
-		} else if(object instanceof Collection<?>) {
+		} else if (object instanceof Collection<?>) {
 			handleCollections((Collection<?>)object);
 		} else {
 			tabCollectionData.setDisable(true);
 		}
+		
 		showClassAttributes();
 		tvMethods.refresh();
 		tvFields.refresh();
