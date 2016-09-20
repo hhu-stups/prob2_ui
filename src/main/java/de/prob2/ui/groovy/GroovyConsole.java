@@ -20,6 +20,7 @@ public class GroovyConsole extends TextArea {
 	private List<Instruction> instructions;
 	private int posInList = -1;
 	private GroovyInterpreter interpreter;
+	private GroovyCodeCompletion codeCompletion;
 	
 
 	public GroovyConsole() {
@@ -28,6 +29,7 @@ public class GroovyConsole extends TextArea {
 		this.instructions = new ArrayList<>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		setListeners();
+		codeCompletion = new GroovyCodeCompletion();
 	}
 	
 	public void setInterpreter(GroovyInterpreter interpreter) {
@@ -149,6 +151,11 @@ public class GroovyConsole extends TextArea {
 		if (e.isShortcutDown() || e.isAltDown()) {
 			return;
 		}
+		
+		if(".".equals(e.getText())) {
+			codeCompletion.activate(this);
+		}
+		
 		charCounterInLine++;
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
