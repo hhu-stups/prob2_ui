@@ -24,6 +24,14 @@ public class GroovyCodeCompletion {
 		suggestions.show(console, x, y);
 	}
 	
+	public void deactivate() {
+		suggestions.hide();
+	}
+	
+	public boolean isVisible() {
+		return suggestions.isShowing();
+	}
+	
 	
 	private Path findCaret(Parent parent) {
 		for (Node node : parent.getChildrenUnmodifiable()) {
@@ -48,13 +56,14 @@ public class GroovyCodeCompletion {
 			x += parentBounds.getMinX();
 			y += parentBounds.getMinY();
 		}
-		Scene scene = node.getScene();
-		x += scene.getX() + scene.getWindow().getX();
-		y += scene.getY() + scene.getWindow().getY();
-		x = Math.min(scene.getWindow().getX() + scene.getWindow().getWidth() - 20, x);
-		y = Math.min(scene.getWindow().getY() + scene.getWindow().getHeight() - 20, y);
-		Point2D point = new Point2D(x, y);
-		return point;
+		if(node.getScene() != null) {
+			Scene scene = node.getScene();
+			x += scene.getX() + scene.getWindow().getX();
+			y += scene.getY() + scene.getWindow().getY();
+			x = Math.min(scene.getWindow().getX() + scene.getWindow().getWidth() - 20, x);
+			y = Math.min(scene.getWindow().getY() + scene.getWindow().getHeight() - 20, y);
+		}
+		return new Point2D(x,y);
 	}
 
 }

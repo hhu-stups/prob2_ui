@@ -153,7 +153,11 @@ public class GroovyConsole extends TextArea {
 		}
 		
 		if(".".equals(e.getText())) {
-			codeCompletion.activate(this);
+			if(!codeCompletion.isVisible()) {
+				codeCompletion.activate(this);
+			} else {
+				codeCompletion.deactivate();
+			}
 		}
 		
 		charCounterInLine++;
