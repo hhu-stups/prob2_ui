@@ -87,8 +87,8 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	void cancel(ActionEvent event) {
 		modelcheckController.cancelModelchecking();
-		// Stage stage = (Stage) this.getScene().getWindow();
-		// stage.close();
+		Stage stage = (Stage) this.getScene().getWindow();
+		stage.close();
 	}
 
 }
