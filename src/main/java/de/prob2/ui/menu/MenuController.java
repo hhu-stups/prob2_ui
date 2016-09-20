@@ -76,8 +76,10 @@ public final class MenuController extends MenuBar {
 			Parent root = loader.load();
 			window.getScene().setRoot(root);
 		} catch (IOException e) {
-			System.err.println("Failed to load FXML-File!");
-			e.printStackTrace();
+			logger.error("loading fxml failed", e);
+			Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
 		}
 	}
 
@@ -90,6 +92,9 @@ public final class MenuController extends MenuBar {
 			window.getScene().setRoot(root);
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
+			Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
 		}
 	}
 
@@ -107,6 +112,9 @@ public final class MenuController extends MenuBar {
 				window.getScene().setRoot(root);
 			} catch (IOException e) {
 				logger.error("loading fxml failed", e);
+				Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+				alert.getDialogPane().getStylesheets().add("prob.css");
+				alert.showAndWait();
 			}
 		}
 	}
