@@ -1,6 +1,7 @@
 package de.prob2.ui.groovy;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -154,15 +155,22 @@ public class GroovyClassStage extends Stage {
 		}
 		groovyHandler.handleProperties(object, fields);
 		groovyHandler.handleMethods(object, methods);
-		handleCollections(object);
+		if(clazz.isArray()) {
+			handleArrays(object);
+		} else if(object instanceof Collection<?>) {
+			handleCollections(object);
+		} else {
+			tab_collection_data.setDisable(true);
+		}
 		showClassAttributes();
 		tv_methods.refresh();
 		tv_fields.refresh();
 		tv_collection_data.refresh();
 	}
 	
-	private void handleCollections(Object object) {
-		if (clazz.isArray()) {
+	private void handleArrays(Object object) {
+		if(object instanceof Object[]) {
+			//Check Array of Objects
 			Object[] objects = (Object[]) object;
 			for (int i = 0; i < objects.length; i++) {
 				String value = "";
@@ -171,17 +179,23 @@ public class GroovyClassStage extends Stage {
 				}
 				collection_data.add(new CollectionDataItem(i,value));
 			}
-		} else if (object instanceof Collection<?>) {
-			int i = 0;
-			for (Object o : (Iterable<?>)object) {
-				collection_data.add(new CollectionDataItem(i,o));
-				i++;
-			}
 		} else {
-			tab_collection_data.setDisable(true);
+			//Check Array of Primitives
+			int length = Array.getLength(object);
+			for(int i = 0; i < length; i++) {
+				collection_data.add(new CollectionDataItem(i,Array.get(object, i)));
+			}
 		}
 	}
 	
+	private void handleCollections(Object object) {
+		int i = 0;
+		for (Object o : (Iterable<?>)object) {
+			collection_data.add(new CollectionDataItem(i,o));
+			i++;
+		}
+	}
+		
 	private void showClassAttributes() {
 		attributes.clear();
 		String packagename = "default";
