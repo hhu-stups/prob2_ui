@@ -15,7 +15,7 @@
 			maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
 			prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
-		<SplitPane dividerPositions="0.25,0.8">
+		<SplitPane dividerPositions="0.26,0.8">
 			<items>
 				<Accordion>
 					<panes>
