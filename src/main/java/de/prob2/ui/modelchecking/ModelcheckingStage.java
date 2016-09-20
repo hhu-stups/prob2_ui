@@ -42,10 +42,8 @@ public class ModelcheckingStage extends Stage {
 	public ModelcheckingStage(
 			CurrentTrace currentTrace,
 			CurrentStage currentStage,
-			FXMLLoader loader,
-			ModelcheckingController modelcheckController) {
+			FXMLLoader loader) {
 		this.currentTrace = currentTrace;
-		this.modelcheckController = modelcheckController;
 		try {
 			loader.setLocation(getClass().getResource("modelchecking_stage.fxml"));
 			loader.setRoot(this);
@@ -58,6 +56,10 @@ public class ModelcheckingStage extends Stage {
 		currentStage.register(this);
 	}
 
+	void setModelcheckController(ModelcheckingController controller) {
+		this.modelcheckController = controller;
+	}
+	
 	@FXML
 	void startModelCheck(ActionEvent event) {
 		if (!currentTrace.exists()) {

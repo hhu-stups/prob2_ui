@@ -18,9 +18,6 @@
 	<Menu text="%menu.dotty">
 		<MenuItem text="%menu.dotty.items.showHistoryAsGraph" onAction="#handleDotty" />
 	</Menu>
-	<Menu text="%menu.verify">
-		<MenuItem text="%menu.verify.items.modelcheck" onAction="#handleModelCheck" />
-	</Menu>
 	<Menu text="%menu.consoles">
 		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole"/>
 	</Menu>
