@@ -31,15 +31,11 @@ public class GroovyCodeCompletion {
 		engine = sep.get();
 		popup = new Popup();
 		lv_suggestions = new ListView<String>();
-		lv_suggestions.getItems().add("boo");
-		lv_suggestions.getItems().add("boo");
-		lv_suggestions.getItems().add("boo");
-		lv_suggestions.getItems().add("boo");
-		lv_suggestions.getItems().add("boo");
-		lv_suggestions.getItems().add("boo");
-		for(int i = 0; i < lv_suggestions.getItems().size(); i++) {
+		for(int i = 0; i < 10; i++) {
+			lv_suggestions.getItems().add(String.valueOf(i));
 			lv_suggestions.setOnKeyPressed(e-> {
 				if(e.getCode().equals(KeyCode.ENTER)) {
+					System.out.println(lv_suggestions.getSelectionModel().getSelectedItem());
 					this.deactivate();
 				}
 			});
