@@ -1,11 +1,17 @@
 package de.prob2.ui.groovy;
 
+import javax.script.ScriptEngine;
+
+import com.google.inject.Inject;
+
+import de.prob.scripting.ScriptEngineProvider;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.shape.Path;
 import javafx.stage.Popup;
 
@@ -14,10 +20,15 @@ public class GroovyCodeCompletion {
 	private Popup popup;
 	
 	private ListView<String> lv_suggestions;
+	
+	private final ScriptEngine engine;
 
 	
 	//Trying with ListView
-	public GroovyCodeCompletion() {
+	
+	@Inject
+	public GroovyCodeCompletion(final ScriptEngineProvider sep) {
+		engine = sep.get();
 		popup = new Popup();
 		lv_suggestions = new ListView<String>();
 		lv_suggestions.getItems().add("boo");
@@ -26,16 +37,23 @@ public class GroovyCodeCompletion {
 		lv_suggestions.getItems().add("boo");
 		lv_suggestions.getItems().add("boo");
 		lv_suggestions.getItems().add("boo");
+		for(int i = 0; i < lv_suggestions.getItems().size(); i++) {
+			lv_suggestions.setOnKeyPressed(e-> {
+				if(e.getCode().equals(KeyCode.ENTER)) {
+					this.deactivate();
+				}
+			});
+		}
 		lv_suggestions.setMaxHeight(200);
 		lv_suggestions.setMaxWidth(400);
 		lv_suggestions.setPrefHeight(200);
 		lv_suggestions.setPrefWidth(400);
 		popup.getContent().add(lv_suggestions);
-		
-		
 	}
 	
+	
 	public void activate(GroovyConsole console) {
+		lv_suggestions.getSelectionModel().selectFirst();
 		Point2D point = findCaretPosition(findCaret(console));
 		double x = point.getX() + 10;
 		double y = point.getY() + 10;

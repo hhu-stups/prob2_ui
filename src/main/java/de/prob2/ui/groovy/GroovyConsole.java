@@ -22,18 +22,20 @@ public class GroovyConsole extends TextArea {
 	private GroovyInterpreter interpreter;
 	private GroovyCodeCompletion codeCompletion;
 	
-
 	public GroovyConsole() {
 		super();
 		this.setContextMenu(new ContextMenu());
 		this.instructions = new ArrayList<>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		setListeners();
-		codeCompletion = new GroovyCodeCompletion();
 	}
 	
 	public void setInterpreter(GroovyInterpreter interpreter) {
 		this.interpreter = interpreter;
+	}
+	
+	public void setCodeCompletion(GroovyCodeCompletion codeCompletion) {
+		this.codeCompletion = codeCompletion;
 	}
 	
 	
