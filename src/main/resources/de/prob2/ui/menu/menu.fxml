@@ -22,8 +22,11 @@
 		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole"/>
 	</Menu>
 	<Menu text="%menu.perspectives">
-		<MenuItem text="%menu.perspectives.default" onAction="#handleLoadDefault" />
-		<MenuItem text="%menu.perspectives.detached" onAction="#handleLoadDetached"/>
+		<Menu text="%menu.perspectives.preset">
+			<MenuItem text="%menu.perspectives.preset.default" onAction="#handleLoadDefault" />
+			<MenuItem text="%menu.perspectives.preset.detached" onAction="#handleLoadDetached"/>
+			<MenuItem text="%menu.perspectives.preset.stacked" onAction="#handleLoadStacked"/>
+		</Menu>
 		<MenuItem text="%menu.perspectives.load" onAction="#handleLoadPerspective" />
 	</Menu>
 	<Menu fx:id="windowMenu" text="%menu.window">

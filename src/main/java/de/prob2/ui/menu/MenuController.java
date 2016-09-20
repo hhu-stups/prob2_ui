@@ -86,7 +86,22 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private void handleLoadDetached() {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-		loader.setLocation(getClass().getResource("../detached.fxml"));
+		loader.setLocation(getClass().getResource("../detachedHistory.fxml"));
+		try {
+			Parent root = loader.load();
+			window.getScene().setRoot(root);
+		} catch (IOException e) {
+			logger.error("loading fxml failed", e);
+			Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
+		}
+	}
+
+	@FXML
+	private void handleLoadStacked() {
+		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
+		loader.setLocation(getClass().getResource("../stackedLists.fxml"));
 		try {
 			Parent root = loader.load();
 			window.getScene().setRoot(root);
