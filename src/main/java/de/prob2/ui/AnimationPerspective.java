@@ -29,9 +29,6 @@ import java.util.HashMap;
 
 @Singleton
 public final class AnimationPerspective extends BorderPane {
-	// FIXME removing "Singletons" solved disappearing components, but kills model checking -> fix model checking
-	// FIXME loaded machine model, loading new perspective -> machine not shown/not selected (can be solved by opening a second machine model and reselecting the previous one)
-
 	// FIXME? "expanded" empty accordions
 	// FIXME? drag view model checking
 	// FIXME? dragging not always working
