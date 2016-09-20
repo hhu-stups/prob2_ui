@@ -74,7 +74,7 @@ public final class AnimationPerspective extends BorderPane {
 
 	@FXML
 	public void initialize() {
-		/*double initialHeight = 200;
+		double initialHeight = 200;
 		double initialWidth = 280;
 		operations.setPrefSize(initialWidth,initialHeight);
 		history.setPrefSize(initialWidth,initialHeight);
@@ -85,10 +85,10 @@ public final class AnimationPerspective extends BorderPane {
 		nodeMap.put(modelcheck,modelcheckTP);
 		nodeMap.put(animations,animationsTP);
 		leftAccordion.setExpandedPane(operationsTP);
-		onDrag();*/
+		onDrag();
 	}
 
-	/*private void onDrag() {
+	private void onDrag() {
 		for (Node node : nodeMap.keySet()){
 			registerDrag(node);
 		}
@@ -174,5 +174,5 @@ public final class AnimationPerspective extends BorderPane {
 		}
 		newParent.getPanes().add(nodeTP);
 		newParent.setExpandedPane(nodeTP);
-	}*/
+	}
 }
