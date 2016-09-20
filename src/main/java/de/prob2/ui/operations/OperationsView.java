@@ -212,7 +212,7 @@ public class OperationsView extends AnchorPane {
 		}
 		if (showNotEnabled) {
 			for (String s : notEnabled) {
-				if (!s.equals("INITIALISATION")) {
+				if (!"INITIALISATION".equals(s)) {
 					events.add(new Operation(s, s, opToParams.get(s), false, withTimeout.contains(s), false, false));
 				}
 			}
@@ -226,7 +226,7 @@ public class OperationsView extends AnchorPane {
 
 	@FXML
 	private void handleDisabledOpsToggle() {
-		FontAwesomeIconView icon = null;
+		FontAwesomeIconView icon;
 		if (disabledOpsToggle.isSelected()) {
 			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE_SLASH);
 			showNotEnabled = false;
@@ -312,7 +312,7 @@ public class OperationsView extends AnchorPane {
 
 	@FXML
 	private void handleSortButton() {
-		FontAwesomeIconView icon = null;
+		FontAwesomeIconView icon;
 		switch (sortMode) {
 		case MODEL_ORDER:
 			sortMode = SortMode.A_TO_Z;

@@ -94,7 +94,7 @@ public class ModelCheckStats extends AnchorPane {
 		results.put(id, result);
 
 		Platform.runLater(() -> {
-			elapsedTime.setText("" + timeElapsed);
+			elapsedTime.setText(String.valueOf(timeElapsed));
 		});
 
 		if (stats != null) {
@@ -103,9 +103,9 @@ public class ModelCheckStats extends AnchorPane {
 			int nrTotalTransitions = stats.getNrTotalTransitions();
 			int percent = nrProcessedNodes * 100 / nrTotalNodes;
 			Platform.runLater(() -> {
-				processedNodes.setText("" + nrProcessedNodes + " (" + percent + " %)");
-				totalNodes.setText("" + nrTotalNodes);
-				totalTransitions.setText("" + nrTotalTransitions);
+				processedNodes.setText(nrProcessedNodes + " (" + percent + " %)");
+				totalNodes.setText(String.valueOf(nrTotalNodes));
+				totalTransitions.setText(String.valueOf(nrTotalTransitions));
 			});
 		}
 		logger.debug("updated Stats");
@@ -116,7 +116,7 @@ public class ModelCheckStats extends AnchorPane {
 		results.put(id, result);
 
 		Platform.runLater(() -> {
-			elapsedTime.setText("" + timeElapsed);
+			elapsedTime.setText(String.valueOf(timeElapsed));
 		});
 
 		this.result = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
@@ -136,8 +136,8 @@ public class ModelCheckStats extends AnchorPane {
 			Number numTrans = coverage.getTotalNumberOfTransitions();
 
 			Platform.runLater(() -> {
-				totalNodes.setText("" + numNodes);
-				totalTransitions.setText("" + numTrans);
+				totalNodes.setText(String.valueOf(numNodes));
+				totalTransitions.setText(String.valueOf(numTrans));
 			});
 
 			showStats(coverage.getNodes(), nodeStats);
@@ -146,7 +146,7 @@ public class ModelCheckStats extends AnchorPane {
 
 		boolean hasTrace = result instanceof ITraceDescription;
 		if (hasTrace) {
-			StateSpace s = modelChecker.getStateSpace();
+			StateSpace s = modelChecker.getStateSpace(); // FIXME is modelChecker always != null ?
 			trace = ((ITraceDescription) result).getTrace(s);
 
 		}

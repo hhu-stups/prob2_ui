@@ -93,7 +93,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 			}
 			if (event.getButton().equals(MouseButton.SECONDARY)) {
 				cm.show(background, event.getScreenX(), event.getScreenY());
-				if (!item.getResult().equals("danger")) {
+				if (!"danger".equals(item.getResult())) {
 					cm.getItems().get(0).setDisable(true);
 				}
 			}
@@ -138,7 +138,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	}
 
 	private FontAwesomeIconView selectIcon(String res) {
-		FontAwesomeIcon icon = null;
+		FontAwesomeIcon icon;
 		switch (res) {
 		case "success":
 			icon = FontAwesomeIcon.CHECK_CIRCLE_ALT;
