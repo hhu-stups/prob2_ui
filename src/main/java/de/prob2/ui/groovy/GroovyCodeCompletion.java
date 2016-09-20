@@ -7,14 +7,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.shape.Path;
 
 public class GroovyCodeCompletion {
 	
 	private ContextMenu suggestions;
 	
+	private ScrollPane sp;
+	
 	public GroovyCodeCompletion() {
-		suggestions = new ContextMenu(new MenuItem("boo"));
+		//sp = new ScrollPane();
+		suggestions = new ContextMenu(new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"), new MenuItem("boo"));
+		//sp.setContextMenu(suggestions);
 	}
 	
 	public void activate(GroovyConsole console) {
@@ -51,6 +56,9 @@ public class GroovyCodeCompletion {
 	private Point2D findCaretPosition(Node node) {
 		double x = 0;
 		double y = 0;
+		if(node == null) {
+			return null;
+		}
 		for (Node n = node; n != null; n=n.getParent()) {
 			Bounds parentBounds = n.getBoundsInParent();
 			x += parentBounds.getMinX();
