@@ -187,7 +187,7 @@ public class StatesView extends AnchorPane {
 		this.updateElements(trace, this.tvRootItem, trace.getModel().getChildrenOfType(Machine.class));
 	}
 
-	public void showExpression(AbstractFormulaElement formula) {
+	private void visualizeExpression(AbstractFormulaElement formula) {
 		formulaGenerator.showFormula(formula.getFormula());
 	}
 
@@ -198,18 +198,22 @@ public class StatesView extends AnchorPane {
 
 		tv.setRowFactory(view -> {
 			final TreeTableRow<StateTreeItem<?>> row = new TreeTableRow<>();
-			final MenuItem showExpressionItem = new MenuItem("Visualize Expression");
-			showExpressionItem.setDisable(true);
-			row.itemProperty().addListener((observable, from, to) -> {
-				showExpressionItem.setDisable(to == null
-						|| !(to instanceof ElementStateTreeItem && to.getContents() instanceof AbstractFormulaElement));
+			final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
+			// Expression can only be shown if the row item is an ElementStateTreeItem containing an AbstractFormulaElement and the current state is initialized.
+			visualizeExpressionItem.disableProperty().bind(
+				Bindings.createBooleanBinding(
+					() -> !(row.getItem() instanceof ElementStateTreeItem && row.getItem().getContents() instanceof AbstractFormulaElement),
+					row.itemProperty()
+				).or(currentTrace.currentStateProperty().initializedProperty().not())
+			);
+			visualizeExpressionItem.setOnAction(event -> {
+				visualizeExpression((AbstractFormulaElement) ((ElementStateTreeItem) row.getItem()).getContents());
 			});
-			showExpressionItem.setOnAction(event -> {
-				showExpression((AbstractFormulaElement) ((ElementStateTreeItem) row.getItem()).getContents());
-			});
-			row.contextMenuProperty()
-					.bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null)
-							.otherwise(new ContextMenu(showExpressionItem)));
+			row.contextMenuProperty().bind(
+				Bindings.when(row.emptyProperty())
+				.then((ContextMenu) null)
+				.otherwise(new ContextMenu(visualizeExpressionItem))
+			);
 			return row;
 		});
 
