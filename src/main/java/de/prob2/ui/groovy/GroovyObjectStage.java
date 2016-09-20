@@ -2,17 +2,14 @@ package de.prob2.ui.groovy;
 
 import java.io.IOException;
 import java.util.Map;
-
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob2.ui.prob2fx.CurrentStage;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -22,19 +19,15 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
-public class GroovyObjectStage extends Stage {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-	@FXML
-	private TableView<GroovyObjectItem> tv_objects;
+public final class GroovyObjectStage extends Stage {
 
-	@FXML
-	private TableColumn<GroovyObjectItem, String> objects;
-
-	@FXML
-	private TableColumn<GroovyObjectItem, String> classes;
-
-	@FXML
-	private TableColumn<GroovyObjectItem, String> values;
+	@FXML private TableView<GroovyObjectItem> tvObjects;
+	@FXML private TableColumn<GroovyObjectItem, String> objects;
+	@FXML private TableColumn<GroovyObjectItem, String> classes;
+	@FXML private TableColumn<GroovyObjectItem, String> values;
 
 	private ObservableList<GroovyObjectItem> items = FXCollections.observableArrayList();
 
@@ -76,7 +69,7 @@ public class GroovyObjectStage extends Stage {
 		items.clear();
 		fillList(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
 		fillList(engine.getBindings(ScriptContext.ENGINE_SCOPE));
-		tv_objects.refresh();
+		tvObjects.refresh();
 		this.show();
 	}
 
@@ -94,14 +87,14 @@ public class GroovyObjectStage extends Stage {
 		classes.setCellValueFactory(new PropertyValueFactory<>("clazzname"));
 		values.setCellValueFactory(new PropertyValueFactory<>("value"));
 
-		tv_objects.setItems(items);
+		tvObjects.setItems(items);
 
-		tv_objects.setOnMouseClicked(e -> {
-			int currentPos = tv_objects.getSelectionModel().getSelectedIndex();
+		tvObjects.setOnMouseClicked(e -> {
+			int currentPos = tvObjects.getSelectionModel().getSelectedIndex();
 			if (currentPos >= 0) {
 				items.get(currentPos).show();
 			}
-			tv_objects.getSelectionModel().clearSelection();
+			tvObjects.getSelectionModel().clearSelection();
 		});
 	}
 

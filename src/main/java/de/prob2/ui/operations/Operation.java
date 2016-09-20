@@ -2,8 +2,6 @@ package de.prob2.ui.operations;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-
 public class Operation {
 	public final String name;
 	public final List<String> params;
@@ -24,11 +22,10 @@ public class Operation {
 
 	@Override
 	public String toString() {
-		return name + "(" + StringUtils.join(params, ", ") + ")";
+		return String.format("%s(%s)", name, String.join(", ", params));
 	}
 	
 	public boolean isEnabled() {
 		return "enabled".equals(enablement);
 	}
-
 }

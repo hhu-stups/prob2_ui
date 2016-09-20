@@ -33,6 +33,7 @@ public class ProBPreferenceType {
 		return this.values == null ? null : this.values.clone();
 	}
 	
+	@Override
 	public boolean equals(final Object obj) {
 		if (obj == null || !this.getClass().equals(obj.getClass())) {
 			return false;
@@ -42,10 +43,12 @@ public class ProBPreferenceType {
 		return Objects.equals(this.getType(), casted.getType()) && Arrays.equals(this.getValues(), casted.getValues());
 	}
 	
+	@Override
 	public int hashCode() {
 		return Objects.hash(this.getType(), Arrays.deepHashCode(this.getValues()));
 	}
 	
+	@Override
 	public String toString() {
 		return String.format("%s(%s)", this.getClass().getSimpleName(), this.getValues() == null ? this.getType() : Arrays.toString(this.getValues()));
 	}

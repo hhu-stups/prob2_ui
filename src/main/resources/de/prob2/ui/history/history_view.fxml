@@ -7,10 +7,10 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <fx:root stylesheets="@../../../../prob.css" type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
-	<ListView fx:id="lv_history" AnchorPane.bottomAnchor="0.0"
+	<ListView fx:id="lvHistory" AnchorPane.bottomAnchor="0.0"
 		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 		AnchorPane.topAnchor="50.0"/>
-	<Button fx:id="btprevious" maxHeight="-Infinity" maxWidth="-Infinity"
+	<Button fx:id="btBack" maxHeight="-Infinity" maxWidth="-Infinity"
 		minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
 		prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="10.0"
 		AnchorPane.topAnchor="15.0">
@@ -21,7 +21,7 @@
 			<Tooltip text="Back"/>
 		</tooltip>
 	</Button>
-	<Button fx:id="btforward" maxHeight="-Infinity" maxWidth="-Infinity"
+	<Button fx:id="btForward" maxHeight="-Infinity" maxWidth="-Infinity"
 		minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
 		prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="50.0"
 		AnchorPane.topAnchor="15.0">
@@ -32,7 +32,7 @@
 			<Tooltip text="Forward"/>
 		</tooltip>
 	</Button>
-	<ToggleButton fx:id="tb_reverse" maxHeight="-Infinity"
+	<ToggleButton fx:id="tbReverse" maxHeight="-Infinity"
 		maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
 		mnemonicParsing="false" prefHeight="26.0" prefWidth="26.0"
 		AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="15.0">

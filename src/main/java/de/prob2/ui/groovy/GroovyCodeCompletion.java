@@ -5,6 +5,7 @@ import javax.script.ScriptEngine;
 import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
+
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -19,10 +20,9 @@ public class GroovyCodeCompletion {
 	
 	private Popup popup;
 	
-	private ListView<String> lv_suggestions;
+	private ListView<String> suggestions;
 	
 	private final ScriptEngine engine;
-
 	
 	//Trying with ListView
 	
@@ -30,26 +30,26 @@ public class GroovyCodeCompletion {
 	public GroovyCodeCompletion(final ScriptEngineProvider sep) {
 		engine = sep.get();
 		popup = new Popup();
-		lv_suggestions = new ListView<String>();
+		suggestions = new ListView<>();
 		for(int i = 0; i < 10; i++) {
-			lv_suggestions.getItems().add(String.valueOf(i));
-			lv_suggestions.setOnKeyPressed(e-> {
-				if(e.getCode().equals(KeyCode.ENTER)) {
-					System.out.println(lv_suggestions.getSelectionModel().getSelectedItem());
+			suggestions.getItems().add(String.valueOf(i));
+			suggestions.setOnKeyPressed(e -> {
+				if(e.getCode() == KeyCode.ENTER) {
+					System.out.println(suggestions.getSelectionModel().getSelectedItem());
 					this.deactivate();
 				}
 			});
 		}
-		lv_suggestions.setMaxHeight(200);
-		lv_suggestions.setMaxWidth(400);
-		lv_suggestions.setPrefHeight(200);
-		lv_suggestions.setPrefWidth(400);
-		popup.getContent().add(lv_suggestions);
+		suggestions.setMaxHeight(200);
+		suggestions.setMaxWidth(400);
+		suggestions.setPrefHeight(200);
+		suggestions.setPrefWidth(400);
+		popup.getContent().add(suggestions);
 	}
 	
 	
 	public void activate(GroovyConsole console) {
-		lv_suggestions.getSelectionModel().selectFirst();
+		suggestions.getSelectionModel().selectFirst();
 		Point2D point = findCaretPosition(findCaret(console));
 		double x = point.getX() + 10;
 		double y = point.getY() + 10;
@@ -82,11 +82,11 @@ public class GroovyCodeCompletion {
 	
 
 	private Point2D findCaretPosition(Node node) {
-		double x = 0;
-		double y = 0;
 		if(node == null) {
 			return null;
 		}
+		double x = 0;
+		double y = 0;
 		for (Node n = node; n != null; n=n.getParent()) {
 			Bounds parentBounds = n.getBoundsInParent();
 			x += parentBounds.getMinX();
