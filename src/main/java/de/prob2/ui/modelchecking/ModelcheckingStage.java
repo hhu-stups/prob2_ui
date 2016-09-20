@@ -68,6 +68,7 @@ public class ModelcheckingStage extends Stage {
 			alert.setHeaderText("No specification file loaded. Cannot run model checker.");
 			alert.getDialogPane().getStylesheets().add("prob.css");
 			alert.showAndWait();
+			this.close();
 			return;
 		}
 		modelcheckController.startModelchecking(getOptions(), currentTrace.getStateSpace());

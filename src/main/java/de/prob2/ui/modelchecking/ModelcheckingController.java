@@ -211,6 +211,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		Node historyNode = toHistoryNode(historyItem);
 		Platform.runLater(() -> {
 			historyNodeList.add(historyNode);
+			mcheckStage.close();
 		});
 	}
 }
