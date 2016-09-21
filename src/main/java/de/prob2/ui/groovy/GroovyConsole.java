@@ -156,7 +156,7 @@ public class GroovyConsole extends TextArea {
 		
 		if(".".equals(e.getText())) {
 			if(!codeCompletion.isVisible()) {
-				codeCompletion.activate(this);
+				codeCompletion.activate(this, getCurrentLine());
 			} else {
 				codeCompletion.deactivate();
 			}

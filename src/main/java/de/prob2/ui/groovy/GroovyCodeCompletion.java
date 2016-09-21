@@ -1,5 +1,10 @@
 package de.prob2.ui.groovy;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+import javax.script.Bindings;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
 import com.google.inject.Inject;
@@ -19,27 +24,27 @@ public class GroovyCodeCompletion {
 	
 	private Popup popup;
 	
-	private ListView<String> lv_suggestions;
+	private ListView<Object> lv_suggestions;
 	
 	private final ScriptEngine engine;
+	
+	private final MetaPropertiesHandler groovyHandler;
 
 	
 	//Trying with ListView
 	
 	@Inject
-	public GroovyCodeCompletion(final ScriptEngineProvider sep) {
+	public GroovyCodeCompletion(final ScriptEngineProvider sep, final MetaPropertiesHandler groovyHandler) {
 		engine = sep.get();
 		popup = new Popup();
-		lv_suggestions = new ListView<String>();
-		for(int i = 0; i < 10; i++) {
-			lv_suggestions.getItems().add(String.valueOf(i));
-			lv_suggestions.setOnKeyPressed(e-> {
-				if(e.getCode().equals(KeyCode.ENTER)) {
-					System.out.println(lv_suggestions.getSelectionModel().getSelectedItem());
-					this.deactivate();
-				}
-			});
-		}
+		this.groovyHandler = groovyHandler;
+		lv_suggestions = new ListView<Object>();
+		lv_suggestions.setOnKeyPressed(e-> {
+			if(e.getCode().equals(KeyCode.ENTER)) {
+				System.out.println(lv_suggestions.getSelectionModel().getSelectedItem());
+				this.deactivate();
+			}
+		});
 		lv_suggestions.setMaxHeight(200);
 		lv_suggestions.setMaxWidth(400);
 		lv_suggestions.setPrefHeight(200);
@@ -48,7 +53,21 @@ public class GroovyCodeCompletion {
 	}
 	
 	
-	public void activate(GroovyConsole console) {
+	public void activate(GroovyConsole console, String currentLine) {
+		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
+		if(!engineScope.keySet().contains(currentLine) && !globalScope.keySet().contains(currentLine)) {
+			return;
+		}
+		Object object = null;
+		if(engineScope.keySet().contains(currentLine)) {
+			object = engineScope.get(currentLine);
+		} else if(globalScope.keySet().contains(currentLine)) {
+			object = globalScope.get(currentLine);
+		} else {
+			return;
+		}
+		showSuggestions(object);
 		lv_suggestions.getSelectionModel().selectFirst();
 		Point2D point = findCaretPosition(findCaret(console));
 		double x = point.getX() + 10;
@@ -57,8 +76,22 @@ public class GroovyCodeCompletion {
 		
 	}
 	
+	
 	public void deactivate() {
 		popup.hide();
+	}
+	
+	private void showSuggestions(Object object) {
+		Class <? extends Object> clazz = object.getClass();
+		for(Method m : clazz.getMethods()) {
+			lv_suggestions.getItems().add(m.getName());
+		}
+		for(Field f : clazz.getFields()) {
+			lv_suggestions.getItems().add(f.getName());
+		}
+		groovyHandler.handleMethods(object, lv_suggestions.getItems());
+		groovyHandler.handleProperties(object, lv_suggestions.getItems());
+		
 	}
 	
 	public boolean isVisible() {
