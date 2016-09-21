@@ -62,10 +62,9 @@ public class GroovyConsole extends TextArea {
 		
 	@Override
 	public void forward() {
-		
-		if(currentPosInLine < charCounterInLine && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
-			currentPosInLine++;
+		if(currentPosInLine <= charCounterInLine && this.getLength() - this.getCaretPosition() <= charCounterInLine) {		
 			super.forward();
+			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 			this.setScrollTop(Double.MIN_VALUE);
 		}
 	}
@@ -73,10 +72,12 @@ public class GroovyConsole extends TextArea {
 	@Override
 	public void backward() {
 		//handleLeft
-		if(currentPosInLine > 0 && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
-			currentPosInLine = Math.max(currentPosInLine - 1, 0);
+		if(currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
 			super.backward();
+			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 			this.setScrollTop(Double.MIN_VALUE);
+		} else if(currentPosInLine == 0) {
+			super.deselect();
 		}
 	}
 	
