@@ -89,8 +89,8 @@ public class GroovyCodeCompletion {
 		for(Field f : clazz.getFields()) {
 			lv_suggestions.getItems().add(f.getName());
 		}
-		groovyHandler.handleMethods(object, lv_suggestions.getItems());
-		groovyHandler.handleProperties(object, lv_suggestions.getItems());
+		//groovyHandler.handleMethods(object, lv_suggestions.getItems());
+		//groovyHandler.handleProperties(object, lv_suggestions.getItems());
 		
 	}
 	

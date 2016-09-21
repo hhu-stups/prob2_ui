@@ -103,28 +103,27 @@ public class GroovyConsole extends TextArea {
 	
 	//
 	private void setListeners() {
-		this.addEventFilter(KeyEvent.ANY, e-> {
+		this.addEventFilter(KeyEvent.ANY, e -> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
 			}
 		});
 		
-		this.addEventFilter(MouseEvent.ANY, e-> {
+		this.addEventFilter(MouseEvent.ANY, e -> {
 			if(e.getButton() == MouseButton.PRIMARY && (this.getLength() - 1 - this.getCaretPosition() < charCounterInLine)) {
 				currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 			}
 		});
 		
 		this.setOnKeyPressed(e -> {
-			if (e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
+			if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
 				handleArrowKeys(e);
 				this.setScrollTop(Double.MAX_VALUE);
-			} else if (e.getCode().isArrowKey()) {
 			} else if (e.getCode().isNavigationKey()) {
 				e.consume();
-			} else if (e.getCode().equals(KeyCode.BACK_SPACE) || e.getCode().equals(KeyCode.DELETE)) {
+			} else if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE) {
 				handleDeletion(e);
-			} else if (e.getCode().equals(KeyCode.ENTER)) {
+			} else if (e.getCode() == KeyCode.ENTER) {
 				handleEnter(e);
 			} else if (!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
 				handleInsertChar(e);
@@ -141,7 +140,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleInsertChar(KeyEvent e) {
 		if(e.getText().isEmpty() || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
-			if(!(e.getCode().equals(KeyCode.UNDEFINED) || e.getCode().equals(KeyCode.ALT_GRAPH))) {
+			if(!(e.getCode() == KeyCode.UNDEFINED || e.getCode() == KeyCode.ALT_GRAPH)) {
 				goToLastPos();
 			}
 			if(e.getText().isEmpty()) {
@@ -172,7 +171,7 @@ public class GroovyConsole extends TextArea {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		e.consume();
-		if("".equals(getCurrentLine())) {
+		if(getCurrentLine().isEmpty()) {
 			this.appendText("\n null");
 		} else {
 			if(!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != InstructionOption.ENTER) {

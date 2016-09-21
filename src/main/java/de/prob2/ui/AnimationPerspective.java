@@ -1,16 +1,16 @@
 package de.prob2.ui;
 
 import java.io.IOException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -24,8 +24,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 
-import java.io.IOException;
-import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class AnimationPerspective extends BorderPane {
@@ -57,7 +57,7 @@ public final class AnimationPerspective extends BorderPane {
 	private boolean dragged;
 	private ImageView snapshot = new ImageView();
 
-	private HashMap<Node, TitledPane> nodeMap = new HashMap<Node, TitledPane>();
+	private HashMap<Node, TitledPane> nodeMap = new HashMap<>();
 	private Logger logger = LoggerFactory.getLogger(AnimationPerspective.class);
 
 	@Inject

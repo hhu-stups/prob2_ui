@@ -5,11 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
@@ -18,8 +14,10 @@ import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Action;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.binding.Bindings;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
@@ -31,6 +29,9 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.AnchorPane;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //@Singleton
 public class StatesView extends AnchorPane {
@@ -187,7 +188,7 @@ public class StatesView extends AnchorPane {
 		this.updateElements(trace, this.tvRootItem, trace.getModel().getChildrenOfType(Machine.class));
 	}
 
-	public void showExpression(AbstractFormulaElement formula) {
+	private void visualizeExpression(AbstractFormulaElement formula) {
 		formulaGenerator.showFormula(formula.getFormula());
 	}
 
@@ -198,18 +199,22 @@ public class StatesView extends AnchorPane {
 
 		tv.setRowFactory(view -> {
 			final TreeTableRow<StateTreeItem<?>> row = new TreeTableRow<>();
-			final MenuItem showExpressionItem = new MenuItem("Visualize Expression");
-			showExpressionItem.setDisable(true);
-			row.itemProperty().addListener((observable, from, to) -> {
-				showExpressionItem.setDisable(to == null
-						|| !(to instanceof ElementStateTreeItem && to.getContents() instanceof AbstractFormulaElement));
+			final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
+			// Expression can only be shown if the row item is an ElementStateTreeItem containing an AbstractFormulaElement and the current state is initialized.
+			visualizeExpressionItem.disableProperty().bind(
+				Bindings.createBooleanBinding(
+					() -> !(row.getItem() instanceof ElementStateTreeItem && row.getItem().getContents() instanceof AbstractFormulaElement),
+					row.itemProperty()
+				).or(currentTrace.currentStateProperty().initializedProperty().not())
+			);
+			visualizeExpressionItem.setOnAction(event -> {
+				visualizeExpression((AbstractFormulaElement) ((ElementStateTreeItem) row.getItem()).getContents());
 			});
-			showExpressionItem.setOnAction(event -> {
-				showExpression((AbstractFormulaElement) ((ElementStateTreeItem) row.getItem()).getContents());
-			});
-			row.contextMenuProperty()
-					.bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null)
-							.otherwise(new ContextMenu(showExpressionItem)));
+			row.contextMenuProperty().bind(
+				Bindings.when(row.emptyProperty())
+				.then((ContextMenu) null)
+				.otherwise(new ContextMenu(visualizeExpressionItem))
+			);
 			return row;
 		});
 
