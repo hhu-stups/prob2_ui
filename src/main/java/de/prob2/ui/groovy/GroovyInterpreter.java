@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.codehaus.groovy.GroovyBugError;
 
 public class GroovyInterpreter {
 	private final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
@@ -40,6 +41,9 @@ public class GroovyInterpreter {
 				resultString = eval.toString();
 				logger.trace("Evaled {} to {}", instruction.getInstruction(), resultString);
 			} catch (ScriptException e) {
+				logger.debug("Groovy Evaluation failed", e);
+				resultString = e.toString();
+			} catch(GroovyBugError e) {
 				logger.debug("Groovy Evaluation failed", e);
 				resultString = e.toString();
 			}
