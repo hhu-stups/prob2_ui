@@ -257,14 +257,22 @@ public final class MenuController extends MenuBar {
 	private void loadPreset(String location) {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(getClass().getResource(location));
+		Parent root;
 		try {
-			Parent root = loader.load();
-			window.getScene().setRoot(root);
+			root = loader.load();
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 			Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
 			alert.getDialogPane().getStylesheets().add("prob.css");
 			alert.showAndWait();
+			return;
+		}
+		window.getScene().setRoot(root);
+		
+		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
+			final MenuToolkit tk = MenuToolkit.toolkit();
+			tk.setGlobalMenuBar(this);
+			tk.setApplicationMenu(this.getMenus().get(0));
 		}
 	}
 
