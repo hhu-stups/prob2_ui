@@ -53,6 +53,12 @@ public class GroovyConsole extends TextArea {
 		currentPosInLine += diff;
 	}
 	
+	public void chooseInstructionThroughPopup(String instruction) {
+		this.appendText(instruction);
+		charCounterInLine += instruction.length();
+		currentPosInLine += instruction.length();
+	}
+	
 	@Override
 	public void copy() {
 		super.copy();
@@ -258,7 +264,7 @@ public class GroovyConsole extends TextArea {
 	private boolean handleBackspace(KeyEvent e) {
 		if(currentPosInLine > 0) {
 			currentPosInLine = Math.max(currentPosInLine - 1, 0);
-			charCounterInLine = Math.max(charCounterInLine - 1, 0);		
+			charCounterInLine = Math.max(charCounterInLine - 1, 0);	
 		} else {
 			e.consume();
 			return true;

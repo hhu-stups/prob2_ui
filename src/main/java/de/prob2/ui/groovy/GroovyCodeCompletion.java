@@ -30,8 +30,8 @@ public class GroovyCodeCompletion extends Popup {
 	private ListView<GroovyClassPropertyItem> lv_suggestions;
 	
 	private ScriptEngine engine;
-	
-	private String currentLine;
+		
+	private GroovyConsole parent;
 	
 	public GroovyCodeCompletion(FXMLLoader loader, ScriptEngine engine) {
 		loader.setLocation(getClass().getResource("groovy_codecompletion_popup.fxml"));
@@ -43,10 +43,10 @@ public class GroovyCodeCompletion extends Popup {
 			logger.error("loading fxml failed", e);
 		}
 		this.engine = engine;
-		this.currentLine ="";
+		this.parent = null;
 		lv_suggestions.setOnKeyPressed(e-> {
 			if(e.getCode().equals(KeyCode.ENTER)) {
-				System.out.println(lv_suggestions.getSelectionModel().getSelectedItem());
+				getParent().chooseInstructionThroughPopup(lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams());
 				this.deactivate();
 			}
 		});		
@@ -54,7 +54,7 @@ public class GroovyCodeCompletion extends Popup {
 	
 	
 	public void activate(GroovyConsole console, String currentLine) {
-		this.currentLine = currentLine;
+		this.parent = console;
 		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
 		if(!engineScope.keySet().contains(currentLine) && !globalScope.keySet().contains(currentLine)) {
@@ -72,6 +72,10 @@ public class GroovyCodeCompletion extends Popup {
 		showPopup(console);
 	}
 	
+	public GroovyConsole getParent() {
+		return parent;
+	}
+	
 	private void showPopup(GroovyConsole console) {
 		lv_suggestions.getSelectionModel().selectFirst();
 		Point2D point = findCaretPosition(findCaret(console));
@@ -81,7 +85,7 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	public void deactivate() {
-		this.currentLine = "";
+		lv_suggestions.getItems().clear();
 		this.hide();
 	}
 	
