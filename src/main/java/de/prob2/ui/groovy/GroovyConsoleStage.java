@@ -23,7 +23,7 @@ public final class GroovyConsoleStage extends Stage {
 
 	@Inject
 	@SuppressWarnings(value = "UR_UNINIT_READ", justification = "Field values are injected by FXMLLoader")
-	private GroovyConsoleStage(FXMLLoader loader, CurrentStage currentStage, GroovyInterpreter interpreter, GroovyCodeCompletion codeCompletion) {
+	private GroovyConsoleStage(FXMLLoader loader, CurrentStage currentStage, GroovyInterpreter interpreter) {
 		try {
 			loader.setLocation(getClass().getResource("groovy_console_stage.fxml"));
 			loader.setRoot(this);
@@ -33,7 +33,6 @@ public final class GroovyConsoleStage extends Stage {
 			logger.error("loading fxml failed", e);
 		}
 		groovyConsole.setInterpreter(interpreter);
-		groovyConsole.setCodeCompletion(codeCompletion);
 		this.setOnCloseRequest(e -> {
 			groovyConsole.closeObjectStage();
 		});

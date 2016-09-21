@@ -20,7 +20,6 @@ public class GroovyConsole extends TextArea {
 	private List<Instruction> instructions;
 	private int posInList = -1;
 	private GroovyInterpreter interpreter;
-	private GroovyCodeCompletion codeCompletion;
 	
 	public GroovyConsole() {
 		super();
@@ -34,11 +33,7 @@ public class GroovyConsole extends TextArea {
 		this.interpreter = interpreter;
 	}
 	
-	public void setCodeCompletion(GroovyCodeCompletion codeCompletion) {
-		this.codeCompletion = codeCompletion;
-	}
-	
-	
+
 	@Override
 	public void paste() {
 		if(this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
@@ -154,11 +149,7 @@ public class GroovyConsole extends TextArea {
 		}
 		
 		if(".".equals(e.getText())) {
-			if(!codeCompletion.isVisible()) {
-				codeCompletion.activate(this, getCurrentLine());
-			} else {
-				codeCompletion.deactivate();
-			}
+			interpreter.triggerCodeCompletion(this, getCurrentLine());
 		}
 		
 		charCounterInLine++;

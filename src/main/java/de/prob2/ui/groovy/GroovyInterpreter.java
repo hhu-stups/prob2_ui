@@ -13,14 +13,16 @@ import org.slf4j.LoggerFactory;
 public class GroovyInterpreter {
 	private final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
 	private final ScriptEngine engine;
+	private final GroovyCodeCompletion codeCompletion;
 	private final GroovyObjectStage groovyObjectStage;
 
 	@Inject
 	public GroovyInterpreter(final ScriptEngineProvider sep, final GroovyObjectStage groovyObjectStage) {
 		engine = sep.get();
 		this.groovyObjectStage = groovyObjectStage;
+		this.codeCompletion = new GroovyCodeCompletion(engine);
 	}
-
+	
 	public ExecResult exec(Instruction instruction) {
 		logger.trace("Exec");
 		
@@ -42,6 +44,14 @@ public class GroovyInterpreter {
 			}
 	
 			return new ExecResult(console.toString(), resultString);
+		}
+	}
+	
+	public void triggerCodeCompletion(GroovyConsole console, String currentLine) {
+		if(!codeCompletion.isVisible()) {
+			codeCompletion.activate(console, currentLine);
+		} else {
+			codeCompletion.deactivate();
 		}
 	}
 	

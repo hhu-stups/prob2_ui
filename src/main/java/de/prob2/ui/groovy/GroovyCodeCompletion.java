@@ -2,14 +2,9 @@ package de.prob2.ui.groovy;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-
-import com.google.inject.Inject;
-
-import de.prob.scripting.ScriptEngineProvider;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -26,15 +21,10 @@ public class GroovyCodeCompletion {
 	
 	private ListView<GroovyClassPropertyItem> lv_suggestions;
 	
-	private final ScriptEngine engine;
+	private ScriptEngine engine;
 	
-
-	
-	//Trying with ListView
-	
-	@Inject
-	public GroovyCodeCompletion(final ScriptEngineProvider sep) {
-		engine = sep.get();
+	public GroovyCodeCompletion(ScriptEngine engine) {
+		this.engine = engine;
 		popup = new Popup();
 		lv_suggestions = new ListView<GroovyClassPropertyItem>();
 		lv_suggestions.setOnKeyPressed(e-> {
