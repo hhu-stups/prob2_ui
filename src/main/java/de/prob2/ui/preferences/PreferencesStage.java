@@ -173,7 +173,9 @@ public final class PreferencesStage extends Stage {
 			});
 
 			return prop;
-		} , ELEMENT_CLASS_STRING_CONVERTER));
+		}, ELEMENT_CLASS_STRING_CONVERTER));
+		
+		this.blacklistView.getItems().setAll(this.classBlacklist.getKnownClasses());
 
 		this.classBlacklist.getKnownClasses()
 				.addListener((SetChangeListener<? super Class<? extends AbstractElement>>) change -> {

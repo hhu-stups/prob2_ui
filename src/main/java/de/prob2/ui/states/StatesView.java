@@ -11,7 +11,6 @@ import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
-import de.prob.model.representation.Action;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 
@@ -226,11 +225,6 @@ public class StatesView extends AnchorPane {
 						this.updateRoot(this.currentTrace.get());
 					}
 				});
-
-		// Hide Action objects by default (they display as source code condensed
-		// into a single line otherwise)
-		this.classBlacklist.getKnownClasses().add(Action.class);
-		this.classBlacklist.getBlacklist().add(Action.class);
 
 		this.currentTrace.addListener((observable, from, to) -> {
 			if (to == null) {

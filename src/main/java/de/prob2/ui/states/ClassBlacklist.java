@@ -3,6 +3,8 @@ package de.prob2.ui.states;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.model.representation.AbstractElement;
+import de.prob.model.representation.Action;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
@@ -15,8 +17,10 @@ public final class ClassBlacklist {
 	@SuppressWarnings("unchecked")
 	private ClassBlacklist() {
 		super();
-		this.blacklist = FXCollections.observableSet();
-		this.knownClasses = FXCollections.observableSet();
+		// Hide Action objects by default (they display as source code condensed
+		// into a single line otherwise)
+		this.blacklist = FXCollections.observableSet(Action.class);
+		this.knownClasses = FXCollections.observableSet(Action.class);
 	}
 	
 	public ObservableSet<Class<? extends AbstractElement>> getBlacklist() {
