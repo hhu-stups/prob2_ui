@@ -46,10 +46,11 @@ public class GroovyCodeCompletion extends Popup {
 		this.parent = null;
 		lv_suggestions.setOnKeyPressed(e-> {
 			if(e.getCode().equals(KeyCode.ENTER)) {
-				getParent().chooseInstructionThroughPopup(lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams());
-				this.deactivate();
+				getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams()));
+				deactivate();
 			}
-		});		
+		});
+		
 	}
 	
 	

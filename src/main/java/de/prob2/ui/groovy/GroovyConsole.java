@@ -53,12 +53,6 @@ public class GroovyConsole extends TextArea {
 		currentPosInLine += diff;
 	}
 	
-	public void chooseInstructionThroughPopup(String instruction) {
-		this.appendText(instruction);
-		charCounterInLine += instruction.length();
-		currentPosInLine += instruction.length();
-	}
-	
 	@Override
 	public void copy() {
 		super.copy();
@@ -68,6 +62,7 @@ public class GroovyConsole extends TextArea {
 		
 	@Override
 	public void forward() {
+		
 		if(currentPosInLine < charCounterInLine && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine++;
 			super.forward();
@@ -87,23 +82,32 @@ public class GroovyConsole extends TextArea {
 	
 	@Override
 	public void selectForward() {
-		//do nothing, but stay at correct position
 		if(currentPosInLine != charCounterInLine) {
-			currentPosInLine--;
+			super.selectForward();
+			currentPosInLine++;
 		}
 	}
 	
 	@Override
 	public void selectBackward() {
-		//do nothing, but stay at correct position
 		if(currentPosInLine != 0) {
-			currentPosInLine++;
-			
+			super.selectBackward();
+			currentPosInLine--;
 		}
 	}
 	
-	//
 	private void setListeners() {
+		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, e-> {
+			if(e instanceof CodeCompletionEvent) {
+				if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER) {
+					String choice = ((CodeCompletionEvent) e).getChoice();
+					this.appendText(choice);
+					currentPosInLine += choice.length();
+					charCounterInLine += choice.length();
+				}
+			}
+		});
+		
 		this.addEventFilter(KeyEvent.ANY, e -> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
@@ -121,7 +125,9 @@ public class GroovyConsole extends TextArea {
 				handleArrowKeys(e);
 				this.setScrollTop(Double.MAX_VALUE);
 			} else if (e.getCode().isNavigationKey()) {
-				e.consume();
+				if(e.getCode() != KeyCode.LEFT && e.getCode() != KeyCode.RIGHT) {
+					e.consume();
+				}
 			} else if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE) {
 				handleDeletion(e);
 			} else if (e.getCode() == KeyCode.ENTER) {
@@ -282,7 +288,7 @@ public class GroovyConsole extends TextArea {
 		return false;
 	}
 	
-	private String getCurrentLine() {
+	public String getCurrentLine() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		return this.getText().substring(posOfEnter + 3, this.getText().length());
 	}
