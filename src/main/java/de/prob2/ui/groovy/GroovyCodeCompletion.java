@@ -31,6 +31,8 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private ScriptEngine engine;
 	
+	private String currentLine;
+	
 	public GroovyCodeCompletion(FXMLLoader loader, ScriptEngine engine) {
 		loader.setLocation(getClass().getResource("groovy_codecompletion_popup.fxml"));
 		loader.setRoot(this);
@@ -41,6 +43,7 @@ public class GroovyCodeCompletion extends Popup {
 			logger.error("loading fxml failed", e);
 		}
 		this.engine = engine;
+		this.currentLine ="";
 		lv_suggestions.setOnKeyPressed(e-> {
 			if(e.getCode().equals(KeyCode.ENTER)) {
 				System.out.println(lv_suggestions.getSelectionModel().getSelectedItem());
@@ -51,12 +54,13 @@ public class GroovyCodeCompletion extends Popup {
 	
 	
 	public void activate(GroovyConsole console, String currentLine) {
+		this.currentLine = currentLine;
 		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
 		if(!engineScope.keySet().contains(currentLine) && !globalScope.keySet().contains(currentLine)) {
 			return;
 		}
-		Object object = null;
+		Object object;
 		if(engineScope.keySet().contains(currentLine)) {
 			object = engineScope.get(currentLine);
 		} else if(globalScope.keySet().contains(currentLine)) {
@@ -65,16 +69,19 @@ public class GroovyCodeCompletion extends Popup {
 			return;
 		}
 		showSuggestions(object);
+		showPopup(console);
+	}
+	
+	private void showPopup(GroovyConsole console) {
 		lv_suggestions.getSelectionModel().selectFirst();
 		Point2D point = findCaretPosition(findCaret(console));
 		double x = point.getX() + 10;
 		double y = point.getY() + 10;
-		this.show(console, x, y);
-		
+		this.show(console, x, y);	
 	}
 	
-	
 	public void deactivate() {
+		this.currentLine = "";
 		this.hide();
 	}
 	
