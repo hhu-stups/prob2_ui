@@ -176,6 +176,7 @@ public final class PreferencesStage extends Stage {
 		}, ELEMENT_CLASS_STRING_CONVERTER));
 		
 		this.blacklistView.getItems().setAll(this.classBlacklist.getKnownClasses());
+		this.blacklistView.getItems().sort(Comparator.comparing(Class::getSimpleName));
 
 		this.classBlacklist.getKnownClasses()
 				.addListener((SetChangeListener<? super Class<? extends AbstractElement>>) change -> {
