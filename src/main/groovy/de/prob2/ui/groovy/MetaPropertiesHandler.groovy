@@ -14,3 +14,4 @@ def static handleMethods(Object object, Collection<GroovyClassPropertyItem> meth
 		methods.add(new GroovyClassPropertyItem(m))
 	}
 }
+

@@ -162,5 +162,13 @@ public class GroovyClassPropertyItem {
 	public void setValue(String value) {
 		this.value.set(value);
 	}
+	
+	public String toString() {
+		String params = "";
+		if(getParams() != null) {
+			params = getParams();
+		}
+		return getName() + "(" + params + ") : " + getType() + " - " + getDeclarer();
+	}
 
 }

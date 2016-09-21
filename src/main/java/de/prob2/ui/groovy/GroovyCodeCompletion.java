@@ -24,21 +24,19 @@ public class GroovyCodeCompletion {
 	
 	private Popup popup;
 	
-	private ListView<Object> lv_suggestions;
+	private ListView<GroovyClassPropertyItem> lv_suggestions;
 	
 	private final ScriptEngine engine;
 	
-	private final MetaPropertiesHandler groovyHandler;
 
 	
 	//Trying with ListView
 	
 	@Inject
-	public GroovyCodeCompletion(final ScriptEngineProvider sep, final MetaPropertiesHandler groovyHandler) {
+	public GroovyCodeCompletion(final ScriptEngineProvider sep) {
 		engine = sep.get();
 		popup = new Popup();
-		this.groovyHandler = groovyHandler;
-		lv_suggestions = new ListView<Object>();
+		lv_suggestions = new ListView<GroovyClassPropertyItem>();
 		lv_suggestions.setOnKeyPressed(e-> {
 			if(e.getCode().equals(KeyCode.ENTER)) {
 				System.out.println(lv_suggestions.getSelectionModel().getSelectedItem());
@@ -84,13 +82,13 @@ public class GroovyCodeCompletion {
 	private void showSuggestions(Object object) {
 		Class <? extends Object> clazz = object.getClass();
 		for(Method m : clazz.getMethods()) {
-			lv_suggestions.getItems().add(m.getName());
+			lv_suggestions.getItems().add(new GroovyClassPropertyItem(m));
 		}
 		for(Field f : clazz.getFields()) {
-			lv_suggestions.getItems().add(f.getName());
+			lv_suggestions.getItems().add(new GroovyClassPropertyItem(f));
 		}
-		//groovyHandler.handleMethods(object, lv_suggestions.getItems());
-		//groovyHandler.handleProperties(object, lv_suggestions.getItems());
+		MetaPropertiesHandler.handleMethods(object, lv_suggestions.getItems());
+		MetaPropertiesHandler.handleProperties(object, lv_suggestions.getItems());
 		
 	}
 	
