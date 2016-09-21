@@ -1,10 +1,17 @@
 package de.prob2.ui.groovy;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -15,29 +22,31 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.shape.Path;
 import javafx.stage.Popup;
 
-public class GroovyCodeCompletion {
+public class GroovyCodeCompletion extends Popup {
 	
-	private Popup popup;
+	private final Logger logger = LoggerFactory.getLogger(GroovyCodeCompletion.class);
 	
+	@FXML
 	private ListView<GroovyClassPropertyItem> lv_suggestions;
 	
 	private ScriptEngine engine;
 	
-	public GroovyCodeCompletion(ScriptEngine engine) {
+	public GroovyCodeCompletion(FXMLLoader loader, ScriptEngine engine) {
+		loader.setLocation(getClass().getResource("groovy_codecompletion_popup.fxml"));
+		loader.setRoot(this);
+		loader.setController(this);
+		try {
+			loader.load();
+		} catch (IOException e) {
+			logger.error("loading fxml failed", e);
+		}
 		this.engine = engine;
-		popup = new Popup();
-		lv_suggestions = new ListView<GroovyClassPropertyItem>();
 		lv_suggestions.setOnKeyPressed(e-> {
 			if(e.getCode().equals(KeyCode.ENTER)) {
 				System.out.println(lv_suggestions.getSelectionModel().getSelectedItem());
 				this.deactivate();
 			}
-		});
-		lv_suggestions.setMaxHeight(200);
-		lv_suggestions.setMaxWidth(400);
-		lv_suggestions.setPrefHeight(200);
-		lv_suggestions.setPrefWidth(400);
-		popup.getContent().add(lv_suggestions);
+		});		
 	}
 	
 	
@@ -60,13 +69,13 @@ public class GroovyCodeCompletion {
 		Point2D point = findCaretPosition(findCaret(console));
 		double x = point.getX() + 10;
 		double y = point.getY() + 10;
-		popup.show(console, x, y);
+		this.show(console, x, y);
 		
 	}
 	
 	
 	public void deactivate() {
-		popup.hide();
+		this.hide();
 	}
 	
 	private void showSuggestions(Object object) {
@@ -83,7 +92,7 @@ public class GroovyCodeCompletion {
 	}
 	
 	public boolean isVisible() {
-		return popup.isShowing();
+		return this.isShowing();
 	}
 	
 	

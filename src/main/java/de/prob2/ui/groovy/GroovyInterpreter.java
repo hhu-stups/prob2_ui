@@ -6,6 +6,7 @@ import javax.script.ScriptException;
 import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
+import javafx.fxml.FXMLLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,10 @@ public class GroovyInterpreter {
 	private final GroovyObjectStage groovyObjectStage;
 
 	@Inject
-	public GroovyInterpreter(final ScriptEngineProvider sep, final GroovyObjectStage groovyObjectStage) {
+	public GroovyInterpreter(FXMLLoader loader, final ScriptEngineProvider sep, final GroovyObjectStage groovyObjectStage) {
 		engine = sep.get();
 		this.groovyObjectStage = groovyObjectStage;
-		this.codeCompletion = new GroovyCodeCompletion(engine);
+		this.codeCompletion = new GroovyCodeCompletion(loader, engine);
 	}
 	
 	public ExecResult exec(Instruction instruction) {
