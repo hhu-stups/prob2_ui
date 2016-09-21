@@ -69,6 +69,9 @@ public class GroovyCodeCompletion extends Popup {
 		} else {
 			return;
 		}
+		if(object == null) {
+			return;
+		}
 		showSuggestions(object);
 		showPopup(console);
 	}
@@ -81,7 +84,7 @@ public class GroovyCodeCompletion extends Popup {
 		lv_suggestions.getSelectionModel().selectFirst();
 		Point2D point = findCaretPosition(findCaret(console));
 		double x = point.getX() + 10;
-		double y = point.getY() + 10;
+		double y = point.getY() + 20;
 		this.show(console, x, y);	
 	}
 	
