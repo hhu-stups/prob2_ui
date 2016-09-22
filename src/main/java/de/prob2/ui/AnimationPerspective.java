@@ -1,9 +1,7 @@
 package de.prob2.ui;
 
 import java.io.IOException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -12,6 +10,7 @@ import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -21,14 +20,15 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public final class AnimationPerspective extends BorderPane {
-	// TODO improve DragDrop/Docking
-	// FIXME drag view model checking
-	// TODO? revert to SplitPane
 	@FXML
 	private OperationsView operations;
 	@FXML
@@ -46,11 +46,18 @@ public final class AnimationPerspective extends BorderPane {
 	@FXML
 	private TitledPane animationsTP;
 	@FXML
-	private Accordion accordion;
+	private Accordion leftAccordion;
+	@FXML
+	private Accordion rightAccordion;
+	@FXML
+	private Accordion topAccordion;
+	@FXML
+	private Accordion bottomAccordion;
 
 	private boolean dragged;
 	private ImageView snapshot = new ImageView();
 
+	private HashMap<Node, TitledPane> nodeMap = new HashMap<>();
 	private Logger logger = LoggerFactory.getLogger(AnimationPerspective.class);
 
 	@Inject
@@ -67,21 +74,27 @@ public final class AnimationPerspective extends BorderPane {
 
 	@FXML
 	public void initialize() {
-		double initialSize = 250;
-		operations.setPrefSize(initialSize, initialSize);
-		history.setPrefSize(initialSize, initialSize);
-		modelcheck.setPrefSize(initialSize, initialSize);
-		animations.setPrefSize(initialSize, initialSize);
+		double initialHeight = 200;
+		double initialWidth = 280;
+		operations.setPrefSize(initialWidth,initialHeight);
+		history.setPrefSize(initialWidth,initialHeight);
+		modelcheck.setPrefSize(initialWidth,initialHeight);
+		animations.setPrefSize(initialWidth,initialHeight);
+		nodeMap.put(operations,operationsTP);
+		nodeMap.put(history,historyTP);
+		nodeMap.put(modelcheck,modelcheckTP);
+		nodeMap.put(animations,animationsTP);
+		leftAccordion.setExpandedPane(operationsTP);
+		onDrag();
 	}
 
 	private void onDrag() {
-		registerDrag(operations, operationsTP);
-		registerDrag(history, historyTP);
-		registerDrag(modelcheck, modelcheckTP);
-		registerDrag(animations, animationsTP);
+		for (Node node : nodeMap.keySet()){
+			registerDrag(node);
+		}
 	}
 
-	private void registerDrag(final Node node, final TitledPane nodeTP) {
+	private void registerDrag(final Node node) {
 		node.setOnMouseEntered(mouseEvent -> this.setCursor(Cursor.OPEN_HAND));
 		node.setOnMousePressed(mouseEvent -> this.setCursor(Cursor.CLOSED_HAND));
 		node.setOnMouseDragEntered(mouseEvent -> {
@@ -89,15 +102,14 @@ public final class AnimationPerspective extends BorderPane {
 			mouseEvent.consume();
 		});
 		node.setOnMouseDragged(mouseEvent -> {
-			Point2D position = this.getParent()
-					.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
+			Point2D position = this.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
 			snapshot.relocate(position.getX(), position.getY());
 			mouseEvent.consume();
 		});
 		node.setOnMouseReleased(mouseEvent -> {
 			this.setCursor(Cursor.DEFAULT);
-			if (dragged) {
-				dragDropped(node, nodeTP);
+			if (dragged){
+				dragDropped(node,mouseEvent);
 			}
 			dragged = false;
 			snapshot.setImage(null);
@@ -108,35 +120,59 @@ public final class AnimationPerspective extends BorderPane {
 			node.startFullDrag();
 			SnapshotParameters snapParams = new SnapshotParameters();
 			snapParams.setFill(Color.TRANSPARENT);
-			snapshot.setImage(node.snapshot(snapParams, null));
-			snapshot.setFitWidth(100);
+			snapshot.setImage(node.snapshot(snapParams,null));
+			snapshot.setFitWidth(200);
 			snapshot.setPreserveRatio(true);
 			((BorderPane) this.getParent()).getChildren().add(snapshot);
 			mouseEvent.consume();
 		});
 	}
 
-	private void dragDropped(final Node node, final TitledPane nodeTP) {
-		// System.out.println(node.getClass().toString() + " dragged,
-		// isResizable() = "+node.isResizable());
-		if (accordion.getPanes().contains(nodeTP)) {
-			if (this.getRight() == null) {
-				this.setRight(node);
-			} else if (this.getTop() == null) {
-				this.setTop(node);
-			} else if (this.getBottom() == null) {
-				this.setBottom(node);
-			} else if (this.getLeft() == null) {
-				this.setLeft(node);
-			}
-			nodeTP.setContent(null);
-			accordion.getPanes().remove(nodeTP);
-			accordion.setExpandedPane(accordion.getPanes().get(0));
-		} else {
-			accordion.getPanes().add(nodeTP);
-			nodeTP.setContent(node);
-			accordion.setExpandedPane(nodeTP);
-			this.getChildren().remove(node);
+	private void dragDropped(final Node node, MouseEvent mouseEvent){
+		TitledPane nodeTP = nodeMap.get(node);
+		Accordion oldParent = (Accordion) nodeTP.getParent();
+		Point2D position = this.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
+
+		boolean middleX = position.getX() > this.getScene().getWidth()/3 && position.getX() <= 2*this.getScene().getWidth()/3;
+		boolean middleY = position.getY() > this.getScene().getHeight()/3 && position.getY() <= 2*this.getScene().getHeight()/3;
+
+		boolean right = position.getX() > this.getScene().getWidth()/2;
+		boolean top = position.getY() < this.getScene().getHeight()/2;
+		boolean bottom = !top;
+		boolean left = !right;
+
+		if (right && middleY && !rightAccordion.getPanes().contains(nodeTP)) {
+			nodeTP.setCollapsible(false);
+			switchParent(oldParent,rightAccordion,nodeTP);
+		} else if (top && middleX && !topAccordion.getPanes().contains(nodeTP)) {
+			nodeTP.setCollapsible(true);
+			switchParent(oldParent,topAccordion,nodeTP);
+		} else if (bottom && middleX && !bottomAccordion.getPanes().contains(nodeTP)) {
+			nodeTP.setCollapsible(true);
+			switchParent(oldParent,bottomAccordion,nodeTP);
+		} else if (left && middleY && !leftAccordion.getPanes().contains(nodeTP)){
+			nodeTP.setCollapsible(false);
+			switchParent(oldParent,leftAccordion,nodeTP);
 		}
+	}
+
+	private void switchParent(Accordion oldParent, Accordion newParent, TitledPane nodeTP){
+		oldParent.getPanes().remove(nodeTP);
+		if (!oldParent.getPanes().isEmpty()) {
+			oldParent.setExpandedPane(oldParent.getPanes().get(0));
+			if (oldParent.getPanes().size()==1){
+				oldParent.getPanes().get(0).setCollapsible(false);
+			}
+		}
+
+		if (newParent.getPanes().size()>=1){
+			for (TitledPane panes:newParent.getPanes()){
+				panes.setCollapsible(true);
+				panes.setExpanded(false);
+			}
+			nodeTP.setCollapsible(true);
+		}
+		newParent.getPanes().add(nodeTP);
+		newParent.setExpandedPane(nodeTP);
 	}
 }

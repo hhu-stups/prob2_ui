@@ -1,51 +1,66 @@
 package de.prob2.ui.groovy;
 
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
+
+import com.google.inject.Inject;
+
+import de.prob.scripting.ScriptEngineProvider;
+import javafx.fxml.FXMLLoader;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.inject.Inject;
-import de.prob.scripting.ScriptEngineProvider;
+import org.codehaus.groovy.GroovyBugError;
 
 public class GroovyInterpreter {
-	private final Logger logger = LoggerFactory
-			.getLogger(GroovyInterpreter.class);
-
+	private final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
 	private final ScriptEngine engine;
-		
+	private final GroovyCodeCompletion codeCompletion;
 	private final GroovyObjectStage groovyObjectStage;
-	
 
 	@Inject
-	public GroovyInterpreter(final ScriptEngineProvider sep, final GroovyObjectStage groovyObjectStage) {
+	public GroovyInterpreter(FXMLLoader loader, final ScriptEngineProvider sep, final GroovyObjectStage groovyObjectStage) {
 		engine = sep.get();
 		this.groovyObjectStage = groovyObjectStage;
+		this.codeCompletion = new GroovyCodeCompletion(loader, engine);
 	}
-
-	public Pair exec(Instruction instruction) {
-		String resultString = "";
-		StringBuilder console = new StringBuilder();
+	
+	public ExecResult exec(Instruction instruction) {
 		logger.trace("Exec");
-		try {
-			if("inspect".equals(instruction.getInstruction())) {
-				groovyObjectStage.showObjects(engine);
-				return new Pair("", "result");
-			}
+		
+		if ("inspect".equals(instruction.getInstruction())) {
+			groovyObjectStage.showObjects(engine);
+			return new ExecResult("", "");
+		} else {
+			String resultString;
+			StringBuilder console = new StringBuilder();
 			engine.put("__console", console);
 			logger.trace("Eval {} on {}", instruction.getInstruction(), engine);
-			Object eval = engine.eval(instruction.getInstruction());
-			resultString = eval.toString();
-			logger.trace("Evaled {} to {}", instruction.getInstruction(), resultString);
-			
-		} catch (Exception e) {
-			logger.debug("Groovy Evaluation failed",e);
-			resultString = e.getMessage();
+			try {
+				Object eval = engine.eval(instruction.getInstruction());
+				resultString = eval.toString();
+				logger.trace("Evaled {} to {}", instruction.getInstruction(), resultString);
+			} catch (ScriptException e) {
+				logger.debug("Groovy Evaluation failed", e);
+				resultString = e.toString();
+			} catch(GroovyBugError e) {
+				logger.debug("Groovy Evaluation failed", e);
+				resultString = e.toString();
+			}
+	
+			return new ExecResult(console.toString(), resultString);
 		}
-
-		return new Pair(console.toString(), resultString);
+	}
+	
+	public void triggerCodeCompletion(GroovyConsole console, String currentLine) {
+		if(!codeCompletion.isVisible()) {
+			codeCompletion.activate(console, currentLine);
+		} else {
+			codeCompletion.deactivate();
+		}
 	}
 	
 	public void closeObjectStage() {
 		groovyObjectStage.close();
 	}
-
 }

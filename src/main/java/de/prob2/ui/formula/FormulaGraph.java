@@ -58,10 +58,6 @@ public class FormulaGraph extends Region {
 		return max + 1;
 	}
 	
-	private int breadth(int level) {
-		return getAllNodesOnLevel(level).size();
-	}
-	
 	private double maxWidth(int level) {
 		double result = 0;
 		for(FormulaNode node: getAllNodesOnLevel(level)) {

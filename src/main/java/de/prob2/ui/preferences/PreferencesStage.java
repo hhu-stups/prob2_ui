@@ -1,22 +1,23 @@
 package de.prob2.ui.preferences;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.be4.classicalb.core.parser.exceptions.BException;
+
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.prolog.term.ListPrologTerm;
+
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.SetChangeListener;
@@ -34,6 +35,9 @@ import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class PreferencesStage extends Stage {
@@ -57,30 +61,18 @@ public final class PreferencesStage extends Stage {
 		}
 	};
 
-	@FXML
-	private Stage stage;
-	@FXML
-	private Button undoButton;
-	@FXML
-	private Button resetButton;
-	@FXML
-	private Button applyButton;
-	@FXML
-	private Label applyWarning;
-	@FXML
-	private TreeTableView<PrefTreeItem> tv;
-	@FXML
-	private TreeTableColumn<PrefTreeItem, String> tvName;
-	@FXML
-	private TreeTableColumn<PrefTreeItem, String> tvChanged;
-	@FXML
-	private TreeTableColumn<PrefTreeItem, String> tvValue;
-	@FXML
-	private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
-	@FXML
-	private TreeTableColumn<PrefTreeItem, String> tvDescription;
-	@FXML
-	private ListView<Class<? extends AbstractElement>> blacklistView;
+	@FXML private Stage stage;
+	@FXML private Button undoButton;
+	@FXML private Button resetButton;
+	@FXML private Button applyButton;
+	@FXML private Label applyWarning;
+	@FXML private TreeTableView<PrefTreeItem> tv;
+	@FXML private TreeTableColumn<PrefTreeItem, String> tvName;
+	@FXML private TreeTableColumn<PrefTreeItem, String> tvChanged;
+	@FXML private TreeTableColumn<PrefTreeItem, String> tvValue;
+	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
+	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
+	@FXML private ListView<Class<? extends AbstractElement>> blacklistView;
 
 	private final ClassBlacklist classBlacklist;
 	private final CurrentTrace currentTrace;
@@ -181,7 +173,10 @@ public final class PreferencesStage extends Stage {
 			});
 
 			return prop;
-		} , ELEMENT_CLASS_STRING_CONVERTER));
+		}, ELEMENT_CLASS_STRING_CONVERTER));
+		
+		this.blacklistView.getItems().setAll(this.classBlacklist.getKnownClasses());
+		this.blacklistView.getItems().sort(Comparator.comparing(Class::getSimpleName));
 
 		this.classBlacklist.getKnownClasses()
 				.addListener((SetChangeListener<? super Class<? extends AbstractElement>>) change -> {
@@ -191,7 +186,7 @@ public final class PreferencesStage extends Stage {
 
 					if (change.wasAdded() && !items.contains(added)) {
 						items.add(added);
-						items.sort((left, right) -> left.getSimpleName().compareTo(right.getSimpleName()));
+						items.sort(Comparator.comparing(Class::getSimpleName));
 					} else if (change.wasRemoved() && items.contains(removed)) {
 						if (this.classBlacklist.getBlacklist().contains(removed)) {
 							this.classBlacklist.getBlacklist().remove(removed);

@@ -7,10 +7,10 @@
 <?import javafx.stage.Stage?>
 <fx:root type="Stage" title="Groovy Objects" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
-		<Scene height="400.0" width="600.0">
+		<Scene stylesheets="@../../../../prob.css" height="400.0" width="600.0">
 			<!-- TableView does not extend Pane, so we have to wrap it in a StackPane so we can add the menu bar to it on Mac. -->
 			<StackPane>
-				<TableView fx:id="tv_objects" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
+				<TableView fx:id="tvObjects" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
 					<columns>
 						<TableColumn fx:id="objects" editable="true" prefWidth="89.0" text="Objects" />
 						<TableColumn fx:id="classes" editable="true" prefWidth="89.0" text="Class" />

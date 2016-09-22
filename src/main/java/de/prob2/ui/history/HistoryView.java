@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -22,8 +21,8 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 
-@Singleton
-public class HistoryView extends AnchorPane {
+//@Singleton
+public final class HistoryView extends AnchorPane {
 	private static class TransitionCell extends ListCell<HistoryItem> {
 		@Override
 		protected void updateItem(HistoryItem item, boolean empty) {
@@ -60,17 +59,10 @@ public class HistoryView extends AnchorPane {
 		}
 	}
 
-	@FXML
-	private ListView<HistoryItem> lv_history;
-
-	@FXML
-	private ToggleButton tb_reverse;
-
-	@FXML
-	private Button btprevious;
-
-	@FXML
-	private Button btforward;
+	@FXML private ListView<HistoryItem> lvHistory;
+	@FXML private ToggleButton tbReverse;
+	@FXML private Button btBack;
+	@FXML private Button btForward;
 
 	private final CurrentTrace currentTrace;
 
@@ -92,14 +84,14 @@ public class HistoryView extends AnchorPane {
 	@FXML
 	public void initialize() {
 		currentTrace.addListener((observable, from, to) -> {
-			lv_history.getItems().clear();
+			lvHistory.getItems().clear();
 			if (to != null) {
 				int currentPos = to.getCurrent().getIndex();
 
 				if (currentPos == -1) {
-					lv_history.getItems().add(new HistoryItem(HistoryStatus.PRESENT));
+					lvHistory.getItems().add(new HistoryItem(HistoryStatus.PRESENT));
 				} else {
-					lv_history.getItems().add(new HistoryItem(HistoryStatus.PAST));
+					lvHistory.getItems().add(new HistoryItem(HistoryStatus.PAST));
 				}
 
 				List<Transition> transitionList = to.getTransitionList();
@@ -112,41 +104,41 @@ public class HistoryView extends AnchorPane {
 					} else {
 						status = HistoryStatus.PRESENT;
 					}
-					lv_history.getItems().add(new HistoryItem(transitionList.get(i), status));
+					lvHistory.getItems().add(new HistoryItem(transitionList.get(i), status));
 				}
 			}
 
-			if (tb_reverse.isSelected()) {
-				Collections.reverse(lv_history.getItems());
+			if (tbReverse.isSelected()) {
+				Collections.reverse(lvHistory.getItems());
 			}
 		});
 
-		btprevious.disableProperty().bind(currentTrace.canGoBackProperty().not());
-		btforward.disableProperty().bind(currentTrace.canGoForwardProperty().not());
+		btBack.disableProperty().bind(currentTrace.canGoBackProperty().not());
+		btForward.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 
-		lv_history.setCellFactory(item -> new TransitionCell());
+		lvHistory.setCellFactory(item -> new TransitionCell());
 
-		lv_history.setOnMouseClicked(e -> {
+		lvHistory.setOnMouseClicked(e -> {
 			if (currentTrace.exists()) {
 				currentTrace.set(currentTrace.get().gotoPosition(getCurrentIndex()));
 			}
 		});
 
-		lv_history.setOnMouseMoved(e -> {
-			lv_history.setCursor(Cursor.HAND);
+		lvHistory.setOnMouseMoved(e -> {
+			lvHistory.setCursor(Cursor.HAND);
 		});
 
-		tb_reverse.setOnAction(e -> {
-			Collections.reverse(lv_history.getItems());
+		tbReverse.setOnAction(e -> {
+			Collections.reverse(lvHistory.getItems());
 		});
 
-		btprevious.setOnAction(e -> {
+		btBack.setOnAction(e -> {
 			if (currentTrace.exists()) {
 				currentTrace.set(currentTrace.back());
 			}
 		});
 
-		btforward.setOnAction(e -> {
+		btForward.setOnAction(e -> {
 			if (currentTrace.exists()) {
 				currentTrace.set(currentTrace.forward());
 			}
@@ -154,9 +146,9 @@ public class HistoryView extends AnchorPane {
 	}
 
 	private int getCurrentIndex() {
-		int currentPos = lv_history.getSelectionModel().getSelectedIndex();
-		int length = lv_history.getItems().size();
-		if (tb_reverse.isSelected()) {
+		int currentPos = lvHistory.getSelectionModel().getSelectedIndex();
+		int length = lvHistory.getItems().size();
+		if (tbReverse.isSelected()) {
 			return length - 2 - currentPos;
 		} else {
 			return currentPos - 1;

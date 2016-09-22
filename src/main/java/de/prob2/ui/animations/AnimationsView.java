@@ -4,17 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -28,7 +26,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
-@Singleton
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+//@Singleton
 public class AnimationsView extends AnchorPane implements IAnimationChangeListener {
 	@FXML
 	private TableView<Animation> animationsTable;
@@ -76,12 +77,12 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			contextMenu.getItems().add(removeMenuItem);
 			row.setOnMouseClicked(event -> {
 				if (!row.isEmpty()) {
-					if (event.getButton().equals(MouseButton.PRIMARY)) {
+					if (event.getButton() == MouseButton.PRIMARY) {
 						currentIndex = row.getIndex();
 						Trace trace = row.getItem().getTrace();
 						animations.changeCurrentAnimation(trace);
 					}
-					if (event.getButton().equals(MouseButton.SECONDARY)) {
+					if (event.getButton() == MouseButton.SECONDARY) {
 						contextMenu.show(row, event.getScreenX(), event.getScreenY());
 					}
 				}
@@ -110,10 +111,11 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			ObservableList<Animation> animationsList = animationsTable.getItems();
 			animationsList.clear();
 			animationsList.addAll(animList);
-			if (previousSize < animationsList.size())
+			if (previousSize < animationsList.size()) {
 				currentIndex = animationsList.size() - 1;
-			else if (previousSize > animationsList.size() && currentIndex > 0)
+			} else if (previousSize > animationsList.size() && currentIndex > 0) {
 				currentIndex--;
+			}
 			animationsTable.getFocusModel().focus(currentIndex);
 			previousSize = animationsList.size();
 		});

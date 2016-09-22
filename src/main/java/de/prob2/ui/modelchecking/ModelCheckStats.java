@@ -124,31 +124,29 @@ public class ModelCheckStats extends AnchorPane {
 		String message = result.getMessage();
 
 		ModelChecker modelChecker = jobs.get(id);
-		ComputeCoverageResult coverage = null;
-
-		if (modelChecker != null) {
-			coverage = modelChecker.getCoverage();
-		}
 		jobs.remove(id);
 
-		if (coverage != null) {
-			Number numNodes = coverage.getTotalNumberOfNodes();
-			Number numTrans = coverage.getTotalNumberOfTransitions();
+		if (modelChecker != null) {
+			ComputeCoverageResult coverage = modelChecker.getCoverage();
+			if (coverage != null) {
+				Number numNodes = coverage.getTotalNumberOfNodes();
+				Number numTrans = coverage.getTotalNumberOfTransitions();
 
-			Platform.runLater(() -> {
-				totalNodes.setText(String.valueOf(numNodes));
-				totalTransitions.setText(String.valueOf(numTrans));
-			});
+				Platform.runLater(() -> {
+					totalNodes.setText(String.valueOf(numNodes));
+					totalTransitions.setText(String.valueOf(numTrans));
+				});
 
-			showStats(coverage.getNodes(), nodeStats);
-			showStats(coverage.getOps(), transStats);
-		}
+				showStats(coverage.getNodes(), nodeStats);
+				showStats(coverage.getOps(), transStats);
+			}
 
-		boolean hasTrace = result instanceof ITraceDescription;
-		if (hasTrace) {
-			StateSpace s = modelChecker.getStateSpace(); // FIXME is modelChecker always != null ?
-			trace = ((ITraceDescription) result).getTrace(s);
+			boolean hasTrace = result instanceof ITraceDescription;
+			if (hasTrace) {
+				StateSpace s = modelChecker.getStateSpace(); 
+				trace = ((ITraceDescription) result).getTrace(s);
 
+			}
 		}
 		showResult(message);
 

@@ -1,24 +1,49 @@
 package de.prob2.ui.states;
 
-import java.util.HashSet;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sun.javafx.collections.ObservableSetWrapper;
 
+import de.prob.model.classicalb.Assertion;
+import de.prob.model.classicalb.Constraint;
+import de.prob.model.classicalb.Parameter;
+import de.prob.model.classicalb.Property;
 import de.prob.model.representation.AbstractElement;
+import de.prob.model.representation.Action;
+import de.prob.model.representation.BEvent;
+import de.prob.model.representation.Constant;
+import de.prob.model.representation.Guard;
+import de.prob.model.representation.Invariant;
+import de.prob.model.representation.Set;
+import de.prob.model.representation.Variable;
+
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
 @Singleton
-public class ClassBlacklist {
+public final class ClassBlacklist {
 	private final ObservableSet<Class<? extends AbstractElement>> blacklist;
 	private final ObservableSet<Class<? extends AbstractElement>> knownClasses;
 	
 	@Inject
+	@SuppressWarnings("unchecked")
 	private ClassBlacklist() {
 		super();
-		this.blacklist = new ObservableSetWrapper<>(new HashSet<>());
-		this.knownClasses = new ObservableSetWrapper<>(new HashSet<>());
+		// Hide Action objects by default (they display as source code condensed
+		// into a single line otherwise)
+		this.blacklist = FXCollections.observableSet(Action.class);
+		this.knownClasses = FXCollections.observableSet(
+			Action.class,
+			Assertion.class,
+			BEvent.class,
+			Constant.class,
+			Constraint.class,
+			Guard.class,
+			Invariant.class,
+			Parameter.class,
+			Property.class,
+			Set.class,
+			Variable.class
+		);
 	}
 	
 	public ObservableSet<Class<? extends AbstractElement>> getBlacklist() {
