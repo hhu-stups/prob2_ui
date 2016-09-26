@@ -106,35 +106,54 @@ public class GroovyCodeCompletion extends Popup {
 	
 	public void activate(GroovyConsole console, String currentLine) {
 		this.parent = console;
-		handleScopeObjects(currentLine);
-		/*try {
-			showSuggestions(Class.forName("java.lang.String"));
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+		//System.out.println(currentLine);
+		if(currentLine.indexOf('.') == -1) {
+			handleScopeObject(currentLine);
+		} else {
+			handleReturnTypeObject(currentLine);
+		}
 		showPopup(console);
 	}
 	
-	private void handleScopeObjects(String currentLine) {
-		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
-		if(!engineScope.keySet().contains(currentLine) && !globalScope.keySet().contains(currentLine)) {
-			return;
+	private void handleReturnTypeObject(String currentLine) {
+		int indexOfPoint = currentLine.indexOf(".");
+		int indexOfSemicolon = Math.max(currentLine.indexOf(";"),currentLine.length());
+		String currentObject = currentLine.substring(0,indexOfPoint);
+		String currentMethod = currentLine.substring(indexOfPoint + 1, indexOfSemicolon);
+		Object object = getObjectFromScope(currentObject);
+		fillMethodsAndProperties(object.getClass());
+		MetaPropertiesHandler.handleMethods(object, currentObjectMethodsAndProperties);
+		MetaPropertiesHandler.handleProperties(object, currentObjectMethodsAndProperties);
+		
+		Class <? extends Object> clazz = null;
+		for(GroovyClassPropertyItem item: currentObjectMethodsAndProperties) {
+			if(item.getNameAndParams().equals(currentMethod)) {
+				clazz = item.getReturnTypeClass();
+				break;
+			}
 		}
-		Object object;
-		if(engineScope.keySet().contains(currentLine)) {
-			object = engineScope.get(currentLine);
-		} else if(globalScope.keySet().contains(currentLine)) {
-			object = globalScope.get(currentLine);
-		} else {
-			return;
-		}
+		showSuggestions(clazz);
+	}
+	
+	private void handleScopeObject(String currentLine) {
+		Object object = getObjectFromScope(currentLine);
 		if(object == null) {
 			return;
 		}
 		showSuggestions(object);
 		
+	}
+	
+	private Object getObjectFromScope(String currentLine) {
+		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
+		Object object = null;
+		if(engineScope.keySet().contains(currentLine)) {
+			object = engineScope.get(currentLine);
+		} else if(globalScope.keySet().contains(currentLine)) {
+			object = globalScope.get(currentLine);
+		}
+		return object;
 	}
 	
 	public GroovyConsole getParent() {
