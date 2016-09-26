@@ -115,7 +115,7 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	private void handleReturnTypeObject(String currentLine) {
-		currentLine = new StringBuilder(currentLine).insert(getParent().getCurrentPosInLine(), ".").toString();		
+		currentLine = currentLine.substring(0, getParent().getCurrentPosInLine());	
 		String[] methods = currentLine.split("\\.");
 		Object object = getObjectFromScope(methods[0]);
 		Class<? extends Object> clazz = object.getClass();
