@@ -16,14 +16,12 @@ def static handleMethods(Object object, Collection<GroovyClassPropertyItem> meth
 }
 
 def static handleProperties(Class <? extends Object> clazz, Collection<GroovyClassPropertyItem> properties) {
-	//Object o = clazz.newInstance();
 	for (PropertyValue p : clazz.getMetaPropertyValues()) {
 		properties.add(new GroovyClassPropertyItem(p))
 	}
 }
 
 def static handleMethods(Class <? extends Object> clazz, Collection<GroovyClassPropertyItem> methods) {
-	//Object o = clazz.newInstance();
 	for (MetaMethod m : clazz.getMetaClass().metaMethods) {
 		methods.add(new GroovyClassPropertyItem(m))
 	}

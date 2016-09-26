@@ -106,7 +106,6 @@ public class GroovyCodeCompletion extends Popup {
 	
 	public void activate(GroovyConsole console, String currentLine) {
 		this.parent = console;
-		//System.out.println(currentLine);
 		if(currentLine.indexOf('.') == -1) {
 			handleScopeObject(currentLine);
 		} else {
@@ -117,19 +116,19 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private void handleReturnTypeObject(String currentLine) {
 		int indexOfPoint = currentLine.indexOf(".");
-		int indexOfSemicolon = Math.max(currentLine.indexOf(";"),currentLine.length());
 		String currentObject = currentLine.substring(0,indexOfPoint);
-		String currentMethod = currentLine.substring(indexOfPoint + 1, indexOfSemicolon);
 		Object object = getObjectFromScope(currentObject);
-		fillMethodsAndProperties(object.getClass());
-		MetaPropertiesHandler.handleMethods(object, currentObjectMethodsAndProperties);
-		MetaPropertiesHandler.handleProperties(object, currentObjectMethodsAndProperties);
-		
-		Class <? extends Object> clazz = null;
-		for(GroovyClassPropertyItem item: currentObjectMethodsAndProperties) {
-			if(item.getNameAndParams().equals(currentMethod)) {
-				clazz = item.getReturnTypeClass();
-				break;
+		String[] methods = currentLine.split("\\.");
+		Class<? extends Object> clazz = object.getClass();
+		for(String currentMethod : methods) {
+			fillMethodsAndProperties(clazz);
+			MetaPropertiesHandler.handleMethods(object, currentObjectMethodsAndProperties);
+			MetaPropertiesHandler.handleProperties(object, currentObjectMethodsAndProperties);
+			for(GroovyClassPropertyItem item: currentObjectMethodsAndProperties) {
+				if(item.getNameAndParams().equals(currentMethod)) {
+						clazz = item.getReturnTypeClass();
+						break;
+				}
 			}
 		}
 		showSuggestions(clazz);

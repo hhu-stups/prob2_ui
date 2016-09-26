@@ -103,7 +103,6 @@ public class GroovyConsole extends TextArea {
 				if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER) {
 					String choice = ((CodeCompletionEvent) e).getChoice();
 					String currentInstruction = getCurrentInstruction(getCurrentLine());
-					System.out.println(currentInstruction);
 					this.setText(this.getText().substring(0, this.getText().lastIndexOf(currentInstruction)));
 					this.appendText(choice);
 					currentPosInLine += choice.length() - currentInstruction.length();
