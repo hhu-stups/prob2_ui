@@ -305,5 +305,10 @@ public class GroovyConsole extends TextArea {
 	public void closeObjectStage() {
 		interpreter.closeObjectStage();
 	}
+	
+	public int getCurrentPosInLine() {
+		return currentPosInLine;
+	}
+	
 
 }

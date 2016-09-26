@@ -115,17 +115,16 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	private void handleReturnTypeObject(String currentLine) {
-		int indexOfPoint = currentLine.indexOf(".");
-		String currentObject = currentLine.substring(0,indexOfPoint);
-		Object object = getObjectFromScope(currentObject);
+		currentLine = new StringBuilder(currentLine).insert(getParent().getCurrentPosInLine(), ".").toString();		
 		String[] methods = currentLine.split("\\.");
+		Object object = getObjectFromScope(methods[0]);
 		Class<? extends Object> clazz = object.getClass();
-		for(String currentMethod : methods) {
+		for(int i = 1; i < methods.length; i++) {
 			fillMethodsAndProperties(clazz);
 			MetaPropertiesHandler.handleMethods(object, currentObjectMethodsAndProperties);
 			MetaPropertiesHandler.handleProperties(object, currentObjectMethodsAndProperties);
 			for(GroovyClassPropertyItem item: currentObjectMethodsAndProperties) {
-				if(item.getNameAndParams().equals(currentMethod)) {
+				if(item.getNameAndParams().equals(methods[i])) {
 						clazz = item.getReturnTypeClass();
 						break;
 				}
