@@ -169,7 +169,6 @@ public class GroovyConsole extends TextArea {
 		if (e.isShortcutDown() || e.isAltDown()) {
 			return;
 		}
-		
 		if(".".equals(e.getText())) {
 			interpreter.triggerCodeCompletion(this, getCurrentLine());
 		}

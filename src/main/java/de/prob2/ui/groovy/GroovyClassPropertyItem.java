@@ -25,6 +25,7 @@ public class GroovyClassPropertyItem {
 	private SimpleStringProperty declarer;
 	private final SimpleStringProperty exception;
 	private SimpleStringProperty value;
+	private Class<?> returnTypeClass;
 
 	private Logger logger = LoggerFactory.getLogger(GroovyClassPropertyItem.class);
 
@@ -36,6 +37,7 @@ public class GroovyClassPropertyItem {
 		}
 		this.params = new SimpleStringProperty(String.join(", ", parameterNames));
 		this.type = new SimpleStringProperty(m.getReturnType().getSimpleName());
+		this.returnTypeClass = m.getReturnType();
 		this.origin = new SimpleStringProperty("JAVA");
 		this.modifier = new SimpleStringProperty(Modifier.toString(m.getModifiers()));
 		this.declarer = new SimpleStringProperty(m.getDeclaringClass().getSimpleName());
@@ -51,6 +53,7 @@ public class GroovyClassPropertyItem {
 		this.name = new SimpleStringProperty(f.getName());
 		this.params = new SimpleStringProperty();
 		this.type = new SimpleStringProperty(f.getType().getSimpleName());
+		this.returnTypeClass = f.getType();
 		this.origin = new SimpleStringProperty("JAVA");
 		this.modifier = new SimpleStringProperty(Modifier.toString(f.getModifiers()));
 		this.declarer = new SimpleStringProperty(f.getDeclaringClass().getSimpleName());
@@ -67,6 +70,7 @@ public class GroovyClassPropertyItem {
 		this.name = new SimpleStringProperty(p.getName());
 		this.params = new SimpleStringProperty();
 		this.type = new SimpleStringProperty(p.getType().getSimpleName());
+		this.returnTypeClass = p.getType();
 		this.origin = new SimpleStringProperty("GROOVY");
 		this.modifier = new SimpleStringProperty(Modifier.toString(p.getType().getModifiers()));
 		this.declarer = new SimpleStringProperty("n/a");
@@ -92,6 +96,7 @@ public class GroovyClassPropertyItem {
 		}
 		this.params = new SimpleStringProperty(String.join(", ", parameterNames));
 		this.type = new SimpleStringProperty(m.getReturnType().getSimpleName());
+		this.returnTypeClass = m.getReturnType();
 		this.origin = new SimpleStringProperty("GROOVY");
 		this.modifier = new SimpleStringProperty(Modifier.toString(m.getModifiers()));
 		this.declarer = new SimpleStringProperty(m.getDeclaringClass().getName());
@@ -173,6 +178,10 @@ public class GroovyClassPropertyItem {
 	
 	public String toString() {
 		return getNameAndParams() +  " : " + getType() + " - " + getDeclarer();
+	}
+	
+	public Class<? extends Object> getReturnTypeClass() {
+		return returnTypeClass;
 	}
 
 }

@@ -56,12 +56,14 @@ public class GroovyCodeCompletion extends Popup {
 		this.currentObjectMethodsAndProperties = new ArrayList<GroovyClassPropertyItem>();
 		lv_suggestions.setItems(suggestions);
 		lv_suggestions.setOnKeyPressed(e-> {
+			
 			if(e.getCode().equals(KeyCode.ENTER)) {
 				if(lv_suggestions.getSelectionModel().getSelectedItem() != null) {
 					getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams()));
 				}
 				deactivate();
 			}
+			
 			if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
 				filterSuggestions("");
 				if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentLine().length() - 1)) {
@@ -104,6 +106,17 @@ public class GroovyCodeCompletion extends Popup {
 	
 	public void activate(GroovyConsole console, String currentLine) {
 		this.parent = console;
+		handleScopeObjects(currentLine);
+		/*try {
+			showSuggestions(Class.forName("java.lang.String"));
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		showPopup(console);
+	}
+	
+	private void handleScopeObjects(String currentLine) {
 		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
 		if(!engineScope.keySet().contains(currentLine) && !globalScope.keySet().contains(currentLine)) {
@@ -121,7 +134,7 @@ public class GroovyCodeCompletion extends Popup {
 			return;
 		}
 		showSuggestions(object);
-		showPopup(console);
+		
 	}
 	
 	public GroovyConsole getParent() {
@@ -129,6 +142,9 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	private void showPopup(GroovyConsole console) {
+		if(suggestions.isEmpty()) {
+			return;
+		}
 		lv_suggestions.getSelectionModel().selectFirst();
 		Point2D point = findCaretPosition(findCaret(console));
 		double x = point.getX() + 10;
@@ -142,19 +158,30 @@ public class GroovyCodeCompletion extends Popup {
 		this.hide();
 	}
 	
-	private void showSuggestions(Object object) {
-		currentObjectMethodsAndProperties.clear();
-		Class <? extends Object> clazz = object.getClass();
+	private void fillMethodsAndProperties(Class <? extends Object> clazz) {
 		for(Method m : clazz.getMethods()) {
 			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(m));
 		}
 		for(Field f : clazz.getFields()) {
 			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(f));
 		}
+	}
+	
+	private void showSuggestions(Object object) {
+		currentObjectMethodsAndProperties.clear();
+		fillMethodsAndProperties(object.getClass());
 		MetaPropertiesHandler.handleMethods(object, currentObjectMethodsAndProperties);
 		MetaPropertiesHandler.handleProperties(object, currentObjectMethodsAndProperties);
 		suggestions.addAll(currentObjectMethodsAndProperties);
 		
+	}
+	
+	private void showSuggestions(Class <? extends Object> clazz) {
+		currentObjectMethodsAndProperties.clear();
+		fillMethodsAndProperties(clazz);
+		MetaPropertiesHandler.handleMethods(clazz, currentObjectMethodsAndProperties);
+		MetaPropertiesHandler.handleProperties(clazz, currentObjectMethodsAndProperties);
+		suggestions.addAll(currentObjectMethodsAndProperties);
 	}
 	
 	public boolean isVisible() {
