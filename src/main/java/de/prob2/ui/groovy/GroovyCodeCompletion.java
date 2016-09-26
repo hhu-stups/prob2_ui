@@ -3,6 +3,9 @@ package de.prob2.ui.groovy;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -10,6 +13,8 @@ import javax.script.ScriptEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -29,9 +34,13 @@ public class GroovyCodeCompletion extends Popup {
 	@FXML
 	private ListView<GroovyClassPropertyItem> lv_suggestions;
 	
+	private ObservableList<GroovyClassPropertyItem> suggestions = FXCollections.observableArrayList();
+	
 	private ScriptEngine engine;
 		
 	private GroovyConsole parent;
+	
+	private List<GroovyClassPropertyItem> currentObjectMethodsAndProperties;
 	
 	public GroovyCodeCompletion(FXMLLoader loader, ScriptEngine engine) {
 		loader.setLocation(getClass().getResource("groovy_codecompletion_popup.fxml"));
@@ -44,13 +53,51 @@ public class GroovyCodeCompletion extends Popup {
 		}
 		this.engine = engine;
 		this.parent = null;
+		this.currentObjectMethodsAndProperties = new ArrayList<GroovyClassPropertyItem>();
+		lv_suggestions.setItems(suggestions);
 		lv_suggestions.setOnKeyPressed(e-> {
 			if(e.getCode().equals(KeyCode.ENTER)) {
-				getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams()));
+				if(lv_suggestions.getSelectionModel().getSelectedItem() != null) {
+					getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams()));
+				}
 				deactivate();
+			}
+			if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
+				filterSuggestions("");
+				return;
+			}
+			if(e.getText().length() == 1 && !e.getText().equals(".")) {
+				filterSuggestions(e.getText());
 			}
 		});
 		
+	}
+	
+	
+	private void filterSuggestions(String addition) {
+		int indexOfInstruction = getParent().getText().lastIndexOf(">") + 1;
+		String currentInstruction = getParent().getText().substring(indexOfInstruction, getParent().getText().length()) + addition;
+		if("".equals(addition)) {
+			currentInstruction = currentInstruction.substring(0, currentInstruction.length()-1);
+		}
+		int indexOfPoint = currentInstruction.indexOf(".");
+		int indexOfSemicolon = Math.max(currentInstruction.indexOf(";"),currentInstruction.length());
+		String filter = currentInstruction.substring(indexOfPoint + 1, indexOfSemicolon);
+		refresh(filter);
+	}
+	
+	private void refresh(String filter) {
+		suggestions.clear();
+		for(int i = 0; i < currentObjectMethodsAndProperties.size(); i++) {
+			GroovyClassPropertyItem suggestion = currentObjectMethodsAndProperties.get(i);
+			if(suggestion.getName().contains(filter)) {
+				suggestions.add(suggestion);
+			}
+		}
+		lv_suggestions.getSelectionModel().selectFirst();
+		if(suggestions.isEmpty()) {
+			this.deactivate();
+		}
 	}
 	
 	
@@ -89,20 +136,21 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	public void deactivate() {
-		lv_suggestions.getItems().clear();
+		suggestions.clear();
 		this.hide();
 	}
 	
 	private void showSuggestions(Object object) {
 		Class <? extends Object> clazz = object.getClass();
 		for(Method m : clazz.getMethods()) {
-			lv_suggestions.getItems().add(new GroovyClassPropertyItem(m));
+			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(m));
 		}
 		for(Field f : clazz.getFields()) {
-			lv_suggestions.getItems().add(new GroovyClassPropertyItem(f));
+			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(f));
 		}
-		MetaPropertiesHandler.handleMethods(object, lv_suggestions.getItems());
-		MetaPropertiesHandler.handleProperties(object, lv_suggestions.getItems());
+		MetaPropertiesHandler.handleMethods(object, currentObjectMethodsAndProperties);
+		MetaPropertiesHandler.handleProperties(object, currentObjectMethodsAndProperties);
+		suggestions.addAll(currentObjectMethodsAndProperties);
 		
 	}
 	
