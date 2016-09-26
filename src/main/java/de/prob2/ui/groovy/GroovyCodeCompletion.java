@@ -64,9 +64,13 @@ public class GroovyCodeCompletion extends Popup {
 			}
 			if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
 				filterSuggestions("");
+				if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentLine().length() - 1)) {
+					deactivate();
+				}
 				return;
+				
 			}
-			if(e.getText().length() == 1 && !e.getText().equals(".")) {
+			if(e.getText().length() == 1 && !".".equals(e.getText())) {
 				filterSuggestions(e.getText());
 			}
 		});
@@ -87,7 +91,7 @@ public class GroovyCodeCompletion extends Popup {
 		suggestions.clear();
 		for(int i = 0; i < currentObjectMethodsAndProperties.size(); i++) {
 			GroovyClassPropertyItem suggestion = currentObjectMethodsAndProperties.get(i);
-			if(suggestion.getName().contains(filter)) {
+			if(suggestion.getNameAndParams().contains(filter)) {
 				suggestions.add(suggestion);
 			}
 		}
@@ -134,10 +138,12 @@ public class GroovyCodeCompletion extends Popup {
 	
 	public void deactivate() {
 		suggestions.clear();
+		currentObjectMethodsAndProperties.clear();
 		this.hide();
 	}
 	
 	private void showSuggestions(Object object) {
+		currentObjectMethodsAndProperties.clear();
 		Class <? extends Object> clazz = object.getClass();
 		for(Method m : clazz.getMethods()) {
 			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(m));

@@ -144,8 +144,8 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	public String getCurrentInstruction(String filter) {
-		int indexOfPoint = filter.indexOf(".");
-		int indexOfSemicolon = Math.max(filter.indexOf(";"),filter.length());
+		int indexOfPoint = filter.indexOf('.');
+		int indexOfSemicolon = Math.max(filter.indexOf(';'),filter.length());
 		String result = filter.substring(indexOfPoint + 1, indexOfSemicolon);
 		return result;
 	}
