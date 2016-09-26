@@ -102,9 +102,11 @@ public class GroovyConsole extends TextArea {
 			if(e instanceof CodeCompletionEvent) {
 				if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER) {
 					String choice = ((CodeCompletionEvent) e).getChoice();
+					String currentInstruction = getCurrentInstruction(getCurrentLine());
+					this.setText(this.getText().substring(0, this.getText().lastIndexOf(currentInstruction)));
 					this.appendText(choice);
-					currentPosInLine += choice.length();
-					charCounterInLine += choice.length();
+					currentPosInLine += choice.length() - currentInstruction.length();
+					charCounterInLine += choice.length() - currentInstruction.length();
 				}
 			}
 		});
@@ -139,6 +141,13 @@ public class GroovyConsole extends TextArea {
 				handleRest(e);
 			}
 		});
+	}
+	
+	public String getCurrentInstruction(String filter) {
+		int indexOfPoint = filter.indexOf(".");
+		int indexOfSemicolon = Math.max(filter.indexOf(";"),filter.length());
+		String result = filter.substring(indexOfPoint + 1, indexOfSemicolon);
+		return result;
 	}
 	
 	private void goToLastPos() {

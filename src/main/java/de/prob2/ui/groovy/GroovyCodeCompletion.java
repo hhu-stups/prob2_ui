@@ -75,15 +75,12 @@ public class GroovyCodeCompletion extends Popup {
 	
 	
 	private void filterSuggestions(String addition) {
-		int indexOfInstruction = getParent().getText().lastIndexOf(">") + 1;
-		String currentInstruction = getParent().getText().substring(indexOfInstruction, getParent().getText().length()) + addition;
+		String currentInstruction = getParent().getCurrentLine() + addition;
 		if("".equals(addition)) {
 			currentInstruction = currentInstruction.substring(0, currentInstruction.length()-1);
 		}
-		int indexOfPoint = currentInstruction.indexOf(".");
-		int indexOfSemicolon = Math.max(currentInstruction.indexOf(";"),currentInstruction.length());
-		String filter = currentInstruction.substring(indexOfPoint + 1, indexOfSemicolon);
-		refresh(filter);
+		currentInstruction = getParent().getCurrentInstruction(currentInstruction);
+		refresh(currentInstruction);
 	}
 	
 	private void refresh(String filter) {
