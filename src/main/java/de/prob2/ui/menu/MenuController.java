@@ -51,12 +51,7 @@ public final class MenuController extends MenuBar {
 	private final CurrentStage currentStage;
 	private final CurrentTrace currentTrace;
 	private final FormulaGenerator formulaGenerator;
-	private final ModelcheckingController modelcheckingController;
-
-	private final DottyStage dottyStage;
-	private final PreferencesStage preferencesStage;
-	private final GroovyConsoleStage groovyConsoleStage;
-
+	
 	private Window window;
 
 	@FXML private Menu windowMenu;
@@ -64,26 +59,24 @@ public final class MenuController extends MenuBar {
 	@FXML private MenuItem enterFormulaForVisualization;
 	@FXML private MenuItem aboutItem;
 
-	private Logger logger = LoggerFactory.getLogger(MenuController.class);
+	private final Logger logger = LoggerFactory.getLogger(MenuController.class);
 	
 	@Inject
-	private MenuController(final FXMLLoader loader,
-		
-		final Injector injector, final Api api, final AnimationSelector animationSelector, final CurrentStage currentStage,
-		final CurrentTrace currentTrace, final FormulaGenerator formulaGenerator,
-		final ModelcheckingController modelcheckingController,
-		
-		final DottyStage dottyStage, final GroovyConsoleStage groovyConsoleStage, final PreferencesStage preferencesStage) {
+	private MenuController(
+		final FXMLLoader loader,
+		final Injector injector,
+		final Api api,
+		final AnimationSelector animationSelector,
+		final CurrentStage currentStage,
+		final CurrentTrace currentTrace,
+		final FormulaGenerator formulaGenerator
+	) {
 		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
 		this.currentStage = currentStage;
 		this.currentTrace = currentTrace;
 		this.formulaGenerator = formulaGenerator;
-		this.modelcheckingController = modelcheckingController;
-		this.dottyStage = dottyStage;
-		this.groovyConsoleStage = groovyConsoleStage;
-		this.preferencesStage = preferencesStage;
 		
 		loader.setLocation(getClass().getResource("menu.fxml"));
 		loader.setRoot(this);
@@ -193,7 +186,7 @@ public final class MenuController extends MenuBar {
 			}
 
 			this.animationSelector.addNewAnimation(new Trace(newSpace));
-			modelcheckingController.resetView();
+			injector.getInstance(ModelcheckingController.class).resetView();
 			break;
 
 		default:
@@ -212,8 +205,9 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handlePreferences(ActionEvent event) {
-		this.preferencesStage.show();
-		this.preferencesStage.toFront();
+		final Stage preferencesStage = injector.getInstance(PreferencesStage.class);
+		preferencesStage.show();
+		preferencesStage.toFront();
 	}
 
 	@FXML
@@ -231,13 +225,14 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleDotty(ActionEvent event) {
-		this.dottyStage.showAndWait();
+		injector.getInstance(DottyStage.class).showAndWait();
 	}
 
 	@FXML
 	public void handleGroovyConsole(ActionEvent event) {
-		this.groovyConsoleStage.show();
-		this.groovyConsoleStage.toFront();
+		final Stage groovyConsoleStage = injector.getInstance(GroovyConsoleStage.class);
+		groovyConsoleStage.show();
+		groovyConsoleStage.toFront();
 	}
 
 	@FXML

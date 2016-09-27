@@ -11,60 +11,42 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-
-<fx:root type="Stage" title="Model Check" xmlns="http://javafx.com/javafx/8.0.65"
-	xmlns:fx="http://javafx.com/fxml/1" resizable="false">
+<Stage fx:id="mcheckStage" title="Model Check" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
-			<AnchorPane stylesheets="@../../../../prob.css"
-				styleClass="dialog">
-				<Button layoutX="103.0" layoutY="223.0" mnemonicParsing="false"
-					onAction="#startModelCheck" text="Model Check"
-					AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="105.0"
-					AnchorPane.bottomAnchor="15.0">
+			<AnchorPane stylesheets="@../../../../prob.css" styleClass="dialog">
+				<Button layoutX="103.0" layoutY="223.0" onAction="#startModelCheck" text="Model Check" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="105.0" AnchorPane.bottomAnchor="15.0">
 				</Button>
-				<Button layoutX="225.0" layoutY="260.0" mnemonicParsing="false"
-					onAction="#cancel" text="Cancel" AnchorPane.bottomAnchor="15.0"
-					AnchorPane.rightAnchor="15.0" AnchorPane.leftAnchor="205.0" />
-				<ChoiceBox layoutX="118.0" layoutY="44.0" prefHeight="26.0"
-					prefWidth="134.0" value="Breadth First" AnchorPane.rightAnchor="20.0"
-					AnchorPane.topAnchor="20.0">
+				<Button layoutX="225.0" layoutY="260.0" onAction="#cancel" text="Cancel" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.leftAnchor="205.0" />
+				<ChoiceBox layoutX="118.0" layoutY="44.0" prefHeight="26.0" prefWidth="134.0" value="Breadth First" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
 					<tooltip>
 						<Tooltip text="Search Strategy" />
 					</tooltip>
 					<items>
 						<FXCollections fx:factory="observableArrayList">
 							<String fx:value="Breadth First" />
-							<!-- <String fx:value="Mixed DF/BF" /> <String fx:value="Depth First" 
-								/> <String fx:value="Heuristic Function/Random" /> <String fx:value="Hash-Random" 
-								/> <String fx:value="Random" /> <String fx:value="Out-Degree for Deadlock 
-								Checking" /> <String fx:value="Disabled Transitions in State" /> -->
+							<!--
+							<String fx:value="Mixed DF/BF" />
+							<String fx:value="Depth First" />
+							<String fx:value="Heuristic Function/Random" />
+							<String fx:value="Hash-Random" />
+							<String fx:value="Random" />
+							<String fx:value="Out-Degree for Deadlock Checking" />
+							<String fx:value="Disabled Transitions in State" />
+							-->
 						</FXCollections>
 					</items>
 				</ChoiceBox>
-				<VBox layoutX="11.0" layoutY="69.0" spacing="15.0"
-					AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-					AnchorPane.bottomAnchor="60.0" AnchorPane.topAnchor="70.0"
-					styleClass="dark">
-					<children>
-						<CheckBox fx:id="findDeadlocks" alignment="CENTER_LEFT"
-							mnemonicParsing="false" selected="true" text="Find Deadlocks" />
-						<CheckBox fx:id="findInvViolations" alignment="CENTER_LEFT"
-							mnemonicParsing="false" selected="true" text="Find Invariant Violations"
-							textAlignment="CENTER" />
-						<CheckBox fx:id="findBAViolations" alignment="CENTER_LEFT"
-							mnemonicParsing="false" text="Find B ASSERTION Violations" />
-						<CheckBox fx:id="findGoal" alignment="CENTER_LEFT"
-							mnemonicParsing="false" text="Find GOAL (from DEFINITIONS)" />
-						<CheckBox fx:id="stopAtFullCoverage" alignment="CENTER_LEFT"
-							mnemonicParsing="false" text="Stop when all OPERATIONS Covered" />
-						<CheckBox fx:id="searchForNewErrors" alignment="CENTER_LEFT"
-							mnemonicParsing="false" selected="true" text="Search for New Errors" />
-					</children>
+				<VBox layoutX="11.0" layoutY="69.0" spacing="15.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="60.0" AnchorPane.topAnchor="70.0" styleClass="dark">
+					<CheckBox fx:id="findDeadlocks" selected="true" text="Find Deadlocks"/>
+					<CheckBox fx:id="findInvViolations" selected="true" text="Find Invariant Violations" textAlignment="CENTER"/>
+					<CheckBox fx:id="findBAViolations" text="Find B ASSERTION Violations"/>
+					<CheckBox fx:id="findGoal" text="Find GOAL (from DEFINITIONS)"/>
+					<CheckBox fx:id="stopAtFullCoverage" text="Stop when all OPERATIONS Covered"/>
+					<CheckBox fx:id="searchForNewErrors" selected="true" text="Search for New Errors"/>
 				</VBox>
-				<Label layoutX="10.0" layoutY="49.0" text="Search Strategy:"
-					AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="25.0" />
+				<Label layoutX="10.0" layoutY="49.0" text="Search Strategy:" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="25.0" />
 			</AnchorPane>
 		</Scene>
 	</scene>
-</fx:root>
+</Stage>
