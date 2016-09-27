@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -55,13 +56,13 @@ public class GroovyCodeCompletion extends Popup {
 		this.parent = null;
 		this.currentObjectMethodsAndProperties = new ArrayList<GroovyClassPropertyItem>();
 		lv_suggestions.setItems(suggestions);
+		lv_suggestions.setOnMouseClicked(e-> {
+			chooseMethod(e);
+		});
 		lv_suggestions.setOnKeyPressed(e-> {
 			
 			if(e.getCode().equals(KeyCode.ENTER)) {
-				if(lv_suggestions.getSelectionModel().getSelectedItem() != null) {
-					getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams()));
-				}
-				deactivate();
+				chooseMethod(e);
 			}
 			
 			if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
@@ -77,6 +78,13 @@ public class GroovyCodeCompletion extends Popup {
 			}
 		});
 		
+	}
+	
+	private void chooseMethod(Event e) {
+		if(lv_suggestions.getSelectionModel().getSelectedItem() != null) {
+			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams()));
+		}
+		deactivate();
 	}
 	
 	
@@ -111,8 +119,10 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	private void handleObjects(String currentLine) {
-		String currentObject = currentLine.substring(0, getParent().getCurrentPosInLine());	
-		String[] methods = currentObject.split("\\.");
+		String currentInstruction = currentLine.substring(0, getParent().getCurrentPosInLine());	
+		currentInstruction = currentInstruction.replaceAll("\\s","");
+		String[] currentObjects = currentInstruction.split(";");
+		String[] methods = currentObjects[currentObjects.length-1].split("\\.");
 		Object object = getObjectFromScope(methods[0]);
 		if(object == null) {
 			return;
@@ -131,6 +141,7 @@ public class GroovyCodeCompletion extends Popup {
 		}
 		showSuggestions(clazz);
 	}
+	
 		
 	private Object getObjectFromScope(String currentLine) {
 		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);

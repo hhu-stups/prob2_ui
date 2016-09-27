@@ -1,6 +1,5 @@
 package de.prob2.ui.groovy
 
-import org.codehaus.groovy.runtime.DefaultGroovyMethods
 import org.codehaus.groovy.runtime.HandleMetaClass
 import org.codehaus.groovy.runtime.InvokerHelper
 

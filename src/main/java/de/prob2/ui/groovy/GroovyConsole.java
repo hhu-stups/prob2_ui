@@ -100,7 +100,7 @@ public class GroovyConsole extends TextArea {
 	private void setListeners() {
 		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, e-> {
 			if(e instanceof CodeCompletionEvent) {
-				if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER) {
+				if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent) {
 					String choice = ((CodeCompletionEvent) e).getChoice();
 					String currentInstruction = getCurrentInstruction(getCurrentLine());
 					this.setText(this.getText().substring(0, this.getText().lastIndexOf(currentInstruction)));

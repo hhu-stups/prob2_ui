@@ -4,7 +4,6 @@ import javafx.event.Event;
 import javafx.event.EventType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 
 @SuppressWarnings("serial")
 public class CodeCompletionEvent extends Event {
@@ -15,25 +14,17 @@ public class CodeCompletionEvent extends Event {
     private KeyCode code;
     private String choice;
 	
-	public CodeCompletionEvent(KeyEvent event) {
+
+	public CodeCompletionEvent(Event event, String choice) {
 		super(CODECOMPLETION);
 		this.event = event;
-		this.code = event.getCode();
-	}
-	
-	public CodeCompletionEvent(KeyEvent event, String choice) {
-		super(CODECOMPLETION);
-		this.event = event;
-		this.code = event.getCode();
 		this.choice = choice;
-	}
-	
-	public CodeCompletionEvent(MouseEvent event) {
-		super(CODECOMPLETION);
-		this.event = event;
 		this.code = null;
+		if(event instanceof KeyEvent) {
+			this.code = ((KeyEvent) event).getCode();
+		}
 	}
-	
+		
 	public Event getEvent() {
 		return event;
 	}
