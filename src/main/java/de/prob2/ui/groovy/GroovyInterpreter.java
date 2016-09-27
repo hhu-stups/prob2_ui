@@ -60,6 +60,10 @@ public class GroovyInterpreter {
 		}
 	}
 	
+	public void triggerCloseCodeCompletion() {
+		codeCompletion.deactivate();
+	}
+	
 	public void closeObjectStage() {
 		groovyObjectStage.close();
 	}

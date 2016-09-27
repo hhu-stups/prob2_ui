@@ -98,6 +98,9 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void setListeners() {
+		this.addEventFilter(MouseEvent.ANY, e-> {
+			interpreter.triggerCloseCodeCompletion();
+		});
 		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, e-> {
 			if(e instanceof CodeCompletionEvent) {
 				if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent) {
