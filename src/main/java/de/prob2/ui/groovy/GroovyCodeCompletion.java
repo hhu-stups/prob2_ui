@@ -64,10 +64,12 @@ public class GroovyCodeCompletion extends Popup {
 			if(e.getCode().equals(KeyCode.ENTER)) {
 				chooseMethod(e);
 			}
-			
+			if(e.getCode().equals(KeyCode.LEFT) || e.getCode().equals(KeyCode.RIGHT)) {
+				getParent().fireEvent(new CodeCompletionEvent(e));
+			}
 			if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
 				filterSuggestions("");
-				if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentLine().length() - 1)) {
+				if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
 					deactivate();
 				}
 				return;
@@ -87,7 +89,7 @@ public class GroovyCodeCompletion extends Popup {
 		deactivate();
 	}
 	
-	
+	@Deprecated
 	private void filterSuggestions(String addition) {
 		String currentInstruction = getParent().getCurrentLine() + addition;
 		if("".equals(addition)) {
@@ -96,6 +98,7 @@ public class GroovyCodeCompletion extends Popup {
 		currentInstruction = getParent().getCurrentInstruction(currentInstruction);
 		refresh(currentInstruction);
 	}
+	//2 Errors hier
 	
 	private void refresh(String filter) {
 		suggestions.clear();

@@ -98,20 +98,11 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void setListeners() {
-		this.addEventFilter(MouseEvent.ANY, e-> {
+		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e-> {
 			interpreter.triggerCloseCodeCompletion();
 		});
 		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, e-> {
-			if(e instanceof CodeCompletionEvent) {
-				if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent) {
-					String choice = ((CodeCompletionEvent) e).getChoice();
-					String currentInstruction = getCurrentInstruction(getCurrentLine());
-					this.setText(this.getText().substring(0, this.getText().lastIndexOf(currentInstruction)));
-					this.appendText(choice);
-					currentPosInLine += choice.length() - currentInstruction.length();
-					charCounterInLine += choice.length() - currentInstruction.length();
-				}
-			}
+			handleCodeCompletionEvent(e);
 		});
 		
 		this.addEventFilter(KeyEvent.ANY, e -> {
@@ -146,12 +137,33 @@ public class GroovyConsole extends TextArea {
 		});
 	}
 	
+	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
+		if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent) {
+			String choice = ((CodeCompletionEvent) e).getChoice();
+			String currentInstruction = getCurrentInstruction(getCurrentLine());
+			this.setText(this.getText().substring(0, this.getText().lastIndexOf(currentInstruction)));
+			this.appendText(choice);
+			currentPosInLine += choice.length() - currentInstruction.length();
+			charCounterInLine += choice.length() - currentInstruction.length();
+		} else if(((CodeCompletionEvent) e).getCode() == KeyCode.LEFT) {
+				if('.' == getCurrentLine().charAt(currentPosInLine - 1)) {
+					interpreter.triggerCloseCodeCompletion();
+				}
+		} else if(((CodeCompletionEvent) e).getCode() == KeyCode.RIGHT) {
+			if(';' == getCurrentLine().charAt(currentPosInLine - 1)) {
+				interpreter.triggerCloseCodeCompletion();
+			}
+		}
+	}
+	
+	@Deprecated
 	public String getCurrentInstruction(String filter) {
 		int indexOfPoint = filter.lastIndexOf('.');
 		int indexOfSemicolon = Math.max(filter.lastIndexOf(';'),filter.length());
 		String result = filter.substring(indexOfPoint + 1, indexOfSemicolon);
 		return result;
 	}
+	//1 Error hier und 1 Error in GroovyCodeCompletion
 	
 	private void goToLastPos() {
 		this.positionCaret(this.getLength());

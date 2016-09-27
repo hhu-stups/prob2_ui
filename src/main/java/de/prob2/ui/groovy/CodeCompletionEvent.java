@@ -24,6 +24,16 @@ public class CodeCompletionEvent extends Event {
 			this.code = ((KeyEvent) event).getCode();
 		}
 	}
+	
+	public CodeCompletionEvent(Event event) {
+		super(CODECOMPLETION);
+		this.event = event;
+		this.choice = "";
+		this.code = null;
+		if(event instanceof KeyEvent) {
+			this.code = ((KeyEvent) event).getCode();
+		}
+	}
 		
 	public Event getEvent() {
 		return event;
