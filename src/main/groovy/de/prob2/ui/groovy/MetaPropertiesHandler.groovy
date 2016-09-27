@@ -1,6 +1,12 @@
 package de.prob2.ui.groovy
 
+import org.codehaus.groovy.runtime.DefaultGroovyMethods
+import org.codehaus.groovy.runtime.HandleMetaClass
+import org.codehaus.groovy.runtime.InvokerHelper
+
+
 def static handleProperties(Object object, Collection<GroovyClassPropertyItem> properties) {
+	
 	for (PropertyValue p : object.metaPropertyValues) {
 		properties.add(new GroovyClassPropertyItem(p))
 	}
@@ -16,13 +22,15 @@ def static handleMethods(Object object, Collection<GroovyClassPropertyItem> meth
 }
 
 def static handleProperties(Class <? extends Object> clazz, Collection<GroovyClassPropertyItem> properties) {
-	for (PropertyValue p : clazz.getMetaPropertyValues()) {
-		properties.add(new GroovyClassPropertyItem(p))
+	HandleMetaClass metaClass = new HandleMetaClass(InvokerHelper.getMetaClass(clazz));
+	for (MetaBeanProperty m : metaClass.getProperties()) {
+		properties.add(new GroovyClassPropertyItem(m))
 	}
 }
 
 def static handleMethods(Class <? extends Object> clazz, Collection<GroovyClassPropertyItem> methods) {
-	for (MetaMethod m : clazz.getMetaClass().metaMethods) {
+	HandleMetaClass metaClass = new HandleMetaClass(InvokerHelper.getMetaClass(clazz));
+	for (MetaMethod m : metaClass.metaMethods) {
 		methods.add(new GroovyClassPropertyItem(m))
 	}
 }

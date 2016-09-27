@@ -106,18 +106,17 @@ public class GroovyCodeCompletion extends Popup {
 	
 	public void activate(GroovyConsole console, String currentLine) {
 		this.parent = console;
-		if(currentLine.indexOf('.') == -1) {
-			handleScopeObject(currentLine);
-		} else {
-			handleReturnTypeObject(currentLine);
-		}
+		handleObjects(currentLine);
 		showPopup(console);
 	}
 	
-	private void handleReturnTypeObject(String currentLine) {
-		currentLine = currentLine.substring(0, getParent().getCurrentPosInLine());	
-		String[] methods = currentLine.split("\\.");
+	private void handleObjects(String currentLine) {
+		String currentObject = currentLine.substring(0, getParent().getCurrentPosInLine());	
+		String[] methods = currentObject.split("\\.");
 		Object object = getObjectFromScope(methods[0]);
+		if(object == null) {
+			return;
+		}
 		Class<? extends Object> clazz = object.getClass();
 		for(int i = 1; i < methods.length; i++) {
 			fillMethodsAndProperties(clazz);
@@ -132,16 +131,7 @@ public class GroovyCodeCompletion extends Popup {
 		}
 		showSuggestions(clazz);
 	}
-	
-	private void handleScopeObject(String currentLine) {
-		Object object = getObjectFromScope(currentLine);
-		if(object == null) {
-			return;
-		}
-		showSuggestions(object);
 		
-	}
-	
 	private Object getObjectFromScope(String currentLine) {
 		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
@@ -183,16 +173,7 @@ public class GroovyCodeCompletion extends Popup {
 			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(f));
 		}
 	}
-	
-	private void showSuggestions(Object object) {
-		currentObjectMethodsAndProperties.clear();
-		fillMethodsAndProperties(object.getClass());
-		MetaPropertiesHandler.handleMethods(object, currentObjectMethodsAndProperties);
-		MetaPropertiesHandler.handleProperties(object, currentObjectMethodsAndProperties);
-		suggestions.addAll(currentObjectMethodsAndProperties);
 		
-	}
-	
 	private void showSuggestions(Class <? extends Object> clazz) {
 		currentObjectMethodsAndProperties.clear();
 		fillMethodsAndProperties(clazz);

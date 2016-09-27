@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import groovy.lang.GroovyRuntimeException;
+import groovy.lang.MetaBeanProperty;
 import groovy.lang.MetaMethod;
 import groovy.lang.PropertyValue;
 import javafx.beans.property.SimpleStringProperty;
@@ -26,6 +27,7 @@ public class GroovyClassPropertyItem {
 	private final SimpleStringProperty exception;
 	private SimpleStringProperty value;
 	private Class<?> returnTypeClass;
+	private final boolean isMethod;
 
 	private Logger logger = LoggerFactory.getLogger(GroovyClassPropertyItem.class);
 
@@ -47,6 +49,7 @@ public class GroovyClassPropertyItem {
 		}
 		this.exception = new SimpleStringProperty(String.join(", ", exceptionNames));
 		this.value = new SimpleStringProperty();
+		this.isMethod = true;
 	}
 
 	public GroovyClassPropertyItem(Field f) {
@@ -64,6 +67,7 @@ public class GroovyClassPropertyItem {
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			logger.error("error creating property", e);
 		}
+		this.isMethod = false;
 	}
 
 	public GroovyClassPropertyItem(PropertyValue p) {
@@ -86,6 +90,30 @@ public class GroovyClassPropertyItem {
 		} catch (GroovyRuntimeException e) {
 			logger.error("error creating property", e);
 		}
+		this.isMethod = false;
+	}
+	
+	public GroovyClassPropertyItem(MetaBeanProperty m) {
+		this.name = new SimpleStringProperty(m.getName());
+		this.params = new SimpleStringProperty();
+		this.type = new SimpleStringProperty(m.getType().getSimpleName());
+		this.returnTypeClass = m.getType();
+		this.origin = new SimpleStringProperty("GROOVY");
+		this.modifier = new SimpleStringProperty(Modifier.toString(m.getType().getModifiers()));
+		this.declarer = new SimpleStringProperty("n/a");
+		if (m.getType().getDeclaringClass() != null) {
+			this.declarer = new SimpleStringProperty(m.getType().getDeclaringClass().getSimpleName());
+		}
+		this.exception = new SimpleStringProperty();
+		this.value = new SimpleStringProperty();
+		try {
+			if (m.getField() != null) {
+				this.value = new SimpleStringProperty(m.getField().toString());
+			}
+		} catch (GroovyRuntimeException e) {
+			logger.error("error creating property", e);
+		}
+		this.isMethod = false;
 	}
 
 	public GroovyClassPropertyItem(MetaMethod m) {
@@ -102,6 +130,7 @@ public class GroovyClassPropertyItem {
 		this.declarer = new SimpleStringProperty(m.getDeclaringClass().getName());
 		this.exception = new SimpleStringProperty();
 		this.value = new SimpleStringProperty();
+		this.isMethod = true;
 	}
 
 	public String getName() {
@@ -172,6 +201,9 @@ public class GroovyClassPropertyItem {
 		String params = "";
 		if(getParams() != null) {
 			params = getParams();
+		}
+		if(!isMethod) {
+			return getName();
 		}
 		return getName() + "(" + params + ")";
 	}
