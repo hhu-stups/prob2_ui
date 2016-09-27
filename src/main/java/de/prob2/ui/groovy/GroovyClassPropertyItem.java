@@ -5,13 +5,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.codehaus.groovy.reflection.CachedClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import groovy.lang.GroovyRuntimeException;
-import groovy.lang.MetaBeanProperty;
 import groovy.lang.MetaMethod;
 import groovy.lang.MetaProperty;
 import groovy.lang.PropertyValue;
@@ -88,8 +88,10 @@ public class GroovyClassPropertyItem {
 			if (p.getValue() != null) {
 				this.value = new SimpleStringProperty(p.getValue().toString());
 			}
-		} catch (GroovyRuntimeException e) {
-			logger.error("error creating property", e);
+		} catch (GroovyRuntimeException e1) {
+			logger.error("error creating property", e1);
+		} catch(NoSuchElementException e2) {
+			logger.error("error creating property", e2);
 		}
 		this.isMethod = false;
 	}
@@ -107,15 +109,6 @@ public class GroovyClassPropertyItem {
 		}
 		this.exception = new SimpleStringProperty();
 		this.value = new SimpleStringProperty();
-		try {
-			if (m instanceof MetaBeanProperty) {
-				this.value = new SimpleStringProperty(m.PROPERTY_SET_PREFIX);
-			} else {
-				this.value = new SimpleStringProperty("");
-			}
-		} catch (GroovyRuntimeException e) {
-			logger.error("error creating property", e);
-		}
 		this.isMethod = false;
 	}
 

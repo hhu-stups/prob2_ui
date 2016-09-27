@@ -116,7 +116,7 @@ public class GroovyClassStage extends Stage {
 		}
 		
 		MetaPropertiesHandler.handleProperties(object, fields);
-		MetaPropertiesHandler.handleMethods(object, methods);
+		MetaPropertiesHandler.handleMethods(clazz, methods);
 		
 		if (clazz.isArray()) {
 			handleArrays(object);
