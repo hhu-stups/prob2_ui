@@ -140,7 +140,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			}
 			if (event.getButton() == MouseButton.SECONDARY) {
 				cm.show(background, event.getScreenX(), event.getScreenY());
-				if (!"danger".equals(item.getResult())) {
+				if (item.getResult() != ModelCheckStats.Result.DANGER) {
 					cm.getItems().get(0).setDisable(true);
 				}
 			}
@@ -184,17 +184,23 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		selected.getStyleClass().add("historyItemBackgroundSelected");
 	}
 
-	private FontAwesomeIconView selectIcon(String res) {
+	private FontAwesomeIconView selectIcon(ModelCheckStats.Result res) {
 		FontAwesomeIcon icon;
 		switch (res) {
-		case "success":
-			icon = FontAwesomeIcon.CHECK_CIRCLE_ALT;
-			break;
-		case "danger":
-			icon = FontAwesomeIcon.TIMES_CIRCLE_ALT;
-			break;
-		default:
-			icon = FontAwesomeIcon.EXCLAMATION_TRIANGLE;
+			case SUCCESS:
+				icon = FontAwesomeIcon.CHECK_CIRCLE_ALT;
+				break;
+			
+			case DANGER:
+				icon = FontAwesomeIcon.TIMES_CIRCLE_ALT;
+				break;
+			
+			case WARNING:
+				icon = FontAwesomeIcon.EXCLAMATION_TRIANGLE;
+				break;
+			
+			default:
+				throw new IllegalArgumentException("Invalid result: " + res);
 		}
 		FontAwesomeIconView iconView = new FontAwesomeIconView(icon);
 		iconView.setSize("15");

@@ -1,5 +1,7 @@
 package de.prob2.ui.modelchecking;
 
+import java.util.Objects;
+
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
@@ -7,12 +9,19 @@ import javafx.scene.layout.AnchorPane;
 
 public class Stat {
 
-	private String name;
-	private String value;
+	private final String name;
+	private final String value;
 
 	public Stat(String name, String value) {
+		Objects.requireNonNull(name);
+		Objects.requireNonNull(value);
+		
 		this.name = name;
-		this.value = value != null ? value : "";
+		this.value = value;
+	}
+	
+	public Stat(String name) {
+		this(name, "");
 	}
 
 	public Node[] toFX() {
