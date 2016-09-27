@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import groovy.lang.GroovyRuntimeException;
 import groovy.lang.MetaBeanProperty;
 import groovy.lang.MetaMethod;
+import groovy.lang.MetaProperty;
 import groovy.lang.PropertyValue;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -93,7 +94,7 @@ public class GroovyClassPropertyItem {
 		this.isMethod = false;
 	}
 	
-	public GroovyClassPropertyItem(MetaBeanProperty m) {
+	public GroovyClassPropertyItem(MetaProperty m) {
 		this.name = new SimpleStringProperty(m.getName());
 		this.params = new SimpleStringProperty();
 		this.type = new SimpleStringProperty(m.getType().getSimpleName());
@@ -107,8 +108,10 @@ public class GroovyClassPropertyItem {
 		this.exception = new SimpleStringProperty();
 		this.value = new SimpleStringProperty();
 		try {
-			if (m.getField() != null) {
-				this.value = new SimpleStringProperty(m.getField().toString());
+			if (m instanceof MetaBeanProperty) {
+				this.value = new SimpleStringProperty(m.PROPERTY_SET_PREFIX);
+			} else {
+				this.value = new SimpleStringProperty("");
 			}
 		} catch (GroovyRuntimeException e) {
 			logger.error("error creating property", e);

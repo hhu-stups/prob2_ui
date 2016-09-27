@@ -23,7 +23,7 @@ def static handleMethods(Object object, Collection<GroovyClassPropertyItem> meth
 
 def static handleProperties(Class <? extends Object> clazz, Collection<GroovyClassPropertyItem> properties) {
 	HandleMetaClass metaClass = new HandleMetaClass(InvokerHelper.getMetaClass(clazz));
-	for (MetaBeanProperty m : metaClass.getProperties()) {
+	for (MetaProperty m : metaClass.getProperties()) {
 		properties.add(new GroovyClassPropertyItem(m))
 	}
 }

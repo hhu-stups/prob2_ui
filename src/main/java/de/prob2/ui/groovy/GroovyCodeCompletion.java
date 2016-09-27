@@ -120,8 +120,8 @@ public class GroovyCodeCompletion extends Popup {
 		Class<? extends Object> clazz = object.getClass();
 		for(int i = 1; i < methods.length; i++) {
 			fillMethodsAndProperties(clazz);
-			MetaPropertiesHandler.handleMethods(object, currentObjectMethodsAndProperties);
-			MetaPropertiesHandler.handleProperties(object, currentObjectMethodsAndProperties);
+			MetaPropertiesHandler.handleMethods(clazz, currentObjectMethodsAndProperties);
+			MetaPropertiesHandler.handleProperties(clazz, currentObjectMethodsAndProperties);
 			for(GroovyClassPropertyItem item: currentObjectMethodsAndProperties) {
 				if(item.getNameAndParams().equals(methods[i])) {
 						clazz = item.getReturnTypeClass();
