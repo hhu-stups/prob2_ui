@@ -21,6 +21,8 @@ import de.prob2.ui.prob2fx.CurrentStateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
+import de.prob2.ui.stats.StatsView;
+
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
@@ -49,6 +51,7 @@ public class ProB2Module extends AbstractModule {
 		bind(ModelineController.class);
 		bind(OperationsView.class);
 		bind(StatesView.class);
+		bind(StatsView.class);
 		bind(AnimationsView.class);
 	}
 

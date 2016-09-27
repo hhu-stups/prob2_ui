@@ -1,44 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.menu.MenuController?>
-<?import javafx.scene.layout.BorderPane?>
-
-<?import de.prob2.ui.states.StatesView?>
-<?import javafx.scene.control.Accordion?>
-<?import javafx.scene.control.TitledPane?>
-<?import de.prob2.ui.operations.OperationsView?>
-<?import de.prob2.ui.history.HistoryView?>
-<?import de.prob2.ui.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.animations.AnimationsView?>
+<?import de.prob2.ui.history.HistoryView?>
+<?import de.prob2.ui.menu.MenuController?>
+<?import de.prob2.ui.modelchecking.ModelcheckingController?>
+<?import de.prob2.ui.operations.OperationsView?>
+<?import de.prob2.ui.states.StatesView?>
+<?import de.prob2.ui.stats.StatsView?>
+<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.BorderPane?>
 <BorderPane fx:id="rootContainer" maxHeight="Infinity"
 			maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
 			prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
 		<SplitPane dividerPositions="0.26,0.8">
-			<items>
-				<Accordion>
-					<panes>
-						<TitledPane text="Operations">
-							<OperationsView/>
-						</TitledPane>
-						<TitledPane text="Model Check Stats">
-							<ModelcheckingController/>
-						</TitledPane>
-					</panes>
-				</Accordion>
-				<SplitPane dividerPositions="0.8" orientation="VERTICAL">
-				    <StatesView/>
-				    <AnimationsView/>
-				</SplitPane>
-				<Accordion expandedPane="$historyTP">
-					<panes>
-						<TitledPane text="History" fx:id="historyTP" collapsible="false">
-							<HistoryView/>
-						</TitledPane>
-					</panes>
-				</Accordion>
-			</items>
+			<Accordion>
+				<panes>
+					<TitledPane text="Operations">
+						<OperationsView/>
+					</TitledPane>
+					<TitledPane text="Model Check">
+						<ModelcheckingController/>
+					</TitledPane>
+					<TitledPane text="Statistics">
+						<StatsView/>
+					</TitledPane>
+				</panes>
+			</Accordion>
+			<SplitPane dividerPositions="0.8" orientation="VERTICAL">
+				<StatesView/>
+				<AnimationsView/>
+			</SplitPane>
+			<Accordion expandedPane="$historyTP">
+				<panes>
+					<TitledPane text="History" fx:id="historyTP" collapsible="false">
+						<HistoryView/>
+					</TitledPane>
+				</panes>
+			</Accordion>
 		</SplitPane>
 	</center>
 	<top>

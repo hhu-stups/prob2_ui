@@ -1,4 +1,4 @@
-package de.prob2.ui.modelchecking;
+package de.prob2.ui.stats;
 
 import java.util.Objects;
 
@@ -8,7 +8,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 
 public class Stat {
-
 	private final String name;
 	private final String value;
 
@@ -25,29 +24,24 @@ public class Stat {
 	}
 
 	public Node[] toFX() {
-		Node[] nodes = new Node[2];
-		nodes[0] = toFX(name, "left");
-		nodes[1] = toFX(value, "right");
-		
-		return nodes;
+		return new Node[] {toFX(name, false), toFX(value, true)};
 	}
 
-	private Node toFX(String s, String alignment) {
+	private Node toFX(String s, boolean rightAligned) {
 		AnchorPane aP = new AnchorPane();
 		aP.setMinHeight(30.0);
 		aP.getStylesheets().add("prob.css");
 		aP.getStyleClass().add("gridViewRow");
-		Label l = new Label();
-		l.setText(s);
+		Label l = new Label(s);
 		l.setTooltip(new Tooltip(s));
 		aP.getChildren().add(l);
 		AnchorPane.setTopAnchor(l, 6.0);
 		AnchorPane.setBottomAnchor(l, 7.5);
-		if("left".equals(alignment)) {
+		if (rightAligned) {
+			AnchorPane.setRightAnchor(l, 10.0);
+		} else {
 			AnchorPane.setLeftAnchor(l, 10.0);
 			AnchorPane.setRightAnchor(l, 0.0);
-		} else if("right".equals(alignment)) {
-			AnchorPane.setRightAnchor(l, 10.0);
 		}
 	
 		return aP;
