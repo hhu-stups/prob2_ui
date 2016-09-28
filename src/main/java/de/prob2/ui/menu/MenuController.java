@@ -2,6 +2,8 @@ package de.prob2.ui.menu;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import com.google.inject.Inject;
@@ -17,6 +19,7 @@ import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
+import de.prob2.ui.config.Config;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.groovy.GroovyConsoleStage;
@@ -25,6 +28,8 @@ import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -48,12 +53,16 @@ public final class MenuController extends MenuBar {
 	private final Injector injector;
 	private final Api api;
 	private final AnimationSelector animationSelector;
+	private final Config config;
 	private final CurrentStage currentStage;
 	private final CurrentTrace currentTrace;
 	private final FormulaGenerator formulaGenerator;
 	
 	private Window window;
 
+	@FXML private Menu recentFilesMenu;
+	@FXML private MenuItem recentFilesPlaceholder;
+	@FXML private MenuItem clearRecentFiles;
 	@FXML private Menu windowMenu;
 	@FXML private MenuItem preferencesItem;
 	@FXML private MenuItem enterFormulaForVisualization;
@@ -67,6 +76,7 @@ public final class MenuController extends MenuBar {
 		final Injector injector,
 		final Api api,
 		final AnimationSelector animationSelector,
+		final Config config,
 		final CurrentStage currentStage,
 		final CurrentTrace currentTrace,
 		final FormulaGenerator formulaGenerator
@@ -74,6 +84,7 @@ public final class MenuController extends MenuBar {
 		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
+		this.config = config;
 		this.currentStage = currentStage;
 		this.currentTrace = currentTrace;
 		this.formulaGenerator = formulaGenerator;
@@ -118,6 +129,51 @@ public final class MenuController extends MenuBar {
 			tk.setGlobalMenuBar(this);
 		}
 	}
+	
+	@FXML
+	public void initialize() {
+		this.sceneProperty().addListener((observable, from, to) -> {
+			if (to != null) {
+				to.windowProperty().addListener((observable1, from1, to1) -> {
+					this.window = to1;
+				});
+			}
+		});
+		
+		final ListChangeListener<String> recentFilesListener = change -> {
+			final ObservableList<MenuItem> recentItems = this.recentFilesMenu.getItems();
+			final List<MenuItem> newItems = new ArrayList<>();
+			for (String s : this.config.getRecentFiles()) {
+				final MenuItem item = new MenuItem(new File(s).getName());
+				item.setOnAction(event -> {
+					this.open(s);
+				});
+				newItems.add(item);
+			}
+			
+			// If there are no recent files, show a placeholder and disable clearing
+			this.clearRecentFiles.setDisable(newItems.isEmpty());
+			if (newItems.isEmpty()) {
+				newItems.add(this.recentFilesPlaceholder);
+			}
+			
+			// Keep the last two items (the separator and the "clear recent files" item)
+			newItems.addAll(recentItems.subList(recentItems.size()-2, recentItems.size()));
+			
+			// Replace the old recents with the new ones
+			this.recentFilesMenu.getItems().setAll(newItems);
+		};
+		this.config.getRecentFiles().addListener(recentFilesListener);
+		// Fire the listener once to populate the recent files menu
+		recentFilesListener.onChanged(null);
+		
+		this.enterFormulaForVisualization.disableProperty().bind(currentTrace.currentStateProperty().initializedProperty().not());
+	}
+	
+	@FXML
+	private void handleClearRecentFiles() {
+		this.config.getRecentFiles().clear();
+	}
 
 	@FXML
 	private void handleLoadDefault() {
@@ -154,17 +210,36 @@ public final class MenuController extends MenuBar {
 			}
 		}
 	}
+	
+	private void open(String path) {
+		final StateSpace newSpace;
+		try {
+			newSpace = this.api.b_load(path);
+		} catch (IOException | BException e) {
+			logger.error("loading file failed", e);
+			Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
+			return;
+		}
+		
+		this.animationSelector.addNewAnimation(new Trace(newSpace));
+		injector.getInstance(ModelcheckingController.class).resetView();
+		
+		// Remove the path first to avoid listing the same file twice.
+		this.config.getRecentFiles().remove(path);
+		this.config.getRecentFiles().add(0, path);
+	}
 
 	@FXML
 	private void handleOpen(ActionEvent event) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
 		fileChooser.getExtensionFilters().addAll(
-				// new FileChooser.ExtensionFilter("All Files", "*.*"),
-				new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")// ,
-		// new FileChooser.ExtensionFilter("EventB Files", "*.eventb", "*.bum",
-		// "*.buc"),
-		// new FileChooser.ExtensionFilter("CSP Files", "*.cspm")
+			// new FileChooser.ExtensionFilter("All Files", "*.*"),
+			new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")// ,
+			// new FileChooser.ExtensionFilter("EventB Files", "*.eventb", "*.bum", "*.buc"),
+			// new FileChooser.ExtensionFilter("CSP Files", "*.cspm")
 		);
 
 		final File selectedFile = fileChooser.showOpenDialog(this.window);
@@ -173,25 +248,13 @@ public final class MenuController extends MenuBar {
 		}
 
 		switch (fileChooser.getSelectedExtensionFilter().getDescription()) {
-		case "Classical B Files":
-			final StateSpace newSpace;
-			try {
-				newSpace = this.api.b_load(selectedFile.getAbsolutePath());
-			} catch (IOException | BException e) {
-				logger.error("loading file failed", e);
-				Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-				alert.getDialogPane().getStylesheets().add("prob.css");
-				alert.showAndWait();
-				return;
-			}
-
-			this.animationSelector.addNewAnimation(new Trace(newSpace));
-			injector.getInstance(ModelcheckingController.class).resetView();
-			break;
-
-		default:
-			throw new IllegalStateException(
-					"Unknown file type selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
+			case "Classical B Files":
+				this.open(selectedFile.getAbsolutePath());
+				break;
+	
+			default:
+				throw new IllegalStateException(
+						"Unknown file type selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
 		}
 	}
 
@@ -233,20 +296,6 @@ public final class MenuController extends MenuBar {
 		final Stage groovyConsoleStage = injector.getInstance(GroovyConsoleStage.class);
 		groovyConsoleStage.show();
 		groovyConsoleStage.toFront();
-	}
-
-	@FXML
-	public void initialize() {
-		this.sceneProperty().addListener((observable, from, to) -> {
-			if (to != null) {
-				to.windowProperty().addListener((observable1, from1, to1) -> {
-					this.window = to1;
-				});
-			}
-		});
-
-		this.enterFormulaForVisualization.disableProperty()
-				.bind(currentTrace.currentStateProperty().initializedProperty().not());
 	}
 
 	private void loadPreset(String location) {
