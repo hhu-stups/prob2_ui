@@ -42,8 +42,9 @@ sourceSets.main.groovy.srcDirs += ["src/main/java"]
 
 
 dependencies {
-	compile 'org.codehaus.groovy:groovy-all:2.4.7'
-	compile 'de.hhu.stups:de.prob2.kernel:2.0.2'
+	compile 'com.google.code.gson:gson:1.7.1'
 	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.4'
+	compile 'de.hhu.stups:de.prob2.kernel:2.0.2'
 	compile 'de.jensd:fontawesomefx:8.9'
+	compile 'org.codehaus.groovy:groovy-all:2.4.7'
 }
