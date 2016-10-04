@@ -33,7 +33,7 @@ macAppBundle {
 macAppBundle.mainClassName = mainClassName
 
 if (hasProperty("macAppJRE")) {
- Used to set a custom JRE to bundle at the command line: -PmacAppJRE=/path/to/the/jre
+	// Used to set a custom JRE to bundle at the command line: -PmacAppJRE=/path/to/the/jre
 	macAppBundle.jreHome = macAppJRE
 }
 
