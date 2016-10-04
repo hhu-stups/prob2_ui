@@ -110,7 +110,6 @@ public class GroovyCodeCompletion extends Popup {
 			currentPosInSuggestion = Math.min(currentSuggestion.length() - 1, currentPosInSuggestion + 1);
 		}
 		filterSuggestions("", CodeCompletionAction.ARROWKEY);
-		getParent().fireEvent(new CodeCompletionEvent(e)); //can be improved
 	}
 	
 	private void handleDeletion(KeyEvent e) {
@@ -142,9 +141,7 @@ public class GroovyCodeCompletion extends Popup {
 	
 	
 	private void filterSuggestions(String addition, CodeCompletionAction action) {
-		//currentInstruction refactorable?
-		String currentInstruction ="";
-		currentInstruction = currentSuggestion;
+		String currentInstruction = currentSuggestion;
 		if(action.equals(CodeCompletionAction.ARROWKEY)) {
 			currentInstruction = currentSuggestion.substring(0, currentPosInSuggestion);
 			
@@ -153,7 +150,6 @@ public class GroovyCodeCompletion extends Popup {
 			currentPosInSuggestion++;
 			charCounterInSuggestion++;
 			currentInstruction = currentSuggestion;
-			
 		}
 		refresh(currentInstruction);
 	}
