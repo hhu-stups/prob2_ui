@@ -119,7 +119,9 @@ public final class AnimationPerspective extends BorderPane {
 			}
 			dragged = false;
 			snapshot.setImage(null);
-			((BorderPane) this.getParent()).getChildren().remove(snapshot);
+			if (((BorderPane) this.getParent()).getChildren().contains(snapshot)) {
+				((BorderPane) this.getParent()).getChildren().remove(snapshot);
+			}
 			mouseEvent.consume();
 		});
 		node.setOnDragDetected(mouseEvent -> {
