@@ -3,6 +3,8 @@ package de.prob2.ui.groovy
 import org.codehaus.groovy.runtime.HandleMetaClass
 import org.codehaus.groovy.runtime.InvokerHelper
 
+import de.prob2.ui.groovy.objects.GroovyClassPropertyItem;
+
 
 def static handleProperties(Object object, Collection<GroovyClassPropertyItem> properties) {
 	for (PropertyValue p : object.metaPropertyValues) {

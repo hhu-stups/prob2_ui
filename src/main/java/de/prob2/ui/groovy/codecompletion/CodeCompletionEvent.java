@@ -1,4 +1,4 @@
-package de.prob2.ui.groovy;
+package de.prob2.ui.groovy.codecompletion;
 
 import javafx.event.Event;
 import javafx.event.EventType;
