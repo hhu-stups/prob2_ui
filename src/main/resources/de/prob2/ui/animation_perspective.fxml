@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.animations.AnimationsView?>
 <?import de.prob2.ui.history.HistoryView?>
 <?import de.prob2.ui.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.operations.OperationsView?>
-<?import de.prob2.ui.animations.AnimationsView?>
 <?import de.prob2.ui.states.StatesView?>
+<?import de.prob2.ui.stats.StatsView?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.TitledPane?>
@@ -20,8 +21,11 @@
 					<TitledPane text="History" fx:id="historyTP">
 						<HistoryView fx:id="history"/>
 					</TitledPane>
-					<TitledPane text="Model Check Stats" fx:id="modelcheckTP">
+					<TitledPane text="Model Check" fx:id="modelcheckTP">
 						<ModelcheckingController fx:id="modelcheck"/>
+					</TitledPane>
+					<TitledPane text="Statistics">
+						<StatsView/>
 					</TitledPane>
 					<TitledPane text="Animations" fx:id="animationsTP">
 						<AnimationsView fx:id="animations"/>

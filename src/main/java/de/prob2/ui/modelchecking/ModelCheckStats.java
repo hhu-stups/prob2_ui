@@ -2,15 +2,9 @@ package de.prob2.ui.modelchecking;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.inject.Inject;
-
-import de.prob.animator.command.ComputeCoverageCommand.ComputeCoverageResult;
+import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLOk;
 import de.prob.check.ModelCheckOk;
@@ -19,51 +13,50 @@ import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
+import de.prob2.ui.stats.StatsView;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-public class ModelCheckStats extends AnchorPane {
-	@FXML
-	private AnchorPane resultBackground;
-	@FXML
-	private Text resultText;
-	@FXML
-	private VBox statsBox;
-	@FXML
-	private Label elapsedTime;
-	@FXML
-	private Label processedNodes;
-	@FXML
-	private Label totalNodes;
-	@FXML
-	private Label totalTransitions;
-	@FXML
-	private GridPane nodeStats;
-	@FXML
-	private GridPane transStats;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class ModelCheckStats extends AnchorPane {
+	public static enum Result {
+		SUCCESS, DANGER, WARNING
+	}
+	
+	@FXML private AnchorPane resultBackground;
+	@FXML private Text resultText;
+	@FXML private VBox statsBox;
+	@FXML private Label elapsedTime;
+	@FXML private Label processedNodes;
+	@FXML private Label totalNodes;
+	@FXML private Label totalTransitions;
 
 	private Map<String, ModelChecker> jobs = new HashMap<>();
 	private Map<String, IModelCheckingResult> results = new HashMap<>();
 	private ModelcheckingController modelcheckingController;
-	private String result = "warning";
+	private Result result;
 	private Trace trace;
-	private Logger logger = LoggerFactory.getLogger(ModelCheckStats.class);
-
-	@Inject
-	public ModelCheckStats(FXMLLoader loader, ModelcheckingController modelcheckingController) {
+	
+	private final StatsView statsView;
+	private final Logger logger = LoggerFactory.getLogger(ModelCheckStats.class);
+	
+	public ModelCheckStats(FXMLLoader loader, ModelcheckingController modelcheckingController, StatsView statsView) {
 		this.modelcheckingController = modelcheckingController;
+		this.statsView = statsView;
+		loader.setLocation(getClass().getResource("modelchecking_stats.fxml"));
+		loader.setRoot(this);
+		loader.setController(this);
 		try {
-			loader.setLocation(getClass().getResource("modelchecking_stats.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
@@ -89,8 +82,7 @@ public class ModelCheckStats extends AnchorPane {
 		resultBackground.setVisible(false);
 	}
 
-	public void updateStats(final String id, final long timeElapsed, final IModelCheckingResult result,
-			final StateSpaceStats stats) {
+	public void updateStats(final String id, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
 		results.put(id, result);
 
 		Platform.runLater(() -> {
@@ -108,27 +100,39 @@ public class ModelCheckStats extends AnchorPane {
 				totalTransitions.setText(String.valueOf(nrTotalTransitions));
 			});
 		}
-		logger.debug("updated Stats");
+		
+		ModelChecker modelChecker = jobs.get(id);
+		if (modelChecker != null) {
+			ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
+			if (coverage != null) {
+				statsView.update(coverage);
+			}
+		}
 	}
 
-	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result,
-			final StateSpaceStats stats) {
+	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
 		results.put(id, result);
 
 		Platform.runLater(() -> {
 			elapsedTime.setText(String.valueOf(timeElapsed));
 		});
-
-		this.result = result instanceof ModelCheckOk || result instanceof LTLOk ? "success"
-				: result instanceof ITraceDescription ? "danger" : "warning";
+		
+		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
+			this.result = Result.SUCCESS;
+		} else if (result instanceof ITraceDescription) {
+			this.result = Result.DANGER;
+		} else {
+			this.result = Result.WARNING;
+		}
 		String message = result.getMessage();
 
 		ModelChecker modelChecker = jobs.get(id);
 		jobs.remove(id);
 
 		if (modelChecker != null) {
-			ComputeCoverageResult coverage = modelChecker.getCoverage();
+			ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
 			if (coverage != null) {
+				statsView.update(coverage);
 				Number numNodes = coverage.getTotalNumberOfNodes();
 				Number numTrans = coverage.getTotalNumberOfTransitions();
 
@@ -136,16 +140,11 @@ public class ModelCheckStats extends AnchorPane {
 					totalNodes.setText(String.valueOf(numNodes));
 					totalTransitions.setText(String.valueOf(numTrans));
 				});
-
-				showStats(coverage.getNodes(), nodeStats);
-				showStats(coverage.getOps(), transStats);
 			}
-
-			boolean hasTrace = result instanceof ITraceDescription;
-			if (hasTrace) {
-				StateSpace s = modelChecker.getStateSpace(); 
+			
+			if (result instanceof ITraceDescription) {
+				StateSpace s = modelChecker.getStateSpace();
 				trace = ((ITraceDescription) result).getTrace(s);
-
 			}
 		}
 		showResult(message);
@@ -158,54 +157,27 @@ public class ModelCheckStats extends AnchorPane {
 		resultText.setText(message);
 		resultText.setWrappingWidth(this.modelcheckingController.widthProperty().doubleValue() - 60);
 		switch (this.result) {
-		case "success":
-			resultBackground.getStyleClass().clear();
-			resultBackground.getStyleClass().add("mcheckSuccess");
-			resultText.setFill(Color.web("#5e945e"));
-			break;
+			case SUCCESS:
+				resultBackground.getStyleClass().setAll("mcheckSuccess");
+				resultText.setFill(Color.web("#5e945e"));
+				break;
 
-		case "danger":
-			resultBackground.getStyleClass().clear();
-			resultBackground.getStyleClass().add("mcheckDanger");
-			resultText.setFill(Color.web("#b95050ff"));
-			break;
+			case DANGER:
+				resultBackground.getStyleClass().setAll("mcheckDanger");
+				resultText.setFill(Color.web("#b95050ff"));
+				break;
 
-		case "warning":
-			resultBackground.getStyleClass().clear();
-			resultBackground.getStyleClass().add("mcheckWarning");
-			resultText.setFill(Color.web("#96904e"));
-			break;
+			case WARNING:
+				resultBackground.getStyleClass().setAll("mcheckWarning");
+				resultText.setFill(Color.web("#96904e"));
+				break;
 
-		default:
-			throw new IllegalArgumentException("Unknown result: " + this.result);
+			default:
+				throw new IllegalArgumentException("Unknown result: " + this.result);
 		}
 	}
-
-	private void showStats(List<String> packedStats, GridPane grid) {
-		Platform.runLater(() -> {
-			grid.getChildren().clear();
-		});
-		for (String pStat : packedStats) {
-			String woPre = pStat.startsWith("'") ? pStat.substring(1) : pStat;
-			String woSuf = woPre.endsWith("'") ? woPre.substring(0, woPre.length() - 1) : woPre;
-			String[] split = woSuf.split(":");
-			Stat stat;
-			if (split.length == 2) {
-				stat = new Stat(split[0], split[1]);
-			} else if (split.length == 1) {
-				stat = new Stat(split[0], null);
-			} else {
-				throw new IllegalArgumentException(String.format(
-						"Invalid number of splits (%d, should be 1 or 2) for packed stat: %s", split.length, pStat));
-			}
-			Node[] statFX = stat.toFX();
-			Platform.runLater(() -> {
-				grid.addRow(packedStats.indexOf(pStat) + 1, statFX);
-			});
-		}
-	}
-
-	public String getResult() {
+	
+	public Result getResult() {
 		return result;
 	}
 

@@ -20,7 +20,6 @@ public class GroovyConsole extends TextArea {
 	private List<Instruction> instructions;
 	private int posInList = -1;
 	private GroovyInterpreter interpreter;
-	private GroovyCodeCompletion codeCompletion;
 	
 	public GroovyConsole() {
 		super();
@@ -34,11 +33,7 @@ public class GroovyConsole extends TextArea {
 		this.interpreter = interpreter;
 	}
 	
-	public void setCodeCompletion(GroovyCodeCompletion codeCompletion) {
-		this.codeCompletion = codeCompletion;
-	}
-	
-	
+
 	@Override
 	public void paste() {
 		if(this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
@@ -67,9 +62,9 @@ public class GroovyConsole extends TextArea {
 		
 	@Override
 	public void forward() {
-		if(currentPosInLine < charCounterInLine && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
-			currentPosInLine++;
+		if(currentPosInLine <= charCounterInLine && this.getLength() - this.getCaretPosition() <= charCounterInLine) {		
 			super.forward();
+			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 			this.setScrollTop(Double.MIN_VALUE);
 		}
 	}
@@ -77,54 +72,62 @@ public class GroovyConsole extends TextArea {
 	@Override
 	public void backward() {
 		//handleLeft
-		if(currentPosInLine > 0 && this.getLength() - 1 - this.getCaretPosition() <= charCounterInLine) {
-			currentPosInLine = Math.max(currentPosInLine - 1, 0);
+		if(currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
 			super.backward();
+			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 			this.setScrollTop(Double.MIN_VALUE);
+		} else if(currentPosInLine == 0) {
+			super.deselect();
 		}
 	}
 	
 	@Override
 	public void selectForward() {
-		//do nothing, but stay at correct position
 		if(currentPosInLine != charCounterInLine) {
-			currentPosInLine--;
+			super.selectForward();
+			currentPosInLine++;
 		}
 	}
 	
 	@Override
 	public void selectBackward() {
-		//do nothing, but stay at correct position
 		if(currentPosInLine != 0) {
-			currentPosInLine++;
-			
+			super.selectBackward();
+			currentPosInLine--;
 		}
 	}
 	
-	//
 	private void setListeners() {
-		this.addEventFilter(KeyEvent.ANY, e-> {
+		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e-> {
+			interpreter.triggerCloseCodeCompletion();
+		});
+		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, e-> {
+			handleCodeCompletionEvent(e);
+		});
+		
+		this.addEventFilter(KeyEvent.ANY, e -> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
 			}
 		});
 		
-		this.addEventFilter(MouseEvent.ANY, e-> {
+		this.addEventFilter(MouseEvent.ANY, e -> {
 			if(e.getButton() == MouseButton.PRIMARY && (this.getLength() - 1 - this.getCaretPosition() < charCounterInLine)) {
 				currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 			}
 		});
 		
 		this.setOnKeyPressed(e -> {
-			if (e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
+			if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
 				handleArrowKeys(e);
 				this.setScrollTop(Double.MAX_VALUE);
-			} else if (e.getCode().isArrowKey()) {
 			} else if (e.getCode().isNavigationKey()) {
-				e.consume();
-			} else if (e.getCode().equals(KeyCode.BACK_SPACE) || e.getCode().equals(KeyCode.DELETE)) {
+				if(e.getCode() != KeyCode.LEFT && e.getCode() != KeyCode.RIGHT) {
+					e.consume();
+				}
+			} else if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE) {
 				handleDeletion(e);
-			} else if (e.getCode().equals(KeyCode.ENTER)) {
+			} else if (e.getCode() == KeyCode.ENTER) {
 				handleEnter(e);
 			} else if (!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
 				handleInsertChar(e);
@@ -134,6 +137,34 @@ public class GroovyConsole extends TextArea {
 		});
 	}
 	
+	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
+		if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent) {
+			String choice = ((CodeCompletionEvent) e).getChoice();
+			String currentInstruction = getCurrentInstruction(getCurrentLine());
+			this.setText(this.getText().substring(0, this.getText().lastIndexOf(currentInstruction)));
+			this.appendText(choice);
+			currentPosInLine += choice.length() - currentInstruction.length();
+			charCounterInLine += choice.length() - currentInstruction.length();
+		} else if(((CodeCompletionEvent) e).getCode() == KeyCode.LEFT) {
+				if('.' == getCurrentLine().charAt(currentPosInLine - 1)) {
+					interpreter.triggerCloseCodeCompletion();
+				}
+		} else if(((CodeCompletionEvent) e).getCode() == KeyCode.RIGHT) {
+			if(';' == getCurrentLine().charAt(currentPosInLine - 1)) {
+				interpreter.triggerCloseCodeCompletion();
+			}
+		}
+	}
+	
+	@Deprecated
+	public String getCurrentInstruction(String filter) {
+		int indexOfPoint = filter.lastIndexOf('.');
+		int indexOfSemicolon = Math.max(filter.lastIndexOf(';'),filter.length());
+		String result = filter.substring(indexOfPoint + 1, indexOfSemicolon);
+		return result;
+	}
+	//1 Error hier und 1 Error in GroovyCodeCompletion
+	
 	private void goToLastPos() {
 		this.positionCaret(this.getLength());
 		currentPosInLine = charCounterInLine;
@@ -141,7 +172,7 @@ public class GroovyConsole extends TextArea {
 	
 	private void handleInsertChar(KeyEvent e) {
 		if(e.getText().isEmpty() || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
-			if(!(e.getCode().equals(KeyCode.UNDEFINED) || e.getCode().equals(KeyCode.ALT_GRAPH))) {
+			if(!(e.getCode() == KeyCode.UNDEFINED || e.getCode() == KeyCode.ALT_GRAPH)) {
 				goToLastPos();
 			}
 			if(e.getText().isEmpty()) {
@@ -153,13 +184,8 @@ public class GroovyConsole extends TextArea {
 		if (e.isShortcutDown() || e.isAltDown()) {
 			return;
 		}
-		
 		if(".".equals(e.getText())) {
-			if(!codeCompletion.isVisible()) {
-				codeCompletion.activate(this);
-			} else {
-				codeCompletion.deactivate();
-			}
+			interpreter.triggerCodeCompletion(this, getCurrentLine());
 		}
 		
 		charCounterInLine++;
@@ -172,7 +198,7 @@ public class GroovyConsole extends TextArea {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		e.consume();
-		if("".equals(getCurrentLine())) {
+		if(getCurrentLine().isEmpty()) {
 			this.appendText("\n null");
 		} else {
 			if(!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != InstructionOption.ENTER) {
@@ -268,7 +294,7 @@ public class GroovyConsole extends TextArea {
 	private boolean handleBackspace(KeyEvent e) {
 		if(currentPosInLine > 0) {
 			currentPosInLine = Math.max(currentPosInLine - 1, 0);
-			charCounterInLine = Math.max(charCounterInLine - 1, 0);		
+			charCounterInLine = Math.max(charCounterInLine - 1, 0);	
 		} else {
 			e.consume();
 			return true;
@@ -286,7 +312,7 @@ public class GroovyConsole extends TextArea {
 		return false;
 	}
 	
-	private String getCurrentLine() {
+	public String getCurrentLine() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		return this.getText().substring(posOfEnter + 3, this.getText().length());
 	}
@@ -294,5 +320,10 @@ public class GroovyConsole extends TextArea {
 	public void closeObjectStage() {
 		interpreter.closeObjectStage();
 	}
+	
+	public int getCurrentPosInLine() {
+		return currentPosInLine;
+	}
+	
 
 }

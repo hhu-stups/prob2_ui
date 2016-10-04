@@ -22,88 +22,44 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 public class GroovyClassStage extends Stage {
+	@FXML private TableView<GroovyClassPropertyItem> tvMethods;
+	@FXML private TableView<GroovyClassPropertyItem> tvFields;
+	@FXML private TableView<GroovyClassItem> tvClass;
+	@FXML private TableView<CollectionDataItem> tvCollectionData;
+	
+	@FXML private Tab tabCollectionData;
+	
+	@FXML private TableColumn<GroovyClassItem, String> cattributes;
+	@FXML private TableColumn<GroovyClassItem, String> cvalues;
+	
+	@FXML private TableColumn<GroovyClassPropertyItem, String> fnames;
+	@FXML private TableColumn<GroovyClassPropertyItem, String> fvalues;
+	@FXML private TableColumn<GroovyClassPropertyItem, String> ftypes;
+	@FXML private TableColumn<GroovyClassPropertyItem, String> forigins;
+	@FXML private TableColumn<GroovyClassPropertyItem, String> fmodifiers;
+	@FXML private TableColumn<GroovyClassPropertyItem, String> fdeclarers;
+	
+	@FXML private TableColumn<GroovyClassPropertyItem, String> mnames;
+	@FXML private TableColumn<GroovyClassPropertyItem, String> mparams;
+	@FXML private TableColumn<GroovyClassPropertyItem, String> mtypes;
+	@FXML private TableColumn<GroovyClassPropertyItem, String> morigins;
+	@FXML private TableColumn<GroovyClassPropertyItem, String> mmodifiers;
+	@FXML private TableColumn<GroovyClassPropertyItem, String> mdeclarers;
+	@FXML private TableColumn<GroovyClassPropertyItem, String> mexceptions;
+	
+	@FXML private TableColumn<CollectionDataItem, String> cdindices;
+	@FXML private TableColumn<CollectionDataItem, String> cdvalues;
 	
 	private Class<?> clazz;
 	
-	@FXML
-	private TableView<GroovyClassPropertyItem> tv_methods;
-	
-	@FXML
-	private TableView<GroovyClassPropertyItem> tv_fields;
-	
-	@FXML
-	private TableView<GroovyClassItem> tv_class;
-	
-	@FXML
-	private TableView<CollectionDataItem> tv_collection_data;
-	
-	@FXML
-	private Tab tab_collection_data;
-	
-	@FXML
-	private TableColumn<GroovyClassItem, String> cattributes;
-	
-	@FXML
-	private TableColumn<GroovyClassItem, String> cvalues;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> fnames;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> fvalues;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> ftypes;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> forigins;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> fmodifiers;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> fdeclarers;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> mnames;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> mparams;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> mtypes;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> morigins;
-		
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> mmodifiers;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> mdeclarers;
-	
-	@FXML
-	private TableColumn<GroovyClassPropertyItem, String> mexceptions;
-	
-	@FXML
-	private TableColumn<CollectionDataItem, String> cdindices;
-	
-	@FXML
-	private TableColumn<CollectionDataItem, String> cdvalues;
-	
 	private ObservableList<GroovyClassPropertyItem> methods = FXCollections.observableArrayList();
-	
 	private ObservableList<GroovyClassPropertyItem> fields = FXCollections.observableArrayList();
-	
 	private ObservableList<GroovyClassItem> attributes = FXCollections.observableArrayList();
-	
-	private ObservableList<CollectionDataItem> collection_data = FXCollections.observableArrayList();
-	
-	private MetaPropertiesHandler groovyHandler;
+	private ObservableList<CollectionDataItem> collectionData = FXCollections.observableArrayList();
 	
 	private Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
 	
-	public GroovyClassStage(FXMLLoader loader, MetaPropertiesHandler groovyHandler) {
+	public GroovyClassStage(FXMLLoader loader) {
 		loader.setLocation(getClass().getResource("groovy_class_stage.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
@@ -112,14 +68,11 @@ public class GroovyClassStage extends Stage {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		this.groovyHandler = groovyHandler;
 	}
 	
 	public void setClass(Class<?> clazz) {
 		this.clazz = clazz;
 	}
-	
-	
 	
 	@FXML
 	public void initialize() {
@@ -130,77 +83,83 @@ public class GroovyClassStage extends Stage {
 		mmodifiers.setCellValueFactory(new PropertyValueFactory<>("modifier"));
 		mdeclarers.setCellValueFactory(new PropertyValueFactory<>("declarer"));
 		mexceptions.setCellValueFactory(new PropertyValueFactory<>("exception"));
+		
 		fnames.setCellValueFactory(new PropertyValueFactory<>("name"));
 		fvalues.setCellValueFactory(new PropertyValueFactory<>("value"));
 		ftypes.setCellValueFactory(new PropertyValueFactory<>("type"));
 		forigins.setCellValueFactory(new PropertyValueFactory<>("origin"));
 		fmodifiers.setCellValueFactory(new PropertyValueFactory<>("modifier"));
 		fdeclarers.setCellValueFactory(new PropertyValueFactory<>("declarer"));
+		
 		cattributes.setCellValueFactory(new PropertyValueFactory<>("attribute"));
 		cvalues.setCellValueFactory(new PropertyValueFactory<>("value"));
 		cdindices.setCellValueFactory(new PropertyValueFactory<>("index"));
 		cdvalues.setCellValueFactory(new PropertyValueFactory<>("value"));
 		
-		tv_methods.setItems(methods);
-		tv_fields.setItems(fields);
-		tv_class.setItems(attributes);
-		tv_collection_data.setItems(collection_data);
+		tvMethods.setItems(methods);
+		tvFields.setItems(fields);
+		tvClass.setItems(attributes);
+		tvCollectionData.setItems(collectionData);
 	}
 	
 	public void showMethodsAndFields(Object object) {
 		methods.clear();
 		fields.clear();
-		collection_data.clear();
+		collectionData.clear();
 		
-		for(Method m: clazz.getMethods()) {
+		for (Method m : clazz.getMethods()) {
 			methods.add(new GroovyClassPropertyItem(m));
 		}
-		for(Field f : clazz.getFields()) {
+		
+		for (Field f : clazz.getFields()) {
 			fields.add(new GroovyClassPropertyItem(f));
 		}
-		groovyHandler.handleProperties(object, fields);
-		groovyHandler.handleMethods(object, methods);
-		if(clazz.isArray()) {
+		
+		MetaPropertiesHandler.handleProperties(object, fields);
+		MetaPropertiesHandler.handleMethods(clazz, methods);
+		
+		if (clazz.isArray()) {
 			handleArrays(object);
-		} else if(object instanceof Collection<?>) {
-			handleCollections(object);
+		} else if (object instanceof Collection<?>) {
+			handleCollections((Collection<?>)object);
 		} else {
-			tab_collection_data.setDisable(true);
+			tabCollectionData.setDisable(true);
 		}
+		
 		showClassAttributes();
-		tv_methods.refresh();
-		tv_fields.refresh();
-		tv_collection_data.refresh();
+		tvMethods.refresh();
+		tvFields.refresh();
+		tvCollectionData.refresh();
 	}
 	
 	private void handleArrays(Object object) {
 		if(object instanceof Object[]) {
-			//Check Array of Objects
+			// Check Array of Objects
 			Object[] objects = (Object[]) object;
 			for (int i = 0; i < objects.length; i++) {
 				String value = "";
 				if (objects[i] != null) {
 					value = objects[i].toString();
 				}
-				collection_data.add(new CollectionDataItem(i,value));
+				collectionData.add(new CollectionDataItem(i,value));
 			}
 		} else {
-			//Check Array of Primitives
+			// Check Array of Primitives
 			int length = Array.getLength(object);
 			for(int i = 0; i < length; i++) {
-				collection_data.add(new CollectionDataItem(i,Array.get(object, i)));
+				collectionData.add(new CollectionDataItem(i,Array.get(object, i)));
 			}
 		}
 	}
 	
-	private void handleCollections(Object object) {
+	private void handleCollections(Collection<?> object) {
 		int i = 0;
-		for (Object o : (Iterable<?>)object) {
-			collection_data.add(new CollectionDataItem(i,o));
+		for (Object o : object) {
+			collectionData.add(new CollectionDataItem(i,o));
 			i++;
 		}
 	}
-		
+	
 	private void showClassAttributes() {
 		attributes.clear();
 		String packagename = "default";
@@ -225,7 +184,6 @@ public class GroovyClassStage extends Stage {
 		attributes.add(new GroovyClassItem("Superclasses", String.join(", ", superclassNames)));
 		attributes.add(new GroovyClassItem("isPrimitive", Boolean.toString(clazz.isPrimitive())));
 		attributes.add(new GroovyClassItem("isArray", Boolean.toString(clazz.isArray())));
-		tv_class.refresh();
+		tvClass.refresh();
 	}
-
 }

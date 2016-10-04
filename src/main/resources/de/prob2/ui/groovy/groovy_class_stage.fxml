@@ -16,7 +16,7 @@
 				<TabPane layoutY="0" prefHeight="600.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 					<Tab text="Class">
 						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-							<TableView fx:id="tv_class" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+							<TableView fx:id="tvClass" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 								<columns>
 									<TableColumn fx:id="cattributes" prefWidth="75.0" text="Attribute"/>
 									<TableColumn fx:id="cvalues" prefWidth="75.0" text="Value"/>
@@ -29,7 +29,7 @@
 					</Tab>
 					<Tab text="Public Fields and Properties">
 						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-							<TableView fx:id="tv_fields" layoutX="6.0" prefHeight="304.0" prefWidth="593.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+							<TableView fx:id="tvFields" layoutX="6.0" prefHeight="304.0" prefWidth="593.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 								<columns>
 									<TableColumn fx:id="fnames" prefWidth="106.0" text="Name"/>
 									<TableColumn fx:id="fvalues" prefWidth="97.0" text="Value"/>
@@ -46,7 +46,7 @@
 					</Tab>
 					<Tab text="Methods">
 						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-							<TableView fx:id="tv_methods" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+							<TableView fx:id="tvMethods" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 								<columns>
 									<TableColumn fx:id="mnames" prefWidth="75.0" text="Name"/>
 									<TableColumn fx:id="mparams" prefWidth="92.0" text="Params"/>
@@ -62,9 +62,9 @@
 							</TableView>
 						</AnchorPane>
 					</Tab>
-					<Tab fx:id="tab_collection_data" text="Collection Data">
+					<Tab fx:id="tabCollectionData" text="Collection Data">
 						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-							<TableView fx:id="tv_collection_data" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+							<TableView fx:id="tvCollectionData" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 								<columns>
 									<TableColumn fx:id="cdindices" prefWidth="75.0" text="Index"/>
 									<TableColumn fx:id="cdvalues" prefWidth="92.0" text="Value"/>

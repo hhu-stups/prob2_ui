@@ -56,15 +56,12 @@ public class FormulaView extends Stage {
 			} else if(e.getButton() == MouseButton.SECONDARY) {
 				graph.getTransforms().add(new Scale(0.8, 0.8));
 				dragFactor *= 0.8;
-				
 			}
 			
 			group.getChildren().clear();
 			group.getChildren().add(graph);
-			double Xpos = e.getX()/graph.getWidth();
-			double Ypos = e.getY()/graph.getHeight();
-			root.setHvalue(Xpos);
-			root.setVvalue(Ypos);
+			root.setHvalue(e.getX() / graph.getWidth());
+			root.setVvalue(e.getY() / graph.getHeight());
 		});
 	}
 }

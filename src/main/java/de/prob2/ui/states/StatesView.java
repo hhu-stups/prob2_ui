@@ -5,21 +5,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
-import de.prob.model.representation.Action;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.binding.Bindings;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
@@ -31,6 +28,9 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.AnchorPane;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //@Singleton
 public class StatesView extends AnchorPane {
@@ -225,11 +225,6 @@ public class StatesView extends AnchorPane {
 						this.updateRoot(this.currentTrace.get());
 					}
 				});
-
-		// Hide Action objects by default (they display as source code condensed
-		// into a single line otherwise)
-		this.classBlacklist.getKnownClasses().add(Action.class);
-		this.classBlacklist.getBlacklist().add(Action.class);
 
 		this.currentTrace.addListener((observable, from, to) -> {
 			if (to == null) {

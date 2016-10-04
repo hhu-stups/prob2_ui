@@ -4,31 +4,36 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Joiner;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.Injector;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelChecker;
 import de.prob.check.ModelCheckingOptions;
-import de.prob.check.ModelCheckingOptions.Options;
 import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
+
+import de.prob2.ui.prob2fx.CurrentStage;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.stats.StatsView;
+
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
@@ -39,53 +44,88 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-//@Singleton
-public class ModelcheckingController extends ScrollPane implements IModelCheckListener {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-	@FXML
-	private AnchorPane statsPane;
-	@FXML
-	private VBox historyBox;
+//@Singleton
+public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
+	// modelchecking_stats_view.fxml
+	@FXML private AnchorPane statsPane;
+	@FXML private VBox historyBox;
+	@FXML private Button addModelCheckButton;
+	
+	// modelchecking_stage.fxml
+	@FXML private Stage mcheckStage;
+	@FXML private CheckBox findDeadlocks;
+	@FXML private CheckBox findInvViolations;
+	@FXML private CheckBox findBAViolations;
+	@FXML private CheckBox findGoal;
+	@FXML private CheckBox stopAtFullCoverage;
+	@FXML private CheckBox searchForNewErrors;
+	
+	private final Injector injector;
+	private final AnimationSelector animations;
+	private final CurrentTrace currentTrace;
+	private final StatsView statsView;
+	
+	private final Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
 
 	private ModelChecker checker;
 	private ObservableList<Node> historyNodeList;
 	private ModelCheckStats currentStats;
 	private ModelCheckingOptions currentOptions;
-	private AnimationSelector animations;
-	private Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
-	private final Stage mcheckStage;
 
 	@Inject
-	private ModelcheckingController(final AnimationSelector animations, final ModelcheckingStage modelcheckingStage,
-			FXMLLoader loader) {
+	private ModelcheckingController(
+		final Injector injector,
+		final AnimationSelector animations,
+		final CurrentTrace currentTrace,
+		final CurrentStage currentStage,
+		final StatsView statsView
+	) {
+		this.injector = injector;
 		this.animations = animations;
-		this.mcheckStage = modelcheckingStage;
+		this.currentTrace = currentTrace;
+		this.statsView = statsView;
+		
+		final FXMLLoader mainLoader = injector.getInstance(FXMLLoader.class);
+		mainLoader.setLocation(getClass().getResource("modelchecking_stats_view.fxml"));
+		mainLoader.setRoot(this);
+		mainLoader.setController(this);
 		try {
-			loader.setLocation(getClass().getResource("modelchecking_stats_view.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
-			loader.load();
+			mainLoader.load();
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
+		
+		final FXMLLoader stageLoader = injector.getInstance(FXMLLoader.class);
+		stageLoader.setLocation(getClass().getResource("modelchecking_stage.fxml"));
+		stageLoader.setController(this);
+		try {
+			stageLoader.load();
+		} catch (IOException e) {
+			logger.error("loading fxml failed", e);
+		}
+		currentStage.register(this.mcheckStage);
 	}
+	
+	// modelchecking_stats_view.fxml
 
 	@FXML
 	public void initialize() {
-		showStats(new ModelCheckStats(new FXMLLoader(), this));
+		showStats(new ModelCheckStats(injector.getInstance(FXMLLoader.class), this, statsView));
 		historyNodeList = historyBox.getChildren();
+		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 
 	@FXML
 	private void addModelCheck() {
-		((ModelcheckingStage) this.mcheckStage).setModelcheckController(this);
 		this.mcheckStage.showAndWait();
-		this.mcheckStage.toFront();
 	}
 
 	void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {
 		currentOptions = options;
-		currentStats = new ModelCheckStats(new FXMLLoader(), this);
+		currentStats = new ModelCheckStats(injector.getInstance(FXMLLoader.class), this, statsView);
 		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, this));
 		currentStats.addJob(checker.getJobId(), checker);
 		showStats(currentStats);
@@ -98,13 +138,13 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		AnchorPane background = new AnchorPane();
 		VBox.setMargin(background, new Insets(2.5, 5, 2.5, 5));
 		background.setOnMouseClicked(event -> {
-			if (event.getButton().equals(MouseButton.PRIMARY)) {
+			if (event.getButton() == MouseButton.PRIMARY) {
 				showStats(item.getStats());
 				updateSelectedItem(background);
 			}
-			if (event.getButton().equals(MouseButton.SECONDARY)) {
+			if (event.getButton() == MouseButton.SECONDARY) {
 				cm.show(background, event.getScreenX(), event.getScreenY());
-				if (!"danger".equals(item.getResult())) {
+				if (item.getResult() != ModelCheckStats.Result.DANGER) {
 					cm.getItems().get(0).setDisable(true);
 				}
 			}
@@ -140,7 +180,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		return cm;
 	}
 
-	protected void updateSelectedItem(Node selected) {
+	private void updateSelectedItem(Node selected) {
 		for (Node node : historyNodeList) {
 			node.getStyleClass().remove("historyItemBackgroundSelected");
 			node.getStyleClass().add("historyItemBackground");
@@ -148,17 +188,23 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		selected.getStyleClass().add("historyItemBackgroundSelected");
 	}
 
-	private FontAwesomeIconView selectIcon(String res) {
+	private FontAwesomeIconView selectIcon(ModelCheckStats.Result res) {
 		FontAwesomeIcon icon;
 		switch (res) {
-		case "success":
-			icon = FontAwesomeIcon.CHECK_CIRCLE_ALT;
-			break;
-		case "danger":
-			icon = FontAwesomeIcon.TIMES_CIRCLE_ALT;
-			break;
-		default:
-			icon = FontAwesomeIcon.EXCLAMATION_TRIANGLE;
+			case SUCCESS:
+				icon = FontAwesomeIcon.CHECK_CIRCLE_ALT;
+				break;
+			
+			case DANGER:
+				icon = FontAwesomeIcon.TIMES_CIRCLE_ALT;
+				break;
+			
+			case WARNING:
+				icon = FontAwesomeIcon.EXCLAMATION_TRIANGLE;
+				break;
+			
+			default:
+				throw new IllegalArgumentException("Invalid result: " + res);
 		}
 		FontAwesomeIconView iconView = new FontAwesomeIconView(icon);
 		iconView.setSize("15");
@@ -169,12 +215,12 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 		ModelChecker modelChecker = checker;
 		AbstractElement main = modelChecker.getStateSpace().getMainComponent();
 		List<String> optsList = new ArrayList<>();
-		for (Options opts : options.getPrologOptions()) {
+		for (ModelCheckingOptions.Options opts : options.getPrologOptions()) {
 			optsList.add(opts.getDescription());
 		}
 		String name = main == null ? "Model Check" : main.toString();
 		if (!optsList.isEmpty()) {
-			name += " with " + Joiner.on(", ").join(optsList);
+			name += " with " + String.join(", ", optsList);
 		}
 		return name;
 	}
@@ -186,8 +232,7 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	}
 
 	private void showStats(ModelCheckStats stats) {
-		statsPane.getChildren().clear();
-		statsPane.getChildren().add(stats);
+		statsPane.getChildren().setAll(stats);
 		AnchorPane.setTopAnchor(stats, 0.0);
 		AnchorPane.setRightAnchor(stats, 0.0);
 		AnchorPane.setBottomAnchor(stats, 0.0);
@@ -195,9 +240,45 @@ public class ModelcheckingController extends ScrollPane implements IModelCheckLi
 	}
 
 	public void resetView() {
-		showStats(new ModelCheckStats(new FXMLLoader(), this));
+		showStats(new ModelCheckStats(injector.getInstance(FXMLLoader.class), this, statsView));
 		historyNodeList.clear();
 	}
+	
+	// modelchecking_stage.fxml
+	
+	@FXML
+	private void startModelCheck(ActionEvent event) {
+		if (currentTrace.exists()) {
+			startModelchecking(getOptions(), animations.getCurrentTrace().getStateSpace());
+		} else {
+			final Alert alert = new Alert(Alert.AlertType.ERROR, "No specification file loaded. Cannot run model checker.");
+			alert.setHeaderText("Specification file missing");
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
+			this.mcheckStage.close();
+		}
+	}
+	
+	private ModelCheckingOptions getOptions() {
+		ModelCheckingOptions options = new ModelCheckingOptions();
+		options = options.breadthFirst(true);
+		options = options.checkDeadlocks(findDeadlocks.isSelected());
+		options = options.checkInvariantViolations(findInvViolations.isSelected());
+		options = options.checkAssertions(findBAViolations.isSelected());
+		options = options.checkGoal(findGoal.isSelected());
+		options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
+		options = options.recheckExisting(!searchForNewErrors.isSelected());
+		
+		return options;
+	}
+	
+	@FXML
+	void cancel(ActionEvent event) {
+		cancelModelchecking();
+		this.mcheckStage.getScene().getWindow().hide();
+	}
+	
+	// Overrides
 
 	@Override
 	public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {

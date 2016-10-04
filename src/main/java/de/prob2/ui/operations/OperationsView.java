@@ -10,24 +10,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.BEvent;
 import de.prob.model.representation.Machine;
-import de.prob.model.representation.ModelElementList;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -42,8 +37,14 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 //@Singleton
-public class OperationsView extends AnchorPane {
+public final class OperationsView extends AnchorPane {
 	private static enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
@@ -112,30 +113,18 @@ public class OperationsView extends AnchorPane {
 		return 0;
 	}
 
-	@FXML
-	private ListView<Operation> opsListView;
-	@FXML
-	private Button backButton;
-	@FXML
-	private Button forwardButton;
-	@FXML
-	private Button searchButton;
-	@FXML
-	private Button sortButton;
-	@FXML
-	private ToggleButton disabledOpsToggle;
-	@FXML
-	private TextField filterEvents;
-	@FXML
-	private TextField randomText;
-	@FXML
-	private MenuItem oneRandomEvent;
-	@FXML
-	private MenuItem fiveRandomEvents;
-	@FXML
-	private MenuItem tenRandomEvents;
-	@FXML
-	private CustomMenuItem someRandomEvents;
+	@FXML private ListView<Operation> opsListView;
+	@FXML private Button backButton;
+	@FXML private Button forwardButton;
+	@FXML private Button searchButton;
+	@FXML private Button sortButton;
+	@FXML private ToggleButton disabledOpsToggle;
+	@FXML private TextField filterEvents;
+	@FXML private TextField randomText;
+	@FXML private MenuItem oneRandomEvent;
+	@FXML private MenuItem fiveRandomEvents;
+	@FXML private MenuItem tenRandomEvents;
+	@FXML private CustomMenuItem someRandomEvents;
 
 	private AbstractModel currentModel;
 	private List<String> opNames = new ArrayList<>();
@@ -204,16 +193,17 @@ public class OperationsView extends AnchorPane {
 			String name = extractPrettyName(transition.getName());
 			notEnabled.remove(name);
 			List<String> params = transition.getParams();
+			List<String> returnValues = transition.getReturnValues();
 			boolean explored = transition.getDestination().isExplored();
-			boolean errored = explored && !transition.getDestination().isInvariantOk() ? true : false;
+			boolean errored = explored && !transition.getDestination().isInvariantOk();
 			logger.debug("{} {}", name, errored);
-			Operation operation = new Operation(id, name, params, true, withTimeout.contains(name), explored, errored);
+			Operation operation = new Operation(id, name, params, returnValues, true, withTimeout.contains(name), explored, errored);
 			events.add(operation);
 		}
 		if (showNotEnabled) {
 			for (String s : notEnabled) {
 				if (!"INITIALISATION".equals(s)) {
-					events.add(new Operation(s, s, opToParams.get(s), false, withTimeout.contains(s), false, false));
+					events.add(new Operation(s, s, opToParams.get(s),Collections.emptyList(), false, withTimeout.contains(s), false, false));
 				}
 			}
 		}
@@ -368,8 +358,7 @@ public class OperationsView extends AnchorPane {
 		opNames = new ArrayList<>();
 		opToParams = new HashMap<>();
 		if (mainComponent instanceof Machine) {
-			ModelElementList<BEvent> events = mainComponent.getChildrenOfType(BEvent.class);
-			for (BEvent e : events) {
+			for (BEvent e : mainComponent.getChildrenOfType(BEvent.class)) {
 				opNames.add(e.getName());
 
 				List<String> paramList = new ArrayList<>();
@@ -383,5 +372,7 @@ public class OperationsView extends AnchorPane {
 				opToParams.put(e.getName(), paramList);
 			}
 		}
+		
+		
 	}
 }

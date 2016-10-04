@@ -10,34 +10,26 @@ import javafx.util.Builder;
 import javafx.util.BuilderFactory;
 
 public class GuiceBuilderFactory implements BuilderFactory {
-
 	private Injector injector;
+	BuilderFactory javafxDefaultBuilderFactory = new JavaFXBuilderFactory();
 
 	@Inject
 	public GuiceBuilderFactory(Injector injector) {
 		this.injector = injector;
 	}
 
-	BuilderFactory javafxDefaultBuilderFactory = new JavaFXBuilderFactory();
-
 	@Override
 	public Builder<?> getBuilder(Class<?> type) {
 		if (isGuiceResponsibleForType(type)) {
 			Object instance = injector.getInstance(type);
-			return wrapInstanceInBuilder(instance);
+			return () -> instance;
+		} else {
+			return javafxDefaultBuilderFactory.getBuilder(type);
 		}
-		return javafxDefaultBuilderFactory.getBuilder(type);
 	}
-
-	private Builder<?> wrapInstanceInBuilder(Object instance) {
-		return () -> {
-			return instance;
-		};
-	}
-
+	
 	private boolean isGuiceResponsibleForType(Class<?> type) {
 		Binding<?> binding = injector.getExistingBinding(Key.get(type));
 		return binding != null;
 	}
-
 }

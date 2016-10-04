@@ -1,10 +1,23 @@
 package de.prob2.ui.groovy;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.script.Bindings;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
-import com.google.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import de.prob.scripting.ScriptEngineProvider;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -15,54 +28,176 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.shape.Path;
 import javafx.stage.Popup;
 
-public class GroovyCodeCompletion {
+public class GroovyCodeCompletion extends Popup {
 	
-	private Popup popup;
+	private final Logger logger = LoggerFactory.getLogger(GroovyCodeCompletion.class);
 	
-	private ListView<String> lv_suggestions;
+	@FXML
+	private ListView<GroovyClassPropertyItem> lv_suggestions;
 	
-	private final ScriptEngine engine;
-
+	private ObservableList<GroovyClassPropertyItem> suggestions = FXCollections.observableArrayList();
 	
-	//Trying with ListView
+	private ScriptEngine engine;
+		
+	private GroovyConsole parent;
 	
-	@Inject
-	public GroovyCodeCompletion(final ScriptEngineProvider sep) {
-		engine = sep.get();
-		popup = new Popup();
-		lv_suggestions = new ListView<String>();
-		for(int i = 0; i < 10; i++) {
-			lv_suggestions.getItems().add(String.valueOf(i));
-			lv_suggestions.setOnKeyPressed(e-> {
-				if(e.getCode().equals(KeyCode.ENTER)) {
-					System.out.println(lv_suggestions.getSelectionModel().getSelectedItem());
-					this.deactivate();
-				}
-			});
+	private List<GroovyClassPropertyItem> currentObjectMethodsAndProperties;
+	
+	public GroovyCodeCompletion(FXMLLoader loader, ScriptEngine engine) {
+		loader.setLocation(getClass().getResource("groovy_codecompletion_popup.fxml"));
+		loader.setRoot(this);
+		loader.setController(this);
+		try {
+			loader.load();
+		} catch (IOException e) {
+			logger.error("loading fxml failed", e);
 		}
-		lv_suggestions.setMaxHeight(200);
-		lv_suggestions.setMaxWidth(400);
-		lv_suggestions.setPrefHeight(200);
-		lv_suggestions.setPrefWidth(400);
-		popup.getContent().add(lv_suggestions);
-	}
-	
-	
-	public void activate(GroovyConsole console) {
-		lv_suggestions.getSelectionModel().selectFirst();
-		Point2D point = findCaretPosition(findCaret(console));
-		double x = point.getX() + 10;
-		double y = point.getY() + 10;
-		popup.show(console, x, y);
+		this.engine = engine;
+		this.parent = null;
+		this.currentObjectMethodsAndProperties = new ArrayList<GroovyClassPropertyItem>();
+		lv_suggestions.setItems(suggestions);
+		lv_suggestions.setOnMouseClicked(e-> {
+			chooseMethod(e);
+		});
+		lv_suggestions.setOnKeyPressed(e-> {
+			
+			if(e.getCode().equals(KeyCode.ENTER)) {
+				chooseMethod(e);
+			}
+			if(e.getCode().equals(KeyCode.LEFT) || e.getCode().equals(KeyCode.RIGHT)) {
+				getParent().fireEvent(new CodeCompletionEvent(e));
+			}
+			if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
+				filterSuggestions("");
+				if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
+					deactivate();
+				}
+				return;
+				
+			}
+			if(e.getText().length() == 1 && !".".equals(e.getText())) {
+				filterSuggestions(e.getText());
+			}
+		});
 		
 	}
 	
+	private void chooseMethod(Event e) {
+		if(lv_suggestions.getSelectionModel().getSelectedItem() != null) {
+			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams()));
+		}
+		deactivate();
+	}
+	
+	@Deprecated
+	private void filterSuggestions(String addition) {
+		String currentInstruction = getParent().getCurrentLine() + addition;
+		if("".equals(addition)) {
+			currentInstruction = currentInstruction.substring(0, currentInstruction.length()-1);
+		}
+		currentInstruction = getParent().getCurrentInstruction(currentInstruction);
+		refresh(currentInstruction);
+	}
+	//2 Errors hier
+	
+	private void refresh(String filter) {
+		suggestions.clear();
+		for(int i = 0; i < currentObjectMethodsAndProperties.size(); i++) {
+			GroovyClassPropertyItem suggestion = currentObjectMethodsAndProperties.get(i);
+			if(suggestion.getNameAndParams().contains(filter)) {
+				suggestions.add(suggestion);
+			}
+		}
+		lv_suggestions.getSelectionModel().selectFirst();
+		if(suggestions.isEmpty()) {
+			this.deactivate();
+		}
+	}
+	
+	
+	public void activate(GroovyConsole console, String currentLine) {
+		this.parent = console;
+		handleObjects(currentLine);
+		showPopup(console);
+	}
+	
+	private void handleObjects(String currentLine) {
+		String currentInstruction = currentLine.substring(0, getParent().getCurrentPosInLine());	
+		currentInstruction = currentInstruction.replaceAll("\\s","");
+		String[] currentObjects = currentInstruction.split(";");
+		String[] methods = currentObjects[currentObjects.length-1].split("\\.");
+		Object object = getObjectFromScope(methods[0]);
+		if(object == null) {
+			return;
+		}
+		Class<? extends Object> clazz = object.getClass();
+		for(int i = 1; i < methods.length; i++) {
+			fillMethodsAndProperties(clazz);
+			MetaPropertiesHandler.handleMethods(clazz, currentObjectMethodsAndProperties);
+			MetaPropertiesHandler.handleProperties(clazz, currentObjectMethodsAndProperties);
+			for(GroovyClassPropertyItem item: currentObjectMethodsAndProperties) {
+				if(item.getNameAndParams().equals(methods[i])) {
+						clazz = item.getReturnTypeClass();
+						break;
+				}
+			}
+		}
+		showSuggestions(clazz);
+	}
+	
+		
+	private Object getObjectFromScope(String currentLine) {
+		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
+		Object object = null;
+		if(engineScope.keySet().contains(currentLine)) {
+			object = engineScope.get(currentLine);
+		} else if(globalScope.keySet().contains(currentLine)) {
+			object = globalScope.get(currentLine);
+		}
+		return object;
+	}
+	
+	public GroovyConsole getParent() {
+		return parent;
+	}
+	
+	private void showPopup(GroovyConsole console) {
+		if(suggestions.isEmpty()) {
+			return;
+		}
+		lv_suggestions.getSelectionModel().selectFirst();
+		Point2D point = findCaretPosition(findCaret(console));
+		double x = point.getX() + 10;
+		double y = point.getY() + 20;
+		this.show(console, x, y);	
+	}
+	
 	public void deactivate() {
-		popup.hide();
+		suggestions.clear();
+		currentObjectMethodsAndProperties.clear();
+		this.hide();
+	}
+	
+	private void fillMethodsAndProperties(Class <? extends Object> clazz) {
+		for(Method m : clazz.getMethods()) {
+			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(m));
+		}
+		for(Field f : clazz.getFields()) {
+			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(f));
+		}
+	}
+		
+	private void showSuggestions(Class <? extends Object> clazz) {
+		currentObjectMethodsAndProperties.clear();
+		fillMethodsAndProperties(clazz);
+		MetaPropertiesHandler.handleMethods(clazz, currentObjectMethodsAndProperties);
+		MetaPropertiesHandler.handleProperties(clazz, currentObjectMethodsAndProperties);
+		suggestions.addAll(currentObjectMethodsAndProperties);
 	}
 	
 	public boolean isVisible() {
-		return popup.isShowing();
+		return this.isShowing();
 	}
 	
 	
