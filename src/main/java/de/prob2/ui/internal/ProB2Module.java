@@ -6,9 +6,12 @@ import java.util.ResourceBundle;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+
 import de.prob.MainModule;
+
 import de.prob2.ui.AnimationPerspective;
 import de.prob2.ui.animations.AnimationsView;
+import de.prob2.ui.config.Config;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MenuController;
@@ -21,6 +24,8 @@ import de.prob2.ui.prob2fx.CurrentStateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
+import de.prob2.ui.stats.StatsView;
+
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
@@ -34,6 +39,7 @@ public class ProB2Module extends AbstractModule {
 		
 		// General stuff
 		bind(ClassBlacklist.class);
+		bind(Config.class);
 		bind(CurrentModel.class);
 		bind(CurrentState.class);
 		bind(CurrentStateSpace.class);
@@ -49,6 +55,7 @@ public class ProB2Module extends AbstractModule {
 		bind(ModelineController.class);
 		bind(OperationsView.class);
 		bind(StatesView.class);
+		bind(StatsView.class);
 		bind(AnimationsView.class);
 	}
 

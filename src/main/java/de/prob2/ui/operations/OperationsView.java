@@ -193,16 +193,17 @@ public final class OperationsView extends AnchorPane {
 			String name = extractPrettyName(transition.getName());
 			notEnabled.remove(name);
 			List<String> params = transition.getParams();
+			List<String> returnValues = transition.getReturnValues();
 			boolean explored = transition.getDestination().isExplored();
 			boolean errored = explored && !transition.getDestination().isInvariantOk();
 			logger.debug("{} {}", name, errored);
-			Operation operation = new Operation(id, name, params, true, withTimeout.contains(name), explored, errored);
+			Operation operation = new Operation(id, name, params, returnValues, true, withTimeout.contains(name), explored, errored);
 			events.add(operation);
 		}
 		if (showNotEnabled) {
 			for (String s : notEnabled) {
 				if (!"INITIALISATION".equals(s)) {
-					events.add(new Operation(s, s, opToParams.get(s), false, withTimeout.contains(s), false, false));
+					events.add(new Operation(s, s, opToParams.get(s),Collections.emptyList(), false, withTimeout.contains(s), false, false));
 				}
 			}
 		}
@@ -371,5 +372,7 @@ public final class OperationsView extends AnchorPane {
 				opToParams.put(e.getName(), paramList);
 			}
 		}
+		
+		
 	}
 }

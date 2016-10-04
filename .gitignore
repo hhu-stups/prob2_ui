@@ -20,3 +20,4 @@
 *.log
 *.log.*
 prob_log.txt
+*.prob

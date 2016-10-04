@@ -22,6 +22,7 @@ import de.prob.statespace.StateSpace;
 
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.stats.StatsView;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -65,6 +66,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private final Injector injector;
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
+	private final StatsView statsView;
 	
 	private final Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
 
@@ -78,11 +80,13 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		final Injector injector,
 		final AnimationSelector animations,
 		final CurrentTrace currentTrace,
-		final CurrentStage currentStage
+		final CurrentStage currentStage,
+		final StatsView statsView
 	) {
 		this.injector = injector;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
+		this.statsView = statsView;
 		
 		final FXMLLoader mainLoader = injector.getInstance(FXMLLoader.class);
 		mainLoader.setLocation(getClass().getResource("modelchecking_stats_view.fxml"));
@@ -109,7 +113,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@FXML
 	public void initialize() {
-		showStats(new ModelCheckStats(injector.getInstance(FXMLLoader.class), this));
+		showStats(new ModelCheckStats(injector.getInstance(FXMLLoader.class), this, statsView));
 		historyNodeList = historyBox.getChildren();
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
@@ -121,7 +125,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {
 		currentOptions = options;
-		currentStats = new ModelCheckStats(injector.getInstance(FXMLLoader.class), this);
+		currentStats = new ModelCheckStats(injector.getInstance(FXMLLoader.class), this, statsView);
 		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, this));
 		currentStats.addJob(checker.getJobId(), checker);
 		showStats(currentStats);
@@ -236,7 +240,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	}
 
 	public void resetView() {
-		showStats(new ModelCheckStats(injector.getInstance(FXMLLoader.class), this));
+		showStats(new ModelCheckStats(injector.getInstance(FXMLLoader.class), this, statsView));
 		historyNodeList.clear();
 	}
 	

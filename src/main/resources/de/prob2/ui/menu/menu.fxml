@@ -3,10 +3,16 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.layout.BorderPane?>
 <fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml" BorderPane.alignment="CENTER">
 	<Menu text="%menu.file">
 		<MenuItem text="%menu.file.items.open" accelerator="Shortcut+O" onAction="#handleOpen" />
+		<Menu fx:id="recentFilesMenu" text="%menu.file.items.openRecent">
+			<MenuItem fx:id="recentFilesPlaceholder" text="%menu.file.items.openRecent.items.placeholder" disable="true" />
+			<SeparatorMenuItem/>
+			<MenuItem fx:id="clearRecentFiles" text="%menu.file.items.openRecent.items.clear" onAction="#handleClearRecentFiles" />
+		</Menu>
 		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W" onAction="#handleClose" />
 	</Menu>
 	<Menu text="%menu.edit">

@@ -28,9 +28,8 @@ public final class ClassBlacklist {
 	@SuppressWarnings("unchecked")
 	private ClassBlacklist() {
 		super();
-		// Hide Action objects by default (they display as source code condensed
-		// into a single line otherwise)
-		this.blacklist = FXCollections.observableSet(Action.class);
+		// Some classes are hidden in the default config file
+		this.blacklist = FXCollections.observableSet();
 		this.knownClasses = FXCollections.observableSet(
 			Action.class,
 			Assertion.class,
