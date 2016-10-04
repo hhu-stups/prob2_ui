@@ -149,15 +149,6 @@ public class GroovyConsole extends TextArea {
 			currentPosInLine += diff;
 			charCounterInLine += diff;
 			this.positionCaret(caret + diff);
-			
-		} else if(((CodeCompletionEvent) e).getCode() == KeyCode.LEFT) {
-				if('.' == getCurrentLine().charAt(currentPosInLine - 1)) {
-					interpreter.triggerCloseCodeCompletion();
-				}
-		} else if(((CodeCompletionEvent) e).getCode() == KeyCode.RIGHT) {
-			if(';' == getCurrentLine().charAt(currentPosInLine - 1)) {
-				interpreter.triggerCloseCodeCompletion();
-			}
 		}
 	}
 	

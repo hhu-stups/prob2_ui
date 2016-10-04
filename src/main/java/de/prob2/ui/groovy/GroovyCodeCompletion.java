@@ -25,6 +25,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.shape.Path;
 import javafx.stage.Popup;
 
@@ -71,47 +72,65 @@ public class GroovyCodeCompletion extends Popup {
 		lv_suggestions.setOnKeyPressed(e-> {
 			
 			if(e.getCode().equals(KeyCode.ENTER)) {
+				//handle Enter in Groovy Code Completion
 				chooseMethod(e);
 				return;
 			}
 			if(e.getCode().equals(KeyCode.LEFT) || e.getCode().equals(KeyCode.RIGHT)) {
-				if(e.getCode().equals(KeyCode.LEFT)) {
-					currentPosInSuggestion = Math.max(0, currentPosInSuggestion-1);
-				} else if(e.getCode().equals(KeyCode.RIGHT)) {
-					currentPosInSuggestion = Math.min(currentSuggestion.length() - 1, currentPosInSuggestion + 1);
-				}
-				filterSuggestions("", CodeCompletionAction.ARROWKEY);
-				getParent().fireEvent(new CodeCompletionEvent(e)); //can be improved
+				handleArrowKey(e);
 				return;
 			}
+			
 			if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
-				if(e.getCode().equals(KeyCode.DELETE)) {
-					if(currentPosInSuggestion != charCounterInSuggestion) {
-
-						charCounterInSuggestion--;
-						currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.min(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
-					}
-				} else if(e.getCode().equals(KeyCode.BACK_SPACE)) {
-					if(currentPosInSuggestion != 0) {
-						currentPosInSuggestion--;
-						charCounterInSuggestion--;
-						currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.max(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
-					}					
-					
-				}
-				filterSuggestions("", CodeCompletionAction.DELETION);
-				if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
-					deactivate();
-				}
+				handleDeletion(e);
 				return;
-				
 			}
+			
 			if(e.getText().length() == 1 && !".".equals(e.getText())) {
-
+				//handle Insert Char
 				filterSuggestions(e.getText(), CodeCompletionAction.INSERTION);
 			}
 		});
 		
+	}
+	
+	private void handleArrowKey(KeyEvent e) {
+		if(e.getCode().equals(KeyCode.LEFT)) {
+			if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
+				deactivate();
+				return;
+			}
+			currentPosInSuggestion = Math.max(0, currentPosInSuggestion-1);
+
+		} else if(e.getCode().equals(KeyCode.RIGHT)) {
+			if(';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
+				deactivate();
+				return;
+			}
+			currentPosInSuggestion = Math.min(currentSuggestion.length() - 1, currentPosInSuggestion + 1);
+		}
+		filterSuggestions("", CodeCompletionAction.ARROWKEY);
+		getParent().fireEvent(new CodeCompletionEvent(e)); //can be improved
+	}
+	
+	private void handleDeletion(KeyEvent e) {
+		if(e.getCode().equals(KeyCode.DELETE)) {
+			if(currentPosInSuggestion != charCounterInSuggestion) {
+				charCounterInSuggestion--;
+				currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.min(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
+			}
+		} else if(e.getCode().equals(KeyCode.BACK_SPACE)) {
+			if(currentPosInSuggestion != 0) {
+				currentPosInSuggestion--;
+				charCounterInSuggestion--;
+				currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.max(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
+			}					
+			
+		}
+		filterSuggestions("", CodeCompletionAction.DELETION);
+		if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
+			deactivate();
+		}
 	}
 	
 	private void chooseMethod(Event e) {
@@ -123,6 +142,7 @@ public class GroovyCodeCompletion extends Popup {
 	
 	
 	private void filterSuggestions(String addition, CodeCompletionAction action) {
+		//currentInstruction refactorable?
 		String currentInstruction ="";
 		currentInstruction = currentSuggestion;
 		if(action.equals(CodeCompletionAction.ARROWKEY)) {
