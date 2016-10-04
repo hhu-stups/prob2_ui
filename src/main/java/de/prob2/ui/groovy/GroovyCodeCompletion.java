@@ -61,14 +61,12 @@ public class GroovyCodeCompletion extends Popup {
 		}
 		this.engine = engine;
 		this.parent = null;
-		this.currentObjectMethodsAndProperties = new ArrayList<GroovyClassPropertyItem>();
+		this.currentObjectMethodsAndProperties = new ArrayList<>();
 		this.currentSuggestion = "";
 		this.currentPosInSuggestion = 0;
 		this.charCounterInSuggestion = 0;
 		lv_suggestions.setItems(suggestions);
-		lv_suggestions.setOnMouseClicked(e-> {
-			chooseMethod(e);
-		});
+		lv_suggestions.setOnMouseClicked(this::chooseMethod);
 		lv_suggestions.setOnKeyPressed(e-> {
 			
 			if(e.getCode().equals(KeyCode.ENTER)) {
@@ -123,18 +121,13 @@ public class GroovyCodeCompletion extends Popup {
 	
 	
 	private void handleDeletion(KeyEvent e) {
-		if(e.getCode().equals(KeyCode.DELETE)) {
-			if(currentPosInSuggestion != charCounterInSuggestion) {
-				charCounterInSuggestion--;
-				currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.min(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
-			}
-		} else if(e.getCode().equals(KeyCode.BACK_SPACE)) {
-			if(currentPosInSuggestion != 0) {
-				currentPosInSuggestion--;
-				charCounterInSuggestion--;
-				currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.max(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
-			}					
-			
+		if(e.getCode().equals(KeyCode.DELETE) && currentPosInSuggestion != charCounterInSuggestion) {
+			charCounterInSuggestion--;
+			currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.min(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
+		} else if(e.getCode().equals(KeyCode.BACK_SPACE) && currentPosInSuggestion != 0) {
+			currentPosInSuggestion--;
+			charCounterInSuggestion--;
+			currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.max(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());				
 		}
 		filterSuggestions("", CodeCompletionAction.DELETION);
 		if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
