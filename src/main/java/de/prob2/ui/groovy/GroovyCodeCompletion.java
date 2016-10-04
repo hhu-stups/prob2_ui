@@ -215,6 +215,9 @@ public class GroovyCodeCompletion extends Popup {
 						clazz = item.getReturnTypeClass();
 						break;
 				}
+				if(i == methods.length - 1) {
+					return;
+				}
 			}
 		}
 		showSuggestions(clazz);
