@@ -15,6 +15,7 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MenuController;
+import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.modeline.ModelineController;
 import de.prob2.ui.operations.OperationsView;
@@ -45,10 +46,12 @@ public class ProB2Module extends AbstractModule {
 		bind(CurrentStateSpace.class);
 		bind(CurrentTrace.class);
 		bind(FormulaGenerator.class);
+		bind(RecentFiles.class);
 		bind(ResourceBundle.class).toInstance(bundle);
 
 		// Controllers
 		bind(AnimationPerspective.class);
+		bind(AnimationsView.class);
 		bind(HistoryView.class);
 		bind(MenuController.class);
 		bind(ModelcheckingController.class);
@@ -56,7 +59,6 @@ public class ProB2Module extends AbstractModule {
 		bind(OperationsView.class);
 		bind(StatesView.class);
 		bind(StatsView.class);
-		bind(AnimationsView.class);
 	}
 
 	@Provides
