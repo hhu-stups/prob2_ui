@@ -13,13 +13,15 @@ public class CodeCompletionEvent extends Event {
     private Event event;
     private KeyCode code;
     private String choice;
+    private String currentSuggestion;
 	
 
-	public CodeCompletionEvent(Event event, String choice) {
+	public CodeCompletionEvent(Event event, String choice, String suggestion) {
 		super(CODECOMPLETION);
 		this.event = event;
 		this.choice = choice;
 		this.code = null;
+		this.currentSuggestion = suggestion;
 		if(event instanceof KeyEvent) {
 			this.code = ((KeyEvent) event).getCode();
 		}
@@ -45,6 +47,10 @@ public class CodeCompletionEvent extends Event {
 	
 	public String getChoice() {
 		return choice;
+	}
+	
+	public String getCurrentSuggestion() {
+		return currentSuggestion;
 	}
 	
 }

@@ -140,11 +140,16 @@ public class GroovyConsole extends TextArea {
 	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
 		if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent) {
 			String choice = ((CodeCompletionEvent) e).getChoice();
-			String currentInstruction = getCurrentInstruction(getCurrentLine());
-			this.setText(this.getText().substring(0, this.getText().lastIndexOf(currentInstruction)));
-			this.appendText(choice);
-			currentPosInLine += choice.length() - currentInstruction.length();
-			charCounterInLine += choice.length() - currentInstruction.length();
+			String suggestion = ((CodeCompletionEvent) e).getCurrentSuggestion();
+			choice = choice.substring(suggestion.length());
+			String newText = new StringBuilder(this.getText()).insert(this.getCaretPosition(), choice).toString();
+			int diff = newText.length() - this.getText().length();
+			int caret = this.getCaretPosition();
+			this.setText(newText);
+			currentPosInLine += diff;
+			charCounterInLine += diff;
+			this.positionCaret(caret + diff);
+			
 		} else if(((CodeCompletionEvent) e).getCode() == KeyCode.LEFT) {
 				if('.' == getCurrentLine().charAt(currentPosInLine - 1)) {
 					interpreter.triggerCloseCodeCompletion();
@@ -155,15 +160,6 @@ public class GroovyConsole extends TextArea {
 			}
 		}
 	}
-	
-	@Deprecated
-	public String getCurrentInstruction(String filter) {
-		int indexOfPoint = filter.lastIndexOf('.');
-		int indexOfSemicolon = Math.max(filter.lastIndexOf(';'),filter.length());
-		String result = filter.substring(indexOfPoint + 1, indexOfSemicolon);
-		return result;
-	}
-	//1 Error hier und 1 Error in GroovyCodeCompletion
 	
 	private void goToLastPos() {
 		this.positionCaret(this.getLength());

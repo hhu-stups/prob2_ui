@@ -43,6 +43,12 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private List<GroovyClassPropertyItem> currentObjectMethodsAndProperties;
 	
+	private String currentSuggestion;
+	
+	private int currentPosInSuggestion;
+	
+	private int charCounterInSuggestion;
+	
 	public GroovyCodeCompletion(FXMLLoader loader, ScriptEngine engine) {
 		loader.setLocation(getClass().getResource("groovy_codecompletion_popup.fxml"));
 		loader.setRoot(this);
@@ -55,6 +61,9 @@ public class GroovyCodeCompletion extends Popup {
 		this.engine = engine;
 		this.parent = null;
 		this.currentObjectMethodsAndProperties = new ArrayList<GroovyClassPropertyItem>();
+		this.currentSuggestion = "";
+		this.currentPosInSuggestion = 0;
+		this.charCounterInSuggestion = 0;
 		lv_suggestions.setItems(suggestions);
 		lv_suggestions.setOnMouseClicked(e-> {
 			chooseMethod(e);
@@ -63,12 +72,34 @@ public class GroovyCodeCompletion extends Popup {
 			
 			if(e.getCode().equals(KeyCode.ENTER)) {
 				chooseMethod(e);
+				return;
 			}
 			if(e.getCode().equals(KeyCode.LEFT) || e.getCode().equals(KeyCode.RIGHT)) {
-				getParent().fireEvent(new CodeCompletionEvent(e));
+				if(e.getCode().equals(KeyCode.LEFT)) {
+					currentPosInSuggestion = Math.max(0, currentPosInSuggestion-1);
+				} else if(e.getCode().equals(KeyCode.RIGHT)) {
+					currentPosInSuggestion = Math.min(currentSuggestion.length() - 1, currentPosInSuggestion + 1);
+				}
+				filterSuggestions("", CodeCompletionAction.ARROWKEY);
+				getParent().fireEvent(new CodeCompletionEvent(e)); //can be improved
+				return;
 			}
 			if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
-				filterSuggestions("");
+				if(e.getCode().equals(KeyCode.DELETE)) {
+					if(currentPosInSuggestion != charCounterInSuggestion) {
+
+						charCounterInSuggestion--;
+						currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.min(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
+					}
+				} else if(e.getCode().equals(KeyCode.BACK_SPACE)) {
+					if(currentPosInSuggestion != 0) {
+						currentPosInSuggestion--;
+						charCounterInSuggestion--;
+						currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.max(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
+					}					
+					
+				}
+				filterSuggestions("", CodeCompletionAction.DELETION);
 				if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
 					deactivate();
 				}
@@ -76,7 +107,8 @@ public class GroovyCodeCompletion extends Popup {
 				
 			}
 			if(e.getText().length() == 1 && !".".equals(e.getText())) {
-				filterSuggestions(e.getText());
+
+				filterSuggestions(e.getText(), CodeCompletionAction.INSERTION);
 			}
 		});
 		
@@ -84,21 +116,28 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private void chooseMethod(Event e) {
 		if(lv_suggestions.getSelectionModel().getSelectedItem() != null) {
-			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams()));
+			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams(), currentSuggestion));
 		}
 		deactivate();
 	}
 	
-	@Deprecated
-	private void filterSuggestions(String addition) {
-		String currentInstruction = getParent().getCurrentLine() + addition;
-		if("".equals(addition)) {
-			currentInstruction = currentInstruction.substring(0, currentInstruction.length()-1);
+	
+	private void filterSuggestions(String addition, CodeCompletionAction action) {
+		String currentInstruction ="";
+		currentInstruction = currentSuggestion;
+		if(action.equals(CodeCompletionAction.ARROWKEY)) {
+			currentInstruction = currentSuggestion.substring(0, currentPosInSuggestion);
+			
+		} else if(action.equals(CodeCompletionAction.INSERTION)) {
+			currentSuggestion = new StringBuilder(currentSuggestion).insert(currentPosInSuggestion, addition.charAt(0)).toString();
+			currentPosInSuggestion++;
+			charCounterInSuggestion++;
+			currentInstruction = currentSuggestion;
+			
 		}
-		currentInstruction = getParent().getCurrentInstruction(currentInstruction);
 		refresh(currentInstruction);
 	}
-	//2 Errors hier
+	
 	
 	private void refresh(String filter) {
 		suggestions.clear();
@@ -176,6 +215,9 @@ public class GroovyCodeCompletion extends Popup {
 	public void deactivate() {
 		suggestions.clear();
 		currentObjectMethodsAndProperties.clear();
+		currentSuggestion ="";
+		currentPosInSuggestion = 0;
+		charCounterInSuggestion = 0;
 		this.hide();
 	}
 	
