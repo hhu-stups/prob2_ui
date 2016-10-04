@@ -138,7 +138,7 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
-		if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent) {
+		if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent)((CodeCompletionEvent) e).getEvent()).getText())) {
 			String choice = ((CodeCompletionEvent) e).getChoice();
 			String suggestion = ((CodeCompletionEvent) e).getCurrentSuggestion();
 			choice = choice.substring(suggestion.length());

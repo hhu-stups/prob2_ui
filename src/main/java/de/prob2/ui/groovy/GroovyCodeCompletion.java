@@ -76,6 +76,11 @@ public class GroovyCodeCompletion extends Popup {
 				chooseMethod(e);
 				return;
 			}
+			if(";".equals(e.getText())) {
+				//handle Semicolon
+				chooseFirst(e);
+				return;
+			}
 			if(e.getCode().equals(KeyCode.LEFT) || e.getCode().equals(KeyCode.RIGHT)) {
 				handleArrowKey(e);
 				return;
@@ -94,6 +99,7 @@ public class GroovyCodeCompletion extends Popup {
 		
 	}
 	
+	
 	private void handleArrowKey(KeyEvent e) {
 		if(e.getCode().equals(KeyCode.LEFT)) {
 			if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
@@ -111,6 +117,10 @@ public class GroovyCodeCompletion extends Popup {
 		}
 		filterSuggestions("", CodeCompletionAction.ARROWKEY);
 	}
+	
+	
+	
+	
 	
 	private void handleDeletion(KeyEvent e) {
 		if(e.getCode().equals(KeyCode.DELETE)) {
@@ -132,9 +142,19 @@ public class GroovyCodeCompletion extends Popup {
 		}
 	}
 	
+	
+	
+	
 	private void chooseMethod(Event e) {
 		if(lv_suggestions.getSelectionModel().getSelectedItem() != null) {
 			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams(), currentSuggestion));
+		}
+		deactivate();
+	}
+	
+	private void chooseFirst(Event e) {
+		if(lv_suggestions.getItems().get(0) != null) {
+			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getItems().get(0).getNameAndParams(), currentSuggestion));
 		}
 		deactivate();
 	}
