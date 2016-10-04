@@ -11,6 +11,7 @@ import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 
+import de.prob2.ui.stats.StatsView;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -41,6 +42,10 @@ public final class AnimationPerspective extends BorderPane {
 	private ModelcheckingController modelcheck;
 	@FXML
 	private TitledPane modelcheckTP;
+	@FXML
+	private StatsView stats;
+	@FXML
+	private TitledPane statsTP;
 	@FXML
 	private AnimationsView animations;
 	@FXML
@@ -84,6 +89,7 @@ public final class AnimationPerspective extends BorderPane {
 		nodeMap.put(history,historyTP);
 		nodeMap.put(modelcheck,modelcheckTP);
 		nodeMap.put(animations,animationsTP);
+		nodeMap.put(stats,statsTP);
 		leftAccordion.setExpandedPane(operationsTP);
 		onDrag();
 	}
@@ -138,8 +144,6 @@ public final class AnimationPerspective extends BorderPane {
 
 		boolean right = position.getX() > this.getScene().getWidth()/2;
 		boolean top = position.getY() < this.getScene().getHeight()/2;
-		boolean bottom = !top;
-		boolean left = !right;
 
 		if (right && middleY && !rightAccordion.getPanes().contains(nodeTP)) {
 			nodeTP.setCollapsible(false);
@@ -147,10 +151,10 @@ public final class AnimationPerspective extends BorderPane {
 		} else if (top && middleX && !topAccordion.getPanes().contains(nodeTP)) {
 			nodeTP.setCollapsible(true);
 			switchParent(oldParent,topAccordion,nodeTP);
-		} else if (bottom && middleX && !bottomAccordion.getPanes().contains(nodeTP)) {
+		} else if (!top && middleX && !bottomAccordion.getPanes().contains(nodeTP)) {
 			nodeTP.setCollapsible(true);
 			switchParent(oldParent,bottomAccordion,nodeTP);
-		} else if (left && middleY && !leftAccordion.getPanes().contains(nodeTP)){
+		} else if (!right && middleY && !leftAccordion.getPanes().contains(nodeTP)){
 			nodeTP.setCollapsible(false);
 			switchParent(oldParent,leftAccordion,nodeTP);
 		}
