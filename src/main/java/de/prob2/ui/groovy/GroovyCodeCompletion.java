@@ -147,14 +147,14 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private void chooseMethod(Event e) {
 		if(lv_suggestions.getSelectionModel().getSelectedItem() != null) {
-			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams(), currentSuggestion));
+			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams(), currentSuggestion.substring(0, currentPosInSuggestion)));
 		}
 		deactivate();
 	}
 	
 	private void chooseFirst(Event e) {
 		if(lv_suggestions.getItems().get(0) != null) {
-			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getItems().get(0).getNameAndParams(), currentSuggestion));
+			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getItems().get(0).getNameAndParams(), currentSuggestion.substring(0, currentPosInSuggestion)));
 		}
 		deactivate();
 	}
@@ -179,7 +179,7 @@ public class GroovyCodeCompletion extends Popup {
 		suggestions.clear();
 		for(int i = 0; i < currentObjectMethodsAndProperties.size(); i++) {
 			GroovyClassPropertyItem suggestion = currentObjectMethodsAndProperties.get(i);
-			if(suggestion.getNameAndParams().contains(filter)) {
+			if(suggestion.getNameAndParams().startsWith(filter)) {
 				suggestions.add(suggestion);
 			}
 		}
