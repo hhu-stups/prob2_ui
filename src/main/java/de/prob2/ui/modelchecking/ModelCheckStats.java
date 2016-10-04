@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class ModelCheckStats extends AnchorPane {
-	public static enum Result {
+	public enum Result {
 		SUCCESS, DANGER, WARNING
 	}
 	
