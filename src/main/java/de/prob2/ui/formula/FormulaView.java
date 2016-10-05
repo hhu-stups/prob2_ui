@@ -5,6 +5,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 
@@ -24,7 +25,9 @@ public class FormulaView extends Stage {
 		group = new Group();
 		root = new ScrollPane(group);
 		group.getChildren().add(graph);
-		Scene scene = new Scene(root, 1024, 768);
+		// Wrap root in a StackPane so the Mac menu bar can be set
+		// (the root has to be a Pane subclass, and ScrollPane extends Control and not Pane)
+		Scene scene = new Scene(new StackPane(root), 1024, 768);
 		scene.getStylesheets().add("prob.css");
 		this.setTitle("Mathematical Expression");
 		this.setScene(scene);
