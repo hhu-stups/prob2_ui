@@ -1,6 +1,7 @@
 package de.prob2.ui.states;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,17 +34,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //@Singleton
-public class StatesView extends AnchorPane {
-	@FXML
-	private TreeTableView<StateTreeItem<?>> tv;
-	@FXML
-	private TreeTableColumn<StateTreeItem<?>, String> tvName;
-	@FXML
-	private TreeTableColumn<StateTreeItem<?>, String> tvValue;
-	@FXML
-	private TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
-	@FXML
-	private TreeItem<StateTreeItem<?>> tvRootItem;
+public final class StatesView extends AnchorPane {
+	private static final Logger logger = LoggerFactory.getLogger(StatesView.class);
+	
+	@FXML private TreeTableView<StateTreeItem<?>> tv;
+	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvName;
+	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvValue;
+	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
+	@FXML private TreeItem<StateTreeItem<?>> tvRootItem;
 
 	private final CurrentTrace currentTrace;
 	private final ClassBlacklist classBlacklist;
@@ -52,11 +50,13 @@ public class StatesView extends AnchorPane {
 	private Map<IEvalElement, AbstractEvalResult> currentValues;
 	private Map<IEvalElement, AbstractEvalResult> previousValues;
 
-	private Logger logger = LoggerFactory.getLogger(StatesView.class);
-
 	@Inject
-	private StatesView(final CurrentTrace currentTrace, final ClassBlacklist classBlacklist,
-			final FormulaGenerator formulaGenerator, final FXMLLoader loader) {
+	private StatesView(
+		final CurrentTrace currentTrace,
+		final ClassBlacklist classBlacklist,
+		final FormulaGenerator formulaGenerator,
+		final FXMLLoader loader
+	) {
 		this.currentTrace = currentTrace;
 		this.classBlacklist = classBlacklist;
 		this.formulaGenerator = formulaGenerator;
@@ -105,13 +105,13 @@ public class StatesView extends AnchorPane {
 				StateTreeItem<?> sti = ti.getValue();
 				if (sti.getContents().equals(e)) {
 					childItem = ti;
-					childItem.getValue().update(this.currentValues, this.previousValues);
+					childItem.setValue(ElementStateTreeItem.fromElementAndValues(e, this.currentValues, this.previousValues));
 					break;
 				}
 			}
 
 			if (childItem == null) {
-				childItem = new TreeItem<>(new ElementStateTreeItem(e, this.currentValues, this.previousValues));
+				childItem = new TreeItem<>(ElementStateTreeItem.fromElementAndValues(e, this.currentValues, this.previousValues));
 				treeItem.getChildren().add(childItem);
 			}
 
@@ -135,7 +135,7 @@ public class StatesView extends AnchorPane {
 			}
 		}
 
-		treeItem.getChildren().sort((a, b) -> a.getValue().getName().compareTo(b.getValue().getName()));
+		treeItem.getChildren().sort(Comparator.comparing(a -> a.getValue().getName()));
 	}
 
 	private void updateChildren(final Trace trace, final TreeItem<StateTreeItem<?>> treeItem,
@@ -180,7 +180,7 @@ public class StatesView extends AnchorPane {
 			}
 		}
 
-		treeItem.getChildren().sort((a, b) -> a.getValue().getName().compareTo(b.getValue().getName()));
+		treeItem.getChildren().sort(Comparator.comparing(a -> a.getValue().getName()));
 	}
 
 	private void updateRoot(final Trace trace) {
