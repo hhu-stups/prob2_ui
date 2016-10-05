@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
@@ -16,6 +18,7 @@ import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.formula.FormulaGenerator;
+import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.binding.Bindings;
@@ -43,6 +46,7 @@ public final class StatesView extends AnchorPane {
 	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
 	@FXML private TreeItem<StateTreeItem<?>> tvRootItem;
 
+	private final Injector injector;
 	private final CurrentTrace currentTrace;
 	private final ClassBlacklist classBlacklist;
 	private final FormulaGenerator formulaGenerator;
@@ -52,11 +56,13 @@ public final class StatesView extends AnchorPane {
 
 	@Inject
 	private StatesView(
+		final Injector injector,
 		final CurrentTrace currentTrace,
 		final ClassBlacklist classBlacklist,
 		final FormulaGenerator formulaGenerator,
 		final FXMLLoader loader
 	) {
+		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.classBlacklist = classBlacklist;
 		this.formulaGenerator = formulaGenerator;
@@ -200,19 +206,43 @@ public final class StatesView extends AnchorPane {
 			final TreeTableRow<StateTreeItem<?>> row = new TreeTableRow<>();
 			final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
 			// Expression can only be shown if the row item is an ElementStateTreeItem containing an AbstractFormulaElement and the current state is initialized.
-			visualizeExpressionItem.disableProperty().bind(
-				Bindings.createBooleanBinding(
-					() -> !(row.getItem() instanceof ElementStateTreeItem && row.getItem().getContents() instanceof AbstractFormulaElement),
+			visualizeExpressionItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> !(
+					row.getItem() instanceof ElementStateTreeItem
+					&& row.getItem().getContents() instanceof AbstractFormulaElement
+				),
 					row.itemProperty()
 				).or(currentTrace.currentStateProperty().initializedProperty().not())
 			);
 			visualizeExpressionItem.setOnAction(event -> {
 				visualizeExpression((AbstractFormulaElement) ((ElementStateTreeItem) row.getItem()).getContents());
 			});
+			
+			final MenuItem showFullValueItem = new MenuItem("Show Full Value");
+			// Full value can only be shown if the row item is an ElementStateTreeItem containing an AbstractFormulaElement and the corresponding value is an EvalResult.
+			showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> !(
+					row.getItem() instanceof ElementStateTreeItem
+					&& row.getItem().getContents() instanceof AbstractFormulaElement
+					&& this.currentValues.get(((AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents()).getFormula()) instanceof EvalResult
+				),
+				row.itemProperty()
+			));
+			showFullValueItem.setOnAction(event -> {
+				logger.trace("Showing full value for row {}", row);
+				final AbstractFormulaElement element = (AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents();
+				final EvalResult value = (EvalResult)this.currentValues.get(element.getFormula());
+				final FullValueStage stage = injector.getInstance(FullValueStage.class);
+				injector.getInstance(CurrentStage.class).register(stage);
+				stage.setTitle(element.toString());
+				stage.setAsciiText(value.getValue());
+				stage.show();
+			});
+			
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu) null)
-				.otherwise(new ContextMenu(visualizeExpressionItem))
+				.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem))
 			);
 			return row;
 		});

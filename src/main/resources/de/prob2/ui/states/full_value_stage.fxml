@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.Region?>
+<fx:root type="Stage" width="480" height="320" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene stylesheets="@../../../../prob.css">
+			<BorderPane maxWidth="Infinity" maxHeight="Infinity">
+				<padding>
+					<Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+				</padding>
+				<center>
+					<TextArea fx:id="textarea" editable="false" maxWidth="Infinity" maxHeight="Infinity"/>
+				</center>
+				<bottom>
+					<HBox spacing="10.0">
+						<padding>
+							<Insets top="10.0"/>
+						</padding>
+						<RadioButton fx:id="asciiRadio" selected="true" text="ASCII" HBox.hgrow="NEVER" onAction="#updateText">
+							<toggleGroup>
+								<ToggleGroup fx:id="asciiUnicodeGroup"/>
+							</toggleGroup>
+						</RadioButton>
+						<RadioButton fx:id="unicodeRadio" text="Unicode" HBox.hgrow="NEVER" onAction="#updateText">
+							<toggleGroup>
+								<fx:reference source="asciiUnicodeGroup"/>
+							</toggleGroup>
+						</RadioButton>
+						<Region minWidth="-Infinity" maxWidth="Infinity" minHeight="-Infinity" maxHeight="Infinity" HBox.hgrow="ALWAYS"/>
+						<Button fx:id="saveAsButton" text="Save As..." alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#saveAs"/>
+					</HBox>
+				</bottom>
+			</BorderPane>
+		</Scene>
+	</scene>
+</fx:root>
