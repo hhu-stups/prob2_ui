@@ -123,7 +123,7 @@ public class GroovyClassPropertyItem {
 					parameterNames.add(c.getName());
 				}
 			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+				logger.error("", e);
 			}
 		}
 		this.params = new SimpleStringProperty(String.join(", ", parameterNames));
@@ -134,7 +134,7 @@ public class GroovyClassPropertyItem {
 		try {
 			this.declarer = new SimpleStringProperty(Class.forName(m.getDeclaringClass().getName()).getSimpleName());
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			logger.error("", e);
 		}
 		this.exception = new SimpleStringProperty();
 		this.value = new SimpleStringProperty();
