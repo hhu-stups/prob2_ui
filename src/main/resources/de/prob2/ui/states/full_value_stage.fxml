@@ -10,7 +10,7 @@
 <?import javafx.stage.Stage?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.Region?>
-<fx:root type="Stage" width="480" height="320" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" minWidth="240" minHeight="160" width="480" height="320" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@../../../../prob.css">
 			<BorderPane maxWidth="Infinity" maxHeight="Infinity">
@@ -18,7 +18,7 @@
 					<Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
 				</padding>
 				<center>
-					<TextArea fx:id="textarea" editable="false" maxWidth="Infinity" maxHeight="Infinity"/>
+					<TextArea fx:id="textarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity"/>
 				</center>
 				<bottom>
 					<HBox spacing="10.0">

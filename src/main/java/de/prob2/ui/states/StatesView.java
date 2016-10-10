@@ -31,6 +31,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
 import org.slf4j.Logger;
@@ -202,8 +203,9 @@ public final class StatesView extends AnchorPane {
 		this.currentValues = null;
 		this.previousValues = null;
 
-		tv.setRowFactory(view -> {
+		tv.setRowFactory(view -> { // NOSONAR // Sonar counts every if statement in a lambda as a conditional expression and complains if there are more than 3. This is not a reasonable limit here.
 			final TreeTableRow<StateTreeItem<?>> row = new TreeTableRow<>();
+			
 			final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
 			// Expression can only be shown if the row item is an ElementStateTreeItem containing an AbstractFormulaElement and the current state is initialized.
 			visualizeExpressionItem.disableProperty().bind(Bindings.createBooleanBinding(
@@ -229,7 +231,6 @@ public final class StatesView extends AnchorPane {
 				row.itemProperty()
 			));
 			showFullValueItem.setOnAction(event -> {
-				logger.trace("Showing full value for row {}", row);
 				final AbstractFormulaElement element = (AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents();
 				final EvalResult value = (EvalResult)this.currentValues.get(element.getFormula());
 				final FullValueStage stage = injector.getInstance(FullValueStage.class);
@@ -244,6 +245,14 @@ public final class StatesView extends AnchorPane {
 				.then((ContextMenu) null)
 				.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem))
 			);
+			
+			// Double-click on an item triggers "show full value" if allowed.
+			row.setOnMouseClicked(event -> {
+				if (!showFullValueItem.isDisable() && event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+					showFullValueItem.getOnAction().handle(null);
+				}
+			});
+			
 			return row;
 		});
 
