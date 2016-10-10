@@ -189,18 +189,19 @@ public class GroovyCodeCompletion extends Popup {
 	public void activate(GroovyConsole console, String currentLine) {
 		this.parent = console;
 		handleObjects(currentLine);
+		handleStaticClasses(currentLine);
 		showPopup(console);
 	}
 	
+	private void handleStaticClasses(String currentLine) {
+		
+	}
+	
 	private void handleObjects(String currentLine) {
-		String currentInstruction = currentLine.substring(0, getParent().getCurrentPosInLine());	
-		currentInstruction = currentInstruction.replaceAll("\\s","");
-		currentInstruction = splitBraces(currentInstruction);
-		if(getParent().getCurrentPosInLine() == 0 || currentInstruction.charAt(getParent().getCurrentPosInLine() - 1) == ';') {
+		String[] methods = getMethodsFromCurrentLine(currentLine);
+		if(methods == null) {
 			return;
 		}
-		String[] currentObjects = currentInstruction.split(";");
-		String[] methods = currentObjects[currentObjects.length-1].split("\\.");
 		Object object = getObjectFromScope(methods[0]);
 		if(object == null) {
 			return;
@@ -221,6 +222,18 @@ public class GroovyCodeCompletion extends Popup {
 			}
 		}
 		showSuggestions(clazz);
+	}
+	
+	private String[] getMethodsFromCurrentLine(String currentLine) {
+		String currentInstruction = currentLine.substring(0, getParent().getCurrentPosInLine());	
+		if(getParent().getCurrentPosInLine() == 0 || currentInstruction.charAt(getParent().getCurrentPosInLine() - 1) == ';') {
+			return null;
+		}
+		currentInstruction = currentInstruction.replaceAll("\\s","");
+		currentInstruction = splitBraces(currentInstruction);
+		String[] currentObjects = currentInstruction.split(";");
+		String[] methods = currentObjects[currentObjects.length-1].split("\\.");
+		return methods;
 	}
 	
 	public String splitBraces(String currentInstruction) {
