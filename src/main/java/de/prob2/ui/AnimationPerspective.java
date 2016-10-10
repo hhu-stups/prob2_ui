@@ -147,16 +147,21 @@ public final class AnimationPerspective extends BorderPane {
 		boolean right = position.getX() > this.getScene().getWidth()/2;
 		boolean top = position.getY() < this.getScene().getHeight()/2;
 
-		if (right && middleY && !rightAccordion.getPanes().contains(nodeTP)) {
+		boolean switchToRight = right && middleY && !rightAccordion.getPanes().contains(nodeTP);
+		boolean switchToTop = top && middleX && !topAccordion.getPanes().contains(nodeTP);
+		boolean switchToBottom = !top && middleX && !bottomAccordion.getPanes().contains(nodeTP);
+		boolean switchToLeft = !right && middleY && !leftAccordion.getPanes().contains(nodeTP);
+
+		if (switchToRight) {
 			nodeTP.setCollapsible(false);
 			switchParent(oldParent,rightAccordion,nodeTP);
-		} else if (top && middleX && !topAccordion.getPanes().contains(nodeTP)) {
+		} else if (switchToTop) {
 			nodeTP.setCollapsible(true);
 			switchParent(oldParent,topAccordion,nodeTP);
-		} else if (!top && middleX && !bottomAccordion.getPanes().contains(nodeTP)) {
+		} else if (switchToBottom) {
 			nodeTP.setCollapsible(true);
 			switchParent(oldParent,bottomAccordion,nodeTP);
-		} else if (!right && middleY && !leftAccordion.getPanes().contains(nodeTP)){
+		} else if (switchToLeft){
 			nodeTP.setCollapsible(false);
 			switchParent(oldParent,leftAccordion,nodeTP);
 		}
