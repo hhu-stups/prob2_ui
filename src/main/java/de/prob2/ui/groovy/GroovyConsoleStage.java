@@ -33,9 +33,7 @@ public final class GroovyConsoleStage extends Stage {
 			logger.error("loading fxml failed", e);
 		}
 		groovyConsole.setInterpreter(interpreter);
-		this.setOnCloseRequest(e -> {
-			groovyConsole.closeObjectStage();
-		});
+		this.setOnCloseRequest(e -> groovyConsole.closeObjectStage());
 
 		currentStage.register(this);
 	}

@@ -42,10 +42,7 @@ public class GroovyInterpreter {
 				Object eval = engine.eval(instruction.getInstruction());
 				resultString = eval.toString();
 				logger.trace("Evaled {} to {}", instruction.getInstruction(), resultString);
-			} catch (ScriptException e) {
-				logger.debug("Groovy Evaluation failed", e);
-				resultString = e.toString();
-			} catch(GroovyBugError e) {
+			} catch (ScriptException|GroovyBugError e) {
 				logger.debug("Groovy Evaluation failed", e);
 				resultString = e.toString();
 			}

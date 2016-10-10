@@ -166,18 +166,14 @@ public final class OperationsView extends AnchorPane {
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 
-		currentTrace.addListener((observable, from, to) -> {
-			update(to);
-		});
+		currentTrace.addListener((observable, from, to) -> update(to));
 	}
 
 	private void update(Trace trace) {
 		if (trace == null) {
 			currentModel = null;
 			opNames = new ArrayList<>();
-			Platform.runLater(() -> {
-				opsListView.getItems().clear();
-			});
+			Platform.runLater(() -> opsListView.getItems().clear());
 			return;
 		}
 
@@ -209,9 +205,7 @@ public final class OperationsView extends AnchorPane {
 		}
 		doSort();
 
-		Platform.runLater(() -> {
-			opsListView.getItems().setAll(applyFilter(filter));
-		});
+		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
 	}
 
 	@FXML

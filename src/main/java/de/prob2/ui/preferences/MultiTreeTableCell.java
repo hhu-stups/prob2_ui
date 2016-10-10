@@ -139,9 +139,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 				));
 				spinner.setEditable(true);
 				// Commit by pressing Enter in the spinner editor.
-				spinner.getEditor().setOnAction(event -> {
-					this.commitEdit(spinner.getEditor().getText());
-				});
+				spinner.getEditor().setOnAction(event -> this.commitEdit(spinner.getEditor().getText()));
 				// Cancel by pressing Escape in the spinner editor.
 				spinner.getEditor().setOnKeyReleased(event -> {
 					if (event.getCode() == KeyCode.ESCAPE) {
@@ -188,9 +186,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 				// Default case for strings and unknown types, simply display a text field.
 				final TextField textField = new TextField(item.getValue());
 				// Commit by pressing Enter in the text field.
-				textField.setOnAction(event -> {
-					this.commitEdit(textField.getText());
-				});
+				textField.setOnAction(event -> this.commitEdit(textField.getText()));
 				// Cancel by pressing Escape in the text field.
 				textField.setOnKeyReleased(event -> {
 					if (event.getCode() == KeyCode.ESCAPE) {
@@ -236,9 +232,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 						// CheckBox doesn't exist yet, so create it.
 						final CheckBox checkBox = new CheckBox();
 						checkBox.setSelected("true".equals(pti.getValue()));
-						checkBox.setOnAction(event -> {
-							this.instantEdit("" + checkBox.isSelected());
-						});
+						checkBox.setOnAction(event -> this.instantEdit("" + checkBox.isSelected()));
 						this.setText(null);
 						this.setGraphic(checkBox);
 					}
@@ -284,9 +278,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 							: VALID_TYPE_VALUES.get(type)
 						));
 						comboBox.getSelectionModel().select(pti.getValue());
-						comboBox.setOnAction(event -> {
-							this.instantEdit(comboBox.getValue());
-						});
+						comboBox.setOnAction(event -> this.instantEdit(comboBox.getValue()));
 						this.setText(null);
 						this.setGraphic(comboBox);
 					}

@@ -133,9 +133,7 @@ public final class MenuController extends MenuBar {
 	public void initialize() {
 		this.sceneProperty().addListener((observable, from, to) -> {
 			if (to != null) {
-				to.windowProperty().addListener((observable1, from1, to1) -> {
-					this.window = to1;
-				});
+				to.windowProperty().addListener((observable1, from1, to1) -> this.window = to1);
 			}
 		});
 		
@@ -144,9 +142,7 @@ public final class MenuController extends MenuBar {
 			final List<MenuItem> newItems = new ArrayList<>();
 			for (String s : this.recentFiles) {
 				final MenuItem item = new MenuItem(new File(s).getName());
-				item.setOnAction(event -> {
-					this.open(s);
-				});
+				item.setOnAction(event -> this.open(s));
 				newItems.add(item);
 			}
 			

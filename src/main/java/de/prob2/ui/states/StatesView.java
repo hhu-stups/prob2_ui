@@ -216,9 +216,9 @@ public final class StatesView extends AnchorPane {
 					row.itemProperty()
 				).or(currentTrace.currentStateProperty().initializedProperty().not())
 			);
-			visualizeExpressionItem.setOnAction(event -> {
-				visualizeExpression((AbstractFormulaElement) ((ElementStateTreeItem) row.getItem()).getContents());
-			});
+			visualizeExpressionItem.setOnAction(event ->
+				visualizeExpression((AbstractFormulaElement) ((ElementStateTreeItem) row.getItem()).getContents())
+			);
 			
 			final MenuItem showFullValueItem = new MenuItem("Show Full Value");
 			// Full value can only be shown if the row item is an ElementStateTreeItem containing an AbstractFormulaElement and the corresponding value is an EvalResult.

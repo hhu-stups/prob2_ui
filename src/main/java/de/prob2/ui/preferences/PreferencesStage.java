@@ -119,12 +119,12 @@ public final class PreferencesStage extends Stage {
 
 		tvValue.setCellFactory(col -> {
 			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell<>();
-			cell.tableRowProperty().addListener((observable, from, to) -> {
-				to.treeItemProperty().addListener((observable1, from1, to1) -> {
+			cell.tableRowProperty().addListener((observable, from, to) ->
+				to.treeItemProperty().addListener((observable1, from1, to1) ->
 					cell.setEditable(
-							to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem);
-				});
-			});
+							to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem)
+				)
+			);
 			return cell;
 		});
 		tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));

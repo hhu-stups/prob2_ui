@@ -124,13 +124,9 @@ public final class HistoryView extends AnchorPane {
 			}
 		});
 
-		lvHistory.setOnMouseMoved(e -> {
-			lvHistory.setCursor(Cursor.HAND);
-		});
+		lvHistory.setOnMouseMoved(e -> lvHistory.setCursor(Cursor.HAND));
 
-		tbReverse.setOnAction(e -> {
-			Collections.reverse(lvHistory.getItems());
-		});
+		tbReverse.setOnAction(e -> Collections.reverse(lvHistory.getItems()));
 
 		btBack.setOnAction(e -> {
 			if (currentTrace.exists()) {

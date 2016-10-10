@@ -161,9 +161,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 		FontAwesomeIconView iconView = selectIcon(item.getResult());
 		Text text = new Text(toPrettyString(item.getOptions()));
-		Platform.runLater(() -> {
-			text.wrappingWidthProperty().bind(this.widthProperty().subtract(70.0));
-		});
+		Platform.runLater(() -> text.wrappingWidthProperty().bind(this.widthProperty().subtract(70.0)));
 		box.getChildren().add(iconView);
 		box.getChildren().add(text);
 
@@ -173,9 +171,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private ContextMenu createContextMenu(HistoryItem item) {
 		ContextMenu cm = new ContextMenu();
 		MenuItem mItem = new MenuItem("Show Trace To Error State");
-		mItem.setOnAction(event -> {
-			animations.addNewAnimation(item.getStats().getTrace());
-		});
+		mItem.setOnAction(event -> animations.addNewAnimation(item.getStats().getTrace()));
 		cm.getItems().add(mItem);
 		return cm;
 	}

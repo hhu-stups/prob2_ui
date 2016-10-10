@@ -73,9 +73,7 @@ public class StatsView extends AnchorPane {
 	public void update(ComputeCoverageCommand.ComputeCoverageResult result) {
 		Number numTrans = result.getTotalNumberOfTransitions();
 		
-		Platform.runLater(() -> {
-			totalTransitions.setText(String.valueOf(numTrans));
-		});
+		Platform.runLater(() -> totalTransitions.setText(String.valueOf(numTrans)));
 		
 		showStats(result.getNodes(), nodeStats);
 		showStats(result.getOps(), transStats);

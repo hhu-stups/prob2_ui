@@ -39,7 +39,7 @@ public class GroovyCodeCompletion extends Popup {
 	private final Logger logger = LoggerFactory.getLogger(GroovyCodeCompletion.class);
 	
 	@FXML
-	private ListView<GroovyClassPropertyItem> lv_suggestions;
+	private ListView<GroovyClassPropertyItem> lvSuggestions;
 	
 	private ObservableList<GroovyClassPropertyItem> suggestions = FXCollections.observableArrayList();
 	
@@ -70,9 +70,9 @@ public class GroovyCodeCompletion extends Popup {
 		this.currentSuggestion = "";
 		this.currentPosInSuggestion = 0;
 		this.charCounterInSuggestion = 0;
-		lv_suggestions.setItems(suggestions);
-		lv_suggestions.setOnMouseClicked(this::chooseMethod);
-		lv_suggestions.setOnKeyPressed(e-> {
+		lvSuggestions.setItems(suggestions);
+		lvSuggestions.setOnMouseClicked(this::chooseMethod);
+		lvSuggestions.setOnKeyPressed(e-> {
 			
 			if(e.getCode().equals(KeyCode.ENTER)) {
 				//handle Enter in Groovy Code Completion
@@ -144,15 +144,15 @@ public class GroovyCodeCompletion extends Popup {
 	
 	
 	private void chooseMethod(Event e) {
-		if(lv_suggestions.getSelectionModel().getSelectedItem() != null) {
-			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getSelectionModel().getSelectedItem().getNameAndParams(), currentSuggestion.substring(0, currentPosInSuggestion)));
+		if(lvSuggestions.getSelectionModel().getSelectedItem() != null) {
+			getParent().fireEvent(new CodeCompletionEvent(e, lvSuggestions.getSelectionModel().getSelectedItem().getNameAndParams(), currentSuggestion.substring(0, currentPosInSuggestion)));
 		}
 		deactivate();
 	}
 	
 	private void chooseFirst(Event e) {
-		if(lv_suggestions.getItems().get(0) != null) {
-			getParent().fireEvent(new CodeCompletionEvent(e, lv_suggestions.getItems().get(0).getNameAndParams(), currentSuggestion.substring(0, currentPosInSuggestion)));
+		if(lvSuggestions.getItems().get(0) != null) {
+			getParent().fireEvent(new CodeCompletionEvent(e, lvSuggestions.getItems().get(0).getNameAndParams(), currentSuggestion.substring(0, currentPosInSuggestion)));
 		}
 		deactivate();
 	}
@@ -180,7 +180,7 @@ public class GroovyCodeCompletion extends Popup {
 				suggestions.add(suggestion);
 			}
 		}
-		lv_suggestions.getSelectionModel().selectFirst();
+		lvSuggestions.getSelectionModel().selectFirst();
 		if(suggestions.isEmpty()) {
 			this.deactivate();
 		}
@@ -286,7 +286,7 @@ public class GroovyCodeCompletion extends Popup {
 		if(suggestions.isEmpty()) {
 			return;
 		}
-		lv_suggestions.getSelectionModel().selectFirst();
+		lvSuggestions.getSelectionModel().selectFirst();
 		Point2D point = findCaretPosition(findCaret(console));
 		double x = point.getX() + 10;
 		double y = point.getY() + 20;

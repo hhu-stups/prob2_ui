@@ -41,9 +41,7 @@ public class ProB2 extends Application {
 		mainScene.getStylesheets().add("prob.css");
 		stage.setTitle("ProB 2.0");
 		stage.setScene(mainScene);
-		stage.setOnCloseRequest(e-> {
-			Platform.exit();
-		});
+		stage.setOnCloseRequest(e -> Platform.exit());
 		
 		injector.getInstance(CurrentStage.class).register(stage);
 
