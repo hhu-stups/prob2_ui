@@ -203,7 +203,7 @@ public class GroovyCodeCompletion extends Popup {
 		        clazz = Class.forName(fullClassName);
 	    		fillAllMethodsAndProperties(clazz, GroovyMethodOption.STATIC);
 				showSuggestions(clazz, GroovyMethodOption.STATIC);
-		    } catch (ClassNotFoundException e1) {
+		    } catch (ClassNotFoundException ignored) { //NOSONAR
 		        // Just try with the next package if the current fullClassName does not fit any classes
 		    }
 		}
@@ -257,9 +257,9 @@ public class GroovyCodeCompletion extends Popup {
 		String result = "";
 		for(int i = 0; i < instruction.length; i++) {
 			if(instruction[i] == '(' && instruction[i+1] != ')') {
-				result += ";";
+				result = new StringBuilder(result).append(";").toString();
 			} else {
-				result += instruction[i];
+				result = new StringBuilder(result).append(instruction[i]).toString();
 			}
 		}
 		return result;
