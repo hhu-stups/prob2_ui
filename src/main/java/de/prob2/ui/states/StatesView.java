@@ -229,7 +229,6 @@ public final class StatesView extends AnchorPane {
 				row.itemProperty()
 			));
 			showFullValueItem.setOnAction(event -> {
-				logger.trace("Showing full value for row {}", row);
 				final AbstractFormulaElement element = (AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents();
 				final EvalResult value = (EvalResult)this.currentValues.get(element.getFormula());
 				final FullValueStage stage = injector.getInstance(FullValueStage.class);
