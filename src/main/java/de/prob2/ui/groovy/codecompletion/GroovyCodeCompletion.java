@@ -3,6 +3,7 @@ package de.prob2.ui.groovy.codecompletion;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -303,7 +304,9 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private void fillMethodsAndProperties(Class <? extends Object> clazz, GroovyMethodOption option) {
 		for(Method m : clazz.getMethods()) {
-			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(m));
+			if((option == GroovyMethodOption.ALL) || (option == GroovyMethodOption.NONSTATIC && !Modifier.isStatic(m.getModifiers())) || (option == GroovyMethodOption.STATIC && Modifier.isStatic(m.getModifiers()))) {
+				currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(m));
+			}
 		}
 		for(Field f : clazz.getFields()) {
 			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(f));

@@ -82,7 +82,7 @@ public final class StatesView extends AnchorPane {
 		if (element instanceof AbstractFormulaElement) {
 			((AbstractFormulaElement) element).unsubscribe(trace.getStateSpace());
 		}
-
+		
 		for (final Class<? extends AbstractElement> clazz : element.getChildren().keySet()) {
 			this.unsubscribeAllChildren(trace, element.getChildren().get(clazz));
 		}
