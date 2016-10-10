@@ -21,7 +21,7 @@ public class GroovyClassPropertyItem {
 
 	private final SimpleStringProperty name;
 	private final SimpleStringProperty params;
-	private final SimpleStringProperty type;
+	private SimpleStringProperty type;
 	private final SimpleStringProperty origin;
 	private final SimpleStringProperty modifier;
 	private SimpleStringProperty declarer;
@@ -116,14 +116,26 @@ public class GroovyClassPropertyItem {
 		this.name = new SimpleStringProperty(m.getName());
 		final List<String> parameterNames = new ArrayList<>();
 		for (CachedClass c : m.getParameterTypes()) {
-			parameterNames.add(c.getName());
+			try {
+				if(!c.isPrimitive()) {
+					parameterNames.add(Class.forName(c.getName()).getSimpleName());
+				} else {
+					parameterNames.add(c.getName());
+				}
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 		this.params = new SimpleStringProperty(String.join(", ", parameterNames));
 		this.type = new SimpleStringProperty(m.getReturnType().getSimpleName());
 		this.returnTypeClass = m.getReturnType();
 		this.origin = new SimpleStringProperty("GROOVY");
 		this.modifier = new SimpleStringProperty(Modifier.toString(m.getModifiers()));
-		this.declarer = new SimpleStringProperty(m.getDeclaringClass().getName());
+		try {
+			this.declarer = new SimpleStringProperty(Class.forName(m.getDeclaringClass().getName()).getSimpleName());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 		this.exception = new SimpleStringProperty();
 		this.value = new SimpleStringProperty();
 		this.isMethod = true;
