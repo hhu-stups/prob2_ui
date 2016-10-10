@@ -19,10 +19,12 @@ def static handleProperties(Class <? extends Object> clazz, Collection<GroovyCla
 	}
 }
 
-def static handleMethods(Class <? extends Object> clazz, Collection<GroovyClassPropertyItem> methods) {
+def static handleMethods(Class <? extends Object> clazz, Collection<GroovyClassPropertyItem> methods, GroovyMethodOption option)  {
 	HandleMetaClass metaClass = new HandleMetaClass(InvokerHelper.getMetaClass(clazz));
 	for (MetaMethod m : metaClass.metaMethods) {
-		methods.add(new GroovyClassPropertyItem(m))
+		if((option == GroovyMethodOption.ALL) || (option == GroovyMethodOption.NONSTATIC && !m.isStatic()) || (option == GroovyMethodOption.STATIC && !m.isStatic())) {
+			methods.add(new GroovyClassPropertyItem(m))
+		}
 	}
 }
 

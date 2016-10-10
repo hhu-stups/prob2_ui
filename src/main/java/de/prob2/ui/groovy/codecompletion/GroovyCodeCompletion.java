@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.prob2.ui.groovy.GroovyConsole;
+import de.prob2.ui.groovy.GroovyMethodOption;
 import de.prob2.ui.groovy.MetaPropertiesHandler;
 import de.prob2.ui.groovy.objects.GroovyClassPropertyItem;
 import javafx.collections.FXCollections;
@@ -194,7 +195,19 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	private void handleStaticClasses(String currentLine) {
-		
+		String[] methods = getMethodsFromCurrentLine(currentLine);
+		Package[] packages = Package.getPackages();
+		for (Package pack : packages) {
+		    String fullClassName= pack.getName() + "." + methods[methods.length - 1];
+		    Class <? extends Object> clazz = null;
+		    try {
+		        clazz = Class.forName(fullClassName);
+	    		fillAllMethodsAndProperties(clazz, GroovyMethodOption.STATIC);
+				showSuggestions(clazz, GroovyMethodOption.STATIC);
+		    } catch (ClassNotFoundException e1) {
+		        // Just try with the next package if the current fullClassName does not fit any classes
+		    }
+		}
 	}
 	
 	private void handleObjects(String currentLine) {
@@ -208,9 +221,7 @@ public class GroovyCodeCompletion extends Popup {
 		}
 		Class<? extends Object> clazz = object.getClass();
 		for(int i = 1; i < methods.length; i++) {
-			fillMethodsAndProperties(clazz);
-			MetaPropertiesHandler.handleMethods(clazz, currentObjectMethodsAndProperties);
-			MetaPropertiesHandler.handleProperties(clazz, currentObjectMethodsAndProperties);
+			fillAllMethodsAndProperties(clazz, GroovyMethodOption.NONSTATIC);
 			for(GroovyClassPropertyItem item: currentObjectMethodsAndProperties) {
 				if(item.getNameAndParams().equals(methods[i])) {
 						clazz = item.getReturnTypeClass();
@@ -221,7 +232,7 @@ public class GroovyCodeCompletion extends Popup {
 				}
 			}
 		}
-		showSuggestions(clazz);
+		showSuggestions(clazz, GroovyMethodOption.NONSTATIC);
 	}
 	
 	private String[] getMethodsFromCurrentLine(String currentLine) {
@@ -234,6 +245,12 @@ public class GroovyCodeCompletion extends Popup {
 		String[] currentObjects = currentInstruction.split(";");
 		String[] methods = currentObjects[currentObjects.length-1].split("\\.");
 		return methods;
+	}
+	
+	private void fillAllMethodsAndProperties(Class <? extends Object> clazz, GroovyMethodOption option) {
+		fillMethodsAndProperties(clazz, option);
+		MetaPropertiesHandler.handleMethods(clazz, currentObjectMethodsAndProperties, option);
+		MetaPropertiesHandler.handleProperties(clazz, currentObjectMethodsAndProperties);
 	}
 	
 	public String splitBraces(String currentInstruction) {
@@ -285,7 +302,7 @@ public class GroovyCodeCompletion extends Popup {
 		this.hide();
 	}
 	
-	private void fillMethodsAndProperties(Class <? extends Object> clazz) {
+	private void fillMethodsAndProperties(Class <? extends Object> clazz, GroovyMethodOption option) {
 		for(Method m : clazz.getMethods()) {
 			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(m));
 		}
@@ -294,10 +311,10 @@ public class GroovyCodeCompletion extends Popup {
 		}
 	}
 		
-	private void showSuggestions(Class <? extends Object> clazz) {
+	private void showSuggestions(Class <? extends Object> clazz, GroovyMethodOption option) {
 		currentObjectMethodsAndProperties.clear();
-		fillMethodsAndProperties(clazz);
-		MetaPropertiesHandler.handleMethods(clazz, currentObjectMethodsAndProperties);
+		fillMethodsAndProperties(clazz, option);
+		MetaPropertiesHandler.handleMethods(clazz, currentObjectMethodsAndProperties, option);
 		MetaPropertiesHandler.handleProperties(clazz, currentObjectMethodsAndProperties);
 		suggestions.addAll(currentObjectMethodsAndProperties);
 	}

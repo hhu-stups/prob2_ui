@@ -11,6 +11,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.prob2.ui.groovy.GroovyMethodOption;
 import de.prob2.ui.groovy.MetaPropertiesHandler;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -117,7 +118,7 @@ public class GroovyClassStage extends Stage {
 		}
 		
 		MetaPropertiesHandler.handleProperties(object, fields);
-		MetaPropertiesHandler.handleMethods(clazz, methods);
+		MetaPropertiesHandler.handleMethods(clazz, methods, GroovyMethodOption.ALL);
 		
 		if (clazz.isArray()) {
 			handleArrays(object);
