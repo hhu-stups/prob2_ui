@@ -115,7 +115,7 @@ public class GroovyCodeCompletion extends Popup {
 				deactivate();
 				return;
 			}
-			currentPosInSuggestion = Math.min(currentSuggestion.length() - 1, currentPosInSuggestion + 1);
+			currentPosInSuggestion = Math.min(currentSuggestion.length(), currentPosInSuggestion + 1);
 		}
 		filterSuggestions("", CodeCompletionAction.ARROWKEY);
 	}
@@ -161,7 +161,6 @@ public class GroovyCodeCompletion extends Popup {
 		String currentInstruction = currentSuggestion;
 		if(action.equals(CodeCompletionAction.ARROWKEY)) {
 			currentInstruction = currentSuggestion.substring(0, currentPosInSuggestion);
-			
 		} else if(action.equals(CodeCompletionAction.INSERTION)) {
 			currentSuggestion = new StringBuilder(currentSuggestion).insert(currentPosInSuggestion, addition.charAt(0)).toString();
 			currentPosInSuggestion++;
