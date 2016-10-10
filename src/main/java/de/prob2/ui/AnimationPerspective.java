@@ -166,7 +166,7 @@ public final class AnimationPerspective extends BorderPane {
 		oldParent.getPanes().remove(nodeTP);
 		if (!oldParent.getPanes().isEmpty()) {
 			oldParent.setExpandedPane(oldParent.getPanes().get(0));
-			if (oldParent.getPanes().size()==1){
+			if (oldParent != bottomAccordion && oldParent != topAccordion && oldParent.getPanes().size()==1){
 				oldParent.getPanes().get(0).setCollapsible(false);
 			}
 		}
