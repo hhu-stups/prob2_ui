@@ -21,18 +21,14 @@ import com.google.inject.Singleton;
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
 
+import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.states.ClassBlacklist;
-
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
+@SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
 public final class Config {
 	private static final class ConfigData {
 		private int maxRecentFiles;
@@ -53,16 +49,15 @@ public final class Config {
 	
 	private final Gson gson;
 	private final ClassBlacklist classBlacklist;
+	private final RecentFiles recentFiles;
 	
 	private final ConfigData defaultData;
 	
-	private final IntegerProperty maxRecentFiles;
-	private final ObservableList<String> recentFiles;
-	
 	@Inject
-	private Config(final ClassBlacklist classBlacklist) {
+	private Config(final ClassBlacklist classBlacklist, final RecentFiles recentFiles) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.classBlacklist = classBlacklist;
+		this.recentFiles = recentFiles;
 		
 		try (final Reader defaultReader = new InputStreamReader(new FileInputStream(DEFAULT))) {
 			this.defaultData = gson.fromJson(defaultReader, ConfigData.class);
@@ -72,21 +67,9 @@ public final class Config {
 			throw new IllegalStateException("Failed to open default config file", exc);
 		}
 		
-		this.maxRecentFiles = new SimpleIntegerProperty();
-		this.recentFiles = FXCollections.observableArrayList();
-		
-		if (!LOCATION.getParentFile().exists()) {
-			if (!LOCATION.getParentFile().mkdirs()) {
-				logger.warn("Failed to create the parent directory for the config file {}", LOCATION.getAbsolutePath());
-			}
+		if (!LOCATION.getParentFile().exists() && !LOCATION.getParentFile().mkdirs()) {
+			logger.warn("Failed to create the parent directory for the config file {}", LOCATION.getAbsolutePath());
 		}
-		
-		this.getRecentFiles().addListener((ListChangeListener<? super String>)change -> {
-			if (change.getList().size() > this.getMaxRecentFiles()) {
-				// Truncate the list of recent files if it is longer than the maximum
-				change.getList().remove(this.getMaxRecentFiles(), change.getList().size());
-			}
-		});
 		
 		this.load();
 	}
@@ -113,7 +96,7 @@ public final class Config {
 			configData.statesViewHiddenClasses = new ArrayList<>(this.defaultData.statesViewHiddenClasses);
 		}
 		
-		this.maxRecentFiles.set(configData.maxRecentFiles);
+		this.recentFiles.setMaximum(configData.maxRecentFiles);
 		this.recentFiles.setAll(configData.recentFiles);
 		
 		for (String name : configData.statesViewHiddenClasses) {
@@ -134,8 +117,8 @@ public final class Config {
 	
 	public void save() {
 		final ConfigData configData = new ConfigData();
-		configData.maxRecentFiles = this.getMaxRecentFiles();
-		configData.recentFiles = new ArrayList<>(this.getRecentFiles());
+		configData.maxRecentFiles = this.recentFiles.getMaximum();
+		configData.recentFiles = new ArrayList<>(this.recentFiles);
 		configData.statesViewHiddenClasses = new ArrayList<>();
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
@@ -148,21 +131,5 @@ public final class Config {
 		} catch (IOException exc) {
 			logger.warn("Failed to save config file", exc);
 		}
-	}
-	
-	public IntegerProperty maxRecentFilesProperty() {
-		return this.maxRecentFiles;
-	}
-	
-	public int getMaxRecentFiles() {
-		return this.maxRecentFilesProperty().get();
-	}
-	
-	public void setMaxRecentFiles(final int maxRecentFiles) {
-		this.maxRecentFilesProperty().set(maxRecentFiles);
-	}
-	
-	public ObservableList<String> getRecentFiles() {
-		return this.recentFiles;
 	}
 }

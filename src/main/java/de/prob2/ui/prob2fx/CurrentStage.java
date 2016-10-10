@@ -20,7 +20,6 @@ public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 	@Inject
 	private CurrentStage() {
 		super();
-		
 		this.stage = new SimpleObjectProperty<>(null);
 	}
 	

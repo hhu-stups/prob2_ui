@@ -54,7 +54,6 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		final CurrentModel currentModel
 	) {
 		super(null);
-		
 		this.animationSelector = animationSelector;
 		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
 			@Override

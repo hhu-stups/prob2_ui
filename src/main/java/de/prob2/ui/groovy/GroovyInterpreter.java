@@ -6,6 +6,8 @@ import javax.script.ScriptException;
 import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
+import de.prob2.ui.groovy.codecompletion.GroovyCodeCompletion;
+import de.prob2.ui.groovy.objects.GroovyObjectStage;
 import javafx.fxml.FXMLLoader;
 
 import org.slf4j.Logger;

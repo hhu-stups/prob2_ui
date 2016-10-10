@@ -1,13 +1,16 @@
 package de.prob2.ui.states;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
@@ -15,6 +18,7 @@ import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.formula.FormulaGenerator;
+import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.binding.Bindings;
@@ -27,24 +31,23 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //@Singleton
-public class StatesView extends AnchorPane {
-	@FXML
-	private TreeTableView<StateTreeItem<?>> tv;
-	@FXML
-	private TreeTableColumn<StateTreeItem<?>, String> tvName;
-	@FXML
-	private TreeTableColumn<StateTreeItem<?>, String> tvValue;
-	@FXML
-	private TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
-	@FXML
-	private TreeItem<StateTreeItem<?>> tvRootItem;
+public final class StatesView extends AnchorPane {
+	private static final Logger logger = LoggerFactory.getLogger(StatesView.class);
+	
+	@FXML private TreeTableView<StateTreeItem<?>> tv;
+	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvName;
+	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvValue;
+	@FXML private TreeTableColumn<StateTreeItem<?>, String> tvPreviousValue;
+	@FXML private TreeItem<StateTreeItem<?>> tvRootItem;
 
+	private final Injector injector;
 	private final CurrentTrace currentTrace;
 	private final ClassBlacklist classBlacklist;
 	private final FormulaGenerator formulaGenerator;
@@ -52,11 +55,15 @@ public class StatesView extends AnchorPane {
 	private Map<IEvalElement, AbstractEvalResult> currentValues;
 	private Map<IEvalElement, AbstractEvalResult> previousValues;
 
-	private Logger logger = LoggerFactory.getLogger(StatesView.class);
-
 	@Inject
-	private StatesView(final CurrentTrace currentTrace, final ClassBlacklist classBlacklist,
-			final FormulaGenerator formulaGenerator, final FXMLLoader loader) {
+	private StatesView(
+		final Injector injector,
+		final CurrentTrace currentTrace,
+		final ClassBlacklist classBlacklist,
+		final FormulaGenerator formulaGenerator,
+		final FXMLLoader loader
+	) {
+		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.classBlacklist = classBlacklist;
 		this.formulaGenerator = formulaGenerator;
@@ -75,7 +82,7 @@ public class StatesView extends AnchorPane {
 		if (element instanceof AbstractFormulaElement) {
 			((AbstractFormulaElement) element).unsubscribe(trace.getStateSpace());
 		}
-
+		
 		for (final Class<? extends AbstractElement> clazz : element.getChildren().keySet()) {
 			this.unsubscribeAllChildren(trace, element.getChildren().get(clazz));
 		}
@@ -105,13 +112,13 @@ public class StatesView extends AnchorPane {
 				StateTreeItem<?> sti = ti.getValue();
 				if (sti.getContents().equals(e)) {
 					childItem = ti;
-					childItem.getValue().update(this.currentValues, this.previousValues);
+					childItem.setValue(ElementStateTreeItem.fromElementAndValues(e, this.currentValues, this.previousValues));
 					break;
 				}
 			}
 
 			if (childItem == null) {
-				childItem = new TreeItem<>(new ElementStateTreeItem(e, this.currentValues, this.previousValues));
+				childItem = new TreeItem<>(ElementStateTreeItem.fromElementAndValues(e, this.currentValues, this.previousValues));
 				treeItem.getChildren().add(childItem);
 			}
 
@@ -135,7 +142,7 @@ public class StatesView extends AnchorPane {
 			}
 		}
 
-		treeItem.getChildren().sort((a, b) -> a.getValue().getName().compareTo(b.getValue().getName()));
+		treeItem.getChildren().sort(Comparator.comparing(a -> a.getValue().getName()));
 	}
 
 	private void updateChildren(final Trace trace, final TreeItem<StateTreeItem<?>> treeItem,
@@ -180,7 +187,7 @@ public class StatesView extends AnchorPane {
 			}
 		}
 
-		treeItem.getChildren().sort((a, b) -> a.getValue().getName().compareTo(b.getValue().getName()));
+		treeItem.getChildren().sort(Comparator.comparing(a -> a.getValue().getName()));
 	}
 
 	private void updateRoot(final Trace trace) {
@@ -196,24 +203,56 @@ public class StatesView extends AnchorPane {
 		this.currentValues = null;
 		this.previousValues = null;
 
-		tv.setRowFactory(view -> {
+		tv.setRowFactory(view -> { // NOSONAR // Sonar counts every if statement in a lambda as a conditional expression and complains if there are more than 3. This is not a reasonable limit here.
 			final TreeTableRow<StateTreeItem<?>> row = new TreeTableRow<>();
+			
 			final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
 			// Expression can only be shown if the row item is an ElementStateTreeItem containing an AbstractFormulaElement and the current state is initialized.
-			visualizeExpressionItem.disableProperty().bind(
-				Bindings.createBooleanBinding(
-					() -> !(row.getItem() instanceof ElementStateTreeItem && row.getItem().getContents() instanceof AbstractFormulaElement),
+			visualizeExpressionItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> !(
+					row.getItem() instanceof ElementStateTreeItem
+					&& row.getItem().getContents() instanceof AbstractFormulaElement
+				),
 					row.itemProperty()
 				).or(currentTrace.currentStateProperty().initializedProperty().not())
 			);
 			visualizeExpressionItem.setOnAction(event -> {
 				visualizeExpression((AbstractFormulaElement) ((ElementStateTreeItem) row.getItem()).getContents());
 			});
+			
+			final MenuItem showFullValueItem = new MenuItem("Show Full Value");
+			// Full value can only be shown if the row item is an ElementStateTreeItem containing an AbstractFormulaElement and the corresponding value is an EvalResult.
+			showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> !(
+					row.getItem() instanceof ElementStateTreeItem
+					&& row.getItem().getContents() instanceof AbstractFormulaElement
+					&& this.currentValues.get(((AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents()).getFormula()) instanceof EvalResult
+				),
+				row.itemProperty()
+			));
+			showFullValueItem.setOnAction(event -> {
+				final AbstractFormulaElement element = (AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents();
+				final EvalResult value = (EvalResult)this.currentValues.get(element.getFormula());
+				final FullValueStage stage = injector.getInstance(FullValueStage.class);
+				injector.getInstance(CurrentStage.class).register(stage);
+				stage.setTitle(element.toString());
+				stage.setAsciiText(value.getValue());
+				stage.show();
+			});
+			
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu) null)
-				.otherwise(new ContextMenu(visualizeExpressionItem))
+				.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem))
 			);
+			
+			// Double-click on an item triggers "show full value" if allowed.
+			row.setOnMouseClicked(event -> {
+				if (!showFullValueItem.isDisable() && event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+					showFullValueItem.getOnAction().handle(null);
+				}
+			});
+			
 			return row;
 		});
 

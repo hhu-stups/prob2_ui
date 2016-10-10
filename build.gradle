@@ -2,9 +2,9 @@ plugins {
 	id "edu.sc.seis.macAppBundle" version "2.1.6"
 }
 
-apply plugin: 'groovy'
-apply plugin: 'eclipse'
 apply plugin: 'application'
+apply plugin: 'eclipse'
+apply plugin: 'groovy'
 
 sourceCompatibility="1.8"
 targetCompatibility="1.8"
