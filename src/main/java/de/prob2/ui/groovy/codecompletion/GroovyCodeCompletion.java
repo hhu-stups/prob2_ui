@@ -195,6 +195,10 @@ public class GroovyCodeCompletion extends Popup {
 	private void handleObjects(String currentLine) {
 		String currentInstruction = currentLine.substring(0, getParent().getCurrentPosInLine());	
 		currentInstruction = currentInstruction.replaceAll("\\s","");
+		currentInstruction = splitBraces(currentInstruction);
+		if(getParent().getCurrentPosInLine() == 0 || currentInstruction.charAt(getParent().getCurrentPosInLine() - 1) == ';') {
+			return;
+		}
 		String[] currentObjects = currentInstruction.split(";");
 		String[] methods = currentObjects[currentObjects.length-1].split("\\.");
 		Object object = getObjectFromScope(methods[0]);
@@ -211,7 +215,7 @@ public class GroovyCodeCompletion extends Popup {
 						clazz = item.getReturnTypeClass();
 						break;
 				}
-				if(i == methods.length - 1) {
+				if(item.equals(currentObjectMethodsAndProperties.get(currentObjectMethodsAndProperties.size() - 1))) {
 					return;
 				}
 			}
@@ -219,7 +223,19 @@ public class GroovyCodeCompletion extends Popup {
 		showSuggestions(clazz);
 	}
 	
-		
+	public String splitBraces(String currentInstruction) {
+		char[] instruction = currentInstruction.toCharArray();
+		String result = "";
+		for(int i = 0; i < instruction.length; i++) {
+			if(instruction[i] == '(' && instruction[i+1] != ')') {
+				result += ";";
+			} else {
+				result += instruction[i];
+			}
+		}
+		return result;
+	}
+			
 	private Object getObjectFromScope(String currentLine) {
 		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
