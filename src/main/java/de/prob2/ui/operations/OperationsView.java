@@ -173,7 +173,7 @@ public final class OperationsView extends AnchorPane {
 		if (trace == null) {
 			currentModel = null;
 			opNames = new ArrayList<>();
-			Platform.runLater(() -> opsListView.getItems().clear());
+			Platform.runLater(opsListView.getItems()::clear);
 			return;
 		}
 
