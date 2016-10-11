@@ -58,9 +58,7 @@ public class GroovyClassStage extends Stage {
 	private ObservableList<GroovyClassPropertyItem> fields = FXCollections.observableArrayList();
 	private ObservableList<GroovyClassItem> attributes = FXCollections.observableArrayList();
 	private ObservableList<CollectionDataItem> collectionData = FXCollections.observableArrayList();
-	
-	private Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
-	
+
 	public GroovyClassStage(FXMLLoader loader) {
 		loader.setLocation(getClass().getResource("groovy_class_stage.fxml"));
 		loader.setRoot(this);
@@ -68,6 +66,7 @@ public class GroovyClassStage extends Stage {
 		try {
 			loader.load();
 		} catch (IOException e) {
+			Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
 			logger.error("loading fxml failed", e);
 		}
 	}

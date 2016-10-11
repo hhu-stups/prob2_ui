@@ -88,10 +88,8 @@ public class GroovyClassPropertyItem {
 			if (p.getValue() != null) {
 				this.value = new SimpleStringProperty(p.getValue().toString());
 			}
-		} catch (GroovyRuntimeException e1) {
-			logger.error("error creating property", e1);
-		} catch(NoSuchElementException e2) {
-			logger.error("error creating property", e2);
+		} catch (GroovyRuntimeException|NoSuchElementException e) {
+			logger.error("error creating property", e);
 		}
 		this.isMethod = false;
 	}

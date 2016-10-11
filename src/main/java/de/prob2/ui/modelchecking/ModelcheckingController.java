@@ -67,8 +67,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 	private final StatsView statsView;
-	
-	private final Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
 
 	private ModelChecker checker;
 	private ObservableList<Node> historyNodeList;
@@ -92,6 +90,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		mainLoader.setLocation(getClass().getResource("modelchecking_stats_view.fxml"));
 		mainLoader.setRoot(this);
 		mainLoader.setController(this);
+		Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
 		try {
 			mainLoader.load();
 		} catch (IOException e) {

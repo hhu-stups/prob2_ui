@@ -44,8 +44,6 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 	private int currentIndex;
 	private int previousSize = 0;
 
-	private Logger logger = LoggerFactory.getLogger(AnimationsView.class);
-
 	@Inject
 	private AnimationsView(final AnimationSelector animations, final FXMLLoader loader) {
 		this.animations = animations;
@@ -56,6 +54,7 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
+			Logger logger = LoggerFactory.getLogger(AnimationsView.class);
 			logger.error("loading fxml failed", e);
 		}
 	}

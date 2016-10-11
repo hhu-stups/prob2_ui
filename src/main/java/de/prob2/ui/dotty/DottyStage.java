@@ -24,8 +24,6 @@ public final class DottyStage extends Stage {
 	@FXML
 	ScrollPane pane;
 
-	private Logger logger = LoggerFactory.getLogger(DottyStage.class);
-
 	@Inject
 	private DottyStage(FXMLLoader loader, CurrentStage currentStage) {
 		try {
@@ -34,6 +32,7 @@ public final class DottyStage extends Stage {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
+			Logger logger = LoggerFactory.getLogger(DottyStage.class);
 			logger.error("loading fxml failed", e);
 		}
 

@@ -101,7 +101,7 @@ public class GroovyConsole extends TextArea {
 	private void setListeners() {
 		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> interpreter.triggerCloseCodeCompletion());
 
-		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, e -> handleCodeCompletionEvent(e));
+		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, this::handleCodeCompletionEvent);
 
 		this.addEventFilter(KeyEvent.ANY, e -> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {

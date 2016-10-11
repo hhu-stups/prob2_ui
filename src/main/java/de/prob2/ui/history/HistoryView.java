@@ -66,8 +66,6 @@ public final class HistoryView extends AnchorPane {
 
 	private final CurrentTrace currentTrace;
 
-	private Logger logger = LoggerFactory.getLogger(HistoryView.class);
-
 	@Inject
 	private HistoryView(FXMLLoader loader, CurrentTrace currentTrace) {
 		this.currentTrace = currentTrace;
@@ -77,6 +75,7 @@ public final class HistoryView extends AnchorPane {
 		try {
 			loader.load();
 		} catch (IOException e) {
+			Logger logger = LoggerFactory.getLogger(HistoryView.class);
 			logger.error("loading fxml failed", e);
 		}
 	}

@@ -14,8 +14,6 @@ import javafx.scene.layout.Pane;
 @Singleton
 public class ModelineController extends Pane {
 
-	private Logger logger = LoggerFactory.getLogger(ModelineController.class);
-
 	@Inject
 	private ModelineController(FXMLLoader loader) {
 		try {
@@ -23,6 +21,7 @@ public class ModelineController extends Pane {
 			loader.setRoot(this);
 			loader.load();
 		} catch (IOException e) {
+			Logger logger = LoggerFactory.getLogger(ModelineController.class);
 			logger.error("loading fxml failed", e);
 		}
 	}

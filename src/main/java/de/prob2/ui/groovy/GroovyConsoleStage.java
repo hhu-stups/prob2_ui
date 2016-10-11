@@ -19,7 +19,6 @@ public final class GroovyConsoleStage extends Stage {
 
 	@FXML
 	private GroovyConsole groovyConsole;
-	private Logger logger = LoggerFactory.getLogger(GroovyConsoleStage.class);
 
 	@Inject
 	@SuppressWarnings(value = "UR_UNINIT_READ", justification = "Field values are injected by FXMLLoader")
@@ -30,6 +29,7 @@ public final class GroovyConsoleStage extends Stage {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
+			Logger logger = LoggerFactory.getLogger(GroovyConsoleStage.class);
 			logger.error("loading fxml failed", e);
 		}
 		groovyConsole.setInterpreter(interpreter);

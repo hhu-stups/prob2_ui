@@ -33,8 +33,6 @@ public final class GroovyObjectStage extends Stage {
 
 	private FXMLLoader loader;
 	private CurrentStage currentStage;
-	
-	private Logger logger = LoggerFactory.getLogger(GroovyObjectStage.class);
 
 	@Inject
 	private GroovyObjectStage(FXMLLoader loader, CurrentStage currentStage) {
@@ -45,6 +43,7 @@ public final class GroovyObjectStage extends Stage {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
+			Logger logger = LoggerFactory.getLogger(GroovyObjectStage.class);
 			logger.error("loading fxml failed", e);
 		}
 		this.currentStage = currentStage;
@@ -54,9 +53,7 @@ public final class GroovyObjectStage extends Stage {
 
 	@Override
 	public void close() {
-		for (GroovyObjectItem item : items) {
-			item.close();
-		}
+		items.forEach(GroovyObjectItem::close);
 		super.close();
 	}
 
