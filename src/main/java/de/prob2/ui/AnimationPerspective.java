@@ -139,31 +139,36 @@ public final class AnimationPerspective extends BorderPane {
 	private void dragDropped(final Node node, MouseEvent mouseEvent){
 		TitledPane nodeTP = nodeMap.get(node);
 		Accordion oldParent = (Accordion) nodeTP.getParent();
+		Accordion newParent = null;
 		Point2D position = this.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
 
 		boolean middleX = position.getX() > this.getScene().getWidth()/3 && position.getX() <= 2*this.getScene().getWidth()/3;
 		boolean middleY = position.getY() > this.getScene().getHeight()/3 && position.getY() <= 2*this.getScene().getHeight()/3;
 
 		boolean right = position.getX() > this.getScene().getWidth()/2;
-		boolean top = position.getY() < this.getScene().getHeight()/2;
+		boolean bottom = position.getY() > this.getScene().getHeight()/2;
 
 		boolean switchToRight = right && middleY && !rightAccordion.getPanes().contains(nodeTP);
-		boolean switchToTop = top && middleX && !topAccordion.getPanes().contains(nodeTP);
-		boolean switchToBottom = !top && middleX && !bottomAccordion.getPanes().contains(nodeTP);
+		boolean switchToTop = !bottom && middleX && !topAccordion.getPanes().contains(nodeTP);
+		boolean switchToBottom = bottom && middleX && !bottomAccordion.getPanes().contains(nodeTP);
 		boolean switchToLeft = !right && middleY && !leftAccordion.getPanes().contains(nodeTP);
 
 		if (switchToRight) {
 			nodeTP.setCollapsible(false);
-			switchParent(oldParent,rightAccordion,nodeTP);
+			newParent = rightAccordion;
 		} else if (switchToTop) {
 			nodeTP.setCollapsible(true);
-			switchParent(oldParent,topAccordion,nodeTP);
+			newParent = topAccordion;
 		} else if (switchToBottom) {
 			nodeTP.setCollapsible(true);
-			switchParent(oldParent,bottomAccordion,nodeTP);
+			newParent = bottomAccordion;
 		} else if (switchToLeft){
 			nodeTP.setCollapsible(false);
-			switchParent(oldParent,leftAccordion,nodeTP);
+			newParent = leftAccordion;
+		}
+
+		if (newParent != null) {
+			switchParent(oldParent, newParent, nodeTP);
 		}
 	}
 
