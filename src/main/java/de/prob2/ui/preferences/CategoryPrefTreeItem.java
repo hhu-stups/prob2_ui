@@ -4,8 +4,4 @@ public class CategoryPrefTreeItem extends PrefTreeItem {
 	public CategoryPrefTreeItem(String name) {
 		super(name, "", "", null, "", "");
 	}
-
-	public CategoryPrefTreeItem() {
-		this("");
-	}
 }
