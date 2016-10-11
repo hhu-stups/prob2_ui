@@ -185,21 +185,26 @@ public final class OperationsView extends AnchorPane {
 		Set<String> notEnabled = new HashSet<>(opNames);
 		Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		for (Transition transition : operations) {
-			String id = transition.getId();
-			String name = extractPrettyName(transition.getName());
+			final String name = extractPrettyName(transition.getName());
 			notEnabled.remove(name);
-			List<String> params = transition.getParams();
-			List<String> returnValues = transition.getReturnValues();
-			boolean explored = transition.getDestination().isExplored();
-			boolean errored = explored && !transition.getDestination().isInvariantOk();
+			final boolean explored = transition.getDestination().isExplored();
+			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			logger.debug("{} {}", name, errored);
-			Operation operation = new Operation(id, name, params, returnValues, true, withTimeout.contains(name), explored, errored);
+			Operation operation = new Operation(
+				transition.getId(),
+				name,
+				transition.getParams(),
+				transition.getReturnValues(),
+				withTimeout.contains(name) ? Operation.Status.TIMEOUT : Operation.Status.ENABLED,
+				explored,
+				errored
+			);
 			events.add(operation);
 		}
 		if (showNotEnabled) {
 			for (String s : notEnabled) {
 				if (!"INITIALISATION".equals(s)) {
-					events.add(new Operation(s, s, opToParams.get(s),Collections.emptyList(), false, withTimeout.contains(s), false, false));
+					events.add(new Operation(s, s, opToParams.get(s), Collections.emptyList(), Operation.Status.DISABLED, false, false));
 				}
 			}
 		}

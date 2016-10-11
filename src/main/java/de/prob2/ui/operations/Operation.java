@@ -5,22 +5,32 @@ import java.util.List;
 import de.prob.unicode.UnicodeTranslator;
 
 public class Operation {
+	public enum Status {
+		DISABLED, ENABLED, TIMEOUT
+	}
+	
 	public final String name;
 	public final List<String> params;
 	public final String id;
-	public final String enablement;
+	public final Status status;
 	public final List<String> returnValues;
 	final boolean explored;
 	final boolean errored;
 
-	public Operation(final String id, final String name, final List<String> params, List<String> returnValues,
-			final boolean isEnabled,
-			final boolean hasTimeout, final boolean explored, final boolean errored) {
+	public Operation(
+		final String id,
+		final String name,
+		final List<String> params,
+		final List<String> returnValues,
+		final Operation.Status status,
+		final boolean explored,
+		final boolean errored
+	) {
 		this.id = id;
 		this.name = name;
 		this.params = params;
 		this.returnValues = returnValues;
-		enablement = isEnabled ? "enabled" : hasTimeout ? "timeout" : "notEnabled";
+		this.status = status;
 		this.explored = explored;
 		this.errored = errored;
 	}
@@ -42,6 +52,6 @@ public class Operation {
 	}
 
 	public boolean isEnabled() {
-		return "enabled".equals(enablement);
+		return this.status == Operation.Status.ENABLED;
 	}
 }
