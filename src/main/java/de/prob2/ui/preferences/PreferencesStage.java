@@ -14,6 +14,7 @@ import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.prolog.term.ListPrologTerm;
 
+import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
@@ -27,6 +28,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
@@ -62,6 +65,7 @@ public final class PreferencesStage extends Stage {
 	};
 
 	@FXML private Stage stage;
+	@FXML private Spinner<Integer> recentFilesCountSpinner;
 	@FXML private Button undoButton;
 	@FXML private Button resetButton;
 	@FXML private Button applyButton;
@@ -77,6 +81,7 @@ public final class PreferencesStage extends Stage {
 	private final ClassBlacklist classBlacklist;
 	private final CurrentTrace currentTrace;
 	private final ProBPreferences preferences;
+	private final RecentFiles recentFiles;
 
 	private Logger logger = LoggerFactory.getLogger(ListView.class);
 
@@ -85,12 +90,14 @@ public final class PreferencesStage extends Stage {
 			final ClassBlacklist classBlacklist,
 			final CurrentTrace currentTrace,
 			final ProBPreferences preferences,
+			final RecentFiles recentFiles,
 			final FXMLLoader loader,
 			final CurrentStage currentStage) {
 		this.classBlacklist = classBlacklist;
 		this.currentTrace = currentTrace;
 		this.preferences = preferences;
 		this.preferences.setStateSpace(currentTrace.exists() ? currentTrace.getStateSpace() : null);
+		this.recentFiles = recentFiles;
 
 		loader.setLocation(this.getClass().getResource("preferences_stage.fxml"));
 		loader.setRoot(this);
@@ -106,6 +113,17 @@ public final class PreferencesStage extends Stage {
 
 	@FXML
 	public void initialize() {
+		// General
+		
+		final SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 50);
+		
+		// bindBidirectional doesn't work properly here, don't ask why
+		this.recentFiles.maximumProperty().addListener((observable, from, to) -> valueFactory.setValue((Integer)to));
+		valueFactory.valueProperty().addListener((observable, from, to) -> this.recentFiles.setMaximum(to));
+		valueFactory.setValue(this.recentFiles.getMaximum());
+		
+		this.recentFilesCountSpinner.setValueFactory(valueFactory);
+		
 		// ProB Preferences
 
 		this.undoButton.disableProperty().bind(this.preferences.changesAppliedProperty());
