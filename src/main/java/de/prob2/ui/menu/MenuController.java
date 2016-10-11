@@ -152,6 +152,9 @@ public final class MenuController extends MenuBar {
 				newItems.add(this.recentFilesPlaceholder);
 			}
 			
+			// Add a shortcut for reopening the most recent file
+			newItems.get(0).setAccelerator(KeyCombination.valueOf("Shift+Shortcut+'O'"));
+			
 			// Keep the last two items (the separator and the "clear recent files" item)
 			newItems.addAll(recentItems.subList(recentItems.size()-2, recentItems.size()));
 			
