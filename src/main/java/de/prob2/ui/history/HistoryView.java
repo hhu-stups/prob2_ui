@@ -82,6 +82,7 @@ public final class HistoryView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
+		this.setMinWidth(100);
 		currentTrace.addListener((observable, from, to) -> {
 			lvHistory.getItems().clear();
 			if (to != null) {
