@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 
 //@Singleton
 public class AnimationsView extends AnchorPane implements IAnimationChangeListener {
+	private static final Logger logger = LoggerFactory.getLogger(AnimationsView.class);
+	
 	@FXML
 	private TableView<Animation> animationsTable;
 	@FXML
@@ -54,7 +56,6 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			Logger logger = LoggerFactory.getLogger(AnimationsView.class);
 			logger.error("loading fxml failed", e);
 		}
 	}

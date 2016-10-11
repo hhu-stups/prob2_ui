@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.codehaus.groovy.GroovyBugError;
 
 public class GroovyInterpreter {
-	private final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
+	private static final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
 	private final ScriptEngine engine;
 	private final GroovyCodeCompletion codeCompletion;
 	private final GroovyObjectStage groovyObjectStage;

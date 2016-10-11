@@ -58,6 +58,8 @@ public final class HistoryView extends AnchorPane {
 			}
 		}
 	}
+	
+	private static final Logger logger = LoggerFactory.getLogger(HistoryView.class);
 
 	@FXML private ListView<HistoryItem> lvHistory;
 	@FXML private ToggleButton tbReverse;
@@ -75,7 +77,6 @@ public final class HistoryView extends AnchorPane {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			Logger logger = LoggerFactory.getLogger(HistoryView.class);
 			logger.error("loading fxml failed", e);
 		}
 	}

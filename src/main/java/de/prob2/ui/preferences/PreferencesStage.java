@@ -13,6 +13,7 @@ import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.prolog.term.ListPrologTerm;
+import de.prob.statespace.Trace;
 
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.prob2fx.CurrentStage;
@@ -21,6 +22,7 @@ import de.prob2.ui.states.ClassBlacklist;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -63,6 +65,8 @@ public final class PreferencesStage extends Stage {
 			return clazz == null ? "null" : clazz.getSimpleName();
 		}
 	};
+	
+	private static final Logger logger = LoggerFactory.getLogger(ListView.class);
 
 	@FXML private Stage stage;
 	@FXML private Spinner<Integer> recentFilesCountSpinner;
@@ -82,8 +86,6 @@ public final class PreferencesStage extends Stage {
 	private final CurrentTrace currentTrace;
 	private final ProBPreferences preferences;
 	private final RecentFiles recentFiles;
-
-	private Logger logger = LoggerFactory.getLogger(ListView.class);
 
 	@Inject
 	private PreferencesStage(
@@ -165,10 +167,13 @@ public final class PreferencesStage extends Stage {
 
 		tv.getRoot().setValue(new CategoryPrefTreeItem("Preferences"));
 
-		this.currentTrace.addListener((observable, from, to) -> {
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			this.preferences.setStateSpace(to == null ? null : to.getStateSpace());
 			this.updatePreferences();
-		});
+		};
+		this.currentTrace.addListener(traceChangeListener);
+		// Fire the listener manually once to load the current preferences
+		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 
 		// States View
 
