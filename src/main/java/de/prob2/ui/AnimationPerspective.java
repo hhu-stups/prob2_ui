@@ -63,7 +63,6 @@ public final class AnimationPerspective extends BorderPane {
 	private ImageView snapshot = new ImageView();
 
 	private HashMap<Node, TitledPane> nodeMap = new HashMap<>();
-	private Logger logger = LoggerFactory.getLogger(AnimationPerspective.class);
 
 	@Inject
 	private AnimationPerspective(FXMLLoader loader) {
@@ -73,6 +72,7 @@ public final class AnimationPerspective extends BorderPane {
 		try {
 			loader.load();
 		} catch (IOException e) {
+			Logger logger = LoggerFactory.getLogger(AnimationPerspective.class);
 			logger.error("loading fxml failed", e);
 		}
 	}
@@ -95,9 +95,7 @@ public final class AnimationPerspective extends BorderPane {
 	}
 
 	private void onDrag() {
-		for (Node node : nodeMap.keySet()){
-			registerDrag(node);
-		}
+		nodeMap.keySet().forEach(this::registerDrag);
 	}
 
 	private void registerDrag(final Node node) {
