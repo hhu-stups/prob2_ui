@@ -18,7 +18,8 @@ import groovy.lang.PropertyValue;
 import javafx.beans.property.SimpleStringProperty;
 
 public class GroovyClassPropertyItem {
-
+	private static final Logger logger = LoggerFactory.getLogger(GroovyClassPropertyItem.class);
+	
 	private final SimpleStringProperty name;
 	private final SimpleStringProperty params;
 	private SimpleStringProperty type;
@@ -29,8 +30,6 @@ public class GroovyClassPropertyItem {
 	private SimpleStringProperty value;
 	private Class<?> returnTypeClass;
 	private final boolean isMethod;
-
-	private Logger logger = LoggerFactory.getLogger(GroovyClassPropertyItem.class);
 
 	public GroovyClassPropertyItem(Method m) {
 		this.name = new SimpleStringProperty(m.getName());

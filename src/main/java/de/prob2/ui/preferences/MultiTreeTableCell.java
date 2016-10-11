@@ -25,11 +25,10 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S, String> {
+	private static final Logger logger = LoggerFactory.getLogger(MultiTreeTableCell.class);
+	
 	// Valid values for named list-like types.
 	private static final Map<String, String[]> VALID_TYPE_VALUES;
-	
-	private Logger logger = LoggerFactory.getLogger(MultiTreeTableCell.class);
-
 	
 	static {
 		final Map<String, String[]> validTypeValues = new HashMap<>();

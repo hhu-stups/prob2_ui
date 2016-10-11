@@ -33,6 +33,8 @@ public final class ModelCheckStats extends AnchorPane {
 		SUCCESS, DANGER, WARNING
 	}
 	
+	private static final Logger logger = LoggerFactory.getLogger(ModelCheckStats.class);
+	
 	@FXML private AnchorPane resultBackground;
 	@FXML private Text resultText;
 	@FXML private VBox statsBox;
@@ -48,7 +50,6 @@ public final class ModelCheckStats extends AnchorPane {
 	private Trace trace;
 	
 	private final StatsView statsView;
-	private final Logger logger = LoggerFactory.getLogger(ModelCheckStats.class);
 	
 	public ModelCheckStats(FXMLLoader loader, ModelcheckingController modelcheckingController, StatsView statsView) {
 		this.modelcheckingController = modelcheckingController;

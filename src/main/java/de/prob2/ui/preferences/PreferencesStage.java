@@ -63,6 +63,8 @@ public final class PreferencesStage extends Stage {
 			return clazz == null ? "null" : clazz.getSimpleName();
 		}
 	};
+	
+	private static final Logger logger = LoggerFactory.getLogger(ListView.class);
 
 	@FXML private Stage stage;
 	@FXML private Spinner<Integer> recentFilesCountSpinner;
@@ -82,8 +84,6 @@ public final class PreferencesStage extends Stage {
 	private final CurrentTrace currentTrace;
 	private final ProBPreferences preferences;
 	private final RecentFiles recentFiles;
-
-	private Logger logger = LoggerFactory.getLogger(ListView.class);
 
 	@Inject
 	private PreferencesStage(

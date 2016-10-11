@@ -49,6 +49,8 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
+	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
+	
 	private final Injector injector;
 	private final Api api;
 	private final AnimationSelector animationSelector;
@@ -66,8 +68,6 @@ public final class MenuController extends MenuBar {
 	@FXML private MenuItem preferencesItem;
 	@FXML private MenuItem enterFormulaForVisualization;
 	@FXML private MenuItem aboutItem;
-
-	private final Logger logger = LoggerFactory.getLogger(MenuController.class);
 	
 	@Inject
 	private MenuController(

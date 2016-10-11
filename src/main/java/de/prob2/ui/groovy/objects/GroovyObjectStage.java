@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class GroovyObjectStage extends Stage {
+	private static final Logger logger = LoggerFactory.getLogger(GroovyObjectStage.class);
 
 	@FXML private TableView<GroovyObjectItem> tvObjects;
 	@FXML private TableColumn<GroovyObjectItem, String> objects;
@@ -43,7 +44,6 @@ public final class GroovyObjectStage extends Stage {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			Logger logger = LoggerFactory.getLogger(GroovyObjectStage.class);
 			logger.error("loading fxml failed", e);
 		}
 		this.currentStage = currentStage;

@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 
 @Singleton
 public final class GroovyConsoleStage extends Stage {
+	private static final Logger logger = LoggerFactory.getLogger(GroovyConsoleStage.class);
 
 	@FXML
 	private GroovyConsole groovyConsole;
@@ -29,7 +30,6 @@ public final class GroovyConsoleStage extends Stage {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			Logger logger = LoggerFactory.getLogger(GroovyConsoleStage.class);
 			logger.error("loading fxml failed", e);
 		}
 		groovyConsole.setInterpreter(interpreter);

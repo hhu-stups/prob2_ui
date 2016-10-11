@@ -49,6 +49,8 @@ import org.slf4j.LoggerFactory;
 
 //@Singleton
 public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
+	private static final Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
+	
 	// modelchecking_stats_view.fxml
 	@FXML private AnchorPane statsPane;
 	@FXML private VBox historyBox;
@@ -90,7 +92,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		mainLoader.setLocation(getClass().getResource("modelchecking_stats_view.fxml"));
 		mainLoader.setRoot(this);
 		mainLoader.setController(this);
-		Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
 		try {
 			mainLoader.load();
 		} catch (IOException e) {

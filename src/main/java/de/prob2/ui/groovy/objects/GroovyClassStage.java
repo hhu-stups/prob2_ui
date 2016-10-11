@@ -24,6 +24,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 public class GroovyClassStage extends Stage {
+	private static final Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
+	
 	@FXML private TableView<GroovyClassPropertyItem> tvMethods;
 	@FXML private TableView<GroovyClassPropertyItem> tvFields;
 	@FXML private TableView<GroovyClassItem> tvClass;
@@ -66,7 +68,6 @@ public class GroovyClassStage extends Stage {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
 			logger.error("loading fxml failed", e);
 		}
 	}

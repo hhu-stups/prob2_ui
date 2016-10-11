@@ -86,7 +86,9 @@ public final class OperationsView extends AnchorPane {
 			}
 		}
 	}
-
+	
+	private static final Logger logger = LoggerFactory.getLogger(OperationsView.class);
+	
 	private static String extractPrettyName(final String name) {
 		if ("$setup_constants".equals(name)) {
 			return "SETUP_CONSTANTS";
@@ -134,8 +136,6 @@ public final class OperationsView extends AnchorPane {
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
-
-	private Logger logger = LoggerFactory.getLogger(OperationsView.class);
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final FXMLLoader loader) {

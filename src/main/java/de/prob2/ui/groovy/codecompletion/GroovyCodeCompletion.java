@@ -35,8 +35,7 @@ import javafx.scene.shape.Path;
 import javafx.stage.Popup;
 
 public class GroovyCodeCompletion extends Popup {
-	
-	private final Logger logger = LoggerFactory.getLogger(GroovyCodeCompletion.class);
+	private static final Logger logger = LoggerFactory.getLogger(GroovyCodeCompletion.class);
 	
 	@FXML
 	private ListView<GroovyClassPropertyItem> lvSuggestions;

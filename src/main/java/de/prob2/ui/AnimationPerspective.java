@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class AnimationPerspective extends BorderPane {
+	private static final Logger logger = LoggerFactory.getLogger(AnimationPerspective.class);
+	
 	@FXML
 	private OperationsView operations;
 	@FXML
@@ -72,7 +74,6 @@ public final class AnimationPerspective extends BorderPane {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			Logger logger = LoggerFactory.getLogger(AnimationPerspective.class);
 			logger.error("loading fxml failed", e);
 		}
 	}

@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class DottyStage extends Stage {
+	private static final Logger logger = LoggerFactory.getLogger(DottyStage.class);
+	
 	@FXML
 	ImageView graph;
 	@FXML
@@ -32,7 +34,6 @@ public final class DottyStage extends Stage {
 			loader.setController(this);
 			loader.load();
 		} catch (IOException e) {
-			Logger logger = LoggerFactory.getLogger(DottyStage.class);
 			logger.error("loading fxml failed", e);
 		}
 
