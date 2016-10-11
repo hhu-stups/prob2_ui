@@ -67,10 +67,10 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 			}
 		});
 		
-		this.exists = new SimpleBooleanProperty(false);
+		this.exists = new SimpleBooleanProperty(this, "exists", false);
 		this.exists.bind(Bindings.isNotNull(this));
 		
-		this.animatorBusy = new SimpleBooleanProperty(false);
+		this.animatorBusy = new SimpleBooleanProperty(this, "animatorBusy", false);
 		this.animatorBusy.addListener((observable, from, to) -> {
 			if (to) {
 				this.get().getStateSpace().startTransaction();
@@ -83,14 +83,14 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		this.stateSpace = currentStateSpace;
 		this.model = currentModel;
 		
-		this.transitionListWritable = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.transitionList = new SimpleListProperty<>(FXCollections.unmodifiableObservableList(this.transitionListWritable));
+		this.transitionListWritable = new SimpleListProperty<>(this, "transitionListWritable", FXCollections.observableArrayList());
+		this.transitionList = new SimpleListProperty<>(this, "transitionList", FXCollections.unmodifiableObservableList(this.transitionListWritable));
 		
-		this.canGoBack = new SimpleBooleanProperty(false);
-		this.canGoForward = new SimpleBooleanProperty(false);
+		this.canGoBack = new SimpleBooleanProperty(this, "canGoBack", false);
+		this.canGoForward = new SimpleBooleanProperty(this, "canGoForward", false);
 		
-		this.back = new SimpleObjectProperty<>(null);
-		this.forward = new SimpleObjectProperty<>(null);
+		this.back = new SimpleObjectProperty<>(this, "back", null);
+		this.forward = new SimpleObjectProperty<>(this, "forward", null);
 		
 		this.addListener((observable, from, to) -> {
 			if (to == null) {

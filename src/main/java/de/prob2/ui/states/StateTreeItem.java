@@ -12,9 +12,9 @@ public class StateTreeItem<T> {
 	
 	protected StateTreeItem(final String name, final String value, final String previousValue, final T contents) {
 		super();
-		this.name = new SimpleStringProperty(name);
-		this.value = new SimpleStringProperty(value);
-		this.previousValue = new SimpleStringProperty(previousValue);
+		this.name = new SimpleStringProperty(this, "name", name);
+		this.value = new SimpleStringProperty(this, "value", value);
+		this.previousValue = new SimpleStringProperty(this, "previousValue", previousValue);
 		this.contents = contents;
 	}
 	

@@ -20,17 +20,17 @@ public final class CurrentModel extends ReadOnlyObjectProperty<AbstractModel> {
 	private CurrentModel() {
 		super();
 		
-		this.model = new SimpleObjectProperty<>(null);
+		this.model = new SimpleObjectProperty<>(this, "model", null);
 	}
 	
 	@Override
 	public Object getBean() {
-		return this.model.getBean();
+		return null;
 	}
 	
 	@Override
 	public String getName() {
-		return this.model.getName();
+		return "";
 	}
 	
 	@Override

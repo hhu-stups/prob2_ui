@@ -8,8 +8,8 @@ public class CollectionDataItem {
 	private final SimpleStringProperty value;
 	
 	public CollectionDataItem(int index, Object value) {
-		this.index = new SimpleStringProperty(Integer.toString(index));
-		this.value = new SimpleStringProperty(value.toString());
+		this.index = new SimpleStringProperty(this, "index", Integer.toString(index));
+		this.value = new SimpleStringProperty(this, "value", value.toString());
 	}
 	
 	public String getIndex() {

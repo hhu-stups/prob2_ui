@@ -65,12 +65,12 @@ public abstract class PrefTreeItem {
 		final String description
 	) {
 		super();
-		this.name = new SimpleStringProperty(name);
-		this.changed = new SimpleStringProperty(changed);
-		this.value = new SimpleStringProperty(value);
-		this.valueType = new SimpleObjectProperty<>(valueType);
-		this.defaultValue = new SimpleStringProperty(defaultValue);
-		this.description = new SimpleStringProperty(description);
+		this.name = new SimpleStringProperty(this, "name", name);
+		this.changed = new SimpleStringProperty(this, "changed", changed);
+		this.value = new SimpleStringProperty(this, "value", value);
+		this.valueType = new SimpleObjectProperty<>(this, "valueType", valueType);
+		this.defaultValue = new SimpleStringProperty(this, "defaultValue", defaultValue);
+		this.description = new SimpleStringProperty(this, "description", description);
 	}
 
 	public void updateValue(final ProBPreferences prefs) {}

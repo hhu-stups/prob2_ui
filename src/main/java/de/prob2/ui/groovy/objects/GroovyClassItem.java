@@ -8,8 +8,8 @@ public class GroovyClassItem {
 	private final SimpleStringProperty value;
 	
 	public GroovyClassItem(String attribute, String value) {
-		this.attribute = new SimpleStringProperty(attribute);
-		this.value = new SimpleStringProperty(value);
+		this.attribute = new SimpleStringProperty(this, "attribute", attribute);
+		this.value = new SimpleStringProperty(this, "value", value);
 	}
 	
 	public String getAttribute() {
