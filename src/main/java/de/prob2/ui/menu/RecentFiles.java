@@ -16,7 +16,7 @@ public final class RecentFiles extends SimpleListProperty<String> {
 	@Inject
 	private RecentFiles() {
 		this.set(FXCollections.observableArrayList());
-		this.maximum = new SimpleIntegerProperty();
+		this.maximum = new SimpleIntegerProperty(this, "maximum");
 		this.addListener((ListChangeListener<? super String>)change -> {
 			if (change.getList().size() > this.getMaximum()) {
 				// Truncate the list of recent files if it is longer than the maximum

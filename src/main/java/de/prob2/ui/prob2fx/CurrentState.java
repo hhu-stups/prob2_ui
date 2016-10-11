@@ -24,8 +24,8 @@ public final class CurrentState extends ReadOnlyObjectProperty<State> {
 	private CurrentState() {
 		super();
 		
-		this.state = new SimpleObjectProperty<>(null);
-		this.initialized = new SimpleBooleanProperty(false);
+		this.state = new SimpleObjectProperty<>(this, "state", null);
+		this.initialized = new SimpleBooleanProperty(this, "initialized", false);
 		
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
@@ -38,12 +38,12 @@ public final class CurrentState extends ReadOnlyObjectProperty<State> {
 	
 	@Override
 	public Object getBean() {
-		return this.state.getBean();
+		return null;
 	}
 	
 	@Override
 	public String getName() {
-		return this.state.getName();
+		return "";
 	}
 	
 	@Override

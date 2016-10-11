@@ -8,54 +8,13 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public abstract class PrefTreeItem {
-	protected final StringProperty name;
-	public ReadOnlyStringProperty nameProperty() {
-		return this.name;
-	}
-	public String getName() {
-		return this.name.get();
-	}
+	private final StringProperty name;
+	private final StringProperty changed;
+	private final StringProperty value;
+	private final ObjectProperty<ProBPreferenceType> valueType;
+	private final StringProperty defaultValue;
+	private final StringProperty description;
 	
-	protected final StringProperty changed;
-	public ReadOnlyStringProperty changedProperty() {
-		return this.changed;
-	}
-	public String getChanged() {
-		return this.changed.get();
-	}
-	
-	protected final StringProperty value;
-	public ReadOnlyStringProperty valueProperty() {
-		return this.value;
-	}
-	public String getValue() {
-		return this.value.get();
-	}
-	
-	protected final ObjectProperty<ProBPreferenceType> valueType;
-	public ReadOnlyObjectProperty<ProBPreferenceType> valueTypeProperty() {
-		return this.valueType;
-	}
-	public ProBPreferenceType getValueType() {
-		return this.valueType.get();
-	}
-
-	protected final StringProperty defaultValue;
-	public ReadOnlyStringProperty defaultValueProperty() {
-		return this.defaultValue;
-	}
-	public String getDefaultValue() {
-		return this.defaultValue.get();
-	}
-
-	protected final StringProperty description;
-	public ReadOnlyStringProperty descriptionProperty() {
-		return this.description;
-	}
-	public String getDescription() {
-		return this.description.get();
-	}
-
 	protected PrefTreeItem(
 		final String name,
 		final String changed,
@@ -65,13 +24,59 @@ public abstract class PrefTreeItem {
 		final String description
 	) {
 		super();
-		this.name = new SimpleStringProperty(name);
-		this.changed = new SimpleStringProperty(changed);
-		this.value = new SimpleStringProperty(value);
-		this.valueType = new SimpleObjectProperty<>(valueType);
-		this.defaultValue = new SimpleStringProperty(defaultValue);
-		this.description = new SimpleStringProperty(description);
+		this.name = new SimpleStringProperty(this, "name", name);
+		this.changed = new SimpleStringProperty(this, "changed", changed);
+		this.value = new SimpleStringProperty(this, "value", value);
+		this.valueType = new SimpleObjectProperty<>(this, "valueType", valueType);
+		this.defaultValue = new SimpleStringProperty(this, "defaultValue", defaultValue);
+		this.description = new SimpleStringProperty(this, "description", description);
+	}
+	
+	public ReadOnlyStringProperty nameProperty() {
+		return this.name;
+	}
+	
+	public String getName() {
+		return this.name.get();
+	}
+	
+	public ReadOnlyStringProperty changedProperty() {
+		return this.changed;
+	}
+	
+	public String getChanged() {
+		return this.changed.get();
+	}
+	
+	public ReadOnlyStringProperty valueProperty() {
+		return this.value;
+	}
+	
+	public String getValue() {
+		return this.value.get();
+	}
+	
+	public ReadOnlyObjectProperty<ProBPreferenceType> valueTypeProperty() {
+		return this.valueType;
+	}
+	
+	public ProBPreferenceType getValueType() {
+		return this.valueType.get();
 	}
 
-	public void updateValue(final ProBPreferences prefs) {}
+	public ReadOnlyStringProperty defaultValueProperty() {
+		return this.defaultValue;
+	}
+	
+	public String getDefaultValue() {
+		return this.defaultValue.get();
+	}
+
+	public ReadOnlyStringProperty descriptionProperty() {
+		return this.description;
+	}
+	
+	public String getDescription() {
+		return this.description.get();
+	}
 }

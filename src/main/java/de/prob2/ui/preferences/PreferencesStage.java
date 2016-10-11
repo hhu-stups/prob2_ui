@@ -243,23 +243,38 @@ public final class PreferencesStage extends Stage {
 					item = ti;
 				}
 			}
-			if (item == null) {
-				final ProBPreferenceType type;
-				if (pref.type instanceof ListPrologTerm) {
-					final ListPrologTerm values = (ListPrologTerm) pref.type;
-					final String[] arr = new String[values.size()];
-					for (int i = 0; i < values.size(); i++) {
-						arr[i] = values.get(i).getFunctor();
-					}
-					type = new ProBPreferenceType(arr);
-				} else {
-					type = new ProBPreferenceType(pref.type.getFunctor());
+			
+			final ProBPreferenceType type;
+			if (pref.type instanceof ListPrologTerm) {
+				final ListPrologTerm values = (ListPrologTerm) pref.type;
+				final String[] arr = new String[values.size()];
+				for (int i = 0; i < values.size(); i++) {
+					arr[i] = values.get(i).getFunctor();
 				}
-				item = new TreeItem<>(
-						new RealPrefTreeItem(pref.name, "", "", type, pref.defaultValue, pref.description));
+				type = new ProBPreferenceType(arr);
+			} else {
+				type = new ProBPreferenceType(pref.type.getFunctor());
+			}
+			final String value = this.preferences.getPreferenceValue(pref.name);
+			
+			if (item == null) {
+				item = new TreeItem<>();
 				category.getChildren().add(item);
 			}
-			item.getValue().updateValue(this.preferences);
+			item.setValue(new RealPrefTreeItem(
+				pref.name,
+				value.equals(pref.defaultValue) ? "" : "*",
+				value,
+				type,
+				pref.defaultValue,
+				pref.description
+			));
+		}
+		
+		this.tv.getRoot().getChildren().sort(Comparator.comparing(c -> c.getValue().getName()));
+		
+		for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
+			ti.getChildren().sort(Comparator.comparing(c -> c.getValue().getName()));
 		}
 	}
 
