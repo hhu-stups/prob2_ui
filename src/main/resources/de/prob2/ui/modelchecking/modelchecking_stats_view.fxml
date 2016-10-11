@@ -5,7 +5,9 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
-<fx:root type="ScrollPane" fitToHeight="true" fitToWidth="true" stylesheets="@../../../../prob.css" xmlns:fx="http://javafx.com/fxml/1">
+
+<fx:root type="ScrollPane" fitToHeight="true" fitToWidth="true"
+	stylesheets="@../../../../prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<VBox>
 		<AnchorPane>
 			<VBox fx:id="historyBox" style="-fx-border-color: grey;" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="32.0"/>
