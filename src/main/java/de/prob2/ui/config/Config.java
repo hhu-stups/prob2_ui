@@ -59,7 +59,7 @@ public final class Config {
 		this.classBlacklist = classBlacklist;
 		this.recentFiles = recentFiles;
 		
-		try (final Reader defaultReader = new InputStreamReader(new FileInputStream(DEFAULT))) {
+		try (final Reader defaultReader = new InputStreamReader(new FileInputStream(DEFAULT), "UTF-8")) {
 			this.defaultData = gson.fromJson(defaultReader, ConfigData.class);
 		} catch (FileNotFoundException exc) {
 			throw new IllegalStateException("Default config file not found", exc);
@@ -76,9 +76,9 @@ public final class Config {
 	
 	public void load() {
 		ConfigData configData;
-		try (final Reader reader = new InputStreamReader(new FileInputStream(LOCATION))) {
+		try (final Reader reader = new InputStreamReader(new FileInputStream(LOCATION), "UTF-8")) {
 			configData = gson.fromJson(reader, ConfigData.class);
-		} catch (FileNotFoundException ignored) {
+		} catch (FileNotFoundException ignored) { // NOSONAR
 			// Config file doesn't exist yet, use the defaults
 			configData = this.defaultData;
 		} catch (IOException exc) {
@@ -124,7 +124,7 @@ public final class Config {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
 		}
 		
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(LOCATION))) {
+		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(LOCATION), "UTF-8")) {
 			gson.toJson(configData, writer);
 		} catch (FileNotFoundException exc) {
 			logger.warn("Failed to create config file", exc);
