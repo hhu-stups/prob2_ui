@@ -12,10 +12,13 @@
 <?import javafx.scene.layout.Region?>
 <fx:root type="Stage" minWidth="240" minHeight="160" width="480"
 	height="320" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<ToggleGroup fx:id="asciiUnicodeGroup"/>
+	</fx:define>
 	<scene>
 		<Scene>
 			<BorderPane maxWidth="Infinity" maxHeight="Infinity"
-				stylesheets="@../../../../prob.css" styleClass="dialog">
+				stylesheets="@/prob.css" styleClass="dialog">
 				<padding>
 					<Insets top="30.0" right="0.0" bottom="10.0" left="0.0" />
 				</padding>
@@ -29,17 +32,9 @@
 							<Insets top="10.0" left="15.0" right="15.0"/>
 						</padding>
 						<RadioButton fx:id="asciiRadio" selected="true" text="ASCII"
-							HBox.hgrow="NEVER" onAction="#updateText">
-							<toggleGroup>
-								<ToggleGroup fx:id="asciiUnicodeGroup" />
-							</toggleGroup>
-						</RadioButton>
+							HBox.hgrow="NEVER" toggleGroup="$asciiUnicodeGroup" onAction="#updateText"/>
 						<RadioButton fx:id="unicodeRadio" text="Unicode"
-							HBox.hgrow="NEVER" onAction="#updateText">
-							<toggleGroup>
-								<fx:reference source="asciiUnicodeGroup" />
-							</toggleGroup>
-						</RadioButton>
+							HBox.hgrow="NEVER" toggleGroup="$asciiUnicodeGroup" onAction="#updateText"/>
 						<Region minWidth="-Infinity" maxWidth="Infinity" minHeight="-Infinity"
 							maxHeight="Infinity" HBox.hgrow="ALWAYS" />
 						<Button fx:id="saveAsButton" text="Save As..." alignment="CENTER_RIGHT"
