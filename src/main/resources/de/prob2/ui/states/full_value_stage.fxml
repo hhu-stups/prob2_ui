@@ -10,33 +10,40 @@
 <?import javafx.stage.Stage?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.Region?>
-<fx:root type="Stage" minWidth="240" minHeight="160" width="480" height="320" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" minWidth="240" minHeight="160" width="480"
+	height="320" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
-		<Scene stylesheets="@../../../../prob.css">
-			<BorderPane maxWidth="Infinity" maxHeight="Infinity">
+		<Scene>
+			<BorderPane maxWidth="Infinity" maxHeight="Infinity"
+				stylesheets="@../../../../prob.css" styleClass="dialog">
 				<padding>
-					<Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+					<Insets top="30.0" right="0.0" bottom="10.0" left="0.0" />
 				</padding>
 				<center>
-					<TextArea fx:id="textarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity"/>
+					<TextArea fx:id="textarea" editable="false" wrapText="true"
+						maxWidth="Infinity" maxHeight="Infinity" />
 				</center>
 				<bottom>
 					<HBox spacing="10.0">
 						<padding>
-							<Insets top="10.0"/>
+							<Insets top="10.0" left="15.0" right="15.0"/>
 						</padding>
-						<RadioButton fx:id="asciiRadio" selected="true" text="ASCII" HBox.hgrow="NEVER" onAction="#updateText">
+						<RadioButton fx:id="asciiRadio" selected="true" text="ASCII"
+							HBox.hgrow="NEVER" onAction="#updateText">
 							<toggleGroup>
-								<ToggleGroup fx:id="asciiUnicodeGroup"/>
+								<ToggleGroup fx:id="asciiUnicodeGroup" />
 							</toggleGroup>
 						</RadioButton>
-						<RadioButton fx:id="unicodeRadio" text="Unicode" HBox.hgrow="NEVER" onAction="#updateText">
+						<RadioButton fx:id="unicodeRadio" text="Unicode"
+							HBox.hgrow="NEVER" onAction="#updateText">
 							<toggleGroup>
-								<fx:reference source="asciiUnicodeGroup"/>
+								<fx:reference source="asciiUnicodeGroup" />
 							</toggleGroup>
 						</RadioButton>
-						<Region minWidth="-Infinity" maxWidth="Infinity" minHeight="-Infinity" maxHeight="Infinity" HBox.hgrow="ALWAYS"/>
-						<Button fx:id="saveAsButton" text="Save As..." alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#saveAs"/>
+						<Region minWidth="-Infinity" maxWidth="Infinity" minHeight="-Infinity"
+							maxHeight="Infinity" HBox.hgrow="ALWAYS" />
+						<Button fx:id="saveAsButton" text="Save As..." alignment="CENTER_RIGHT"
+							HBox.hgrow="NEVER" onAction="#saveAs" />
 					</HBox>
 				</bottom>
 			</BorderPane>
