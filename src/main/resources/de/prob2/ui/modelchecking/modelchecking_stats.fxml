@@ -8,7 +8,7 @@
 <?import javafx.scene.text.Text?>
 <fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
 	<VBox spacing="8.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
-		<AnchorPane fx:id="resultBackground" styleClass="mcheckNoCheck" stylesheets="@../../../../prob.css">
+		<AnchorPane fx:id="resultBackground" styleClass="mcheckNoCheck" stylesheets="@/prob.css">
 			<Text fx:id="resultText" fill="#8a8a8a" strokeType="OUTSIDE" strokeWidth="0.0" text="No Model Checking Job done." AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
 				<font>
 					<Font name="System Bold" size="13.0" />

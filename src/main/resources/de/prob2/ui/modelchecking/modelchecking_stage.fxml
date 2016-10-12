@@ -14,7 +14,7 @@
 <Stage fx:id="mcheckStage" title="Model Check" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
-			<AnchorPane stylesheets="@../../../../prob.css" styleClass="dialog">
+			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
 				<Button layoutX="103.0" layoutY="223.0" onAction="#startModelCheck" text="Model Check" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="105.0" AnchorPane.bottomAnchor="15.0">
 				</Button>
 				<Button layoutX="225.0" layoutY="260.0" onAction="#cancel" text="Cancel" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.leftAnchor="205.0" />
