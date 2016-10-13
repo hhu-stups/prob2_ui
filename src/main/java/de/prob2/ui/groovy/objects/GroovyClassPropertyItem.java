@@ -17,10 +17,9 @@ import groovy.lang.MetaProperty;
 import groovy.lang.PropertyValue;
 import javafx.beans.property.SimpleStringProperty;
 
-public class GroovyClassPropertyItem {
+public class GroovyClassPropertyItem extends GroovyAbstractItem {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyClassPropertyItem.class);
 	
-	private final SimpleStringProperty name;
 	private final SimpleStringProperty params;
 	private final SimpleStringProperty type;
 	private final SimpleStringProperty origin;
@@ -32,7 +31,6 @@ public class GroovyClassPropertyItem {
 	private final boolean isMethod;
 	
 	private static final String PARAMS = "params";
-	private static final String NAMES = "name";
 	private static final String TYPE = "type";
 	private static final String ORIGIN = "orgin";
 	private static final String MODIFIER = "modifier";
@@ -41,7 +39,7 @@ public class GroovyClassPropertyItem {
 	private static final String VALUE = "value";
 
 	public GroovyClassPropertyItem(Method m) {
-		this.name = new SimpleStringProperty(this, NAMES, m.getName());
+		super(m.getName());
 		final List<String> parameterNames = new ArrayList<>();
 		for (Class<?> c : m.getParameterTypes()) {
 			parameterNames.add(c.getSimpleName());
@@ -62,7 +60,7 @@ public class GroovyClassPropertyItem {
 	}
 
 	public GroovyClassPropertyItem(Field f) {
-		this.name = new SimpleStringProperty(this, NAMES, f.getName());
+		super(f.getName());
 		this.params = new SimpleStringProperty(this, PARAMS);
 		this.type = new SimpleStringProperty(this, TYPE, f.getType().getSimpleName());
 		this.returnTypeClass = f.getType();
@@ -80,7 +78,7 @@ public class GroovyClassPropertyItem {
 	}
 
 	public GroovyClassPropertyItem(PropertyValue p) {
-		this.name = new SimpleStringProperty(this, NAMES, p.getName());
+		super(p.getName());
 		this.params = new SimpleStringProperty(this, PARAMS);
 		this.type = new SimpleStringProperty(this, TYPE, p.getType().getSimpleName());
 		this.returnTypeClass = p.getType();
@@ -103,7 +101,7 @@ public class GroovyClassPropertyItem {
 	}
 	
 	public GroovyClassPropertyItem(MetaProperty m) {
-		this.name = new SimpleStringProperty(this, NAMES, m.getName());
+		super(m.getName());
 		this.params = new SimpleStringProperty(this, PARAMS);
 		this.type = new SimpleStringProperty(this, TYPE, m.getType().getSimpleName());
 		this.returnTypeClass = m.getType();
@@ -119,7 +117,7 @@ public class GroovyClassPropertyItem {
 	}
 
 	public GroovyClassPropertyItem(MetaMethod m) {
-		this.name = new SimpleStringProperty(this, NAMES, m.getName());
+		super(m.getName());
 		final List<String> parameterNames = new ArrayList<>();
 		for (CachedClass c : m.getParameterTypes()) {
 			if(!c.isPrimitive()) {
@@ -137,14 +135,6 @@ public class GroovyClassPropertyItem {
 		this.exception = new SimpleStringProperty(this, EXCEPTION);
 		this.value = new SimpleStringProperty(this, VALUE);
 		this.isMethod = true;
-	}
-
-	public String getName() {
-		return name.get();
-	}
-
-	public void setName(String name) {
-		this.name.set(name);
 	}
 
 	public String getParams() {
