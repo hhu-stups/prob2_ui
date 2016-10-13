@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.script.Bindings;
@@ -87,10 +88,11 @@ public class GroovyCodeCompletion extends Popup {
 				chooseFirst(e);
 				return;
 			}
-			if(e.getCode().equals(KeyCode.LEFT) || e.getCode().equals(KeyCode.RIGHT)) {
+			if(e.getCode().equals(KeyCode.LEFT) || e.getCode().equals(KeyCode.RIGHT) || e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
 				handleArrowKey(e);
 				return;
 			}
+			
 			
 			if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
 				handleDeletion(e);
@@ -119,6 +121,20 @@ public class GroovyCodeCompletion extends Popup {
 				return;
 			}
 			currentPosInSuggestion = Math.min(currentSuggestion.length(), currentPosInSuggestion + 1);
+		} else if(e.getCode().equals(KeyCode.UP)) {
+			if(lvSuggestions.getSelectionModel().getSelectedIndex() == 0) {
+				lvSuggestions.getSelectionModel().selectLast();
+				lvSuggestions.scrollTo(suggestions.size()-1);
+				e.consume();
+			}
+			return;
+		} else if(e.getCode().equals(KeyCode.DOWN)) {
+			if(lvSuggestions.getSelectionModel().getSelectedIndex() == suggestions.size() - 1) {
+				lvSuggestions.getSelectionModel().selectFirst();
+				lvSuggestions.scrollTo(0);
+				e.consume();
+			}
+			return;
 		}
 		filterSuggestions("", CodeCompletionAction.ARROWKEY);
 	}
@@ -184,12 +200,21 @@ public class GroovyCodeCompletion extends Popup {
 				suggestions.add(suggestion);
 			}
 		}
+		sortSuggestions();
 		lvSuggestions.getSelectionModel().selectFirst();
 		if(suggestions.isEmpty()) {
 			this.deactivate();
 		}
 	}
 	
+	private void sortSuggestions() {
+		suggestions.sort(new Comparator<GroovyClassPropertyItem>() {
+			@Override
+			public int compare(GroovyClassPropertyItem o1, GroovyClassPropertyItem o2) {
+				return o1.toString().compareToIgnoreCase(o2.toString());
+			}
+		});
+	}
 	
 	public void activate(GroovyConsole console, String currentLine) {
 		this.parent = console;
@@ -290,6 +315,7 @@ public class GroovyCodeCompletion extends Popup {
 		if(suggestions.isEmpty()) {
 			return;
 		}
+		sortSuggestions();
 		lvSuggestions.getSelectionModel().selectFirst();
 		Point2D point = findCaretPosition(findCaret(console));
 		double x = point.getX() + 10;
