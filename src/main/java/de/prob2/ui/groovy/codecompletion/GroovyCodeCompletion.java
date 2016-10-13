@@ -119,7 +119,11 @@ public class GroovyCodeCompletion extends Popup {
 				deactivate();
 				return;
 			}
-			currentPosInSuggestion = Math.min(currentSuggestion.length(), currentPosInSuggestion + 1);
+			if(getParent().getCaretPosition() != getParent().getText().length()) {
+				currentSuggestion += getParent().getText().charAt(getParent().getCaretPosition());
+				charCounterInSuggestion += 1;
+				currentPosInSuggestion = Math.min(currentSuggestion.length(), currentPosInSuggestion + 1);
+			}
 		} else if(e.getCode().equals(KeyCode.UP)) {
 			if(lvSuggestions.getSelectionModel().getSelectedIndex() == 0) {
 				lvSuggestions.getSelectionModel().selectLast();
@@ -212,6 +216,9 @@ public class GroovyCodeCompletion extends Popup {
 		int indexOfPoint = currentLine.lastIndexOf(".");
 		String currentPrefix = currentLine;
 		if(action == TriggerAction.TRIGGER) {
+			if(indexOfPoint == -1) {
+				return;
+			}
 			currentSuggestion = currentLine.substring(indexOfPoint + 1, currentLine.length());
 			currentPosInSuggestion = currentSuggestion.length();
 			charCounterInSuggestion = currentPosInSuggestion;
