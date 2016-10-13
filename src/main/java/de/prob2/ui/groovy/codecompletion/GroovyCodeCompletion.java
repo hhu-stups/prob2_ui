@@ -70,6 +70,10 @@ public class GroovyCodeCompletion extends Popup {
 		this.currentPosInSuggestion = 0;
 		this.charCounterInSuggestion = 0;
 		lvSuggestions.setItems(suggestions);
+		setListeners();
+	}
+	
+	public void setListeners() {
 		lvSuggestions.setOnMouseClicked(this::chooseMethod);
 		lvSuggestions.setOnKeyPressed(e-> {
 			
@@ -98,7 +102,6 @@ public class GroovyCodeCompletion extends Popup {
 				filterSuggestions(e.getText(), CodeCompletionAction.INSERTION);
 			}
 		});
-		
 	}
 	
 	
@@ -213,7 +216,7 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private void handleObjects(String currentLine) {
 		String[] methods = getMethodsFromCurrentLine(currentLine);
-		if(methods == null) {
+		if(methods.length == 0) {
 			return;
 		}
 		Object object = getObjectFromScope(methods[0]);
@@ -239,14 +242,13 @@ public class GroovyCodeCompletion extends Popup {
 	private String[] getMethodsFromCurrentLine(String currentLine) {
 		String currentInstruction = currentLine.substring(0, getParent().getCurrentPosInLine());	
 		if(getParent().getCurrentPosInLine() == 0 || currentInstruction.charAt(getParent().getCurrentPosInLine() - 1) == ';') {
-			return null;
+			return new String[]{};
 		}
 		currentInstruction = currentInstruction.replaceAll("\\s","");
 		currentInstruction = currentInstruction.replaceAll("=", ";");
 		currentInstruction = splitBraces(currentInstruction);
 		String[] currentObjects = currentInstruction.split(";");
-		String[] methods = currentObjects[currentObjects.length-1].split("\\.");
-		return methods;
+		return currentObjects[currentObjects.length-1].split("\\.");
 	}
 	
 	private void fillAllMethodsAndProperties(Class <? extends Object> clazz, GroovyMethodOption option) {
