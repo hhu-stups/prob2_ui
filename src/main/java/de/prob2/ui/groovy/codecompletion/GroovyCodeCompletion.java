@@ -144,14 +144,16 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private void chooseMethod(Event e) {
 		if(lvSuggestions.getSelectionModel().getSelectedItem() != null) {
-			getParent().fireEvent(new CodeCompletionEvent(e, lvSuggestions.getSelectionModel().getSelectedItem().getNameAndParams(), currentSuggestion.substring(0, currentPosInSuggestion)));
+			String choice = lvSuggestions.getSelectionModel().getSelectedItem().getNameAndParams();
+			getParent().fireEvent(new CodeCompletionEvent(e, choice, choice.substring(0, currentPosInSuggestion)));
 		}
 		deactivate();
 	}
 	
 	private void chooseFirst(Event e) {
 		if(lvSuggestions.getItems().get(0) != null) {
-			getParent().fireEvent(new CodeCompletionEvent(e, lvSuggestions.getItems().get(0).getNameAndParams(), currentSuggestion.substring(0, currentPosInSuggestion)));
+			String choice = lvSuggestions.getItems().get(0).getNameAndParams();
+			getParent().fireEvent(new CodeCompletionEvent(e, lvSuggestions.getItems().get(0).getNameAndParams(), choice.substring(0, currentPosInSuggestion)));
 		}
 		deactivate();
 	}
@@ -175,7 +177,7 @@ public class GroovyCodeCompletion extends Popup {
 		suggestions.clear();
 		for(int i = 0; i < currentObjectMethodsAndProperties.size(); i++) {
 			GroovyClassPropertyItem suggestion = currentObjectMethodsAndProperties.get(i);
-			if(suggestion.getNameAndParams().startsWith(filter)) {
+			if(suggestion.getNameAndParams().toLowerCase().startsWith(filter.toLowerCase())) {
 				suggestions.add(suggestion);
 			}
 		}
@@ -240,6 +242,7 @@ public class GroovyCodeCompletion extends Popup {
 			return null;
 		}
 		currentInstruction = currentInstruction.replaceAll("\\s","");
+		currentInstruction = currentInstruction.replaceAll("=", ";");
 		currentInstruction = splitBraces(currentInstruction);
 		String[] currentObjects = currentInstruction.split(";");
 		String[] methods = currentObjects[currentObjects.length-1].split("\\.");

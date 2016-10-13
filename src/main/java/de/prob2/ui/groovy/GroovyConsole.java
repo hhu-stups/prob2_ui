@@ -139,8 +139,9 @@ public class GroovyConsole extends TextArea {
 		if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent)((CodeCompletionEvent) e).getEvent()).getText())) {
 			String choice = ((CodeCompletionEvent) e).getChoice();
 			String suggestion = ((CodeCompletionEvent) e).getCurrentSuggestion();
-			choice = choice.substring(suggestion.length());
-			String newText = new StringBuilder(this.getText()).insert(this.getCaretPosition(), choice).toString();
+			String newText = this.getText().substring(0, this.getCaretPosition() - suggestion.length());
+			newText = new StringBuilder(newText).append(choice).toString();
+			newText = new StringBuilder(newText).append(this.getText().substring(this.getCaretPosition())).toString();
 			int diff = newText.length() - this.getText().length();
 			int caret = this.getCaretPosition();
 			this.setText(newText);
