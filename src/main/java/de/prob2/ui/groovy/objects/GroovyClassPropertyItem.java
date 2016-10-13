@@ -193,6 +193,7 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 		this.value.set(value);
 	}
 	
+	@Override
 	public String getNameAndParams() {
 		String parameters = "";
 		if(getParams() != null) {

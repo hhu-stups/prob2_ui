@@ -15,8 +15,11 @@ public class GroovyObjectItem extends GroovyAbstractItem {
 		this.object = object;
 		this.clazz = object.getClass();
 		this.clazzname = new SimpleStringProperty(this, "clazzname", clazz.getSimpleName());
-		this.classstage = classstage;
 		this.value = new SimpleStringProperty(this, "value", object.toString());
+		if(classstage == null) {
+			return;
+		}
+		this.classstage = classstage;
 		classstage.setClass(clazz);
 	}
 	

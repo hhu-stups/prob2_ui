@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -17,7 +18,9 @@ import org.slf4j.LoggerFactory;
 import de.prob2.ui.groovy.GroovyConsole;
 import de.prob2.ui.groovy.GroovyMethodOption;
 import de.prob2.ui.groovy.MetaPropertiesHandler;
+import de.prob2.ui.groovy.objects.GroovyAbstractItem;
 import de.prob2.ui.groovy.objects.GroovyClassPropertyItem;
+import de.prob2.ui.groovy.objects.GroovyObjectItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -38,15 +41,15 @@ public class GroovyCodeCompletion extends Popup {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyCodeCompletion.class);
 	
 	@FXML
-	private ListView<GroovyClassPropertyItem> lvSuggestions;
+	private ListView<GroovyAbstractItem> lvSuggestions;
 	
-	private ObservableList<GroovyClassPropertyItem> suggestions = FXCollections.observableArrayList();
+	private ObservableList<GroovyAbstractItem> suggestions = FXCollections.observableArrayList();
 	
 	private ScriptEngine engine;
 		
 	private GroovyConsole parent;
 	
-	private List<GroovyClassPropertyItem> currentObjectMethodsAndProperties;
+	private List<GroovyAbstractItem> currentObjectMethodsAndProperties;
 	
 	private String currentSuggestion;
 	
@@ -193,7 +196,7 @@ public class GroovyCodeCompletion extends Popup {
 	private void refresh(String filter) {
 		suggestions.clear();
 		for(int i = 0; i < currentObjectMethodsAndProperties.size(); i++) {
-			GroovyClassPropertyItem suggestion = currentObjectMethodsAndProperties.get(i);
+			GroovyAbstractItem suggestion = currentObjectMethodsAndProperties.get(i);
 			if(suggestion.getNameAndParams().toLowerCase().startsWith(filter.toLowerCase())) {
 				suggestions.add(suggestion);
 			}
@@ -216,16 +219,19 @@ public class GroovyCodeCompletion extends Popup {
 		int indexOfPoint = currentLine.lastIndexOf(".");
 		String currentPrefix = currentLine;
 		if(action == TriggerAction.TRIGGER) {
-			if(indexOfPoint == -1) {
-				return;
+			if(indexOfPoint != -1) {
+				currentSuggestion = currentLine.substring(indexOfPoint + 1, currentLine.length());
+				currentPosInSuggestion = currentSuggestion.length();
+				charCounterInSuggestion = currentPosInSuggestion;
+				currentPrefix = currentLine.substring(0, indexOfPoint);
 			}
-			currentSuggestion = currentLine.substring(indexOfPoint + 1, currentLine.length());
-			currentPosInSuggestion = currentSuggestion.length();
-			charCounterInSuggestion = currentPosInSuggestion;
-			currentPrefix = currentLine.substring(0, indexOfPoint);
 		}
 		handleObjects(currentPrefix, action);
 		handleStaticClasses(currentPrefix, action);
+		if(indexOfPoint == -1 && action == TriggerAction.TRIGGER) {
+			fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
+			fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
+		}
 		showPopup(console);
 	}
 	
@@ -269,9 +275,9 @@ public class GroovyCodeCompletion extends Popup {
 		Class<? extends Object> clazz = object.getClass();
 		for(int i = 1; i < methods.length; i++) {
 			fillAllMethodsAndProperties(clazz, GroovyMethodOption.NONSTATIC);
-			for(GroovyClassPropertyItem item: currentObjectMethodsAndProperties) {
+			for(GroovyAbstractItem item: currentObjectMethodsAndProperties) {
 				if(item.getNameAndParams().equals(methods[i])) {
-						clazz = item.getReturnTypeClass();
+						clazz = ((GroovyClassPropertyItem) item).getReturnTypeClass();
 						break;
 				}
 				if(item.equals(currentObjectMethodsAndProperties.get(currentObjectMethodsAndProperties.size() - 1))) {
@@ -295,7 +301,6 @@ public class GroovyCodeCompletion extends Popup {
 		} else {
 			currentInstruction = currentLine;
 		}
-
 
 		currentInstruction = currentInstruction.replaceAll("\\s","");
 		currentInstruction = currentInstruction.replaceAll("=", ";");
@@ -349,6 +354,15 @@ public class GroovyCodeCompletion extends Popup {
 		double x = point.getX() + 10;
 		double y = point.getY() + 20;
 		this.show(console, x, y);	
+	}
+	
+	public void fillObjects(Bindings bindings) {
+		for (final Map.Entry<String, Object> entry : bindings.entrySet()) {
+			if(entry == null || entry.getKey() == null || entry.getValue() == null) {
+				continue;
+			}
+			suggestions.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), null));
+		}
 	}
 	
 	public void deactivate() {

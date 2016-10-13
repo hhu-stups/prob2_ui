@@ -18,4 +18,12 @@ public class GroovyAbstractItem {
 		this.name.set(name);
 	}
 	
+	public String getNameAndParams() {
+		return getName();
+	}
+	
+	public String toString() {
+		return getName();
+	}
+	
 }
