@@ -1,6 +1,8 @@
 package de.prob2.ui.animations;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +34,7 @@ import org.slf4j.LoggerFactory;
 //@Singleton
 public class AnimationsView extends AnchorPane implements IAnimationChangeListener {
 	private static final Logger logger = LoggerFactory.getLogger(AnimationsView.class);
-	
+
 	@FXML
 	private TableView<Animation> animationsTable;
 	@FXML
@@ -41,6 +43,8 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 	private TableColumn<Animation, String> lastop;
 	@FXML
 	private TableColumn<Animation, String> tracelength;
+	@FXML
+	private TableColumn<Animation, String> time;
 
 	private final AnimationSelector animations;
 	private int currentIndex;
@@ -65,6 +69,7 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 		machine.setCellValueFactory(new PropertyValueFactory<>("modelName"));
 		lastop.setCellValueFactory(new PropertyValueFactory<>("lastOperation"));
 		tracelength.setCellValueFactory(new PropertyValueFactory<>("steps"));
+		time.setCellValueFactory(new PropertyValueFactory<>("time")); 
 		animationsTable.setRowFactory(tableView -> {
 			final TableRow<Animation> row = new TableRow<>();
 			final ContextMenu contextMenu = new ContextMenu();
@@ -104,7 +109,13 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			String steps = t.getTransitionList().size() + "";
 			boolean isCurrent = t.equals(currentTrace);
 			boolean isProtected = animations.getProtectedTraces().contains(t.getUUID());
+			LocalDateTime time = LocalDateTime.now();
 			Animation a = new Animation(modelName, lastOp, steps, t, isCurrent, isProtected);
+			Animation aa = contains(animationsTable, a);
+			if (aa != null) {
+				time = LocalDateTime.parse(aa.getTime(), DateTimeFormatter.ofPattern("HH:mm:ss d MMM uuuu"));
+			}
+			a.setTime(time);
 			animList.add(a);
 		}
 		Platform.runLater(() -> {
@@ -121,8 +132,16 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 		});
 	}
 
+	private Animation contains(TableView<Animation> animTable, Animation animation) {
+		for (Animation a : animTable.getItems()) {
+			if (a.getTrace().getUUID().equals(animation.getTrace().getUUID())) {
+				return a;
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public void animatorStatus(boolean busy) {
 	}
-
 }
