@@ -139,9 +139,6 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	
-	
-	
-	
 	private void handleDeletion(KeyEvent e) {
 		if(e.getCode().equals(KeyCode.DELETE) && currentPosInSuggestion != charCounterInSuggestion) {
 			charCounterInSuggestion--;
@@ -176,7 +173,6 @@ public class GroovyCodeCompletion extends Popup {
 		deactivate();
 	}
 	
-	
 	private void filterSuggestions(String addition, CodeCompletionAction action) {
 		String currentInstruction = currentSuggestion;
 		if(action.equals(CodeCompletionAction.ARROWKEY)) {
@@ -189,8 +185,7 @@ public class GroovyCodeCompletion extends Popup {
 		}
 		refresh(currentInstruction);
 	}
-	
-	
+		
 	private void refresh(String filter) {
 		suggestions.clear();
 		for(int i = 0; i < currentObjectMethodsAndProperties.size(); i++) {
@@ -212,16 +207,33 @@ public class GroovyCodeCompletion extends Popup {
 		});
 	}
 	
-	public void activate(GroovyConsole console, String currentLine) {
+	public void activate(GroovyConsole console, String currentLine, TriggerAction action) {
 		this.parent = console;
-		handleObjects(currentLine);
-		handleStaticClasses(currentLine);
+		int indexOfPoint = currentLine.lastIndexOf(".");
+		String currentPrefix = currentLine;
+		if(action == TriggerAction.TRIGGER) {
+			currentSuggestion = currentLine.substring(indexOfPoint + 1, currentLine.length());
+			currentPosInSuggestion = currentSuggestion.length();
+			charCounterInSuggestion = currentPosInSuggestion;
+			currentPrefix = currentLine.substring(0, indexOfPoint);
+		}
+		handleObjects(currentPrefix, action);
+		handleStaticClasses(currentPrefix, action);
 		showPopup(console);
 	}
 	
-	private void handleStaticClasses(String currentLine) {
-		String[] methods = getMethodsFromCurrentLine(currentLine);
+	private void handleStaticClasses(String currentLine, TriggerAction action) {
+		String[] methods = getMethodsFromCurrentLine(currentLine, action);
 		Package[] packages = Package.getPackages();
+		String currentInstruction = "";
+		if(action == TriggerAction.POINT) {
+			currentInstruction = currentLine.substring(0, getParent().getCurrentPosInLine());
+			if(getParent().getCurrentPosInLine() == 0 || currentInstruction.charAt(getParent().getCurrentPosInLine() - 1) == ';') {
+				return;
+			}
+		} else {
+			currentInstruction = currentLine;
+		}
 		for (Package pack : packages) {
 		    String fullClassName= pack.getName() + "." + methods[methods.length - 1];
 		    Class <? extends Object> clazz = null;
@@ -233,10 +245,13 @@ public class GroovyCodeCompletion extends Popup {
 		        // Just try with the next package if the current fullClassName does not fit any classes
 		    }
 		}
+		if(action == TriggerAction.TRIGGER) {
+			refresh(currentSuggestion);
+		}
 	}
 	
-	private void handleObjects(String currentLine) {
-		String[] methods = getMethodsFromCurrentLine(currentLine);
+	private void handleObjects(String currentLine, TriggerAction action) {
+		String[] methods = getMethodsFromCurrentLine(currentLine, action);
 		if(methods.length == 0) {
 			return;
 		}
@@ -258,13 +273,23 @@ public class GroovyCodeCompletion extends Popup {
 			}
 		}
 		showSuggestions(clazz, GroovyMethodOption.NONSTATIC);
+		if(action == TriggerAction.TRIGGER) {
+			refresh(currentSuggestion);
+		}
 	}
 	
-	private String[] getMethodsFromCurrentLine(String currentLine) {
-		String currentInstruction = currentLine.substring(0, getParent().getCurrentPosInLine());	
-		if(getParent().getCurrentPosInLine() == 0 || currentInstruction.charAt(getParent().getCurrentPosInLine() - 1) == ';') {
-			return new String[]{};
+	private String[] getMethodsFromCurrentLine(String currentLine, TriggerAction action) {
+		String currentInstruction = "";
+		if(action == TriggerAction.POINT) {
+			currentInstruction = currentLine.substring(0, getParent().getCurrentPosInLine());
+			if(getParent().getCurrentPosInLine() == 0 || currentInstruction.charAt(getParent().getCurrentPosInLine() - 1) == ';') {
+				return new String[]{};
+			}
+		} else {
+			currentInstruction = currentLine;
 		}
+
+
 		currentInstruction = currentInstruction.replaceAll("\\s","");
 		currentInstruction = currentInstruction.replaceAll("=", ";");
 		currentInstruction = splitBraces(currentInstruction);

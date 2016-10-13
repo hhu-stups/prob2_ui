@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.prob2.ui.groovy.codecompletion.CodeCompletionEvent;
+import de.prob2.ui.groovy.codecompletion.TriggerAction;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
@@ -111,6 +112,11 @@ public class GroovyConsole extends TextArea {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
 			}
+			
+			if(e.getCode() == KeyCode.SPACE && e.isControlDown()) {
+				int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
+				interpreter.triggerCodeCompletion(this, getCurrentLine().substring(0, caretPosInLine), TriggerAction.TRIGGER);
+			}
 		});
 		
 		this.addEventFilter(MouseEvent.ANY, e -> {
@@ -175,7 +181,7 @@ public class GroovyConsole extends TextArea {
 			return;
 		}
 		if(".".equals(e.getText())) {
-			interpreter.triggerCodeCompletion(this, getCurrentLine());
+			interpreter.triggerCodeCompletion(this, getCurrentLine(), TriggerAction.POINT);
 		}
 		
 		charCounterInLine++;
