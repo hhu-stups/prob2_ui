@@ -73,7 +73,7 @@ public class GroovyCodeCompletion extends Popup {
 		setListeners();
 	}
 	
-	public void setListeners() {
+	private void setListeners() {
 		lvSuggestions.setOnMouseClicked(this::chooseMethod);
 		lvSuggestions.setOnKeyPressed(e-> {
 			
@@ -257,7 +257,7 @@ public class GroovyCodeCompletion extends Popup {
 		MetaPropertiesHandler.handleProperties(clazz, currentObjectMethodsAndProperties);
 	}
 	
-	public String splitBraces(String currentInstruction) {
+	private String splitBraces(String currentInstruction) {
 		char[] instruction = currentInstruction.toCharArray();
 		String result = "";
 		for(int i = 0; i < instruction.length; i++) {
