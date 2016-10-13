@@ -208,11 +208,8 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	private void sortSuggestions() {
-		suggestions.sort(new Comparator<GroovyClassPropertyItem>() {
-			@Override
-			public int compare(GroovyClassPropertyItem o1, GroovyClassPropertyItem o2) {
-				return o1.toString().compareToIgnoreCase(o2.toString());
-			}
+		suggestions.sort((o1,o2) -> {
+			return o1.toString().compareToIgnoreCase(o2.toString());
 		});
 	}
 	
