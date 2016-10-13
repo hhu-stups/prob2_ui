@@ -31,46 +31,46 @@ public class GroovyClassPropertyItem {
 	private final Class<?> returnTypeClass;
 	private final boolean isMethod;
 	
-	private final String params_ = "params";
-	private final String name_ = "name";
-	private final String type_ = "type";
-	private final String origin_ = "orgin";
-	private final String modifier_ = "modifier";
-	private final String declarer_ = "declarer";
-	private final String exception_ = "exception";
-	private final String value_ = "value";
+	private final static String paramsConst = "params";
+	private final static String nameConst = "name";
+	private final static String typeConst = "type";
+	private final static String originConst = "orgin";
+	private final static String modifierConst = "modifier";
+	private final static String declarerConst = "declarer";
+	private final static String exceptionConst = "exception";
+	private final static String valueConst = "value";
 
 	public GroovyClassPropertyItem(Method m) {
-		this.name = new SimpleStringProperty(this, name_, m.getName());
+		this.name = new SimpleStringProperty(this, nameConst, m.getName());
 		final List<String> parameterNames = new ArrayList<>();
 		for (Class<?> c : m.getParameterTypes()) {
 			parameterNames.add(c.getSimpleName());
 		}
-		this.params = new SimpleStringProperty(this, params_, String.join(", ", parameterNames));
-		this.type = new SimpleStringProperty(this, type_, m.getReturnType().getSimpleName());
+		this.params = new SimpleStringProperty(this, paramsConst, String.join(", ", parameterNames));
+		this.type = new SimpleStringProperty(this, typeConst, m.getReturnType().getSimpleName());
 		this.returnTypeClass = m.getReturnType();
-		this.origin = new SimpleStringProperty(this, origin_, "JAVA");
-		this.modifier = new SimpleStringProperty(this, modifier_, Modifier.toString(m.getModifiers()));
-		this.declarer = new SimpleStringProperty(this, declarer_, m.getDeclaringClass().getSimpleName());
+		this.origin = new SimpleStringProperty(this, originConst, "JAVA");
+		this.modifier = new SimpleStringProperty(this, modifierConst, Modifier.toString(m.getModifiers()));
+		this.declarer = new SimpleStringProperty(this, declarerConst, m.getDeclaringClass().getSimpleName());
 		final List<String> exceptionNames = new ArrayList<>();
 		for (Class<?> c : m.getExceptionTypes()) {
 			exceptionNames.add(c.getSimpleName());
 		}
-		this.exception = new SimpleStringProperty(this, exception_, String.join(", ", exceptionNames));
-		this.value = new SimpleStringProperty(this, value_);
+		this.exception = new SimpleStringProperty(this, exceptionConst, String.join(", ", exceptionNames));
+		this.value = new SimpleStringProperty(this, valueConst);
 		this.isMethod = true;
 	}
 
 	public GroovyClassPropertyItem(Field f) {
-		this.name = new SimpleStringProperty(this, name_, f.getName());
-		this.params = new SimpleStringProperty(this, params_);
-		this.type = new SimpleStringProperty(this, type_, f.getType().getSimpleName());
+		this.name = new SimpleStringProperty(this, nameConst, f.getName());
+		this.params = new SimpleStringProperty(this, paramsConst);
+		this.type = new SimpleStringProperty(this, typeConst, f.getType().getSimpleName());
 		this.returnTypeClass = f.getType();
-		this.origin = new SimpleStringProperty(this, origin_, "JAVA");
-		this.modifier = new SimpleStringProperty(this, modifier_, Modifier.toString(f.getModifiers()));
-		this.declarer = new SimpleStringProperty(this, declarer_, f.getDeclaringClass().getSimpleName());
-		this.exception = new SimpleStringProperty(this, exception_);
-		this.value = new SimpleStringProperty(this, value_);
+		this.origin = new SimpleStringProperty(this, originConst, "JAVA");
+		this.modifier = new SimpleStringProperty(this, modifierConst, Modifier.toString(f.getModifiers()));
+		this.declarer = new SimpleStringProperty(this, declarerConst, f.getDeclaringClass().getSimpleName());
+		this.exception = new SimpleStringProperty(this, exceptionConst);
+		this.value = new SimpleStringProperty(this, valueConst);
 		try {
 			this.value.set(f.get(null).toString());
 		} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -80,18 +80,18 @@ public class GroovyClassPropertyItem {
 	}
 
 	public GroovyClassPropertyItem(PropertyValue p) {
-		this.name = new SimpleStringProperty(this, name_, p.getName());
-		this.params = new SimpleStringProperty(this, params_);
-		this.type = new SimpleStringProperty(this, type_, p.getType().getSimpleName());
+		this.name = new SimpleStringProperty(this, nameConst, p.getName());
+		this.params = new SimpleStringProperty(this, paramsConst);
+		this.type = new SimpleStringProperty(this, typeConst, p.getType().getSimpleName());
 		this.returnTypeClass = p.getType();
-		this.origin = new SimpleStringProperty(this, origin_, "GROOVY");
-		this.modifier = new SimpleStringProperty(this, modifier_, Modifier.toString(p.getType().getModifiers()));
-		this.declarer = new SimpleStringProperty(this, declarer_, "n/a");
+		this.origin = new SimpleStringProperty(this, originConst, "GROOVY");
+		this.modifier = new SimpleStringProperty(this, modifierConst, Modifier.toString(p.getType().getModifiers()));
+		this.declarer = new SimpleStringProperty(this, declarerConst, "n/a");
 		if (p.getType().getDeclaringClass() != null) {
 			this.declarer.set(p.getType().getDeclaringClass().getSimpleName());
 		}
-		this.exception = new SimpleStringProperty(this, exception_);
-		this.value = new SimpleStringProperty(this, value_);
+		this.exception = new SimpleStringProperty(this, exceptionConst);
+		this.value = new SimpleStringProperty(this, valueConst);
 		try {
 			if (p.getValue() != null) {
 				this.value.set(p.getValue().toString());
@@ -103,23 +103,23 @@ public class GroovyClassPropertyItem {
 	}
 	
 	public GroovyClassPropertyItem(MetaProperty m) {
-		this.name = new SimpleStringProperty(this, name_, m.getName());
-		this.params = new SimpleStringProperty(this, params_);
-		this.type = new SimpleStringProperty(this, type_, m.getType().getSimpleName());
+		this.name = new SimpleStringProperty(this, nameConst, m.getName());
+		this.params = new SimpleStringProperty(this, paramsConst);
+		this.type = new SimpleStringProperty(this, typeConst, m.getType().getSimpleName());
 		this.returnTypeClass = m.getType();
-		this.origin = new SimpleStringProperty(this, origin_, "GROOVY");
-		this.modifier = new SimpleStringProperty(this, modifier_, Modifier.toString(m.getType().getModifiers()));
-		this.declarer = new SimpleStringProperty(this, declarer_, "n/a");
+		this.origin = new SimpleStringProperty(this, originConst, "GROOVY");
+		this.modifier = new SimpleStringProperty(this, modifierConst, Modifier.toString(m.getType().getModifiers()));
+		this.declarer = new SimpleStringProperty(this, declarerConst, "n/a");
 		if (m.getType().getDeclaringClass() != null) {
 			this.declarer.set(m.getType().getDeclaringClass().getSimpleName());
 		}
-		this.exception = new SimpleStringProperty(this, exception_);
-		this.value = new SimpleStringProperty(this, value_);
+		this.exception = new SimpleStringProperty(this, exceptionConst);
+		this.value = new SimpleStringProperty(this, valueConst);
 		this.isMethod = false;
 	}
 
 	public GroovyClassPropertyItem(MetaMethod m) {
-		this.name = new SimpleStringProperty(this, name_, m.getName());
+		this.name = new SimpleStringProperty(this, nameConst, m.getName());
 		final List<String> parameterNames = new ArrayList<>();
 		for (CachedClass c : m.getParameterTypes()) {
 			if(!c.isPrimitive()) {
@@ -128,14 +128,14 @@ public class GroovyClassPropertyItem {
 				parameterNames.add(c.getName());
 			}
 		}
-		this.params = new SimpleStringProperty(this, params_, String.join(", ", parameterNames));
-		this.type = new SimpleStringProperty(this, type_, m.getReturnType().getSimpleName());
+		this.params = new SimpleStringProperty(this, paramsConst, String.join(", ", parameterNames));
+		this.type = new SimpleStringProperty(this, typeConst, m.getReturnType().getSimpleName());
 		this.returnTypeClass = m.getReturnType();
-		this.origin = new SimpleStringProperty(this, origin_, "GROOVY");
-		this.modifier = new SimpleStringProperty(this, modifier_, Modifier.toString(m.getModifiers()));
-		this.declarer = new SimpleStringProperty(this, declarer_, m.getDeclaringClass().getTheClass().getSimpleName());
-		this.exception = new SimpleStringProperty(this, exception_);
-		this.value = new SimpleStringProperty(this, value_);
+		this.origin = new SimpleStringProperty(this, originConst, "GROOVY");
+		this.modifier = new SimpleStringProperty(this, modifierConst, Modifier.toString(m.getModifiers()));
+		this.declarer = new SimpleStringProperty(this, declarerConst, m.getDeclaringClass().getTheClass().getSimpleName());
+		this.exception = new SimpleStringProperty(this, exceptionConst);
+		this.value = new SimpleStringProperty(this, valueConst);
 		this.isMethod = true;
 	}
 
