@@ -44,10 +44,10 @@ public final class ProBPreferences {
 		this.cachedPreferences = FXCollections.observableHashMap();
 		this.cachedPreferenceValues = FXCollections.observableHashMap();
 		this.changedPreferences = FXCollections.observableHashMap();
-		this.changesApplied = new SimpleBooleanProperty(true);
-		this.changedPreferences.addListener((MapChangeListener<? super String, ? super String>)change -> {
-			this.changesApplied.set(change.getMap().isEmpty());
-		});
+		this.changesApplied = new SimpleBooleanProperty(this, "changesApplied", true);
+		this.changedPreferences.addListener((MapChangeListener<? super String, ? super String>)change ->
+			this.changesApplied.set(change.getMap().isEmpty())
+		);
 		this.stateSpace = null;
 	}
 	

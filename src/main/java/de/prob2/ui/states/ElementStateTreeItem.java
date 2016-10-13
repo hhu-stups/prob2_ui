@@ -13,6 +13,10 @@ import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
 
 public class ElementStateTreeItem extends StateTreeItem<AbstractElement> {
+	public ElementStateTreeItem(final String name, final String value, final String previousValue, final AbstractElement contents) {
+		super(name, value, previousValue, contents);
+	}
+	
 	private static String stringRep(final AbstractEvalResult res) {
 		Objects.requireNonNull(res);
 		if (res instanceof IdentifierNotInitialised) {
@@ -28,24 +32,22 @@ public class ElementStateTreeItem extends StateTreeItem<AbstractElement> {
 		}
 	}
 	
-	public ElementStateTreeItem(
+	public static ElementStateTreeItem fromElementAndValues(
 		final AbstractElement element,
 		final Map<IEvalElement, AbstractEvalResult> values,
 		final Map<IEvalElement, AbstractEvalResult> previousValues
 	) {
-		super(element.toString(), "", "", element);
-		this.update(values, previousValues);
-	}
-	
-	@Override
-	public void update(
-		final Map<IEvalElement, AbstractEvalResult> values,
-		final Map<IEvalElement, AbstractEvalResult> previousValues
-	) {
-		if (this.getContents() instanceof AbstractFormulaElement) {
-			IEvalElement formula = ((AbstractFormulaElement)this.getContents()).getFormula();
-			this.value.set(stringRep(values.get(formula)));
-			this.previousValue.set(previousValues == null ? "" : stringRep(previousValues.get(formula)));
+		final String value;
+		final String previousValue;
+		if (element instanceof AbstractFormulaElement) {
+			final IEvalElement formula = ((AbstractFormulaElement)element).getFormula();
+			value = stringRep(values.get(formula));
+			previousValue = previousValues == null ? "" : stringRep(previousValues.get(formula));
+		} else {
+			value = "";
+			previousValue = "";
 		}
+		
+		return new ElementStateTreeItem(element.toString(), value, previousValue, element);
 	}
 }

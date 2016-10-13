@@ -11,10 +11,4 @@ public class RealPrefTreeItem extends PrefTreeItem {
 	) {
 		super(name, changed, value, valueType, defaultValue, description);
 	}
-	
-	@Override
-	public void updateValue(final ProBPreferences prefs) {
-		this.value.set(prefs.getPreferenceValue(this.getName()));
-		this.changed.set(this.value.get().equals(this.defaultValue.get()) ? "" : "*");
-	}
 }

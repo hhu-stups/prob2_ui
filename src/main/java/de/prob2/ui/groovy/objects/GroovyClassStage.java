@@ -1,4 +1,4 @@
-package de.prob2.ui.groovy;
+package de.prob2.ui.groovy.objects;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -11,6 +11,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.prob2.ui.groovy.GroovyMethodOption;
+import de.prob2.ui.groovy.MetaPropertiesHandler;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -22,6 +24,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 public class GroovyClassStage extends Stage {
+	private static final Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
+	
 	@FXML private TableView<GroovyClassPropertyItem> tvMethods;
 	@FXML private TableView<GroovyClassPropertyItem> tvFields;
 	@FXML private TableView<GroovyClassItem> tvClass;
@@ -56,9 +60,7 @@ public class GroovyClassStage extends Stage {
 	private ObservableList<GroovyClassPropertyItem> fields = FXCollections.observableArrayList();
 	private ObservableList<GroovyClassItem> attributes = FXCollections.observableArrayList();
 	private ObservableList<CollectionDataItem> collectionData = FXCollections.observableArrayList();
-	
-	private Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
-	
+
 	public GroovyClassStage(FXMLLoader loader) {
 		loader.setLocation(getClass().getResource("groovy_class_stage.fxml"));
 		loader.setRoot(this);
@@ -116,7 +118,7 @@ public class GroovyClassStage extends Stage {
 		}
 		
 		MetaPropertiesHandler.handleProperties(object, fields);
-		MetaPropertiesHandler.handleMethods(clazz, methods);
+		MetaPropertiesHandler.handleMethods(clazz, methods, GroovyMethodOption.ALL);
 		
 		if (clazz.isArray()) {
 			handleArrays(object);

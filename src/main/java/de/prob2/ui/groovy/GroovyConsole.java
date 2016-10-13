@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.prob2.ui.groovy.codecompletion.CodeCompletionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
@@ -27,6 +28,10 @@ public class GroovyConsole extends TextArea {
 		this.instructions = new ArrayList<>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		setListeners();
+	}
+	
+	public void reset() {
+		this.setText("Prob 2.0 Groovy Console");
 	}
 	
 	public void setInterpreter(GroovyInterpreter interpreter) {
@@ -98,13 +103,10 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void setListeners() {
-		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e-> {
-			interpreter.triggerCloseCodeCompletion();
-		});
-		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, e-> {
-			handleCodeCompletionEvent(e);
-		});
-		
+		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> interpreter.triggerCloseCodeCompletion());
+
+		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, this::handleCodeCompletionEvent);
+
 		this.addEventFilter(KeyEvent.ANY, e -> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
@@ -138,32 +140,20 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
-		if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent) {
+		if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent)((CodeCompletionEvent) e).getEvent()).getText())) {
 			String choice = ((CodeCompletionEvent) e).getChoice();
-			String currentInstruction = getCurrentInstruction(getCurrentLine());
-			this.setText(this.getText().substring(0, this.getText().lastIndexOf(currentInstruction)));
-			this.appendText(choice);
-			currentPosInLine += choice.length() - currentInstruction.length();
-			charCounterInLine += choice.length() - currentInstruction.length();
-		} else if(((CodeCompletionEvent) e).getCode() == KeyCode.LEFT) {
-				if('.' == getCurrentLine().charAt(currentPosInLine - 1)) {
-					interpreter.triggerCloseCodeCompletion();
-				}
-		} else if(((CodeCompletionEvent) e).getCode() == KeyCode.RIGHT) {
-			if(';' == getCurrentLine().charAt(currentPosInLine - 1)) {
-				interpreter.triggerCloseCodeCompletion();
-			}
+			String suggestion = ((CodeCompletionEvent) e).getCurrentSuggestion();
+			String newText = this.getText().substring(0, this.getCaretPosition() - suggestion.length());
+			newText = new StringBuilder(newText).append(choice).toString();
+			newText = new StringBuilder(newText).append(this.getText().substring(this.getCaretPosition())).toString();
+			int diff = newText.length() - this.getText().length();
+			int caret = this.getCaretPosition();
+			this.setText(newText);
+			currentPosInLine += diff;
+			charCounterInLine += diff;
+			this.positionCaret(caret + diff);
 		}
 	}
-	
-	@Deprecated
-	public String getCurrentInstruction(String filter) {
-		int indexOfPoint = filter.lastIndexOf('.');
-		int indexOfSemicolon = Math.max(filter.lastIndexOf(';'),filter.length());
-		String result = filter.substring(indexOfPoint + 1, indexOfSemicolon);
-		return result;
-	}
-	//1 Error hier und 1 Error in GroovyCodeCompletion
 	
 	private void goToLastPos() {
 		this.positionCaret(this.getLength());
@@ -207,7 +197,11 @@ public class GroovyConsole extends TextArea {
 				instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
 			}
 			posInList = instructions.size() - 1;
-			this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
+			if("clear".equals(interpreter.exec(instructions.get(posInList)).getConsoleOutput())) {
+				reset();
+			} else {
+				this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
+			}
 		}
 		this.appendText("\n >");
 	}

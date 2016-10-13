@@ -15,6 +15,7 @@
 
 # Gradle
 .gradle/
+gradle-app.setting
 
 # ProB
 *.log

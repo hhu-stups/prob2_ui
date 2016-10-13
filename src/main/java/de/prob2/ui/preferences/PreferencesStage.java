@@ -13,13 +13,16 @@ import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.prolog.term.ListPrologTerm;
+import de.prob.statespace.Trace;
 
+import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -27,6 +30,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
@@ -60,8 +65,11 @@ public final class PreferencesStage extends Stage {
 			return clazz == null ? "null" : clazz.getSimpleName();
 		}
 	};
+	
+	private static final Logger logger = LoggerFactory.getLogger(ListView.class);
 
 	@FXML private Stage stage;
+	@FXML private Spinner<Integer> recentFilesCountSpinner;
 	@FXML private Button undoButton;
 	@FXML private Button resetButton;
 	@FXML private Button applyButton;
@@ -77,20 +85,21 @@ public final class PreferencesStage extends Stage {
 	private final ClassBlacklist classBlacklist;
 	private final CurrentTrace currentTrace;
 	private final ProBPreferences preferences;
-
-	private Logger logger = LoggerFactory.getLogger(ListView.class);
+	private final RecentFiles recentFiles;
 
 	@Inject
 	private PreferencesStage(
 			final ClassBlacklist classBlacklist,
 			final CurrentTrace currentTrace,
 			final ProBPreferences preferences,
+			final RecentFiles recentFiles,
 			final FXMLLoader loader,
 			final CurrentStage currentStage) {
 		this.classBlacklist = classBlacklist;
 		this.currentTrace = currentTrace;
 		this.preferences = preferences;
 		this.preferences.setStateSpace(currentTrace.exists() ? currentTrace.getStateSpace() : null);
+		this.recentFiles = recentFiles;
 
 		loader.setLocation(this.getClass().getResource("preferences_stage.fxml"));
 		loader.setRoot(this);
@@ -106,6 +115,17 @@ public final class PreferencesStage extends Stage {
 
 	@FXML
 	public void initialize() {
+		// General
+		
+		final SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 50);
+		
+		// bindBidirectional doesn't work properly here, don't ask why
+		this.recentFiles.maximumProperty().addListener((observable, from, to) -> valueFactory.setValue((Integer)to));
+		valueFactory.valueProperty().addListener((observable, from, to) -> this.recentFiles.setMaximum(to));
+		valueFactory.setValue(this.recentFiles.getMaximum());
+		
+		this.recentFilesCountSpinner.setValueFactory(valueFactory);
+		
 		// ProB Preferences
 
 		this.undoButton.disableProperty().bind(this.preferences.changesAppliedProperty());
@@ -119,12 +139,12 @@ public final class PreferencesStage extends Stage {
 
 		tvValue.setCellFactory(col -> {
 			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell<>();
-			cell.tableRowProperty().addListener((observable, from, to) -> {
-				to.treeItemProperty().addListener((observable1, from1, to1) -> {
+			cell.tableRowProperty().addListener((observable, from, to) ->
+				to.treeItemProperty().addListener((observable1, from1, to1) ->
 					cell.setEditable(
-							to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem);
-				});
-			});
+							to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem)
+				)
+			);
 			return cell;
 		});
 		tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
@@ -147,10 +167,13 @@ public final class PreferencesStage extends Stage {
 
 		tv.getRoot().setValue(new CategoryPrefTreeItem("Preferences"));
 
-		this.currentTrace.addListener((observable, from, to) -> {
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			this.preferences.setStateSpace(to == null ? null : to.getStateSpace());
 			this.updatePreferences();
-		});
+		};
+		this.currentTrace.addListener(traceChangeListener);
+		// Fire the listener manually once to load the current preferences
+		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 
 		// States View
 
@@ -220,23 +243,38 @@ public final class PreferencesStage extends Stage {
 					item = ti;
 				}
 			}
-			if (item == null) {
-				final ProBPreferenceType type;
-				if (pref.type instanceof ListPrologTerm) {
-					final ListPrologTerm values = (ListPrologTerm) pref.type;
-					final String[] arr = new String[values.size()];
-					for (int i = 0; i < values.size(); i++) {
-						arr[i] = values.get(i).getFunctor();
-					}
-					type = new ProBPreferenceType(arr);
-				} else {
-					type = new ProBPreferenceType(pref.type.getFunctor());
+			
+			final ProBPreferenceType type;
+			if (pref.type instanceof ListPrologTerm) {
+				final ListPrologTerm values = (ListPrologTerm) pref.type;
+				final String[] arr = new String[values.size()];
+				for (int i = 0; i < values.size(); i++) {
+					arr[i] = values.get(i).getFunctor();
 				}
-				item = new TreeItem<>(
-						new RealPrefTreeItem(pref.name, "", "", type, pref.defaultValue, pref.description));
+				type = new ProBPreferenceType(arr);
+			} else {
+				type = new ProBPreferenceType(pref.type.getFunctor());
+			}
+			final String value = this.preferences.getPreferenceValue(pref.name);
+			
+			if (item == null) {
+				item = new TreeItem<>();
 				category.getChildren().add(item);
 			}
-			item.getValue().updateValue(this.preferences);
+			item.setValue(new RealPrefTreeItem(
+				pref.name,
+				value.equals(pref.defaultValue) ? "" : "*",
+				value,
+				type,
+				pref.defaultValue,
+				pref.description
+			));
+		}
+		
+		this.tv.getRoot().getChildren().sort(Comparator.comparing(c -> c.getValue().getName()));
+		
+		for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
+			ti.getChildren().sort(Comparator.comparing(c -> c.getValue().getName()));
 		}
 	}
 

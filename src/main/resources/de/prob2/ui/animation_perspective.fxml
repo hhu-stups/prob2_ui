@@ -24,8 +24,8 @@
 					<TitledPane text="Model Check" fx:id="modelcheckTP">
 						<ModelcheckingController fx:id="modelcheck"/>
 					</TitledPane>
-					<TitledPane text="Statistics">
-						<StatsView/>
+					<TitledPane text="Statistics" fx:id="statsTP">
+						<StatsView fx:id="stats"/>
 					</TitledPane>
 					<TitledPane text="Animations" fx:id="animationsTP">
 						<AnimationsView fx:id="animations"/>

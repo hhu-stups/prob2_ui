@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 
 //@Singleton
 public class AnimationsView extends AnchorPane implements IAnimationChangeListener {
+	private static final Logger logger = LoggerFactory.getLogger(AnimationsView.class);
+	
 	@FXML
 	private TableView<Animation> animationsTable;
 	@FXML
@@ -43,8 +45,6 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 	private final AnimationSelector animations;
 	private int currentIndex;
 	private int previousSize = 0;
-
-	private Logger logger = LoggerFactory.getLogger(AnimationsView.class);
 
 	@Inject
 	private AnimationsView(final AnimationSelector animations, final FXMLLoader loader) {

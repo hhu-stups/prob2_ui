@@ -29,9 +29,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class ModelCheckStats extends AnchorPane {
-	public static enum Result {
+	public enum Result {
 		SUCCESS, DANGER, WARNING
 	}
+	
+	private static final Logger logger = LoggerFactory.getLogger(ModelCheckStats.class);
 	
 	@FXML private AnchorPane resultBackground;
 	@FXML private Text resultText;
@@ -48,7 +50,6 @@ public final class ModelCheckStats extends AnchorPane {
 	private Trace trace;
 	
 	private final StatsView statsView;
-	private final Logger logger = LoggerFactory.getLogger(ModelCheckStats.class);
 	
 	public ModelCheckStats(FXMLLoader loader, ModelcheckingController modelcheckingController, StatsView statsView) {
 		this.modelcheckingController = modelcheckingController;
@@ -65,15 +66,15 @@ public final class ModelCheckStats extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		Platform.runLater(() -> {
+		Platform.runLater(() ->
 			this.modelcheckingController.widthProperty().addListener((observableValue, oldValue, newValue) -> {
 				if (newValue == null) {
 					resultText.setWrappingWidth(0);
 					return;
 				}
 				resultText.setWrappingWidth(newValue.doubleValue() - 60);
-			});
-		});
+			})
+		);
 	}
 
 	void addJob(String jobId, ModelChecker checker) {
@@ -85,9 +86,7 @@ public final class ModelCheckStats extends AnchorPane {
 	public void updateStats(final String id, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
 		results.put(id, result);
 
-		Platform.runLater(() -> {
-			elapsedTime.setText(String.valueOf(timeElapsed));
-		});
+		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
 
 		if (stats != null) {
 			int nrProcessedNodes = stats.getNrProcessedNodes();
@@ -113,9 +112,7 @@ public final class ModelCheckStats extends AnchorPane {
 	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
 		results.put(id, result);
 
-		Platform.runLater(() -> {
-			elapsedTime.setText(String.valueOf(timeElapsed));
-		});
+		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
 		
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
 			this.result = Result.SUCCESS;

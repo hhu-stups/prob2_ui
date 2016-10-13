@@ -13,8 +13,7 @@ import javafx.scene.layout.Pane;
 
 @Singleton
 public class ModelineController extends Pane {
-
-	private Logger logger = LoggerFactory.getLogger(ModelineController.class);
+	private static final Logger logger = LoggerFactory.getLogger(ModelineController.class);
 
 	@Inject
 	private ModelineController(FXMLLoader loader) {

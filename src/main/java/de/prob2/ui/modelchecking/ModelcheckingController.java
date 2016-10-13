@@ -49,6 +49,8 @@ import org.slf4j.LoggerFactory;
 
 //@Singleton
 public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
+	private static final Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
+	
 	// modelchecking_stats_view.fxml
 	@FXML private AnchorPane statsPane;
 	@FXML private VBox historyBox;
@@ -67,8 +69,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 	private final StatsView statsView;
-	
-	private final Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
 
 	private ModelChecker checker;
 	private ObservableList<Node> historyNodeList;
@@ -161,9 +161,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 		FontAwesomeIconView iconView = selectIcon(item.getResult());
 		Text text = new Text(toPrettyString(item.getOptions()));
-		Platform.runLater(() -> {
-			text.wrappingWidthProperty().bind(this.widthProperty().subtract(70.0));
-		});
+		Platform.runLater(() -> text.wrappingWidthProperty().bind(this.widthProperty().subtract(70.0)));
 		box.getChildren().add(iconView);
 		box.getChildren().add(text);
 
@@ -173,9 +171,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private ContextMenu createContextMenu(HistoryItem item) {
 		ContextMenu cm = new ContextMenu();
 		MenuItem mItem = new MenuItem("Show Trace To Error State");
-		mItem.setOnAction(event -> {
-			animations.addNewAnimation(item.getStats().getTrace());
-		});
+		mItem.setOnAction(event -> animations.addNewAnimation(item.getStats().getTrace()));
 		cm.getItems().add(mItem);
 		return cm;
 	}

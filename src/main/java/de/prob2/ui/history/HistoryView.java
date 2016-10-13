@@ -58,6 +58,8 @@ public final class HistoryView extends AnchorPane {
 			}
 		}
 	}
+	
+	private static final Logger logger = LoggerFactory.getLogger(HistoryView.class);
 
 	@FXML private ListView<HistoryItem> lvHistory;
 	@FXML private ToggleButton tbReverse;
@@ -65,8 +67,6 @@ public final class HistoryView extends AnchorPane {
 	@FXML private Button btForward;
 
 	private final CurrentTrace currentTrace;
-
-	private Logger logger = LoggerFactory.getLogger(HistoryView.class);
 
 	@Inject
 	private HistoryView(FXMLLoader loader, CurrentTrace currentTrace) {
@@ -124,13 +124,9 @@ public final class HistoryView extends AnchorPane {
 			}
 		});
 
-		lvHistory.setOnMouseMoved(e -> {
-			lvHistory.setCursor(Cursor.HAND);
-		});
+		lvHistory.setOnMouseMoved(e -> lvHistory.setCursor(Cursor.HAND));
 
-		tbReverse.setOnAction(e -> {
-			Collections.reverse(lvHistory.getItems());
-		});
+		tbReverse.setOnAction(e -> Collections.reverse(lvHistory.getItems()));
 
 		btBack.setOnAction(e -> {
 			if (currentTrace.exists()) {

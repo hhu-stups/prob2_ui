@@ -25,11 +25,10 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S, String> {
+	private static final Logger logger = LoggerFactory.getLogger(MultiTreeTableCell.class);
+	
 	// Valid values for named list-like types.
 	private static final Map<String, String[]> VALID_TYPE_VALUES;
-	
-	private Logger logger = LoggerFactory.getLogger(MultiTreeTableCell.class);
-
 	
 	static {
 		final Map<String, String[]> validTypeValues = new HashMap<>();
@@ -108,6 +107,134 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 		}
 	}
 	
+	private void editAsSpinner(final int min, final int max, final String initial) {
+		final Spinner<Integer> spinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, Integer.parseInt(initial)));
+		spinner.setEditable(true);
+		// Commit by pressing Enter in the spinner editor.
+		spinner.getEditor().setOnAction(event -> this.commitEdit(spinner.getEditor().getText()));
+		// Cancel by pressing Escape in the spinner editor.
+		spinner.getEditor().setOnKeyReleased(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				this.cancelEdit();
+			}
+		});
+		this.setGraphic(spinner);
+		// Request focus on the spinner editor so the user can start typing right away.
+		spinner.getEditor().requestFocus();
+		spinner.getEditor().selectAll();
+	}
+	
+	private void editAsFileChooser(final PrefTreeItem item) {
+		final FileChooser fileChooser = new FileChooser();
+		final File initialFileDirectory = new File(item.getValue()).getParentFile();
+		if (initialFileDirectory.exists()) {
+			fileChooser.setInitialDirectory(initialFileDirectory);
+		}
+		final File chosenFile = fileChooser.showOpenDialog(this.getScene().getWindow());
+		if (chosenFile == null) {
+			this.cancelEdit();
+		} else {
+			this.commitEdit(chosenFile.getPath());
+		}
+	}
+	
+	private void editAsDirectoryChooser(final PrefTreeItem item) {
+		final DirectoryChooser directoryChooser = new DirectoryChooser();
+		final File initialDirectory = new File(item.getValue());
+		if (initialDirectory.exists()) {
+			directoryChooser.setInitialDirectory(initialDirectory);
+		}
+		final File chosenDirectory = directoryChooser.showDialog(this.getScene().getWindow());
+		if (chosenDirectory == null) {
+			this.cancelEdit();
+		} else {
+			this.commitEdit(chosenDirectory.getPath());
+		}
+	}
+	
+	private void editAsText(final PrefTreeItem item) {
+		final TextField textField = new TextField(item.getValue());
+		// Commit by pressing Enter in the text field.
+		textField.setOnAction(event -> this.commitEdit(textField.getText()));
+		// Cancel by pressing Escape in the text field.
+		textField.setOnKeyReleased(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				this.cancelEdit();
+			}
+		});
+		this.setGraphic(textField);
+		// Request focus on the text field so the user can start typing right away.
+		textField.requestFocus();
+		textField.selectAll();
+	}
+	
+	private void changeToText() {
+		this.setGraphic(null);
+		this.setText(this.getTreeTableRow().getItem().getValue());
+	}
+	
+	private void changeToCheckBox(final PrefTreeItem pti) {
+		if (this.getGraphic() instanceof CheckBox) {
+			// CheckBox already exists, so we only need to update the value.
+			((CheckBox)this.getGraphic()).setSelected("true".equals(pti.getValue()));
+		} else {
+			// CheckBox doesn't exist yet, so create it.
+			final CheckBox checkBox = new CheckBox();
+			checkBox.setSelected("true".equals(pti.getValue()));
+			checkBox.setOnAction(event -> this.instantEdit("" + checkBox.isSelected()));
+			this.setText(null);
+			this.setGraphic(checkBox);
+		}
+	}
+	
+	private void changeToColorPicker(final PrefTreeItem pti) {
+		Color color;
+		try {
+			color = Color.web(pti.getValue());
+		} catch (final IllegalArgumentException exc) {
+			logger.error("Invalid color",exc);
+			color = Color.color(1.0, 0.0, 1.0);
+		}
+		if (this.getGraphic() instanceof ColorPicker) {
+			final ColorPicker colorPicker = (ColorPicker)this.getGraphic();
+			colorPicker.setValue(color);
+		} else {
+			final ColorPicker colorPicker = new ColorPicker(color);
+			colorPicker.setOnAction(event -> {
+				final Color selected = colorPicker.getValue();
+				// noinspection NumericCastThatLosesPrecision
+				this.instantEdit(String.format(
+					"#%02x%02x%02x",
+					(int)(selected.getRed()*256),
+					(int)(selected.getGreen()*256),
+					(int)(selected.getBlue()*256)
+				));
+			});
+			this.setText(null);
+			this.setGraphic(colorPicker);
+		}
+	}
+	
+	private void changeToComboBox(final PrefTreeItem pti, final String type) {
+		if (this.getGraphic() instanceof ComboBox) {
+			// ComboBox already exists, so we only need to update the selection.
+			@SuppressWarnings("unchecked")
+			final ComboBox<String> comboBox = (ComboBox<String>)this.getGraphic();
+			comboBox.getSelectionModel().select(pti.getValue());
+		} else {
+			// ComboBox doesn't exist yet, so create it.
+			final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(
+				"[]".equals(type)
+					? pti.getValueType().getValues()
+					: VALID_TYPE_VALUES.get(type)
+			));
+			comboBox.getSelectionModel().select(pti.getValue());
+			comboBox.setOnAction(event -> this.instantEdit(comboBox.getValue()));
+			this.setText(null);
+			this.setGraphic(comboBox);
+		}
+	}
+	
 	@Override
 	public void startEdit() {
 		final PrefTreeItem item = this.getTreeTableRow().getItem();
@@ -128,79 +255,34 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 		this.setText(null);
 		switch (valueType.getType()) {
 			case "int":
+				editAsSpinner(Integer.MIN_VALUE, Integer.MAX_VALUE, item.getValue());
+				break;
+			
 			case "nat":
+				editAsSpinner(0, Integer.MAX_VALUE, item.getValue());
+				break;
+			
 			case "nat1":
+				editAsSpinner(1, Integer.MAX_VALUE, item.getValue());
+				break;
+			
 			case "neg":
-				// Integer types get a spinner.
-				final Spinner<Integer> spinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(
-					"nat1".equals(valueType.getType()) ? 1 : "nat".equals(valueType.getType()) ? 0 : Integer.MIN_VALUE, // Minimum: 1 for nat1, 0 for nat, MIN_VALUE otherwise.
-					"neg".equals(valueType.getType()) ? 0 : Integer.MAX_VALUE, // Maximum: 0 for neg, MAX_VALUE otherwise.
-					Integer.parseInt(item.getValue()) // Current value.
-				));
-				spinner.setEditable(true);
-				// Commit by pressing Enter in the spinner editor.
-				spinner.getEditor().setOnAction(event -> {
-					this.commitEdit(spinner.getEditor().getText());
-				});
-				// Cancel by pressing Escape in the spinner editor.
-				spinner.getEditor().setOnKeyReleased(event -> {
-					if (event.getCode() == KeyCode.ESCAPE) {
-						this.cancelEdit();
-					}
-				});
-				this.setGraphic(spinner);
-				// Request focus on the spinner editor so the user can start typing right away.
-				spinner.getEditor().requestFocus();
-				spinner.getEditor().selectAll();
+				editAsSpinner(Integer.MIN_VALUE, 0, item.getValue());
 				break;
 			
 			case "path":
 			case "file_path":
-				final FileChooser fileChooser = new FileChooser();
-				final File initialFileDirectory = new File(item.getValue()).getParentFile();
-				if (initialFileDirectory.exists()) {
-					fileChooser.setInitialDirectory(initialFileDirectory);
-				}
-				final File chosenFile = fileChooser.showOpenDialog(this.getScene().getWindow());
-				if (chosenFile == null) {
-					this.cancelEdit();
-				} else {
-					this.commitEdit(chosenFile.getPath());
-				}
+				editAsFileChooser(item);
 				break;
 			
 			case "directory_path":
-				final DirectoryChooser directoryChooser = new DirectoryChooser();
-				final File initialDirectory = new File(item.getValue());
-				if (initialDirectory.exists()) {
-					directoryChooser.setInitialDirectory(initialDirectory);
-				}
-				final File chosenDirectory = directoryChooser.showDialog(this.getScene().getWindow());
-				if (chosenDirectory == null) {
-					this.cancelEdit();
-				} else {
-					this.commitEdit(chosenDirectory.getPath());
-				}
+				editAsDirectoryChooser(item);
 				break;
 			
 			case "string":
 			default:
 				// Default case for strings and unknown types, simply display a text field.
-				final TextField textField = new TextField(item.getValue());
-				// Commit by pressing Enter in the text field.
-				textField.setOnAction(event -> {
-					this.commitEdit(textField.getText());
-				});
-				// Cancel by pressing Escape in the text field.
-				textField.setOnKeyReleased(event -> {
-					if (event.getCode() == KeyCode.ESCAPE) {
-						this.cancelEdit();
-					}
-				});
-				this.setGraphic(textField);
-				// Request focus on the text field so the user can start typing right away.
-				textField.requestFocus();
-				textField.selectAll();
+				editAsText(item);
 		}
 	}
 	
@@ -209,8 +291,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 		super.cancelEdit();
 		// Revert to normal text, unless this is an "always editable" cell.
 		if (!ALWAYS_EDITABLE.contains(this.getTreeTableRow().getItem().getValueType().getType())) {
-			this.setGraphic(null);
-			this.setText(this.getTreeTableRow().getItem().getValue());
+			changeToText();
 		}
 	}
 	
@@ -222,78 +303,22 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 			final PrefTreeItem pti = this.getTreeTableRow().getItem();
 			if (pti.getValueType() == null) {
 				// If there is no value type (for categories for example), just display the value text.
-				this.setGraphic(null);
-				this.setText(this.getTreeTableRow().getItem().getValue());
+				changeToText();
 			} else {
 				// Handle the special cases for "always editable" cells.
 				final String type = pti.getValueType().getType();
 				if ("bool".equals(type)) {
 					// Booleans get a CheckBox.
-					if (this.getGraphic() instanceof CheckBox) {
-						// CheckBox already exists, so we only need to update the value.
-						((CheckBox)this.getGraphic()).setSelected("true".equals(pti.getValue()));
-					} else {
-						// CheckBox doesn't exist yet, so create it.
-						final CheckBox checkBox = new CheckBox();
-						checkBox.setSelected("true".equals(pti.getValue()));
-						checkBox.setOnAction(event -> {
-							this.instantEdit("" + checkBox.isSelected());
-						});
-						this.setText(null);
-						this.setGraphic(checkBox);
-					}
+					changeToCheckBox(pti);
 				} else if ("rgb_color".equals(type)) {
 					// Colors get a ColorPicker.
-					Color color;
-					try {
-						color = Color.web(pti.getValue());
-					} catch (final IllegalArgumentException exc) {
-						logger.error("Invalid color",exc);
-						color = Color.color(1.0, 0.0, 1.0);
-					}
-					if (this.getGraphic() instanceof ColorPicker) {
-						final ColorPicker colorPicker = (ColorPicker)this.getGraphic();
-						colorPicker.setValue(color);
-					} else {
-						final ColorPicker colorPicker = new ColorPicker(color);
-						colorPicker.setOnAction(event -> {
-							final Color selected = colorPicker.getValue();
-							// noinspection NumericCastThatLosesPrecision
-							this.instantEdit(String.format(
-								"#%02x%02x%02x",
-								(int)(selected.getRed()*256),
-								(int)(selected.getGreen()*256),
-								(int)(selected.getBlue()*256)
-							));
-						});
-						this.setText(null);
-						this.setGraphic(colorPicker);
-					}
+					changeToColorPicker(pti);
 				} else if ("[]".equals(type) || VALID_TYPE_VALUES.containsKey(type)) {
 					// Lists get a ComboBox.
-					if (this.getGraphic() instanceof ComboBox) {
-						// ComboBox already exists, so we only need to update the selection.
-						@SuppressWarnings("unchecked")
-						final ComboBox<String> comboBox = (ComboBox<String>)this.getGraphic();
-						comboBox.getSelectionModel().select(pti.getValue());
-					} else {
-						// ComboBox doesn't exist yet, so create it.
-						final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(
-							"[]".equals(type)
-							? pti.getValueType().getValues()
-							: VALID_TYPE_VALUES.get(type)
-						));
-						comboBox.getSelectionModel().select(pti.getValue());
-						comboBox.setOnAction(event -> {
-							this.instantEdit(comboBox.getValue());
-						});
-						this.setText(null);
-						this.setGraphic(comboBox);
-					}
+					changeToComboBox(pti, type);
 				} else {
 					// Cell is not always editable, so display normal text when not editing
-					this.setGraphic(null);
-					this.setText(this.getTreeTableRow().getItem().getValue());
+					changeToText();
 				}
 			}
 		} else {

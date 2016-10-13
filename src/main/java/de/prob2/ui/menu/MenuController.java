@@ -19,7 +19,6 @@ import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
-import de.prob2.ui.config.Config;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.groovy.GroovyConsoleStage;
@@ -50,13 +49,15 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
+	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
+	
 	private final Injector injector;
 	private final Api api;
 	private final AnimationSelector animationSelector;
-	private final Config config;
 	private final CurrentStage currentStage;
 	private final CurrentTrace currentTrace;
 	private final FormulaGenerator formulaGenerator;
+	private final RecentFiles recentFiles;
 	
 	private Window window;
 
@@ -67,8 +68,6 @@ public final class MenuController extends MenuBar {
 	@FXML private MenuItem preferencesItem;
 	@FXML private MenuItem enterFormulaForVisualization;
 	@FXML private MenuItem aboutItem;
-
-	private final Logger logger = LoggerFactory.getLogger(MenuController.class);
 	
 	@Inject
 	private MenuController(
@@ -76,18 +75,18 @@ public final class MenuController extends MenuBar {
 		final Injector injector,
 		final Api api,
 		final AnimationSelector animationSelector,
-		final Config config,
 		final CurrentStage currentStage,
 		final CurrentTrace currentTrace,
-		final FormulaGenerator formulaGenerator
-	) {
+		final FormulaGenerator formulaGenerator,
+		final RecentFiles recentFiles
+		) {
 		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
-		this.config = config;
 		this.currentStage = currentStage;
 		this.currentTrace = currentTrace;
 		this.formulaGenerator = formulaGenerator;
+		this.recentFiles = recentFiles;
 		
 		loader.setLocation(getClass().getResource("menu.fxml"));
 		loader.setRoot(this);
@@ -134,20 +133,16 @@ public final class MenuController extends MenuBar {
 	public void initialize() {
 		this.sceneProperty().addListener((observable, from, to) -> {
 			if (to != null) {
-				to.windowProperty().addListener((observable1, from1, to1) -> {
-					this.window = to1;
-				});
+				to.windowProperty().addListener((observable1, from1, to1) -> this.window = to1);
 			}
 		});
 		
 		final ListChangeListener<String> recentFilesListener = change -> {
 			final ObservableList<MenuItem> recentItems = this.recentFilesMenu.getItems();
 			final List<MenuItem> newItems = new ArrayList<>();
-			for (String s : this.config.getRecentFiles()) {
+			for (String s : this.recentFiles) {
 				final MenuItem item = new MenuItem(new File(s).getName());
-				item.setOnAction(event -> {
-					this.open(s);
-				});
+				item.setOnAction(event -> this.open(s));
 				newItems.add(item);
 			}
 			
@@ -157,13 +152,16 @@ public final class MenuController extends MenuBar {
 				newItems.add(this.recentFilesPlaceholder);
 			}
 			
+			// Add a shortcut for reopening the most recent file
+			newItems.get(0).setAccelerator(KeyCombination.valueOf("Shift+Shortcut+'O'"));
+			
 			// Keep the last two items (the separator and the "clear recent files" item)
 			newItems.addAll(recentItems.subList(recentItems.size()-2, recentItems.size()));
 			
 			// Replace the old recents with the new ones
 			this.recentFilesMenu.getItems().setAll(newItems);
 		};
-		this.config.getRecentFiles().addListener(recentFilesListener);
+		this.recentFiles.addListener(recentFilesListener);
 		// Fire the listener once to populate the recent files menu
 		recentFilesListener.onChanged(null);
 		
@@ -172,7 +170,7 @@ public final class MenuController extends MenuBar {
 	
 	@FXML
 	private void handleClearRecentFiles() {
-		this.config.getRecentFiles().clear();
+		this.recentFiles.clear();
 	}
 
 	@FXML
@@ -227,8 +225,8 @@ public final class MenuController extends MenuBar {
 		injector.getInstance(ModelcheckingController.class).resetView();
 		
 		// Remove the path first to avoid listing the same file twice.
-		this.config.getRecentFiles().remove(path);
-		this.config.getRecentFiles().add(0, path);
+		this.recentFiles.remove(path);
+		this.recentFiles.add(0, path);
 	}
 
 	@FXML

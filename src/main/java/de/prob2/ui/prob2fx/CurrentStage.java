@@ -20,18 +20,17 @@ public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 	@Inject
 	private CurrentStage() {
 		super();
-		
-		this.stage = new SimpleObjectProperty<>(null);
+		this.stage = new SimpleObjectProperty<>(this, "stage", null);
 	}
 	
 	@Override
 	public Object getBean() {
-		return this.stage.getBean();
+		return null;
 	}
 	
 	@Override
 	public String getName() {
-		return this.stage.getName();
+		return "";
 	}
 	
 	@Override

@@ -10,6 +10,7 @@ import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.prob2fx.CurrentStage;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -40,6 +41,7 @@ public class ProB2 extends Application {
 		mainScene.getStylesheets().add("prob.css");
 		stage.setTitle("ProB 2.0");
 		stage.setScene(mainScene);
+		stage.setOnCloseRequest(e -> Platform.exit());
 		
 		injector.getInstance(CurrentStage.class).register(stage);
 
@@ -51,4 +53,5 @@ public class ProB2 extends Application {
 		config.save();
 		injector.getInstance(ProBInstanceProvider.class).shutdownAll();
 	}
+
 }

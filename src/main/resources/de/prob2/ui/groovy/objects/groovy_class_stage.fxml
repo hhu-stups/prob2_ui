@@ -10,7 +10,7 @@
 <?import javafx.stage.Stage?>
 <fx:root type="Stage" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
-		<Scene stylesheets="@../../../../prob.css" height="600.0" width="800.0">
+		<Scene stylesheets="@/prob.css" height="600.0" width="800.0">
 			<!-- TabPane *obviously* does not extend Pane, so we have to wrap it in a StackPane so we can add the menu bar to it on Mac. -->
 			<StackPane>
 				<TabPane layoutY="0" prefHeight="600.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

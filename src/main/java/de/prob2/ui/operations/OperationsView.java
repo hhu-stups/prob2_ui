@@ -45,7 +45,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 //@Singleton
 public final class OperationsView extends AnchorPane {
-	private static enum SortMode {
+	private enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
 
@@ -86,7 +86,9 @@ public final class OperationsView extends AnchorPane {
 			}
 		}
 	}
-
+	
+	private static final Logger logger = LoggerFactory.getLogger(OperationsView.class);
+	
 	private static String extractPrettyName(final String name) {
 		if ("$setup_constants".equals(name)) {
 			return "SETUP_CONSTANTS";
@@ -135,8 +137,6 @@ public final class OperationsView extends AnchorPane {
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
 
-	private Logger logger = LoggerFactory.getLogger(OperationsView.class);
-
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final FXMLLoader loader) {
 		this.currentTrace = currentTrace;
@@ -166,18 +166,14 @@ public final class OperationsView extends AnchorPane {
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 
-		currentTrace.addListener((observable, from, to) -> {
-			update(to);
-		});
+		currentTrace.addListener((observable, from, to) -> update(to));
 	}
 
 	private void update(Trace trace) {
 		if (trace == null) {
 			currentModel = null;
 			opNames = new ArrayList<>();
-			Platform.runLater(() -> {
-				opsListView.getItems().clear();
-			});
+			Platform.runLater(opsListView.getItems()::clear);
 			return;
 		}
 
@@ -189,29 +185,32 @@ public final class OperationsView extends AnchorPane {
 		Set<String> notEnabled = new HashSet<>(opNames);
 		Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		for (Transition transition : operations) {
-			String id = transition.getId();
-			String name = extractPrettyName(transition.getName());
+			final String name = extractPrettyName(transition.getName());
 			notEnabled.remove(name);
-			List<String> params = transition.getParams();
-			List<String> returnValues = transition.getReturnValues();
-			boolean explored = transition.getDestination().isExplored();
-			boolean errored = explored && !transition.getDestination().isInvariantOk();
+			final boolean explored = transition.getDestination().isExplored();
+			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			logger.debug("{} {}", name, errored);
-			Operation operation = new Operation(id, name, params, returnValues, true, withTimeout.contains(name), explored, errored);
+			Operation operation = new Operation(
+				transition.getId(),
+				name,
+				transition.getParams(),
+				transition.getReturnValues(),
+				withTimeout.contains(name) ? Operation.Status.TIMEOUT : Operation.Status.ENABLED,
+				explored,
+				errored
+			);
 			events.add(operation);
 		}
 		if (showNotEnabled) {
 			for (String s : notEnabled) {
 				if (!"INITIALISATION".equals(s)) {
-					events.add(new Operation(s, s, opToParams.get(s),Collections.emptyList(), false, withTimeout.contains(s), false, false));
+					events.add(new Operation(s, s, opToParams.get(s), Collections.emptyList(), Operation.Status.DISABLED, false, false));
 				}
 			}
 		}
 		doSort();
 
-		Platform.runLater(() -> {
-			opsListView.getItems().setAll(applyFilter(filter));
-		});
+		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
 	}
 
 	@FXML

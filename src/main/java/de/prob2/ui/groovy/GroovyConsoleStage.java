@@ -16,10 +16,10 @@ import javafx.stage.Stage;
 
 @Singleton
 public final class GroovyConsoleStage extends Stage {
+	private static final Logger logger = LoggerFactory.getLogger(GroovyConsoleStage.class);
 
 	@FXML
 	private GroovyConsole groovyConsole;
-	private Logger logger = LoggerFactory.getLogger(GroovyConsoleStage.class);
 
 	@Inject
 	@SuppressWarnings(value = "UR_UNINIT_READ", justification = "Field values are injected by FXMLLoader")
@@ -33,9 +33,7 @@ public final class GroovyConsoleStage extends Stage {
 			logger.error("loading fxml failed", e);
 		}
 		groovyConsole.setInterpreter(interpreter);
-		this.setOnCloseRequest(e -> {
-			groovyConsole.closeObjectStage();
-		});
+		this.setOnCloseRequest(e -> groovyConsole.closeObjectStage());
 
 		currentStage.register(this);
 	}

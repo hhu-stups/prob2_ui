@@ -1,4 +1,4 @@
-package de.prob2.ui.groovy;
+package de.prob2.ui.groovy.objects;
 
 import java.io.IOException;
 import java.util.Map;
@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class GroovyObjectStage extends Stage {
+	private static final Logger logger = LoggerFactory.getLogger(GroovyObjectStage.class);
 
 	@FXML private TableView<GroovyObjectItem> tvObjects;
 	@FXML private TableColumn<GroovyObjectItem, String> objects;
@@ -33,8 +34,6 @@ public final class GroovyObjectStage extends Stage {
 
 	private FXMLLoader loader;
 	private CurrentStage currentStage;
-	
-	private Logger logger = LoggerFactory.getLogger(GroovyObjectStage.class);
 
 	@Inject
 	private GroovyObjectStage(FXMLLoader loader, CurrentStage currentStage) {
@@ -54,9 +53,7 @@ public final class GroovyObjectStage extends Stage {
 
 	@Override
 	public void close() {
-		for (GroovyObjectItem item : items) {
-			item.close();
-		}
+		items.forEach(GroovyObjectItem::close);
 		super.close();
 	}
 

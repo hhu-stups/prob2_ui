@@ -19,12 +19,12 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class DottyStage extends Stage {
+	private static final Logger logger = LoggerFactory.getLogger(DottyStage.class);
+	
 	@FXML
 	ImageView graph;
 	@FXML
 	ScrollPane pane;
-
-	private Logger logger = LoggerFactory.getLogger(DottyStage.class);
 
 	@Inject
 	private DottyStage(FXMLLoader loader, CurrentStage currentStage) {

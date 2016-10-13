@@ -20,17 +20,17 @@ public final class CurrentStateSpace extends ReadOnlyObjectProperty<StateSpace> 
 	private CurrentStateSpace() {
 		super();
 		
-		this.stateSpace = new SimpleObjectProperty<>(null);
+		this.stateSpace = new SimpleObjectProperty<>(this, "stateSpace", null);
 	}
 	
 	@Override
 	public Object getBean() {
-		return this.stateSpace.getBean();
+		return null;
 	}
 	
 	@Override
 	public String getName() {
-		return this.stateSpace.getName();
+		return "";
 	}
 	
 	@Override

@@ -18,10 +18,10 @@ import javafx.scene.control.Alert;
 
 @Singleton
 public final class FormulaGenerator {
+	private static final Logger logger = LoggerFactory.getLogger(FormulaGenerator.class);
+	
 	private final CurrentTrace currentTrace;
 	private final CurrentStage currentStage;
-
-	private Logger logger = LoggerFactory.getLogger(FormulaGenerator.class);
 
 	@Inject
 	private FormulaGenerator(final CurrentTrace currentTrace, final CurrentStage currentStage) {

@@ -1,96 +1,127 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
-	<VBox spacing="13.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
-		<VBox spacing="3.0">
-			<HBox prefHeight="12.0" spacing="7.0">
-				<Label text="Total Transitions:" />
-				<Label fx:id="totalTransitions" />
-			</HBox>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.ScrollPane?>
+
+<fx:root type="ScrollPane" fitToHeight="true" fitToWidth="true"
+	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1"
+	xmlns="http://javafx.com/javafx/8.0.65">
+	<AnchorPane>
+		<VBox spacing="13.0" AnchorPane.bottomAnchor="10.0"
+			AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0"
+			AnchorPane.topAnchor="10.0">
+			<VBox spacing="3.0">
+				<HBox prefHeight="12.0" spacing="7.0">
+					<Label text="Total Transitions:" />
+					<Label fx:id="totalTransitions" />
+					<VBox.margin>
+						<Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+					</VBox.margin>
+				</HBox>
+			</VBox>
+			<AnchorPane>
+				<Label alignment="CENTER" prefHeight="16.0" text="Node Stats"
+					AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+					AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+					<font>
+						<Font name="System Bold" size="15.0" />
+					</font>
+				</Label>
+			</AnchorPane>
+			<VBox>
+				<GridPane>
+					<columnConstraints>
+						<ColumnConstraints hgrow="SOMETIMES" minWidth="160.0"
+							prefWidth="160.0" />
+						<ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0"
+							prefWidth="120.0" />
+					</columnConstraints>
+					<rowConstraints>
+						<RowConstraints minHeight="20.0" prefHeight="20.0"
+							vgrow="SOMETIMES" />
+					</rowConstraints>
+					<AnchorPane
+						style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
+						<Label text="Status" AnchorPane.leftAnchor="10.0">
+							<font>
+								<Font name="System Bold" size="14.0" />
+							</font>
+						</Label>
+					</AnchorPane>
+					<AnchorPane
+						style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
+						GridPane.columnIndex="1">
+						<Label text="# of Nodes" AnchorPane.rightAnchor="10.0">
+							<font>
+								<Font name="System Bold" size="14.0" />
+							</font>
+						</Label>
+					</AnchorPane>
+				</GridPane>
+				<GridPane fx:id="nodeStats">
+					<columnConstraints>
+						<ColumnConstraints hgrow="SOMETIMES" minWidth="120.0"
+							prefWidth="120.0" />
+						<ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES"
+							maxWidth="120.0" prefWidth="120.0" />
+					</columnConstraints>
+				</GridPane>
+			</VBox>
+			<AnchorPane>
+				<Label alignment="CENTER" prefHeight="16.0" text="Transitions Stats"
+					AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+					AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+					<font>
+						<Font name="System Bold" size="15.0" />
+					</font>
+				</Label>
+			</AnchorPane>
+			<VBox>
+				<GridPane>
+					<columnConstraints>
+						<ColumnConstraints hgrow="SOMETIMES" minWidth="120.0"
+							prefWidth="140.0" />
+						<ColumnConstraints hgrow="SOMETIMES" prefWidth="140.0" />
+					</columnConstraints>
+					<rowConstraints>
+						<RowConstraints minHeight="-Infinity" prefHeight="20.0"
+							vgrow="SOMETIMES" />
+					</rowConstraints>
+					<AnchorPane prefHeight="18.0"
+						style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
+						<Label text="Transition Name" AnchorPane.leftAnchor="10.0">
+							<font>
+								<Font name="System Bold" size="14.0" />
+							</font>
+						</Label>
+					</AnchorPane>
+					<AnchorPane prefHeight="18.0"
+						style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
+						GridPane.columnIndex="1">
+						<Label text="# of Transitions" AnchorPane.rightAnchor="10.0">
+							<font>
+								<Font name="System Bold" size="14.0" />
+							</font>
+						</Label>
+					</AnchorPane>
+				</GridPane>
+				<GridPane fx:id="transStats">
+					<columnConstraints>
+						<ColumnConstraints hgrow="SOMETIMES" minWidth="140.0"
+							prefWidth="140.0" />
+						<ColumnConstraints hgrow="SOMETIMES" maxWidth="140.0"
+							prefWidth="140.0" />
+					</columnConstraints>
+				</GridPane>
+			</VBox>
 		</VBox>
-		<AnchorPane>
-			<Label alignment="CENTER" prefHeight="16.0" text="Node Stats" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
-				<font>
-					<Font name="System Bold" size="15.0" />
-				</font>
-			</Label>
-		</AnchorPane>
-		<VBox>
-			<GridPane>
-				<columnConstraints>
-					<ColumnConstraints hgrow="SOMETIMES" minWidth="160.0" prefWidth="160.0" />
-					<ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" prefWidth="120.0" />
-				</columnConstraints>
-				<rowConstraints>
-					<RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="SOMETIMES" />
-				</rowConstraints>
-				<AnchorPane style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
-					<Label text="Status" AnchorPane.leftAnchor="10.0">
-						<font>
-							<Font name="System Bold" size="14.0" />
-						</font>
-					</Label>
-				</AnchorPane>
-				<AnchorPane style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;" GridPane.columnIndex="1">
-					<Label text="# of Nodes" AnchorPane.rightAnchor="10.0">
-						<font>
-							<Font name="System Bold" size="14.0" />
-						</font>
-					</Label>
-				</AnchorPane>
-			</GridPane>
-			<GridPane fx:id="nodeStats">
-				<columnConstraints>
-					<ColumnConstraints hgrow="SOMETIMES" minWidth="120.0" prefWidth="120.0" />
-					<ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120.0" prefWidth="120.0" />
-				</columnConstraints>
-			</GridPane>
-		</VBox>
-		<AnchorPane>
-			<Label alignment="CENTER" prefHeight="16.0" text="Transitions Stats" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
-				<font>
-					<Font name="System Bold" size="15.0" />
-				</font>
-			</Label>
-		</AnchorPane>
-		<VBox>
-			<GridPane>
-				<columnConstraints>
-					<ColumnConstraints hgrow="SOMETIMES" minWidth="120.0" prefWidth="140.0" />
-					<ColumnConstraints hgrow="SOMETIMES" prefWidth="140.0" />
-				</columnConstraints>
-				<rowConstraints>
-					<RowConstraints minHeight="-Infinity" prefHeight="20.0" vgrow="SOMETIMES" />
-				</rowConstraints>
-				<AnchorPane prefHeight="18.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
-					<Label text="Transition Name" AnchorPane.leftAnchor="10.0">
-						<font>
-							<Font name="System Bold" size="14.0" />
-						</font>
-					</Label>
-				</AnchorPane>
-				<AnchorPane prefHeight="18.0" style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;" GridPane.columnIndex="1">
-					<Label text="# of Transitions" AnchorPane.rightAnchor="10.0">
-						<font>
-							<Font name="System Bold" size="14.0" />
-						</font>
-					</Label>
-				</AnchorPane>
-			</GridPane>
-			<GridPane fx:id="transStats">
-				<columnConstraints>
-					<ColumnConstraints hgrow="SOMETIMES" minWidth="140.0" prefWidth="140.0" />
-					<ColumnConstraints hgrow="SOMETIMES" maxWidth="140.0" prefWidth="140.0" />
-				</columnConstraints>
-			</GridPane>
-		</VBox>
-	</VBox>
+	</AnchorPane>
 </fx:root>

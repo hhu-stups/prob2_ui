@@ -6,6 +6,8 @@ import javax.script.ScriptException;
 import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
+import de.prob2.ui.groovy.codecompletion.GroovyCodeCompletion;
+import de.prob2.ui.groovy.objects.GroovyObjectStage;
 import javafx.fxml.FXMLLoader;
 
 import org.slf4j.Logger;
@@ -13,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.codehaus.groovy.GroovyBugError;
 
 public class GroovyInterpreter {
-	private final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
+	private static final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
 	private final ScriptEngine engine;
 	private final GroovyCodeCompletion codeCompletion;
 	private final GroovyObjectStage groovyObjectStage;
@@ -31,6 +33,8 @@ public class GroovyInterpreter {
 		if ("inspect".equals(instruction.getInstruction())) {
 			groovyObjectStage.showObjects(engine);
 			return new ExecResult("", "");
+		} else if("clear".equals(instruction.getInstruction())) {
+			return new ExecResult("clear","");
 		} else {
 			String resultString;
 			StringBuilder console = new StringBuilder();
@@ -40,10 +44,7 @@ public class GroovyInterpreter {
 				Object eval = engine.eval(instruction.getInstruction());
 				resultString = eval.toString();
 				logger.trace("Evaled {} to {}", instruction.getInstruction(), resultString);
-			} catch (ScriptException e) {
-				logger.debug("Groovy Evaluation failed", e);
-				resultString = e.toString();
-			} catch(GroovyBugError e) {
+			} catch (ScriptException|GroovyBugError e) {
 				logger.debug("Groovy Evaluation failed", e);
 				resultString = e.toString();
 			}
