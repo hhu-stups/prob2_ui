@@ -33,6 +33,8 @@ public class GroovyInterpreter {
 		if ("inspect".equals(instruction.getInstruction())) {
 			groovyObjectStage.showObjects(engine);
 			return new ExecResult("", "");
+		} else if("clear".equals(instruction.getInstruction())) {
+			return new ExecResult("clear","");
 		} else {
 			String resultString;
 			StringBuilder console = new StringBuilder();

@@ -30,6 +30,10 @@ public class GroovyConsole extends TextArea {
 		setListeners();
 	}
 	
+	public void reset() {
+		this.setText("Prob 2.0 Groovy Console");
+	}
+	
 	public void setInterpreter(GroovyInterpreter interpreter) {
 		this.interpreter = interpreter;
 	}
@@ -193,7 +197,11 @@ public class GroovyConsole extends TextArea {
 				instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
 			}
 			posInList = instructions.size() - 1;
-			this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
+			if("clear".equals(interpreter.exec(instructions.get(posInList)).getConsoleOutput())) {
+				reset();
+			} else {
+				this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
+			}
 		}
 		this.appendText("\n >");
 	}
