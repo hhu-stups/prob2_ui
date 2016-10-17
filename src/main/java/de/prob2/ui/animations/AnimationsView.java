@@ -70,7 +70,7 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 		machine.setCellValueFactory(new PropertyValueFactory<>("modelName"));
 		lastop.setCellValueFactory(new PropertyValueFactory<>("lastOperation"));
 		tracelength.setCellValueFactory(new PropertyValueFactory<>("steps"));
-		time.setCellValueFactory(new PropertyValueFactory<>("time")); 
+		time.setCellValueFactory(new PropertyValueFactory<>("time"));
 		animationsTable.setRowFactory(tableView -> {
 			final TableRow<Animation> row = new TableRow<>();
 			final ContextMenu contextMenu = new ContextMenu();
@@ -80,23 +80,38 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 				animations.removeTrace(a.getTrace());
 				animationsTable.getItems().remove(a);
 			});
+			final MenuItem removeAllMenuItem = new MenuItem("Remove All Traces");
+			removeAllMenuItem.setOnAction(event -> removeAllTraces());
 			contextMenu.getItems().add(removeMenuItem);
-			row.setOnMouseClicked(event -> rowClicked(row,event,contextMenu));
+			contextMenu.getItems().add(removeAllMenuItem);
+			row.setOnMouseClicked(event -> rowClicked(row, event, contextMenu));
 			return row;
 		});
 	}
 
-	private void rowClicked(TableRow<Animation> row, MouseEvent event, ContextMenu contextMenu) {
-		if (!row.isEmpty()) {
-			if (event.getButton() == MouseButton.PRIMARY) {
-				currentIndex = row.getIndex();
-				Trace trace = row.getItem().getTrace();
-				animations.changeCurrentAnimation(trace);
-			}
-			if (event.getButton() == MouseButton.SECONDARY) {
-				contextMenu.show(row, event.getScreenX(), event.getScreenY());
-			}
+	private void removeAllTraces() {
+		ObservableList<Animation> animationsList = animationsTable.getItems();
+		for (Animation a : animationsList) {
+			animations.removeTrace(a.getTrace());
 		}
+		animationsList.clear();
+	}
+
+	private void rowClicked(TableRow<Animation> row, MouseEvent event, ContextMenu contextMenu) {
+		if (!row.isEmpty() && event.getButton() == MouseButton.PRIMARY) {
+			currentIndex = row.getIndex();
+			Trace trace = row.getItem().getTrace();
+			animations.changeCurrentAnimation(trace);
+		}
+		if (event.getButton() == MouseButton.SECONDARY) {
+			if(row.isEmpty()) {
+				contextMenu.getItems().get(0).setDisable(true);
+			} else {
+				contextMenu.getItems().get(0).setDisable(false);
+			}
+			contextMenu.show(row, event.getScreenX(), event.getScreenY());
+		}
+
 	}
 
 	@Override
