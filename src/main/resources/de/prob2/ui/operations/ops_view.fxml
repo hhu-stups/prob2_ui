@@ -22,7 +22,7 @@
 				alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
 				maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
 				mnemonicParsing="false" onAction="#handleSearchButton"
-				prefHeight="26.0" prefWidth="26.0" stylesheets="@../../../../prob.css"
+				prefHeight="26.0" prefWidth="26.0" stylesheets="@/prob.css"
 				AnchorPane.leftAnchor="10.0"
 				AnchorPane.topAnchor="10.0">
 				<graphic>
@@ -39,7 +39,7 @@
 			<Button fx:id="backButton" layoutX="39.0" layoutY="2.0"
 				maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
 				minWidth="-Infinity" mnemonicParsing="false" onAction="#handleBackButton"
-				prefHeight="26.0" prefWidth="26.0" stylesheets="@../../../../prob.css"
+				prefHeight="26.0" prefWidth="26.0" stylesheets="@/prob.css"
 				AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="10.0"
 				AnchorPane.topAnchor="2.0">
 				<graphic>
@@ -53,7 +53,7 @@
 			<Button fx:id="forwardButton" layoutX="72.0" layoutY="3.0"
 				maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
 				minWidth="-Infinity" mnemonicParsing="false" onAction="#handleForwardButton"
-				prefHeight="26.0" prefWidth="26.0" stylesheets="@../../../../prob.css"
+				prefHeight="26.0" prefWidth="26.0" stylesheets="@/prob.css"
 				AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="50.0"
 				AnchorPane.topAnchor="2.0">
 				<graphic>
@@ -67,7 +67,7 @@
 			<Button fx:id="sortButton" layoutX="104.0" layoutY="2.0"
 				maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
 				minWidth="-Infinity" mnemonicParsing="false" onAction="#handleSortButton"
-				prefHeight="26.0" prefWidth="26.0" stylesheets="@../../../../prob.css"
+				prefHeight="26.0" prefWidth="26.0" stylesheets="@/prob.css"
 				AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="90.0"
 				AnchorPane.topAnchor="2.0">
 				<graphic>
@@ -82,7 +82,7 @@
 				layoutY="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
 				minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
 				onAction="#handleDisabledOpsToggle" prefHeight="26.0" prefWidth="26.0"
-				stylesheets="@../../../../prob.css" AnchorPane.bottomAnchor="2.0"
+				stylesheets="@/prob.css" AnchorPane.bottomAnchor="2.0"
 				AnchorPane.rightAnchor="55.0" AnchorPane.topAnchor="2.0">
 				<graphic>
 					<FontAwesomeIconView StyleClass="icon-dark"
@@ -92,7 +92,7 @@
 			<MenuButton fx:id="randomButton" layoutX="160.0"
 				layoutY="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
 				minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-				prefHeight="26.0" prefWidth="45.0" stylesheets="@../../../../prob.css"
+				prefHeight="26.0" prefWidth="45.0" stylesheets="@/prob.css"
 				AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="5.0"
 				AnchorPane.topAnchor="0.0">
 				<items>

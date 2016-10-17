@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.prob2.ui.groovy.codecompletion.CodeCompletionEvent;
+import de.prob2.ui.groovy.codecompletion.TriggerAction;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
@@ -28,6 +29,10 @@ public class GroovyConsole extends TextArea {
 		this.instructions = new ArrayList<>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		setListeners();
+	}
+	
+	public void reset() {
+		this.setText("Prob 2.0 Groovy Console");
 	}
 	
 	public void setInterpreter(GroovyInterpreter interpreter) {
@@ -107,6 +112,11 @@ public class GroovyConsole extends TextArea {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
 			}
+			
+			if(e.isControlDown() && e.getCode() == KeyCode.SPACE) {
+				int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
+				interpreter.triggerCodeCompletion(this, getCurrentLine().substring(0, caretPosInLine), TriggerAction.TRIGGER);
+			}
 		});
 		
 		this.addEventFilter(MouseEvent.ANY, e -> {
@@ -139,14 +149,18 @@ public class GroovyConsole extends TextArea {
 		if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent)((CodeCompletionEvent) e).getEvent()).getText())) {
 			String choice = ((CodeCompletionEvent) e).getChoice();
 			String suggestion = ((CodeCompletionEvent) e).getCurrentSuggestion();
-			choice = choice.substring(suggestion.length());
-			String newText = new StringBuilder(this.getText()).insert(this.getCaretPosition(), choice).toString();
+			String newText = this.getText().substring(0, this.getCaretPosition() - suggestion.length());
+			newText = new StringBuilder(newText).append(choice).toString();
+			newText = new StringBuilder(newText).append(this.getText().substring(this.getCaretPosition())).toString();
 			int diff = newText.length() - this.getText().length();
 			int caret = this.getCaretPosition();
 			this.setText(newText);
 			currentPosInLine += diff;
 			charCounterInLine += diff;
 			this.positionCaret(caret + diff);
+		} else if(((CodeCompletionEvent)e).getCode() == KeyCode.SPACE) {
+			handleInsertChar((KeyEvent)e.getEvent());
+			e.consume();
 		}
 	}
 	
@@ -170,7 +184,7 @@ public class GroovyConsole extends TextArea {
 			return;
 		}
 		if(".".equals(e.getText())) {
-			interpreter.triggerCodeCompletion(this, getCurrentLine());
+			interpreter.triggerCodeCompletion(this, getCurrentLine(), TriggerAction.POINT);
 		}
 		
 		charCounterInLine++;
@@ -192,7 +206,11 @@ public class GroovyConsole extends TextArea {
 				instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
 			}
 			posInList = instructions.size() - 1;
-			this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
+			if("clear".equals(interpreter.exec(instructions.get(posInList)).getConsoleOutput())) {
+				reset();
+			} else {
+				this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
+			}
 		}
 		this.appendText("\n >");
 	}

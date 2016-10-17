@@ -1,5 +1,8 @@
 package de.prob2.ui.animations;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import de.prob.statespace.Trace;
 
 public class Animation {
@@ -9,6 +12,7 @@ public class Animation {
 	private Trace trace;
 	private boolean isCurrent;
 	private boolean isProtected;
+	private String time;
 
 	public Animation(String modelName, String lastOperation, String steps, Trace trace, boolean isCurrent,
 			boolean isProtected) {
@@ -39,8 +43,16 @@ public class Animation {
 	public boolean isCurrent() {
 		return isCurrent;
 	}
-	
+
 	public boolean isProtected() {
 		return isProtected;
+	}
+
+	public void setTime(LocalDateTime time) {
+		this.time = time.format(DateTimeFormatter.ofPattern("HH:mm:ss d MMM uuuu"));
+	}
+
+	public String getTime() {
+		return time;
 	}
 }

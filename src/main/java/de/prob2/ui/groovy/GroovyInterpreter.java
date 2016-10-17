@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
 import de.prob2.ui.groovy.codecompletion.GroovyCodeCompletion;
+import de.prob2.ui.groovy.codecompletion.TriggerAction;
 import de.prob2.ui.groovy.objects.GroovyObjectStage;
 import javafx.fxml.FXMLLoader;
 
@@ -33,6 +34,8 @@ public class GroovyInterpreter {
 		if ("inspect".equals(instruction.getInstruction())) {
 			groovyObjectStage.showObjects(engine);
 			return new ExecResult("", "");
+		} else if("clear".equals(instruction.getInstruction())) {
+			return new ExecResult("clear","");
 		} else {
 			String resultString;
 			StringBuilder console = new StringBuilder();
@@ -51,11 +54,9 @@ public class GroovyInterpreter {
 		}
 	}
 	
-	public void triggerCodeCompletion(GroovyConsole console, String currentLine) {
+	public void triggerCodeCompletion(GroovyConsole console, String currentLine, TriggerAction action) {
 		if(!codeCompletion.isVisible()) {
-			codeCompletion.activate(console, currentLine);
-		} else {
-			codeCompletion.deactivate();
+			codeCompletion.activate(console, currentLine, action);
 		}
 	}
 	

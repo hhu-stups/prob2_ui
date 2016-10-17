@@ -21,8 +21,6 @@
 .accordion {
 	-fx-background-color: -prob-grey;
 	-fx-padding: 1.0em 0.0 0.0 0.0;
-	-fx-border-width: 0.0 0.3em 0.0 0.0;
-	-fx-border-color: -prob-aqua;
 }
 
 /************************************************************************************
@@ -263,7 +261,7 @@
  * SplitView																		*
  ************************************************************************************/
 .split-pane > .split-pane-divider {
-	-fx-padding: 0.0 0.15em 0.0 0.15em;
+	-fx-padding: 0.0 0.15em 0.0 0.2em;
 }
 /* horizontal the two nodes are placed to the left/right of each other. */
 .split-pane:horizontal > .split-pane-divider {
@@ -346,10 +344,12 @@
  * TableView, TreeTableView															*
  ************************************************************************************/
 .table-view {
+	-fx-padding: -1;
 	-fx-table-cell-border-color: transparent;
 	-fx-accent: transparent;
 }
 .tree-table-view {
+	-fx-padding: -1;
 	-fx-border-width: 0.0;
 }
 .table-view .column-header,
@@ -357,9 +357,11 @@
 .table-view .filler,
 .tree-table-view .filler {
 	-fx-background-color: transparent;
+	-fx-border-color: -prob-grey;
+	-fx-border-width: 0 1 0 1;
 }
 .with-border .column-header {
-	-fx-border-width: 0.0 0.0 2.0 0.2;
+	/*-fx-border-width: 0.0 0.0 2.0 0.2;*/
 }
 .table-view > .virtual-flow > .corner,
 .tree-table-view > .virtual-flow > .corner {
@@ -396,6 +398,7 @@
 	-fx-text-fill: -prob-grey;
 }
 
+
 /************************************************************************************
  * Specific Styles																	*
  ************************************************************************************/
@@ -423,6 +426,10 @@
 .dialog .button:hover {
     -fx-text-fill: -prob-grey-75;
     -fx-border-color: -prob-grey-75;
+}
+.dialog .text-area {
+	-fx-border-color: -prob-grey;
+	-fx-border-width: 0.2em 0 0 0;
 }
 
 /* ====================== DARK ======================= */

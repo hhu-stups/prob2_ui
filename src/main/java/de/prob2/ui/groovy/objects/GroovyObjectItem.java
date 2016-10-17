@@ -2,9 +2,8 @@ package de.prob2.ui.groovy.objects;
 
 import javafx.beans.property.SimpleStringProperty;
 
-public class GroovyObjectItem {
+public class GroovyObjectItem extends GroovyAbstractItem {
 	
-	private final SimpleStringProperty name;
 	private final Class<?> clazz;
 	private final SimpleStringProperty clazzname;
 	private final SimpleStringProperty value;
@@ -12,21 +11,16 @@ public class GroovyObjectItem {
 	private GroovyClassStage classstage;
 	
 	public GroovyObjectItem(String name, Object object, GroovyClassStage classstage) {
-		this.name = new SimpleStringProperty(this, "name", name);
+		super(name);
 		this.object = object;
 		this.clazz = object.getClass();
 		this.clazzname = new SimpleStringProperty(this, "clazzname", clazz.getSimpleName());
-		this.classstage = classstage;
 		this.value = new SimpleStringProperty(this, "value", object.toString());
+		if(classstage == null) {
+			return;
+		}
+		this.classstage = classstage;
 		classstage.setClass(clazz);
-	}
-	
-	public String getName() {
-		return name.get();
-	}
-	
-	public void setName(String name) {
-		this.name.set(name);
 	}
 	
 	public String getClazzname() {

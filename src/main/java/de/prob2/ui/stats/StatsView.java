@@ -3,28 +3,25 @@ package de.prob2.ui.stats;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.prolog.term.IntegerPrologTerm;
 import de.prob.prolog.term.ListPrologTerm;
-
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 //@Singleton
-public class StatsView extends AnchorPane {
+public class StatsView extends ScrollPane {
 	@FXML private Label totalTransitions;
 	@FXML private GridPane nodeStats;
 	@FXML private GridPane transStats;
