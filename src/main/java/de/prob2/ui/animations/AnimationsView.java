@@ -151,9 +151,11 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 	}
 
 	private Animation contains(TableView<Animation> animTable, Animation animation) {
-		for (Animation a : animTable.getItems()) {
-			if (a.getTrace().getUUID().equals(animation.getTrace().getUUID())) {
-				return a;
+		if (animTable != null) {
+			for (Animation a : animTable.getItems()) {
+				if (a.getTrace().getUUID().equals(animation.getTrace().getUUID())) {
+					return a;
+				}
 			}
 		}
 		return null;
