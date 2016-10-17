@@ -153,7 +153,7 @@ public class GroovyCodeCompletionHandler {
 	
 	
 	private String[] getMethodsFromCurrentLine(String currentLine, TriggerAction action, GroovyConsole parent) {
-		String currentInstruction = "";
+		String currentInstruction;
 		if(action == TriggerAction.POINT) {
 			currentInstruction = currentLine.substring(0, parent.getCurrentPosInLine());
 			if(parent.getCurrentPosInLine() == 0 || currentInstruction.charAt(parent.getCurrentPosInLine() - 1) == ';') {

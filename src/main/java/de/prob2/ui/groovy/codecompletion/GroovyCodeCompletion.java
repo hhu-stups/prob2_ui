@@ -64,7 +64,7 @@ public class GroovyCodeCompletion extends Popup {
 		String currentPrefix = currentLine;
 		if(action == TriggerAction.TRIGGER) {
 			currentLine = currentLine.replaceAll("\\s","");
-			int indexOfPoint = currentLine.lastIndexOf(".");
+			int indexOfPoint = currentLine.lastIndexOf('.');
 			int indexOfSemicolon = currentLine.lastIndexOf(";");
 			if(indexOfPoint != -1) {
 				if(indexOfSemicolon <= getParent().getCurrentPosInLine()) {
