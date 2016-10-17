@@ -63,20 +63,20 @@ public class GroovyCodeCompletion extends Popup {
 		this.parent = console;
 		String currentPrefix = currentLine;
 		if(action == TriggerAction.TRIGGER) {
-			currentLine = currentLine.replaceAll("\\s","");
-			int indexOfPoint = currentLine.lastIndexOf('.');
-			int indexOfSemicolon = currentLine.lastIndexOf(";");
+			String newCurrentLine = currentLine.replaceAll("\\s","");
+			int indexOfPoint = newCurrentLine.lastIndexOf('.');
+			int indexOfSemicolon = newCurrentLine.lastIndexOf(';');
 			if(indexOfPoint != -1) {
 				if(indexOfSemicolon <= getParent().getCurrentPosInLine()) {
-					currentSuggestion = currentLine.substring(indexOfSemicolon + 1, currentLine.length());
+					currentSuggestion = newCurrentLine.substring(indexOfSemicolon + 1, newCurrentLine.length());
 					currentPosInSuggestion = currentSuggestion.length();
 					charCounterInSuggestion = currentPosInSuggestion;
 					currentPrefix = "";
 				} else {
-					currentSuggestion = currentLine.substring(indexOfPoint + 1, currentLine.length());
+					currentSuggestion = newCurrentLine.substring(indexOfPoint + 1, newCurrentLine.length());
 					currentPosInSuggestion = currentSuggestion.length();
 					charCounterInSuggestion = currentPosInSuggestion;
-					currentPrefix = currentLine.substring(0, indexOfPoint + 1);
+					currentPrefix = newCurrentLine.substring(0, indexOfPoint + 1);
 				} 
 			}
 		}
