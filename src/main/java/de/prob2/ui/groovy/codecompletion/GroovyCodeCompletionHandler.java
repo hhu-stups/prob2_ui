@@ -27,7 +27,7 @@ public class GroovyCodeCompletionHandler {
 	
 	public GroovyCodeCompletionHandler(ObservableList<GroovyAbstractItem> suggestions) {
 		this.suggestions = suggestions;
-		this.currentSuggestions = new ArrayList<GroovyAbstractItem>();
+		this.currentSuggestions = new ArrayList<>();
 	}
 	
 	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, TriggerAction action, GroovyConsole parent, ScriptEngine engine) {

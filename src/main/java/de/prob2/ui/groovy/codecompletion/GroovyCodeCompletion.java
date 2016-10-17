@@ -101,9 +101,7 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	private void sortSuggestions() {
-		suggestions.sort((o1,o2) -> {
-			return o1.toString().compareToIgnoreCase(o2.toString());
-		});
+		suggestions.sort((o1,o2) -> o1.toString().compareToIgnoreCase(o2.toString()));
 	}
 	
 	public void deactivate() {
