@@ -12,12 +12,14 @@
 <?import javafx.scene.control.ScrollPane?>
 
 <fx:root type="ScrollPane" fitToHeight="true" fitToWidth="true"
-	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1"
-	xmlns="http://javafx.com/javafx/8.0.65">
+	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.65">
 	<AnchorPane>
+		<Label text="No model loaded" AnchorPane.bottomAnchor="0.0"
+			AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"
+			AnchorPane.rightAnchor="0.0" alignment="center" fx:id="noStatsLabel"/>
 		<VBox spacing="13.0" AnchorPane.bottomAnchor="10.0"
 			AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0"
-			AnchorPane.topAnchor="10.0">
+			AnchorPane.topAnchor="10.0" fx:id="statsBox">
 			<VBox spacing="3.0">
 				<HBox prefHeight="12.0" spacing="7.0">
 					<Label text="Total Transitions:" />
