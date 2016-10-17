@@ -127,13 +127,13 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			String steps = t.getTransitionList().size() + "";
 			boolean isCurrent = t.equals(currentTrace);
 			boolean isProtected = animations.getProtectedTraces().contains(t.getUUID());
-			LocalDateTime time = LocalDateTime.now();
 			Animation a = new Animation(modelName, lastOp, steps, t, isCurrent, isProtected);
 			Animation aa = contains(animationsTable, a);
 			if (aa != null) {
-				time = LocalDateTime.parse(aa.getTime(), DateTimeFormatter.ofPattern("HH:mm:ss d MMM uuuu"));
+				a.setTime(LocalDateTime.parse(aa.getTime(), DateTimeFormatter.ofPattern("HH:mm:ss d MMM uuuu")));
+			} else {
+				a.setTime(LocalDateTime.now());
 			}
-			a.setTime(time);
 			animList.add(a);
 		}
 		Platform.runLater(() -> {
