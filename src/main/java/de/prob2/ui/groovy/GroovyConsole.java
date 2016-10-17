@@ -113,7 +113,7 @@ public class GroovyConsole extends TextArea {
 				e.consume();
 			}
 			
-			if(e.getCode() == KeyCode.SPACE && e.isControlDown()) {
+			if(e.isControlDown() && e.getCode() == KeyCode.SPACE) {
 				int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
 				interpreter.triggerCodeCompletion(this, getCurrentLine().substring(0, caretPosInLine), TriggerAction.TRIGGER);
 			}
@@ -158,6 +158,9 @@ public class GroovyConsole extends TextArea {
 			currentPosInLine += diff;
 			charCounterInLine += diff;
 			this.positionCaret(caret + diff);
+		} else if(((CodeCompletionEvent)e).getCode() == KeyCode.SPACE) {
+			handleInsertChar((KeyEvent)e.getEvent());
+			e.consume();
 		}
 	}
 	

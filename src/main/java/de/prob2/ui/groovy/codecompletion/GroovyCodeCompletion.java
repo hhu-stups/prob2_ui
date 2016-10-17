@@ -49,7 +49,7 @@ public class GroovyCodeCompletion extends Popup {
 		
 	private GroovyConsole parent;
 	
-	private List<GroovyAbstractItem> currentObjectMethodsAndProperties;
+	private List<GroovyAbstractItem> currentSuggestions;
 	
 	private String currentSuggestion;
 	
@@ -68,7 +68,7 @@ public class GroovyCodeCompletion extends Popup {
 		}
 		this.engine = engine;
 		this.parent = null;
-		this.currentObjectMethodsAndProperties = new ArrayList<>();
+		this.currentSuggestions = new ArrayList<>();
 		this.currentSuggestion = "";
 		this.currentPosInSuggestion = 0;
 		this.charCounterInSuggestion = 0;
@@ -79,7 +79,9 @@ public class GroovyCodeCompletion extends Popup {
 	private void setListeners() {
 		lvSuggestions.setOnMouseClicked(this::chooseMethod);
 		lvSuggestions.setOnKeyPressed(e-> {
-			
+			if(e.getCode().equals(KeyCode.SPACE)) {
+				getParent().fireEvent(new CodeCompletionEvent(e));
+			}
 			if(e.getCode().equals(KeyCode.ENTER)) {
 				//handle Enter in Groovy Code Completion
 				chooseMethod(e);
@@ -111,7 +113,7 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private void handleArrowKey(KeyEvent e) {
 		if(e.getCode().equals(KeyCode.LEFT)) {
-			if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
+			if(';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1) || '.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
 				deactivate();
 				return;
 			}
@@ -162,8 +164,6 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	
-	
-	
 	private void chooseMethod(Event e) {
 		if(lvSuggestions.getSelectionModel().getSelectedItem() != null) {
 			String choice = lvSuggestions.getSelectionModel().getSelectedItem().getNameAndParams();
@@ -195,8 +195,8 @@ public class GroovyCodeCompletion extends Popup {
 		
 	private void refresh(String filter) {
 		suggestions.clear();
-		for(int i = 0; i < currentObjectMethodsAndProperties.size(); i++) {
-			GroovyAbstractItem suggestion = currentObjectMethodsAndProperties.get(i);
+		for(int i = 0; i < currentSuggestions.size(); i++) {
+			GroovyAbstractItem suggestion = currentSuggestions.get(i);
 			if(suggestion.getNameAndParams().toLowerCase().startsWith(filter.toLowerCase())) {
 				suggestions.add(suggestion);
 			}
@@ -223,29 +223,29 @@ public class GroovyCodeCompletion extends Popup {
 				currentSuggestion = currentLine.substring(indexOfPoint + 1, currentLine.length());
 				currentPosInSuggestion = currentSuggestion.length();
 				charCounterInSuggestion = currentPosInSuggestion;
-				currentPrefix = currentLine.substring(0, indexOfPoint);
+				currentPrefix = currentLine.substring(0, indexOfPoint + 1);
 			}
 		}
-		handleObjects(currentPrefix, action);
+		handleMethodsFromObjects(currentPrefix, action);
 		handleStaticClasses(currentPrefix, action);
-		if(indexOfPoint == -1 && action == TriggerAction.TRIGGER) {
+		if(suggestions.isEmpty()) {
+			handleObjects(action);
+		}
+		showPopup(console);
+	}
+	
+	private void handleObjects(TriggerAction action) {
+		if(action == TriggerAction.TRIGGER) {
 			fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
 			fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
 		}
-		showPopup(console);
 	}
 	
 	private void handleStaticClasses(String currentLine, TriggerAction action) {
 		String[] methods = getMethodsFromCurrentLine(currentLine, action);
 		Package[] packages = Package.getPackages();
-		String currentInstruction = "";
-		if(action == TriggerAction.POINT) {
-			currentInstruction = currentLine.substring(0, getParent().getCurrentPosInLine());
-			if(getParent().getCurrentPosInLine() == 0 || currentInstruction.charAt(getParent().getCurrentPosInLine() - 1) == ';') {
-				return;
-			}
-		} else {
-			currentInstruction = currentLine;
+		if(methods.length == 0) {
+			return;
 		}
 		for (Package pack : packages) {
 		    String fullClassName= pack.getName() + "." + methods[methods.length - 1];
@@ -263,7 +263,7 @@ public class GroovyCodeCompletion extends Popup {
 		}
 	}
 	
-	private void handleObjects(String currentLine, TriggerAction action) {
+	private void handleMethodsFromObjects(String currentLine, TriggerAction action) {
 		String[] methods = getMethodsFromCurrentLine(currentLine, action);
 		if(methods.length == 0) {
 			return;
@@ -275,12 +275,12 @@ public class GroovyCodeCompletion extends Popup {
 		Class<? extends Object> clazz = object.getClass();
 		for(int i = 1; i < methods.length; i++) {
 			fillAllMethodsAndProperties(clazz, GroovyMethodOption.NONSTATIC);
-			for(GroovyAbstractItem item: currentObjectMethodsAndProperties) {
+			for(GroovyAbstractItem item: currentSuggestions) {
 				if(item.getNameAndParams().equals(methods[i])) {
 						clazz = ((GroovyClassPropertyItem) item).getReturnTypeClass();
 						break;
 				}
-				if(item.equals(currentObjectMethodsAndProperties.get(currentObjectMethodsAndProperties.size() - 1))) {
+				if(item.equals(currentSuggestions.get(currentSuggestions.size() - 1))) {
 					return;
 				}
 			}
@@ -300,8 +300,10 @@ public class GroovyCodeCompletion extends Popup {
 			}
 		} else {
 			currentInstruction = currentLine;
+			if(!currentInstruction.contains(".")) {
+				return new String[]{};
+			}
 		}
-
 		currentInstruction = currentInstruction.replaceAll("\\s","");
 		currentInstruction = currentInstruction.replaceAll("=", ";");
 		currentInstruction = splitBraces(currentInstruction);
@@ -311,8 +313,8 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private void fillAllMethodsAndProperties(Class <? extends Object> clazz, GroovyMethodOption option) {
 		fillMethodsAndProperties(clazz, option);
-		MetaPropertiesHandler.handleMethods(clazz, currentObjectMethodsAndProperties, option);
-		MetaPropertiesHandler.handleProperties(clazz, currentObjectMethodsAndProperties);
+		MetaPropertiesHandler.handleMethods(clazz, currentSuggestions, option);
+		MetaPropertiesHandler.handleProperties(clazz, currentSuggestions);
 	}
 	
 	private String splitBraces(String currentInstruction) {
@@ -357,17 +359,19 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	public void fillObjects(Bindings bindings) {
+		suggestions.clear();
 		for (final Map.Entry<String, Object> entry : bindings.entrySet()) {
 			if(entry == null || entry.getKey() == null || entry.getValue() == null) {
 				continue;
 			}
-			suggestions.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), null));
+			currentSuggestions.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), null));
 		}
+		suggestions.addAll(currentSuggestions);
 	}
 	
 	public void deactivate() {
 		suggestions.clear();
-		currentObjectMethodsAndProperties.clear();
+		currentSuggestions.clear();
 		currentSuggestion ="";
 		currentPosInSuggestion = 0;
 		charCounterInSuggestion = 0;
@@ -377,20 +381,21 @@ public class GroovyCodeCompletion extends Popup {
 	private void fillMethodsAndProperties(Class <? extends Object> clazz, GroovyMethodOption option) {
 		for(Method m : clazz.getMethods()) {
 			if((option == GroovyMethodOption.ALL) || (option == GroovyMethodOption.NONSTATIC && !Modifier.isStatic(m.getModifiers())) || (option == GroovyMethodOption.STATIC && Modifier.isStatic(m.getModifiers()))) {
-				currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(m));
+				currentSuggestions.add(new GroovyClassPropertyItem(m));
 			}
 		}
 		for(Field f : clazz.getFields()) {
-			currentObjectMethodsAndProperties.add(new GroovyClassPropertyItem(f));
+			currentSuggestions.add(new GroovyClassPropertyItem(f));
 		}
 	}
 		
 	private void showSuggestions(Class <? extends Object> clazz, GroovyMethodOption option) {
-		currentObjectMethodsAndProperties.clear();
+		currentSuggestions.clear();
+		suggestions.clear();
 		fillMethodsAndProperties(clazz, option);
-		MetaPropertiesHandler.handleMethods(clazz, currentObjectMethodsAndProperties, option);
-		MetaPropertiesHandler.handleProperties(clazz, currentObjectMethodsAndProperties);
-		suggestions.addAll(currentObjectMethodsAndProperties);
+		MetaPropertiesHandler.handleMethods(clazz, currentSuggestions, option);
+		MetaPropertiesHandler.handleProperties(clazz, currentSuggestions);
+		suggestions.addAll(currentSuggestions);
 	}
 	
 	public boolean isVisible() {
