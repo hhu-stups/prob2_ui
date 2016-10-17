@@ -120,7 +120,7 @@ public class GroovyCodeCompletion extends Popup {
 			currentPosInSuggestion = Math.max(0, currentPosInSuggestion-1);
 
 		} else if(e.getCode().equals(KeyCode.RIGHT)) {
-			if(';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
+			if(';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine())) {
 				deactivate();
 				return;
 			}
