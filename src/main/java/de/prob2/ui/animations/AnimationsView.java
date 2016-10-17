@@ -26,6 +26,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
 import org.slf4j.Logger;
@@ -80,20 +81,22 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 				animationsTable.getItems().remove(a);
 			});
 			contextMenu.getItems().add(removeMenuItem);
-			row.setOnMouseClicked(event -> {
-				if (!row.isEmpty()) {
-					if (event.getButton() == MouseButton.PRIMARY) {
-						currentIndex = row.getIndex();
-						Trace trace = row.getItem().getTrace();
-						animations.changeCurrentAnimation(trace);
-					}
-					if (event.getButton() == MouseButton.SECONDARY) {
-						contextMenu.show(row, event.getScreenX(), event.getScreenY());
-					}
-				}
-			});
+			row.setOnMouseClicked(event -> rowClicked(row,event,contextMenu));
 			return row;
 		});
+	}
+
+	private void rowClicked(TableRow<Animation> row, MouseEvent event, ContextMenu contextMenu) {
+		if (!row.isEmpty()) {
+			if (event.getButton() == MouseButton.PRIMARY) {
+				currentIndex = row.getIndex();
+				Trace trace = row.getItem().getTrace();
+				animations.changeCurrentAnimation(trace);
+			}
+			if (event.getButton() == MouseButton.SECONDARY) {
+				contextMenu.show(row, event.getScreenX(), event.getScreenY());
+			}
+		}
 	}
 
 	@Override

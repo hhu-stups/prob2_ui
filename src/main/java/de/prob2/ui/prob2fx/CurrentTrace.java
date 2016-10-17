@@ -94,17 +94,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
-				this.currentState.set(null);
-				this.stateSpace.set(null);
-				this.model.set(null);
-				
-				this.transitionListWritable.clear();
-				
-				this.canGoBack.set(false);
-				this.canGoForward.set(false);
-				
-				this.back.set(null);
-				this.forward.set(null);
+				clearProperties();
 			} else {
 				this.animationSelector.traceChange(to);
 				
@@ -122,7 +112,21 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 			}
 		});
 	}
-	
+
+	private void clearProperties() {
+		this.currentState.set(null);
+		this.stateSpace.set(null);
+		this.model.set(null);
+
+		this.transitionListWritable.clear();
+
+		this.canGoBack.set(false);
+		this.canGoForward.set(false);
+
+		this.back.set(null);
+		this.forward.set(null);
+	}
+
 	/**
 	 * A read-only boolean property indicating whether a current trace exists (i. e. is not null).
 	 * 
