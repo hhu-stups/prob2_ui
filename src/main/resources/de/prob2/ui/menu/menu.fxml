@@ -31,6 +31,7 @@
 		<Menu text="%menu.perspectives.preset">
 			<MenuItem text="%menu.perspectives.preset.default" onAction="#handleLoadDefault" />
 			<MenuItem text="%menu.perspectives.preset.detached" onAction="#handleLoadDetached"/>
+			<MenuItem text="%menu.perspectives.preset.detached2" onAction="#handleLoadDetached2"/>
 			<MenuItem text="%menu.perspectives.preset.stacked" onAction="#handleLoadStacked"/>
 		</Menu>
 		<MenuItem text="%menu.perspectives.load" onAction="#handleLoadPerspective" />
