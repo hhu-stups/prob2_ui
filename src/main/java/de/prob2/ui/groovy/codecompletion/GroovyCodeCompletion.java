@@ -216,7 +216,7 @@ public class GroovyCodeCompletion extends Popup {
 	
 	public void activate(GroovyConsole console, String currentLine, TriggerAction action) {
 		this.parent = console;
-		int indexOfPoint = currentLine.lastIndexOf(".");
+		int indexOfPoint = currentLine.lastIndexOf('.');
 		String currentPrefix = currentLine;
 		if(action == TriggerAction.TRIGGER) {
 			if(indexOfPoint != -1) {
