@@ -82,12 +82,14 @@ public class GroovyCodeCompletionHandler {
 	
 	public void handleObjects(TriggerAction action, ScriptEngine engine) {
 		if(action == TriggerAction.TRIGGER) {
+			currentSuggestions.clear();
 			fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
 			fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
 		}
 	}
 		
 	private void fillAllMethodsAndProperties(Class <? extends Object> clazz, GroovyMethodOption option) {
+		currentSuggestions.clear();
 		fillMethodsAndProperties(clazz, option);
 		MetaPropertiesHandler.handleMethods(clazz, currentSuggestions, option);
 		MetaPropertiesHandler.handleProperties(clazz, currentSuggestions);
@@ -137,7 +139,6 @@ public class GroovyCodeCompletionHandler {
 	}
 	
 
-	
 	private Object getObjectFromScope(String currentLine, ScriptEngine engine) {
 		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
