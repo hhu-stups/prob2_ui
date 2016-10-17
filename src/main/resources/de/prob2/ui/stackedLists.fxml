@@ -24,20 +24,20 @@
 					<TitledPane text="Model Check">
 						<ModelcheckingController/>
 					</TitledPane>
-					<TitledPane text="Statistics">
-						<StatsView/>
-					</TitledPane>
 				</panes>
 			</Accordion>
 			<SplitPane dividerPositions="0.8" orientation="VERTICAL">
 				<StatesView/>
 				<AnimationsView/>
 			</SplitPane>
-			<Accordion expandedPane="$historyTP">
+			<Accordion>
 				<panes>
-					<TitledPane text="History" fx:id="historyTP" collapsible="false">
+					<TitledPane text="History">
 						<HistoryView/>
 					</TitledPane>
+					<TitledPane text="Statistics">
+                    	<StatsView/>
+                    </TitledPane>
 				</panes>
 			</Accordion>
 		</SplitPane>

@@ -184,6 +184,11 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
+	private void handleLoadDetached2() {
+		loadPreset("../detachedHistoryAndStatistics.fxml");
+	}
+
+	@FXML
 	private void handleLoadStacked() {
 		loadPreset("../stackedLists.fxml");
 	}

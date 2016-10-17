@@ -10,10 +10,15 @@
 	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<VBox>
 		<AnchorPane>
-			<VBox fx:id="historyBox" style="-fx-border-color: grey;" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="32.0"/>
-			<Button fx:id="addModelCheckButton" disable="true" prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="-4.0" onAction="#addModelCheck">
+			<VBox fx:id="historyBox" style="-fx-border-color: grey;"
+				AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="5.0"
+				AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="40.0" />
+			<Button fx:id="addModelCheckButton" disable="true" prefHeight="26.0"
+				prefWidth="26.0" contentDisplay="GRAPHIC_ONLY" AnchorPane.topAnchor="6.0"
+				AnchorPane.rightAnchor="-4.0" onAction="#addModelCheck">
 				<graphic>
-					<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE" size="26"/>
+					<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
+						size="26" />
 				</graphic>
 			</Button>
 		</AnchorPane>

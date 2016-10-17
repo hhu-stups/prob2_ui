@@ -228,7 +228,6 @@ public class GroovyCodeCompletion extends Popup {
 		deactivate();
 	}
 	
-
 	public GroovyConsole getParent() {
 		return parent;
 	}

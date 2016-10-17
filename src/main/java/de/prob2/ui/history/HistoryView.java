@@ -83,27 +83,16 @@ public final class HistoryView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
+		this.setMinWidth(100);
 		currentTrace.addListener((observable, from, to) -> {
 			lvHistory.getItems().clear();
+
 			if (to != null) {
 				int currentPos = to.getCurrent().getIndex();
-
-				if (currentPos == -1) {
-					lvHistory.getItems().add(new HistoryItem(HistoryStatus.PRESENT));
-				} else {
-					lvHistory.getItems().add(new HistoryItem(HistoryStatus.PAST));
-				}
-
+				addItems(lvHistory,currentPos);
 				List<Transition> transitionList = to.getTransitionList();
 				for (int i = 0; i < transitionList.size(); i++) {
-					HistoryStatus status;
-					if (i < currentPos) {
-						status = HistoryStatus.PAST;
-					} else if (i > currentPos) {
-						status = HistoryStatus.FUTURE;
-					} else {
-						status = HistoryStatus.PRESENT;
-					}
+					HistoryStatus status = getStatus(i,currentPos);
 					lvHistory.getItems().add(new HistoryItem(transitionList.get(i), status));
 				}
 			}
@@ -148,6 +137,24 @@ public final class HistoryView extends AnchorPane {
 			return length - 2 - currentPos;
 		} else {
 			return currentPos - 1;
+		}
+	}
+
+	private HistoryStatus getStatus(int i, int currentPos) {
+		if (i < currentPos) {
+			return HistoryStatus.PAST;
+		} else if (i > currentPos) {
+			return HistoryStatus.FUTURE;
+		} else {
+			return HistoryStatus.PRESENT;
+		}
+	}
+
+	private void addItems(ListView lvHistory, int currentPos) {
+		if (currentPos == -1) {
+			lvHistory.getItems().add(new HistoryItem(HistoryStatus.PRESENT));
+		} else {
+			lvHistory.getItems().add(new HistoryItem(HistoryStatus.PAST));
 		}
 	}
 }
