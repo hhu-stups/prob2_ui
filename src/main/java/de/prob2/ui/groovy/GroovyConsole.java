@@ -1,5 +1,6 @@
 package de.prob2.ui.groovy;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,10 +9,12 @@ import de.prob2.ui.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.groovy.codecompletion.TriggerAction;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 
 
 public class GroovyConsole extends TextArea {
@@ -142,6 +145,35 @@ public class GroovyConsole extends TextArea {
 			} else {
 				handleRest(e);
 			}
+		});
+		
+		this.setOnDragOver(e-> {
+            Dragboard dragbord = e.getDragboard();
+            if (dragbord.hasFiles()) {
+                e.acceptTransferModes(TransferMode.COPY);
+            } else {
+                e.consume();
+            }
+		});
+		
+		this.setOnDragDropped(e-> {
+            Dragboard dragbord = e.getDragboard();
+            boolean success = false;
+            if (dragbord.hasFiles()) {
+                success = true;
+                String filePath = null;
+                for (File file : dragbord.getFiles()) {
+                    filePath = file.getAbsolutePath();
+                    String newText = new StringBuilder(this.getText()).insert(this.getCaretPosition(), filePath).toString();
+                    int caretPosition = this.getCaretPosition();
+                    this.setText(newText);
+                    charCounterInLine += filePath.length();
+                    currentPosInLine += filePath.length();
+                    this.positionCaret(caretPosition + filePath.length());
+                }
+            }
+            e.setDropCompleted(success);
+            e.consume();
 		});
 	}
 	
