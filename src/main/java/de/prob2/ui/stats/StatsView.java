@@ -31,7 +31,7 @@ public class StatsView extends ScrollPane {
 	private GridPane transStats;
 	@FXML
 	private VBox statsBox;
-	@FXML 
+	@FXML
 	private Label noStatsLabel;
 
 	private final CurrentTrace currentTrace;
@@ -72,15 +72,21 @@ public class StatsView extends ScrollPane {
 	}
 
 	public void update(ComputeCoverageCommand.ComputeCoverageResult result) {
-		statsBox.setVisible(true);
-		noStatsLabel.setVisible(false);
+		if (result.getNodes().isEmpty() && result.getOps().isEmpty()
+				&& result.getTotalNumberOfNodes().intValue() == 0) {
+			statsBox.setVisible(false);
+			noStatsLabel.setVisible(true);
+		} else {
+			statsBox.setVisible(true);
+			noStatsLabel.setVisible(false);
 
-		Number numTrans = result.getTotalNumberOfTransitions();
+			Number numTrans = result.getTotalNumberOfTransitions();
 
-		Platform.runLater(() -> totalTransitions.setText(String.valueOf(numTrans)));
+			Platform.runLater(() -> totalTransitions.setText(String.valueOf(numTrans)));
 
-		showStats(result.getNodes(), nodeStats);
-		showStats(result.getOps(), transStats);
+			showStats(result.getNodes(), nodeStats);
+			showStats(result.getOps(), transStats);
+		}
 	}
 
 	private static void showStats(List<String> packedStats, GridPane grid) {
