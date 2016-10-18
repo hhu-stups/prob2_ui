@@ -67,7 +67,7 @@ public class GroovyCodeCompletion extends Popup {
 		}
 		completionHandler.handleMethodsFromObjects(currentPrefix, currentSuggestion, action, parent, engine);
 		completionHandler.handleStaticClasses(currentPrefix, currentSuggestion, action, parent);
-		completionHandler.handleObjects(action, engine);
+		completionHandler.handleObjects(currentSuggestion, action, engine);
 		showPopup(console);
 	}
 	
@@ -76,18 +76,19 @@ public class GroovyCodeCompletion extends Popup {
 		String newCurrentLine = currentLine.replaceAll("\\s","");
 		int indexOfPoint = newCurrentLine.lastIndexOf('.');
 		int indexOfSemicolon = newCurrentLine.lastIndexOf(';');
-		if(indexOfPoint != -1) {
-			if(indexOfSemicolon <= getParent().getCurrentPosInLine()) {
-				currentSuggestion = newCurrentLine.substring(indexOfSemicolon + 1, newCurrentLine.length());
-				currentPosInSuggestion = currentSuggestion.length();
-				charCounterInSuggestion = currentPosInSuggestion;
-				currentPrefix = "";
-			} else {
-				currentSuggestion = newCurrentLine.substring(indexOfPoint + 1, newCurrentLine.length());
-				currentPosInSuggestion = currentSuggestion.length();
-				charCounterInSuggestion = currentPosInSuggestion;
-				currentPrefix = newCurrentLine.substring(0, indexOfPoint + 1);
-			} 
+		
+		if((indexOfPoint < indexOfSemicolon && indexOfSemicolon > getParent().getCurrentPosInLine()) || (indexOfPoint != -1 && indexOfSemicolon == -1)) {
+			int index = Math.max(-1, indexOfPoint);
+			currentSuggestion = newCurrentLine.substring(index + 1, newCurrentLine.length());
+			currentPosInSuggestion = currentSuggestion.length();
+			charCounterInSuggestion = currentPosInSuggestion;
+			currentPrefix = newCurrentLine.substring(0, index + 1);
+		} else {
+			int index = Math.max(-1, indexOfSemicolon);
+			currentSuggestion = newCurrentLine.substring(index + 1, newCurrentLine.length());
+			charCounterInSuggestion = currentSuggestion.length();
+			currentPosInSuggestion = charCounterInSuggestion;
+			currentPrefix = currentSuggestion;
 		}
 		return currentPrefix;
 	}
@@ -147,13 +148,8 @@ public class GroovyCodeCompletion extends Popup {
 			if(e.getCode().equals(KeyCode.SPACE)) {
 				getParent().fireEvent(new CodeCompletionEvent(e));
 			}
-			if(e.getCode().equals(KeyCode.ENTER)) {
+			if(";".equals(e.getText()) || e.getCode().equals(KeyCode.ENTER)) {
 				//handle Enter in Groovy Code Completion
-				chooseMethod(e);
-				return;
-			}
-			if(";".equals(e.getText())) {
-				//handle Semicolon
 				chooseMethod(e);
 				return;
 			}
@@ -161,10 +157,8 @@ public class GroovyCodeCompletion extends Popup {
 				handleArrowKey(e);
 				return;
 			}
-			
-			
 			if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
-				handleDeletion(e);
+				handleRemove(e);
 				return;
 			}
 			
@@ -235,16 +229,13 @@ public class GroovyCodeCompletion extends Popup {
 		}
 	}
 	
-	private void handleDeletion(KeyEvent e) {
+	private void handleRemove(KeyEvent e) {
 		if(e.getCode().equals(KeyCode.DELETE)) {
 			handleDeletion();
 		} else if(e.getCode().equals(KeyCode.BACK_SPACE)) {
 			handleBackspace();
 		}
 		filterSuggestions("", CodeCompletionAction.DELETION);
-		if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
-			deactivate();
-		}
 	}
 	
 	private void handleDeletion() {
@@ -263,7 +254,7 @@ public class GroovyCodeCompletion extends Popup {
 			charCounterInSuggestion--;
 			currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.max(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());		
 		}
-		if(getParent().getCurrentPosInLine() == 0) {
+		if(getParent().getCurrentPosInLine() == 0 || '.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
 			deactivate();
 		}
 	}
