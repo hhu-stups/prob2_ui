@@ -176,14 +176,14 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	private void handleArrowKey(KeyEvent e) {
-		boolean needReturn = false;
+		boolean needReturn;
 		if(e.getCode().equals(KeyCode.LEFT)) {
-			needReturn = handleLeft(e);
+			needReturn = handleLeft();
 			if(needReturn) {
 				return;
 			}
 		} else if(e.getCode().equals(KeyCode.RIGHT)) {
-			needReturn = handleRight(e);
+			needReturn = handleRight();
 			if(needReturn) {
 				return;
 			}
@@ -197,7 +197,7 @@ public class GroovyCodeCompletion extends Popup {
 		filterSuggestions("", CodeCompletionAction.ARROWKEY);
 	}
 	
-	private boolean handleLeft(KeyEvent e) {
+	private boolean handleLeft() {
 		if(getParent().getCurrentPosInLine() == 0 || ';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1) || '.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
 			deactivate();
 			return true;
@@ -206,7 +206,7 @@ public class GroovyCodeCompletion extends Popup {
 		return false;
 	}
 	
-	private boolean handleRight(KeyEvent e) {
+	private boolean handleRight() {
 		if(getParent().getCurrentPosInLine() == getParent().getCurrentLine().length() || ';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine())) {
 			deactivate();
 			return true;

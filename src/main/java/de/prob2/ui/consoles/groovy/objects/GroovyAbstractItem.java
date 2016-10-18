@@ -22,6 +22,7 @@ public class GroovyAbstractItem {
 		return getName();
 	}
 	
+	@Override
 	public String toString() {
 		return getName();
 	}
