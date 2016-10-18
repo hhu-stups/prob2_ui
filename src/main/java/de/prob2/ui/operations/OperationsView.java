@@ -276,8 +276,10 @@ public final class OperationsView extends AnchorPane {
 			comparator = (o1, o2) -> {
 				if (o1.name.equals(o2.name)) {
 					return compareParams(o1.params, o2.params);
-				} else {
+				} else if (o1.name.equalsIgnoreCase(o2.name)) {
 					return o1.name.compareTo(o2.name);
+				} else {
+					return o1.name.compareToIgnoreCase(o2.name);
 				}
 			};
 			break;
@@ -286,8 +288,10 @@ public final class OperationsView extends AnchorPane {
 			comparator = (o1, o2) -> {
 				if (o1.name.equals(o2.name)) {
 					return -compareParams(o1.params, o2.params);
-				} else {
+				} else if (o1.name.equalsIgnoreCase(o2.name)) {
 					return -o1.name.compareTo(o2.name);
+				} else {
+					return -o1.name.compareToIgnoreCase(o2.name);
 				}
 			};
 			break;
