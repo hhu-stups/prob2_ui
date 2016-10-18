@@ -154,7 +154,7 @@ public class GroovyCodeCompletion extends Popup {
 			}
 			if(";".equals(e.getText())) {
 				//handle Semicolon
-				chooseFirst(e);
+				chooseMethod(e);
 				return;
 			}
 			if(e.getCode().equals(KeyCode.LEFT) || e.getCode().equals(KeyCode.RIGHT) || e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
@@ -252,6 +252,9 @@ public class GroovyCodeCompletion extends Popup {
 			charCounterInSuggestion--;
 			currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.min(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
 		}
+		if(getParent().getCaretPosition() == getParent().getText().length()) {
+			deactivate();
+		}
 	}
 	
 	private void handleBackspace() {
@@ -260,20 +263,15 @@ public class GroovyCodeCompletion extends Popup {
 			charCounterInSuggestion--;
 			currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.max(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());		
 		}
+		if(getParent().getCurrentPosInLine() == 0) {
+			deactivate();
+		}
 	}
 	
 	private void chooseMethod(Event e) {
 		if(lvSuggestions.getSelectionModel().getSelectedItem() != null) {
 			String choice = lvSuggestions.getSelectionModel().getSelectedItem().getNameAndParams();
 			getParent().fireEvent(new CodeCompletionEvent(e, choice, choice.substring(0, currentPosInSuggestion)));
-		}
-		deactivate();
-	}
-	
-	private void chooseFirst(Event e) {
-		if(lvSuggestions.getItems().get(0) != null) {
-			String choice = lvSuggestions.getItems().get(0).getNameAndParams();
-			getParent().fireEvent(new CodeCompletionEvent(e, lvSuggestions.getItems().get(0).getNameAndParams(), choice.substring(0, currentPosInSuggestion)));
 		}
 		deactivate();
 	}
