@@ -63,29 +63,33 @@ public class GroovyCodeCompletion extends Popup {
 		this.parent = console;
 		String currentPrefix = currentLine;
 		if(action == TriggerAction.TRIGGER) {
-			String newCurrentLine = currentLine.replaceAll("\\s","");
-			int indexOfPoint = newCurrentLine.lastIndexOf('.');
-			int indexOfSemicolon = newCurrentLine.lastIndexOf(';');
-			if(indexOfPoint != -1) {
-				if(indexOfSemicolon <= getParent().getCurrentPosInLine()) {
-					currentSuggestion = newCurrentLine.substring(indexOfSemicolon + 1, newCurrentLine.length());
-					currentPosInSuggestion = currentSuggestion.length();
-					charCounterInSuggestion = currentPosInSuggestion;
-					currentPrefix = "";
-				} else {
-					currentSuggestion = newCurrentLine.substring(indexOfPoint + 1, newCurrentLine.length());
-					currentPosInSuggestion = currentSuggestion.length();
-					charCounterInSuggestion = currentPosInSuggestion;
-					currentPrefix = newCurrentLine.substring(0, indexOfPoint + 1);
-				} 
-			}
+			currentPrefix = handleActivationByTriggering(currentLine);
 		}
 		completionHandler.handleMethodsFromObjects(currentPrefix, currentSuggestion, action, parent, engine);
 		completionHandler.handleStaticClasses(currentPrefix, currentSuggestion, action, parent);
-		if(suggestions.isEmpty()) {
-			completionHandler.handleObjects(action, engine);
-		}
+		completionHandler.handleObjects(action, engine);
 		showPopup(console);
+	}
+	
+	private String handleActivationByTriggering(String currentLine) {
+		String currentPrefix = currentLine;
+		String newCurrentLine = currentLine.replaceAll("\\s","");
+		int indexOfPoint = newCurrentLine.lastIndexOf('.');
+		int indexOfSemicolon = newCurrentLine.lastIndexOf(';');
+		if(indexOfPoint != -1) {
+			if(indexOfSemicolon <= getParent().getCurrentPosInLine()) {
+				currentSuggestion = newCurrentLine.substring(indexOfSemicolon + 1, newCurrentLine.length());
+				currentPosInSuggestion = currentSuggestion.length();
+				charCounterInSuggestion = currentPosInSuggestion;
+				currentPrefix = "";
+			} else {
+				currentSuggestion = newCurrentLine.substring(indexOfPoint + 1, newCurrentLine.length());
+				currentPosInSuggestion = currentSuggestion.length();
+				charCounterInSuggestion = currentPosInSuggestion;
+				currentPrefix = newCurrentLine.substring(0, indexOfPoint + 1);
+			} 
+		}
+		return currentPrefix;
 	}
 	
 	private void showPopup(GroovyConsole console) {
@@ -116,12 +120,10 @@ public class GroovyCodeCompletion extends Popup {
 	public void filterSuggestions(String addition, CodeCompletionAction action) {
 		String currentInstruction = currentSuggestion;
 		if(action.equals(CodeCompletionAction.ARROWKEY)) {
+			//handle Arrow Key
 			currentInstruction = currentSuggestion.substring(0, currentPosInSuggestion);
 		} else if(action.equals(CodeCompletionAction.INSERTION)) {
-			currentSuggestion = new StringBuilder(currentSuggestion).insert(currentPosInSuggestion, addition.charAt(0)).toString();
-			currentPosInSuggestion++;
-			charCounterInSuggestion++;
-			currentInstruction = currentSuggestion;
+			currentInstruction = handleInsertChar(addition);
 		}
 		completionHandler.refresh(currentInstruction);
 		sortSuggestions();
@@ -129,6 +131,13 @@ public class GroovyCodeCompletion extends Popup {
 		if(suggestions.isEmpty()) {
 			this.deactivate();
 		}
+	}
+	
+	private String handleInsertChar(String addition) {
+		currentSuggestion = new StringBuilder(currentSuggestion).insert(currentPosInSuggestion, addition.charAt(0)).toString();
+		currentPosInSuggestion++;
+		charCounterInSuggestion++;
+		return currentSuggestion;
 	}
 	
 
@@ -167,53 +176,89 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	private void handleArrowKey(KeyEvent e) {
+		boolean needReturn = false;
 		if(e.getCode().equals(KeyCode.LEFT)) {
-			if(getParent().getCurrentPosInLine() == 0 || ';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1) || '.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
-				deactivate();
+			needReturn = handleLeft(e);
+			if(needReturn) {
 				return;
 			}
-			currentPosInSuggestion = Math.max(0, currentPosInSuggestion-1);
-
 		} else if(e.getCode().equals(KeyCode.RIGHT)) {
-			if(getParent().getCurrentPosInLine() == getParent().getCurrentLine().length() || ';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine())) {
-				deactivate();
+			needReturn = handleRight(e);
+			if(needReturn) {
 				return;
-			}
-			if(getParent().getCaretPosition() != getParent().getText().length()) {
-				currentSuggestion += getParent().getText().charAt(getParent().getCaretPosition());
-				charCounterInSuggestion += 1;
-				currentPosInSuggestion = Math.min(currentSuggestion.length(), currentPosInSuggestion + 1);
 			}
 		} else if(e.getCode().equals(KeyCode.UP)) {
-			if(lvSuggestions.getSelectionModel().getSelectedIndex() == 0) {
-				lvSuggestions.getSelectionModel().selectLast();
-				lvSuggestions.scrollTo(suggestions.size()-1);
-				e.consume();
-			}
+			handleUp(e);
 			return;
 		} else if(e.getCode().equals(KeyCode.DOWN)) {
-			if(lvSuggestions.getSelectionModel().getSelectedIndex() == suggestions.size() - 1) {
-				lvSuggestions.getSelectionModel().selectFirst();
-				lvSuggestions.scrollTo(0);
-				e.consume();
-			}
+			handleDown(e);
 			return;
 		}
 		filterSuggestions("", CodeCompletionAction.ARROWKEY);
 	}
 	
+	private boolean handleLeft(KeyEvent e) {
+		if(getParent().getCurrentPosInLine() == 0 || ';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1) || '.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
+			deactivate();
+			return true;
+		}
+		currentPosInSuggestion = Math.max(0, currentPosInSuggestion-1);
+		return false;
+	}
+	
+	private boolean handleRight(KeyEvent e) {
+		if(getParent().getCurrentPosInLine() == getParent().getCurrentLine().length() || ';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine())) {
+			deactivate();
+			return true;
+		}
+		if(getParent().getCaretPosition() != getParent().getText().length()) {
+			currentSuggestion += getParent().getText().charAt(getParent().getCaretPosition());
+			charCounterInSuggestion += 1;
+			currentPosInSuggestion = Math.min(currentSuggestion.length(), currentPosInSuggestion + 1);
+		}
+		return false;
+	}
+	
+	private void handleUp(KeyEvent e) {
+		if(lvSuggestions.getSelectionModel().getSelectedIndex() == 0) {
+			lvSuggestions.getSelectionModel().selectLast();
+			lvSuggestions.scrollTo(suggestions.size()-1);
+			e.consume();
+		}
+	}
+	
+	private void handleDown(KeyEvent e) {
+		if(lvSuggestions.getSelectionModel().getSelectedIndex() == suggestions.size() - 1) {
+			lvSuggestions.getSelectionModel().selectFirst();
+			lvSuggestions.scrollTo(0);
+			e.consume();
+		}
+	}
+	
 	private void handleDeletion(KeyEvent e) {
-		if(e.getCode().equals(KeyCode.DELETE) && currentPosInSuggestion != charCounterInSuggestion) {
-			charCounterInSuggestion--;
-			currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.min(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
-		} else if(e.getCode().equals(KeyCode.BACK_SPACE) && currentPosInSuggestion != 0) {
-			currentPosInSuggestion--;
-			charCounterInSuggestion--;
-			currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.max(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());				
+		if(e.getCode().equals(KeyCode.DELETE)) {
+			handleDeletion();
+		} else if(e.getCode().equals(KeyCode.BACK_SPACE)) {
+			handleBackspace();
 		}
 		filterSuggestions("", CodeCompletionAction.DELETION);
 		if('.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
 			deactivate();
+		}
+	}
+	
+	private void handleDeletion() {
+		if(currentPosInSuggestion != charCounterInSuggestion) {
+			charCounterInSuggestion--;
+			currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.min(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
+		}
+	}
+	
+	private void handleBackspace() {
+		if(currentPosInSuggestion != 0) {
+			currentPosInSuggestion--;
+			charCounterInSuggestion--;
+			currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.max(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());		
 		}
 	}
 	

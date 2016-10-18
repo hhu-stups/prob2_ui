@@ -81,7 +81,7 @@ public class GroovyCodeCompletionHandler {
 	}
 	
 	public void handleObjects(TriggerAction action, ScriptEngine engine) {
-		if(action == TriggerAction.TRIGGER) {
+		if(action == TriggerAction.TRIGGER && suggestions.isEmpty()) {
 			currentSuggestions.clear();
 			fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
 			fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));

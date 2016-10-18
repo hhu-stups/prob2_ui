@@ -107,10 +107,26 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void setListeners() {
+		setCodeCompletionEvent();
+		setMouseEvent();
+		setKeyEvent();
+		setDragDrop();
+	}
+	
+	private void setCodeCompletionEvent() {
 		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> interpreter.triggerCloseCodeCompletion());
-
 		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, this::handleCodeCompletionEvent);
-
+	}
+	
+	private void setMouseEvent() {
+		this.addEventFilter(MouseEvent.ANY, e -> {
+			if(e.getButton() == MouseButton.PRIMARY && (this.getLength() - 1 - this.getCaretPosition() < charCounterInLine)) {
+				currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
+			}
+		});
+	}
+	
+	private void setKeyEvent() {
 		this.addEventFilter(KeyEvent.ANY, e -> {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
@@ -119,12 +135,6 @@ public class GroovyConsole extends TextArea {
 			if(e.isControlDown() && e.getCode() == KeyCode.SPACE) {
 				int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
 				interpreter.triggerCodeCompletion(this, getCurrentLine().substring(0, caretPosInLine), TriggerAction.TRIGGER);
-			}
-		});
-		
-		this.addEventFilter(MouseEvent.ANY, e -> {
-			if(e.getButton() == MouseButton.PRIMARY && (this.getLength() - 1 - this.getCaretPosition() < charCounterInLine)) {
-				currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 			}
 		});
 		
@@ -146,7 +156,9 @@ public class GroovyConsole extends TextArea {
 				handleRest(e);
 			}
 		});
-		
+	}
+	
+	private void setDragDrop() {
 		this.setOnDragOver(e-> {
             Dragboard dragbord = e.getDragboard();
             if (dragbord.hasFiles()) {
@@ -178,22 +190,27 @@ public class GroovyConsole extends TextArea {
 	}
 	
 	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
-		if(((CodeCompletionEvent) e).getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent)((CodeCompletionEvent) e).getEvent()).getText())) {
-			String choice = ((CodeCompletionEvent) e).getChoice();
-			String suggestion = ((CodeCompletionEvent) e).getCurrentSuggestion();
-			String newText = this.getText().substring(0, this.getCaretPosition() - suggestion.length());
-			newText = new StringBuilder(newText).append(choice).toString();
-			newText = new StringBuilder(newText).append(this.getText().substring(this.getCaretPosition())).toString();
-			int diff = newText.length() - this.getText().length();
-			int caret = this.getCaretPosition();
-			this.setText(newText);
-			currentPosInLine += diff;
-			charCounterInLine += diff;
-			this.positionCaret(caret + diff);
+		if((e.getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent)e.getEvent()).getText()))) {
+			handleChooseSuggestion(e);
 		} else if(((CodeCompletionEvent)e).getCode() == KeyCode.SPACE) {
+			//handle Space in Code Completion
 			handleInsertChar((KeyEvent)e.getEvent());
 			e.consume();
 		}
+	}
+	
+	private void handleChooseSuggestion(CodeCompletionEvent e) {
+		String choice = ((CodeCompletionEvent) e).getChoice();
+		String suggestion = ((CodeCompletionEvent) e).getCurrentSuggestion();
+		String newText = this.getText().substring(0, this.getCaretPosition() - suggestion.length());
+		newText = new StringBuilder(newText).append(choice).toString();
+		newText = new StringBuilder(newText).append(this.getText().substring(this.getCaretPosition())).toString();
+		int diff = newText.length() - this.getText().length();
+		int caret = this.getCaretPosition();
+		this.setText(newText);
+		currentPosInLine += diff;
+		charCounterInLine += diff;
+		this.positionCaret(caret + diff);
 	}
 	
 	private void goToLastPos() {
