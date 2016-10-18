@@ -1,4 +1,4 @@
-package de.prob2.ui.groovy.objects;
+package de.prob2.ui.consoles.groovy.objects;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

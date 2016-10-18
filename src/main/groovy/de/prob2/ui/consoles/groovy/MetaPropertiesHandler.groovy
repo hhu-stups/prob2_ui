@@ -1,10 +1,11 @@
-package de.prob2.ui.groovy
+package de.prob2.ui.consoles.groovy
 
 import org.codehaus.groovy.runtime.HandleMetaClass
 import org.codehaus.groovy.runtime.InvokerHelper
 
-import de.prob2.ui.groovy.objects.GroovyAbstractItem
-import de.prob2.ui.groovy.objects.GroovyClassPropertyItem;
+import de.prob2.ui.consoles.groovy.GroovyMethodOption;
+import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem
+import de.prob2.ui.consoles.groovy.objects.GroovyClassPropertyItem;
 
 
 def static handleProperties(Object object, Collection<? extends GroovyAbstractItem> properties) {

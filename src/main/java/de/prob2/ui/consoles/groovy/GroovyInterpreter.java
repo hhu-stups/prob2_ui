@@ -1,4 +1,4 @@
-package de.prob2.ui.groovy;
+package de.prob2.ui.consoles.groovy;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -6,9 +6,9 @@ import javax.script.ScriptException;
 import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
-import de.prob2.ui.groovy.codecompletion.GroovyCodeCompletion;
-import de.prob2.ui.groovy.codecompletion.TriggerAction;
-import de.prob2.ui.groovy.objects.GroovyObjectStage;
+import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;
+import de.prob2.ui.consoles.groovy.codecompletion.TriggerAction;
+import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import javafx.fxml.FXMLLoader;
 
 import org.slf4j.Logger;

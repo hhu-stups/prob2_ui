@@ -1,12 +1,12 @@
-package de.prob2.ui.groovy;
+package de.prob2.ui.consoles.groovy;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.prob2.ui.groovy.codecompletion.CodeCompletionEvent;
-import de.prob2.ui.groovy.codecompletion.TriggerAction;
+import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
+import de.prob2.ui.consoles.groovy.codecompletion.TriggerAction;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Dragboard;

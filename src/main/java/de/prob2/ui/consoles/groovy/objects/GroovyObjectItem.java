@@ -1,4 +1,4 @@
-package de.prob2.ui.groovy.objects;
+package de.prob2.ui.consoles.groovy.objects;
 
 import javafx.beans.property.SimpleStringProperty;
 

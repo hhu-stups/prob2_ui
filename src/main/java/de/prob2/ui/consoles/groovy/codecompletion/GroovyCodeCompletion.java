@@ -1,4 +1,4 @@
-package de.prob2.ui.groovy.codecompletion;
+package de.prob2.ui.consoles.groovy.codecompletion;
 
 import java.io.IOException;
 import javax.script.ScriptEngine;
@@ -6,8 +6,8 @@ import javax.script.ScriptEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.prob2.ui.groovy.GroovyConsole;
-import de.prob2.ui.groovy.objects.GroovyAbstractItem;
+import de.prob2.ui.consoles.groovy.GroovyConsole;
+import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;

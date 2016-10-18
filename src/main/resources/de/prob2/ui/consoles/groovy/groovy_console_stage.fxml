@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.groovy.GroovyConsole?>
+<?import de.prob2.ui.consoles.groovy.GroovyConsole?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>

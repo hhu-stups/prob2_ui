@@ -18,10 +18,9 @@ import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
+import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaGenerator;
-import de.prob2.ui.groovy.GroovyConsoleStage;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentStage;

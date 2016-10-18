@@ -1,4 +1,4 @@
-package de.prob2.ui.groovy.codecompletion;
+package de.prob2.ui.consoles.groovy.codecompletion;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -11,12 +11,12 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
-import de.prob2.ui.groovy.GroovyConsole;
-import de.prob2.ui.groovy.GroovyMethodOption;
-import de.prob2.ui.groovy.MetaPropertiesHandler;
-import de.prob2.ui.groovy.objects.GroovyAbstractItem;
-import de.prob2.ui.groovy.objects.GroovyClassPropertyItem;
-import de.prob2.ui.groovy.objects.GroovyObjectItem;
+import de.prob2.ui.consoles.groovy.GroovyConsole;
+import de.prob2.ui.consoles.groovy.GroovyMethodOption;
+import de.prob2.ui.consoles.groovy.MetaPropertiesHandler;
+import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
+import de.prob2.ui.consoles.groovy.objects.GroovyClassPropertyItem;
+import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import javafx.collections.ObservableList;
 
 public class GroovyCodeCompletionHandler {
