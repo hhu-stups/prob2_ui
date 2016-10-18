@@ -263,37 +263,15 @@ public final class OperationsView extends AnchorPane {
 		final Comparator<Operation> comparator;
 		switch (sortMode) {
 		case MODEL_ORDER:
-			comparator = (o1, o2) -> {
-				if (o1.name.equals(o2.name)) {
-					return compareParams(o1.params, o2.params);
-				} else {
-					return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
-				}
-			};
+			comparator = modelOrder();
 			break;
 
 		case A_TO_Z:
-			comparator = (o1, o2) -> {
-				if (o1.name.equals(o2.name)) {
-					return compareParams(o1.params, o2.params);
-				} else if (o1.name.equalsIgnoreCase(o2.name)) {
-					return o1.name.compareTo(o2.name);
-				} else {
-					return o1.name.compareToIgnoreCase(o2.name);
-				}
-			};
+			comparator = aToZ();
 			break;
 
 		case Z_TO_A:
-			comparator = (o1, o2) -> {
-				if (o1.name.equals(o2.name)) {
-					return -compareParams(o1.params, o2.params);
-				} else if (o1.name.equalsIgnoreCase(o2.name)) {
-					return -o1.name.compareTo(o2.name);
-				} else {
-					return -o1.name.compareToIgnoreCase(o2.name);
-				}
-			};
+			comparator = zToA();
 			break;
 
 		default:
@@ -301,6 +279,40 @@ public final class OperationsView extends AnchorPane {
 		}
 
 		Collections.sort(events, comparator);
+	}
+
+	private Comparator<Operation> zToA() {
+		return (o1, o2) -> {
+			if (o1.name.equals(o2.name)) {
+				return -compareParams(o1.params, o2.params);
+			} else if (o1.name.equalsIgnoreCase(o2.name)) {
+				return -o1.name.compareTo(o2.name);
+			} else {
+				return -o1.name.compareToIgnoreCase(o2.name);
+			}
+		};
+	}
+
+	private Comparator<Operation> aToZ() {
+		return (o1, o2) -> {
+			if (o1.name.equals(o2.name)) {
+				return compareParams(o1.params, o2.params);
+			} else if (o1.name.equalsIgnoreCase(o2.name)) {
+				return o1.name.compareTo(o2.name);
+			} else {
+				return o1.name.compareToIgnoreCase(o2.name);
+			}
+		};
+	}
+
+	private Comparator<Operation> modelOrder() {
+		return (o1, o2) -> {
+			if (o1.name.equals(o2.name)) {
+				return compareParams(o1.params, o2.params);
+			} else {
+				return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
+			}
+		};
 	}
 
 	@FXML
