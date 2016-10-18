@@ -26,6 +26,7 @@
 	</Menu>
 	<Menu text="%menu.consoles">
 		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole"/>
+		<MenuItem text="%menu.consoles.items.b" onAction="#handleBConsole"/>
 	</Menu>
 	<Menu text="%menu.perspectives">
 		<Menu text="%menu.perspectives.preset">

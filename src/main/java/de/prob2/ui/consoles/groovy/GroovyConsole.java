@@ -19,7 +19,6 @@ public class GroovyConsole extends Console {
 	public GroovyConsole() {
 		super();
 		this.appendText("Prob 2.0 Groovy Console \n >");
-		
 	}
 	
 	public void reset() {
@@ -119,7 +118,7 @@ public class GroovyConsole extends Console {
 	
 	@Override
 	protected void handleEnter(KeyEvent e) {
-		super.handleEnter(e);
+		super.handleEnterAbstract(e);
 		if(getCurrentLine().isEmpty()) {
 			this.appendText("\n null");
 		} else {

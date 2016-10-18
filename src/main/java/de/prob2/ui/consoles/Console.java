@@ -13,7 +13,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
-public class Console extends TextArea {
+public abstract class Console extends TextArea {
 	
 	protected List<Instruction> instructions;
 	protected int charCounterInLine = 0;
@@ -156,8 +156,9 @@ public class Console extends TextArea {
 		currentPosInLine = charCounterInLine;
 	}
 	
+	protected abstract void handleEnter(KeyEvent e);
 	
-	protected void handleEnter(KeyEvent e) {
+	protected void handleEnterAbstract(KeyEvent e) {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		e.consume();
