@@ -363,19 +363,22 @@ public final class OperationsView extends AnchorPane {
 		if (mainComponent instanceof Machine) {
 			for (BEvent e : mainComponent.getChildrenOfType(BEvent.class)) {
 				opNames.add(e.getName());
-
-				List<String> paramList = new ArrayList<>();
-				if (e instanceof Event) {
-					for (EventParameter eParam : ((Event) e).getParameters()) {
-						paramList.add(eParam.getName());
-					}
-				} else if (e instanceof de.prob.model.classicalb.Operation) {
-					paramList.addAll(((de.prob.model.classicalb.Operation) e).getParameters());
-				}
-				opToParams.put(e.getName(), paramList);
+				opToParams.put(e.getName(), getParams(e));
 			}
 		}
 		
 		
+	}
+
+	private List<String> getParams(BEvent e) {
+		List<String> paramList = new ArrayList<>();
+		if (e instanceof Event) {
+			for (EventParameter eParam : ((Event) e).getParameters()) {
+				paramList.add(eParam.getName());
+			}
+		} else if (e instanceof de.prob.model.classicalb.Operation) {
+			paramList.addAll(((de.prob.model.classicalb.Operation) e).getParameters());
+		}
+		return paramList;
 	}
 }
