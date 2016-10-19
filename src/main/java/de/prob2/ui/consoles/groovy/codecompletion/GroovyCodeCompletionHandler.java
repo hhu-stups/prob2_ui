@@ -176,16 +176,15 @@ public class GroovyCodeCompletionHandler {
 	}
 	
 	private String splitBraces(String currentInstruction) {
-		char[] instruction = currentInstruction.toCharArray();
-		String result = "";
-		for(int i = 0; i < instruction.length; i++) {
-			if(instruction[i] == '(' && instruction[i+1] != ')') {
-				result = new StringBuilder(result).append(";").toString();
+		StringBuilder result = new StringBuilder();
+		for (int i = 1; i < currentInstruction.length(); i++) {
+			if (currentInstruction.charAt(i-1) == '(' && currentInstruction.charAt(i) != ')') {
+				result.append(";");
 			} else {
-				result = new StringBuilder(result).append(instruction[i]).toString();
+				result.append(currentInstruction.charAt(i-1));
 			}
 		}
-		return result;
+		return result.toString();
 	}
 	
 	public void clear() {
