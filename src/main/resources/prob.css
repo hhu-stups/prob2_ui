@@ -30,8 +30,8 @@
 	-fx-background-color: transparent;
 }
 .menu-button > .arrow-button > .arrow {
-    -fx-background-color: -prob-grey;
-    -fx-opacity: 0.8;
+	-fx-background-color: -prob-grey;
+	-fx-opacity: 0.8;
 }
 .button-dark {
 	-fx-background-color: -prob-grey;
@@ -46,7 +46,7 @@
 	-fx-opacity: 0.8;
 }
 
-.icon-dark:hover, .menu-button:hover > .arrow-button > .arrow, 
+.icon-dark:hover, .menu-button:hover > .arrow-button > .arrow,
 .menu-button:hover .icon-dark  {
 	-fx-opacity: 1.0;
 }
@@ -80,7 +80,7 @@
  * ChoiceBox																		*
  ************************************************************************************/
 .choice-box {
-	-fx-background-color: transparent;	
+	-fx-background-color: transparent;
 	-fx-text-fill: -prob-grey;
 	-fx-border-radius: 5.0;
 	-fx-border-color: -prob-grey;
@@ -94,19 +94,18 @@
  * ComboBox																			*
  ************************************************************************************/
 .combo-box {
-	-fx-background-color: transparent;	
+	-fx-background-color: transparent;
 	-fx-text-fill: -prob-grey;
 	-fx-border-radius: 5.0;
 	-fx-border-color: -prob-grey;
 }
 .combo-box:hover {
-	-fx-background-color: -prob-grey-20;	
+	-fx-background-color: -prob-grey-20;
 	-fx-background-radius: 5.0;
 }
 .combo-box-popup > .list-view {
-    -fx-background-color: -prob-grey-75;
- 	-fx-background-radius: 3.0 3.0 3.0 3.0;
-} 
+	-fx-background-color: -prob-grey-75;  -fx-background-radius: 3.0 3.0 3.0 3.0;
+}
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
 	-fx-background: transparent;
 }
@@ -119,12 +118,12 @@
  * DialogPane																		*
  ************************************************************************************/
 .dialog-pane .button {
-    -fx-background-color: transparent;
-    -fx-border-color: -prob-grey;
-    -fx-border-radius: 6.0;
-    -fx-background-insets: 0.0,1.0,2.0;
-    -fx-text-fill: -prob-grey;
-    -fx-font-weight: bold;
+	-fx-background-color: transparent;
+	-fx-border-color: -prob-grey;
+	-fx-border-radius: 6.0;
+	-fx-background-insets: 0.0,1.0,2.0;
+	-fx-text-fill: -prob-grey;
+	-fx-font-weight: bold;
 }
 .dialog-pane .button:hover {
 	-fx-text-fill: -prob-grey-75;
@@ -154,8 +153,8 @@
  * Menu, ContextMenu, MenuBar														*
  ************************************************************************************/
 .context-menu {
- 	-fx-background-color: -prob-grey-75;
- 	-fx-background-radius: 3.0 3.0 3.0 3.0;
+	-fx-background-color: -prob-grey-75;
+	-fx-background-radius: 3.0 3.0 3.0 3.0;
 	-fx-effect: null;
 }
 .context-menu .menu-item > .label {
@@ -191,12 +190,12 @@
 .menu-bar > .container > .menu-button:hover,
 .menu-bar > .container > .menu-button:focused,
 .menu-bar > .container > .menu-button:showing {
-    -fx-background-color: -prob-aqua;
+	-fx-background-color: -prob-aqua;
 }
 .menu-bar > .container > .menu-button:hover > .label,
 .menu-bar > .container > .menu-button:focused > .label,
 .menu-bar > .container > .menu-button:showing > .label{
-    -fx-text-fill: -prob-white;
+	-fx-text-fill: -prob-white;
 }
 
 /************************************************************************************
@@ -206,7 +205,7 @@
 	-fx-background-color: transparent;
 }
 .scroll-bar > .thumb {
-	-fx-background-color: -prob-grey-75; 
+	-fx-background-color: -prob-grey-75;
 	-fx-background-insets: 2.0, 3.0, 4.0;
 	-fx-background-radius: 5.0em;
 }
@@ -216,13 +215,13 @@
 }
 .scroll-bar:vertical > .increment-button,
 .scroll-bar:vertical > .decrement-button {
-	-fx-background-color: transparent;     
+	-fx-background-color: transparent;
 	-fx-color: transparent;
 	-fx-padding: 0.0em 0.08em -0.3em 0.08em;
 }
 .scroll-bar:horizontal > .increment-button,
 .scroll-bar:horizontal > .decrement-button {
-	-fx-background-color: transparent;     
+	-fx-background-color: transparent;
 	-fx-color: transparent;
 	-fx-padding: 0.08em -0.3em 0.08em 0.0em;
 }
@@ -247,7 +246,7 @@
 }
 .spinner .increment-arrow-button .increment-arrow,
 .spinner .decrement-arrow-button .decrement-arrow {
-    -fx-background-color: -prob-grey;
+	-fx-background-color: -prob-grey;
 }
 .spinner .text-field {
 	-fx-border-radius: 4.0 0.0 0.0 4.0;
@@ -265,43 +264,43 @@
 }
 /* horizontal the two nodes are placed to the left/right of each other. */
 .split-pane:horizontal > .split-pane-divider {
-   -fx-background-color: -prob-aqua;
+	-fx-background-color: -prob-aqua;
 }
 /* vertical the two nodes are placed on top of each other. */
 .split-pane:vertical > .split-pane-divider {
-   -fx-background-color: -prob-grey;
+	-fx-background-color: -prob-grey;
 }
 
 /************************************************************************************
  * TabPane																			*
  ************************************************************************************/
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
-    -fx-text-fill: -prob-white;
+	-fx-text-fill: -prob-white;
 }
 .tab-pane > .tab-header-area > .headers-region > .tab {
-    -fx-background-radius: 5.0 5.0 0.0 0.0;
-    -fx-background-color: -prob-grey;
-    -fx-background-insets: 1.0 1.0 0.0 1.0;
+	-fx-background-radius: 5.0 5.0 0.0 0.0;
+	-fx-background-color: -prob-grey;
+	-fx-background-insets: 1.0 1.0 0.0 1.0;
 }
 .tab-pane > .tab-header-area > .headers-region > .tab:hover {
-    -fx-background-color: -prob-grey-75;
+	-fx-background-color: -prob-grey-75;
 }
 .tab-pane > .tab-header-area > .headers-region > .tab:selected {
-    -fx-background-color: -prob-aqua;
+	-fx-background-color: -prob-aqua;
 }
 .tab-pane > .tab-header-area > .tab-header-background {
-    -fx-background-color: white;
-    -fx-border-color: -prob-grey;
-    -fx-border-width: 0.0 0.0 0.1em 0.0;
+	-fx-background-color: white;
+	-fx-border-color: -prob-grey;
+	-fx-border-width: 0.0 0.0 0.1em 0.0;
 }
 .tab-pane > .tab-header-area {
-    -fx-padding: 0.0em 0.0em 0.0em 0.0em;
+	-fx-padding: 0.0em 0.0em 0.0em 0.0em;
 }
 .tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator {
-    -fx-border-width: 1.0, 1.0;
-    -fx-border-color: transparent;
-    -fx-border-insets: -4.0 -4.0 -6.0 -5.0, -2.0 -2.0 -5.0 -3.0;
-    -fx-border-radius: 2.0, 1.0; 
+	-fx-border-width: 1.0, 1.0;
+	-fx-border-color: transparent;
+	-fx-border-insets: -4.0 -4.0 -6.0 -5.0, -2.0 -2.0 -5.0 -3.0;
+	-fx-border-radius: 2.0, 1.0;
 }
 
 /************************************************************************************
@@ -319,25 +318,25 @@
  * Titled Pane																		*
  ************************************************************************************/
 .titled-pane {
-    -fx-text-fill: -prob-white;
+	-fx-text-fill: -prob-white;
 }
 .titled-pane > .title {
-    -fx-background-color: -prob-grey;
-    -fx-padding: 1.0em;
+	-fx-background-color: -prob-grey;
+	-fx-padding: 1.0em;
 }
 .titled-pane > .title:hover {
-    -fx-background-color: -prob-aqua;
+	-fx-background-color: -prob-aqua;
 }
 .titled-pane > .title > .arrow-button > .arrow {
-    -fx-background-color: -prob-white;
-    -fx-background-insets: 1.0 0.0 -1.0 0.0, 0.0;
-    -fx-padding: 0.25em 0.3125em 0.25em 0.3125em; 
+	-fx-background-color: -prob-white;
+	-fx-background-insets: 1.0 0.0 -1.0 0.0, 0.0;
+	-fx-padding: 0.25em 0.3125em 0.25em 0.3125em;
 }
 .titled-pane > *.content {
-    -fx-border-color: -prob-grey;
+	-fx-border-color: -prob-grey;
 }
 .titled-pane:focused > .title > .arrow-button > .arrow {
-    -fx-effect: none;
+	-fx-effect: none;
 }
 
 /************************************************************************************
@@ -388,10 +387,10 @@
 }
 .table-view .column-header-background,
 .tree-table-view > .column-header-background {
-    -fx-background-color: white;
+	-fx-background-color: white;
 	-fx-border-color: transparent transparent -prob-grey transparent;
 	-fx-border-width: 0.0 0.0 2.0 0.0;
-    -fx-padding: 0.4em;
+	-fx-padding: 0.4em;
 }
 .tree-table-view .column-header .label,
 .table-view .column-header .label {
@@ -416,16 +415,16 @@
 	-fx-font-weight: bold;
 }
 .dialog .button {
-    -fx-background-color: transparent;
-    -fx-border-color: -prob-grey;
-    -fx-border-radius: 6.0;
-    -fx-background-insets: 0.0,1.0,2.0;
-    -fx-text-fill: -prob-grey;
-    -fx-font-weight: bold;
+	-fx-background-color: transparent;
+	-fx-border-color: -prob-grey;
+	-fx-border-radius: 6.0;
+	-fx-background-insets: 0.0,1.0,2.0;
+	-fx-text-fill: -prob-grey;
+	-fx-font-weight: bold;
 }
 .dialog .button:hover {
-    -fx-text-fill: -prob-grey-75;
-    -fx-border-color: -prob-grey-75;
+	-fx-text-fill: -prob-grey-75;
+	-fx-border-color: -prob-grey-75;
 }
 .dialog .text-area {
 	-fx-border-color: -prob-grey;
@@ -484,19 +483,19 @@
 
 /* ================= OPERATIONS VIEW ================= */
 .errored {
-	-fx-border-width: 0.0 0.0 0.0 0.3em; 
+	-fx-border-width: 0.0 0.0 0.0 0.3em;
 	-fx-border-color: -prob-orange;
 	-fx-text-fill: -prob-orange;
 	-fx-padding: 0.4em 0.0 0.4em 1.0em;
 }
 .unexplored {
-	-fx-border-width: 0.0 0.0 0.0 0.3em; 
+	-fx-border-width: 0.0 0.0 0.0 0.3em;
 	-fx-border-color: -prob-aqua;
 	-fx-text-fill: -prob-aqua;
 	-fx-padding: 0.4em 0.0 0.4em 1.0em;
 }
 .normal {
-	-fx-border-width: 0.0 0.0 0.0 0.3em; 
+	-fx-border-width: 0.0 0.0 0.0 0.3em;
 	-fx-border-color: transparent;
 	-fx-text-fill: black;
 	-fx-padding: 0.4em 0.0 0.4em 1.0em;
@@ -507,7 +506,13 @@
 	-fx-background-color: -prob-grey-20;
 }
 
-/* ================ MODELCHECKING VIEW =============== */	
+/* =================== STATES VIEW =================== */
+
+.changed {
+	-fx-background-color: #cccccc;
+}
+
+/* ================ MODELCHECKING VIEW =============== */
 .mcheckSuccess {
 	-fx-background-color: #00ff0022;
 	-fx-background-radius: 5.0 5.0 5.0 5.0;

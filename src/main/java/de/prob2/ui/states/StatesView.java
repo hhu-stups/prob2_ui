@@ -113,6 +113,7 @@ public final class StatesView extends AnchorPane {
 				if (sti.getContents().equals(e)) {
 					childItem = ti;
 					childItem.setValue(ElementStateTreeItem.fromElementAndValues(e, this.currentValues, this.previousValues));
+					
 					break;
 				}
 			}
@@ -205,6 +206,19 @@ public final class StatesView extends AnchorPane {
 
 		tv.setRowFactory(view -> { // NOSONAR // Sonar counts every if statement in a lambda as a conditional expression and complains if there are more than 3. This is not a reasonable limit here.
 			final TreeTableRow<StateTreeItem<?>> row = new TreeTableRow<>();
+			
+			row.itemProperty().addListener((observable, from, to) -> {
+				if (
+					!(to instanceof ElementStateTreeItem)
+					|| to.getValue() == null
+					|| to.getPreviousValue() == null
+					|| to.getValue().equals(to.getPreviousValue())
+				) {
+					row.getStyleClass().remove("changed");
+				} else if (!row.getStyleClass().contains("changed")) {
+					row.getStyleClass().add("changed");
+				}
+			});
 			
 			final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
 			// Expression can only be shown if the row item is an ElementStateTreeItem containing an AbstractFormulaElement and the current state is initialized.
