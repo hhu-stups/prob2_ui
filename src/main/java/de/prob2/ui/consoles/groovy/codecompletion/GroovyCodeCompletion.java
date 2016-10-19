@@ -39,6 +39,7 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private final GroovyCodeCompletionHandler completionHandler;
 	
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UR_UNINIT_READ", justification = "Field values are injected by FXMLLoader")
 	public GroovyCodeCompletion(FXMLLoader loader, ScriptEngine engine) {
 		loader.setLocation(getClass().getResource("groovy_codecompletion_popup.fxml"));
 		loader.setRoot(this);
