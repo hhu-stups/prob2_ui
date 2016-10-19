@@ -88,32 +88,6 @@ public final class OperationsView extends AnchorPane {
 	}
 	
 	private static final Logger logger = LoggerFactory.getLogger(OperationsView.class);
-	
-	private static String extractPrettyName(final String name) {
-		if ("$setup_constants".equals(name)) {
-			return "SETUP_CONSTANTS";
-		}
-		if ("$initialise_machine".equals(name)) {
-			return "INITIALISATION";
-		}
-		return name;
-	}
-
-	private static String stripString(final String param) {
-		return param.replaceAll("\\{", "").replaceAll("\\}", "");
-	}
-
-	private static int compareParams(final List<String> params1, final List<String> params2) {
-		for (int i = 0; i < params1.size(); i++) {
-			String p1 = stripString(params1.get(i));
-			String p2 = stripString(params2.get(i));
-			if (p1.compareTo(p2) != 0) {
-				return p1.compareTo(p2);
-			}
-
-		}
-		return 0;
-	}
 
 	@FXML private ListView<Operation> opsListView;
 	@FXML private Button backButton;
@@ -136,6 +110,34 @@ public final class OperationsView extends AnchorPane {
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
+	
+	private final Comparator<Operation> zToA = (o1, o2) -> {
+		if (o1.name.equals(o2.name)) {
+			return -compareParams(o1.params, o2.params);
+		} else if (o1.name.equalsIgnoreCase(o2.name)) {
+			return -o1.name.compareTo(o2.name);
+		} else {
+			return -o1.name.compareToIgnoreCase(o2.name);
+		}
+	};
+	
+	private final Comparator<Operation> aToZ = (o1, o2) -> {
+		if (o1.name.equals(o2.name)) {
+			return compareParams(o1.params, o2.params);
+		} else if (o1.name.equalsIgnoreCase(o2.name)) {
+			return o1.name.compareTo(o2.name);
+		} else {
+			return o1.name.compareToIgnoreCase(o2.name);
+		}
+	};
+	
+	private final Comparator<Operation> modelOrder = (o1, o2) -> {
+		if (o1.name.equals(o2.name)) {
+			return compareParams(o1.params, o2.params);
+		} else {
+			return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
+		}
+	};
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final FXMLLoader loader) {
@@ -212,6 +214,32 @@ public final class OperationsView extends AnchorPane {
 
 		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
 	}
+	
+	private static String extractPrettyName(final String name) {
+		if ("$setup_constants".equals(name)) {
+			return "SETUP_CONSTANTS";
+		}
+		if ("$initialise_machine".equals(name)) {
+			return "INITIALISATION";
+		}
+		return name;
+	}
+	
+	private static String stripString(final String param) {
+		return param.replaceAll("\\{", "").replaceAll("\\}", "");
+	}
+	
+	private static int compareParams(final List<String> params1, final List<String> params2) {
+		for (int i = 0; i < params1.size(); i++) {
+			String p1 = stripString(params1.get(i));
+			String p2 = stripString(params2.get(i));
+			if (p1.compareTo(p2) != 0) {
+				return p1.compareTo(p2);
+			}
+			
+		}
+		return 0;
+	}
 
 	@FXML
 	private void handleDisabledOpsToggle() {
@@ -263,15 +291,15 @@ public final class OperationsView extends AnchorPane {
 		final Comparator<Operation> comparator;
 		switch (sortMode) {
 		case MODEL_ORDER:
-			comparator = modelOrder();
+			comparator = modelOrder;
 			break;
 
 		case A_TO_Z:
-			comparator = aToZ();
+			comparator = aToZ;
 			break;
 
 		case Z_TO_A:
-			comparator = zToA();
+			comparator = zToA;
 			break;
 
 		default:
@@ -279,40 +307,6 @@ public final class OperationsView extends AnchorPane {
 		}
 
 		Collections.sort(events, comparator);
-	}
-
-	private Comparator<Operation> zToA() {
-		return (o1, o2) -> {
-			if (o1.name.equals(o2.name)) {
-				return -compareParams(o1.params, o2.params);
-			} else if (o1.name.equalsIgnoreCase(o2.name)) {
-				return -o1.name.compareTo(o2.name);
-			} else {
-				return -o1.name.compareToIgnoreCase(o2.name);
-			}
-		};
-	}
-
-	private Comparator<Operation> aToZ() {
-		return (o1, o2) -> {
-			if (o1.name.equals(o2.name)) {
-				return compareParams(o1.params, o2.params);
-			} else if (o1.name.equalsIgnoreCase(o2.name)) {
-				return o1.name.compareTo(o2.name);
-			} else {
-				return o1.name.compareToIgnoreCase(o2.name);
-			}
-		};
-	}
-
-	private Comparator<Operation> modelOrder() {
-		return (o1, o2) -> {
-			if (o1.name.equals(o2.name)) {
-				return compareParams(o1.params, o2.params);
-			} else {
-				return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
-			}
-		};
 	}
 
 	@FXML
