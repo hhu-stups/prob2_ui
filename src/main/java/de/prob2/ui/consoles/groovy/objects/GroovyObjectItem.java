@@ -1,13 +1,14 @@
 package de.prob2.ui.consoles.groovy.objects;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public class GroovyObjectItem extends GroovyAbstractItem {
 	
 	private final Class<?> clazz;
-	private final SimpleStringProperty clazzname;
-	private final SimpleStringProperty value;
-	private Object object;
+	private final StringProperty clazzname;
+	private final StringProperty value;
+	private final Object object;
 	private GroovyClassStage classstage;
 	
 	public GroovyObjectItem(String name, Object object, GroovyClassStage classstage) {
