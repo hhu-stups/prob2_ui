@@ -150,11 +150,7 @@ public final class HistoryView extends AnchorPane {
 		}
 	}
 
-	private void addItems(ListView lvHistory, int currentPos) {
-		if (currentPos == -1) {
-			lvHistory.getItems().add(new HistoryItem(HistoryStatus.PRESENT));
-		} else {
-			lvHistory.getItems().add(new HistoryItem(HistoryStatus.PAST));
-		}
+	private void addItems(ListView<HistoryItem> lvHistory, int currentPos) {
+		lvHistory.getItems().add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST));
 	}
 }
