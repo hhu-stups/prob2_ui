@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+
 <fx:root type="Stage" minWidth="240" minHeight="160" width="480"
 	height="320" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -22,7 +23,7 @@
 			<BorderPane maxWidth="Infinity" maxHeight="Infinity"
 				stylesheets="@/prob.css" styleClass="dialog">
 				<padding>
-					<Insets top="30.0" right="0.0" bottom="10.0" left="0.0" />
+					<Insets top="1.0" right="0.0" bottom="10.0" left="0.0" />
 				</padding>
 				<center>
 					<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
