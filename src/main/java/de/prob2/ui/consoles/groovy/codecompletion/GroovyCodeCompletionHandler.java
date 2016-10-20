@@ -30,7 +30,7 @@ public class GroovyCodeCompletionHandler {
 		this.currentSuggestions = new ArrayList<>();
 	}
 	
-	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, TriggerAction action, GroovyConsole parent, ScriptEngine engine) {
+	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action, GroovyConsole parent, ScriptEngine engine) {
 		String[] methods = getMethodsFromCurrentLine(currentLine, parent);
 		if(methods.length == 0) {
 			return;
@@ -53,12 +53,12 @@ public class GroovyCodeCompletionHandler {
 			}
 		}
 		showSuggestions(clazz, GroovyMethodOption.NONSTATIC);
-		if(action == TriggerAction.TRIGGER) {
+		if(action == CodeCompletionTriggerAction.TRIGGER) {
 			refresh(currentSuggestion);
 		}
 	}
 	
-	public void handleStaticClasses(String currentLine, String currentSuggestion, TriggerAction action, GroovyConsole parent) {
+	public void handleStaticClasses(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action, GroovyConsole parent) {
 		String[] methods = getMethodsFromCurrentLine(currentLine, parent);
 		Package[] packages = Package.getPackages();
 		if(methods.length == 0) {
@@ -75,13 +75,13 @@ public class GroovyCodeCompletionHandler {
 		        // Just try with the next package if the current fullClassName does not fit any classes
 		    }
 		}
-		if(action == TriggerAction.TRIGGER) {
+		if(action == CodeCompletionTriggerAction.TRIGGER) {
 			refresh(currentSuggestion);
 		}
 	}
 	
-	public void handleObjects(String currentSuggestion, TriggerAction action, ScriptEngine engine) {
-		if(action == TriggerAction.TRIGGER && suggestions.isEmpty()) {
+	public void handleObjects(String currentSuggestion, CodeCompletionTriggerAction action, ScriptEngine engine) {
+		if(action == CodeCompletionTriggerAction.TRIGGER && suggestions.isEmpty()) {
 			currentSuggestions.clear();
 			fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
 			fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));

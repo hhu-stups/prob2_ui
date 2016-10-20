@@ -57,9 +57,9 @@ public class GroovyCodeCompletion extends Popup {
 		setListeners();
 	}
 	
-	public void activate(GroovyConsole console, String currentLine, TriggerAction action) {
+	public void activate(GroovyConsole console, String currentLine, CodeCompletionTriggerAction action) {
 		this.parent = console;
-		if(action == TriggerAction.POINT) {
+		if(action == CodeCompletionTriggerAction.POINT) {
 			currentLine = currentLine + ".";
 		}
 		String currentPrefix = handleActivation(currentLine);

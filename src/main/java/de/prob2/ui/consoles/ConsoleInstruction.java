@@ -1,13 +1,11 @@
 package de.prob2.ui.consoles;
 
-import de.prob2.ui.consoles.groovy.InstructionOption;
-
 public class ConsoleInstruction {
 	
 	private String instruction;
-	private InstructionOption option;
+	private ConsoleInstructionOption option;
 	
-	public ConsoleInstruction(String instruction, InstructionOption option) {
+	public ConsoleInstruction(String instruction, ConsoleInstructionOption option) {
 		this.instruction = instruction;
 		this.option = option;
 	}
@@ -16,7 +14,7 @@ public class ConsoleInstruction {
 		return instruction;
 	}
 	
-	public InstructionOption getOption() {
+	public ConsoleInstructionOption getOption() {
 		return option;
 	}
 

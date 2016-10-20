@@ -4,7 +4,7 @@ import java.io.File;
 
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
-import de.prob2.ui.consoles.groovy.codecompletion.TriggerAction;
+import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -32,7 +32,7 @@ public class GroovyConsole extends Console {
 	@Override
 	protected void handleInsertChar(KeyEvent e) {
 		if(".".equals(e.getText())) {
-			triggerCodeCompletion(TriggerAction.POINT);
+			triggerCodeCompletion(CodeCompletionTriggerAction.POINT);
 		}
 		super.handleInsertChar(e);
 	}
@@ -49,12 +49,12 @@ public class GroovyConsole extends Console {
 		super.setKeyEvent();
 		this.addEventFilter(KeyEvent.ANY, e -> {
 			if(e.isControlDown() && e.getCode() == KeyCode.SPACE) {
-				triggerCodeCompletion(TriggerAction.TRIGGER);
+				triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER);
 			}
 		});
 	}
 	
-	private void triggerCodeCompletion(TriggerAction action) {
+	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
 		if(getCaretPosition() > this.getText().lastIndexOf("\n") + 2) {
 			int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
 			interpreter.triggerCodeCompletion(this, getCurrentLine().substring(0, caretPosInLine), action);

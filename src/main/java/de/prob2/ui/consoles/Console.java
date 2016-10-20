@@ -5,8 +5,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import de.prob2.ui.consoles.groovy.InstructionOption;
-
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
@@ -164,10 +162,10 @@ public abstract class Console extends TextArea {
 		currentPosInLine = 0;
 		e.consume();
 		if(!getCurrentLine().isEmpty()) {
-			if(!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != InstructionOption.ENTER) {
-				instructions.set(instructions.size() - 1, new ConsoleInstruction(getCurrentLine(), InstructionOption.ENTER));
+			if(!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
+				instructions.set(instructions.size() - 1, new ConsoleInstruction(getCurrentLine(), ConsoleInstructionOption.ENTER));
 			} else {
-				instructions.add(new ConsoleInstruction(getCurrentLine(), InstructionOption.ENTER));
+				instructions.add(new ConsoleInstruction(getCurrentLine(), ConsoleInstructionOption.ENTER));
 			}
 			posInList = instructions.size() - 1;
 		}
@@ -194,10 +192,10 @@ public abstract class Console extends TextArea {
 		if(posInList == instructions.size() - 1) {
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
 			if(!lastinstruction.equals(getCurrentLine()) && posInList == instructions.size() - 1) {
-				if(instructions.get(posInList).getOption() == InstructionOption.UP) {
-					instructions.set(instructions.size() - 1, new ConsoleInstruction(getCurrentLine(), InstructionOption.UP));
+				if(instructions.get(posInList).getOption() == ConsoleInstructionOption.UP) {
+					instructions.set(instructions.size() - 1, new ConsoleInstruction(getCurrentLine(), ConsoleInstructionOption.UP));
 				} else {
-					instructions.add(new ConsoleInstruction(getCurrentLine(), InstructionOption.UP));
+					instructions.add(new ConsoleInstruction(getCurrentLine(), ConsoleInstructionOption.UP));
 					setTextAfterArrowKey();
 					return true;
 				}

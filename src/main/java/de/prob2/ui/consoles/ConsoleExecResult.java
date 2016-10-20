@@ -1,10 +1,10 @@
-package de.prob2.ui.consoles.groovy;
+package de.prob2.ui.consoles;
 
-public class ExecResult {
+public class ConsoleExecResult {
 	private final String consoleOutput;
 	private final String result;
 	
-	public ExecResult(String consoleOutput, String result) {
+	public ConsoleExecResult(String consoleOutput, String result) {
 		this.consoleOutput = consoleOutput;
 		this.result = result;
 	}

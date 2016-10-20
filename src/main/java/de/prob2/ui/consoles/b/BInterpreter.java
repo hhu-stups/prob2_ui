@@ -17,11 +17,12 @@ import de.prob.statespace.FormalismType;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.Executable;
 
 
-public class BInterpreter implements IAnimationChangeListener, Executable<String> {
+public class BInterpreter implements IAnimationChangeListener, Executable {
 
 	private static final Logger logger = LoggerFactory.getLogger(BInterpreter.class);
 	private final StateSpace defaultSS;
@@ -40,7 +41,7 @@ public class BInterpreter implements IAnimationChangeListener, Executable<String
 		animations.registerAnimationChangeListener(this);
 	}
 
-	public String exec(final ConsoleInstruction instruction) {
+	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
 		String line = instruction.getInstruction();
 		String res = "";
 		try {
@@ -55,9 +56,9 @@ public class BInterpreter implements IAnimationChangeListener, Executable<String
 			}
 		} catch (EvaluationException e) {
 			logger.info("B evaluation failed", e);
-			return "Invalid syntax: " + e.getMessage();
+			return new ConsoleExecResult("", "Invalid syntax: " + e.getMessage()) ;
 		}
-		return res;
+		return new ConsoleExecResult("", res);
 	}
 
 	public String result(AbstractEvalResult res) {

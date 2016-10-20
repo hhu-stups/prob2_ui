@@ -6,10 +6,11 @@ import javax.script.ScriptException;
 import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
+import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.Executable;
 import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;
-import de.prob2.ui.consoles.groovy.codecompletion.TriggerAction;
+import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import javafx.fxml.FXMLLoader;
 
@@ -17,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.codehaus.groovy.GroovyBugError;
 
-public class GroovyInterpreter implements Executable<ExecResult> {
+public class GroovyInterpreter implements Executable {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
 	private final ScriptEngine engine;
 	private final GroovyCodeCompletion codeCompletion;
@@ -30,14 +31,15 @@ public class GroovyInterpreter implements Executable<ExecResult> {
 		this.codeCompletion = new GroovyCodeCompletion(loader, engine);
 	}
 	
-	public ExecResult exec(final ConsoleInstruction instruction) {
+	@Override
+	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
 		logger.trace("Exec");
 		
 		if ("inspect".equals(instruction.getInstruction())) {
 			groovyObjectStage.showObjects(engine);
-			return new ExecResult("", "");
+			return new ConsoleExecResult("", "");
 		} else if("clear".equals(instruction.getInstruction())) {
-			return new ExecResult("clear","");
+			return new ConsoleExecResult("clear","");
 		} else {
 			String resultString;
 			StringBuilder console = new StringBuilder();
@@ -52,11 +54,11 @@ public class GroovyInterpreter implements Executable<ExecResult> {
 				resultString = e.toString();
 			}
 	
-			return new ExecResult(console.toString(), resultString);
+			return new ConsoleExecResult(console.toString(), resultString);
 		}
 	}
 	
-	public void triggerCodeCompletion(GroovyConsole console, String currentLine, TriggerAction action) {
+	public void triggerCodeCompletion(GroovyConsole console, String currentLine, CodeCompletionTriggerAction action) {
 		if(!codeCompletion.isVisible()) {
 			codeCompletion.activate(console, currentLine, action);
 		}
