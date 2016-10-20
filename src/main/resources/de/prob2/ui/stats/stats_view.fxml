@@ -16,14 +16,22 @@
 	<AnchorPane>
 		<Label text="No model loaded" AnchorPane.bottomAnchor="0.0"
 			AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"
-			AnchorPane.rightAnchor="0.0" alignment="center" fx:id="noStatsLabel"/>
+			AnchorPane.rightAnchor="0.0" alignment="center" fx:id="noStatsLabel" />
 		<VBox spacing="13.0" AnchorPane.bottomAnchor="10.0"
 			AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0"
 			AnchorPane.topAnchor="10.0" fx:id="statsBox">
 			<VBox spacing="3.0">
 				<HBox prefHeight="12.0" spacing="7.0">
-					<Label text="Total Transitions:" />
-					<Label fx:id="totalTransitions" />
+					<Label text="Total Transitions:">
+						<font>
+							<Font name="System Bold" size="14.0"/>
+						</font>
+					</Label>
+					<Label fx:id="totalTransitions"> 
+						<font>
+							<Font size="14.0" />
+						</font>
+					</Label>
 					<VBox.margin>
 						<Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
 					</VBox.margin>

@@ -7,33 +7,59 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 <fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
-	<VBox spacing="8.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
-		<AnchorPane fx:id="resultBackground" styleClass="mcheckNoCheck" stylesheets="@/prob.css">
-			<Text fx:id="resultText" fill="#8a8a8a" strokeType="OUTSIDE" strokeWidth="0.0" text="No Model Checking Job done." AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
+	<VBox spacing="8.0" AnchorPane.bottomAnchor="10.0"
+		AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0"
+		AnchorPane.topAnchor="0.0">
+		<AnchorPane fx:id="resultBackground" styleClass="mcheckNoCheck"
+			stylesheets="@/prob.css">
+			<Text fx:id="resultText" fill="#8a8a8a" strokeType="OUTSIDE"
+				strokeWidth="0.0" text="No Model Checking Job done."
+				AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0"
+				AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
 				<font>
 					<Font name="System Bold" size="13.0" />
 				</font>
 			</Text>
 		</AnchorPane>
-		<VBox fx:id="statsBox" spacing="13.0" visible="false">
-			<HBox prefHeight="12.0" spacing="7.0">
-				<Label text="Time Elapsed:" />
-				<Label fx:id="elapsedTime" />
-			</HBox>
-			<VBox spacing="3.0">
+		<AnchorPane>
+			<VBox fx:id="statsBox" spacing="13.0" visible="false"
+				AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
+				AnchorPane.topAnchor="5.0" AnchorPane.bottomAnchor="5.0">
 				<HBox prefHeight="12.0" spacing="7.0">
-					<Label text="Processed Nodes:" />
-					<Label fx:id="processedNodes" />
+					<Label text="Time Elapsed:">
+						<font>
+							<Font name="System Bold" />
+						</font>
+					</Label>
+					<Label fx:id="elapsedTime" />
 				</HBox>
-				<HBox prefHeight="12.0" spacing="7.0">
-					<Label text="Total Nodes:" />
-					<Label fx:id="totalNodes" />
-				</HBox>
-				<HBox prefHeight="12.0" spacing="7.0">
-					<Label text="Total Transitions:" />
-					<Label fx:id="totalTransitions" />
-				</HBox>
+				<VBox spacing="3.0">
+					<HBox prefHeight="12.0" spacing="7.0">
+						<Label text="Processed Nodes:">
+							<font>
+								<Font name="System Bold" />
+							</font>
+						</Label>
+						<Label fx:id="processedNodes" />
+					</HBox>
+					<HBox prefHeight="12.0" spacing="7.0">
+						<Label text="Total Nodes:">
+							<font>
+								<Font name="System Bold" />
+							</font>
+						</Label>
+						<Label fx:id="totalNodes" />
+					</HBox>
+					<HBox prefHeight="12.0" spacing="7.0">
+						<Label text="Total Transitions:">
+							<font>
+								<Font name="System bold" />
+							</font>
+						</Label>
+						<Label fx:id="totalTransitions" />
+					</HBox>
+				</VBox>
 			</VBox>
-		</VBox>
+		</AnchorPane>
 	</VBox>
 </fx:root>
