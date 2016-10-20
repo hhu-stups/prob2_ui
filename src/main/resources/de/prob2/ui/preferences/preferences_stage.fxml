@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" fx:id="stage" title="Preferences"
+<fx:root type="Stage" fx:id="stage" title="%preferences.title"
 	minHeight="160.0" minWidth="320.0" onCloseRequest="#handleClose"
 	xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
@@ -26,39 +26,32 @@
 				a StackPane so we can add the menu bar to it on Mac. -->
 			<StackPane>
 				<TabPane tabClosingPolicy="UNAVAILABLE">
-					<Tab text="General">
+					<Tab text="%preferences.tabs.general">
 						<VBox spacing="10.0">
 							<padding>
 								<Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
 							</padding>
 							<HBox spacing="10.0">
 								<!-- TODO fix vertical alignment -->
-								<Label text="Number of recent files to keep:"/>
+								<Label text="%preferences.tabs.general.recentFilesLimitLabel"/>
 								<Spinner fx:id="recentFilesCountSpinner"/>
 							</HBox>
 						</VBox>
 					</Tab>
-					<Tab text="ProB Preferences">
+					<Tab text="%preferences.tabs.proBPreferences">
 						<BorderPane styleClass="dialog">
 							<center>
 								<TreeTableView fx:id="tv" prefHeight="400.0"
 									prefWidth="600.0" editable="true" showRoot="false" styleClass="with-border">
 									<columns>
-										<TreeTableColumn fx:id="tvName" editable="false"
-											minWidth="80.0" prefWidth="320.0" text="Name" />
-										<TreeTableColumn fx:id="tvChanged" editable="false"
-											resizable="false" prefWidth="20.0" text="*" />
-										<TreeTableColumn fx:id="tvValue" editable="true"
-											minWidth="40.0" prefWidth="120.0" sortable="false" text="Value" />
-										<TreeTableColumn fx:id="tvDefaultValue"
-											editable="false" minWidth="40.0" prefWidth="120.0" sortable="false"
-											text="Default Value" />
-										<TreeTableColumn fx:id="tvDescription"
-											editable="false" styleClass="left" minWidth="80.0" prefWidth="900.0"
-											sortable="false" text="Description" />
+										<TreeTableColumn fx:id="tvName" editable="false" minWidth="80.0" prefWidth="320.0" text="%preferences.tabs.proBPreferences.columns.name" />
+										<TreeTableColumn fx:id="tvChanged" editable="false" resizable="false" prefWidth="20.0" text="%preferences.tabs.proBPreferences.columns.changed" />
+										<TreeTableColumn fx:id="tvValue" editable="true" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferences.tabs.proBPreferences.columns.value" />
+										<TreeTableColumn fx:id="tvDefaultValue" editable="false" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferences.tabs.proBPreferences.columns.defaultValue" />
+										<TreeTableColumn fx:id="tvDescription" editable="false" styleClass="left" minWidth="80.0" prefWidth="900.0" sortable="false" text="%preferences.tabs.proBPreferences.columns.description" />
 									</columns>
 									<placeholder>
-										<Label text="No model loaded" />
+										<Label text="%common.noModelLoaded" />
 									</placeholder>
 									<TreeItem expanded="true" />
 								</TreeTableView>
@@ -68,21 +61,15 @@
 									<padding>
 										<Insets top="10.0" bottom="10.0" left="10.0" right="10.0" />
 									</padding>
-									<Button fx:id="undoButton" text="Undo Changes" disable="true"
-										HBox.hgrow="NEVER" onAction="#handleUndoChanges" />
-									<Button fx:id="resetButton" text="Restore Defaults"
-										disable="true" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults" />
-									<Label fx:id="applyWarning" text="There are unapplied preference changes"
-										visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity"
-										maxHeight="Infinity" style="-fx-text-fill: -prob-orange; -fx-font-weight: bold"
-										alignment="CENTER" />
-									<Button fx:id="applyButton" text="Apply Changes"
-										disable="true" HBox.hgrow="NEVER" onAction="#handleApply" />
+									<Button fx:id="undoButton" text="%preferences.tabs.proBPreferences.undo" disable="true" HBox.hgrow="NEVER" onAction="#handleUndoChanges" />
+									<Button fx:id="resetButton" text="%preferences.tabs.proBPreferences.reset" disable="true" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults" />
+									<Label fx:id="applyWarning" text="%preferences.tabs.proBPreferences.notAppliedWarning" visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" style="-fx-text-fill: -prob-orange; -fx-font-weight: bold" alignment="CENTER" />
+									<Button fx:id="applyButton" text="%preferences.tabs.proBPreferences.apply" disable="true" HBox.hgrow="NEVER" onAction="#handleApply" />
 								</HBox>
 							</bottom>
 						</BorderPane>
 					</Tab>
-					<Tab text="States View">
+					<Tab text="%preferences.tabs.statesView">
 						<AnchorPane>
 							<ListView fx:id="blacklistView" editable="true"
 								AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="0.0"

@@ -15,10 +15,10 @@
 		prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="10.0"
 		AnchorPane.topAnchor="15.0">
 		<graphic>
-			<FontAwesomeIconView StyleClass="icon-dark" glyphName="CHEVRON_LEFT" size="15"/>
+			<FontAwesomeIconView styleClass="icon-dark" glyphName="CHEVRON_LEFT" size="15"/>
 		</graphic>
 		<tooltip>
-			<Tooltip text="Back"/>
+			<Tooltip text="%history.buttons.back.tooltip"/>
 		</tooltip>
 	</Button>
 	<Button fx:id="btForward" maxHeight="-Infinity" maxWidth="-Infinity"
@@ -26,10 +26,10 @@
 		prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="50.0"
 		AnchorPane.topAnchor="15.0">
 		<graphic>
-			<FontAwesomeIconView StyleClass="icon-dark" glyphName="CHEVRON_RIGHT" size="15"/>
+			<FontAwesomeIconView styleClass="icon-dark" glyphName="CHEVRON_RIGHT" size="15"/>
 		</graphic>
 		<tooltip>
-			<Tooltip text="Forward"/>
+			<Tooltip text="%history.buttons.forward.tooltip"/>
 		</tooltip>
 	</Button>
 	<ToggleButton fx:id="tbReverse" maxHeight="-Infinity"
@@ -37,10 +37,10 @@
 		mnemonicParsing="false" prefHeight="26.0" prefWidth="26.0"
 		AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="15.0">
 		<graphic>
-			<FontAwesomeIconView StyleClass="icon-dark" glyphName="SORT" size="15"/>
+			<FontAwesomeIconView styleClass="icon-dark" glyphName="SORT" size="15"/>
 		</graphic>
 		<tooltip>
-			<Tooltip text="Sort"/>
+			<Tooltip text="%history.buttons.reverse.tooltip"/>
 		</tooltip>
 	</ToggleButton>
 </fx:root>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.consoles.groovy.GroovyConsole?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<fx:root type="Stage" title="%consoles.groovy.title" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene stylesheets="@/prob.css" width="800" height="600">
+			<!-- GroovyConsole does not extend Pane, so we have to wrap it in a StackPane so we can add the menu bar to it on Mac. -->
+			<StackPane>
+				<GroovyConsole fx:id="groovyConsole" prefHeight="512.0" prefWidth="1024.0" />
+			</StackPane>
+		</Scene>
+	</scene>
+</fx:root>

@@ -49,26 +49,65 @@ import org.slf4j.LoggerFactory;
 
 //@Singleton
 public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
+	private final class ModelcheckingStageController {
+		@FXML private Stage mcheckStage;
+		@FXML private CheckBox findDeadlocks;
+		@FXML private CheckBox findInvViolations;
+		@FXML private CheckBox findBAViolations;
+		@FXML private CheckBox findGoal;
+		@FXML private CheckBox stopAtFullCoverage;
+		@FXML private CheckBox searchForNewErrors;
+		
+		@FXML
+		public void initialize() {
+			currentStage.register(this.mcheckStage);
+		}
+		
+		@FXML
+		private void startModelCheck(ActionEvent event) {
+			if (currentTrace.exists()) {
+				startModelchecking(getOptions(), animations.getCurrentTrace().getStateSpace());
+			} else {
+				final Alert alert = new Alert(Alert.AlertType.ERROR, "No specification file loaded. Cannot run model checker.");
+				alert.setHeaderText("Specification file missing");
+				alert.getDialogPane().getStylesheets().add("prob.css");
+				alert.showAndWait();
+				this.mcheckStage.close();
+			}
+		}
+		
+		private ModelCheckingOptions getOptions() {
+			ModelCheckingOptions options = new ModelCheckingOptions();
+			options = options.breadthFirst(true);
+			options = options.checkDeadlocks(findDeadlocks.isSelected());
+			options = options.checkInvariantViolations(findInvViolations.isSelected());
+			options = options.checkAssertions(findBAViolations.isSelected());
+			options = options.checkGoal(findGoal.isSelected());
+			options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
+			options = options.recheckExisting(!searchForNewErrors.isSelected());
+			
+			return options;
+		}
+		
+		@FXML
+		void cancel(ActionEvent event) {
+			cancelModelchecking();
+			this.mcheckStage.getScene().getWindow().hide();
+		}
+	}
+	
 	private static final Logger logger = LoggerFactory.getLogger(ModelcheckingController.class);
 	
-	// modelchecking_stats_view.fxml
 	@FXML private AnchorPane statsPane;
 	@FXML private VBox historyBox;
 	@FXML private Button addModelCheckButton;
 	
-	// modelchecking_stage.fxml
-	@FXML private Stage mcheckStage;
-	@FXML private CheckBox findDeadlocks;
-	@FXML private CheckBox findInvViolations;
-	@FXML private CheckBox findBAViolations;
-	@FXML private CheckBox findGoal;
-	@FXML private CheckBox stopAtFullCoverage;
-	@FXML private CheckBox searchForNewErrors;
-	
 	private final Injector injector;
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
+	private final CurrentStage currentStage;
 	private final StatsView statsView;
+	private final ModelcheckingStageController stageController;
 
 	private ModelChecker checker;
 	private ObservableList<Node> historyNodeList;
@@ -86,6 +125,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		this.injector = injector;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
+		this.currentStage = currentStage;
 		this.statsView = statsView;
 		
 		final FXMLLoader mainLoader = injector.getInstance(FXMLLoader.class);
@@ -100,16 +140,14 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		
 		final FXMLLoader stageLoader = injector.getInstance(FXMLLoader.class);
 		stageLoader.setLocation(getClass().getResource("modelchecking_stage.fxml"));
-		stageLoader.setController(this);
+		this.stageController = new ModelcheckingStageController();
+		stageLoader.setController(this.stageController);
 		try {
 			stageLoader.load();
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		currentStage.register(this.mcheckStage);
 	}
-	
-	// modelchecking_stats_view.fxml
 
 	@FXML
 	public void initialize() {
@@ -120,7 +158,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@FXML
 	private void addModelCheck() {
-		this.mcheckStage.showAndWait();
+		this.stageController.mcheckStage.showAndWait();
 	}
 
 	void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {
@@ -239,42 +277,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		showStats(new ModelCheckStats(injector.getInstance(FXMLLoader.class), this, statsView));
 		historyNodeList.clear();
 	}
-	
-	// modelchecking_stage.fxml
-	
-	@FXML
-	private void startModelCheck(ActionEvent event) {
-		if (currentTrace.exists()) {
-			startModelchecking(getOptions(), animations.getCurrentTrace().getStateSpace());
-		} else {
-			final Alert alert = new Alert(Alert.AlertType.ERROR, "No specification file loaded. Cannot run model checker.");
-			alert.setHeaderText("Specification file missing");
-			alert.getDialogPane().getStylesheets().add("prob.css");
-			alert.showAndWait();
-			this.mcheckStage.close();
-		}
-	}
-	
-	private ModelCheckingOptions getOptions() {
-		ModelCheckingOptions options = new ModelCheckingOptions();
-		options = options.breadthFirst(true);
-		options = options.checkDeadlocks(findDeadlocks.isSelected());
-		options = options.checkInvariantViolations(findInvViolations.isSelected());
-		options = options.checkAssertions(findBAViolations.isSelected());
-		options = options.checkGoal(findGoal.isSelected());
-		options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
-		options = options.recheckExisting(!searchForNewErrors.isSelected());
-		
-		return options;
-	}
-	
-	@FXML
-	void cancel(ActionEvent event) {
-		cancelModelchecking();
-		this.mcheckStage.getScene().getWindow().hide();
-	}
-	
-	// Overrides
 
 	@Override
 	public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
@@ -288,7 +290,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		Node historyNode = toHistoryNode(historyItem);
 		Platform.runLater(() -> {
 			historyNodeList.add(historyNode);
-			mcheckStage.close();
+			this.stageController.mcheckStage.close();
 		});
 	}
 }

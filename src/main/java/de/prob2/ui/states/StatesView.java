@@ -22,6 +22,7 @@ import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -113,6 +114,7 @@ public final class StatesView extends AnchorPane {
 				if (sti.getContents().equals(e)) {
 					childItem = ti;
 					childItem.setValue(ElementStateTreeItem.fromElementAndValues(e, this.currentValues, this.previousValues));
+					
 					break;
 				}
 			}
@@ -206,6 +208,19 @@ public final class StatesView extends AnchorPane {
 		tv.setRowFactory(view -> { // NOSONAR // Sonar counts every if statement in a lambda as a conditional expression and complains if there are more than 3. This is not a reasonable limit here.
 			final TreeTableRow<StateTreeItem<?>> row = new TreeTableRow<>();
 			
+			row.itemProperty().addListener((observable, from, to) -> {
+				if (
+					!(to instanceof ElementStateTreeItem)
+					|| to.getValue() == null
+					|| to.getPreviousValue() == null
+					|| to.getValue().equals(to.getPreviousValue())
+				) {
+					row.getStyleClass().remove("changed");
+				} else if (!row.getStyleClass().contains("changed")) {
+					row.getStyleClass().add("changed");
+				}
+			});
+			
 			final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
 			// Expression can only be shown if the row item is an ElementStateTreeItem containing an AbstractFormulaElement and the current state is initialized.
 			visualizeExpressionItem.disableProperty().bind(Bindings.createBooleanBinding(
@@ -233,10 +248,17 @@ public final class StatesView extends AnchorPane {
 			showFullValueItem.setOnAction(event -> {
 				final AbstractFormulaElement element = (AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents();
 				final EvalResult value = (EvalResult)this.currentValues.get(element.getFormula());
+				final EvalResult previousValue;
+				if (this.previousValues.get(element.getFormula()) instanceof EvalResult) {
+					previousValue = (EvalResult)this.previousValues.get(element.getFormula());
+				} else {
+					previousValue = null;
+				}
 				final FullValueStage stage = injector.getInstance(FullValueStage.class);
 				injector.getInstance(CurrentStage.class).register(stage);
 				stage.setTitle(element.toString());
-				stage.setAsciiText(value.getValue());
+				stage.setCurrentValue(AsciiUnicodeString.fromAscii(value.getValue()));
+				stage.setPreviousValue(AsciiUnicodeString.fromAscii(previousValue == null ? "(not initialized)" : previousValue.getValue()));
 				stage.show();
 			});
 			
@@ -265,12 +287,14 @@ public final class StatesView extends AnchorPane {
 					}
 				});
 
-		this.currentTrace.addListener((observable, from, to) -> {
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			if (to == null) {
 				this.tvRootItem.getChildren().clear();
 			} else {
 				this.updateRoot(to);
 			}
-		});
+		};
+		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
+		this.currentTrace.addListener(traceChangeListener);
 	}
 }

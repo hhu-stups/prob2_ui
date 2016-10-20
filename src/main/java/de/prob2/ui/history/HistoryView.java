@@ -9,8 +9,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
+import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
@@ -83,35 +86,26 @@ public final class HistoryView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		currentTrace.addListener((observable, from, to) -> {
+		this.setMinWidth(100);
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			lvHistory.getItems().clear();
+			
 			if (to != null) {
 				int currentPos = to.getCurrent().getIndex();
-
-				if (currentPos == -1) {
-					lvHistory.getItems().add(new HistoryItem(HistoryStatus.PRESENT));
-				} else {
-					lvHistory.getItems().add(new HistoryItem(HistoryStatus.PAST));
-				}
-
+				addItems(lvHistory,currentPos);
 				List<Transition> transitionList = to.getTransitionList();
 				for (int i = 0; i < transitionList.size(); i++) {
-					HistoryStatus status;
-					if (i < currentPos) {
-						status = HistoryStatus.PAST;
-					} else if (i > currentPos) {
-						status = HistoryStatus.FUTURE;
-					} else {
-						status = HistoryStatus.PRESENT;
-					}
+					HistoryStatus status = getStatus(i,currentPos);
 					lvHistory.getItems().add(new HistoryItem(transitionList.get(i), status));
 				}
 			}
-
+			
 			if (tbReverse.isSelected()) {
 				Collections.reverse(lvHistory.getItems());
 			}
-		});
+		};
+		traceChangeListener.changed(currentTrace, null, currentTrace.get());
+		currentTrace.addListener(traceChangeListener);
 
 		btBack.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		btForward.disableProperty().bind(currentTrace.canGoForwardProperty().not());
@@ -149,5 +143,19 @@ public final class HistoryView extends AnchorPane {
 		} else {
 			return currentPos - 1;
 		}
+	}
+
+	private HistoryStatus getStatus(int i, int currentPos) {
+		if (i < currentPos) {
+			return HistoryStatus.PAST;
+		} else if (i > currentPos) {
+			return HistoryStatus.FUTURE;
+		} else {
+			return HistoryStatus.PRESENT;
+		}
+	}
+
+	private void addItems(ListView<HistoryItem> lvHistory, int currentPos) {
+		lvHistory.getItems().add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST));
 	}
 }

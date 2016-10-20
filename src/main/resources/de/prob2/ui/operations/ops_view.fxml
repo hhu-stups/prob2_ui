@@ -31,7 +31,7 @@
 				</graphic>
 			</Button>
 			<TextField fx:id="filterEvents" onAction="#handleSearchButton"
-				promptText="Filter Events" AnchorPane.bottomAnchor="10.0"
+				promptText="%operations.search.prompt" AnchorPane.bottomAnchor="10.0"
 				AnchorPane.leftAnchor="45.0" AnchorPane.rightAnchor="10.0"
 				AnchorPane.topAnchor="10.0" prefHeight="26.0"/>
 		</AnchorPane>
@@ -47,7 +47,7 @@
 						glyphName="CHEVRON_LEFT" size="15"/>
 				</graphic>
 				<tooltip>
-					<Tooltip text="Back"/>
+					<Tooltip text="%history.buttons.back.tooltip"/>
 				</tooltip>
 			</Button>
 			<Button fx:id="forwardButton" layoutX="72.0" layoutY="3.0"
@@ -61,7 +61,7 @@
 						glyphName="CHEVRON_RIGHT" size="15"/>
 				</graphic>
 				<tooltip>
-					<Tooltip text="Forward"/>
+					<Tooltip text="%history.buttons.forward.tooltip"/>
 				</tooltip>
 			</Button>
 			<Button fx:id="sortButton" layoutX="104.0" layoutY="2.0"
@@ -75,7 +75,7 @@
 						glyphName="SORT" size="15"/>
 				</graphic>
 				<tooltip>
-					<Tooltip text="Sort"/>
+					<Tooltip text="%history.buttons.reverse.tooltip"/>
 				</tooltip>
 			</Button>
 			<ToggleButton fx:id="disabledOpsToggle" layoutX="130.0"
@@ -97,17 +97,17 @@
 				AnchorPane.topAnchor="0.0">
 				<items>
 					<MenuItem fx:id="oneRandomEvent" mnemonicParsing="false"
-						onAction="#random" text="Execute 1 Event"/>
+						onAction="#random" text="%operations.random.one"/>
 					<MenuItem fx:id="fiveRandomEvents" mnemonicParsing="false"
-						onAction="#random" text="Execute 5 Events"/>
+						onAction="#random" text="%operations.random.five"/>
 					<MenuItem fx:id="tenRandomEvents" mnemonicParsing="false"
-						onAction="#random" text="Execute 10 Events"/>
+						onAction="#random" text="%operations.random.ten"/>
 					<CustomMenuItem fx:id="someRandomEvents"
 						mnemonicParsing="false">
 						<content>
 							<AnchorPane>
 								<TextField fx:id="randomText" onAction="#random"
-									promptText="# of Events"/>
+									promptText="%operations.random.some.prompt"/>
 							</AnchorPane>
 						</content>
 					</CustomMenuItem>
@@ -117,7 +117,7 @@
 						glyphName="RANDOM" size="15"/>
 				</graphic>
 				<tooltip>
-					<Tooltip text="Random Events"/>
+					<Tooltip text="%operations.random.tooltip"/>
 				</tooltip>
 			</MenuButton>
 		</AnchorPane>

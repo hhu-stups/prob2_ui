@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
 
@@ -24,6 +25,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
+import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,6 +33,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -88,32 +91,8 @@ public final class OperationsView extends AnchorPane {
 	}
 	
 	private static final Logger logger = LoggerFactory.getLogger(OperationsView.class);
-	
-	private static String extractPrettyName(final String name) {
-		if ("$setup_constants".equals(name)) {
-			return "SETUP_CONSTANTS";
-		}
-		if ("$initialise_machine".equals(name)) {
-			return "INITIALISATION";
-		}
-		return name;
-	}
-
-	private static String stripString(final String param) {
-		return param.replaceAll("\\{", "").replaceAll("\\}", "");
-	}
-
-	private static int compareParams(final List<String> params1, final List<String> params2) {
-		for (int i = 0; i < params1.size(); i++) {
-			String p1 = stripString(params1.get(i));
-			String p2 = stripString(params2.get(i));
-			if (p1.compareTo(p2) != 0) {
-				return p1.compareTo(p2);
-			}
-
-		}
-		return 0;
-	}
+	// Matches empty string or number
+	private static final Pattern NUMBER_OR_EMPTY_PATTERN = Pattern.compile("^$|^\\d+$");
 
 	@FXML private ListView<Operation> opsListView;
 	@FXML private Button backButton;
@@ -123,6 +102,7 @@ public final class OperationsView extends AnchorPane {
 	@FXML private ToggleButton disabledOpsToggle;
 	@FXML private TextField filterEvents;
 	@FXML private TextField randomText;
+	@FXML private MenuButton randomButton;
 	@FXML private MenuItem oneRandomEvent;
 	@FXML private MenuItem fiveRandomEvents;
 	@FXML private MenuItem tenRandomEvents;
@@ -136,6 +116,34 @@ public final class OperationsView extends AnchorPane {
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
+	
+	private final Comparator<Operation> zToA = (o1, o2) -> {
+		if (o1.name.equals(o2.name)) {
+			return -compareParams(o1.params, o2.params);
+		} else if (o1.name.equalsIgnoreCase(o2.name)) {
+			return -o1.name.compareTo(o2.name);
+		} else {
+			return -o1.name.compareToIgnoreCase(o2.name);
+		}
+	};
+	
+	private final Comparator<Operation> aToZ = (o1, o2) -> {
+		if (o1.name.equals(o2.name)) {
+			return compareParams(o1.params, o2.params);
+		} else if (o1.name.equalsIgnoreCase(o2.name)) {
+			return o1.name.compareTo(o2.name);
+		} else {
+			return o1.name.compareToIgnoreCase(o2.name);
+		}
+	};
+	
+	private final Comparator<Operation> modelOrder = (o1, o2) -> {
+		if (o1.name.equals(o2.name)) {
+			return compareParams(o1.params, o2.params);
+		} else {
+			return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
+		}
+	};
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final FXMLLoader loader) {
@@ -165,7 +173,15 @@ public final class OperationsView extends AnchorPane {
 
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
+		randomButton.disableProperty().bind(currentTrace.existsProperty().not());
+		
+		randomText.textProperty().addListener((observable, from, to) -> {
+			if (!NUMBER_OR_EMPTY_PATTERN.matcher(to).matches() && NUMBER_OR_EMPTY_PATTERN.matcher(from).matches()) {
+				((StringProperty)observable).set(from);
+			}
+		});
 
+		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
 	}
 
@@ -211,6 +227,32 @@ public final class OperationsView extends AnchorPane {
 		doSort();
 
 		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
+	}
+	
+	private static String extractPrettyName(final String name) {
+		if ("$setup_constants".equals(name)) {
+			return "SETUP_CONSTANTS";
+		}
+		if ("$initialise_machine".equals(name)) {
+			return "INITIALISATION";
+		}
+		return name;
+	}
+	
+	private static String stripString(final String param) {
+		return param.replaceAll("\\{", "").replaceAll("\\}", "");
+	}
+	
+	private static int compareParams(final List<String> params1, final List<String> params2) {
+		for (int i = 0; i < params1.size(); i++) {
+			String p1 = stripString(params1.get(i));
+			String p2 = stripString(params2.get(i));
+			if (p1.compareTo(p2) != 0) {
+				return p1.compareTo(p2);
+			}
+			
+		}
+		return 0;
 	}
 
 	@FXML
@@ -263,33 +305,15 @@ public final class OperationsView extends AnchorPane {
 		final Comparator<Operation> comparator;
 		switch (sortMode) {
 		case MODEL_ORDER:
-			comparator = (o1, o2) -> {
-				if (o1.name.equals(o2.name)) {
-					return compareParams(o1.params, o2.params);
-				} else {
-					return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
-				}
-			};
+			comparator = modelOrder;
 			break;
 
 		case A_TO_Z:
-			comparator = (o1, o2) -> {
-				if (o1.name.equals(o2.name)) {
-					return compareParams(o1.params, o2.params);
-				} else {
-					return o1.name.compareTo(o2.name);
-				}
-			};
+			comparator = aToZ;
 			break;
 
 		case Z_TO_A:
-			comparator = (o1, o2) -> {
-				if (o1.name.equals(o2.name)) {
-					return -compareParams(o1.params, o2.params);
-				} else {
-					return -o1.name.compareTo(o2.name);
-				}
-			};
+			comparator = zToA;
 			break;
 
 		default:
@@ -333,14 +357,10 @@ public final class OperationsView extends AnchorPane {
 	public void random(ActionEvent event) {
 		if (currentTrace.exists()) {
 			if (event.getSource().equals(randomText)) {
-				// FIXME We should not just throw an exception! I think it is
-				// possible to add a validator function
-				try {
-					int steps = Integer.parseInt(randomText.getText());
-					currentTrace.set(currentTrace.get().randomAnimation(steps));
-				} catch (NumberFormatException e) {
-					logger.error("invalid number", e);
+				if (randomText.getText().isEmpty()) {
+					return;
 				}
+				currentTrace.set(currentTrace.get().randomAnimation(Integer.parseInt(randomText.getText())));
 			} else if (event.getSource().equals(oneRandomEvent)) {
 				currentTrace.set(currentTrace.get().randomAnimation(1));
 			} else if (event.getSource().equals(fiveRandomEvents)) {
@@ -359,19 +379,22 @@ public final class OperationsView extends AnchorPane {
 		if (mainComponent instanceof Machine) {
 			for (BEvent e : mainComponent.getChildrenOfType(BEvent.class)) {
 				opNames.add(e.getName());
-
-				List<String> paramList = new ArrayList<>();
-				if (e instanceof Event) {
-					for (EventParameter eParam : ((Event) e).getParameters()) {
-						paramList.add(eParam.getName());
-					}
-				} else if (e instanceof de.prob.model.classicalb.Operation) {
-					paramList.addAll(((de.prob.model.classicalb.Operation) e).getParameters());
-				}
-				opToParams.put(e.getName(), paramList);
+				opToParams.put(e.getName(), getParams(e));
 			}
 		}
 		
 		
+	}
+
+	private List<String> getParams(BEvent e) {
+		List<String> paramList = new ArrayList<>();
+		if (e instanceof Event) {
+			for (EventParameter eParam : ((Event) e).getParameters()) {
+				paramList.add(eParam.getName());
+			}
+		} else if (e instanceof de.prob.model.classicalb.Operation) {
+			paramList.addAll(((de.prob.model.classicalb.Operation) e).getParameters());
+		}
+		return paramList;
 	}
 }
