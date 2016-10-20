@@ -59,17 +59,17 @@ public class GroovyCodeCompletion extends Popup {
 	
 	public void activate(GroovyConsole console, String currentLine, TriggerAction action) {
 		this.parent = console;
-		String currentPrefix = currentLine + ".";
-		if(action == TriggerAction.TRIGGER) {
-			currentPrefix = handleActivationByTriggering(currentLine);
+		if(action == TriggerAction.POINT) {
+			currentLine = currentLine + ".";
 		}
+		String currentPrefix = handleActivation(currentLine);
 		completionHandler.handleMethodsFromObjects(currentPrefix, currentSuggestion, action, parent, engine);
 		completionHandler.handleStaticClasses(currentPrefix, currentSuggestion, action, parent);
 		completionHandler.handleObjects(currentSuggestion, action, engine);
 		showPopup(console);
 	}
 	
-	private String handleActivationByTriggering(String currentLine) {
+	private String handleActivation(String currentLine) {
 		String currentPrefix;
 		String newCurrentLine = currentLine.replaceAll("\\s","");
 		int indexOfPoint = newCurrentLine.lastIndexOf('.');
@@ -85,7 +85,7 @@ public class GroovyCodeCompletion extends Popup {
 			int index = Math.max(-1, indexOfSemicolon);
 			currentSuggestion = newCurrentLine.substring(index + 1, newCurrentLine.length());
 			charCounterInSuggestion = currentSuggestion.length();
-			currentPosInSuggestion = charCounterInSuggestion;
+			currentPosInSuggestion = 0;
 			currentPrefix = currentSuggestion;
 		}
 		return currentPrefix;
