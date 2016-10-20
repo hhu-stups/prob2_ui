@@ -25,7 +25,6 @@ public final class GroovyConsoleStage extends Stage {
 	@Inject
 	private GroovyConsoleStage(FXMLLoader loader, CurrentStage currentStage, GroovyInterpreter interpreter) {
 		this.interpreter = interpreter;
-		
 		try {
 			loader.setLocation(getClass().getResource("groovy_console_stage.fxml"));
 			loader.setRoot(this);
@@ -34,7 +33,6 @@ public final class GroovyConsoleStage extends Stage {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		
 		currentStage.register(this);
 	}
 	

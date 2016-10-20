@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
 import de.prob2.ui.consoles.ConsoleInstruction;
+import de.prob2.ui.consoles.Executable;
 import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;
 import de.prob2.ui.consoles.groovy.codecompletion.TriggerAction;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
@@ -16,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.codehaus.groovy.GroovyBugError;
 
-public class GroovyInterpreter {
+public class GroovyInterpreter implements Executable<ExecResult> {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
 	private final ScriptEngine engine;
 	private final GroovyCodeCompletion codeCompletion;

@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 public final class BConsoleStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(BConsoleStage.class);
 
-
 	@FXML
 	private BConsole bConsole;
 	
@@ -36,7 +35,6 @@ public final class BConsoleStage extends Stage {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		
 		currentStage.register(this);
 	}
 	

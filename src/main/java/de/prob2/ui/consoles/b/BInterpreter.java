@@ -18,9 +18,10 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.consoles.ConsoleInstruction;
+import de.prob2.ui.consoles.Executable;
 
 
-public class BInterpreter implements IAnimationChangeListener {
+public class BInterpreter implements IAnimationChangeListener, Executable<String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(BInterpreter.class);
 	private final StateSpace defaultSS;
@@ -39,7 +40,7 @@ public class BInterpreter implements IAnimationChangeListener {
 		animations.registerAnimationChangeListener(this);
 	}
 
-	public String eval(final ConsoleInstruction instruction) {
+	public String exec(final ConsoleInstruction instruction) {
 		String line = instruction.getInstruction();
 		String res = "";
 		try {
