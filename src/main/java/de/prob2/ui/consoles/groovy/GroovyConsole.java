@@ -74,7 +74,8 @@ public class GroovyConsole extends Console {
 		this.setOnDragDropped(e-> {
             Dragboard dragbord = e.getDragboard();
             boolean success = false;
-            if (dragbord.hasFiles()) {
+            int lastPosOfEnter = this.getText().lastIndexOf("\n");
+            if (dragbord.hasFiles() && this.getCaretPosition() >= lastPosOfEnter + 3) {
                 success = true;
                 String path = null;
                 for (File file : dragbord.getFiles()) {
