@@ -143,11 +143,18 @@
 .list-cell:odd {
 	-fx-background: white;
 }
+.list-cell:focused:odd {
+	-fx-background: -prob-aqua;
+}
 .list-cell:empty:hover {
 	-fx-background-color: white;
 }
 .list-cell:hover {
 	-fx-background-color: -prob-grey-20;
+}
+.popup .list-view {
+	-fx-border-color: -prob-grey;
+	-fx-border-width: 0.02em 0.02em 0.02em 0.2em;
 }
 
 /************************************************************************************
@@ -305,7 +312,7 @@
 }
 
 /************************************************************************************
- * TextArea																	*
+ * TextArea																			*
  ************************************************************************************/
 .text-area {
 	-fx-background-color: -prob-grey-20;
@@ -518,6 +525,12 @@
 
 .changed {
 	-fx-background-color: -prob-grey-20;
+}
+.changed:focused {
+	-fx-border-color: -prob-aqua;
+}
+.changed:focused .tree-table-cell {
+	-fx-text-fill: black;
 }
 
 /* ================ MODELCHECKING VIEW =============== */
