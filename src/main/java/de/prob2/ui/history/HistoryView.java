@@ -9,8 +9,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
+import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
@@ -84,9 +87,9 @@ public final class HistoryView extends AnchorPane {
 	@FXML
 	public void initialize() {
 		this.setMinWidth(100);
-		currentTrace.addListener((observable, from, to) -> {
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			lvHistory.getItems().clear();
-
+			
 			if (to != null) {
 				int currentPos = to.getCurrent().getIndex();
 				addItems(lvHistory,currentPos);
@@ -96,11 +99,13 @@ public final class HistoryView extends AnchorPane {
 					lvHistory.getItems().add(new HistoryItem(transitionList.get(i), status));
 				}
 			}
-
+			
 			if (tbReverse.isSelected()) {
 				Collections.reverse(lvHistory.getItems());
 			}
-		});
+		};
+		traceChangeListener.changed(currentTrace, null, currentTrace.get());
+		currentTrace.addListener(traceChangeListener);
 
 		btBack.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		btForward.disableProperty().bind(currentTrace.canGoForwardProperty().not());

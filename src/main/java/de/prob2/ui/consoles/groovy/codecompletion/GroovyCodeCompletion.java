@@ -22,25 +22,25 @@ import javafx.stage.Popup;
 public class GroovyCodeCompletion extends Popup {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyCodeCompletion.class);
 	
-	@FXML
-	private ListView<GroovyAbstractItem> lvSuggestions;
+	@FXML private ListView<GroovyAbstractItem> lvSuggestions;
 	
 	private final ObservableList<GroovyAbstractItem> suggestions;
-	
 	private ScriptEngine engine;
-		
 	private GroovyConsole parent;
-		
 	private String currentSuggestion;
-	
 	private int currentPosInSuggestion;
-	
 	private int charCounterInSuggestion;
-	
 	private final GroovyCodeCompletionHandler completionHandler;
 	
-	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UR_UNINIT_READ", justification = "Field values are injected by FXMLLoader")
 	public GroovyCodeCompletion(FXMLLoader loader, ScriptEngine engine) {
+		this.engine = engine;
+		this.parent = null;
+		this.currentSuggestion = "";
+		this.currentPosInSuggestion = 0;
+		this.charCounterInSuggestion = 0;
+		this.suggestions = FXCollections.observableArrayList();
+		this.completionHandler = new GroovyCodeCompletionHandler(suggestions);
+		
 		loader.setLocation(getClass().getResource("groovy_codecompletion_popup.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
@@ -49,17 +49,14 @@ public class GroovyCodeCompletion extends Popup {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		this.engine = engine;
-		this.parent = null;
-		this.currentSuggestion = "";
-		this.currentPosInSuggestion = 0;
-		this.charCounterInSuggestion = 0;
-		suggestions = FXCollections.observableArrayList();
+	}
+	
+	@FXML
+	public void initialize() {
 		lvSuggestions.setItems(suggestions);
-		this.completionHandler = new GroovyCodeCompletionHandler(suggestions);
 		setListeners();
 	}
-		
+	
 	public void activate(GroovyConsole console, String currentLine, TriggerAction action) {
 		this.parent = console;
 		String currentPrefix = currentLine;

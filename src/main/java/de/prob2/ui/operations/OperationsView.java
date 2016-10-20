@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
 
@@ -24,6 +25,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
+import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,6 +33,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -88,6 +91,8 @@ public final class OperationsView extends AnchorPane {
 	}
 	
 	private static final Logger logger = LoggerFactory.getLogger(OperationsView.class);
+	// Matches empty string or number
+	private static final Pattern NUMBER_OR_EMPTY_PATTERN = Pattern.compile("^$|^\\d+$");
 
 	@FXML private ListView<Operation> opsListView;
 	@FXML private Button backButton;
@@ -97,6 +102,7 @@ public final class OperationsView extends AnchorPane {
 	@FXML private ToggleButton disabledOpsToggle;
 	@FXML private TextField filterEvents;
 	@FXML private TextField randomText;
+	@FXML private MenuButton randomButton;
 	@FXML private MenuItem oneRandomEvent;
 	@FXML private MenuItem fiveRandomEvents;
 	@FXML private MenuItem tenRandomEvents;
@@ -167,7 +173,15 @@ public final class OperationsView extends AnchorPane {
 
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
+		randomButton.disableProperty().bind(currentTrace.existsProperty().not());
+		
+		randomText.textProperty().addListener((observable, from, to) -> {
+			if (!NUMBER_OR_EMPTY_PATTERN.matcher(to).matches() && NUMBER_OR_EMPTY_PATTERN.matcher(from).matches()) {
+				((StringProperty)observable).set(from);
+			}
+		});
 
+		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
 	}
 
@@ -343,14 +357,10 @@ public final class OperationsView extends AnchorPane {
 	public void random(ActionEvent event) {
 		if (currentTrace.exists()) {
 			if (event.getSource().equals(randomText)) {
-				// FIXME We should not just throw an exception! I think it is
-				// possible to add a validator function
-				try {
-					int steps = Integer.parseInt(randomText.getText());
-					currentTrace.set(currentTrace.get().randomAnimation(steps));
-				} catch (NumberFormatException e) {
-					logger.error("invalid number", e);
+				if (randomText.getText().isEmpty()) {
+					return;
 				}
+				currentTrace.set(currentTrace.get().randomAnimation(Integer.parseInt(randomText.getText())));
 			} else if (event.getSource().equals(oneRandomEvent)) {
 				currentTrace.set(currentTrace.get().randomAnimation(1));
 			} else if (event.getSource().equals(fiveRandomEvents)) {

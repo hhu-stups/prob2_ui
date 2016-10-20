@@ -33,7 +33,7 @@ public class BInterpreter implements IAnimationChangeListener {
 		try {
 			s = bfactory.create("MACHINE Empty END").load();
 		} catch (ModelTranslationError e) {
-			throw new RuntimeException("loading a model into ProB failed!");
+			logger.error("loading a model into ProB failed!", e);
 		}
 		defaultSS = s;
 		animations.registerAnimationChangeListener(this);
@@ -53,9 +53,8 @@ public class BInterpreter implements IAnimationChangeListener {
 				res = result.toString();
 			}
 		} catch (EvaluationException e) {
-			res = "Not correct B syntax! ";
-			logger.debug(res);
-			return res;
+			logger.info("B evaluation failed", e);
+			return "Invalid syntax: " + e.getMessage();
 		}
 		return res;
 	}
@@ -77,7 +76,6 @@ public class BInterpreter implements IAnimationChangeListener {
 			if (currentTrace == null) {
 				modelName = null;
 				notifyModelChange(modelName);
-				this.currentTrace = currentTrace;
 			} else if (currentTrace.getModel().getFormalismType() == FormalismType.B) {
 				// ignore models that are not B models
 				String modelName = currentTrace.getStateSpace().getMainComponent().toString();
@@ -85,8 +83,8 @@ public class BInterpreter implements IAnimationChangeListener {
 					this.modelName = modelName;
 					notifyModelChange(this.modelName);
 				}
-				this.currentTrace = currentTrace;
 			}
+			this.currentTrace = currentTrace;
 		}
 	}
 

@@ -3,16 +3,17 @@ package de.prob2.ui.stats;
 import java.io.IOException;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.prolog.term.IntegerPrologTerm;
 import de.prob.prolog.term.ListPrologTerm;
+import de.prob.statespace.Trace;
+
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -21,18 +22,16 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 //@Singleton
 public class StatsView extends ScrollPane {
-	@FXML
-	private Label totalTransitions;
-	@FXML
-	private GridPane nodeStats;
-	@FXML
-	private GridPane transStats;
-	@FXML
-	private VBox statsBox;
-	@FXML
-	private Label noStatsLabel;
+	@FXML private Label totalTransitions;
+	@FXML private GridPane nodeStats;
+	@FXML private GridPane transStats;
+	@FXML private VBox statsBox;
+	@FXML private Label noStatsLabel;
 
 	private final CurrentTrace currentTrace;
 	private static final Logger logger = LoggerFactory.getLogger(StatsView.class);
@@ -53,22 +52,18 @@ public class StatsView extends ScrollPane {
 
 	@FXML
 	public void initialize() {
-		this.currentTrace.addListener((observable, from, to) -> {
-			logger.trace("Trace changed!");
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
 			if (currentTrace.exists()) {
-				logger.trace("Trace exists, asking for coverage data");
 				this.currentTrace.getStateSpace().execute(cmd);
-				logger.trace("Got coverage data");
 				update(cmd.getResult());
-				logger.trace("Updated coverage data");
 			} else {
-				logger.trace("Trace doesn't exist, using dummy coverage data instead");
 				update(cmd.new ComputeCoverageResult(new IntegerPrologTerm(0), new IntegerPrologTerm(0),
-						new ListPrologTerm(), new ListPrologTerm(), new ListPrologTerm()));
+					new ListPrologTerm(), new ListPrologTerm(), new ListPrologTerm()));
 			}
-		});
-		statsBox.setVisible(false);
+		};
+		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
+		this.currentTrace.addListener(traceChangeListener);
 	}
 
 	public void update(ComputeCoverageCommand.ComputeCoverageResult result) {

@@ -18,10 +18,12 @@ import org.slf4j.LoggerFactory;
 public final class BConsoleStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(BConsoleStage.class);
 
+
 	@FXML
 	private BConsole bConsole;
 	
 	private final BInterpreter interpreter;
+
 
 	@Inject
 	private BConsoleStage(FXMLLoader loader, CurrentStage currentStage, BInterpreter interpreter) {
@@ -42,5 +44,5 @@ public final class BConsoleStage extends Stage {
 	public void initialize() {
 		bConsole.setInterpreter(interpreter);
 	}
-	
+
 }

@@ -1,10 +1,12 @@
 package de.prob2.ui.consoles;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import de.prob2.ui.consoles.groovy.InstructionOption;
+
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
@@ -13,11 +15,11 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
 public abstract class Console extends TextArea {
+	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS);
 	
 	protected List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
-	protected static final KeyCode[] REST = {KeyCode.ESCAPE,KeyCode.SCROLL_LOCK,KeyCode.PAUSE,KeyCode.NUM_LOCK,KeyCode.INSERT,KeyCode.CONTEXT_MENU,KeyCode.CAPS};
 	protected int posInList = -1;
 
 	public Console() {
@@ -226,7 +228,7 @@ public abstract class Console extends TextArea {
 	
 	
 	private void handleRest(KeyEvent e) {
-		if(Arrays.asList(REST).contains(e.getCode())) {
+		if(REST.contains(e.getCode())) {
 			e.consume();
 		}
 	}
