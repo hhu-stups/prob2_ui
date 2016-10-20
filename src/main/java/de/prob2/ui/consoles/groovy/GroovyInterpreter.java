@@ -6,6 +6,7 @@ import javax.script.ScriptException;
 import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
+import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;
 import de.prob2.ui.consoles.groovy.codecompletion.TriggerAction;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
@@ -28,7 +29,7 @@ public class GroovyInterpreter {
 		this.codeCompletion = new GroovyCodeCompletion(loader, engine);
 	}
 	
-	public ExecResult exec(Instruction instruction) {
+	public ExecResult exec(final ConsoleInstruction instruction) {
 		logger.trace("Exec");
 		
 		if ("inspect".equals(instruction.getInstruction())) {

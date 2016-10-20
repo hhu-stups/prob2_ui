@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.prob2.ui.consoles.groovy.Instruction;
 import de.prob2.ui.consoles.groovy.InstructionOption;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextArea;
@@ -15,7 +14,7 @@ import javafx.scene.input.MouseEvent;
 
 public abstract class Console extends TextArea {
 	
-	protected List<Instruction> instructions;
+	protected List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
 	protected static final KeyCode[] REST = {KeyCode.ESCAPE,KeyCode.SCROLL_LOCK,KeyCode.PAUSE,KeyCode.NUM_LOCK,KeyCode.INSERT,KeyCode.CONTEXT_MENU,KeyCode.CAPS};
@@ -164,9 +163,9 @@ public abstract class Console extends TextArea {
 		e.consume();
 		if(!getCurrentLine().isEmpty()) {
 			if(!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != InstructionOption.ENTER) {
-				instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.ENTER));
+				instructions.set(instructions.size() - 1, new ConsoleInstruction(getCurrentLine(), InstructionOption.ENTER));
 			} else {
-				instructions.add(new Instruction(getCurrentLine(), InstructionOption.ENTER));
+				instructions.add(new ConsoleInstruction(getCurrentLine(), InstructionOption.ENTER));
 			}
 			posInList = instructions.size() - 1;
 		}
@@ -194,9 +193,9 @@ public abstract class Console extends TextArea {
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
 			if(!lastinstruction.equals(getCurrentLine()) && posInList == instructions.size() - 1) {
 				if(instructions.get(posInList).getOption() == InstructionOption.UP) {
-					instructions.set(instructions.size() - 1, new Instruction(getCurrentLine(), InstructionOption.UP));
+					instructions.set(instructions.size() - 1, new ConsoleInstruction(getCurrentLine(), InstructionOption.UP));
 				} else {
-					instructions.add(new Instruction(getCurrentLine(), InstructionOption.UP));
+					instructions.add(new ConsoleInstruction(getCurrentLine(), InstructionOption.UP));
 					setTextAfterArrowKey();
 					return true;
 				}

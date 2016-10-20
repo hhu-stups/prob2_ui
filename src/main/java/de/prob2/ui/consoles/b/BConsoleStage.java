@@ -22,7 +22,7 @@ public final class BConsoleStage extends Stage {
 	private BConsole bConsole;
 
 	@Inject
-	private BConsoleStage(FXMLLoader loader, CurrentStage currentStage) {
+	private BConsoleStage(FXMLLoader loader, CurrentStage currentStage, BInterpreter interpreter) {
 		try {
 			loader.setLocation(getClass().getResource("b_console_stage.fxml"));
 			loader.setRoot(this);
@@ -31,6 +31,7 @@ public final class BConsoleStage extends Stage {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
+		bConsole.setInterpreter(interpreter);
 		currentStage.register(this);
 	}
 }
