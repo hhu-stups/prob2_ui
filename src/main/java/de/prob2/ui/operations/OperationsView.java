@@ -181,6 +181,7 @@ public final class OperationsView extends AnchorPane {
 			}
 		});
 
+		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
 	}
 

@@ -22,6 +22,7 @@ import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -279,12 +280,14 @@ public final class StatesView extends AnchorPane {
 					}
 				});
 
-		this.currentTrace.addListener((observable, from, to) -> {
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			if (to == null) {
 				this.tvRootItem.getChildren().clear();
 			} else {
 				this.updateRoot(to);
 			}
-		});
+		};
+		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
+		this.currentTrace.addListener(traceChangeListener);
 	}
 }

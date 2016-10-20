@@ -33,19 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //@Singleton
-public class AnimationsView extends AnchorPane implements IAnimationChangeListener {
+public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
 	private static final Logger logger = LoggerFactory.getLogger(AnimationsView.class);
 
-	@FXML
-	private TableView<Animation> animationsTable;
-	@FXML
-	private TableColumn<Animation, String> machine;
-	@FXML
-	private TableColumn<Animation, String> lastop;
-	@FXML
-	private TableColumn<Animation, String> tracelength;
-	@FXML
-	private TableColumn<Animation, String> time;
+	@FXML private TableView<Animation> animationsTable;
+	@FXML private TableColumn<Animation, String> machine;
+	@FXML private TableColumn<Animation, String> lastop;
+	@FXML private TableColumn<Animation, String> tracelength;
+	@FXML private TableColumn<Animation, String> time;
 
 	private final AnimationSelector animations;
 	private int currentIndex;
@@ -87,6 +82,7 @@ public class AnimationsView extends AnchorPane implements IAnimationChangeListen
 			row.setOnMouseClicked(event -> rowClicked(row, event, contextMenu));
 			return row;
 		});
+		this.traceChange(animations.getCurrentTrace(), true);
 	}
 
 	private void removeAllTraces() {
