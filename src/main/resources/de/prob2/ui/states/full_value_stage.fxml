@@ -3,6 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.BorderPane?>
@@ -23,8 +25,14 @@
 					<Insets top="30.0" right="0.0" bottom="10.0" left="0.0" />
 				</padding>
 				<center>
-					<TextArea fx:id="textarea" editable="false" wrapText="true"
-						maxWidth="Infinity" maxHeight="Infinity" />
+					<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+						<Tab text="%states.fullValue.tabs.current">
+							<TextArea fx:id="currentValueTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
+						</Tab>
+						<Tab fx:id="previousValueTab" text="%states.fullValue.tabs.previous">
+							<TextArea fx:id="previousValueTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
+						</Tab>
+					</TabPane>
 				</center>
 				<bottom>
 					<HBox spacing="10.0">

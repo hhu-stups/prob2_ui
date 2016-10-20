@@ -10,13 +10,13 @@ import java.util.Objects;
 
 import com.google.inject.Inject;
 
-import de.prob.unicode.UnicodeTranslator;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.FileChooser;
@@ -28,14 +28,17 @@ import org.slf4j.LoggerFactory;
 public class FullValueStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(FullValueStage.class);
 	
-	@FXML private TextArea textarea;
+	@FXML private TabPane tabPane;
+	@FXML private Tab previousValueTab;
+	@FXML private TextArea currentValueTextarea;
+	@FXML private TextArea previousValueTextarea;
 	@FXML private ToggleGroup asciiUnicodeGroup;
 	@FXML private RadioButton asciiRadio;
 	@FXML private RadioButton unicodeRadio;
 	@FXML private Button saveAsButton;
 	
-	private String asciiText;
-	private String unicodeText;
+	private AsciiUnicodeString currentValue;
+	private AsciiUnicodeString previousValue;
 	
 	@Inject
 	public FullValueStage(final FXMLLoader loader) {
@@ -49,35 +52,42 @@ public class FullValueStage extends Stage {
 		}
 	}
 	
-	public String getAsciiText() {
-		return this.asciiText;
+	public AsciiUnicodeString getCurrentValue() {
+		return this.currentValue;
 	}
 	
-	public void setAsciiText(final String asciiText) {
-		Objects.requireNonNull(asciiText);
-		this.asciiText = asciiText;
-		this.unicodeText = UnicodeTranslator.toUnicode(asciiText);
+	public void setCurrentValue(final AsciiUnicodeString currentValue) {
+		Objects.requireNonNull(currentValue);
+		this.currentValue = currentValue;
 		this.updateText();
 	}
 	
-	public String getUnicodeText() {
-		return this.unicodeText;
+	public String currentValueAsString() {
+		return asciiRadio.isSelected() ? this.getCurrentValue().toAscii() : this.getCurrentValue().toUnicode();
 	}
 	
-	public void setUnicodeText(final String unicodeText) {
-		Objects.requireNonNull(unicodeText);
-		this.unicodeText = unicodeText;
-		this.asciiText = UnicodeTranslator.toAscii(unicodeText);
+	public AsciiUnicodeString getPreviousValue() {
+		return this.previousValue;
+	}
+	
+	public void setPreviousValue(final AsciiUnicodeString previousValue) {
+		Objects.requireNonNull(previousValue);
+		this.previousValue = previousValue;
 		this.updateText();
 	}
 	
-	public String getText() {
-		return asciiRadio.isSelected() ? this.getAsciiText() : this.getUnicodeText();
+	public String previousValueAsString() {
+		return asciiRadio.isSelected() ? this.getPreviousValue().toAscii() : this.getPreviousValue().toUnicode();
 	}
 	
 	@FXML
 	private void updateText() {
-		this.textarea.setText(this.getText());
+		if (this.getCurrentValue() != null) {
+			this.currentValueTextarea.setText(this.currentValueAsString());
+		}
+		if (this.getPreviousValue() != null) {
+			this.previousValueTextarea.setText(this.previousValueAsString());
+		}
 	}
 	
 	@FXML
@@ -93,7 +103,13 @@ public class FullValueStage extends Stage {
 		}
 		
 		try (final Writer out = new OutputStreamWriter(new FileOutputStream(selected), Charset.forName("UTF-8"))) {
-			out.write(this.getText());
+			final String value;
+			if (previousValueTab.isSelected()) {
+				value = this.previousValueAsString();
+			} else {
+				value = this.currentValueAsString();
+			}
+			out.write(value);
 		} catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
 			logger.error("Failed to save value to file", e);
 			new Alert(Alert.AlertType.ERROR, "Failed to save file:\n" + e.getMessage()).showAndWait();

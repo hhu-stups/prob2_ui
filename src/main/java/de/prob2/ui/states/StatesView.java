@@ -248,10 +248,17 @@ public final class StatesView extends AnchorPane {
 			showFullValueItem.setOnAction(event -> {
 				final AbstractFormulaElement element = (AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents();
 				final EvalResult value = (EvalResult)this.currentValues.get(element.getFormula());
+				final EvalResult previousValue;
+				if (this.previousValues.get(element.getFormula()) instanceof EvalResult) {
+					previousValue = (EvalResult)this.previousValues.get(element.getFormula());
+				} else {
+					previousValue = null;
+				}
 				final FullValueStage stage = injector.getInstance(FullValueStage.class);
 				injector.getInstance(CurrentStage.class).register(stage);
 				stage.setTitle(element.toString());
-				stage.setAsciiText(value.getValue());
+				stage.setCurrentValue(AsciiUnicodeString.fromAscii(value.getValue()));
+				stage.setPreviousValue(AsciiUnicodeString.fromAscii(previousValue == null ? "(not initialized)" : previousValue.getValue()));
 				stage.show();
 			});
 			
