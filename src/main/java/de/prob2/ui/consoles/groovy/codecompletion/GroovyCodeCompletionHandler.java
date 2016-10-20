@@ -85,8 +85,6 @@ public class GroovyCodeCompletionHandler {
 			currentSuggestions.clear();
 			fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
 			fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
-		}
-		if(action == TriggerAction.TRIGGER) {
 			refresh(currentSuggestion);
 		}
 	}
@@ -156,17 +154,9 @@ public class GroovyCodeCompletionHandler {
 	
 	
 	private String[] getMethodsFromCurrentLine(String currentLine, TriggerAction action, GroovyConsole parent) {
-		String currentInstruction;
-		if(action == TriggerAction.POINT) {
-			currentInstruction = currentLine.substring(0, parent.getCurrentPosInLine());
-			if(parent.getCurrentPosInLine() == 0 || currentInstruction.charAt(parent.getCurrentPosInLine() - 1) == ';') {
-				return new String[]{};
-			}
-		} else {
-			currentInstruction = currentLine;
-			if(!currentInstruction.contains(".")) {
-				return new String[]{};
-			}
+		String currentInstruction = currentLine;
+		if(!currentInstruction.contains(".")) {
+			return new String[]{};
 		}
 		currentInstruction = currentInstruction.replaceAll("\\s","");
 		currentInstruction = currentInstruction.replaceAll("=", ";");

@@ -32,7 +32,7 @@ public class GroovyConsole extends Console {
 	@Override
 	protected void handleInsertChar(KeyEvent e) {
 		if(".".equals(e.getText())) {
-			interpreter.triggerCodeCompletion(this, getCurrentLine(), TriggerAction.POINT);
+			triggerCodeCompletion(TriggerAction.POINT);
 		}
 		super.handleInsertChar(e);
 	}
@@ -49,10 +49,16 @@ public class GroovyConsole extends Console {
 		super.setKeyEvent();
 		this.addEventFilter(KeyEvent.ANY, e -> {
 			if(e.isControlDown() && e.getCode() == KeyCode.SPACE) {
-				int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
-				interpreter.triggerCodeCompletion(this, getCurrentLine().substring(0, caretPosInLine), TriggerAction.TRIGGER);
+				triggerCodeCompletion(TriggerAction.TRIGGER);
 			}
 		});
+	}
+	
+	private void triggerCodeCompletion(TriggerAction action) {
+		if(getCaretPosition() > this.getText().lastIndexOf("\n") + 2) {
+			int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
+			interpreter.triggerCodeCompletion(this, getCurrentLine().substring(0, caretPosInLine), action);
+		}
 	}
 	
 	private void setCodeCompletionEvent() {
