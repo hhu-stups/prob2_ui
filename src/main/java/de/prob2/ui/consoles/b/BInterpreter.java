@@ -79,7 +79,7 @@ public class BInterpreter implements IAnimationChangeListener, Executable<String
 				notifyModelChange(modelName);
 			} else if (currentTrace.getModel().getFormalismType() == FormalismType.B) {
 				// ignore models that are not B models
-				String modelName = currentTrace.getStateSpace().getMainComponent().toString();
+				String modelName = currentTrace.getStateSpace().getMainComponent().toString(); //NOSONAR
 				if (!modelName.equals(this.modelName)) {
 					this.modelName = modelName;
 					notifyModelChange(this.modelName);
@@ -90,7 +90,6 @@ public class BInterpreter implements IAnimationChangeListener, Executable<String
 	}
 
 	public void notifyModelChange(final String name) {
-		//submit(WebUtils.wrap("cmd", "BConsole.modelChange", "modelloaded", name != null, "name", name == null ? "" : name));
 		logger.trace("BConsole.modelChange\n modelloaded");
 		String output = name == null ? "" : name;
 		logger.trace(output);
@@ -99,10 +98,8 @@ public class BInterpreter implements IAnimationChangeListener, Executable<String
 	@Override
 	public void animatorStatus(final boolean busy) {
 		if (busy) {
-			//submit(WebUtils.wrap("cmd", "BConsole.disable"));
 			logger.trace("BConsole.disable");
 		} else {
-			//submit(WebUtils.wrap("cmd", "BConsole.enable"));
 			logger.trace("BConsole.enable");
 		}
 	}

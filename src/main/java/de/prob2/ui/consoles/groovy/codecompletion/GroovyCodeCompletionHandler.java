@@ -153,7 +153,7 @@ public class GroovyCodeCompletionHandler {
 	}
 	
 	
-	private String[] getMethodsFromCurrentLine(String currentLine, TriggerAction action, GroovyConsole parent) {
+	private String[] getMethodsFromCurrentLine(String currentLine, GroovyConsole parent) {
 		String currentInstruction = currentLine;
 		if(!currentInstruction.contains(".")) {
 			return new String[]{};
