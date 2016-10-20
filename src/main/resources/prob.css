@@ -104,7 +104,8 @@
 	-fx-background-radius: 5.0;
 }
 .combo-box-popup > .list-view {
-	-fx-background-color: -prob-grey-75;  -fx-background-radius: 3.0 3.0 3.0 3.0;
+	-fx-background-color: -prob-grey-75;  
+	-fx-background-radius: 3.0 3.0 3.0 3.0;
 }
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
 	-fx-background: transparent;
@@ -304,6 +305,13 @@
 }
 
 /************************************************************************************
+ * TextArea																	*
+ ************************************************************************************/
+.text-area {
+	-fx-background-color: -prob-grey-20;
+}
+
+/************************************************************************************
  * TextField																		*
  ************************************************************************************/
 .text-field {
@@ -343,12 +351,12 @@
  * TableView, TreeTableView															*
  ************************************************************************************/
 .table-view {
-	-fx-padding: -1;
+	-fx-padding: -1.0;
 	-fx-table-cell-border-color: transparent;
 	-fx-accent: transparent;
 }
 .tree-table-view {
-	-fx-padding: -1;
+	-fx-padding: -1.0;
 	-fx-border-width: 0.0;
 }
 .table-view .column-header,
@@ -357,7 +365,7 @@
 .tree-table-view .filler {
 	-fx-background-color: transparent;
 	-fx-border-color: -prob-grey;
-	-fx-border-width: 0 1 0 1;
+	-fx-border-width: 0.0 1.0 0.0 1.0;
 }
 .with-border .column-header {
 	/*-fx-border-width: 0.0 0.0 2.0 0.2;*/
@@ -428,7 +436,7 @@
 }
 .dialog .text-area {
 	-fx-border-color: -prob-grey;
-	-fx-border-width: 0.2em 0 0 0;
+	-fx-border-width: 0.2em 0.0 0.0 0.0;
 }
 
 /* ====================== DARK ======================= */
@@ -509,7 +517,7 @@
 /* =================== STATES VIEW =================== */
 
 .changed {
-	-fx-background-color: #cccccc;
+	-fx-background-color: -prob-grey-20;
 }
 
 /* ================ MODELCHECKING VIEW =============== */
