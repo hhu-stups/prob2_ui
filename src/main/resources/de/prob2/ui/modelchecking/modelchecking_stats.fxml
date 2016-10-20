@@ -13,7 +13,7 @@
 		<AnchorPane fx:id="resultBackground" styleClass="mcheckNoCheck"
 			stylesheets="@/prob.css">
 			<Text fx:id="resultText" fill="#8a8a8a" strokeType="OUTSIDE"
-				strokeWidth="0.0" text="No Model Checking Job done."
+				strokeWidth="0.0" text="%modelchecking.stats.placeholder"
 				AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0"
 				AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
 				<font>
@@ -26,7 +26,7 @@
 				AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
 				AnchorPane.topAnchor="5.0" AnchorPane.bottomAnchor="5.0">
 				<HBox prefHeight="12.0" spacing="7.0">
-					<Label text="Time Elapsed:">
+					<Label text="%modelchecking.stats.elapsedTime">
 						<font>
 							<Font name="System Bold" />
 						</font>
@@ -35,7 +35,7 @@
 				</HBox>
 				<VBox spacing="3.0">
 					<HBox prefHeight="12.0" spacing="7.0">
-						<Label text="Processed Nodes:">
+						<Label text="%modelchecking.stats.processedNodes">
 							<font>
 								<Font name="System Bold" />
 							</font>
@@ -43,7 +43,7 @@
 						<Label fx:id="processedNodes" />
 					</HBox>
 					<HBox prefHeight="12.0" spacing="7.0">
-						<Label text="Total Nodes:">
+						<Label text="%modelchecking.stats.totalNodes">
 							<font>
 								<Font name="System Bold" />
 							</font>
@@ -51,7 +51,7 @@
 						<Label fx:id="totalNodes" />
 					</HBox>
 					<HBox prefHeight="12.0" spacing="7.0">
-						<Label text="Total Transitions:">
+						<Label text="%modelchecking.stats.totalTransitions">
 							<font>
 								<Font name="System bold" />
 							</font>

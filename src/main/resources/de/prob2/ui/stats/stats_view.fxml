@@ -14,7 +14,7 @@
 <fx:root type="ScrollPane" fitToHeight="true" fitToWidth="true"
 	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.65">
 	<AnchorPane>
-		<Label text="No model loaded" AnchorPane.bottomAnchor="0.0"
+		<Label text="%common.noModelLoaded" AnchorPane.bottomAnchor="0.0"
 			AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"
 			AnchorPane.rightAnchor="0.0" alignment="center" fx:id="noStatsLabel" />
 		<VBox spacing="13.0" AnchorPane.bottomAnchor="10.0"
@@ -22,7 +22,7 @@
 			AnchorPane.topAnchor="10.0" fx:id="statsBox">
 			<VBox spacing="3.0">
 				<HBox prefHeight="12.0" spacing="7.0">
-					<Label text="Total Transitions:">
+					<Label text="%stats.totalTransitions">
 						<font>
 							<Font name="System Bold" size="14.0"/>
 						</font>
@@ -38,7 +38,7 @@
 				</HBox>
 			</VBox>
 			<AnchorPane>
-				<Label alignment="CENTER" prefHeight="16.0" text="Node Stats"
+				<Label alignment="CENTER" prefHeight="16.0" text="%stats.nodeStats"
 					AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 					AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
 					<font>
@@ -60,7 +60,7 @@
 					</rowConstraints>
 					<AnchorPane
 						style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
-						<Label text="Status" AnchorPane.leftAnchor="10.0">
+						<Label text="%stats.nodeStats.status" AnchorPane.leftAnchor="10.0">
 							<font>
 								<Font name="System Bold" size="14.0" />
 							</font>
@@ -69,7 +69,7 @@
 					<AnchorPane
 						style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
 						GridPane.columnIndex="1">
-						<Label text="# of Nodes" AnchorPane.rightAnchor="10.0">
+						<Label text="%stats.nodeStats.numberOfNodes" AnchorPane.rightAnchor="10.0">
 							<font>
 								<Font name="System Bold" size="14.0" />
 							</font>
@@ -86,7 +86,7 @@
 				</GridPane>
 			</VBox>
 			<AnchorPane>
-				<Label alignment="CENTER" prefHeight="16.0" text="Transitions Stats"
+				<Label alignment="CENTER" prefHeight="16.0" text="%stats.transitionStats"
 					AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 					AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
 					<font>
@@ -107,7 +107,7 @@
 					</rowConstraints>
 					<AnchorPane prefHeight="18.0"
 						style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
-						<Label text="Transition Name" AnchorPane.leftAnchor="10.0">
+						<Label text="%stats.transitionStats.name" AnchorPane.leftAnchor="10.0">
 							<font>
 								<Font name="System Bold" size="14.0" />
 							</font>
@@ -116,7 +116,7 @@
 					<AnchorPane prefHeight="18.0"
 						style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
 						GridPane.columnIndex="1">
-						<Label text="# of Transitions" AnchorPane.rightAnchor="10.0">
+						<Label text="%stats.transitionStats.numberOfTransitions" AnchorPane.rightAnchor="10.0">
 							<font>
 								<Font name="System Bold" size="14.0" />
 							</font>

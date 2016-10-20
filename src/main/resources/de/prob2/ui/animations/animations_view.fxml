@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
-
 <fx:root minHeight="70.0" minWidth="200.0" stylesheets="@/prob.css"
 	type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
 	<TableView fx:id="animationsTable" AnchorPane.bottomAnchor="1.0"
@@ -13,19 +11,19 @@
 		AnchorPane.topAnchor="0.0">
 		<columns>
 			<TableColumn fx:id="machine" minWidth="117.0" prefWidth="117.0"
-				text="Machine/Context" />
+				text="%animations.columns.machine" />
 			<TableColumn fx:id="lastop" minWidth="102.0" prefWidth="102.0"
-				text="Last Operation" />
+				text="%animations.columns.lastop" />
 			<TableColumn fx:id="tracelength" minWidth="88.0"
-				prefWidth="88.0" styleClass="center" text="Trace length" />
+				prefWidth="88.0" styleClass="center" text="%animations.columns.tracelength" />
 			<TableColumn fx:id="time" minWidth="65.0" prefWidth="65.0"
-				text="Time" />
+				text="%animations.columns.time" />
 		</columns>
 		<columnResizePolicy>
 			<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 		</columnResizePolicy>
 		<placeholder>
-			<Label text="No model loaded" />
+			<Label text="%common.noModelLoaded" />
 		</placeholder>
 	</TableView>
 </fx:root>
