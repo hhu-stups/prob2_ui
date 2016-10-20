@@ -77,7 +77,6 @@ public class BInterpreter implements IAnimationChangeListener {
 			if (currentTrace == null) {
 				modelName = null;
 				notifyModelChange(modelName);
-				this.currentTrace = currentTrace;
 			} else if (currentTrace.getModel().getFormalismType() == FormalismType.B) {
 				// ignore models that are not B models
 				String modelName = currentTrace.getStateSpace().getMainComponent().toString();
@@ -85,8 +84,8 @@ public class BInterpreter implements IAnimationChangeListener {
 					this.modelName = modelName;
 					notifyModelChange(this.modelName);
 				}
-				this.currentTrace = currentTrace;
 			}
+			this.currentTrace = currentTrace;
 		}
 	}
 

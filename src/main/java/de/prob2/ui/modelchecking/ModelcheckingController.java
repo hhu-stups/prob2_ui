@@ -68,6 +68,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private final Injector injector;
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
+	private final CurrentStage currentStage;
 	private final StatsView statsView;
 
 	private ModelChecker checker;
@@ -86,6 +87,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		this.injector = injector;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
+		this.currentStage = currentStage;
 		this.statsView = statsView;
 		
 		final FXMLLoader mainLoader = injector.getInstance(FXMLLoader.class);
@@ -106,7 +108,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		currentStage.register(this.mcheckStage);
 	}
 	
 	// modelchecking_stats_view.fxml
@@ -116,6 +117,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		showStats(new ModelCheckStats(injector.getInstance(FXMLLoader.class), this, statsView));
 		historyNodeList = historyBox.getChildren();
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not());
+		currentStage.register(this.mcheckStage);
 	}
 
 	@FXML
