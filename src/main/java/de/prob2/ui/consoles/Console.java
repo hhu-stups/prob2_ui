@@ -107,6 +107,16 @@ public abstract class Console extends TextArea {
 			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
 				e.consume();
 			}
+			if(e.isControlDown()) {
+				if(e.getCode() == KeyCode.A) {
+					this.positionCaret(this.getCaretPosition() - currentPosInLine);
+					currentPosInLine = 0;
+				} else if(e.getCode() == KeyCode.E) {
+					this.positionCaret(this.getLength());
+					currentPosInLine = charCounterInLine;
+				}
+				e.consume();
+			}
 		});
 		
 		this.setOnKeyPressed(e -> {
