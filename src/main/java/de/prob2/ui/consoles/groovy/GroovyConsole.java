@@ -3,6 +3,8 @@ package de.prob2.ui.consoles.groovy;
 import java.io.File;
 
 import de.prob2.ui.consoles.Console;
+import de.prob2.ui.consoles.ConsoleInstruction;
+import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import javafx.scene.input.Dragboard;
@@ -126,13 +128,18 @@ public class GroovyConsole extends Console {
 	@Override
 	protected void handleEnter(KeyEvent e) {
 		super.handleEnterAbstract(e);
+		ConsoleInstruction instruction = instructions.get(posInList);
+		if(backwardSearchActive) {
+			instruction = new ConsoleInstruction(getCurrentLine(), ConsoleInstructionOption.ENTER);
+			backwardSearchActive = false;
+		}
 		if(getCurrentLine().isEmpty()) {
 			this.appendText("\n null");
 		} else {
-			if("clear".equals(interpreter.exec(instructions.get(posInList)).getConsoleOutput())) {
+			if("clear".equals(interpreter.exec(instruction).getConsoleOutput())) {
 				reset();
 			} else {
-				this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
+				this.appendText("\n" + interpreter.exec(instruction));
 			}
 		}
 		this.appendText("\n >");

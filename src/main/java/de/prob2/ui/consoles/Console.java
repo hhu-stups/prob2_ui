@@ -19,6 +19,8 @@ public abstract class Console extends TextArea {
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
+	protected boolean backwardSearchActive = false;
+	protected String backwardSearchCurrent ="";
 
 	public Console() {
 		this.setContextMenu(new ContextMenu());
@@ -114,6 +116,10 @@ public abstract class Console extends TextArea {
 				} else if(e.getCode() == KeyCode.E) {
 					this.positionCaret(this.getLength());
 					currentPosInLine = charCounterInLine;
+				} else if(e.getCode() == KeyCode.R) {
+					if(backwardSearchActive == false) {
+						backwardSearchActivate();
+					}
 				}
 				e.consume();
 			}
@@ -139,6 +145,24 @@ public abstract class Console extends TextArea {
 		});
 	}
 	
+	protected void backwardSearchActivate() {
+		int posOfEnter = Math.max(this.getText().lastIndexOf("\n"), this.getText().length() - 1);
+		this.setText(this.getText().substring(0, posOfEnter) + "(backward search active): '': " + getCurrentLine());
+		this.positionCaret(this.getText().length());
+		backwardSearchActive = true;
+	}
+	//backwardSearch stays active Insert char, Backspace, Delete, Rest
+	
+	protected String backwardSearchResult() {
+		String result = "";
+		for(int i = instructions.size() - 1; i >= 0; i--) {
+			if(instructions.get(i).getInstruction().contains(backwardSearchCurrent)) {
+				return result;
+			}
+		}
+		return null;
+	}
+	
 	protected void handleInsertChar(KeyEvent e) {
 		if(e.getText().isEmpty() || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
 			if(!(e.getCode() == KeyCode.UNDEFINED || e.getCode() == KeyCode.ALT_GRAPH)) {
@@ -153,7 +177,6 @@ public abstract class Console extends TextArea {
 		if (e.isShortcutDown() || e.isAltDown()) {
 			return;
 		}
-		
 		charCounterInLine++;
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
@@ -282,6 +305,9 @@ public abstract class Console extends TextArea {
 	}
 	
 	public String getCurrentLine() {
+		if(backwardSearchActive) {
+			return backwardSearchCurrent;
+		}
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		return this.getText().substring(posOfEnter + 3, this.getText().length());
 	}
