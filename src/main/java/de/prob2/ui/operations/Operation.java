@@ -40,7 +40,7 @@ public class Operation {
 		StringBuilder sb = new StringBuilder();
 		if (!returnValues.isEmpty()) {
 			sb.append(String.join(", ", returnValues));
-			sb.append(UnicodeTranslator.toUnicode(" <-- "));
+			sb.append(" ← ");
 		}
 		sb.append(name);
 		if (!params.isEmpty()) {
