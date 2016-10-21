@@ -85,7 +85,7 @@ public class GroovyCodeCompletion extends Popup {
 			int index = Math.max(-1, indexOfSemicolon);
 			currentSuggestion = newCurrentLine.substring(index + 1, newCurrentLine.length());
 			charCounterInSuggestion = currentSuggestion.length();
-			currentPosInSuggestion = 0;
+			currentPosInSuggestion = charCounterInSuggestion;
 			currentPrefix = currentSuggestion;
 		}
 		return currentPrefix;
