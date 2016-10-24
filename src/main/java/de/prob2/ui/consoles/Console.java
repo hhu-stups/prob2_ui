@@ -335,6 +335,10 @@ public abstract class Console extends TextArea {
 		boolean needReturn;
 		int maxPosInLine = charCounterInLine;
 		if(backwardSearchActive) {
+			if(e.getCode() == KeyCode.DELETE) {
+				backwardSearchDeactivate();
+				return;
+			}
 			refreshSearch(e);
 			maxPosInLine = charCounterInLine + 2 + backwardSearchResult("").getResult().length();
 		}
