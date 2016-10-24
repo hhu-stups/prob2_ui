@@ -233,14 +233,19 @@ public abstract class Console extends TextArea {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		e.consume();
+		String instruction = getCurrentLine();
+		if(backwardSearchActive) {
+			instruction = getBackwardSearchCurrentResult();
+		}
 		if(!getCurrentLine().isEmpty()) {
 			if(!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
-				instructions.set(instructions.size() - 1, new ConsoleInstruction(getCurrentLine(), ConsoleInstructionOption.ENTER));
+				instructions.set(instructions.size() - 1, new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 			} else {
-				instructions.add(new ConsoleInstruction(getCurrentLine(), ConsoleInstructionOption.ENTER));
+				instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 			}
 			posInList = instructions.size() - 1;
 		}
+		backwardSearchActive = false;
 	}
 	
 	private void handleArrowKeys(KeyEvent e) {
