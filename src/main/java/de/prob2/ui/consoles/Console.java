@@ -20,7 +20,8 @@ public abstract class Console extends TextArea {
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
 	protected boolean backwardSearchActive = false;
-	//protected String backwardSearchCurrent ="";
+	private static final String FOUND = "(backward search) '':";
+	private static final String NOTFOUND = "(failed backward search) '':"; 
 
 	public Console() {
 		this.setContextMenu(new ContextMenu());
@@ -119,6 +120,7 @@ public abstract class Console extends TextArea {
 				if(e.getCode() == KeyCode.A) {
 					this.positionCaret(this.getCaretPosition() - currentPosInLine);
 					currentPosInLine = 0;
+					e.consume();
 				} else if(e.getCode() == KeyCode.E) {
 					this.positionCaret(this.getLength());
 					currentPosInLine = charCounterInLine;
@@ -126,17 +128,18 @@ public abstract class Console extends TextArea {
 					if(backwardSearchActive == false) {
 						backwardSearchActivate();
 					}
+				} else if(e.getCode() == KeyCode.V && backwardSearchActive) {
+					e.consume();
 				}
-				e.consume();
 			}
 		});
 		
 		this.setOnKeyPressed(e -> {
 			if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
-				handleArrowKeys(e);
 				if(backwardSearchActive) {
 					backwardSearchDeactivate();
 				}
+				handleArrowKeys(e);
 				this.setScrollTop(Double.MAX_VALUE);
 			} else if (e.getCode().isNavigationKey()) {
 				if(e.getCode() != KeyCode.LEFT && e.getCode() != KeyCode.RIGHT) {
@@ -156,17 +159,17 @@ public abstract class Console extends TextArea {
 	
 	protected void backwardSearchActivate() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
-		this.setText(this.getText().substring(0, posOfEnter + 1) + "(backward search active) '': " + getCurrentLine());
+		this.setText(this.getText().substring(0, posOfEnter + 1) + FOUND + getCurrentLine());
 		this.positionCaret(this.getText().lastIndexOf("'"));
 		currentPosInLine = 0;
 		charCounterInLine = 0;
 		backwardSearchActive = true;
 	}
-	//backwardSearch stays active Insert char, Backspace, Delete, Rest
+	//backwardSearch stays active Rest
 	
 	protected void backwardSearchDeactivate() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
-		String searchResult = backwardSearchResult();
+		String searchResult = backwardSearchResult("").getResult();
 		this.setText(this.getText().substring(0, posOfEnter + 1) + " >" + searchResult);
 		this.positionCaret(this.getText().length());
 		charCounterInLine = searchResult.length();
@@ -174,14 +177,14 @@ public abstract class Console extends TextArea {
 		backwardSearchActive = false;
 	}
 	
-	protected String backwardSearchResult() {
+	protected BackwardSearchResult backwardSearchResult(String addition) {
 		String result = getBackwardSearchCurrentResult();
 		for(int i = instructions.size() - 1; i >= 0; i--) {
-			if(instructions.get(i).getInstruction().contains(getBackwardSearchCurrent())) {
-				return instructions.get(i).getInstruction();
+			if(instructions.get(i).getInstruction().contains(getBackwardSearchCurrent() + addition)) {
+				return new BackwardSearchResult(instructions.get(i).getInstruction(),true);
 			}
 		}
-		return result;
+		return new BackwardSearchResult(result, false);
 	}
 	
 	public String getBackwardSearchCurrent() {
@@ -191,7 +194,7 @@ public abstract class Console extends TextArea {
 	}
 	
 	public String getBackwardSearchCurrentResult() {
-		int posOfColon = this.getCurrentLine().indexOf(':') + this.getText().lastIndexOf("\n") + 5;
+		int posOfColon = this.getCurrentLine().indexOf(':') + this.getText().lastIndexOf("\n") + 4;
 		String result = this.getText().substring(posOfColon, this.getText().length());
 		return result;
 	}
@@ -214,12 +217,25 @@ public abstract class Console extends TextArea {
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
 		if(backwardSearchActive) {
-			int posOfColon = this.getCurrentLine().indexOf(':') + this.getText().lastIndexOf("\n") + 3;
-			this.insertText(posOfColon - 1, e.getCharacter());
-			this.setText(this.getText().substring(0, posOfColon + 2) + backwardSearchResult());
-			this.positionCaret(posOfColon - 1);
-			e.consume();
+			handleInsertCharInSearch(e);
 		}
+	}
+	
+	protected void handleInsertCharInSearch(KeyEvent e) {
+		String searchPrefix = FOUND;
+		BackwardSearchResult searchResult = backwardSearchResult(e.getText());
+		String searchCurrent = getBackwardSearchCurrent();
+		if(!searchResult.getFound()) {
+			searchPrefix = NOTFOUND;
+		}
+		int posOfEnter = this.getText().lastIndexOf("\n");
+		String newText = this.getText().substring(0, posOfEnter + 1);
+		newText = new StringBuilder(newText).append(searchPrefix.substring(0,searchPrefix.length() - 2)).toString();
+		newText = new StringBuilder(newText).append(searchCurrent + e.getCharacter() + "':" + searchResult.getResult()).toString();
+		this.setText(newText);
+		int posOfColon = this.getCurrentLine().indexOf(':') + this.getText().lastIndexOf("\n") + 3;
+		this.positionCaret(posOfColon -1);
+		e.consume();
 	}
 	
 	private void goToLastPos() {
@@ -312,7 +328,7 @@ public abstract class Console extends TextArea {
 		boolean needReturn;
 		int maxPosInLine = charCounterInLine;
 		if(backwardSearchActive) {
-			maxPosInLine = charCounterInLine + 2 + backwardSearchResult().length();
+			maxPosInLine = charCounterInLine + 2 + backwardSearchResult("").getResult().length();
 		}
 		if(!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine || e.isShortcutDown() || e.isAltDown()) {
 			e.consume();
