@@ -180,7 +180,11 @@ public abstract class Console extends TextArea {
 	protected BackwardSearchResult backwardSearchResult(String addition) {
 		String result = getBackwardSearchCurrentResult();
 		for(int i = instructions.size() - 1; i >= 0; i--) {
-			if(instructions.get(i).getInstruction().contains(getBackwardSearchCurrent() + addition)) {
+			String key = getBackwardSearchCurrent() + addition;
+			if("".equals(addition) && !"".equals(key)) {
+				key = key.substring(0,key.length() - 1);
+			}
+			if(instructions.get(i).getInstruction().contains(key)) {
 				return new BackwardSearchResult(instructions.get(i).getInstruction(),true);
 			}
 		}
@@ -217,13 +221,17 @@ public abstract class Console extends TextArea {
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
 		if(backwardSearchActive) {
-			handleInsertCharInSearch(e);
+			refreshSearch(e);
+			e.consume();
 		}
 	}
 	
-	protected void handleInsertCharInSearch(KeyEvent e) {
+	protected void refreshSearch(KeyEvent e) {
 		String searchPrefix = FOUND;
 		BackwardSearchResult searchResult = backwardSearchResult(e.getText());
+		if(e.getCode() == KeyCode.BACK_SPACE) {
+			searchResult = backwardSearchResult("");
+		}
 		String searchCurrent = getBackwardSearchCurrent();
 		if(!searchResult.getFound()) {
 			searchPrefix = NOTFOUND;
@@ -235,7 +243,6 @@ public abstract class Console extends TextArea {
 		this.setText(newText);
 		int posOfColon = this.getCurrentLine().indexOf(':') + this.getText().lastIndexOf("\n") + 3;
 		this.positionCaret(posOfColon -1);
-		e.consume();
 	}
 	
 	private void goToLastPos() {
@@ -328,6 +335,7 @@ public abstract class Console extends TextArea {
 		boolean needReturn;
 		int maxPosInLine = charCounterInLine;
 		if(backwardSearchActive) {
+			refreshSearch(e);
 			maxPosInLine = charCounterInLine + 2 + backwardSearchResult("").getResult().length();
 		}
 		if(!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine || e.isShortcutDown() || e.isAltDown()) {
