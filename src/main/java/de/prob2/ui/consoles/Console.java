@@ -185,13 +185,13 @@ public abstract class Console extends TextArea {
 	}
 	
 	public String getBackwardSearchCurrent() {
-		int posOfFirstQuotation = this.getCurrentLine().indexOf("'");
-		int posOfLastQuotation = this.getCurrentLine().lastIndexOf("'");
+		int posOfFirstQuotation = this.getCurrentLine().indexOf(39);
+		int posOfLastQuotation = this.getCurrentLine().lastIndexOf(39);
 		return this.getCurrentLine().substring(posOfFirstQuotation + 1, posOfLastQuotation);
 	}
 	
 	public String getBackwardSearchCurrentResult() {
-		int posOfColon = this.getCurrentLine().indexOf(":") + this.getText().lastIndexOf("\n") + 5;
+		int posOfColon = this.getCurrentLine().indexOf(':') + this.getText().lastIndexOf("\n") + 5;
 		String result = this.getText().substring(posOfColon, this.getText().length());
 		return result;
 	}
@@ -214,7 +214,7 @@ public abstract class Console extends TextArea {
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
 		if(backwardSearchActive) {
-			int posOfColon = this.getCurrentLine().indexOf(":") + this.getText().lastIndexOf("\n") + 3;
+			int posOfColon = this.getCurrentLine().indexOf(':') + this.getText().lastIndexOf("\n") + 3;
 			this.insertText(posOfColon - 1, e.getCharacter());
 			this.setText(this.getText().substring(0, posOfColon + 2) + backwardSearchResult());
 			this.positionCaret(posOfColon - 1);
