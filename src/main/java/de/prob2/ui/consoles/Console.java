@@ -164,7 +164,7 @@ public abstract class Console extends TextArea {
 	
 	protected void activateSearch() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
-		this.setText(this.getText().substring(0, posOfEnter + 1) + searchHandler.FOUND + getCurrentLine());
+		this.setText(this.getText().substring(0, posOfEnter + 1) + ConsoleSearchHandler.FOUND + getCurrentLine());
 		this.positionCaret(this.getText().lastIndexOf("'"));
 		currentPosInLine = 0;
 		charCounterInLine = 0;
@@ -191,7 +191,6 @@ public abstract class Console extends TextArea {
 				return;
 			}
 		}
-	
 		if (e.isShortcutDown() || e.isAltDown()) {
 			return;
 		}
@@ -227,6 +226,11 @@ public abstract class Console extends TextArea {
 				instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 			}
 			posInList = instructions.size() - 1;
+		}
+		if(searchHandler.isActive()) {
+			int posOfColon = this.getCurrentLine().indexOf(':');
+			int posOfEnter = this.getText().lastIndexOf("\n");
+			this.replaceText(posOfEnter + 1, this.getText().length(), " >" + this.getCurrentLine().substring(posOfColon + 1, this.getCurrentLine().length()));
 		}
 		searchHandler.deactivateSearch();
 	}

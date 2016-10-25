@@ -11,8 +11,8 @@ public class ConsoleSearchHandler {
 	protected boolean searchActive = false;
 	protected List<SearchResult> searchResults;
 	protected int currentSearchIndex = 0;
-	public final String FOUND = "(backward search) '':";
-	public final String NOTFOUND = "(failed backward search) '':"; 
+	public static final String FOUND = "(backward search) '':";
+	public static final String NOTFOUND = "(failed backward search) '':"; 
 	private final Console parent;
 	private final List<ConsoleInstruction> instructions;
 	
@@ -93,11 +93,6 @@ public class ConsoleSearchHandler {
 	}
 	
 	protected void searchNext() {
-		/*try {
-			Thread.sleep(100);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}*/
 		currentSearchIndex = Math.min(searchResults.size() - 1, currentSearchIndex + 1);
 		refreshSearch("");
 	}
