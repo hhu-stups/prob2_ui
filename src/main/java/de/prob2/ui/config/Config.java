@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,14 +36,7 @@ public final class Config {
 	}
 	
 	private static final File LOCATION = new File(Main.getProBDirectory() + File.separator + "prob2ui" + File.separator + "config.json");
-	private static final File DEFAULT;
-	static {
-		try {
-			DEFAULT = new File(Config.class.getResource("default.json").toURI());
-		} catch (URISyntaxException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+	
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 	
 	private final Gson gson;
@@ -59,7 +51,7 @@ public final class Config {
 		this.classBlacklist = classBlacklist;
 		this.recentFiles = recentFiles;
 		
-		try (final Reader defaultReader = new InputStreamReader(new FileInputStream(DEFAULT), "UTF-8")) {
+		try (final Reader defaultReader = new InputStreamReader(Config.class.getResourceAsStream("default.json"), "UTF-8")) {
 			this.defaultData = gson.fromJson(defaultReader, ConfigData.class);
 		} catch (FileNotFoundException exc) {
 			throw new IllegalStateException("Default config file not found", exc);
