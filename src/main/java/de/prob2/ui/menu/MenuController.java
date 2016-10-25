@@ -312,7 +312,6 @@ public final class MenuController extends MenuBar {
 			return;
 		}
 		window.getScene().setRoot(root);
-		animationSelector.changeCurrentAnimation(currentTrace.get());
 
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			final MenuToolkit tk = MenuToolkit.toolkit();
