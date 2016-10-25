@@ -123,14 +123,18 @@ public abstract class Console extends TextArea {
 				} else if(e.getCode() == KeyCode.E) {
 					this.positionCaret(this.getLength());
 					currentPosInLine = charCounterInLine;
-				} else if(e.getCode() == KeyCode.R) {
-					if(!searchHandler.isActive()) {
-						activateSearch();
-					} else {
-						searchHandler.searchNext();
-					}
 				} else if(e.getCode() == KeyCode.V && searchHandler.isActive()) {
 					e.consume();
+				}
+			}
+		});
+		
+		this.addEventFilter(KeyEvent.KEY_PRESSED, e-> {
+			if(e.isControlDown() && e.getCode() == KeyCode.R) {
+				if(!searchHandler.isActive()) {
+					activateSearch();
+				} else {
+					searchHandler.searchNext();
 				}
 			}
 		});
