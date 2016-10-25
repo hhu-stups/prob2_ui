@@ -40,6 +40,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -322,7 +323,8 @@ public final class MenuController extends MenuBar {
 			return;
 		}
 		window.getScene().setRoot(root);
-		
+		animationSelector.changeCurrentAnimation(currentTrace.get());
+
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			final MenuToolkit tk = MenuToolkit.toolkit();
 			tk.setGlobalMenuBar(this);
