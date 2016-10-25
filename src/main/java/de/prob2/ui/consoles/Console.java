@@ -127,6 +127,8 @@ public abstract class Console extends TextArea {
 				} else if(e.getCode() == KeyCode.R) {
 					if(!searchActive) {
 						activateSearch();
+					} else {
+						refreshSearch(e);
 					}
 				} else if(e.getCode() == KeyCode.V && searchActive) {
 					e.consume();
@@ -169,7 +171,7 @@ public abstract class Console extends TextArea {
 	
 	protected void deactivateSearch() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
-		String searchResult = searchResult("").getResult();
+		String searchResult = searchResult("").get(0).getResult();
 		this.setText(this.getText().substring(0, posOfEnter + 1) + " >" + searchResult);
 		this.positionCaret(this.getText().length());
 		charCounterInLine = searchResult.length();
@@ -177,18 +179,22 @@ public abstract class Console extends TextArea {
 		searchActive = false;
 	}
 	
-	protected SearchResult searchResult(String addition) {
-		String result = getCurrentSearchResult();
+	protected List<SearchResult> searchResult(String addition) {
+		String defaultResult = getCurrentSearchResult();
+		ArrayList<SearchResult> result = new ArrayList<SearchResult>();
 		for(int i = instructions.size() - 1; i >= 0; i--) {
 			String key = getSearchCurrent() + addition;
 			if("".equals(addition) && !"".equals(key)) {
 				key = key.substring(0,key.length() - 1);
 			}
 			if(instructions.get(i).getInstruction().contains(key)) {
-				return new SearchResult(instructions.get(i).getInstruction(),true);
+				result.add(new SearchResult(instructions.get(i).getInstruction(),true));
 			}
 		}
-		return new SearchResult(result, false);
+		if(result.isEmpty()) {
+			result.add(new SearchResult(defaultResult, false));
+		}
+		return result;
 	}
 	
 	public String getSearchCurrent() {
@@ -227,9 +233,9 @@ public abstract class Console extends TextArea {
 	
 	protected void refreshSearch(KeyEvent e) {
 		String searchPrefix = FOUND;
-		SearchResult searchResult = searchResult(e.getText());
+		SearchResult searchResult = searchResult(e.getText()).get(0);
 		if(e.getCode() == KeyCode.BACK_SPACE) {
-			searchResult = searchResult("");
+			searchResult = searchResult("").get(0);
 		}
 		String searchCurrent = getSearchCurrent();
 		if(!searchResult.getFound()) {
@@ -243,6 +249,7 @@ public abstract class Console extends TextArea {
 		int posOfColon = this.getCurrentLine().indexOf(':') + this.getText().lastIndexOf("\n") + 3;
 		this.positionCaret(posOfColon -1);
 	}
+	
 	
 	private void goToLastPos() {
 		this.positionCaret(this.getLength());
@@ -339,7 +346,7 @@ public abstract class Console extends TextArea {
 				return;
 			}
 			refreshSearch(e);
-			maxPosInLine = charCounterInLine + 2 + searchResult("").getResult().length();
+			maxPosInLine = charCounterInLine + 2 + searchResult("").get(0).getResult().length();
 		}
 		if(!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine || e.isShortcutDown() || e.isAltDown()) {
 			e.consume();
