@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
-//@Singleton
 public final class OperationsView extends AnchorPane {
 	private enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
