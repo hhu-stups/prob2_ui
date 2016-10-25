@@ -125,7 +125,7 @@ public abstract class Console extends TextArea {
 					this.positionCaret(this.getLength());
 					currentPosInLine = charCounterInLine;
 				} else if(e.getCode() == KeyCode.R) {
-					if(backwardSearchActive == false) {
+					if(!backwardSearchActive) {
 						backwardSearchActivate();
 					}
 				} else if(e.getCode() == KeyCode.V && backwardSearchActive) {
@@ -199,8 +199,7 @@ public abstract class Console extends TextArea {
 	
 	public String getBackwardSearchCurrentResult() {
 		int posOfColon = this.getCurrentLine().indexOf(':') + this.getText().lastIndexOf("\n") + 4;
-		String result = this.getText().substring(posOfColon, this.getText().length());
-		return result;
+		return this.getText().substring(posOfColon, this.getText().length());
 	}
 	
 	protected void handleInsertChar(KeyEvent e) {

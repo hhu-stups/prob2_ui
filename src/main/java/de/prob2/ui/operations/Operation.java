@@ -2,8 +2,6 @@ package de.prob2.ui.operations;
 
 import java.util.List;
 
-import de.prob.unicode.UnicodeTranslator;
-
 public class Operation {
 	public enum Status {
 		DISABLED, ENABLED, TIMEOUT
