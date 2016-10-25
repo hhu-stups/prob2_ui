@@ -1,11 +1,11 @@
 package de.prob2.ui.consoles;
 
-public class BackwardSearchResult {
+public class SearchResult {
 
 	private String result;
 	private boolean found;
 	
-	public BackwardSearchResult(String result, boolean found) {
+	public SearchResult(String result, boolean found) {
 		this.result = result;
 		this.found = found;
 	}
