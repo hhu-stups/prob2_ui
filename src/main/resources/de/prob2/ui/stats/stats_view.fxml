@@ -72,7 +72,8 @@
 			</VBox>
 			<AnchorPane>
 				<ToggleButton AnchorPane.leftAnchor="2.0"
-					onAction="#handleExtendedStatsToggle" fx:id="extendedStatsToggle">
+					onAction="#handleExtendedStatsToggle" fx:id="extendedStatsToggle"
+					text="%stats.showExtendedStats">
 					<graphic>
 						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
 							size="16" />

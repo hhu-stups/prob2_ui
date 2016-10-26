@@ -99,10 +99,13 @@ public class StatsView extends ScrollPane {
 			
 			icon = new FontAwesomeIconView(FontAwesomeIcon.CLOSE);
 			tooltip = new Tooltip("Close Extended Stats");
+			extendedStatsToggle.setText("");
 		} else {
 			this.currentTrace.removeListener(traceChangeListener);
+			
 			icon = new FontAwesomeIconView(FontAwesomeIcon.PLUS_CIRCLE);
 			tooltip = new Tooltip("Show Extended Stats");
+			extendedStatsToggle.setText("Show Extended Stats");
 		}
 		icon.setSize("16");
 		icon.setStyle("-fx-fill: -prob-grey");
