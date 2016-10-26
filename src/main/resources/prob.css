@@ -423,6 +423,10 @@
 	-fx-alignment: center-left;
 	-fx-padding: 0.0 0.0 0.0 0.5em;
 }
+.border {
+	-fx-border-color: -prob-grey;
+	-fx-border-width: 0.2em 0.0 0.2em 0.0;
+}
 
 /* ===================== DIALOG ====================== */
 .dialog > .label {
@@ -496,43 +500,6 @@
 	-fx-font-size: 12.0px;
 }
 
-/* ================= OPERATIONS VIEW ================= */
-.errored {
-	-fx-border-width: 0.0 0.0 0.0 0.3em;
-	-fx-border-color: -prob-orange;
-	-fx-text-fill: -prob-orange;
-	-fx-padding: 0.4em 0.0 0.4em 1.0em;
-}
-.unexplored {
-	-fx-border-width: 0.0 0.0 0.0 0.3em;
-	-fx-border-color: -prob-aqua;
-	-fx-text-fill: -prob-aqua;
-	-fx-padding: 0.4em 0.0 0.4em 1.0em;
-}
-.normal {
-	-fx-border-width: 0.0 0.0 0.0 0.3em;
-	-fx-border-color: transparent;
-	-fx-text-fill: black;
-	-fx-padding: 0.4em 0.0 0.4em 1.0em;
-}
-.unexplored:hover,
-.errored:hover,
-.normal:hover {
-	-fx-background-color: -prob-grey-20;
-}
-
-/* =================== STATES VIEW =================== */
-
-.changed {
-	-fx-background-color: -prob-grey-20;
-}
-.changed:focused {
-	-fx-border-color: -prob-aqua;
-}
-.changed:focused .tree-table-cell {
-	-fx-text-fill: black;
-}
-
 /* ================ MODELCHECKING VIEW =============== */
 .mcheckSuccess {
 	-fx-background-color: #00ff0022;
@@ -575,4 +542,41 @@
 .historyItemBackgroundSelected:hover {
 	-fx-background-color: -prob-grey-75;
 	-fx-border-color: -prob-grey;
+}
+
+/* ================= OPERATIONS VIEW ================= */
+.errored {
+	-fx-border-width: 0.0 0.0 0.0 0.3em;
+	-fx-border-color: -prob-orange;
+	-fx-text-fill: -prob-orange;
+	-fx-padding: 0.4em 0.0 0.4em 1.0em;
+}
+.unexplored {
+	-fx-border-width: 0.0 0.0 0.0 0.3em;
+	-fx-border-color: -prob-aqua;
+	-fx-text-fill: -prob-aqua;
+	-fx-padding: 0.4em 0.0 0.4em 1.0em;
+}
+.normal {
+	-fx-border-width: 0.0 0.0 0.0 0.3em;
+	-fx-border-color: transparent;
+	-fx-text-fill: black;
+	-fx-padding: 0.4em 0.0 0.4em 1.0em;
+}
+.unexplored:hover,
+.errored:hover,
+.normal:hover {
+	-fx-background-color: -prob-grey-20;
+}
+
+/* =================== STATES VIEW =================== */
+
+.changed {
+	-fx-background-color: -prob-grey-20;
+}
+.changed:focused {
+	-fx-border-color: -prob-aqua;
+}
+.changed:focused .tree-table-cell {
+	-fx-text-fill: black;
 }
