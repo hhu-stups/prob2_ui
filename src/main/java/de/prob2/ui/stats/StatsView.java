@@ -79,7 +79,10 @@ public class StatsView extends ScrollPane {
 		extendedStatsBox.visibleProperty().bind(extendedStatsToggle.selectedProperty());
 		statsBox.visibleProperty().bind(currentTrace.existsProperty());
 		noStatsLabel.visibleProperty().bind(statsBox.visibleProperty().not());
-
+		extendedStatsBox.managedProperty().bind(extendedStatsBox.visibleProperty());
+		statsBox.managedProperty().bind(statsBox.visibleProperty());
+		noStatsLabel.managedProperty().bind(noStatsLabel.visibleProperty());
+		
 		if (extendedStatsToggle.isSelected()) {
 			traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 			this.currentTrace.addListener(traceChangeListener);
