@@ -27,14 +27,26 @@ import org.slf4j.LoggerFactory;
 
 //@Singleton
 public class StatsView extends ScrollPane {
-	@FXML private Label totalTransitions;
-	@FXML private GridPane nodeStats;
-	@FXML private GridPane transStats;
-	@FXML private VBox statsBox;
-	@FXML private Label noStatsLabel;
+	@FXML
+	private Label totalTransitions;
+	@FXML
+	private Label totalNodes;
+	@FXML
+	private Label processedNodes;
+	@FXML
+	private GridPane nodeStats;
+	@FXML
+	private GridPane transStats;
+	@FXML
+	private VBox statsBox;
+	@FXML
+	private VBox extendedStatsBox;
+	@FXML
+	private Label noStatsLabel;
 
 	private final CurrentTrace currentTrace;
 	private static final Logger logger = LoggerFactory.getLogger(StatsView.class);
+	private boolean showExtendedStats = false;
 
 	@Inject
 	public StatsView(final FXMLLoader loader, final CurrentTrace currentTrace) {
@@ -59,7 +71,7 @@ public class StatsView extends ScrollPane {
 				update(cmd.getResult());
 			} else {
 				update(cmd.new ComputeCoverageResult(new IntegerPrologTerm(0), new IntegerPrologTerm(0),
-					new ListPrologTerm(), new ListPrologTerm(), new ListPrologTerm()));
+						new ListPrologTerm(), new ListPrologTerm(), new ListPrologTerm()));
 			}
 		};
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
@@ -76,8 +88,12 @@ public class StatsView extends ScrollPane {
 			noStatsLabel.setVisible(false);
 
 			Number numTrans = result.getTotalNumberOfTransitions();
+			Number numNodes = result.getTotalNumberOfNodes();
 
-			Platform.runLater(() -> totalTransitions.setText(String.valueOf(numTrans)));
+//			Platform.runLater(() -> {
+//				totalTransitions.setText(String.valueOf(numTrans));
+//				totalNodes.setText(String.valueOf(numNodes));
+//			});
 
 			showStats(result.getNodes(), nodeStats);
 			showStats(result.getOps(), transStats);
