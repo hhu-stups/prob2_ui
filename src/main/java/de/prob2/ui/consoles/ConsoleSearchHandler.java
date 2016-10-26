@@ -40,13 +40,15 @@ public class ConsoleSearchHandler {
 		searchActive = false;
 	}
 	
-	protected void searchResult(String addition) {
+	protected void searchResult(KeyEvent e) {
 		searchResults.clear();
+		String key = getSearchCurrent();
+		if(e.getCode() != KeyCode.BACK_SPACE) {
+			key += e.getText();
+		} else {
+			key = key.substring(0, Math.max(0, key.length() - 1));
+		}
 		for(int i = instructions.size() - 1; i >= 0; i--) {
-			String key = getSearchCurrent() + addition;
-			if("".equals(addition) && !"".equals(key)) {
-				key = key.substring(0,key.length() - 1);
-			}
 			if(instructions.get(i).getInstruction().contains(key)) {
 				searchResults.add(new SearchResult(instructions.get(i).getInstruction(),true));
 			}
@@ -70,13 +72,8 @@ public class ConsoleSearchHandler {
 	protected void handleKey(KeyEvent e) {
 		if(isActive()) {
 			currentSearchIndex = 0;
-			if(e.getCode() == KeyCode.BACK_SPACE) {
-				searchResult("");
-			} else {
-				searchResult(e.getText());
-				e.consume();
-			}
-			refreshSearch(e.getCharacter());
+			searchResult(e);
+			refreshSearch();
 		}
 	}
 	
@@ -96,12 +93,12 @@ public class ConsoleSearchHandler {
 				return true;
 			}
 			handleKey(e);
-			searchResult("");
+			searchResult(e);
 		}
 		return false;
 	}
 	
-	protected void refreshSearch(String addition) {
+	protected void refreshSearch() {
 		String searchPrefix = FOUND;
 		String searchCurrent = getSearchCurrent();
 		if(!searchResults.get(0).getFound()) {
@@ -110,7 +107,7 @@ public class ConsoleSearchHandler {
 		int posOfEnter = parent.getText().lastIndexOf("\n");
 		String newText = parent.getText().substring(0, posOfEnter + 1);
 		newText = new StringBuilder(newText).append(searchPrefix.substring(0,searchPrefix.length() - 2)).toString();
-		newText = new StringBuilder(newText).append(searchCurrent + addition + "':" + searchResults.get(currentSearchIndex).getResult()).toString();
+		newText = new StringBuilder(newText).append(searchCurrent + "':" + searchResults.get(currentSearchIndex).getResult()).toString();
 		parent.setText(newText);
 		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf("\n") + 3;
 		parent.positionCaret(posOfColon -1);
@@ -118,7 +115,7 @@ public class ConsoleSearchHandler {
 	
 	protected void searchNext() {
 		currentSearchIndex = Math.min(searchResults.size() - 1, currentSearchIndex + 1);
-		refreshSearch("");
+		refreshSearch();
 	}
 
 }

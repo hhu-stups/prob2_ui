@@ -116,14 +116,16 @@ public abstract class Console extends TextArea {
 				e.consume();
 			}
 			if(e.isControlDown()) {
-				if(e.getCode() == KeyCode.A) {
-					this.positionCaret(this.getCaretPosition() - currentPosInLine);
-					currentPosInLine = 0;
-					e.consume();
-				} else if(e.getCode() == KeyCode.E) {
-					this.positionCaret(this.getLength());
-					currentPosInLine = charCounterInLine;
-				} else if(e.getCode() == KeyCode.V && searchHandler.isActive()) {
+				if(!searchHandler.isActive()) {
+					if(e.getCode() == KeyCode.A) {
+						this.positionCaret(this.getCaretPosition() - currentPosInLine);
+						currentPosInLine = 0;
+						e.consume();
+					} else if(e.getCode() == KeyCode.E) {
+						this.positionCaret(this.getLength());
+						currentPosInLine = charCounterInLine;
+					}
+				} else if(e.getCode() == KeyCode.V || e.getCode() == KeyCode.A) {
 					e.consume();
 				}
 			}
