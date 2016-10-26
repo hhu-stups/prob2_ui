@@ -11,7 +11,6 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
-import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
 import de.prob2.ui.consoles.groovy.MetaPropertiesHandler;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
@@ -30,7 +29,7 @@ public class GroovyCodeCompletionHandler {
 		this.currentSuggestions = new ArrayList<>();
 	}
 	
-	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action, GroovyConsole parent, ScriptEngine engine) {
+	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action, ScriptEngine engine) {
 		String[] methods = getMethodsFromCurrentLine(currentLine);
 		if(methods.length == 0) {
 			return;
@@ -58,7 +57,7 @@ public class GroovyCodeCompletionHandler {
 		}
 	}
 	
-	public void handleStaticClasses(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action, GroovyConsole parent) {
+	public void handleStaticClasses(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action) {
 		String[] methods = getMethodsFromCurrentLine(currentLine);
 		Package[] packages = Package.getPackages();
 		if(methods.length == 0) {

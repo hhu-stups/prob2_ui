@@ -63,8 +63,8 @@ public class GroovyCodeCompletion extends Popup {
 			currentLine = currentLine + "."; //NOSONAR
 		}
 		String currentPrefix = handleActivation(currentLine);
-		completionHandler.handleMethodsFromObjects(currentPrefix, currentSuggestion, action, parent, engine);
-		completionHandler.handleStaticClasses(currentPrefix, currentSuggestion, action, parent);
+		completionHandler.handleMethodsFromObjects(currentPrefix, currentSuggestion, action, engine);
+		completionHandler.handleStaticClasses(currentPrefix, currentSuggestion, action);
 		completionHandler.handleObjects(currentSuggestion, action, engine);
 		showPopup(console);
 	}

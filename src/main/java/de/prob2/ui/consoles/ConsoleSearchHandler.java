@@ -100,14 +100,13 @@ public class ConsoleSearchHandler {
 	
 	protected void refreshSearch() {
 		String searchPrefix = FOUND;
-		String searchCurrent = getSearchCurrent();
 		if(!searchResults.get(0).getFound()) {
 			searchPrefix = NOTFOUND;
 		}
 		int posOfEnter = parent.getText().lastIndexOf("\n");
 		String newText = parent.getText().substring(0, posOfEnter + 1);
 		newText = new StringBuilder(newText).append(searchPrefix.substring(0,searchPrefix.length() - 2)).toString();
-		newText = new StringBuilder(newText).append(searchCurrent + "':" + searchResults.get(currentSearchIndex).getResult()).toString();
+		newText = new StringBuilder(newText).append(getSearchCurrent() + "':" + searchResults.get(currentSearchIndex).getResult()).toString();
 		parent.setText(newText);
 		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf("\n") + 3;
 		parent.positionCaret(posOfColon -1);
