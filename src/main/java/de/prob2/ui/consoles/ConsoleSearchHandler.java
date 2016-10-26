@@ -111,6 +111,7 @@ public class ConsoleSearchHandler {
 		parent.setText(newText);
 		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf("\n") + 3;
 		parent.positionCaret(posOfColon -1);
+		parent.setScrollTop(Double.MAX_VALUE);
 	}
 	
 	protected void searchNext() {
