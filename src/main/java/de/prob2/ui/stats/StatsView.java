@@ -53,7 +53,6 @@ public class StatsView extends ScrollPane {
 		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
 		if (to != null) {
 			to.getStateSpace().execute(cmd);
-			System.out.println("computed");
 			update(cmd.getResult());
 		} else {
 			update(cmd.new ComputeCoverageResult(new IntegerPrologTerm(0), new IntegerPrologTerm(0),
