@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Tooltip?>
 
 <fx:root type="ScrollPane" fitToHeight="true" fitToWidth="true"
 	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
@@ -20,6 +21,9 @@
 					<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
 						size="26" />
 				</graphic>
+				<tooltip>
+				<Tooltip text="%modelchecking.stats.addModelCheck.tooltip"/>
+				</tooltip>
 			</Button>
 		</AnchorPane>
 		<AnchorPane fx:id="statsPane" />
