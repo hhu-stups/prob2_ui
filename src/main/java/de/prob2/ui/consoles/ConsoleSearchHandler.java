@@ -68,13 +68,37 @@ public class ConsoleSearchHandler {
 	}
 	
 	protected void handleKey(KeyEvent e) {
-		currentSearchIndex = 0;
-		if(e.getCode() == KeyCode.BACK_SPACE) {
-			searchResult("");
-		} else {
-			searchResult(e.getText());
+		if(isActive()) {
+			currentSearchIndex = 0;
+			if(e.getCode() == KeyCode.BACK_SPACE) {
+				searchResult("");
+			} else {
+				searchResult(e.getText());
+				e.consume();
+			}
+			refreshSearch(e.getCharacter());
 		}
-		refreshSearch(e.getCharacter());
+	}
+	
+	protected void handleEnter() {
+		if(isActive()) {
+			int posOfColon = parent.getCurrentLine().indexOf(':');
+			int posOfEnter = parent.getText().lastIndexOf("\n");
+			parent.replaceText(posOfEnter + 1, parent.getText().length(), " >" + parent.getCurrentLine().substring(posOfColon + 1, parent.getCurrentLine().length()));
+			deactivateSearch();
+		}
+	}
+	
+	protected boolean handleDeletion(KeyEvent e) {
+		if(isActive()) {
+			if(e.getCode() == KeyCode.DELETE) {
+				parent.deactivateSearch();
+				return true;
+			}
+			handleKey(e);
+			searchResult("");
+		}
+		return false;
 	}
 	
 	protected void refreshSearch(String addition) {

@@ -141,9 +141,6 @@ public abstract class Console extends TextArea {
 		
 		this.setOnKeyPressed(e -> {
 			if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
-				if(searchHandler.isActive()) {
-					deactivateSearch();
-				}
 				handleArrowKeys(e);
 				this.setScrollTop(Double.MAX_VALUE);
 			} else if (e.getCode().isNavigationKey()) {
@@ -181,6 +178,7 @@ public abstract class Console extends TextArea {
 		searchHandler.deactivateSearch();
 	}
 	
+	
 	protected void handleInsertChar(KeyEvent e) {
 		if(e.getText().isEmpty() || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
 			if(!(e.getCode() == KeyCode.UNDEFINED || e.getCode() == KeyCode.ALT_GRAPH)) {
@@ -197,10 +195,7 @@ public abstract class Console extends TextArea {
 		charCounterInLine++;
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
-		if(searchHandler.isActive()) {
-			searchHandler.handleKey(e);
-			e.consume();
-		}
+		searchHandler.handleKey(e);
 	}
 	
 	
@@ -227,16 +222,14 @@ public abstract class Console extends TextArea {
 			}
 			posInList = instructions.size() - 1;
 		}
-		if(searchHandler.isActive()) {
-			int posOfColon = this.getCurrentLine().indexOf(':');
-			int posOfEnter = this.getText().lastIndexOf("\n");
-			this.replaceText(posOfEnter + 1, this.getText().length(), " >" + this.getCurrentLine().substring(posOfColon + 1, this.getCurrentLine().length()));
-		}
-		searchHandler.deactivateSearch();
+		searchHandler.handleEnter();
 	}
 	
 	private void handleArrowKeys(KeyEvent e) {
 		boolean needReturn;
+		if(searchHandler.isActive()) {
+			deactivateSearch();
+		}
 		if(e.getCode().equals(KeyCode.UP)) {
 			needReturn = handleUp(e);
 		} else {
@@ -298,13 +291,10 @@ public abstract class Console extends TextArea {
 	private void handleDeletion(KeyEvent e) {
 		boolean needReturn;
 		int maxPosInLine = charCounterInLine;
+		if(searchHandler.handleDeletion(e)) {
+			return;
+		}
 		if(searchHandler.isActive()) {
-			if(e.getCode() == KeyCode.DELETE) {
-				deactivateSearch();
-				return;
-			}
-			searchHandler.handleKey(e);
-			searchHandler.searchResult("");
 			maxPosInLine = charCounterInLine + 2 + searchHandler.getCurrentSearchResult().length();
 		}
 		if(!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine || e.isShortcutDown() || e.isAltDown()) {
