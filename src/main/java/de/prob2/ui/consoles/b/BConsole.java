@@ -19,7 +19,9 @@ public class BConsole extends Console {
 	@Override
 	protected void handleEnter(KeyEvent e) {
 		super.handleEnterAbstract(e);
-		this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
+		if(!getCurrentLine().isEmpty()) {
+			this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
+		}
 		this.appendText("\n >");
 	}
 	

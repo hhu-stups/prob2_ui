@@ -127,10 +127,10 @@ public class GroovyConsole extends Console {
 	@Override
 	protected void handleEnter(KeyEvent e) {
 		super.handleEnterAbstract(e);
-		ConsoleInstruction instruction = instructions.get(posInList);
 		if(getCurrentLine().isEmpty()) {
 			this.appendText("\n null");
 		} else {
+			ConsoleInstruction instruction = instructions.get(posInList);
 			if("clear".equals(interpreter.exec(instruction).getConsoleOutput())) {
 				reset();
 			} else {
