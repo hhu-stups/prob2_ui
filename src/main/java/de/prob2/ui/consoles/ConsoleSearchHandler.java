@@ -91,9 +91,9 @@ public class ConsoleSearchHandler {
 			if(e.getCode() == KeyCode.DELETE) {
 				parent.deactivateSearch();
 				return true;
+			} else if(parent.getCaretPosition() != parent.getLength() - parent.getCurrentLine().length() + parent.getCurrentLine().indexOf("'") + 1) {
+				handleKey(e);
 			}
-			handleKey(e);
-			searchResult(e);
 		}
 		return false;
 	}
