@@ -25,7 +25,6 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//@Singleton
 public class StatsView extends ScrollPane {
 	@FXML
 	private Label totalTransitions;

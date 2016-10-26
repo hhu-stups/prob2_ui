@@ -244,17 +244,8 @@ public final class PreferencesStage extends Stage {
 				}
 			}
 			
-			final ProBPreferenceType type;
-			if (pref.type instanceof ListPrologTerm) {
-				final ListPrologTerm values = (ListPrologTerm) pref.type;
-				final String[] arr = new String[values.size()];
-				for (int i = 0; i < values.size(); i++) {
-					arr[i] = values.get(i).getFunctor();
-				}
-				type = new ProBPreferenceType(arr);
-			} else {
-				type = new ProBPreferenceType(pref.type.getFunctor());
-			}
+			final ProBPreferenceType type = createType(pref);
+
 			final String value = this.preferences.getPreferenceValue(pref.name);
 			
 			if (item == null) {
@@ -275,6 +266,19 @@ public final class PreferencesStage extends Stage {
 		
 		for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
 			ti.getChildren().sort(Comparator.comparing(c -> c.getValue().getName()));
+		}
+	}
+
+	private ProBPreferenceType createType(ProBPreference pref) {
+		if (pref.type instanceof ListPrologTerm) {
+			final ListPrologTerm values = (ListPrologTerm) pref.type;
+			final String[] arr = new String[values.size()];
+			for (int i = 0; i < values.size(); i++) {
+				arr[i] = values.get(i).getFunctor();
+			}
+			return new ProBPreferenceType(arr);
+		} else {
+			return new ProBPreferenceType(pref.type.getFunctor());
 		}
 	}
 

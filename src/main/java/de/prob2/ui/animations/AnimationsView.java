@@ -32,7 +32,6 @@ import javafx.scene.layout.AnchorPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//@Singleton
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
 	private static final Logger logger = LoggerFactory.getLogger(AnimationsView.class);
 

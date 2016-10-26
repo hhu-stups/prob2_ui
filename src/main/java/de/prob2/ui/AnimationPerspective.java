@@ -138,7 +138,6 @@ public final class AnimationPerspective extends BorderPane {
 	private void dragDropped(final Node node, MouseEvent mouseEvent){
 		TitledPane nodeTP = nodeMap.get(node);
 		Accordion oldParent = (Accordion) nodeTP.getParent();
-		Accordion newParent = null;
 		Point2D position = this.sceneToLocal(new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY()));
 
 		boolean middleX = position.getX() > this.getScene().getWidth()/3 && position.getX() <= 2*this.getScene().getWidth()/3;
@@ -152,22 +151,34 @@ public final class AnimationPerspective extends BorderPane {
 		boolean switchToBottom = bottom && middleX && !bottomAccordion.getPanes().contains(nodeTP);
 		boolean switchToLeft = !right && middleY && !leftAccordion.getPanes().contains(nodeTP);
 
-		if (switchToRight) {
-			nodeTP.setCollapsible(false);
-			newParent = rightAccordion;
-		} else if (switchToTop) {
-			nodeTP.setCollapsible(true);
-			newParent = topAccordion;
-		} else if (switchToBottom) {
-			nodeTP.setCollapsible(true);
-			newParent = bottomAccordion;
-		} else if (switchToLeft){
-			nodeTP.setCollapsible(false);
-			newParent = leftAccordion;
-		}
+		Accordion newParent = calculateNewParent(switchToTop,switchToBottom,switchToLeft,switchToRight,nodeTP);
 
 		if (newParent != null) {
 			switchParent(oldParent, newParent, nodeTP);
+		}
+	}
+
+	private Accordion calculateNewParent(
+			boolean switchToTop,
+			boolean switchToBottom,
+			boolean switchToLeft,
+			boolean switchToRight,
+			TitledPane nodeTP
+	) {
+		if (switchToRight) {
+			nodeTP.setCollapsible(false);
+			return rightAccordion;
+		} else if (switchToTop) {
+			nodeTP.setCollapsible(true);
+			return topAccordion;
+		} else if (switchToBottom) {
+			nodeTP.setCollapsible(true);
+			return bottomAccordion;
+		} else if (switchToLeft){
+			nodeTP.setCollapsible(false);
+			return leftAccordion;
+		} else {
+			return null;
 		}
 	}
 

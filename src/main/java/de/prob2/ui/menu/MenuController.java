@@ -1,19 +1,10 @@
 package de.prob2.ui.menu;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.be4.classicalb.core.parser.exceptions.BException;
-
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
@@ -26,26 +17,25 @@ import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -322,7 +312,7 @@ public final class MenuController extends MenuBar {
 			return;
 		}
 		window.getScene().setRoot(root);
-		
+
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			final MenuToolkit tk = MenuToolkit.toolkit();
 			tk.setGlobalMenuBar(this);

@@ -38,7 +38,6 @@ import javafx.scene.layout.AnchorPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//@Singleton
 public final class StatesView extends AnchorPane {
 	private static final Logger logger = LoggerFactory.getLogger(StatesView.class);
 	

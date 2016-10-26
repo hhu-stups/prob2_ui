@@ -19,12 +19,12 @@ public abstract class Console extends TextArea {
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
-	protected boolean backwardSearchActive = false;
-	//protected String backwardSearchCurrent ="";
+	protected ConsoleSearchHandler searchHandler;
 
 	public Console() {
 		this.setContextMenu(new ContextMenu());
 		this.instructions = new ArrayList<>();
+		this.searchHandler = new ConsoleSearchHandler(this, instructions);
 		setListeners();
 	}
 	
@@ -61,8 +61,8 @@ public abstract class Console extends TextArea {
 			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 			this.setScrollTop(Double.MIN_VALUE);
 		}
-		if(backwardSearchActive) {
-			backwardSearchDeactivate();
+		if(searchHandler.isActive()) {
+			deactivateSearch();
 		}
 	}
 	
@@ -76,8 +76,8 @@ public abstract class Console extends TextArea {
 		} else if(currentPosInLine == 0) {
 			super.deselect();
 		}
-		if(backwardSearchActive) {
-			backwardSearchDeactivate();
+		if(searchHandler.isActive()) {
+			deactivateSearch();
 		}
 	}
 	
@@ -116,27 +116,34 @@ public abstract class Console extends TextArea {
 				e.consume();
 			}
 			if(e.isControlDown()) {
-				if(e.getCode() == KeyCode.A) {
-					this.positionCaret(this.getCaretPosition() - currentPosInLine);
-					currentPosInLine = 0;
-				} else if(e.getCode() == KeyCode.E) {
-					this.positionCaret(this.getLength());
-					currentPosInLine = charCounterInLine;
-				} else if(e.getCode() == KeyCode.R) {
-					if(backwardSearchActive == false) {
-						backwardSearchActivate();
+				if(!searchHandler.isActive()) {
+					if(e.getCode() == KeyCode.A) {
+						this.positionCaret(this.getCaretPosition() - currentPosInLine);
+						currentPosInLine = 0;
+						e.consume();
+					} else if(e.getCode() == KeyCode.E) {
+						this.positionCaret(this.getLength());
+						currentPosInLine = charCounterInLine;
 					}
+				} else if(e.getCode() == KeyCode.V || e.getCode() == KeyCode.A) {
+					e.consume();
 				}
-				e.consume();
+			}
+		});
+		
+		this.addEventFilter(KeyEvent.KEY_PRESSED, e-> {
+			if(e.isControlDown() && e.getCode() == KeyCode.R) {
+				if(!searchHandler.isActive()) {
+					activateSearch();
+				} else {
+					searchHandler.searchNext();
+				}
 			}
 		});
 		
 		this.setOnKeyPressed(e -> {
 			if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
 				handleArrowKeys(e);
-				if(backwardSearchActive) {
-					backwardSearchDeactivate();
-				}
 				this.setScrollTop(Double.MAX_VALUE);
 			} else if (e.getCode().isNavigationKey()) {
 				if(e.getCode() != KeyCode.LEFT && e.getCode() != KeyCode.RIGHT) {
@@ -154,47 +161,25 @@ public abstract class Console extends TextArea {
 		});
 	}
 	
-	protected void backwardSearchActivate() {
+	protected void activateSearch() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
-		this.setText(this.getText().substring(0, posOfEnter + 1) + "(backward search active) '': " + getCurrentLine());
+		this.setText(this.getText().substring(0, posOfEnter + 1) + ConsoleSearchHandler.FOUND + getCurrentLine());
 		this.positionCaret(this.getText().lastIndexOf("'"));
 		currentPosInLine = 0;
 		charCounterInLine = 0;
-		backwardSearchActive = true;
+		searchHandler.activateSearch();
 	}
-	//backwardSearch stays active Insert char, Backspace, Delete, Rest
 	
-	protected void backwardSearchDeactivate() {
+	protected void deactivateSearch() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
-		String searchResult = backwardSearchResult();
+		String searchResult = searchHandler.getCurrentSearchResult();
 		this.setText(this.getText().substring(0, posOfEnter + 1) + " >" + searchResult);
 		this.positionCaret(this.getText().length());
 		charCounterInLine = searchResult.length();
 		currentPosInLine = charCounterInLine;
-		backwardSearchActive = false;
+		searchHandler.deactivateSearch();
 	}
 	
-	protected String backwardSearchResult() {
-		String result = getBackwardSearchCurrentResult();
-		for(int i = instructions.size() - 1; i >= 0; i--) {
-			if(instructions.get(i).getInstruction().contains(getBackwardSearchCurrent())) {
-				return instructions.get(i).getInstruction();
-			}
-		}
-		return result;
-	}
-	
-	public String getBackwardSearchCurrent() {
-		int posOfFirstQuotation = this.getCurrentLine().indexOf(39);
-		int posOfLastQuotation = this.getCurrentLine().lastIndexOf(39);
-		return this.getCurrentLine().substring(posOfFirstQuotation + 1, posOfLastQuotation);
-	}
-	
-	public String getBackwardSearchCurrentResult() {
-		int posOfColon = this.getCurrentLine().indexOf(':') + this.getText().lastIndexOf("\n") + 5;
-		String result = this.getText().substring(posOfColon, this.getText().length());
-		return result;
-	}
 	
 	protected void handleInsertChar(KeyEvent e) {
 		if(e.getText().isEmpty() || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
@@ -206,21 +191,15 @@ public abstract class Console extends TextArea {
 				return;
 			}
 		}
-	
 		if (e.isShortcutDown() || e.isAltDown()) {
 			return;
 		}
 		charCounterInLine++;
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
-		if(backwardSearchActive) {
-			int posOfColon = this.getCurrentLine().indexOf(':') + this.getText().lastIndexOf("\n") + 3;
-			this.insertText(posOfColon - 1, e.getCharacter());
-			this.setText(this.getText().substring(0, posOfColon + 2) + backwardSearchResult());
-			this.positionCaret(posOfColon - 1);
-			e.consume();
-		}
+		searchHandler.handleKey(e);
 	}
+	
 	
 	private void goToLastPos() {
 		this.positionCaret(this.getLength());
@@ -234,8 +213,8 @@ public abstract class Console extends TextArea {
 		currentPosInLine = 0;
 		e.consume();
 		String instruction = getCurrentLine();
-		if(backwardSearchActive) {
-			instruction = getBackwardSearchCurrentResult();
+		if(searchHandler.isActive()) {
+			instruction = searchHandler.getCurrentSearchResult();
 		}
 		if(!getCurrentLine().isEmpty()) {
 			if(!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
@@ -245,11 +224,14 @@ public abstract class Console extends TextArea {
 			}
 			posInList = instructions.size() - 1;
 		}
-		backwardSearchActive = false;
+		searchHandler.handleEnter();
 	}
 	
 	private void handleArrowKeys(KeyEvent e) {
 		boolean needReturn;
+		if(searchHandler.isActive()) {
+			deactivateSearch();
+		}
 		if(e.getCode().equals(KeyCode.UP)) {
 			needReturn = handleUp(e);
 		} else {
@@ -311,8 +293,11 @@ public abstract class Console extends TextArea {
 	private void handleDeletion(KeyEvent e) {
 		boolean needReturn;
 		int maxPosInLine = charCounterInLine;
-		if(backwardSearchActive) {
-			maxPosInLine = charCounterInLine + 2 + backwardSearchResult().length();
+		if(searchHandler.handleDeletion(e)) {
+			return;
+		}
+		if(searchHandler.isActive()) {
+			maxPosInLine = charCounterInLine + 2 + searchHandler.getCurrentSearchResult().length();
 		}
 		if(!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine || e.isShortcutDown() || e.isAltDown()) {
 			e.consume();

@@ -24,7 +24,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 
-//@Singleton
 public final class HistoryView extends AnchorPane {
 	private static class TransitionCell extends ListCell<HistoryItem> {
 		@Override

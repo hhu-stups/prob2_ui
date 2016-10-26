@@ -31,7 +31,7 @@ public class GroovyCodeCompletionHandler {
 	}
 	
 	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action, GroovyConsole parent, ScriptEngine engine) {
-		String[] methods = getMethodsFromCurrentLine(currentLine, parent);
+		String[] methods = getMethodsFromCurrentLine(currentLine);
 		if(methods.length == 0) {
 			return;
 		}
@@ -59,7 +59,7 @@ public class GroovyCodeCompletionHandler {
 	}
 	
 	public void handleStaticClasses(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action, GroovyConsole parent) {
-		String[] methods = getMethodsFromCurrentLine(currentLine, parent);
+		String[] methods = getMethodsFromCurrentLine(currentLine);
 		Package[] packages = Package.getPackages();
 		if(methods.length == 0) {
 			return;
@@ -153,7 +153,7 @@ public class GroovyCodeCompletionHandler {
 	}
 	
 	
-	private String[] getMethodsFromCurrentLine(String currentLine, GroovyConsole parent) {
+	private String[] getMethodsFromCurrentLine(String currentLine) {
 		String currentInstruction = currentLine;
 		if(!currentInstruction.contains(".")) {
 			return new String[]{};
