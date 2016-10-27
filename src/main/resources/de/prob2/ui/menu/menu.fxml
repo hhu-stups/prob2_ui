@@ -5,42 +5,53 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.layout.BorderPane?>
-<fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml" BorderPane.alignment="CENTER">
+<fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml"
+	BorderPane.alignment="CENTER">
 	<Menu text="%menu.file">
-		<MenuItem text="%menu.file.items.open" accelerator="Shortcut+O" onAction="#handleOpen" />
+		<MenuItem text="%menu.file.items.open" accelerator="Shortcut+O"
+			onAction="#handleOpen" />
 		<Menu fx:id="recentFilesMenu" text="%menu.file.items.openRecent">
-			<MenuItem fx:id="recentFilesPlaceholder" text="%menu.file.items.openRecent.items.placeholder" disable="true" />
-			<SeparatorMenuItem/>
-			<MenuItem fx:id="clearRecentFiles" text="%menu.file.items.openRecent.items.clear" onAction="#handleClearRecentFiles" />
+			<MenuItem fx:id="recentFilesPlaceholder"
+				text="%menu.file.items.openRecent.items.placeholder" disable="true" />
+			<SeparatorMenuItem />
+			<MenuItem fx:id="clearRecentFiles" text="%menu.file.items.openRecent.items.clear"
+				onAction="#handleClearRecentFiles" />
 		</Menu>
-		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W" onAction="#handleClose" />
+		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"
+			onAction="#handleClose" />
 	</Menu>
 	<Menu text="%menu.edit">
-		<MenuItem fx:id="preferencesItem" text="%menu.edit.items.preferences" onAction="#handlePreferences" />
+		<MenuItem fx:id="preferencesItem" text="%menu.edit.items.preferences"
+			onAction="#handlePreferences" />
 	</Menu>
 	<Menu text="%menu.formula">
-		<MenuItem fx:id="enterFormulaForVisualization" text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />
+		<MenuItem fx:id="enterFormulaForVisualization"
+			text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />
 	</Menu>
 	<Menu text="%menu.dotty">
-		<MenuItem text="%menu.dotty.items.showHistoryAsGraph" onAction="#handleDotty" />
+		<MenuItem text="%menu.dotty.items.showHistoryAsGraph"
+			onAction="#handleDotty" />
 	</Menu>
 	<Menu text="%menu.consoles">
-		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole"/>
-		<MenuItem text="%menu.consoles.items.b" onAction="#handleBConsole"/>
+		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole" />
+		<MenuItem text="%menu.consoles.items.b" onAction="#handleBConsole" />
 	</Menu>
 	<Menu text="%menu.perspectives">
 		<Menu text="%menu.perspectives.preset">
 			<MenuItem text="%menu.perspectives.preset.default" onAction="#handleLoadDefault" />
-			<MenuItem text="%menu.perspectives.preset.detached" onAction="#handleLoadDetached"/>
-			<MenuItem text="%menu.perspectives.preset.detached2" onAction="#handleLoadDetached2"/>
-			<MenuItem text="%menu.perspectives.preset.stacked" onAction="#handleLoadStacked"/>
+			<MenuItem text="%menu.perspectives.preset.detached"
+				onAction="#handleLoadDetached" />
+			<MenuItem text="%menu.perspectives.preset.detached2"
+				onAction="#handleLoadDetached2" />
+			<MenuItem text="%menu.perspectives.preset.stacked" onAction="#handleLoadStacked" />
 		</Menu>
 		<MenuItem text="%menu.perspectives.load" onAction="#handleLoadPerspective" />
 	</Menu>
 	<Menu fx:id="windowMenu" text="%menu.window">
-		
+
 	</Menu>
 	<Menu text="%menu.help">
 		<MenuItem fx:id="aboutItem" text="%menu.help.items.about" />
+		<MenuItem text="%menu.help.reportBug" onAction="#handleReportBug" />
 	</Menu>
 </fx:root>

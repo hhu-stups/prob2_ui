@@ -319,5 +319,10 @@ public final class MenuController extends MenuBar {
 			tk.setApplicationMenu(this.getMenus().get(0));
 		}
 	}
+	
+	@FXML
+	private void handleReportBug(ActionEvent event) {
+		System.out.println("report bug");
+	}
 
 }
