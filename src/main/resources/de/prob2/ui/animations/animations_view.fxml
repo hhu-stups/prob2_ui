@@ -14,7 +14,7 @@
 				text="%animations.columns.machine" />
 			<TableColumn fx:id="lastop" minWidth="102.0" prefWidth="102.0"
 				text="%animations.columns.lastop" />
-			<TableColumn fx:id="tracelength" minWidth="88.0"
+			<TableColumn fx:id="tracelength" minWidth="92.0"
 				prefWidth="88.0" styleClass="center" text="%animations.columns.tracelength" />
 			<TableColumn fx:id="time" minWidth="65.0" prefWidth="65.0"
 				text="%animations.columns.time" />
