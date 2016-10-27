@@ -338,6 +338,7 @@ public final class MenuController extends MenuBar {
 		webEnging.load("https://probjira.atlassian.net/secure/RapidBoard.jspa?rapidView=8");
 		
 		Scene scene = new Scene(webView);
+		scene.getStylesheets().add("prob.css");
 		
 		Stage stage = new Stage();
 		stage.setScene(scene);
