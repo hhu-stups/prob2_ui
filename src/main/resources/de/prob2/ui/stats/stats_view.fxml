@@ -84,7 +84,7 @@
 				</ToggleButton>
 				<VBox fx:id="extendedStatsBox" AnchorPane.topAnchor="20.0"
 					AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
-					AnchorPane.bottomAnchor="5.0" visible="false">
+					AnchorPane.bottomAnchor="5.0" visible="false" spacing="10.0">
 					<AnchorPane>
 						<Label alignment="CENTER" prefHeight="16.0" text="%stats.nodeStats"
 							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
