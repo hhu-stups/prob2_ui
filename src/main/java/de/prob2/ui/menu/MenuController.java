@@ -1,8 +1,18 @@
 package de.prob2.ui.menu;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
@@ -23,19 +33,19 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -318,6 +328,21 @@ public final class MenuController extends MenuBar {
 			tk.setGlobalMenuBar(this);
 			tk.setApplicationMenu(this.getMenus().get(0));
 		}
+	}
+	
+	@FXML
+	private void handleReportBug(ActionEvent event) {
+		WebView webView = new WebView();
+		WebEngine webEnging = webView.getEngine();
+		webEnging.setJavaScriptEnabled(true);
+		webEnging.load("https://probjira.atlassian.net/secure/RapidBoard.jspa?rapidView=8");
+		
+		Scene scene = new Scene(webView);
+		
+		Stage stage = new Stage();
+		stage.setScene(scene);
+		stage.setTitle("Report Bug");
+		stage.show();
 	}
 
 }
