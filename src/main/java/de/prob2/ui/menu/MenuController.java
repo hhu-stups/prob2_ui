@@ -2,6 +2,8 @@ package de.prob2.ui.menu;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,6 +60,7 @@ public final class MenuController extends MenuBar {
 	private final CurrentTrace currentTrace;
 	private final FormulaGenerator formulaGenerator;
 	private final RecentFiles recentFiles;
+	private final URL url;
 	
 	private Window window;
 
@@ -79,7 +82,7 @@ public final class MenuController extends MenuBar {
 		final CurrentTrace currentTrace,
 		final FormulaGenerator formulaGenerator,
 		final RecentFiles recentFiles
-		) {
+		) throws MalformedURLException {
 		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
@@ -87,8 +90,9 @@ public final class MenuController extends MenuBar {
 		this.currentTrace = currentTrace;
 		this.formulaGenerator = formulaGenerator;
 		this.recentFiles = recentFiles;
-		
-		loader.setLocation(getClass().getResource("menu.fxml"));
+		this.url = getClass().getResource("menu.fxml");
+
+		loader.setLocation(this.url);
 		loader.setRoot(this);
 		loader.setController(this);
 		try {
@@ -175,22 +179,22 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleLoadDefault() {
-		loadPreset("../main.fxml");
+		loadPreset("main.fxml");
 	}
 
 	@FXML
 	private void handleLoadDetached() {
-		loadPreset("../detachedHistory.fxml");
+		loadPreset("detachedHistory.fxml");
 	}
 
 	@FXML
 	private void handleLoadDetached2() {
-		loadPreset("../detachedHistoryAndStatistics.fxml");
+		loadPreset("detachedHistoryAndStatistics.fxml");
 	}
 
 	@FXML
 	private void handleLoadStacked() {
-		loadPreset("../stackedLists.fxml");
+		loadPreset("stackedLists.fxml");
 	}
 
 	@FXML
@@ -310,7 +314,16 @@ public final class MenuController extends MenuBar {
 
 	private void loadPreset(String location) {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-		loader.setLocation(getClass().getResource(location));
+		String dir = this.url.toString().replace("menu/menu.fxml","");
+		try {
+			loader.setLocation(new URL(dir + location));
+		} catch (MalformedURLException e){
+			logger.error("URL not found", e);
+			Alert alert = new Alert(Alert.AlertType.ERROR, "URL not found:\n" + e);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
+			return;
+		}
 		Parent root;
 		try {
 			root = loader.load();
