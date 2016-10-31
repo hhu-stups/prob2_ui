@@ -19,7 +19,8 @@ import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
-
+import de.prob2.ui.consoles.b.BConsole;
+import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.states.ClassBlacklist;
 
@@ -32,6 +33,8 @@ public final class Config {
 	private static final class ConfigData {
 		private int maxRecentFiles;
 		private List<String> recentFiles;
+		private int maxGroovyConsoleEntries;
+		private List<String> groovyConsoleEntries;
 		private List<String> statesViewHiddenClasses;
 	}
 	
@@ -42,14 +45,19 @@ public final class Config {
 	private final Gson gson;
 	private final ClassBlacklist classBlacklist;
 	private final RecentFiles recentFiles;
-	
+	private final List<String> groovyConsoleEntries;
 	private final ConfigData defaultData;
+	private final GroovyConsole groovyConsole;
+	private final BConsole bConsole;
 	
 	@Inject
-	private Config(final ClassBlacklist classBlacklist, final RecentFiles recentFiles) {
+	private Config(final ClassBlacklist classBlacklist, final RecentFiles recentFiles, final GroovyConsole groovyConsole, final BConsole bConsole) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.classBlacklist = classBlacklist;
 		this.recentFiles = recentFiles;
+		this.groovyConsoleEntries = new ArrayList<>();
+		this.groovyConsole = groovyConsole;
+		this.bConsole = bConsole;
 		
 		try (final Reader defaultReader = new InputStreamReader(Config.class.getResourceAsStream("default.json"), "UTF-8")) {
 			this.defaultData = gson.fromJson(defaultReader, ConfigData.class);
@@ -84,12 +92,18 @@ public final class Config {
 			configData.recentFiles = new ArrayList<>(this.defaultData.recentFiles);
 		}
 		
+		if(configData.groovyConsoleEntries == null) {
+			configData.maxGroovyConsoleEntries = this.defaultData.maxGroovyConsoleEntries;
+			configData.groovyConsoleEntries = new ArrayList<>(this.defaultData.maxGroovyConsoleEntries);
+		}
+		
 		if (configData.statesViewHiddenClasses == null) {
 			configData.statesViewHiddenClasses = new ArrayList<>(this.defaultData.statesViewHiddenClasses);
 		}
 		
 		this.recentFiles.setMaximum(configData.maxRecentFiles);
 		this.recentFiles.setAll(configData.recentFiles);
+		this.groovyConsoleEntries.addAll(configData.groovyConsoleEntries);
 		
 		for (String name : configData.statesViewHiddenClasses) {
 			Class<? extends AbstractElement> clazz;
@@ -111,6 +125,8 @@ public final class Config {
 		final ConfigData configData = new ConfigData();
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
+		configData.maxGroovyConsoleEntries = 100;
+		configData.groovyConsoleEntries = new ArrayList<>(this.groovyConsoleEntries);
 		configData.statesViewHiddenClasses = new ArrayList<>();
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
@@ -123,5 +139,9 @@ public final class Config {
 		} catch (IOException exc) {
 			logger.warn("Failed to save config file", exc);
 		}
+	}
+	
+	public List<String> getConsoleEntries() {
+		return groovyConsoleEntries;
 	}
 }

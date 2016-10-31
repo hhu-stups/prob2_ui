@@ -9,6 +9,7 @@ import de.prob2.ui.prob2fx.CurrentStage;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -18,13 +19,10 @@ import org.slf4j.LoggerFactory;
 public final class GroovyConsoleStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyConsoleStage.class);
 
-	@FXML private GroovyConsole groovyConsole;
-	
-	private final GroovyInterpreter interpreter;
-
+	private GroovyConsole groovyConsole;
+		
 	@Inject
-	private GroovyConsoleStage(FXMLLoader loader, CurrentStage currentStage, GroovyInterpreter interpreter) {
-		this.interpreter = interpreter;
+	private GroovyConsoleStage(FXMLLoader loader, CurrentStage currentStage, GroovyConsole groovyConsole) {
 		try {
 			loader.setLocation(getClass().getResource("groovy_console_stage.fxml"));
 			loader.setRoot(this);
@@ -34,11 +32,11 @@ public final class GroovyConsoleStage extends Stage {
 			logger.error("loading fxml failed", e);
 		}
 		currentStage.register(this);
+		this.getScene().setRoot(new StackPane(groovyConsole));
 	}
 	
 	@FXML
 	public void initialize() {
-		groovyConsole.setInterpreter(interpreter);
 		this.setOnCloseRequest(e -> groovyConsole.closeObjectStage());
 	}
 }

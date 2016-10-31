@@ -12,6 +12,8 @@ import de.prob.MainModule;
 import de.prob2.ui.AnimationPerspective;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.config.Config;
+import de.prob2.ui.consoles.b.BConsole;
+import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MenuController;
@@ -46,6 +48,8 @@ public class ProB2Module extends AbstractModule {
 		bind(CurrentStateSpace.class);
 		bind(CurrentTrace.class);
 		bind(FormulaGenerator.class);
+		bind(GroovyConsole.class);
+		bind(BConsole.class);
 		bind(RecentFiles.class);
 		bind(ResourceBundle.class).toInstance(bundle);
 

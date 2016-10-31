@@ -7,8 +7,8 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.prob2fx.CurrentStage;
 
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -18,15 +18,8 @@ import org.slf4j.LoggerFactory;
 public final class BConsoleStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(BConsoleStage.class);
 
-	@FXML
-	private BConsole bConsole;
-	
-	private final BInterpreter interpreter;
-
-
 	@Inject
-	private BConsoleStage(FXMLLoader loader, CurrentStage currentStage, BInterpreter interpreter) {
-		this.interpreter = interpreter;
+	private BConsoleStage(FXMLLoader loader, CurrentStage currentStage, BConsole bConsole) {
 		try {
 			loader.setLocation(getClass().getResource("b_console_stage.fxml"));
 			loader.setRoot(this);
@@ -36,11 +29,7 @@ public final class BConsoleStage extends Stage {
 			logger.error("loading fxml failed", e);
 		}
 		currentStage.register(this);
-	}
-	
-	@FXML
-	public void initialize() {
-		bConsole.setInterpreter(interpreter);
+		this.getScene().setRoot(new StackPane(bConsole));
 	}
 
 }

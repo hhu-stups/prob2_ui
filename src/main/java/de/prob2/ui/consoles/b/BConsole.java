@@ -1,19 +1,21 @@
 package de.prob2.ui.consoles.b;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import de.prob2.ui.consoles.Console;
 import javafx.scene.input.KeyEvent;
 
+@Singleton
 public class BConsole extends Console {
 	
 	private BInterpreter interpreter;
 
-	public BConsole() {
+	@Inject
+	private BConsole(BInterpreter interpreter) {
 		super();
-		this.appendText("Prob 2.0 B Console \n >");
-	}
-	
-	public void setInterpreter(BInterpreter interpreter) {
 		this.interpreter = interpreter;
+		this.appendText("Prob 2.0 B Console \n >");
 	}
 
 	@Override

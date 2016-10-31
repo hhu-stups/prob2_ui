@@ -2,6 +2,9 @@ package de.prob2.ui.consoles.groovy;
 
 import java.io.File;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
@@ -12,16 +15,18 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 
-
+@Singleton
 public class GroovyConsole extends Console {
 	
 	private GroovyInterpreter interpreter;
 	
-	public GroovyConsole() {
+	@Inject
+	public GroovyConsole(GroovyInterpreter interpreter) {
 		super();
+		this.interpreter = interpreter;
 		this.appendText("Prob 2.0 Groovy Console \n >");
 	}
-	
+		
 	public void reset() {
 		this.setText("Prob 2.0 Groovy Console");
 	}
@@ -144,6 +149,7 @@ public class GroovyConsole extends Console {
 		
 	public void closeObjectStage() {
 		interpreter.closeObjectStage();
-	}	
+	}
+
 
 }
