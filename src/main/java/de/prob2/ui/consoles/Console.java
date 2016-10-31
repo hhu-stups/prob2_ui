@@ -14,12 +14,13 @@ import javafx.scene.input.MouseEvent;
 
 public abstract class Console extends TextArea {
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS);
-	
+    
 	protected List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
 	protected ConsoleSearchHandler searchHandler;
+	
 
 	public Console() {
 		this.setContextMenu(new ContextMenu());
@@ -353,7 +354,7 @@ public abstract class Console extends TextArea {
 	public List<String> getInstructionEntries() {
 		//last 100 Entries
 		List<String> entries = new ArrayList<>();
-		for(int i = instructions.size() - 1; i >= 0 && i >= instructions.size() - 100; i--) {
+		for(int i = Math.max(instructions.size() - 100,0); i < instructions.size(); i++) {
 			entries.add(instructions.get(i).getInstruction());
 		}
 		return entries;

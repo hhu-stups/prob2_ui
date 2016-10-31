@@ -16,7 +16,7 @@ public final class BConsoleStage extends Stage {
 	private BConsoleStage(CurrentStage currentStage, BConsole bConsole) {
 		this.setTitle("B Console");
 		this.setScene(new Scene(new StackPane(bConsole), 800, 600));
-		this.getScene().getStylesheets().add(getClass().getResource("../../../../../prob.css").toString());
+		this.getScene().getStylesheets().add(getClass().getResource("../../../../../prob.css").toExternalForm());
 		currentStage.register(this);
 	}
 
