@@ -346,4 +346,21 @@ public abstract class Console extends TextArea {
 		return currentPosInLine;
 	}
 	
+	public List<ConsoleInstruction> getInstructions() {
+		return instructions;
+	}
+	
+	public List<String> getInstructionEntries() {
+		//last 100 Entries
+		List<String> entries = new ArrayList<>();
+		for(int i = instructions.size() - 1; i >= 0 && i >= instructions.size() - 100; i--) {
+			entries.add(instructions.get(i).getInstruction());
+		}
+		return entries;
+	}
+	
+	public void increaseCounter() {
+		posInList++;
+	}
+	
 }
