@@ -16,12 +16,15 @@ import com.google.inject.Inject;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.classicalb.Operation;
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.BEvent;
+import de.prob.model.representation.Constant;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -184,8 +187,35 @@ public final class OperationsView extends AnchorPane {
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
 	}
+	
+	private List<String> extractSetupConstantsParams(final Trace trace, final Transition transition) {
+		// It seems that there is no way to easily find out the constant values behind a $setup_constants transition.
+		// So we look at the values of all constants in the state after each transition.
+		final Set<IEvalElement> constantsFormulas = new HashSet<>();
+		for (final Constant c : trace.getStateSpace().getMainComponent().getChildrenOfType(Constant.class)) {
+			constantsFormulas.add(c.getFormula());
+		}
+		
+		for (final IEvalElement ee : constantsFormulas) {
+			trace.getStateSpace().subscribe(this, ee);
+		}
+		
+		final List<String> params = new ArrayList<>();
+		final Map<IEvalElement, AbstractEvalResult> values = transition.getDestination().getValues();
+		for (final Map.Entry<IEvalElement, AbstractEvalResult> entry : values.entrySet()) {
+			if (constantsFormulas.contains(entry.getKey())) {
+				params.add(entry.getKey() + "=" + entry.getValue());
+			}
+		}
+		
+		for (final IEvalElement ee : constantsFormulas) {
+			trace.getStateSpace().unsubscribe(this, ee);
+		}
+		
+		return params;
+	}
 
-	private void update(Trace trace) {
+	private void update(final Trace trace) {
 		if (trace == null) {
 			currentModel = null;
 			opNames = new ArrayList<>();
@@ -197,19 +227,27 @@ public final class OperationsView extends AnchorPane {
 			updateModel(trace);
 		}
 		events = new ArrayList<>();
-		Set<Transition> operations = trace.getNextTransitions(true);
-		Set<String> notEnabled = new HashSet<>(opNames);
-		Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
+		final Set<Transition> operations = trace.getNextTransitions(true);
+		final Set<String> notEnabled = new HashSet<>(opNames);
+		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		for (Transition transition : operations) {
 			final String name = extractPrettyName(transition.getName());
 			notEnabled.remove(name);
+			
+			final List<String> params;
+			if ("SETUP_CONSTANTS".equals(name)) {
+				params = this.extractSetupConstantsParams(trace, transition);
+			} else {
+				params = transition.getParams();
+			}
+			
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			logger.debug("{} {}", name, errored);
 			OperationItem operationItem = new OperationItem(
 				transition.getId(),
 				name,
-				transition.getParams(),
+				params,
 				transition.getReturnValues(),
 				withTimeout.contains(name) ? OperationItem.Status.TIMEOUT : OperationItem.Status.ENABLED,
 				explored,
