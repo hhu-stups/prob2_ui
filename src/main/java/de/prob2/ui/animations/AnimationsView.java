@@ -116,10 +116,10 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		for (Trace t : traces) {
 			AbstractModel model = t.getModel();
 			AbstractElement mainComponent = t.getStateSpace().getMainComponent();
-			String modelName = mainComponent != null ? mainComponent.toString() : model.getModelFile().getName();
+			String modelName = mainComponent == null ? model.getModelFile().getName() : mainComponent.toString();
 			Transition op = t.getCurrentTransition();
-			String lastOp = op != null ? op.getPrettyRep() : "";
-			String steps = t.getTransitionList().size() + "";
+			String lastOp = op == null ? "" : op.getPrettyRep().replace("<--", "←");
+			String steps = Integer.toString(t.getTransitionList().size());
 			boolean isCurrent = t.equals(currentTrace);
 			boolean isProtected = animations.getProtectedTraces().contains(t.getUUID());
 			Animation a = new Animation(modelName, lastOp, steps, t, isCurrent, isProtected);
