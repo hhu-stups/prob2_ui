@@ -37,12 +37,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.GridPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -287,10 +290,13 @@ public final class MenuController extends MenuBar {
 		dialog.setHeaderText("Enter Formula for Visualization");
 		dialog.setContentText("Enter Formula: ");
 		dialog.getDialogPane().getStylesheets().add("prob.css");
+		dialog.setResizable(false);
+		dialog.getDialogPane().setMinSize(720, 480);
 		Optional<String> result = dialog.showAndWait();
 		if (result.isPresent()) {
-			formulaGenerator.parseAndShowFormula(result.get());
+			formulaGenerator.parseAndShowFormula(result.get(), dialog);
 		}
+
 	}
 
 	@FXML

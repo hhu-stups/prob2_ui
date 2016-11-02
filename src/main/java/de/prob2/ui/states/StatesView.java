@@ -28,6 +28,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
@@ -196,7 +197,7 @@ public final class StatesView extends AnchorPane {
 	}
 
 	private void visualizeExpression(AbstractFormulaElement formula) {
-		formulaGenerator.showFormula(formula.getFormula());
+		formulaGenerator.showFormula(formula.getFormula(), new TextInputDialog());
 	}
 
 	@FXML

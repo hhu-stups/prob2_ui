@@ -16,7 +16,7 @@ public final class GroovyConsoleStage extends Stage {
 	private GroovyConsoleStage(CurrentStage currentStage, GroovyConsole groovyConsole) {
 		this.setTitle("Groovy Console");
 		this.setScene(new Scene(new StackPane(groovyConsole), 800, 600));
-		this.getScene().getStylesheets().add(getClass().getResource("../../../../../prob.css").toExternalForm());
+		this.getScene().getStylesheets().add("prob.css");
 		this.setOnCloseRequest(e -> groovyConsole.closeObjectStage());
 		currentStage.register(this);
 	}
