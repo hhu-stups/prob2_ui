@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
+
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.b.BConsole;
@@ -40,6 +42,7 @@ public final class Config {
 		private List<String> statesViewHiddenClasses;
 	}
 	
+	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
 	private static final File LOCATION = new File(Main.getProBDirectory() + File.separator + "prob2ui" + File.separator + "config.json");
 	
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
@@ -47,8 +50,6 @@ public final class Config {
 	private final Gson gson;
 	private final ClassBlacklist classBlacklist;
 	private final RecentFiles recentFiles;
-	private final List<String> groovyConsoleEntries;
-	private final List<String> bConsoleEntries;
 	private final ConfigData defaultData;
 	private final GroovyConsole groovyConsole;
 	private final BConsole bConsole;
@@ -58,12 +59,10 @@ public final class Config {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.classBlacklist = classBlacklist;
 		this.recentFiles = recentFiles;
-		this.groovyConsoleEntries = new ArrayList<>();
-		this.bConsoleEntries = new ArrayList<>();
 		this.groovyConsole = groovyConsole;
 		this.bConsole = bConsole;
 		
-		try (final Reader defaultReader = new InputStreamReader(Config.class.getResourceAsStream("default.json"), "UTF-8")) {
+		try (final Reader defaultReader = new InputStreamReader(Config.class.getResourceAsStream("default.json"), CONFIG_CHARSET)) {
 			this.defaultData = gson.fromJson(defaultReader, ConfigData.class);
 		} catch (FileNotFoundException exc) {
 			throw new IllegalStateException("Default config file not found", exc);
@@ -78,40 +77,42 @@ public final class Config {
 		this.load();
 	}
 	
-	public void load() {
-		ConfigData configData;
-		try (final Reader reader = new InputStreamReader(new FileInputStream(LOCATION), "UTF-8")) {
-			configData = gson.fromJson(reader, ConfigData.class);
-		} catch (FileNotFoundException ignored) { // NOSONAR
-			// Config file doesn't exist yet, use the defaults
-			configData = this.defaultData;
-		} catch (IOException exc) {
-			logger.warn("Failed to open config file", exc);
-			return;
-		}
-		
+	private void replaceMissingWithDefaults(final ConfigData configData) {
 		// If some keys are null (for example when loading a config from a previous version that did not have those keys), replace them with their values from the default config.
 		if (configData.recentFiles == null) {
 			configData.maxRecentFiles = this.defaultData.maxRecentFiles;
 			configData.recentFiles = new ArrayList<>(this.defaultData.recentFiles);
 		}
 		
-		if(configData.groovyConsoleEntries == null) {
+		if (configData.groovyConsoleEntries == null) {
 			configData.groovyConsoleEntries = new ArrayList<>(this.defaultData.groovyConsoleEntries);
 		}
 		
-		if(configData.bConsoleEntries == null) {
+		if (configData.bConsoleEntries == null) {
 			configData.bConsoleEntries = new ArrayList<>(this.defaultData.bConsoleEntries);
 		}
 		
 		if (configData.statesViewHiddenClasses == null) {
 			configData.statesViewHiddenClasses = new ArrayList<>(this.defaultData.statesViewHiddenClasses);
 		}
+	}
+	
+	public void load() {
+		ConfigData configData;
+		try (final Reader reader = new InputStreamReader(new FileInputStream(LOCATION), CONFIG_CHARSET)) {
+			configData = gson.fromJson(reader, ConfigData.class);
+		} catch (FileNotFoundException exc) {
+			logger.info("Config file not found, loading default settings", exc);
+			configData = this.defaultData;
+		} catch (IOException exc) {
+			logger.warn("Failed to open config file", exc);
+			return;
+		}
+		
+		this.replaceMissingWithDefaults(configData);
 		
 		this.recentFiles.setMaximum(configData.maxRecentFiles);
 		this.recentFiles.setAll(configData.recentFiles);
-		this.groovyConsoleEntries.addAll(configData.groovyConsoleEntries);
-		this.bConsoleEntries.addAll(configData.bConsoleEntries);
 		
 		for (String name : configData.statesViewHiddenClasses) {
 			Class<? extends AbstractElement> clazz;
@@ -150,7 +151,7 @@ public final class Config {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
 		}
 		
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(LOCATION), "UTF-8")) {
+		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(LOCATION), CONFIG_CHARSET)) {
 			gson.toJson(configData, writer);
 		} catch (FileNotFoundException exc) {
 			logger.warn("Failed to create config file", exc);

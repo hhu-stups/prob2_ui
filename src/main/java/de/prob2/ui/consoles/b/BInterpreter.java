@@ -80,9 +80,9 @@ public class BInterpreter implements IAnimationChangeListener, Executable {
 				notifyModelChange(modelName);
 			} else if (currentTrace.getModel().getFormalismType() == FormalismType.B) {
 				// ignore models that are not B models
-				String modelName = currentTrace.getStateSpace().getMainComponent().toString(); //NOSONAR
-				if (!modelName.equals(this.modelName)) {
-					this.modelName = modelName;
+				String mainModelName = currentTrace.getStateSpace().getMainComponent().toString();
+				if (!mainModelName.equals(this.modelName)) {
+					this.modelName = mainModelName;
 					notifyModelChange(this.modelName);
 				}
 			}
