@@ -2,7 +2,7 @@ package de.prob2.ui.operations;
 
 import java.util.List;
 
-public class Operation {
+public class OperationItem {
 	public enum Status {
 		DISABLED, ENABLED, TIMEOUT
 	}
@@ -15,12 +15,12 @@ public class Operation {
 	final boolean explored;
 	final boolean errored;
 
-	public Operation(
+	public OperationItem(
 		final String id,
 		final String name,
 		final List<String> params,
 		final List<String> returnValues,
-		final Operation.Status status,
+		final OperationItem.Status status,
 		final boolean explored,
 		final boolean errored
 	) {
@@ -50,6 +50,6 @@ public class Operation {
 	}
 
 	public boolean isEnabled() {
-		return this.status == Operation.Status.ENABLED;
+		return this.status == OperationItem.Status.ENABLED;
 	}
 }

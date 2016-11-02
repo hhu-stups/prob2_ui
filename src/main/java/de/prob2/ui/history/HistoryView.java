@@ -4,13 +4,11 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.value.ChangeListener;
@@ -23,6 +21,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class HistoryView extends AnchorPane {
 	private static class TransitionCell extends ListCell<HistoryItem> {
@@ -40,7 +41,7 @@ public final class HistoryView extends AnchorPane {
 					// Evaluate the transition so the pretty rep includes
 					// argument list and result
 					item.transition.evaluate();
-					text = new Text(item.transition.getPrettyRep());
+					text = new Text(item.transition.getPrettyRep().replace("<--", "←"));
 				}
 
 				switch (item.status) {

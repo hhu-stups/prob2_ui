@@ -38,7 +38,7 @@ public class GroovyCodeCompletionHandler {
 		if(object == null) {
 			return;
 		}
-		Class<? extends Object> clazz = object.getClass();
+		Class<?> clazz = object.getClass();
 		for(int i = 1; i < methods.length; i++) {
 			fillAllMethodsAndProperties(clazz, GroovyMethodOption.NONSTATIC);
 			for(GroovyAbstractItem item: currentSuggestions) {
@@ -64,15 +64,15 @@ public class GroovyCodeCompletionHandler {
 			return;
 		}
 		for (Package pack : packages) {
-		    String fullClassName= pack.getName() + "." + methods[methods.length - 1];
-		    Class <? extends Object> clazz = null;
-		    try {
-		        clazz = Class.forName(fullClassName);
-	    		fillAllMethodsAndProperties(clazz, GroovyMethodOption.STATIC);
+			String fullClassName = pack.getName() + "." + methods[methods.length - 1];
+			Class<?> clazz = null;
+			try {
+				clazz = Class.forName(fullClassName);
+				fillAllMethodsAndProperties(clazz, GroovyMethodOption.STATIC);
 				showSuggestions(clazz, GroovyMethodOption.STATIC);
-		    } catch (ClassNotFoundException ignored) { //NOSONAR
-		        // Just try with the next package if the current fullClassName does not fit any classes
-		    }
+			} catch (ClassNotFoundException ignored) { // NOSONAR
+				// Just try with the next package if the current fullClassName does not fit any classes
+			}
 		}
 		if(action == CodeCompletionTriggerAction.TRIGGER) {
 			refresh(currentSuggestion);
@@ -88,7 +88,7 @@ public class GroovyCodeCompletionHandler {
 		}
 	}
 		
-	private void fillAllMethodsAndProperties(Class <? extends Object> clazz, GroovyMethodOption option) {
+	private void fillAllMethodsAndProperties(Class <?> clazz, GroovyMethodOption option) {
 		currentSuggestions.clear();
 		fillMethodsAndProperties(clazz, option);
 		MetaPropertiesHandler.handleMethods(clazz, currentSuggestions, option);
@@ -106,7 +106,7 @@ public class GroovyCodeCompletionHandler {
 		suggestions.addAll(currentSuggestions);
 	}
 		
-	private void fillMethodsAndProperties(Class <? extends Object> clazz, GroovyMethodOption option) {
+	private void fillMethodsAndProperties(Class <?> clazz, GroovyMethodOption option) {
 		for(Method m : clazz.getMethods()) {
 			if((option == GroovyMethodOption.ALL) || (option == GroovyMethodOption.NONSTATIC && !Modifier.isStatic(m.getModifiers())) || (option == GroovyMethodOption.STATIC && Modifier.isStatic(m.getModifiers()))) {
 				currentSuggestions.add(new GroovyClassPropertyItem(m));
@@ -118,7 +118,7 @@ public class GroovyCodeCompletionHandler {
 	}
 	
 	
-	private void showSuggestions(Class <? extends Object> clazz, GroovyMethodOption option) {
+	private void showSuggestions(Class <?> clazz, GroovyMethodOption option) {
 		currentSuggestions.clear();
 		suggestions.clear();
 		fillMethodsAndProperties(clazz, option);

@@ -1,6 +1,8 @@
 {
 	"maxRecentFiles": 10,
 	"recentFiles": [],
+	"groovyConsoleEntries": [],
+	"bConsoleEntries": [],
 	"statesViewHiddenClasses": [
 		"de.prob.model.representation.Action"
 	]

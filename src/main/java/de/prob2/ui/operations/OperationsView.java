@@ -13,6 +13,10 @@ import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
+import de.prob.model.classicalb.Operation;
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
 import de.prob.model.representation.AbstractElement;
@@ -43,17 +47,14 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 public final class OperationsView extends AnchorPane {
 	private enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
 
-	private static final class OperationsCell extends ListCell<Operation> {
+	private static final class OperationsCell extends ListCell<OperationItem> {
 		@Override
-		protected void updateItem(Operation item, boolean empty) {
+		protected void updateItem(OperationItem item, boolean empty) {
 			super.updateItem(item, empty);
 			if (item != null && !empty) {
 				setText(item.toString());
@@ -93,7 +94,7 @@ public final class OperationsView extends AnchorPane {
 	// Matches empty string or number
 	private static final Pattern NUMBER_OR_EMPTY_PATTERN = Pattern.compile("^$|^\\d+$");
 
-	@FXML private ListView<Operation> opsListView;
+	@FXML private ListView<OperationItem> opsListView;
 	@FXML private Button backButton;
 	@FXML private Button forwardButton;
 	@FXML private Button searchButton;
@@ -110,13 +111,13 @@ public final class OperationsView extends AnchorPane {
 	private AbstractModel currentModel;
 	private List<String> opNames = new ArrayList<>();
 	private Map<String, List<String>> opToParams = new HashMap<>();
-	private List<Operation> events = new ArrayList<>();
+	private List<OperationItem> events = new ArrayList<>();
 	private boolean showNotEnabled = true;
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
 	
-	private final Comparator<Operation> zToA = (o1, o2) -> {
+	private final Comparator<OperationItem> zToA = (o1, o2) -> {
 		if (o1.name.equals(o2.name)) {
 			return -compareParams(o1.params, o2.params);
 		} else if (o1.name.equalsIgnoreCase(o2.name)) {
@@ -126,7 +127,7 @@ public final class OperationsView extends AnchorPane {
 		}
 	};
 	
-	private final Comparator<Operation> aToZ = (o1, o2) -> {
+	private final Comparator<OperationItem> aToZ = (o1, o2) -> {
 		if (o1.name.equals(o2.name)) {
 			return compareParams(o1.params, o2.params);
 		} else if (o1.name.equalsIgnoreCase(o2.name)) {
@@ -136,7 +137,7 @@ public final class OperationsView extends AnchorPane {
 		}
 	};
 	
-	private final Comparator<Operation> modelOrder = (o1, o2) -> {
+	private final Comparator<OperationItem> modelOrder = (o1, o2) -> {
 		if (o1.name.equals(o2.name)) {
 			return compareParams(o1.params, o2.params);
 		} else {
@@ -205,21 +206,21 @@ public final class OperationsView extends AnchorPane {
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			logger.debug("{} {}", name, errored);
-			Operation operation = new Operation(
+			OperationItem operationItem = new OperationItem(
 				transition.getId(),
 				name,
 				transition.getParams(),
 				transition.getReturnValues(),
-				withTimeout.contains(name) ? Operation.Status.TIMEOUT : Operation.Status.ENABLED,
+				withTimeout.contains(name) ? OperationItem.Status.TIMEOUT : OperationItem.Status.ENABLED,
 				explored,
 				errored
 			);
-			events.add(operation);
+			events.add(operationItem);
 		}
 		if (showNotEnabled) {
 			for (String s : notEnabled) {
 				if (!"INITIALISATION".equals(s)) {
-					events.add(new Operation(s, s, opToParams.get(s), Collections.emptyList(), Operation.Status.DISABLED, false, false));
+					events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(), OperationItem.Status.DISABLED, false, false));
 				}
 			}
 		}
@@ -290,9 +291,9 @@ public final class OperationsView extends AnchorPane {
 		opsListView.getItems().setAll(applyFilter(filter));
 	}
 
-	private List<Operation> applyFilter(final String filter) {
-		List<Operation> newOps = new ArrayList<>();
-		for (Operation op : events) {
+	private List<OperationItem> applyFilter(final String filter) {
+		List<OperationItem> newOps = new ArrayList<>();
+		for (OperationItem op : events) {
 			if (op.name.startsWith(filter)) {
 				newOps.add(op);
 			}
@@ -301,7 +302,7 @@ public final class OperationsView extends AnchorPane {
 	}
 
 	private void doSort() {
-		final Comparator<Operation> comparator;
+		final Comparator<OperationItem> comparator;
 		switch (sortMode) {
 		case MODEL_ORDER:
 			comparator = modelOrder;
@@ -391,8 +392,8 @@ public final class OperationsView extends AnchorPane {
 			for (EventParameter eParam : ((Event) e).getParameters()) {
 				paramList.add(eParam.getName());
 			}
-		} else if (e instanceof de.prob.model.classicalb.Operation) {
-			paramList.addAll(((de.prob.model.classicalb.Operation) e).getParameters());
+		} else if (e instanceof Operation) {
+			paramList.addAll(((Operation) e).getParameters());
 		}
 		return paramList;
 	}
