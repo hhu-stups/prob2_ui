@@ -51,6 +51,16 @@ import javafx.stage.Window;
 
 @Singleton
 public final class MenuController extends MenuBar {
+	private static final URL FXML_ROOT;
+	
+	static {
+		try {
+			FXML_ROOT = new URL(MenuController.class.getResource("menu.fxml"), "..");
+		} catch (MalformedURLException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+	
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 	
 	private final Injector injector;
@@ -60,7 +70,6 @@ public final class MenuController extends MenuBar {
 	private final CurrentTrace currentTrace;
 	private final FormulaGenerator formulaGenerator;
 	private final RecentFiles recentFiles;
-	private final URL url;
 	
 	private Window window;
 
@@ -82,7 +91,7 @@ public final class MenuController extends MenuBar {
 		final CurrentTrace currentTrace,
 		final FormulaGenerator formulaGenerator,
 		final RecentFiles recentFiles
-		) throws MalformedURLException {
+	) {
 		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
@@ -90,9 +99,8 @@ public final class MenuController extends MenuBar {
 		this.currentTrace = currentTrace;
 		this.formulaGenerator = formulaGenerator;
 		this.recentFiles = recentFiles;
-		this.url = getClass().getResource("menu.fxml");
 
-		loader.setLocation(this.url);
+		loader.setLocation(getClass().getResource("menu.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
 		try {
@@ -314,12 +322,11 @@ public final class MenuController extends MenuBar {
 
 	private void loadPreset(String location) {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-		String dir = this.url.toString().replace("menu/menu.fxml","");
 		try {
-			loader.setLocation(new URL(dir + location));
-		} catch (MalformedURLException e){
-			logger.error("URL not found", e);
-			Alert alert = new Alert(Alert.AlertType.ERROR, "URL not found:\n" + e);
+			loader.setLocation(new URL(FXML_ROOT, location));
+		} catch (MalformedURLException e) {
+			logger.error("Malformed location", e);
+			Alert alert = new Alert(Alert.AlertType.ERROR, "Malformed location:\n" + e);
 			alert.getDialogPane().getStylesheets().add("prob.css");
 			alert.showAndWait();
 			return;
