@@ -104,7 +104,7 @@ public final class ModelCheckStats extends AnchorPane {
 		if (modelChecker != null) {
 			ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
 			if (coverage != null) {
-				statsView.update(coverage);
+				statsView.updatExtendedStats(coverage);
 			}
 		}
 	}
@@ -129,7 +129,7 @@ public final class ModelCheckStats extends AnchorPane {
 		if (modelChecker != null) {
 			ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
 			if (coverage != null) {
-				statsView.update(coverage);
+				statsView.updatExtendedStats(coverage);
 				Number numNodes = coverage.getTotalNumberOfNodes();
 				Number numTrans = coverage.getTotalNumberOfTransitions();
 

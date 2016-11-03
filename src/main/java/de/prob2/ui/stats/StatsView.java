@@ -11,8 +11,8 @@ import com.google.inject.Inject;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.ComputeCoverageCommand;
-import de.prob.prolog.term.IntegerPrologTerm;
-import de.prob.prolog.term.ListPrologTerm;
+import de.prob.animator.command.ComputeStateSpaceStatsCommand;
+import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
@@ -49,16 +49,7 @@ public class StatsView extends ScrollPane {
 
 	private final CurrentTrace currentTrace;
 	private static final Logger logger = LoggerFactory.getLogger(StatsView.class);
-	private final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
-		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
-		if (to != null) {
-			to.getStateSpace().execute(cmd);
-			update(cmd.getResult());
-		} else {
-			update(cmd.new ComputeCoverageResult(new IntegerPrologTerm(0), new IntegerPrologTerm(0),
-					new ListPrologTerm(), new ListPrologTerm(), new ListPrologTerm()));
-		}
-	};
+	private final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> computeStats(to);
 
 	@Inject
 	public StatsView(final FXMLLoader loader, final CurrentTrace currentTrace) {
@@ -82,11 +73,9 @@ public class StatsView extends ScrollPane {
 		extendedStatsBox.managedProperty().bind(extendedStatsBox.visibleProperty());
 		statsBox.managedProperty().bind(statsBox.visibleProperty());
 		noStatsLabel.managedProperty().bind(noStatsLabel.visibleProperty());
-		
-		if (extendedStatsToggle.isSelected()) {
-			traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
-			this.currentTrace.addListener(traceChangeListener);
-		}
+
+		this.currentTrace.addListener(traceChangeListener);
+		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 	}
 
 	@FXML
@@ -95,14 +84,11 @@ public class StatsView extends ScrollPane {
 		Tooltip tooltip;
 		if (extendedStatsToggle.isSelected()) {
 			traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
-			this.currentTrace.addListener(traceChangeListener);
-			
+
 			icon = new FontAwesomeIconView(FontAwesomeIcon.CLOSE);
 			tooltip = new Tooltip("Close Extended Stats");
 			extendedStatsToggle.setText("");
 		} else {
-			this.currentTrace.removeListener(traceChangeListener);
-			
 			icon = new FontAwesomeIconView(FontAwesomeIcon.PLUS_CIRCLE);
 			tooltip = new Tooltip("Show Extended Stats");
 			extendedStatsToggle.setText("Show Extended Stats");
@@ -113,15 +99,35 @@ public class StatsView extends ScrollPane {
 		extendedStatsToggle.setTooltip(tooltip);
 	}
 
-	public void update(ComputeCoverageCommand.ComputeCoverageResult result) {
-		// Number numTrans = result.getTotalNumberOfTransitions();
-		// Number numNodes = result.getTotalNumberOfNodes();
-		//
-		// Platform.runLater(() -> {
-		// totalTransitions.setText(String.valueOf(numTrans));
-		// totalNodes.setText(String.valueOf(numNodes));
-		// });
+	private void computeStats(Trace trace) {
+		if (trace != null) {
+			final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
+			trace.getStateSpace().execute(stateSpaceStatsCmd);
+			updateSimpleStats(stateSpaceStatsCmd.getResult());
 
+			if (extendedStatsToggle.isSelected()) {
+				final ComputeCoverageCommand coverageCmd = new ComputeCoverageCommand();
+				trace.getStateSpace().execute(coverageCmd);
+				updatExtendedStats(coverageCmd.getResult());
+			}
+		} else {
+			noStatsLabel.setVisible(true);
+		}
+	}
+
+	private void updateSimpleStats(StateSpaceStats result) {
+		int nrTotalNodes = result.getNrTotalNodes();
+		int nrTotalTransitions = result.getNrTotalTransitions();
+		int nrProcessedNodes = result.getNrProcessedNodes();
+
+		Platform.runLater(() -> {
+			totalNodes.setText(Integer.toString(nrTotalNodes));
+			totalTransitions.setText(Integer.toString(nrTotalTransitions));
+			processedNodes.setText(Integer.toString(nrProcessedNodes));
+		});
+	}
+
+	public void updatExtendedStats(ComputeCoverageCommand.ComputeCoverageResult result) {
 		showStats(result.getNodes(), nodeStats);
 		showStats(result.getOps(), transStats);
 	}
