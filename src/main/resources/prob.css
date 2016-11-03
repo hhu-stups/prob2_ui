@@ -579,12 +579,6 @@
 
 /* =================== STATES VIEW =================== */
 
-.changed {
-	-fx-background-color: -prob-grey-20;
-}
-.changed:focused {
-	-fx-border-color: -prob-aqua;
-}
-.changed:focused .tree-table-cell {
-	-fx-text-fill: black;
+.changed .tree-table-cell {
+	-fx-font-weight: bold;
 }
