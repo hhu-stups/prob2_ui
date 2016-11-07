@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.ExpandFormulaCommand;
 import de.prob.animator.command.InsertFormulaForVisualizationCommand;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -20,6 +22,7 @@ import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
+
 @Singleton
 public final class FormulaGenerator {
 	private static final Logger logger = LoggerFactory.getLogger(FormulaGenerator.class);
@@ -38,7 +41,10 @@ public final class FormulaGenerator {
 		dialog.setContentText("Enter Formula: ");
 		dialog.getDialogPane().getStylesheets().add("prob.css");
 		dialog.setResizable(false);
-		dialog.getDialogPane().setMinSize(720, 320);
+		dialog.getDialogPane().setMinSize(720, 400);
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		icon.setGlyphSize(50);
+		dialog.setGraphic(icon);
 	}
 
 	private ExpandedFormula expandFormula(final IEvalElement formula) {
@@ -65,7 +71,9 @@ public final class FormulaGenerator {
 		} catch (EvaluationException | ProBError e) {
 			logger.error("loading fxml failed", e);
 			dialog.setHeaderText("Could not visualize formula!\n");
-			//dialog.setGraphic(new Alert(AlertType.ERROR).getGraphic());
+			FontAwesomeIconView icon = (new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE));
+			icon.setGlyphSize(50);
+			dialog.setGraphic(icon);
 			showParseError(e, dialog);
 		}
 	}
@@ -77,7 +85,9 @@ public final class FormulaGenerator {
 		} catch (EvaluationException e) {
 			logger.error("Evaluation of formula failed", e);
 			dialog.setHeaderText("Could not parse formula!\n");
-			//dialog.setGraphic(new Alert(AlertType.ERROR).getGraphic());
+			FontAwesomeIconView icon = (new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE));
+			icon.setGlyphSize(50);
+			dialog.setGraphic(icon);
 			showParseError(e, dialog);
 			return;
 		}
