@@ -66,7 +66,7 @@ public final class FormulaGenerator {
 		} catch (EvaluationException | ProBError e) {
 			logger.error("loading fxml failed", e);
 			dialog.setHeaderText("Could not visualize formula!\n");
-			FontAwesomeIconView icon = (new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE));
+			FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
 			icon.setGlyphSize(50);
 			dialog.setGraphic(icon);
 			showParseError(e, dialog);
@@ -80,7 +80,7 @@ public final class FormulaGenerator {
 		} catch (EvaluationException e) {
 			logger.error("Evaluation of formula failed", e);
 			dialog.setHeaderText("Could not parse formula!\n");
-			FontAwesomeIconView icon = (new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE));
+			FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
 			icon.setGlyphSize(50);
 			dialog.setGraphic(icon);
 			showParseError(e, dialog);
