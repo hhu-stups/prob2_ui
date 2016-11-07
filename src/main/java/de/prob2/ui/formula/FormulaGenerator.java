@@ -36,15 +36,10 @@ public final class FormulaGenerator {
 		this.currentTrace = currentTrace;
 		this.currentStage = currentStage;
 		this.dialog = dialog;
-		dialog.setTitle("Enter Formula for Visualization");
-		dialog.setHeaderText("Enter Formula for Visualization");
-		dialog.setContentText("Enter Formula: ");
-		dialog.getDialogPane().getStylesheets().add("prob.css");
-		dialog.setResizable(false);
-		dialog.getDialogPane().setMinSize(720, 400);
-		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
-		icon.setGlyphSize(50);
-		dialog.setGraphic(icon);
+		dialog.setOnCloseRequest(e-> {
+			setDefaultDialogSettings();
+		});
+		setDefaultDialogSettings();
 	}
 
 	private ExpandedFormula expandFormula(final IEvalElement formula) {
@@ -112,5 +107,19 @@ public final class FormulaGenerator {
 		if (result.isPresent()) {
 			parseAndShowFormula(result.get(), dialog);
 		}
+	}
+	
+	private void setDefaultDialogSettings() {
+		dialog.setTitle("Enter Formula for Visualization");
+		dialog.setHeaderText("Enter Formula for Visualization");
+		dialog.setContentText("Enter Formula: ");
+		dialog.getDialogPane().getStylesheets().add("prob.css");
+		dialog.setResizable(false);
+		dialog.getDialogPane().setMinSize(720, 400);
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		icon.setGlyphSize(50);
+		dialog.setGraphic(icon);
+		dialog.getDialogPane().setExpandableContent(null);
+		dialog.getDialogPane().setExpanded(false);
 	}
 }
