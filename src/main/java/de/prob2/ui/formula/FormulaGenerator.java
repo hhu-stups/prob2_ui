@@ -20,18 +20,25 @@ import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
-
 @Singleton
 public final class FormulaGenerator {
 	private static final Logger logger = LoggerFactory.getLogger(FormulaGenerator.class);
 	
 	private final CurrentTrace currentTrace;
 	private final CurrentStage currentStage;
+	private final TextInputDialog dialog;
 
 	@Inject
-	private FormulaGenerator(final CurrentTrace currentTrace, final CurrentStage currentStage) {
+	private FormulaGenerator(final CurrentTrace currentTrace, final CurrentStage currentStage, final TextInputDialog dialog) {
 		this.currentTrace = currentTrace;
 		this.currentStage = currentStage;
+		this.dialog = dialog;
+		dialog.setTitle("Enter Formula for Visualization");
+		dialog.setHeaderText("Enter Formula for Visualization");
+		dialog.setContentText("Enter Formula: ");
+		dialog.getDialogPane().getStylesheets().add("prob.css");
+		dialog.setResizable(false);
+		dialog.getDialogPane().setMinSize(720, 320);
 	}
 
 	private ExpandedFormula expandFormula(final IEvalElement formula) {
@@ -57,9 +64,8 @@ public final class FormulaGenerator {
 			fview.show();
 		} catch (EvaluationException | ProBError e) {
 			logger.error("loading fxml failed", e);
-			/*final Alert alert = new Alert(Alert.AlertType.ERROR, "Could not visualize formula:\n" + e);
-			alert.getDialogPane().getStylesheets().add("prob.css");
-			alert.showAndWait();*/
+			dialog.setHeaderText("Could not visualize formula!\n");
+			//dialog.setGraphic(new Alert(AlertType.ERROR).getGraphic());
 			showParseError(e, dialog);
 		}
 	}
@@ -70,10 +76,8 @@ public final class FormulaGenerator {
 			parsed = currentTrace.getModel().parseFormula(formula);
 		} catch (EvaluationException e) {
 			logger.error("Evaluation of formula failed", e);
-
-			//final Alert alert = new Alert(Alert.AlertType.ERROR, "Could not parse formula:\n" + e);
-			//alert.getDialogPane().getStylesheets().add("prob.css");
-			//alert.showAndWait();
+			dialog.setHeaderText("Could not parse formula!\n");
+			//dialog.setGraphic(new Alert(AlertType.ERROR).getGraphic());
 			showParseError(e, dialog);
 			return;
 		}
@@ -86,11 +90,17 @@ public final class FormulaGenerator {
 		e.printStackTrace(pw);
 		String exception = sw.toString();
 		TextArea exceptionText = new TextArea(exception);
+		exceptionText.setEditable(false);
+		exceptionText.getStyleClass().add("text-area-error");
 		dialog.getDialogPane().setExpandableContent(exceptionText);
+		dialog.getDialogPane().setExpanded(true);
+		openDialog();
+	}
+	
+	public void openDialog() {
 		Optional<String> result = dialog.showAndWait();
-		//dialog.showAndWait();
-		/*if (result.isPresent()) {
+		if (result.isPresent()) {
 			parseAndShowFormula(result.get(), dialog);
-		}*/
+		}
 	}
 }
