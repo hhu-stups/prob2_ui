@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<fx:root type="Stage" title="%newProject.stage.title" resizable="false"
+	xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene stylesheets="@/prob.css" width="500" height="500">
+			<AnchorPane>
+			</AnchorPane>
+		</Scene>
+	</scene>
+</fx:root>
+

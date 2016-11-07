@@ -29,6 +29,7 @@ import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.NewProjectStage;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -37,15 +38,12 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.GridPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -55,7 +53,7 @@ import javafx.stage.Window;
 @Singleton
 public final class MenuController extends MenuBar {
 	private static final URL FXML_ROOT;
-	
+
 	static {
 		try {
 			FXML_ROOT = new URL(MenuController.class.getResource("menu.fxml"), "..");
@@ -63,9 +61,9 @@ public final class MenuController extends MenuBar {
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
-	
+
 	private final Injector injector;
 	private final Api api;
 	private final AnimationSelector animationSelector;
@@ -73,28 +71,28 @@ public final class MenuController extends MenuBar {
 	private final CurrentTrace currentTrace;
 	private final FormulaGenerator formulaGenerator;
 	private final RecentFiles recentFiles;
-	
+
 	private Window window;
 
-	@FXML private Menu recentFilesMenu;
-	@FXML private MenuItem recentFilesPlaceholder;
-	@FXML private MenuItem clearRecentFiles;
-	@FXML private Menu windowMenu;
-	@FXML private MenuItem preferencesItem;
-	@FXML private MenuItem enterFormulaForVisualization;
-	@FXML private MenuItem aboutItem;
-	
+	@FXML
+	private Menu recentFilesMenu;
+	@FXML
+	private MenuItem recentFilesPlaceholder;
+	@FXML
+	private MenuItem clearRecentFiles;
+	@FXML
+	private Menu windowMenu;
+	@FXML
+	private MenuItem preferencesItem;
+	@FXML
+	private MenuItem enterFormulaForVisualization;
+	@FXML
+	private MenuItem aboutItem;
+
 	@Inject
-	private MenuController(
-		final FXMLLoader loader,
-		final Injector injector,
-		final Api api,
-		final AnimationSelector animationSelector,
-		final CurrentStage currentStage,
-		final CurrentTrace currentTrace,
-		final FormulaGenerator formulaGenerator,
-		final RecentFiles recentFiles
-	) {
+	private MenuController(final FXMLLoader loader, final Injector injector, final Api api,
+			final AnimationSelector animationSelector, final CurrentStage currentStage, final CurrentTrace currentTrace,
+			final FormulaGenerator formulaGenerator, final RecentFiles recentFiles) {
 		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
@@ -111,39 +109,39 @@ public final class MenuController extends MenuBar {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		
+
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
 			final MenuToolkit tk = MenuToolkit.toolkit();
-			
+
 			// Remove About menu item from Help
 			aboutItem.getParentMenu().getItems().remove(aboutItem);
 			aboutItem.setText("About ProB 2");
-			
+
 			// Remove Preferences menu item from Edit
 			preferencesItem.getParentMenu().getItems().remove(preferencesItem);
 			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
-			
+
 			// Create Mac-style application menu
 			final Menu applicationMenu = tk.createDefaultApplicationMenu("ProB 2");
 			this.getMenus().add(0, applicationMenu);
 			tk.setApplicationMenu(applicationMenu);
 			applicationMenu.getItems().setAll(aboutItem, new SeparatorMenuItem(), preferencesItem,
-				new SeparatorMenuItem(), tk.createHideMenuItem("ProB 2"), tk.createHideOthersMenuItem(),
-				tk.createUnhideAllMenuItem(), new SeparatorMenuItem(), tk.createQuitMenuItem("ProB 2"));
-			
+					new SeparatorMenuItem(), tk.createHideMenuItem("ProB 2"), tk.createHideOthersMenuItem(),
+					tk.createUnhideAllMenuItem(), new SeparatorMenuItem(), tk.createQuitMenuItem("ProB 2"));
+
 			// Add Mac-style items to Window menu
 			windowMenu.getItems().addAll(tk.createMinimizeMenuItem(), tk.createZoomMenuItem(),
-				tk.createCycleWindowsItem(), new SeparatorMenuItem(), tk.createBringAllToFrontItem(),
-				new SeparatorMenuItem());
+					tk.createCycleWindowsItem(), new SeparatorMenuItem(), tk.createBringAllToFrontItem(),
+					new SeparatorMenuItem());
 			tk.autoAddWindowMenuItems(windowMenu);
-			
+
 			// Make this the global menu bar
 			tk.setGlobalMenuBar(this);
 		}
 	}
-	
+
 	@FXML
 	public void initialize() {
 		this.sceneProperty().addListener((observable, from, to) -> {
@@ -151,7 +149,7 @@ public final class MenuController extends MenuBar {
 				to.windowProperty().addListener((observable1, from1, to1) -> this.window = to1);
 			}
 		});
-		
+
 		final ListChangeListener<String> recentFilesListener = change -> {
 			final ObservableList<MenuItem> recentItems = this.recentFilesMenu.getItems();
 			final List<MenuItem> newItems = new ArrayList<>();
@@ -160,29 +158,32 @@ public final class MenuController extends MenuBar {
 				item.setOnAction(event -> this.open(s));
 				newItems.add(item);
 			}
-			
-			// If there are no recent files, show a placeholder and disable clearing
+
+			// If there are no recent files, show a placeholder and disable
+			// clearing
 			this.clearRecentFiles.setDisable(newItems.isEmpty());
 			if (newItems.isEmpty()) {
 				newItems.add(this.recentFilesPlaceholder);
 			}
-			
+
 			// Add a shortcut for reopening the most recent file
 			newItems.get(0).setAccelerator(KeyCombination.valueOf("Shift+Shortcut+'O'"));
-			
-			// Keep the last two items (the separator and the "clear recent files" item)
-			newItems.addAll(recentItems.subList(recentItems.size()-2, recentItems.size()));
-			
+
+			// Keep the last two items (the separator and the "clear recent
+			// files" item)
+			newItems.addAll(recentItems.subList(recentItems.size() - 2, recentItems.size()));
+
 			// Replace the old recents with the new ones
 			this.recentFilesMenu.getItems().setAll(newItems);
 		};
 		this.recentFiles.addListener(recentFilesListener);
 		// Fire the listener once to populate the recent files menu
 		recentFilesListener.onChanged(null);
-		
-		this.enterFormulaForVisualization.disableProperty().bind(currentTrace.currentStateProperty().initializedProperty().not());
+
+		this.enterFormulaForVisualization.disableProperty()
+				.bind(currentTrace.currentStateProperty().initializedProperty().not());
 	}
-	
+
 	@FXML
 	private void handleClearRecentFiles() {
 		this.recentFiles.clear();
@@ -228,7 +229,7 @@ public final class MenuController extends MenuBar {
 			}
 		}
 	}
-	
+
 	private void open(String path) {
 		final StateSpace newSpace;
 		try {
@@ -240,10 +241,10 @@ public final class MenuController extends MenuBar {
 			alert.showAndWait();
 			return;
 		}
-		
+
 		this.animationSelector.addNewAnimation(new Trace(newSpace));
 		injector.getInstance(ModelcheckingController.class).resetView();
-		
+
 		// Remove the path first to avoid listing the same file twice.
 		this.recentFiles.remove(path);
 		this.recentFiles.add(0, path);
@@ -254,10 +255,11 @@ public final class MenuController extends MenuBar {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
 		fileChooser.getExtensionFilters().addAll(
-			// new FileChooser.ExtensionFilter("All Files", "*.*"),
-			new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")// ,
-			// new FileChooser.ExtensionFilter("EventB Files", "*.eventb", "*.bum", "*.buc"),
-			// new FileChooser.ExtensionFilter("CSP Files", "*.cspm")
+				// new FileChooser.ExtensionFilter("All Files", "*.*"),
+				new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")// ,
+		// new FileChooser.ExtensionFilter("EventB Files", "*.eventb", "*.bum",
+		// "*.buc"),
+		// new FileChooser.ExtensionFilter("CSP Files", "*.cspm")
 		);
 
 		final File selectedFile = fileChooser.showOpenDialog(this.window);
@@ -266,13 +268,13 @@ public final class MenuController extends MenuBar {
 		}
 
 		switch (fileChooser.getSelectedExtensionFilter().getDescription()) {
-			case "Classical B Files":
-				this.open(selectedFile.getAbsolutePath());
-				break;
-	
-			default:
-				throw new IllegalStateException(
-						"Unknown file type selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
+		case "Classical B Files":
+			this.open(selectedFile.getAbsolutePath());
+			break;
+
+		default:
+			throw new IllegalStateException(
+					"Unknown file type selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
 		}
 	}
 
@@ -318,7 +320,7 @@ public final class MenuController extends MenuBar {
 		groovyConsoleStage.show();
 		groovyConsoleStage.toFront();
 	}
-	
+
 	@FXML
 	public void handleBConsole(ActionEvent event) {
 		final Stage bConsoleStage = injector.getInstance(BConsoleStage.class);
@@ -355,21 +357,27 @@ public final class MenuController extends MenuBar {
 			tk.setApplicationMenu(this.getMenus().get(0));
 		}
 	}
-	
+
 	@FXML
 	private void handleReportBug(ActionEvent event) {
 		WebView webView = new WebView();
 		WebEngine webEnging = webView.getEngine();
 		webEnging.setJavaScriptEnabled(true);
 		webEnging.load("https://probjira.atlassian.net/secure/RapidBoard.jspa?rapidView=8");
-		
+
 		Scene scene = new Scene(webView);
 		scene.getStylesheets().add("prob.css");
-		
+
 		Stage stage = new Stage();
 		stage.setScene(scene);
 		stage.setTitle("Report Bug");
 		stage.show();
 	}
 
+	@FXML
+	private void createNewProject(ActionEvent event) {
+		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
+		newProjectStage.show();
+		newProjectStage.toFront();
+	}
 }
