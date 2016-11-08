@@ -15,6 +15,7 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.formula.FormulaGenerator;
+import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.RecentFiles;
@@ -48,6 +49,7 @@ public class ProB2Module extends AbstractModule {
 		bind(CurrentStateSpace.class);
 		bind(CurrentTrace.class);
 		bind(FormulaGenerator.class);
+		bind(FormulaInputStage.class);
 		bind(GroovyConsole.class);
 		bind(BConsole.class);
 		bind(RecentFiles.class);
