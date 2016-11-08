@@ -131,7 +131,7 @@ public abstract class Console extends TextArea {
 			}
 		});
 		
-		this.setOnKeyPressed(e -> keyPressed(e));
+		this.setOnKeyPressed(this::keyPressed);
 	}
 
 	private void keyPressed(KeyEvent e) {
