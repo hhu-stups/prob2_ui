@@ -55,7 +55,6 @@ public class FormulaInputStage extends Stage {
 			loader.load();
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
-			e.printStackTrace();
 		}
 		currentStage.register(this);
 		this.injector = injector;
@@ -65,13 +64,8 @@ public class FormulaInputStage extends Stage {
 	private void setButtonAction() {
 		Button btapply = (Button) parent.lookupButton(ButtonType.APPLY);
 		Button btcancel = (Button) parent.lookupButton(ButtonType.CANCEL);
-		btapply.setOnMouseClicked(e-> {
-			apply();
-		});
-		
-		btcancel.setOnMouseClicked(e-> {
-			close();
-		});
+		btapply.setOnMouseClicked(e->apply());
+		btcancel.setOnMouseClicked(e->close());
 		
 		tf_formula.setOnKeyReleased(e-> {
 			if(e.getCode() == KeyCode.ENTER) {
@@ -93,6 +87,7 @@ public class FormulaInputStage extends Stage {
 			exceptionText.setText(sw.toString());
 			parent.setExpanded(true);
 			lb_header.setText("Could not parse or visualize formula");
+			tf_formula.getStyleClass().add("text-field-error");
 			icon.setIcon(FontAwesomeIcon.MINUS_CIRCLE);
 		}
 	}
