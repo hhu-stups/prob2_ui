@@ -12,6 +12,7 @@ import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 @Singleton
@@ -28,7 +29,8 @@ public class NewProjectStage extends Stage {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		
+		this.initModality(Modality.WINDOW_MODAL);
+		this.initOwner(currentStage.get());
 		currentStage.register(this);
 	}
 	

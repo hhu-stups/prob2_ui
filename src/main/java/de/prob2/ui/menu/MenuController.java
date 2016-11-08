@@ -370,7 +370,7 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private void createNewProject(ActionEvent event) {
 		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
-		newProjectStage.show();
+		newProjectStage.showAndWait();
 		newProjectStage.toFront();
 	}
 }

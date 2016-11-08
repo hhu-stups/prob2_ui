@@ -5,18 +5,47 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Button?>
 
 <fx:root type="Stage" title="%newProject.stage.title" resizable="false"
 	xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
-		<Scene stylesheets="@/prob.css" width="500" height="500">
-			<AnchorPane>
-				<HBox spacing="5" alignment="center" AnchorPane.leftAnchor="15"
-					AnchorPane.topAnchor="20">
-					<Label text="%newProject.stage.projectName" />
-					<TextField />
-				</HBox>
+		<Scene stylesheets="@/prob.css">
+			<AnchorPane minWidth="500" styleClass="dialog">
+				<VBox spacing="5" AnchorPane.topAnchor="25"
+					AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0"
+					AnchorPane.rightAnchor="0">
+					<Label text="Create new ProB Project">
+						<font>
+							<Font size="18" />
+						</font>
+						<VBox.margin>
+							<Insets left="10" right="10" />
+						</VBox.margin>
+					</Label>
+					<AnchorPane styleClass="border">
+						<HBox spacing="20" alignment="center_left"
+							AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
+							AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20">
+							<Label text="%newProject.stage.projectName" />
+							<TextField HBox.hgrow="always" />
+						</HBox>
+					</AnchorPane>
+					<ButtonBar>
+						<buttons>
+							<Button text="%common.cancel" cancelButton="true"/>
+							<Button text="%common.finish"/>
+						</buttons>
+						<VBox.margin>
+							<Insets left="10" right="10" top="10"/>
+						</VBox.margin>
+					</ButtonBar>
+				</VBox>
 			</AnchorPane>
 		</Scene>
 	</scene>
