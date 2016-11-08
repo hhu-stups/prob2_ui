@@ -189,18 +189,23 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	private void handleLoadDetached() {
-		loadPreset("detachedHistory.fxml");
+	private void handleLoadSeparated() {
+		loadPreset("separatedHistory.fxml");
 	}
 
 	@FXML
-	private void handleLoadDetached2() {
-		loadPreset("detachedHistoryAndStatistics.fxml");
+	private void handleLoadSeparated2() {
+		loadPreset("separatedHistoryAndStatistics.fxml");
 	}
 
 	@FXML
 	private void handleLoadStacked() {
 		loadPreset("stackedLists.fxml");
+	}
+
+	@FXML
+	private void handleLoadDetached() {
+		System.out.println("detach");
 	}
 
 	@FXML
