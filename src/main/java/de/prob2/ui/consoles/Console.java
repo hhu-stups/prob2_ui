@@ -117,18 +117,7 @@ public abstract class Console extends TextArea {
 				e.consume();
 			}
 			if(e.isControlDown()) {
-				if(!searchHandler.isActive()) {
-					if(e.getCode() == KeyCode.A) {
-						this.positionCaret(this.getCaretPosition() - currentPosInLine);
-						currentPosInLine = 0;
-						e.consume();
-					} else if(e.getCode() == KeyCode.E) {
-						this.positionCaret(this.getLength());
-						currentPosInLine = charCounterInLine;
-					}
-				} else if(e.getCode() == KeyCode.V || e.getCode() == KeyCode.A) {
-					e.consume();
-				}
+				controlDown(e);
 			}
 		});
 		
@@ -142,26 +131,43 @@ public abstract class Console extends TextArea {
 			}
 		});
 		
-		this.setOnKeyPressed(e -> {
-			if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
-				handleArrowKeys(e);
-				this.setScrollTop(Double.MAX_VALUE);
-			} else if (e.getCode().isNavigationKey()) {
-				if(e.getCode() != KeyCode.LEFT && e.getCode() != KeyCode.RIGHT) {
-					e.consume();
-				}
-			} else if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE) {
-				handleDeletion(e);
-			} else if (e.getCode() == KeyCode.ENTER) {
-				handleEnter(e);
-			} else if (!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
-				handleInsertChar(e);
-			} else {
-				handleRest(e);
-			}
-		});
+		this.setOnKeyPressed(e -> keyPressed(e));
 	}
-	
+
+	private void keyPressed(KeyEvent e) {
+		if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
+			handleArrowKeys(e);
+			this.setScrollTop(Double.MAX_VALUE);
+		} else if (e.getCode().isNavigationKey()) {
+			if(e.getCode() != KeyCode.LEFT && e.getCode() != KeyCode.RIGHT) {
+				e.consume();
+			}
+		} else if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE) {
+			handleDeletion(e);
+		} else if (e.getCode() == KeyCode.ENTER) {
+			handleEnter(e);
+		} else if (!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
+			handleInsertChar(e);
+		} else {
+			handleRest(e);
+		}
+	}
+
+	private void controlDown(KeyEvent e) {
+		if(!searchHandler.isActive()) {
+			if(e.getCode() == KeyCode.A) {
+				this.positionCaret(this.getCaretPosition() - currentPosInLine);
+				currentPosInLine = 0;
+				e.consume();
+			} else if(e.getCode() == KeyCode.E) {
+				this.positionCaret(this.getLength());
+				currentPosInLine = charCounterInLine;
+			}
+		} else if(e.getCode() == KeyCode.V || e.getCode() == KeyCode.A) {
+			e.consume();
+		}
+	}
+
 	protected void activateSearch() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		this.setText(this.getText().substring(0, posOfEnter + 1) + ConsoleSearchHandler.FOUND + getCurrentLine());

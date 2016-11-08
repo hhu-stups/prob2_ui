@@ -36,9 +36,7 @@ public final class FormulaGenerator {
 		this.currentTrace = currentTrace;
 		this.currentStage = currentStage;
 		this.dialog = dialog;
-		dialog.setOnCloseRequest(e-> {
-			setDefaultDialogSettings();
-		});
+		dialog.setOnCloseRequest(e-> setDefaultDialogSettings());
 		setDefaultDialogSettings();
 	}
 
