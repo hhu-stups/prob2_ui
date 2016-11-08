@@ -38,7 +38,7 @@
 					</AnchorPane>
 					<ButtonBar>
 						<buttons>
-							<Button text="%common.cancel" cancelButton="true"/>
+							<Button text="%common.cancel" cancelButton="true" onAction="#cancel"/>
 							<Button text="%common.finish"/>
 						</buttons>
 						<VBox.margin>

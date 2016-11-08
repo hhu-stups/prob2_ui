@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.prob2fx.CurrentStage;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Modality;
@@ -35,6 +36,7 @@ public class NewProjectStage extends Stage {
 	}
 	
 	@FXML
-	public void initialize() {
+	void cancel(ActionEvent event) {
+		this.close();
 	}
 }
