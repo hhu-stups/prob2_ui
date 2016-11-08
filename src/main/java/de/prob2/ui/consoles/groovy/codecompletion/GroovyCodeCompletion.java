@@ -59,10 +59,11 @@ public class GroovyCodeCompletion extends Popup {
 	
 	public void activate(GroovyConsole console, String currentLine, CodeCompletionTriggerAction action) {
 		this.parent = console;
+		String newCurrentLine = currentLine;
 		if(action == CodeCompletionTriggerAction.POINT) {
-			currentLine += ".";
+			newCurrentLine += ".";
 		}
-		String currentPrefix = handleActivation(currentLine);
+		String currentPrefix = handleActivation(newCurrentLine);
 		completionHandler.handleMethodsFromObjects(currentPrefix, currentSuggestion, action, engine);
 		completionHandler.handleStaticClasses(currentPrefix, currentSuggestion, action);
 		completionHandler.handleObjects(currentSuggestion, action, engine);
@@ -142,31 +143,33 @@ public class GroovyCodeCompletion extends Popup {
 
 	private void setListeners() {
 		lvSuggestions.setOnMouseClicked(this::chooseMethod);
-		lvSuggestions.setOnKeyPressed(e-> {
-			if(e.getCode().equals(KeyCode.SPACE)) {
-				getParent().fireEvent(new CodeCompletionEvent(e));
-			}
-			if(";".equals(e.getText()) || e.getCode().equals(KeyCode.ENTER)) {
-				//handle Enter in Groovy Code Completion
-				chooseMethod(e);
-				return;
-			}
-			if(e.getCode().equals(KeyCode.LEFT) || e.getCode().equals(KeyCode.RIGHT) || e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
-				handleArrowKey(e);
-				return;
-			}
-			if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
-				handleRemove(e);
-				return;
-			}
-			
-			if(e.getText().length() == 1 && !".".equals(e.getText())) {
-				//handle Insert Char
-				filterSuggestions(e.getText(), CodeCompletionAction.INSERTION);
-			}
-		});
+		lvSuggestions.setOnKeyPressed(this::keyPressed);
 	}
-	
+
+	private void keyPressed(KeyEvent e) {
+		if(e.getCode().equals(KeyCode.SPACE)) {
+			getParent().fireEvent(new CodeCompletionEvent(e));
+		}
+		if(";".equals(e.getText()) || e.getCode().equals(KeyCode.ENTER)) {
+			//handle Enter in Groovy Code Completion
+			chooseMethod(e);
+			return;
+		}
+		if(e.getCode().equals(KeyCode.LEFT) || e.getCode().equals(KeyCode.RIGHT) || e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)) {
+			handleArrowKey(e);
+			return;
+		}
+		if(e.getCode().equals(KeyCode.DELETE) || e.getCode().equals(KeyCode.BACK_SPACE)) {
+			handleRemove(e);
+			return;
+		}
+
+		if(e.getText().length() == 1 && !".".equals(e.getText())) {
+			//handle Insert Char
+			filterSuggestions(e.getText(), CodeCompletionAction.INSERTION);
+		}
+	}
+
 	private void handleArrowKey(KeyEvent e) {
 		boolean needReturn;
 		if(e.getCode().equals(KeyCode.LEFT)) {

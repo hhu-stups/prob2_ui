@@ -3,12 +3,20 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
 
 <fx:root type="Stage" title="%newProject.stage.title" resizable="false"
 	xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css" width="500" height="500">
 			<AnchorPane>
+				<HBox spacing="5" alignment="center" AnchorPane.leftAnchor="15"
+					AnchorPane.topAnchor="20">
+					<Label text="%newProject.stage.projectName" />
+					<TextField />
+				</HBox>
 			</AnchorPane>
 		</Scene>
 	</scene>

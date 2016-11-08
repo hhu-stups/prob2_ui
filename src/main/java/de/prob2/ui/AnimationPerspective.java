@@ -174,7 +174,7 @@ public final class AnimationPerspective extends BorderPane {
 		} else if (switchToBottom) {
 			nodeTP.setCollapsible(true);
 			return bottomAccordion;
-		} else if (switchToLeft){
+		} else if (switchToLeft) {
 			nodeTP.setCollapsible(false);
 			return leftAccordion;
 		} else {
