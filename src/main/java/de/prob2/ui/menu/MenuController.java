@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.control.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +36,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -60,7 +56,7 @@ public final class MenuController extends MenuBar {
 	}
 	
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
-	
+
 	private final Injector injector;
 	private final Api api;
 	private final AnimationSelector animationSelector;
@@ -106,7 +102,7 @@ public final class MenuController extends MenuBar {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		
+
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
@@ -206,6 +202,15 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private void handleLoadDetached() {
 		System.out.println("detach");
+		FXMLLoader stageLoader = new FXMLLoader(getClass().getResource("detachedPerspectivesChoice.fxml"));
+		DialogPane root;
+		try {
+			root = stageLoader.load();
+			Dialog dialog = new Dialog();
+			dialog.setDialogPane(root);
+		} catch (IOException e) {
+			logger.error("loading fxml failed", e);
+		}
 	}
 
 	@FXML
