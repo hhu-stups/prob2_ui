@@ -160,7 +160,6 @@ public final class OperationsView extends AnchorPane {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-
 	}
 
 	@FXML

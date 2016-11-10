@@ -6,6 +6,7 @@ import com.google.inject.Injector;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -45,6 +46,9 @@ public class ProB2 extends Application {
 		
 		injector.getInstance(CurrentStage.class).register(stage);
 
+		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
+		currentProject.addListener((observable, from, to) -> stage.setTitle("ProB 2.0 [" + to.getName() + "]")); 
+		
 		stage.show();
 	}
 	

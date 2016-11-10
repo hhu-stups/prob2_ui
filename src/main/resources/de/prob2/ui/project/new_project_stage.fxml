@@ -33,13 +33,13 @@
 							AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
 							AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20">
 							<Label text="%newProject.stage.projectName" />
-							<TextField HBox.hgrow="always" />
+							<TextField fx:id="projectNameField" HBox.hgrow="always" />
 						</HBox>
 					</AnchorPane>
 					<ButtonBar>
 						<buttons>
 							<Button text="%common.cancel" cancelButton="true" onAction="#cancel"/>
-							<Button text="%common.finish"/>
+							<Button fx:id="finishButton" text="%common.finish" onAction="#finish"/>
 						</buttons>
 						<VBox.margin>
 							<Insets left="10" right="10" top="10"/>
