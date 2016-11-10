@@ -1,24 +1,32 @@
 package de.prob2.ui.animations;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 
+import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
+import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
+import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
@@ -29,26 +37,35 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
 	private static final Logger logger = LoggerFactory.getLogger(AnimationsView.class);
 
-	@FXML private TableView<Animation> animationsTable;
-	@FXML private TableColumn<Animation, String> machine;
-	@FXML private TableColumn<Animation, String> lastop;
-	@FXML private TableColumn<Animation, String> tracelength;
-	@FXML private TableColumn<Animation, String> time;
+	@FXML
+	private TableView<Animation> animationsTable;
+	@FXML
+	private TableColumn<Animation, String> machine;
+	@FXML
+	private TableColumn<Animation, String> lastop;
+	@FXML
+	private TableColumn<Animation, String> tracelength;
+	@FXML
+	private TableColumn<Animation, String> time;
 
 	private final AnimationSelector animations;
 	private int currentIndex;
 	private int previousSize = 0;
 
+	private CurrentProject currentProject;
+
+	private Api api;
+
 	@Inject
-	private AnimationsView(final AnimationSelector animations, final FXMLLoader loader) {
+	private AnimationsView(final Api api, final AnimationSelector animations, CurrentProject currentProject,
+			final FXMLLoader loader) {
 		this.animations = animations;
+		this.api = api;
 		this.animations.registerAnimationChangeListener(this);
+		this.currentProject = currentProject;
 		try {
 			loader.setLocation(getClass().getResource("animations_view.fxml"));
 			loader.setRoot(this);
@@ -82,6 +99,28 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			return row;
 		});
 		this.traceChange(animations.getCurrentTrace(), true);
+
+		currentProject.addListener((observable, from, to) -> {
+			removeAllTraces();
+			addAll(to.getFiles());
+		});
+	}
+
+	private void addAll(List<File> files) {
+		for (int i = 0; i < files.size(); i++) {
+			final StateSpace newSpace;
+			String path = files.get(i).getAbsolutePath();
+			try {
+				newSpace = this.api.b_load(path);
+			} catch (IOException | BException e) {
+				logger.error("loading file failed", e);
+				Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+				alert.getDialogPane().getStylesheets().add("prob.css");
+				alert.showAndWait();
+				return;
+			}
+			this.animations.addNewAnimation(new Trace(newSpace));
+		}
 	}
 
 	private void removeAllTraces() {
@@ -99,7 +138,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			animations.changeCurrentAnimation(trace);
 		}
 		if (event.getButton() == MouseButton.SECONDARY) {
-			if(row.isEmpty()) {
+			if (row.isEmpty()) {
 				contextMenu.getItems().get(0).setDisable(true);
 			} else {
 				contextMenu.getItems().get(0).setDisable(false);

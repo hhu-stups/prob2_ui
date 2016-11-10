@@ -443,6 +443,9 @@
 	-fx-border-color: -prob-grey;
 	-fx-border-width: 0.2em 0.0 0.2em 0.0;
 }
+.no-border {
+	-fx-border-width: 0 0 0 0;
+}
 
 /* ===================== DIALOG ====================== */
 .dialog > .label {

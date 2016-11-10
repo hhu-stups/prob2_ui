@@ -57,7 +57,7 @@ public class ProB2Module extends AbstractModule {
 
 		// Controllers
 		bind(AnimationPerspective.class);
-		bind(AnimationsView.class);
+		bind(AnimationsView.class).asEagerSingleton();
 		bind(HistoryView.class);
 		bind(MenuController.class);
 		bind(ModelcheckingController.class);

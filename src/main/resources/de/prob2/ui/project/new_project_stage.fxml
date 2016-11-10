@@ -11,16 +11,18 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 
-<fx:root type="Stage" title="%newProject.stage.title" resizable="false"
-	xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" title="%newProject.stage.stageTitle"
+	resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<AnchorPane minWidth="500" styleClass="dialog">
+			<AnchorPane minWidth="500">
 				<VBox spacing="5" AnchorPane.topAnchor="25"
 					AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0"
 					AnchorPane.rightAnchor="0">
-					<Label text="Create new ProB Project">
+					<Label text="%newProject.stage.title">
 						<font>
 							<Font size="18" />
 						</font>
@@ -29,20 +31,36 @@
 						</VBox.margin>
 					</Label>
 					<AnchorPane styleClass="border">
-						<HBox spacing="20" alignment="center_left"
-							AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
-							AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20">
-							<Label text="%newProject.stage.projectName" />
-							<TextField fx:id="projectNameField" HBox.hgrow="always" />
-						</HBox>
+						<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
+							AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" alignment="center_right">
+							<HBox spacing="20" alignment="center_left">
+								<Label text="%newProject.stage.projectName" />
+								<TextField fx:id="projectNameField" HBox.hgrow="always" />
+							</HBox>
+							<AnchorPane>
+								<Label text="%newProject.stage.files"
+									AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="5" />
+								<Button fx:id="addFileButton" prefHeight="26.0"
+									prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+									AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addFile">
+									<graphic>
+										<FontAwesomeIconView fill="#555560"
+											glyphName="PLUS_CIRCLE" size="26" />
+									</graphic>
+								</Button>
+							</AnchorPane>
+							<ListView fx:id="filesListView" styleClass="no-border" prefHeight="200" />
+						</VBox>
 					</AnchorPane>
-					<ButtonBar>
+					<ButtonBar styleClass="dialog">
 						<buttons>
-							<Button text="%common.cancel" cancelButton="true" onAction="#cancel"/>
-							<Button fx:id="finishButton" text="%common.finish" onAction="#finish"/>
+							<Button text="%common.cancel" cancelButton="true"
+								onAction="#cancel" />
+							<Button fx:id="finishButton" text="%common.finish"
+								onAction="#finish" />
 						</buttons>
 						<VBox.margin>
-							<Insets left="10" right="10" top="10"/>
+							<Insets left="10" right="10" top="10" />
 						</VBox.margin>
 					</ButtonBar>
 				</VBox>
