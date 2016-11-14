@@ -68,8 +68,8 @@ public class StatsView extends ScrollPane {
 	@FXML
 	public void initialize() {
 		extendedStatsBox.visibleProperty().bind(extendedStatsToggle.selectedProperty());
-		statsBox.visibleProperty().bind(currentTrace.existsProperty());
-		noStatsLabel.visibleProperty().bind(statsBox.visibleProperty().not());
+		noStatsLabel.visibleProperty().bind(currentTrace.existsProperty().not());
+		statsBox.visibleProperty().bind(noStatsLabel.visibleProperty().not());
 		extendedStatsBox.managedProperty().bind(extendedStatsBox.visibleProperty());
 		statsBox.managedProperty().bind(statsBox.visibleProperty());
 		noStatsLabel.managedProperty().bind(noStatsLabel.visibleProperty());
@@ -110,9 +110,7 @@ public class StatsView extends ScrollPane {
 				trace.getStateSpace().execute(coverageCmd);
 				updatExtendedStats(coverageCmd.getResult());
 			}
-		} else {
-			noStatsLabel.setVisible(true);
-		}
+		} 
 	}
 
 	private void updateSimpleStats(StateSpaceStats result) {

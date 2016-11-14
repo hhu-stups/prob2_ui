@@ -26,9 +26,11 @@ import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.preferences.PreferencesStage;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.NewProjectStage;
+import de.prob2.ui.project.Project;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -86,6 +88,8 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private MenuItem aboutItem;
 
+	private CurrentProject currentProject;
+
 	@Inject
 	private MenuController(
 		final FXMLLoader loader,
@@ -94,6 +98,7 @@ public final class MenuController extends MenuBar {
 		final AnimationSelector animationSelector,
 		final CurrentStage currentStage,
 		final CurrentTrace currentTrace,
+		final CurrentProject currentProject,
 		final RecentFiles recentFiles
 	) {
 		this.injector = injector;
@@ -101,6 +106,7 @@ public final class MenuController extends MenuBar {
 		this.animationSelector = animationSelector;
 		this.currentStage = currentStage;
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.recentFiles = recentFiles;
 
 		loader.setLocation(getClass().getResource("menu.fxml"));
@@ -157,7 +163,10 @@ public final class MenuController extends MenuBar {
 			final List<MenuItem> newItems = new ArrayList<>();
 			for (String s : this.recentFiles) {
 				final MenuItem item = new MenuItem(new File(s).getName());
-				item.setOnAction(event -> this.open(s));
+				item.setOnAction(event -> {
+					this.currentProject.changeCurrentProjet(new Project(new File(s)));
+					this.open(s);
+				});
 				newItems.add(item);
 			}
 
@@ -244,7 +253,6 @@ public final class MenuController extends MenuBar {
 			return;
 		}
 
-		this.animationSelector.addNewAnimation(new Trace(newSpace));
 		injector.getInstance(ModelcheckingController.class).resetView();
 
 		// Remove the path first to avoid listing the same file twice.
@@ -272,6 +280,7 @@ public final class MenuController extends MenuBar {
 		switch (fileChooser.getSelectedExtensionFilter().getDescription()) {
 		case "Classical B Files":
 			this.open(selectedFile.getAbsolutePath());
+			currentProject.changeCurrentProjet(new Project(selectedFile));
 			break;
 
 		default:
