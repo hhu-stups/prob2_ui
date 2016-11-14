@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,6 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.dotty.DottyStage;
@@ -39,6 +38,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -91,16 +93,9 @@ public final class MenuController extends MenuBar {
 	private CurrentProject currentProject;
 
 	@Inject
-	private MenuController(
-		final FXMLLoader loader,
-		final Injector injector,
-		final Api api,
-		final AnimationSelector animationSelector,
-		final CurrentStage currentStage,
-		final CurrentTrace currentTrace,
-		final CurrentProject currentProject,
-		final RecentFiles recentFiles
-	) {
+	private MenuController(final FXMLLoader loader, final Injector injector, final Api api,
+			final AnimationSelector animationSelector, final CurrentStage currentStage, final CurrentTrace currentTrace,
+			final CurrentProject currentProject, final RecentFiles recentFiles) {
 		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
@@ -163,10 +158,7 @@ public final class MenuController extends MenuBar {
 			final List<MenuItem> newItems = new ArrayList<>();
 			for (String s : this.recentFiles) {
 				final MenuItem item = new MenuItem(new File(s).getName());
-				item.setOnAction(event -> {
-					this.currentProject.changeCurrentProjet(new Project(new File(s)));
-					this.open(s);
-				});
+				item.setOnAction(event -> this.open(s));
 				newItems.add(item);
 			}
 
@@ -242,17 +234,47 @@ public final class MenuController extends MenuBar {
 	}
 
 	private void open(String path) {
-		final StateSpace newSpace;
+		if (currentProject.exists()) {
+			Alert alert = new Alert(AlertType.CONFIRMATION);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			
+			ButtonType buttonTypeAdd = new ButtonType("Add");
+			ButtonType buttonTypeClose = new ButtonType("Close current");
+			ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+			if (currentProject.isSingleFile()) {
+				alert.setHeaderText("You've already opened a file.");
+				alert.setContentText("Do you want to close the current file?");
+				alert.getButtonTypes().setAll(buttonTypeClose, buttonTypeCancel);
+			} else {
+				alert.setHeaderText("You've already opened a project.");
+				alert.setContentText("Do you want to close the current project or add the selected file?");
+				alert.getButtonTypes().setAll(buttonTypeAdd, buttonTypeClose, buttonTypeCancel);
+			}
+			Optional<ButtonType> result = alert.showAndWait();
+			
+			if (result.get() == buttonTypeAdd) {
+				currentProject.addFile(new File(path));
+			} else if (result.get() == buttonTypeClose) {
+				openPath(path);
+			} 
+		} else {
+			openPath(path);
+		}
+	}
+
+	private void openPath(String path) {
 		try {
-			newSpace = this.api.b_load(path);
+			this.api.b_load(path);
 		} catch (IOException | BException e) {
 			logger.error("loading file failed", e);
-			Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-			alert.getDialogPane().getStylesheets().add("prob.css");
-			alert.showAndWait();
+			Alert a = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+			a.getDialogPane().getStylesheets().add("prob.css");
+			a.showAndWait();
 			return;
 		}
 
+		this.currentProject.changeCurrentProjet(new Project(new File(path)));
 		injector.getInstance(ModelcheckingController.class).resetView();
 
 		// Remove the path first to avoid listing the same file twice.
@@ -280,7 +302,6 @@ public final class MenuController extends MenuBar {
 		switch (fileChooser.getSelectedExtensionFilter().getDescription()) {
 		case "Classical B Files":
 			this.open(selectedFile.getAbsolutePath());
-			currentProject.changeCurrentProjet(new Project(selectedFile));
 			break;
 
 		default:

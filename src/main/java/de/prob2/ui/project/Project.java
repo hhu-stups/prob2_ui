@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Project {
 	private String name;
-	private List<File> files;
+	private List<File> files = new ArrayList<File>();
 	private final boolean singleFile;
 
 	public Project(String name, List<File> files) {
@@ -32,5 +32,9 @@ public class Project {
 	
 	public boolean isSingleFile() {
 		return singleFile;
+	}
+
+	public void addFile(File file) {
+		this.files.add(file);
 	}
 }
