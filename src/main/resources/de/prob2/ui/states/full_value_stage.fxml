@@ -13,8 +13,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" minWidth="240" minHeight="160" width="480"
-	height="320" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" minWidth="240" minHeight="160" width="480" height="320" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<ToggleGroup fx:id="asciiUnicodeGroup"/>
 	</fx:define>
@@ -27,11 +26,14 @@
 				</padding>
 				<center>
 					<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
-						<Tab text="%states.fullValue.tabs.current">
+						<Tab fx:id="currentValueTab" text="%states.fullValue.tabs.current">
 							<TextArea fx:id="currentValueTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
 						</Tab>
 						<Tab fx:id="previousValueTab" text="%states.fullValue.tabs.previous">
 							<TextArea fx:id="previousValueTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
+						</Tab>
+						<Tab fx:id="diffTab" text="%states.fullValue.tabs.diff">
+							<TextArea fx:id="diffTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
 						</Tab>
 					</TabPane>
 				</center>
