@@ -7,11 +7,15 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
+
+import difflib.DiffUtils;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -34,9 +38,12 @@ public class FullValueStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(FullValueStage.class);
 	
 	@FXML private TabPane tabPane;
+	@FXML private Tab currentValueTab;
 	@FXML private Tab previousValueTab;
+	@FXML private Tab diffTab;
 	@FXML private TextArea currentValueTextarea;
 	@FXML private TextArea previousValueTextarea;
+	@FXML private TextArea diffTextarea;
 	@FXML private ToggleGroup asciiUnicodeGroup;
 	@FXML private RadioButton asciiRadio;
 	@FXML private RadioButton unicodeRadio;
@@ -45,6 +52,7 @@ public class FullValueStage extends Stage {
 	
 	private AsciiUnicodeString currentValue;
 	private AsciiUnicodeString previousValue;
+	private String diff;
 	
 	@Inject
 	public FullValueStage(final FXMLLoader loader) {
@@ -133,11 +141,21 @@ public class FullValueStage extends Stage {
 	
 	@FXML
 	private void updateText() {
-		if (this.getCurrentValue() != null) {
-			this.currentValueTextarea.setText(prettifyIfEnabled(this.currentValueAsString()));
+		final String cv = this.getCurrentValue() == null ? null : prettifyIfEnabled(this.currentValueAsString());
+		final String pv = this.getPreviousValue() == null ? null : prettifyIfEnabled(this.previousValueAsString());
+		if (cv != null) {
+			this.currentValueTextarea.setText(cv);
 		}
-		if (this.getPreviousValue() != null) {
-			this.previousValueTextarea.setText(prettifyIfEnabled(this.previousValueAsString()));
+		if (pv != null) {
+			this.previousValueTextarea.setText(pv);
+		}
+		if (cv != null && pv != null) {
+			final List<String> prevLines = Arrays.asList(pv.split("\n"));
+			final List<String> curLines = Arrays.asList(cv.split("\n"));
+			final List<String> uniDiffLines = DiffUtils.generateUnifiedDiff("", "", prevLines, DiffUtils.diff(prevLines, curLines), 3);
+			// Don't display the "file names" in the first two lines
+			this.diff = String.join("\n", uniDiffLines.subList(2, uniDiffLines.size()));
+			this.diffTextarea.setText(this.diff);
 		}
 	}
 	
@@ -155,10 +173,15 @@ public class FullValueStage extends Stage {
 		
 		try (final Writer out = new OutputStreamWriter(new FileOutputStream(selected), Charset.forName("UTF-8"))) {
 			final String value;
-			if (previousValueTab.isSelected()) {
-				value = this.previousValueAsString();
-			} else {
+			if (currentValueTab.isSelected()) {
 				value = this.currentValueAsString();
+			} else if (previousValueTab.isSelected()) {
+				value = this.previousValueAsString();
+			} else if (diffTab.isSelected()) {
+				value = this.diff;
+			} else {
+				logger.error("No known tab selected");
+				return;
 			}
 			out.write(value);
 		} catch (FileNotFoundException e) {
