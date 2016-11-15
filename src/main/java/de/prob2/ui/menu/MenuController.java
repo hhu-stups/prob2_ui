@@ -7,14 +7,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.prob2.ui.AnimationPerspective;
-import de.prob2.ui.animations.Animation;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.stats.StatsView;
 import javafx.application.Platform;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
@@ -75,20 +72,20 @@ public final class MenuController extends MenuBar {
 				BorderPane pane = (BorderPane) root.getChildrenUnmodifiable().get(0);
 				Accordion accordion = (Accordion) pane.getChildren().get(0);
 				for (TitledPane tp : accordion.getPanes()) {
+					tp.managedProperty().bind(visibleProperty());
 					if (tp.getContent() instanceof OperationsView) {
-						tp.getContent().setVisible(!detachOperations.isSelected());
+						tp.setVisible(!detachOperations.isSelected());
 					} else if (tp.getContent() instanceof HistoryView) {
-						tp.getContent().setVisible(!detachHistory.isSelected());
+						tp.setVisible(!detachHistory.isSelected());
 					} else if (tp.getContent() instanceof ModelcheckingController) {
-						tp.getContent().setVisible(!detachModelcheck.isSelected());
+						tp.setVisible(!detachModelcheck.isSelected());
 					} else if (tp.getContent() instanceof StatsView) {
-						tp.getContent().setVisible(!detachStats.isSelected());
+						tp.setVisible(!detachStats.isSelected());
 					} else if (tp.getContent() instanceof AnimationsView){
-						tp.getContent().setVisible(!detachAnimations.isSelected());
+						tp.setVisible(!detachAnimations.isSelected());
 					}
 				}
 				this.detached.close();
-				//System.out.println("later");
 			});
 		}
 	}

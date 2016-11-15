@@ -7,7 +7,6 @@
 <?import de.prob2.ui.states.StatesView?>
 <?import de.prob2.ui.stats.StatsView?>
 <?import javafx.scene.control.Accordion?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.BorderPane?>
 <fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml">
