@@ -7,8 +7,16 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.prob2.ui.AnimationPerspective;
+import de.prob2.ui.animations.Animation;
+import de.prob2.ui.animations.AnimationsView;
+import de.prob2.ui.history.HistoryView;
+import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.stats.StatsView;
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,10 +70,25 @@ public final class MenuController extends MenuBar {
 
 		@FXML
 		private void apply() {
-			this.detached.close();
+			Parent root = loadPreset("draggable.fxml");
 			Platform.runLater(() -> {
-				loadPreset("separatedHistory.fxml");
-				System.out.println("later");
+				BorderPane pane = (BorderPane) root.getChildrenUnmodifiable().get(0);
+				Accordion accordion = (Accordion) pane.getChildren().get(0);
+				for (TitledPane tp : accordion.getPanes()) {
+					if (tp.getContent() instanceof OperationsView) {
+						tp.getContent().setVisible(!detachOperations.isSelected());
+					} else if (tp.getContent() instanceof HistoryView) {
+						tp.getContent().setVisible(!detachHistory.isSelected());
+					} else if (tp.getContent() instanceof ModelcheckingController) {
+						tp.getContent().setVisible(!detachModelcheck.isSelected());
+					} else if (tp.getContent() instanceof StatsView) {
+						tp.getContent().setVisible(!detachStats.isSelected());
+					} else if (tp.getContent() instanceof AnimationsView){
+						tp.getContent().setVisible(!detachAnimations.isSelected());
+					}
+				}
+				this.detached.close();
+				//System.out.println("later");
 			});
 		}
 	}
@@ -345,7 +368,7 @@ public final class MenuController extends MenuBar {
 		bConsoleStage.toFront();
 	}
 
-	private void loadPreset(String location) {
+	private Parent loadPreset(String location) {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		try {
 			loader.setLocation(new URL(FXML_ROOT, location));
@@ -354,7 +377,7 @@ public final class MenuController extends MenuBar {
 			Alert alert = new Alert(Alert.AlertType.ERROR, "Malformed location:\n" + e);
 			alert.getDialogPane().getStylesheets().add("prob.css");
 			alert.showAndWait();
-			return;
+			return null;
 		}
 		Parent root;
 		try {
@@ -364,7 +387,7 @@ public final class MenuController extends MenuBar {
 			Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
 			alert.getDialogPane().getStylesheets().add("prob.css");
 			alert.showAndWait();
-			return;
+			return null;
 		}
 		window.getScene().setRoot(root);
 
@@ -373,6 +396,7 @@ public final class MenuController extends MenuBar {
 			tk.setGlobalMenuBar(this);
 			tk.setApplicationMenu(this.getMenus().get(0));
 		}
+		return root;
 	}
 	
 	@FXML
