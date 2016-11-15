@@ -248,7 +248,7 @@ public final class StatesView extends AnchorPane {
 				final AbstractFormulaElement element = (AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents();
 				final EvalResult value = (EvalResult)this.currentValues.get(element.getFormula());
 				final EvalResult previousValue;
-				if (this.previousValues.get(element.getFormula()) instanceof EvalResult) {
+				if (this.previousValues != null && this.previousValues.get(element.getFormula()) instanceof EvalResult) {
 					previousValue = (EvalResult)this.previousValues.get(element.getFormula());
 				} else {
 					previousValue = null;
