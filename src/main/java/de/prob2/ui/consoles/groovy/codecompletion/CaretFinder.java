@@ -9,6 +9,9 @@ import javafx.scene.shape.Path;
 
 @Deprecated
 public class CaretFinder {
+	private CaretFinder() {
+		throw new IllegalStateException("Do not create instances of " + CaretFinder.class);
+	}
 	
 	public static Path findCaret(Parent parent) {
 		for (Node node : parent.getChildrenUnmodifiable()) {
@@ -44,5 +47,4 @@ public class CaretFinder {
 		}
 		return new Point2D(x,y);
 	}
-
 }

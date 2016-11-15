@@ -8,7 +8,7 @@ import de.prob.animator.command.InsertFormulaForVisualizationCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.exception.ProBError;
+
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -40,17 +40,13 @@ public final class FormulaGenerator {
 		return expandCmd.getResult();
 	}
 
-	public void showFormula(final IEvalElement formula) throws EvaluationException, ProBError {
-		ExpandedFormula expanded = expandFormula(formula);
-		FormulaView fview = new FormulaView(new FormulaGraph(new FormulaNode(expanded)));
+	public void showFormula(final IEvalElement formula) {
+		FormulaView fview = new FormulaView(new FormulaGraph(new FormulaNode(expandFormula(formula))));
 		currentStage.register(fview);
 		fview.show();
 	}
 
-	public void parseAndShowFormula(final String formula) throws EvaluationException {
-		final IEvalElement parsed;
-		parsed = currentTrace.getModel().parseFormula(formula);
-		showFormula(parsed);
+	public void parseAndShowFormula(final String formula) {
+		showFormula(currentTrace.getModel().parseFormula(formula));
 	}
-			
 }
