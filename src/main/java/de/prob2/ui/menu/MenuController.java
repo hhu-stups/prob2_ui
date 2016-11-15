@@ -45,6 +45,19 @@ import javafx.stage.Window;
 
 @Singleton
 public final class MenuController extends MenuBar {
+	private final class DetachViewStageController {
+		@FXML private Stage detached;
+		@FXML private CheckBox detachOperations;
+		@FXML private CheckBox detachHistory;
+		@FXML private CheckBox detachModelcheck;
+		@FXML private CheckBox detachStats;
+		@FXML private CheckBox detachAnimations;
+
+		@FXML
+		public void initialize() {
+			currentStage.register(this.detached);
+		}
+	}
 	private static final URL FXML_ROOT;
 	
 	static {
@@ -63,6 +76,7 @@ public final class MenuController extends MenuBar {
 	private final CurrentStage currentStage;
 	private final CurrentTrace currentTrace;
 	private final RecentFiles recentFiles;
+	private final DetachViewStageController dvController;
 	
 	private Window window;
 
@@ -129,6 +143,16 @@ public final class MenuController extends MenuBar {
 			
 			// Make this the global menu bar
 			tk.setGlobalMenuBar(this);
+		}
+
+		final FXMLLoader stageLoader = injector.getInstance(FXMLLoader.class);
+		stageLoader.setLocation(getClass().getResource("detachedPerspectivesChoice.fxml"));
+		this.dvController = new DetachViewStageController();
+		stageLoader.setController(this.dvController);
+		try {
+			stageLoader.load();
+		} catch (IOException e) {
+			logger.error("loading fxml failed", e);
 		}
 	}
 	
@@ -198,16 +222,7 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleLoadDetached() {
-		System.out.println("detach");
-		FXMLLoader stageLoader = new FXMLLoader(getClass().getResource("detachedPerspectivesChoice.fxml"));
-		DialogPane root;
-		try {
-			root = stageLoader.load();
-			Dialog dialog = new Dialog();
-			dialog.setDialogPane(root);
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		this.dvController.detached.showAndWait();
 	}
 
 	@FXML

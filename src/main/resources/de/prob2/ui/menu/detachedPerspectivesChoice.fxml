@@ -5,13 +5,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<Stage fx:id="mcheckStage" title="%modelchecking.stage.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+<Stage fx:id="detached" title="%menu.perspectives.detach" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
     <scene>
         <Scene fill="TRANSPARENT">
             <AnchorPane stylesheets="@/prob.css" styleClass="dialog">
                 <VBox layoutX="11.0" layoutY="69.0" spacing="15.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="60.0" AnchorPane.topAnchor="70.0" styleClass="dark">
-                    <CheckBox fx:id="detachOperations" selected="true" text="%menu.perspectives.detachStage.operations"/>
-                    <CheckBox fx:id="detachHistory" selected="true" text="%menu.perspectives.detachStage.history"/>
+                    <CheckBox fx:id="detachOperations" text="%menu.perspectives.detachStage.operations"/>
+                    <CheckBox fx:id="detachHistory" text="%menu.perspectives.detachStage.history"/>
                     <CheckBox fx:id="detachModelcheck" text="%menu.perspectives.detachStage.modelcheck"/>
                     <CheckBox fx:id="detachStats" text="%menu.perspectives.detachStage.stats"/>
                     <CheckBox fx:id="detachAnimations" text="%menu.perspectives.detachStage.animations"/>
