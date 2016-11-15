@@ -92,7 +92,7 @@ public final class AnimationPerspective extends BorderPane {
 		nodeMap.put(animations,animationsTP);
 		nodeMap.put(stats,statsTP);
 		//leftAccordion.setExpandedPane(operationsTP);
-		//onDrag();
+		onDrag();
 	}
 
 	private void onDrag() {

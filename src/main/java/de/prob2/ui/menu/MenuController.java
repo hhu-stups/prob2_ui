@@ -10,6 +10,7 @@ import java.util.List;
 import com.sun.javafx.stage.StageHelper;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.history.HistoryView;
+import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.stats.StatsView;
 import javafx.application.Platform;
@@ -422,11 +423,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	private boolean alreadyStaged(Stage stage) {
-		return	(stage.getScene().getRoot() instanceof OperationsView) ||
-				(stage.getScene().getRoot() instanceof HistoryView) ||
-				(stage.getScene().getRoot() instanceof ModelcheckingController) ||
-				(stage.getScene().getRoot() instanceof StatsView) ||
-				(stage.getScene().getRoot() instanceof AnimationsView);
+		return stage.getScene().getRoot() instanceof IComponents;
 	}
 
 	private boolean removable(TitledPane tp) {
