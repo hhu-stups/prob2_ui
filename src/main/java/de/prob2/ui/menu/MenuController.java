@@ -399,25 +399,26 @@ public final class MenuController extends MenuBar {
 	}
 
 	private void removeTP(Accordion accordion) {
+		//FIXME: throws ConcurrentModificationException
 		for (TitledPane tp : accordion.getPanes()) {
-			if (tp.getContent() instanceof OperationsView && dvController.detachOperations.isSelected()) {
-				Platform.runLater(()->transferToNewWindow(tp.getContent()));
+			if (removable(tp)) {
+				Platform.runLater(()->transferToNewWindow(tp.getContent(),tp.getText()));
 				accordion.getPanes().remove(tp);
-				//tp.setVisible(!dvController.detachOperations.isSelected());
-			} else if (tp.getContent() instanceof HistoryView) {
-				tp.setVisible(!dvController.detachHistory.isSelected());
-			} else if (tp.getContent() instanceof ModelcheckingController) {
-				tp.setVisible(!dvController.detachModelcheck.isSelected());
-			} else if (tp.getContent() instanceof StatsView) {
-				tp.setVisible(!dvController.detachStats.isSelected());
-			} else if (tp.getContent() instanceof AnimationsView){
-				tp.setVisible(!dvController.detachAnimations.isSelected());
 			}
 		}
 	}
 
-	private void transferToNewWindow(Node node) {
+	private boolean removable(TitledPane tp) {
+		return (tp.getContent() instanceof OperationsView && dvController.detachOperations.isSelected())
+				|| 	(tp.getContent() instanceof HistoryView && dvController.detachHistory.isSelected())
+				|| 	(tp.getContent() instanceof ModelcheckingController && dvController.detachModelcheck.isSelected())
+				||	(tp.getContent() instanceof StatsView && dvController.detachStats.isSelected())
+				||	(tp.getContent() instanceof AnimationsView && dvController.detachAnimations.isSelected());
+	}
+
+	private void transferToNewWindow(Node node, String title) {
 		Stage stage = new Stage();
+		stage.setTitle(title);
 		Scene scene = new Scene((Parent) node);
 		scene.getStylesheets().add("prob.css");
 		stage.setScene(scene);
