@@ -590,3 +590,11 @@
 .changed .tree-table-cell {
 	-fx-font-weight: bold;
 }
+
+.false {
+	-fx-background-color: pink;
+}
+
+.true {
+	-fx-background-color: palegreen;
+}
