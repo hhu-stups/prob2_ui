@@ -3,6 +3,7 @@ package de.prob2.ui.consoles.groovy.codecompletion;
 import java.io.IOException;
 import javax.script.ScriptEngine;
 
+import org.fxmisc.richtext.PopupAlignment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,6 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Point2D;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -40,7 +40,6 @@ public class GroovyCodeCompletion extends Popup {
 		this.charCounterInSuggestion = 0;
 		this.suggestions = FXCollections.observableArrayList();
 		this.completionHandler = new GroovyCodeCompletionHandler(suggestions);
-		
 		loader.setLocation(getClass().getResource("groovy_codecompletion_popup.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
@@ -59,6 +58,7 @@ public class GroovyCodeCompletion extends Popup {
 	
 	public void activate(GroovyConsole console, String currentLine, CodeCompletionTriggerAction action) {
 		this.parent = console;
+		console.setPopupWindow(this);
 		String newCurrentLine = currentLine;
 		if(action == CodeCompletionTriggerAction.POINT) {
 			newCurrentLine += ".";
@@ -67,7 +67,7 @@ public class GroovyCodeCompletion extends Popup {
 		completionHandler.handleMethodsFromObjects(currentPrefix, currentSuggestion, action, engine);
 		completionHandler.handleStaticClasses(currentPrefix, currentSuggestion, action);
 		completionHandler.handleObjects(currentSuggestion, action, engine);
-		showPopup(console);
+		showPopup();
 	}
 	
 	private String handleActivation(String currentLine) {
@@ -92,16 +92,14 @@ public class GroovyCodeCompletion extends Popup {
 		return currentPrefix;
 	}
 	
-	private void showPopup(GroovyConsole console) {
+	private void showPopup() {
 		if(suggestions.isEmpty()) {
 			return;
 		}
 		sortSuggestions();
 		lvSuggestions.getSelectionModel().selectFirst();
-		Point2D point = CaretFinder.findCaretPosition(CaretFinder.findCaret(console));
-		double x = point.getX() + 10;
-		double y = point.getY() + 20;
-		this.show(console, x, y);	
+		parent.setPopupAlignment(PopupAlignment.CARET_BOTTOM);
+		this.show(parent.getScene().getWindow());
 	}
 	
 	private void sortSuggestions() {

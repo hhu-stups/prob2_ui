@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.shape.Path;
 
+@Deprecated
 public class CaretFinder {
 	
 	public static Path findCaret(Parent parent) {

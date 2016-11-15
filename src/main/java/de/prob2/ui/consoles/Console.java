@@ -5,14 +5,15 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import org.fxmisc.richtext.CodeArea;
+
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
-public abstract class Console extends TextArea {
+public abstract class Console extends CodeArea {
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS);
     
 	protected List<ConsoleInstruction> instructions;
@@ -20,7 +21,6 @@ public abstract class Console extends TextArea {
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
 	protected ConsoleSearchHandler searchHandler;
-	
 
 	public Console() {
 		this.setContextMenu(new ContextMenu());
@@ -28,7 +28,7 @@ public abstract class Console extends TextArea {
 		this.searchHandler = new ConsoleSearchHandler(this, instructions);
 		setListeners();
 	}
-	
+		
 	@Override
 	public void paste() {
 		if(this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
@@ -40,64 +40,20 @@ public abstract class Console extends TextArea {
 		int diff = this.getLength() - oldText.length();
 		String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		if(currentLine.contains("\n")) {
-			this.setText(oldText);
+			this.replaceText(oldText);
 			goToLastPos();
 			return;
 		}
 		charCounterInLine += diff;
 		currentPosInLine += diff;
 	}
-	
+		
 	@Override
 	public void copy() {
 		super.copy();
 		goToLastPos();
 	}
-		
-		
-	@Override
-	public void forward() {
-		if(currentPosInLine <= charCounterInLine && this.getLength() - this.getCaretPosition() <= charCounterInLine) {		
-			super.forward();
-			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
-			this.setScrollTop(Double.MIN_VALUE);
-		}
-		if(searchHandler.isActive()) {
-			deactivateSearch();
-		}
-	}
-	
-	@Override
-	public void backward() {
-		//handleLeft
-		if(currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
-			super.backward();
-			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
-			this.setScrollTop(Double.MIN_VALUE);
-		} else if(currentPosInLine == 0) {
-			super.deselect();
-		}
-		if(searchHandler.isActive()) {
-			deactivateSearch();
-		}
-	}
-	
-	@Override
-	public void selectForward() {
-		if(currentPosInLine != charCounterInLine) {
-			super.selectForward();
-			currentPosInLine++;
-		}
-	}
-	
-	@Override
-	public void selectBackward() {
-		if(currentPosInLine != 0) {
-			super.selectBackward();
-			currentPosInLine--;
-		}
-	}
-	
+			
 	protected void setListeners() {
 		setMouseEvent();
 		setKeyEvent();
@@ -137,10 +93,13 @@ public abstract class Console extends TextArea {
 	private void keyPressed(KeyEvent e) {
 		if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
 			handleArrowKeys(e);
-			this.setScrollTop(Double.MAX_VALUE);
+			e.consume();
+			//this.setScrollTop(Double.MAX_VALUE);
 		} else if (e.getCode().isNavigationKey()) {
-			if(e.getCode() != KeyCode.LEFT && e.getCode() != KeyCode.RIGHT) {
+			if((e.getCode() != KeyCode.LEFT && e.getCode() != KeyCode.RIGHT) || e.isShiftDown()) {
 				e.consume();
+			} else {
+				handleArrowKeys(e);
 			}
 		} else if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE) {
 			handleDeletion(e);
@@ -170,7 +129,7 @@ public abstract class Console extends TextArea {
 
 	protected void activateSearch() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
-		this.setText(this.getText().substring(0, posOfEnter + 1) + ConsoleSearchHandler.FOUND + getCurrentLine());
+		this.replaceText(this.getText().substring(0, posOfEnter + 1) + ConsoleSearchHandler.FOUND + getCurrentLine());
 		this.positionCaret(this.getText().lastIndexOf("'"));
 		currentPosInLine = 0;
 		charCounterInLine = 0;
@@ -180,7 +139,7 @@ public abstract class Console extends TextArea {
 	protected void deactivateSearch() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		String searchResult = searchHandler.getCurrentSearchResult();
-		this.setText(this.getText().substring(0, posOfEnter + 1) + " >" + searchResult);
+		this.replaceText(this.getText().substring(0, posOfEnter + 1) + " >" + searchResult);
 		this.positionCaret(this.getText().length());
 		charCounterInLine = searchResult.length();
 		currentPosInLine = charCounterInLine;
@@ -210,6 +169,7 @@ public abstract class Console extends TextArea {
 	
 	private void goToLastPos() {
 		this.positionCaret(this.getLength());
+		deselect();
 		currentPosInLine = charCounterInLine;
 	}
 	
@@ -235,14 +195,20 @@ public abstract class Console extends TextArea {
 	}
 	
 	private void handleArrowKeys(KeyEvent e) {
-		boolean needReturn;
+		boolean needReturn = false;
 		if(searchHandler.isActive()) {
 			deactivateSearch();
 		}
 		if(e.getCode().equals(KeyCode.UP)) {
 			needReturn = handleUp(e);
-		} else {
+		} else if(e.getCode().equals(KeyCode.DOWN)) {
 			needReturn = handleDown(e);				
+		} else if(e.getCode().equals(KeyCode.LEFT)) {
+			handleLeft(e);
+			needReturn = true;
+		} else {
+			handleRight();
+			needReturn = true;
 		}
 		if(needReturn) {
 			return;
@@ -280,14 +246,34 @@ public abstract class Console extends TextArea {
 		return false;
 	}
 	
+	private void handleLeft(KeyEvent e) {
+		if(currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
+			currentPosInLine--;
+		} else if(currentPosInLine == 0) {
+			e.consume();
+			super.deselect();
+		}
+		if(searchHandler.isActive()) {
+			deactivateSearch();
+		}
+	}
+	
+	private void handleRight() {
+		if(currentPosInLine < charCounterInLine && this.getLength() - this.getCaretPosition() <= charCounterInLine) {		
+			currentPosInLine++;
+		}
+		if(searchHandler.isActive()) {
+			deactivateSearch();
+		}
+	}
+	
 	
 	private void setTextAfterArrowKey() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
-		this.setText(this.getText().substring(0, posOfEnter + 3));
 		String currentLine = instructions.get(posInList).getInstruction();
+		this.replaceText(this.getText().substring(0, posOfEnter + 3) + currentLine);
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
-		this.appendText(currentLine);
 	}
 	
 	
