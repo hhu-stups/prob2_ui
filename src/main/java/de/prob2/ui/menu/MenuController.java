@@ -71,7 +71,7 @@ public final class MenuController extends MenuBar {
 			Parent root = loadPreset("main.fxml");
 			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(0);
 			Accordion accordion = (Accordion) pane.getItems().get(0);
-			removeTP(accordion);
+			removeTP(accordion,pane);
 			this.detached.close();
 		}
 	}
@@ -398,13 +398,20 @@ public final class MenuController extends MenuBar {
 		stage.show();
 	}
 
-	private void removeTP(Accordion accordion) {
-		//FIXME: throws ConcurrentModificationException
+	private void removeTP(Accordion accordion,SplitPane pane) {
+		//FIXME: Do not open multiple stages containing the same item
 		for (TitledPane tp : accordion.getPanes()) {
-			if (removable(tp)) {
-				Platform.runLater(()->transferToNewWindow(tp.getContent(),tp.getText()));
-				accordion.getPanes().remove(tp);
-			}
+			Platform.runLater(() -> {
+				if (removable(tp)) {
+					Platform.runLater(() -> transferToNewWindow(tp.getContent(),tp.getText()));
+					accordion.getPanes().remove(tp);
+					if (accordion.getPanes().isEmpty()) {
+						pane.getItems().remove(accordion);
+						pane.setDividerPositions(0);
+						pane.lookupAll(".split-pane-divider").stream().forEach(div ->  div.setMouseTransparent(true));
+					}
+				}
+			});
 		}
 	}
 
