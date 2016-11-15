@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.application.Platform;
 import javafx.scene.control.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ import javafx.stage.Window;
 public final class MenuController extends MenuBar {
 	private final class DetachViewStageController {
 		@FXML private Stage detached;
+		@FXML private Button apply;
 		@FXML private CheckBox detachOperations;
 		@FXML private CheckBox detachHistory;
 		@FXML private CheckBox detachModelcheck;
@@ -56,6 +58,15 @@ public final class MenuController extends MenuBar {
 		@FXML
 		public void initialize() {
 			currentStage.register(this.detached);
+		}
+
+		@FXML
+		private void apply() {
+			this.detached.close();
+			Platform.runLater(() -> {
+				loadPreset("separatedHistory.fxml");
+				System.out.println("later");
+			});
 		}
 	}
 	private static final URL FXML_ROOT;
@@ -222,7 +233,7 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleLoadDetached() {
-		this.dvController.detached.showAndWait();
+		this.dvController.detached.show();
 	}
 
 	@FXML
