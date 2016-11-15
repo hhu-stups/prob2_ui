@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sun.javafx.stage.StageHelper;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.operations.OperationsView;
@@ -14,7 +15,6 @@ import de.prob2.ui.stats.StatsView;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -399,7 +399,13 @@ public final class MenuController extends MenuBar {
 	}
 
 	private void removeTP(Accordion accordion,SplitPane pane) {
-		//FIXME: Do not open multiple stages containing the same item
+		//FIXME: Do not open multiple stages containing the same item -> working fine with one component, crashing with 2 or more
+		for (Stage stage: StageHelper.getStages()) {
+			if (alreadyStaged(stage)){
+				stage.setScene(null);
+				stage.close();
+			}
+		}
 		for (TitledPane tp : accordion.getPanes()) {
 			Platform.runLater(() -> {
 				if (removable(tp)) {
@@ -415,12 +421,20 @@ public final class MenuController extends MenuBar {
 		}
 	}
 
+	private boolean alreadyStaged(Stage stage) {
+		return	(stage.getScene().getRoot() instanceof OperationsView) ||
+				(stage.getScene().getRoot() instanceof HistoryView) ||
+				(stage.getScene().getRoot() instanceof ModelcheckingController) ||
+				(stage.getScene().getRoot() instanceof StatsView) ||
+				(stage.getScene().getRoot() instanceof AnimationsView);
+	}
+
 	private boolean removable(TitledPane tp) {
-		return (tp.getContent() instanceof OperationsView && dvController.detachOperations.isSelected())
-				|| 	(tp.getContent() instanceof HistoryView && dvController.detachHistory.isSelected())
-				|| 	(tp.getContent() instanceof ModelcheckingController && dvController.detachModelcheck.isSelected())
-				||	(tp.getContent() instanceof StatsView && dvController.detachStats.isSelected())
-				||	(tp.getContent() instanceof AnimationsView && dvController.detachAnimations.isSelected());
+		return	(tp.getContent() instanceof OperationsView && dvController.detachOperations.isSelected()) ||
+				(tp.getContent() instanceof HistoryView && dvController.detachHistory.isSelected())	||
+				(tp.getContent() instanceof ModelcheckingController && dvController.detachModelcheck.isSelected()) ||
+				(tp.getContent() instanceof StatsView && dvController.detachStats.isSelected()) ||
+				(tp.getContent() instanceof AnimationsView && dvController.detachAnimations.isSelected());
 	}
 
 	private void transferToNewWindow(Node node, String title) {
