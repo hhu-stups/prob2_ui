@@ -24,7 +24,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.dotty.DottyStage;
-import de.prob2.ui.formula.FormulaGenerator;
+import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentStage;
@@ -62,7 +62,6 @@ public final class MenuController extends MenuBar {
 	private final AnimationSelector animationSelector;
 	private final CurrentStage currentStage;
 	private final CurrentTrace currentTrace;
-	private final FormulaGenerator formulaGenerator;
 	private final RecentFiles recentFiles;
 	
 	private Window window;
@@ -83,7 +82,6 @@ public final class MenuController extends MenuBar {
 		final AnimationSelector animationSelector,
 		final CurrentStage currentStage,
 		final CurrentTrace currentTrace,
-		final FormulaGenerator formulaGenerator,
 		final RecentFiles recentFiles
 	) {
 		this.injector = injector;
@@ -91,7 +89,6 @@ public final class MenuController extends MenuBar {
 		this.animationSelector = animationSelector;
 		this.currentStage = currentStage;
 		this.currentTrace = currentTrace;
-		this.formulaGenerator = formulaGenerator;
 		this.recentFiles = recentFiles;
 
 		loader.setLocation(getClass().getResource("menu.fxml"));
@@ -298,7 +295,9 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleFormulaInput(ActionEvent event) {
-		formulaGenerator.openDialog();
+		final Stage formulaInputStage = injector.getInstance(FormulaInputStage.class);
+		formulaInputStage.show();
+		formulaInputStage.toFront();
 	}
 
 	@FXML
