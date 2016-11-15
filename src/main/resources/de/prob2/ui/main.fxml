@@ -16,19 +16,19 @@
 		<SplitPane dividerPositions="0.26">
 			<Accordion>
 				<panes>
-					<TitledPane text="Operations">
+					<TitledPane text="%tptitles.operations">
 						<OperationsView/>
 					</TitledPane>
-					<TitledPane text="History">
+					<TitledPane text="%tptitles.history">
 						<HistoryView/>
 					</TitledPane>
-					<TitledPane text="Model Check">
+					<TitledPane text="%tptitles.modelcheck">
 						<ModelcheckingController/>
 					</TitledPane>
-					<TitledPane text="Statistics">
+					<TitledPane text="%tptitles.stats">
 						<StatsView/>
 					</TitledPane>
-					<TitledPane text="Animations">
+					<TitledPane text="%tptitles.animations">
 						<AnimationsView/>
 					</TitledPane>
 				</panes>

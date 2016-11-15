@@ -13,19 +13,19 @@
 	<left>
 		<Accordion minWidth="280" fx:id="leftAccordion">
 			<panes>
-				<TitledPane text="Operations" fx:id="operationsTP">
+				<TitledPane text="%tptitles.operations" fx:id="operationsTP">
 					<OperationsView fx:id="operations"/>
 				</TitledPane>
-				<TitledPane text="History" fx:id="historyTP">
+				<TitledPane text="%tptitles.history" fx:id="historyTP">
 					<HistoryView fx:id="history"/>
 				</TitledPane>
-				<TitledPane text="Model Check" fx:id="modelcheckTP">
+				<TitledPane text="%tptitles.modelcheck" fx:id="modelcheckTP">
 					<ModelcheckingController fx:id="modelcheck"/>
 				</TitledPane>
-				<TitledPane text="Statistics" fx:id="statsTP">
+				<TitledPane text="%tptitles.stats" fx:id="statsTP">
 					<StatsView fx:id="stats"/>
 				</TitledPane>
-				<TitledPane text="Animations" fx:id="animationsTP">
+				<TitledPane text="%tptitles.animations" fx:id="animationsTP">
 					<AnimationsView fx:id="animations"/>
 				</TitledPane>
 			</panes>

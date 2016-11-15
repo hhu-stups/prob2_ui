@@ -12,6 +12,7 @@ import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.stats.StatsView;
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
@@ -67,26 +68,11 @@ public final class MenuController extends MenuBar {
 
 		@FXML
 		private void apply() {
-			Parent root = loadPreset("draggable.fxml");
-			Platform.runLater(() -> {
-				BorderPane pane = (BorderPane) root.getChildrenUnmodifiable().get(0);
-				Accordion accordion = (Accordion) pane.getChildren().get(0);
-				for (TitledPane tp : accordion.getPanes()) {
-					tp.managedProperty().bind(visibleProperty());
-					if (tp.getContent() instanceof OperationsView) {
-						tp.setVisible(!detachOperations.isSelected());
-					} else if (tp.getContent() instanceof HistoryView) {
-						tp.setVisible(!detachHistory.isSelected());
-					} else if (tp.getContent() instanceof ModelcheckingController) {
-						tp.setVisible(!detachModelcheck.isSelected());
-					} else if (tp.getContent() instanceof StatsView) {
-						tp.setVisible(!detachStats.isSelected());
-					} else if (tp.getContent() instanceof AnimationsView){
-						tp.setVisible(!detachAnimations.isSelected());
-					}
-				}
-				this.detached.close();
-			});
+			Parent root = loadPreset("main.fxml");
+			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(0);
+			Accordion accordion = (Accordion) pane.getItems().get(0);
+			removeTP(accordion);
+			this.detached.close();
 		}
 	}
 	private static final URL FXML_ROOT;
@@ -412,4 +398,29 @@ public final class MenuController extends MenuBar {
 		stage.show();
 	}
 
+	private void removeTP(Accordion accordion) {
+		for (TitledPane tp : accordion.getPanes()) {
+			if (tp.getContent() instanceof OperationsView && dvController.detachOperations.isSelected()) {
+				Platform.runLater(()->transferToNewWindow(tp.getContent()));
+				accordion.getPanes().remove(tp);
+				//tp.setVisible(!dvController.detachOperations.isSelected());
+			} else if (tp.getContent() instanceof HistoryView) {
+				tp.setVisible(!dvController.detachHistory.isSelected());
+			} else if (tp.getContent() instanceof ModelcheckingController) {
+				tp.setVisible(!dvController.detachModelcheck.isSelected());
+			} else if (tp.getContent() instanceof StatsView) {
+				tp.setVisible(!dvController.detachStats.isSelected());
+			} else if (tp.getContent() instanceof AnimationsView){
+				tp.setVisible(!dvController.detachAnimations.isSelected());
+			}
+		}
+	}
+
+	private void transferToNewWindow(Node node) {
+		Stage stage = new Stage();
+		Scene scene = new Scene((Parent) node);
+		scene.getStylesheets().add("prob.css");
+		stage.setScene(scene);
+		stage.show();
+	}
 }
