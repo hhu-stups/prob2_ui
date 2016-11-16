@@ -4,15 +4,20 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.exception.ProBError;
+
 import de.prob2.ui.prob2fx.CurrentStage;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
@@ -20,9 +25,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
-import javafx.scene.control.Button;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FormulaInputStage extends Stage {
 	
@@ -79,12 +84,13 @@ public class FormulaInputStage extends Stage {
 		try {
 			formulaGenerator.parseAndShowFormula(tf_formula.getText());
 			close();
-		} catch (Exception exception) {
-			logger.error("Evaluation of formula or loading fxml failed", exception);
+		} catch (EvaluationException | ProBError exception) {
+			logger.error("Evaluation of formula failed", exception);
 			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			exception.printStackTrace(pw);
-			exceptionText.setText(sw.toString());
+			try (PrintWriter pw = new PrintWriter(sw)) {
+				exception.printStackTrace(pw);
+				exceptionText.setText(sw.toString());
+			}
 			parent.setExpanded(true);
 			lb_header.setText("Could not parse or visualize formula");
 			tf_formula.getStyleClass().add("text-field-error");

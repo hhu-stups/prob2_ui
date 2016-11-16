@@ -11,7 +11,9 @@ import com.google.inject.Injector;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Machine;
@@ -26,6 +28,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
@@ -234,7 +237,14 @@ public final class StatesView extends AnchorPane {
 	}
 
 	private void visualizeExpression(AbstractFormulaElement formula) {
-		formulaGenerator.showFormula(formula.getFormula());
+		try {
+			formulaGenerator.showFormula(formula.getFormula());
+		} catch (EvaluationException | ProBError e) {
+			logger.error("Could not visualize formula", e);
+			final Alert alert = new Alert(Alert.AlertType.ERROR, "Could not visualize formula:\n" + e);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
+		}
 	}
 
 	@FXML
