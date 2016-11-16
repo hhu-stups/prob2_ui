@@ -30,6 +30,8 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import org.fxmisc.richtext.StyleClassedTextArea;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +45,7 @@ public class FullValueStage extends Stage {
 	@FXML private Tab diffTab;
 	@FXML private TextArea currentValueTextarea;
 	@FXML private TextArea previousValueTextarea;
-	@FXML private TextArea diffTextarea;
+	@FXML private StyleClassedTextArea diffTextarea;
 	@FXML private ToggleGroup asciiUnicodeGroup;
 	@FXML private RadioButton asciiRadio;
 	@FXML private RadioButton unicodeRadio;
@@ -153,9 +155,43 @@ public class FullValueStage extends Stage {
 			final List<String> prevLines = Arrays.asList(pv.split("\n"));
 			final List<String> curLines = Arrays.asList(cv.split("\n"));
 			final List<String> uniDiffLines = DiffUtils.generateUnifiedDiff("", "", prevLines, DiffUtils.diff(prevLines, curLines), 3);
+			
+			this.diffTextarea.clear();
+			if (uniDiffLines.isEmpty()) {
+				return;
+			}
+			
 			// Don't display the "file names" in the first two lines
-			this.diff = String.join("\n", uniDiffLines.subList(2, uniDiffLines.size()));
-			this.diffTextarea.setText(this.diff);
+			for (final String line : uniDiffLines.subList(2, uniDiffLines.size())) {
+				this.diffTextarea.appendText(line);
+				this.diffTextarea.appendText("\n");
+				
+				final String styleClass;
+				switch (line.charAt(0)) {
+					case '@':
+						styleClass = "coords";
+						break;
+					
+					case '+':
+						styleClass = "insert";
+						break;
+					
+					case '-':
+						styleClass = "delete";
+						break;
+					
+					default:
+						styleClass = null;
+				}
+				
+				if (styleClass != null) {
+					this.diffTextarea.setStyleClass(
+						this.diffTextarea.getLength() - line.length() - 1,
+						this.diffTextarea.getLength() - 1,
+						styleClass
+					);
+				}
+			}
 		}
 	}
 	

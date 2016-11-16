@@ -591,10 +591,24 @@
 	-fx-font-weight: bold;
 }
 
-.false {
+.tree-table-cell.false {
 	-fx-background-color: pink;
 }
 
-.true {
+.tree-table-cell.true {
 	-fx-background-color: palegreen;
+}
+
+/* === FullValueStage === */
+
+.difftextarea .coords {
+	-fx-fill: teal;
+}
+
+.difftextarea .insert {
+	-fx-fill: green;
+}
+
+.difftextarea .delete {
+	-fx-fill: red;
 }
