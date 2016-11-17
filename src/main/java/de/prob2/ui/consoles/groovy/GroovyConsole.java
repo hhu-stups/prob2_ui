@@ -19,7 +19,7 @@ import javafx.scene.input.TransferMode;
 public class GroovyConsole extends Console {
 	
 	private GroovyInterpreter interpreter;
-	
+		
 	@Inject
 	public GroovyConsole(GroovyInterpreter interpreter) {
 		super();
@@ -28,7 +28,7 @@ public class GroovyConsole extends Console {
 	}
 		
 	public void reset() {
-		this.setText("Prob 2.0 Groovy Console");
+		this.replaceText("Prob 2.0 Groovy Console");
 	}
 	
 	public void setInterpreter(GroovyInterpreter interpreter) {
@@ -94,7 +94,7 @@ public class GroovyConsole extends Console {
                     path = file.getAbsolutePath();
                     String newText = new StringBuilder(this.getText()).insert(this.getCaretPosition(), path).toString();
                     int caretPosition = this.getCaretPosition();
-                    this.setText(newText);
+                    this.replaceText(newText);
                     charCounterInLine += path.length();
                     currentPosInLine += path.length();
                     this.positionCaret(caretPosition + path.length());
@@ -108,7 +108,7 @@ public class GroovyConsole extends Console {
 	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
 		if(e.getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent)e.getEvent()).getText())) {
 			handleChooseSuggestion(e);
-			this.setScrollTop(Double.MAX_VALUE);
+			//Fthis.setScrollTop(Double.MAX_VALUE);
 		} else if(((CodeCompletionEvent)e).getCode() == KeyCode.SPACE) {
 			//handle Space in Code Completion
 			handleInsertChar((KeyEvent)e.getEvent());
@@ -121,15 +121,29 @@ public class GroovyConsole extends Console {
 		String suggestion = ((CodeCompletionEvent) e).getCurrentSuggestion();
 		String newText = this.getText().substring(0, this.getCaretPosition() - suggestion.length());
 		newText = new StringBuilder(newText).append(choice).toString();
-		newText = new StringBuilder(newText).append(this.getText().substring(this.getCaretPosition())).toString();
+		int indexSkipped = getIndexSkipped(this.getText().substring(this.getCaretPosition()), choice, suggestion);
+		int indexOfRest = this.getCaretPosition() + indexSkipped;
+		newText = new StringBuilder(newText).append(this.getText().substring(indexOfRest)).toString();
 		int diff = newText.length() - this.getText().length();
-		int caret = this.getCaretPosition();
-		this.setText(newText);
-		currentPosInLine += diff;
+		this.replaceText(newText);
+		currentPosInLine += diff + indexSkipped;
 		charCounterInLine += diff;
-		this.positionCaret(caret + diff);
+		this.positionCaret(indexOfRest + diff);
 	}
 	
+	private int getIndexSkipped(String rest, String choice, String suggestion) {
+		String restOfChoice = choice.substring(suggestion.length());
+		int result = 0;
+		for(int i = 0; i < Math.min(rest.length(), restOfChoice.length()); i++) {
+			if(restOfChoice.charAt(i) == rest.charAt(i)) {
+				result++;
+			} else {
+				break;
+			}
+		}
+		return result;
+	}
+		
 	@Override
 	protected void handleEnter(KeyEvent e) {
 		super.handleEnterAbstract(e);

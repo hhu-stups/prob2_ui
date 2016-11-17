@@ -34,7 +34,6 @@ public class GroovyInterpreter implements Executable {
 	@Override
 	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
 		logger.trace("Exec");
-		
 		if ("inspect".equals(instruction.getInstruction())) {
 			groovyObjectStage.showObjects(engine);
 			return new ConsoleExecResult("", "");

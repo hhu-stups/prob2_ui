@@ -11,7 +11,9 @@ import com.google.inject.Injector;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Machine;
@@ -26,9 +28,11 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
@@ -39,6 +43,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class StatesView extends AnchorPane {
+	private static final class ValueCell extends TreeTableCell<StateTreeItem<?>, String> {
+		private ValueCell() {
+			super();
+		}
+		
+		@Override
+		protected void updateItem(final String item, final boolean empty) {
+			super.updateItem(item, empty);
+			
+			if (item == null || empty) {
+				super.setText(null);
+				super.setGraphic(null);
+				this.getStyleClass().removeAll("false", "true");
+			} else {
+				
+				super.setText(item);
+				super.setGraphic(null);
+				
+				if ("FALSE".equals(item)) {
+					if (!this.getStyleClass().contains("false")) {
+						this.getStyleClass().add("false");
+					}
+				} else {
+					this.getStyleClass().remove("false");
+				}
+				
+				if ("TRUE".equals(item)) {
+					if (!this.getStyleClass().contains("true")) {
+						this.getStyleClass().add("true");
+					}
+				} else {
+					this.getStyleClass().remove("true");
+				}
+			}
+		}
+	}
+	
 	private static final Logger logger = LoggerFactory.getLogger(StatesView.class);
 	
 	@FXML private TreeTableView<StateTreeItem<?>> tv;
@@ -196,7 +237,14 @@ public final class StatesView extends AnchorPane {
 	}
 
 	private void visualizeExpression(AbstractFormulaElement formula) {
-		formulaGenerator.showFormula(formula.getFormula());
+		try {
+			formulaGenerator.showFormula(formula.getFormula());
+		} catch (EvaluationException | ProBError e) {
+			logger.error("Could not visualize formula", e);
+			final Alert alert = new Alert(Alert.AlertType.ERROR, "Could not visualize formula:\n" + e);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
+		}
 	}
 
 	@FXML
@@ -248,7 +296,7 @@ public final class StatesView extends AnchorPane {
 				final AbstractFormulaElement element = (AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents();
 				final EvalResult value = (EvalResult)this.currentValues.get(element.getFormula());
 				final EvalResult previousValue;
-				if (this.previousValues.get(element.getFormula()) instanceof EvalResult) {
+				if (this.previousValues != null && this.previousValues.get(element.getFormula()) instanceof EvalResult) {
 					previousValue = (EvalResult)this.previousValues.get(element.getFormula());
 				} else {
 					previousValue = null;
@@ -276,6 +324,9 @@ public final class StatesView extends AnchorPane {
 			
 			return row;
 		});
+		
+		this.tvValue.setCellFactory(col -> new ValueCell());
+		this.tvPreviousValue.setCellFactory(col -> new ValueCell());
 
 		this.tvRootItem.setValue(new ElementClassStateTreeItem(Machine.class));
 

@@ -593,3 +593,25 @@
 .changed .tree-table-cell {
 	-fx-font-weight: bold;
 }
+
+.tree-table-cell.false {
+	-fx-background-color: pink;
+}
+
+.tree-table-cell.true {
+	-fx-background-color: palegreen;
+}
+
+/* === FullValueStage === */
+
+.difftextarea .coords {
+	-fx-fill: teal;
+}
+
+.difftextarea .insert {
+	-fx-fill: green;
+}
+
+.difftextarea .delete {
+	-fx-fill: red;
+}

@@ -3,18 +3,18 @@ package de.prob2.ui.stats;
 import java.io.IOException;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -26,6 +26,9 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatsView extends ScrollPane {
 	@FXML
@@ -110,7 +113,7 @@ public class StatsView extends ScrollPane {
 				trace.getStateSpace().execute(coverageCmd);
 				updatExtendedStats(coverageCmd.getResult());
 			}
-		} 
+		}
 	}
 
 	private void updateSimpleStats(StateSpaceStats result) {
