@@ -1,10 +1,23 @@
 package de.prob2.ui.prob2fx;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.Main;
+import de.prob2.ui.config.Config;
 import de.prob2.ui.project.Project;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -19,12 +32,16 @@ import javafx.collections.ObservableList;
 
 @Singleton
 public class CurrentProject extends SimpleObjectProperty<Project> {
+	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
+	private static final Logger logger = LoggerFactory.getLogger(CurrentProject.class);
 	private final BooleanProperty exists;
 	private final BooleanProperty isSingleFile;
 	private final ListProperty<File> files;
+	private final Gson gson;
 
 	@Inject
 	private CurrentProject() {
+		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
 		this.exists.bind(Bindings.isNotNull(this));
 		this.isSingleFile = new SimpleBooleanProperty(this, "isSingleFile", false);
@@ -75,5 +92,16 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public boolean exists() {
 		return this.existsProperty().get();
+	}
+
+	public void save() {
+		File location = new File(System.getProperty("user.home") + File.separator + this.getName() + ".json");
+		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(location), CONFIG_CHARSET)) {
+			gson.toJson(this.get(), writer);
+		} catch (FileNotFoundException exc) {
+			logger.warn("Failed to create config file", exc);
+		} catch (IOException exc) {
+			logger.warn("Failed to save config file", exc);
+		}
 	}
 }

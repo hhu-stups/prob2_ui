@@ -407,6 +407,6 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void saveProject(ActionEvent event) {
-		System.out.println("save");
+		currentProject.save();
 	}
 }
