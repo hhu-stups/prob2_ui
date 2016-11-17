@@ -16,8 +16,6 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.Main;
-import de.prob2.ui.config.Config;
 import de.prob2.ui.project.Project;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -66,7 +64,7 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		if (!this.isSingleFile()) {
 			ObservableList<File> list = this.getFiles();
 			list.add(file);
-			this.set(new Project(this.getName(), list));
+			this.set(new Project(this.getName(), list, this.get().getLocation()));
 		}
 	}
 
@@ -95,13 +93,13 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public void save() {
-		File location = new File(System.getProperty("user.home") + File.separator + this.getName() + ".json");
+		File location = new File(this.get().getLocation() + File.separator + this.getName() + ".json");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(location), CONFIG_CHARSET)) {
 			gson.toJson(this.get(), writer);
 		} catch (FileNotFoundException exc) {
-			logger.warn("Failed to create config file", exc);
+			logger.warn("Failed to create project data file", exc);
 		} catch (IOException exc) {
-			logger.warn("Failed to save config file", exc);
+			logger.warn("Failed to save project", exc);
 		}
 	}
 }

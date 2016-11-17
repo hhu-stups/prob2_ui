@@ -13,6 +13,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
@@ -20,16 +23,12 @@ import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
-
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.states.ClassBlacklist;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")

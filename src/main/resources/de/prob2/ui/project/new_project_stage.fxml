@@ -35,7 +35,24 @@
 							AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" alignment="center_right">
 							<HBox spacing="20" alignment="center_left">
 								<Label text="%newProject.stage.projectName" />
-								<TextField fx:id="projectNameField" HBox.hgrow="always" />
+								<TextField fx:id="projectNameField" HBox.hgrow="always">
+									<font>
+										<Font size="12" />
+									</font>
+								</TextField>
+							</HBox>
+							<HBox spacing="20" alignment="center_left">
+								<Label text="%newProject.stage.location" />
+								<TextField fx:id="locationField" HBox.hgrow="always">
+									<font>
+										<Font size="12" />
+									</font>
+								</TextField>
+								<Button styleClass="button-dark2" text="%newProject.stage.selectLocation"
+									onAction="#selectLocation" />
+								<VBox.margin>
+									<Insets top="10" />
+								</VBox.margin>
 							</HBox>
 							<AnchorPane>
 								<Label text="%newProject.stage.files"
@@ -49,7 +66,8 @@
 									</graphic>
 								</Button>
 							</AnchorPane>
-							<ListView fx:id="filesListView" styleClass="no-border" prefHeight="200" />
+							<ListView fx:id="filesListView" styleClass="no-border"
+								prefHeight="200" />
 						</VBox>
 					</AnchorPane>
 					<ButtonBar styleClass="dialog">
@@ -64,6 +82,9 @@
 						</VBox.margin>
 					</ButtonBar>
 				</VBox>
+				<Label fx:id="errorExplanationLabel" textFill="#B77300"
+					AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="20"
+					AnchorPane.rightAnchor="200" />
 			</AnchorPane>
 		</Scene>
 	</scene>

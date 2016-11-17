@@ -8,11 +8,13 @@ public class Project {
 	private String name;
 	private List<File> files = new ArrayList<File>();
 	private final boolean singleFile;
+	private File location;
 
-	public Project(String name, List<File> files) {
+	public Project(String name, List<File> files, File location) {
 		this.name = name;
 		this.files = files;
 		this.singleFile = false;
+		this.location = location;
 	}
 	
 	public Project(File file) {
@@ -36,5 +38,9 @@ public class Project {
 
 	public void addFile(File file) {
 		this.files.add(file);
+	}
+	
+	public File getLocation() {
+		return location;
 	}
 }

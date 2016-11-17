@@ -12,12 +12,15 @@ import com.google.inject.Singleton;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentStage;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -31,7 +34,11 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private TextField projectNameField;
 	@FXML
+	private TextField locationField;
+	@FXML
 	private ListView<File> filesListView;
+	@FXML
+	private Label errorExplanationLabel;
 
 	private CurrentProject currentProject;
 
@@ -54,6 +61,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	public void initialize() {
 		finishButton.disableProperty().bind(projectNameField.lengthProperty().lessThanOrEqualTo(0));
+		locationField.setText(System.getProperty("user.home"));
 	}
 
 	@FXML
@@ -74,6 +82,13 @@ public class NewProjectStage extends Stage {
 		
 		filesListView.getItems().add(selectedFile);
 	}
+	
+	@FXML
+	void selectLocation(ActionEvent event) {
+		DirectoryChooser dirChooser = new DirectoryChooser();
+		dirChooser.setTitle("Select Location");
+		locationField.setText(dirChooser.showDialog(this.getOwner()).getAbsolutePath());
+	}
 
 	@FXML
 	void cancel(ActionEvent event) {
@@ -82,7 +97,12 @@ public class NewProjectStage extends Stage {
 
 	@FXML
 	void finish(ActionEvent event) {
-		Project newProject = new Project(projectNameField.getText(), filesListView.getItems());
+		File dir = new File(locationField.getText());
+		if(!dir.isDirectory()) {
+			errorExplanationLabel.setText("The location does not exist or is invalid");
+			return;
+		} 
+		Project newProject = new Project(projectNameField.getText(), filesListView.getItems(), dir);
 		currentProject.changeCurrentProject(newProject);
 		this.close();
 	}
