@@ -11,8 +11,7 @@
 	<Menu text="%menu.file">
 		<MenuItem text="%menu.file.items.newProject" accelerator="Alt+Shortcut+N"
 			onAction="#createNewProject" />
-		<MenuItem text="%menu.file.items.openProject" accelerator="Alt+Shortcut+O"
-			disable="true" />
+		<MenuItem text="%menu.file.items.openProject" accelerator="Alt+Shortcut+O" onAction="#openProject"/>
 		<Menu fx:id="recentProjectsMenu" text="%menu.file.items.openRecentProject"
 			disable="true">
 			<MenuItem fx:id="recentFilesPlaceholder" text="%menu.file.items.placeholder"
@@ -32,8 +31,8 @@
 				text="%menu.file.items.openRecentFile.items.clear" onAction="#handleClearRecentFiles" />
 		</Menu>
 		<SeparatorMenuItem />
-		<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject" accelerator="Shortcut+S"
-			onAction="#saveProject" />
+		<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject"
+			accelerator="Shortcut+S" onAction="#saveProject" />
 		<SeparatorMenuItem />
 		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"
 			onAction="#handleClose" />

@@ -109,7 +109,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private void addAll(List<File> files) {
 		for (int i = 0; i < files.size(); i++) {
 			final StateSpace newSpace;
-			String path = files.get(i).getAbsolutePath();
+			String path = files.get(i).getPath();
 			try {
 				newSpace = this.api.b_load(path);
 			} catch (IOException | BException e) {

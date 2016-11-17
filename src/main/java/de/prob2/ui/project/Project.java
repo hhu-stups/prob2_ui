@@ -7,8 +7,8 @@ import java.util.List;
 public class Project {
 	private String name;
 	private List<File> files = new ArrayList<File>();
-	private final boolean singleFile;
 	private File location;
+	private final boolean singleFile;
 
 	public Project(String name, List<File> files, File location) {
 		this.name = name;

@@ -409,4 +409,17 @@ public final class MenuController extends MenuBar {
 	private void saveProject(ActionEvent event) {
 		currentProject.save();
 	}
+	
+	@FXML
+	private void openProject(ActionEvent event) {
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open Project");
+		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("ProB2 Projects", "*.json"));
+
+		final File selectedProject = fileChooser.showOpenDialog(this.window);
+		if (selectedProject == null) {
+			return;
+		}
+		currentProject.open(selectedProject);
+	}
 }

@@ -1,10 +1,13 @@
 package de.prob2.ui.prob2fx;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
@@ -45,19 +48,20 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		this.isSingleFile = new SimpleBooleanProperty(this, "isSingleFile", false);
 		this.files = new SimpleListProperty<>(this, "files", FXCollections.observableArrayList());
 	}
-	
-    @Override
-    public void set(Project project) {
-        super.set(project);
-        this.isSingleFile.set(project.isSingleFile());
-    }
+
 	@Override
-    public String getName() {
-        return this.get().getName();
-    }
+	public void set(Project project) {
+		super.set(project);
+		this.isSingleFile.set(project.isSingleFile());
+	}
+
+	@Override
+	public String getName() {
+		return this.get().getName();
+	}
 
 	public void changeCurrentProject(Project project) {
-		this.set(project);	
+		this.set(project);
 	}
 
 	public void addFile(File file) {
@@ -71,11 +75,11 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 	public ReadOnlyListProperty<File> filesProperty() {
 		return this.files;
 	}
-	
+
 	public ObservableList<File> getFiles() {
 		return (ObservableList<File>) this.get().getFiles();
 	}
-	
+
 	public ReadOnlyBooleanProperty isSingleFileProperty() {
 		return this.isSingleFile;
 	}
@@ -101,5 +105,19 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		} catch (IOException exc) {
 			logger.warn("Failed to save project", exc);
 		}
+	}
+
+	public void open(File file) {
+		Project project;
+		try (final Reader reader = new InputStreamReader(new FileInputStream(file), CONFIG_CHARSET)) {
+			project = gson.fromJson(reader, Project.class);
+		} catch (FileNotFoundException exc) {
+			logger.warn("Project file not found", exc);
+			return;
+		} catch (IOException exc) {
+			logger.warn("Failed to open project file", exc);
+			return;
+		}
+		this.set(project);
 	}
 }
