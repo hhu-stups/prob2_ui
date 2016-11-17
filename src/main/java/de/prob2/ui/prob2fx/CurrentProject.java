@@ -28,6 +28,11 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		this.isSingleFile = new SimpleBooleanProperty(this, "isSingleFile", false);
 		this.files = new SimpleListProperty<>(this, "files", FXCollections.observableArrayList());
 	}
+	
+	@Override
+    public String getName() {
+        return this.get().getName();
+    }
 
 	public void changeCurrentProjet(Project project) {
 		this.set(project);

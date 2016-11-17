@@ -18,7 +18,6 @@ import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
-import de.prob.statespace.AnimationSelector;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.dotty.DottyStage;
@@ -68,7 +67,6 @@ public final class MenuController extends MenuBar {
 
 	private final Injector injector;
 	private final Api api;
-	private final AnimationSelector animationSelector;
 	private final CurrentStage currentStage;
 	private final CurrentTrace currentTrace;
 	private final RecentFiles recentFiles;
@@ -94,11 +92,10 @@ public final class MenuController extends MenuBar {
 
 	@Inject
 	private MenuController(final FXMLLoader loader, final Injector injector, final Api api,
-			final AnimationSelector animationSelector, final CurrentStage currentStage, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final RecentFiles recentFiles) {
+			final CurrentStage currentStage, final CurrentTrace currentTrace, final CurrentProject currentProject,
+			final RecentFiles recentFiles) {
 		this.injector = injector;
 		this.api = api;
-		this.animationSelector = animationSelector;
 		this.currentStage = currentStage;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
@@ -237,9 +234,9 @@ public final class MenuController extends MenuBar {
 		if (currentProject.exists()) {
 			Alert alert = new Alert(AlertType.CONFIRMATION);
 			alert.getDialogPane().getStylesheets().add("prob.css");
-			
+
 			ButtonType buttonTypeAdd = new ButtonType("Add");
-			ButtonType buttonTypeClose = new ButtonType("Close current");
+			ButtonType buttonTypeClose = new ButtonType("Close");
 			ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 
 			if (currentProject.isSingleFile()) {
@@ -252,12 +249,12 @@ public final class MenuController extends MenuBar {
 				alert.getButtonTypes().setAll(buttonTypeAdd, buttonTypeClose, buttonTypeCancel);
 			}
 			Optional<ButtonType> result = alert.showAndWait();
-			
+
 			if (result.get() == buttonTypeAdd) {
 				currentProject.addFile(new File(path));
 			} else if (result.get() == buttonTypeClose) {
 				openPath(path);
-			} 
+			}
 		} else {
 			openPath(path);
 		}
