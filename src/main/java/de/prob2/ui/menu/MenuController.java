@@ -87,6 +87,8 @@ public final class MenuController extends MenuBar {
 	private MenuItem enterFormulaForVisualization;
 	@FXML
 	private MenuItem aboutItem;
+	@FXML
+	private MenuItem saveProjectItem;
 
 	private CurrentProject currentProject;
 
@@ -182,6 +184,8 @@ public final class MenuController extends MenuBar {
 
 		this.enterFormulaForVisualization.disableProperty()
 				.bind(currentTrace.currentStateProperty().initializedProperty().not());
+		this.saveProjectItem.disableProperty()
+				.bind(currentProject.existsProperty().not().or(currentProject.isSingleFileProperty()));
 	}
 
 	@FXML
@@ -271,7 +275,7 @@ public final class MenuController extends MenuBar {
 			return;
 		}
 
-		this.currentProject.changeCurrentProjet(new Project(new File(path)));
+		this.currentProject.changeCurrentProject(new Project(new File(path)));
 		injector.getInstance(ModelcheckingController.class).resetView();
 
 		// Remove the path first to avoid listing the same file twice.
@@ -399,5 +403,10 @@ public final class MenuController extends MenuBar {
 		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();
+	}
+
+	@FXML
+	private void saveProject(ActionEvent event) {
+		System.out.println("save");
 	}
 }

@@ -32,8 +32,8 @@
 				text="%menu.file.items.openRecentFile.items.clear" onAction="#handleClearRecentFiles" />
 		</Menu>
 		<SeparatorMenuItem />
-		<MenuItem text="%menu.file.items.saveProject" accelerator="Shortcut+S"
-			disable="true" />
+		<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject" accelerator="Shortcut+S"
+			onAction="#saveProject" />
 		<SeparatorMenuItem />
 		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"
 			onAction="#handleClose" />

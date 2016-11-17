@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.project.Project;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -25,17 +26,23 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 	@Inject
 	private CurrentProject() {
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
+		this.exists.bind(Bindings.isNotNull(this));
 		this.isSingleFile = new SimpleBooleanProperty(this, "isSingleFile", false);
 		this.files = new SimpleListProperty<>(this, "files", FXCollections.observableArrayList());
 	}
 	
+    @Override
+    public void set(Project project) {
+        super.set(project);
+        this.isSingleFile.set(project.isSingleFile());
+    }
 	@Override
     public String getName() {
         return this.get().getName();
     }
 
-	public void changeCurrentProjet(Project project) {
-		this.set(project);
+	public void changeCurrentProject(Project project) {
+		this.set(project);	
 	}
 
 	public void addFile(File file) {
@@ -59,7 +66,7 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public boolean isSingleFile() {
-		return this.get().isSingleFile();
+		return this.isSingleFileProperty().get();
 	}
 
 	public ReadOnlyBooleanProperty existsProperty() {
@@ -67,6 +74,6 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public boolean exists() {
-		return this.get() != null;
+		return this.existsProperty().get();
 	}
 }

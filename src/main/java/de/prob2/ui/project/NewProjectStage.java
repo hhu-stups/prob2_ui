@@ -83,7 +83,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	void finish(ActionEvent event) {
 		Project newProject = new Project(projectNameField.getText(), filesListView.getItems());
-		currentProject.changeCurrentProjet(newProject);
+		currentProject.changeCurrentProject(newProject);
 		this.close();
 	}
 }
