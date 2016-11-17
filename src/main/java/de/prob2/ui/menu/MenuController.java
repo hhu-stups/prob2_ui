@@ -409,7 +409,7 @@ public final class MenuController extends MenuBar {
 	private void saveProject(ActionEvent event) {
 		currentProject.save();
 	}
-	
+
 	@FXML
 	private void openProject(ActionEvent event) {
 		final FileChooser fileChooser = new FileChooser();
@@ -420,6 +420,25 @@ public final class MenuController extends MenuBar {
 		if (selectedProject == null) {
 			return;
 		}
-		currentProject.open(selectedProject);
+
+		if (currentProject.exists()) {
+			Alert alert = new Alert(AlertType.CONFIRMATION);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+
+			if (currentProject.isSingleFile()) {
+				alert.setHeaderText("You've already opened a file.");
+				alert.setContentText("Do you want to close the current file?");
+			} else {
+				alert.setHeaderText("You've already opened a project.");
+				alert.setContentText("Do you want to close the current project?");
+			}
+			Optional<ButtonType> result = alert.showAndWait();
+
+			if (result.get() == ButtonType.OK) {
+				currentProject.open(selectedProject);
+			}
+		} else {
+			currentProject.open(selectedProject);
+		}
 	}
 }
