@@ -56,9 +56,7 @@ public class GroovyCodeCompletion extends Popup {
 		setListeners();
 	}
 	
-	public void activate(GroovyConsole console, String currentLine, CodeCompletionTriggerAction action) {
-		this.parent = console;
-		console.setPopupWindow(this);
+	public void activate(String currentLine, CodeCompletionTriggerAction action) {
 		String newCurrentLine = currentLine;
 		if(action == CodeCompletionTriggerAction.POINT) {
 			newCurrentLine += ".";
@@ -264,6 +262,11 @@ public class GroovyCodeCompletion extends Popup {
 			getParent().fireEvent(new CodeCompletionEvent(e, choice, choice.substring(0, currentPosInSuggestion)));
 		}
 		deactivate();
+	}
+	
+	public void setParent(GroovyConsole parent) {
+		this.parent = parent;
+		parent.setPopupWindow(this);
 	}
 	
 	public GroovyConsole getParent() {

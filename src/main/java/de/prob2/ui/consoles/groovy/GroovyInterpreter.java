@@ -57,9 +57,13 @@ public class GroovyInterpreter implements Executable {
 		}
 	}
 	
-	public void triggerCodeCompletion(GroovyConsole console, String currentLine, CodeCompletionTriggerAction action) {
+	public void setCodeCompletion(GroovyConsole parent) {
+		codeCompletion.setParent(parent);
+	}
+	
+	public void triggerCodeCompletion(String currentLine, CodeCompletionTriggerAction action) {
 		if(!codeCompletion.isVisible()) {
-			codeCompletion.activate(console, currentLine, action);
+			codeCompletion.activate(currentLine, action);
 		}
 	}
 	
