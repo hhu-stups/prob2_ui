@@ -21,10 +21,14 @@ public class BConsole extends Console {
 	@Override
 	protected void handleEnter(KeyEvent e) {
 		super.handleEnterAbstract(e);
-		if(!getCurrentLine().isEmpty()) {
+		String currentLine = getCurrentLine();
+		if(currentLine.isEmpty()) {
+			this.appendText("\nnull");
+		} else {
 			this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
 		}
 		this.appendText("\n >");
+		this.setEstimatedScrollY(Double.MAX_VALUE);
 	}
 	
 }

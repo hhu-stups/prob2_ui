@@ -99,7 +99,7 @@ public class GroovyConsole extends Console {
                     this.replaceText(newText);
                     charCounterInLine += path.length();
                     currentPosInLine += path.length();
-                    this.positionCaret(caretPosition + path.length());
+                    this.moveTo(caretPosition + path.length());
                 }
             }
             e.setDropCompleted(success);
@@ -110,7 +110,7 @@ public class GroovyConsole extends Console {
 	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
 		if(e.getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent)e.getEvent()).getText())) {
 			handleChooseSuggestion(e);
-			//Fthis.setScrollTop(Double.MAX_VALUE);
+			this.setEstimatedScrollY(Double.MAX_VALUE);
 		} else if(((CodeCompletionEvent)e).getCode() == KeyCode.SPACE) {
 			//handle Space in Code Completion
 			handleInsertChar((KeyEvent)e.getEvent());
@@ -130,7 +130,7 @@ public class GroovyConsole extends Console {
 		this.replaceText(newText);
 		currentPosInLine += diff + indexSkipped;
 		charCounterInLine += diff;
-		this.positionCaret(indexOfRest + diff);
+		this.moveTo(indexOfRest + diff);
 	}
 	
 	private int getIndexSkipped(String rest, String choice, String suggestion) {
@@ -150,7 +150,7 @@ public class GroovyConsole extends Console {
 	protected void handleEnter(KeyEvent e) {
 		super.handleEnterAbstract(e);
 		if(getCurrentLine().isEmpty()) {
-			this.appendText("\n null");
+			this.appendText("\nnull");
 		} else {
 			ConsoleInstruction instruction = instructions.get(posInList);
 			if("clear".equals(interpreter.exec(instruction).getConsoleOutput())) {
@@ -160,6 +160,8 @@ public class GroovyConsole extends Console {
 			}
 		}
 		this.appendText("\n >");
+		this.replaceText(this.getText());
+		this.setEstimatedScrollY(Double.MAX_VALUE);
 	}
 	
 		
