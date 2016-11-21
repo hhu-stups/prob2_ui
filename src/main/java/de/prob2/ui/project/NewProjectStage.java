@@ -2,6 +2,10 @@ package de.prob2.ui.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,9 +107,27 @@ public class NewProjectStage extends Stage {
 			errorExplanationLabel.setText("The location does not exist or is invalid");
 			return;
 		}
-		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(),
-				filesListView.getItems(), dir);
+		List<File> machines = filesListView.getItems();
+		machines = copyMachines(machines, dir);
+		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines, dir);
 		currentProject.changeCurrentProject(newProject);
+		currentProject.save();
 		this.close();
+	}
+
+	private List<File> copyMachines(List<File> machines, File dir) {
+		String path = dir.getAbsolutePath();
+		for (File machine : machines) {
+			int i = machines.indexOf(machine);
+			Path source = machine.toPath();
+			File newMachine = new File(path + File.separator + machine.getName());
+			try {
+				Files.copy(source, newMachine.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				machines.set(i, newMachine);
+			} catch (IOException e) {
+				logger.error("Could not copy file to the selected directory: " + machine.getAbsolutePath(), e);
+			}
+		}
+		return machines;
 	}
 }
