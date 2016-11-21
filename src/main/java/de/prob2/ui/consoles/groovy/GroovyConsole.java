@@ -2,6 +2,10 @@ package de.prob2.ui.consoles.groovy;
 
 import java.io.File;
 
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -11,6 +15,7 @@ import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -26,6 +31,9 @@ public class GroovyConsole extends Console {
 		this.interpreter = interpreter;
 		interpreter.setCodeCompletion(this);
 		this.appendText("Prob 2.0 Groovy Console \n >");
+		setListeners();
+		InputMap<KeyEvent> ctrlSpace = InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCodeCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER));
+		Nodes.addInputMap(this, ctrlSpace);
 	}
 		
 	public void reset() {
@@ -37,30 +45,19 @@ public class GroovyConsole extends Console {
 	}
 	
 	@Override
-	protected void handleInsertChar(KeyEvent e) {
+	protected void keyPressed(KeyEvent e) {
 		if(".".equals(e.getText())) {
 			triggerCodeCompletion(CodeCompletionTriggerAction.POINT);
 		}
-		super.handleInsertChar(e);
+		super.keyPressed(e);
 	}
 	
-	@Override
+	
 	protected void setListeners() {
-		super.setListeners();
 		setCodeCompletionEvent();
 		setDragDrop();
 	}
-	
-	@Override
-	protected void setKeyEvent() {
-		super.setKeyEvent();
-		this.addEventFilter(KeyEvent.ANY, e -> {
-			if(e.isControlDown() && e.getCode() == KeyCode.SPACE) {
-				triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER);
-			}
-		});
-	}
-	
+		
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
 		this.replaceText(this.getText());
 		if(getCaretPosition() > this.getText().lastIndexOf("\n") + 2) {
@@ -113,7 +110,7 @@ public class GroovyConsole extends Console {
 			this.setEstimatedScrollY(Double.MAX_VALUE);
 		} else if(((CodeCompletionEvent)e).getCode() == KeyCode.SPACE) {
 			//handle Space in Code Completion
-			handleInsertChar((KeyEvent)e.getEvent());
+			keyPressed((KeyEvent)e.getEvent());
 			e.consume();
 		}
 	}
@@ -147,8 +144,8 @@ public class GroovyConsole extends Console {
 	}
 		
 	@Override
-	protected void handleEnter(KeyEvent e) {
-		super.handleEnterAbstract(e);
+	protected void handleEnter() {
+		super.handleEnterAbstract();
 		if(getCurrentLine().isEmpty()) {
 			this.appendText("\nnull");
 		} else {

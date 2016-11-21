@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.consoles.Console;
-import javafx.scene.input.KeyEvent;
 
 @Singleton
 public class BConsole extends Console {
@@ -19,8 +18,8 @@ public class BConsole extends Console {
 	}
 
 	@Override
-	protected void handleEnter(KeyEvent e) {
-		super.handleEnterAbstract(e);
+	protected void handleEnter() {
+		super.handleEnterAbstract();
 		String currentLine = getCurrentLine();
 		if(currentLine.isEmpty()) {
 			this.appendText("\nnull");

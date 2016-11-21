@@ -8,9 +8,9 @@ import java.util.Set;
 import org.fxmisc.richtext.StyleClassedTextArea;
 
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
@@ -29,13 +29,32 @@ public abstract class Console extends StyleClassedTextArea {
 	public Console() {
 		this.instructions = new ArrayList<>();
 		this.searchHandler = new ConsoleSearchHandler(this, instructions);
-		setListeners();
-		InputMap<KeyEvent> map = InputMap.consume(EventPattern.keyPressed(), e->  this.keyPressed(e));
-		Nodes.addInputMap(this, map);
+		setEvents();
+	}
+	
+	public void setEvents() {
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.mouseClicked(MouseButton.PRIMARY), e->  this.mouseClicked()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(), e->  this.keyPressed(e)));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.R, KeyCodeCombination.CONTROL_DOWN), e-> this.controlR()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCodeCombination.CONTROL_DOWN), e-> this.copy()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.V, KeyCodeCombination.CONTROL_DOWN), e-> this.paste()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.A, KeyCodeCombination.CONTROL_DOWN), e-> this.controlA()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.E, KeyCodeCombination.CONTROL_DOWN), e-> this.controlE()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.TAB), e-> e.consume()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.UP), e-> this.handleUp()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DOWN), e-> this.handleDown()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.LEFT), e-> this.handleLeft()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.RIGHT), e-> this.handleRight()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DELETE), e-> this.handleDeletion(e)));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.BACK_SPACE), e-> this.handleDeletion(e)));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e-> this.handleEnter()));
 	}
 		
 	@Override
 	public void paste() {
+		if(searchHandler.isActive()) {
+			return;
+		}
 		if(this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
 			goToLastPos();
 		}
@@ -58,83 +77,44 @@ public abstract class Console extends StyleClassedTextArea {
 		super.copy();
 		goToLastPos();
 	}
-			
-	protected void setListeners() {
-		setMouseEvent();
-		setKeyEvent();
-	}
-	
-	private void setMouseEvent() {
-		this.addEventFilter(MouseEvent.ANY, e -> {
-			if(e.getButton() == MouseButton.PRIMARY && (this.getLength() - 1 - this.getCaretPosition() < charCounterInLine)) {
-				currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
-			}
-		});
-	}
-	
-	protected void setKeyEvent() {
-		this.addEventFilter(KeyEvent.ANY, e -> {
-			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
-				e.consume();
-			}
-			if(e.isControlDown()) {
-				controlDown(e);
-			}
-		});
-		
-		this.addEventFilter(KeyEvent.KEY_PRESSED, e-> {
-			if(e.isControlDown()) {
-				if(e.getCode() == KeyCode.R) {
-					if(!searchHandler.isActive()) {
-						activateSearch();
-					} else {
-						searchHandler.searchNext();
-					}
-				} else if(e.getCode() == KeyCode.C) {
-					this.copy();
-				} else if(e.getCode() == KeyCode.V) {
-					this.paste();
-				}
-			}
-			if(e.getCode() == KeyCode.TAB) {
-				e.consume();
-			}
-		});
-	}
-
-	private void keyPressed(KeyEvent e) {
-		if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
-			handleArrowKeys(e);
-			this.setEstimatedScrollY(Double.MAX_VALUE);
-		} else if (e.getCode().isNavigationKey()) {
-			if((e.getCode() != KeyCode.LEFT && e.getCode() != KeyCode.RIGHT) || e.isShiftDown()) {
-				e.consume();
-			} else {
-				handleArrowKeys(e);
-			}
-		} else if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE) {
-			handleDeletion(e);
-		} else if (e.getCode() == KeyCode.ENTER) {
-			handleEnter(e);
-		} else if (!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
-			handleInsertChar(e);
-		} else {
-			handleRest(e);
+				
+	private void mouseClicked() {
+		if(this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
+			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 		}
 	}
-
-	private void controlDown(KeyEvent e) {
+	
+	public void controlR() {
 		if(!searchHandler.isActive()) {
-			if(e.getCode() == KeyCode.A) {
-				this.moveTo(this.getCaretPosition() - currentPosInLine);
-				currentPosInLine = 0;
-				e.consume();
-			} else if(e.getCode() == KeyCode.E) {
-				this.moveTo(this.getLength());
-				currentPosInLine = charCounterInLine;
-			}
-		} else if(e.getCode() == KeyCode.V || e.getCode() == KeyCode.A) {
-			e.consume();
+			activateSearch();
+		} else {
+			searchHandler.searchNext();
+		}
+	}
+	
+	protected void keyPressed(KeyEvent e) {
+		if(REST.contains(e.getCode()) || e.isAltDown() || e.isShiftDown() || e.isControlDown() || e.isMetaDown() || e.isShortcutDown() || e.getCode() == KeyCode.ALT_GRAPH || e.getCode() == KeyCode.UNDEFINED) {
+			return;
+		}
+		if(!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
+			charCounterInLine++;
+			currentPosInLine++;
+			posInList = instructions.size() - 1;
+			searchHandler.handleKey(e);
+		}
+	}
+	
+	private void controlA() {
+		if(!searchHandler.isActive()) {
+			this.moveTo(this.getCaretPosition() - currentPosInLine);
+			currentPosInLine = 0;
+		}
+	}
+	
+	private void controlE() {
+		if(!searchHandler.isActive()) {
+			this.moveTo(this.getLength());
+			currentPosInLine = charCounterInLine;
 		}
 	}
 
@@ -148,45 +128,26 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	protected void deactivateSearch() {
-		int posOfEnter = this.getText().lastIndexOf("\n");
-		String searchResult = searchHandler.getCurrentSearchResult();
-		this.replaceText(this.getText().substring(0, posOfEnter + 1) + " >" + searchResult);
-		this.moveTo(this.getText().length());
-		charCounterInLine = searchResult.length();
-		currentPosInLine = charCounterInLine;
-		searchHandler.deactivateSearch();
-	}
-	
-	
-	protected void handleInsertChar(KeyEvent e) {
-		if(e.getText().isEmpty() || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
-			if(!(e.getCode() == KeyCode.UNDEFINED || e.getCode() == KeyCode.ALT_GRAPH)) {
-				goToLastPos();
-			}
-			if(e.getText().isEmpty()) {
-				e.consume();
-				return;
-			}
+		if(searchHandler.isActive()) {
+			int posOfEnter = this.getText().lastIndexOf("\n");
+			String searchResult = searchHandler.getCurrentSearchResult();
+			this.replaceText(this.getText().substring(0, posOfEnter + 1) + " >" + searchResult);
+			this.moveTo(this.getText().length());
+			charCounterInLine = searchResult.length();
+			currentPosInLine = charCounterInLine;
+			searchHandler.deactivateSearch();
 		}
-		if (e.isShortcutDown() || e.isAltDown()) {
-			return;
-		}
-		charCounterInLine++;
-		currentPosInLine++;
-		posInList = instructions.size() - 1;
-		searchHandler.handleKey(e);
 	}
-	
-	
+		
 	private void goToLastPos() {
 		this.moveTo(this.getLength());
 		deselect();
 		currentPosInLine = charCounterInLine;
 	}
 	
-	protected abstract void handleEnter(KeyEvent e);
+	protected abstract void handleEnter();
 	
-	protected void handleEnterAbstract(KeyEvent e) {
+	protected void handleEnterAbstract() {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		String instruction = getCurrentLine();
@@ -203,32 +164,20 @@ public abstract class Console extends StyleClassedTextArea {
 		}
 		searchHandler.handleEnter();
 	}
-	
-	private void handleArrowKeys(KeyEvent e) {
-		boolean needReturn = false;
-		if(searchHandler.isActive()) {
-			deactivateSearch();
-		}
-		if(e.getCode().equals(KeyCode.UP)) {
-			needReturn = handleUp(e);
-		} else if(e.getCode().equals(KeyCode.DOWN)) {
-			needReturn = handleDown(e);				
-		} else if(e.getCode().equals(KeyCode.LEFT)) {
-			handleLeft(e);
-			needReturn = true;
-		} else {
-			handleRight();
-			needReturn = true;
-		}
-		if(needReturn) {
+		
+	private void handleDown() {
+		deactivateSearch();
+		if(posInList == instructions.size() - 1) {
 			return;
 		}
+		posInList = Math.min(posInList+1, instructions.size() - 1);
 		setTextAfterArrowKey();
 	}
 	
-	private boolean handleUp(KeyEvent e) {
+	private void handleUp() {
+		deactivateSearch();
 		if(posInList == -1) { 
-			return true;
+			return;
 		}
 		if(posInList == instructions.size() - 1) {
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
@@ -238,41 +187,29 @@ public abstract class Console extends StyleClassedTextArea {
 				} else {
 					instructions.add(new ConsoleInstruction(getCurrentLine(), ConsoleInstructionOption.UP));
 					setTextAfterArrowKey();
-					return true;
+					return;
 				}
 			}
 		}
 		posInList = Math.max(posInList - 1, 0);
-		return false;
+		setTextAfterArrowKey();
 	}
-	
-	private boolean handleDown(KeyEvent e) {
-		if(posInList == instructions.size() - 1) {
-			return true;
-		}
-		posInList = Math.min(posInList+1, instructions.size() - 1);
-		return false;
-	}
-	
-	private void handleLeft(KeyEvent e) {
+		
+	private void handleLeft() {
+		deactivateSearch();
 		if(currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine--;
 			this.moveTo(this.getCaretPosition() - 1);
 		} else if(currentPosInLine == 0) {
 			super.deselect();
 		}
-		if(searchHandler.isActive()) {
-			deactivateSearch();
-		}
 	}
 	
 	private void handleRight() {
+		deactivateSearch();
 		if(currentPosInLine < charCounterInLine && this.getLength() - this.getCaretPosition() <= charCounterInLine) {		
 			currentPosInLine++;
 			this.moveTo(this.getCaretPosition() + 1);
-		}
-		if(searchHandler.isActive()) {
-			deactivateSearch();
 		}
 	}
 	
@@ -283,14 +220,9 @@ public abstract class Console extends StyleClassedTextArea {
 		this.replaceText(this.getText().substring(0, posOfEnter + 3) + currentLine);
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
+		this.setEstimatedScrollY(Double.MAX_VALUE);
 	}
-	
-	private void handleRest(KeyEvent e) {
-		if(REST.contains(e.getCode())) {
-			e.consume();
-		}
-	}
-		
+			
 	private void handleDeletion(KeyEvent e) {
 		int maxPosInLine = charCounterInLine;
 		if(searchHandler.handleDeletion(e)) {
@@ -299,8 +231,7 @@ public abstract class Console extends StyleClassedTextArea {
 		if(searchHandler.isActive()) {
 			maxPosInLine = charCounterInLine + 2 + searchHandler.getCurrentSearchResult().length();
 		}
-		if(!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine || e.isShortcutDown() || e.isAltDown()) {
-			e.consume();
+		if(!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine) {
 			return;
 		}
 		if(e.getCode().equals(KeyCode.BACK_SPACE)) {
@@ -326,8 +257,6 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public String getCurrentLine() {
-		/*int posOfEnter = this.getText().lastIndexOf("\n");
-		return this.getText().substring(posOfEnter + 3, this.getText().length());*/
 		return this.getText(this.getCurrentParagraph()).substring(2);
 	}
 		
