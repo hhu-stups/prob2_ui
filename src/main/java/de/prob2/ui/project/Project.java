@@ -6,21 +6,21 @@ import java.util.List;
 
 public class Project {
 	private String name;
-	private List<File> files = new ArrayList<File>();
+	private List<File> machines = new ArrayList<File>();
 	private File location;
 	private final boolean singleFile;
 
-	public Project(String name, List<File> files, File location) {
+	public Project(String name, List<File> machines, File location) {
 		this.name = name;
-		this.files = files;
+		this.machines = machines;
 		this.singleFile = false;
 		this.location = location;
 	}
 	
 	public Project(File file) {
 		this.name = file.getName();
-		this.files = new ArrayList<File>();
-		files.add(file);
+		this.machines = new ArrayList<File>();
+		machines.add(file);
 		this.singleFile = true;
 	}
 
@@ -28,16 +28,16 @@ public class Project {
 		return name;
 	}
 	
-	public List<File> getFiles() {
-		return files;
+	public List<File> getMachines() {
+		return machines;
 	}
 	
 	public boolean isSingleFile() {
 		return singleFile;
 	}
 
-	public void addFile(File file) {
-		this.files.add(file);
+	public void addMachine(File machine) {
+		this.machines.add(machine);
 	}
 	
 	public File getLocation() {

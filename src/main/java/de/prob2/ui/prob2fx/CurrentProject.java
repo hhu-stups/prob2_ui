@@ -77,7 +77,7 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public ObservableList<File> getFiles() {
-		return (ObservableList<File>) this.get().getFiles();
+		return (ObservableList<File>) this.get().getMachines();
 	}
 
 	public ReadOnlyBooleanProperty isSingleFileProperty() {

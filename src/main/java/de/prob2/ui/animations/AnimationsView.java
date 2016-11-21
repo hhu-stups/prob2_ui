@@ -102,7 +102,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 		currentProject.addListener((observable, from, to) -> {
 			removeAllTraces();
-			addAll(to.getFiles());
+			addAll(to.getMachines());
 		});
 	}
 

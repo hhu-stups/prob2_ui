@@ -66,7 +66,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	void addFile(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Add File");
+		fileChooser.setTitle("Add Machine");
 		fileChooser.getExtensionFilters()
 				.addAll(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")// ,
 		// new FileChooser.ExtensionFilter("EventB Files", "*.eventb", "*.bum",
