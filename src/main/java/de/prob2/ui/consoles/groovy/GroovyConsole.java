@@ -24,6 +24,7 @@ public class GroovyConsole extends Console {
 	public GroovyConsole(GroovyInterpreter interpreter) {
 		super();
 		this.interpreter = interpreter;
+		interpreter.setCodeCompletion(this);
 		this.appendText("Prob 2.0 Groovy Console \n >");
 	}
 		
@@ -61,9 +62,10 @@ public class GroovyConsole extends Console {
 	}
 	
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
+		this.replaceText(this.getText());
 		if(getCaretPosition() > this.getText().lastIndexOf("\n") + 2) {
 			int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
-			interpreter.triggerCodeCompletion(this, getCurrentLine().substring(0, caretPosInLine), action);
+			interpreter.triggerCodeCompletion(getCurrentLine().substring(0, caretPosInLine), action);
 		}
 	}
 	
