@@ -18,7 +18,7 @@ import org.fxmisc.wellbehaved.event.Nodes;
 
 
 public abstract class Console extends StyleClassedTextArea {
-	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS);
+	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB);
     
 	protected List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
@@ -34,19 +34,18 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	public void setEvents() {
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.mouseClicked(MouseButton.PRIMARY), e->  this.mouseClicked()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(), e->  this.keyPressed(e)));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(), this::keyPressed));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.R, KeyCodeCombination.CONTROL_DOWN), e-> this.controlR()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCodeCombination.CONTROL_DOWN), e-> this.copy()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.V, KeyCodeCombination.CONTROL_DOWN), e-> this.paste()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.A, KeyCodeCombination.CONTROL_DOWN), e-> this.controlA()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.E, KeyCodeCombination.CONTROL_DOWN), e-> this.controlE()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.TAB), e-> e.consume()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.UP), e-> this.handleUp()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DOWN), e-> this.handleDown()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.LEFT), e-> this.handleLeft()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.RIGHT), e-> this.handleRight()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DELETE), e-> this.handleDeletion(e)));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.BACK_SPACE), e-> this.handleDeletion(e)));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DELETE), this::handleDeletion));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.BACK_SPACE), this::handleDeletion));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e-> this.handleEnter()));
 	}
 		
@@ -93,15 +92,30 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	protected void keyPressed(KeyEvent e) {
-		if(REST.contains(e.getCode()) || e.isAltDown() || e.isShiftDown() || e.isControlDown() || e.isMetaDown() || e.isShortcutDown() || e.getCode() == KeyCode.ALT_GRAPH || e.getCode() == KeyCode.UNDEFINED) {
+		if(REST.contains(e.getCode())) {
 			return;
 		}
 		if(!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
-			charCounterInLine++;
-			currentPosInLine++;
-			posInList = instructions.size() - 1;
-			searchHandler.handleKey(e);
+			handleInsertChar(e);
 		}
+	}
+	
+	private void handleInsertChar(KeyEvent e) {
+		if(e.getText().isEmpty() || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
+			if(!(e.getCode() == KeyCode.UNDEFINED || e.getCode() == KeyCode.ALT_GRAPH)) {
+				goToLastPos();
+			}
+			if(e.getText().isEmpty()) {
+				return;
+			}
+		}
+		if (e.isShortcutDown() || e.isAltDown()) {
+			return;
+		}
+		charCounterInLine++;
+		currentPosInLine++;
+		posInList = instructions.size() - 1;
+		searchHandler.handleKey(e);
 	}
 	
 	private void controlA() {
@@ -235,13 +249,13 @@ public abstract class Console extends StyleClassedTextArea {
 			return;
 		}
 		if(e.getCode().equals(KeyCode.BACK_SPACE)) {
-			handleBackspace(e);
+			handleBackspace();
 		} else {
-			handleDelete(e);
+			handleDelete();
 		}
 	}
 	
-	private void handleBackspace(KeyEvent e) {
+	private void handleBackspace() {
 		if(currentPosInLine > 0) {
 			currentPosInLine = Math.max(currentPosInLine - 1, 0);
 			charCounterInLine = Math.max(charCounterInLine - 1, 0);	
@@ -249,7 +263,7 @@ public abstract class Console extends StyleClassedTextArea {
 		}
 	}
 	
-	private void handleDelete(KeyEvent e) {
+	private void handleDelete() {
 		if(currentPosInLine < charCounterInLine) {
 			charCounterInLine = Math.max(charCounterInLine - 1, 0);
 			this.deleteNextChar();

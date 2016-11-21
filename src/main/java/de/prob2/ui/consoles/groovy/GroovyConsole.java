@@ -32,8 +32,7 @@ public class GroovyConsole extends Console {
 		interpreter.setCodeCompletion(this);
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		setListeners();
-		InputMap<KeyEvent> ctrlSpace = InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCodeCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER));
-		Nodes.addInputMap(this, ctrlSpace);
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCodeCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
 	}
 		
 	public void reset() {
@@ -59,7 +58,6 @@ public class GroovyConsole extends Console {
 	}
 		
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
-		this.replaceText(this.getText());
 		if(getCaretPosition() > this.getText().lastIndexOf("\n") + 2) {
 			int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
 			interpreter.triggerCodeCompletion(getCurrentLine().substring(0, caretPosInLine), action);
