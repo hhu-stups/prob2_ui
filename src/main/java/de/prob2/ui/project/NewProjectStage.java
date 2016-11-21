@@ -33,6 +33,8 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private TextField projectNameField;
 	@FXML
+	private TextField projectDescriptionField;
+	@FXML
 	private TextField locationField;
 	@FXML
 	private ListView<File> filesListView;
@@ -78,10 +80,10 @@ public class NewProjectStage extends Stage {
 		if (selectedFile == null) {
 			return;
 		}
-		
+
 		filesListView.getItems().add(selectedFile);
 	}
-	
+
 	@FXML
 	void selectLocation(ActionEvent event) {
 		DirectoryChooser dirChooser = new DirectoryChooser();
@@ -97,11 +99,12 @@ public class NewProjectStage extends Stage {
 	@FXML
 	void finish(ActionEvent event) {
 		File dir = new File(locationField.getText());
-		if(!dir.isDirectory()) {
+		if (!dir.isDirectory()) {
 			errorExplanationLabel.setText("The location does not exist or is invalid");
 			return;
-		} 
-		Project newProject = new Project(projectNameField.getText(), filesListView.getItems(), dir);
+		}
+		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(),
+				filesListView.getItems(), dir);
 		currentProject.changeCurrentProject(newProject);
 		this.close();
 	}

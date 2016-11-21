@@ -42,6 +42,17 @@
 								</TextField>
 							</HBox>
 							<HBox spacing="20" alignment="center_left">
+								<Label text="%newProject.stage.projectDescription" />
+								<TextField fx:id="projectDescriptionField" HBox.hgrow="always">
+									<font>
+										<Font size="12" />
+									</font>
+								</TextField>
+								<VBox.margin>
+									<Insets top="5" />
+								</VBox.margin>
+							</HBox>
+							<HBox spacing="20" alignment="center_left">
 								<Label text="%newProject.stage.location" />
 								<TextField fx:id="locationField" HBox.hgrow="always">
 									<font>

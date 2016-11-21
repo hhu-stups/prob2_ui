@@ -68,7 +68,7 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		if (!this.isSingleFile()) {
 			ObservableList<File> list = this.getFiles();
 			list.add(file);
-			this.set(new Project(this.getName(), list, this.get().getLocation()));
+			this.set(new Project(this.getName(), this.get().getDescription(), list, this.get().getLocation()));
 		}
 	}
 
