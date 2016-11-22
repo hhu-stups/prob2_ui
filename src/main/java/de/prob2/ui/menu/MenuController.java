@@ -1,55 +1,53 @@
 package de.prob2.ui.menu;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.sun.javafx.stage.StageHelper;
-import de.prob2.ui.animations.AnimationsView;
-import de.prob2.ui.history.HistoryView;
-import de.prob2.ui.internal.IComponents;
-import de.prob2.ui.operations.OperationsView;
-import de.prob2.ui.stats.StatsView;
-import javafx.application.Platform;
-import javafx.scene.Node;
-import javafx.scene.control.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
+import com.sun.javafx.stage.StageHelper;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaInputStage;
+import de.prob2.ui.history.HistoryView;
+import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.modelchecking.ModelcheckingController;
+import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.stats.StatsView;
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -63,9 +61,7 @@ public final class MenuController extends MenuBar {
 		@FXML private CheckBox detachAnimations;
 
 		@FXML
-		public void initialize() {
-			currentStage.register(this.detached);
-		}
+		public void initialize() {}
 
 		@FXML
 		private void apply() {
@@ -399,19 +395,20 @@ public final class MenuController extends MenuBar {
 		stage.show();
 	}
 
-	private void removeTP(Accordion accordion,SplitPane pane) {
-		//FIXME: Do not open multiple stages containing the same item -> working fine with one component, crashing with 2 or more
+	private void removeTP(Accordion accordion, SplitPane pane) {
 		for (Stage stage: StageHelper.getStages()) {
 			if (alreadyStaged(stage)){
-				stage.setScene(null);
-				stage.close();
+				Platform.runLater(() -> {
+					stage.setScene(null);
+					stage.close();
+				});
 			}
 		}
 		for (TitledPane tp : accordion.getPanes()) {
 			Platform.runLater(() -> {
 				if (removable(tp)) {
-					Platform.runLater(() -> transferToNewWindow(tp.getContent(),tp.getText()));
 					accordion.getPanes().remove(tp);
+					transferToNewWindow(tp.getContent(),tp.getText());
 					if (accordion.getPanes().isEmpty()) {
 						pane.getItems().remove(accordion);
 						pane.setDividerPositions(0);
@@ -437,6 +434,7 @@ public final class MenuController extends MenuBar {
 	private void transferToNewWindow(Node node, String title) {
 		Stage stage = new Stage();
 		stage.setTitle(title);
+		stage.setOnCloseRequest(e -> e.consume());
 		Scene scene = new Scene((Parent) node);
 		scene.getStylesheets().add("prob.css");
 		stage.setScene(scene);
