@@ -110,11 +110,31 @@ public final class MenuController extends MenuBar {
 		}
 
 		private boolean removable(TitledPane tp) {
-			return	(tp.getContent() instanceof OperationsView && detachOperations.isSelected()) ||
-					(tp.getContent() instanceof HistoryView && detachHistory.isSelected())	||
-					(tp.getContent() instanceof ModelcheckingController && detachModelcheck.isSelected()) ||
-					(tp.getContent() instanceof StatsView && detachStats.isSelected()) ||
-					(tp.getContent() instanceof AnimationsView && detachAnimations.isSelected());
+			return	removableOperations(tp) ||
+					removableHistory(tp) ||
+					removableModelcheck(tp) ||
+					removableStats(tp) ||
+					removableAnimations(tp);
+		}
+
+		private boolean removableOperations(TitledPane tp) {
+			return tp.getContent() instanceof OperationsView && detachOperations.isSelected();
+		}
+
+		private boolean removableHistory(TitledPane tp) {
+			return tp.getContent() instanceof HistoryView && detachHistory.isSelected();
+		}
+
+		private boolean removableModelcheck(TitledPane tp) {
+			return tp.getContent() instanceof ModelcheckingController && detachModelcheck.isSelected();
+		}
+
+		private boolean removableStats(TitledPane tp) {
+			return tp.getContent() instanceof StatsView && detachStats.isSelected();
+		}
+
+		private boolean removableAnimations(TitledPane tp) {
+			return tp.getContent() instanceof AnimationsView && detachAnimations.isSelected();
 		}
 
 		private void transferToNewWindow(Node node, String title) {
