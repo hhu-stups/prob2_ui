@@ -107,10 +107,10 @@ public class ConsoleSearchHandler {
 		String newText = parent.getText().substring(0, posOfEnter + 1);
 		newText = new StringBuilder(newText).append(searchPrefix.substring(0,searchPrefix.length() - 2)).toString();
 		newText = new StringBuilder(newText).append(getSearchCurrent() + "':" + searchResults.get(currentSearchIndex).getResult()).toString();
-		parent.setText(newText);
+		parent.replaceText(newText);
 		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf("\n") + 3;
-		parent.positionCaret(posOfColon -1);
-		parent.setScrollTop(Double.MAX_VALUE);
+		parent.moveTo(posOfColon -1);
+		parent.setEstimatedScrollY(Double.MAX_VALUE);
 	}
 	
 	protected void searchNext() {

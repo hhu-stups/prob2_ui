@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+<?import org.fxmisc.richtext.StyleClassedTextArea?>
 <fx:root type="Stage" minWidth="240" minHeight="160" width="480" height="320" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<ToggleGroup fx:id="asciiUnicodeGroup"/>
@@ -33,7 +34,7 @@
 							<TextArea fx:id="previousValueTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
 						</Tab>
 						<Tab fx:id="diffTab" text="%states.fullValue.tabs.diff">
-							<TextArea fx:id="diffTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
+							<StyleClassedTextArea fx:id="diffTextarea" editable="false" wrapText="true" styleClass="difftextarea" maxWidth="Infinity" maxHeight="Infinity" />
 						</Tab>
 					</TabPane>
 				</center>

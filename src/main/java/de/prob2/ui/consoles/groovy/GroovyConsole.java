@@ -2,6 +2,10 @@ package de.prob2.ui.consoles.groovy;
 
 import java.io.File;
 
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -11,6 +15,7 @@ import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -19,16 +24,19 @@ import javafx.scene.input.TransferMode;
 public class GroovyConsole extends Console {
 	
 	private GroovyInterpreter interpreter;
-	
+		
 	@Inject
 	public GroovyConsole(GroovyInterpreter interpreter) {
 		super();
 		this.interpreter = interpreter;
+		interpreter.setCodeCompletion(this);
 		this.appendText("Prob 2.0 Groovy Console \n >");
+		setListeners();
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCodeCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
 	}
 		
 	public void reset() {
-		this.setText("Prob 2.0 Groovy Console");
+		this.replaceText("Prob 2.0 Groovy Console");
 	}
 	
 	public void setInterpreter(GroovyInterpreter interpreter) {
@@ -36,34 +44,23 @@ public class GroovyConsole extends Console {
 	}
 	
 	@Override
-	protected void handleInsertChar(KeyEvent e) {
+	protected void keyPressed(KeyEvent e) {
 		if(".".equals(e.getText())) {
 			triggerCodeCompletion(CodeCompletionTriggerAction.POINT);
 		}
-		super.handleInsertChar(e);
+		super.keyPressed(e);
 	}
 	
-	@Override
+	
 	protected void setListeners() {
-		super.setListeners();
 		setCodeCompletionEvent();
 		setDragDrop();
 	}
-	
-	@Override
-	protected void setKeyEvent() {
-		super.setKeyEvent();
-		this.addEventFilter(KeyEvent.ANY, e -> {
-			if(e.isControlDown() && e.getCode() == KeyCode.SPACE) {
-				triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER);
-			}
-		});
-	}
-	
+		
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
 		if(getCaretPosition() > this.getText().lastIndexOf("\n") + 2) {
 			int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
-			interpreter.triggerCodeCompletion(this, getCurrentLine().substring(0, caretPosInLine), action);
+			interpreter.triggerCodeCompletion(getCurrentLine().substring(0, caretPosInLine), action);
 		}
 	}
 	
@@ -94,10 +91,10 @@ public class GroovyConsole extends Console {
                     path = file.getAbsolutePath();
                     String newText = new StringBuilder(this.getText()).insert(this.getCaretPosition(), path).toString();
                     int caretPosition = this.getCaretPosition();
-                    this.setText(newText);
+                    this.replaceText(newText);
                     charCounterInLine += path.length();
                     currentPosInLine += path.length();
-                    this.positionCaret(caretPosition + path.length());
+                    this.moveTo(caretPosition + path.length());
                 }
             }
             e.setDropCompleted(success);
@@ -108,10 +105,10 @@ public class GroovyConsole extends Console {
 	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
 		if(e.getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent)e.getEvent()).getText())) {
 			handleChooseSuggestion(e);
-			this.setScrollTop(Double.MAX_VALUE);
+			this.setEstimatedScrollY(Double.MAX_VALUE);
 		} else if(((CodeCompletionEvent)e).getCode() == KeyCode.SPACE) {
 			//handle Space in Code Completion
-			handleInsertChar((KeyEvent)e.getEvent());
+			keyPressed((KeyEvent)e.getEvent());
 			e.consume();
 		}
 	}
@@ -121,20 +118,34 @@ public class GroovyConsole extends Console {
 		String suggestion = ((CodeCompletionEvent) e).getCurrentSuggestion();
 		String newText = this.getText().substring(0, this.getCaretPosition() - suggestion.length());
 		newText = new StringBuilder(newText).append(choice).toString();
-		newText = new StringBuilder(newText).append(this.getText().substring(this.getCaretPosition())).toString();
+		int indexSkipped = getIndexSkipped(this.getText().substring(this.getCaretPosition()), choice, suggestion);
+		int indexOfRest = this.getCaretPosition() + indexSkipped;
+		newText = new StringBuilder(newText).append(this.getText().substring(indexOfRest)).toString();
 		int diff = newText.length() - this.getText().length();
-		int caret = this.getCaretPosition();
-		this.setText(newText);
-		currentPosInLine += diff;
+		this.replaceText(newText);
+		currentPosInLine += diff + indexSkipped;
 		charCounterInLine += diff;
-		this.positionCaret(caret + diff);
+		this.moveTo(indexOfRest + diff);
 	}
 	
+	private int getIndexSkipped(String rest, String choice, String suggestion) {
+		String restOfChoice = choice.substring(suggestion.length());
+		int result = 0;
+		for(int i = 0; i < Math.min(rest.length(), restOfChoice.length()); i++) {
+			if(restOfChoice.charAt(i) == rest.charAt(i)) {
+				result++;
+			} else {
+				break;
+			}
+		}
+		return result;
+	}
+		
 	@Override
-	protected void handleEnter(KeyEvent e) {
-		super.handleEnterAbstract(e);
+	protected void handleEnter() {
+		super.handleEnterAbstract();
 		if(getCurrentLine().isEmpty()) {
-			this.appendText("\n null");
+			this.appendText("\nnull");
 		} else {
 			ConsoleInstruction instruction = instructions.get(posInList);
 			if("clear".equals(interpreter.exec(instruction).getConsoleOutput())) {
@@ -144,6 +155,8 @@ public class GroovyConsole extends Console {
 			}
 		}
 		this.appendText("\n >");
+		this.replaceText(this.getText());
+		this.setEstimatedScrollY(Double.MAX_VALUE);
 	}
 	
 		
