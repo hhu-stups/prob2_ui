@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class Console extends StyleClassedTextArea {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
-	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB);
+	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
     
 	protected List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
@@ -47,7 +47,7 @@ public abstract class Console extends StyleClassedTextArea {
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.R, KeyCombination.CONTROL_DOWN), e-> this.controlR()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.A, KeyCombination.CONTROL_DOWN), e-> this.controlA()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.E, KeyCombination.CONTROL_DOWN), e-> this.controlE()));
-		
+				
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.UP), e-> this.handleUp()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DOWN), e-> this.handleDown()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.LEFT), e-> this.handleLeft()));
@@ -117,7 +117,7 @@ public abstract class Console extends StyleClassedTextArea {
 				return;
 			}
 		}
-		if (e.isControlDown() || e.isAltDown() || e.isMetaDown()) {
+		if (e.isControlDown() || e.isMetaDown()) {
 			return;
 		}
 		charCounterInLine++;

@@ -3,10 +3,12 @@ package de.prob2.ui.consoles;
 public class ConsoleExecResult {
 	private final String consoleOutput;
 	private final String result;
+	private final ConsoleExecResultType resultType;
 	
-	public ConsoleExecResult(String consoleOutput, String result) {
+	public ConsoleExecResult(String consoleOutput, String result, ConsoleExecResultType resultType) {
 		this.consoleOutput = consoleOutput;
 		this.result = result;
+		this.resultType = resultType;
 	}
 	
 	public String getConsoleOutput() {
@@ -15,6 +17,10 @@ public class ConsoleExecResult {
 	
 	public String getResult() {
 		return this.result;
+	}
+	
+	public ConsoleExecResultType getResultType() {
+		return resultType;
 	}
 	
 	@Override
