@@ -170,7 +170,15 @@ public final class OperationsView extends AnchorPane implements IComponents {
 
 		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue != null && newValue.isEnabled()) {
-				currentTrace.set(currentTrace.get().add(newValue.id));
+				final Trace newTrace;
+				try {
+					newTrace = currentTrace.get().add(newValue.id);
+				} catch (IllegalArgumentException e) {
+					logger.debug("Operation {} is no longer valid (user probably clicked too fast)", newValue.id);
+					logger.debug("Ignoring exception", e);
+					return;
+				}
+				currentTrace.set(newTrace);
 				logger.debug("Selected item: " + newValue);
 			}
 		});
