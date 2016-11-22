@@ -1,6 +1,7 @@
 package de.prob2.ui.consoles.groovy;
 
 import java.io.File;
+import java.util.Collections;
 
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
@@ -10,6 +11,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.consoles.Console;
+import de.prob2.ui.consoles.ConsoleExecResult;
+import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
@@ -33,6 +36,7 @@ public class GroovyConsole extends Console {
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		setListeners();
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCodeCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
+		//Collections.singletonList("")
 	}
 		
 	public void reset() {
@@ -148,10 +152,19 @@ public class GroovyConsole extends Console {
 			this.appendText("\nnull");
 		} else {
 			ConsoleInstruction instruction = instructions.get(posInList);
-			if("clear".equals(interpreter.exec(instruction).getConsoleOutput())) {
+			ConsoleExecResult execResult = interpreter.exec(instruction);
+			if("clear".equals(execResult.getConsoleOutput())) {
 				reset();
 			} else {
-				this.appendText("\n" + interpreter.exec(instruction));
+				this.appendText("\n" + execResult);
+			}
+			if(execResult.getResultType() == ConsoleExecResultType.ERROR) {
+				//this.getParagraph(this.getCurrentParagraph()-1).setParagraphStyle("error")
+				//this.get
+				this.setStyleClass(0,5,"error");
+				this.getParagraph(0).restyle(Collections.singleton("-fx-fill:red"));
+				//this.setStyleClass(0, 10, "error");
+				
 			}
 		}
 		this.appendText("\n >");

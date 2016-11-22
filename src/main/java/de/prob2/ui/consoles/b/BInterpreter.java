@@ -18,6 +18,7 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.consoles.ConsoleExecResult;
+import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.Executable;
 
@@ -56,9 +57,9 @@ public class BInterpreter implements IAnimationChangeListener, Executable {
 			}
 		} catch (EvaluationException e) {
 			logger.info("B evaluation failed", e);
-			return new ConsoleExecResult("", "Invalid syntax: " + e.getMessage()) ;
+			return new ConsoleExecResult("", "Invalid syntax: " + e.getMessage(), ConsoleExecResultType.ERROR) ;
 		}
-		return new ConsoleExecResult("", res);
+		return new ConsoleExecResult("", res, ConsoleExecResultType.PASSED);
 	}
 
 	public String result(AbstractEvalResult res) {
