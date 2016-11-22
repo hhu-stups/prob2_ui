@@ -75,6 +75,36 @@ public final class MenuController extends MenuBar {
 			removeTP(accordion,pane);
 			this.detached.close();
 		}
+
+		private void removeTP(Accordion accordion, SplitPane pane) {
+			for (Stage stage: StageHelper.getStages()) {
+				if (alreadyStaged(stage)){
+					Platform.runLater(() -> {
+						stage.setScene(null);
+						stage.close();
+					});
+				}
+			}
+			for (TitledPane tp : accordion.getPanes()) {
+				Platform.runLater(() -> {
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						logger.error("Thread interupted",e);
+						Thread.currentThread().interrupt();
+					}
+					if (removable(tp)) {
+						accordion.getPanes().remove(tp);
+						transferToNewWindow(tp.getContent(),tp.getText());
+						if (accordion.getPanes().isEmpty()) {
+							pane.getItems().remove(accordion);
+							pane.setDividerPositions(0);
+							pane.lookupAll(".split-pane-divider").stream().forEach(div ->  div.setMouseTransparent(true));
+						}
+					}
+				});
+			}
+		}
 	}
 	private static final URL FXML_ROOT;
 	
@@ -184,13 +214,8 @@ public final class MenuController extends MenuBar {
 		
 		final ListChangeListener<String> recentFilesListener = change -> {
 			final ObservableList<MenuItem> recentItems = this.recentFilesMenu.getItems();
-			final List<MenuItem> newItems = new ArrayList<>();
-			for (String s : this.recentFiles) {
-				final MenuItem item = new MenuItem(new File(s).getName());
-				item.setOnAction(event -> this.open(s));
-				newItems.add(item);
-			}
-			
+			final List<MenuItem> newItems = getRecentFileItems();
+
 			// If there are no recent files, show a placeholder and disable clearing
 			this.clearRecentFiles.setDisable(newItems.isEmpty());
 			if (newItems.isEmpty()) {
@@ -399,36 +424,6 @@ public final class MenuController extends MenuBar {
 		stage.show();
 	}
 
-	private void removeTP(Accordion accordion, SplitPane pane) {
-		for (Stage stage: StageHelper.getStages()) {
-			if (alreadyStaged(stage)){
-				Platform.runLater(() -> {
-					stage.setScene(null);
-					stage.close();
-				});
-			}
-		}
-		for (TitledPane tp : accordion.getPanes()) {
-			Platform.runLater(() -> {
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					logger.error("Thread interupted",e);
-					Thread.currentThread().interrupt();
-				}
-				if (removable(tp)) {
-					accordion.getPanes().remove(tp);
-					transferToNewWindow(tp.getContent(),tp.getText());
-					if (accordion.getPanes().isEmpty()) {
-						pane.getItems().remove(accordion);
-						pane.setDividerPositions(0);
-						pane.lookupAll(".split-pane-divider").stream().forEach(div ->  div.setMouseTransparent(true));
-					}
-				}
-			});
-		}
-	}
-
 	private boolean alreadyStaged(Stage stage) {
 		return stage.getScene().getRoot() instanceof IComponents;
 	}
@@ -445,10 +440,33 @@ public final class MenuController extends MenuBar {
 		Stage stage = new Stage();
 		stage.setTitle(title);
 		stage.getIcons().add(new Image("prob_128.gif"));
-		stage.setOnCloseRequest(WindowEvent::consume);
+		stage.setOnCloseRequest(e -> {
+			if (node instanceof OperationsView) {
+				dvController.detachOperations.setSelected(false);
+			} else if (node instanceof HistoryView) {
+				dvController.detachHistory.setSelected(false);
+			} else if (node instanceof ModelcheckingController) {
+				dvController.detachModelcheck.setSelected(false);
+			} else if (node instanceof StatsView) {
+				dvController.detachStats.setSelected(false);
+			} else if (node instanceof AnimationsView) {
+				dvController.detachAnimations.setSelected(false);
+			}
+			dvController.apply();
+		});
 		Scene scene = new Scene((Parent) node);
 		scene.getStylesheets().add("prob.css");
 		stage.setScene(scene);
 		stage.show();
+	}
+
+	private List<MenuItem> getRecentFileItems(){
+		final List<MenuItem> newItems = new ArrayList<>();
+		for (String s : this.recentFiles) {
+			final MenuItem item = new MenuItem(new File(s).getName());
+			item.setOnAction(event -> this.open(s));
+			newItems.add(item);
+		}
+		return newItems;
 	}
 }
