@@ -1,8 +1,6 @@
 package de.prob2.ui.consoles.groovy;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
 
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
@@ -28,15 +26,12 @@ import javafx.scene.input.TransferMode;
 public class GroovyConsole extends Console {
 	
 	private GroovyInterpreter interpreter;
-	
-	private ArrayList<String> styleClasses;
-		
+			
 	@Inject
 	public GroovyConsole(GroovyInterpreter interpreter) {
 		super();
 		this.interpreter = interpreter;
 		interpreter.setCodeCompletion(this);
-		this.styleClasses = new ArrayList<>();
 		this.appendText("Prob 2.0 Groovy Console \n >");
 		setListeners();
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCodeCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
@@ -167,6 +162,7 @@ public class GroovyConsole extends Console {
 			}
 		}
 		this.appendText("\n >");
+		this.setStyleClass(this.getText().length() - 2, this.getText().length(), "current");
 		this.setEstimatedScrollY(Double.MAX_VALUE);
 	}
 	
