@@ -38,6 +38,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.slf4j.Logger;
@@ -45,10 +46,16 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.NodeChangeListener;
+import java.util.prefs.PreferenceChangeListener;
+import java.util.prefs.Preferences;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -60,6 +67,7 @@ public final class MenuController extends MenuBar {
 		@FXML private CheckBox detachModelcheck;
 		@FXML private CheckBox detachStats;
 		@FXML private CheckBox detachAnimations;
+		Preferences windowPrefs = Preferences.userNodeForPackage(getClass());
 
 		@FXML
 		public void initialize() {
@@ -69,6 +77,7 @@ public final class MenuController extends MenuBar {
 		@FXML
 		private void apply() {
 			Parent root = loadPreset("main.fxml");
+			assert root != null;
 			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(0);
 			Accordion accordion = (Accordion) pane.getItems().get(0);
 			removeTP(accordion,pane);
@@ -76,18 +85,24 @@ public final class MenuController extends MenuBar {
 		}
 
 		private void removeTP(Accordion accordion, SplitPane pane) {
-			for (Stage stage: StageHelper.getStages()) {
-				if (alreadyStaged(stage)){
-					Platform.runLater(() -> {
-						stage.setScene(null);
-						stage.close();
-					});
+			final CountDownLatch latch = new CountDownLatch(1);
+			if (StageHelper.getStages().size()<=2) {
+				latch.countDown();
+			} else {
+				for (Stage stage : StageHelper.getStages()) {
+					if (alreadyStaged(stage)) {
+						Platform.runLater(() -> {
+							stage.setScene(null);
+							stage.close();
+							latch.countDown();
+						});
+					}
 				}
 			}
 			for (TitledPane tp : accordion.getPanes()) {
 				Platform.runLater(() -> {
 					try {
-						Thread.sleep(50);
+						latch.await();
 					} catch (InterruptedException e) {
 						logger.error("Thread interupted",e);
 						Thread.currentThread().interrupt();
@@ -142,6 +157,10 @@ public final class MenuController extends MenuBar {
 			stage.setTitle(title);
 			stage.getIcons().add(new Image("prob_128.gif"));
 			stage.setOnCloseRequest(e -> {
+				windowPrefs.putDouble(node.getClass()+"X",stage.getX());
+				windowPrefs.putDouble(node.getClass()+"Y",stage.getY());
+				windowPrefs.putDouble(node.getClass()+"Width",stage.getWidth());
+				windowPrefs.putDouble(node.getClass()+"Height",stage.getHeight());
 				if (node instanceof OperationsView) {
 					detachOperations.setSelected(false);
 				} else if (node instanceof HistoryView) {
@@ -155,6 +174,11 @@ public final class MenuController extends MenuBar {
 				}
 				dvController.apply();
 			});
+			stage.setWidth(windowPrefs.getDouble(node.getClass()+"Width",200));
+			stage.setHeight(windowPrefs.getDouble(node.getClass()+"Height",100));
+			stage.setX(windowPrefs.getDouble(node.getClass()+"X", Screen.getPrimary().getVisualBounds().getWidth()-stage.getWidth()/2));
+			stage.setY(windowPrefs.getDouble(node.getClass()+"Y", Screen.getPrimary().getVisualBounds().getHeight()-stage.getHeight()/2));
+
 			Scene scene = new Scene((Parent) node);
 			scene.getStylesheets().add("prob.css");
 			stage.setScene(scene);
