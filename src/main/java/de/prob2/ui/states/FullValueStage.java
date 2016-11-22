@@ -55,7 +55,6 @@ public class FullValueStage extends Stage {
 	
 	private AsciiUnicodeString currentValue;
 	private AsciiUnicodeString previousValue;
-	private String diff;
 	
 	@Inject
 	public FullValueStage(final FXMLLoader loader) {
@@ -195,9 +194,15 @@ public class FullValueStage extends Stage {
 	private void saveAs() {
 		final FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().setAll(
-			new FileChooser.ExtensionFilter("Text Files", "*.txt")
+			new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+			new FileChooser.ExtensionFilter("All Files", "*.*")
 		);
-		chooser.setInitialFileName(this.getTitle() + ".txt");
+		if (diffTab.isSelected()) {
+			chooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter("Diff Files", "*.diff"));
+			chooser.setInitialFileName(this.getTitle() + ".diff");
+		} else {
+			chooser.setInitialFileName(this.getTitle() + ".txt");
+		}
 		final File selected = chooser.showSaveDialog(this);
 		if (selected == null) {
 			return;
@@ -206,11 +211,11 @@ public class FullValueStage extends Stage {
 		try (final Writer out = new OutputStreamWriter(new FileOutputStream(selected), Charset.forName("UTF-8"))) {
 			final String value;
 			if (currentValueTab.isSelected()) {
-				value = this.currentValueAsString();
+				value = this.currentValueTextarea.getText();
 			} else if (previousValueTab.isSelected()) {
-				value = this.previousValueAsString();
+				value = this.previousValueTextarea.getText();
 			} else if (diffTab.isSelected()) {
-				value = this.diff;
+				value = this.diffTextarea.getText();
 			} else {
 				logger.error("No known tab selected");
 				return;
