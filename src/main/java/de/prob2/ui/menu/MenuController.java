@@ -35,7 +35,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -414,7 +413,8 @@ public final class MenuController extends MenuBar {
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					logger.error("Thread interupted",e);
+					Thread.currentThread().interrupt();
 				}
 				if (removable(tp)) {
 					accordion.getPanes().remove(tp);
