@@ -40,7 +40,6 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,6 +103,42 @@ public final class MenuController extends MenuBar {
 					}
 				});
 			}
+		}
+
+		private boolean alreadyStaged(Stage stage) {
+			return stage.getScene().getRoot() instanceof IComponents;
+		}
+
+		private boolean removable(TitledPane tp) {
+			return	(tp.getContent() instanceof OperationsView && detachOperations.isSelected()) ||
+					(tp.getContent() instanceof HistoryView && detachHistory.isSelected())	||
+					(tp.getContent() instanceof ModelcheckingController && detachModelcheck.isSelected()) ||
+					(tp.getContent() instanceof StatsView && detachStats.isSelected()) ||
+					(tp.getContent() instanceof AnimationsView && detachAnimations.isSelected());
+		}
+
+		private void transferToNewWindow(Node node, String title) {
+			Stage stage = new Stage();
+			stage.setTitle(title);
+			stage.getIcons().add(new Image("prob_128.gif"));
+			stage.setOnCloseRequest(e -> {
+				if (node instanceof OperationsView) {
+					detachOperations.setSelected(false);
+				} else if (node instanceof HistoryView) {
+					detachHistory.setSelected(false);
+				} else if (node instanceof ModelcheckingController) {
+					detachModelcheck.setSelected(false);
+				} else if (node instanceof StatsView) {
+					detachStats.setSelected(false);
+				} else if (node instanceof AnimationsView) {
+					detachAnimations.setSelected(false);
+				}
+				dvController.apply();
+			});
+			Scene scene = new Scene((Parent) node);
+			scene.getStylesheets().add("prob.css");
+			stage.setScene(scene);
+			stage.show();
 		}
 	}
 	private static final URL FXML_ROOT;
@@ -421,42 +456,6 @@ public final class MenuController extends MenuBar {
 		Stage stage = new Stage();
 		stage.setScene(scene);
 		stage.setTitle("Report Bug");
-		stage.show();
-	}
-
-	private boolean alreadyStaged(Stage stage) {
-		return stage.getScene().getRoot() instanceof IComponents;
-	}
-
-	private boolean removable(TitledPane tp) {
-		return	(tp.getContent() instanceof OperationsView && dvController.detachOperations.isSelected()) ||
-				(tp.getContent() instanceof HistoryView && dvController.detachHistory.isSelected())	||
-				(tp.getContent() instanceof ModelcheckingController && dvController.detachModelcheck.isSelected()) ||
-				(tp.getContent() instanceof StatsView && dvController.detachStats.isSelected()) ||
-				(tp.getContent() instanceof AnimationsView && dvController.detachAnimations.isSelected());
-	}
-
-	private void transferToNewWindow(Node node, String title) {
-		Stage stage = new Stage();
-		stage.setTitle(title);
-		stage.getIcons().add(new Image("prob_128.gif"));
-		stage.setOnCloseRequest(e -> {
-			if (node instanceof OperationsView) {
-				dvController.detachOperations.setSelected(false);
-			} else if (node instanceof HistoryView) {
-				dvController.detachHistory.setSelected(false);
-			} else if (node instanceof ModelcheckingController) {
-				dvController.detachModelcheck.setSelected(false);
-			} else if (node instanceof StatsView) {
-				dvController.detachStats.setSelected(false);
-			} else if (node instanceof AnimationsView) {
-				dvController.detachAnimations.setSelected(false);
-			}
-			dvController.apply();
-		});
-		Scene scene = new Scene((Parent) node);
-		scene.getStylesheets().add("prob.css");
-		stage.setScene(scene);
 		stage.show();
 	}
 
