@@ -71,7 +71,7 @@ public abstract class Console extends StyleClassedTextArea {
 		int diff = this.getLength() - oldText.length();
 		String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		if(currentLine.contains("\n")) {
-			this.replaceText(oldText);
+			this.deleteText(this.getText().length() - currentLine.length(), this.getText().length());
 			goToLastPos();
 			return;
 		}
@@ -137,7 +137,8 @@ public abstract class Console extends StyleClassedTextArea {
 
 	protected void activateSearch() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
-		this.replaceText(this.getText().substring(0, posOfEnter + 1) + ConsoleSearchHandler.FOUND + getCurrentLine());
+		this.deleteText(posOfEnter + 1, this.getText().length());
+		this.appendText(ConsoleSearchHandler.FOUND + getCurrentLine());
 		this.moveTo(this.getText().lastIndexOf("'"));
 		currentPosInLine = 0;
 		charCounterInLine = 0;
@@ -148,7 +149,8 @@ public abstract class Console extends StyleClassedTextArea {
 		if(searchHandler.isActive()) {
 			int posOfEnter = this.getText().lastIndexOf("\n");
 			String searchResult = searchHandler.getCurrentSearchResult();
-			this.replaceText(this.getText().substring(0, posOfEnter + 1) + " >" + searchResult);
+			this.deleteText(posOfEnter + 3, this.getText().length());
+			this.appendText(" >" + searchResult);
 			this.moveTo(this.getText().length());
 			charCounterInLine = searchResult.length();
 			currentPosInLine = charCounterInLine;
@@ -234,7 +236,8 @@ public abstract class Console extends StyleClassedTextArea {
 	private void setTextAfterArrowKey() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		String currentLine = instructions.get(posInList).getInstruction();
-		this.replaceText(this.getText().substring(0, posOfEnter + 3) + currentLine);
+		this.deleteText(posOfEnter + 4, this.getText().length());
+		this.appendText(currentLine);
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
 		this.setEstimatedScrollY(Double.MAX_VALUE);
@@ -274,6 +277,9 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public String getCurrentLine() {
+		if(this.getText(this.getCurrentParagraph()).length() < 2) {
+			return "";
+		}
 		return this.getText(this.getCurrentParagraph()).substring(2);
 	}
 		

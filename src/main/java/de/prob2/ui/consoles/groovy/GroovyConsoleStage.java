@@ -18,6 +18,7 @@ public final class GroovyConsoleStage extends Stage {
 	private GroovyConsoleStage(CurrentStage currentStage, GroovyConsole groovyConsole) {
 		this.setTitle("Groovy Console");
 		// Needs to be wrapped in a Pane subclass (VirtualizedScrollPane is not actually a Pane) for the Mac menu bar to work
+		groovyConsole.getStyleClass().add("console");
 		this.setScene(new Scene(new StackPane(new VirtualizedScrollPane<>(groovyConsole)), 800, 600));
 		this.getScene().getStylesheets().add("prob.css");
 		this.setOnCloseRequest(e -> groovyConsole.closeObjectStage());

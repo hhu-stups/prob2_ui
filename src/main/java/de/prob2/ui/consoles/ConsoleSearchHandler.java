@@ -81,7 +81,9 @@ public class ConsoleSearchHandler {
 		if(isActive()) {
 			int posOfColon = parent.getCurrentLine().indexOf(':');
 			int posOfEnter = parent.getText().lastIndexOf("\n");
-			parent.replaceText(posOfEnter + 1, parent.getText().length(), " >" + parent.getCurrentLine().substring(posOfColon + 1, parent.getCurrentLine().length()));
+			String addition = " >" + parent.getCurrentLine().substring(posOfColon + 1, parent.getCurrentLine().length());
+			parent.deleteText(posOfEnter + 1, parent.getText().length());
+			parent.appendText(addition);
 			deactivateSearch();
 		}
 	}
@@ -104,10 +106,9 @@ public class ConsoleSearchHandler {
 			searchPrefix = NOTFOUND;
 		}
 		int posOfEnter = parent.getText().lastIndexOf("\n");
-		String newText = parent.getText().substring(0, posOfEnter + 1);
-		newText = new StringBuilder(newText).append(searchPrefix.substring(0,searchPrefix.length() - 2)).toString();
-		newText = new StringBuilder(newText).append(getSearchCurrent() + "':" + searchResults.get(currentSearchIndex).getResult()).toString();
-		parent.replaceText(newText);
+		String addition = searchPrefix.substring(0,searchPrefix.length() - 2) + getSearchCurrent() + "':" + searchResults.get(currentSearchIndex).getResult();
+		parent.deleteText(posOfEnter + 1, parent.getText().length());
+		parent.appendText(addition);
 		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf("\n") + 3;
 		parent.moveTo(posOfColon -1);
 		parent.setEstimatedScrollY(Double.MAX_VALUE);
