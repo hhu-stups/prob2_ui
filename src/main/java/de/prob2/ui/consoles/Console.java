@@ -109,15 +109,10 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	private void handleInsertChar(KeyEvent e) {
-		if(e.getText().isEmpty() || (!(e.isControlDown() || e.isAltDown() || e.isMetaDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
-			if(!(e.getCode() == KeyCode.UNDEFINED || e.getCode() == KeyCode.ALT_GRAPH)) {
-				goToLastPos();
-			}
-			if(e.getText().isEmpty()) {
-				return;
-			}
+		if(this.getLength() - this.getCaretPosition() > charCounterInLine) {
+			goToLastPos();
 		}
-		if (e.isControlDown() || e.isMetaDown()) {
+		if (e.isControlDown() || e.isMetaDown() || e.getText().isEmpty()) {
 			return;
 		}
 		charCounterInLine++;
