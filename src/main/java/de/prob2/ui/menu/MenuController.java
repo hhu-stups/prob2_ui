@@ -33,12 +33,15 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +64,9 @@ public final class MenuController extends MenuBar {
 		@FXML private CheckBox detachAnimations;
 
 		@FXML
-		public void initialize() {}
+		public void initialize() {
+			detached.getIcons().add(new Image("prob_128.gif"));
+		}
 
 		@FXML
 		private void apply() {
@@ -406,6 +411,11 @@ public final class MenuController extends MenuBar {
 		}
 		for (TitledPane tp : accordion.getPanes()) {
 			Platform.runLater(() -> {
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 				if (removable(tp)) {
 					accordion.getPanes().remove(tp);
 					transferToNewWindow(tp.getContent(),tp.getText());
@@ -434,7 +444,8 @@ public final class MenuController extends MenuBar {
 	private void transferToNewWindow(Node node, String title) {
 		Stage stage = new Stage();
 		stage.setTitle(title);
-		stage.setOnCloseRequest(e -> e.consume());
+		stage.getIcons().add(new Image("prob_128.gif"));
+		stage.setOnCloseRequest(WindowEvent::consume);
 		Scene scene = new Scene((Parent) node);
 		scene.getStylesheets().add("prob.css");
 		stage.setScene(scene);

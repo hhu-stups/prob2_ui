@@ -80,6 +80,8 @@ public class StatsView extends ScrollPane implements IComponents {
 
 		this.currentTrace.addListener(traceChangeListener);
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
+
+		this.setMinSize(200,100);
 	}
 
 	@FXML
