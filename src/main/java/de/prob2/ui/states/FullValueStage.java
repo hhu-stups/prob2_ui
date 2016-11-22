@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -166,31 +167,26 @@ public class FullValueStage extends Stage {
 				this.diffTextarea.appendText(line);
 				this.diffTextarea.appendText("\n");
 				
-				final String styleClass;
+				final List<String> styleClasses = new ArrayList<>();
 				switch (line.charAt(0)) {
 					case '@':
-						styleClass = "coords";
+						styleClasses.add("coords");
 						break;
 					
 					case '+':
-						styleClass = "insert";
+						styleClasses.add("insert");
 						break;
 					
 					case '-':
-						styleClass = "delete";
+						styleClasses.add("delete");
 						break;
-					
-					default:
-						styleClass = null;
 				}
 				
-				if (styleClass != null) {
-					this.diffTextarea.setStyleClass(
-						this.diffTextarea.getLength() - line.length() - 1,
-						this.diffTextarea.getLength() - 1,
-						styleClass
-					);
-				}
+				this.diffTextarea.setStyle(
+					this.diffTextarea.getLength() - line.length() - 1,
+					this.diffTextarea.getLength() - 1,
+					styleClasses
+				);
 			}
 		}
 	}
