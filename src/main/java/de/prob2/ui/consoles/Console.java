@@ -15,8 +15,12 @@ import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public abstract class Console extends StyleClassedTextArea {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB);
     
 	protected List<ConsoleInstruction> instructions;
@@ -105,7 +109,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	private void handleInsertChar(KeyEvent e) {
-		if(e.getText().isEmpty() || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
+		if(e.getText().isEmpty() || (!(e.isControlDown() || e.isAltDown() || e.isMetaDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
 			if(!(e.getCode() == KeyCode.UNDEFINED || e.getCode() == KeyCode.ALT_GRAPH)) {
 				goToLastPos();
 			}
@@ -113,7 +117,7 @@ public abstract class Console extends StyleClassedTextArea {
 				return;
 			}
 		}
-		if (e.isShortcutDown() || e.isAltDown()) {
+		if (e.isControlDown() || e.isAltDown() || e.isMetaDown()) {
 			return;
 		}
 		charCounterInLine++;
