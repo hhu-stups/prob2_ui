@@ -39,13 +39,13 @@ public class FormulaInputStage extends Stage {
 	private DialogPane parent;
 	
 	@FXML
-	private TextField tf_formula;
+	private TextField tfFormula;
 	
 	@FXML
 	private TextArea exceptionText;
 	
 	@FXML
-	private Label lb_header;
+	private Label lbHeader;
 	
 	@FXML
 	private FontAwesomeIconView icon;
@@ -72,7 +72,7 @@ public class FormulaInputStage extends Stage {
 		btapply.setOnMouseClicked(e->apply());
 		btcancel.setOnMouseClicked(e->close());
 		
-		tf_formula.setOnKeyReleased(e-> {
+		tfFormula.setOnKeyReleased(e-> {
 			if(e.getCode() == KeyCode.ENTER) {
 				apply();
 			}
@@ -82,7 +82,7 @@ public class FormulaInputStage extends Stage {
 	private void apply() {
 		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
 		try {
-			formulaGenerator.parseAndShowFormula(tf_formula.getText());
+			formulaGenerator.parseAndShowFormula(tfFormula.getText());
 			close();
 		} catch (EvaluationException | ProBError exception) {
 			logger.error("Evaluation of formula failed", exception);
@@ -92,8 +92,8 @@ public class FormulaInputStage extends Stage {
 				exceptionText.setText(sw.toString());
 			}
 			parent.setExpanded(true);
-			lb_header.setText("Could not parse or visualize formula");
-			tf_formula.getStyleClass().add("text-field-error");
+			lbHeader.setText("Could not parse or visualize formula");
+			tfFormula.getStyleClass().add("text-field-error");
 			icon.setIcon(FontAwesomeIcon.MINUS_CIRCLE);
 		}
 	}

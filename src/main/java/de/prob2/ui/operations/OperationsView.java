@@ -363,7 +363,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 			throw new IllegalStateException("Unhandled sort mode: " + sortMode);
 		}
 
-		Collections.sort(events, comparator);
+		events.sort(comparator);
 	}
 
 	@FXML

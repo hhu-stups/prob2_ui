@@ -36,8 +36,8 @@
 						<HistoryView/>
 					</TitledPane>
 					<TitledPane text="%tptitles.stats">
-                    	<StatsView/>
-                    </TitledPane>
+						<StatsView/>
+					</TitledPane>
 				</panes>
 			</Accordion>
 		</SplitPane>

@@ -159,5 +159,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 	@Override
 	public void animatorStatus(boolean busy) {
+		// Not used
 	}
 }

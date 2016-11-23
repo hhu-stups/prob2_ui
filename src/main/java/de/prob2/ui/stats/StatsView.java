@@ -100,7 +100,7 @@ public class StatsView extends ScrollPane implements IComponents {
 			extendedStatsToggle.setText("Show Extended Stats");
 		}
 		icon.setSize("16");
-		icon.setStyle("-fx-fill: -prob-grey");
+		icon.setStyle("-fx-fill: -prob-grey;");
 		extendedStatsToggle.setGraphic(icon);
 		extendedStatsToggle.setTooltip(tooltip);
 	}

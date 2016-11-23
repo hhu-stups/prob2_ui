@@ -85,12 +85,13 @@ public class FormulaNode extends Region {
 	}
 	
 	private Color calculateColor(ExpandedFormula data) {
-		if(data.getValue() instanceof String) {
+		if (data.getValue() instanceof String) {
 			return Color.GRAY;
-		} else if(!(Boolean)data.getValue()) {
+		} else if (!(Boolean)data.getValue()) {
 			return Color.ORANGERED;
+		} else {
+			return Color.LIME;
 		}
-		return Color.LIME;
 	}
 	
 	
@@ -98,9 +99,8 @@ public class FormulaNode extends Region {
 		rectangle.setFill(value);
 	}
 	
+	@Override
 	public String toString() {
 		return text.getText();
 	}
-	
-
 }

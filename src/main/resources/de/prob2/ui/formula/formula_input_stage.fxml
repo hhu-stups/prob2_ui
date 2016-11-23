@@ -1,56 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.control.ButtonType?>
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.Scene?>
-<?import javafx.stage.Stage?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.text.Font?>
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-
+<?import javafx.stage.Stage?>
 <fx:root type="Stage" resizable="false" title="Enter Formula for Visualization" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css" height="560.0" width="800.0">
 			<DialogPane fx:id="parent" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
-			    <header>
-			      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="85.0" prefWidth="720.0">
-			         <children>
-			         	<Label fx:id="lb_header" text="Enter Formula for Visualization" layoutX="10.0" layoutY = "31.0">
-			         		<font>
-			                  	<Font size="19.0"/>
-			                  </font>
-			         	</Label> 
-			            <FontAwesomeIconView fx:id="icon" styleClass="icon-dark" glyphName="QUESTION_CIRCLE" size="80" X="700.0" Y="100.0"/>
-			         </children></AnchorPane>
-			    </header>
-			    <content>
-			      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="60.0" prefWidth="480.0">
-			         <children>
-			            <HBox layoutX="6.0" prefHeight="50.0" prefWidth="720.0">
-			               <children>
-			                  <Label alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="103.0" text="Enter Formula:"/>
-			                  <TextField fx:id ="tf_formula" prefHeight="26.0" prefWidth="348.0" />
-			               </children>
-			            </HBox>
-			         </children></AnchorPane>
-			    </content>
-			   <buttonTypes>
-			      <ButtonType fx:constant="CANCEL" />
-			      <ButtonType fx:constant="APPLY" />
-			   </buttonTypes>
-			   <expandableContent>
-				   <StackPane prefHeight = "300.0" prefWidth = "720.0">
-				   		<children>
-				   			<TextArea editable="false" styleClass="text-area-error" fx:id="exceptionText" prefHeight="300.0" prefWidth="720.0"/>
-				   		</children>
-				   </StackPane>
-			   </expandableContent>
+				<header>
+					<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="85.0" prefWidth="720.0">
+						<Label fx:id="lbHeader" text="Enter Formula for Visualization" layoutX="10.0" layoutY="31.0">
+							<font>
+								<Font size="19.0"/>
+							</font>
+						</Label>
+						<FontAwesomeIconView fx:id="icon" styleClass="icon-dark" glyphName="QUESTION_CIRCLE" size="80" x="700.0" y="100.0"/>
+					</AnchorPane>
+				</header>
+				<content>
+					<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="60.0" prefWidth="480.0">
+						<HBox layoutX="6.0" prefHeight="50.0" prefWidth="720.0">
+							<Label alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="103.0" text="Enter Formula:"/>
+							<TextField fx:id="tfFormula" prefHeight="26.0" prefWidth="348.0"/>
+						</HBox>
+					</AnchorPane>
+				</content>
+				<expandableContent>
+					<StackPane prefHeight="300.0" prefWidth="720.0">
+						<TextArea editable="false" styleClass="text-area-error" fx:id="exceptionText" prefHeight="300.0" prefWidth="720.0"/>
+					</StackPane>
+				</expandableContent>
+				<ButtonType fx:constant="CANCEL"/>
+				<ButtonType fx:constant="APPLY"/>
 			</DialogPane>
 		</Scene>
 	</scene>

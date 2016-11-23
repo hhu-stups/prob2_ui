@@ -15,21 +15,17 @@ import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 public abstract class Console extends StyleClassedTextArea {
-	private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
-    
+	
 	protected List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
 	protected ConsoleSearchHandler searchHandler;
 
-	public Console() {
+	protected Console() {
 		this.instructions = new ArrayList<>();
 		this.searchHandler = new ConsoleSearchHandler(this, instructions);
 		setEvents();
@@ -136,10 +132,10 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	protected void activateSearch() {
-		int posOfEnter = this.getText().lastIndexOf("\n");
+		int posOfEnter = this.getText().lastIndexOf('\n');
 		this.deleteText(posOfEnter + 1, this.getText().length());
 		this.appendText(ConsoleSearchHandler.FOUND + getCurrentLine());
-		this.moveTo(this.getText().lastIndexOf("'"));
+		this.moveTo(this.getText().lastIndexOf('\''));
 		currentPosInLine = 0;
 		charCounterInLine = 0;
 		searchHandler.activateSearch();
@@ -147,7 +143,7 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	protected void deactivateSearch() {
 		if(searchHandler.isActive()) {
-			int posOfEnter = this.getText().lastIndexOf("\n");
+			int posOfEnter = this.getText().lastIndexOf('\n');
 			String searchResult = searchHandler.getCurrentSearchResult();
 			this.deleteText(posOfEnter + 3, this.getText().length());
 			this.appendText(" >" + searchResult);
@@ -234,7 +230,7 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	
 	private void setTextAfterArrowKey() {
-		int posOfEnter = this.getText().lastIndexOf("\n");
+		int posOfEnter = this.getText().lastIndexOf('\n');
 		String currentLine = instructions.get(posInList).getInstruction();
 		this.deleteText(posOfEnter + 4, this.getText().length());
 		this.appendText(currentLine);
@@ -242,7 +238,7 @@ public abstract class Console extends StyleClassedTextArea {
 		currentPosInLine = charCounterInLine;
 		this.setEstimatedScrollY(Double.MAX_VALUE);
 	}
-			
+	
 	private void handleDeletion(KeyEvent e) {
 		int maxPosInLine = charCounterInLine;
 		if(searchHandler.handleDeletion(e)) {
