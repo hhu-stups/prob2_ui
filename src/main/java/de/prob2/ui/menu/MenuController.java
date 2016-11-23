@@ -27,7 +27,6 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
-import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.modelchecking.ModelcheckingController;
@@ -435,11 +434,6 @@ public final class MenuController extends MenuBar {
 		final Stage formulaInputStage = injector.getInstance(FormulaInputStage.class);
 		formulaInputStage.show();
 		formulaInputStage.toFront();
-	}
-
-	@FXML
-	private void handleDotty(ActionEvent event) {
-		injector.getInstance(DottyStage.class).showAndWait();
 	}
 
 	@FXML
