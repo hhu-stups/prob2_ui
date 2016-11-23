@@ -170,16 +170,9 @@ public final class OperationsView extends AnchorPane implements IComponents {
 
 		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue != null && newValue.isEnabled()) {
-				final Trace newTrace;
-				try {
-					newTrace = currentTrace.get().add(newValue.id);
-				} catch (IllegalArgumentException e) {
-					logger.debug("Operation {} is no longer valid (user probably clicked too fast)", newValue.id);
-					logger.debug("Ignoring exception", e);
-					return;
-				}
-				currentTrace.set(newTrace);
-				logger.debug("Selected item: " + newValue);
+				// Disable the operations list until the trace change is finished, the update method reenables it later
+				opsListView.setDisable(true);
+				currentTrace.set(currentTrace.get().add(newValue.id));
 			}
 		});
 
@@ -226,12 +219,15 @@ public final class OperationsView extends AnchorPane implements IComponents {
 
 	private void update(final Trace trace) {
 		if (trace == null) {
+			this.opsListView.setDisable(true);
 			currentModel = null;
 			opNames = new ArrayList<>();
 			Platform.runLater(opsListView.getItems()::clear);
 			return;
 		}
-
+		
+		this.opsListView.setDisable(false);
+		
 		if (trace.getModel() != currentModel) {
 			updateModel(trace);
 		}
