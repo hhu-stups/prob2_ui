@@ -14,7 +14,7 @@
 <?import javafx.scene.control.ListView?>
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 
-<fx:root type="Stage" title="%newProject.stage.stageTitle"
+<fx:root type="Stage" title="%addMachine.stage.stageTitle"
 	resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -22,7 +22,7 @@
 				<VBox spacing="5" AnchorPane.topAnchor="25"
 					AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0"
 					AnchorPane.rightAnchor="0">
-					<Label text="%newProject.stage.title">
+					<Label text="%addMachine.stage.title">
 						<font>
 							<Font size="18" />
 						</font>
@@ -34,16 +34,16 @@
 						<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
 							AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" alignment="center_right">
 							<HBox spacing="20" alignment="center_left">
-								<Label text="%newProject.stage.projectName" />
-								<TextField fx:id="projectNameField" HBox.hgrow="always">
+								<Label text="%addMachine.stage.name" />
+								<TextField fx:id="nameField" HBox.hgrow="always">
 									<font>
 										<Font size="12" />
 									</font>
 								</TextField>
 							</HBox>
 							<HBox spacing="20" alignment="center_left">
-								<Label text="%newProject.stage.projectDescription" />
-								<TextField fx:id="projectDescriptionField" HBox.hgrow="always">
+								<Label text="%addMachine.stage.description" />
+								<TextField fx:id="descriptionField" HBox.hgrow="always">
 									<font>
 										<Font size="12" />
 									</font>
@@ -52,39 +52,14 @@
 									<Insets top="5" />
 								</VBox.margin>
 							</HBox>
-							<HBox spacing="20" alignment="center_left">
-								<Label text="%newProject.stage.location" />
-								<TextField fx:id="locationField" HBox.hgrow="always">
-									<font>
-										<Font size="12" />
-									</font>
-								</TextField>
-								<Button styleClass="button-dark2" text="%newProject.stage.selectLocation"
-									onAction="#selectLocation" />
-								<VBox.margin>
-									<Insets top="10" />
-								</VBox.margin>
-							</HBox>
-							<AnchorPane>
-								<Label text="%newProject.stage.files"
-									AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="5" />
-								<Button fx:id="addFileButton" prefHeight="26.0"
-									prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-									AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addFile">
-									<graphic>
-										<FontAwesomeIconView fill="#555560"
-											glyphName="PLUS_CIRCLE" size="26" />
-									</graphic>
-								</Button>
-							</AnchorPane>
-							<ListView fx:id="filesListView" styleClass="no-border"
-								prefHeight="200" />
 						</VBox>
 					</AnchorPane>
 					<ButtonBar styleClass="dialog">
 						<buttons>
 							<Button text="%common.cancel" cancelButton="true"
 								onAction="#cancel" />
+							<Button fx:id="addMachineButton" text="%addMachine.stage.addMachineButton"
+								onAction="#addMachine" />
 							<Button fx:id="finishButton" text="%common.finish"
 								onAction="#finish" />
 						</buttons>
@@ -93,9 +68,6 @@
 						</VBox.margin>
 					</ButtonBar>
 				</VBox>
-				<Label fx:id="errorExplanationLabel" textFill="#B77300"
-					AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="20"
-					AnchorPane.rightAnchor="200" />
 			</AnchorPane>
 		</Scene>
 	</scene>

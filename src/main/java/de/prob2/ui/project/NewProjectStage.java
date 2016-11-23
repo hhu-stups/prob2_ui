@@ -45,10 +45,15 @@ public class NewProjectStage extends Stage {
 	private Label errorExplanationLabel;
 
 	private CurrentProject currentProject;
+	private CurrentStage currentStage;
+
+	private FXMLLoader loader;
 
 	@Inject
 	private NewProjectStage(FXMLLoader loader, CurrentProject currentProject, CurrentStage currentStage) {
 		this.currentProject = currentProject;
+		this.currentStage = currentStage;
+		this.loader = loader;
 		try {
 			loader.setLocation(getClass().getResource("new_project_stage.fxml"));
 			loader.setRoot(this);
@@ -84,6 +89,9 @@ public class NewProjectStage extends Stage {
 			return;
 		}
 
+		AddMachineStage addMachineStage = new AddMachineStage(loader, currentStage, selectedFile);
+		Machine machine = addMachineStage.showStage();
+		
 		filesListView.getItems().add(selectedFile);
 	}
 
