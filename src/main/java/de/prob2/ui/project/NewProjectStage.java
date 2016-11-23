@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.event.ActionEvent;
@@ -30,7 +29,7 @@ import javafx.stage.Stage;
 
 @Singleton
 public class NewProjectStage extends Stage {
-	private static final Logger logger = LoggerFactory.getLogger(DottyStage.class);
+	private static final Logger logger = LoggerFactory.getLogger(NewProjectStage.class);
 
 	@FXML
 	private Button finishButton;
