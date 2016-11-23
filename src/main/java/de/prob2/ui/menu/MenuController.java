@@ -1,38 +1,59 @@
 package de.prob2.ui.menu;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.prefs.Preferences;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.sun.javafx.stage.StageHelper;
+
 import de.be4.classicalb.core.parser.exceptions.BException;
+
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.history.HistoryView;
-import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
-import javafx.application.Platform;
+
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Accordion;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.web.WebEngine;
@@ -41,21 +62,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.NodeChangeListener;
-import java.util.prefs.PreferenceChangeListener;
-import java.util.prefs.Preferences;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -67,7 +76,13 @@ public final class MenuController extends MenuBar {
 		@FXML private CheckBox detachModelcheck;
 		@FXML private CheckBox detachStats;
 		@FXML private CheckBox detachAnimations;
-		Preferences windowPrefs = Preferences.userNodeForPackage(getClass());
+		private final Preferences windowPrefs;
+		private final Set<Stage> wrapperStages;
+		
+		private DetachViewStageController() {
+			windowPrefs = Preferences.userNodeForPackage(MenuController.DetachViewStageController.class);
+			wrapperStages = new HashSet<>();
+		}
 
 		@FXML
 		public void initialize() {
@@ -80,50 +95,33 @@ public final class MenuController extends MenuBar {
 			assert root != null;
 			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(0);
 			Accordion accordion = (Accordion) pane.getItems().get(0);
-			removeTP(accordion,pane);
+			removeTP(accordion, pane);
 			this.detached.close();
 		}
 
 		private void removeTP(Accordion accordion, SplitPane pane) {
-			final CountDownLatch latch = new CountDownLatch(1);
-			if (StageHelper.getStages().size()<=2) {
-				latch.countDown();
-			} else {
-				for (Stage stage : StageHelper.getStages()) {
-					if (alreadyStaged(stage)) {
-						Platform.runLater(() -> {
-							stage.setScene(null);
-							stage.close();
-							latch.countDown();
-						});
-					}
+			for (Iterator<Stage> it = wrapperStages.iterator(); it.hasNext();) {
+				final Stage stage = it.next();
+				stage.setScene(null);
+				stage.hide();
+				it.remove();
+			}
+			
+			for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
+				final TitledPane tp = it.next();
+				if (removable(tp)) {
+					it.remove();
+					transferToNewWindow((Parent)tp.getContent(), tp.getText());
 				}
 			}
-			for (TitledPane tp : accordion.getPanes()) {
-				Platform.runLater(() -> {
-					try {
-						latch.await();
-					} catch (InterruptedException e) {
-						logger.error("Thread interupted",e);
-						Thread.currentThread().interrupt();
-					}
-					if (removable(tp)) {
-						accordion.getPanes().remove(tp);
-						transferToNewWindow(tp.getContent(),tp.getText());
-						if (accordion.getPanes().isEmpty()) {
-							pane.getItems().remove(accordion);
-							pane.setDividerPositions(0);
-							pane.lookupAll(".split-pane-divider").stream().forEach(div ->  div.setMouseTransparent(true));
-						}
-					}
-				});
+			
+			if (accordion.getPanes().isEmpty()) {
+				pane.getItems().remove(accordion);
+				pane.setDividerPositions(0);
+				pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(true));
 			}
 		}
-
-		private boolean alreadyStaged(Stage stage) {
-			return stage.getScene().getRoot() instanceof IComponents;
-		}
-
+		
 		private boolean removable(TitledPane tp) {
 			return	removableOperations(tp) ||
 					removableHistory(tp) ||
@@ -152,8 +150,9 @@ public final class MenuController extends MenuBar {
 			return tp.getContent() instanceof AnimationsView && detachAnimations.isSelected();
 		}
 
-		private void transferToNewWindow(Node node, String title) {
+		private void transferToNewWindow(Parent node, String title) {
 			Stage stage = new Stage();
+			wrapperStages.add(stage);
 			stage.setTitle(title);
 			stage.getIcons().add(new Image("prob_128.gif"));
 			stage.setOnCloseRequest(e -> {
@@ -179,9 +178,10 @@ public final class MenuController extends MenuBar {
 			stage.setX(windowPrefs.getDouble(node.getClass()+"X", Screen.getPrimary().getVisualBounds().getWidth()-stage.getWidth()/2));
 			stage.setY(windowPrefs.getDouble(node.getClass()+"Y", Screen.getPrimary().getVisualBounds().getHeight()-stage.getHeight()/2));
 
-			Scene scene = new Scene((Parent) node);
+			Scene scene = new Scene(node);
 			scene.getStylesheets().add("prob.css");
 			stage.setScene(scene);
+			currentStage.register(stage);
 			stage.show();
 		}
 	}
