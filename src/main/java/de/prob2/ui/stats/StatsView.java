@@ -13,6 +13,7 @@ import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
 
+import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
@@ -30,7 +31,7 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StatsView extends ScrollPane {
+public class StatsView extends ScrollPane implements IComponents {
 	@FXML
 	private Label totalTransitions;
 	@FXML
@@ -79,6 +80,8 @@ public class StatsView extends ScrollPane {
 
 		this.currentTrace.addListener(traceChangeListener);
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
+
+		this.setMinSize(200,100);
 	}
 
 	@FXML

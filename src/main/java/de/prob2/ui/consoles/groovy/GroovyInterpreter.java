@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
 import de.prob2.ui.consoles.ConsoleExecResult;
+import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.Executable;
 import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;
@@ -36,12 +37,13 @@ public class GroovyInterpreter implements Executable {
 		logger.trace("Exec");
 		if ("inspect".equals(instruction.getInstruction())) {
 			groovyObjectStage.showObjects(engine);
-			return new ConsoleExecResult("", "");
+			return new ConsoleExecResult("", "", ConsoleExecResultType.PASSED);
 		} else if("clear".equals(instruction.getInstruction())) {
-			return new ConsoleExecResult("clear","");
+			return new ConsoleExecResult("clear","", ConsoleExecResultType.PASSED);
 		} else {
 			String resultString;
 			StringBuilder console = new StringBuilder();
+			ConsoleExecResultType resultType = ConsoleExecResultType.PASSED;
 			engine.put("__console", console);
 			logger.trace("Eval {} on {}", instruction.getInstruction(), engine);
 			try {
@@ -51,9 +53,9 @@ public class GroovyInterpreter implements Executable {
 			} catch (ScriptException|GroovyBugError e) {
 				logger.debug("Groovy Evaluation failed", e);
 				resultString = e.toString();
+				resultType = ConsoleExecResultType.ERROR;
 			}
-	
-			return new ConsoleExecResult(console.toString(), resultString);
+			return new ConsoleExecResult(console.toString(), resultString, resultType);
 		}
 	}
 	

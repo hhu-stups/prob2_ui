@@ -5,16 +5,23 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import org.fxmisc.richtext.CodeArea;
-
-import javafx.scene.control.ContextMenu;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 
-public abstract class Console extends CodeArea {
-	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS);
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+public abstract class Console extends StyleClassedTextArea {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
+	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
     
 	protected List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
@@ -23,14 +30,38 @@ public abstract class Console extends CodeArea {
 	protected ConsoleSearchHandler searchHandler;
 
 	public Console() {
-		this.setContextMenu(new ContextMenu());
 		this.instructions = new ArrayList<>();
 		this.searchHandler = new ConsoleSearchHandler(this, instructions);
-		setListeners();
+		setEvents();
+	}
+	
+	public void setEvents() {
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.mouseClicked(MouseButton.PRIMARY), e->  this.mouseClicked()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(), this::keyPressed));
+		
+		// GUI-style shortcuts, these should use the Shortcut key (i. e. Command on Mac, Control on other systems).
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCombination.SHORTCUT_DOWN), e-> this.copy()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.V, KeyCombination.SHORTCUT_DOWN), e-> this.paste()));
+		
+		// Shell/Emacs-style shortcuts, these should always use Control as the modifier, even on Mac (this is how it works in a normal terminal window).
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.R, KeyCombination.CONTROL_DOWN), e-> this.controlR()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.A, KeyCombination.CONTROL_DOWN), e-> this.controlA()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.E, KeyCombination.CONTROL_DOWN), e-> this.controlE()));
+				
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.UP), e-> this.handleUp()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DOWN), e-> this.handleDown()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.LEFT), e-> this.handleLeft()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.RIGHT), e-> this.handleRight()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DELETE), this::handleDeletion));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.BACK_SPACE), this::handleDeletion));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e-> this.handleEnter()));
 	}
 		
 	@Override
 	public void paste() {
+		if(searchHandler.isActive()) {
+			return;
+		}
 		if(this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
 			goToLastPos();
 		}
@@ -40,7 +71,7 @@ public abstract class Console extends CodeArea {
 		int diff = this.getLength() - oldText.length();
 		String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		if(currentLine.contains("\n")) {
-			this.replaceText(oldText);
+			this.deleteText(this.getText().length() - currentLine.length(), this.getText().length());
 			goToLastPos();
 			return;
 		}
@@ -53,111 +84,35 @@ public abstract class Console extends CodeArea {
 		super.copy();
 		goToLastPos();
 	}
-			
-	protected void setListeners() {
-		setMouseEvent();
-		setKeyEvent();
-	}
-	
-	private void setMouseEvent() {
-		this.addEventFilter(MouseEvent.ANY, e -> {
-			if(e.getButton() == MouseButton.PRIMARY && (this.getLength() - 1 - this.getCaretPosition() < charCounterInLine)) {
-				currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
-			}
-		});
-	}
-	
-	protected void setKeyEvent() {
-		this.addEventFilter(KeyEvent.ANY, e -> {
-			if(e.getCode() == KeyCode.Z && (e.isShortcutDown() || e.isAltDown())) {
-				e.consume();
-			}
-			if(e.isControlDown()) {
-				controlDown(e);
-			}
-		});
-		
-		this.addEventFilter(KeyEvent.KEY_PRESSED, e-> {
-			if(e.isControlDown() && e.getCode() == KeyCode.R) {
-				if(!searchHandler.isActive()) {
-					activateSearch();
-				} else {
-					searchHandler.searchNext();
-				}
-			}
-		});
-		
-		this.setOnKeyPressed(this::keyPressed);
-	}
-
-	private void keyPressed(KeyEvent e) {
-		if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
-			handleArrowKeys(e);
-			e.consume();
-			//this.setScrollTop(Double.MAX_VALUE);
-		} else if (e.getCode().isNavigationKey()) {
-			if((e.getCode() != KeyCode.LEFT && e.getCode() != KeyCode.RIGHT) || e.isShiftDown()) {
-				e.consume();
-			} else {
-				handleArrowKeys(e);
-			}
-		} else if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE) {
-			handleDeletion(e);
-		} else if (e.getCode() == KeyCode.ENTER) {
-			handleEnter(e);
-		} else if (!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
-			handleInsertChar(e);
-		} else {
-			handleRest(e);
+				
+	private void mouseClicked() {
+		if(this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
+			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 		}
 	}
-
-	private void controlDown(KeyEvent e) {
+	
+	public void controlR() {
 		if(!searchHandler.isActive()) {
-			if(e.getCode() == KeyCode.A) {
-				this.positionCaret(this.getCaretPosition() - currentPosInLine);
-				currentPosInLine = 0;
-				e.consume();
-			} else if(e.getCode() == KeyCode.E) {
-				this.positionCaret(this.getLength());
-				currentPosInLine = charCounterInLine;
-			}
-		} else if(e.getCode() == KeyCode.V || e.getCode() == KeyCode.A) {
-			e.consume();
+			activateSearch();
+		} else {
+			searchHandler.searchNext();
 		}
 	}
-
-	protected void activateSearch() {
-		int posOfEnter = this.getText().lastIndexOf("\n");
-		this.replaceText(this.getText().substring(0, posOfEnter + 1) + ConsoleSearchHandler.FOUND + getCurrentLine());
-		this.positionCaret(this.getText().lastIndexOf("'"));
-		currentPosInLine = 0;
-		charCounterInLine = 0;
-		searchHandler.activateSearch();
-	}
 	
-	protected void deactivateSearch() {
-		int posOfEnter = this.getText().lastIndexOf("\n");
-		String searchResult = searchHandler.getCurrentSearchResult();
-		this.replaceText(this.getText().substring(0, posOfEnter + 1) + " >" + searchResult);
-		this.positionCaret(this.getText().length());
-		charCounterInLine = searchResult.length();
-		currentPosInLine = charCounterInLine;
-		searchHandler.deactivateSearch();
-	}
-	
-	
-	protected void handleInsertChar(KeyEvent e) {
-		if(e.getText().isEmpty() || (!(e.isShortcutDown() || e.isAltDown()) && (this.getLength() - this.getCaretPosition()) > charCounterInLine)) {
-			if(!(e.getCode() == KeyCode.UNDEFINED || e.getCode() == KeyCode.ALT_GRAPH)) {
-				goToLastPos();
-			}
-			if(e.getText().isEmpty()) {
-				e.consume();
-				return;
-			}
+	protected void keyPressed(KeyEvent e) {
+		if(REST.contains(e.getCode())) {
+			return;
 		}
-		if (e.isShortcutDown() || e.isAltDown()) {
+		if(!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
+			handleInsertChar(e);
+		}
+	}
+	
+	private void handleInsertChar(KeyEvent e) {
+		if(this.getLength() - this.getCaretPosition() > charCounterInLine) {
+			goToLastPos();
+		}
+		if (e.isControlDown() || e.isMetaDown() || e.getText().isEmpty()) {
 			return;
 		}
 		charCounterInLine++;
@@ -166,24 +121,59 @@ public abstract class Console extends CodeArea {
 		searchHandler.handleKey(e);
 	}
 	
+	private void controlA() {
+		if(!searchHandler.isActive()) {
+			this.moveTo(this.getCaretPosition() - currentPosInLine);
+			currentPosInLine = 0;
+		}
+	}
 	
+	private void controlE() {
+		if(!searchHandler.isActive()) {
+			this.moveTo(this.getLength());
+			currentPosInLine = charCounterInLine;
+		}
+	}
+
+	protected void activateSearch() {
+		int posOfEnter = this.getText().lastIndexOf("\n");
+		this.deleteText(posOfEnter + 1, this.getText().length());
+		this.appendText(ConsoleSearchHandler.FOUND + getCurrentLine());
+		this.moveTo(this.getText().lastIndexOf("'"));
+		currentPosInLine = 0;
+		charCounterInLine = 0;
+		searchHandler.activateSearch();
+	}
+	
+	protected void deactivateSearch() {
+		if(searchHandler.isActive()) {
+			int posOfEnter = this.getText().lastIndexOf("\n");
+			String searchResult = searchHandler.getCurrentSearchResult();
+			this.deleteText(posOfEnter + 3, this.getText().length());
+			this.appendText(" >" + searchResult);
+			this.moveTo(this.getText().length());
+			charCounterInLine = searchResult.length();
+			currentPosInLine = charCounterInLine;
+			searchHandler.deactivateSearch();
+		}
+	}
+		
 	private void goToLastPos() {
-		this.positionCaret(this.getLength());
+		this.moveTo(this.getLength());
 		deselect();
 		currentPosInLine = charCounterInLine;
 	}
 	
-	protected abstract void handleEnter(KeyEvent e);
+	protected abstract void handleEnter();
 	
-	protected void handleEnterAbstract(KeyEvent e) {
+	protected void handleEnterAbstract() {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
-		e.consume();
 		String instruction = getCurrentLine();
 		if(searchHandler.isActive()) {
 			instruction = searchHandler.getCurrentSearchResult();
 		}
-		if(!getCurrentLine().isEmpty()) {
+		if(!instruction.isEmpty()) {
 			if(!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
 				instructions.set(instructions.size() - 1, new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 			} else {
@@ -193,33 +183,20 @@ public abstract class Console extends CodeArea {
 		}
 		searchHandler.handleEnter();
 	}
-	
-	private void handleArrowKeys(KeyEvent e) {
-		boolean needReturn = false;
-		if(searchHandler.isActive()) {
-			deactivateSearch();
-		}
-		if(e.getCode().equals(KeyCode.UP)) {
-			needReturn = handleUp(e);
-		} else if(e.getCode().equals(KeyCode.DOWN)) {
-			needReturn = handleDown(e);				
-		} else if(e.getCode().equals(KeyCode.LEFT)) {
-			handleLeft(e);
-			needReturn = true;
-		} else {
-			handleRight();
-			needReturn = true;
-		}
-		if(needReturn) {
+		
+	private void handleDown() {
+		deactivateSearch();
+		if(posInList == instructions.size() - 1) {
 			return;
 		}
+		posInList = Math.min(posInList+1, instructions.size() - 1);
 		setTextAfterArrowKey();
 	}
 	
-	private boolean handleUp(KeyEvent e) {
-		e.consume();
+	private void handleUp() {
+		deactivateSearch();
 		if(posInList == -1) { 
-			return true;
+			return;
 		}
 		if(posInList == instructions.size() - 1) {
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
@@ -229,41 +206,29 @@ public abstract class Console extends CodeArea {
 				} else {
 					instructions.add(new ConsoleInstruction(getCurrentLine(), ConsoleInstructionOption.UP));
 					setTextAfterArrowKey();
-					return true;
+					return;
 				}
 			}
 		}
 		posInList = Math.max(posInList - 1, 0);
-		return false;
+		setTextAfterArrowKey();
 	}
-	
-	private boolean handleDown(KeyEvent e) {
-		e.consume();
-		if(posInList == instructions.size() - 1) {
-			return true;
-		}
-		posInList = Math.min(posInList+1, instructions.size() - 1);
-		return false;
-	}
-	
-	private void handleLeft(KeyEvent e) {
+		
+	private void handleLeft() {
+		deactivateSearch();
 		if(currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine--;
+			this.moveTo(this.getCaretPosition() - 1);
 		} else if(currentPosInLine == 0) {
-			e.consume();
 			super.deselect();
-		}
-		if(searchHandler.isActive()) {
-			deactivateSearch();
 		}
 	}
 	
 	private void handleRight() {
+		deactivateSearch();
 		if(currentPosInLine < charCounterInLine && this.getLength() - this.getCaretPosition() <= charCounterInLine) {		
 			currentPosInLine++;
-		}
-		if(searchHandler.isActive()) {
-			deactivateSearch();
+			this.moveTo(this.getCaretPosition() + 1);
 		}
 	}
 	
@@ -271,20 +236,14 @@ public abstract class Console extends CodeArea {
 	private void setTextAfterArrowKey() {
 		int posOfEnter = this.getText().lastIndexOf("\n");
 		String currentLine = instructions.get(posInList).getInstruction();
-		this.replaceText(this.getText().substring(0, posOfEnter + 3) + currentLine);
+		this.deleteText(posOfEnter + 4, this.getText().length());
+		this.appendText(currentLine);
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
+		this.setEstimatedScrollY(Double.MAX_VALUE);
 	}
-	
-	
-	private void handleRest(KeyEvent e) {
-		if(REST.contains(e.getCode())) {
-			e.consume();
-		}
-	}
-	
+			
 	private void handleDeletion(KeyEvent e) {
-		boolean needReturn;
 		int maxPosInLine = charCounterInLine;
 		if(searchHandler.handleDeletion(e)) {
 			return;
@@ -292,47 +251,36 @@ public abstract class Console extends CodeArea {
 		if(searchHandler.isActive()) {
 			maxPosInLine = charCounterInLine + 2 + searchHandler.getCurrentSearchResult().length();
 		}
-		if(!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine || e.isShortcutDown() || e.isAltDown()) {
-			e.consume();
+		if(!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine) {
 			return;
 		}
 		if(e.getCode().equals(KeyCode.BACK_SPACE)) {
-			needReturn = handleBackspace(e);
-			if(needReturn) {
-				return;
-			}
+			handleBackspace();
 		} else {
-			needReturn = handleDelete(e);
-			if(needReturn) {
-				return;
-			}
+			handleDelete();
 		}
 	}
 	
-	private boolean handleBackspace(KeyEvent e) {
+	private void handleBackspace() {
 		if(currentPosInLine > 0) {
 			currentPosInLine = Math.max(currentPosInLine - 1, 0);
 			charCounterInLine = Math.max(charCounterInLine - 1, 0);	
-		} else {
-			e.consume();
-			return true;
+			this.deletePreviousChar();
 		}
-		return false;
 	}
 	
-	private boolean handleDelete(KeyEvent e) {
+	private void handleDelete() {
 		if(currentPosInLine < charCounterInLine) {
 			charCounterInLine = Math.max(charCounterInLine - 1, 0);
-		} else if(currentPosInLine == charCounterInLine) {
-			e.consume();
-			return true;
+			this.deleteNextChar();
 		}
-		return false;
 	}
 	
 	public String getCurrentLine() {
-		int posOfEnter = this.getText().lastIndexOf("\n");
-		return this.getText().substring(posOfEnter + 3, this.getText().length());
+		if(this.getText(this.getCurrentParagraph()).length() < 2) {
+			return "";
+		}
+		return this.getText(this.getCurrentParagraph()).substring(2);
 	}
 		
 	public int getCurrentPosInLine() {

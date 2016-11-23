@@ -20,6 +20,7 @@ import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 
+import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
@@ -47,7 +48,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
+public final class ModelcheckingController extends ScrollPane implements IModelCheckListener, IComponents {
 	private final class ModelcheckingStageController {
 		@FXML private Stage mcheckStage;
 		@FXML private CheckBox findDeadlocks;

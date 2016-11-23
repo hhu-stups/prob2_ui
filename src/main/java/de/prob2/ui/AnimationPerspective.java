@@ -91,7 +91,6 @@ public final class AnimationPerspective extends BorderPane {
 		nodeMap.put(modelcheck,modelcheckTP);
 		nodeMap.put(animations,animationsTP);
 		nodeMap.put(stats,statsTP);
-		leftAccordion.setExpandedPane(operationsTP);
 		onDrag();
 	}
 

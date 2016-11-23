@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.prefs.Preferences;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,17 +22,20 @@ import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
+import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
-import de.prob2.ui.dotty.DottyStage;
 import de.prob2.ui.formula.FormulaInputStage;
+import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.modelchecking.ModelcheckingController;
+import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
+import de.prob2.ui.stats.StatsView;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -36,23 +43,154 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.TitledPane;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
 @Singleton
 public final class MenuController extends MenuBar {
+	private final class DetachViewStageController {
+		@FXML
+		private Stage detached;
+		@FXML
+		private Button apply;
+		@FXML
+		private CheckBox detachOperations;
+		@FXML
+		private CheckBox detachHistory;
+		@FXML
+		private CheckBox detachModelcheck;
+		@FXML
+		private CheckBox detachStats;
+		@FXML
+		private CheckBox detachAnimations;
+		private final Preferences windowPrefs;
+		private final Set<Stage> wrapperStages;
+
+		private DetachViewStageController() {
+			windowPrefs = Preferences.userNodeForPackage(MenuController.DetachViewStageController.class);
+			wrapperStages = new HashSet<>();
+		}
+
+		@FXML
+		public void initialize() {
+			detached.getIcons().add(new Image("prob_128.gif"));
+		}
+
+		@FXML
+		private void apply() {
+			Parent root = loadPreset("main.fxml");
+			assert root != null;
+			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(0);
+			Accordion accordion = (Accordion) pane.getItems().get(0);
+			removeTP(accordion, pane);
+			this.detached.close();
+		}
+
+		private void removeTP(Accordion accordion, SplitPane pane) {
+			for (Iterator<Stage> it = wrapperStages.iterator(); it.hasNext();) {
+				final Stage stage = it.next();
+				stage.setScene(null);
+				stage.hide();
+				it.remove();
+			}
+
+			for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
+				final TitledPane tp = it.next();
+				if (removable(tp)) {
+					it.remove();
+					transferToNewWindow((Parent) tp.getContent(), tp.getText());
+				}
+			}
+
+			if (accordion.getPanes().isEmpty()) {
+				pane.getItems().remove(accordion);
+				pane.setDividerPositions(0);
+				pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(true));
+			}
+		}
+
+		private boolean removable(TitledPane tp) {
+			return removableOperations(tp) || removableHistory(tp) || removableModelcheck(tp) || removableStats(tp)
+					|| removableAnimations(tp);
+		}
+
+		private boolean removableOperations(TitledPane tp) {
+			return tp.getContent() instanceof OperationsView && detachOperations.isSelected();
+		}
+
+		private boolean removableHistory(TitledPane tp) {
+			return tp.getContent() instanceof HistoryView && detachHistory.isSelected();
+		}
+
+		private boolean removableModelcheck(TitledPane tp) {
+			return tp.getContent() instanceof ModelcheckingController && detachModelcheck.isSelected();
+		}
+
+		private boolean removableStats(TitledPane tp) {
+			return tp.getContent() instanceof StatsView && detachStats.isSelected();
+		}
+
+		private boolean removableAnimations(TitledPane tp) {
+			return tp.getContent() instanceof AnimationsView && detachAnimations.isSelected();
+		}
+
+		private void transferToNewWindow(Parent node, String title) {
+			Stage stage = new Stage();
+			wrapperStages.add(stage);
+			stage.setTitle(title);
+			stage.getIcons().add(new Image("prob_128.gif"));
+			stage.setOnCloseRequest(e -> {
+				windowPrefs.putDouble(node.getClass() + "X", stage.getX());
+				windowPrefs.putDouble(node.getClass() + "Y", stage.getY());
+				windowPrefs.putDouble(node.getClass() + "Width", stage.getWidth());
+				windowPrefs.putDouble(node.getClass() + "Height", stage.getHeight());
+				if (node instanceof OperationsView) {
+					detachOperations.setSelected(false);
+				} else if (node instanceof HistoryView) {
+					detachHistory.setSelected(false);
+				} else if (node instanceof ModelcheckingController) {
+					detachModelcheck.setSelected(false);
+				} else if (node instanceof StatsView) {
+					detachStats.setSelected(false);
+				} else if (node instanceof AnimationsView) {
+					detachAnimations.setSelected(false);
+				}
+				dvController.apply();
+			});
+			stage.setWidth(windowPrefs.getDouble(node.getClass() + "Width", 200));
+			stage.setHeight(windowPrefs.getDouble(node.getClass() + "Height", 100));
+			stage.setX(windowPrefs.getDouble(node.getClass() + "X",
+					Screen.getPrimary().getVisualBounds().getWidth() - stage.getWidth() / 2));
+			stage.setY(windowPrefs.getDouble(node.getClass() + "Y",
+					Screen.getPrimary().getVisualBounds().getHeight() - stage.getHeight() / 2));
+
+			Scene scene = new Scene(node);
+			scene.getStylesheets().add("prob.css");
+			stage.setScene(scene);
+			currentStage.register(stage);
+			stage.show();
+		}
+	}
+
 	private static final URL FXML_ROOT;
 
 	static {
@@ -70,7 +208,7 @@ public final class MenuController extends MenuBar {
 	private final CurrentStage currentStage;
 	private final CurrentTrace currentTrace;
 	private final RecentFiles recentFiles;
-
+	private final DetachViewStageController dvController;
 	private Window window;
 
 	@FXML
@@ -142,6 +280,16 @@ public final class MenuController extends MenuBar {
 			// Make this the global menu bar
 			tk.setGlobalMenuBar(this);
 		}
+
+		final FXMLLoader stageLoader = injector.getInstance(FXMLLoader.class);
+		stageLoader.setLocation(getClass().getResource("detachedPerspectivesChoice.fxml"));
+		this.dvController = new DetachViewStageController();
+		stageLoader.setController(this.dvController);
+		try {
+			stageLoader.load();
+		} catch (IOException e) {
+			logger.error("loading fxml failed", e);
+		}
 	}
 
 	@FXML
@@ -154,12 +302,7 @@ public final class MenuController extends MenuBar {
 
 		final ListChangeListener<String> recentFilesListener = change -> {
 			final ObservableList<MenuItem> recentItems = this.recentFilesMenu.getItems();
-			final List<MenuItem> newItems = new ArrayList<>();
-			for (String s : this.recentFiles) {
-				final MenuItem item = new MenuItem(new File(s).getName());
-				item.setOnAction(event -> this.open(s));
-				newItems.add(item);
-			}
+			final List<MenuItem> newItems = getRecentFileItems();
 
 			// If there are no recent files, show a placeholder and disable
 			// clearing
@@ -199,18 +342,23 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	private void handleLoadDetached() {
-		loadPreset("detachedHistory.fxml");
+	private void handleLoadSeparated() {
+		loadPreset("separatedHistory.fxml");
 	}
 
 	@FXML
-	private void handleLoadDetached2() {
-		loadPreset("detachedHistoryAndStatistics.fxml");
+	private void handleLoadSeparated2() {
+		loadPreset("separatedHistoryAndStatistics.fxml");
 	}
 
 	@FXML
 	private void handleLoadStacked() {
 		loadPreset("stackedLists.fxml");
+	}
+
+	@FXML
+	private void handleLoadDetached() {
+		this.dvController.detached.show();
 	}
 
 	@FXML
@@ -334,11 +482,6 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	private void handleDotty(ActionEvent event) {
-		injector.getInstance(DottyStage.class).showAndWait();
-	}
-
-	@FXML
 	public void handleGroovyConsole(ActionEvent event) {
 		final Stage groovyConsoleStage = injector.getInstance(GroovyConsoleStage.class);
 		groovyConsoleStage.show();
@@ -352,7 +495,7 @@ public final class MenuController extends MenuBar {
 		bConsoleStage.toFront();
 	}
 
-	private void loadPreset(String location) {
+	private Parent loadPreset(String location) {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		try {
 			loader.setLocation(new URL(FXML_ROOT, location));
@@ -361,7 +504,7 @@ public final class MenuController extends MenuBar {
 			Alert alert = new Alert(Alert.AlertType.ERROR, "Malformed location:\n" + e);
 			alert.getDialogPane().getStylesheets().add("prob.css");
 			alert.showAndWait();
-			return;
+			return null;
 		}
 		Parent root;
 		try {
@@ -371,7 +514,7 @@ public final class MenuController extends MenuBar {
 			Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
 			alert.getDialogPane().getStylesheets().add("prob.css");
 			alert.showAndWait();
-			return;
+			return null;
 		}
 		window.getScene().setRoot(root);
 
@@ -380,6 +523,7 @@ public final class MenuController extends MenuBar {
 			tk.setGlobalMenuBar(this);
 			tk.setApplicationMenu(this.getMenus().get(0));
 		}
+		return root;
 	}
 
 	@FXML
@@ -423,7 +567,7 @@ public final class MenuController extends MenuBar {
 			newProjectStage.showAndWait();
 			newProjectStage.toFront();
 		}
-		
+
 	}
 
 	@FXML
@@ -461,5 +605,15 @@ public final class MenuController extends MenuBar {
 		} else {
 			currentProject.open(selectedProject);
 		}
+	}
+
+	private List<MenuItem> getRecentFileItems() {
+		final List<MenuItem> newItems = new ArrayList<>();
+		for (String s : this.recentFiles) {
+			final MenuItem item = new MenuItem(new File(s).getName());
+			item.setOnAction(event -> this.open(s));
+			newItems.add(item);
+		}
+		return newItems;
 	}
 }

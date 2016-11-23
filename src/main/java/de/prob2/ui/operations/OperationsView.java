@@ -29,6 +29,7 @@ import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
+import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
@@ -50,7 +51,7 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class OperationsView extends AnchorPane {
+public final class OperationsView extends AnchorPane implements IComponents {
 	private enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
@@ -168,8 +169,9 @@ public final class OperationsView extends AnchorPane {
 
 		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue != null && newValue.isEnabled()) {
+				// Disable the operations list until the trace change is finished, the update method reenables it later
+				opsListView.setDisable(true);
 				currentTrace.set(currentTrace.get().add(newValue.id));
-				logger.debug("Selected item: " + newValue);
 			}
 		});
 
@@ -216,12 +218,15 @@ public final class OperationsView extends AnchorPane {
 
 	private void update(final Trace trace) {
 		if (trace == null) {
+			this.opsListView.setDisable(true);
 			currentModel = null;
 			opNames = new ArrayList<>();
 			Platform.runLater(opsListView.getItems()::clear);
 			return;
 		}
-
+		
+		this.opsListView.setDisable(false);
+		
 		if (trace.getModel() != currentModel) {
 			updateModel(trace);
 		}

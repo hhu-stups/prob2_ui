@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import javafx.scene.control.Button?>
+<Stage fx:id="detached" title="%menu.perspectives.detach" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+    <scene>
+        <Scene fill="TRANSPARENT">
+            <AnchorPane stylesheets="@/prob.css" styleClass="dialog">
+                <VBox layoutX="11.0" layoutY="69.0" spacing="15.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="50.0" AnchorPane.topAnchor="0.0" styleClass="dark">
+                    <CheckBox fx:id="detachOperations" text="%menu.perspectives.detachStage.operations"/>
+                    <CheckBox fx:id="detachHistory" text="%menu.perspectives.detachStage.history"/>
+                    <CheckBox fx:id="detachModelcheck" text="%menu.perspectives.detachStage.modelcheck"/>
+                    <CheckBox fx:id="detachStats" text="%menu.perspectives.detachStage.stats"/>
+                    <CheckBox fx:id="detachAnimations" text="%menu.perspectives.detachStage.animations"/>
+                </VBox>
+                <Button fx:id="apply" onAction="#apply" text="%menu.perspectives.detachStage.apply" AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="200.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"/>
+            </AnchorPane>
+        </Scene>
+    </scene>
+</Stage>

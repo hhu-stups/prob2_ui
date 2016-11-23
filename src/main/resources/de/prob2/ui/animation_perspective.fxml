@@ -7,32 +7,29 @@
 <?import de.prob2.ui.states.StatesView?>
 <?import de.prob2.ui.stats.StatsView?>
 <?import javafx.scene.control.Accordion?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.BorderPane?>
 <fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml">
 	<left>
-		<AnchorPane minWidth="280.0">
-			<Accordion fx:id="leftAccordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-				<panes>
-					<TitledPane text="Operations" fx:id="operationsTP">
-						<OperationsView fx:id="operations"/>
-					</TitledPane>
-					<TitledPane text="History" fx:id="historyTP">
-						<HistoryView fx:id="history"/>
-					</TitledPane>
-					<TitledPane text="Model Check" fx:id="modelcheckTP">
-						<ModelcheckingController fx:id="modelcheck"/>
-					</TitledPane>
-					<TitledPane text="Statistics" fx:id="statsTP">
-						<StatsView fx:id="stats"/>
-					</TitledPane>
-					<TitledPane text="Animations" fx:id="animationsTP">
-						<AnimationsView fx:id="animations"/>
-					</TitledPane>
-				</panes>
-			</Accordion>
-		</AnchorPane>
+		<Accordion minWidth="280" fx:id="leftAccordion">
+			<panes>
+				<TitledPane text="%tptitles.operations" fx:id="operationsTP">
+					<OperationsView fx:id="operations"/>
+				</TitledPane>
+				<TitledPane text="%tptitles.history" fx:id="historyTP">
+					<HistoryView fx:id="history"/>
+				</TitledPane>
+				<TitledPane text="%tptitles.modelcheck" fx:id="modelcheckTP">
+					<ModelcheckingController fx:id="modelcheck"/>
+				</TitledPane>
+				<TitledPane text="%tptitles.stats" fx:id="statsTP">
+					<StatsView fx:id="stats"/>
+				</TitledPane>
+				<TitledPane text="%tptitles.animations" fx:id="animationsTP">
+					<AnimationsView fx:id="animations"/>
+				</TitledPane>
+			</panes>
+		</Accordion>
 	</left>
 	<top>
 		<Accordion fx:id="topAccordion"/>

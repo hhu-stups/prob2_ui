@@ -48,5 +48,6 @@ dependencies {
 	compile 'de.hhu.stups:de.prob2.kernel:2.0.4-SNAPSHOT'
 	compile 'de.jensd:fontawesomefx:8.9'
 	compile 'org.codehaus.groovy:groovy-all:2.4.7'
-	compile 'org.fxmisc.richtext:richtextfx:0.6.10'
+	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '1.0.0-SNAPSHOT'
+	compile 'org.fxmisc.wellbehaved:wellbehavedfx:0.3'
 }

@@ -22,6 +22,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.internal.IComponents;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -37,7 +38,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
-public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
+public final class AnimationsView extends AnchorPane implements IAnimationChangeListener, IComponents {
 	private static final Logger logger = LoggerFactory.getLogger(AnimationsView.class);
 
 	@FXML
