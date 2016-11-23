@@ -295,7 +295,7 @@
  ************************************************************************************/
 
 .console .error{
-    -fx-fill:red;
+	-fx-fill:red;
 }
 
 .console .current{
@@ -528,20 +528,20 @@
 #past {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: normal;
-	-fx-font-size: 12.0px;
+	-fx-font-size: 12px;
 }
 
 #present {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: bold;
-	-fx-font-size: 12.0px;
+	-fx-font-size: 12px;
 }
 
 #future {
 	-fx-font-family: ARIAL;
 	-fx-fill: -prob-grey-75;
 	-fx-font-style: italic;
-	-fx-font-size: 12.0px;
+	-fx-font-size: 12px;
 }
 
 /* ================ MODELCHECKING VIEW =============== */

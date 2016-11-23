@@ -63,7 +63,7 @@
 									</padding>
 									<Button fx:id="undoButton" text="%preferences.tabs.proBPreferences.undo" disable="true" HBox.hgrow="NEVER" onAction="#handleUndoChanges" />
 									<Button fx:id="resetButton" text="%preferences.tabs.proBPreferences.reset" disable="true" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults" />
-									<Label fx:id="applyWarning" text="%preferences.tabs.proBPreferences.notAppliedWarning" visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" style="-fx-text-fill: -prob-orange; -fx-font-weight: bold" alignment="CENTER" />
+									<Label fx:id="applyWarning" text="%preferences.tabs.proBPreferences.notAppliedWarning" visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" style="-fx-text-fill: -prob-orange; -fx-font-weight: bold;" alignment="CENTER" />
 									<Button fx:id="applyButton" text="%preferences.tabs.proBPreferences.apply" disable="true" HBox.hgrow="NEVER" onAction="#handleApply" />
 								</HBox>
 							</bottom>

@@ -130,9 +130,8 @@ public class GroovyCodeCompletionHandler {
 	
 	public void refresh(String filter) {
 		suggestions.clear();
-		for(int i = 0; i < currentSuggestions.size(); i++) {
-			GroovyAbstractItem suggestion = currentSuggestions.get(i);
-			if(suggestion.getNameAndParams().toLowerCase().startsWith(filter.toLowerCase())) {
+		for (GroovyAbstractItem suggestion : currentSuggestions) {
+			if (suggestion.getNameAndParams().toLowerCase().startsWith(filter.toLowerCase())) {
 				suggestions.add(suggestion);
 			}
 		}

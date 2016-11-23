@@ -42,6 +42,7 @@ public class BInterpreter implements IAnimationChangeListener, Executable {
 		animations.registerAnimationChangeListener(this);
 	}
 
+	@Override
 	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
 		String line = instruction.getInstruction();
 		String res = "";

@@ -18,7 +18,7 @@
 		AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
 		<AnchorPane prefHeight="35.0" prefWidth="246.0">
-			<Button fx:id="searchButton" StyleClass="button-dark"
+			<Button fx:id="searchButton" styleClass="button-dark"
 				alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
 				maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
 				mnemonicParsing="false" onAction="#handleSearchButton"
@@ -43,7 +43,7 @@
 				AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="10.0"
 				AnchorPane.topAnchor="2.0">
 				<graphic>
-					<FontAwesomeIconView StyleClass="icon-dark"
+					<FontAwesomeIconView styleClass="icon-dark"
 						glyphName="CHEVRON_LEFT" size="15"/>
 				</graphic>
 				<tooltip>
@@ -57,7 +57,7 @@
 				AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="50.0"
 				AnchorPane.topAnchor="2.0">
 				<graphic>
-					<FontAwesomeIconView StyleClass="icon-dark"
+					<FontAwesomeIconView styleClass="icon-dark"
 						glyphName="CHEVRON_RIGHT" size="15"/>
 				</graphic>
 				<tooltip>
@@ -71,7 +71,7 @@
 				AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="90.0"
 				AnchorPane.topAnchor="2.0">
 				<graphic>
-					<FontAwesomeIconView StyleClass="icon-dark"
+					<FontAwesomeIconView styleClass="icon-dark"
 						glyphName="SORT" size="15"/>
 				</graphic>
 				<tooltip>
@@ -85,7 +85,7 @@
 				stylesheets="@/prob.css" AnchorPane.bottomAnchor="2.0"
 				AnchorPane.rightAnchor="55.0" AnchorPane.topAnchor="2.0">
 				<graphic>
-					<FontAwesomeIconView StyleClass="icon-dark"
+					<FontAwesomeIconView styleClass="icon-dark"
 						glyphName="EYE" size="15"/>
 				</graphic>
 			</ToggleButton>
@@ -113,7 +113,7 @@
 					</CustomMenuItem>
 				</items>
 				<graphic>
-					<FontAwesomeIconView StyleClass="icon-dark"
+					<FontAwesomeIconView styleClass="icon-dark"
 						glyphName="RANDOM" size="15"/>
 				</graphic>
 				<tooltip>

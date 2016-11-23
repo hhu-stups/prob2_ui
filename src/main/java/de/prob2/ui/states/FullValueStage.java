@@ -179,6 +179,9 @@ public class FullValueStage extends Stage {
 					case '-':
 						styleClasses.add("delete");
 						break;
+					
+					default:
+						// No style class
 				}
 				
 				this.diffTextarea.setStyle(
