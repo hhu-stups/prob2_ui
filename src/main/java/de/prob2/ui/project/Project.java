@@ -8,11 +8,11 @@ public class Project {
 	private String name;
 	private String description;
 	private File location;
-	private List<File> machines = new ArrayList<File>();
+	private List<Machine> machines = new ArrayList<Machine>();
 
 	private final boolean singleFile;
 
-	public Project(String name, String description, List<File> machines, File location) {
+	public Project(String name, String description, List<Machine> machines, File location) {
 		this.name = name;
 		this.description = description;
 		this.machines = machines;
@@ -22,8 +22,9 @@ public class Project {
 
 	public Project(File file) {
 		this.name = file.getName();
-		this.machines = new ArrayList<File>();
-		machines.add(file);
+		this.machines = new ArrayList<Machine>();
+		String name[] = file.getName().split("\\.");
+		machines.add(new Machine(name[0], "", file));
 		this.singleFile = true;
 	}
 
@@ -31,7 +32,7 @@ public class Project {
 		return name;
 	}
 
-	public List<File> getMachines() {
+	public List<Machine> getMachines() {
 		return machines;
 	}
 
@@ -40,7 +41,8 @@ public class Project {
 	}
 
 	public void addMachine(File machine) {
-		this.machines.add(machine);
+		String name[] = machine.getName().split("\\.");
+		machines.add(new Machine(name[0], "", machine));
 	}
 
 	public File getLocation() {

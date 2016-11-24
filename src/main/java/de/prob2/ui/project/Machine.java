@@ -16,4 +16,17 @@ public class Machine {
 	public String getName() {
 		return name;
 	}
+	
+	public File getLocation() {
+		return location;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+	
+	@Override
+	public String toString() {
+		return this.name;
+	}
 }

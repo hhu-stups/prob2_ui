@@ -403,7 +403,7 @@ public final class MenuController extends MenuBar {
 			Optional<ButtonType> result = alert.showAndWait();
 
 			if (result.get() == buttonTypeAdd) {
-				currentProject.addFile(new File(path));
+				currentProject.addMachine(new File(path));
 			} else if (result.get() == buttonTypeClose) {
 				openPath(path);
 			}

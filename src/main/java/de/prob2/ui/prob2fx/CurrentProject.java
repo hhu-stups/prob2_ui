@@ -19,6 +19,7 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.Project;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -37,7 +38,7 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 	private static final Logger logger = LoggerFactory.getLogger(CurrentProject.class);
 	private final BooleanProperty exists;
 	private final BooleanProperty isSingleFile;
-	private final ListProperty<File> files;
+	private final ListProperty<Machine> machines;
 	private final Gson gson;
 
 	@Inject
@@ -46,7 +47,7 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
 		this.exists.bind(Bindings.isNotNull(this));
 		this.isSingleFile = new SimpleBooleanProperty(this, "isSingleFile", false);
-		this.files = new SimpleListProperty<>(this, "files", FXCollections.observableArrayList());
+		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
 	}
 
 	@Override
@@ -64,20 +65,21 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		this.set(project);
 	}
 
-	public void addFile(File file) {
+	public void addMachine(File machine) {
 		if (!this.isSingleFile()) {
-			ObservableList<File> list = this.getFiles();
-			list.add(file);
-			this.set(new Project(this.getName(), this.get().getDescription(), list, this.get().getLocation()));
+			ObservableList<Machine> machinesList = this.getFiles();
+			String name[] = machine.getName().split("\\.");
+			machinesList.add(new Machine(name[0], "", machine));
+			this.set(new Project(this.getName(), this.get().getDescription(), machinesList, this.get().getLocation()));
 		}
 	}
 
-	public ReadOnlyListProperty<File> filesProperty() {
-		return this.files;
+	public ReadOnlyListProperty<Machine> filesProperty() {
+		return this.machines;
 	}
 
-	public ObservableList<File> getFiles() {
-		return (ObservableList<File>) this.get().getMachines();
+	public ObservableList<Machine> getFiles() {
+		return (ObservableList<Machine>) this.get().getMachines();
 	}
 
 	public ReadOnlyBooleanProperty isSingleFileProperty() {

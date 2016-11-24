@@ -1,6 +1,5 @@
 package de.prob2.ui.animations;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,8 +20,9 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.internal.IComponents;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.Machine;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -107,10 +107,10 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		});
 	}
 
-	private void addAll(List<File> files) {
-		for (int i = 0; i < files.size(); i++) {
+	private void addAll(List<Machine> machines) {
+		for (Machine machine: machines) {
 			final StateSpace newSpace;
-			String path = files.get(i).getPath();
+			String path = machine.getLocation().getPath();
 			try {
 				newSpace = this.api.b_load(path);
 			} catch (IOException | BException e) {

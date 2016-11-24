@@ -58,8 +58,8 @@
 						<buttons>
 							<Button text="%common.cancel" cancelButton="true"
 								onAction="#cancel" />
-							<Button fx:id="addMachineButton" text="%addMachine.stage.addMachineButton"
-								onAction="#addMachine" />
+							<!--<Button fx:id="addMachineButton" text="%addMachine.stage.addMachineButton" 
+								onAction="#addMachine" /> -->
 							<Button fx:id="finishButton" text="%common.finish"
 								onAction="#finish" />
 						</buttons>

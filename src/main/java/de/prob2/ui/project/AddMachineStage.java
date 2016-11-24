@@ -21,8 +21,6 @@ public class AddMachineStage extends Stage {
 	@FXML
 	private Button finishButton;
 	@FXML
-	private Button addMachineButton;
-	@FXML
 	private TextField nameField;
 	@FXML
 	private TextField descriptionField;
@@ -62,11 +60,6 @@ public class AddMachineStage extends Stage {
 	void finish(ActionEvent event) {
 		machine = new Machine(nameField.getText(), descriptionField.getText(), machineFile);
 		this.close();
-	}
-
-	@FXML
-	void addMachine(ActionEvent event) {
-		//TODO
 	}
 
 	public Machine showStage() {

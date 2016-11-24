@@ -40,7 +40,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private TextField locationField;
 	@FXML
-	private ListView<File> filesListView;
+	private ListView<Machine> filesListView;
 	@FXML
 	private Label errorExplanationLabel;
 
@@ -91,8 +91,10 @@ public class NewProjectStage extends Stage {
 
 		AddMachineStage addMachineStage = new AddMachineStage(loader, currentStage, selectedFile);
 		Machine machine = addMachineStage.showStage();
-		
-		filesListView.getItems().add(selectedFile);
+
+		if (machine != null) {
+			filesListView.getItems().add(machine);
+		}
 	}
 
 	@FXML
@@ -114,7 +116,7 @@ public class NewProjectStage extends Stage {
 			errorExplanationLabel.setText("The location does not exist or is invalid");
 			return;
 		}
-		List<File> machines = filesListView.getItems();
+		List<Machine> machines = filesListView.getItems();
 		machines = copyMachines(machines, dir);
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines, dir);
 		currentProject.changeCurrentProject(newProject);
@@ -122,17 +124,19 @@ public class NewProjectStage extends Stage {
 		this.close();
 	}
 
-	private List<File> copyMachines(List<File> machines, File dir) {
+	private List<Machine> copyMachines(List<Machine> machines, File dir) {
 		String path = dir.getAbsolutePath();
-		for (File machine : machines) {
+		for (Machine machine : machines) {
 			int i = machines.indexOf(machine);
-			Path source = machine.toPath();
-			File newMachine = new File(path + File.separator + machine.getName());
+			Path source = machine.getLocation().toPath();
+			File newLocation = new File(path + File.separator + machine.getLocation().getName());
+			Machine newMachine = new Machine(machine.getName(), machine.getDescription(), newLocation);
 			try {
-				Files.copy(source, newMachine.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(source, newLocation.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				machines.set(i, newMachine);
 			} catch (IOException e) {
-				logger.error("Could not copy file to the selected directory: " + machine.getAbsolutePath(), e);
+				logger.error(
+						"Could not copy file to the selected directory: " + machine.getLocation().getAbsolutePath(), e);
 			}
 		}
 		return machines;
