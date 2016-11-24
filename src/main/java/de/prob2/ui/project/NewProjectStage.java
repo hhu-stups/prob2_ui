@@ -40,7 +40,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private TextField locationField;
 	@FXML
-	private ListView<Machine> filesListView;
+	private ListView<Machine> machinesListView;
 	@FXML
 	private Label errorExplanationLabel;
 
@@ -74,7 +74,13 @@ public class NewProjectStage extends Stage {
 	}
 
 	@FXML
-	void addFile(ActionEvent event) {
+	void addPreference(ActionEvent event) {
+		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(loader, currentStage);
+		addProBPreferencesStage.showAndWait();
+	}
+	
+	@FXML
+	void addMachine(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Add Machine");
 		fileChooser.getExtensionFilters()
@@ -93,7 +99,7 @@ public class NewProjectStage extends Stage {
 		Machine machine = addMachineStage.showStage();
 
 		if (machine != null) {
-			filesListView.getItems().add(machine);
+			machinesListView.getItems().add(machine);
 		}
 	}
 
@@ -116,7 +122,7 @@ public class NewProjectStage extends Stage {
 			errorExplanationLabel.setText("The location does not exist or is invalid");
 			return;
 		}
-		List<Machine> machines = filesListView.getItems();
+		List<Machine> machines = machinesListView.getItems();
 		machines = copyMachines(machines, dir);
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines, dir);
 		currentProject.changeCurrentProject(newProject);

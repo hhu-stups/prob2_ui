@@ -66,11 +66,11 @@
 								</VBox.margin>
 							</HBox>
 							<AnchorPane>
-								<Label text="%newProject.stage.files"
+								<Label text="%newProject.stage.preferences"
 									AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="5" />
-								<Button fx:id="addFileButton" prefHeight="26.0"
-									prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-									AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addFile">
+								<Button prefHeight="26.0" prefWidth="26.0"
+									contentDisplay="GRAPHIC_ONLY" AnchorPane.rightAnchor="0"
+									AnchorPane.topAnchor="10" onAction="#addPreference">
 									<graphic>
 										<FontAwesomeIconView fill="#555560"
 											glyphName="PLUS_CIRCLE" size="26" />
@@ -78,6 +78,20 @@
 								</Button>
 							</AnchorPane>
 							<ListView fx:id="filesListView" styleClass="no-border"
+								prefHeight="200" />
+							<AnchorPane>
+								<Label text="%newProject.stage.machines"
+									AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="5" />
+								<Button prefHeight="26.0" prefWidth="26.0"
+									contentDisplay="GRAPHIC_ONLY" AnchorPane.rightAnchor="0"
+									AnchorPane.topAnchor="10" onAction="#addMachine">
+									<graphic>
+										<FontAwesomeIconView fill="#555560"
+											glyphName="PLUS_CIRCLE" size="26" />
+									</graphic>
+								</Button>
+							</AnchorPane>
+							<ListView fx:id="machinesListView" styleClass="no-border"
 								prefHeight="200" />
 						</VBox>
 					</AnchorPane>
