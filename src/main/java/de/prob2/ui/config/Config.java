@@ -26,6 +26,7 @@ import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.menu.RecentFiles;
+import de.prob2.ui.menu.UIState;
 import de.prob2.ui.states.ClassBlacklist;
 
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ public final class Config {
 		private List<String> groovyConsoleEntries;
 		private List<String> bConsoleEntries;
 		private List<String> statesViewHiddenClasses;
+		private String guiState;
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
@@ -53,12 +55,14 @@ public final class Config {
 	private final ConfigData defaultData;
 	private final GroovyConsole groovyConsole;
 	private final BConsole bConsole;
+	private final UIState uiState;
 	
 	@Inject
-	private Config(final ClassBlacklist classBlacklist, final RecentFiles recentFiles, final GroovyConsole groovyConsole, final BConsole bConsole) {
+	private Config(final ClassBlacklist classBlacklist, final RecentFiles recentFiles, final UIState uiState, final GroovyConsole groovyConsole, final BConsole bConsole) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.classBlacklist = classBlacklist;
 		this.recentFiles = recentFiles;
+		this.uiState = uiState;
 		this.groovyConsole = groovyConsole;
 		this.bConsole = bConsole;
 		
@@ -95,6 +99,9 @@ public final class Config {
 		if (configData.statesViewHiddenClasses == null) {
 			configData.statesViewHiddenClasses = new ArrayList<>(this.defaultData.statesViewHiddenClasses);
 		}
+		if(configData.guiState == null || "".equals(configData.guiState)) {
+			configData.guiState = "main.fxml";
+		}
 	}
 	
 	public void load() {
@@ -113,6 +120,7 @@ public final class Config {
 		
 		this.recentFiles.setMaximum(configData.maxRecentFiles);
 		this.recentFiles.setAll(configData.recentFiles);
+		this.uiState.setGuiState(configData.guiState);;
 		
 		for (String name : configData.statesViewHiddenClasses) {
 			Class<? extends AbstractElement> clazz;
@@ -142,6 +150,7 @@ public final class Config {
 	
 	public void save() {
 		final ConfigData configData = new ConfigData();
+		configData.guiState = this.uiState.getGuiState();
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
 		configData.groovyConsoleEntries = new ArrayList<>(groovyConsole.getInstructionEntries());

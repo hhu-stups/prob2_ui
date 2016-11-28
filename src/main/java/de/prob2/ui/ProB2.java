@@ -6,6 +6,8 @@ import com.google.inject.Injector;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
+import de.prob2.ui.menu.MenuController;
+import de.prob2.ui.menu.UIState;
 import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -28,7 +30,8 @@ public class ProB2 extends Application {
 		ProB2Module module = new ProB2Module();
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 		config = injector.getInstance(Config.class);
-
+		UIState uiState = injector.getInstance(UIState.class);
+		MenuController menu = injector.getInstance(MenuController.class);
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(getClass().getResource("main.fxml"));
 
@@ -44,8 +47,9 @@ public class ProB2 extends Application {
 		stage.setOnCloseRequest(e -> Platform.exit());
 		
 		injector.getInstance(CurrentStage.class).register(stage);
-
+		menu.loadPreset(uiState.getGuiState());
 		stage.show();
+		
 	}
 	
 	@Override

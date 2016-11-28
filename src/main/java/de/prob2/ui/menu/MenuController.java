@@ -202,6 +202,7 @@ public final class MenuController extends MenuBar {
 	private final CurrentStage currentStage;
 	private final CurrentTrace currentTrace;
 	private final RecentFiles recentFiles;
+	private final UIState uiState;
 	private final DetachViewStageController dvController;
 	
 	private Window window;
@@ -222,7 +223,8 @@ public final class MenuController extends MenuBar {
 		final AnimationSelector animationSelector,
 		final CurrentStage currentStage,
 		final CurrentTrace currentTrace,
-		final RecentFiles recentFiles
+		final RecentFiles recentFiles,
+		final UIState uiState
 	) {
 		this.injector = injector;
 		this.api = api;
@@ -230,7 +232,7 @@ public final class MenuController extends MenuBar {
 		this.currentStage = currentStage;
 		this.currentTrace = currentTrace;
 		this.recentFiles = recentFiles;
-
+		this.uiState = uiState;
 		loader.setLocation(getClass().getResource("menu.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
@@ -450,8 +452,9 @@ public final class MenuController extends MenuBar {
 		bConsoleStage.toFront();
 	}
 
-	private Parent loadPreset(String location) {
+	public Parent loadPreset(String location) {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
+		this.uiState.setGuiState(location);
 		try {
 			loader.setLocation(new URL(FXML_ROOT, location));
 		} catch (MalformedURLException e) {
@@ -472,7 +475,7 @@ public final class MenuController extends MenuBar {
 			return null;
 		}
 		window.getScene().setRoot(root);
-
+		
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			final MenuToolkit tk = MenuToolkit.toolkit();
 			tk.setGlobalMenuBar(this);
