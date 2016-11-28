@@ -77,7 +77,7 @@
 									</graphic>
 								</Button>
 							</AnchorPane>
-							<ListView fx:id="filesListView" styleClass="no-border"
+							<ListView fx:id="preferencesListView" styleClass="no-border"
 								prefHeight="200" />
 							<AnchorPane>
 								<Label text="%newProject.stage.machines"

@@ -9,15 +9,17 @@ public class Project {
 	private String description;
 	private File location;
 	private List<Machine> machines = new ArrayList<Machine>();
+	private List<Preference> preferences = new ArrayList<Preference>();
 
 	private final boolean singleFile;
 
-	public Project(String name, String description, List<Machine> machines, File location) {
+	public Project(String name, String description, List<Machine> machines, List<Preference> preferences, File location) {
 		this.name = name;
 		this.description = description;
 		this.machines = machines;
 		this.singleFile = false;
 		this.location = location;
+		this.preferences = preferences;
 	}
 
 	public Project(File file) {
@@ -51,5 +53,9 @@ public class Project {
 
 	public String getDescription() {
 		return description;
+	}
+	
+	public List<Preference> getPreferences() {
+		return preferences;
 	}
 }

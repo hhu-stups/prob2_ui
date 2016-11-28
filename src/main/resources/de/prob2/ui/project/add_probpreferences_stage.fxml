@@ -12,6 +12,7 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Button?>
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.scene.control.ListView?>
 
 <fx:root type="Stage" title="%addProBPreference.stage.stageTitle"
 	resizable="false" xmlns:fx="http://javafx.com/fxml/1">
@@ -40,6 +41,27 @@
 									</font>
 								</TextField>
 							</HBox>
+							<HBox spacing="20" alignment="center_left">
+								<Label text="%addProBPreference.stage.preference" />
+								<TextField fx:id="preferenceNameField" HBox.hgrow="always">
+									<font>
+										<Font size="12" />
+									</font>
+								</TextField>
+								<Label text="%addProBPreference.stage.value" />
+								<TextField fx:id="preferenceValueField" HBox.hgrow="always">
+									<font>
+										<Font size="12" />
+									</font>
+								</TextField>
+								<Button fx:id="addPreferenceButton" styleClass="button-dark2" text="%addProBPreference.stage.add"
+									onAction="#addPreference" />
+								<VBox.margin>
+									<Insets top="10" bottom="10"/>
+								</VBox.margin>
+							</HBox>
+							<ListView fx:id="preferencesListView" styleClass="no-border"
+								prefHeight="200" />
 						</VBox>
 					</AnchorPane>
 					<ButtonBar styleClass="dialog">

@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,8 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private ListView<Machine> machinesListView;
 	@FXML
+	private ListView<Preference> preferencesListView;
+	@FXML
 	private Label errorExplanationLabel;
 
 	private CurrentProject currentProject;
@@ -76,7 +79,8 @@ public class NewProjectStage extends Stage {
 	@FXML
 	void addPreference(ActionEvent event) {
 		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(loader, currentStage);
-		addProBPreferencesStage.showAndWait();
+		Preference preference = addProBPreferencesStage.showStage();
+		preferencesListView.getItems().add(preference);
 	}
 	
 	@FXML
@@ -124,7 +128,8 @@ public class NewProjectStage extends Stage {
 		}
 		List<Machine> machines = machinesListView.getItems();
 		machines = copyMachines(machines, dir);
-		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines, dir);
+		List<Preference> preferences = preferencesListView.getItems();
+		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines, preferences, dir);
 		currentProject.changeCurrentProject(newProject);
 		currentProject.save();
 		this.close();
