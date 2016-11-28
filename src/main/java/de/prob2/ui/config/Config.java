@@ -152,8 +152,8 @@ public final class Config {
 		
 		this.uiState.setGuiState(configData.guiState);
 		
-		for(String views: configData.detachedViews) {
-			this.uiState.addView(views);
+		for(String view: configData.detachedViews) {
+			this.uiState.addView(view);
 		}
 	}
 	

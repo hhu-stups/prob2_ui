@@ -67,6 +67,11 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
+	
+	private enum ApplyDetachedEnum {
+		JSON, USER
+	}
+	
 	private final class DetachViewStageController {
 		@FXML private Stage detached;
 		@FXML private Button apply;
@@ -92,16 +97,20 @@ public final class MenuController extends MenuBar {
 
 		@FXML
 		private void apply() {
+			apply(ApplyDetachedEnum.USER);
+		}
+		
+		private void apply(ApplyDetachedEnum detachedBy) {
 			Parent root = loadPreset("main.fxml");
 			assert root != null;
 			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(0);
 			Accordion accordion = (Accordion) pane.getItems().get(0);
-			removeTP(accordion, pane);
+			removeTP(accordion, pane, detachedBy);
 			uiState.setGuiState("detached");
 			this.detached.close();
 		}
-
-		private void removeTP(Accordion accordion, SplitPane pane) {
+		
+		private void removeTP(Accordion accordion, SplitPane pane, ApplyDetachedEnum detachedBy) {
 			for (Iterator<Stage> it = wrapperStages.iterator(); it.hasNext();) {
 				final Stage stage = it.next();
 				stage.setScene(null);
@@ -111,7 +120,7 @@ public final class MenuController extends MenuBar {
 			
 			for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 				final TitledPane tp = it.next();
-				if (removable(tp)) {
+				if (removable(tp, detachedBy)) {
 					it.remove();
 					transferToNewWindow((Parent)tp.getContent(), tp.getText());
 				}
@@ -124,32 +133,52 @@ public final class MenuController extends MenuBar {
 			}
 		}
 		
-		private boolean removable(TitledPane tp) {
-			return	removableOperations(tp) ||
-					removableHistory(tp) ||
-					removableModelcheck(tp) ||
-					removableStats(tp) ||
-					removableAnimations(tp);
+		private boolean removable(TitledPane tp, ApplyDetachedEnum detachedBy) {
+			return	removableOperations(tp, detachedBy) ||
+					removableHistory(tp, detachedBy) ||
+					removableModelcheck(tp, detachedBy) ||
+					removableStats(tp, detachedBy) ||
+					removableAnimations(tp, detachedBy);
 		}
 
-		private boolean removableOperations(TitledPane tp) {
-			return tp.getContent() instanceof OperationsView && (detachOperations.isSelected() || uiState.getDetachedViews().contains(tp.getText()));
+		private boolean removableOperations(TitledPane tp, ApplyDetachedEnum detachedBy) {
+			boolean condition = detachOperations.isSelected();
+			if(detachedBy == ApplyDetachedEnum.JSON) {
+				condition = uiState.getDetachedViews().contains(tp.getText());
+			}
+			return tp.getContent() instanceof OperationsView && condition;
 		}
 
-		private boolean removableHistory(TitledPane tp) {
-			return tp.getContent() instanceof HistoryView && (detachHistory.isSelected() || uiState.getDetachedViews().contains(tp.getText()));
+		private boolean removableHistory(TitledPane tp, ApplyDetachedEnum detachedBy) {
+			boolean condition = detachHistory.isSelected();
+			if(detachedBy == ApplyDetachedEnum.JSON) {
+				condition = uiState.getDetachedViews().contains(tp.getText());
+			}
+			return tp.getContent() instanceof HistoryView && condition;
 		}
 
-		private boolean removableModelcheck(TitledPane tp) {
-			return tp.getContent() instanceof ModelcheckingController && (detachModelcheck.isSelected() || uiState.getDetachedViews().contains(tp.getText()));
+		private boolean removableModelcheck(TitledPane tp, ApplyDetachedEnum detachedBy) {
+			boolean condition = detachModelcheck.isSelected();
+			if(detachedBy == ApplyDetachedEnum.JSON) {
+				condition = uiState.getDetachedViews().contains(tp.getText());
+			}
+			return tp.getContent() instanceof ModelcheckingController && condition;
 		}
 
-		private boolean removableStats(TitledPane tp) {
-			return tp.getContent() instanceof StatsView && (detachStats.isSelected() || uiState.getDetachedViews().contains(tp.getText()));
+		private boolean removableStats(TitledPane tp, ApplyDetachedEnum detachedBy) {
+			boolean condition = detachStats.isSelected();
+			if(detachedBy == ApplyDetachedEnum.JSON) {
+				condition = uiState.getDetachedViews().contains(tp.getText());
+			}
+			return tp.getContent() instanceof StatsView && condition;
 		}
 
-		private boolean removableAnimations(TitledPane tp) {
-			return tp.getContent() instanceof AnimationsView && (detachAnimations.isSelected() || uiState.getDetachedViews().contains(tp.getText()));
+		private boolean removableAnimations(TitledPane tp, ApplyDetachedEnum detachedBy) {
+			boolean condition = detachAnimations.isSelected();
+			if(detachedBy == ApplyDetachedEnum.JSON) {
+				condition = uiState.getDetachedViews().contains(tp.getText());
+			}
+			return tp.getContent() instanceof AnimationsView && condition;
 		}
 
 		private void transferToNewWindow(Parent node, String title) {
@@ -331,30 +360,35 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private void handleLoadDefault() {
 		loadPreset("main.fxml");
+		uiState.getDetachedViews().clear();
 	}
 
 	@FXML
 	private void handleLoadSeparated() {
 		loadPreset("separatedHistory.fxml");
+		uiState.getDetachedViews().clear();
 	}
 
 	@FXML
 	private void handleLoadSeparated2() {
 		loadPreset("separatedHistoryAndStatistics.fxml");
+		uiState.getDetachedViews().clear();
 	}
 
 	@FXML
 	private void handleLoadStacked() {
 		loadPreset("stackedLists.fxml");
+		uiState.getDetachedViews().clear();
 	}
 
 	@FXML
 	private void handleLoadDetached() {
 		this.dvController.detached.show();
+		uiState.getDetachedViews().clear();
 	}
 	
 	public void applyDetached() {
-		dvController.apply();
+		this.dvController.apply(ApplyDetachedEnum.JSON);
 	}
 
 	@FXML
@@ -465,7 +499,6 @@ public final class MenuController extends MenuBar {
 	public Parent loadPreset(String location) {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		this.uiState.setGuiState(location);
-		this.uiState.getDetachedViews().clear();
 		try {
 			loader.setLocation(new URL(FXML_ROOT, location));
 		} catch (MalformedURLException e) {
