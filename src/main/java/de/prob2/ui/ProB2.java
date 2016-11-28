@@ -47,7 +47,11 @@ public class ProB2 extends Application {
 		stage.setOnCloseRequest(e -> Platform.exit());
 		
 		injector.getInstance(CurrentStage.class).register(stage);
-		menu.loadPreset(uiState.getGuiState());
+		if("detached".equals(uiState.getGuiState())) {
+			menu.applyDetached();
+		} else {
+			menu.loadPreset(uiState.getGuiState());
+		}
 		stage.show();
 		
 	}

@@ -42,6 +42,7 @@ public final class Config {
 		private List<String> bConsoleEntries;
 		private List<String> statesViewHiddenClasses;
 		private String guiState;
+		private List<String> detachedViews;
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
@@ -100,7 +101,10 @@ public final class Config {
 			configData.statesViewHiddenClasses = new ArrayList<>(this.defaultData.statesViewHiddenClasses);
 		}
 		if(configData.guiState == null || "".equals(configData.guiState)) {
-			configData.guiState = "main.fxml";
+			configData.guiState = this.defaultData.guiState;
+		}
+		if(configData.detachedViews == null) {
+			configData.detachedViews = new ArrayList<>(this.defaultData.detachedViews);
 		}
 	}
 	
@@ -120,7 +124,6 @@ public final class Config {
 		
 		this.recentFiles.setMaximum(configData.maxRecentFiles);
 		this.recentFiles.setAll(configData.recentFiles);
-		this.uiState.setGuiState(configData.guiState);;
 		
 		for (String name : configData.statesViewHiddenClasses) {
 			Class<? extends AbstractElement> clazz;
@@ -146,11 +149,18 @@ public final class Config {
 			bConsole.getInstructions().add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 			bConsole.increaseCounter();
 		}
+		
+		this.uiState.setGuiState(configData.guiState);
+		
+		for(String views: configData.detachedViews) {
+			this.uiState.addView(views);
+		}
 	}
 	
 	public void save() {
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
+		configData.detachedViews = new ArrayList<>(this.uiState.getDetachedViews());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
 		configData.groovyConsoleEntries = new ArrayList<>(groovyConsole.getInstructionEntries());

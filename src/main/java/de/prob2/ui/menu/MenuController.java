@@ -77,10 +77,12 @@ public final class MenuController extends MenuBar {
 		@FXML private CheckBox detachAnimations;
 		private final Preferences windowPrefs;
 		private final Set<Stage> wrapperStages;
+		private final UIState uiState;
 		
-		private DetachViewStageController() {
+		private DetachViewStageController(UIState uiState) {
 			windowPrefs = Preferences.userNodeForPackage(MenuController.DetachViewStageController.class);
 			wrapperStages = new HashSet<>();
+			this.uiState = uiState;
 		}
 
 		@FXML
@@ -95,6 +97,7 @@ public final class MenuController extends MenuBar {
 			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(0);
 			Accordion accordion = (Accordion) pane.getItems().get(0);
 			removeTP(accordion, pane);
+			uiState.setGuiState("detached");
 			this.detached.close();
 		}
 
@@ -130,29 +133,30 @@ public final class MenuController extends MenuBar {
 		}
 
 		private boolean removableOperations(TitledPane tp) {
-			return tp.getContent() instanceof OperationsView && detachOperations.isSelected();
+			return tp.getContent() instanceof OperationsView && (detachOperations.isSelected() || uiState.getDetachedViews().contains(tp.getText()));
 		}
 
 		private boolean removableHistory(TitledPane tp) {
-			return tp.getContent() instanceof HistoryView && detachHistory.isSelected();
+			return tp.getContent() instanceof HistoryView && (detachHistory.isSelected() || uiState.getDetachedViews().contains(tp.getText()));
 		}
 
 		private boolean removableModelcheck(TitledPane tp) {
-			return tp.getContent() instanceof ModelcheckingController && detachModelcheck.isSelected();
+			return tp.getContent() instanceof ModelcheckingController && (detachModelcheck.isSelected() || uiState.getDetachedViews().contains(tp.getText()));
 		}
 
 		private boolean removableStats(TitledPane tp) {
-			return tp.getContent() instanceof StatsView && detachStats.isSelected();
+			return tp.getContent() instanceof StatsView && (detachStats.isSelected() || uiState.getDetachedViews().contains(tp.getText()));
 		}
 
 		private boolean removableAnimations(TitledPane tp) {
-			return tp.getContent() instanceof AnimationsView && detachAnimations.isSelected();
+			return tp.getContent() instanceof AnimationsView && (detachAnimations.isSelected() || uiState.getDetachedViews().contains(tp.getText()));
 		}
 
 		private void transferToNewWindow(Parent node, String title) {
 			Stage stage = new Stage();
 			wrapperStages.add(stage);
 			stage.setTitle(title);
+			uiState.addView(title);
 			stage.getIcons().add(new Image("prob_128.gif"));
 			stage.setOnCloseRequest(e -> {
 				windowPrefs.putDouble(node.getClass()+"X",stage.getX());
@@ -170,6 +174,7 @@ public final class MenuController extends MenuBar {
 				} else if (node instanceof AnimationsView) {
 					detachAnimations.setSelected(false);
 				}
+				uiState.getDetachedViews().remove(stage.getTitle());
 				dvController.apply();
 			});
 			stage.setWidth(windowPrefs.getDouble(node.getClass()+"Width",200));
@@ -275,7 +280,7 @@ public final class MenuController extends MenuBar {
 
 		final FXMLLoader stageLoader = injector.getInstance(FXMLLoader.class);
 		stageLoader.setLocation(getClass().getResource("detachedPerspectivesChoice.fxml"));
-		this.dvController = new DetachViewStageController();
+		this.dvController = new DetachViewStageController(this.uiState);
 		stageLoader.setController(this.dvController);
 		try {
 			stageLoader.load();
@@ -347,6 +352,10 @@ public final class MenuController extends MenuBar {
 	private void handleLoadDetached() {
 		this.dvController.detached.show();
 	}
+	
+	public void applyDetached() {
+		dvController.apply();
+	}
 
 	@FXML
 	private void handleLoadPerspective() {
@@ -358,6 +367,7 @@ public final class MenuController extends MenuBar {
 			try {
 				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 				loader.setLocation(selectedFile.toURI().toURL());
+				uiState.setGuiState(selectedFile.toString());
 				Parent root = loader.load();
 				window.getScene().setRoot(root);
 			} catch (IOException e) {
@@ -455,6 +465,7 @@ public final class MenuController extends MenuBar {
 	public Parent loadPreset(String location) {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		this.uiState.setGuiState(location);
+		this.uiState.getDetachedViews().clear();
 		try {
 			loader.setLocation(new URL(FXML_ROOT, location));
 		} catch (MalformedURLException e) {
