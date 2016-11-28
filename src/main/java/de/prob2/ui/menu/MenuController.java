@@ -145,6 +145,9 @@ public final class MenuController extends MenuBar {
 			boolean condition = detachOperations.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
 				condition = uiState.getDetachedViews().contains(tp.getText());
+				if(condition) {
+					detachOperations.setSelected(true);
+				}
 			}
 			return tp.getContent() instanceof OperationsView && condition;
 		}
@@ -153,6 +156,9 @@ public final class MenuController extends MenuBar {
 			boolean condition = detachHistory.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
 				condition = uiState.getDetachedViews().contains(tp.getText());
+				if(condition) {
+					detachHistory.setSelected(true);
+				}
 			}
 			return tp.getContent() instanceof HistoryView && condition;
 		}
@@ -161,6 +167,9 @@ public final class MenuController extends MenuBar {
 			boolean condition = detachModelcheck.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
 				condition = uiState.getDetachedViews().contains(tp.getText());
+				if(condition) {
+					detachModelcheck.setSelected(true);
+				}
 			}
 			return tp.getContent() instanceof ModelcheckingController && condition;
 		}
@@ -169,6 +178,9 @@ public final class MenuController extends MenuBar {
 			boolean condition = detachStats.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
 				condition = uiState.getDetachedViews().contains(tp.getText());
+				if(condition) {
+					detachStats.setSelected(true);
+				}
 			}
 			return tp.getContent() instanceof StatsView && condition;
 		}
@@ -177,6 +189,9 @@ public final class MenuController extends MenuBar {
 			boolean condition = detachAnimations.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
 				condition = uiState.getDetachedViews().contains(tp.getText());
+				if(condition) {
+					detachAnimations.setSelected(true);
+				}
 			}
 			return tp.getContent() instanceof AnimationsView && condition;
 		}
@@ -185,7 +200,9 @@ public final class MenuController extends MenuBar {
 			Stage stage = new Stage();
 			wrapperStages.add(stage);
 			stage.setTitle(title);
-			uiState.addView(title);
+			if(!uiState.getDetachedViews().contains(title)) {
+				uiState.addView(title);
+			}
 			stage.getIcons().add(new Image("prob_128.gif"));
 			stage.setOnCloseRequest(e -> {
 				windowPrefs.putDouble(node.getClass()+"X",stage.getX());
@@ -383,8 +400,8 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleLoadDetached() {
-		this.dvController.detached.show();
 		uiState.getDetachedViews().clear();
+		this.dvController.detached.show();
 	}
 	
 	public void applyDetached() {
@@ -476,7 +493,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	private void handleFormulaInput(ActionEvent event) {
+	private void handleFormulaInput() {
 		final Stage formulaInputStage = injector.getInstance(FormulaInputStage.class);
 		formulaInputStage.show();
 		formulaInputStage.toFront();
