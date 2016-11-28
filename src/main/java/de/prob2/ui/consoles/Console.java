@@ -232,7 +232,7 @@ public abstract class Console extends StyleClassedTextArea {
 	private void setTextAfterArrowKey() {
 		int posOfEnter = this.getText().lastIndexOf('\n');
 		String currentLine = instructions.get(posInList).getInstruction();
-		this.deleteText(posOfEnter + 4, this.getText().length());
+		this.deleteText(posOfEnter + 3, this.getText().length());
 		this.appendText(currentLine);
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
