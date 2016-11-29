@@ -36,6 +36,7 @@ import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -257,6 +258,7 @@ public final class MenuController extends MenuBar {
 	private final UIState uiState;
 	private final DetachViewStageController dvController;
 	
+	private final Object openLock;
 	private Window window;
 
 	@FXML private Menu recentFilesMenu;
@@ -285,6 +287,9 @@ public final class MenuController extends MenuBar {
 		this.currentTrace = currentTrace;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
+		
+		this.openLock = new Object();
+
 		loader.setLocation(getClass().getResource("menu.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
@@ -431,51 +436,52 @@ public final class MenuController extends MenuBar {
 		}
 	}
 	
+	private void openAsync(String path) {
+		new Thread(() -> this.open(path), "File Opener Thread").start();
+	}
+	
 	private void open(String path) {
-		final StateSpace newSpace;
-		try {
-			newSpace = this.api.b_load(path);
-		} catch (IOException | BException e) {
-			logger.error("loading file failed", e);
-			Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-			alert.getDialogPane().getStylesheets().add("prob.css");
-			alert.showAndWait();
-			return;
+		// NOTE: This method may be called from outside the JavaFX main thread, for example from openAsync.
+		// This means that all JavaFX calls must be wrapped in Platform.runLater.
+		
+		// Prevent multiple threads from loading a file at the same time
+		synchronized (this.openLock) {
+			final StateSpace newSpace;
+			try {
+				newSpace = this.api.b_load(path);
+			} catch (IOException | BException e) {
+				logger.error("loading file failed", e);
+				Platform.runLater(() -> {
+					Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+					alert.getDialogPane().getStylesheets().add("prob.css");
+					alert.show();
+				});
+				return;
+			}
+			
+			this.animationSelector.addNewAnimation(new Trace(newSpace));
+			Platform.runLater(() -> {
+				injector.getInstance(ModelcheckingController.class).resetView();
+				
+				// Remove the path first to avoid listing the same file twice.
+				this.recentFiles.remove(path);
+				this.recentFiles.add(0, path);
+			});
 		}
-		
-		this.animationSelector.addNewAnimation(new Trace(newSpace));
-		injector.getInstance(ModelcheckingController.class).resetView();
-		
-		// Remove the path first to avoid listing the same file twice.
-		this.recentFiles.remove(path);
-		this.recentFiles.add(0, path);
 	}
 
 	@FXML
 	private void handleOpen(ActionEvent event) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
-		fileChooser.getExtensionFilters().addAll(
-			// new FileChooser.ExtensionFilter("All Files", "*.*"),
-			new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")// ,
-			// new FileChooser.ExtensionFilter("EventB Files", "*.eventb", "*.bum", "*.buc"),
-			// new FileChooser.ExtensionFilter("CSP Files", "*.cspm")
-		);
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
 
 		final File selectedFile = fileChooser.showOpenDialog(this.window);
 		if (selectedFile == null) {
 			return;
 		}
 
-		switch (fileChooser.getSelectedExtensionFilter().getDescription()) {
-			case "Classical B Files":
-				this.open(selectedFile.getAbsolutePath());
-				break;
-	
-			default:
-				throw new IllegalStateException(
-						"Unknown file type selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
-		}
+		this.openAsync(selectedFile.getAbsolutePath());
 	}
 
 	@FXML
@@ -566,7 +572,7 @@ public final class MenuController extends MenuBar {
 		final List<MenuItem> newItems = new ArrayList<>();
 		for (String s : this.recentFiles) {
 			final MenuItem item = new MenuItem(new File(s).getName());
-			item.setOnAction(event -> this.open(s));
+			item.setOnAction(event -> this.openAsync(s));
 			newItems.add(item);
 		}
 		return newItems;
