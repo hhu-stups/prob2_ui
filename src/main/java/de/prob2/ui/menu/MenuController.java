@@ -94,6 +94,7 @@ public final class MenuController extends MenuBar {
 		@FXML
 		public void initialize() {
 			detached.getIcons().add(new Image("prob_128.gif"));
+			currentStage.register(detached);
 		}
 
 		@FXML
@@ -201,29 +202,32 @@ public final class MenuController extends MenuBar {
 		private void transferToNewWindow(Parent node, String title) {
 			Stage stage = new Stage();
 			wrapperStages.add(stage);
+			currentStage.register(stage);
 			stage.setTitle(title);
 			if(!uiState.getDetachedViews().contains(title)) {
 				uiState.addView(title);
 			}
 			stage.getIcons().add(new Image("prob_128.gif"));
-			stage.setOnCloseRequest(e -> {
-				windowPrefs.putDouble(node.getClass()+"X",stage.getX());
-				windowPrefs.putDouble(node.getClass()+"Y",stage.getY());
-				windowPrefs.putDouble(node.getClass()+"Width",stage.getWidth());
-				windowPrefs.putDouble(node.getClass()+"Height",stage.getHeight());
-				if (node instanceof OperationsView) {
-					detachOperations.setSelected(false);
-				} else if (node instanceof HistoryView) {
-					detachHistory.setSelected(false);
-				} else if (node instanceof ModelcheckingController) {
-					detachModelcheck.setSelected(false);
-				} else if (node instanceof StatsView) {
-					detachStats.setSelected(false);
-				} else if (node instanceof AnimationsView) {
-					detachAnimations.setSelected(false);
+			stage.showingProperty().addListener((observable, from, to) -> {
+				if (!to) {
+					windowPrefs.putDouble(node.getClass()+"X",stage.getX());
+					windowPrefs.putDouble(node.getClass()+"Y",stage.getY());
+					windowPrefs.putDouble(node.getClass()+"Width",stage.getWidth());
+					windowPrefs.putDouble(node.getClass()+"Height",stage.getHeight());
+					if (node instanceof OperationsView) {
+						detachOperations.setSelected(false);
+					} else if (node instanceof HistoryView) {
+						detachHistory.setSelected(false);
+					} else if (node instanceof ModelcheckingController) {
+						detachModelcheck.setSelected(false);
+					} else if (node instanceof StatsView) {
+						detachStats.setSelected(false);
+					} else if (node instanceof AnimationsView) {
+						detachAnimations.setSelected(false);
+					}
+					uiState.getDetachedViews().remove(stage.getTitle());
+					dvController.apply();
 				}
-				uiState.getDetachedViews().remove(stage.getTitle());
-				dvController.apply();
 			});
 			stage.setWidth(windowPrefs.getDouble(node.getClass()+"Width",200));
 			stage.setHeight(windowPrefs.getDouble(node.getClass()+"Height",100));
@@ -233,7 +237,6 @@ public final class MenuController extends MenuBar {
 			Scene scene = new Scene(node);
 			scene.getStylesheets().add("prob.css");
 			stage.setScene(scene);
-			currentStage.register(stage);
 			stage.show();
 		}
 	}
