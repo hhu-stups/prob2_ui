@@ -15,7 +15,7 @@ public class UIState {
 	
 	@Inject
 	public UIState() {
-		this.guiState = "main";
+		this.guiState = "main.fxml";
 		this.detachedViews = new ArrayList<>();
 	}
 	

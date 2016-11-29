@@ -6,6 +6,6 @@
 	"statesViewHiddenClasses": [
 		"de.prob.model.representation.Action"
 	],
-	"guiState": "",
+	"guiState": "main.fxml",
 	"detachedViews": []
 }
