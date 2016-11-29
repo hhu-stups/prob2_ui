@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
-	
+	// FIXME user applying already selected detached views -> closing all detached
 	private enum ApplyDetachedEnum {
 		JSON, USER
 	}
@@ -127,7 +127,7 @@ public final class MenuController extends MenuBar {
 					transferToNewWindow((Parent)tp.getContent(), tp.getText());
 				}
 			}
-			
+			printStages();
 			if (accordion.getPanes().isEmpty()) {
 				pane.getItems().remove(accordion);
 				pane.setDividerPositions(0);
@@ -196,6 +196,13 @@ public final class MenuController extends MenuBar {
 				}
 			}
 			return tp.getContent() instanceof AnimationsView && condition;
+		}
+
+		private void printStages() {
+			for(String s : uiState.getStages()) {
+				System.out.println(s);
+			}
+			System.out.println();
 		}
 
 		private void transferToNewWindow(Parent node, String title) {
