@@ -491,7 +491,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	private void handlePreferences(ActionEvent event) {
+	public void handlePreferences() {
 		final Stage preferencesStage = injector.getInstance(PreferencesStage.class);
 		preferencesStage.show();
 		preferencesStage.toFront();
@@ -505,14 +505,14 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	public void handleGroovyConsole(ActionEvent event) {
+	public void handleGroovyConsole() {
 		final Stage groovyConsoleStage = injector.getInstance(GroovyConsoleStage.class);
 		groovyConsoleStage.show();
 		groovyConsoleStage.toFront();
 	}
 	
 	@FXML
-	public void handleBConsole(ActionEvent event) {
+	public void handleBConsole() {
 		final Stage bConsoleStage = injector.getInstance(BConsoleStage.class);
 		bConsoleStage.show();
 		bConsoleStage.toFront();
