@@ -83,12 +83,10 @@ public final class MenuController extends MenuBar {
 		@FXML private CheckBox detachAnimations;
 		private final Preferences windowPrefs;
 		private final Set<Stage> wrapperStages;
-		private final UIState uiState;
 		
-		private DetachViewStageController(UIState uiState) {
+		private DetachViewStageController() {
 			windowPrefs = Preferences.userNodeForPackage(MenuController.DetachViewStageController.class);
 			wrapperStages = new HashSet<>();
-			this.uiState = uiState;
 		}
 
 		@FXML
@@ -332,7 +330,7 @@ public final class MenuController extends MenuBar {
 
 		final FXMLLoader stageLoader = injector.getInstance(FXMLLoader.class);
 		stageLoader.setLocation(getClass().getResource("detachedPerspectivesChoice.fxml"));
-		this.dvController = new DetachViewStageController(this.uiState);
+		this.dvController = new DetachViewStageController();
 		stageLoader.setController(this.dvController);
 		try {
 			stageLoader.load();
