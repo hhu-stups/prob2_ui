@@ -20,7 +20,6 @@ import javafx.stage.Stage;
 public class ProB2 extends Application {
 	private Injector injector;
 	private Config config;
-	private UIPersistence uiPersistence;
 	
 	public static void main(String... args) {
 		launch(args);
@@ -32,7 +31,7 @@ public class ProB2 extends Application {
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 		config = injector.getInstance(Config.class);
 		UIState uiState = injector.getInstance(UIState.class);
-		uiPersistence = new UIPersistence(uiState, injector);
+		UIPersistence uiPersistence = new UIPersistence(uiState, injector);
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(getClass().getResource("main.fxml"));
 		loader.load();
