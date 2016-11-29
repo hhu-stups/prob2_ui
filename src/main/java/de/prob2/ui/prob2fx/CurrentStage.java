@@ -2,6 +2,8 @@ package de.prob2.ui.prob2fx;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import de.prob2.ui.internal.UIState;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -26,11 +28,13 @@ import javafx.stage.Stage;
 @Singleton
 public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 	private final ObjectProperty<Stage> stage;
+	private UIState uiState;
 
 	@Inject
-	private CurrentStage() {
+	private CurrentStage(UIState uiState) {
 		super();
 		this.stage = new SimpleObjectProperty<>(this, "stage", null);
+		this.uiState = uiState;
 	}
 
 	@Override
@@ -69,6 +73,13 @@ public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 	}
 
 	public void register(final Stage stage) {
+		stage.showingProperty().addListener((observable, from, to) -> {
+			if (to) {
+				uiState.addStage(stage.getTitle());
+			} else {
+				uiState.removeStage(stage.getTitle());
+			}
+		});
 		stage.focusedProperty().addListener((observable, from, to) -> {
 			if (to) {
 				this.stage.set(stage);

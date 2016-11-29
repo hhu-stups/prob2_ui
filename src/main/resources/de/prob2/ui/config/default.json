@@ -5,5 +5,7 @@
 	"bConsoleEntries": [],
 	"statesViewHiddenClasses": [
 		"de.prob.model.representation.Action"
-	]
+	],
+	"guiState": "main.fxml",
+	"stages": []
 }

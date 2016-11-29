@@ -158,7 +158,9 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@FXML
 	private void addModelCheck() {
-		this.stageController.mcheckStage.showAndWait();
+		if(!stageController.mcheckStage.isShowing()) {
+			this.stageController.mcheckStage.showAndWait();
+		}
 	}
 
 	void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {

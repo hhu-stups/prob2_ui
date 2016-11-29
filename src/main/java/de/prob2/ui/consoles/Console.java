@@ -50,6 +50,11 @@ public abstract class Console extends StyleClassedTextArea {
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.RIGHT), e-> this.handleRight()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DELETE), this::handleDeletion));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.BACK_SPACE), this::handleDeletion));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER, KeyCombination.SHIFT_DOWN), KeyEvent::consume));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ESCAPE, KeyCombination.SHIFT_DOWN), KeyEvent::consume));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER, KeyCombination.ALT_DOWN), KeyEvent::consume));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.BACK_SPACE, KeyCombination.ALT_DOWN), KeyEvent::consume));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DELETE, KeyCombination.ALT_DOWN), KeyEvent::consume));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e-> this.handleEnter()));
 	}
 		
@@ -145,7 +150,7 @@ public abstract class Console extends StyleClassedTextArea {
 		if(searchHandler.isActive()) {
 			int posOfEnter = this.getText().lastIndexOf('\n');
 			String searchResult = searchHandler.getCurrentSearchResult();
-			this.deleteText(posOfEnter + 3, this.getText().length());
+			this.deleteText(posOfEnter + 1, this.getText().length());
 			this.appendText(" >" + searchResult);
 			this.moveTo(this.getText().length());
 			charCounterInLine = searchResult.length();
@@ -178,6 +183,7 @@ public abstract class Console extends StyleClassedTextArea {
 			posInList = instructions.size() - 1;
 		}
 		searchHandler.handleEnter();
+		goToLastPos();
 	}
 		
 	private void handleDown() {
@@ -232,7 +238,7 @@ public abstract class Console extends StyleClassedTextArea {
 	private void setTextAfterArrowKey() {
 		int posOfEnter = this.getText().lastIndexOf('\n');
 		String currentLine = instructions.get(posInList).getInstruction();
-		this.deleteText(posOfEnter + 4, this.getText().length());
+		this.deleteText(posOfEnter + 3, this.getText().length());
 		this.appendText(currentLine);
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
@@ -273,10 +279,10 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public String getCurrentLine() {
-		if(this.getText(this.getCurrentParagraph()).length() < 2) {
+		if(this.getText(this.getParagraphs().size() - 1).length() < 2) {
 			return "";
 		}
-		return this.getText(this.getCurrentParagraph()).substring(2);
+		return this.getText(this.getParagraphs().size() - 1).substring(2);
 	}
 		
 	public int getCurrentPosInLine() {

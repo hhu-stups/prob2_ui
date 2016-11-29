@@ -7,6 +7,7 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.prob2.ui.prob2fx.CurrentStage;
 
@@ -22,6 +23,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public final class GroovyObjectStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyObjectStage.class);
 

@@ -27,6 +27,7 @@ import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
+import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.states.ClassBlacklist;
 
@@ -39,6 +40,8 @@ public final class Config {
 		private List<String> groovyConsoleEntries;
 		private List<String> bConsoleEntries;
 		private List<String> statesViewHiddenClasses;
+		private String guiState;
+		private List<String> stages;
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
@@ -52,12 +55,14 @@ public final class Config {
 	private final ConfigData defaultData;
 	private final GroovyConsole groovyConsole;
 	private final BConsole bConsole;
+	private final UIState uiState;
 	
 	@Inject
-	private Config(final ClassBlacklist classBlacklist, final RecentFiles recentFiles, final GroovyConsole groovyConsole, final BConsole bConsole) {
+	private Config(final ClassBlacklist classBlacklist, final RecentFiles recentFiles, final UIState uiState, final GroovyConsole groovyConsole, final BConsole bConsole) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.classBlacklist = classBlacklist;
 		this.recentFiles = recentFiles;
+		this.uiState = uiState;
 		this.groovyConsole = groovyConsole;
 		this.bConsole = bConsole;
 		
@@ -93,6 +98,12 @@ public final class Config {
 		
 		if (configData.statesViewHiddenClasses == null) {
 			configData.statesViewHiddenClasses = new ArrayList<>(this.defaultData.statesViewHiddenClasses);
+		}
+		if(configData.guiState == null || "".equals(configData.guiState)) {
+			configData.guiState = this.defaultData.guiState;
+		}
+		if(configData.stages == null) {
+			configData.stages = new ArrayList<>(this.defaultData.stages);
 		}
 	}
 	
@@ -137,10 +148,18 @@ public final class Config {
 			bConsole.getInstructions().add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 			bConsole.increaseCounter();
 		}
+		
+		this.uiState.setGuiState(configData.guiState);
+		
+		for(String stage: configData.stages) {
+			this.uiState.addStage(stage);
+		}
 	}
 	
 	public void save() {
 		final ConfigData configData = new ConfigData();
+		configData.guiState = this.uiState.getGuiState();
+		configData.stages = new ArrayList<>(this.uiState.getStages());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
 		configData.groovyConsoleEntries = new ArrayList<>(groovyConsole.getInstructionEntries());

@@ -6,7 +6,8 @@ import com.google.inject.Injector;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
-import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.internal.UIPersistence;
+import de.prob2.ui.internal.UIState;
 import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -29,12 +30,11 @@ public class ProB2 extends Application {
 		ProB2Module module = new ProB2Module();
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 		config = injector.getInstance(Config.class);
-
+		UIState uiState = injector.getInstance(UIState.class);
+		UIPersistence uiPersistence = new UIPersistence(uiState, injector);
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(getClass().getResource("main.fxml"));
-
 		loader.load();
-
 		Parent root = loader.getRoot();
 
 		Scene mainScene = new Scene(root, 1024, 768);
@@ -45,11 +45,9 @@ public class ProB2 extends Application {
 		stage.setOnCloseRequest(e -> Platform.exit());
 		
 		injector.getInstance(CurrentStage.class).register(stage);
-
-		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		currentProject.addListener((observable, from, to) -> stage.setTitle("ProB 2.0 [" + to.getName() + "]")); 
-		
+		uiPersistence.open();
 		stage.show();
+		
 	}
 	
 	@Override

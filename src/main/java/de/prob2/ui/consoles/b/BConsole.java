@@ -4,6 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.consoles.Console;
+import de.prob2.ui.consoles.ConsoleExecResult;
+import de.prob2.ui.consoles.ConsoleExecResultType;
 
 @Singleton
 public class BConsole extends Console {
@@ -24,9 +26,16 @@ public class BConsole extends Console {
 		if(currentLine.isEmpty()) {
 			this.appendText("\nnull");
 		} else {
-			this.appendText("\n" + interpreter.exec(instructions.get(posInList)));
+			ConsoleExecResult execResult = interpreter.exec(instructions.get(posInList));
+			this.appendText("\n" + execResult);
+			if(execResult.getResultType() == ConsoleExecResultType.ERROR) {
+				int begin = this.getText().length() - execResult.toString().length();
+				int end = this.getText().length();
+				this.setStyleClass(begin, end, "error");
+			}
 		}
 		this.appendText("\n >");
+		this.setStyleClass(this.getText().length() - 2, this.getText().length(), "current");
 		this.setEstimatedScrollY(Double.MAX_VALUE);
 	}
 	

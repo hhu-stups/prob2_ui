@@ -108,7 +108,7 @@ public class GroovyCodeCompletionHandler {
 		
 	private void fillMethodsAndProperties(Class <?> clazz, GroovyMethodOption option) {
 		for(Method m : clazz.getMethods()) {
-			if((option == GroovyMethodOption.ALL) || (option == GroovyMethodOption.NONSTATIC && !Modifier.isStatic(m.getModifiers())) || (option == GroovyMethodOption.STATIC && Modifier.isStatic(m.getModifiers()))) {
+			if((option == GroovyMethodOption.ALL) || (isNonstatic(option, m)) || (isStatic(option, m))) {
 				currentSuggestions.add(new GroovyClassPropertyItem(m));
 			}
 		}
@@ -117,7 +117,14 @@ public class GroovyCodeCompletionHandler {
 		}
 	}
 	
-	
+	private boolean isNonstatic(GroovyMethodOption option, Method m) {
+		return option == GroovyMethodOption.NONSTATIC && !Modifier.isStatic(m.getModifiers());
+	}
+
+	private boolean isStatic(GroovyMethodOption option, Method m) {
+		return option == GroovyMethodOption.STATIC && Modifier.isStatic(m.getModifiers());
+	}
+
 	private void showSuggestions(Class <?> clazz, GroovyMethodOption option) {
 		currentSuggestions.clear();
 		suggestions.clear();
