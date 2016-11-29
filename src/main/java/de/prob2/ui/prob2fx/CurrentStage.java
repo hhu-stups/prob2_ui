@@ -3,7 +3,7 @@ package de.prob2.ui.prob2fx;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.menu.UIState;
+import de.prob2.ui.internal.UIState;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;

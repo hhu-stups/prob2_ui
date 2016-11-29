@@ -6,8 +6,8 @@ import com.google.inject.Injector;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
-import de.prob2.ui.menu.MenuController;
-import de.prob2.ui.menu.UIState;
+import de.prob2.ui.internal.UIPersistence;
+import de.prob2.ui.internal.UIState;
 import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 public class ProB2 extends Application {
 	private Injector injector;
 	private Config config;
+	private UIPersistence uiPersistence;
 	
 	public static void main(String... args) {
 		launch(args);
@@ -31,12 +32,10 @@ public class ProB2 extends Application {
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 		config = injector.getInstance(Config.class);
 		UIState uiState = injector.getInstance(UIState.class);
-		MenuController menu = injector.getInstance(MenuController.class);
+		uiPersistence = new UIPersistence(uiState, injector);
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(getClass().getResource("main.fxml"));
-
 		loader.load();
-
 		Parent root = loader.getRoot();
 
 		Scene mainScene = new Scene(root, 1024, 768);
@@ -47,11 +46,7 @@ public class ProB2 extends Application {
 		stage.setOnCloseRequest(e -> Platform.exit());
 		
 		injector.getInstance(CurrentStage.class).register(stage);
-		if("detached".equals(uiState.getGuiState())) {
-			menu.applyDetached();
-		} else {
-			menu.loadPreset(uiState.getGuiState());
-		}
+		uiPersistence.open();
 		stage.show();
 		
 	}

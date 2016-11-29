@@ -1,4 +1,4 @@
-package de.prob2.ui.menu;
+package de.prob2.ui.internal;
 
 import java.util.HashSet;
 import java.util.Set;

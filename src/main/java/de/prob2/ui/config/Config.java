@@ -25,8 +25,8 @@ import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
+import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
-import de.prob2.ui.menu.UIState;
 import de.prob2.ui.states.ClassBlacklist;
 
 import org.slf4j.Logger;
