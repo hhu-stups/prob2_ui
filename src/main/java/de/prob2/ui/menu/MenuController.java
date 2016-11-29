@@ -97,6 +97,7 @@ public final class MenuController extends MenuBar {
 
 		@FXML
 		private void apply() {
+			uiState.getDetachedViews().clear();
 			apply(ApplyDetachedEnum.USER);
 		}
 		
@@ -400,7 +401,7 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleLoadDetached() {
-		uiState.getDetachedViews().clear();
+		
 		this.dvController.detached.show();
 	}
 	
