@@ -80,9 +80,11 @@ public class NewProjectStage extends Stage {
 	void addPreference(ActionEvent event) {
 		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(loader, currentStage);
 		Preference preference = addProBPreferencesStage.showStage();
-		preferencesListView.getItems().add(preference);
+		if (preference != null) {
+			preferencesListView.getItems().add(preference);
+		}
 	}
-	
+
 	@FXML
 	void addMachine(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
@@ -129,7 +131,8 @@ public class NewProjectStage extends Stage {
 		List<Machine> machines = machinesListView.getItems();
 		machines = copyMachines(machines, dir);
 		List<Preference> preferences = preferencesListView.getItems();
-		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines, preferences, dir);
+		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines,
+				preferences, dir);
 		currentProject.changeCurrentProject(newProject);
 		currentProject.save();
 		this.close();
