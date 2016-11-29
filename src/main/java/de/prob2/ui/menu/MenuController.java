@@ -99,7 +99,6 @@ public final class MenuController extends MenuBar {
 
 		@FXML
 		private void apply() {
-			uiState.getDetachedViews().clear();
 			apply(ApplyDetachedEnum.USER);
 		}
 		
@@ -119,6 +118,7 @@ public final class MenuController extends MenuBar {
 			for (final Stage stage : wrapperStagesCopy) {
 				stage.setScene(null);
 				stage.hide();
+				uiState.getStages().remove(stage.getTitle());
 			}
 			
 			for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
@@ -147,7 +147,7 @@ public final class MenuController extends MenuBar {
 		private boolean removableOperations(TitledPane tp, ApplyDetachedEnum detachedBy) {
 			boolean condition = detachOperations.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getDetachedViews().contains(tp.getText());
+				condition = uiState.getStages().contains(tp.getText());
 				if(condition) {
 					detachOperations.setSelected(true);
 				}
@@ -158,7 +158,7 @@ public final class MenuController extends MenuBar {
 		private boolean removableHistory(TitledPane tp, ApplyDetachedEnum detachedBy) {
 			boolean condition = detachHistory.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getDetachedViews().contains(tp.getText());
+				condition = uiState.getStages().contains(tp.getText());
 				if(condition) {
 					detachHistory.setSelected(true);
 				}
@@ -169,7 +169,7 @@ public final class MenuController extends MenuBar {
 		private boolean removableModelcheck(TitledPane tp, ApplyDetachedEnum detachedBy) {
 			boolean condition = detachModelcheck.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getDetachedViews().contains(tp.getText());
+				condition = uiState.getStages().contains(tp.getText());
 				if(condition) {
 					detachModelcheck.setSelected(true);
 				}
@@ -180,7 +180,7 @@ public final class MenuController extends MenuBar {
 		private boolean removableStats(TitledPane tp, ApplyDetachedEnum detachedBy) {
 			boolean condition = detachStats.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getDetachedViews().contains(tp.getText());
+				condition = uiState.getStages().contains(tp.getText());
 				if(condition) {
 					detachStats.setSelected(true);
 				}
@@ -191,7 +191,7 @@ public final class MenuController extends MenuBar {
 		private boolean removableAnimations(TitledPane tp, ApplyDetachedEnum detachedBy) {
 			boolean condition = detachAnimations.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getDetachedViews().contains(tp.getText());
+				condition = uiState.getStages().contains(tp.getText());
 				if(condition) {
 					detachAnimations.setSelected(true);
 				}
@@ -202,11 +202,8 @@ public final class MenuController extends MenuBar {
 		private void transferToNewWindow(Parent node, String title) {
 			Stage stage = new Stage();
 			wrapperStages.add(stage);
-			currentStage.register(stage);
 			stage.setTitle(title);
-			if(!uiState.getDetachedViews().contains(title)) {
-				uiState.addView(title);
-			}
+			currentStage.register(stage);
 			stage.getIcons().add(new Image("prob_128.gif"));
 			stage.showingProperty().addListener((observable, from, to) -> {
 				if (!to) {
@@ -225,7 +222,7 @@ public final class MenuController extends MenuBar {
 					} else if (node instanceof AnimationsView) {
 						detachAnimations.setSelected(false);
 					}
-					uiState.getDetachedViews().remove(stage.getTitle());
+					uiState.getStages().remove(stage.getTitle());
 					dvController.apply();
 				}
 			});
@@ -386,30 +383,29 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private void handleLoadDefault() {
 		loadPreset("main.fxml");
-		uiState.getDetachedViews().clear();
+		uiState.getStages().clear();
 	}
 
 	@FXML
 	private void handleLoadSeparated() {
 		loadPreset("separatedHistory.fxml");
-		uiState.getDetachedViews().clear();
+		uiState.getStages().clear();
 	}
 
 	@FXML
 	private void handleLoadSeparated2() {
 		loadPreset("separatedHistoryAndStatistics.fxml");
-		uiState.getDetachedViews().clear();
+		uiState.getStages().clear();
 	}
 
 	@FXML
 	private void handleLoadStacked() {
 		loadPreset("stackedLists.fxml");
-		uiState.getDetachedViews().clear();
+		uiState.getStages().clear();
 	}
 
 	@FXML
 	private void handleLoadDetached() {
-		
 		this.dvController.detached.show();
 	}
 	

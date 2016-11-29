@@ -1,7 +1,7 @@
 package de.prob2.ui.menu;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -11,12 +11,12 @@ public class UIState {
 	
 	private String guiState;
 	
-	private List<String> detachedViews;
+	private Set<String> stages;
 	
 	@Inject
 	public UIState() {
 		this.guiState = "main.fxml";
-		this.detachedViews = new ArrayList<>();
+		this.stages = new HashSet<>();
 	}
 	
 	public void setGuiState(String guiState) {
@@ -27,16 +27,16 @@ public class UIState {
 		return guiState;
 	}
 	
-	public void addView(String view) {
-		detachedViews.add(view);
+	public void addStage(String stage) {
+		stages.add(stage);
 	}
 	
-	public void removeView(String view) {
-		detachedViews.remove(view);
+	public void removeStage(String stage) {
+		stages.remove(stage);
 	}
 	
-	public List<String> getDetachedViews() {
-		return detachedViews;
+	public Set<String> getStages() {
+		return stages;
 	}
 
 }

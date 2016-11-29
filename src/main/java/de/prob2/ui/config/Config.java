@@ -42,7 +42,7 @@ public final class Config {
 		private List<String> bConsoleEntries;
 		private List<String> statesViewHiddenClasses;
 		private String guiState;
-		private List<String> detachedViews;
+		private List<String> stages;
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
@@ -103,8 +103,8 @@ public final class Config {
 		if(configData.guiState == null || "".equals(configData.guiState)) {
 			configData.guiState = this.defaultData.guiState;
 		}
-		if(configData.detachedViews == null) {
-			configData.detachedViews = new ArrayList<>(this.defaultData.detachedViews);
+		if(configData.stages == null) {
+			configData.stages = new ArrayList<>(this.defaultData.stages);
 		}
 	}
 	
@@ -152,15 +152,15 @@ public final class Config {
 		
 		this.uiState.setGuiState(configData.guiState);
 		
-		for(String view: configData.detachedViews) {
-			this.uiState.addView(view);
+		for(String stage: configData.stages) {
+			this.uiState.addStage(stage);
 		}
 	}
 	
 	public void save() {
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
-		configData.detachedViews = new ArrayList<>(this.uiState.getDetachedViews());
+		configData.stages = new ArrayList<>(this.uiState.getStages());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
 		configData.groovyConsoleEntries = new ArrayList<>(groovyConsole.getInstructionEntries());
