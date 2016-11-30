@@ -96,7 +96,7 @@ public class NewProjectStage extends Stage {
 		// new FileChooser.ExtensionFilter("CSP Files", "*.cspm")
 		);
 
-		final File selectedFile = fileChooser.showOpenDialog(this.getOwner());
+		final File selectedFile = fileChooser.showOpenDialog(this);
 		if (selectedFile == null) {
 			return;
 		}

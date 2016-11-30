@@ -8,6 +8,7 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.UIPersistence;
 import de.prob2.ui.internal.UIState;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -45,6 +46,8 @@ public class ProB2 extends Application {
 		stage.setOnCloseRequest(e -> Platform.exit());
 		
 		injector.getInstance(CurrentStage.class).register(stage);
+		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
+		currentProject.addListener((observable, from, to) -> stage.setTitle("ProB 2.0 [" + to.getName() + "]"));
 		uiPersistence.open();
 		stage.show();
 		
