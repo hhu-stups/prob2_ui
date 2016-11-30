@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -41,11 +43,15 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private TextField locationField;
 	@FXML
-	private ListView<Machine> machinesListView;
-	@FXML
 	private ListView<Preference> preferencesListView;
 	@FXML
 	private Label errorExplanationLabel;
+	@FXML
+	private TableView<Machine> machinesTableView;
+	@FXML
+	private TableColumn<Machine, String> nameColumn;
+	@FXML
+	private TableColumn<Machine, String> descriptionColumn;
 
 	private CurrentProject currentProject;
 	private CurrentStage currentStage;
@@ -74,6 +80,9 @@ public class NewProjectStage extends Stage {
 	public void initialize() {
 		finishButton.disableProperty().bind(projectNameField.lengthProperty().lessThanOrEqualTo(0));
 		locationField.setText(System.getProperty("user.home"));
+		
+		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 	}
 
 	@FXML
@@ -89,12 +98,7 @@ public class NewProjectStage extends Stage {
 	void addMachine(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Add Machine");
-		fileChooser.getExtensionFilters()
-				.addAll(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp")// ,
-		// new FileChooser.ExtensionFilter("EventB Files", "*.eventb", "*.bum",
-		// "*.buc"),
-		// new FileChooser.ExtensionFilter("CSP Files", "*.cspm")
-		);
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
 
 		final File selectedFile = fileChooser.showOpenDialog(this);
 		if (selectedFile == null) {
@@ -105,7 +109,7 @@ public class NewProjectStage extends Stage {
 		Machine machine = addMachineStage.showStage();
 
 		if (machine != null) {
-			machinesListView.getItems().add(machine);
+			machinesTableView.getItems().add(machine);
 		}
 	}
 
@@ -128,7 +132,7 @@ public class NewProjectStage extends Stage {
 			errorExplanationLabel.setText("The location does not exist or is invalid");
 			return;
 		}
-		List<Machine> machines = machinesListView.getItems();
+		List<Machine> machines = machinesTableView.getItems();
 		machines = copyMachines(machines, dir);
 		List<Preference> preferences = preferencesListView.getItems();
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines,
