@@ -1,11 +1,20 @@
 package de.prob2.ui.project;
 
 import java.io.File;
+import java.util.List;
 
 public class Machine {
 	private String name;
 	private String description;
+	private List<String> preferences;
 	private File location;
+	
+	public Machine(String name, String description, List<String> preferences, File location) {
+		this.name = name;
+		this.description = description;
+		this.preferences = preferences;
+		this.location = location;
+	}
 	
 	public Machine(String name, String description, File location) {
 		this.name = name;

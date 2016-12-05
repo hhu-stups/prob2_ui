@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +21,12 @@ import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -29,6 +35,8 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
+import javafx.util.Pair;
 
 @Singleton
 public class NewProjectStage extends Stage {
@@ -55,6 +63,7 @@ public class NewProjectStage extends Stage {
 
 	private CurrentProject currentProject;
 	private CurrentStage currentStage;
+	private Map<Pair<Integer, Integer>, Boolean> preferencesMap = new HashMap<>();
 
 	private FXMLLoader loader;
 
@@ -80,7 +89,7 @@ public class NewProjectStage extends Stage {
 	public void initialize() {
 		finishButton.disableProperty().bind(projectNameField.lengthProperty().lessThanOrEqualTo(0));
 		locationField.setText(System.getProperty("user.home"));
-		
+
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 	}
@@ -91,6 +100,45 @@ public class NewProjectStage extends Stage {
 		Preference preference = addProBPreferencesStage.showStage();
 		if (preference != null) {
 			preferencesListView.getItems().add(preference);
+
+			TableColumn<Machine, Boolean> preferenceColumn = new TableColumn<>(preference.toString());
+
+			preferenceColumn.setEditable(true);
+			preferenceColumn.setCellFactory(new Callback<TableColumn<Machine, Boolean>, TableCell<Machine, Boolean>>() {
+				public TableCell<Machine, Boolean> call(TableColumn<Machine, Boolean> p) {
+					return new CheckBoxCell<Machine, Boolean>();
+				}
+			});
+			machinesTableView.getColumns().add(preferenceColumn);
+		}
+	}
+
+	private class CheckBoxCell<S, T> extends TableCell<S, T> {
+		private final CheckBox checkBox;
+
+		public CheckBoxCell() {
+			this.checkBox = new CheckBox();
+			checkBox.setOnAction((event) -> {
+				int column = this.getTableView().getColumns().indexOf(this.getTableColumn());
+				int row = this.getIndex();
+				boolean checked = checkBox.isSelected();
+				preferencesMap.put(new Pair<Integer, Integer>(row, column), checked);
+			});
+			this.checkBox.setAlignment(Pos.CENTER);
+
+			setAlignment(Pos.CENTER);
+			setGraphic(checkBox);
+		}
+
+		@Override
+		public void updateItem(T item, boolean empty) {
+			super.updateItem(item, empty);
+			if (empty) {
+				setText(null);
+				setGraphic(null);
+			} else {
+				setGraphic(checkBox);
+			}
 		}
 	}
 
@@ -98,7 +146,8 @@ public class NewProjectStage extends Stage {
 	void addMachine(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Add Machine");
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
+		fileChooser.getExtensionFilters()
+				.add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
 
 		final File selectedFile = fileChooser.showOpenDialog(this);
 		if (selectedFile == null) {
@@ -148,7 +197,8 @@ public class NewProjectStage extends Stage {
 			int i = machines.indexOf(machine);
 			Path source = machine.getLocation().toPath();
 			File newLocation = new File(path + File.separator + machine.getLocation().getName());
-			Machine newMachine = new Machine(machine.getName(), machine.getDescription(), newLocation);
+			List<String> preferences = getSelectedPreferences(machine);
+			Machine newMachine = new Machine(machine.getName(), machine.getDescription(), preferences, newLocation);
 			try {
 				Files.copy(source, newLocation.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				machines.set(i, newMachine);
@@ -158,5 +208,20 @@ public class NewProjectStage extends Stage {
 			}
 		}
 		return machines;
+	}
+
+	private List<String> getSelectedPreferences(Machine machine) {
+		int totalColumns = machinesTableView.getColumns().size();
+		int firstPrefColumn = totalColumns - preferencesListView.getItems().size();
+		int row = machinesTableView.getItems().indexOf(machine);
+
+		List<String> prefs = new ArrayList<>();
+		for (int column = firstPrefColumn; column < totalColumns; column++) {
+			if (preferencesMap.get(new Pair<>(row, column)) != null && preferencesMap.get(new Pair<>(row, column))) {
+				Preference preference = preferencesListView.getItems().get(column - firstPrefColumn);
+				prefs.add(preference.toString());
+			}
+		}
+		return prefs;
 	}
 }

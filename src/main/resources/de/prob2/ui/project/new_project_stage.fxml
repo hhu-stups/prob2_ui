@@ -93,7 +93,7 @@
 									</graphic>
 								</Button>
 							</AnchorPane>
-							<TableView fx:id="machinesTableView" prefHeight="300"> 
+							<TableView fx:id="machinesTableView" prefHeight="300" editable="true"> 
 								<columns>
 									<TableColumn fx:id="nameColumn" editable="false"
 										text="%newProject.stage.machinesTableView.name" />
