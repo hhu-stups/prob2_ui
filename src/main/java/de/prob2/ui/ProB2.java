@@ -45,9 +45,8 @@ public class ProB2 extends Application {
 		stage.setOnCloseRequest(e -> Platform.exit());
 		
 		injector.getInstance(CurrentStage.class).register(stage);
-		uiPersistence.open();
 		stage.show();
-		
+		uiPersistence.open();
 	}
 	
 	@Override
