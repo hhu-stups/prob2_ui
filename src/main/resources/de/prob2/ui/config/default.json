@@ -17,5 +17,6 @@
 	"bConsoleCharCounterInLine": 0,
 	"bConsoleCurrentPosInLine": 0,
 	"bConsoleCaret": 22,
-	"bConsoleErrors": []
+	"bConsoleErrors": [],
+	"currentPreference": "General"
 }

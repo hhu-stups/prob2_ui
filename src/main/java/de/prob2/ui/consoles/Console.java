@@ -32,6 +32,7 @@ public abstract class Console extends StyleClassedTextArea {
 		this.instructions = new ArrayList<>();
 		this.errors = new ArrayList<>();
 		this.searchHandler = new ConsoleSearchHandler(this, instructions);
+		this.requestFollowCaret();
 		setEvents();
 	}
 	

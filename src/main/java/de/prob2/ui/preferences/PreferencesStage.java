@@ -32,6 +32,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
@@ -81,11 +83,16 @@ public final class PreferencesStage extends Stage {
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	@FXML private ListView<Class<? extends AbstractElement>> blacklistView;
+	@FXML private TabPane tab_pane;
+	@FXML private Tab tab_general;
+	@FXML private Tab tab_preferences;
+	@FXML private Tab tab_statesview;
 
 	private final ClassBlacklist classBlacklist;
 	private final CurrentTrace currentTrace;
 	private final ProBPreferences preferences;
 	private final RecentFiles recentFiles;
+	private String currentTab;
 
 	@Inject
 	private PreferencesStage(
@@ -100,6 +107,7 @@ public final class PreferencesStage extends Stage {
 		this.preferences = preferences;
 		this.preferences.setStateSpace(currentTrace.exists() ? currentTrace.getStateSpace() : null);
 		this.recentFiles = recentFiles;
+		this.currentTab = "General";
 
 		loader.setLocation(this.getClass().getResource("preferences_stage.fxml"));
 		loader.setRoot(this);
@@ -217,6 +225,9 @@ public final class PreferencesStage extends Stage {
 						items.remove(removed);
 					}
 				});
+		this.tab_general.setOnSelectionChanged(e-> currentTab = tab_general.getText());
+		this.tab_preferences.setOnSelectionChanged(e-> currentTab = tab_preferences.getText());
+		this.tab_statesview.setOnSelectionChanged(e-> currentTab = tab_statesview.getText());
 	}
 
 	private void updatePreferences() {
@@ -316,5 +327,25 @@ public final class PreferencesStage extends Stage {
 			alert.showAndWait();
 			return false;
 		}
+	}
+	
+	public String getCurrentTab() {
+		return currentTab;
+	}
+	
+	public void setCurrentTab(String tab) {
+		this.currentTab = tab;
+	}
+	
+	public void selectGeneral() {
+		tab_pane.getSelectionModel().select(tab_general);
+	}
+	
+	public void selectPreferences() {
+		tab_pane.getSelectionModel().select(tab_preferences);
+	}
+	
+	public void selectStatesView() {
+		tab_pane.getSelectionModel().select(tab_statesview);
 	}
 }

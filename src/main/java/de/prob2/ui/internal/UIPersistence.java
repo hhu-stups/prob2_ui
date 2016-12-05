@@ -9,6 +9,7 @@ import de.prob2.ui.consoles.groovy.GroovyInterpreter;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.MenuController;
+import de.prob2.ui.preferences.PreferencesStage;
 
 public class UIPersistence {
 
@@ -47,6 +48,18 @@ public class UIPersistence {
 			if(uiState.getStages().contains(item.getClazzname())) {
 				item.show();
 			}
+		}
+		PreferencesStage preferencesStage = injector.getInstance(PreferencesStage.class);
+		switch(preferencesStage.getCurrentTab()) {
+			case "General":
+				preferencesStage.selectGeneral();
+				break;
+			case "ProB Preferences":
+				preferencesStage.selectPreferences();
+				break;
+			case "States View":
+				preferencesStage.selectStatesView();
+				break;
 		}
 	}
 	

@@ -16,6 +16,7 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
@@ -27,6 +28,7 @@ import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
+import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.ClassBlacklist;
 import javafx.scene.control.IndexRange;
 
@@ -54,6 +56,7 @@ public final class Config {
 		private int bConsoleCurrentPosInLine;
 		private int bConsoleCaret;
 		private List<IndexRange> bConsoleErrors;
+		private String currentPreference;
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
@@ -67,16 +70,23 @@ public final class Config {
 	private final ConfigData defaultData;
 	private final GroovyConsole groovyConsole;
 	private final BConsole bConsole;
+	private final Injector injector;
 	private final UIState uiState;
 	
 	@Inject
-	private Config(final ClassBlacklist classBlacklist, final RecentFiles recentFiles, final UIState uiState, final GroovyConsole groovyConsole, final BConsole bConsole) {
+	private Config(final ClassBlacklist classBlacklist, 
+					final RecentFiles recentFiles, 
+					final UIState uiState, 
+					final GroovyConsole groovyConsole, 
+					final BConsole bConsole, 
+					final Injector injector) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.classBlacklist = classBlacklist;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
 		this.groovyConsole = groovyConsole;
 		this.bConsole = bConsole;
+		this.injector = injector;
 		
 		try (final Reader defaultReader = new InputStreamReader(Config.class.getResourceAsStream("default.json"), CONFIG_CHARSET)) {
 			this.defaultData = gson.fromJson(defaultReader, ConfigData.class);
@@ -108,6 +118,9 @@ public final class Config {
 		}
 		if(configData.stages == null) {
 			configData.stages = new ArrayList<>(this.defaultData.stages);
+		}
+		if(configData.currentPreference == null) {
+			configData.currentPreference = this.defaultData.currentPreference;
 		}
 		this.replaceMissingWithDefaultsConsoles(configData);
 
@@ -207,6 +220,7 @@ public final class Config {
 			this.uiState.addStage(stage);
 		}
 		
+		this.injector.getInstance(PreferencesStage.class).setCurrentTab(configData.currentPreference);
 		this.loadConsoles(configData);
 	}
 	
@@ -233,6 +247,7 @@ public final class Config {
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
 		configData.statesViewHiddenClasses = new ArrayList<>();
+		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
 		this.saveConsoles(configData);
 
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
