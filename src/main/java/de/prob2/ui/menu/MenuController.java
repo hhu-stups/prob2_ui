@@ -381,25 +381,25 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private void handleLoadDefault() {
 		loadPreset("main.fxml");
-		uiState.getStages().clear();
+		uiState.clearDetachedStages();
 	}
 
 	@FXML
 	private void handleLoadSeparated() {
 		loadPreset("separatedHistory.fxml");
-		uiState.getStages().clear();
+		uiState.clearDetachedStages();
 	}
 
 	@FXML
 	private void handleLoadSeparated2() {
 		loadPreset("separatedHistoryAndStatistics.fxml");
-		uiState.getStages().clear();
+		uiState.clearDetachedStages();
 	}
 
 	@FXML
 	private void handleLoadStacked() {
 		loadPreset("stackedLists.fxml");
-		uiState.getStages().clear();
+		uiState.clearDetachedStages();
 	}
 
 	@FXML

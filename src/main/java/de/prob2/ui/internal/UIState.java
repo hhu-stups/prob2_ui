@@ -1,5 +1,6 @@
 package de.prob2.ui.internal;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,6 +9,9 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class UIState {
+	
+	private static final String[] DETACHED_VALUES = new String[]{"History", "Operations", "Model Check", "Statistics", "Animations"};
+	private static final Set<String> DETACHED = new HashSet<String>(Arrays.asList(DETACHED_VALUES));
 	
 	private String guiState;
 	
@@ -37,6 +41,14 @@ public class UIState {
 	
 	public Set<String> getStages() {
 		return stages;
+	}
+	
+	public void clearDetachedStages() {
+		for (String stage : stages) {
+			if(DETACHED.contains(stage)) {
+				stages.remove(stage);
+			}
+		}
 	}
 
 }
