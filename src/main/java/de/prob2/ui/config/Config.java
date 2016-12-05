@@ -28,6 +28,7 @@ import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.states.ClassBlacklist;
+import javafx.scene.control.IndexRange;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,16 @@ public final class Config {
 		private List<String> statesViewHiddenClasses;
 		private String guiState;
 		private List<String> stages;
+		private String groovyConsoleState;
+		private int groovyConsoleCharCounterInLine;
+		private int groovyConsoleCurrentPosInLine;
+		private int groovyConsoleCaret;
+		private List<IndexRange> groovyConsoleErrors;
+		private String bConsoleState;
+		private int bConsoleCharCounterInLine;
+		private int bConsoleCurrentPosInLine;
+		private int bConsoleCaret;
+		private List<IndexRange> bConsoleErrors;
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
@@ -106,6 +117,20 @@ public final class Config {
 		if(configData.stages == null) {
 			configData.stages = new ArrayList<>(this.defaultData.stages);
 		}
+		if(configData.groovyConsoleState == null) {
+			configData.groovyConsoleState = this.defaultData.groovyConsoleState;
+			configData.groovyConsoleCharCounterInLine = this.defaultData.groovyConsoleCharCounterInLine;
+			configData.groovyConsoleCurrentPosInLine = this.defaultData.groovyConsoleCurrentPosInLine;
+			configData.groovyConsoleCaret = this.defaultData.groovyConsoleCaret;
+			configData.groovyConsoleErrors = new ArrayList<>(this.defaultData.groovyConsoleErrors);
+		}
+		if(configData.bConsoleState == null) {
+			configData.bConsoleState = this.defaultData.bConsoleState;
+			configData.bConsoleCharCounterInLine = this.defaultData.bConsoleCharCounterInLine;
+			configData.bConsoleCurrentPosInLine = this.defaultData.bConsoleCurrentPosInLine;
+			configData.bConsoleCaret = this.defaultData.bConsoleCaret;
+			configData.bConsoleErrors = new ArrayList<>(this.defaultData.bConsoleErrors);
+		}
 	}
 	
 	public void load() {
@@ -155,6 +180,26 @@ public final class Config {
 		for(String stage: configData.stages) {
 			this.uiState.addStage(stage);
 		}
+		
+		this.groovyConsole.replaceText(configData.groovyConsoleState);
+		this.groovyConsole.setCharCounterInLine(configData.groovyConsoleCharCounterInLine);
+		this.groovyConsole.setCurrentPosInLine(configData.groovyConsoleCurrentPosInLine);
+		this.groovyConsole.moveTo(configData.groovyConsoleCaret);
+		
+		for(IndexRange range: configData.groovyConsoleErrors) {
+			groovyConsole.getErrors().add(range);
+			groovyConsole.setStyleClass(range.getStart(), range.getEnd(), "error");
+		}
+		
+		this.bConsole.replaceText(configData.bConsoleState);
+		this.bConsole.setCharCounterInLine(configData.bConsoleCharCounterInLine);
+		this.bConsole.setCurrentPosInLine(configData.bConsoleCurrentPosInLine);
+		this.bConsole.moveTo(configData.bConsoleCaret);
+		
+		for(IndexRange range: configData.bConsoleErrors) {
+			bConsole.getErrors().add(range);
+			bConsole.setStyleClass(range.getStart(), range.getEnd(), "error");
+		}
 	}
 	
 	public void save() {
@@ -166,6 +211,16 @@ public final class Config {
 		configData.groovyConsoleEntries = new ArrayList<>(groovyConsole.getInstructionEntries());
 		configData.bConsoleEntries = new ArrayList<>(bConsole.getInstructionEntries());
 		configData.statesViewHiddenClasses = new ArrayList<>();
+		configData.groovyConsoleState = groovyConsole.getText();
+		configData.groovyConsoleCharCounterInLine = groovyConsole.getCharCounterInLine();
+		configData.groovyConsoleCurrentPosInLine = groovyConsole.getCurrentPosInLine();
+		configData.groovyConsoleCaret = groovyConsole.getCaretPosition();
+		configData.groovyConsoleErrors = new ArrayList<>(groovyConsole.getErrors());
+		configData.bConsoleState = bConsole.getText();
+		configData.bConsoleCharCounterInLine = bConsole.getCharCounterInLine();
+		configData.bConsoleCurrentPosInLine = bConsole.getCurrentPosInLine();
+		configData.bConsoleCaret = bConsole.getCaretPosition();
+		configData.bConsoleErrors = new ArrayList<>(bConsole.getErrors());
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
 		}

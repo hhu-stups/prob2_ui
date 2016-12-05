@@ -11,7 +11,7 @@ import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
-
+import javafx.scene.control.IndexRange;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -33,13 +33,13 @@ public class GroovyConsole extends Console {
 		super();
 		this.interpreter = interpreter;
 		interpreter.setCodeCompletion(this);
-		this.appendText("Prob 2.0 Groovy Console \n >");
+		this.appendText("ProB 2.0 Groovy Console \n >");
 		setListeners();
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
 	}
 	
 	public void reset() {
-		this.replaceText("Prob 2.0 Groovy Console");
+		this.replaceText("ProB 2.0 Groovy Console");
 	}
 	
 	public void setInterpreter(GroovyInterpreter interpreter) {
@@ -160,6 +160,7 @@ public class GroovyConsole extends Console {
 				int begin = this.getText().length() - execResult.toString().length();
 				int end = this.getText().length();
 				this.setStyleClass(begin, end, "error");
+				errors.add(new IndexRange(begin, end));
 			}
 		}
 		this.appendText("\n >");

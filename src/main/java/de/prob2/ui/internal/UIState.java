@@ -11,7 +11,7 @@ import com.google.inject.Singleton;
 public class UIState {
 	
 	private static final String[] DETACHED_VALUES = new String[]{"History", "Operations", "Model Check", "Statistics", "Animations"};
-	private static final Set<String> DETACHED = new HashSet<String>(Arrays.asList(DETACHED_VALUES));
+	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList(DETACHED_VALUES));
 	
 	private String guiState;
 	

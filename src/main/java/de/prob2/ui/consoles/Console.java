@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import javafx.scene.control.IndexRange;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
@@ -24,9 +25,11 @@ public abstract class Console extends StyleClassedTextArea {
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
 	protected ConsoleSearchHandler searchHandler;
+	protected List<IndexRange> errors;
 
 	protected Console() {
 		this.instructions = new ArrayList<>();
+		this.errors = new ArrayList<>();
 		this.searchHandler = new ConsoleSearchHandler(this, instructions);
 		setEvents();
 	}
@@ -289,6 +292,10 @@ public abstract class Console extends StyleClassedTextArea {
 		return currentPosInLine;
 	}
 	
+	public int getCharCounterInLine() {
+		return charCounterInLine;
+	}
+	
 	public List<ConsoleInstruction> getInstructions() {
 		return instructions;
 	}
@@ -304,6 +311,18 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	public void increaseCounter() {
 		posInList++;
+	}
+	
+	public void setCharCounterInLine(int value) {
+		charCounterInLine = value;
+	}
+	
+	public void setCurrentPosInLine(int value) {
+		currentPosInLine = value;
+	}
+	
+	public List<IndexRange> getErrors() {
+		return errors;
 	}
 	
 }

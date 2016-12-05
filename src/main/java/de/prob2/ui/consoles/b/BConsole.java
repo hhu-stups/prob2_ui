@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
+import javafx.scene.control.IndexRange;
 
 @Singleton
 public class BConsole extends Console {
@@ -16,7 +17,7 @@ public class BConsole extends Console {
 	private BConsole(BInterpreter interpreter) {
 		super();
 		this.interpreter = interpreter;
-		this.appendText("Prob 2.0 B Console \n >");
+		this.appendText("ProB 2.0 B Console \n >");
 	}
 
 	@Override
@@ -32,6 +33,7 @@ public class BConsole extends Console {
 				int begin = this.getText().length() - execResult.toString().length();
 				int end = this.getText().length();
 				this.setStyleClass(begin, end, "error");
+				errors.add(new IndexRange(begin, end));
 			}
 		}
 		this.appendText("\n >");
