@@ -1,6 +1,7 @@
 package de.prob2.ui.consoles.groovy.objects;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -34,8 +35,8 @@ public final class GroovyObjectStage extends Stage {
 
 	private ObservableList<GroovyObjectItem> items = FXCollections.observableArrayList();
 
-	private FXMLLoader loader;
-	private CurrentStage currentStage;
+	private final FXMLLoader loader;
+	private final CurrentStage currentStage;
 
 	@Inject
 	private GroovyObjectStage(FXMLLoader loader, CurrentStage currentStage) {
@@ -49,7 +50,6 @@ public final class GroovyObjectStage extends Stage {
 			logger.error("loading fxml failed", e);
 		}
 		this.currentStage = currentStage;
-
 		currentStage.register(this);
 	}
 
@@ -93,6 +93,10 @@ public final class GroovyObjectStage extends Stage {
 			}
 			tvObjects.getSelectionModel().clearSelection();
 		});
+	}
+	
+	public List<GroovyObjectItem> getItems() {
+		return items;
 	}
 
 }
