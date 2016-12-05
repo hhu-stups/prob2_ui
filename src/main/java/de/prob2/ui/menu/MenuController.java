@@ -58,6 +58,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -403,7 +404,8 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	public void handleLoadDetached() {
-		this.dvController.detached.show();
+		this.dvController.detached.initModality(Modality.APPLICATION_MODAL);
+		this.dvController.detached.showAndWait();
 	}
 	
 	public void applyDetached() {
@@ -498,7 +500,7 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private void handleFormulaInput() {
 		final Stage formulaInputStage = injector.getInstance(FormulaInputStage.class);
-		formulaInputStage.show();
+		formulaInputStage.showAndWait();
 		formulaInputStage.toFront();
 	}
 
