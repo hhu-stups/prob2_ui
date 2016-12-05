@@ -598,7 +598,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	private void handleReportBug(ActionEvent event) {
+	public void handleReportBug() {
 		final Stage reportBugStage = injector.getInstance(ReportBugStage.class);
 		reportBugStage.show();
 		reportBugStage.toFront();
