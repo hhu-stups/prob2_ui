@@ -38,6 +38,12 @@ public class UIPersistence {
 		if(uiState.getStages().contains("Preferences")) {
 			menu.handlePreferences();
 		}
+		if(uiState.getStages().contains("Detach Components")) {
+			menu.handleLoadDetached();
+		}
+		if(uiState.getStages().contains("Report Bug")) {
+			menu.handleReportBug();
+		}
 	}
 	
 }

@@ -61,8 +61,6 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -421,7 +419,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	private void handleLoadDetached() {
+	public void handleLoadDetached() {
 		this.dvController.detached.show();
 	}
 
@@ -601,18 +599,9 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleReportBug(ActionEvent event) {
-		WebView webView = new WebView();
-		WebEngine webEnging = webView.getEngine();
-		webEnging.setJavaScriptEnabled(true);
-		webEnging.load("https://probjira.atlassian.net/secure/RapidBoard.jspa?rapidView=8");
-
-		Scene scene = new Scene(webView);
-		scene.getStylesheets().add("prob.css");
-
-		Stage stage = new Stage();
-		stage.setScene(scene);
-		stage.setTitle("Report Bug");
-		stage.show();
+		final Stage reportBugStage = injector.getInstance(ReportBugStage.class);
+		reportBugStage.show();
+		reportBugStage.toFront();
 	}
 
 	@FXML
