@@ -51,15 +51,14 @@ public class UIPersistence {
 		}
 		PreferencesStage preferencesStage = injector.getInstance(PreferencesStage.class);
 		switch(preferencesStage.getCurrentTab()) {
-			case "General":
-				preferencesStage.selectGeneral();
-				break;
 			case "ProB Preferences":
 				preferencesStage.selectPreferences();
 				break;
 			case "States View":
 				preferencesStage.selectStatesView();
 				break;
+			default:
+				preferencesStage.selectGeneral();
 		}
 	}
 	

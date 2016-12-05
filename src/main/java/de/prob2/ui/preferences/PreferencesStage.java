@@ -83,10 +83,10 @@ public final class PreferencesStage extends Stage {
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	@FXML private ListView<Class<? extends AbstractElement>> blacklistView;
-	@FXML private TabPane tab_pane;
-	@FXML private Tab tab_general;
-	@FXML private Tab tab_preferences;
-	@FXML private Tab tab_statesview;
+	@FXML private TabPane tabPane;
+	@FXML private Tab tabGeneral;
+	@FXML private Tab tabPreferences;
+	@FXML private Tab tabStatesView;
 
 	private final ClassBlacklist classBlacklist;
 	private final CurrentTrace currentTrace;
@@ -225,9 +225,9 @@ public final class PreferencesStage extends Stage {
 						items.remove(removed);
 					}
 				});
-		this.tab_general.setOnSelectionChanged(e-> currentTab = tab_general.getText());
-		this.tab_preferences.setOnSelectionChanged(e-> currentTab = tab_preferences.getText());
-		this.tab_statesview.setOnSelectionChanged(e-> currentTab = tab_statesview.getText());
+		this.tabGeneral.setOnSelectionChanged(e-> currentTab = tabGeneral.getText());
+		this.tabPreferences.setOnSelectionChanged(e-> currentTab = tabPreferences.getText());
+		this.tabStatesView.setOnSelectionChanged(e-> currentTab = tabStatesView.getText());
 	}
 
 	private void updatePreferences() {
@@ -338,14 +338,14 @@ public final class PreferencesStage extends Stage {
 	}
 	
 	public void selectGeneral() {
-		tab_pane.getSelectionModel().select(tab_general);
+		tabPane.getSelectionModel().select(tabGeneral);
 	}
 	
 	public void selectPreferences() {
-		tab_pane.getSelectionModel().select(tab_preferences);
+		tabPane.getSelectionModel().select(tabPreferences);
 	}
 	
 	public void selectStatesView() {
-		tab_pane.getSelectionModel().select(tab_statesview);
+		tabPane.getSelectionModel().select(tabStatesView);
 	}
 }
