@@ -18,12 +18,16 @@ public class ReportBugStage extends Stage {
 	@Inject
 	public ReportBugStage(FXMLLoader loader, CurrentStage currentStage) {
 		WebView webView = new WebView();
-		this.setTitle("Report Bug");
-		this.setScene(new Scene(webView));
-		currentStage.register(this);
 		WebEngine webEnging = webView.getEngine();
 		webEnging.setJavaScriptEnabled(true);
 		webEnging.load("https://probjira.atlassian.net/secure/RapidBoard.jspa?rapidView=8");
+		
+		Scene scene = new Scene(webView);
+		scene.getStylesheets().add("prob.css");
+		
+		this.setTitle("Report Bug");
+		this.setScene(scene);
+		currentStage.register(this);
 	}
 	
 }
