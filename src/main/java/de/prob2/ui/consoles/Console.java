@@ -26,6 +26,7 @@ public abstract class Console extends StyleClassedTextArea {
 	protected int posInList = -1;
 	protected ConsoleSearchHandler searchHandler;
 	protected List<IndexRange> errors;
+	protected Executable interpreter;
 
 	protected Console() {
 		this.instructions = new ArrayList<>();
@@ -168,24 +169,42 @@ public abstract class Console extends StyleClassedTextArea {
 		currentPosInLine = charCounterInLine;
 	}
 	
-	protected abstract void handleEnter();
-	
-	protected void handleEnterAbstract() {
+	protected abstract void reset();
+		
+	protected void handleEnter() {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
-		String instruction = getCurrentLine();
+		String currentLine = getCurrentLine();
 		if(searchHandler.isActive()) {
-			instruction = searchHandler.getCurrentSearchResult();
+			currentLine = searchHandler.getCurrentSearchResult();
 		}
-		if(!instruction.isEmpty()) {
+		if(!currentLine.isEmpty()) {
 			if(!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
-				instructions.set(instructions.size() - 1, new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
+				instructions.set(instructions.size() - 1, new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
 			} else {
-				instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
+				instructions.add(new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
 			}
 			posInList = instructions.size() - 1;
+			ConsoleInstruction instruction = instructions.get(posInList);
+			ConsoleExecResult execResult = interpreter.exec(instruction);
+			if("clear".equals(execResult.getConsoleOutput())) {
+				reset();
+			} else {
+				this.appendText("\n" + execResult);
+			}
+			if(execResult.getResultType() == ConsoleExecResultType.ERROR) {
+				int begin = this.getText().length() - execResult.toString().length();
+				int end = this.getText().length();
+				this.setStyleClass(begin, end, "error");
+				errors.add(new IndexRange(begin, end));
+			}
+		} else {
+			this.appendText("\nnull");
 		}
 		searchHandler.handleEnter();
+		this.appendText("\n >");
+		this.setStyleClass(this.getText().length() - 2, this.getText().length(), "current");
+		this.setEstimatedScrollY(Double.MAX_VALUE);
 		goToLastPos();
 	}
 		
