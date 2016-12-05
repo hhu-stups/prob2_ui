@@ -43,6 +43,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -157,8 +158,9 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	}
 
 	@FXML
-	private void addModelCheck() {
+	public void addModelCheck() {
 		if(!stageController.mcheckStage.isShowing()) {
+			this.stageController.mcheckStage.initModality(Modality.APPLICATION_MODAL);
 			this.stageController.mcheckStage.showAndWait();
 		}
 	}
