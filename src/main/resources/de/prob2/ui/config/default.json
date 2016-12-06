@@ -18,5 +18,6 @@
 	"bConsoleCurrentPosInLine": 0,
 	"bConsoleCaret": 22,
 	"bConsoleErrors": [],
-	"currentPreference": "General"
+	"currentPreference": "General",
+	"openedPerspectives": []
 }

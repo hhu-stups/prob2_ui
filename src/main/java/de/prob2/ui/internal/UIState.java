@@ -7,6 +7,7 @@ import java.util.Set;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+
 @Singleton
 public class UIState {
 	
@@ -44,7 +45,8 @@ public class UIState {
 	}
 	
 	public void clearDetachedStages() {
-		for (String stage : stages) {
+		HashSet<String> set = new HashSet<>(stages);
+		for(String stage : set) {
 			if(DETACHED.contains(stage)) {
 				stages.remove(stage);
 			}
