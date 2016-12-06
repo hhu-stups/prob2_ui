@@ -23,6 +23,7 @@ import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
+import de.prob2.ui.MainController;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
@@ -99,6 +100,7 @@ public final class MenuController extends MenuBar {
 
 		@FXML
 		public void initialize() {
+			detached.initModality(Modality.APPLICATION_MODAL);
 			detached.getIcons().add(new Image("prob_128.gif"));
 			currentStage.register(detached);
 		}
@@ -111,7 +113,7 @@ public final class MenuController extends MenuBar {
 		private void apply(ApplyDetachedEnum detachedBy) {
 			Parent root = loadPreset("main.fxml");
 			assert root != null;
-			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(0);
+			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(1);
 			Accordion accordion = (Accordion) pane.getItems().get(0);
 			removeTP(accordion, pane, detachedBy);
 			uiState.setGuiState("detached");
@@ -397,31 +399,30 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleLoadDefault() {
+		uiState.clearDetachedStages();
 		loadPreset("main.fxml");
-		uiState.getStages().clear();
 	}
 
 	@FXML
 	private void handleLoadSeparated() {
+		uiState.clearDetachedStages();
 		loadPreset("separatedHistory.fxml");
-		uiState.getStages().clear();
 	}
 
 	@FXML
 	private void handleLoadSeparated2() {
+		uiState.clearDetachedStages();
 		loadPreset("separatedHistoryAndStatistics.fxml");
-		uiState.getStages().clear();
 	}
 
 	@FXML
 	private void handleLoadStacked() {
+		uiState.clearDetachedStages();
 		loadPreset("stackedLists.fxml");
-		uiState.getStages().clear();
 	}
-
+	
 	@FXML
 	public void handleLoadDetached() {
-		this.dvController.detached.initModality(Modality.APPLICATION_MODAL);
 		this.dvController.detached.showAndWait();
 	}
 
@@ -570,6 +571,7 @@ public final class MenuController extends MenuBar {
 	public Parent loadPreset(String location) {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		this.uiState.setGuiState(location);
+		injector.getInstance(MainController.class).refresh(uiState);
 		try {
 			loader.setLocation(new URL(FXML_ROOT, location));
 		} catch (MalformedURLException e) {
@@ -579,6 +581,7 @@ public final class MenuController extends MenuBar {
 			alert.showAndWait();
 			return null;
 		}
+		loader.setRoot(injector.getInstance(MainController.class));
 		Parent root;
 		try {
 			root = loader.load();

@@ -6,12 +6,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.consoles.Console;
-import de.prob2.ui.consoles.ConsoleExecResult;
-import de.prob2.ui.consoles.ConsoleExecResultType;
-import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
-
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -25,21 +21,20 @@ import org.fxmisc.wellbehaved.event.Nodes;
 
 @Singleton
 public class GroovyConsole extends Console {
-	
-	private GroovyInterpreter interpreter;
-	
+			
 	@Inject
 	public GroovyConsole(GroovyInterpreter interpreter) {
 		super();
 		this.interpreter = interpreter;
 		interpreter.setCodeCompletion(this);
-		this.appendText("Prob 2.0 Groovy Console \n >");
+		this.appendText("ProB 2.0 Groovy Console \n >");
 		setListeners();
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
 	}
 	
 	public void reset() {
-		this.replaceText("Prob 2.0 Groovy Console");
+		this.replaceText("ProB 2.0 Groovy Console");
+		this.errors.clear();
 	}
 	
 	public void setInterpreter(GroovyInterpreter interpreter) {
@@ -63,12 +58,12 @@ public class GroovyConsole extends Console {
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
 		if(getCaretPosition() > this.getText().lastIndexOf('\n') + 2) {
 			int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
-			interpreter.triggerCodeCompletion(getCurrentLine().substring(0, caretPosInLine), action);
+			((GroovyInterpreter) interpreter).triggerCodeCompletion(getCurrentLine().substring(0, caretPosInLine), action);
 		}
 	}
 	
 	private void setCodeCompletionEvent() {
-		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> interpreter.triggerCloseCodeCompletion());
+		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> ((GroovyInterpreter) interpreter).triggerCloseCodeCompletion());
 		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, this::handleCodeCompletionEvent);
 	}
 	
@@ -141,35 +136,10 @@ public class GroovyConsole extends Console {
 			}
 		}
 		return result;
-	}
-		
-	@Override
-	protected void handleEnter() {
-		super.handleEnterAbstract();
-		if(getCurrentLine().isEmpty()) {
-			this.appendText("\nnull");
-		} else {
-			ConsoleInstruction instruction = instructions.get(posInList);
-			ConsoleExecResult execResult = interpreter.exec(instruction);
-			if("clear".equals(execResult.getConsoleOutput())) {
-				reset();
-			} else {
-				this.appendText("\n" + execResult);
-			}
-			if(execResult.getResultType() == ConsoleExecResultType.ERROR) {
-				int begin = this.getText().length() - execResult.toString().length();
-				int end = this.getText().length();
-				this.setStyleClass(begin, end, "error");
-			}
-		}
-		this.appendText("\n >");
-		this.setStyleClass(this.getText().length() - 2, this.getText().length(), "current");
-		this.setEstimatedScrollY(Double.MAX_VALUE);
-	}
-	
+	}	
 		
 	public void closeObjectStage() {
-		interpreter.closeObjectStage();
+		((GroovyInterpreter) interpreter).closeObjectStage();
 	}
 
 

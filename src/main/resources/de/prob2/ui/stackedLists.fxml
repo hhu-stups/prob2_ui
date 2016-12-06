@@ -11,7 +11,8 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.BorderPane?>
-<BorderPane fx:id="rootContainer" maxHeight="Infinity"
+<?import de.prob2.ui.MainController?>
+<fx:root type="MainController" maxHeight="Infinity"
 			maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
 			prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
@@ -45,4 +46,4 @@
 	<top>
 		<MenuController/>
 	</top>
-</BorderPane>
+</fx:root>

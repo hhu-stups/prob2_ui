@@ -6,7 +6,10 @@ import com.google.inject.Injector;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
+import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
+import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.MenuController;
+import de.prob2.ui.preferences.PreferencesStage;
 
 public class UIPersistence {
 
@@ -40,6 +43,22 @@ public class UIPersistence {
 		}
 		if(uiState.getStages().contains("Report Bug")) {
 			menu.handleReportBug();
+		}
+		for (GroovyObjectItem item: injector.getInstance(GroovyObjectStage.class).getItems()) {
+			if(uiState.getStages().contains(item.getClazzname())) {
+				item.show();
+			}
+		}
+		PreferencesStage preferencesStage = injector.getInstance(PreferencesStage.class);
+		switch(preferencesStage.getCurrentTab()) {
+			case "ProB Preferences":
+				preferencesStage.selectPreferences();
+				break;
+			case "States View":
+				preferencesStage.selectStatesView();
+				break;
+			default:
+				preferencesStage.selectGeneral();
 		}
 	}
 	

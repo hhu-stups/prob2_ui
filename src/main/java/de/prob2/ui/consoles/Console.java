@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import javafx.scene.control.IndexRange;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
@@ -24,10 +25,14 @@ public abstract class Console extends StyleClassedTextArea {
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
 	protected ConsoleSearchHandler searchHandler;
+	protected List<IndexRange> errors;
+	protected Executable interpreter;
 
 	protected Console() {
 		this.instructions = new ArrayList<>();
+		this.errors = new ArrayList<>();
 		this.searchHandler = new ConsoleSearchHandler(this, instructions);
+		this.requestFollowCaret();
 		setEvents();
 	}
 	
@@ -165,24 +170,42 @@ public abstract class Console extends StyleClassedTextArea {
 		currentPosInLine = charCounterInLine;
 	}
 	
-	protected abstract void handleEnter();
-	
-	protected void handleEnterAbstract() {
+	protected abstract void reset();
+		
+	protected void handleEnter() {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
-		String instruction = getCurrentLine();
+		String currentLine = getCurrentLine();
 		if(searchHandler.isActive()) {
-			instruction = searchHandler.getCurrentSearchResult();
+			currentLine = searchHandler.getCurrentSearchResult();
 		}
-		if(!instruction.isEmpty()) {
+		if(!currentLine.isEmpty()) {
 			if(!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
-				instructions.set(instructions.size() - 1, new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
+				instructions.set(instructions.size() - 1, new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
 			} else {
-				instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
+				instructions.add(new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
 			}
 			posInList = instructions.size() - 1;
+			ConsoleInstruction instruction = instructions.get(posInList);
+			ConsoleExecResult execResult = interpreter.exec(instruction);
+			if("clear".equals(execResult.getConsoleOutput())) {
+				reset();
+			} else {
+				this.appendText("\n" + execResult);
+			}
+			if(execResult.getResultType() == ConsoleExecResultType.ERROR) {
+				int begin = this.getText().length() - execResult.toString().length();
+				int end = this.getText().length();
+				this.setStyleClass(begin, end, "error");
+				errors.add(new IndexRange(begin, end));
+			}
+		} else {
+			this.appendText("\nnull");
 		}
 		searchHandler.handleEnter();
+		this.appendText("\n >");
+		this.setStyleClass(this.getText().length() - 2, this.getText().length(), "current");
+		this.setEstimatedScrollY(Double.MAX_VALUE);
 		goToLastPos();
 	}
 		
@@ -289,6 +312,10 @@ public abstract class Console extends StyleClassedTextArea {
 		return currentPosInLine;
 	}
 	
+	public int getCharCounterInLine() {
+		return charCounterInLine;
+	}
+	
 	public List<ConsoleInstruction> getInstructions() {
 		return instructions;
 	}
@@ -304,6 +331,18 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	public void increaseCounter() {
 		posInList++;
+	}
+	
+	public void setCharCounterInLine(int value) {
+		charCounterInLine = value;
+	}
+	
+	public void setCurrentPosInLine(int value) {
+		currentPosInLine = value;
+	}
+	
+	public List<IndexRange> getErrors() {
+		return errors;
 	}
 	
 }

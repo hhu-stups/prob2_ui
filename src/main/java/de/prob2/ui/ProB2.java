@@ -12,7 +12,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -33,25 +32,22 @@ public class ProB2 extends Application {
 		config = injector.getInstance(Config.class);
 		UIState uiState = injector.getInstance(UIState.class);
 		UIPersistence uiPersistence = new UIPersistence(uiState, injector);
-		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-		loader.setLocation(getClass().getResource("main.fxml"));
-		loader.load();
-		Parent root = loader.getRoot();
-
+		Parent root = injector.getInstance(MainController.class);
 		Scene mainScene = new Scene(root, 1024, 768);
 		mainScene.getStylesheets().add("prob.css");
 		stage.setTitle("ProB 2.0");
 		stage.setScene(mainScene);
 		stage.getIcons().add(new Image("prob_128.gif"));
 		stage.setOnCloseRequest(e -> Platform.exit());
-		
 		injector.getInstance(CurrentStage.class).register(stage);
+
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		currentProject.addListener((observable, from, to) -> stage.setTitle("ProB 2.0 [" + to.getName() + "]"));
-		uiPersistence.open();
+
 		stage.show();
-		
+		uiPersistence.open();
 	}
+	
 	
 	@Override
 	public void stop() {
