@@ -9,8 +9,7 @@
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import de.prob2.ui.MainController?>
-<fx:root type="MainController" xmlns:fx="http://javafx.com/fxml">
+<fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml">
 	<left>
 		<Accordion minWidth="280" fx:id="leftAccordion">
 			<panes>
