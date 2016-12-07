@@ -70,7 +70,8 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 			ObservableList<Machine> machinesList = this.getFiles();
 			String name[] = machine.getName().split("\\.");
 			machinesList.add(new Machine(name[0], "", machine));
-			this.set(new Project(this.getName(), this.get().getDescription(), machinesList, this.get().getPreferences(), this.get().getLocation()));
+			this.set(new Project(this.getName(), this.get().getDescription(), machinesList, this.get().getPreferences(),
+					this.get().getLocation()));
 		}
 	}
 

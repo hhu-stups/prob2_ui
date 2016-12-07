@@ -1,6 +1,7 @@
 package de.prob2.ui.project;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Machine {
@@ -20,6 +21,7 @@ public class Machine {
 		this.name = name;
 		this.description = description;
 		this.location = location;
+		this.preferences = new ArrayList<>();
 	}
 	
 	public String getName() {
@@ -37,5 +39,13 @@ public class Machine {
 	@Override
 	public String toString() {
 		return this.name;
+	}
+
+	public String getPath() {
+		return location.getAbsolutePath();
+	}
+	
+	public List<String> getPreferences() {
+		return preferences;
 	}
 }

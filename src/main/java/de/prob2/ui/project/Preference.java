@@ -16,4 +16,8 @@ public class Preference {
 	public String toString() {
 		return this.name;
 	}
+	
+	public Map<String, String> getPreferences() {
+		return preferences;
+	}
 }

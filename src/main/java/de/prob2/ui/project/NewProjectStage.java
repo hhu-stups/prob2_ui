@@ -63,7 +63,8 @@ public class NewProjectStage extends Stage {
 
 	private CurrentProject currentProject;
 	private CurrentStage currentStage;
-	private Map<Pair<Integer, Integer>, Boolean> preferencesMap = new HashMap<>();
+	private Map<Pair<Integer, Integer>, Boolean> prefBooleanMap = new HashMap<>();
+	private Map<String,Preference> preferencesMap = new HashMap<>();
 
 	private FXMLLoader loader;
 
@@ -100,6 +101,7 @@ public class NewProjectStage extends Stage {
 		Preference preference = addProBPreferencesStage.showStage();
 		if (preference != null) {
 			preferencesListView.getItems().add(preference);
+			preferencesMap.put(preference.toString(), preference);
 
 			TableColumn<Machine, Boolean> preferenceColumn = new TableColumn<>(preference.toString());
 
@@ -122,7 +124,7 @@ public class NewProjectStage extends Stage {
 				int column = this.getTableView().getColumns().indexOf(this.getTableColumn());
 				int row = this.getIndex();
 				boolean checked = checkBox.isSelected();
-				preferencesMap.put(new Pair<Integer, Integer>(row, column), checked);
+				prefBooleanMap.put(new Pair<Integer, Integer>(row, column), checked);
 			});
 			this.checkBox.setAlignment(Pos.CENTER);
 
@@ -183,7 +185,7 @@ public class NewProjectStage extends Stage {
 		}
 		List<Machine> machines = machinesTableView.getItems();
 		machines = copyMachines(machines, dir);
-		List<Preference> preferences = preferencesListView.getItems();
+		Map<String, Preference> preferences = preferencesMap;
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines,
 				preferences, dir);
 		currentProject.changeCurrentProject(newProject);
@@ -217,7 +219,7 @@ public class NewProjectStage extends Stage {
 
 		List<String> prefs = new ArrayList<>();
 		for (int column = firstPrefColumn; column < totalColumns; column++) {
-			if (preferencesMap.get(new Pair<>(row, column)) != null && preferencesMap.get(new Pair<>(row, column))) {
+			if (prefBooleanMap.get(new Pair<>(row, column)) != null && prefBooleanMap.get(new Pair<>(row, column))) {
 				Preference preference = preferencesListView.getItems().get(column - firstPrefColumn);
 				prefs.add(preference.toString());
 			}

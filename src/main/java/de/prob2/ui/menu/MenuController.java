@@ -19,7 +19,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
@@ -259,13 +258,11 @@ public final class MenuController extends MenuBar {
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 
 	private final Injector injector;
-	private final Api api;
 	private final CurrentStage currentStage;
 	private final CurrentTrace currentTrace;
 	private final RecentFiles recentFiles;
 	private final UIState uiState;
 	private final DetachViewStageController dvController;
-	private final Object openLock;
 	private Window window;
 
 	@FXML
@@ -293,14 +290,11 @@ public final class MenuController extends MenuBar {
 			final CurrentProject currentProject, final CurrentTrace currentTrace, final RecentFiles recentFiles,
 			final UIState uiState) {
 		this.injector = injector;
-		this.api = api;
 		this.currentStage = currentStage;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
-
-		this.openLock = new Object();
 
 		loader.setLocation(getClass().getResource("menu.fxml"));
 		loader.setRoot(this);
@@ -420,7 +414,7 @@ public final class MenuController extends MenuBar {
 		uiState.clearDetachedStages();
 		loadPreset("stackedLists.fxml");
 	}
-	
+
 	@FXML
 	public void handleLoadDetached() {
 		this.dvController.detached.showAndWait();
@@ -475,37 +469,17 @@ public final class MenuController extends MenuBar {
 			if (result.get() == buttonTypeAdd) {
 				currentProject.addMachine(new File(path));
 			} else if (result.get() == buttonTypeClose) {
-				openAsync(path);
+				Platform.runLater(() -> {
+					this.currentProject.changeCurrentProject(new Project(new File(path)));
+					injector.getInstance(ModelcheckingController.class).resetView();
+
+					// Remove the path first to avoid listing the same file
+					// twice.
+					this.recentFiles.remove(path);
+					this.recentFiles.add(0, path);
+				});
 			}
 		} else {
-			openAsync(path);
-		}
-	}
-
-	private void openAsync(String path) {
-		new Thread(() -> this.openPath(path), "File Opener Thread").start();
-	}
-
-	private void openPath(String path) {
-		// NOTE: This method may be called from outside the JavaFX main thread,
-		// for example from openAsync.
-		// This means that all JavaFX calls must be wrapped in
-		// Platform.runLater.
-
-		// Prevent multiple threads from loading a file at the same time
-		synchronized (this.openLock) {
-			try {
-				this.api.b_load(path);
-			} catch (IOException | BException e) {
-				logger.error("loading file failed", e);
-				Platform.runLater(() -> {
-					Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-					alert.getDialogPane().getStylesheets().add("prob.css");
-					alert.show();
-				});
-				return;
-			}
-			
 			Platform.runLater(() -> {
 				this.currentProject.changeCurrentProject(new Project(new File(path)));
 				injector.getInstance(ModelcheckingController.class).resetView();

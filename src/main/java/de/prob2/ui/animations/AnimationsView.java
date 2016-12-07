@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.Api;
@@ -23,6 +22,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Machine;
+import de.prob2.ui.project.MachineLoader;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -57,14 +57,13 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private int previousSize = 0;
 
 	private CurrentProject currentProject;
-
-	private Api api;
+	private MachineLoader machineLoader;
 
 	@Inject
 	private AnimationsView(final Api api, final AnimationSelector animations, CurrentProject currentProject,
-			final FXMLLoader loader) {
+			final FXMLLoader loader, final MachineLoader machineLoader) {
 		this.animations = animations;
-		this.api = api;
+		this.machineLoader = machineLoader;
 		this.animations.registerAnimationChangeListener(this);
 		this.currentProject = currentProject;
 		try {
@@ -108,19 +107,19 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	}
 
 	private void addAll(List<Machine> machines) {
-		for (Machine machine: machines) {
-			final StateSpace newSpace;
-			String path = machine.getLocation().getPath();
+		for (Machine machine : machines) {
+			StateSpace stateSpace = machineLoader.load(machine);
 			try {
-				newSpace = this.api.b_load(path);
-			} catch (IOException | BException e) {
-				logger.error("loading file failed", e);
-				Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-				alert.getDialogPane().getStylesheets().add("prob.css");
-				alert.showAndWait();
-				return;
+				this.animations.addNewAnimation(new Trace(stateSpace));
+			} catch (NullPointerException e) {
+				logger.error("loading machine \"" + machine.getName() + "\" failed", e);
+				Platform.runLater(() -> {
+					Alert alert = new Alert(Alert.AlertType.ERROR,
+							"Could not open machine \"" + machine.getName() + "\":\n" + e);
+					alert.getDialogPane().getStylesheets().add("prob.css");
+					alert.show();
+				});
 			}
-			this.animations.addNewAnimation(new Trace(newSpace));
 		}
 	}
 
