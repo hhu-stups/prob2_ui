@@ -24,13 +24,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -63,8 +67,8 @@ public class NewProjectStage extends Stage {
 
 	private CurrentProject currentProject;
 	private CurrentStage currentStage;
-	private Map<Pair<Integer, Integer>, Boolean> prefBooleanMap = new HashMap<>();
-	private Map<String,Preference> preferencesMap = new HashMap<>();
+	private Map<Pair<Machine, Integer>, Boolean> prefBooleanMap = new HashMap<>();
+	private Map<String, Preference> preferencesMap = new HashMap<>();
 
 	private FXMLLoader loader;
 
@@ -93,6 +97,28 @@ public class NewProjectStage extends Stage {
 
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+
+		machinesTableView.setRowFactory(tableView -> {
+			final TableRow<Machine> row = new TableRow<>();
+			final ContextMenu contextMenu = new ContextMenu();
+			final MenuItem removeMenuItem = new MenuItem("Remove Machine");
+			removeMenuItem.setOnAction(event -> {
+				Machine m = row.getItem();
+				machinesTableView.getItems().remove(m);
+			});
+			contextMenu.getItems().add(removeMenuItem);
+			row.setOnMouseClicked(event -> {
+				if (event.getButton() == MouseButton.SECONDARY) {
+					if (row.isEmpty()) {
+						contextMenu.getItems().get(0).setDisable(true);
+					} else {
+						contextMenu.getItems().get(0).setDisable(false);
+					}
+					contextMenu.show(row, event.getScreenX(), event.getScreenY());
+				}
+			});
+			return row;
+		});
 	}
 
 	@FXML
@@ -122,9 +148,11 @@ public class NewProjectStage extends Stage {
 			this.checkBox = new CheckBox();
 			checkBox.setOnAction((event) -> {
 				int column = this.getTableView().getColumns().indexOf(this.getTableColumn());
-				int row = this.getIndex();
+				T row = this.getItem();
 				boolean checked = checkBox.isSelected();
-				prefBooleanMap.put(new Pair<Integer, Integer>(row, column), checked);
+				if(row instanceof Machine) {
+					prefBooleanMap.put(new Pair<Machine, Integer>((Machine) row, column), checked);
+				}
 			});
 			this.checkBox.setAlignment(Pos.CENTER);
 
@@ -215,11 +243,10 @@ public class NewProjectStage extends Stage {
 	private List<String> getSelectedPreferences(Machine machine) {
 		int totalColumns = machinesTableView.getColumns().size();
 		int firstPrefColumn = totalColumns - preferencesListView.getItems().size();
-		int row = machinesTableView.getItems().indexOf(machine);
 
 		List<String> prefs = new ArrayList<>();
 		for (int column = firstPrefColumn; column < totalColumns; column++) {
-			if (prefBooleanMap.get(new Pair<>(row, column)) != null && prefBooleanMap.get(new Pair<>(row, column))) {
+			if (prefBooleanMap.get(new Pair<>(machine, column)) != null && prefBooleanMap.get(new Pair<>(machine, column))) {
 				Preference preference = preferencesListView.getItems().get(column - firstPrefColumn);
 				prefs.add(preference.toString());
 			}
