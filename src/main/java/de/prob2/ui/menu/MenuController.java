@@ -114,12 +114,14 @@ public final class MenuController extends MenuBar {
 		private void removeTP(Accordion accordion, SplitPane pane, ApplyDetachedEnum detachedBy) {
 			final HashSet<Stage> wrapperStagesCopy = new HashSet<>(wrapperStages);
 			wrapperStages.clear();
+			System.out.println("Before");
+			printStages();
 			for (final Stage stage : wrapperStagesCopy) {
 				stage.setScene(null);
 				stage.hide();
 				uiState.getStages().remove(stage.getTitle());
 			}
-			
+
 			for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 				final TitledPane tp = it.next();
 				if (removable(tp, detachedBy)) {
@@ -127,7 +129,9 @@ public final class MenuController extends MenuBar {
 					transferToNewWindow((Parent)tp.getContent(), tp.getText());
 				}
 			}
+			System.out.println("After");
 			printStages();
+			System.out.println("========================================================");
 			if (accordion.getPanes().isEmpty()) {
 				pane.getItems().remove(accordion);
 				pane.setDividerPositions(0);
