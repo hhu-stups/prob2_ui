@@ -24,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -63,6 +64,7 @@ public class FormulaInputStage extends Stage {
 		}
 		currentStage.register(this);
 		this.injector = injector;
+		this.initModality(Modality.APPLICATION_MODAL);
 		setButtonAction();
 	}
 

@@ -200,4 +200,5 @@ public final class AnimationPerspective extends BorderPane {
 		newParent.getPanes().add(nodeTP);
 		newParent.setExpandedPane(nodeTP);
 	}
+	
 }

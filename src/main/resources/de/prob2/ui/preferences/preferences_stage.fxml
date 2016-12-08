@@ -25,8 +25,8 @@
 			<!-- TabPane *obviously* does not extend Pane, so we have to wrap it in 
 				a StackPane so we can add the menu bar to it on Mac. -->
 			<StackPane>
-				<TabPane tabClosingPolicy="UNAVAILABLE">
-					<Tab text="%preferences.tabs.general">
+				<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+					<Tab fx:id="tabGeneral" text="%preferences.tabs.general">
 						<VBox spacing="10.0">
 							<padding>
 								<Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
@@ -38,7 +38,7 @@
 							</HBox>
 						</VBox>
 					</Tab>
-					<Tab text="%preferences.tabs.proBPreferences">
+					<Tab fx:id="tabPreferences" text="%preferences.tabs.proBPreferences">
 						<BorderPane styleClass="dialog">
 							<center>
 								<TreeTableView fx:id="tv" prefHeight="400.0"
@@ -69,7 +69,7 @@
 							</bottom>
 						</BorderPane>
 					</Tab>
-					<Tab text="%preferences.tabs.statesView">
+					<Tab fx:id="tabStatesView" text="%preferences.tabs.statesView">
 						<AnchorPane>
 							<ListView fx:id="blacklistView" editable="true"
 								AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="0.0"

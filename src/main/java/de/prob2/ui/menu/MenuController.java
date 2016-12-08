@@ -23,7 +23,7 @@ import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
+import de.prob2.ui.MainController;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
@@ -57,9 +57,8 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -92,6 +91,7 @@ public final class MenuController extends MenuBar {
 
 		@FXML
 		public void initialize() {
+			detached.initModality(Modality.APPLICATION_MODAL);
 			detached.getIcons().add(new Image("prob_128.gif"));
 			currentStage.register(detached);
 		}
@@ -104,7 +104,7 @@ public final class MenuController extends MenuBar {
 		private void apply(ApplyDetachedEnum detachedBy) {
 			Parent root = loadPreset("main.fxml");
 			assert root != null;
-			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(0);
+			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(1);
 			Accordion accordion = (Accordion) pane.getItems().get(0);
 			removeTP(accordion, pane, detachedBy);
 			uiState.setGuiState("detached");
@@ -388,31 +388,31 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleLoadDefault() {
+		uiState.clearDetachedStages();
 		loadPreset("main.fxml");
-		uiState.getStages().clear();
 	}
 
 	@FXML
 	private void handleLoadSeparated() {
+		uiState.clearDetachedStages();
 		loadPreset("separatedHistory.fxml");
-		uiState.getStages().clear();
 	}
 
 	@FXML
 	private void handleLoadSeparated2() {
+		uiState.clearDetachedStages();
 		loadPreset("separatedHistoryAndStatistics.fxml");
-		uiState.getStages().clear();
 	}
 
 	@FXML
 	private void handleLoadStacked() {
+		uiState.clearDetachedStages();
 		loadPreset("stackedLists.fxml");
-		uiState.getStages().clear();
 	}
-
+	
 	@FXML
-	private void handleLoadDetached() {
-		this.dvController.detached.show();
+	public void handleLoadDetached() {
+		this.dvController.detached.showAndWait();
 	}
 	
 	public void applyDetached() {
@@ -507,7 +507,7 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private void handleFormulaInput() {
 		final Stage formulaInputStage = injector.getInstance(FormulaInputStage.class);
-		formulaInputStage.show();
+		formulaInputStage.showAndWait();
 		formulaInputStage.toFront();
 	}
 
@@ -528,6 +528,7 @@ public final class MenuController extends MenuBar {
 	public Parent loadPreset(String location) {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		this.uiState.setGuiState(location);
+		injector.getInstance(MainController.class).refresh(uiState);
 		try {
 			loader.setLocation(new URL(FXML_ROOT, location));
 		} catch (MalformedURLException e) {
@@ -537,6 +538,7 @@ public final class MenuController extends MenuBar {
 			alert.showAndWait();
 			return null;
 		}
+		loader.setRoot(injector.getInstance(MainController.class));
 		Parent root;
 		try {
 			root = loader.load();
@@ -558,19 +560,10 @@ public final class MenuController extends MenuBar {
 	}
 	
 	@FXML
-	private void handleReportBug(ActionEvent event) {
-		WebView webView = new WebView();
-		WebEngine webEnging = webView.getEngine();
-		webEnging.setJavaScriptEnabled(true);
-		webEnging.load("https://probjira.atlassian.net/secure/RapidBoard.jspa?rapidView=8");
-		
-		Scene scene = new Scene(webView);
-		scene.getStylesheets().add("prob.css");
-		
-		Stage stage = new Stage();
-		stage.setScene(scene);
-		stage.setTitle("Report Bug");
-		stage.show();
+	public void handleReportBug() {
+		final Stage reportBugStage = injector.getInstance(ReportBugStage.class);
+		reportBugStage.show();
+		reportBugStage.toFront();
 	}
 
 	private List<MenuItem> getRecentFileItems(){
