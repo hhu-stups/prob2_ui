@@ -148,11 +148,9 @@ public class NewProjectStage extends Stage {
 			this.checkBox = new CheckBox();
 			checkBox.setOnAction((event) -> {
 				int column = this.getTableView().getColumns().indexOf(this.getTableColumn());
-				T row = this.getItem();
+				Machine row = (Machine) this.getTableRow().getItem();
 				boolean checked = checkBox.isSelected();
-				if(row instanceof Machine) {
-					prefBooleanMap.put(new Pair<Machine, Integer>((Machine) row, column), checked);
-				}
+				prefBooleanMap.put(new Pair<Machine, Integer>((Machine) row, column), checked);
 			});
 			this.checkBox.setAlignment(Pos.CENTER);
 
@@ -246,7 +244,8 @@ public class NewProjectStage extends Stage {
 
 		List<String> prefs = new ArrayList<>();
 		for (int column = firstPrefColumn; column < totalColumns; column++) {
-			if (prefBooleanMap.get(new Pair<>(machine, column)) != null && prefBooleanMap.get(new Pair<>(machine, column))) {
+			if (prefBooleanMap.get(new Pair<>(machine, column)) != null
+					&& prefBooleanMap.get(new Pair<>(machine, column))) {
 				Preference preference = preferencesListView.getItems().get(column - firstPrefColumn);
 				prefs.add(preference.toString());
 			}
