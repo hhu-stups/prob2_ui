@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.gson.Gson;
@@ -25,6 +26,7 @@ import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
+import de.prob2.ui.internal.UIPersistence;
 import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.preferences.PreferencesStage;
@@ -44,7 +46,7 @@ public final class Config {
 		private List<String> bConsoleEntries;
 		private List<String> statesViewHiddenClasses;
 		private String guiState;
-		private List<String> stages;
+		private HashMap<String, List<Double>> stages;
 		private List<String> groovyObjectTabs;
 		private String groovyConsoleState;
 		private int groovyConsoleCharCounterInLine;
@@ -118,7 +120,7 @@ public final class Config {
 			configData.guiState = this.defaultData.guiState;
 		}
 		if(configData.stages == null) {
-			configData.stages = new ArrayList<>(this.defaultData.stages);
+			configData.stages = new HashMap<>(this.defaultData.stages);
 		}
 		if(configData.groovyObjectTabs == null) {
 			configData.groovyObjectTabs = new ArrayList<>(this.defaultData.groovyObjectTabs);
@@ -223,8 +225,8 @@ public final class Config {
 				
 		this.uiState.setGuiState(configData.guiState);
 		
-		for(String stage: configData.stages) {
-			this.uiState.addStage(stage);
+		for(String stage: configData.stages.keySet()) {
+			this.uiState.addStage(stage, configData.stages.get(stage));
 		}
 				
 		for(String tab: configData.groovyObjectTabs) {
@@ -260,7 +262,8 @@ public final class Config {
 	public void save() {
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
-		configData.stages = new ArrayList<>(this.uiState.getStages());
+		injector.getInstance(UIPersistence.class).save();
+		configData.stages = new HashMap<>(this.uiState.getStages());
 		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
@@ -268,7 +271,7 @@ public final class Config {
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
 		//configData.openedPerspectives = new ArrayList<>(injector.getInstance(AnimationPerspective.class).getOpenedPerspectives());
 		this.saveConsoles(configData);
-
+		
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
 		}

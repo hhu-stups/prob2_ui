@@ -2,6 +2,7 @@ package de.prob2.ui.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,14 +19,14 @@ public class UIState {
 	
 	private String guiState;
 	
-	private Set<String> stages;
+	private HashMap<String, List<Double>> stages;
 	
 	private List<String> groovyObjectTabs;
 		
 	@Inject
 	public UIState() {
 		this.guiState = "main.fxml";
-		this.stages = new HashSet<>();
+		this.stages = new HashMap<String, List<Double>>();
 		this.groovyObjectTabs = new ArrayList<>();
 	}
 	
@@ -37,15 +38,15 @@ public class UIState {
 		return guiState;
 	}
 	
-	public void addStage(String stage) {
-		stages.add(stage);
+	public void addStage(String stage, List<Double> stageData) {
+		stages.put(stage, stageData);
 	}
 	
 	public void removeStage(String stage) {
 		stages.remove(stage);
 	}
 	
-	public Set<String> getStages() {
+	public HashMap<String, List<Double>> getStages() {
 		return stages;
 	}
 	
@@ -66,8 +67,8 @@ public class UIState {
 	}
 	
 	public void clearDetachedStages() {
-		HashSet<String> set = new HashSet<>(stages);
-		for(String stage : set) {
+		HashMap<String,List<Double>> set = new HashMap<>(stages);
+		for(String stage : set.keySet()) {
 			if(DETACHED.contains(stage)) {
 				stages.remove(stage);
 			}

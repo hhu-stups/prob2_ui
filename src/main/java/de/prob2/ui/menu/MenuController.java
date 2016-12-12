@@ -146,7 +146,7 @@ public final class MenuController extends MenuBar {
 		private boolean removableOperations(TitledPane tp, ApplyDetachedEnum detachedBy) {
 			boolean condition = detachOperations.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().contains(tp.getText());
+				condition = uiState.getStages().keySet().contains(tp.getText());
 				if(condition) {
 					detachOperations.setSelected(true);
 				}
@@ -157,7 +157,7 @@ public final class MenuController extends MenuBar {
 		private boolean removableHistory(TitledPane tp, ApplyDetachedEnum detachedBy) {
 			boolean condition = detachHistory.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().contains(tp.getText());
+				condition = uiState.getStages().keySet().contains(tp.getText());
 				if(condition) {
 					detachHistory.setSelected(true);
 				}
@@ -168,7 +168,7 @@ public final class MenuController extends MenuBar {
 		private boolean removableModelcheck(TitledPane tp, ApplyDetachedEnum detachedBy) {
 			boolean condition = detachModelcheck.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().contains(tp.getText());
+				condition = uiState.getStages().keySet().contains(tp.getText());
 				if(condition) {
 					detachModelcheck.setSelected(true);
 				}
@@ -179,7 +179,7 @@ public final class MenuController extends MenuBar {
 		private boolean removableStats(TitledPane tp, ApplyDetachedEnum detachedBy) {
 			boolean condition = detachStats.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().contains(tp.getText());
+				condition = uiState.getStages().keySet().contains(tp.getText());
 				if(condition) {
 					detachStats.setSelected(true);
 				}
@@ -190,7 +190,7 @@ public final class MenuController extends MenuBar {
 		private boolean removableAnimations(TitledPane tp, ApplyDetachedEnum detachedBy) {
 			boolean condition = detachAnimations.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().contains(tp.getText());
+				condition = uiState.getStages().keySet().contains(tp.getText());
 				if(condition) {
 					detachAnimations.setSelected(true);
 				}
