@@ -521,7 +521,6 @@ public final class MenuController extends MenuBar {
 	public Parent loadPreset(String location) {
 		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		this.uiState.setGuiState(location);
-		injector.getInstance(MainController.class).refresh(uiState);
 		try {
 			loader.setLocation(new URL(FXML_ROOT, location));
 		} catch (MalformedURLException e) {
@@ -532,6 +531,7 @@ public final class MenuController extends MenuBar {
 			return null;
 		}
 		loader.setRoot(injector.getInstance(MainController.class));
+		injector.getInstance(MainController.class).refresh(uiState);
 		Parent root;
 		try {
 			root = loader.load();

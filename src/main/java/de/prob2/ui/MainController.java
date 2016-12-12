@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.UIState;
-
 import javafx.fxml.FXML;
 
 
@@ -35,11 +34,8 @@ public class MainController extends BorderPane {
 	public MainController(FXMLLoader loader, UIState uiState) {
 		this.loader = loader;
 		refresh(uiState);
-		operationsTP.expandedProperty().addListener(listener -> {
-			System.out.println("boo1");
-		});
 	}
-	
+		
 	public void refresh(UIState uiState) {
 		String guiState = "main.fxml";
 		if(!"detached".equals(uiState.getGuiState())) {
@@ -54,4 +50,5 @@ public class MainController extends BorderPane {
 			LOGGER.error("loading FXML failed", e);
 		}
 	}
+		
 }

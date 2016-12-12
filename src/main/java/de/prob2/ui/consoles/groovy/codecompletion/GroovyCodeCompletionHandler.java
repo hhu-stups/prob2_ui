@@ -101,7 +101,7 @@ public class GroovyCodeCompletionHandler {
 			if(entry == null || entry.getKey() == null || entry.getValue() == null) {
 				continue;
 			}
-			currentSuggestions.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), null));
+			currentSuggestions.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), null, null));
 		}
 		suggestions.addAll(currentSuggestions);
 	}

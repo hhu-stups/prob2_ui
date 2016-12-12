@@ -21,7 +21,6 @@ import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
-
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.b.BConsole;
@@ -46,6 +45,7 @@ public final class Config {
 		private List<String> statesViewHiddenClasses;
 		private String guiState;
 		private List<String> stages;
+		private List<String> groovyObjectTabs;
 		private String groovyConsoleState;
 		private int groovyConsoleCharCounterInLine;
 		private int groovyConsoleCurrentPosInLine;
@@ -57,6 +57,7 @@ public final class Config {
 		private int bConsoleCaret;
 		private List<IndexRange> bConsoleErrors;
 		private String currentPreference;
+		//private List<String> openedPerspectives;
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
@@ -119,9 +120,15 @@ public final class Config {
 		if(configData.stages == null) {
 			configData.stages = new ArrayList<>(this.defaultData.stages);
 		}
+		if(configData.groovyObjectTabs == null) {
+			configData.groovyObjectTabs = new ArrayList<>(this.defaultData.groovyObjectTabs);
+		}
 		if(configData.currentPreference == null) {
 			configData.currentPreference = this.defaultData.currentPreference;
 		}
+		/*if(configData.openedPerspectives == null) {
+			configData.openedPerspectives = new ArrayList<>(this.defaultData.openedPerspectives);
+		}*/
 		this.replaceMissingWithDefaultsConsoles(configData);
 
 	}
@@ -219,8 +226,18 @@ public final class Config {
 		for(String stage: configData.stages) {
 			this.uiState.addStage(stage);
 		}
+				
+		for(String tab: configData.groovyObjectTabs) {
+			this.uiState.addGroovyObjectTab(tab);
+			
+		}
 		
 		this.injector.getInstance(PreferencesStage.class).setCurrentTab(configData.currentPreference);
+		
+		/*for(String perspective : configData.openedPerspectives) {
+			this.injector.getInstance(AnimationPerspective.class).getOpenedPerspectives().add(perspective);
+		}*/
+		
 		this.loadConsoles(configData);
 	}
 	
@@ -244,10 +261,12 @@ public final class Config {
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
 		configData.stages = new ArrayList<>(this.uiState.getStages());
+		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
 		configData.statesViewHiddenClasses = new ArrayList<>();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
+		//configData.openedPerspectives = new ArrayList<>(injector.getInstance(AnimationPerspective.class).getOpenedPerspectives());
 		this.saveConsoles(configData);
 
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {

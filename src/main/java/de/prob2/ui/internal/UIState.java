@@ -1,7 +1,9 @@
 package de.prob2.ui.internal;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.google.inject.Inject;
@@ -18,10 +20,13 @@ public class UIState {
 	
 	private Set<String> stages;
 	
+	private List<String> groovyObjectTabs;
+		
 	@Inject
 	public UIState() {
 		this.guiState = "main.fxml";
 		this.stages = new HashSet<>();
+		this.groovyObjectTabs = new ArrayList<>();
 	}
 	
 	public void setGuiState(String guiState) {
@@ -42,6 +47,22 @@ public class UIState {
 	
 	public Set<String> getStages() {
 		return stages;
+	}
+	
+	public void addGroovyObjectTab(String tab) {
+		groovyObjectTabs.add(tab);
+	}
+	
+	public void addGroovyObjectTab(String tab, int index) {
+		groovyObjectTabs.add(index, tab);
+	}
+	
+	public void removeGroovyObjectTab(int index) {
+		groovyObjectTabs.remove(index);
+	}
+		
+	public List<String> getGroovyObjectTabs() {
+		return groovyObjectTabs;
 	}
 	
 	public void clearDetachedStages() {

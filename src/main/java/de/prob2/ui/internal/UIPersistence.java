@@ -1,23 +1,30 @@
 package de.prob2.ui.internal;
 
 
+import java.util.List;
+
+import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
+import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem.ShowEnum;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.preferences.PreferencesStage;
 
+@Singleton
 public class UIPersistence {
 
-	private UIState uiState;
+	private final UIState uiState;
 	
-	private Injector injector;
+	private final Injector injector;
 	
-	public UIPersistence(UIState uiState, Injector injector) {
+	@Inject
+	private UIPersistence(UIState uiState, Injector injector) {
 		this.uiState = uiState;
 		this.injector = injector;
 	}
@@ -44,9 +51,12 @@ public class UIPersistence {
 		if(uiState.getStages().contains("Report Bug")) {
 			menu.handleReportBug();
 		}
-		for (GroovyObjectItem item: injector.getInstance(GroovyObjectStage.class).getItems()) {
-			if(uiState.getStages().contains(item.getClazzname())) {
-				item.show();
+		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
+		int j = 0;
+		for(int i = 0; i < groovyObjects.size(); i++) {
+			if(uiState.getStages().contains(groovyObjects.get(i).getClazzname())) {
+				groovyObjects.get(i).show(ShowEnum.PERSISTENCE,j);
+				j++;
 			}
 		}
 		PreferencesStage preferencesStage = injector.getInstance(PreferencesStage.class);
