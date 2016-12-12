@@ -7,19 +7,30 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.UIState;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Accordion;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 
 @Singleton
 public class MainController extends BorderPane {
 	
 	private FXMLLoader loader;
-		
+	
+	@FXML
+	private Accordion leftAccordion;
+	
+	@FXML
+	private TitledPane operationsTP;
 	
 	@Inject
 	public MainController(FXMLLoader loader, UIState uiState) {
 		this.loader = loader;
 		refresh(uiState);
+		operationsTP.expandedProperty().addListener(listener -> {
+			System.out.println("boo1");
+		});
 	}
 	
 	public void refresh(UIState uiState) {
