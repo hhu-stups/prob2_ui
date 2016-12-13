@@ -18,6 +18,8 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentStage;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -67,7 +69,7 @@ public class NewProjectStage extends Stage {
 
 	private CurrentProject currentProject;
 	private CurrentStage currentStage;
-	private Map<Pair<Machine, Integer>, Boolean> prefBooleanMap = new HashMap<>();
+	private Map<Pair<Machine, Integer>, BooleanProperty> prefBooleanMap = new HashMap<>();
 	private Map<String, Preference> preferencesMap = new HashMap<>();
 
 	private FXMLLoader loader;
@@ -105,6 +107,14 @@ public class NewProjectStage extends Stage {
 			removeMenuItem.setOnAction(event -> {
 				Machine m = row.getItem();
 				machinesTableView.getItems().remove(m);
+				int totalColumns = machinesTableView.getColumns().size();
+				int firstPrefColumn = totalColumns - preferencesListView.getItems().size();
+				for (int i = firstPrefColumn; i < totalColumns; i++) {
+					prefBooleanMap.remove(new Pair<Machine, Integer>(m, i));
+				}
+				machinesTableView.refresh();
+				System.out.println(prefBooleanMap);
+				System.out.println(machinesTableView.getItems());
 			});
 			contextMenu.getItems().add(removeMenuItem);
 			row.setOnMouseClicked(event -> {
@@ -145,17 +155,34 @@ public class NewProjectStage extends Stage {
 		private final CheckBox checkBox;
 
 		public CheckBoxCell() {
-			this.checkBox = new CheckBox();
+			checkBox = new CheckBox();
+			//checkBox.selectedProperty().set(false);
+//			if (getTableRow() != null) {
+//				Machine machine = (Machine) this.getTableRow().getItem();
+//				int column = this.getTableView().getColumns().indexOf(this.getTableColumn());
+//				Pair<Machine, Integer> pair = new Pair<Machine, Integer>(machine, column);
+//				if (prefBooleanMap.containsKey(pair)) {
+//					// this.checkBox.setSelected(prefBooleanMap.get(pair).get());
+//					checkBox.selectedProperty().set(prefBooleanMap.get(pair).get());
+//					System.out.println("*******************************************************************");
+//				}
+//			} else {
+//				System.out.println(this.getIndex());
+//			}
 			checkBox.setOnAction((event) -> {
+				Machine machine = (Machine) this.getTableRow().getItem();
 				int column = this.getTableView().getColumns().indexOf(this.getTableColumn());
-				Machine row = (Machine) this.getTableRow().getItem();
-				boolean checked = checkBox.isSelected();
-				prefBooleanMap.put(new Pair<Machine, Integer>((Machine) row, column), checked);
+				Pair<Machine, Integer> pair = new Pair<Machine, Integer>(machine, column);
+				prefBooleanMap.put(pair, new SimpleBooleanProperty(checkBox.isSelected()));
+				checkBox.selectedProperty().bindBidirectional(prefBooleanMap.get(pair));
+				System.out.println(prefBooleanMap);
 			});
-			this.checkBox.setAlignment(Pos.CENTER);
 
 			setAlignment(Pos.CENTER);
 			setGraphic(checkBox);
+			System.out.println("----------------------------");
+			System.out.println(prefBooleanMap);
+			System.out.println("----------------------------");
 		}
 
 		@Override
@@ -245,7 +272,7 @@ public class NewProjectStage extends Stage {
 		List<String> prefs = new ArrayList<>();
 		for (int column = firstPrefColumn; column < totalColumns; column++) {
 			if (prefBooleanMap.get(new Pair<>(machine, column)) != null
-					&& prefBooleanMap.get(new Pair<>(machine, column))) {
+					&& prefBooleanMap.get(new Pair<>(machine, column)).get()) {
 				Preference preference = preferencesListView.getItems().get(column - firstPrefColumn);
 				prefs.add(preference.toString());
 			}

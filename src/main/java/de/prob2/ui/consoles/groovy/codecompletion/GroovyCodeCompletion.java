@@ -273,7 +273,6 @@ public class GroovyCodeCompletion extends Popup {
 		return parent;
 	}
 	
-	
 	public boolean isVisible() {
 		return this.isShowing();
 	}

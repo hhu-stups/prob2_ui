@@ -101,14 +101,14 @@ public class GroovyCodeCompletionHandler {
 			if(entry == null || entry.getKey() == null || entry.getValue() == null) {
 				continue;
 			}
-			currentSuggestions.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), null));
+			currentSuggestions.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), null, null));
 		}
 		suggestions.addAll(currentSuggestions);
 	}
 		
 	private void fillMethodsAndProperties(Class <?> clazz, GroovyMethodOption option) {
 		for(Method m : clazz.getMethods()) {
-			if((option == GroovyMethodOption.ALL) || (isNonstatic(option, m)) || (isStatic(option, m))) {
+			if((option == GroovyMethodOption.ALL) || isNonstatic(option, m) || isStatic(option, m)) {
 				currentSuggestions.add(new GroovyClassPropertyItem(m));
 			}
 		}
