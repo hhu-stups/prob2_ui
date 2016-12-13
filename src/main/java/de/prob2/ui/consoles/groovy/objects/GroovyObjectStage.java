@@ -3,6 +3,7 @@ package de.prob2.ui.consoles.groovy.objects;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -10,7 +11,6 @@ import javax.script.ScriptEngine;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem.ShowEnum;
 import de.prob2.ui.internal.UIState;
 import de.prob2.ui.prob2fx.CurrentStage;
 
@@ -55,9 +55,7 @@ public final class GroovyObjectStage extends Stage {
 		this.currentStage = currentStage;
 		this.uiState = uiState;
 		currentStage.register(this);
-		this.setOnCloseRequest(e-> {
-			close();
-		});
+		this.setOnCloseRequest(e-> close());
 	}
 
 	@Override
@@ -97,7 +95,7 @@ public final class GroovyObjectStage extends Stage {
 		tvObjects.setOnMouseClicked(e -> {
 			int currentPos = tvObjects.getSelectionModel().getSelectedIndex();
 			if (currentPos >= 0) {
-				items.get(currentPos).show(ShowEnum.DEFAULT,0);
+				items.get(currentPos).show(GroovyObjectItem.ShowEnum.DEFAULT,0);
 			}
 			tvObjects.getSelectionModel().clearSelection();
 		});
@@ -106,6 +104,4 @@ public final class GroovyObjectStage extends Stage {
 	public List<GroovyObjectItem> getItems() {
 		return items;
 	}
-	
-
 }

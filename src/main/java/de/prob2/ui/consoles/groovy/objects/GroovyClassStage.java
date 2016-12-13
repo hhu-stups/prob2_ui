@@ -8,15 +8,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
 import de.prob2.ui.consoles.groovy.MetaPropertiesHandler;
 import de.prob2.ui.internal.UIState;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -27,6 +22,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GroovyClassStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
@@ -117,16 +115,9 @@ public class GroovyClassStage extends Stage {
 		tvClass.setItems(attributes);
 		tvCollectionData.setItems(collectionData);
 
-		tabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
-			@Override
-			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-				uiState.getGroovyObjectTabs().set(index, ((Tab)newValue).getText());
-			}
-		});
+		tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> uiState.getGroovyObjectTabs().set(index, newValue.getText()));
 		
-		this.setOnCloseRequest(e-> {
-			uiState.getGroovyObjectTabs().remove(this.getTitle());
-		});
+		this.setOnCloseRequest(e -> uiState.getGroovyObjectTabs().remove(this.getTitle()));
 	}
 	
 	public void showMethodsAndFields(Object object) {
@@ -217,7 +208,7 @@ public class GroovyClassStage extends Stage {
 	public void openTab(String tab) {
 		switch(tab) {
 			case "Public Fields and Properties":
-				tabPane.getSelectionModel().select(tabFields);;
+				tabPane.getSelectionModel().select(tabFields);
 				break;
 			case "Methods":
 				tabPane.getSelectionModel().select(tabMethods);

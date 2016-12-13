@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.inject.Inject;
@@ -13,20 +14,16 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class UIState {
-	
-	private static final String[] DETACHED_VALUES = new String[]{"History", "Operations", "Model Check", "Statistics", "Animations"};
-	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList(DETACHED_VALUES));
+	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList(new String[] {"History", "Operations", "Model Check", "Statistics", "Animations"}));
 	
 	private String guiState;
-	
 	private HashMap<String, List<Double>> stages;
-	
 	private List<String> groovyObjectTabs;
 		
 	@Inject
 	public UIState() {
 		this.guiState = "main.fxml";
-		this.stages = new HashMap<String, List<Double>>();
+		this.stages = new HashMap<>();
 		this.groovyObjectTabs = new ArrayList<>();
 	}
 	
@@ -46,7 +43,7 @@ public class UIState {
 		stages.remove(stage);
 	}
 	
-	public HashMap<String, List<Double>> getStages() {
+	public Map<String, List<Double>> getStages() {
 		return stages;
 	}
 	
@@ -67,12 +64,6 @@ public class UIState {
 	}
 	
 	public void clearDetachedStages() {
-		HashMap<String,List<Double>> set = new HashMap<>(stages);
-		for(String stage : set.keySet()) {
-			if(DETACHED.contains(stage)) {
-				stages.remove(stage);
-			}
-		}
+		stages.keySet().removeAll(DETACHED);
 	}
-
 }

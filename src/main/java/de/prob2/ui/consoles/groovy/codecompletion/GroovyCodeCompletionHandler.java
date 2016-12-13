@@ -108,7 +108,7 @@ public class GroovyCodeCompletionHandler {
 		
 	private void fillMethodsAndProperties(Class <?> clazz, GroovyMethodOption option) {
 		for(Method m : clazz.getMethods()) {
-			if((option == GroovyMethodOption.ALL) || (isNonstatic(option, m)) || (isStatic(option, m))) {
+			if((option == GroovyMethodOption.ALL) || isNonstatic(option, m) || isStatic(option, m)) {
 				currentSuggestions.add(new GroovyClassPropertyItem(m));
 			}
 		}

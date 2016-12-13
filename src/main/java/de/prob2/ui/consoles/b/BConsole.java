@@ -6,8 +6,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.consoles.Console;
 
 @Singleton
-public class BConsole extends Console {
-	
+public final class BConsole extends Console {
 	@Inject
 	private BConsole(BInterpreter interpreter) {
 		super();
@@ -15,9 +14,9 @@ public class BConsole extends Console {
 		this.appendText("ProB 2.0 B Console \n >");
 	}
 	
+	@Override
 	public void reset() {
 		this.replaceText("ProB 2.0 B Console");
 		this.errors.clear();
 	}
-	
 }

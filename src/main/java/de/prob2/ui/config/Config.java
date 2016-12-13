@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
+
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.b.BConsole;
@@ -31,6 +32,7 @@ import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.ClassBlacklist;
+
 import javafx.scene.control.IndexRange;
 
 import org.slf4j.Logger;
@@ -59,7 +61,6 @@ public final class Config {
 		private int bConsoleCaret;
 		private List<IndexRange> bConsoleErrors;
 		private String currentPreference;
-		//private List<String> openedPerspectives;
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
@@ -112,27 +113,23 @@ public final class Config {
 			configData.maxRecentFiles = this.defaultData.maxRecentFiles;
 			configData.recentFiles = new ArrayList<>(this.defaultData.recentFiles);
 		}
-				
+		
 		if (configData.statesViewHiddenClasses == null) {
 			configData.statesViewHiddenClasses = new ArrayList<>(this.defaultData.statesViewHiddenClasses);
 		}
-		if(configData.guiState == null || "".equals(configData.guiState)) {
+		if (configData.guiState == null || configData.guiState.isEmpty()) {
 			configData.guiState = this.defaultData.guiState;
 		}
-		if(configData.stages == null) {
+		if (configData.stages == null) {
 			configData.stages = new HashMap<>(this.defaultData.stages);
 		}
-		if(configData.groovyObjectTabs == null) {
+		if (configData.groovyObjectTabs == null) {
 			configData.groovyObjectTabs = new ArrayList<>(this.defaultData.groovyObjectTabs);
 		}
-		if(configData.currentPreference == null) {
+		if (configData.currentPreference == null) {
 			configData.currentPreference = this.defaultData.currentPreference;
 		}
-		/*if(configData.openedPerspectives == null) {
-			configData.openedPerspectives = new ArrayList<>(this.defaultData.openedPerspectives);
-		}*/
 		this.replaceMissingWithDefaultsConsoles(configData);
-
 	}
 	
 	private void replaceMissingWithDefaultsConsoles(final ConfigData configData) {
@@ -143,14 +140,14 @@ public final class Config {
 		if (configData.bConsoleEntries == null) {
 			configData.bConsoleEntries = new ArrayList<>(this.defaultData.bConsoleEntries);
 		}
-		if(configData.groovyConsoleState == null) {
+		if (configData.groovyConsoleState == null) {
 			configData.groovyConsoleState = this.defaultData.groovyConsoleState;
 			configData.groovyConsoleCharCounterInLine = this.defaultData.groovyConsoleCharCounterInLine;
 			configData.groovyConsoleCurrentPosInLine = this.defaultData.groovyConsoleCurrentPosInLine;
 			configData.groovyConsoleCaret = this.defaultData.groovyConsoleCaret;
 			configData.groovyConsoleErrors = new ArrayList<>(this.defaultData.groovyConsoleErrors);
 		}
-		if(configData.bConsoleState == null) {
+		if (configData.bConsoleState == null) {
 			configData.bConsoleState = this.defaultData.bConsoleState;
 			configData.bConsoleCharCounterInLine = this.defaultData.bConsoleCharCounterInLine;
 			configData.bConsoleCurrentPosInLine = this.defaultData.bConsoleCurrentPosInLine;
@@ -160,12 +157,12 @@ public final class Config {
 	}
 	
 	private void loadConsoles(final ConfigData configData) {
-		for(String instruction : configData.groovyConsoleEntries) {
+		for (String instruction : configData.groovyConsoleEntries) {
 			groovyConsole.getInstructions().add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 			groovyConsole.increaseCounter();
 		}
 		
-		for(String instruction : configData.bConsoleEntries) {
+		for (String instruction : configData.bConsoleEntries) {
 			bConsole.getInstructions().add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 			bConsole.increaseCounter();
 		}
@@ -175,7 +172,7 @@ public final class Config {
 		this.groovyConsole.setCurrentPosInLine(configData.groovyConsoleCurrentPosInLine);
 		this.groovyConsole.moveTo(configData.groovyConsoleCaret);
 		
-		for(IndexRange range: configData.groovyConsoleErrors) {
+		for (IndexRange range : configData.groovyConsoleErrors) {
 			groovyConsole.getErrors().add(range);
 			groovyConsole.setStyleClass(range.getStart(), range.getEnd(), "error");
 		}
@@ -185,7 +182,7 @@ public final class Config {
 		this.bConsole.setCurrentPosInLine(configData.bConsoleCurrentPosInLine);
 		this.bConsole.moveTo(configData.bConsoleCaret);
 		
-		for(IndexRange range: configData.bConsoleErrors) {
+		for (IndexRange range : configData.bConsoleErrors) {
 			bConsole.getErrors().add(range);
 			bConsole.setStyleClass(range.getStart(), range.getEnd(), "error");
 		}
@@ -222,23 +219,18 @@ public final class Config {
 			classBlacklist.getKnownClasses().add(clazz);
 			classBlacklist.getBlacklist().add(clazz);
 		}
-				
+		
 		this.uiState.setGuiState(configData.guiState);
 		
-		for(String stage: configData.stages.keySet()) {
+		for (String stage : configData.stages.keySet()) {
 			this.uiState.addStage(stage, configData.stages.get(stage));
 		}
-				
-		for(String tab: configData.groovyObjectTabs) {
+		
+		for (String tab : configData.groovyObjectTabs) {
 			this.uiState.addGroovyObjectTab(tab);
-			
 		}
 		
 		this.injector.getInstance(PreferencesStage.class).setCurrentTab(configData.currentPreference);
-		
-		/*for(String perspective : configData.openedPerspectives) {
-			this.injector.getInstance(AnimationPerspective.class).getOpenedPerspectives().add(perspective);
-		}*/
 		
 		this.loadConsoles(configData);
 	}
@@ -269,7 +261,6 @@ public final class Config {
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
 		configData.statesViewHiddenClasses = new ArrayList<>();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
-		//configData.openedPerspectives = new ArrayList<>(injector.getInstance(AnimationPerspective.class).getOpenedPerspectives());
 		this.saveConsoles(configData);
 		
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
@@ -284,5 +275,4 @@ public final class Config {
 			logger.warn("Failed to save config file", exc);
 		}
 	}
-	
 }

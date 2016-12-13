@@ -1,6 +1,5 @@
 package de.prob2.ui.internal;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,18 +13,16 @@ import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
-import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem.ShowEnum;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.ReportBugStage;
 import de.prob2.ui.preferences.PreferencesStage;
+
 import javafx.stage.Stage;
 
 @Singleton
-public class UIPersistence {
-
+public final class UIPersistence {
 	private final UIState uiState;
-	
 	private final Injector injector;
 	
 	@Inject
@@ -62,14 +59,14 @@ public class UIPersistence {
 		}
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
 		int j = 0;
-		for(int i = 0; i < groovyObjects.size(); i++) {
-			if(uiState.getStages().keySet().contains(groovyObjects.get(i).getClazzname())) {
-				groovyObjects.get(i).show(ShowEnum.PERSISTENCE,j);
+		for (GroovyObjectItem groovyObject : groovyObjects) {
+			if (uiState.getStages().keySet().contains(groovyObject.getClazzname())) {
+				groovyObject.show(GroovyObjectItem.ShowEnum.PERSISTENCE, j);
 				j++;
 			}
 		}
 		PreferencesStage preferencesStage = injector.getInstance(PreferencesStage.class);
-		switch(preferencesStage.getCurrentTab()) {
+		switch (preferencesStage.getCurrentTab()) {
 			case "ProB Preferences":
 				preferencesStage.selectPreferences();
 				break;
@@ -111,5 +108,4 @@ public class UIPersistence {
 		data.add(stage.getHeight());
 		return data;
 	}
-	
 }
