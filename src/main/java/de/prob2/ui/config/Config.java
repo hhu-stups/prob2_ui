@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -94,7 +96,10 @@ public final class Config {
 		this.bConsole = bConsole;
 		this.injector = injector;
 		
-		try (final Reader defaultReader = new InputStreamReader(Config.class.getResourceAsStream("default.json"), CONFIG_CHARSET)) {
+		try (
+			final InputStream is = Config.class.getResourceAsStream("default.json");
+			final Reader defaultReader = new InputStreamReader(is, CONFIG_CHARSET)
+		) {
 			this.defaultData = gson.fromJson(defaultReader, ConfigData.class);
 		} catch (FileNotFoundException exc) {
 			throw new IllegalStateException("Default config file not found", exc);
@@ -192,7 +197,10 @@ public final class Config {
 	
 	public void load() {
 		ConfigData configData;
-		try (final Reader reader = new InputStreamReader(new FileInputStream(LOCATION), CONFIG_CHARSET)) {
+		try (
+			final InputStream is = new FileInputStream(LOCATION);
+			final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
+		) {
 			configData = gson.fromJson(reader, ConfigData.class);
 		} catch (FileNotFoundException exc) {
 			logger.info("Config file not found, loading default settings", exc);
@@ -278,7 +286,10 @@ public final class Config {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
 		}
 		
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(LOCATION), CONFIG_CHARSET)) {
+		try (
+			final OutputStream os = new FileOutputStream(LOCATION);
+			final Writer writer = new OutputStreamWriter(os, CONFIG_CHARSET)
+		) {
 			gson.toJson(configData, writer);
 		} catch (FileNotFoundException exc) {
 			logger.warn("Failed to create config file", exc);
