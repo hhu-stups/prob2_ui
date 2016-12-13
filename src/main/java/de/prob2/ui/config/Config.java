@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -33,6 +34,7 @@ import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.ClassBlacklist;
 
+import javafx.geometry.BoundingBox;
 import javafx.scene.control.IndexRange;
 
 import org.slf4j.Logger;
@@ -48,7 +50,7 @@ public final class Config {
 		private List<String> bConsoleEntries;
 		private List<String> statesViewHiddenClasses;
 		private String guiState;
-		private HashMap<String, List<Double>> stages;
+		private HashMap<String, double[]> stages;
 		private List<String> groovyObjectTabs;
 		private String groovyConsoleState;
 		private int groovyConsoleCharCounterInLine;
@@ -222,8 +224,9 @@ public final class Config {
 		
 		this.uiState.setGuiState(configData.guiState);
 		
-		for (String stage : configData.stages.keySet()) {
-			this.uiState.addStage(stage, configData.stages.get(stage));
+		for (final Map.Entry<String, double[]> entry : configData.stages.entrySet()) {
+			final double[] v = entry.getValue();
+			this.uiState.addStage(entry.getKey(), new BoundingBox(v[0], v[1], v[2], v[3]));
 		}
 		
 		for (String tab : configData.groovyObjectTabs) {
@@ -255,7 +258,15 @@ public final class Config {
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
 		injector.getInstance(UIPersistence.class).save();
-		configData.stages = new HashMap<>(this.uiState.getStages());
+		configData.stages = new HashMap<>();
+		for (final Map.Entry<String, BoundingBox> entry : this.uiState.getStages().entrySet()) {
+			configData.stages.put(entry.getKey(), new double[] {
+				entry.getValue().getMinX(),
+				entry.getValue().getMinY(),
+				entry.getValue().getWidth(),
+				entry.getValue().getHeight(),
+			});
+		}
 		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);

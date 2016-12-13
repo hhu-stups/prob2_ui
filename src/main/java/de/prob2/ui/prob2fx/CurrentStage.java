@@ -1,17 +1,16 @@
 package de.prob2.ui.prob2fx;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.UIState;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
 /**
@@ -68,13 +67,8 @@ public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 	
 	public void register(final Stage stage) {
 		stage.showingProperty().addListener((observable, from, to) -> {
-			if(to) {
-				List<Double> stageData = new ArrayList<>();
-				stageData.add(stage.getX());
-				stageData.add(stage.getY());
-				stageData.add(stage.getWidth());
-				stageData.add(stage.getHeight());
-				uiState.addStage(stage.getTitle(), stageData);
+			if (to) {
+				uiState.addStage(stage.getTitle(), new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()));
 			} else {
 				uiState.removeStage(stage.getTitle());
 			}

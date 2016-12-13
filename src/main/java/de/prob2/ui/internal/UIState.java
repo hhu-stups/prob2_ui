@@ -11,13 +11,15 @@ import java.util.Set;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import javafx.geometry.BoundingBox;
+
 
 @Singleton
 public class UIState {
 	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList(new String[] {"History", "Operations", "Model Check", "Statistics", "Animations"}));
 	
 	private String guiState;
-	private HashMap<String, List<Double>> stages;
+	private HashMap<String, BoundingBox> stages;
 	private List<String> groovyObjectTabs;
 		
 	@Inject
@@ -35,15 +37,15 @@ public class UIState {
 		return guiState;
 	}
 	
-	public void addStage(String stage, List<Double> stageData) {
-		stages.put(stage, stageData);
+	public void addStage(String stage, BoundingBox box) {
+		stages.put(stage, box);
 	}
 	
 	public void removeStage(String stage) {
 		stages.remove(stage);
 	}
 	
-	public Map<String, List<Double>> getStages() {
+	public Map<String, BoundingBox> getStages() {
 		return stages;
 	}
 	

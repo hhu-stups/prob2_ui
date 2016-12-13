@@ -1,6 +1,5 @@
 package de.prob2.ui.internal;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -18,6 +17,7 @@ import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.ReportBugStage;
 import de.prob2.ui.preferences.PreferencesStage;
 
+import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
 @Singleton
@@ -78,11 +78,11 @@ public final class UIPersistence {
 		}
 	}
 	
-	public void sizeStage(Stage stage, List<Double> data) {
-		stage.setX(data.get(0));
-		stage.setY(data.get(1));
-		stage.setWidth(data.get(2));
-		stage.setHeight(data.get(3));
+	public void sizeStage(Stage stage, BoundingBox box) {
+		stage.setX(box.getMinX());
+		stage.setY(box.getMinY());
+		stage.setWidth(box.getWidth());
+		stage.setHeight(box.getHeight());
 	}
 	
 	public void save() {
@@ -100,12 +100,7 @@ public final class UIPersistence {
 		}
 	}
 	
-	private List<Double> getStageData(Stage stage) {
-		List<Double> data = new ArrayList<>();
-		data.add(stage.getX());
-		data.add(stage.getY());
-		data.add(stage.getWidth());
-		data.add(stage.getHeight());
-		return data;
+	private BoundingBox getStageData(Stage stage) {
+		return new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
 	}
 }
