@@ -148,13 +148,6 @@ public final class MenuController extends MenuBar {
 			return condition;
 		}
 
-		private void printStages() {
-			for(String s : uiState.getStages().keySet()) {
-				System.out.println(s);
-			}
-			System.out.println();
-		}
-
 		private void transferToNewWindow(Parent node, String title) {
 			Stage stage = new Stage();
 			wrapperStages.add(stage);
