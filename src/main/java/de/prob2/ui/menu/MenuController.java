@@ -159,7 +159,7 @@ public final class MenuController extends MenuBar {
 			stage.setTitle(title);
 			currentStage.register(stage, null);
 			stage.getIcons().add(new Image("prob_128.gif"));
-			stage.setOnCloseRequest(e -> {
+			stage.setOnHidden(e -> {
 				windowPrefs.putDouble(node.getClass()+"X",stage.getX());
 				windowPrefs.putDouble(node.getClass()+"Y",stage.getY());
 				windowPrefs.putDouble(node.getClass()+"Width",stage.getWidth());
