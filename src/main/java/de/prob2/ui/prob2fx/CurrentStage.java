@@ -1,8 +1,5 @@
 package de.prob2.ui.prob2fx;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -13,7 +10,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
 /**
@@ -26,14 +22,11 @@ public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 	
 	private UIState uiState;
 	
-	private List<Stage> stages;
-	
 	@Inject
 	private CurrentStage(UIState uiState) {
 		super();
 		this.stage = new SimpleObjectProperty<>(this, "stage", null);
 		this.uiState = uiState;
-		this.stages = new ArrayList<>();
 	}
 	
 	@Override
@@ -74,14 +67,12 @@ public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 	public void register(final Stage stage) {
 		stage.showingProperty().addListener((observable, from, to) -> {
 			if (to) {
-				uiState.addStage(stage.getTitle(), new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()));
-				stages.add(stage);
+				uiState.addStage(stage.getTitle(), stage);
 			} else {
 				if("ProB 2.0".equals(stage.getTitle())) {
 					return;
 				}
 				uiState.removeStage(stage.getTitle());
-				stages.remove(stage);
 			}
 		});
 		stage.focusedProperty().addListener((observable, from, to) -> {
@@ -91,9 +82,5 @@ public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 				this.stage.set(null);
 			}
 		});
-	}
-	
-	public List<Stage> getStages() {
-		return stages;
 	}
 }
