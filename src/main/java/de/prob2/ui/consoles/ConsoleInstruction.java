@@ -18,6 +18,7 @@ public class ConsoleInstruction {
 		return option;
 	}
 	
+	@Override
 	public String toString() {
 		return instruction;
 	}

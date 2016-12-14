@@ -524,4 +524,10 @@ public final class MenuController extends MenuBar {
 		}
 		return newItems;
 	}
+	
+	public void handleMainStages(Class<? extends Stage> clazz) {
+		final Stage stage = injector.getInstance(clazz);
+		stage.show();
+		stage.toFront();
+	}
 }

@@ -1,7 +1,10 @@
 package de.prob2.ui.internal;
 
+import java.util.HashMap;
 import java.util.List;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -40,26 +43,21 @@ public final class UIPersistence {
 		} else {
 			menu.loadPreset(uiState.getGuiState());
 		}
-		if(uiState.getStages().keySet().contains("Groovy Console")) {
-			sizeStage(injector.getInstance(GroovyConsoleStage.class), uiState.getStages().get("Groovy Console"));
-			menu.handleGroovyConsole();
-			if(uiState.getStages().keySet().contains("Groovy Objects")) {
-				sizeStage(injector.getInstance(GroovyObjectStage.class), uiState.getStages().get("Groovy Objects"));
-				injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
+		if(uiState.getStages().keySet().contains("Groovy Objects")) {
+			sizeStage(injector.getInstance(GroovyObjectStage.class), uiState.getStages().get("Groovy Objects"));
+			injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
+		}
+		HashMap<String, Class<? extends Stage>> mainStages = Maps.newHashMap(
+			ImmutableMap.of("Groovy Console", GroovyConsoleStage.class, "B Console", BConsoleStage.class, "Preferences", PreferencesStage.class, "Report Bug", ReportBugStage.class)
+		);
+		
+		for(String stage : mainStages.keySet()) {
+			if(uiState.getStages().keySet().contains(stage)) {
+				sizeStage(injector.getInstance(mainStages.get(stage)), uiState.getStages().get(stage));
+				menu.handleMainStages(mainStages.get(stage));
 			}
 		}
-		if(uiState.getStages().keySet().contains("B Console")) {
-			sizeStage(injector.getInstance(BConsoleStage.class), uiState.getStages().get("B Console"));
-			menu.handleBConsole();
-		}
-		if(uiState.getStages().keySet().contains("Preferences")) {
-			sizeStage(injector.getInstance(PreferencesStage.class), uiState.getStages().get("Preferences"));
-			menu.handlePreferences();
-		}
-		if(uiState.getStages().keySet().contains("Report Bug")) {
-			sizeStage(injector.getInstance(ReportBugStage.class), uiState.getStages().get("Report Bug"));
-			menu.handleReportBug();
-		}
+		
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
 		int j = 0;
 		for (GroovyObjectItem groovyObject : groovyObjects) {

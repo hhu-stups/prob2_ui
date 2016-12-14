@@ -312,8 +312,7 @@ public abstract class Console extends StyleClassedTextArea {
 	public String[] getSettings() {
 		String instructionEntries = instructions.toString();
 		String error = errors.toString();
-		String[] settings = new String[]{instructionEntries, getText(), String.valueOf(charCounterInLine), String.valueOf(currentPosInLine), String.valueOf(getCaretPosition()), error};
-		return settings;
+		return new String[]{instructionEntries, getText(), String.valueOf(charCounterInLine), String.valueOf(currentPosInLine), String.valueOf(getCaretPosition()), error};
 	}
 	
 	public void applySettings(String[] settings) {
