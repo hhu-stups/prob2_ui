@@ -49,7 +49,6 @@ public class ProB2 extends Application {
 			stage.setWidth(mainBox.getWidth());
 			stage.setHeight(mainBox.getHeight());
 		}
-		
 		stage.show();
 		uiPersistence.open();
 	}
