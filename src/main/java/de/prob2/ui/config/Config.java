@@ -123,10 +123,6 @@ public final class Config {
 		if (configData.currentPreference == null) {
 			configData.currentPreference = this.defaultData.currentPreference;
 		}
-		this.replaceMissingWithDefaultsConsoles(configData);
-	}
-	
-	private void replaceMissingWithDefaultsConsoles(final ConfigData configData) {
 		if(configData.groovyConsoleSettings == null) {
 			configData.groovyConsoleSettings = this.defaultData.groovyConsoleSettings;
 		}
@@ -134,12 +130,7 @@ public final class Config {
 			configData.bConsoleSettings = this.defaultData.bConsoleSettings;
 		}
 	}
-	
-	private void loadConsoles(final ConfigData configData) {
-		groovyConsole.applySettings(configData.groovyConsoleSettings);
-		bConsole.applySettings(configData.bConsoleSettings);
-	}
-	
+			
 	public void load() {
 		ConfigData configData;
 		try (
@@ -188,15 +179,10 @@ public final class Config {
 		
 		this.injector.getInstance(PreferencesStage.class).setCurrentTab(configData.currentPreference);
 		
-		this.loadConsoles(configData);
+		groovyConsole.applySettings(configData.groovyConsoleSettings);
+		bConsole.applySettings(configData.bConsoleSettings);
 	}
-	
-	private void saveConsoles(final ConfigData configData) {
-		configData.groovyConsoleSettings = groovyConsole.getSettings();
-		configData.bConsoleSettings = bConsole.getSettings();
-	}
-	
-	
+		
 	public void save() {
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
@@ -215,7 +201,8 @@ public final class Config {
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
 		configData.statesViewHiddenClasses = new ArrayList<>();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
-		this.saveConsoles(configData);
+		configData.groovyConsoleSettings = groovyConsole.getSettings();
+		configData.bConsoleSettings = bConsole.getSettings();
 		
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
