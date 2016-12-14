@@ -310,14 +310,14 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public String[] getSettings() {
-		String instruction = instructions.toString();
+		String instructionEntries = instructions.toString();
 		String error = errors.toString();
-		String[] settings = new String[]{instruction, getText(), String.valueOf(charCounterInLine), String.valueOf(currentPosInLine), String.valueOf(getCaretPosition()), error};
+		String[] settings = new String[]{instructionEntries, getText(), String.valueOf(charCounterInLine), String.valueOf(currentPosInLine), String.valueOf(getCaretPosition()), error};
 		return settings;
 	}
 	
 	public void applySettings(String[] settings) {
-		String instructionEntries = settings[0].substring(1, settings[0].length()-1);
+		String instructionEntries = settings[0].substring(1, settings[0].length()-1).replaceAll(" ", "");
 		String[] instructionSettings = instructionEntries.split(",");
 		String errorsEntries = settings[5].substring(1, settings[5].length()-1).replaceAll(" ", "");
 		String[] errorsSettings = errorsEntries.split(",");

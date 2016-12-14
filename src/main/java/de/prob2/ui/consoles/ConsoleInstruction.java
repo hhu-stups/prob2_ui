@@ -17,5 +17,9 @@ public class ConsoleInstruction {
 	public ConsoleInstructionOption getOption() {
 		return option;
 	}
+	
+	public String toString() {
+		return instruction;
+	}
 
 }
