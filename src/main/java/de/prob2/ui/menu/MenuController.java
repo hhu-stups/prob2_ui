@@ -145,7 +145,7 @@ public final class MenuController extends MenuBar {
 		private boolean removablePane(TitledPane tp, CheckBox detached, ApplyDetachedEnum detachedBy) {
 			boolean condition = detached.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getSavedStageBoxes().keySet().contains(tp.getText());
+				condition = uiState.getSavedStageBoxes().containsKey(tp.getText());
 				if(condition) {
 					detached.setSelected(true);
 				}

@@ -56,7 +56,7 @@ public final class UIPersistence {
 		);
 		
 		for (final Map.Entry<String, Class<? extends Stage>> entry : mainStages.entrySet()) {
-			if(uiState.getSavedStageBoxes().keySet().contains(entry.getKey())) {
+			if(uiState.getSavedStageBoxes().containsKey(entry.getKey())) {
 				sizeStage(injector.getInstance(entry.getValue()), uiState.getSavedStageBoxes().get(entry.getKey()));
 				menu.handleMainStages(entry.getValue());
 			}
@@ -64,14 +64,14 @@ public final class UIPersistence {
 	}
 	
 	private void openGroovyObjects() {
-		if(uiState.getSavedStageBoxes().keySet().contains("Groovy Objects")) {
+		if(uiState.getSavedStageBoxes().containsKey("Groovy Objects")) {
 			sizeStage(injector.getInstance(GroovyObjectStage.class), uiState.getSavedStageBoxes().get("Groovy Objects"));
 			injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
 		}
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
 		int j = 0;
 		for (GroovyObjectItem groovyObject : groovyObjects) {
-			if (uiState.getSavedStageBoxes().keySet().contains(groovyObject.getClazzname())) {
+			if (uiState.getSavedStageBoxes().containsKey(groovyObject.getClazzname())) {
 				sizeStage(groovyObject.getStage(), uiState.getSavedStageBoxes().get(groovyObject.getClazzname()));
 				groovyObject.show(GroovyObjectItem.ShowEnum.PERSISTENCE, j);
 				j++;
