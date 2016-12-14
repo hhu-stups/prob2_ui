@@ -7,7 +7,14 @@
 		"de.prob.model.representation.Action"
 	],
 	"guiState": "main.fxml",
-	"stages": {},
+	"stages": {
+    	"ProB 2.0": [
+      	768.0,
+      	216.0,
+      	1024.0,
+      	768.0
+    	]
+	},
 	"groovyConsoleState": "ProB 2.0 Groovy Console\n >",
 	"groovyConsoleCharCounterInLine": 0,
 	"groovyConsoleCurrentPosInLine": 0,

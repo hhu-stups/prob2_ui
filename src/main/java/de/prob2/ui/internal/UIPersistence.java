@@ -16,7 +16,7 @@ import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.ReportBugStage;
 import de.prob2.ui.preferences.PreferencesStage;
-
+import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
@@ -34,6 +34,7 @@ public final class UIPersistence {
 	
 	public void open() {
 		MenuController menu = injector.getInstance(MenuController.class);
+		sizeStage(injector.getInstance(CurrentStage.class).getStages().get(0), uiState.getStages().get("ProB 2.0"));
 		if("detached".equals(uiState.getGuiState())) {
 			menu.applyDetached();
 		} else {
@@ -89,27 +90,10 @@ public final class UIPersistence {
 	}
 	
 	public void save() {
-		if(uiState.getStages().keySet().contains("Groovy Console")) {
-			uiState.getStages().put("Groovy Console", getStageData(injector.getInstance(GroovyConsoleStage.class)));
+		for(Stage stage: injector.getInstance(CurrentStage.class).getStages()) {
+			uiState.getStages().put(stage.getTitle(), getStageData(stage));
 		}
-		if(uiState.getStages().keySet().contains("B Console")) {
-			uiState.getStages().put("B Console", getStageData(injector.getInstance(BConsoleStage.class)));
-		}
-		if(uiState.getStages().keySet().contains("Preferences")) {
-			uiState.getStages().put("Preferences", getStageData(injector.getInstance(PreferencesStage.class)));
-		}
-		if(uiState.getStages().keySet().contains("Report Bug")) {
-			uiState.getStages().put("Report Bug", getStageData(injector.getInstance(ReportBugStage.class)));
-		}
-		if(uiState.getStages().keySet().contains("Groovy Objects")) {
-			uiState.getStages().put("Groovy Objects", getStageData(injector.getInstance(GroovyObjectStage.class)));
-		}
-		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
-		for (GroovyObjectItem groovyObject : groovyObjects) {
-			if (uiState.getStages().keySet().contains(groovyObject.getClazzname())) {
-				uiState.getStages().put(groovyObject.getClazzname(), getStageData(groovyObject.getStage()));
-			}
-		}
+		
 	}
 	
 	private BoundingBox getStageData(Stage stage) {
