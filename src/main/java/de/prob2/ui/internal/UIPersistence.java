@@ -25,6 +25,7 @@ public final class UIPersistence {
 	private final UIState uiState;
 	private final Injector injector;
 	
+	
 	@Inject
 	private UIPersistence(UIState uiState, Injector injector) {
 		this.uiState = uiState;
@@ -42,6 +43,7 @@ public final class UIPersistence {
 			sizeStage(injector.getInstance(GroovyConsoleStage.class), uiState.getStages().get("Groovy Console"));
 			menu.handleGroovyConsole();
 			if(uiState.getStages().keySet().contains("Groovy Objects")) {
+				sizeStage(injector.getInstance(GroovyObjectStage.class), uiState.getStages().get("Groovy Objects"));
 				injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
 			}
 		}
@@ -61,6 +63,7 @@ public final class UIPersistence {
 		int j = 0;
 		for (GroovyObjectItem groovyObject : groovyObjects) {
 			if (uiState.getStages().keySet().contains(groovyObject.getClazzname())) {
+				sizeStage(groovyObject.getStage(), uiState.getStages().get(groovyObject.getClazzname()));
 				groovyObject.show(GroovyObjectItem.ShowEnum.PERSISTENCE, j);
 				j++;
 			}
@@ -97,6 +100,15 @@ public final class UIPersistence {
 		}
 		if(uiState.getStages().keySet().contains("Report Bug")) {
 			uiState.getStages().put("Report Bug", getStageData(injector.getInstance(ReportBugStage.class)));
+		}
+		if(uiState.getStages().keySet().contains("Groovy Objects")) {
+			uiState.getStages().put("Groovy Objects", getStageData(injector.getInstance(GroovyObjectStage.class)));
+		}
+		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
+		for (GroovyObjectItem groovyObject : groovyObjects) {
+			if (uiState.getStages().keySet().contains(groovyObject.getClazzname())) {
+				uiState.getStages().put(groovyObject.getClazzname(), getStageData(groovyObject.getStage()));
+			}
 		}
 	}
 	
