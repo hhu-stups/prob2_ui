@@ -32,21 +32,27 @@ public class ProB2 extends Application {
 		config = injector.getInstance(Config.class);
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
 		UIState uiState = injector.getInstance(UIState.class);
+		
 		Parent root = injector.getInstance(MainController.class);
-		BoundingBox mainBox = uiState.getStages().get("ProB 2.0");
-		Scene mainScene = new Scene(root, mainBox.getWidth(), mainBox.getHeight());
+		Scene mainScene = new Scene(root);
 		mainScene.getStylesheets().add("prob.css");
 		stage.setTitle("ProB 2.0");
 		stage.setScene(mainScene);
 		stage.getIcons().add(new Image("prob_128.gif"));
 		stage.setOnCloseRequest(e -> Platform.exit());
 		injector.getInstance(CurrentStage.class).register(stage);
-		stage.setX(mainBox.getMinX());
-		stage.setY(mainBox.getMinY());
+		
+		final BoundingBox mainBox = uiState.getSavedStageBoxes().get("ProB 2.0");
+		if (mainBox != null) {
+			stage.setX(mainBox.getMinX());
+			stage.setY(mainBox.getMinY());
+			stage.setWidth(mainBox.getWidth());
+			stage.setHeight(mainBox.getHeight());
+		}
+		
 		stage.show();
 		uiPersistence.open();
 	}
-	
 	
 	@Override
 	public void stop() {

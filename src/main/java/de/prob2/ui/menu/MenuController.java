@@ -117,7 +117,6 @@ public final class MenuController extends MenuBar {
 			for (final Stage stage : wrapperStagesCopy) {
 				stage.setScene(null);
 				stage.hide();
-				uiState.getStages().remove(stage.getTitle());
 			}
 			
 			for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
@@ -146,7 +145,7 @@ public final class MenuController extends MenuBar {
 		private boolean removablePane(TitledPane tp, CheckBox detached, ApplyDetachedEnum detachedBy) {
 			boolean condition = detached.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().keySet().contains(tp.getText());
+				condition = uiState.getSavedStageBoxes().keySet().contains(tp.getText());
 				if(condition) {
 					detached.setSelected(true);
 				}
@@ -177,7 +176,6 @@ public final class MenuController extends MenuBar {
 					} else if (node instanceof AnimationsView) {
 						detachAnimations.setSelected(false);
 					}
-					uiState.getStages().remove(stage.getTitle());
 					dvController.apply();
 				}
 			});

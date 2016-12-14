@@ -1,5 +1,7 @@
 package de.prob2.ui.internal;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,19 +14,21 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import javafx.geometry.BoundingBox;
-
+import javafx.stage.Stage;
 
 @Singleton
 public class UIState {
 	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList(new String[] {"History", "Operations", "Model Check", "Statistics", "Animations"}));
 	
 	private String guiState;
-	private HashMap<String, BoundingBox> stages;
-	private List<String> groovyObjectTabs;
+	private final Map<String, BoundingBox> savedStageBoxes;
+	private final Map<String, Reference<Stage>> stages;
+	private final List<String> groovyObjectTabs;
 		
 	@Inject
 	public UIState() {
 		this.guiState = "main.fxml";
+		this.savedStageBoxes = new HashMap<>();
 		this.stages = new HashMap<>();
 		this.groovyObjectTabs = new ArrayList<>();
 	}
@@ -37,16 +41,20 @@ public class UIState {
 		return guiState;
 	}
 	
-	public void addStage(String stage, BoundingBox box) {
-		stages.put(stage, box);
+	public void addStage(String id, Stage stage) {
+		stages.put(id, new WeakReference<>(stage));
 	}
 	
-	public void removeStage(String stage) {
-		stages.remove(stage);
+	public void removeStage(String id) {
+		stages.remove(id);
 	}
 	
-	public Map<String, BoundingBox> getStages() {
-		return stages;
+	public Map<String, BoundingBox> getSavedStageBoxes() {
+		return this.savedStageBoxes;
+	}
+	
+	public Map<String, Reference<Stage>> getStages() {
+		return this.stages;
 	}
 	
 	public void addGroovyObjectTab(String tab) {

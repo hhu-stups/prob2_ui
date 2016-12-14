@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.ref.Reference;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,13 +29,13 @@ import de.prob.model.representation.AbstractElement;
 
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
-import de.prob2.ui.internal.UIPersistence;
 import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.ClassBlacklist;
 
 import javafx.geometry.BoundingBox;
+import javafx.stage.Stage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,7 +131,7 @@ public final class Config {
 			configData.bConsoleSettings = this.defaultData.bConsoleSettings;
 		}
 	}
-			
+	
 	public void load() {
 		ConfigData configData;
 		try (
@@ -170,7 +171,7 @@ public final class Config {
 		
 		for (final Map.Entry<String, double[]> entry : configData.stages.entrySet()) {
 			final double[] v = entry.getValue();
-			this.uiState.addStage(entry.getKey(), new BoundingBox(v[0], v[1], v[2], v[3]));
+			this.uiState.getSavedStageBoxes().put(entry.getKey(), new BoundingBox(v[0], v[1], v[2], v[3]));
 		}
 		
 		for (String tab : configData.groovyObjectTabs) {
@@ -186,15 +187,13 @@ public final class Config {
 	public void save() {
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
-		injector.getInstance(UIPersistence.class).save();
 		configData.stages = new HashMap<>();
-		for (final Map.Entry<String, BoundingBox> entry : this.uiState.getStages().entrySet()) {
-			configData.stages.put(entry.getKey(), new double[] {
-				entry.getValue().getMinX(),
-				entry.getValue().getMinY(),
-				entry.getValue().getWidth(),
-				entry.getValue().getHeight(),
-			});
+		for (final Map.Entry<String, Reference<Stage>> entry : this.uiState.getStages().entrySet()) {
+			final Stage stage = entry.getValue().get();
+			if (stage == null) {
+				continue;
+			}
+			configData.stages.put(entry.getKey(), new double[] {stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()});
 		}
 		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
