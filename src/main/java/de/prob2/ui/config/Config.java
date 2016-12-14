@@ -68,7 +68,7 @@ public final class Config {
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
-	private static final File LOCATION = new File(Main.getProBDirectory() + File.separator + "prob2ui" + File.separator + "config.json");
+	private static final File LOCATION = new File(Main.getProBDirectory() + File.separator + "prob2ui" + File.separator + "default.json");
 	
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 	

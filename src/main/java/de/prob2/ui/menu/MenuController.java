@@ -4,11 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.prefs.Preferences;
 
 import com.google.inject.Inject;
@@ -68,11 +64,11 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
-	// FIXME user applying already selected detached views -> closing all detached
+	// FIXME all checkboxes selected when reloading detached
 	private enum ApplyDetachedEnum {
 		JSON, USER
 	}
-	
+	private int cnt = 0;
 	private final class DetachViewStageController {
 		@FXML private Stage detached;
 		@FXML private Button apply;
@@ -83,7 +79,7 @@ public final class MenuController extends MenuBar {
 		@FXML private CheckBox detachAnimations;
 		private final Preferences windowPrefs;
 		private final Set<Stage> wrapperStages;
-		
+
 		private DetachViewStageController() {
 			windowPrefs = Preferences.userNodeForPackage(MenuController.DetachViewStageController.class);
 			wrapperStages = new HashSet<>();
@@ -114,8 +110,6 @@ public final class MenuController extends MenuBar {
 		private void removeTP(Accordion accordion, SplitPane pane, ApplyDetachedEnum detachedBy) {
 			final HashSet<Stage> wrapperStagesCopy = new HashSet<>(wrapperStages);
 			wrapperStages.clear();
-			System.out.println("Before");
-			printStages();
 			for (final Stage stage : wrapperStagesCopy) {
 				stage.setScene(null);
 				stage.hide();
@@ -129,9 +123,6 @@ public final class MenuController extends MenuBar {
 					transferToNewWindow((Parent)tp.getContent(), tp.getText());
 				}
 			}
-			System.out.println("After");
-			printStages();
-			System.out.println("========================================================");
 			if (accordion.getPanes().isEmpty()) {
 				pane.getItems().remove(accordion);
 				pane.setDividerPositions(0);
@@ -203,7 +194,7 @@ public final class MenuController extends MenuBar {
 		}
 
 		private void printStages() {
-			for(String s : uiState.getStages()) {
+			for(String s : uiState.getStages().keySet()) {
 				System.out.println(s);
 			}
 			System.out.println();
@@ -215,26 +206,25 @@ public final class MenuController extends MenuBar {
 			stage.setTitle(title);
 			currentStage.register(stage);
 			stage.getIcons().add(new Image("prob_128.gif"));
-			stage.showingProperty().addListener((observable, from, to) -> {
-				if (!to) {
-					windowPrefs.putDouble(node.getClass()+"X",stage.getX());
-					windowPrefs.putDouble(node.getClass()+"Y",stage.getY());
-					windowPrefs.putDouble(node.getClass()+"Width",stage.getWidth());
-					windowPrefs.putDouble(node.getClass()+"Height",stage.getHeight());
-					if (node instanceof OperationsView) {
-						detachOperations.setSelected(false);
-					} else if (node instanceof HistoryView) {
-						detachHistory.setSelected(false);
-					} else if (node instanceof ModelcheckingController) {
-						detachModelcheck.setSelected(false);
-					} else if (node instanceof StatsView) {
-						detachStats.setSelected(false);
-					} else if (node instanceof AnimationsView) {
-						detachAnimations.setSelected(false);
-					}
-					uiState.getStages().remove(stage.getTitle());
-					dvController.apply();
+			stage.setOnCloseRequest(e -> {
+				System.out.println("Closing "+node.getClass()+"-Stage");
+				windowPrefs.putDouble(node.getClass()+"X",stage.getX());
+				windowPrefs.putDouble(node.getClass()+"Y",stage.getY());
+				windowPrefs.putDouble(node.getClass()+"Width",stage.getWidth());
+				windowPrefs.putDouble(node.getClass()+"Height",stage.getHeight());
+				if (node instanceof OperationsView) {
+					detachOperations.setSelected(false);
+				} else if (node instanceof HistoryView) {
+					detachHistory.setSelected(false);
+				} else if (node instanceof ModelcheckingController) {
+					detachModelcheck.setSelected(false);
+				} else if (node instanceof StatsView) {
+					detachStats.setSelected(false);
+				} else if (node instanceof AnimationsView) {
+					detachAnimations.setSelected(false);
 				}
+				uiState.getStages().remove(stage.getTitle());
+				dvController.apply();
 			});
 			stage.setWidth(windowPrefs.getDouble(node.getClass()+"Width",200));
 			stage.setHeight(windowPrefs.getDouble(node.getClass()+"Height",100));
