@@ -68,7 +68,7 @@ public final class MenuController extends MenuBar {
 	private enum ApplyDetachedEnum {
 		JSON, USER
 	}
-	private int cnt = 0;
+
 	private final class DetachViewStageController {
 		@FXML private Stage detached;
 		@FXML private Button apply;
@@ -207,7 +207,6 @@ public final class MenuController extends MenuBar {
 			currentStage.register(stage);
 			stage.getIcons().add(new Image("prob_128.gif"));
 			stage.setOnCloseRequest(e -> {
-				System.out.println("Closing "+node.getClass()+"-Stage");
 				windowPrefs.putDouble(node.getClass()+"X",stage.getX());
 				windowPrefs.putDouble(node.getClass()+"Y",stage.getY());
 				windowPrefs.putDouble(node.getClass()+"Width",stage.getWidth());
