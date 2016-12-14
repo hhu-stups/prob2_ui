@@ -41,14 +41,6 @@ public class UIState {
 		return guiState;
 	}
 	
-	public void addStage(String id, Stage stage) {
-		stages.put(id, new WeakReference<>(stage));
-	}
-	
-	public void removeStage(String id) {
-		stages.remove(id);
-	}
-	
 	public Map<String, BoundingBox> getSavedStageBoxes() {
 		return this.savedStageBoxes;
 	}

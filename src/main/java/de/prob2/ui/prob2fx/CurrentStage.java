@@ -1,5 +1,7 @@
 package de.prob2.ui.prob2fx;
 
+import java.lang.ref.WeakReference;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -14,7 +16,7 @@ import javafx.stage.Stage;
 
 /**
  * <p>A singleton read-only property holding the current foreground {@link Stage}. If there is no JavaFX Stage in the foreground, the value is {@code null}.</p>
- * <p>This class keeps track of the current stage using listeners on {@link Stage#focusedProperty()}. Because it is not possible to listen on this property for every stage automatically, stages must be manually registered using the {@link #register(Stage)} method. If a non-registered Stage is in the foreground, the property value is {@code null}, as if the foreground window was not a JavaFX Stage.</p>
+ * <p>This class keeps track of the current stage using listeners on {@link Stage#focusedProperty()}. Because it is not possible to listen on this property for every stage automatically, stages must be manually registered using the {@link #register(Stage, String)} method. If a non-registered Stage is in the foreground, the property value is {@code null}, as if the foreground window was not a JavaFX Stage.</p>
  */
 @Singleton
 public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
@@ -64,15 +66,23 @@ public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 		this.stage.removeListener(listener);
 	}
 	
-	public void register(final Stage stage) {
+	public void register(final Stage stage, final String id) {
+		stage.getProperties().put("id", id);
 		stage.showingProperty().addListener((observable, from, to) -> {
+			final String stageId = (String)stage.getProperties().get("id");
 			if (to) {
-				uiState.addStage(stage.getTitle(), stage);
-			} else {
-				if("ProB 2.0".equals(stage.getTitle())) {
-					return;
+				if (stageId != null) {
+					uiState.getStages().put(stageId, new WeakReference<>(stage));
 				}
-				uiState.removeStage(stage.getTitle());
+			} else {
+				// FIXME The main stage is special-cased at the moment.
+				// The main way to exit the application is to close the main stage,
+				// which would normally remove it from the stage map.
+				// We don't want that to happen, otherwise the main stage's bounds
+				// cannot be restored on the next launch.
+				if (stageId != null && !"de.prob2.ui.ProB2".equals(stageId)) {
+					uiState.getStages().remove(stageId);
+				}
 			}
 		});
 		stage.focusedProperty().addListener((observable, from, to) -> {

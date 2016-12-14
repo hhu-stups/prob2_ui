@@ -302,7 +302,7 @@ public final class StatesView extends AnchorPane {
 					previousValue = null;
 				}
 				final FullValueStage stage = injector.getInstance(FullValueStage.class);
-				injector.getInstance(CurrentStage.class).register(stage);
+				injector.getInstance(CurrentStage.class).register(stage, null);
 				stage.setTitle(element.toString());
 				stage.setCurrentValue(AsciiUnicodeString.fromAscii(value.getValue()));
 				stage.setPreviousValue(AsciiUnicodeString.fromAscii(previousValue == null ? "(not initialized)" : previousValue.getValue()));

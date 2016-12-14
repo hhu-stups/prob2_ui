@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.prefs.Preferences;
 
 import com.google.inject.Inject;
@@ -19,6 +23,7 @@ import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.b.BConsoleStage;
@@ -89,7 +94,7 @@ public final class MenuController extends MenuBar {
 		public void initialize() {
 			detached.initModality(Modality.APPLICATION_MODAL);
 			detached.getIcons().add(new Image("prob_128.gif"));
-			currentStage.register(detached);
+			currentStage.register(detached, this.getClass().getName());
 		}
 
 		@FXML
@@ -152,7 +157,7 @@ public final class MenuController extends MenuBar {
 			Stage stage = new Stage();
 			wrapperStages.add(stage);
 			stage.setTitle(title);
-			currentStage.register(stage);
+			currentStage.register(stage, null);
 			stage.getIcons().add(new Image("prob_128.gif"));
 			stage.setOnCloseRequest(e -> {
 				windowPrefs.putDouble(node.getClass()+"X",stage.getX());
@@ -170,7 +175,6 @@ public final class MenuController extends MenuBar {
 				} else if (node instanceof AnimationsView) {
 					detachAnimations.setSelected(false);
 				}
-				uiState.getStages().remove(stage.getTitle());
 				dvController.apply();
 			});
 			stage.setWidth(windowPrefs.getDouble(node.getClass()+"Width",200));
@@ -439,7 +443,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	public void handlePreferences() {
+	private void handlePreferences() {
 		final Stage preferencesStage = injector.getInstance(PreferencesStage.class);
 		preferencesStage.show();
 		preferencesStage.toFront();
@@ -453,14 +457,14 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	public void handleGroovyConsole() {
+	private void handleGroovyConsole() {
 		final Stage groovyConsoleStage = injector.getInstance(GroovyConsoleStage.class);
 		groovyConsoleStage.show();
 		groovyConsoleStage.toFront();
 	}
 	
 	@FXML
-	public void handleBConsole() {
+	private void handleBConsole() {
 		final Stage bConsoleStage = injector.getInstance(BConsoleStage.class);
 		bConsoleStage.show();
 		bConsoleStage.toFront();
@@ -501,7 +505,7 @@ public final class MenuController extends MenuBar {
 	}
 	
 	@FXML
-	public void handleReportBug() {
+	private void handleReportBug() {
 		final Stage reportBugStage = injector.getInstance(ReportBugStage.class);
 		reportBugStage.show();
 		reportBugStage.toFront();
@@ -515,11 +519,5 @@ public final class MenuController extends MenuBar {
 			newItems.add(item);
 		}
 		return newItems;
-	}
-	
-	public void handleMainStages(Class<? extends Stage> clazz) {
-		final Stage stage = injector.getInstance(clazz);
-		stage.show();
-		stage.toFront();
 	}
 }

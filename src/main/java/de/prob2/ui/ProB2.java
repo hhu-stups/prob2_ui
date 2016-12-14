@@ -40,9 +40,9 @@ public class ProB2 extends Application {
 		stage.setScene(mainScene);
 		stage.getIcons().add(new Image("prob_128.gif"));
 		stage.setOnCloseRequest(e -> Platform.exit());
-		injector.getInstance(CurrentStage.class).register(stage);
+		injector.getInstance(CurrentStage.class).register(stage, this.getClass().getName());
 		
-		final BoundingBox mainBox = uiState.getSavedStageBoxes().get("ProB 2.0");
+		final BoundingBox mainBox = uiState.getSavedStageBoxes().get(this.getClass().getName());
 		if (mainBox != null) {
 			stage.setX(mainBox.getMinX());
 			stage.setY(mainBox.getMinY());
