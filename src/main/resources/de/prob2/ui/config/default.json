@@ -7,7 +7,7 @@
 		"de.prob.model.representation.Action"
 	],
 	"guiState": "main.fxml",
-	"stages": [],
+	"stages": {},
 	"groovyConsoleState": "ProB 2.0 Groovy Console\n >",
 	"groovyConsoleCharCounterInLine": 0,
 	"groovyConsoleCurrentPosInLine": 0,
@@ -19,5 +19,6 @@
 	"bConsoleCaret": 22,
 	"bConsoleErrors": [],
 	"currentPreference": "General",
-	"openedPerspectives": []
+	"openedPerspectives": [],
+	"groovyObjectTabs": []
 }

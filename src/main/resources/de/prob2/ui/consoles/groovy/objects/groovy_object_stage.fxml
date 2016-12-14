@@ -2,15 +2,17 @@
 
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <fx:root type="Stage" title="%consoles.groovy.objects.title" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css" height="400.0" width="600.0">
-			<!-- TableView does not extend Pane, so we have to wrap it in a StackPane so we can add the menu bar to it on Mac. -->
-			<StackPane>
-				<TableView fx:id="tvObjects" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
+			<!-- TableView does not extend Pane, so we have to wrap it in a Pane so we can add the menu bar to it on Mac. -->
+			<AnchorPane>
+				<TableView fx:id="tvObjects" AnchorPane.bottomAnchor="0.0"
+					AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+					AnchorPane.topAnchor="0.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
 					<columns>
 						<TableColumn fx:id="objects" editable="false" prefWidth="89.0" text="%consoles.groovy.columns.name" />
 						<TableColumn fx:id="classes" editable="false" prefWidth="89.0" text="%consoles.groovy.columns.type" />
@@ -20,7 +22,7 @@
 						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 					</columnResizePolicy>
 				</TableView>
-			</StackPane>
+			</AnchorPane>
 		</Scene>
 	</scene>
 </fx:root>

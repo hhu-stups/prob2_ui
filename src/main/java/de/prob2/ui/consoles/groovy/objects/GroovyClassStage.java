@@ -8,20 +8,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
 import de.prob2.ui.consoles.groovy.MetaPropertiesHandler;
+import de.prob2.ui.internal.UIState;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GroovyClassStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
@@ -31,7 +34,11 @@ public class GroovyClassStage extends Stage {
 	@FXML private TableView<GroovyClassItem> tvClass;
 	@FXML private TableView<CollectionDataItem> tvCollectionData;
 	
+	@FXML private TabPane tabPane;
 	@FXML private Tab tabCollectionData;
+	@FXML private Tab tabClass;
+	@FXML private Tab tabFields;
+	@FXML private Tab tabMethods;
 	
 	@FXML private TableColumn<GroovyClassItem, String> cattributes;
 	@FXML private TableColumn<GroovyClassItem, String> cvalues;
@@ -60,8 +67,13 @@ public class GroovyClassStage extends Stage {
 	private ObservableList<GroovyClassPropertyItem> fields = FXCollections.observableArrayList();
 	private ObservableList<GroovyClassItem> attributes = FXCollections.observableArrayList();
 	private ObservableList<CollectionDataItem> collectionData = FXCollections.observableArrayList();
+	
+	private UIState uiState;
+	private int index;
 
-	public GroovyClassStage(FXMLLoader loader) {
+	public GroovyClassStage(FXMLLoader loader, UIState uiState) {
+		this.index = 0;
+		this.uiState = uiState;
 		loader.setLocation(getClass().getResource("groovy_class_stage.fxml"));
 		loader.setRoot(this);
 		loader.setController(this);
@@ -102,6 +114,10 @@ public class GroovyClassStage extends Stage {
 		tvFields.setItems(fields);
 		tvClass.setItems(attributes);
 		tvCollectionData.setItems(collectionData);
+
+		tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> uiState.getGroovyObjectTabs().set(index, newValue.getText()));
+		
+		this.setOnCloseRequest(e -> uiState.getGroovyObjectTabs().remove(this.getTitle()));
 	}
 	
 	public void showMethodsAndFields(Object object) {
@@ -187,5 +203,22 @@ public class GroovyClassStage extends Stage {
 		attributes.add(new GroovyClassItem("isPrimitive", Boolean.toString(clazz.isPrimitive())));
 		attributes.add(new GroovyClassItem("isArray", Boolean.toString(clazz.isArray())));
 		tvClass.refresh();
+	}
+	
+	public void openTab(String tab) {
+		switch(tab) {
+			case "Public Fields and Properties":
+				tabPane.getSelectionModel().select(tabFields);
+				break;
+			case "Methods":
+				tabPane.getSelectionModel().select(tabMethods);
+				break;
+			default:
+				tabPane.getSelectionModel().select(tabClass);
+		}
+	}
+	
+	public void setIndex(int index) {
+		this.index = index;
 	}
 }
