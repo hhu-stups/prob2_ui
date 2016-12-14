@@ -36,16 +36,18 @@ public final class UIPersistence {
 	}
 	
 	public void open() {
+		openWindows();
+		openGroovyObjects();
+		choosePreferencesTab();
+	}
+	
+	private void openWindows() {
 		MenuController menu = injector.getInstance(MenuController.class);
 		sizeStage(injector.getInstance(CurrentStage.class).getStages().get(0), uiState.getStages().get("ProB 2.0"));
 		if("detached".equals(uiState.getGuiState())) {
 			menu.applyDetached();
 		} else {
 			menu.loadPreset(uiState.getGuiState());
-		}
-		if(uiState.getStages().keySet().contains("Groovy Objects")) {
-			sizeStage(injector.getInstance(GroovyObjectStage.class), uiState.getStages().get("Groovy Objects"));
-			injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
 		}
 		HashMap<String, Class<? extends Stage>> mainStages = Maps.newHashMap(
 			ImmutableMap.of("Groovy Console", GroovyConsoleStage.class, "B Console", BConsoleStage.class, "Preferences", PreferencesStage.class, "Report Bug", ReportBugStage.class)
@@ -57,7 +59,13 @@ public final class UIPersistence {
 				menu.handleMainStages(mainStages.get(stage));
 			}
 		}
-		
+	}
+	
+	private void openGroovyObjects() {
+		if(uiState.getStages().keySet().contains("Groovy Objects")) {
+			sizeStage(injector.getInstance(GroovyObjectStage.class), uiState.getStages().get("Groovy Objects"));
+			injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
+		}
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
 		int j = 0;
 		for (GroovyObjectItem groovyObject : groovyObjects) {
@@ -67,6 +75,9 @@ public final class UIPersistence {
 				j++;
 			}
 		}
+	}
+	
+	private void choosePreferencesTab() {
 		PreferencesStage preferencesStage = injector.getInstance(PreferencesStage.class);
 		switch (preferencesStage.getCurrentTab()) {
 			case "ProB Preferences":
