@@ -27,6 +27,7 @@ public abstract class Console extends StyleClassedTextArea {
 	protected ConsoleSearchHandler searchHandler;
 	protected List<IndexRange> errors;
 	protected Executable interpreter;
+	
 
 	protected Console() {
 		this.instructions = new ArrayList<>();
@@ -307,42 +308,40 @@ public abstract class Console extends StyleClassedTextArea {
 		}
 		return this.getText(this.getParagraphs().size() - 1).substring(2);
 	}
+	
+	public String[] getSettings() {
+		String instructionEntries = instructions.toString();
+		String error = errors.toString();
+		return new String[]{instructionEntries, getText(), String.valueOf(charCounterInLine), String.valueOf(currentPosInLine), String.valueOf(getCaretPosition()), error};
+	}
+	
+	public void applySettings(String[] settings) {
+		String instructionEntries = settings[0].substring(1, settings[0].length()-1).replaceAll(" ", "");
+		String[] instructionSettings = instructionEntries.split(",");
+		String errorsEntries = settings[5].substring(1, settings[5].length()-1).replaceAll(" ", "");
+		String[] errorsSettings = errorsEntries.split(",");
+		for(String instruction: instructionSettings) {
+			instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
+			posInList++;
+		}
+		this.replaceText(settings[1]);
+		charCounterInLine = Integer.parseInt((String) settings[2]);
+		currentPosInLine = Integer.parseInt((String) settings[3]);
+		this.moveTo(Integer.parseInt((String) settings[4]));
+		if(errorsSettings.length < 2) {
+			return;
+		}
+		for(int i = 0; i < errorsSettings.length; i=i+2) {			
+			IndexRange range = new IndexRange(Integer.parseInt(errorsSettings[i]), Integer.parseInt(errorsSettings[i+1]));
+			errors.add(range);
+			this.setStyleClass(range.getStart(), range.getEnd(), "error");
+		}
+	}
 		
 	public int getCurrentPosInLine() {
 		return currentPosInLine;
 	}
 	
-	public int getCharCounterInLine() {
-		return charCounterInLine;
-	}
-	
-	public List<ConsoleInstruction> getInstructions() {
-		return instructions;
-	}
-	
-	public List<String> getInstructionEntries() {
-		//last 100 Entries
-		List<String> entries = new ArrayList<>();
-		for(int i = Math.max(instructions.size() - 100,0); i < instructions.size(); i++) {
-			entries.add(instructions.get(i).getInstruction());
-		}
-		return entries;
-	}
-	
-	public void increaseCounter() {
-		posInList++;
-	}
-	
-	public void setCharCounterInLine(int value) {
-		charCounterInLine = value;
-	}
-	
-	public void setCurrentPosInLine(int value) {
-		currentPosInLine = value;
-	}
-	
-	public List<IndexRange> getErrors() {
-		return errors;
-	}
+
 	
 }

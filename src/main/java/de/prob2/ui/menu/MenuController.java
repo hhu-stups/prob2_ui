@@ -131,66 +131,22 @@ public final class MenuController extends MenuBar {
 		}
 		
 		private boolean removable(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			return	removableOperations(tp, detachedBy) ||
-					removableHistory(tp, detachedBy) ||
-					removableModelcheck(tp, detachedBy) ||
-					removableStats(tp, detachedBy) ||
-					removableAnimations(tp, detachedBy);
+			return	(removablePane(tp, detachOperations, detachedBy) && tp.getContent() instanceof OperationsView) ||
+					(removablePane(tp, detachHistory, detachedBy) && tp.getContent() instanceof HistoryView) ||
+					(removablePane(tp, detachModelcheck, detachedBy) && tp.getContent() instanceof ModelcheckingController) ||
+					(removablePane(tp, detachStats, detachedBy) && tp.getContent() instanceof StatsView) ||
+					(removablePane(tp, detachAnimations, detachedBy) && tp.getContent() instanceof AnimationsView);
 		}
-
-		private boolean removableOperations(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			boolean condition = detachOperations.isSelected();
+		
+		private boolean removablePane(TitledPane tp, CheckBox detached, ApplyDetachedEnum detachedBy) {
+			boolean condition = detached.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
 				condition = uiState.getStages().keySet().contains(tp.getText());
 				if(condition) {
-					detachOperations.setSelected(true);
+					detached.setSelected(true);
 				}
 			}
-			return tp.getContent() instanceof OperationsView && condition;
-		}
-
-		private boolean removableHistory(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			boolean condition = detachHistory.isSelected();
-			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().keySet().contains(tp.getText());
-				if(condition) {
-					detachHistory.setSelected(true);
-				}
-			}
-			return tp.getContent() instanceof HistoryView && condition;
-		}
-
-		private boolean removableModelcheck(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			boolean condition = detachModelcheck.isSelected();
-			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().keySet().contains(tp.getText());
-				if(condition) {
-					detachModelcheck.setSelected(true);
-				}
-			}
-			return tp.getContent() instanceof ModelcheckingController && condition;
-		}
-
-		private boolean removableStats(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			boolean condition = detachStats.isSelected();
-			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().keySet().contains(tp.getText());
-				if(condition) {
-					detachStats.setSelected(true);
-				}
-			}
-			return tp.getContent() instanceof StatsView && condition;
-		}
-
-		private boolean removableAnimations(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			boolean condition = detachAnimations.isSelected();
-			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().keySet().contains(tp.getText());
-				if(condition) {
-					detachAnimations.setSelected(true);
-				}
-			}
-			return tp.getContent() instanceof AnimationsView && condition;
+			return condition;
 		}
 
 		private void printStages() {
@@ -567,5 +523,11 @@ public final class MenuController extends MenuBar {
 			newItems.add(item);
 		}
 		return newItems;
+	}
+	
+	public void handleMainStages(Class<? extends Stage> clazz) {
+		final Stage stage = injector.getInstance(clazz);
+		stage.show();
+		stage.toFront();
 	}
 }

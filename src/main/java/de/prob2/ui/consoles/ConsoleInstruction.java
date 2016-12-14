@@ -17,5 +17,10 @@ public class ConsoleInstruction {
 	public ConsoleInstructionOption getOption() {
 		return option;
 	}
+	
+	@Override
+	public String toString() {
+		return instruction;
+	}
 
 }

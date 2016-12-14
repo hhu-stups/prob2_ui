@@ -1,23 +1,24 @@
 {
 	"maxRecentFiles": 10,
 	"recentFiles": [],
-	"groovyConsoleEntries": [],
-	"bConsoleEntries": [],
 	"statesViewHiddenClasses": [
 		"de.prob.model.representation.Action"
 	],
 	"guiState": "main.fxml",
-	"stages": {},
-	"groovyConsoleState": "ProB 2.0 Groovy Console\n >",
-	"groovyConsoleCharCounterInLine": 0,
-	"groovyConsoleCurrentPosInLine": 0,
-	"groovyConsoleCaret": 26,
-	"groovyConsoleErrors": [],
-	"bConsoleState": "ProB 2.0 B Console\n >",
-	"bConsoleCharCounterInLine": 0,
-	"bConsoleCurrentPosInLine": 0,
-	"bConsoleCaret": 22,
-	"bConsoleErrors": [],
+	"stages": {
+    	"ProB 2.0": [
+      	768.0,
+      	216.0,
+      	1024.0,
+      	768.0
+    	]
+	},
+	"groovyConsoleSettings": [
+		"[]", "ProB 2.0 Groovy Console\n >", "0", "0", "26", "[]"
+	],
+	"bConsoleSettings": [
+		"[]", "ProB 2.0 B Console\n >", "0", "0", "22", "[]"
+	],
 	"currentPreference": "General",
 	"openedPerspectives": [],
 	"groovyObjectTabs": []
