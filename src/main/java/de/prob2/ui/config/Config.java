@@ -5,13 +5,17 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +32,13 @@ import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
+import de.prob2.ui.internal.UIPersistence;
 import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.ClassBlacklist;
+
+import javafx.geometry.BoundingBox;
 import javafx.scene.control.IndexRange;
 
 @Singleton
@@ -44,7 +51,8 @@ public final class Config {
 		private List<String> bConsoleEntries;
 		private List<String> statesViewHiddenClasses;
 		private String guiState;
-		private List<String> stages;
+		private HashMap<String, double[]> stages;
+		private List<String> groovyObjectTabs;
 		private String groovyConsoleState;
 		private int groovyConsoleCharCounterInLine;
 		private int groovyConsoleCurrentPosInLine;
@@ -87,7 +95,10 @@ public final class Config {
 		this.bConsole = bConsole;
 		this.injector = injector;
 		
-		try (final Reader defaultReader = new InputStreamReader(Config.class.getResourceAsStream("default.json"), CONFIG_CHARSET)) {
+		try (
+			final InputStream is = Config.class.getResourceAsStream("default.json");
+			final Reader defaultReader = new InputStreamReader(is, CONFIG_CHARSET)
+		) {
 			this.defaultData = gson.fromJson(defaultReader, ConfigData.class);
 		} catch (FileNotFoundException exc) {
 			throw new IllegalStateException("Default config file not found", exc);
@@ -108,21 +119,23 @@ public final class Config {
 			configData.maxRecentFiles = this.defaultData.maxRecentFiles;
 			configData.recentFiles = new ArrayList<>(this.defaultData.recentFiles);
 		}
-				
+		
 		if (configData.statesViewHiddenClasses == null) {
 			configData.statesViewHiddenClasses = new ArrayList<>(this.defaultData.statesViewHiddenClasses);
 		}
-		if(configData.guiState == null || "".equals(configData.guiState)) {
+		if (configData.guiState == null || configData.guiState.isEmpty()) {
 			configData.guiState = this.defaultData.guiState;
 		}
-		if(configData.stages == null) {
-			configData.stages = new ArrayList<>(this.defaultData.stages);
+		if (configData.stages == null) {
+			configData.stages = new HashMap<>(this.defaultData.stages);
 		}
-		if(configData.currentPreference == null) {
+		if (configData.groovyObjectTabs == null) {
+			configData.groovyObjectTabs = new ArrayList<>(this.defaultData.groovyObjectTabs);
+		}
+		if (configData.currentPreference == null) {
 			configData.currentPreference = this.defaultData.currentPreference;
 		}
 		this.replaceMissingWithDefaultsConsoles(configData);
-
 	}
 	
 	private void replaceMissingWithDefaultsConsoles(final ConfigData configData) {
@@ -133,14 +146,14 @@ public final class Config {
 		if (configData.bConsoleEntries == null) {
 			configData.bConsoleEntries = new ArrayList<>(this.defaultData.bConsoleEntries);
 		}
-		if(configData.groovyConsoleState == null) {
+		if (configData.groovyConsoleState == null) {
 			configData.groovyConsoleState = this.defaultData.groovyConsoleState;
 			configData.groovyConsoleCharCounterInLine = this.defaultData.groovyConsoleCharCounterInLine;
 			configData.groovyConsoleCurrentPosInLine = this.defaultData.groovyConsoleCurrentPosInLine;
 			configData.groovyConsoleCaret = this.defaultData.groovyConsoleCaret;
 			configData.groovyConsoleErrors = new ArrayList<>(this.defaultData.groovyConsoleErrors);
 		}
-		if(configData.bConsoleState == null) {
+		if (configData.bConsoleState == null) {
 			configData.bConsoleState = this.defaultData.bConsoleState;
 			configData.bConsoleCharCounterInLine = this.defaultData.bConsoleCharCounterInLine;
 			configData.bConsoleCurrentPosInLine = this.defaultData.bConsoleCurrentPosInLine;
@@ -150,12 +163,12 @@ public final class Config {
 	}
 	
 	private void loadConsoles(final ConfigData configData) {
-		for(String instruction : configData.groovyConsoleEntries) {
+		for (String instruction : configData.groovyConsoleEntries) {
 			groovyConsole.getInstructions().add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 			groovyConsole.increaseCounter();
 		}
 		
-		for(String instruction : configData.bConsoleEntries) {
+		for (String instruction : configData.bConsoleEntries) {
 			bConsole.getInstructions().add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 			bConsole.increaseCounter();
 		}
@@ -165,7 +178,7 @@ public final class Config {
 		this.groovyConsole.setCurrentPosInLine(configData.groovyConsoleCurrentPosInLine);
 		this.groovyConsole.moveTo(configData.groovyConsoleCaret);
 		
-		for(IndexRange range: configData.groovyConsoleErrors) {
+		for (IndexRange range : configData.groovyConsoleErrors) {
 			groovyConsole.getErrors().add(range);
 			groovyConsole.setStyleClass(range.getStart(), range.getEnd(), "error");
 		}
@@ -175,7 +188,7 @@ public final class Config {
 		this.bConsole.setCurrentPosInLine(configData.bConsoleCurrentPosInLine);
 		this.bConsole.moveTo(configData.bConsoleCaret);
 		
-		for(IndexRange range: configData.bConsoleErrors) {
+		for (IndexRange range : configData.bConsoleErrors) {
 			bConsole.getErrors().add(range);
 			bConsole.setStyleClass(range.getStart(), range.getEnd(), "error");
 		}
@@ -183,7 +196,10 @@ public final class Config {
 	
 	public void load() {
 		ConfigData configData;
-		try (final Reader reader = new InputStreamReader(new FileInputStream(LOCATION), CONFIG_CHARSET)) {
+		try (
+			final InputStream is = new FileInputStream(LOCATION);
+			final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
+		) {
 			configData = gson.fromJson(reader, ConfigData.class);
 		} catch (FileNotFoundException exc) {
 			logger.info("Config file not found, loading default settings", exc);
@@ -212,14 +228,20 @@ public final class Config {
 			classBlacklist.getKnownClasses().add(clazz);
 			classBlacklist.getBlacklist().add(clazz);
 		}
-				
+		
 		this.uiState.setGuiState(configData.guiState);
 		
-		for(String stage: configData.stages) {
-			this.uiState.addStage(stage);
+		for (final Map.Entry<String, double[]> entry : configData.stages.entrySet()) {
+			final double[] v = entry.getValue();
+			this.uiState.addStage(entry.getKey(), new BoundingBox(v[0], v[1], v[2], v[3]));
+		}
+		
+		for (String tab : configData.groovyObjectTabs) {
+			this.uiState.addGroovyObjectTab(tab);
 		}
 		
 		this.injector.getInstance(PreferencesStage.class).setCurrentTab(configData.currentPreference);
+		
 		this.loadConsoles(configData);
 	}
 	
@@ -242,18 +264,31 @@ public final class Config {
 	public void save() {
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
-		configData.stages = new ArrayList<>(this.uiState.getStages());
+		injector.getInstance(UIPersistence.class).save();
+		configData.stages = new HashMap<>();
+		for (final Map.Entry<String, BoundingBox> entry : this.uiState.getStages().entrySet()) {
+			configData.stages.put(entry.getKey(), new double[] {
+				entry.getValue().getMinX(),
+				entry.getValue().getMinY(),
+				entry.getValue().getWidth(),
+				entry.getValue().getHeight(),
+			});
+		}
+		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
 		configData.statesViewHiddenClasses = new ArrayList<>();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
 		this.saveConsoles(configData);
-
+		
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
 		}
 		
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(LOCATION), CONFIG_CHARSET)) {
+		try (
+			final OutputStream os = new FileOutputStream(LOCATION);
+			final Writer writer = new OutputStreamWriter(os, CONFIG_CHARSET)
+		) {
 			gson.toJson(configData, writer);
 		} catch (FileNotFoundException exc) {
 			logger.warn("Failed to create config file", exc);
@@ -261,5 +296,4 @@ public final class Config {
 			logger.warn("Failed to save config file", exc);
 		}
 	}
-	
 }

@@ -7,13 +7,12 @@ import javafx.scene.input.KeyEvent;
 
 @SuppressWarnings("serial")
 public class CodeCompletionEvent extends Event {
+	public static final EventType<CodeCompletionEvent> CODECOMPLETION = new EventType<>(Event.ANY, "CODECOMPLETION");
 	
-    public static final EventType<CodeCompletionEvent> CODECOMPLETION = new EventType<>(Event.ANY, "CODECOMPLETION");
-    
-    private Event event;
-    private KeyCode code;
-    private String choice;
-    private String currentSuggestion;
+	private Event event;
+	private KeyCode code;
+	private String choice;
+	private String currentSuggestion;
 	
 
 	public CodeCompletionEvent(Event event, String choice, String suggestion) {
@@ -36,7 +35,7 @@ public class CodeCompletionEvent extends Event {
 			this.code = ((KeyEvent) event).getCode();
 		}
 	}
-		
+	
 	public Event getEvent() {
 		return event;
 	}
@@ -52,5 +51,4 @@ public class CodeCompletionEvent extends Event {
 	public String getCurrentSuggestion() {
 		return currentSuggestion;
 	}
-	
 }

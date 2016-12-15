@@ -32,6 +32,7 @@ public class GroovyConsole extends Console {
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
 	}
 	
+	@Override
 	public void reset() {
 		this.replaceText("ProB 2.0 Groovy Console");
 		this.errors.clear();

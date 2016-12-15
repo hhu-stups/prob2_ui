@@ -90,6 +90,36 @@ public class NewProjectStage extends Stage {
 
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+
+//		machinesTableView.setRowFactory(tableView -> {
+//			final TableRow<Machine> row = new TableRow<>();
+//			final ContextMenu contextMenu = new ContextMenu();
+//			final MenuItem removeMenuItem = new MenuItem("Remove Machine");
+//			removeMenuItem.setOnAction(event -> {
+//				Machine m = row.getItem();
+//				machinesTableView.getItems().remove(m);
+//				int totalColumns = machinesTableView.getColumns().size();
+//				int firstPrefColumn = totalColumns - preferencesListView.getItems().size();
+//				for (int i = firstPrefColumn; i < totalColumns; i++) {
+//					prefBooleanMap.remove(new Pair<Machine, Integer>(m, i));
+//				}
+//				machinesTableView.refresh();
+//				System.out.println(prefBooleanMap);
+//				System.out.println(machinesTableView.getItems());
+//			});
+//			contextMenu.getItems().add(removeMenuItem);
+//			row.setOnMouseClicked(event -> {
+//				if (event.getButton() == MouseButton.SECONDARY) {
+//					if (row.isEmpty()) {
+//						contextMenu.getItems().get(0).setDisable(true);
+//					} else {
+//						contextMenu.getItems().get(0).setDisable(false);
+//					}
+//					contextMenu.show(row, event.getScreenX(), event.getScreenY());
+//				}
+//			});
+//			return row;
+//		});
 	}
 
 	@FXML

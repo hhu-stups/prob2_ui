@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -211,7 +212,10 @@ public class FullValueStage extends Stage {
 			return;
 		}
 		
-		try (final Writer out = new OutputStreamWriter(new FileOutputStream(selected), Charset.forName("UTF-8"))) {
+		try (
+			final OutputStream os = new FileOutputStream(selected);
+			final Writer out = new OutputStreamWriter(os, Charset.forName("UTF-8"))
+		) {
 			final String value;
 			if (currentValueTab.isSelected()) {
 				value = this.currentValueTextarea.getText();

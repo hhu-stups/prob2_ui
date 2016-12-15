@@ -3,6 +3,7 @@ package de.prob2.ui.consoles.groovy.objects;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -10,6 +11,7 @@ import javax.script.ScriptEngine;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.UIState;
 import de.prob2.ui.prob2fx.CurrentStage;
 
 import javafx.collections.FXCollections;
@@ -37,9 +39,10 @@ public final class GroovyObjectStage extends Stage {
 
 	private final FXMLLoader loader;
 	private final CurrentStage currentStage;
+	private final UIState uiState;
 
 	@Inject
-	private GroovyObjectStage(FXMLLoader loader, CurrentStage currentStage) {
+	private GroovyObjectStage(FXMLLoader loader, CurrentStage currentStage, UIState uiState) {
 		this.loader = loader;
 		try {
 			loader.setLocation(getClass().getResource("groovy_object_stage.fxml"));
@@ -50,12 +53,15 @@ public final class GroovyObjectStage extends Stage {
 			logger.error("loading fxml failed", e);
 		}
 		this.currentStage = currentStage;
+		this.uiState = uiState;
 		currentStage.register(this);
+		this.setOnCloseRequest(e-> close());
 	}
 
 	@Override
 	public void close() {
 		items.forEach(GroovyObjectItem::close);
+		uiState.getGroovyObjectTabs().clear();
 		super.close();
 	}
 
@@ -72,9 +78,9 @@ public final class GroovyObjectStage extends Stage {
 			if(entry == null || entry.getKey() == null || entry.getValue() == null) {
 				continue;
 			}
-			GroovyClassStage stage = new GroovyClassStage(loader);
+			GroovyClassStage stage = new GroovyClassStage(loader, uiState);
 			currentStage.register(stage);
-			items.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), stage));
+			items.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), stage, uiState));
 		}
 	}
 
@@ -89,7 +95,7 @@ public final class GroovyObjectStage extends Stage {
 		tvObjects.setOnMouseClicked(e -> {
 			int currentPos = tvObjects.getSelectionModel().getSelectedIndex();
 			if (currentPos >= 0) {
-				items.get(currentPos).show();
+				items.get(currentPos).show(GroovyObjectItem.ShowEnum.DEFAULT,0);
 			}
 			tvObjects.getSelectionModel().clearSelection();
 		});
@@ -98,5 +104,4 @@ public final class GroovyObjectStage extends Stage {
 	public List<GroovyObjectItem> getItems() {
 		return items;
 	}
-
 }
