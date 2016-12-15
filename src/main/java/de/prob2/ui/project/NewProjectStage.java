@@ -22,14 +22,18 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -91,35 +95,26 @@ public class NewProjectStage extends Stage {
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
-//		machinesTableView.setRowFactory(tableView -> {
-//			final TableRow<Machine> row = new TableRow<>();
-//			final ContextMenu contextMenu = new ContextMenu();
-//			final MenuItem removeMenuItem = new MenuItem("Remove Machine");
-//			removeMenuItem.setOnAction(event -> {
-//				Machine m = row.getItem();
-//				machinesTableView.getItems().remove(m);
-//				int totalColumns = machinesTableView.getColumns().size();
-//				int firstPrefColumn = totalColumns - preferencesListView.getItems().size();
-//				for (int i = firstPrefColumn; i < totalColumns; i++) {
-//					prefBooleanMap.remove(new Pair<Machine, Integer>(m, i));
-//				}
-//				machinesTableView.refresh();
-//				System.out.println(prefBooleanMap);
-//				System.out.println(machinesTableView.getItems());
-//			});
-//			contextMenu.getItems().add(removeMenuItem);
-//			row.setOnMouseClicked(event -> {
-//				if (event.getButton() == MouseButton.SECONDARY) {
-//					if (row.isEmpty()) {
-//						contextMenu.getItems().get(0).setDisable(true);
-//					} else {
-//						contextMenu.getItems().get(0).setDisable(false);
-//					}
-//					contextMenu.show(row, event.getScreenX(), event.getScreenY());
-//				}
-//			});
-//			return row;
-//		});
+		machinesTableView.setRowFactory(tableView -> {
+			final TableRow<MachineTableItem> row = new TableRow<>();
+			final ContextMenu contextMenu = new ContextMenu();
+			final MenuItem removeMenuItem = new MenuItem("Remove Machine");
+			removeMenuItem.setOnAction(event -> {
+				machinesTableView.getItems().remove(row.getItem());
+			});
+			contextMenu.getItems().add(removeMenuItem);
+			row.setOnMouseClicked(event -> {
+				if (event.getButton() == MouseButton.SECONDARY) {
+					if (row.isEmpty()) {
+						contextMenu.getItems().get(0).setDisable(true);
+					} else {
+						contextMenu.getItems().get(0).setDisable(false);
+					}
+					contextMenu.show(row, event.getScreenX(), event.getScreenY());
+				}
+			});
+			return row;
+		});
 	}
 
 	@FXML
