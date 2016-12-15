@@ -62,7 +62,7 @@ public class FormulaInputStage extends Stage {
 		} catch (IOException e) {
 			logger.error("loading fxml failed", e);
 		}
-		currentStage.register(this);
+		currentStage.register(this, null);
 		this.injector = injector;
 		this.initModality(Modality.APPLICATION_MODAL);
 		setButtonAction();

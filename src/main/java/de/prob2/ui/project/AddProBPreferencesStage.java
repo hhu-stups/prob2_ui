@@ -48,7 +48,7 @@ public class AddProBPreferencesStage extends Stage {
 		}
 		this.initModality(Modality.WINDOW_MODAL);
 		this.initOwner(currentStage.get());
-		currentStage.register(this);
+		currentStage.register(this, this.getClass().getName());
 	}
 
 	@FXML

@@ -66,5 +66,9 @@ public class GroovyObjectItem extends GroovyAbstractItem {
 		classstage.close();
 	}
 	
+	public GroovyClassStage getStage() {
+		return classstage;
+	}
+	
 
 }

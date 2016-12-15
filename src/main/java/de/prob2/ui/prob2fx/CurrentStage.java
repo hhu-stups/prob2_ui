@@ -1,5 +1,7 @@
 package de.prob2.ui.prob2fx;
 
+import java.lang.ref.WeakReference;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -10,7 +12,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
 /**
@@ -74,12 +75,23 @@ public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 		this.stage.removeListener(listener);
 	}
 
-	public void register(final Stage stage) {
+	public void register(final Stage stage, final String id) {
+		stage.getProperties().put("id", id);
 		stage.showingProperty().addListener((observable, from, to) -> {
+			final String stageId = (String)stage.getProperties().get("id");
 			if (to) {
-				uiState.addStage(stage.getTitle(), new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()));
+				if (stageId != null) {
+					uiState.getStages().put(stageId, new WeakReference<>(stage));
+				}
 			} else {
-				uiState.removeStage(stage.getTitle());
+				// FIXME The main stage is special-cased at the moment.
+				// The main way to exit the application is to close the main stage,
+				// which would normally remove it from the stage map.
+				// We don't want that to happen, otherwise the main stage's bounds
+				// cannot be restored on the next launch.
+				if (stageId != null && !"de.prob2.ui.ProB2".equals(stageId)) {
+					uiState.getStages().remove(stageId);
+				}
 			}
 		});
 		stage.focusedProperty().addListener((observable, from, to) -> {

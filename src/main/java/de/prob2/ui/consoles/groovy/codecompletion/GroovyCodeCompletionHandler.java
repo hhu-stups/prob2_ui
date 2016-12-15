@@ -149,9 +149,9 @@ public class GroovyCodeCompletionHandler {
 		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
 		Object object = null;
-		if(engineScope.keySet().contains(currentLine)) {
+		if(engineScope.containsKey(currentLine)) {
 			object = engineScope.get(currentLine);
-		} else if(globalScope.keySet().contains(currentLine)) {
+		} else if(globalScope.containsKey(currentLine)) {
 			object = globalScope.get(currentLine);
 		}
 		return object;

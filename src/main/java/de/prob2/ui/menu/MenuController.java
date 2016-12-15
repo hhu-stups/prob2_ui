@@ -70,6 +70,7 @@ import javafx.stage.Window;
 @Singleton
 public final class MenuController extends MenuBar {
 
+	// FIXME all checkboxes selected when reloading detached
 	private enum ApplyDetachedEnum {
 		JSON, USER
 	}
@@ -101,7 +102,7 @@ public final class MenuController extends MenuBar {
 		public void initialize() {
 			detached.initModality(Modality.APPLICATION_MODAL);
 			detached.getIcons().add(new Image("prob_128.gif"));
-			currentStage.register(detached);
+			currentStage.register(detached, this.getClass().getName());
 		}
 
 		@FXML
@@ -125,7 +126,6 @@ public final class MenuController extends MenuBar {
 			for (final Stage stage : wrapperStagesCopy) {
 				stage.setScene(null);
 				stage.hide();
-				uiState.getStages().remove(stage.getTitle());
 			}
 
 			for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
@@ -135,7 +135,6 @@ public final class MenuController extends MenuBar {
 					transferToNewWindow((Parent) tp.getContent(), tp.getText());
 				}
 			}
-
 			if (accordion.getPanes().isEmpty()) {
 				pane.getItems().remove(accordion);
 				pane.setDividerPositions(0);
@@ -144,92 +143,47 @@ public final class MenuController extends MenuBar {
 		}
 
 		private boolean removable(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			return removableOperations(tp, detachedBy) || removableHistory(tp, detachedBy)
-					|| removableModelcheck(tp, detachedBy) || removableStats(tp, detachedBy)
-					|| removableAnimations(tp, detachedBy);
+			return	(removablePane(tp, detachOperations, detachedBy) && tp.getContent() instanceof OperationsView) ||
+					(removablePane(tp, detachHistory, detachedBy) && tp.getContent() instanceof HistoryView) ||
+					(removablePane(tp, detachModelcheck, detachedBy) && tp.getContent() instanceof ModelcheckingController) ||
+					(removablePane(tp, detachStats, detachedBy) && tp.getContent() instanceof StatsView) ||
+					(removablePane(tp, detachAnimations, detachedBy) && tp.getContent() instanceof AnimationsView);
 		}
-
-		private boolean removableOperations(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			boolean condition = detachOperations.isSelected();
+		
+		private boolean removablePane(TitledPane tp, CheckBox detached, ApplyDetachedEnum detachedBy) {
+			boolean condition = detached.isSelected();
 			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().keySet().contains(tp.getText());
+				condition = uiState.getSavedStageBoxes().containsKey(tp.getText());
 				if(condition) {
-					detachOperations.setSelected(true);
+					detached.setSelected(true);
 				}
 			}
-			return tp.getContent() instanceof OperationsView && condition;
-		}
-
-		private boolean removableHistory(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			boolean condition = detachHistory.isSelected();
-			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().keySet().contains(tp.getText());
-				if(condition) {
-					detachHistory.setSelected(true);
-				}
-			}
-			return tp.getContent() instanceof HistoryView && condition;
-		}
-
-		private boolean removableModelcheck(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			boolean condition = detachModelcheck.isSelected();
-			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().keySet().contains(tp.getText());
-				if(condition) {
-					detachModelcheck.setSelected(true);
-				}
-			}
-			return tp.getContent() instanceof ModelcheckingController && condition;
-		}
-
-		private boolean removableStats(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			boolean condition = detachStats.isSelected();
-			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().keySet().contains(tp.getText());
-				if(condition) {
-					detachStats.setSelected(true);
-				}
-			}
-			return tp.getContent() instanceof StatsView && condition;
-		}
-
-		private boolean removableAnimations(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			boolean condition = detachAnimations.isSelected();
-			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getStages().keySet().contains(tp.getText());
-				if(condition) {
-					detachAnimations.setSelected(true);
-				}
-			}
-			return tp.getContent() instanceof AnimationsView && condition;
+			return condition;
 		}
 
 		private void transferToNewWindow(Parent node, String title) {
 			Stage stage = new Stage();
 			wrapperStages.add(stage);
 			stage.setTitle(title);
-			currentStage.register(stage);
+			currentStage.register(stage, null);
 			stage.getIcons().add(new Image("prob_128.gif"));
-			stage.showingProperty().addListener((observable, from, to) -> {
-				if (!to) {
-					windowPrefs.putDouble(node.getClass() + "X", stage.getX());
-					windowPrefs.putDouble(node.getClass() + "Y", stage.getY());
-					windowPrefs.putDouble(node.getClass() + "Width", stage.getWidth());
-					windowPrefs.putDouble(node.getClass() + "Height", stage.getHeight());
-					if (node instanceof OperationsView) {
-						detachOperations.setSelected(false);
-					} else if (node instanceof HistoryView) {
-						detachHistory.setSelected(false);
-					} else if (node instanceof ModelcheckingController) {
-						detachModelcheck.setSelected(false);
-					} else if (node instanceof StatsView) {
-						detachStats.setSelected(false);
-					} else if (node instanceof AnimationsView) {
-						detachAnimations.setSelected(false);
-					}
-					uiState.getStages().remove(stage.getTitle());
-					dvController.apply();
+			stage.setOnHidden(e -> {
+				windowPrefs.putDouble(node.getClass()+"X",stage.getX());
+				windowPrefs.putDouble(node.getClass()+"Y",stage.getY());
+				windowPrefs.putDouble(node.getClass()+"Width",stage.getWidth());
+				windowPrefs.putDouble(node.getClass()+"Height",stage.getHeight());
+				if (node instanceof OperationsView) {
+					detachOperations.setSelected(false);
+				} else if (node instanceof HistoryView) {
+					detachHistory.setSelected(false);
+				} else if (node instanceof ModelcheckingController) {
+					detachModelcheck.setSelected(false);
+				} else if (node instanceof StatsView) {
+					detachStats.setSelected(false);
+				} else if (node instanceof AnimationsView) {
+					detachAnimations.setSelected(false);
 				}
+				dvController.apply();
 			});
 			stage.setWidth(windowPrefs.getDouble(node.getClass() + "Width", 200));
 			stage.setHeight(windowPrefs.getDouble(node.getClass() + "Height", 100));
@@ -515,7 +469,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	public void handlePreferences() {
+	private void handlePreferences() {
 		final Stage preferencesStage = injector.getInstance(PreferencesStage.class);
 		preferencesStage.show();
 		preferencesStage.toFront();
@@ -529,14 +483,14 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	public void handleGroovyConsole() {
+	private void handleGroovyConsole() {
 		final Stage groovyConsoleStage = injector.getInstance(GroovyConsoleStage.class);
 		groovyConsoleStage.show();
 		groovyConsoleStage.toFront();
 	}
 
 	@FXML
-	public void handleBConsole() {
+	private void handleBConsole() {
 		final Stage bConsoleStage = injector.getInstance(BConsoleStage.class);
 		bConsoleStage.show();
 		bConsoleStage.toFront();
@@ -577,7 +531,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	public void handleReportBug() {
+	private void handleReportBug() {
 		final Stage reportBugStage = injector.getInstance(ReportBugStage.class);
 		reportBugStage.show();
 		reportBugStage.toFront();

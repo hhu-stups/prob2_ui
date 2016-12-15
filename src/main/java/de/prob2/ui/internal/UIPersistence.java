@@ -1,6 +1,7 @@
 package de.prob2.ui.internal;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -8,20 +9,21 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
-import de.prob2.ui.consoles.b.BConsoleStage;
-import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.MenuController;
-import de.prob2.ui.menu.ReportBugStage;
-import de.prob2.ui.preferences.PreferencesStage;
 
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public final class UIPersistence {
+	private static final Logger LOGGER = LoggerFactory.getLogger(UIPersistence.class);
+	
 	private final UIState uiState;
 	private final Injector injector;
 	
@@ -31,76 +33,85 @@ public final class UIPersistence {
 		this.injector = injector;
 	}
 	
-	public void open() {
-		MenuController menu = injector.getInstance(MenuController.class);
-		if("detached".equals(uiState.getGuiState())) {
-			menu.applyDetached();
-		} else {
-			menu.loadPreset(uiState.getGuiState());
-		}
-		if(uiState.getStages().keySet().contains("Groovy Console")) {
-			sizeStage(injector.getInstance(GroovyConsoleStage.class), uiState.getStages().get("Groovy Console"));
-			menu.handleGroovyConsole();
-			if(uiState.getStages().keySet().contains("Groovy Objects")) {
-				injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
-			}
-		}
-		if(uiState.getStages().keySet().contains("B Console")) {
-			sizeStage(injector.getInstance(BConsoleStage.class), uiState.getStages().get("B Console"));
-			menu.handleBConsole();
-		}
-		if(uiState.getStages().keySet().contains("Preferences")) {
-			sizeStage(injector.getInstance(PreferencesStage.class), uiState.getStages().get("Preferences"));
-			menu.handlePreferences();
-		}
-		if(uiState.getStages().keySet().contains("Report Bug")) {
-			sizeStage(injector.getInstance(ReportBugStage.class), uiState.getStages().get("Report Bug"));
-			menu.handleReportBug();
-		}
-		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
-		int j = 0;
-		for (GroovyObjectItem groovyObject : groovyObjects) {
-			if (uiState.getStages().keySet().contains(groovyObject.getClazzname())) {
-				groovyObject.show(GroovyObjectItem.ShowEnum.PERSISTENCE, j);
-				j++;
-			}
-		}
-		PreferencesStage preferencesStage = injector.getInstance(PreferencesStage.class);
-		switch (preferencesStage.getCurrentTab()) {
-			case "ProB Preferences":
-				preferencesStage.selectPreferences();
-				break;
-			case "States View":
-				preferencesStage.selectStatesView();
-				break;
-			default:
-				preferencesStage.selectGeneral();
-		}
-	}
-	
-	public void sizeStage(Stage stage, BoundingBox box) {
+	private static void sizeStage(Stage stage, BoundingBox box) {
 		stage.setX(box.getMinX());
 		stage.setY(box.getMinY());
 		stage.setWidth(box.getWidth());
 		stage.setHeight(box.getHeight());
 	}
 	
-	public void save() {
-		if(uiState.getStages().keySet().contains("Groovy Console")) {
-			uiState.getStages().put("Groovy Console", getStageData(injector.getInstance(GroovyConsoleStage.class)));
+	private void restoreStage(final String id, BoundingBox box) {
+		LOGGER.info("Restoring stage with ID {} and bounding box {}", id, box);
+		if (id == null) {
+			LOGGER.warn("Stage identifier is null, cannot restore window");
+			return;
 		}
-		if(uiState.getStages().keySet().contains("B Console")) {
-			uiState.getStages().put("B Console", getStageData(injector.getInstance(BConsoleStage.class)));
+		
+		switch (id) {
+			case "de.prob2.ui.ProB2":
+				// The main stage's size is restored in the application start method.
+				return;
+			
+			case "de.prob2.ui.consoles.groovy.objects.GroovyObjectStage":
+				injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
+				return;
+			
+			case "de.prob2.ui.menu.MenuController$DetachViewStageController":
+				injector.getInstance(MenuController.class).handleLoadDetached();
+				return;
+			
+			default:
+				LOGGER.info("No special handling for stage identifier {}, will use injection", id);
 		}
-		if(uiState.getStages().keySet().contains("Preferences")) {
-			uiState.getStages().put("Preferences", getStageData(injector.getInstance(PreferencesStage.class)));
+		
+		Class<?> clazz;
+		try {
+			clazz = Class.forName(id);
+		} catch (ClassNotFoundException e) {
+			LOGGER.warn("Class not found, cannot restore window", e);
+			return;
 		}
-		if(uiState.getStages().keySet().contains("Report Bug")) {
-			uiState.getStages().put("Report Bug", getStageData(injector.getInstance(ReportBugStage.class)));
+		
+		Class<? extends Stage> stageClazz;
+		try {
+			stageClazz = clazz.asSubclass(Stage.class);
+		} catch (ClassCastException e) {
+			LOGGER.warn("Class is not a subclass of javafx.stage.Stage, cannot restore window", e);
+			return;
+		}
+		
+		try {
+			final Stage stage = injector.getInstance(stageClazz);
+			stage.show();
+			if (box != null) {
+				sizeStage(stage, box);
+			}
+		} catch (RuntimeException e) {
+			LOGGER.warn("Failed to restore window", e);
 		}
 	}
 	
-	private BoundingBox getStageData(Stage stage) {
-		return new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
+	public void open() {
+		final MenuController menu = injector.getInstance(MenuController.class);
+		
+		if("detached".equals(uiState.getGuiState())) {
+			menu.applyDetached();
+		} else {
+			menu.loadPreset(uiState.getGuiState());
+		}
+		
+		for (final Map.Entry<String, BoundingBox> entry : uiState.getSavedStageBoxes().entrySet()) {
+			this.restoreStage(entry.getKey(), entry.getValue());
+		}
+		
+		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
+		int j = 0;
+		for (GroovyObjectItem groovyObject : groovyObjects) {
+			if (uiState.getSavedStageBoxes().containsKey(groovyObject.getClazzname())) {
+				sizeStage(groovyObject.getStage(), uiState.getSavedStageBoxes().get(groovyObject.getClazzname()));
+				groovyObject.show(GroovyObjectItem.ShowEnum.PERSISTENCE, j);
+				j++;
+			}
+		}
 	}
 }

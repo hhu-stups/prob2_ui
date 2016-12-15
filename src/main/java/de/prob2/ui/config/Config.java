@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.ref.Reference;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,18 +29,14 @@ import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
-import de.prob2.ui.consoles.ConsoleInstruction;
-import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
-import de.prob2.ui.internal.UIPersistence;
 import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.ClassBlacklist;
-
 import javafx.geometry.BoundingBox;
-import javafx.scene.control.IndexRange;
+import javafx.stage.Stage;
 
 @Singleton
 @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
@@ -47,22 +44,12 @@ public final class Config {
 	private static final class ConfigData {
 		private int maxRecentFiles;
 		private List<String> recentFiles;
-		private List<String> groovyConsoleEntries;
-		private List<String> bConsoleEntries;
+		private String[] groovyConsoleSettings;
+		private String[] bConsoleSettings;
 		private List<String> statesViewHiddenClasses;
 		private String guiState;
 		private HashMap<String, double[]> stages;
 		private List<String> groovyObjectTabs;
-		private String groovyConsoleState;
-		private int groovyConsoleCharCounterInLine;
-		private int groovyConsoleCurrentPosInLine;
-		private int groovyConsoleCaret;
-		private List<IndexRange> groovyConsoleErrors;
-		private String bConsoleState;
-		private int bConsoleCharCounterInLine;
-		private int bConsoleCurrentPosInLine;
-		private int bConsoleCaret;
-		private List<IndexRange> bConsoleErrors;
 		private String currentPreference;
 	}
 	
@@ -135,62 +122,11 @@ public final class Config {
 		if (configData.currentPreference == null) {
 			configData.currentPreference = this.defaultData.currentPreference;
 		}
-		this.replaceMissingWithDefaultsConsoles(configData);
-	}
-	
-	private void replaceMissingWithDefaultsConsoles(final ConfigData configData) {
-		if (configData.groovyConsoleEntries == null) {
-			configData.groovyConsoleEntries = new ArrayList<>(this.defaultData.groovyConsoleEntries);
+		if(configData.groovyConsoleSettings == null) {
+			configData.groovyConsoleSettings = this.defaultData.groovyConsoleSettings;
 		}
-		
-		if (configData.bConsoleEntries == null) {
-			configData.bConsoleEntries = new ArrayList<>(this.defaultData.bConsoleEntries);
-		}
-		if (configData.groovyConsoleState == null) {
-			configData.groovyConsoleState = this.defaultData.groovyConsoleState;
-			configData.groovyConsoleCharCounterInLine = this.defaultData.groovyConsoleCharCounterInLine;
-			configData.groovyConsoleCurrentPosInLine = this.defaultData.groovyConsoleCurrentPosInLine;
-			configData.groovyConsoleCaret = this.defaultData.groovyConsoleCaret;
-			configData.groovyConsoleErrors = new ArrayList<>(this.defaultData.groovyConsoleErrors);
-		}
-		if (configData.bConsoleState == null) {
-			configData.bConsoleState = this.defaultData.bConsoleState;
-			configData.bConsoleCharCounterInLine = this.defaultData.bConsoleCharCounterInLine;
-			configData.bConsoleCurrentPosInLine = this.defaultData.bConsoleCurrentPosInLine;
-			configData.bConsoleCaret = this.defaultData.bConsoleCaret;
-			configData.bConsoleErrors = new ArrayList<>(this.defaultData.bConsoleErrors);
-		}
-	}
-	
-	private void loadConsoles(final ConfigData configData) {
-		for (String instruction : configData.groovyConsoleEntries) {
-			groovyConsole.getInstructions().add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
-			groovyConsole.increaseCounter();
-		}
-		
-		for (String instruction : configData.bConsoleEntries) {
-			bConsole.getInstructions().add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
-			bConsole.increaseCounter();
-		}
-		
-		this.groovyConsole.replaceText(configData.groovyConsoleState);
-		this.groovyConsole.setCharCounterInLine(configData.groovyConsoleCharCounterInLine);
-		this.groovyConsole.setCurrentPosInLine(configData.groovyConsoleCurrentPosInLine);
-		this.groovyConsole.moveTo(configData.groovyConsoleCaret);
-		
-		for (IndexRange range : configData.groovyConsoleErrors) {
-			groovyConsole.getErrors().add(range);
-			groovyConsole.setStyleClass(range.getStart(), range.getEnd(), "error");
-		}
-		
-		this.bConsole.replaceText(configData.bConsoleState);
-		this.bConsole.setCharCounterInLine(configData.bConsoleCharCounterInLine);
-		this.bConsole.setCurrentPosInLine(configData.bConsoleCurrentPosInLine);
-		this.bConsole.moveTo(configData.bConsoleCaret);
-		
-		for (IndexRange range : configData.bConsoleErrors) {
-			bConsole.getErrors().add(range);
-			bConsole.setStyleClass(range.getStart(), range.getEnd(), "error");
+		if(configData.bConsoleSettings == null) {
+			configData.bConsoleSettings = this.defaultData.bConsoleSettings;
 		}
 	}
 	
@@ -233,7 +169,7 @@ public final class Config {
 		
 		for (final Map.Entry<String, double[]> entry : configData.stages.entrySet()) {
 			final double[] v = entry.getValue();
-			this.uiState.addStage(entry.getKey(), new BoundingBox(v[0], v[1], v[2], v[3]));
+			this.uiState.getSavedStageBoxes().put(entry.getKey(), new BoundingBox(v[0], v[1], v[2], v[3]));
 		}
 		
 		for (String tab : configData.groovyObjectTabs) {
@@ -242,44 +178,28 @@ public final class Config {
 		
 		this.injector.getInstance(PreferencesStage.class).setCurrentTab(configData.currentPreference);
 		
-		this.loadConsoles(configData);
+		groovyConsole.applySettings(configData.groovyConsoleSettings);
+		bConsole.applySettings(configData.bConsoleSettings);
 	}
-	
-	private void saveConsoles(final ConfigData configData) {
-		configData.groovyConsoleEntries = new ArrayList<>(groovyConsole.getInstructionEntries());
-		configData.bConsoleEntries = new ArrayList<>(bConsole.getInstructionEntries());
-		configData.groovyConsoleState = groovyConsole.getText();
-		configData.groovyConsoleCharCounterInLine = groovyConsole.getCharCounterInLine();
-		configData.groovyConsoleCurrentPosInLine = groovyConsole.getCurrentPosInLine();
-		configData.groovyConsoleCaret = groovyConsole.getCaretPosition();
-		configData.groovyConsoleErrors = new ArrayList<>(groovyConsole.getErrors());
-		configData.bConsoleState = bConsole.getText();
-		configData.bConsoleCharCounterInLine = bConsole.getCharCounterInLine();
-		configData.bConsoleCurrentPosInLine = bConsole.getCurrentPosInLine();
-		configData.bConsoleCaret = bConsole.getCaretPosition();
-		configData.bConsoleErrors = new ArrayList<>(bConsole.getErrors());
-	}
-	
-	
+		
 	public void save() {
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
-		injector.getInstance(UIPersistence.class).save();
 		configData.stages = new HashMap<>();
-		for (final Map.Entry<String, BoundingBox> entry : this.uiState.getStages().entrySet()) {
-			configData.stages.put(entry.getKey(), new double[] {
-				entry.getValue().getMinX(),
-				entry.getValue().getMinY(),
-				entry.getValue().getWidth(),
-				entry.getValue().getHeight(),
-			});
+		for (final Map.Entry<String, Reference<Stage>> entry : this.uiState.getStages().entrySet()) {
+			final Stage stage = entry.getValue().get();
+			if (stage == null) {
+				continue;
+			}
+			configData.stages.put(entry.getKey(), new double[] {stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()});
 		}
 		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
 		configData.statesViewHiddenClasses = new ArrayList<>();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
-		this.saveConsoles(configData);
+		configData.groovyConsoleSettings = groovyConsole.getSettings();
+		configData.bConsoleSettings = bConsole.getSettings();
 		
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());

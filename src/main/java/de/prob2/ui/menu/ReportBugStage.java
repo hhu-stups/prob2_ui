@@ -27,7 +27,7 @@ public class ReportBugStage extends Stage {
 		
 		this.setTitle("Report Bug");
 		this.setScene(scene);
-		currentStage.register(this);
+		currentStage.register(this, this.getClass().getName());
 	}
 	
 }

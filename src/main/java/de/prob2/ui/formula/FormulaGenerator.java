@@ -42,7 +42,7 @@ public final class FormulaGenerator {
 
 	public void showFormula(final IEvalElement formula) {
 		FormulaView fview = new FormulaView(new FormulaGraph(new FormulaNode(expandFormula(formula))));
-		currentStage.register(fview);
+		currentStage.register(fview, null);
 		fview.show();
 	}
 

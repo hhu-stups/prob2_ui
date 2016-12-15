@@ -20,7 +20,7 @@ public final class BConsoleStage extends Stage {
 		bConsole.getStyleClass().add("console");
 		this.setScene(new Scene(new StackPane(new VirtualizedScrollPane<>(bConsole)), 800, 600));
 		this.getScene().getStylesheets().add("prob.css");
-		currentStage.register(this);
+		currentStage.register(this, this.getClass().getName());
 	}
 
 }

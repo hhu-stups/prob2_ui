@@ -61,7 +61,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		
 		@FXML
 		public void initialize() {
-			currentStage.register(this.mcheckStage);
+			currentStage.register(this.mcheckStage, null);
 		}
 		
 		@FXML

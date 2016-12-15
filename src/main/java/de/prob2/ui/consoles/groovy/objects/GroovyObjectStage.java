@@ -54,7 +54,7 @@ public final class GroovyObjectStage extends Stage {
 		}
 		this.currentStage = currentStage;
 		this.uiState = uiState;
-		currentStage.register(this);
+		currentStage.register(this, this.getClass().getName());
 		this.setOnCloseRequest(e-> close());
 	}
 
@@ -79,7 +79,7 @@ public final class GroovyObjectStage extends Stage {
 				continue;
 			}
 			GroovyClassStage stage = new GroovyClassStage(loader, uiState);
-			currentStage.register(stage);
+			currentStage.register(stage, null);
 			items.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), stage, uiState));
 		}
 	}
