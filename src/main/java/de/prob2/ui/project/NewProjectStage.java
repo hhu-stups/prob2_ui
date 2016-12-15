@@ -21,22 +21,20 @@ import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.Pair;
 
 @Singleton
 public class NewProjectStage extends Stage {
@@ -55,16 +53,15 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private Label errorExplanationLabel;
 	@FXML
-	private TableView<Machine> machinesTableView;
+	private TableView<MachineTableItem> machinesTableView;
 	@FXML
-	private TableColumn<Machine, String> nameColumn;
+	private TableColumn<MachineTableItem, String> nameColumn;
 	@FXML
-	private TableColumn<Machine, String> descriptionColumn;
+	private TableColumn<MachineTableItem, String> descriptionColumn;
 
 	private CurrentProject currentProject;
 	private CurrentStage currentStage;
-	private Map<Pair<Integer, Integer>, Boolean> prefBooleanMap = new HashMap<>();
-	private Map<String,Preference> preferencesMap = new HashMap<>();
+	private Map<String, Preference> preferencesMap = new HashMap<>();
 
 	private FXMLLoader loader;
 
@@ -103,44 +100,20 @@ public class NewProjectStage extends Stage {
 			preferencesListView.getItems().add(preference);
 			preferencesMap.put(preference.toString(), preference);
 
-			TableColumn<Machine, Boolean> preferenceColumn = new TableColumn<>(preference.toString());
-
-			preferenceColumn.setEditable(true);
-			preferenceColumn.setCellFactory(new Callback<TableColumn<Machine, Boolean>, TableCell<Machine, Boolean>>() {
-				public TableCell<Machine, Boolean> call(TableColumn<Machine, Boolean> p) {
-					return new CheckBoxCell<Machine, Boolean>();
-				}
-			});
-			machinesTableView.getColumns().add(preferenceColumn);
-		}
-	}
-
-	private class CheckBoxCell<S, T> extends TableCell<S, T> {
-		private final CheckBox checkBox;
-
-		public CheckBoxCell() {
-			this.checkBox = new CheckBox();
-			checkBox.setOnAction((event) -> {
-				int column = this.getTableView().getColumns().indexOf(this.getTableColumn());
-				int row = this.getIndex();
-				boolean checked = checkBox.isSelected();
-				prefBooleanMap.put(new Pair<Integer, Integer>(row, column), checked);
-			});
-			this.checkBox.setAlignment(Pos.CENTER);
-
-			setAlignment(Pos.CENTER);
-			setGraphic(checkBox);
-		}
-
-		@Override
-		public void updateItem(T item, boolean empty) {
-			super.updateItem(item, empty);
-			if (empty) {
-				setText(null);
-				setGraphic(null);
-			} else {
-				setGraphic(checkBox);
+			for (MachineTableItem item : machinesTableView.getItems()) {
+				item.addPreferenceProperty(preference);
 			}
+
+			TableColumn<MachineTableItem, Boolean> preferenceColumn = new TableColumn<>(preference.toString());
+			preferenceColumn.setEditable(true);
+			preferenceColumn.setCellFactory(
+					new Callback<TableColumn<MachineTableItem, Boolean>, TableCell<MachineTableItem, Boolean>>() {
+						public TableCell<MachineTableItem, Boolean> call(TableColumn<MachineTableItem, Boolean> p) {
+							return new CheckBoxTableCell<>();
+						}
+					});
+			preferenceColumn.setCellValueFactory(cellData -> cellData.getValue().getPreferenceProperty(preference));
+			machinesTableView.getColumns().add(preferenceColumn);
 		}
 	}
 
@@ -160,7 +133,7 @@ public class NewProjectStage extends Stage {
 		Machine machine = addMachineStage.showStage();
 
 		if (machine != null) {
-			machinesTableView.getItems().add(machine);
+			machinesTableView.getItems().add(new MachineTableItem(machine, preferencesListView.getItems()));
 		}
 	}
 
@@ -183,8 +156,8 @@ public class NewProjectStage extends Stage {
 			errorExplanationLabel.setText("The location does not exist or is invalid");
 			return;
 		}
-		List<Machine> machines = machinesTableView.getItems();
-		machines = copyMachines(machines, dir);
+		List<MachineTableItem> machineItems = machinesTableView.getItems();
+		List<Machine> machines = copyMachines(machineItems, dir);
 		Map<String, Preference> preferences = preferencesMap;
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines,
 				preferences, dir);
@@ -193,17 +166,18 @@ public class NewProjectStage extends Stage {
 		this.close();
 	}
 
-	private List<Machine> copyMachines(List<Machine> machines, File dir) {
+	private List<Machine> copyMachines(List<MachineTableItem> machineItems, File dir) {
 		String path = dir.getAbsolutePath();
-		for (Machine machine : machines) {
-			int i = machines.indexOf(machine);
+		List<Machine> machines = new ArrayList<>();
+		for (MachineTableItem machineItem : machineItems) {
+			Machine machine = machineItem.get();
 			Path source = machine.getLocation().toPath();
 			File newLocation = new File(path + File.separator + machine.getLocation().getName());
-			List<String> preferences = getSelectedPreferences(machine);
+			List<String> preferences = getSelectedPreferences(machineItem);
 			Machine newMachine = new Machine(machine.getName(), machine.getDescription(), preferences, newLocation);
 			try {
 				Files.copy(source, newLocation.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				machines.set(i, newMachine);
+				machines.add(newMachine);
 			} catch (IOException e) {
 				logger.error(
 						"Could not copy file to the selected directory: " + machine.getLocation().getAbsolutePath(), e);
@@ -212,15 +186,10 @@ public class NewProjectStage extends Stage {
 		return machines;
 	}
 
-	private List<String> getSelectedPreferences(Machine machine) {
-		int totalColumns = machinesTableView.getColumns().size();
-		int firstPrefColumn = totalColumns - preferencesListView.getItems().size();
-		int row = machinesTableView.getItems().indexOf(machine);
-
+	private List<String> getSelectedPreferences(MachineTableItem machineItem) {
 		List<String> prefs = new ArrayList<>();
-		for (int column = firstPrefColumn; column < totalColumns; column++) {
-			if (prefBooleanMap.get(new Pair<>(row, column)) != null && prefBooleanMap.get(new Pair<>(row, column))) {
-				Preference preference = preferencesListView.getItems().get(column - firstPrefColumn);
+		for (Preference preference : preferencesListView.getItems()) {
+			if(machineItem.getPreferences().get(preference).get()) {
 				prefs.add(preference.toString());
 			}
 		}
