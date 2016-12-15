@@ -139,6 +139,7 @@ public class NewProjectStage extends Stage {
 					});
 			preferenceColumn.setCellValueFactory(cellData -> cellData.getValue().getPreferenceProperty(preference));
 			machinesTableView.getColumns().add(preferenceColumn);
+			machinesTableView.refresh();
 		}
 	}
 
