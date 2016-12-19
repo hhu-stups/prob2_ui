@@ -1,12 +1,17 @@
 package de.prob2.ui.internal;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.MainController;
+import de.prob2.ui.MainController.TitledPaneExpanded;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
@@ -93,6 +98,7 @@ public final class UIPersistence {
 	
 	public void open() {
 		final MenuController menu = injector.getInstance(MenuController.class);
+		final MainController main = injector.getInstance(MainController.class);
 		if("detached".equals(uiState.getGuiState())) {
 			menu.applyDetached();
 		} else {
@@ -112,5 +118,17 @@ public final class UIPersistence {
 				j++;
 			}
 		}
+		
+ 		HashMap<String, TitledPaneExpanded> expandedTitledPanes = Maps.newHashMap(
+ 	 			ImmutableMap.of("Operations", TitledPaneExpanded.OPERATIONS, "History", TitledPaneExpanded.HISTORY, "Animations", TitledPaneExpanded.ANIMATIONS, 
+ 	 							"Model Check", TitledPaneExpanded.MODELCHECK, "Statistics", TitledPaneExpanded.STATS)
+ 	 	);
+		
+		for(String titledPane : expandedTitledPanes.keySet()) {
+			if(uiState.getExpandedTitledPanes().contains(titledPane)) {
+				main.expandTitledPane(expandedTitledPanes.get(titledPane));
+			}
+		}
+		
 	}
 }

@@ -23,6 +23,7 @@ public class UIState {
 	private final Map<String, BoundingBox> savedStageBoxes;
 	private final Map<String, Reference<Stage>> stages;
 	private final List<String> groovyObjectTabs;
+	private List<String> expandedTitledPanes;
 		
 	@Inject
 	public UIState() {
@@ -30,6 +31,7 @@ public class UIState {
 		this.savedStageBoxes = new HashMap<>();
 		this.stages = new HashMap<>();
 		this.groovyObjectTabs = new ArrayList<>();
+		this.expandedTitledPanes = new ArrayList<>();
 	}
 	
 	public void setGuiState(String guiState) {
@@ -66,5 +68,9 @@ public class UIState {
 	
 	public void clearDetachedStages() {
 		stages.keySet().removeAll(DETACHED);
+	}
+	
+	public List<String> getExpandedTitledPanes() {
+		return expandedTitledPanes;
 	}
 }

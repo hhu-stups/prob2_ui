@@ -484,7 +484,7 @@ public final class MenuController extends MenuBar {
 		}
 		Parent root = injector.getInstance(MainController.class);
 		loader.setRoot(root);
-		((MainController) root).refresh(uiState);
+		((MainController) root).refresh();
 		window.getScene().setRoot(root);
 		
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {

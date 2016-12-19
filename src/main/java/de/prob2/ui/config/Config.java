@@ -53,6 +53,7 @@ public final class Config {
 		private HashMap<String, double[]> stages;
 		private List<String> groovyObjectTabs;
 		private String currentPreference;
+		private List<String> expandedTitledPanes;
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
@@ -130,6 +131,9 @@ public final class Config {
 		if(configData.bConsoleSettings == null) {
 			configData.bConsoleSettings = this.defaultData.bConsoleSettings;
 		}
+		if(configData.expandedTitledPanes == null) {
+			configData.expandedTitledPanes = this.defaultData.expandedTitledPanes;
+		}
 	}
 	
 	public void load() {
@@ -178,6 +182,10 @@ public final class Config {
 			this.uiState.addGroovyObjectTab(tab);
 		}
 		
+		for (String pane: configData.expandedTitledPanes) {
+			this.uiState.getExpandedTitledPanes().add(pane);
+		}
+		
 		this.injector.getInstance(PreferencesStage.class).setCurrentTab(configData.currentPreference);
 		
 		groovyConsole.applySettings(configData.groovyConsoleSettings);
@@ -202,6 +210,7 @@ public final class Config {
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
 		configData.groovyConsoleSettings = groovyConsole.getSettings();
 		configData.bConsoleSettings = bConsole.getSettings();
+		configData.expandedTitledPanes = new ArrayList<>(this.uiState.getExpandedTitledPanes());
 		
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
