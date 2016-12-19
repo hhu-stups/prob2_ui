@@ -117,7 +117,7 @@ public class GroovyClassStage extends Stage {
 
 		tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> uiState.getGroovyObjectTabs().set(index, newValue.getText()));
 		
-		this.setOnCloseRequest(e -> uiState.getGroovyObjectTabs().remove(this.getTitle()));
+		this.setOnCloseRequest(e -> uiState.removeGroovyObjectTab(index));
 	}
 	
 	public void showMethodsAndFields(Object object) {
