@@ -17,19 +17,19 @@
 		<SplitPane dividerPositions="0.26">
 			<Accordion fx:id="leftAccordion">
 				<panes>
-					<TitledPane text="%tptitles.operations">
+					<TitledPane fx:id = "operationsTP" text="%tptitles.operations" onMouseClicked="#operationsTPClicked">
 						<OperationsView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.history">
+					<TitledPane text="%tptitles.history" fx:id ="historyTP" onMouseClicked="#historyTPClicked">
 						<HistoryView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.modelcheck">
+					<TitledPane text="%tptitles.modelcheck" fx:id = "modelcheckTP" onMouseClicked="#modelcheckTPClicked">
 						<ModelcheckingController/>
 					</TitledPane>
-					<TitledPane text="%tptitles.stats">
+					<TitledPane text="%tptitles.stats" fx:id ="statsTP" onMouseClicked="#statsTPClicked">
 						<StatsView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.animations">
+					<TitledPane text="%tptitles.animations" fx:id = "animationsTP" onMouseClicked="#animationsTPClicked">
 						<AnimationsView/>
 					</TitledPane>
 				</panes>

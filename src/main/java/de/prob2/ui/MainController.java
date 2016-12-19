@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 
@@ -19,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MainController extends BorderPane {
-	private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
+	private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 	
 	private FXMLLoader loader;
 	
@@ -28,7 +29,19 @@ public class MainController extends BorderPane {
 	
 	@FXML
 	private TitledPane operationsTP;
-
+	
+	@FXML
+	private TitledPane modelcheckTP;
+	
+	@FXML
+	private TitledPane historyTP;
+	
+	@FXML
+	private TitledPane animationsTP;
+	
+	@FXML
+	private TitledPane statsTP;
+	
 	
 	@Inject
 	public MainController(FXMLLoader loader, UIState uiState) {
@@ -47,8 +60,37 @@ public class MainController extends BorderPane {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			LOGGER.error("loading FXML failed", e);
-		}
+			logger.error("loading fxml failed", e);
+			Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+			alert.getDialogPane().getStylesheets().add("prob.css");
+			alert.showAndWait();
+		}	
+	}
+	
+	@FXML
+	public void operationsTPClicked() {
+		System.out.println(operationsTP.isExpanded());
+		System.out.println(operationsTP.getParent());
+	}
+	
+	@FXML
+	public void historyTPClicked() {
+		
+	}
+	
+	@FXML
+	public void modelcheckTPClicked() {
+		
+	}
+	
+	@FXML
+	public void statsTPClicked() {
+		
+	}
+		
+	@FXML
+	public void animationsTPClicked() {
+			
 	}
 		
 }

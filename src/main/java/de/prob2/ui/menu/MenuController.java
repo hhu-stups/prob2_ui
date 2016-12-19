@@ -482,18 +482,9 @@ public final class MenuController extends MenuBar {
 			alert.showAndWait();
 			return null;
 		}
-		loader.setRoot(injector.getInstance(MainController.class));
-		injector.getInstance(MainController.class).refresh(uiState);
-		Parent root;
-		try {
-			root = loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-			Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-			alert.getDialogPane().getStylesheets().add("prob.css");
-			alert.showAndWait();
-			return null;
-		}
+		Parent root = injector.getInstance(MainController.class);
+		loader.setRoot(root);
+		((MainController) root).refresh(uiState);
 		window.getScene().setRoot(root);
 		
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
