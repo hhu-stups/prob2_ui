@@ -15,11 +15,11 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
 
 import de.codecentric.centerdevice.MenuToolkit;
 
 import de.prob.scripting.Api;
+import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -399,15 +399,7 @@ public final class MenuController extends MenuBar {
 			final StateSpace newSpace;
 			try {
 				newSpace = this.api.b_load(path);
-			} catch (IOException e) {
-				logger.error("loading file failed", e);
-				Platform.runLater(() -> {
-					Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-					alert.getDialogPane().getStylesheets().add("prob.css");
-					alert.show();
-				});
-				return;
-			} catch (BException e) {
+			} catch (IOException | ModelTranslationError e) {
 				logger.error("loading file failed", e);
 				Platform.runLater(() -> {
 					Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
