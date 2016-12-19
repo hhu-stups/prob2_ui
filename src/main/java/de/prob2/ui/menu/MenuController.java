@@ -399,7 +399,15 @@ public final class MenuController extends MenuBar {
 			final StateSpace newSpace;
 			try {
 				newSpace = this.api.b_load(path);
-			} catch (IOException | BException e) {
+			} catch (IOException e) {
+				logger.error("loading file failed", e);
+				Platform.runLater(() -> {
+					Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
+					alert.getDialogPane().getStylesheets().add("prob.css");
+					alert.show();
+				});
+				return;
+			} catch (BException e) {
 				logger.error("loading file failed", e);
 				Platform.runLater(() -> {
 					Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
