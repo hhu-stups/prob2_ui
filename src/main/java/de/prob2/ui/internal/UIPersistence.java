@@ -93,7 +93,6 @@ public final class UIPersistence {
 	
 	public void open() {
 		final MenuController menu = injector.getInstance(MenuController.class);
-		
 		if("detached".equals(uiState.getGuiState())) {
 			menu.applyDetached();
 		} else {
@@ -107,8 +106,8 @@ public final class UIPersistence {
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
 		int j = 0;
 		for (GroovyObjectItem groovyObject : groovyObjects) {
-			if (uiState.getSavedStageBoxes().containsKey(groovyObject.getClazzname())) {
-				sizeStage(groovyObject.getStage(), uiState.getSavedStageBoxes().get(groovyObject.getClazzname()));
+			if (uiState.getSavedStageBoxes().containsKey("#GroovyObjectId:" + groovyObject.getName())) {
+				sizeStage(groovyObject.getStage(), uiState.getSavedStageBoxes().get("#GroovyObjectId:" + groovyObject.getName()));
 				groovyObject.show(GroovyObjectItem.ShowEnum.PERSISTENCE, j);
 				j++;
 			}

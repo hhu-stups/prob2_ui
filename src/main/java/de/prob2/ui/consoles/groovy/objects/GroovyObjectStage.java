@@ -79,8 +79,8 @@ public final class GroovyObjectStage extends Stage {
 				continue;
 			}
 			GroovyClassStage stage = new GroovyClassStage(loader, uiState);
-			currentStage.register(stage, null);
 			items.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), stage, uiState));
+			currentStage.register(stage, "#GroovyObjectId:" + entry.getKey());
 		}
 	}
 
