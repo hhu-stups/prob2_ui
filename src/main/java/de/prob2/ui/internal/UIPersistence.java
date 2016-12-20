@@ -33,17 +33,15 @@ public final class UIPersistence {
 		this.injector = injector;
 	}
 	
-	private static void sizeStage(Stage stage, BoundingBox box) {
-		stage.setX(box.getMinX());
-		stage.setY(box.getMinY());
-		stage.setWidth(box.getWidth());
-		stage.setHeight(box.getHeight());
-	}
-	
 	private void restoreStage(final String id, BoundingBox box) {
 		LOGGER.info("Restoring stage with ID {} and bounding box {}", id, box);
 		if (id == null) {
 			LOGGER.warn("Stage identifier is null, cannot restore window");
+			return;
+		}
+		
+		if (id.startsWith("#GroovyObjectId:")) {
+			// Handled elsewhere in open()
 			return;
 		}
 		
@@ -105,20 +103,15 @@ public final class UIPersistence {
 		int j = 0;
 		for (GroovyObjectItem groovyObject : groovyObjects) {
 			if (uiState.getSavedStageBoxes().containsKey("#GroovyObjectId:" + groovyObject.getName())) {
-				sizeStage(groovyObject.getStage(), uiState.getSavedStageBoxes().get("#GroovyObjectId:" + groovyObject.getName()));
 				groovyObject.show(GroovyObjectItem.ShowEnum.PERSISTENCE, j);
 				j++;
 			}
 		}
 		
- 		String[] expandedTitledPanes = new String[]{"Operations", "History", "Animations", "Model Check", "Statistics"};
- 	 
-		
-		for(String titledPane : expandedTitledPanes) {
-			if(uiState.getExpandedTitledPanes().contains(titledPane)) {
+		for(String titledPane : new String[] {"Operations", "History", "Animations", "Model Check", "Statistics"}) {
+			if (uiState.getExpandedTitledPanes().contains(titledPane)) {
 				main.expandTitledPane(titledPane);
 			}
 		}
-		
 	}
 }
