@@ -18,6 +18,21 @@ import org.fxmisc.wellbehaved.event.Nodes;
 
 
 public abstract class Console extends StyleClassedTextArea {
+	public static class ConfigData {
+		private List<String> instructions;
+		private String text;
+		private int charCounterInLine;
+		private int currentPosInLine;
+		private int caretPosition;
+		private List<int[]> errorRanges;
+		
+		protected ConfigData() {}
+		
+		public String getText() {
+			return text;
+		}
+	}
+	
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
 	
 	protected List<ConsoleInstruction> instructions;
@@ -309,39 +324,45 @@ public abstract class Console extends StyleClassedTextArea {
 		return this.getText(this.getParagraphs().size() - 1).substring(2);
 	}
 	
-	public String[] getSettings() {
-		String instructionEntries = instructions.toString();
-		String error = errors.toString();
-		return new String[]{instructionEntries, getText(), String.valueOf(charCounterInLine), String.valueOf(currentPosInLine), String.valueOf(getCaretPosition()), error};
+	public Console.ConfigData getSettings() {
+		final Console.ConfigData configData = new Console.ConfigData();
+		configData.instructions = new ArrayList<>();
+		for (final ConsoleInstruction instruction : instructions) {
+			configData.instructions.add(instruction.getInstruction());
+		}
+		configData.text = getText();
+		configData.charCounterInLine = charCounterInLine;
+		configData.currentPosInLine = currentPosInLine;
+		configData.caretPosition = getCaretPosition();
+		configData.errorRanges = new ArrayList<>();
+		for (final IndexRange indexRange : errors) {
+			configData.errorRanges.add(new int[] {indexRange.getStart(), indexRange.getEnd()});
+		}
+		return configData;
 	}
 	
-	public void applySettings(String[] settings) {
-		String instructionEntries = settings[0].substring(1, settings[0].length()-1).replaceAll(" ", "");
-		String[] instructionSettings = instructionEntries.split(",");
-		String errorsEntries = settings[5].substring(1, settings[5].length()-1).replaceAll(" ", "");
-		String[] errorsSettings = errorsEntries.split(",");
-		for(String instruction: instructionSettings) {
+	public void applySettings(Console.ConfigData settings) {
+		if (settings == null) {
+			return;
+		}
+		
+		instructions = new ArrayList<>();
+		for (final String instruction : settings.instructions) {
 			instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 			posInList++;
 		}
-		this.replaceText(settings[1]);
-		this.moveTo(Integer.parseInt((String) settings[4]));
-		charCounterInLine = Integer.parseInt((String) settings[2]);
-		currentPosInLine = Integer.parseInt((String) settings[3]);
-		if(errorsSettings.length < 2) {
-			return;
-		}
-		for(int i = 0; i < errorsSettings.length; i=i+2) {			
-			IndexRange range = new IndexRange(Integer.parseInt(errorsSettings[i]), Integer.parseInt(errorsSettings[i+1]));
-			errors.add(range);
-			this.setStyleClass(range.getStart(), range.getEnd(), "error");
+		this.replaceText(settings.text);
+		charCounterInLine = settings.charCounterInLine;
+		currentPosInLine = settings.currentPosInLine;
+		this.moveTo(settings.caretPosition);
+		errors = new ArrayList<>();
+		for (final int[] range : settings.errorRanges) {
+			errors.add(new IndexRange(range[0], range[1]));
+			this.setStyleClass(range[0], range[1], "error");
 		}
 	}
-		
+	
 	public int getCurrentPosInLine() {
 		return currentPosInLine;
 	}
-	
-
-	
 }

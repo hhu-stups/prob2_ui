@@ -26,6 +26,7 @@ import com.google.inject.Singleton;
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
 
+import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.internal.UIState;
@@ -44,8 +45,8 @@ public final class Config {
 	private static final class ConfigData {
 		private int maxRecentFiles;
 		private List<String> recentFiles;
-		private String[] groovyConsoleSettings;
-		private String[] bConsoleSettings;
+		private Console.ConfigData groovyConsoleSettings;
+		private Console.ConfigData bConsoleSettings;
 		private List<String> statesViewHiddenClasses;
 		private String guiState;
 		private List<String> visibleStages;
@@ -53,6 +54,8 @@ public final class Config {
 		private List<String> groovyObjectTabs;
 		private String currentPreference;
 		private List<String> expandedTitledPanes;
+		
+		private ConfigData() {}
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");

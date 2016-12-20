@@ -21,9 +21,9 @@ public final class BConsole extends Console {
 	}
 	
 	@Override
-	public void applySettings(String[] settings) {
+	public void applySettings(Console.ConfigData settings) {
 		super.applySettings(settings);
-		if(settings[1].length() != 21) {
+		if (settings != null && settings.getText().length() != 21) {
 			this.appendText("\n ---Engine reseted--- \n >");
 		}
 	}
