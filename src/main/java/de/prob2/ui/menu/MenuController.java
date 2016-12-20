@@ -29,11 +29,11 @@ import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.history.HistoryView;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.UIState;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.preferences.PreferencesStage;
-import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 
@@ -55,7 +55,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -73,8 +72,7 @@ public final class MenuController extends MenuBar {
 		JSON, USER
 	}
 
-	private final class DetachViewStageController {
-		@FXML private Stage detached;
+	private final class DetachViewStageController extends Stage {
 		@FXML private Button apply;
 		@FXML private CheckBox detachOperations;
 		@FXML private CheckBox detachHistory;
@@ -87,13 +85,8 @@ public final class MenuController extends MenuBar {
 		private DetachViewStageController() {
 			windowPrefs = Preferences.userNodeForPackage(MenuController.DetachViewStageController.class);
 			wrapperStages = new HashSet<>();
-		}
-
-		@FXML
-		public void initialize() {
-			detached.initModality(Modality.APPLICATION_MODAL);
-			detached.getIcons().add(new Image("prob_128.gif"));
-			currentStage.register(detached, this.getClass().getName());
+			stageManager.loadFXML(this, "detachedPerspectivesChoice.fxml", this.getClass().getName());
+			this.initModality(Modality.APPLICATION_MODAL);
 		}
 
 		@FXML
@@ -108,7 +101,7 @@ public final class MenuController extends MenuBar {
 			Accordion accordion = (Accordion) pane.getItems().get(0);
 			removeTP(accordion, pane, detachedBy);
 			uiState.setGuiState("detached");
-			this.detached.close();
+			this.hide();
 		}
 		
 		private void removeTP(Accordion accordion, SplitPane pane, ApplyDetachedEnum detachedBy) {
@@ -153,11 +146,9 @@ public final class MenuController extends MenuBar {
 		}
 
 		private void transferToNewWindow(Parent node, String title) {
-			Stage stage = new Stage();
+			Stage stage = stageManager.makeStage(new Scene(node), null);
 			wrapperStages.add(stage);
 			stage.setTitle(title);
-			currentStage.register(stage, null);
-			stage.getIcons().add(new Image("prob_128.gif"));
 			stage.setOnHidden(e -> {
 				windowPrefs.putDouble(node.getClass()+"X",stage.getX());
 				windowPrefs.putDouble(node.getClass()+"Y",stage.getY());
@@ -180,10 +171,6 @@ public final class MenuController extends MenuBar {
 			stage.setHeight(windowPrefs.getDouble(node.getClass()+"Height",100));
 			stage.setX(windowPrefs.getDouble(node.getClass()+"X", Screen.getPrimary().getVisualBounds().getWidth()-stage.getWidth()/2));
 			stage.setY(windowPrefs.getDouble(node.getClass()+"Y", Screen.getPrimary().getVisualBounds().getHeight()-stage.getHeight()/2));
-
-			Scene scene = new Scene(node);
-			scene.getStylesheets().add("prob.css");
-			stage.setScene(scene);
 			stage.show();
 		}
 	}
@@ -202,7 +189,7 @@ public final class MenuController extends MenuBar {
 	private final Injector injector;
 	private final Api api;
 	private final AnimationSelector animationSelector;
-	private final CurrentStage currentStage;
+	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final RecentFiles recentFiles;
 	private final UIState uiState;
@@ -221,11 +208,10 @@ public final class MenuController extends MenuBar {
 	
 	@Inject
 	private MenuController(
-		final FXMLLoader loader,
+		final StageManager stageManager,
 		final Injector injector,
 		final Api api,
 		final AnimationSelector animationSelector,
-		final CurrentStage currentStage,
 		final CurrentTrace currentTrace,
 		final RecentFiles recentFiles,
 		final UIState uiState
@@ -233,21 +219,14 @@ public final class MenuController extends MenuBar {
 		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
-		this.currentStage = currentStage;
+		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
 		
 		this.openLock = new Object();
 
-		loader.setLocation(getClass().getResource("menu.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		stageManager.loadFXML(this, "menu.fxml");
 
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
 			// Mac-specific menu stuff
@@ -279,16 +258,8 @@ public final class MenuController extends MenuBar {
 			// Make this the global menu bar
 			tk.setGlobalMenuBar(this);
 		}
-
-		final FXMLLoader stageLoader = injector.getInstance(FXMLLoader.class);
-		stageLoader.setLocation(getClass().getResource("detachedPerspectivesChoice.fxml"));
+		
 		this.dvController = new DetachViewStageController();
-		stageLoader.setController(this.dvController);
-		try {
-			stageLoader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
 	}
 	
 	@FXML
@@ -360,7 +331,7 @@ public final class MenuController extends MenuBar {
 	
 	@FXML
 	public void handleLoadDetached() {
-		this.dvController.detached.showAndWait();
+		this.dvController.showAndWait();
 	}
 	
 	public void applyDetached() {
@@ -384,9 +355,7 @@ public final class MenuController extends MenuBar {
 				window.getScene().setRoot(root);
 			} catch (IOException e) {
 				logger.error("loading fxml failed", e);
-				Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-				alert.getDialogPane().getStylesheets().add("prob.css");
-				alert.showAndWait();
+				stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait();
 			}
 		}
 	}
@@ -406,11 +375,7 @@ public final class MenuController extends MenuBar {
 				newSpace = this.api.b_load(path);
 			} catch (IOException | ModelTranslationError e) {
 				logger.error("loading file failed", e);
-				Platform.runLater(() -> {
-					Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-					alert.getDialogPane().getStylesheets().add("prob.css");
-					alert.show();
-				});
+				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait());
 				return;
 			}
 			
@@ -441,7 +406,7 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleClose(final ActionEvent event) {
-		final Stage stage = this.currentStage.get();
+		final Stage stage = this.stageManager.getCurrent();
 		if (stage != null) {
 			stage.close();
 		}
@@ -482,9 +447,7 @@ public final class MenuController extends MenuBar {
 			loader.setLocation(new URL(FXML_ROOT, location));
 		} catch (MalformedURLException e) {
 			logger.error("Malformed location", e);
-			Alert alert = new Alert(Alert.AlertType.ERROR, "Malformed location:\n" + e);
-			alert.getDialogPane().getStylesheets().add("prob.css");
-			alert.showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Malformed location:\n" + e).showAndWait();
 			return null;
 		}
 		MainController root = injector.getInstance(MainController.class);

@@ -1,6 +1,5 @@
 package de.prob2.ui.stats;
 
-import java.io.IOException;
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -14,12 +13,12 @@ import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.internal.IComponents;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -27,9 +26,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class StatsView extends ScrollPane implements IComponents {
 	@FXML
@@ -52,21 +48,13 @@ public class StatsView extends ScrollPane implements IComponents {
 	private ToggleButton extendedStatsToggle;
 
 	private final CurrentTrace currentTrace;
-	private static final Logger logger = LoggerFactory.getLogger(StatsView.class);
 	private final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> computeStats(to);
 
 	@Inject
-	public StatsView(final FXMLLoader loader, final CurrentTrace currentTrace) {
+	public StatsView(final StageManager stageManager, final CurrentTrace currentTrace) {
 		this.currentTrace = currentTrace;
 
-		loader.setLocation(getClass().getResource("stats_view.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		stageManager.loadFXML(this, "stats_view.fxml");
 	}
 
 	@FXML

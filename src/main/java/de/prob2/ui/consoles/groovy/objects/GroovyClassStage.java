@@ -1,6 +1,5 @@
 package de.prob2.ui.consoles.groovy.objects;
 
-import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -10,12 +9,12 @@ import java.util.List;
 
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
 import de.prob2.ui.consoles.groovy.MetaPropertiesHandler;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.UIState;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -23,12 +22,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class GroovyClassStage extends Stage {
-	private static final Logger logger = LoggerFactory.getLogger(GroovyClassStage.class);
-	
 	@FXML private TableView<GroovyClassPropertyItem> tvMethods;
 	@FXML private TableView<GroovyClassPropertyItem> tvFields;
 	@FXML private TableView<GroovyClassItem> tvClass;
@@ -71,17 +65,10 @@ public class GroovyClassStage extends Stage {
 	private UIState uiState;
 	private int index;
 
-	public GroovyClassStage(FXMLLoader loader, UIState uiState) {
+	public GroovyClassStage(StageManager stageManager, UIState uiState, String name) {
 		this.index = 0;
 		this.uiState = uiState;
-		loader.setLocation(getClass().getResource("groovy_class_stage.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		stageManager.loadFXML(this, "groovy_class_stage.fxml", "#GroovyObjectId:" + name);
 	}
 	
 	public void setClass(Class<?> clazz) {

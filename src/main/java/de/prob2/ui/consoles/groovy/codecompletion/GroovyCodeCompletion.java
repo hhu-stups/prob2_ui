@@ -1,27 +1,23 @@
 package de.prob2.ui.consoles.groovy.codecompletion;
 
-import java.io.IOException;
 import javax.script.ScriptEngine;
-
-import org.fxmisc.richtext.PopupAlignment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
+import de.prob2.ui.internal.StageManager;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 
+import org.fxmisc.richtext.PopupAlignment;
+
 public class GroovyCodeCompletion extends Popup {
-	private static final Logger logger = LoggerFactory.getLogger(GroovyCodeCompletion.class);
-	
 	@FXML private ListView<GroovyAbstractItem> lvSuggestions;
 	
 	private final ObservableList<GroovyAbstractItem> suggestions;
@@ -32,7 +28,7 @@ public class GroovyCodeCompletion extends Popup {
 	private int charCounterInSuggestion;
 	private final GroovyCodeCompletionHandler completionHandler;
 	
-	public GroovyCodeCompletion(FXMLLoader loader, ScriptEngine engine) {
+	public GroovyCodeCompletion(StageManager stageManager, ScriptEngine engine) {
 		this.engine = engine;
 		this.parent = null;
 		this.currentSuggestion = "";
@@ -40,14 +36,7 @@ public class GroovyCodeCompletion extends Popup {
 		this.charCounterInSuggestion = 0;
 		this.suggestions = FXCollections.observableArrayList();
 		this.completionHandler = new GroovyCodeCompletionHandler(suggestions);
-		loader.setLocation(getClass().getResource("groovy_codecompletion_popup.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		stageManager.loadFXML(this, "groovy_codecompletion_popup.fxml");
 	}
 	
 	@FXML

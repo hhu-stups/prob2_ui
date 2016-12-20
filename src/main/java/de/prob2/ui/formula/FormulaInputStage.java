@@ -1,6 +1,5 @@
 package de.prob2.ui.formula;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -13,10 +12,9 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
 
-import de.prob2.ui.prob2fx.CurrentStage;
+import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
@@ -53,16 +51,8 @@ public class FormulaInputStage extends Stage {
 	
 	
 	@Inject
-	public FormulaInputStage(FXMLLoader loader, CurrentStage currentStage, Injector injector) {
-		loader.setLocation(getClass().getResource("formula_input_stage.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
-		currentStage.register(this, null);
+	public FormulaInputStage(StageManager stageManager, Injector injector) {
+		stageManager.loadFXML(this, "formula_input_stage.fxml");
 		this.injector = injector;
 		this.initModality(Modality.APPLICATION_MODAL);
 		setButtonAction();
