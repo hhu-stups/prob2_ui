@@ -333,24 +333,28 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private void handleLoadDefault() {
 		uiState.clearDetachedStages();
+		uiState.getExpandedTitledPanes().clear();
 		loadPreset("main.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated() {
 		uiState.clearDetachedStages();
+		uiState.getExpandedTitledPanes().clear();
 		loadPreset("separatedHistory.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated2() {
 		uiState.clearDetachedStages();
+		uiState.getExpandedTitledPanes().clear();
 		loadPreset("separatedHistoryAndStatistics.fxml");
 	}
 
 	@FXML
 	private void handleLoadStacked() {
 		uiState.clearDetachedStages();
+		uiState.getExpandedTitledPanes().clear();
 		loadPreset("stackedLists.fxml");
 	}
 	
@@ -374,6 +378,8 @@ public final class MenuController extends MenuBar {
 				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 				loader.setLocation(selectedFile.toURI().toURL());
 				uiState.setGuiState(selectedFile.toString());
+				uiState.clearDetachedStages();
+				uiState.getExpandedTitledPanes().clear();
 				Parent root = loader.load();
 				window.getScene().setRoot(root);
 			} catch (IOException e) {

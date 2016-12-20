@@ -23,7 +23,7 @@ public final class BConsole extends Console {
 	@Override
 	public void applySettings(String[] settings) {
 		super.applySettings(settings);
-		if(settings[1].length() == 22) {
+		if(settings[1].length() != 21) {
 			this.appendText("\n ---Engine reseted--- \n >");
 		}
 	}

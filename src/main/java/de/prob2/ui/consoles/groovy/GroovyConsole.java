@@ -114,7 +114,7 @@ public class GroovyConsole extends Console {
 	@Override
 	public void applySettings(String[] settings) {
 		super.applySettings(settings);
-		if(settings[1].length() == 27) {
+		if(settings[1].length() != 26) {
 			this.appendText("\n ---Groovy Engine reseted--- \n >");
 		}
 	}
