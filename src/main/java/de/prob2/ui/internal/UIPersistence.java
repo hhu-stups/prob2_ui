@@ -1,7 +1,6 @@
 package de.prob2.ui.internal;
 
 import java.util.List;
-import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -84,9 +83,6 @@ public final class UIPersistence {
 		try {
 			final Stage stage = injector.getInstance(stageClazz);
 			stage.show();
-			if (box != null) {
-				sizeStage(stage, box);
-			}
 		} catch (RuntimeException e) {
 			LOGGER.warn("Failed to restore window", e);
 		}
@@ -101,8 +97,8 @@ public final class UIPersistence {
 			menu.loadPreset(uiState.getGuiState());
 		}
 		
-		for (final Map.Entry<String, BoundingBox> entry : uiState.getSavedStageBoxes().entrySet()) {
-			this.restoreStage(entry.getKey(), entry.getValue());
+		for (final String id : uiState.getSavedVisibleStages()) {
+			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
 		}
 		
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();

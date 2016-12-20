@@ -20,6 +20,7 @@ public class UIState {
 	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList(new String[] {"History", "Operations", "Model Check", "Statistics", "Animations"}));
 	
 	private String guiState;
+	private final Set<String> savedVisibleStages;
 	private final Map<String, BoundingBox> savedStageBoxes;
 	private final Map<String, Reference<Stage>> stages;
 	private final List<String> groovyObjectTabs;
@@ -28,6 +29,7 @@ public class UIState {
 	@Inject
 	public UIState() {
 		this.guiState = "main.fxml";
+		this.savedVisibleStages = new HashSet<>();
 		this.savedStageBoxes = new HashMap<>();
 		this.stages = new HashMap<>();
 		this.groovyObjectTabs = new ArrayList<>();
@@ -40,6 +42,10 @@ public class UIState {
 	
 	public String getGuiState() {
 		return guiState;
+	}
+	
+	public Set<String> getSavedVisibleStages() {
+		return this.savedVisibleStages;
 	}
 	
 	public Map<String, BoundingBox> getSavedStageBoxes() {

@@ -12,6 +12,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
 /**
@@ -72,16 +73,22 @@ public final class CurrentStage extends ReadOnlyObjectProperty<Stage> {
 			final String stageId = (String)stage.getProperties().get("id");
 			if (to) {
 				if (stageId != null) {
+					final BoundingBox box = uiState.getSavedStageBoxes().get(stageId);
+					if (box != null) {
+						stage.setX(box.getMinX());
+						stage.setY(box.getMinY());
+						stage.setWidth(box.getWidth());
+						stage.setHeight(box.getHeight());
+					}
 					uiState.getStages().put(stageId, new WeakReference<>(stage));
 				}
 			} else {
-				// FIXME The main stage is special-cased at the moment.
-				// The main way to exit the application is to close the main stage,
-				// which would normally remove it from the stage map.
-				// We don't want that to happen, otherwise the main stage's bounds
-				// cannot be restored on the next launch.
-				if (stageId != null && !"de.prob2.ui.ProB2".equals(stageId)) {
+				if (stageId != null) {
 					uiState.getStages().remove(stageId);
+					uiState.getSavedStageBoxes().put(
+						stageId,
+						new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight())
+					);
 				}
 			}
 		});

@@ -11,7 +11,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.ref.Reference;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +34,6 @@ import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.ClassBlacklist;
 
 import javafx.geometry.BoundingBox;
-import javafx.stage.Stage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +48,8 @@ public final class Config {
 		private String[] bConsoleSettings;
 		private List<String> statesViewHiddenClasses;
 		private String guiState;
-		private HashMap<String, double[]> stages;
+		private List<String> visibleStages;
+		private Map<String, double[]> stageBoxes;
 		private List<String> groovyObjectTabs;
 		private String currentPreference;
 		private List<String> expandedTitledPanes;
@@ -116,8 +115,11 @@ public final class Config {
 		if (configData.guiState == null || configData.guiState.isEmpty()) {
 			configData.guiState = this.defaultData.guiState;
 		}
-		if (configData.stages == null) {
-			configData.stages = new HashMap<>(this.defaultData.stages);
+		if (configData.visibleStages == null) {
+			configData.visibleStages = new ArrayList<>(this.defaultData.visibleStages);
+		}
+		if (configData.stageBoxes == null) {
+			configData.stageBoxes = new HashMap<>(this.defaultData.stageBoxes);
 		}
 		if (configData.groovyObjectTabs == null) {
 			configData.groovyObjectTabs = new ArrayList<>(this.defaultData.groovyObjectTabs);
@@ -172,8 +174,10 @@ public final class Config {
 		}
 		
 		this.uiState.setGuiState(configData.guiState);
+		this.uiState.getSavedVisibleStages().clear();
+		this.uiState.getSavedVisibleStages().addAll(configData.visibleStages);
 		
-		for (final Map.Entry<String, double[]> entry : configData.stages.entrySet()) {
+		for (final Map.Entry<String, double[]> entry : configData.stageBoxes.entrySet()) {
 			final double[] v = entry.getValue();
 			this.uiState.getSavedStageBoxes().put(entry.getKey(), new BoundingBox(v[0], v[1], v[2], v[3]));
 		}
@@ -195,13 +199,15 @@ public final class Config {
 	public void save() {
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
-		configData.stages = new HashMap<>();
-		for (final Map.Entry<String, Reference<Stage>> entry : this.uiState.getStages().entrySet()) {
-			final Stage stage = entry.getValue().get();
-			if (stage == null) {
-				continue;
-			}
-			configData.stages.put(entry.getKey(), new double[] {stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()});
+		configData.visibleStages = new ArrayList<>(this.uiState.getStages().keySet());
+		configData.stageBoxes = new HashMap<>();
+		for (final Map.Entry<String, BoundingBox> entry : this.uiState.getSavedStageBoxes().entrySet()) {
+			configData.stageBoxes.put(entry.getKey(), new double[] {
+				entry.getValue().getMinX(),
+				entry.getValue().getMinY(),
+				entry.getValue().getWidth(),
+				entry.getValue().getHeight(),
+			});
 		}
 		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
