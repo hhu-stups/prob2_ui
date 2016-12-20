@@ -5,7 +5,8 @@
 		"de.prob.model.representation.Action"
 	],
 	"guiState": "main.fxml",
-	"stages": {},
+	"visibleStages": [],
+	"stageBoxes": {},
 	"groovyConsoleSettings": [
 		"[]", "ProB 2.0 Groovy Console\n >", "0", "0", "26", "[]"
 	],

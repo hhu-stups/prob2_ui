@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-
 import de.codecentric.centerdevice.MenuToolkit;
 
 import de.prob.scripting.Api;
@@ -482,9 +481,9 @@ public final class MenuController extends MenuBar {
 			alert.showAndWait();
 			return null;
 		}
-		Parent root = injector.getInstance(MainController.class);
+		MainController root = injector.getInstance(MainController.class);
 		loader.setRoot(root);
-		((MainController) root).refresh();
+		root.refresh();
 		window.getScene().setRoot(root);
 		
 		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {

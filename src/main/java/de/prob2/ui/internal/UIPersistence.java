@@ -11,7 +11,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.MainController;
-import de.prob2.ui.MainController.TitledPaneExpanded;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
@@ -88,9 +87,6 @@ public final class UIPersistence {
 		try {
 			final Stage stage = injector.getInstance(stageClazz);
 			stage.show();
-			if (box != null) {
-				sizeStage(stage, box);
-			}
 		} catch (RuntimeException e) {
 			LOGGER.warn("Failed to restore window", e);
 		}
@@ -105,8 +101,8 @@ public final class UIPersistence {
 			menu.loadPreset(uiState.getGuiState());
 		}
 		
-		for (final Map.Entry<String, BoundingBox> entry : uiState.getSavedStageBoxes().entrySet()) {
-			this.restoreStage(entry.getKey(), entry.getValue());
+		for (final String id : uiState.getSavedVisibleStages()) {
+			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
 		}
 		
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
@@ -119,16 +115,18 @@ public final class UIPersistence {
 			}
 		}
 		
- 		HashMap<String, TitledPaneExpanded> expandedTitledPanes = Maps.newHashMap(
- 	 			ImmutableMap.of("Operations", TitledPaneExpanded.OPERATIONS, "History", TitledPaneExpanded.HISTORY, "Animations", TitledPaneExpanded.ANIMATIONS, 
- 	 							"Model Check", TitledPaneExpanded.MODELCHECK, "Statistics", TitledPaneExpanded.STATS)
- 	 	);
+		HashMap<String, MainController.TitledPaneExpanded> expandedTitledPanes = Maps.newHashMap(ImmutableMap.of(
+			"Operations", MainController.TitledPaneExpanded.OPERATIONS,
+			"History", MainController.TitledPaneExpanded.HISTORY,
+			"Animations", MainController.TitledPaneExpanded.ANIMATIONS, 
+			"Model Check", MainController.TitledPaneExpanded.MODELCHECK,
+			"Statistics", MainController.TitledPaneExpanded.STATS
+		));
 		
-		for(String titledPane : expandedTitledPanes.keySet()) {
-			if(uiState.getExpandedTitledPanes().contains(titledPane)) {
-				main.expandTitledPane(expandedTitledPanes.get(titledPane));
+		for (final Map.Entry<String, MainController.TitledPaneExpanded> entry : expandedTitledPanes.entrySet()) {
+			if (uiState.getExpandedTitledPanes().contains(entry.getKey())) {
+				main.expandTitledPane(entry.getValue());
 			}
 		}
-		
 	}
 }
