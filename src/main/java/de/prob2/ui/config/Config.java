@@ -197,6 +197,7 @@ public final class Config {
 	}
 		
 	public void save() {
+		uiState.updateSavedStageBoxes();
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
 		configData.visibleStages = new ArrayList<>(this.uiState.getStages().keySet());

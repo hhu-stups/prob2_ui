@@ -56,6 +56,18 @@ public class UIState {
 		return this.stages;
 	}
 	
+	public void updateSavedStageBoxes() {
+		for (final Map.Entry<String, Reference<Stage>> entry : this.getStages().entrySet()) {
+			final Stage stage = entry.getValue().get();
+			if (stage != null) {
+				this.getSavedStageBoxes().put(
+					entry.getKey(),
+					new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight())
+				);
+			}
+		}
+	}
+	
 	public void addGroovyObjectTab(String tab) {
 		groovyObjectTabs.add(tab);
 	}
