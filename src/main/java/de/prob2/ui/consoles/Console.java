@@ -325,9 +325,9 @@ public abstract class Console extends StyleClassedTextArea {
 			posInList++;
 		}
 		this.replaceText(settings[1]);
+		this.moveTo(Integer.parseInt((String) settings[4]));
 		charCounterInLine = Integer.parseInt((String) settings[2]);
 		currentPosInLine = Integer.parseInt((String) settings[3]);
-		this.moveTo(Integer.parseInt((String) settings[4]));
 		if(errorsSettings.length < 2) {
 			return;
 		}

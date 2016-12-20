@@ -19,4 +19,12 @@ public final class BConsole extends Console {
 		this.replaceText("ProB 2.0 B Console");
 		this.errors.clear();
 	}
+	
+	@Override
+	public void applySettings(String[] settings) {
+		super.applySettings(settings);
+		if(settings[1].length() == 22) {
+			this.appendText("\n ---Engine reseted--- \n >");
+		}
+	}
 }

@@ -111,6 +111,14 @@ public class GroovyConsole extends Console {
 		}
 	}
 	
+	@Override
+	public void applySettings(String[] settings) {
+		super.applySettings(settings);
+		if(settings[1].length() == 27) {
+			this.appendText("\n ---Groovy Engine reseted--- \n >");
+		}
+	}
+	
 	private void handleChooseSuggestion(CodeCompletionEvent e) {
 		String choice = e.getChoice();
 		String suggestion = e.getCurrentSuggestion();
