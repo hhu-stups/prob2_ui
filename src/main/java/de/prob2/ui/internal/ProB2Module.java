@@ -9,7 +9,6 @@ import com.google.inject.Provides;
 
 import de.prob.MainModule;
 
-import de.prob2.ui.AnimationPerspective;
 import de.prob2.ui.MainController;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.config.Config;
@@ -56,7 +55,6 @@ public class ProB2Module extends AbstractModule {
 		bind(ResourceBundle.class).toInstance(bundle);
 
 		// Controllers
-		bind(AnimationPerspective.class);
 		bind(AnimationsView.class);
 		bind(HistoryView.class);
 		bind(MenuController.class);
