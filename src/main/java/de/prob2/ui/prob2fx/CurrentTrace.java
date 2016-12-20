@@ -2,6 +2,7 @@ package de.prob2.ui.prob2fx;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.animator.IAnimator;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.AnimationSelector;

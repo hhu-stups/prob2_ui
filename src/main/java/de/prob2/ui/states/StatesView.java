@@ -1,10 +1,12 @@
 package de.prob2.ui.states;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -18,16 +20,13 @@ import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.formula.FormulaGenerator;
-import de.prob2.ui.prob2fx.CurrentStage;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -38,9 +37,6 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class StatesView extends AnchorPane {
 	private static final class ValueCell extends TreeTableCell<StateTreeItem<?>, String> {
@@ -92,6 +88,7 @@ public final class StatesView extends AnchorPane {
 	private final CurrentTrace currentTrace;
 	private final ClassBlacklist classBlacklist;
 	private final FormulaGenerator formulaGenerator;
+	private final StageManager stageManager;
 
 	private Map<IEvalElement, AbstractEvalResult> currentValues;
 	private Map<IEvalElement, AbstractEvalResult> previousValues;
@@ -102,21 +99,15 @@ public final class StatesView extends AnchorPane {
 		final CurrentTrace currentTrace,
 		final ClassBlacklist classBlacklist,
 		final FormulaGenerator formulaGenerator,
-		final FXMLLoader loader
+		final StageManager stageManager
 	) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.classBlacklist = classBlacklist;
 		this.formulaGenerator = formulaGenerator;
+		this.stageManager = stageManager;
 
-		loader.setLocation(getClass().getResource("states_view.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		stageManager.loadFXML(this, "states_view.fxml");
 	}
 
 	private void unsubscribeAllChildren(final Trace trace, final AbstractElement element) {
@@ -241,9 +232,7 @@ public final class StatesView extends AnchorPane {
 			formulaGenerator.showFormula(formula.getFormula());
 		} catch (EvaluationException | ProBError e) {
 			logger.error("Could not visualize formula", e);
-			final Alert alert = new Alert(Alert.AlertType.ERROR, "Could not visualize formula:\n" + e);
-			alert.getDialogPane().getStylesheets().add("prob.css");
-			alert.showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not visualize formula:\n" + e).showAndWait();
 		}
 	}
 
@@ -302,7 +291,6 @@ public final class StatesView extends AnchorPane {
 					previousValue = null;
 				}
 				final FullValueStage stage = injector.getInstance(FullValueStage.class);
-				injector.getInstance(CurrentStage.class).register(stage, null);
 				stage.setTitle(element.toString());
 				stage.setCurrentValue(AsciiUnicodeString.fromAscii(value.getValue()));
 				stage.setPreviousValue(AsciiUnicodeString.fromAscii(previousValue == null ? "(not initialized)" : previousValue.getValue()));

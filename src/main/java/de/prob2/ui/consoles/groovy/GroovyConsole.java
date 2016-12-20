@@ -2,6 +2,10 @@ package de.prob2.ui.consoles.groovy;
 
 import java.io.File;
 
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -14,10 +18,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-
-import org.fxmisc.wellbehaved.event.EventPattern;
-import org.fxmisc.wellbehaved.event.InputMap;
-import org.fxmisc.wellbehaved.event.Nodes;
 
 @Singleton
 public class GroovyConsole extends Console {
@@ -108,6 +108,14 @@ public class GroovyConsole extends Console {
 			//handle Space in Code Completion
 			keyPressed((KeyEvent)e.getEvent());
 			e.consume();
+		}
+	}
+	
+	@Override
+	public void applySettings(Console.ConfigData settings) {
+		super.applySettings(settings);
+		if (settings != null && settings.getText().length() != 26) {
+			this.appendText("\n ---Groovy Engine reseted--- \n >");
 		}
 	}
 	

@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 
 import de.be4.classicalb.core.parser.exceptions.BException;
@@ -15,6 +18,7 @@ import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.scripting.Api;
+import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -26,6 +30,8 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 
 public final class ProBPreferences {
+	private static final Logger logger = LoggerFactory.getLogger(ProBPreference.class);
+	
 	private final AnimationSelector animationSelector;
 	private final Api api;
 	private StateSpace stateSpace;
@@ -216,7 +222,13 @@ public final class ProBPreferences {
 		}
 		final Map<String, String> newPrefs = this.getPreferenceValues();
 		final String filename = oldTrace.getModel().getModelFile().getAbsolutePath();
-		final StateSpace newSpace = api.b_load(filename, newPrefs);
+		StateSpace newSpace;
+		try {
+			newSpace = api.b_load(filename, newPrefs);
+		} catch (ModelTranslationError e) {
+			logger.error("Loading file failed", e);
+			return;
+		}
 		final Trace newTrace = new Trace(newSpace);
 		this.animationSelector.removeTrace(oldTrace);
 		this.animationSelector.addNewAnimation(newTrace);

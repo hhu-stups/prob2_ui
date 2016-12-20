@@ -3,6 +3,10 @@ package de.prob2.ui.consoles.groovy;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.codehaus.groovy.GroovyBugError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
@@ -10,14 +14,10 @@ import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.Executable;
-import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
+import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
-import javafx.fxml.FXMLLoader;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.codehaus.groovy.GroovyBugError;
+import de.prob2.ui.internal.StageManager;
 
 public class GroovyInterpreter implements Executable {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
@@ -26,10 +26,10 @@ public class GroovyInterpreter implements Executable {
 	private final GroovyObjectStage groovyObjectStage;
 
 	@Inject
-	public GroovyInterpreter(FXMLLoader loader, final ScriptEngineProvider sep, final GroovyObjectStage groovyObjectStage) {
+	private GroovyInterpreter(final StageManager stageManager, final ScriptEngineProvider sep, final GroovyObjectStage groovyObjectStage) {
 		engine = sep.get();
 		this.groovyObjectStage = groovyObjectStage;
-		this.codeCompletion = new GroovyCodeCompletion(loader, engine);
+		this.codeCompletion = new GroovyCodeCompletion(stageManager, engine);
 	}
 	
 	@Override

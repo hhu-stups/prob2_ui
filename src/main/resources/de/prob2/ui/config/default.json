@@ -5,14 +5,12 @@
 		"de.prob.model.representation.Action"
 	],
 	"guiState": "main.fxml",
-	"stages": {},
-	"groovyConsoleSettings": [
-		"[]", "ProB 2.0 Groovy Console\n >", "0", "0", "26", "[]"
-	],
-	"bConsoleSettings": [
-		"[]", "ProB 2.0 B Console\n >", "0", "0", "22", "[]"
-	],
+	"visibleStages": [],
+	"stageBoxes": {},
+	"groovyConsoleSettings": null,
+	"bConsoleSettings": null,
 	"currentPreference": "general",
 	"openedPerspectives": [],
-	"groovyObjectTabs": []
+	"groovyObjectTabs": [],
+	"expandedTitledPanes" : []
 }

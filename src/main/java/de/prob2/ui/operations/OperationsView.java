@@ -1,6 +1,5 @@
 package de.prob2.ui.operations;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,11 +10,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.classicalb.Operation;
@@ -28,15 +29,13 @@ import de.prob.model.representation.Constant;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
 import de.prob2.ui.internal.IComponents;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.ListCell;
@@ -47,9 +46,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class OperationsView extends AnchorPane implements IComponents {
 	private enum SortMode {
@@ -93,24 +89,37 @@ public final class OperationsView extends AnchorPane implements IComponents {
 			}
 		}
 	}
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(OperationsView.class);
 	// Matches empty string or number
 	private static final Pattern NUMBER_OR_EMPTY_PATTERN = Pattern.compile("^$|^\\d+$");
 
-	@FXML private ListView<OperationItem> opsListView;
-	@FXML private Button backButton;
-	@FXML private Button forwardButton;
-	@FXML private Button searchButton;
-	@FXML private Button sortButton;
-	@FXML private ToggleButton disabledOpsToggle;
-	@FXML private TextField filterEvents;
-	@FXML private TextField randomText;
-	@FXML private MenuButton randomButton;
-	@FXML private MenuItem oneRandomEvent;
-	@FXML private MenuItem fiveRandomEvents;
-	@FXML private MenuItem tenRandomEvents;
-	@FXML private CustomMenuItem someRandomEvents;
+	@FXML
+	private ListView<OperationItem> opsListView;
+	@FXML
+	private Button backButton;
+	@FXML
+	private Button forwardButton;
+	@FXML
+	private Button searchButton;
+	@FXML
+	private Button sortButton;
+	@FXML
+	private ToggleButton disabledOpsToggle;
+	@FXML
+	private TextField filterEvents;
+	@FXML
+	private TextField randomText;
+	@FXML
+	private MenuButton randomButton;
+	@FXML
+	private MenuItem oneRandomEvent;
+	@FXML
+	private MenuItem fiveRandomEvents;
+	@FXML
+	private MenuItem tenRandomEvents;
+	@FXML
+	private CustomMenuItem someRandomEvents;
 
 	private AbstractModel currentModel;
 	private List<String> opNames = new ArrayList<>();
@@ -120,7 +129,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
-	
+
 	private final Comparator<OperationItem> zToA = (o1, o2) -> {
 		if (o1.name.equals(o2.name)) {
 			return -compareParams(o1.params, o2.params);
@@ -130,7 +139,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 			return -o1.name.compareToIgnoreCase(o2.name);
 		}
 	};
-	
+
 	private final Comparator<OperationItem> aToZ = (o1, o2) -> {
 		if (o1.name.equals(o2.name)) {
 			return compareParams(o1.params, o2.params);
@@ -140,7 +149,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 			return o1.name.compareToIgnoreCase(o2.name);
 		}
 	};
-	
+
 	private final Comparator<OperationItem> modelOrder = (o1, o2) -> {
 		if (o1.name.equals(o2.name)) {
 			return compareParams(o1.params, o2.params);
@@ -150,17 +159,9 @@ public final class OperationsView extends AnchorPane implements IComponents {
 	};
 
 	@Inject
-	private OperationsView(final CurrentTrace currentTrace, final FXMLLoader loader) {
+	private OperationsView(final CurrentTrace currentTrace, final StageManager stageManager) {
 		this.currentTrace = currentTrace;
-
-		loader.setLocation(getClass().getResource("ops_view.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		stageManager.loadFXML(this, "ops_view.fxml");
 	}
 
 	@FXML
@@ -169,7 +170,8 @@ public final class OperationsView extends AnchorPane implements IComponents {
 
 		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue != null && newValue.isEnabled()) {
-				// Disable the operations list until the trace change is finished, the update method reenables it later
+				// Disable the operations list until the trace change is
+				// finished, the update method reenables it later
 				opsListView.setDisable(true);
 				currentTrace.set(currentTrace.get().add(newValue.id));
 			}
@@ -178,29 +180,31 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 		randomButton.disableProperty().bind(currentTrace.existsProperty().not());
-		
+
 		randomText.textProperty().addListener((observable, from, to) -> {
 			if (!NUMBER_OR_EMPTY_PATTERN.matcher(to).matches() && NUMBER_OR_EMPTY_PATTERN.matcher(from).matches()) {
-				((StringProperty)observable).set(from);
+				((StringProperty) observable).set(from);
 			}
 		});
 
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
 	}
-	
+
 	private List<String> extractSetupConstantsParams(final Trace trace, final Transition transition) {
-		// It seems that there is no way to easily find out the constant values behind a $setup_constants transition.
-		// So we look at the values of all constants in the state after each transition.
+		// It seems that there is no way to easily find out the constant values
+		// behind a $setup_constants transition.
+		// So we look at the values of all constants in the state after each
+		// transition.
 		final Set<IEvalElement> constantsFormulas = new HashSet<>();
 		for (final Constant c : trace.getStateSpace().getMainComponent().getChildrenOfType(Constant.class)) {
 			constantsFormulas.add(c.getFormula());
 		}
-		
+
 		for (final IEvalElement ee : constantsFormulas) {
 			trace.getStateSpace().subscribe(this, ee);
 		}
-		
+
 		final List<String> params = new ArrayList<>();
 		final Map<IEvalElement, AbstractEvalResult> values = transition.getDestination().getValues();
 		for (final Map.Entry<IEvalElement, AbstractEvalResult> entry : values.entrySet()) {
@@ -208,11 +212,11 @@ public final class OperationsView extends AnchorPane implements IComponents {
 				params.add(entry.getKey() + "=" + entry.getValue());
 			}
 		}
-		
+
 		for (final IEvalElement ee : constantsFormulas) {
 			trace.getStateSpace().unsubscribe(this, ee);
 		}
-		
+
 		return params;
 	}
 
@@ -224,9 +228,9 @@ public final class OperationsView extends AnchorPane implements IComponents {
 			Platform.runLater(opsListView.getItems()::clear);
 			return;
 		}
-		
+
 		this.opsListView.setDisable(false);
-		
+
 		if (trace.getModel() != currentModel) {
 			updateModel(trace);
 		}
@@ -237,32 +241,28 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		for (Transition transition : operations) {
 			final String name = extractPrettyName(transition.getName());
 			notEnabled.remove(name);
-			
+
 			final List<String> params;
 			if ("SETUP_CONSTANTS".equals(name)) {
 				params = this.extractSetupConstantsParams(trace, transition);
 			} else {
 				params = transition.getParams();
 			}
-			
+
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			logger.debug("{} {}", name, errored);
-			OperationItem operationItem = new OperationItem(
-				transition.getId(),
-				name,
-				params,
-				transition.getReturnValues(),
-				withTimeout.contains(name) ? OperationItem.Status.TIMEOUT : OperationItem.Status.ENABLED,
-				explored,
-				errored
-			);
+			OperationItem operationItem = new OperationItem(transition.getId(), name, params,
+					transition.getReturnValues(),
+					withTimeout.contains(name) ? OperationItem.Status.TIMEOUT : OperationItem.Status.ENABLED, explored,
+					errored);
 			events.add(operationItem);
 		}
 		if (showNotEnabled) {
 			for (String s : notEnabled) {
 				if (!"INITIALISATION".equals(s)) {
-					events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(), OperationItem.Status.DISABLED, false, false));
+					events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(),
+							OperationItem.Status.DISABLED, false, false));
 				}
 			}
 		}
@@ -270,7 +270,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 
 		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
 	}
-	
+
 	private static String extractPrettyName(final String name) {
 		if ("$setup_constants".equals(name)) {
 			return "SETUP_CONSTANTS";
@@ -280,11 +280,11 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		}
 		return name;
 	}
-	
+
 	private static String stripString(final String param) {
 		return param.replaceAll("\\{", "").replaceAll("\\}", "");
 	}
-	
+
 	private static int compareParams(final List<String> params1, final List<String> params2) {
 		for (int i = 0; i < params1.size(); i++) {
 			String p1 = stripString(params1.get(i));
@@ -292,7 +292,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 			if (p1.compareTo(p2) != 0) {
 				return p1.compareTo(p2);
 			}
-			
+
 		}
 		return 0;
 	}
@@ -424,8 +424,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 				opToParams.put(e.getName(), getParams(e));
 			}
 		}
-		
-		
+
 	}
 
 	private List<String> getParams(BEvent e) {

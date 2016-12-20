@@ -1,7 +1,6 @@
 package de.prob2.ui.internal;
 
 import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,16 +20,20 @@ public class UIState {
 	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList(new String[] {"History", "Operations", "Model Check", "Statistics", "Animations"}));
 	
 	private String guiState;
+	private final Set<String> savedVisibleStages;
 	private final Map<String, BoundingBox> savedStageBoxes;
 	private final Map<String, Reference<Stage>> stages;
 	private final List<String> groovyObjectTabs;
+	private List<String> expandedTitledPanes;
 		
 	@Inject
 	public UIState() {
 		this.guiState = "main.fxml";
+		this.savedVisibleStages = new HashSet<>();
 		this.savedStageBoxes = new HashMap<>();
 		this.stages = new HashMap<>();
 		this.groovyObjectTabs = new ArrayList<>();
+		this.expandedTitledPanes = new ArrayList<>();
 	}
 	
 	public void setGuiState(String guiState) {
@@ -41,12 +44,28 @@ public class UIState {
 		return guiState;
 	}
 	
+	public Set<String> getSavedVisibleStages() {
+		return this.savedVisibleStages;
+	}
+	
 	public Map<String, BoundingBox> getSavedStageBoxes() {
 		return this.savedStageBoxes;
 	}
 	
 	public Map<String, Reference<Stage>> getStages() {
 		return this.stages;
+	}
+	
+	public void updateSavedStageBoxes() {
+		for (final Map.Entry<String, Reference<Stage>> entry : this.getStages().entrySet()) {
+			final Stage stage = entry.getValue().get();
+			if (stage != null) {
+				this.getSavedStageBoxes().put(
+					entry.getKey(),
+					new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight())
+				);
+			}
+		}
 	}
 	
 	public void addGroovyObjectTab(String tab) {
@@ -67,5 +86,9 @@ public class UIState {
 	
 	public void clearDetachedStages() {
 		stages.keySet().removeAll(DETACHED);
+	}
+	
+	public List<String> getExpandedTitledPanes() {
+		return expandedTitledPanes;
 	}
 }

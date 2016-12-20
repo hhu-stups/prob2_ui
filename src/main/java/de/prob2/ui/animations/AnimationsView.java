@@ -1,6 +1,5 @@
 package de.prob2.ui.animations;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -13,20 +12,19 @@ import com.google.inject.Inject;
 
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
-import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.IComponents;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.MachineLoader;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -39,8 +37,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener, IComponents {
-	private static final Logger logger = LoggerFactory.getLogger(AnimationsView.class);
-
 	@FXML
 	private TableView<Animation> animationsTable;
 	@FXML
@@ -52,6 +48,8 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	@FXML
 	private TableColumn<Animation, String> time;
 
+	private static final Logger logger = LoggerFactory.getLogger(AnimationsView.class);
+
 	private final AnimationSelector animations;
 	private int currentIndex;
 	private int previousSize = 0;
@@ -60,20 +58,13 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private MachineLoader machineLoader;
 
 	@Inject
-	private AnimationsView(final Api api, final AnimationSelector animations, CurrentProject currentProject,
-			final FXMLLoader loader, final MachineLoader machineLoader) {
+	private AnimationsView(final AnimationSelector animations, final StageManager stageManager,
+			final MachineLoader machineLoader, CurrentProject currentProject) {
 		this.animations = animations;
 		this.machineLoader = machineLoader;
 		this.animations.registerAnimationChangeListener(this);
 		this.currentProject = currentProject;
-		try {
-			loader.setLocation(getClass().getResource("animations_view.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		stageManager.loadFXML(this, "animations_view.fxml");
 	}
 
 	@FXML

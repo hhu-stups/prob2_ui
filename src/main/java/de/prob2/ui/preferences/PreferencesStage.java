@@ -4,22 +4,22 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.be4.classicalb.core.parser.exceptions.BException;
-
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.statespace.Trace;
-
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentFiles;
-import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -27,7 +27,6 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -44,9 +43,6 @@ import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class PreferencesStage extends Stage {
@@ -94,33 +90,26 @@ public final class PreferencesStage extends Stage {
 	private final CurrentTrace currentTrace;
 	private final ProBPreferences preferences;
 	private final RecentFiles recentFiles;
+	private final StageManager stageManager;
 	private final StringProperty currentTab;
 
 	@Inject
 	private PreferencesStage(
-			final ClassBlacklist classBlacklist,
-			final CurrentTrace currentTrace,
-			final ProBPreferences preferences,
-			final RecentFiles recentFiles,
-			final FXMLLoader loader,
-			final CurrentStage currentStage) {
+		final ClassBlacklist classBlacklist,
+		final CurrentTrace currentTrace,
+		final ProBPreferences preferences,
+		final RecentFiles recentFiles,
+		final StageManager stageManager
+	) {
 		this.classBlacklist = classBlacklist;
 		this.currentTrace = currentTrace;
 		this.preferences = preferences;
 		this.preferences.setStateSpace(currentTrace.exists() ? currentTrace.getStateSpace() : null);
 		this.recentFiles = recentFiles;
+		this.stageManager = stageManager;
 		this.currentTab = new SimpleStringProperty(this, "currentTab", null);
 
-		loader.setLocation(this.getClass().getResource("preferences_stage.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
-
-		currentStage.register(this, this.getClass().getName());
+		stageManager.loadFXML(this, "preferences_stage.fxml", this.getClass().getName());
 	}
 
 	@FXML
@@ -163,10 +152,7 @@ public final class PreferencesStage extends Stage {
 				this.preferences.setPreferenceValue(event.getRowValue().getValue().getName(), event.getNewValue());
 			} catch (final ProBError exc) {
 				logger.error("Invalid preference", exc);
-				Alert alert = new Alert(Alert.AlertType.ERROR,
-						"The entered preference value is not valid.\n" + exc.getMessage());
-				alert.getDialogPane().getStylesheets().add("prob.css");
-				alert.show();
+				stageManager.makeAlert(Alert.AlertType.ERROR, "The entered preference value is not valid.\n" + exc.getMessage()).show();
 			}
 			this.updatePreferences();
 		});
@@ -342,9 +328,7 @@ public final class PreferencesStage extends Stage {
 			return true;
 		} catch (BException | IOException e) {
 			logger.error("Application of changes failed", e);
-			Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e);
-			alert.getDialogPane().getStylesheets().add("prob.css");
-			alert.showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e).showAndWait();
 			return false;
 		}
 	}

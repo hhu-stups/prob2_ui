@@ -1,6 +1,5 @@
 package de.prob2.ui.modelchecking;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,27 +12,20 @@ import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.stats.StatsView;
-
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public final class ModelCheckStats extends AnchorPane {
 	public enum Result {
 		SUCCESS, DANGER, WARNING
 	}
-	
-	private static final Logger logger = LoggerFactory.getLogger(ModelCheckStats.class);
 	
 	@FXML private AnchorPane resultBackground;
 	@FXML private Text resultText;
@@ -51,17 +43,10 @@ public final class ModelCheckStats extends AnchorPane {
 	
 	private final StatsView statsView;
 	
-	public ModelCheckStats(FXMLLoader loader, ModelcheckingController modelcheckingController, StatsView statsView) {
+	public ModelCheckStats(StageManager stageManager, ModelcheckingController modelcheckingController, StatsView statsView) {
 		this.modelcheckingController = modelcheckingController;
 		this.statsView = statsView;
-		loader.setLocation(getClass().getResource("modelchecking_stats.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		stageManager.loadFXML(this, "modelchecking_stats.fxml");
 	}
 
 	@FXML
@@ -145,8 +130,6 @@ public final class ModelCheckStats extends AnchorPane {
 			}
 		}
 		showResult(message);
-
-		logger.debug("is finished");
 	}
 
 	private void showResult(String message) {

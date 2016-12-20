@@ -11,7 +11,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.ref.Reference;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +28,7 @@ import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
+import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.internal.UIState;
@@ -36,7 +36,6 @@ import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.ClassBlacklist;
 import javafx.geometry.BoundingBox;
-import javafx.stage.Stage;
 
 @Singleton
 @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
@@ -44,13 +43,17 @@ public final class Config {
 	private static final class ConfigData {
 		private int maxRecentFiles;
 		private List<String> recentFiles;
-		private String[] groovyConsoleSettings;
-		private String[] bConsoleSettings;
+		private Console.ConfigData groovyConsoleSettings;
+		private Console.ConfigData bConsoleSettings;
 		private List<String> statesViewHiddenClasses;
 		private String guiState;
-		private HashMap<String, double[]> stages;
+		private List<String> visibleStages;
+		private Map<String, double[]> stageBoxes;
 		private List<String> groovyObjectTabs;
 		private String currentPreference;
+		private List<String> expandedTitledPanes;
+		
+		private ConfigData() {}
 	}
 	
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
@@ -113,8 +116,11 @@ public final class Config {
 		if (configData.guiState == null || configData.guiState.isEmpty()) {
 			configData.guiState = this.defaultData.guiState;
 		}
-		if (configData.stages == null) {
-			configData.stages = new HashMap<>(this.defaultData.stages);
+		if (configData.visibleStages == null) {
+			configData.visibleStages = new ArrayList<>(this.defaultData.visibleStages);
+		}
+		if (configData.stageBoxes == null) {
+			configData.stageBoxes = new HashMap<>(this.defaultData.stageBoxes);
 		}
 		if (configData.groovyObjectTabs == null) {
 			configData.groovyObjectTabs = new ArrayList<>(this.defaultData.groovyObjectTabs);
@@ -127,6 +133,9 @@ public final class Config {
 		}
 		if(configData.bConsoleSettings == null) {
 			configData.bConsoleSettings = this.defaultData.bConsoleSettings;
+		}
+		if(configData.expandedTitledPanes == null) {
+			configData.expandedTitledPanes = this.defaultData.expandedTitledPanes;
 		}
 	}
 	
@@ -166,14 +175,20 @@ public final class Config {
 		}
 		
 		this.uiState.setGuiState(configData.guiState);
+		this.uiState.getSavedVisibleStages().clear();
+		this.uiState.getSavedVisibleStages().addAll(configData.visibleStages);
 		
-		for (final Map.Entry<String, double[]> entry : configData.stages.entrySet()) {
+		for (final Map.Entry<String, double[]> entry : configData.stageBoxes.entrySet()) {
 			final double[] v = entry.getValue();
 			this.uiState.getSavedStageBoxes().put(entry.getKey(), new BoundingBox(v[0], v[1], v[2], v[3]));
 		}
 		
 		for (String tab : configData.groovyObjectTabs) {
 			this.uiState.addGroovyObjectTab(tab);
+		}
+		
+		for (String pane: configData.expandedTitledPanes) {
+			this.uiState.getExpandedTitledPanes().add(pane);
 		}
 		
 		this.injector.getInstance(PreferencesStage.class).setCurrentTab(configData.currentPreference);
@@ -183,15 +198,18 @@ public final class Config {
 	}
 		
 	public void save() {
+		uiState.updateSavedStageBoxes();
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
-		configData.stages = new HashMap<>();
-		for (final Map.Entry<String, Reference<Stage>> entry : this.uiState.getStages().entrySet()) {
-			final Stage stage = entry.getValue().get();
-			if (stage == null) {
-				continue;
-			}
-			configData.stages.put(entry.getKey(), new double[] {stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()});
+		configData.visibleStages = new ArrayList<>(this.uiState.getStages().keySet());
+		configData.stageBoxes = new HashMap<>();
+		for (final Map.Entry<String, BoundingBox> entry : this.uiState.getSavedStageBoxes().entrySet()) {
+			configData.stageBoxes.put(entry.getKey(), new double[] {
+				entry.getValue().getMinX(),
+				entry.getValue().getMinY(),
+				entry.getValue().getWidth(),
+				entry.getValue().getHeight(),
+			});
 		}
 		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
@@ -200,6 +218,7 @@ public final class Config {
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
 		configData.groovyConsoleSettings = groovyConsole.getSettings();
 		configData.bConsoleSettings = bConsole.getSettings();
+		configData.expandedTitledPanes = new ArrayList<>(this.uiState.getExpandedTitledPanes());
 		
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());

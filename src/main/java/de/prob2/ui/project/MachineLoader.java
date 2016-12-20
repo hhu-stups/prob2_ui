@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.scripting.Api;
+import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.application.Platform;
@@ -51,7 +51,7 @@ public class MachineLoader {
 				} else {
 					stateSpace = api.b_load(machine.getPath());
 				}
-			} catch (IOException | BException e) {
+			} catch (IOException | ModelTranslationError e) {
 				logger.error("loading file failed", e);
 				Platform.runLater(() -> {
 					Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);

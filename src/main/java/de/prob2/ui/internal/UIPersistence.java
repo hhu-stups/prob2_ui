@@ -1,24 +1,23 @@
 package de.prob2.ui.internal;
 
 import java.util.List;
-import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.MenuController;
-
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class UIPersistence {
@@ -33,17 +32,15 @@ public final class UIPersistence {
 		this.injector = injector;
 	}
 	
-	private static void sizeStage(Stage stage, BoundingBox box) {
-		stage.setX(box.getMinX());
-		stage.setY(box.getMinY());
-		stage.setWidth(box.getWidth());
-		stage.setHeight(box.getHeight());
-	}
-	
 	private void restoreStage(final String id, BoundingBox box) {
 		LOGGER.info("Restoring stage with ID {} and bounding box {}", id, box);
 		if (id == null) {
 			LOGGER.warn("Stage identifier is null, cannot restore window");
+			return;
+		}
+		
+		if (id.startsWith("#GroovyObjectId:")) {
+			// Handled elsewhere in open()
 			return;
 		}
 		
@@ -83,9 +80,6 @@ public final class UIPersistence {
 		try {
 			final Stage stage = injector.getInstance(stageClazz);
 			stage.show();
-			if (box != null) {
-				sizeStage(stage, box);
-			}
 		} catch (RuntimeException e) {
 			LOGGER.warn("Failed to restore window", e);
 		}
@@ -93,24 +87,29 @@ public final class UIPersistence {
 	
 	public void open() {
 		final MenuController menu = injector.getInstance(MenuController.class);
-		
+		final MainController main = injector.getInstance(MainController.class);
 		if("detached".equals(uiState.getGuiState())) {
 			menu.applyDetached();
 		} else {
 			menu.loadPreset(uiState.getGuiState());
 		}
 		
-		for (final Map.Entry<String, BoundingBox> entry : uiState.getSavedStageBoxes().entrySet()) {
-			this.restoreStage(entry.getKey(), entry.getValue());
+		for (final String id : uiState.getSavedVisibleStages()) {
+			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
 		}
 		
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
 		int j = 0;
 		for (GroovyObjectItem groovyObject : groovyObjects) {
-			if (uiState.getSavedStageBoxes().containsKey(groovyObject.getClazzname())) {
-				sizeStage(groovyObject.getStage(), uiState.getSavedStageBoxes().get(groovyObject.getClazzname()));
+			if (uiState.getSavedStageBoxes().containsKey("#GroovyObjectId:" + groovyObject.getName())) {
 				groovyObject.show(GroovyObjectItem.ShowEnum.PERSISTENCE, j);
 				j++;
+			}
+		}
+		
+		for(String titledPane : new String[] {"Operations", "History", "Animations", "Model Check", "Statistics"}) {
+			if (uiState.getExpandedTitledPanes().contains(titledPane)) {
+				main.expandTitledPane(titledPane);
 			}
 		}
 	}

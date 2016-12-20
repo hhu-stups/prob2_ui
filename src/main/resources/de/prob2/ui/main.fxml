@@ -2,6 +2,7 @@
 
 <?import de.prob2.ui.animations.AnimationsView?>
 <?import de.prob2.ui.history.HistoryView?>
+<?import de.prob2.ui.MainController?>
 <?import de.prob2.ui.menu.MenuController?>
 <?import de.prob2.ui.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.operations.OperationsView?>
@@ -10,26 +11,24 @@
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import de.prob2.ui.MainController?>
-<fx:root type = "MainController" maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="MainController" maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
 		<SplitPane dividerPositions="0.26">
 			<Accordion fx:id="leftAccordion">
 				<panes>
-					<TitledPane text="%tptitles.operations">
+					<TitledPane fx:id = "operationsTP" text="%tptitles.operations" onMouseClicked="#operationsTPClicked">
 						<OperationsView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.history">
+					<TitledPane text="%tptitles.history" fx:id ="historyTP" onMouseClicked="#historyTPClicked">
 						<HistoryView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.modelcheck">
+					<TitledPane text="%tptitles.modelcheck" fx:id = "modelcheckTP" onMouseClicked="#modelcheckTPClicked">
 						<ModelcheckingController/>
 					</TitledPane>
-					<TitledPane text="%tptitles.stats">
+					<TitledPane text="%tptitles.stats" fx:id ="statsTP" onMouseClicked="#statsTPClicked">
 						<StatsView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.animations">
+					<TitledPane text="%tptitles.animations" fx:id = "animationsTP" onMouseClicked="#animationsTPClicked">
 						<AnimationsView/>
 					</TitledPane>
 				</panes>
