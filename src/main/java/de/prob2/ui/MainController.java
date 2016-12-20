@@ -1,6 +1,8 @@
 package de.prob2.ui;
 
 import java.io.IOException;
+import java.util.HashMap;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -32,6 +34,17 @@ public class MainController extends BorderPane {
 	private Accordion leftAccordion;
 	
 	@FXML
+	private Accordion rightAccordion;
+	
+	//If the user creates his own FXML and wants and accordion at the top
+	@FXML
+	private Accordion topAccordion;
+	
+	//If the user creates his own FXML and wants and accordion at the bottom
+	@FXML
+	private Accordion bottomAccordion;
+	
+	@FXML
 	private TitledPane operationsTP;
 	
 	@FXML
@@ -55,7 +68,7 @@ public class MainController extends BorderPane {
 		this.uiState = uiState;
 		refresh();
 	}
-			
+	
 	public void refresh() {
 		String guiState = "main.fxml";
 		if(!"detached".equals(uiState.getGuiState())) {
@@ -110,24 +123,28 @@ public class MainController extends BorderPane {
 		}
 	}
 	
-	public void expandTitledPane(TitledPaneExpanded expanded) {
-		switch(expanded) {
-			case HISTORY:
-				historyTP.setExpanded(true);
-				break;
-			case OPERATIONS:
-				operationsTP.setExpanded(true);
-				break;
-			case ANIMATIONS:
-				animationsTP.setExpanded(true);
-				break;
-			case STATS:
-				statsTP.setExpanded(true);
-				break;
-			default:
-				modelcheckTP.setExpanded(true);
-				break;
+	public void expandTitledPane(String titledPane) {
+		Accordion[] accordions = new Accordion[] {leftAccordion, rightAccordion, bottomAccordion, topAccordion};
+
+ 		HashMap<String,TitledPane> titledPanes = new HashMap<String, TitledPane>();
+ 		titledPanes.put("Operations", operationsTP);
+ 		titledPanes.put("History", historyTP);
+ 		titledPanes.put("Animations", animationsTP);
+ 		titledPanes.put("Model Check", modelcheckTP);
+ 		titledPanes.put("Statistics", statsTP);
+
+ 		if(titledPanes.get(titledPane) == null) {
+ 			return;
+ 		}
+		for (Accordion accordion : accordions) {
+			if(accordion == null) {
+				continue;
+			}
+			if(accordion.getPanes().contains(titledPanes.get(titledPane))) {
+				accordion.setExpandedPane(titledPanes.get(titledPane));
+			}			
 		}
+
 	}
 		
 }

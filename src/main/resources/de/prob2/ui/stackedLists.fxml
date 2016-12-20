@@ -14,10 +14,10 @@
 <?import de.prob2.ui.MainController?>
 <fx:root type="MainController" maxHeight="Infinity"
 			maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
-			prefHeight="768.0" prefWidth="1024.0" xmlns:fx="http://javafx.com/fxml/1">
+			prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
 		<SplitPane dividerPositions="0.26,0.8">
-			<Accordion>
+			<Accordion fx:id = "leftAccordion">
 				<panes>
 					<TitledPane text="%tptitles.operations" fx:id="operationsTP" onMouseClicked="#operationsTPClicked">
 						<OperationsView/>
@@ -31,7 +31,7 @@
 				<StatesView/>
 				<AnimationsView/>
 			</SplitPane>
-			<Accordion>
+			<Accordion fx:id = "rightAccordion">
 				<panes>
 					<TitledPane text="%tptitles.history" fx:id="historyTP" onMouseClicked="#historyTPClicked">
 						<HistoryView/>

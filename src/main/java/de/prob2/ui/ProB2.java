@@ -34,7 +34,7 @@ public class ProB2 extends Application {
 		UIState uiState = injector.getInstance(UIState.class);
 		
 		Parent root = injector.getInstance(MainController.class);
-		Scene mainScene = new Scene(root);
+		Scene mainScene = new Scene(root, 1024, 768);
 		mainScene.getStylesheets().add("prob.css");
 		stage.setTitle("ProB 2.0");
 		stage.setScene(mainScene);
