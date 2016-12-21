@@ -1,12 +1,15 @@
 package de.prob2.ui.menu;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.history.HistoryView;
@@ -28,8 +31,14 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Singleton
 public final class DetachViewStageController extends Stage {
-	// FIXME all checkboxes selected when reloading detached
+	// FIXME Detached views sometimes duplicate randomly or resize themselves to zero height
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(DetachViewStageController.class);
 	
 	@FXML private Button apply;
 	@FXML private CheckBox detachOperations;
@@ -42,6 +51,7 @@ public final class DetachViewStageController extends Stage {
 	private final StageManager stageManager;
 	private final UIState uiState;
 	
+	private final Map<Class<? extends Parent>, CheckBox> checkBoxMap;
 	private final Set<Stage> wrapperStages;
 
 	@Inject
@@ -50,12 +60,13 @@ public final class DetachViewStageController extends Stage {
 		this.stageManager = stageManager;
 		this.uiState = uiState;
 		
+		checkBoxMap = new HashMap<>();
 		wrapperStages = new HashSet<>();
 		stageManager.loadFXML(this, "detachedPerspectivesChoice.fxml", null);
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
 	
-	private <T> T findOfType(final Iterable<? super T> objects, final Class<T> clazz) {
+	private static <T> T findOfType(final Iterable<? super T> objects, final Class<T> clazz) {
 		for (final Object o : objects) {
 			try {
 				return clazz.cast(o);
@@ -65,32 +76,62 @@ public final class DetachViewStageController extends Stage {
 		}
 		throw new NoSuchElementException(String.format("No %s object found in %s", clazz, objects));
 	}
-
+	
 	@FXML
-	private void apply() {
-		apply(MenuController.ApplyDetachedEnum.USER);
+	public void initialize() {
+		checkBoxMap.put(OperationsView.class, detachOperations);
+		checkBoxMap.put(HistoryView.class, detachHistory);
+		checkBoxMap.put(ModelcheckingController.class, detachModelcheck);
+		checkBoxMap.put(StatsView.class, detachStats);
+		checkBoxMap.put(AnimationsView.class, detachAnimations);
 	}
 	
-	/* package */ void apply(MenuController.ApplyDetachedEnum detachedBy) {
+	public void selectForDetach(final String name) {
+		final Class<? extends Parent> clazz;
+		try {
+			clazz = Class.forName(name).asSubclass(Parent.class);
+		} catch (ClassNotFoundException e) {
+			LOGGER.warn("Not a valid class name, cannot select for detaching", e);
+			return;
+		} catch (ClassCastException e) {
+			LOGGER.warn("Not a subclass of Parent, cannot select for detaching", e);
+			return;
+		}
+		
+		final CheckBox checkBox = checkBoxMap.get(clazz);
+		if (checkBox == null) {
+			LOGGER.warn("No check box found for {}, cannot select for detaching", clazz);
+			return;
+		}
+		checkBox.setSelected(true);
+	}
+
+	@FXML
+	public void apply() {
 		final Parent root = injector.getInstance(MenuController.class).loadPreset("main.fxml");
 		final SplitPane pane = findOfType(root.getChildrenUnmodifiable(), SplitPane.class);
 		final Accordion accordion = findOfType(pane.getItems(), Accordion.class);
-		removeTP(accordion, pane, detachedBy);
+		removeTP(accordion, pane);
 		uiState.setGuiState("detached");
 		this.hide();
 	}
 	
-	private void removeTP(Accordion accordion, SplitPane pane, MenuController.ApplyDetachedEnum detachedBy) {
+	private void removeTP(Accordion accordion, SplitPane pane) {
+		uiState.updateSavedStageBoxes();
 		final HashSet<Stage> wrapperStagesCopy = new HashSet<>(wrapperStages);
 		wrapperStages.clear();
 		for (final Stage stage : wrapperStagesCopy) {
+			// Save the check box state so it isn't overwritten by the stage's onHidden handler.
+			final CheckBox checkBox = checkBoxMap.get(stage.getScene().getRoot().getClass());
+			final boolean savedState = checkBox.isSelected();
 			stage.setScene(null);
 			stage.hide();
+			checkBox.setSelected(savedState);
 		}
 
 		for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 			final TitledPane tp = it.next();
-			if (removable(tp, detachedBy)) {
+			if (checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
 				it.remove();
 				transferToNewWindow((Parent)tp.getContent(), tp.getText());
 			}
@@ -102,41 +143,12 @@ public final class DetachViewStageController extends Stage {
 		}
 	}
 	
-	private boolean removable(TitledPane tp, MenuController.ApplyDetachedEnum detachedBy) {
-		return	(removablePane(tp, detachOperations, detachedBy) && tp.getContent() instanceof OperationsView) ||
-				(removablePane(tp, detachHistory, detachedBy) && tp.getContent() instanceof HistoryView) ||
-				(removablePane(tp, detachModelcheck, detachedBy) && tp.getContent() instanceof ModelcheckingController) ||
-				(removablePane(tp, detachStats, detachedBy) && tp.getContent() instanceof StatsView) ||
-				(removablePane(tp, detachAnimations, detachedBy) && tp.getContent() instanceof AnimationsView);
-	}
-	
-	private boolean removablePane(TitledPane tp, CheckBox detached, MenuController.ApplyDetachedEnum detachedBy) {
-		boolean condition = detached.isSelected();
-		if(detachedBy == MenuController.ApplyDetachedEnum.JSON) {
-			condition = uiState.getSavedStageBoxes().containsKey(tp.getText());
-			if(condition) {
-				detached.setSelected(true);
-			}
-		}
-		return condition;
-	}
-
 	private void transferToNewWindow(Parent node, String title) {
 		Stage stage = stageManager.makeStage(new Scene(node), this.getClass().getName() + " detached " + node.getClass().getName());
 		wrapperStages.add(stage);
 		stage.setTitle(title);
 		stage.setOnHidden(e -> {
-			if (node instanceof OperationsView) {
-				detachOperations.setSelected(false);
-			} else if (node instanceof HistoryView) {
-				detachHistory.setSelected(false);
-			} else if (node instanceof ModelcheckingController) {
-				detachModelcheck.setSelected(false);
-			} else if (node instanceof StatsView) {
-				detachStats.setSelected(false);
-			} else if (node instanceof AnimationsView) {
-				detachAnimations.setSelected(false);
-			}
+			checkBoxMap.get(node.getClass()).setSelected(false);
 			this.apply();
 		});
 		
