@@ -41,8 +41,15 @@ public final class UIPersistence {
 			return;
 		}
 		
-		if (id.startsWith("#GroovyObjectId:") || id.startsWith(DetachViewStageController.class.getName() + " detached ")) {
+		if (id.startsWith("#GroovyObjectId:")) {
 			// Handled elsewhere in open()
+			return;
+		}
+		
+		if (id.startsWith(DetachViewStageController.class.getName() + " detached ")) {
+			// Remove the prefix before the name of the detached class
+			final String toDetach = id.substring((DetachViewStageController.class.getName() + " detached ").length());
+			injector.getInstance(DetachViewStageController.class).selectForDetach(toDetach);
 			return;
 		}
 		
@@ -86,14 +93,15 @@ public final class UIPersistence {
 	public void open() {
 		final MenuController menu = injector.getInstance(MenuController.class);
 		final MainController main = injector.getInstance(MainController.class);
-		if("detached".equals(uiState.getGuiState())) {
-			menu.applyDetached();
-		} else {
-			menu.loadPreset(uiState.getGuiState());
-		}
 		
 		for (final String id : uiState.getSavedVisibleStages()) {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
+		}
+		
+		if ("detached".equals(uiState.getGuiState())) {
+			injector.getInstance(DetachViewStageController.class).apply();
+		} else {
+			menu.loadPreset(uiState.getGuiState());
 		}
 		
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();

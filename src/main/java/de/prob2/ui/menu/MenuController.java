@@ -49,10 +49,6 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
-	/* package */ enum ApplyDetachedEnum {
-		JSON, USER
-	}
-	
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 
 	private final Injector injector;
@@ -218,10 +214,6 @@ public final class MenuController extends MenuBar {
 		this.dvController.showAndWait();
 	}
 	
-	public void applyDetached() {
-		this.dvController.apply(ApplyDetachedEnum.JSON);
-	}
-
 	@FXML
 	private void handleLoadPerspective() {
 		FileChooser fileChooser = new FileChooser();
