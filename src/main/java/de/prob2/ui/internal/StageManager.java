@@ -124,14 +124,16 @@ public final class StageManager {
 		stage.showingProperty().addListener((observable, from, to) -> {
 			final String stageId = (String)stage.getProperties().get("id");
 			if (to) {
-				final BoundingBox box = uiState.getSavedStageBoxes().get(stageId);
-				if (box != null) {
-					stage.setX(box.getMinX());
-					stage.setY(box.getMinY());
-					stage.setWidth(box.getWidth());
-					stage.setHeight(box.getHeight());
+				if (stageId != null) {
+					final BoundingBox box = uiState.getSavedStageBoxes().get(stageId);
+					if (box != null) {
+						stage.setX(box.getMinX());
+						stage.setY(box.getMinY());
+						stage.setWidth(box.getWidth());
+						stage.setHeight(box.getHeight());
+					}
+					uiState.getStages().put(stageId, new WeakReference<>(stage));
 				}
-				uiState.getStages().put(stageId, new WeakReference<>(stage));
 			} else {
 				if (stageId != null) {
 					uiState.getStages().remove(stageId);
