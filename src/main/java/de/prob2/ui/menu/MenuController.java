@@ -2,8 +2,6 @@ package de.prob2.ui.menu;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -185,16 +183,6 @@ public final class MenuController extends MenuBar {
 			stage.show();
 		}
 	}
-	private static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
-	private static final URL FXML_ROOT;
-	
-	static {
-		try {
-			FXML_ROOT = new URL(MenuController.class.getResource("menu.fxml"), "..");
-		} catch (MalformedURLException e) {
-			throw new IllegalStateException(e);
-		}
-	}
 	
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 
@@ -203,6 +191,7 @@ public final class MenuController extends MenuBar {
 	private final AnimationSelector animationSelector;
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
+	private final MenuToolkit menuToolkit;
 	private final RecentFiles recentFiles;
 	private final UIState uiState;
 	private final DetachViewStageController dvController;
@@ -225,6 +214,7 @@ public final class MenuController extends MenuBar {
 		final Api api,
 		final AnimationSelector animationSelector,
 		final CurrentTrace currentTrace,
+		final MenuToolkit menuToolkit,
 		final RecentFiles recentFiles,
 		final UIState uiState
 	) {
@@ -233,6 +223,7 @@ public final class MenuController extends MenuBar {
 		this.animationSelector = animationSelector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
+		this.menuToolkit = menuToolkit;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
 		
@@ -240,10 +231,9 @@ public final class MenuController extends MenuBar {
 
 		stageManager.loadFXML(this, "menu.fxml");
 
-		if (IS_MAC) {
+		if (menuToolkit != null) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
-			final MenuToolkit tk = MenuToolkit.toolkit();
 			
 			// Remove About menu item from Help
 			aboutItem.getParentMenu().getItems().remove(aboutItem);
@@ -254,21 +244,34 @@ public final class MenuController extends MenuBar {
 			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
 			
 			// Create Mac-style application menu
-			final Menu applicationMenu = tk.createDefaultApplicationMenu("ProB 2");
+			final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu("ProB 2");
 			this.getMenus().add(0, applicationMenu);
-			tk.setApplicationMenu(applicationMenu);
-			applicationMenu.getItems().setAll(aboutItem, new SeparatorMenuItem(), preferencesItem,
-				new SeparatorMenuItem(), tk.createHideMenuItem("ProB 2"), tk.createHideOthersMenuItem(),
-				tk.createUnhideAllMenuItem(), new SeparatorMenuItem(), tk.createQuitMenuItem("ProB 2"));
+			menuToolkit.setApplicationMenu(applicationMenu);
+			applicationMenu.getItems().setAll(
+				aboutItem,
+				new SeparatorMenuItem(),
+				preferencesItem,
+				new SeparatorMenuItem(),
+				menuToolkit.createHideMenuItem("ProB 2"),
+				menuToolkit.createHideOthersMenuItem(),
+				menuToolkit.createUnhideAllMenuItem(),
+				new SeparatorMenuItem(),
+				menuToolkit.createQuitMenuItem("ProB 2")
+			);
 			
 			// Add Mac-style items to Window menu
-			windowMenu.getItems().addAll(tk.createMinimizeMenuItem(), tk.createZoomMenuItem(),
-				tk.createCycleWindowsItem(), new SeparatorMenuItem(), tk.createBringAllToFrontItem(),
-				new SeparatorMenuItem());
-			tk.autoAddWindowMenuItems(windowMenu);
+			windowMenu.getItems().addAll(
+				menuToolkit.createMinimizeMenuItem(),
+				menuToolkit.createZoomMenuItem(),
+				menuToolkit.createCycleWindowsItem(),
+				new SeparatorMenuItem(),
+				menuToolkit.createBringAllToFrontItem(),
+				new SeparatorMenuItem()
+			);
+			menuToolkit.autoAddWindowMenuItems(windowMenu);
 			
 			// Make this the global menu bar
-			tk.setGlobalMenuBar(this);
+			stageManager.setGlobalMacMenuBar(this);
 		}
 		
 		this.dvController = new DetachViewStageController();
@@ -465,10 +468,9 @@ public final class MenuController extends MenuBar {
 		root.refresh();
 		window.getScene().setRoot(root);
 		
-		if (IS_MAC) {
-			final MenuToolkit tk = MenuToolkit.toolkit();
-			tk.setGlobalMenuBar(this);
-			tk.setApplicationMenu(this.getMenus().get(0));
+		if (this.menuToolkit != null) {
+			this.menuToolkit.setApplicationMenu(this.getMenus().get(0));
+			this.stageManager.setGlobalMacMenuBar(this);
 		}
 		return root;
 	}

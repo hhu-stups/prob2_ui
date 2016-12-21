@@ -2,21 +2,30 @@ package de.prob2.ui.internal;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
+import de.codecentric.centerdevice.MenuToolkit;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -32,16 +41,22 @@ public final class StageManager {
 	private static final Image ICON = new Image("prob_128.gif");
 	
 	private final Injector injector;
+	private final MenuToolkit menuToolkit;
 	private final UIState uiState;
 	
 	private final ObjectProperty<Stage> current;
+	private final Map<Stage, Void> registered;
+	private MenuBar globalMacMenuBar;
 	
 	@Inject
-	private StageManager(final Injector injector, final UIState uiState) {
+	private StageManager(final Injector injector, final MenuToolkit menuToolkit, final UIState uiState) {
 		this.injector = injector;
+		this.menuToolkit = menuToolkit;
 		this.uiState = uiState;
 		
 		this.current = new SimpleObjectProperty<>(this, "current");
+		this.registered = new WeakHashMap<>();
+		this.globalMacMenuBar = null;
 	}
 	
 	/**
@@ -100,9 +115,12 @@ public final class StageManager {
 	 * @param id a string identifying the stage for UI persistence, or null if the stage should not be persisted
 	 */
 	public void register(final Stage stage, final String id) {
+		this.registered.put(stage, null);
+		
 		stage.getProperties().put("id", id);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
+		
 		stage.showingProperty().addListener((observable, from, to) -> {
 			final String stageId = (String)stage.getProperties().get("id");
 			if (to) {
@@ -124,6 +142,7 @@ public final class StageManager {
 				}
 			}
 		});
+		
 		stage.focusedProperty().addListener((observable, from, to) -> {
 			if (to) {
 				this.current.set(stage);
@@ -131,6 +150,10 @@ public final class StageManager {
 				this.current.set(null);
 			}
 		});
+		
+		if (this.menuToolkit != null && this.globalMacMenuBar != null) {
+			this.menuToolkit.setMenuBar(stage, this.globalMacMenuBar);
+		}
 	}
 	
 	/**
@@ -196,5 +219,37 @@ public final class StageManager {
 	 */
 	public Stage getCurrent() {
 		return this.currentProperty().get();
+	}
+	
+	/**
+	 * Get a read-only set containing all registered stages. The returned set should not be permanently stored or copied elsewhere, as this would prevent all registered stages from being garbage-collected.
+	 * 
+	 * @return a read-only set containing all registered stages
+	 */
+	public Set<Stage> getRegistered() {
+		return Collections.unmodifiableSet(this.registered.keySet());
+	}
+	
+	/**
+	 * <p>On Mac, set the given menu bar as the menu bar for all registered stages and any stages registered in the future. On other systems this method does nothing.</p>
+	 * <p>This method is similar to {@link MenuToolkit#setGlobalMenuBar(MenuBar)}, except that it only affects registered stages and handles stages with a null scene correctly.</p>
+	 * 
+	 * @param menuBar the menu bar to set
+	 */
+	public void setGlobalMacMenuBar(final MenuBar menuBar) {
+		if (this.menuToolkit == null) {
+			return;
+		}
+		
+		this.globalMacMenuBar = menuBar;
+		for (final Stage stage : this.getRegistered()) {
+			final Scene scene = stage.getScene();
+			if (scene != null) {
+				final Parent root = scene.getRoot();
+				if (root instanceof Pane) {
+					this.menuToolkit.setMenuBar((Pane)root, menuBar);
+				}
+			}
+		}
 	}
 }
