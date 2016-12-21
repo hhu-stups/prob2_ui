@@ -7,6 +7,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 
+import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob.MainModule;
 import de.prob2.ui.MainController;
 import de.prob2.ui.animations.AnimationsView;
@@ -30,7 +32,8 @@ import de.prob2.ui.stats.StatsView;
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
-
+	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
+	
 	private final Locale locale = new Locale("en");
 	private final ResourceBundle bundle = ResourceBundle.getBundle("bundles.prob2", locale);
 
@@ -51,6 +54,7 @@ public class ProB2Module extends AbstractModule {
 		bind(BConsole.class);
 		bind(RecentFiles.class);
 		bind(ResourceBundle.class).toInstance(bundle);
+		bind(MenuToolkit.class).toInstance(IS_MAC ? MenuToolkit.toolkit(locale) : null);
 
 		// Controllers
 		bind(AnimationsView.class);

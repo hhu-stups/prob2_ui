@@ -2,12 +2,11 @@ package de.prob2.ui.menu;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.prefs.Preferences;
@@ -95,16 +94,27 @@ public final class MenuController extends MenuBar {
 			this.initModality(Modality.APPLICATION_MODAL);
 		}
 
+		private <T> T findOfType(final Iterable<? super T> objects, final Class<T> clazz) {
+			for (final Object o : objects) {
+				try {
+					return clazz.cast(o);
+				} catch (ClassCastException ignored) { // NOSONAR
+					// Object doesn't have the type that we want, try the next
+					// one
+				}
+			}
+			throw new NoSuchElementException(String.format("No %s object found in %s", clazz, objects));
+		}
+
 		@FXML
 		private void apply() {
 			apply(ApplyDetachedEnum.USER);
 		}
 
 		private void apply(ApplyDetachedEnum detachedBy) {
-			Parent root = loadPreset("main.fxml");
-			assert root != null;
-			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(1);
-			Accordion accordion = (Accordion) pane.getItems().get(0);
+			final Parent root = loadPreset("main.fxml");
+			final SplitPane pane = findOfType(root.getChildrenUnmodifiable(), SplitPane.class);
+			final Accordion accordion = findOfType(pane.getItems(), Accordion.class);
 			removeTP(accordion, pane, detachedBy);
 			uiState.setGuiState("detached");
 			this.hide();
@@ -184,21 +194,12 @@ public final class MenuController extends MenuBar {
 		}
 	}
 
-	private static final URL FXML_ROOT;
-
-	static {
-		try {
-			FXML_ROOT = new URL(MenuController.class.getResource("menu.fxml"), "..");
-		} catch (MalformedURLException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
+	private final MenuToolkit menuToolkit;
 	private final RecentFiles recentFiles;
 	private final UIState uiState;
 	private final DetachViewStageController dvController;
@@ -224,21 +225,22 @@ public final class MenuController extends MenuBar {
 	private CurrentProject currentProject;
 
 	@Inject
-	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace, final RecentFiles recentFiles,
-			final CurrentProject currentProject, final UIState uiState) {
+	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
+			final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
+			final UIState uiState) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.menuToolkit = menuToolkit;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
 
 		stageManager.loadFXML(this, "menu.fxml");
 
-		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
+		if (menuToolkit != null) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
-			final MenuToolkit tk = MenuToolkit.toolkit();
 
 			// Remove About menu item from Help
 			aboutItem.getParentMenu().getItems().remove(aboutItem);
@@ -249,21 +251,23 @@ public final class MenuController extends MenuBar {
 			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
 
 			// Create Mac-style application menu
-			final Menu applicationMenu = tk.createDefaultApplicationMenu("ProB 2");
+			final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu("ProB 2");
 			this.getMenus().add(0, applicationMenu);
-			tk.setApplicationMenu(applicationMenu);
+
+			menuToolkit.setApplicationMenu(applicationMenu);
 			applicationMenu.getItems().setAll(aboutItem, new SeparatorMenuItem(), preferencesItem,
-					new SeparatorMenuItem(), tk.createHideMenuItem("ProB 2"), tk.createHideOthersMenuItem(),
-					tk.createUnhideAllMenuItem(), new SeparatorMenuItem(), tk.createQuitMenuItem("ProB 2"));
+					new SeparatorMenuItem(), menuToolkit.createHideMenuItem("ProB 2"),
+					menuToolkit.createHideOthersMenuItem(), menuToolkit.createUnhideAllMenuItem(),
+					new SeparatorMenuItem(), menuToolkit.createQuitMenuItem("ProB 2"));
 
 			// Add Mac-style items to Window menu
-			windowMenu.getItems().addAll(tk.createMinimizeMenuItem(), tk.createZoomMenuItem(),
-					tk.createCycleWindowsItem(), new SeparatorMenuItem(), tk.createBringAllToFrontItem(),
-					new SeparatorMenuItem());
-			tk.autoAddWindowMenuItems(windowMenu);
+			windowMenu.getItems().addAll(menuToolkit.createMinimizeMenuItem(), menuToolkit.createZoomMenuItem(),
+					menuToolkit.createCycleWindowsItem(), new SeparatorMenuItem(),
+					menuToolkit.createBringAllToFrontItem(), new SeparatorMenuItem());
+			menuToolkit.autoAddWindowMenuItems(windowMenu);
 
 			// Make this the global menu bar
-			tk.setGlobalMenuBar(this);
+			stageManager.setGlobalMacMenuBar(this);
 		}
 
 		this.dvController = new DetachViewStageController();
@@ -468,34 +472,24 @@ public final class MenuController extends MenuBar {
 		bConsoleStage.toFront();
 	}
 
-	public Parent loadPreset(String location) {
-		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-		this.uiState.setGuiState(location);
-		try {
-			loader.setLocation(new URL(FXML_ROOT, location));
-		} catch (MalformedURLException e) {
-			logger.error("Malformed location", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Malformed location:\n" + e).showAndWait();
-			return null;
-		}
-		MainController root = injector.getInstance(MainController.class);
-		loader.setRoot(root);
-		root.refresh();
-		window.getScene().setRoot(root);
-
-		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
-			final MenuToolkit tk = MenuToolkit.toolkit();
-			tk.setGlobalMenuBar(this);
-			tk.setApplicationMenu(this.getMenus().get(0));
-		}
-		return root;
-	}
-
 	@FXML
 	private void handleReportBug() {
 		final Stage reportBugStage = injector.getInstance(ReportBugStage.class);
 		reportBugStage.show();
 		reportBugStage.toFront();
+	}
+
+	public Parent loadPreset(String location) {
+		this.uiState.setGuiState(location);
+		final MainController root = injector.getInstance(MainController.class);
+		root.refresh();
+		window.getScene().setRoot(root);
+
+		if (this.menuToolkit != null) {
+			this.menuToolkit.setApplicationMenu(this.getMenus().get(0));
+			this.stageManager.setGlobalMacMenuBar(this);
+		}
+		return root;
 	}
 
 	@FXML
