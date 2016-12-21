@@ -83,8 +83,13 @@ public class AddMachineStage extends Stage {
 		for(MachineTableItem i: machinesList) {
 			machinesSet.add(i.getName());
 		}
-		String name[] = machineFile.getName().split("\\.");	
-		nameField.setText(name[0]);
+		String n[] = machineFile.getName().split("\\.");
+		String name = n[0];
+		int i = 1;
+		while (machinesSet.contains(name)) {
+			name = n[0] + "(" + i++ + ")";
+		}
+		nameField.setText(name);
 		super.showAndWait();
 		return machine;
 	}
