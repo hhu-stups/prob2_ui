@@ -54,10 +54,6 @@ public final class UIPersistence {
 				injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
 				return;
 			
-			case "de.prob2.ui.menu.MenuController$DetachViewStageController":
-				injector.getInstance(MenuController.class).handleLoadDetached();
-				return;
-			
 			default:
 				LOGGER.info("No special handling for stage identifier {}, will use injection", id);
 		}
