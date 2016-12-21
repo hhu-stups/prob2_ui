@@ -3,6 +3,7 @@ package de.prob2.ui.project;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
@@ -32,10 +34,14 @@ public class AddProBPreferencesStage extends Stage {
 	private TextField preferenceValueField;
 	@FXML
 	private ListView<Map.Entry<String, String>> preferencesListView;
+	@FXML
+	private Label errorExplanationLabel;
 
 	private Map<String, String> preferenceMap = new HashMap<>();
 
 	private Preference preference;
+
+	private Set<String> preferencesSet;
 
 	AddProBPreferencesStage(FXMLLoader loader, CurrentStage currentStage) {
 		try {
@@ -53,9 +59,21 @@ public class AddProBPreferencesStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		finishButton.disableProperty().bind(nameField.lengthProperty().lessThanOrEqualTo(0));
+		// finishButton.disableProperty().bind(nameField.lengthProperty().lessThanOrEqualTo(0));
 		addPreferenceButton.disableProperty().bind(preferenceNameField.lengthProperty().lessThanOrEqualTo(0)
 				.or(preferenceValueField.lengthProperty().lessThanOrEqualTo(0)));
+		nameField.textProperty().addListener((observable, from, to) -> {
+			if (preferencesSet.contains(to)) {
+				finishButton.setDisable(true);
+				errorExplanationLabel.setText("There is already a preference named '" + to + "'");
+			} else if (to.equals("")) {
+				finishButton.setDisable(true);
+				errorExplanationLabel.setText("");
+			} else {
+				finishButton.setDisable(false);
+				errorExplanationLabel.setText("");
+			}
+		});
 	}
 
 	@FXML
@@ -75,8 +93,9 @@ public class AddProBPreferencesStage extends Stage {
 		preference = new Preference(nameField.getText(), preferenceMap);
 		this.close();
 	}
-	
-	public Preference showStage() {
+
+	public Preference showStage(Set<String> preferencesList) {
+		this.preferencesSet = preferencesList;
 		super.showAndWait();
 		return preference;
 	}

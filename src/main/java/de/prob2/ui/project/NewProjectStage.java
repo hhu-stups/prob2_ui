@@ -120,7 +120,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	void addPreference(ActionEvent event) {
 		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(loader, currentStage);
-		Preference preference = addProBPreferencesStage.showStage();
+		Preference preference = addProBPreferencesStage.showStage(preferencesMap.keySet());
 		if (preference != null) {
 			preferencesListView.getItems().add(preference);
 			preferencesMap.put(preference.toString(), preference);
@@ -215,7 +215,7 @@ public class NewProjectStage extends Stage {
 	private List<String> getSelectedPreferences(MachineTableItem machineItem) {
 		List<String> prefs = new ArrayList<>();
 		for (Preference preference : preferencesListView.getItems()) {
-			if(machineItem.getPreferences().get(preference).get()) {
+			if (machineItem.getPreferences().get(preference).get()) {
 				prefs.add(preference.toString());
 			}
 		}
