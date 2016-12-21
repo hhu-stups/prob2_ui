@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
@@ -88,6 +89,17 @@ public final class MenuController extends MenuBar {
 			stageManager.loadFXML(this, "detachedPerspectivesChoice.fxml", this.getClass().getName());
 			this.initModality(Modality.APPLICATION_MODAL);
 		}
+		
+		private <T> T findOfType(final Iterable<? super T> objects, final Class<T> clazz) {
+			for (final Object o : objects) {
+				try {
+					return clazz.cast(o);
+				} catch (ClassCastException ignored) { // NOSONAR
+					// Object doesn't have the type that we want, try the next one
+				}
+			}
+			throw new NoSuchElementException(String.format("No %s object found in %s", clazz, objects));
+		}
 
 		@FXML
 		private void apply() {
@@ -95,10 +107,9 @@ public final class MenuController extends MenuBar {
 		}
 		
 		private void apply(ApplyDetachedEnum detachedBy) {
-			Parent root = loadPreset("main.fxml");
-			assert root != null;
-			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(1);
-			Accordion accordion = (Accordion) pane.getItems().get(0);
+			final Parent root = loadPreset("main.fxml");
+			final SplitPane pane = findOfType(root.getChildrenUnmodifiable(), SplitPane.class);
+			final Accordion accordion = findOfType(pane.getItems(), Accordion.class);
 			removeTP(accordion, pane, detachedBy);
 			uiState.setGuiState("detached");
 			this.hide();
@@ -174,6 +185,7 @@ public final class MenuController extends MenuBar {
 			stage.show();
 		}
 	}
+	private static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 	private static final URL FXML_ROOT;
 	
 	static {
@@ -228,7 +240,7 @@ public final class MenuController extends MenuBar {
 
 		stageManager.loadFXML(this, "menu.fxml");
 
-		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
+		if (IS_MAC) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
 			final MenuToolkit tk = MenuToolkit.toolkit();
@@ -439,35 +451,26 @@ public final class MenuController extends MenuBar {
 		bConsoleStage.show();
 		bConsoleStage.toFront();
 	}
-
-	public Parent loadPreset(String location) {
-		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-		this.uiState.setGuiState(location);
-		try {
-			loader.setLocation(new URL(FXML_ROOT, location));
-		} catch (MalformedURLException e) {
-			logger.error("Malformed location", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Malformed location:\n" + e).showAndWait();
-			return null;
-		}
-		MainController root = injector.getInstance(MainController.class);
-		loader.setRoot(root);
-		root.refresh();
-		window.getScene().setRoot(root);
-		
-		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
-			final MenuToolkit tk = MenuToolkit.toolkit();
-			tk.setGlobalMenuBar(this);
-			tk.setApplicationMenu(this.getMenus().get(0));
-		}
-		return root;
-	}
 	
 	@FXML
 	private void handleReportBug() {
 		final Stage reportBugStage = injector.getInstance(ReportBugStage.class);
 		reportBugStage.show();
 		reportBugStage.toFront();
+	}
+	
+	public Parent loadPreset(String location) {
+		this.uiState.setGuiState(location);
+		final MainController root = injector.getInstance(MainController.class);
+		root.refresh();
+		window.getScene().setRoot(root);
+		
+		if (IS_MAC) {
+			final MenuToolkit tk = MenuToolkit.toolkit();
+			tk.setGlobalMenuBar(this);
+			tk.setApplicationMenu(this.getMenus().get(0));
+		}
+		return root;
 	}
 
 	private List<MenuItem> getRecentFileItems(){
