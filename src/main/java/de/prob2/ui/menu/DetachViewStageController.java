@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.prefs.Preferences;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -29,7 +28,7 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-final class DetachViewStageController extends Stage {
+public final class DetachViewStageController extends Stage {
 	// FIXME all checkboxes selected when reloading detached
 	
 	@FXML private Button apply;
@@ -43,7 +42,6 @@ final class DetachViewStageController extends Stage {
 	private final StageManager stageManager;
 	private final UIState uiState;
 	
-	private final Preferences windowPrefs;
 	private final Set<Stage> wrapperStages;
 
 	@Inject
@@ -52,7 +50,6 @@ final class DetachViewStageController extends Stage {
 		this.stageManager = stageManager;
 		this.uiState = uiState;
 		
-		windowPrefs = Preferences.userNodeForPackage(DetachViewStageController.class);
 		wrapperStages = new HashSet<>();
 		stageManager.loadFXML(this, "detachedPerspectivesChoice.fxml", null);
 		this.initModality(Modality.APPLICATION_MODAL);
@@ -125,14 +122,10 @@ final class DetachViewStageController extends Stage {
 	}
 
 	private void transferToNewWindow(Parent node, String title) {
-		Stage stage = stageManager.makeStage(new Scene(node), null);
+		Stage stage = stageManager.makeStage(new Scene(node), this.getClass().getName() + " detached " + node.getClass().getName());
 		wrapperStages.add(stage);
 		stage.setTitle(title);
 		stage.setOnHidden(e -> {
-			windowPrefs.putDouble(node.getClass()+"X",stage.getX());
-			windowPrefs.putDouble(node.getClass()+"Y",stage.getY());
-			windowPrefs.putDouble(node.getClass()+"Width",stage.getWidth());
-			windowPrefs.putDouble(node.getClass()+"Height",stage.getHeight());
 			if (node instanceof OperationsView) {
 				detachOperations.setSelected(false);
 			} else if (node instanceof HistoryView) {
@@ -146,10 +139,12 @@ final class DetachViewStageController extends Stage {
 			}
 			this.apply();
 		});
-		stage.setWidth(windowPrefs.getDouble(node.getClass()+"Width",200));
-		stage.setHeight(windowPrefs.getDouble(node.getClass()+"Height",100));
-		stage.setX(windowPrefs.getDouble(node.getClass()+"X", Screen.getPrimary().getVisualBounds().getWidth()-stage.getWidth()/2));
-		stage.setY(windowPrefs.getDouble(node.getClass()+"Y", Screen.getPrimary().getVisualBounds().getHeight()-stage.getHeight()/2));
+		
+		// Default bounds, replaced by saved ones from the config when show() is called
+		stage.setWidth(200);
+		stage.setHeight(100);
+		stage.setX(Screen.getPrimary().getVisualBounds().getWidth()-stage.getWidth()/2);
+		stage.setY(Screen.getPrimary().getVisualBounds().getHeight()-stage.getHeight()/2);
 		stage.show();
 	}
 }

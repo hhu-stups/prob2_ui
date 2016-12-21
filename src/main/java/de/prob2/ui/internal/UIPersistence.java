@@ -12,6 +12,7 @@ import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
+import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.MenuController;
 
 import javafx.geometry.BoundingBox;
@@ -40,7 +41,7 @@ public final class UIPersistence {
 			return;
 		}
 		
-		if (id.startsWith("#GroovyObjectId:")) {
+		if (id.startsWith("#GroovyObjectId:") || id.startsWith(DetachViewStageController.class.getName() + " detached ")) {
 			// Handled elsewhere in open()
 			return;
 		}
