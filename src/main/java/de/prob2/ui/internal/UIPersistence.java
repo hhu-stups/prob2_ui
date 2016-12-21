@@ -15,6 +15,7 @@ import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
+import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.MenuController;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
@@ -39,7 +40,7 @@ public final class UIPersistence {
 			return;
 		}
 		
-		if (id.startsWith("#GroovyObjectId:")) {
+		if (id.startsWith("#GroovyObjectId:") || id.startsWith(DetachViewStageController.class.getName() + " detached ")) {
 			// Handled elsewhere in open()
 			return;
 		}
@@ -51,10 +52,6 @@ public final class UIPersistence {
 			
 			case "de.prob2.ui.consoles.groovy.objects.GroovyObjectStage":
 				injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
-				return;
-			
-			case "de.prob2.ui.menu.MenuController$DetachViewStageController":
-				injector.getInstance(MenuController.class).handleLoadDetached();
 				return;
 			
 			default:

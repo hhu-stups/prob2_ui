@@ -3,13 +3,8 @@ package de.prob2.ui.menu;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
-import java.util.prefs.Preferences;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,21 +15,17 @@ import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob2.ui.MainController;
-import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.formula.FormulaInputStage;
-import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.UIState;
 import de.prob2.ui.modelchecking.ModelcheckingController;
-import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
-import de.prob2.ui.stats.StatsView;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -42,158 +33,25 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TitledPane;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
 @Singleton
 public final class MenuController extends MenuBar {
-
-	// FIXME all checkboxes selected when reloading detached
-	private enum ApplyDetachedEnum {
+	/* package */ enum ApplyDetachedEnum {
 		JSON, USER
 	}
-
-	private final class DetachViewStageController extends Stage {
-		@FXML
-		private Button apply;
-		@FXML
-		private CheckBox detachOperations;
-		@FXML
-		private CheckBox detachHistory;
-		@FXML
-		private CheckBox detachModelcheck;
-		@FXML
-		private CheckBox detachStats;
-		@FXML
-		private CheckBox detachAnimations;
-		private final Preferences windowPrefs;
-		private final Set<Stage> wrapperStages;
-
-		private DetachViewStageController() {
-			windowPrefs = Preferences.userNodeForPackage(MenuController.DetachViewStageController.class);
-			wrapperStages = new HashSet<>();
-			stageManager.loadFXML(this, "detachedPerspectivesChoice.fxml", this.getClass().getName());
-			this.initModality(Modality.APPLICATION_MODAL);
-		}
-
-		private <T> T findOfType(final Iterable<? super T> objects, final Class<T> clazz) {
-			for (final Object o : objects) {
-				try {
-					return clazz.cast(o);
-				} catch (ClassCastException ignored) { // NOSONAR
-					// Object doesn't have the type that we want, try the next
-					// one
-				}
-			}
-			throw new NoSuchElementException(String.format("No %s object found in %s", clazz, objects));
-		}
-
-		@FXML
-		private void apply() {
-			apply(ApplyDetachedEnum.USER);
-		}
-
-		private void apply(ApplyDetachedEnum detachedBy) {
-			final Parent root = loadPreset("main.fxml");
-			final SplitPane pane = findOfType(root.getChildrenUnmodifiable(), SplitPane.class);
-			final Accordion accordion = findOfType(pane.getItems(), Accordion.class);
-			removeTP(accordion, pane, detachedBy);
-			uiState.setGuiState("detached");
-			this.hide();
-		}
-
-		private void removeTP(Accordion accordion, SplitPane pane, ApplyDetachedEnum detachedBy) {
-			final HashSet<Stage> wrapperStagesCopy = new HashSet<>(wrapperStages);
-			wrapperStages.clear();
-			for (final Stage stage : wrapperStagesCopy) {
-				stage.setScene(null);
-				stage.hide();
-			}
-
-			for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
-				final TitledPane tp = it.next();
-				if (removable(tp, detachedBy)) {
-					it.remove();
-					transferToNewWindow((Parent) tp.getContent(), tp.getText());
-				}
-			}
-			if (accordion.getPanes().isEmpty()) {
-				pane.getItems().remove(accordion);
-				pane.setDividerPositions(0);
-				pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(true));
-			}
-		}
-
-		private boolean removable(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			return (removablePane(tp, detachOperations, detachedBy) && tp.getContent() instanceof OperationsView)
-					|| (removablePane(tp, detachHistory, detachedBy) && tp.getContent() instanceof HistoryView)
-					|| (removablePane(tp, detachModelcheck, detachedBy)
-							&& tp.getContent() instanceof ModelcheckingController)
-					|| (removablePane(tp, detachStats, detachedBy) && tp.getContent() instanceof StatsView)
-					|| (removablePane(tp, detachAnimations, detachedBy) && tp.getContent() instanceof AnimationsView);
-		}
-
-		private boolean removablePane(TitledPane tp, CheckBox detached, ApplyDetachedEnum detachedBy) {
-			boolean condition = detached.isSelected();
-			if (detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getSavedStageBoxes().containsKey(tp.getText());
-				if (condition) {
-					detached.setSelected(true);
-				}
-			}
-			return condition;
-		}
-
-		private void transferToNewWindow(Parent node, String title) {
-			Stage stage = stageManager.makeStage(new Scene(node), null);
-			wrapperStages.add(stage);
-			stage.setTitle(title);
-			stage.setOnHidden(e -> {
-				windowPrefs.putDouble(node.getClass() + "X", stage.getX());
-				windowPrefs.putDouble(node.getClass() + "Y", stage.getY());
-				windowPrefs.putDouble(node.getClass() + "Width", stage.getWidth());
-				windowPrefs.putDouble(node.getClass() + "Height", stage.getHeight());
-				if (node instanceof OperationsView) {
-					detachOperations.setSelected(false);
-				} else if (node instanceof HistoryView) {
-					detachHistory.setSelected(false);
-				} else if (node instanceof ModelcheckingController) {
-					detachModelcheck.setSelected(false);
-				} else if (node instanceof StatsView) {
-					detachStats.setSelected(false);
-				} else if (node instanceof AnimationsView) {
-					detachAnimations.setSelected(false);
-				}
-				dvController.apply();
-			});
-			stage.setWidth(windowPrefs.getDouble(node.getClass() + "Width", 200));
-			stage.setHeight(windowPrefs.getDouble(node.getClass() + "Height", 100));
-			stage.setX(windowPrefs.getDouble(node.getClass() + "X",
-					Screen.getPrimary().getVisualBounds().getWidth() - stage.getWidth() / 2));
-			stage.setY(windowPrefs.getDouble(node.getClass() + "Y",
-					Screen.getPrimary().getVisualBounds().getHeight() - stage.getHeight() / 2));
-			stage.show();
-		}
-	}
-
+	
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 
 	private final Injector injector;
@@ -226,12 +84,13 @@ public final class MenuController extends MenuBar {
 
 	@Inject
 	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
-			final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
+			final DetachViewStageController dvController, final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
 			final UIState uiState) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.dvController = dvController;
 		this.menuToolkit = menuToolkit;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
@@ -269,8 +128,6 @@ public final class MenuController extends MenuBar {
 			// Make this the global menu bar
 			stageManager.setGlobalMacMenuBar(this);
 		}
-
-		this.dvController = new DetachViewStageController();
 	}
 
 	@FXML
@@ -346,7 +203,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	public void handleLoadDetached() {
+	private void handleLoadDetached() {
 		this.dvController.showAndWait();
 	}
 
