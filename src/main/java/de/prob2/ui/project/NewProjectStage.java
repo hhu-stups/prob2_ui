@@ -156,7 +156,7 @@ public class NewProjectStage extends Stage {
 		}
 
 		AddMachineStage addMachineStage = new AddMachineStage(loader, currentStage, selectedFile);
-		Machine machine = addMachineStage.showStage();
+		Machine machine = addMachineStage.showStage(machinesTableView.getItems());
 
 		if (machine != null) {
 			machinesTableView.getItems().add(new MachineTableItem(machine, preferencesListView.getItems()));

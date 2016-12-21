@@ -59,7 +59,6 @@ public class AddProBPreferencesStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		// finishButton.disableProperty().bind(nameField.lengthProperty().lessThanOrEqualTo(0));
 		addPreferenceButton.disableProperty().bind(preferenceNameField.lengthProperty().lessThanOrEqualTo(0)
 				.or(preferenceValueField.lengthProperty().lessThanOrEqualTo(0)));
 		nameField.textProperty().addListener((observable, from, to) -> {

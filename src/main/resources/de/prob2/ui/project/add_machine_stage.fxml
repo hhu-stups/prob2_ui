@@ -67,6 +67,9 @@
 						</VBox.margin>
 					</ButtonBar>
 				</VBox>
+				 <Label fx:id="errorExplanationLabel" textFill="#B77300"
+					AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="20"
+					AnchorPane.rightAnchor="200" />
 			</AnchorPane>
 		</Scene>
 	</scene>

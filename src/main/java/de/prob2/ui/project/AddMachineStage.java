@@ -2,6 +2,9 @@ package de.prob2.ui.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +14,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -24,10 +28,14 @@ public class AddMachineStage extends Stage {
 	private TextField nameField;
 	@FXML
 	private TextField descriptionField;
+	@FXML
+	private Label errorExplanationLabel;
 
 	private File machineFile;
 
 	private Machine machine;
+
+	private Set<String> machinesSet = new HashSet<String>();
 
 	AddMachineStage(FXMLLoader loader, CurrentStage currentStage, File machineFile) {
 		this.machineFile = machineFile;
@@ -46,9 +54,18 @@ public class AddMachineStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		finishButton.disableProperty().bind(nameField.lengthProperty().lessThanOrEqualTo(0));
-		String name[] = machineFile.getName().split("\\.");
-		nameField.setText(name[0]);
+		nameField.textProperty().addListener((observable, from, to) -> {
+			if (machinesSet.contains(to)) {
+				finishButton.setDisable(true);
+				errorExplanationLabel.setText("There is already a machine named '" + to + "'");
+			} else if (to.equals("")) {
+				finishButton.setDisable(true);
+				errorExplanationLabel.setText("");
+			} else {
+				finishButton.setDisable(false);
+				errorExplanationLabel.setText("");
+			}
+		});
 	}
 
 	@FXML
@@ -62,7 +79,12 @@ public class AddMachineStage extends Stage {
 		this.close();
 	}
 
-	public Machine showStage() {
+	public Machine showStage(List<MachineTableItem> machinesList) {
+		for(MachineTableItem i: machinesList) {
+			machinesSet.add(i.getName());
+		}
+		String name[] = machineFile.getName().split("\\.");	
+		nameField.setText(name[0]);
 		super.showAndWait();
 		return machine;
 	}
