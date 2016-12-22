@@ -1,18 +1,13 @@
 package de.prob2.ui.project;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.prob2.ui.prob2fx.CurrentStage;
+import de.prob2.ui.internal.StageManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -20,8 +15,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class AddMachineStage extends Stage {
-	private static final Logger logger = LoggerFactory.getLogger(AddMachineStage.class);
-
 	@FXML
 	private Button finishButton;
 	@FXML
@@ -37,19 +30,10 @@ public class AddMachineStage extends Stage {
 
 	private Set<String> machinesSet = new HashSet<String>();
 
-	AddMachineStage(FXMLLoader loader, CurrentStage currentStage, File machineFile) {
+	AddMachineStage(StageManager stageManager, File machineFile) {
 		this.machineFile = machineFile;
-		try {
-			loader.setLocation(getClass().getResource("add_machine_stage.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		stageManager.loadFXML(this, "add_machine_stage.fxml");
 		this.initModality(Modality.WINDOW_MODAL);
-		this.initOwner(currentStage.get());
-		currentStage.register(this, this.getClass().getName());
 	}
 
 	@FXML
@@ -80,7 +64,7 @@ public class AddMachineStage extends Stage {
 	}
 
 	public Machine showStage(List<MachineTableItem> machinesList) {
-		for(MachineTableItem i: machinesList) {
+		for (MachineTableItem i : machinesList) {
 			machinesSet.add(i.getName());
 		}
 		String n[] = machineFile.getName().split("\\.");

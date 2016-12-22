@@ -16,11 +16,10 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentStage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -64,27 +63,15 @@ public class NewProjectStage extends Stage {
 	private TableColumn<MachineTableItem, String> descriptionColumn;
 
 	private CurrentProject currentProject;
-	private CurrentStage currentStage;
 	private Map<String, Preference> preferencesMap = new HashMap<>();
-
-	private FXMLLoader loader;
+	private StageManager stageManager;
 
 	@Inject
-	private NewProjectStage(FXMLLoader loader, CurrentProject currentProject, CurrentStage currentStage) {
+	private NewProjectStage(CurrentProject currentProject, StageManager stageManager) {
 		this.currentProject = currentProject;
-		this.currentStage = currentStage;
-		this.loader = loader;
-		try {
-			loader.setLocation(getClass().getResource("new_project_stage.fxml"));
-			loader.setRoot(this);
-			loader.setController(this);
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		this.stageManager = stageManager;
+		stageManager.loadFXML(this, "new_project_stage.fxml");
 		this.initModality(Modality.WINDOW_MODAL);
-		this.initOwner(currentStage.get());
-		currentStage.register(this, this.getClass().getName());
 	}
 
 	@FXML
@@ -119,7 +106,7 @@ public class NewProjectStage extends Stage {
 
 	@FXML
 	void addPreference(ActionEvent event) {
-		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(loader, currentStage);
+		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(stageManager);
 		Preference preference = addProBPreferencesStage.showStage(preferencesMap.keySet());
 		if (preference != null) {
 			preferencesListView.getItems().add(preference);
@@ -155,7 +142,7 @@ public class NewProjectStage extends Stage {
 			return;
 		}
 
-		AddMachineStage addMachineStage = new AddMachineStage(loader, currentStage, selectedFile);
+		AddMachineStage addMachineStage = new AddMachineStage(stageManager, selectedFile);
 		Machine machine = addMachineStage.showStage(machinesTableView.getItems());
 
 		if (machine != null) {
