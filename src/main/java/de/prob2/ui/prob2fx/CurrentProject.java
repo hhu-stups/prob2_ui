@@ -53,8 +53,6 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 	@Override
 	public void set(Project project) {
 		super.set(project);
-		System.out.println(project);
-		System.out.println(this.get());
 		this.isSingleFile.set(project.isSingleFile());
 	}
 
