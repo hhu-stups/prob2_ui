@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 public class ProB2 extends Application {
 	private Injector injector;
 	private Config config;
-	
+
 	public static void main(String... args) {
 		launch(args);
 	}
@@ -29,22 +29,28 @@ public class ProB2 extends Application {
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 		config = injector.getInstance(Config.class);
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
-		
+
 		Parent root = injector.getInstance(MainController.class);
 		Scene mainScene = new Scene(root, 1024, 768);
 		stage.setTitle("ProB 2.0");
 		stage.setScene(mainScene);
 		stage.setOnCloseRequest(e -> Platform.exit());
-		
+
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		currentProject.addListener((observable, from, to) -> stage.setTitle("ProB 2.0 [" + to.getName() + "]"));
-		
+		currentProject.addListener((observable, from, to) -> {
+			if (to == null) {
+				stage.setTitle("ProB 2.0");
+			} else {
+				stage.setTitle("ProB 2.0 [" + to.getName() + "]");
+			}
+		});
+
 		injector.getInstance(StageManager.class).register(stage, this.getClass().getName());
 
 		stage.show();
 		uiPersistence.open();
 	}
-	
+
 	@Override
 	public void stop() {
 		config.save();

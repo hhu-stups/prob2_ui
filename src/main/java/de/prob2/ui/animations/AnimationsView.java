@@ -81,9 +81,15 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 				Animation a = row.getItem();
 				animations.removeTrace(a.getTrace());
 				animationsTable.getItems().remove(a);
+				if (animationsTable.getItems().isEmpty()) {
+					currentProject.remove();
+				}
 			});
 			final MenuItem removeAllMenuItem = new MenuItem("Remove All Traces");
-			removeAllMenuItem.setOnAction(event -> removeAllTraces());
+			removeAllMenuItem.setOnAction(event -> {
+				removeAllTraces();
+				currentProject.remove();
+			});
 			contextMenu.getItems().add(removeMenuItem);
 			contextMenu.getItems().add(removeAllMenuItem);
 			row.setOnMouseClicked(event -> rowClicked(row, event, contextMenu));
@@ -92,8 +98,10 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		this.traceChange(animations.getCurrentTrace(), true);
 
 		currentProject.addListener((observable, from, to) -> {
-			removeAllTraces();
-			addAll(to.getMachines());
+			if (to != null) {
+				removeAllTraces();
+				addAll(to.getMachines());
+			}
 		});
 	}
 
