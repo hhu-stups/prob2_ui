@@ -31,6 +31,12 @@ public class MachineTableItem {
 		return machine;
 	}
 	
+	public void setMachine(Machine machine) {
+		this.machine = machine;
+		this.name = machine.getName();
+		this.description = machine.getDescription();
+	}
+	
 	public void addPreferenceProperty(Preference p) {
 		preferences.put(p, new SimpleBooleanProperty(false));
 	}

@@ -14,7 +14,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class AddMachineStage extends Stage {
+public class MachineStage extends Stage {
 	@FXML
 	private Button finishButton;
 	@FXML
@@ -24,14 +24,13 @@ public class AddMachineStage extends Stage {
 	@FXML
 	private Label errorExplanationLabel;
 
-	private File machineFile;
+	private File file;
 
 	private Machine machine;
 
 	private Set<String> machinesSet = new HashSet<String>();
 
-	AddMachineStage(StageManager stageManager, File machineFile) {
-		this.machineFile = machineFile;
+	MachineStage(StageManager stageManager) {
 		stageManager.loadFXML(this, "add_machine_stage.fxml");
 		this.initModality(Modality.WINDOW_MODAL);
 	}
@@ -59,11 +58,13 @@ public class AddMachineStage extends Stage {
 
 	@FXML
 	void finish(ActionEvent event) {
-		machine = new Machine(nameField.getText(), descriptionField.getText(), machineFile);
+		machine = new Machine(nameField.getText(), descriptionField.getText(), file);
 		this.close();
 	}
 
-	public Machine showStage(List<MachineTableItem> machinesList) {
+	public Machine addNewMachine(File machineFile, List<MachineTableItem> machinesList) {
+		this.setTitle("Add new Machine");
+		this.file = machineFile;
 		for (MachineTableItem i : machinesList) {
 			machinesSet.add(i.getName());
 		}
@@ -74,6 +75,23 @@ public class AddMachineStage extends Stage {
 			name = n[0] + "(" + i++ + ")";
 		}
 		nameField.setText(name);
+
+		super.showAndWait();
+		return machine;
+	}
+
+	public Machine editMachine(MachineTableItem item, List<MachineTableItem> machinesList) {
+		machine = item.get();
+		this.file = machine.getLocation();
+		this.setTitle("Edit " + machine.getName());
+		for (MachineTableItem i : machinesList) {
+			if (i != item) {
+				machinesSet.add(i.getName());
+			}
+		}
+		nameField.setText(machine.getName());
+		descriptionField.setText(machine.getDescription());
+
 		super.showAndWait();
 		return machine;
 	}

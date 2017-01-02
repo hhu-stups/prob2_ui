@@ -98,6 +98,11 @@ public class NewProjectStage extends Stage {
 						contextMenu.getItems().get(0).setDisable(false);
 					}
 					contextMenu.show(row, event.getScreenX(), event.getScreenY());
+				} else if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+					MachineStage machineStage = new MachineStage(stageManager);
+					Machine machine = machineStage.editMachine(row.getItem(), machinesTableView.getItems());
+					row.getItem().setMachine(machine);
+					machinesTableView.refresh();
 				}
 			});
 			return row;
@@ -142,8 +147,8 @@ public class NewProjectStage extends Stage {
 			return;
 		}
 
-		AddMachineStage addMachineStage = new AddMachineStage(stageManager, selectedFile);
-		Machine machine = addMachineStage.showStage(machinesTableView.getItems());
+		MachineStage machineStage = new MachineStage(stageManager);
+		Machine machine = machineStage.addNewMachine(selectedFile, machinesTableView.getItems());
 
 		if (machine != null) {
 			machinesTableView.getItems().add(new MachineTableItem(machine, preferencesListView.getItems()));
