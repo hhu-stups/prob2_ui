@@ -42,7 +42,7 @@ public class Machine {
 	}
 
 	public String getPath() {
-		return location.getAbsolutePath();
+		return location.getPath();
 	}
 	
 	public List<String> getPreferences() {
