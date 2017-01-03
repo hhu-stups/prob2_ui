@@ -34,6 +34,7 @@ import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.preferences.PreferencesStage;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.states.ClassBlacklist;
 import javafx.geometry.BoundingBox;
 
@@ -52,6 +53,7 @@ public final class Config {
 		private List<String> groovyObjectTabs;
 		private String currentPreference;
 		private List<String> expandedTitledPanes;
+		private String defaultProjectLocation;
 		
 		private ConfigData() {}
 	}
@@ -69,6 +71,7 @@ public final class Config {
 	private final BConsole bConsole;
 	private final Injector injector;
 	private final UIState uiState;
+	private final CurrentProject currentProject;
 	
 	@Inject
 	private Config(final ClassBlacklist classBlacklist, 
@@ -76,7 +79,8 @@ public final class Config {
 					final UIState uiState, 
 					final GroovyConsole groovyConsole, 
 					final BConsole bConsole, 
-					final Injector injector) {
+					final Injector injector,
+					final CurrentProject currentProject) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.classBlacklist = classBlacklist;
 		this.recentFiles = recentFiles;
@@ -84,6 +88,7 @@ public final class Config {
 		this.groovyConsole = groovyConsole;
 		this.bConsole = bConsole;
 		this.injector = injector;
+		this.currentProject = currentProject;
 		
 		try (
 			final InputStream is = Config.class.getResourceAsStream("default.json");
@@ -137,6 +142,9 @@ public final class Config {
 		if(configData.expandedTitledPanes == null) {
 			configData.expandedTitledPanes = this.defaultData.expandedTitledPanes;
 		}
+		if(configData.defaultProjectLocation == null) {
+			configData.defaultProjectLocation = System.getProperty("user.home");
+		}
 	}
 	
 	public void load() {
@@ -158,6 +166,8 @@ public final class Config {
 		
 		this.recentFiles.setMaximum(configData.maxRecentFiles);
 		this.recentFiles.setAll(configData.recentFiles);
+		
+		this.currentProject.setDefaultLocation(configData.defaultProjectLocation);
 		
 		for (String name : configData.statesViewHiddenClasses) {
 			Class<? extends AbstractElement> clazz;
@@ -214,6 +224,7 @@ public final class Config {
 		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
+		configData.defaultProjectLocation = this.currentProject.getDefaultLocation();
 		configData.statesViewHiddenClasses = new ArrayList<>();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
 		configData.groovyConsoleSettings = groovyConsole.getSettings();

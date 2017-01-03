@@ -29,6 +29,8 @@ import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -39,6 +41,7 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 	private final BooleanProperty exists;
 	private final BooleanProperty isSingleFile;
 	private final ListProperty<Machine> machines;
+	private final StringProperty defaultLocation;
 	private final Gson gson;
 
 	@Inject
@@ -48,6 +51,7 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		this.exists.bind(Bindings.isNotNull(this));
 		this.isSingleFile = new SimpleBooleanProperty(this, "isSingleFile", false);
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
+		this.defaultLocation = new SimpleStringProperty(this, "defaultLocation", System.getProperty("user.home"));
 	}
 
 	@Override
@@ -127,5 +131,17 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 	public void remove() {
 		super.set(null);
 		this.isSingleFile.set(false);
+	}
+
+	public StringProperty defaultLocationProperty() {
+		return this.defaultLocation;
+	}
+	
+	public String getDefaultLocation() {
+		return this.defaultLocationProperty().get();
+	}
+
+	public void setDefaultLocation(String defaultProjectLocation) {
+		this.defaultLocationProperty().set(defaultProjectLocation);
 	}
 }

@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -39,7 +38,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-@Singleton
 public class NewProjectStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(NewProjectStage.class);
 
@@ -77,7 +75,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	public void initialize() {
 		finishButton.disableProperty().bind(projectNameField.lengthProperty().lessThanOrEqualTo(0));
-		locationField.setText(System.getProperty("user.home"));
+		locationField.setText(this.currentProject.getDefaultLocation());
 
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
