@@ -203,7 +203,8 @@ public final class Config {
 		uiState.updateSavedStageBoxes();
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
-		configData.visibleStages = new ArrayList<>(this.uiState.getStages().keySet());
+		this.uiState.getSavedVisibleStages().remove("javafx.stage.Stage");
+		configData.visibleStages = new ArrayList<>(this.uiState.getSavedVisibleStages());
 		configData.stageBoxes = new HashMap<>();
 		for (final Map.Entry<String, BoundingBox> entry : this.uiState.getSavedStageBoxes().entrySet()) {
 			configData.stageBoxes.put(entry.getKey(), new double[] {

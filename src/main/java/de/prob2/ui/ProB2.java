@@ -9,7 +9,6 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.UIPersistence;
-import de.prob2.ui.internal.UIState;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -37,9 +36,6 @@ public class ProB2 extends Application {
 		stage.setTitle("ProB 2.0");
 		stage.setScene(mainScene);
 		stage.setOnCloseRequest(e -> Platform.exit());
-		stage.focusedProperty().addListener(e-> {
-			injector.getInstance(UIState.class).moveStageToEnd(stage);
-		});
 		injector.getInstance(StageManager.class).register(stage, this.getClass().getName());
 		stage.show();
 		uiPersistence.open();
