@@ -30,7 +30,6 @@ public class Stat {
 	private Node toFX(String s, boolean rightAligned) {
 		AnchorPane aP = new AnchorPane();
 		aP.setMinHeight(30.0);
-		aP.getStylesheets().add("prob.css");
 		aP.getStyleClass().add("gridViewRow");
 		Label l = new Label(s);
 		l.setTooltip(new Tooltip(s));

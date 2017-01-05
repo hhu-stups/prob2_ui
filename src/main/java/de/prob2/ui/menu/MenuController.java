@@ -2,14 +2,8 @@ package de.prob2.ui.menu;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.prefs.Preferences;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -24,18 +18,14 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.MainController;
-import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.formula.FormulaInputStage;
-import de.prob2.ui.history.HistoryView;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.UIState;
 import de.prob2.ui.modelchecking.ModelcheckingController;
-import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.preferences.PreferencesStage;
-import de.prob2.ui.prob2fx.CurrentStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.stats.StatsView;
 
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
@@ -44,22 +34,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TitledPane;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -68,142 +49,14 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
-	// FIXME all checkboxes selected when reloading detached
-	private enum ApplyDetachedEnum {
-		JSON, USER
-	}
-
-	private final class DetachViewStageController {
-		@FXML private Stage detached;
-		@FXML private Button apply;
-		@FXML private CheckBox detachOperations;
-		@FXML private CheckBox detachHistory;
-		@FXML private CheckBox detachModelcheck;
-		@FXML private CheckBox detachStats;
-		@FXML private CheckBox detachAnimations;
-		private final Preferences windowPrefs;
-		private final Set<Stage> wrapperStages;
-
-		private DetachViewStageController() {
-			windowPrefs = Preferences.userNodeForPackage(MenuController.DetachViewStageController.class);
-			wrapperStages = new HashSet<>();
-		}
-
-		@FXML
-		public void initialize() {
-			detached.initModality(Modality.APPLICATION_MODAL);
-			detached.getIcons().add(new Image("prob_128.gif"));
-			currentStage.register(detached, this.getClass().getName());
-		}
-
-		@FXML
-		private void apply() {
-			apply(ApplyDetachedEnum.USER);
-		}
-		
-		private void apply(ApplyDetachedEnum detachedBy) {
-			Parent root = loadPreset("main.fxml");
-			assert root != null;
-			SplitPane pane = (SplitPane) root.getChildrenUnmodifiable().get(1);
-			Accordion accordion = (Accordion) pane.getItems().get(0);
-			removeTP(accordion, pane, detachedBy);
-			uiState.setGuiState("detached");
-			this.detached.close();
-		}
-		
-		private void removeTP(Accordion accordion, SplitPane pane, ApplyDetachedEnum detachedBy) {
-			final HashSet<Stage> wrapperStagesCopy = new HashSet<>(wrapperStages);
-			wrapperStages.clear();
-			for (final Stage stage : wrapperStagesCopy) {
-				stage.setScene(null);
-				stage.hide();
-			}
-
-			for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
-				final TitledPane tp = it.next();
-				if (removable(tp, detachedBy)) {
-					it.remove();
-					transferToNewWindow((Parent)tp.getContent(), tp.getText());
-				}
-			}
-			if (accordion.getPanes().isEmpty()) {
-				pane.getItems().remove(accordion);
-				pane.setDividerPositions(0);
-				pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(true));
-			}
-		}
-		
-		private boolean removable(TitledPane tp, ApplyDetachedEnum detachedBy) {
-			return	(removablePane(tp, detachOperations, detachedBy) && tp.getContent() instanceof OperationsView) ||
-					(removablePane(tp, detachHistory, detachedBy) && tp.getContent() instanceof HistoryView) ||
-					(removablePane(tp, detachModelcheck, detachedBy) && tp.getContent() instanceof ModelcheckingController) ||
-					(removablePane(tp, detachStats, detachedBy) && tp.getContent() instanceof StatsView) ||
-					(removablePane(tp, detachAnimations, detachedBy) && tp.getContent() instanceof AnimationsView);
-		}
-		
-		private boolean removablePane(TitledPane tp, CheckBox detached, ApplyDetachedEnum detachedBy) {
-			boolean condition = detached.isSelected();
-			if(detachedBy == ApplyDetachedEnum.JSON) {
-				condition = uiState.getSavedStageBoxes().containsKey(tp.getText());
-				if(condition) {
-					detached.setSelected(true);
-				}
-			}
-			return condition;
-		}
-
-		private void transferToNewWindow(Parent node, String title) {
-			Stage stage = new Stage();
-			wrapperStages.add(stage);
-			stage.setTitle(title);
-			currentStage.register(stage, null);
-			stage.getIcons().add(new Image("prob_128.gif"));
-			stage.setOnHidden(e -> {
-				windowPrefs.putDouble(node.getClass()+"X",stage.getX());
-				windowPrefs.putDouble(node.getClass()+"Y",stage.getY());
-				windowPrefs.putDouble(node.getClass()+"Width",stage.getWidth());
-				windowPrefs.putDouble(node.getClass()+"Height",stage.getHeight());
-				if (node instanceof OperationsView) {
-					detachOperations.setSelected(false);
-				} else if (node instanceof HistoryView) {
-					detachHistory.setSelected(false);
-				} else if (node instanceof ModelcheckingController) {
-					detachModelcheck.setSelected(false);
-				} else if (node instanceof StatsView) {
-					detachStats.setSelected(false);
-				} else if (node instanceof AnimationsView) {
-					detachAnimations.setSelected(false);
-				}
-				dvController.apply();
-			});
-			stage.setWidth(windowPrefs.getDouble(node.getClass()+"Width",200));
-			stage.setHeight(windowPrefs.getDouble(node.getClass()+"Height",100));
-			stage.setX(windowPrefs.getDouble(node.getClass()+"X", Screen.getPrimary().getVisualBounds().getWidth()-stage.getWidth()/2));
-			stage.setY(windowPrefs.getDouble(node.getClass()+"Y", Screen.getPrimary().getVisualBounds().getHeight()-stage.getHeight()/2));
-
-			Scene scene = new Scene(node);
-			scene.getStylesheets().add("prob.css");
-			stage.setScene(scene);
-			stage.show();
-		}
-	}
-	private static final URL FXML_ROOT;
-	
-	static {
-		try {
-			FXML_ROOT = new URL(MenuController.class.getResource("menu.fxml"), "..");
-		} catch (MalformedURLException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-	
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 
 	private final Injector injector;
 	private final Api api;
 	private final AnimationSelector animationSelector;
-	private final CurrentStage currentStage;
+	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
+	private final MenuToolkit menuToolkit;
 	private final RecentFiles recentFiles;
 	private final UIState uiState;
 	private final DetachViewStageController dvController;
@@ -221,38 +74,33 @@ public final class MenuController extends MenuBar {
 	
 	@Inject
 	private MenuController(
-		final FXMLLoader loader,
+		final StageManager stageManager,
 		final Injector injector,
 		final Api api,
 		final AnimationSelector animationSelector,
-		final CurrentStage currentStage,
 		final CurrentTrace currentTrace,
+		final DetachViewStageController dvController,
+		final MenuToolkit menuToolkit,
 		final RecentFiles recentFiles,
 		final UIState uiState
 	) {
 		this.injector = injector;
 		this.api = api;
 		this.animationSelector = animationSelector;
-		this.currentStage = currentStage;
+		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
+		this.dvController = dvController;
+		this.menuToolkit = menuToolkit;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
 		
 		this.openLock = new Object();
 
-		loader.setLocation(getClass().getResource("menu.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+		stageManager.loadFXML(this, "menu.fxml");
 
-		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
+		if (menuToolkit != null) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
-			final MenuToolkit tk = MenuToolkit.toolkit();
 			
 			// Remove About menu item from Help
 			aboutItem.getParentMenu().getItems().remove(aboutItem);
@@ -263,31 +111,34 @@ public final class MenuController extends MenuBar {
 			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
 			
 			// Create Mac-style application menu
-			final Menu applicationMenu = tk.createDefaultApplicationMenu("ProB 2");
+			final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu("ProB 2");
 			this.getMenus().add(0, applicationMenu);
-			tk.setApplicationMenu(applicationMenu);
-			applicationMenu.getItems().setAll(aboutItem, new SeparatorMenuItem(), preferencesItem,
-				new SeparatorMenuItem(), tk.createHideMenuItem("ProB 2"), tk.createHideOthersMenuItem(),
-				tk.createUnhideAllMenuItem(), new SeparatorMenuItem(), tk.createQuitMenuItem("ProB 2"));
+			menuToolkit.setApplicationMenu(applicationMenu);
+			applicationMenu.getItems().setAll(
+				aboutItem,
+				new SeparatorMenuItem(),
+				preferencesItem,
+				new SeparatorMenuItem(),
+				menuToolkit.createHideMenuItem("ProB 2"),
+				menuToolkit.createHideOthersMenuItem(),
+				menuToolkit.createUnhideAllMenuItem(),
+				new SeparatorMenuItem(),
+				menuToolkit.createQuitMenuItem("ProB 2")
+			);
 			
 			// Add Mac-style items to Window menu
-			windowMenu.getItems().addAll(tk.createMinimizeMenuItem(), tk.createZoomMenuItem(),
-				tk.createCycleWindowsItem(), new SeparatorMenuItem(), tk.createBringAllToFrontItem(),
-				new SeparatorMenuItem());
-			tk.autoAddWindowMenuItems(windowMenu);
+			windowMenu.getItems().addAll(
+				menuToolkit.createMinimizeMenuItem(),
+				menuToolkit.createZoomMenuItem(),
+				menuToolkit.createCycleWindowsItem(),
+				new SeparatorMenuItem(),
+				menuToolkit.createBringAllToFrontItem(),
+				new SeparatorMenuItem()
+			);
+			menuToolkit.autoAddWindowMenuItems(windowMenu);
 			
 			// Make this the global menu bar
-			tk.setGlobalMenuBar(this);
-		}
-
-		final FXMLLoader stageLoader = injector.getInstance(FXMLLoader.class);
-		stageLoader.setLocation(getClass().getResource("detachedPerspectivesChoice.fxml"));
-		this.dvController = new DetachViewStageController();
-		stageLoader.setController(this.dvController);
-		try {
-			stageLoader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
+			stageManager.setGlobalMacMenuBar(this);
 		}
 	}
 	
@@ -359,14 +210,10 @@ public final class MenuController extends MenuBar {
 	}
 	
 	@FXML
-	public void handleLoadDetached() {
-		this.dvController.detached.showAndWait();
+	private void handleLoadDetached() {
+		this.dvController.showAndWait();
 	}
 	
-	public void applyDetached() {
-		this.dvController.apply(ApplyDetachedEnum.JSON);
-	}
-
 	@FXML
 	private void handleLoadPerspective() {
 		FileChooser fileChooser = new FileChooser();
@@ -384,9 +231,7 @@ public final class MenuController extends MenuBar {
 				window.getScene().setRoot(root);
 			} catch (IOException e) {
 				logger.error("loading fxml failed", e);
-				Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-				alert.getDialogPane().getStylesheets().add("prob.css");
-				alert.showAndWait();
+				stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait();
 			}
 		}
 	}
@@ -406,11 +251,7 @@ public final class MenuController extends MenuBar {
 				newSpace = this.api.b_load(path);
 			} catch (IOException | ModelTranslationError e) {
 				logger.error("loading file failed", e);
-				Platform.runLater(() -> {
-					Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-					alert.getDialogPane().getStylesheets().add("prob.css");
-					alert.show();
-				});
+				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait());
 				return;
 			}
 			
@@ -441,7 +282,7 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleClose(final ActionEvent event) {
-		final Stage stage = this.currentStage.get();
+		final Stage stage = this.stageManager.getCurrent();
 		if (stage != null) {
 			stage.close();
 		}
@@ -474,37 +315,25 @@ public final class MenuController extends MenuBar {
 		bConsoleStage.show();
 		bConsoleStage.toFront();
 	}
-
-	public Parent loadPreset(String location) {
-		FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-		this.uiState.setGuiState(location);
-		try {
-			loader.setLocation(new URL(FXML_ROOT, location));
-		} catch (MalformedURLException e) {
-			logger.error("Malformed location", e);
-			Alert alert = new Alert(Alert.AlertType.ERROR, "Malformed location:\n" + e);
-			alert.getDialogPane().getStylesheets().add("prob.css");
-			alert.showAndWait();
-			return null;
-		}
-		MainController root = injector.getInstance(MainController.class);
-		loader.setRoot(root);
-		root.refresh();
-		window.getScene().setRoot(root);
-		
-		if (System.getProperty("os.name", "").toLowerCase().contains("mac")) {
-			final MenuToolkit tk = MenuToolkit.toolkit();
-			tk.setGlobalMenuBar(this);
-			tk.setApplicationMenu(this.getMenus().get(0));
-		}
-		return root;
-	}
 	
 	@FXML
 	private void handleReportBug() {
 		final Stage reportBugStage = injector.getInstance(ReportBugStage.class);
 		reportBugStage.show();
 		reportBugStage.toFront();
+	}
+	
+	public Parent loadPreset(String location) {
+		this.uiState.setGuiState(location);
+		final MainController root = injector.getInstance(MainController.class);
+		root.refresh();
+		window.getScene().setRoot(root);
+		
+		if (this.menuToolkit != null) {
+			this.menuToolkit.setApplicationMenu(this.getMenus().get(0));
+			this.stageManager.setGlobalMacMenuBar(this);
+		}
+		return root;
 	}
 
 	private List<MenuItem> getRecentFileItems(){

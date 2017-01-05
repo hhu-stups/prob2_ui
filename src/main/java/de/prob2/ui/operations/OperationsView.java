@@ -1,6 +1,5 @@
 package de.prob2.ui.operations;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,13 +29,13 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
 import de.prob2.ui.internal.IComponents;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.ListCell;
@@ -150,18 +149,10 @@ public final class OperationsView extends AnchorPane implements IComponents {
 	};
 
 	@Inject
-	private OperationsView(final CurrentTrace currentTrace, final FXMLLoader loader) {
+	private OperationsView(final CurrentTrace currentTrace, final StageManager stageManager) {
 		this.currentTrace = currentTrace;
 
-		loader.setLocation(getClass().getResource("ops_view.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
-
+		stageManager.loadFXML(this, "ops_view.fxml");
 	}
 
 	@FXML

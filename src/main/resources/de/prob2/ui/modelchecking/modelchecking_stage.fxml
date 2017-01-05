@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<Stage fx:id="mcheckStage" title="%modelchecking.stage.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" fx:id="mcheckStage" title="%modelchecking.stage.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
 			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
@@ -50,4 +50,4 @@
 			</AnchorPane>
 		</Scene>
 	</scene>
-</Stage>
+</fx:root>

@@ -12,6 +12,7 @@ import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
+import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.MenuController;
 
 import javafx.geometry.BoundingBox;
@@ -45,6 +46,13 @@ public final class UIPersistence {
 			return;
 		}
 		
+		if (id.startsWith(DetachViewStageController.class.getName() + " detached ")) {
+			// Remove the prefix before the name of the detached class
+			final String toDetach = id.substring((DetachViewStageController.class.getName() + " detached ").length());
+			injector.getInstance(DetachViewStageController.class).selectForDetach(toDetach);
+			return;
+		}
+		
 		switch (id) {
 			case "de.prob2.ui.ProB2":
 				// The main stage's size is restored in the application start method.
@@ -52,10 +60,6 @@ public final class UIPersistence {
 			
 			case "de.prob2.ui.consoles.groovy.objects.GroovyObjectStage":
 				injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
-				return;
-			
-			case "de.prob2.ui.menu.MenuController$DetachViewStageController":
-				injector.getInstance(MenuController.class).handleLoadDetached();
 				return;
 			
 			default:
@@ -89,14 +93,15 @@ public final class UIPersistence {
 	public void open() {
 		final MenuController menu = injector.getInstance(MenuController.class);
 		final MainController main = injector.getInstance(MainController.class);
-		if("detached".equals(uiState.getGuiState())) {
-			menu.applyDetached();
-		} else {
-			menu.loadPreset(uiState.getGuiState());
-		}
 		
 		for (final String id : uiState.getSavedVisibleStages()) {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
+		}
+		
+		if ("detached".equals(uiState.getGuiState())) {
+			injector.getInstance(DetachViewStageController.class).apply();
+		} else {
+			menu.loadPreset(uiState.getGuiState());
 		}
 		
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();

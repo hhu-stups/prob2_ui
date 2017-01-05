@@ -17,10 +17,11 @@ import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
 
+import de.prob2.ui.internal.StageManager;
+
 import difflib.DiffUtils;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -54,19 +55,15 @@ public class FullValueStage extends Stage {
 	@FXML private CheckBox prettifyCheckBox;
 	@FXML private Button saveAsButton;
 	
+	private final StageManager stageManager;
+	
 	private AsciiUnicodeString currentValue;
 	private AsciiUnicodeString previousValue;
 	
 	@Inject
-	public FullValueStage(final FXMLLoader loader) {
-		loader.setLocation(getClass().getResource("full_value_stage.fxml"));
-		loader.setRoot(this);
-		loader.setController(this);
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("loading fxml failed", e);
-		}
+	public FullValueStage(final StageManager stageManager) {
+		this.stageManager = stageManager;
+		stageManager.loadFXML(this, "full_value_stage.fxml");
 	}
 	
 	private static String prettify(final String s) {
@@ -230,10 +227,10 @@ public class FullValueStage extends Stage {
 			out.write(value);
 		} catch (FileNotFoundException e) {
 			logger.error("Could not open file for writing", e);
-			new Alert(Alert.AlertType.ERROR, "Could not open file for writing:\n" + e.getMessage()).showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file for writing:\n" + e.getMessage()).showAndWait();
 		} catch (IOException e) {
 			logger.error("Failed to save value to file", e);
-			new Alert(Alert.AlertType.ERROR, "Failed to save file:\n" + e.getMessage()).showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to save file:\n" + e.getMessage()).showAndWait();
 		}
 	}
 }
