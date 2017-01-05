@@ -1,7 +1,6 @@
 package de.prob2.ui.states;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -9,6 +8,7 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
@@ -43,6 +43,7 @@ import javafx.scene.layout.AnchorPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public final class StatesView extends AnchorPane {
 	private static final class ValueCell extends TreeTableCell<StateTreeItem<?>, String> {
 		private ValueCell() {
@@ -112,13 +113,7 @@ public final class StatesView extends AnchorPane {
 		this.formulaGenerator = formulaGenerator;
 		this.stageManager = stageManager;
 
-		stageManager.loadFXML(this, "states_view.fxml");		
-		setColumnsWidth();
-		setColumnsOrder();
-		System.out.println(tv.hashCode());
-		tv.setOnMouseEntered(e-> {
-			System.out.println(tv.hashCode());
-		});
+		stageManager.loadFXML(this, "states_view.fxml");
 	}
 
 	private void unsubscribeAllChildren(final Trace trace, final AbstractElement element) {
@@ -345,6 +340,9 @@ public final class StatesView extends AnchorPane {
 		};
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
+		tv.setOnMouseClicked(e-> {
+			System.out.println(tv.hashCode());
+		});
 
 	}
 	
@@ -357,8 +355,9 @@ public final class StatesView extends AnchorPane {
 		double[] widths = uiState.getStatesViewColumnsWidth();
 		List<TreeTableColumn<StateTreeItem<?>, ?>> columns = tv.getColumns();
 		for (int i = 0; i < columns.size(); i++) {
-			columns.get(i).prefWidthProperty().set(widths[i]);
+			columns.get(i).setPrefWidth(widths[i]);
 		}
+		//Next step: implement a resize policy
 	}
 	
 	public void setColumnsOrder() {
@@ -366,20 +365,21 @@ public final class StatesView extends AnchorPane {
 		String[] order = uiState.getStatesViewColumnsOrder();
 		List<TreeTableColumn<StateTreeItem<?>, ?>> newColumns = new ArrayList<>();
 		
-		for(TreeTableColumn<StateTreeItem<?>, ?> column : tv.getColumns()) {
-			for(int i = 0; i < order.length; i++) {
+		for(int i = 0; i < order.length; i++) {
+			for(TreeTableColumn<StateTreeItem<?>, ?> column : tv.getColumns()) {
 				if(column.getText().equals(order[i])) {
 					newColumns.add(column);
 				}
 			}
 		}
+				
+		tv.getColumns().clear();
 		tv.getColumns().setAll(newColumns);
 	}
 	
 	public String[] getColumnsOrder() {
 		String[] order = new String[3];
 		for(int i = 0; i < tv.getColumns().size(); i++) {
-			System.out.println(tv.hashCode());
 			order[i] = tv.getColumns().get(i).getText();
 		}
 		return order;

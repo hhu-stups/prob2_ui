@@ -14,6 +14,7 @@ import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.MenuController;
+import de.prob2.ui.states.StatesView;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
@@ -92,6 +93,7 @@ public final class UIPersistence {
 	public void open() {
 		final MenuController menu = injector.getInstance(MenuController.class);
 		final MainController main = injector.getInstance(MainController.class);
+		final StatesView statesView = injector.getInstance(StatesView.class);
 		
 		for (final String id : uiState.getSavedVisibleStages()) {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
@@ -120,5 +122,7 @@ public final class UIPersistence {
 		
 		main.setHorizontalDividerPositions(uiState.getHorizontalDividerPositions());		
 		main.setVerticalDividerPostions(uiState.getVerticalDividerPositions());
+		statesView.setColumnsWidth();
+		statesView.setColumnsOrder();
 	}
 }
