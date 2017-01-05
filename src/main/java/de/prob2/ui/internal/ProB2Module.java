@@ -56,8 +56,9 @@ public class ProB2Module extends AbstractModule {
 		bind(BConsole.class);
 		bind(RecentFiles.class);
 		bind(ResourceBundle.class).toInstance(bundle);
-		bind(MenuToolkit.class).toInstance(IS_MAC ? MenuToolkit.toolkit(locale) : null);
-
+		if(IS_MAC) {
+			bind(MenuToolkit.class).toInstance(MenuToolkit.toolkit(locale));
+		}
 		// Controllers
 		bind(AnimationsView.class);
 		bind(HistoryView.class);

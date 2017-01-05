@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
+	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 
 	private final Injector injector;
@@ -80,7 +81,6 @@ public final class MenuController extends MenuBar {
 		final AnimationSelector animationSelector,
 		final CurrentTrace currentTrace,
 		final DetachViewStageController dvController,
-		final MenuToolkit menuToolkit,
 		final RecentFiles recentFiles,
 		final UIState uiState
 	) {
@@ -90,7 +90,11 @@ public final class MenuController extends MenuBar {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.dvController = dvController;
-		this.menuToolkit = menuToolkit;
+		if(IS_MAC) {
+			this.menuToolkit = injector.getInstance(MenuToolkit.class);
+		} else {
+			this.menuToolkit = null;
+		}
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
 		
