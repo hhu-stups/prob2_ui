@@ -14,7 +14,6 @@ import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.MenuController;
-
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
@@ -118,5 +117,8 @@ public final class UIPersistence {
 				main.expandTitledPane(titledPane);
 			}
 		}
+		
+		main.setHorizontalDividerPositions(uiState.getHorizontalDividerPositions());		
+		main.setVerticalDividerPostions(uiState.getVerticalDividerPositions());
 	}
 }

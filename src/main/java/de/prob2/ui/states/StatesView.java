@@ -1,5 +1,7 @@
 package de.prob2.ui.states;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +22,7 @@ import de.prob.statespace.Trace;
 
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.UIState;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.binding.Bindings;
@@ -109,7 +112,13 @@ public final class StatesView extends AnchorPane {
 		this.formulaGenerator = formulaGenerator;
 		this.stageManager = stageManager;
 
-		stageManager.loadFXML(this, "states_view.fxml");
+		stageManager.loadFXML(this, "states_view.fxml");		
+		setColumnsWidth();
+		setColumnsOrder();
+		System.out.println(tv.hashCode());
+		tv.setOnMouseEntered(e-> {
+			System.out.println(tv.hashCode());
+		});
 	}
 
 	private void unsubscribeAllChildren(final Trace trace, final AbstractElement element) {
@@ -336,5 +345,44 @@ public final class StatesView extends AnchorPane {
 		};
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
+
 	}
+	
+	public double[] getColumnsWidth() {
+		return new double[]{tvName.getWidth(),tvValue.getWidth(),tvPreviousValue.getWidth()};
+	}
+	
+	public void setColumnsWidth() {
+		UIState uiState = injector.getInstance(UIState.class);
+		double[] widths = uiState.getStatesViewColumnsWidth();
+		List<TreeTableColumn<StateTreeItem<?>, ?>> columns = tv.getColumns();
+		for (int i = 0; i < columns.size(); i++) {
+			columns.get(i).prefWidthProperty().set(widths[i]);
+		}
+	}
+	
+	public void setColumnsOrder() {
+		UIState uiState = injector.getInstance(UIState.class);
+		String[] order = uiState.getStatesViewColumnsOrder();
+		List<TreeTableColumn<StateTreeItem<?>, ?>> newColumns = new ArrayList<>();
+		
+		for(TreeTableColumn<StateTreeItem<?>, ?> column : tv.getColumns()) {
+			for(int i = 0; i < order.length; i++) {
+				if(column.getText().equals(order[i])) {
+					newColumns.add(column);
+				}
+			}
+		}
+		tv.getColumns().setAll(newColumns);
+	}
+	
+	public String[] getColumnsOrder() {
+		String[] order = new String[3];
+		for(int i = 0; i < tv.getColumns().size(); i++) {
+			System.out.println(tv.hashCode());
+			order[i] = tv.getColumns().get(i).getText();
+		}
+		return order;
+	}
+	
 }
