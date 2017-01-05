@@ -8,6 +8,7 @@ import de.prob.cli.ProBInstanceProvider;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.UIPersistence;
+import de.prob2.ui.internal.UIState;
 import de.prob2.ui.prob2fx.CurrentStage;
 
 import javafx.application.Application;
@@ -39,6 +40,9 @@ public class ProB2 extends Application {
 		stage.setScene(mainScene);
 		stage.getIcons().add(new Image("prob_128.gif"));
 		stage.setOnCloseRequest(e -> Platform.exit());
+		stage.focusedProperty().addListener(e-> {
+			injector.getInstance(UIState.class).moveStageToEnd(stage);
+		});
 		injector.getInstance(CurrentStage.class).register(stage, this.getClass().getName());
 		stage.show();
 		uiPersistence.open();

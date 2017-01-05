@@ -126,7 +126,7 @@ public class MainController extends BorderPane {
 	public void expandTitledPane(String titledPane) {
 		Accordion[] accordions = new Accordion[] {leftAccordion, rightAccordion, bottomAccordion, topAccordion};
 
- 		HashMap<String,TitledPane> titledPanes = new HashMap<String, TitledPane>();
+ 		HashMap<String,TitledPane> titledPanes = new HashMap<>();
  		titledPanes.put("Operations", operationsTP);
  		titledPanes.put("History", historyTP);
  		titledPanes.put("Animations", animationsTP);

@@ -3,10 +3,12 @@ package de.prob2.ui.internal;
 import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.inject.Inject;
@@ -54,6 +56,11 @@ public class UIState {
 	
 	public Map<String, Reference<Stage>> getStages() {
 		return this.stages;
+	}
+	
+	public void moveStageToEnd(Stage stage) {
+		/*Entry<String, Reference<Stage>> entry = 
+		stages.keySet().*/
 	}
 	
 	public void updateSavedStageBoxes() {
