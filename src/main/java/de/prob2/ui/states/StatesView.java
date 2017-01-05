@@ -340,10 +340,6 @@ public final class StatesView extends AnchorPane {
 		};
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
-		tv.setOnMouseClicked(e-> {
-			System.out.println(tv.hashCode());
-		});
-
 	}
 	
 	public double[] getColumnsWidth() {
