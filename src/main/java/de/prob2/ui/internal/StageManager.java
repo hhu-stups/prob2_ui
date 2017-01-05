@@ -128,11 +128,7 @@ public final class StageManager {
 		stage.getProperties().put("id", id);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
-		
-		stage.focusedProperty().addListener(e-> {
-			injector.getInstance(UIState.class).moveStageToEnd(stage);
-		});
-		
+		stage.focusedProperty().addListener(e-> injector.getInstance(UIState.class).moveStageToEnd(stage));
 		stage.showingProperty().addListener((observable, from, to) -> {
 			final String stageId = (String)stage.getProperties().get("id");
 			if (to) {

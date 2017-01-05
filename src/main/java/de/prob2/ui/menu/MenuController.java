@@ -255,7 +255,7 @@ public final class MenuController extends MenuBar {
 				newSpace = this.api.b_load(path);
 			} catch (IOException | ModelTranslationError e) {
 				logger.error("loading file failed", e);
-				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait());
+				Platform.runLater(stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e)::showAndWait);
 				return;
 			}
 			
