@@ -13,7 +13,7 @@
 <?import javafx.scene.control.TitledPane?>
 <fx:root type="MainController" maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
-		<SplitPane dividerPositions="0.26">
+		<SplitPane fx:id="horizontalSP" dividerPositions="0.26">
 			<Accordion fx:id="leftAccordion">
 				<panes>
 					<TitledPane fx:id = "operationsTP" text="%tptitles.operations" onMouseClicked="#operationsTPClicked">

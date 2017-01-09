@@ -48,6 +48,7 @@ import javafx.stage.Window;
 
 @Singleton
 public final class MenuController extends MenuBar {
+	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 
 	private final Injector injector;
@@ -87,7 +88,11 @@ public final class MenuController extends MenuBar {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.dvController = dvController;
-		this.menuToolkit = menuToolkit;
+		if(IS_MAC) {
+			this.menuToolkit = injector.getInstance(MenuToolkit.class);
+		} else {
+			this.menuToolkit = null;
+		}
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
 

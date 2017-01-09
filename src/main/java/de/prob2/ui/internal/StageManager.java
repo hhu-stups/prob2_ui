@@ -36,12 +36,13 @@ import javafx.stage.Stage;
  */
 @Singleton
 public final class StageManager {
+	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 	private static final Logger LOGGER = LoggerFactory.getLogger(StageManager.class);
 	private static final String STYLESHEET = "prob.css";
 	private static final Image ICON = new Image("prob_128.gif");
 	
 	private final Injector injector;
-	private final MenuToolkit menuToolkit;
+	private MenuToolkit menuToolkit;
 	private final UIState uiState;
 	
 	private final ObjectProperty<Stage> current;
@@ -49,14 +50,21 @@ public final class StageManager {
 	private MenuBar globalMacMenuBar;
 	
 	@Inject
-	private StageManager(final Injector injector, final MenuToolkit menuToolkit, final UIState uiState) {
+	private StageManager(final Injector injector, final UIState uiState) {
 		this.injector = injector;
-		this.menuToolkit = menuToolkit;
+		this.menuToolkit = null;
+		if(IS_MAC) {
+			createMenuToolkit();
+		}
 		this.uiState = uiState;
 		
 		this.current = new SimpleObjectProperty<>(this, "current");
 		this.registered = new WeakHashMap<>();
 		this.globalMacMenuBar = null;
+	}
+	
+	private void createMenuToolkit() {
+		menuToolkit = injector.getInstance(MenuToolkit.class);
 	}
 	
 	/**
@@ -120,7 +128,7 @@ public final class StageManager {
 		stage.getProperties().put("id", id);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
-		
+		stage.focusedProperty().addListener(e-> injector.getInstance(UIState.class).moveStageToEnd(stage));
 		stage.showingProperty().addListener((observable, from, to) -> {
 			final String stageId = (String)stage.getProperties().get("id");
 			if (to) {

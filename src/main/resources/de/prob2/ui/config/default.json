@@ -12,5 +12,9 @@
 	"currentPreference": "general",
 	"openedPerspectives": [],
 	"groovyObjectTabs": [],
-	"expandedTitledPanes" : []
+	"expandedTitledPanes" : [],
+	"horizontalDividerPositions": [],
+	"verticalDividerPositions": [],
+	"statesViewColumnsWidth": [240.0,240.0,240.0],
+	"statesViewColumnsOrder": ["Name", "Value", "Previous Value"]
 }

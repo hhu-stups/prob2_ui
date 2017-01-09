@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -88,7 +87,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	@FXML private VBox historyBox;
 	@FXML private Button addModelCheckButton;
 	
-	private final Injector injector;
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 	private final StatsView statsView;
@@ -102,13 +100,11 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@Inject
 	private ModelcheckingController(
-		final Injector injector,
 		final AnimationSelector animations,
 		final CurrentTrace currentTrace,
 		final StageManager stageManager,
 		final StatsView statsView
 	) {
-		this.injector = injector;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
 		this.statsView = statsView;

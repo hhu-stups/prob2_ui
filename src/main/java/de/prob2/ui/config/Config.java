@@ -28,6 +28,7 @@ import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
+import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
@@ -36,6 +37,7 @@ import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.states.ClassBlacklist;
+import de.prob2.ui.states.StatesView;
 import javafx.geometry.BoundingBox;
 
 @Singleton
@@ -54,6 +56,10 @@ public final class Config {
 		private String currentPreference;
 		private List<String> expandedTitledPanes;
 		private String defaultProjectLocation;
+		private double[] horizontalDividerPositions;
+		private double[] verticalDividerPositions;
+		private double[] statesViewColumnsWidth;
+		private String[] statesViewColumnsOrder;
 		
 		private ConfigData() {}
 	}
@@ -145,6 +151,24 @@ public final class Config {
 		if(configData.defaultProjectLocation == null) {
 			configData.defaultProjectLocation = System.getProperty("user.home");
 		}
+		
+		MainController main = injector.getInstance(MainController.class);
+		
+		if(configData.horizontalDividerPositions == null) {
+			configData.horizontalDividerPositions = main.getHorizontalDividerPositions();
+		}
+		
+		if(configData.verticalDividerPositions == null) {
+			configData.verticalDividerPositions = main.getVerticalDividerPositions();
+		}
+				
+		if(configData.statesViewColumnsWidth == null) {
+			configData.statesViewColumnsWidth = this.defaultData.statesViewColumnsWidth;
+		}
+		
+		if(configData.statesViewColumnsOrder == null) {
+			configData.statesViewColumnsOrder = this.defaultData.statesViewColumnsOrder;
+		}
 	}
 	
 	public void load() {
@@ -205,13 +229,21 @@ public final class Config {
 		
 		groovyConsole.applySettings(configData.groovyConsoleSettings);
 		bConsole.applySettings(configData.bConsoleSettings);
+		
+		this.uiState.setStatesViewColumnsWidth(configData.statesViewColumnsWidth);
+		this.uiState.setStatesViewColumnsOrder(configData.statesViewColumnsOrder);
+		
+		this.uiState.setHorizontalDividerPositions(configData.horizontalDividerPositions);
+		this.uiState.setVerticalDividerPositions(configData.verticalDividerPositions);
+		
 	}
 		
 	public void save() {
 		uiState.updateSavedStageBoxes();
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
-		configData.visibleStages = new ArrayList<>(this.uiState.getStages().keySet());
+		this.uiState.getSavedVisibleStages().remove("javafx.stage.Stage");
+		configData.visibleStages = new ArrayList<>(this.uiState.getSavedVisibleStages());
 		configData.stageBoxes = new HashMap<>();
 		for (final Map.Entry<String, BoundingBox> entry : this.uiState.getSavedStageBoxes().entrySet()) {
 			configData.stageBoxes.put(entry.getKey(), new double[] {
@@ -230,6 +262,15 @@ public final class Config {
 		configData.groovyConsoleSettings = groovyConsole.getSettings();
 		configData.bConsoleSettings = bConsole.getSettings();
 		configData.expandedTitledPanes = new ArrayList<>(this.uiState.getExpandedTitledPanes());
+		
+		StatesView statesView = injector.getInstance(StatesView.class);
+		configData.statesViewColumnsWidth = statesView.getColumnsWidth();
+		configData.statesViewColumnsOrder = statesView.getColumnsOrder();
+		
+		MainController main = injector.getInstance(MainController.class);
+		
+		configData.horizontalDividerPositions = main.getHorizontalDividerPositions();
+		configData.verticalDividerPositions = main.getVerticalDividerPositions();
 		
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());

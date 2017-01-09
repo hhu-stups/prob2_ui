@@ -9,6 +9,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.UIState;
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 
@@ -46,6 +47,12 @@ public class MainController extends BorderPane {
 	@FXML
 	private TitledPane statsTP;
 	
+	@FXML
+	private SplitPane horizontalSP;
+	
+	@FXML
+	private SplitPane verticalSP;
+	
 	private final UIState uiState;
 	
 	@Inject
@@ -62,7 +69,7 @@ public class MainController extends BorderPane {
 		}
 		stageManager.loadFXML(this, guiState);
 	}
-	
+		
 	@FXML
 	public void operationsTPClicked() {
 		handleTitledPaneClicked(operationsTP);
@@ -107,6 +114,7 @@ public class MainController extends BorderPane {
 		titledPanes.put("Model Check", modelcheckTP);
 		titledPanes.put("Statistics", statsTP);
 
+
 		if (!titledPanes.containsKey(titledPane)) {
 			return;
 		}
@@ -117,6 +125,32 @@ public class MainController extends BorderPane {
 			if (accordion.getPanes().contains(titledPanes.get(titledPane))) {
 				accordion.setExpandedPane(titledPanes.get(titledPane));
 			}
+		}
+	}
+	
+	public double[] getHorizontalDividerPositions() {
+		if(horizontalSP != null) {
+			return horizontalSP.getDividerPositions();
+		}
+		return new double[]{};
+	}
+	
+	public double[] getVerticalDividerPositions() {
+		if(verticalSP != null) {
+			return verticalSP.getDividerPositions();
+		}
+		return new double[]{};
+	}
+	
+	public void setHorizontalDividerPositions(double [] pos) {
+		if(horizontalSP != null) {
+			horizontalSP.setDividerPositions(pos);
+		}
+	}
+	
+	public void setVerticalDividerPostions(double[] pos) {
+		if(verticalSP != null) {
+			verticalSP.setDividerPositions(pos);
 		}
 	}
 }

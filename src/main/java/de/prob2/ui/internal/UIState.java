@@ -3,8 +3,9 @@ package de.prob2.ui.internal;
 import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,15 +26,21 @@ public class UIState {
 	private final Map<String, Reference<Stage>> stages;
 	private final List<String> groovyObjectTabs;
 	private List<String> expandedTitledPanes;
+	private double[] statesViewColumnsWidth;
+	private String[] statesViewColumnsOrder;
+	private double[] horizontalDividerPositions;
+	private double[] verticalDividerPositions;
 		
 	@Inject
 	public UIState() {
 		this.guiState = "main.fxml";
-		this.savedVisibleStages = new HashSet<>();
-		this.savedStageBoxes = new HashMap<>();
-		this.stages = new HashMap<>();
+		this.savedVisibleStages = new LinkedHashSet<>();
+		this.savedStageBoxes = new LinkedHashMap<>();
+		this.stages = new LinkedHashMap<>();
 		this.groovyObjectTabs = new ArrayList<>();
 		this.expandedTitledPanes = new ArrayList<>();
+		this.statesViewColumnsWidth = new double[3];
+		this.statesViewColumnsOrder = new String[3];
 	}
 	
 	public void setGuiState(String guiState) {
@@ -56,8 +63,13 @@ public class UIState {
 		return this.stages;
 	}
 	
+	public void moveStageToEnd(Stage stage) {
+		savedVisibleStages.remove(stage.getClass().getName());
+		savedVisibleStages.add(stage.getClass().getName());
+	}
+	
 	public void updateSavedStageBoxes() {
-		for (final Map.Entry<String, Reference<Stage>> entry : this.getStages().entrySet()) {
+		for (final Map.Entry<String, Reference<Stage>> entry : this.getStages().entrySet()) {	
 			final Stage stage = entry.getValue().get();
 			if (stage != null) {
 				this.getSavedStageBoxes().put(
@@ -91,4 +103,37 @@ public class UIState {
 	public List<String> getExpandedTitledPanes() {
 		return expandedTitledPanes;
 	}
+	
+	public void setStatesViewColumnsWidth(double[] width) {
+		this.statesViewColumnsWidth = width;
+	}
+	
+	public double[] getStatesViewColumnsWidth() {
+		return statesViewColumnsWidth;
+	}
+	
+	public void setStatesViewColumnsOrder(String[] order) {
+		this.statesViewColumnsOrder = order;
+	}
+	
+	public String[] getStatesViewColumnsOrder() {
+		return statesViewColumnsOrder;
+	}
+	
+	public void setHorizontalDividerPositions(double[] pos) {
+		this.horizontalDividerPositions = pos;
+	}
+	
+	public double[] getHorizontalDividerPositions() {
+		return horizontalDividerPositions;
+	}
+	
+	public void setVerticalDividerPositions(double[] pos) {
+		this.verticalDividerPositions = pos;
+	}
+	
+	public double[] getVerticalDividerPositions() {
+		return verticalDividerPositions;
+	}
+	
 }
