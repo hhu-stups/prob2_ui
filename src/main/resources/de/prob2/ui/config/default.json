@@ -15,6 +15,8 @@
 	"expandedTitledPanes" : [],
 	"horizontalDividerPositions": [],
 	"verticalDividerPositions": [],
+	"animationsViewColumnsWidth": [117.0,102.0,92.0,65.0],
+	"animationsViewColumnsOrder": ["Machine/Context", "Last Operation", "Trace Length", "Time"],
 	"statesViewColumnsWidth": [240.0,240.0,240.0],
 	"statesViewColumnsOrder": ["Name", "Value", "Previous Value"]
 }
