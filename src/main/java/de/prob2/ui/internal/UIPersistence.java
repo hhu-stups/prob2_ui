@@ -10,6 +10,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.MainController;
+import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
@@ -94,6 +95,7 @@ public final class UIPersistence {
 		final MenuController menu = injector.getInstance(MenuController.class);
 		final MainController main = injector.getInstance(MainController.class);
 		final StatesView statesView = injector.getInstance(StatesView.class);
+		final AnimationsView animationsView = injector.getInstance(AnimationsView.class);
 		
 		for (final String id : uiState.getSavedVisibleStages()) {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
@@ -124,5 +126,7 @@ public final class UIPersistence {
 		main.setVerticalDividerPostions(uiState.getVerticalDividerPositions());
 		statesView.setColumnsWidth();
 		statesView.setColumnsOrder();
+		animationsView.setColumnsWidth();
+		animationsView.setColumnsOrder();
 	}
 }

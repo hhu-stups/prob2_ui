@@ -29,6 +29,7 @@ import com.google.inject.Singleton;
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
 import de.prob2.ui.MainController;
+import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
@@ -60,6 +61,8 @@ public final class Config {
 		private double[] verticalDividerPositions;
 		private double[] statesViewColumnsWidth;
 		private String[] statesViewColumnsOrder;
+		private double[] animationsViewColumnsWidth;
+		private String[] animationsViewColumnsOrder;
 		
 		private ConfigData() {}
 	}
@@ -169,6 +172,14 @@ public final class Config {
 		if(configData.statesViewColumnsOrder == null) {
 			configData.statesViewColumnsOrder = this.defaultData.statesViewColumnsOrder;
 		}
+		
+		if(configData.animationsViewColumnsWidth == null) {
+			configData.animationsViewColumnsWidth = this.defaultData.animationsViewColumnsWidth;
+		}
+		
+		if(configData.animationsViewColumnsOrder == null) {
+			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder;
+		}
 	}
 	
 	public void load() {
@@ -233,6 +244,9 @@ public final class Config {
 		this.uiState.setStatesViewColumnsWidth(configData.statesViewColumnsWidth);
 		this.uiState.setStatesViewColumnsOrder(configData.statesViewColumnsOrder);
 		
+		this.uiState.setAnimationsViewColumnsWidth(configData.animationsViewColumnsWidth);
+		this.uiState.setAnimationsViewColumnsOrder(configData.animationsViewColumnsOrder);
+		
 		this.uiState.setHorizontalDividerPositions(configData.horizontalDividerPositions);
 		this.uiState.setVerticalDividerPositions(configData.verticalDividerPositions);
 		
@@ -266,6 +280,10 @@ public final class Config {
 		StatesView statesView = injector.getInstance(StatesView.class);
 		configData.statesViewColumnsWidth = statesView.getColumnsWidth();
 		configData.statesViewColumnsOrder = statesView.getColumnsOrder();
+		
+		AnimationsView animationsView = injector.getInstance(AnimationsView.class);
+		configData.animationsViewColumnsWidth = animationsView.getColumnsWidth();
+		configData.animationsViewColumnsOrder = animationsView.getColumnsOrder();
 		
 		MainController main = injector.getInstance(MainController.class);
 		

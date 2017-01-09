@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractElement;
@@ -20,6 +21,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.MachineLoader;
@@ -55,13 +57,15 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private final AnimationSelector animations;
 	private int currentIndex;
 	private int previousSize = 0;
+	private final Injector injector;
 
 	private CurrentProject currentProject;
 	private MachineLoader machineLoader;
 
 	@Inject
-	private AnimationsView(final AnimationSelector animations, final StageManager stageManager,
+	private AnimationsView(final Injector injector, final AnimationSelector animations, final StageManager stageManager,
 			final MachineLoader machineLoader, CurrentProject currentProject) {
+		this.injector = injector;
 		this.animations = animations;
 		this.machineLoader = machineLoader;
 		this.animations.registerAnimationChangeListener(this);
@@ -199,5 +203,44 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	@Override
 	public void animatorStatus(boolean busy) {
 		// Not used
+	}
+	
+	public double[] getColumnsWidth() {
+		return new double[]{machine.getWidth(),lastop.getWidth(),tracelength.getWidth(), time.getWidth()};
+	}
+	
+	public void setColumnsWidth() {
+		UIState uiState = injector.getInstance(UIState.class);
+		double[] widths = uiState.getAnimationsViewColumnsWidth();
+		double width = widths[0] + widths[1] + widths[2] + widths[3];
+		List<TableColumn<Animation, ?>> columns = animationsTable.getColumns();
+		for (int i = 0; i < columns.size(); i++) {
+			animationsTable.resizeColumn(columns.get(i), widths[i] - width/4);
+		}
+	}
+		
+	public void setColumnsOrder() {
+		UIState uiState = injector.getInstance(UIState.class);
+		String[] order = uiState.getAnimationsViewColumnsOrder();
+		List<TableColumn<Animation, ?>> newColumns = new ArrayList<>();
+		
+		for(int i = 0; i < order.length; i++) {
+			for(TableColumn<Animation, ?> column : animationsTable.getColumns()) {
+				if(column.getText().equals(order[i])) {
+					newColumns.add(column);
+				}
+			}
+		}
+				
+		animationsTable.getColumns().clear();
+		animationsTable.getColumns().setAll(newColumns);
+	}
+	
+	public String[] getColumnsOrder() {
+		String[] order = new String[4];
+		for(int i = 0; i < animationsTable.getColumns().size(); i++) {
+			order[i] = animationsTable.getColumns().get(i).getText();
+		}
+		return order;
 	}
 }

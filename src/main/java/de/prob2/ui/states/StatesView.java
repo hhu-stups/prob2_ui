@@ -347,18 +347,17 @@ public final class StatesView extends AnchorPane {
 	public void setColumnsWidth() {
 		UIState uiState = injector.getInstance(UIState.class);
 		double[] widths = uiState.getStatesViewColumnsWidth();
+		double width = widths[0] + widths[1] + widths[2];
 		List<TreeTableColumn<StateTreeItem<?>, ?>> columns = tv.getColumns();
 		for (int i = 0; i < columns.size(); i++) {
-			columns.get(i).setPrefWidth(widths[i]);
+			tv.resizeColumn(columns.get(i), widths[i] - width/3);
 		}
-		//Next step: implement a resize policy
 	}
-	
+		
 	public void setColumnsOrder() {
 		UIState uiState = injector.getInstance(UIState.class);
 		String[] order = uiState.getStatesViewColumnsOrder();
 		List<TreeTableColumn<StateTreeItem<?>, ?>> newColumns = new ArrayList<>();
-		
 		for(int i = 0; i < order.length; i++) {
 			for(TreeTableColumn<StateTreeItem<?>, ?> column : tv.getColumns()) {
 				if(column.getText().equals(order[i])) {
