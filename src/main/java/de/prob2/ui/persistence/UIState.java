@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.persistence;
 
 import java.lang.ref.Reference;
 import java.util.ArrayList;

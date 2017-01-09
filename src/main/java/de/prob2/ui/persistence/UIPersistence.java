@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.persistence;
 
 import java.util.List;
 
@@ -96,6 +96,7 @@ public final class UIPersistence {
 		final MainController main = injector.getInstance(MainController.class);
 		final StatesView statesView = injector.getInstance(StatesView.class);
 		final AnimationsView animationsView = injector.getInstance(AnimationsView.class);
+		final TablePersistenceHandler tablePersistenceHandler = injector.getInstance(TablePersistenceHandler.class);
 		
 		for (final String id : uiState.getSavedVisibleStages()) {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
@@ -124,9 +125,13 @@ public final class UIPersistence {
 		
 		main.setHorizontalDividerPositions(uiState.getHorizontalDividerPositions());		
 		main.setVerticalDividerPostions(uiState.getVerticalDividerPositions());
-		statesView.setColumnsWidth();
+		tablePersistenceHandler.setColumnsWidth(statesView.getTable(), statesView.getTable().getColumns(), TablePersistenceEnum.STATES_VIEW);
+		tablePersistenceHandler.setColumnsOrder(statesView.getTable().getColumns(), TablePersistenceEnum.STATES_VIEW);
+		tablePersistenceHandler.setColumnsWidth(animationsView.getTable(), animationsView.getTable().getColumns(), TablePersistenceEnum.ANIMATIONS_VIEW);
+		tablePersistenceHandler.setColumnsOrder(animationsView.getTable().getColumns(), TablePersistenceEnum.ANIMATIONS_VIEW);
+		/*statesView.setColumnsWidth();
 		statesView.setColumnsOrder();
 		animationsView.setColumnsWidth();
-		animationsView.setColumnsOrder();
+		animationsView.setColumnsOrder();*/
 	}
 }

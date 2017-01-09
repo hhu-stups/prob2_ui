@@ -30,8 +30,9 @@ import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
-import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
+import de.prob2.ui.persistence.TablePersistenceHandler;
+import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
@@ -268,13 +269,15 @@ public final class Config {
 		configData.bConsoleSettings = bConsole.getSettings();
 		configData.expandedTitledPanes = new ArrayList<>(this.uiState.getExpandedTitledPanes());
 		
+		TablePersistenceHandler tablePersistenceHandler = injector.getInstance(TablePersistenceHandler.class);
+		
 		StatesView statesView = injector.getInstance(StatesView.class);
-		configData.statesViewColumnsWidth = statesView.getColumnsWidth();
-		configData.statesViewColumnsOrder = statesView.getColumnsOrder();
+		configData.statesViewColumnsWidth = tablePersistenceHandler.getColumnsWidth(statesView.getColumns());
+		configData.statesViewColumnsOrder = tablePersistenceHandler.getColumnsOrder(statesView.getColumns());
 		
 		AnimationsView animationsView = injector.getInstance(AnimationsView.class);
-		configData.animationsViewColumnsWidth = animationsView.getColumnsWidth();
-		configData.animationsViewColumnsOrder = animationsView.getColumnsOrder();
+		configData.animationsViewColumnsWidth = tablePersistenceHandler.getColumnsWidth(animationsView.getColumns());
+		configData.animationsViewColumnsOrder = tablePersistenceHandler.getColumnsOrder(animationsView.getColumns());
 		
 		MainController main = injector.getInstance(MainController.class);
 		

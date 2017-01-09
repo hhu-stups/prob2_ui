@@ -22,8 +22,8 @@ import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.UIState;
 import de.prob2.ui.modelchecking.ModelcheckingController;
+import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentTrace;
 

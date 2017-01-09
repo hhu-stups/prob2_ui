@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractElement;
@@ -18,7 +17,6 @@ import de.prob.statespace.Transition;
 
 import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.UIState;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -43,11 +41,8 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private final AnimationSelector animations;
 	private int currentIndex;
 	private int previousSize = 0;
-	private final Injector injector;
-
 	@Inject
-	private AnimationsView(final Injector injector, final AnimationSelector animations, final StageManager stageManager) {
-		this.injector = injector;
+	private AnimationsView(final AnimationSelector animations, final StageManager stageManager) {
 		this.animations = animations;
 		this.animations.registerAnimationChangeListener(this);
 		stageManager.loadFXML(this, "animations_view.fxml");
@@ -155,42 +150,12 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		// Not used
 	}
 	
-	public double[] getColumnsWidth() {
-		return new double[]{machine.getWidth(),lastop.getWidth(),tracelength.getWidth(), time.getWidth()};
+	public ObservableList<TableColumn <Animation,?>> getColumns() {
+		return animationsTable.getColumns();
 	}
 	
-	public void setColumnsWidth() {
-		UIState uiState = injector.getInstance(UIState.class);
-		double[] widths = uiState.getAnimationsViewColumnsWidth();
-		double width = widths[0] + widths[1] + widths[2] + widths[3];
-		List<TableColumn<Animation, ?>> columns = animationsTable.getColumns();
-		for (int i = 0; i < columns.size(); i++) {
-			animationsTable.resizeColumn(columns.get(i), widths[i] - width/4);
-		}
-	}
-		
-	public void setColumnsOrder() {
-		UIState uiState = injector.getInstance(UIState.class);
-		String[] order = uiState.getAnimationsViewColumnsOrder();
-		List<TableColumn<Animation, ?>> newColumns = new ArrayList<>();
-		
-		for(int i = 0; i < order.length; i++) {
-			for(TableColumn<Animation, ?> column : animationsTable.getColumns()) {
-				if(column.getText().equals(order[i])) {
-					newColumns.add(column);
-				}
-			}
-		}
-				
-		animationsTable.getColumns().clear();
-		animationsTable.getColumns().setAll(newColumns);
+	public TableView<Animation> getTable() {
+		return animationsTable;
 	}
 	
-	public String[] getColumnsOrder() {
-		String[] order = new String[4];
-		for(int i = 0; i < animationsTable.getColumns().size(); i++) {
-			order[i] = animationsTable.getColumns().get(i).getText();
-		}
-		return order;
-	}
 }

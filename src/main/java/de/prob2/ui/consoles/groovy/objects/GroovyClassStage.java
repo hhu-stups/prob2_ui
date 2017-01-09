@@ -10,8 +10,7 @@ import java.util.List;
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
 import de.prob2.ui.consoles.groovy.MetaPropertiesHandler;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.UIState;
-
+import de.prob2.ui.persistence.UIState;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
