@@ -128,7 +128,12 @@ public final class StageManager {
 		stage.getProperties().put("id", id);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
-		stage.focusedProperty().addListener(e-> injector.getInstance(UIState.class).moveStageToEnd(stage));
+		
+		stage.focusedProperty().addListener(e -> {
+			final String stageId = (String)stage.getProperties().get("id");
+			injector.getInstance(UIState.class).moveStageToEnd(stageId);
+		});
+		
 		stage.showingProperty().addListener((observable, from, to) -> {
 			final String stageId = (String)stage.getProperties().get("id");
 			if (to) {
@@ -141,6 +146,7 @@ public final class StageManager {
 						stage.setHeight(box.getHeight());
 					}
 					uiState.getStages().put(stageId, new WeakReference<>(stage));
+					uiState.getSavedVisibleStages().add(stageId);
 				}
 			} else {
 				if (stageId != null) {

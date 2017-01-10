@@ -19,12 +19,14 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.Console;
@@ -37,6 +39,7 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
+
 import javafx.geometry.BoundingBox;
 
 import org.slf4j.Logger;
@@ -261,7 +264,6 @@ public final class Config {
 		uiState.updateSavedStageBoxes();
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
-		this.uiState.getSavedVisibleStages().remove("javafx.stage.Stage");
 		configData.visibleStages = new ArrayList<>(this.uiState.getSavedVisibleStages());
 		configData.stageBoxes = new HashMap<>();
 		for (final Map.Entry<String, BoundingBox> entry : this.uiState.getSavedStageBoxes().entrySet()) {

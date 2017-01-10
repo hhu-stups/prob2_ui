@@ -70,9 +70,9 @@ public class UIState {
 		return this.stages;
 	}
 	
-	public void moveStageToEnd(Stage stage) {
-		savedVisibleStages.remove(stage.getClass().getName());
-		savedVisibleStages.add(stage.getClass().getName());
+	public void moveStageToEnd(String id) {
+		savedVisibleStages.remove(id);
+		savedVisibleStages.add(id);
 	}
 	
 	public void updateSavedStageBoxes() {
