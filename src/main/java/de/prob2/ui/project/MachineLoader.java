@@ -12,6 +12,7 @@ import com.google.inject.Singleton;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -23,12 +24,14 @@ public class MachineLoader {
 	private Api api;
 	private CurrentProject currentProject;
 	private StateSpace stateSpace;
+	private StageManager stageManager;
 
 	@Inject
-	public MachineLoader(final Api api, final CurrentProject currentProject) {
+	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager) {
 		this.api = api;
 		this.openLock = new Object();
 		this.currentProject = currentProject;
+		this.stageManager = stageManager;
 	}
 
 	public void loadAsync(Machine machine) {
@@ -54,9 +57,7 @@ public class MachineLoader {
 			} catch (IOException | ModelTranslationError e) {
 				logger.error("loading file failed", e);
 				Platform.runLater(() -> {
-					Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open file:\n" + e);
-					alert.getDialogPane().getStylesheets().add("prob.css");
-					alert.show();
+					stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait();
 				});
 				return null;
 			}
