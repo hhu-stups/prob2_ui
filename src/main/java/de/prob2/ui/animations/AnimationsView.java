@@ -30,7 +30,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
-@Singleton
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener, IComponents {
 	@FXML private TableView<Animation> animationsTable;
 	@FXML private TableColumn<Animation, String> machine;

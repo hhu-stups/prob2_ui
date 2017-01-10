@@ -19,6 +19,7 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.stats.StatsView;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class DetachViewStageController extends Stage {
-	// FIXME Detached views sometimes duplicate randomly or resize themselves to zero height
+	// FIXME Detached views sometimes resize themselves to zero height
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DetachViewStageController.class);
 	
@@ -117,10 +118,13 @@ public final class DetachViewStageController extends Stage {
 	}
 	
 	private void removeTP(Accordion accordion, SplitPane pane) {
+		System.out.println("REMOVETP");
 		uiState.updateSavedStageBoxes();
 		final HashSet<Stage> wrapperStagesCopy = new HashSet<>(wrapperStages);
 		wrapperStages.clear();
+		System.out.println("Previous Stages:");
 		for (final Stage stage : wrapperStagesCopy) {
+			System.out.println(stage.getTitle());
 			// Save the check box state so it isn't overwritten by the stage's onHidden handler.
 			final CheckBox checkBox = checkBoxMap.get(stage.getScene().getRoot().getClass());
 			final boolean savedState = checkBox.isSelected();
@@ -128,14 +132,23 @@ public final class DetachViewStageController extends Stage {
 			stage.hide();
 			checkBox.setSelected(savedState);
 		}
-
+		System.out.println("--------");
 		for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 			final TitledPane tp = it.next();
+			System.out.println("TP "+tp.getContent().getClass());
 			if (checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
 				it.remove();
+				System.out.println("  remove");
 				transferToNewWindow((Parent)tp.getContent(), tp.getText());
 			}
 		}
+		System.out.println("--------");
+		System.out.println("Stages:");
+		for (final Stage stage : wrapperStages) {
+			System.out.println(stage.getTitle());
+		}
+		System.out.println("=====================");
+		System.out.println("\n\n\n");
 		if (accordion.getPanes().isEmpty()) {
 			pane.getItems().remove(accordion);
 			pane.setDividerPositions(0);
@@ -144,14 +157,16 @@ public final class DetachViewStageController extends Stage {
 	}
 	
 	private void transferToNewWindow(Parent node, String title) {
+		System.out.println("TRANSFER");
 		Stage stage = stageManager.makeStage(new Scene(node), this.getClass().getName() + " detached " + node.getClass().getName());
 		wrapperStages.add(stage);
 		stage.setTitle(title);
-		stage.setOnHidden(e -> {
+		stage.setOnCloseRequest(e -> {
 			checkBoxMap.get(node.getClass()).setSelected(false);
+			System.out.println(node.getClass()+" will be reintegrated");
 			this.apply();
 		});
-		
+		System.out.println("===================");
 		// Default bounds, replaced by saved ones from the config when show() is called
 		stage.setWidth(200);
 		stage.setHeight(100);
