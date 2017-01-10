@@ -52,4 +52,7 @@ public class OperationItem {
 	public boolean isEnabled() {
 		return this.status == OperationItem.Status.ENABLED;
 	}
+	public boolean isTimeOut() {
+		return this.status == OperationItem.Status.TIMEOUT;
+	}
 }
