@@ -144,7 +144,7 @@ public final class StageManager {
 				}
 			} else {
 				if (stageId != null) {
-					uiState.getStages().remove(stageId);
+					uiState.getSavedVisibleStages().remove(stageId);
 					uiState.getSavedStageBoxes().put(
 						stageId,
 						new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight())
