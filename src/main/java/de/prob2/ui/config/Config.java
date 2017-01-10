@@ -66,8 +66,8 @@ public final class Config {
 		private String[] statesViewColumnsOrder;
 		private double[] animationsViewColumnsWidth;
 		private String[] animationsViewColumnsOrder;
-		private String operationsSortMode;
-		private String operationsShowNotEnabled;
+		private OperationsView.SortMode operationsSortMode;
+		private boolean operationsShowNotEnabled;
 		private ConfigData() {}
 	}
 	
@@ -182,11 +182,6 @@ public final class Config {
 		if(configData.operationsSortMode == null) {
 			configData.operationsSortMode = this.defaultData.operationsSortMode;
 		}
-		
-		if(configData.operationsShowNotEnabled == null) {
-			configData.operationsShowNotEnabled = this.defaultData.operationsShowNotEnabled;
-		}
-		
 	}
 	
 	public void load() {
@@ -255,9 +250,8 @@ public final class Config {
 		this.uiState.setHorizontalDividerPositions(configData.horizontalDividerPositions);
 		this.uiState.setVerticalDividerPositions(configData.verticalDividerPositions);
 		
-		this.uiState.setOperationsSortMode(OperationsView.SortMode.valueOf(configData.operationsSortMode));
-		this.uiState.setOperationsShowNotEnabled(Boolean.parseBoolean(configData.operationsShowNotEnabled));
-		
+		this.uiState.setOperationsSortMode(configData.operationsSortMode);
+		this.uiState.setOperationsShowNotEnabled(configData.operationsShowNotEnabled);
 	}
 		
 	public void save() {
@@ -299,8 +293,8 @@ public final class Config {
 		configData.verticalDividerPositions = main.getVerticalDividerPositions();
 		
 		OperationsView operationsView = injector.getInstance(OperationsView.class);
-		configData.operationsSortMode = String.valueOf(operationsView.getSortMode());
-		configData.operationsShowNotEnabled = String.valueOf(operationsView.getShowNotEnabled());
+		configData.operationsSortMode = operationsView.getSortMode();
+		configData.operationsShowNotEnabled = operationsView.getShowDisabledOps();
 		
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());

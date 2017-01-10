@@ -19,6 +19,6 @@
 	"animationsViewColumnsOrder": ["Machine/Context", "Last Operation", "Trace Length", "Time"],
 	"statesViewColumnsWidth": [240.0,240.0,240.0],
 	"statesViewColumnsOrder": ["Name", "Value", "Previous Value"],
-	"operationsSortMode" : ["MODEL_ORDER"],
-	"operationsShowNotEnabled" : "false"
+	"operationsSortMode" : "MODEL_ORDER",
+	"operationsShowNotEnabled": true
 }

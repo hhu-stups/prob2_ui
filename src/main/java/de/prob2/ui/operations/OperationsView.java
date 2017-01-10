@@ -117,7 +117,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 	private List<String> opNames = new ArrayList<>();
 	private Map<String, List<String>> opToParams = new HashMap<>();
 	private List<OperationItem> events = new ArrayList<>();
-	private boolean showNotEnabled = true;
+	private boolean showDisabledOps = true;
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
@@ -253,7 +253,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 			);
 			events.add(operationItem);
 		}
-		if (showNotEnabled) {
+		if (showDisabledOps) {
 			for (String s : notEnabled) {
 				if (!"INITIALISATION".equals(s)) {
 					events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(), OperationItem.Status.DISABLED, false, false));
@@ -293,14 +293,8 @@ public final class OperationsView extends AnchorPane implements IComponents {
 
 	@FXML
 	private void handleDisabledOpsToggle() {
-		FontAwesomeIconView icon;
-		if (disabledOpsToggle.isSelected()) {
-			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE_SLASH);
-			showNotEnabled = false;
-		} else {
-			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE);
-			showNotEnabled = true;
-		}
+		showDisabledOps = disabledOpsToggle.isSelected();
+		FontAwesomeIconView icon = new FontAwesomeIconView(showDisabledOps ? FontAwesomeIcon.EYE : FontAwesomeIcon.EYE_SLASH);
 		update(currentTrace.get());
 		icon.setSize("15");
 		icon.setStyleClass("icon-dark");
@@ -462,10 +456,10 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		return sortMode;
 	}
 	
-	public void setShowNotEnabled(boolean showNotEnabled) {
-		this.showNotEnabled = showNotEnabled;
+	public void setShowDisabledOps(boolean showDisabledOps) {
+		this.showDisabledOps = showDisabledOps;
 		FontAwesomeIconView icon;
-		if (showNotEnabled) {
+		if (showDisabledOps) {
 			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE);
 			disabledOpsToggle.setSelected(true);
 		} else {
@@ -477,7 +471,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		disabledOpsToggle.setGraphic(icon);
 	}
 	
-	public boolean getShowNotEnabled() {
-		return showNotEnabled;
+	public boolean getShowDisabledOps() {
+		return showDisabledOps;
 	}
 }

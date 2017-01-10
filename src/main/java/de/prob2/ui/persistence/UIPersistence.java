@@ -133,6 +133,6 @@ public final class UIPersistence {
 		
 		final OperationsView operationsView = injector.getInstance(OperationsView.class);
 		operationsView.setSortMode(uiState.getOperationsSortMode());
-		operationsView.setShowNotEnabled(uiState.getOperationsShowNotEnbaled());
+		operationsView.setShowDisabledOps(uiState.getOperationsShowNotEnbaled());
 	}
 }
