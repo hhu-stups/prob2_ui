@@ -5,7 +5,7 @@ import java.lang.ref.WeakReference;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.internal.UIState;
+import de.prob2.ui.persistence.UIState;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;

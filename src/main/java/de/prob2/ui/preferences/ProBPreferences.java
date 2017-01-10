@@ -8,20 +8,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
 import de.prob.animator.domainobjects.ProBPreference;
-import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
-import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
+import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -30,10 +27,8 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 
 public final class ProBPreferences {
-	private static final Logger logger = LoggerFactory.getLogger(ProBPreference.class);
+	private final CurrentTrace currentTrace;
 	
-	private final AnimationSelector animationSelector;
-	private final Api api;
 	private StateSpace stateSpace;
 	private final ObservableMap<String, ProBPreference> cachedPreferences;
 	private final ObservableMap<String, String> cachedPreferenceValues;
@@ -41,12 +36,9 @@ public final class ProBPreferences {
 	private final BooleanProperty changesApplied;
 	
 	@Inject
-	private ProBPreferences(
-		final AnimationSelector animationSelector,
-		final Api api
-	) {
-		this.animationSelector = animationSelector;
-		this.api = api;
+	private ProBPreferences(final CurrentTrace currentTrace) {
+		this.currentTrace = currentTrace;
+		
 		this.cachedPreferences = FXCollections.observableHashMap();
 		this.cachedPreferenceValues = FXCollections.observableHashMap();
 		this.changedPreferences = FXCollections.observableHashMap();
@@ -208,30 +200,16 @@ public final class ProBPreferences {
 	/**
 	 * Reload the current model and apply all preference changes.
 	 *
-	 * @throws BException when thrown by {@link Api#b_load(String, Map)}
-	 * @throws IOException when thrown by {@link Api#b_load(String, Map)}
-	 * @throws IllegalStateException if there is no current trace
+	 * @throws IllegalStateException when thrown by {@link CurrentTrace#reload(Trace, Map)}
+	 * @throws IOException when thrown by {@link CurrentTrace#reload(Trace, Map)}
+	 * @throws ModelTranslationError when thrown by {@link CurrentTrace#reload(Trace, Map)}
 	 * 
 	 * @see #setPreferenceValue(String, String)
 	 * @see #rollback()
+	 * @see CurrentTrace#reload(Trace, Map)
 	 */
-	public void apply() throws BException, IOException {
-		final Trace oldTrace = this.animationSelector.getCurrentTrace();
-		if (oldTrace == null) {
-			throw new IllegalStateException("Cannot apply preferences without a current trace");
-		}
-		final Map<String, String> newPrefs = this.getPreferenceValues();
-		final String filename = oldTrace.getModel().getModelFile().getAbsolutePath();
-		StateSpace newSpace;
-		try {
-			newSpace = api.b_load(filename, newPrefs);
-		} catch (ModelTranslationError e) {
-			logger.error("Loading file failed", e);
-			return;
-		}
-		final Trace newTrace = new Trace(newSpace);
-		this.animationSelector.removeTrace(oldTrace);
-		this.animationSelector.addNewAnimation(newTrace);
+	public void apply() throws IOException, ModelTranslationError {
+		this.currentTrace.reload(this.currentTrace.get(), this.getPreferenceValues());
 	}
 	
 	/**

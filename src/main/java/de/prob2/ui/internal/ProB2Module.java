@@ -6,6 +6,7 @@ import java.util.ResourceBundle;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
 
@@ -53,10 +54,14 @@ public class ProB2Module extends AbstractModule {
 		bind(GroovyConsole.class);
 		bind(BConsole.class);
 		bind(RecentFiles.class);
+		bind(Locale.class).toInstance(locale);
 		bind(ResourceBundle.class).toInstance(bundle);
-		if(IS_MAC) {
+		if (IS_MAC) {
 			bind(MenuToolkit.class).toInstance(MenuToolkit.toolkit(locale));
+		} else {
+			bind(MenuToolkit.class).toProvider(Providers.of(null));
 		}
+		
 		// Controllers
 		bind(AnimationsView.class);
 		bind(HistoryView.class);

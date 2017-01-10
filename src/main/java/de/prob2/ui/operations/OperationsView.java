@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -29,7 +31,6 @@ import de.prob.model.representation.Constant;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
@@ -46,9 +47,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import se.sawano.java.text.AlphanumericComparator;
 
-public final class OperationsView extends AnchorPane implements IComponents {
-	private enum SortMode {
+public final class OperationsView extends AnchorPane {
+	public enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
 
@@ -125,42 +127,18 @@ public final class OperationsView extends AnchorPane implements IComponents {
 	private List<String> opNames = new ArrayList<>();
 	private Map<String, List<String>> opToParams = new HashMap<>();
 	private List<OperationItem> events = new ArrayList<>();
-	private boolean showNotEnabled = true;
+	private boolean showDisabledOps = true;
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
 
-	private final Comparator<OperationItem> zToA = (o1, o2) -> {
-		if (o1.name.equals(o2.name)) {
-			return -compareParams(o1.params, o2.params);
-		} else if (o1.name.equalsIgnoreCase(o2.name)) {
-			return -o1.name.compareTo(o2.name);
-		} else {
-			return -o1.name.compareToIgnoreCase(o2.name);
-		}
-	};
-
-	private final Comparator<OperationItem> aToZ = (o1, o2) -> {
-		if (o1.name.equals(o2.name)) {
-			return compareParams(o1.params, o2.params);
-		} else if (o1.name.equalsIgnoreCase(o2.name)) {
-			return o1.name.compareTo(o2.name);
-		} else {
-			return o1.name.compareToIgnoreCase(o2.name);
-		}
-	};
-
-	private final Comparator<OperationItem> modelOrder = (o1, o2) -> {
-		if (o1.name.equals(o2.name)) {
-			return compareParams(o1.params, o2.params);
-		} else {
-			return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
-		}
-	};
-
+	private final Comparator<CharSequence> alphanumericComparator;
+	
 	@Inject
-	private OperationsView(final CurrentTrace currentTrace, final StageManager stageManager) {
+	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager) {
 		this.currentTrace = currentTrace;
+		this.alphanumericComparator = new AlphanumericComparator(locale);
+
 		stageManager.loadFXML(this, "ops_view.fxml");
 	}
 
@@ -258,7 +236,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 					errored);
 			events.add(operationItem);
 		}
-		if (showNotEnabled) {
+		if (showDisabledOps) {
 			for (String s : notEnabled) {
 				if (!"INITIALISATION".equals(s)) {
 					events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(),
@@ -284,29 +262,40 @@ public final class OperationsView extends AnchorPane implements IComponents {
 	private static String stripString(final String param) {
 		return param.replaceAll("\\{", "").replaceAll("\\}", "");
 	}
-
-	private static int compareParams(final List<String> params1, final List<String> params2) {
-		for (int i = 0; i < params1.size(); i++) {
-			String p1 = stripString(params1.get(i));
-			String p2 = stripString(params2.get(i));
-			if (p1.compareTo(p2) != 0) {
-				return p1.compareTo(p2);
+	
+	private int compareParams(final List<String> left, final List<String> right) {
+		int minSize = left.size() > right.size() ? left.size() : right.size();
+		for (int i = 0; i < minSize; i++) {
+			int cmp = alphanumericComparator.compare(stripString(left.get(i)), stripString(right.get(i)));
+			if (cmp != 0) {
+				return cmp;
 			}
-
 		}
-		return 0;
+		
+		// All elements are equal up to the end of the smaller list, order based on which one has more elements.
+		return Integer.compare(left.size(), right.size());
+	}
+	
+	private int compareAlphanumeric(final OperationItem left, final OperationItem right) {
+		if (left.name.equals(right.name)) {
+			return compareParams(left.params, right.params);
+		} else {
+			return alphanumericComparator.compare(left.name, right.name);
+		}
+	}
+	
+	private int compareModelOrder(final OperationItem left, final OperationItem right) {
+		if (left.name.equals(right.name)) {
+			return compareParams(left.params, right.params);
+		} else {
+			return Integer.compare(opNames.indexOf(left.name), opNames.indexOf(right.name));
+		}
 	}
 
 	@FXML
 	private void handleDisabledOpsToggle() {
-		FontAwesomeIconView icon;
-		if (disabledOpsToggle.isSelected()) {
-			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE_SLASH);
-			showNotEnabled = false;
-		} else {
-			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE);
-			showNotEnabled = true;
-		}
+		showDisabledOps = disabledOpsToggle.isSelected();
+		FontAwesomeIconView icon = new FontAwesomeIconView(showDisabledOps ? FontAwesomeIcon.EYE : FontAwesomeIcon.EYE_SLASH);
 		update(currentTrace.get());
 		icon.setSize("15");
 		icon.setStyleClass("icon-dark");
@@ -346,20 +335,20 @@ public final class OperationsView extends AnchorPane implements IComponents {
 	private void doSort() {
 		final Comparator<OperationItem> comparator;
 		switch (sortMode) {
-		case MODEL_ORDER:
-			comparator = modelOrder;
-			break;
+			case MODEL_ORDER:
+				comparator = this::compareModelOrder;
+				break;
 
-		case A_TO_Z:
-			comparator = aToZ;
-			break;
+			case A_TO_Z:
+				comparator = this::compareAlphanumeric;
+				break;
 
-		case Z_TO_A:
-			comparator = zToA;
-			break;
+			case Z_TO_A:
+				comparator = ((Comparator<OperationItem>)this::compareAlphanumeric).reversed();
+				break;
 
-		default:
-			throw new IllegalStateException("Unhandled sort mode: " + sortMode);
+			default:
+				throw new IllegalStateException("Unhandled sort mode: " + sortMode);
 		}
 
 		events.sort(comparator);
@@ -437,5 +426,52 @@ public final class OperationsView extends AnchorPane implements IComponents {
 			paramList.addAll(((Operation) e).getParameters());
 		}
 		return paramList;
+	}
+	
+	public void setSortMode(OperationsView.SortMode mode) {
+		sortMode = mode; 
+		FontAwesomeIconView icon;
+		switch (sortMode) {
+		case A_TO_Z:
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
+			break;
+
+		case Z_TO_A:
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
+			break;
+
+		case MODEL_ORDER:
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT);
+			break;
+
+		default:
+			throw new IllegalStateException("Unhandled sort mode: " + sortMode);
+		}
+		icon.setSize("15");
+		icon.setStyleClass("icon-dark");
+		sortButton.setGraphic(icon);
+	}
+	
+	public SortMode getSortMode() {
+		return sortMode;
+	}
+	
+	public void setShowDisabledOps(boolean showDisabledOps) {
+		this.showDisabledOps = showDisabledOps;
+		FontAwesomeIconView icon;
+		if (showDisabledOps) {
+			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE);
+			disabledOpsToggle.setSelected(true);
+		} else {
+			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE_SLASH);
+			disabledOpsToggle.setSelected(false);
+		}
+		icon.setSize("15");
+		icon.setStyleClass("icon-dark");
+		disabledOpsToggle.setGraphic(icon);
+	}
+	
+	public boolean getShowDisabledOps() {
+		return showDisabledOps;
 	}
 }

@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.exceptions.BException;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.prolog.term.ListPrologTerm;
+import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentFiles;
@@ -344,7 +344,7 @@ public final class PreferencesStage extends Stage {
 		try {
 			this.preferences.apply();
 			return true;
-		} catch (BException | IOException e) {
+		} catch (IOException | ModelTranslationError e) {
 			logger.error("Application of changes failed", e);
 			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e).showAndWait();
 			return false;

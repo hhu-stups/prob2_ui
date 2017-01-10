@@ -10,7 +10,6 @@ import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
-import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
@@ -24,7 +23,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
-public class StatsView extends ScrollPane implements IComponents {
+public class StatsView extends ScrollPane {
 	@FXML
 	private Label totalTransitions;
 	@FXML

@@ -11,7 +11,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.UIState;
+import de.prob2.ui.persistence.UIState;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;

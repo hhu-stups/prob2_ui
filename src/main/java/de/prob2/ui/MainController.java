@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.UIState;
+import de.prob2.ui.persistence.UIState;
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.SplitPane;

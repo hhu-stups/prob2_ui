@@ -7,7 +7,7 @@ import de.prob.cli.ProBInstanceProvider;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.UIPersistence;
+import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.application.Application;
 import javafx.application.Platform;

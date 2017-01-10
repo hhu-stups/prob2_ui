@@ -1,6 +1,5 @@
 package de.prob2.ui.states;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -24,10 +23,10 @@ import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.UIState;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -340,42 +339,12 @@ public final class StatesView extends AnchorPane {
 		this.currentTrace.addListener(traceChangeListener);
 	}
 	
-	public double[] getColumnsWidth() {
-		return new double[]{tvName.getWidth(),tvValue.getWidth(),tvPreviousValue.getWidth()};
+	public ObservableList<TreeTableColumn<StateTreeItem<?>, ?>> getColumns() {
+		return tv.getColumns();
 	}
 	
-	public void setColumnsWidth() {
-		UIState uiState = injector.getInstance(UIState.class);
-		double[] widths = uiState.getStatesViewColumnsWidth();
-		double width = widths[0] + widths[1] + widths[2];
-		List<TreeTableColumn<StateTreeItem<?>, ?>> columns = tv.getColumns();
-		for (int i = 0; i < columns.size(); i++) {
-			tv.resizeColumn(columns.get(i), widths[i] - width/3);
-		}
-	}
-		
-	public void setColumnsOrder() {
-		UIState uiState = injector.getInstance(UIState.class);
-		String[] order = uiState.getStatesViewColumnsOrder();
-		List<TreeTableColumn<StateTreeItem<?>, ?>> newColumns = new ArrayList<>();
-		for(int i = 0; i < order.length; i++) {
-			for(TreeTableColumn<StateTreeItem<?>, ?> column : tv.getColumns()) {
-				if(column.getText().equals(order[i])) {
-					newColumns.add(column);
-				}
-			}
-		}
-				
-		tv.getColumns().clear();
-		tv.getColumns().setAll(newColumns);
-	}
-	
-	public String[] getColumnsOrder() {
-		String[] order = new String[3];
-		for(int i = 0; i < tv.getColumns().size(); i++) {
-			order[i] = tv.getColumns().get(i).getText();
-		}
-		return order;
+	public TreeTableView<StateTreeItem<?>> getTable() {
+		return tv;
 	}
 	
 }

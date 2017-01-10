@@ -83,7 +83,7 @@
 				minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
 				onAction="#handleDisabledOpsToggle" prefHeight="26.0" prefWidth="26.0"
 				stylesheets="@/prob.css" AnchorPane.bottomAnchor="2.0"
-				AnchorPane.rightAnchor="55.0" AnchorPane.topAnchor="2.0">
+				AnchorPane.rightAnchor="55.0" AnchorPane.topAnchor="2.0" selected="true">
 				<graphic>
 					<FontAwesomeIconView styleClass="icon-dark"
 						glyphName="EYE" size="15"/>

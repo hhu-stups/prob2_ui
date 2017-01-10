@@ -15,7 +15,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
+import de.prob2.ui.persistence.UIState;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -124,11 +124,15 @@ public final class StageManager {
 	 */
 	public void register(final Stage stage, final String id) {
 		this.registered.put(stage, null);
-		
 		stage.getProperties().put("id", id);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
-		stage.focusedProperty().addListener(e-> injector.getInstance(UIState.class).moveStageToEnd(stage));
+		
+		stage.focusedProperty().addListener(e -> {
+			final String stageId = (String)stage.getProperties().get("id");
+			injector.getInstance(UIState.class).moveStageToEnd(stageId);
+		});
+		
 		stage.showingProperty().addListener((observable, from, to) -> {
 			final String stageId = (String)stage.getProperties().get("id");
 			if (to) {
@@ -141,10 +145,11 @@ public final class StageManager {
 						stage.setHeight(box.getHeight());
 					}
 					uiState.getStages().put(stageId, new WeakReference<>(stage));
+					uiState.getSavedVisibleStages().add(stageId);
 				}
 			} else {
 				if (stageId != null) {
-					uiState.getStages().remove(stageId);
+					uiState.getSavedVisibleStages().remove(stageId);
 					uiState.getSavedStageBoxes().put(
 						stageId,
 						new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight())

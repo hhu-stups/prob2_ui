@@ -1,7 +1,7 @@
 package de.prob2.ui.consoles.groovy.objects;
 
 
-import de.prob2.ui.internal.UIState;
+import de.prob2.ui.persistence.UIState;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 

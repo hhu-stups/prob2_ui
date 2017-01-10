@@ -33,8 +33,10 @@ import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
-import de.prob2.ui.internal.UIState;
 import de.prob2.ui.menu.RecentFiles;
+import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.persistence.TablePersistenceHandler;
+import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.states.ClassBlacklist;
@@ -63,7 +65,8 @@ public final class Config {
 		private String[] statesViewColumnsOrder;
 		private double[] animationsViewColumnsWidth;
 		private String[] animationsViewColumnsOrder;
-		
+		private OperationsView.SortMode operationsSortMode;
+		private boolean operationsShowNotEnabled;
 		private ConfigData() {}
 	}
 	
@@ -180,6 +183,10 @@ public final class Config {
 		if(configData.animationsViewColumnsOrder == null) {
 			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder;
 		}
+
+		if(configData.operationsSortMode == null) {
+			configData.operationsSortMode = this.defaultData.operationsSortMode;
+		}
 	}
 	
 	public void load() {
@@ -250,13 +257,14 @@ public final class Config {
 		this.uiState.setHorizontalDividerPositions(configData.horizontalDividerPositions);
 		this.uiState.setVerticalDividerPositions(configData.verticalDividerPositions);
 		
+		this.uiState.setOperationsSortMode(configData.operationsSortMode);
+		this.uiState.setOperationsShowNotEnabled(configData.operationsShowNotEnabled);
 	}
 		
 	public void save() {
 		uiState.updateSavedStageBoxes();
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();
-		this.uiState.getSavedVisibleStages().remove("javafx.stage.Stage");
 		configData.visibleStages = new ArrayList<>(this.uiState.getSavedVisibleStages());
 		configData.stageBoxes = new HashMap<>();
 		for (final Map.Entry<String, BoundingBox> entry : this.uiState.getSavedStageBoxes().entrySet()) {
@@ -277,18 +285,24 @@ public final class Config {
 		configData.bConsoleSettings = bConsole.getSettings();
 		configData.expandedTitledPanes = new ArrayList<>(this.uiState.getExpandedTitledPanes());
 		
+		TablePersistenceHandler tablePersistenceHandler = injector.getInstance(TablePersistenceHandler.class);
+		
 		StatesView statesView = injector.getInstance(StatesView.class);
-		configData.statesViewColumnsWidth = statesView.getColumnsWidth();
-		configData.statesViewColumnsOrder = statesView.getColumnsOrder();
+		configData.statesViewColumnsWidth = tablePersistenceHandler.getColumnsWidth(statesView.getColumns());
+		configData.statesViewColumnsOrder = tablePersistenceHandler.getColumnsOrder(statesView.getColumns());
 		
 		AnimationsView animationsView = injector.getInstance(AnimationsView.class);
-		configData.animationsViewColumnsWidth = animationsView.getColumnsWidth();
-		configData.animationsViewColumnsOrder = animationsView.getColumnsOrder();
+		configData.animationsViewColumnsWidth = tablePersistenceHandler.getColumnsWidth(animationsView.getColumns());
+		configData.animationsViewColumnsOrder = tablePersistenceHandler.getColumnsOrder(animationsView.getColumns());
 		
 		MainController main = injector.getInstance(MainController.class);
 		
 		configData.horizontalDividerPositions = main.getHorizontalDividerPositions();
 		configData.verticalDividerPositions = main.getVerticalDividerPositions();
+		
+		OperationsView operationsView = injector.getInstance(OperationsView.class);
+		configData.operationsSortMode = operationsView.getSortMode();
+		configData.operationsShowNotEnabled = operationsView.getShowDisabledOps();
 		
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
