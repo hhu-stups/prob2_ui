@@ -30,7 +30,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
 import org.slf4j.Logger;
@@ -75,6 +74,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 				animations.removeTrace(a.getTrace());
 				animationsTable.getItems().remove(a);
 			});
+			removeMenuItem.disableProperty().bind(row.emptyProperty());
 			
 			final MenuItem removeAllMenuItem = new MenuItem("Remove All Traces");
 			removeAllMenuItem.setOnAction(event -> removeAllTraces());
@@ -88,8 +88,17 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 					stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to reload model:\n" + e).showAndWait();
 				}
 			});
+			reloadMenuItem.disableProperty().bind(row.emptyProperty());
 			
-			row.setOnMouseClicked(event -> rowClicked(row, event, new ContextMenu(removeMenuItem, removeAllMenuItem, reloadMenuItem)));
+			row.setContextMenu(new ContextMenu(removeMenuItem, removeAllMenuItem, reloadMenuItem));
+			
+			row.setOnMouseClicked(event -> {
+				if (!row.isEmpty() && event.getButton() == MouseButton.PRIMARY) {
+					currentIndex = row.getIndex();
+					Trace trace = row.getItem().getTrace();
+					animations.changeCurrentAnimation(trace);
+				}
+			});
 			return row;
 		});
 		this.traceChange(animations.getCurrentTrace(), true);
@@ -101,20 +110,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			animations.removeTrace(a.getTrace());
 		}
 		animationsList.clear();
-	}
-
-	private void rowClicked(TableRow<Animation> row, MouseEvent event, ContextMenu contextMenu) {
-		if (!row.isEmpty() && event.getButton() == MouseButton.PRIMARY) {
-			currentIndex = row.getIndex();
-			Trace trace = row.getItem().getTrace();
-			animations.changeCurrentAnimation(trace);
-		}
-		if (event.getButton() == MouseButton.SECONDARY) {
-			contextMenu.getItems().get(0).setDisable(row.isEmpty());
-			contextMenu.getItems().get(2).setDisable(row.isEmpty());
-			contextMenu.show(row, event.getScreenX(), event.getScreenY());
-		}
-
 	}
 
 	@Override
