@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -49,6 +50,8 @@ import javafx.scene.paint.Color;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import se.sawano.java.text.AlphanumericComparator;
 
 @Singleton
 public final class OperationsView extends AnchorPane {
@@ -120,38 +123,12 @@ public final class OperationsView extends AnchorPane {
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
+	private final Comparator<CharSequence> alphanumericComparator;
 	
-	private final Comparator<OperationItem> zToA = (o1, o2) -> {
-		if (o1.name.equals(o2.name)) {
-			return -compareParams(o1.params, o2.params);
-		} else if (o1.name.equalsIgnoreCase(o2.name)) {
-			return -o1.name.compareTo(o2.name);
-		} else {
-			return -o1.name.compareToIgnoreCase(o2.name);
-		}
-	};
-	
-	private final Comparator<OperationItem> aToZ = (o1, o2) -> {
-		if (o1.name.equals(o2.name)) {
-			return compareParams(o1.params, o2.params);
-		} else if (o1.name.equalsIgnoreCase(o2.name)) {
-			return o1.name.compareTo(o2.name);
-		} else {
-			return o1.name.compareToIgnoreCase(o2.name);
-		}
-	};
-	
-	private final Comparator<OperationItem> modelOrder = (o1, o2) -> {
-		if (o1.name.equals(o2.name)) {
-			return compareParams(o1.params, o2.params);
-		} else {
-			return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
-		}
-	};
-
 	@Inject
-	private OperationsView(final CurrentTrace currentTrace, final StageManager stageManager) {
+	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager) {
 		this.currentTrace = currentTrace;
+		this.alphanumericComparator = new AlphanumericComparator(locale);
 
 		stageManager.loadFXML(this, "ops_view.fxml");
 	}
@@ -278,16 +255,33 @@ public final class OperationsView extends AnchorPane {
 		return param.replaceAll("\\{", "").replaceAll("\\}", "");
 	}
 	
-	private static int compareParams(final List<String> params1, final List<String> params2) {
-		for (int i = 0; i < params1.size(); i++) {
-			String p1 = stripString(params1.get(i));
-			String p2 = stripString(params2.get(i));
-			if (p1.compareTo(p2) != 0) {
-				return p1.compareTo(p2);
+	private int compareParams(final List<String> left, final List<String> right) {
+		int minSize = left.size() > right.size() ? left.size() : right.size();
+		for (int i = 0; i < minSize; i++) {
+			int cmp = alphanumericComparator.compare(stripString(left.get(i)), stripString(right.get(i)));
+			if (cmp != 0) {
+				return cmp;
 			}
-			
 		}
-		return 0;
+		
+		// All elements are equal up to the end of the smaller list, order based on which one has more elements.
+		return Integer.compare(left.size(), right.size());
+	}
+	
+	private int compareAlphanumeric(final OperationItem left, final OperationItem right) {
+		if (left.name.equals(right.name)) {
+			return compareParams(left.params, right.params);
+		} else {
+			return alphanumericComparator.compare(left.name, right.name);
+		}
+	}
+	
+	private int compareModelOrder(final OperationItem left, final OperationItem right) {
+		if (left.name.equals(right.name)) {
+			return compareParams(left.params, right.params);
+		} else {
+			return Integer.compare(opNames.indexOf(left.name), opNames.indexOf(right.name));
+		}
 	}
 
 	@FXML
@@ -333,20 +327,20 @@ public final class OperationsView extends AnchorPane {
 	private void doSort() {
 		final Comparator<OperationItem> comparator;
 		switch (sortMode) {
-		case MODEL_ORDER:
-			comparator = modelOrder;
-			break;
+			case MODEL_ORDER:
+				comparator = this::compareModelOrder;
+				break;
 
-		case A_TO_Z:
-			comparator = aToZ;
-			break;
+			case A_TO_Z:
+				comparator = this::compareAlphanumeric;
+				break;
 
-		case Z_TO_A:
-			comparator = zToA;
-			break;
+			case Z_TO_A:
+				comparator = ((Comparator<OperationItem>)this::compareAlphanumeric).reversed();
+				break;
 
-		default:
-			throw new IllegalStateException("Unhandled sort mode: " + sortMode);
+			default:
+				throw new IllegalStateException("Unhandled sort mode: " + sortMode);
 		}
 
 		events.sort(comparator);
