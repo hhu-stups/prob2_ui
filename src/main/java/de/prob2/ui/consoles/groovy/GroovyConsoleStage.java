@@ -1,15 +1,14 @@
 package de.prob2.ui.consoles.groovy;
 
+import org.fxmisc.flowless.VirtualizedScrollPane;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
-
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-
-import org.fxmisc.flowless.VirtualizedScrollPane;
 
 @Singleton
 public final class GroovyConsoleStage extends Stage {

@@ -7,10 +7,8 @@ import com.google.inject.Inject;
 
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;

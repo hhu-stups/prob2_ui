@@ -5,18 +5,35 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.layout.BorderPane?>
+
 <fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml"
 	BorderPane.alignment="CENTER">
 	<Menu text="%menu.file">
-		<MenuItem text="%menu.file.items.open" accelerator="Shortcut+O"
-			onAction="#handleOpen" />
-		<Menu fx:id="recentFilesMenu" text="%menu.file.items.openRecent">
-			<MenuItem fx:id="recentFilesPlaceholder"
-				text="%menu.file.items.openRecent.items.placeholder" disable="true" />
+		<MenuItem text="%menu.file.items.newProject" accelerator="Alt+Shortcut+N"
+			onAction="#createNewProject" />
+		<MenuItem text="%menu.file.items.openProject" accelerator="Alt+Shortcut+O" onAction="#openProject"/>
+		<Menu fx:id="recentProjectsMenu" text="%menu.file.items.openRecentProject"
+			disable="true">
+			<MenuItem fx:id="recentFilesPlaceholder" text="%menu.file.items.placeholder"
+				disable="true" />
 			<SeparatorMenuItem />
-			<MenuItem fx:id="clearRecentFiles" text="%menu.file.items.openRecent.items.clear"
-				onAction="#handleClearRecentFiles" />
+			<MenuItem fx:id="clearRecentProjects"
+				text="%menu.file.items.openRecentProject.items.clear" />
 		</Menu>
+		<SeparatorMenuItem />
+		<MenuItem text="%menu.file.items.openFile" accelerator="Shortcut+O"
+			onAction="#handleOpen" />
+		<Menu fx:id="recentFilesMenu" text="%menu.file.items.openRecentFile">
+			<MenuItem fx:id="recentFilesPlaceholder" text="%menu.file.items.placeholder"
+				disable="true" />
+			<SeparatorMenuItem />
+			<MenuItem fx:id="clearRecentFiles"
+				text="%menu.file.items.openRecentFile.items.clear" onAction="#handleClearRecentFiles" />
+		</Menu>
+		<SeparatorMenuItem />
+		<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject"
+			accelerator="Shortcut+S" onAction="#saveProject" />
+		<SeparatorMenuItem />
 		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"
 			onAction="#handleClose" />
 	</Menu>

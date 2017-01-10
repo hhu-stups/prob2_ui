@@ -41,6 +41,17 @@
 .button-dark:hover {
 	-fx-opacity: 0.9;
 }
+.button-dark2 {
+	-fx-background-color: -prob-grey;
+	-fx-background-radius: 6 6 6 6;
+	-fx-border-color: transparent;
+	-fx-background-insets: 0.0,1.0,2.0;
+	-fx-text-fill: -prob-white;
+	-fx-font-weight: bold;
+}
+.button-dark2:hover {
+	-fx-background-color: -prob-grey-75;
+}
 .icon-dark {
 	-fx-fill: -prob-grey;
 	-fx-opacity: 0.8;
@@ -456,6 +467,9 @@
 .border {
 	-fx-border-color: -prob-grey;
 	-fx-border-width: 0.2em 0.0 0.2em 0.0;
+}
+.no-border {
+	-fx-border-width: 0 0 0 0;
 }
 
 /* ===================== DIALOG ====================== */

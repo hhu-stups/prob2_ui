@@ -11,12 +11,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.classicalb.Operation;
@@ -29,10 +31,8 @@ import de.prob.model.representation.Constant;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
@@ -47,10 +47,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import se.sawano.java.text.AlphanumericComparator;
 
 public final class OperationsView extends AnchorPane {
@@ -143,6 +139,7 @@ public final class OperationsView extends AnchorPane {
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
+
 	private final Comparator<CharSequence> alphanumericComparator;
 
 	@Inject

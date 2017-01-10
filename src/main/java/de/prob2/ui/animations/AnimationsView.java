@@ -6,19 +6,25 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import de.prob2.ui.project.Machine;
+import de.prob2.ui.project.MachineLoader;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -30,20 +36,22 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+@Singleton
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
+	@FXML
+	private TableView<Animation> animationsTable;
+	@FXML
+	private TableColumn<Animation, String> machine;
+	@FXML
+	private TableColumn<Animation, String> lastop;
+	@FXML
+	private TableColumn<Animation, String> tracelength;
+	@FXML
+	private TableColumn<Animation, String> time;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(AnimationsView.class);
-	
-	@FXML private TableView<Animation> animationsTable;
-	@FXML private TableColumn<Animation, String> machine;
-	@FXML private TableColumn<Animation, String> lastop;
-	@FXML private TableColumn<Animation, String> tracelength;
-	@FXML private TableColumn<Animation, String> time;
 
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
@@ -51,10 +59,17 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	
 	private int currentIndex;
 	private int previousSize = 0;
+
+	private CurrentProject currentProject;
+	private MachineLoader machineLoader;
+
 	@Inject
-	private AnimationsView(final AnimationSelector animations, final CurrentTrace currentTrace, final StageManager stageManager) {
+	private AnimationsView(final AnimationSelector animations, final StageManager stageManager,
+			final MachineLoader machineLoader, CurrentProject currentProject, CurrentTrace currentTrace) {
 		this.animations = animations;
+		this.machineLoader = machineLoader;
 		this.animations.registerAnimationChangeListener(this);
+		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
 		this.stageManager.loadFXML(this, "animations_view.fxml");
@@ -74,10 +89,18 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 				Animation a = row.getItem();
 				animations.removeTrace(a.getTrace());
 				animationsTable.getItems().remove(a);
+				if (animationsTable.getItems().isEmpty()) {
+					currentProject.remove();
+				}
 			});
+			removeMenuItem.disableProperty().bind(row.emptyProperty());
 			
 			final MenuItem removeAllMenuItem = new MenuItem("Remove All Traces");
-			removeAllMenuItem.setOnAction(event -> removeAllTraces());
+
+			removeAllMenuItem.setOnAction(event -> {
+				removeAllTraces();
+				currentProject.remove();
+			});
 			
 			final MenuItem reloadMenuItem = new MenuItem("Reload");
 			reloadMenuItem.setOnAction(event -> {
@@ -88,11 +111,44 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 					stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to reload model:\n" + e).showAndWait();
 				}
 			});
+			reloadMenuItem.disableProperty().bind(row.emptyProperty());
 			
-			row.setOnMouseClicked(event -> rowClicked(row, event, new ContextMenu(removeMenuItem, removeAllMenuItem, reloadMenuItem)));
+			row.setContextMenu(new ContextMenu(removeMenuItem, removeAllMenuItem, reloadMenuItem));
+			
+			row.setOnMouseClicked(event -> {
+				if (!row.isEmpty() && event.getButton() == MouseButton.PRIMARY) {
+					currentIndex = row.getIndex();
+					Trace trace = row.getItem().getTrace();
+					animations.changeCurrentAnimation(trace);
+				}
+			});
 			return row;
 		});
 		this.traceChange(animations.getCurrentTrace(), true);
+
+		currentProject.addListener((observable, from, to) -> {
+			if (to != null) {
+				removeAllTraces();
+				addAll(to.getMachines());
+			}
+		});
+	}
+
+	private void addAll(List<Machine> machines) {
+		for (Machine machine : machines) {
+			StateSpace stateSpace = machineLoader.load(machine);
+			try {
+				this.animations.addNewAnimation(new Trace(stateSpace));
+			} catch (NullPointerException e) {
+				LOGGER.error("loading machine \"" + machine.getName() + "\" failed", e);
+				Platform.runLater(() -> {
+					Alert alert = new Alert(Alert.AlertType.ERROR,
+							"Could not open machine \"" + machine.getName() + "\":\n" + e);
+					alert.getDialogPane().getStylesheets().add("prob.css");
+					alert.show();
+				});
+			}
+		}
 	}
 
 	private void removeAllTraces() {
@@ -101,20 +157,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			animations.removeTrace(a.getTrace());
 		}
 		animationsList.clear();
-	}
-
-	private void rowClicked(TableRow<Animation> row, MouseEvent event, ContextMenu contextMenu) {
-		if (!row.isEmpty() && event.getButton() == MouseButton.PRIMARY) {
-			currentIndex = row.getIndex();
-			Trace trace = row.getItem().getTrace();
-			animations.changeCurrentAnimation(trace);
-		}
-		if (event.getButton() == MouseButton.SECONDARY) {
-			contextMenu.getItems().get(0).setDisable(row.isEmpty());
-			contextMenu.getItems().get(2).setDisable(row.isEmpty());
-			contextMenu.show(row, event.getScreenX(), event.getScreenY());
-		}
-
 	}
 
 	@Override

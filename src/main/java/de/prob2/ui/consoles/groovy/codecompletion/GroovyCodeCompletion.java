@@ -2,10 +2,11 @@ package de.prob2.ui.consoles.groovy.codecompletion;
 
 import javax.script.ScriptEngine;
 
+import org.fxmisc.richtext.PopupAlignment;
+
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
 import de.prob2.ui.internal.StageManager;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -14,8 +15,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
-
-import org.fxmisc.richtext.PopupAlignment;
 
 public class GroovyCodeCompletion extends Popup {
 	@FXML private ListView<GroovyAbstractItem> lvSuggestions;

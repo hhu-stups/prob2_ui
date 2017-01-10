@@ -2,6 +2,7 @@ package de.prob2.ui.prob2fx;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.statespace.StateSpace;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;

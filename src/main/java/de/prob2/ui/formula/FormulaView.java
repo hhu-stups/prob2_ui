@@ -1,7 +1,6 @@
 package de.prob2.ui.formula;
 
 import de.prob2.ui.internal.StageManager;
-
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Scene;
