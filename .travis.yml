@@ -4,6 +4,7 @@ jdk:
 branches:
   only:
   - master
+  - develop
 script:
 - ./gradlew check
 - ./gradlew distZip
