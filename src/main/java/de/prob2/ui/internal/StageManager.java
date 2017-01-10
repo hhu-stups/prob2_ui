@@ -124,7 +124,6 @@ public final class StageManager {
 	 */
 	public void register(final Stage stage, final String id) {
 		this.registered.put(stage, null);
-		
 		stage.getProperties().put("id", id);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
