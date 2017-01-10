@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
@@ -15,7 +14,6 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
-import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.internal.StageManager;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -30,8 +28,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
-@Singleton
-public final class AnimationsView extends AnchorPane implements IAnimationChangeListener, IComponents {
+public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
 	@FXML private TableView<Animation> animationsTable;
 	@FXML private TableColumn<Animation, String> machine;
 	@FXML private TableColumn<Animation, String> lastop;
