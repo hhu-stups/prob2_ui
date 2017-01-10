@@ -255,7 +255,10 @@ public final class MenuController extends MenuBar {
 				newSpace = this.api.b_load(path);
 			} catch (IOException | ModelTranslationError e) {
 				logger.error("loading file failed", e);
-				Platform.runLater(stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e)::showAndWait);
+				// Do not change to method reference if suggested by Sonar!
+				// This is a false positive - the makeAlert call has to run on the FX thread.
+				// When changed to a method reference, only showAndWait (and not makeAlert) runs on the FX thread.
+				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait());
 				return;
 			}
 			
