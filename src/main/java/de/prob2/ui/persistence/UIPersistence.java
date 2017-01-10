@@ -15,6 +15,7 @@ import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.MenuController;
+import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.states.StatesView;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
@@ -94,9 +95,6 @@ public final class UIPersistence {
 	public void open() {
 		final MenuController menu = injector.getInstance(MenuController.class);
 		final MainController main = injector.getInstance(MainController.class);
-		final StatesView statesView = injector.getInstance(StatesView.class);
-		final AnimationsView animationsView = injector.getInstance(AnimationsView.class);
-		final TablePersistenceHandler tablePersistenceHandler = injector.getInstance(TablePersistenceHandler.class);
 		
 		for (final String id : uiState.getSavedVisibleStages()) {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
@@ -123,15 +121,18 @@ public final class UIPersistence {
 			}
 		}
 		
-		main.setHorizontalDividerPositions(uiState.getHorizontalDividerPositions());		
+		final StatesView statesView = injector.getInstance(StatesView.class);
+		final AnimationsView animationsView = injector.getInstance(AnimationsView.class);
+		final TablePersistenceHandler tablePersistenceHandler = injector.getInstance(TablePersistenceHandler.class);
+		main.setHorizontalDividerPositions(uiState.getHorizontalDividerPositions());
 		main.setVerticalDividerPostions(uiState.getVerticalDividerPositions());
 		tablePersistenceHandler.setColumnsWidth(statesView.getTable(), statesView.getTable().getColumns(), TablePersistenceEnum.STATES_VIEW);
 		tablePersistenceHandler.setColumnsOrder(statesView.getTable().getColumns(), TablePersistenceEnum.STATES_VIEW);
 		tablePersistenceHandler.setColumnsWidth(animationsView.getTable(), animationsView.getTable().getColumns(), TablePersistenceEnum.ANIMATIONS_VIEW);
 		tablePersistenceHandler.setColumnsOrder(animationsView.getTable().getColumns(), TablePersistenceEnum.ANIMATIONS_VIEW);
-		/*statesView.setColumnsWidth();
-		statesView.setColumnsOrder();
-		animationsView.setColumnsWidth();
-		animationsView.setColumnsOrder();*/
+		
+		final OperationsView operationsView = injector.getInstance(OperationsView.class);
+		operationsView.setSortMode(uiState.getOperationsSortMode());
+		operationsView.setShowNotEnabled(uiState.getOperationsShowNotEnbaled());
 	}
 }

@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -50,8 +51,9 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public final class OperationsView extends AnchorPane implements IComponents {
-	private enum SortMode {
+	public enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
 
@@ -430,5 +432,52 @@ public final class OperationsView extends AnchorPane implements IComponents {
 			paramList.addAll(((Operation) e).getParameters());
 		}
 		return paramList;
+	}
+	
+	public void setSortMode(OperationsView.SortMode mode) {
+		sortMode = mode; 
+		FontAwesomeIconView icon;
+		switch (sortMode) {
+		case A_TO_Z:
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
+			break;
+
+		case Z_TO_A:
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
+			break;
+
+		case MODEL_ORDER:
+			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT);
+			break;
+
+		default:
+			throw new IllegalStateException("Unhandled sort mode: " + sortMode);
+		}
+		icon.setSize("15");
+		icon.setStyleClass("icon-dark");
+		sortButton.setGraphic(icon);
+	}
+	
+	public SortMode getSortMode() {
+		return sortMode;
+	}
+	
+	public void setShowNotEnabled(boolean showNotEnabled) {
+		this.showNotEnabled = showNotEnabled;
+		FontAwesomeIconView icon;
+		if (showNotEnabled) {
+			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE);
+			disabledOpsToggle.setSelected(true);
+		} else {
+			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE_SLASH);
+			disabledOpsToggle.setSelected(false);
+		}
+		icon.setSize("15");
+		icon.setStyleClass("icon-dark");
+		disabledOpsToggle.setGraphic(icon);
+	}
+	
+	public boolean getShowNotEnabled() {
+		return showNotEnabled;
 	}
 }

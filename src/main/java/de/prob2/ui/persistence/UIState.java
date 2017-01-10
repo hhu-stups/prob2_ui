@@ -13,6 +13,7 @@ import java.util.Set;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.operations.OperationsView;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
@@ -30,6 +31,8 @@ public class UIState {
 	private String[] statesViewColumnsOrder;
 	private double[] animationsViewColumnsWidth;
 	private String[] animationsViewColumnsOrder;
+	private OperationsView.SortMode operationsSortMode;
+	private boolean operationsShowNotEnabled;
 	private double[] horizontalDividerPositions;
 	private double[] verticalDividerPositions;
 		
@@ -138,6 +141,22 @@ public class UIState {
 	
 	public String[] getAnimationsViewColumnsOrder() {
 		return animationsViewColumnsOrder;
+	}
+	
+	public void setOperationsSortMode(OperationsView.SortMode mode) {
+		this.operationsSortMode = mode;
+	}
+	
+	public OperationsView.SortMode getOperationsSortMode() {
+		return operationsSortMode;
+	}
+	
+	public void setOperationsShowNotEnabled(boolean showNotEnabled) {
+		operationsShowNotEnabled = showNotEnabled;
+	}
+	
+	public boolean getOperationsShowNotEnbaled() {
+		return operationsShowNotEnabled;
 	}
 	
 	public void setHorizontalDividerPositions(double[] pos) {

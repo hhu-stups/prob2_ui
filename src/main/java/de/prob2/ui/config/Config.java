@@ -31,6 +31,7 @@ import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.menu.RecentFiles;
+import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.TablePersistenceHandler;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
@@ -62,7 +63,8 @@ public final class Config {
 		private String[] statesViewColumnsOrder;
 		private double[] animationsViewColumnsWidth;
 		private String[] animationsViewColumnsOrder;
-		
+		private String operationsSortMode;
+		private String operationsShowNotEnabled;
 		private ConfigData() {}
 	}
 	
@@ -174,6 +176,13 @@ public final class Config {
 			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder;
 		}
 		
+		if(configData.operationsSortMode == null) {
+			configData.operationsSortMode = this.defaultData.operationsSortMode;
+		}
+		
+		if(configData.operationsShowNotEnabled == null) {
+			configData.operationsShowNotEnabled = this.defaultData.operationsShowNotEnabled;
+		}
 		
 	}
 	
@@ -243,6 +252,9 @@ public final class Config {
 		this.uiState.setHorizontalDividerPositions(configData.horizontalDividerPositions);
 		this.uiState.setVerticalDividerPositions(configData.verticalDividerPositions);
 		
+		this.uiState.setOperationsSortMode(OperationsView.SortMode.valueOf(configData.operationsSortMode));
+		this.uiState.setOperationsShowNotEnabled(Boolean.parseBoolean(configData.operationsShowNotEnabled));
+		
 	}
 		
 	public void save() {
@@ -283,6 +295,10 @@ public final class Config {
 		
 		configData.horizontalDividerPositions = main.getHorizontalDividerPositions();
 		configData.verticalDividerPositions = main.getVerticalDividerPositions();
+		
+		OperationsView operationsView = injector.getInstance(OperationsView.class);
+		configData.operationsSortMode = String.valueOf(operationsView.getSortMode());
+		configData.operationsShowNotEnabled = String.valueOf(operationsView.getShowNotEnabled());
 		
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
