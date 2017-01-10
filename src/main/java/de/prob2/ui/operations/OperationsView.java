@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 
 import se.sawano.java.text.AlphanumericComparator;
 
-@Singleton
 public final class OperationsView extends AnchorPane {
 	public enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
