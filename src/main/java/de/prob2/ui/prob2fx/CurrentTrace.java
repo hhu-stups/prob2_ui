@@ -1,15 +1,23 @@
 package de.prob2.ui.prob2fx;
 
+import java.io.IOException;
+import java.util.Map;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.animator.IAnimator;
+import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.model.representation.AbstractModel;
+import de.prob.scripting.Api;
+import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -29,6 +37,7 @@ import javafx.collections.ObservableList;
 @Singleton
 public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	private final AnimationSelector animationSelector;
+	private final Api api;
 	
 	private final BooleanProperty exists;
 	private final BooleanProperty animatorBusy;
@@ -49,6 +58,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	@Inject
 	private CurrentTrace(
 		final AnimationSelector animationSelector,
+		final Api api,
 		final CurrentState currentState,
 		final CurrentStateSpace currentStateSpace,
 		final CurrentModel currentModel
@@ -66,6 +76,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 				CurrentTrace.this.animatorBusy.set(busy);
 			}
 		});
+		this.api = api;
 		
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
 		this.exists.bind(Bindings.isNotNull(this));
@@ -314,5 +325,35 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	 */
 	public Trace forward() {
 		return this.forwardProperty().get();
+	}
+	
+	/**
+	 * Reload the given trace's model and make the reloaded trace the current one. If the reload fails, the current trace is not changed.
+	 * 
+	 * @param trace the trace to reload
+	 * @param preferences preferences for the reloaded model
+	 * @throws IllegalStateException if there is no current trace
+	 * @throws IOException when thrown by {@link Api#b_load(String, Map)}
+	 * @throws ModelTranslationError when thrown by {@link Api#b_load(String, Map)}
+	 */
+	public void reload(final Trace trace, final Map<String, String> preferences) throws IOException, ModelTranslationError {
+		final String filename = trace.getModel().getModelFile().getAbsolutePath();
+		final Trace newTrace = new Trace(api.b_load(filename, preferences));
+		this.animationSelector.removeTrace(trace);
+		this.animationSelector.addNewAnimation(newTrace);
+	}
+	
+	/**
+	 * Reload the given trace's model and make the reloaded trace the current one. Preferences are maintained from the old model. If the reload fails, the current trace is not changed.
+	 *
+	 * @param trace the trace to reload
+	 * @throws IllegalStateException if there is no current trace
+	 * @throws IOException when thrown by {@link Api#b_load(String, Map)}
+	 * @throws ModelTranslationError when thrown by {@link Api#b_load(String, Map)}
+	 */
+	public void reload(final Trace trace) throws IOException, ModelTranslationError {
+		final GetCurrentPreferencesCommand cmd = new GetCurrentPreferencesCommand();
+		this.getStateSpace().execute(cmd);
+		this.reload(trace, cmd.getPreferences());
 	}
 }

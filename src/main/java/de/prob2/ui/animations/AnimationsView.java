@@ -1,5 +1,6 @@
 package de.prob2.ui.animations;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -9,15 +10,19 @@ import com.google.inject.Inject;
 
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
+import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
@@ -28,7 +33,12 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AnimationsView.class);
+	
 	@FXML private TableView<Animation> animationsTable;
 	@FXML private TableColumn<Animation, String> machine;
 	@FXML private TableColumn<Animation, String> lastop;
@@ -36,13 +46,18 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	@FXML private TableColumn<Animation, String> time;
 
 	private final AnimationSelector animations;
+	private final CurrentTrace currentTrace;
+	private final StageManager stageManager;
+	
 	private int currentIndex;
 	private int previousSize = 0;
 	@Inject
-	private AnimationsView(final AnimationSelector animations, final StageManager stageManager) {
+	private AnimationsView(final AnimationSelector animations, final CurrentTrace currentTrace, final StageManager stageManager) {
 		this.animations = animations;
 		this.animations.registerAnimationChangeListener(this);
-		stageManager.loadFXML(this, "animations_view.fxml");
+		this.currentTrace = currentTrace;
+		this.stageManager = stageManager;
+		this.stageManager.loadFXML(this, "animations_view.fxml");
 	}
 
 	@FXML
@@ -53,18 +68,28 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		time.setCellValueFactory(new PropertyValueFactory<>("time"));
 		animationsTable.setRowFactory(tableView -> {
 			final TableRow<Animation> row = new TableRow<>();
-			final ContextMenu contextMenu = new ContextMenu();
+			
 			final MenuItem removeMenuItem = new MenuItem("Remove Trace");
 			removeMenuItem.setOnAction(event -> {
 				Animation a = row.getItem();
 				animations.removeTrace(a.getTrace());
 				animationsTable.getItems().remove(a);
 			});
+			
 			final MenuItem removeAllMenuItem = new MenuItem("Remove All Traces");
 			removeAllMenuItem.setOnAction(event -> removeAllTraces());
-			contextMenu.getItems().add(removeMenuItem);
-			contextMenu.getItems().add(removeAllMenuItem);
-			row.setOnMouseClicked(event -> rowClicked(row, event, contextMenu));
+			
+			final MenuItem reloadMenuItem = new MenuItem("Reload");
+			reloadMenuItem.setOnAction(event -> {
+				try {
+					currentTrace.reload(row.getItem().getTrace());
+				} catch (IOException | ModelTranslationError e) {
+					LOGGER.error("Model reload failed", e);
+					stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to reload model:\n" + e).showAndWait();
+				}
+			});
+			
+			row.setOnMouseClicked(event -> rowClicked(row, event, new ContextMenu(removeMenuItem, removeAllMenuItem, reloadMenuItem)));
 			return row;
 		});
 		this.traceChange(animations.getCurrentTrace(), true);
@@ -85,11 +110,8 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			animations.changeCurrentAnimation(trace);
 		}
 		if (event.getButton() == MouseButton.SECONDARY) {
-			if(row.isEmpty()) {
-				contextMenu.getItems().get(0).setDisable(true);
-			} else {
-				contextMenu.getItems().get(0).setDisable(false);
-			}
+			contextMenu.getItems().get(0).setDisable(row.isEmpty());
+			contextMenu.getItems().get(2).setDisable(row.isEmpty());
 			contextMenu.show(row, event.getScreenX(), event.getScreenY());
 		}
 
