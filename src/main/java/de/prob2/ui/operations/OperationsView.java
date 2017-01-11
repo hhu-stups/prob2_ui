@@ -11,14 +11,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.classicalb.Operation;
@@ -31,8 +28,10 @@ import de.prob.model.representation.Constant;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
@@ -47,6 +46,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import se.sawano.java.text.AlphanumericComparator;
 
 public final class OperationsView extends AnchorPane {
@@ -62,14 +65,16 @@ public final class OperationsView extends AnchorPane {
 				setText(item.toString());
 				setGraphicTextGap(10.0);
 				final FontAwesomeIconView icon;
-				if (item.isTimeOut()) {
-					icon = new FontAwesomeIconView(FontAwesomeIcon.CLOCK_ALT);
-					icon.setFill(Color.ORANGE);
-					setDisable(true);
-					getStyleClass().clear();
-					getStyleClass().add("normal");
-				} else {
-					if (item.isEnabled()) {
+				switch (item.status) {
+					case TIMEOUT:
+						icon = new FontAwesomeIconView(FontAwesomeIcon.CLOCK_ALT);
+						icon.setFill(Color.ORANGE);
+						setDisable(true);
+						getStyleClass().clear();
+						getStyleClass().add("normal");
+						break;
+					
+					case ENABLED:
 						icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
 						icon.setFill(Color.LIMEGREEN);
 						setDisable(false);
@@ -83,13 +88,18 @@ public final class OperationsView extends AnchorPane {
 							getStyleClass().clear();
 							getStyleClass().add("normal");
 						}
-					} else {
+						break;
+					
+					case DISABLED:
 						icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
 						icon.setFill(Color.RED);
 						setDisable(true);
 						getStyleClass().clear();
 						getStyleClass().add("normal");
-					}
+						break;
+					
+					default:
+						throw new IllegalStateException("Unhandled status: " + item.status);
 				}
 				setGraphic(icon);
 			} else {
@@ -155,7 +165,7 @@ public final class OperationsView extends AnchorPane {
 		opsListView.setCellFactory(lv -> new OperationsCell());
 
 		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null && newValue.isEnabled()) {
+			if (newValue != null && newValue.status == OperationItem.Status.ENABLED) {
 				// Disable the operations list until the trace change is
 				// finished, the update method reenables it later
 				opsListView.setDisable(true);

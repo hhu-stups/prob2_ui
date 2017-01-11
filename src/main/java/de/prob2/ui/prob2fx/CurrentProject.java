@@ -10,17 +10,17 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.Project;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -32,12 +32,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class CurrentProject extends SimpleObjectProperty<Project> {
-	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
-	private static final Logger logger = LoggerFactory.getLogger(CurrentProject.class);
+	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
+	private static final Logger LOGGER = LoggerFactory.getLogger(CurrentProject.class);
+	
 	private final BooleanProperty exists;
 	private final BooleanProperty isSingleFile;
 	private final ListProperty<Machine> machines;
@@ -71,9 +74,8 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void addMachine(File machine) {
 		if (!this.isSingleFile()) {
-			ObservableList<Machine> machinesList = this.getFiles();
-			String name[] = machine.getName().split("\\.");
-			machinesList.add(new Machine(name[0], "", machine));
+			List<Machine> machinesList = this.getFiles();
+			machinesList.add(new Machine(machine.getName().split("\\.")[0], "", machine));
 			this.set(new Project(this.getName(), this.get().getDescription(), machinesList, this.get().getPreferences(),
 					this.get().getLocation()));
 		}
@@ -83,8 +85,8 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		return this.machines;
 	}
 
-	public ObservableList<Machine> getFiles() {
-		return (ObservableList<Machine>) this.get().getMachines();
+	public List<Machine> getFiles() {
+		return this.get().getMachines();
 	}
 
 	public ReadOnlyBooleanProperty isSingleFileProperty() {
@@ -105,24 +107,24 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void save() {
 		File location = new File(this.get().getLocation() + File.separator + this.getName() + ".json");
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(location), CONFIG_CHARSET)) {
+		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(location), PROJECT_CHARSET)) {
 			gson.toJson(this.get(), writer);
 		} catch (FileNotFoundException exc) {
-			logger.warn("Failed to create project data file", exc);
+			LOGGER.warn("Failed to create project data file", exc);
 		} catch (IOException exc) {
-			logger.warn("Failed to save project", exc);
+			LOGGER.warn("Failed to save project", exc);
 		}
 	}
 
 	public void open(File file) {
 		Project project;
-		try (final Reader reader = new InputStreamReader(new FileInputStream(file), CONFIG_CHARSET)) {
+		try (final Reader reader = new InputStreamReader(new FileInputStream(file), PROJECT_CHARSET)) {
 			project = gson.fromJson(reader, Project.class);
 		} catch (FileNotFoundException exc) {
-			logger.warn("Project file not found", exc);
+			LOGGER.warn("Project file not found", exc);
 			return;
 		} catch (IOException exc) {
-			logger.warn("Failed to open project file", exc);
+			LOGGER.warn("Failed to open project file", exc);
 			return;
 		}
 		this.set(project);

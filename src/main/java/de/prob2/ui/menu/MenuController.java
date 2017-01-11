@@ -6,14 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
@@ -26,16 +24,14 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
+
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -45,6 +41,9 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -232,51 +231,42 @@ public final class MenuController extends MenuBar {
 
 	private void open(String path) {
 		if (currentProject.exists()) {
-			Alert alert = new Alert(AlertType.CONFIRMATION);
-			alert.getDialogPane().getStylesheets().add("prob.css");
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
 
-			ButtonType buttonTypeAdd = new ButtonType("Add");
-			ButtonType buttonTypeClose = new ButtonType("Close");
-			ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+			final ButtonType buttonTypeAdd = new ButtonType("Add");
+			final ButtonType buttonTypeClose = new ButtonType("Close");
 
 			if (currentProject.isSingleFile()) {
 				alert.setHeaderText("You've already opened a file.");
 				alert.setContentText("Do you want to close the current file?");
-				alert.getButtonTypes().setAll(buttonTypeClose, buttonTypeCancel);
+				alert.getButtonTypes().setAll(buttonTypeClose, ButtonType.CANCEL);
 			} else {
 				alert.setHeaderText("You've already opened a project.");
 				alert.setContentText("Do you want to close the current project or add the selected file?");
-				alert.getButtonTypes().setAll(buttonTypeAdd, buttonTypeClose, buttonTypeCancel);
+				alert.getButtonTypes().setAll(buttonTypeAdd, buttonTypeClose, ButtonType.CANCEL);
 			}
 			Optional<ButtonType> result = alert.showAndWait();
 
-			if (result.get() == buttonTypeAdd) {
+			if (!result.isPresent() || ButtonType.CANCEL.equals(result.get())) {
+				return;
+			} else if (buttonTypeAdd.equals(result.get())) {
 				currentProject.addMachine(new File(path));
-			} else if (result.get() == buttonTypeClose) {
-				Platform.runLater(() -> {
-					this.currentProject.changeCurrentProject(new Project(new File(path)));
-					injector.getInstance(ModelcheckingController.class).resetView();
-
-					// Remove the path first to avoid listing the same file
-					// twice.
-					this.recentFiles.remove(path);
-					this.recentFiles.add(0, path);
-				});
+				return;
 			}
-		} else {
-			Platform.runLater(() -> {
-				this.currentProject.changeCurrentProject(new Project(new File(path)));
-				injector.getInstance(ModelcheckingController.class).resetView();
-
-				// Remove the path first to avoid listing the same file twice.
-				this.recentFiles.remove(path);
-				this.recentFiles.add(0, path);
-			});
 		}
+		
+		Platform.runLater(() -> {
+			this.currentProject.changeCurrentProject(new Project(new File(path)));
+			injector.getInstance(ModelcheckingController.class).resetView();
+
+			// Remove the path first to avoid listing the same file twice.
+			this.recentFiles.remove(path);
+			this.recentFiles.add(0, path);
+		});
 	}
 
 	@FXML
-	private void handleOpen(ActionEvent event) {
+	private void handleOpen() {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
 		fileChooser.getExtensionFilters()
@@ -291,7 +281,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	private void handleClose(final ActionEvent event) {
+	private void handleClose() {
 		final Stage stage = this.stageManager.getCurrent();
 		if (stage != null) {
 			stage.close();
@@ -345,13 +335,11 @@ public final class MenuController extends MenuBar {
 		}
 		return root;
 	}
-
-	@FXML
-	private void createNewProject(ActionEvent event) {
+	
+	private boolean confirmReplacingProject() {
 		if (currentProject.exists()) {
-			Alert alert = new Alert(AlertType.CONFIRMATION);
-			alert.getDialogPane().getStylesheets().add("prob.css");
-
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
+			
 			if (currentProject.isSingleFile()) {
 				alert.setHeaderText("You've already opened a file.");
 				alert.setContentText("Do you want to close the current file?");
@@ -360,27 +348,34 @@ public final class MenuController extends MenuBar {
 				alert.setContentText("Do you want to close the current project?");
 			}
 			Optional<ButtonType> result = alert.showAndWait();
-
-			if (result.get() == ButtonType.OK) {
-				final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
-				newProjectStage.showAndWait();
-				newProjectStage.toFront();
-			}
+			return result.isPresent() && ButtonType.OK.equals(result.get());
 		} else {
-			final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
-			newProjectStage.showAndWait();
-			newProjectStage.toFront();
+			return true;
 		}
-
 	}
 
 	@FXML
-	private void saveProject(ActionEvent event) {
+	private void createNewProject() {
+		if (!confirmReplacingProject()) {
+			return;
+		}
+
+		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
+		newProjectStage.showAndWait();
+		newProjectStage.toFront();
+	}
+
+	@FXML
+	private void saveProject() {
 		currentProject.save();
 	}
 
 	@FXML
-	private void openProject(ActionEvent event) {
+	private void openProject() {
+		if (!confirmReplacingProject()) {
+			return;
+		}
+		
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Project");
 		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("ProB2 Projects", "*.json"));
@@ -390,25 +385,7 @@ public final class MenuController extends MenuBar {
 			return;
 		}
 
-		if (currentProject.exists()) {
-			Alert alert = new Alert(AlertType.CONFIRMATION);
-			alert.getDialogPane().getStylesheets().add("prob.css");
-
-			if (currentProject.isSingleFile()) {
-				alert.setHeaderText("You've already opened a file.");
-				alert.setContentText("Do you want to close the current file?");
-			} else {
-				alert.setHeaderText("You've already opened a project.");
-				alert.setContentText("Do you want to close the current project?");
-			}
-			Optional<ButtonType> result = alert.showAndWait();
-
-			if (result.get() == ButtonType.OK) {
-				currentProject.open(selectedProject);
-			}
-		} else {
-			currentProject.open(selectedProject);
-		}
+		currentProject.open(selectedProject);
 	}
 
 	private List<MenuItem> getRecentFileItems() {

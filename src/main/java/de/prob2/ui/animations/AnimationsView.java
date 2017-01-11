@@ -56,7 +56,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
-	
+
 	private int currentIndex;
 	private int previousSize = 0;
 
@@ -83,7 +83,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		time.setCellValueFactory(new PropertyValueFactory<>("time"));
 		animationsTable.setRowFactory(tableView -> {
 			final TableRow<Animation> row = new TableRow<>();
-			
+
 			final MenuItem removeMenuItem = new MenuItem("Remove Trace");
 			removeMenuItem.setOnAction(event -> {
 				Animation a = row.getItem();
@@ -94,14 +94,14 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 				}
 			});
 			removeMenuItem.disableProperty().bind(row.emptyProperty());
-			
+
 			final MenuItem removeAllMenuItem = new MenuItem("Remove All Traces");
 
 			removeAllMenuItem.setOnAction(event -> {
 				removeAllTraces();
 				currentProject.remove();
 			});
-			
+
 			final MenuItem reloadMenuItem = new MenuItem("Reload");
 			reloadMenuItem.setOnAction(event -> {
 				try {
@@ -112,9 +112,9 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 				}
 			});
 			reloadMenuItem.disableProperty().bind(row.emptyProperty());
-			
+
 			row.setContextMenu(new ContextMenu(removeMenuItem, removeAllMenuItem, reloadMenuItem));
-			
+
 			row.setOnMouseClicked(event -> {
 				if (!row.isEmpty() && event.getButton() == MouseButton.PRIMARY) {
 					currentIndex = row.getIndex();
@@ -142,10 +142,8 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			} catch (NullPointerException e) {
 				LOGGER.error("loading machine \"" + machine.getName() + "\" failed", e);
 				Platform.runLater(() -> {
-					Alert alert = new Alert(Alert.AlertType.ERROR,
-							"Could not open machine \"" + machine.getName() + "\":\n" + e);
-					alert.getDialogPane().getStylesheets().add("prob.css");
-					alert.show();
+					stageManager.makeAlert(Alert.AlertType.ERROR,
+							"Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait();
 				});
 			}
 		}
@@ -210,13 +208,13 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	public void animatorStatus(boolean busy) {
 		// Not used
 	}
-	
-	public ObservableList<TableColumn <Animation,?>> getColumns() {
+
+	public ObservableList<TableColumn<Animation, ?>> getColumns() {
 		return animationsTable.getColumns();
 	}
-	
+
 	public TableView<Animation> getTable() {
 		return animationsTable;
 	}
-	
+
 }
