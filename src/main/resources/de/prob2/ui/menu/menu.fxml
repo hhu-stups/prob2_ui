@@ -38,6 +38,7 @@
 			onAction="#handleClose" />
 	</Menu>
 	<Menu text="%menu.edit">
+		<MenuItem fx:id="reloadMachineItem" text="%menu.edit.items.reloadMachine" accelerator="Shortcut+R" onAction="#handleReloadMachine" />
 		<MenuItem fx:id="preferencesItem" text="%menu.edit.items.preferences"
 			onAction="#handlePreferences" />
 	</Menu>

@@ -12,6 +12,8 @@ import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
 
+import de.prob.scripting.ModelTranslationError;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
@@ -68,13 +70,15 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private Menu windowMenu;
 	@FXML
+	private MenuItem saveProjectItem;
+	@FXML
+	private MenuItem reloadMachineItem;
+	@FXML
 	private MenuItem preferencesItem;
 	@FXML
 	private MenuItem enterFormulaForVisualization;
 	@FXML
 	private MenuItem aboutItem;
-	@FXML
-	private MenuItem saveProjectItem;
 
 	private CurrentProject currentProject;
 
@@ -163,10 +167,11 @@ public final class MenuController extends MenuBar {
 		// Fire the listener once to populate the recent files menu
 		recentFilesListener.onChanged(null);
 
-		this.enterFormulaForVisualization.disableProperty()
-				.bind(currentTrace.currentStateProperty().initializedProperty().not());
 		this.saveProjectItem.disableProperty()
 				.bind(currentProject.existsProperty().not().or(currentProject.isSingleFileProperty()));
+		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not());
+		this.enterFormulaForVisualization.disableProperty()
+				.bind(currentTrace.currentStateProperty().initializedProperty().not());
 	}
 
 	@FXML
@@ -285,6 +290,16 @@ public final class MenuController extends MenuBar {
 		final Stage stage = this.stageManager.getCurrent();
 		if (stage != null) {
 			stage.close();
+		}
+	}
+	
+	@FXML
+	private void handleReloadMachine() {
+		try {
+			this.currentTrace.reload(this.currentTrace.get());
+		} catch (IOException | ModelTranslationError e) {
+			logger.error("Model reload failed", e);
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to reload model:\n" + e).showAndWait();
 		}
 	}
 
