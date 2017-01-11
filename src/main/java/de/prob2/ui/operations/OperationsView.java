@@ -237,7 +237,7 @@ public final class OperationsView extends AnchorPane {
 
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
-			logger.debug("{} {}", name, errored);
+			logger.trace("{} {}", name, errored);
 			OperationItem operationItem = new OperationItem(
 					transition.getId(),
 					name,
