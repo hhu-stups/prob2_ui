@@ -243,7 +243,7 @@ public final class OperationsView extends AnchorPane {
 					name,
 					params,
 					transition.getReturnValues(),
-					withTimeout.contains(name) ? OperationItem.Status.TIMEOUT : OperationItem.Status.ENABLED,
+					OperationItem.Status.ENABLED,
 					explored,
 					errored);
 			events.add(operationItem);
@@ -256,6 +256,14 @@ public final class OperationsView extends AnchorPane {
 				}
 			}
 		}
+		for (String s : withTimeout) {
+			if (!notEnabled.contains(s)) {
+				events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(),
+						OperationItem.Status.TIMEOUT, false, false));
+			
+			}
+		}
+		
 		doSort();
 
 		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
