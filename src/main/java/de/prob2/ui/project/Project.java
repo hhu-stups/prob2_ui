@@ -7,30 +7,31 @@ import java.util.List;
 import java.util.Map;
 
 public class Project {
-	private String name;
-	private String description;
-	private File location;
-	private List<Machine> machines = new ArrayList<Machine>();
-	private Map<String, Preference> preferences = new HashMap<>();
-
+	private final String name;
+	private final String description;
+	private final File location;
 	private final boolean singleFile;
+	private final List<Machine> machines;
+	private final Map<String, Preference> preferences;
 
 	public Project(String name, String description, List<Machine> machines, Map<String, Preference> preferences,
 			File location) {
 		this.name = name;
 		this.description = description;
-		this.machines = machines;
 		this.singleFile = false;
+		this.machines = machines;
 		this.location = location;
 		this.preferences = preferences;
 	}
 
 	public Project(File file) {
 		this.name = file.getName();
-		this.machines = new ArrayList<Machine>();
-		String name[] = file.getName().split("\\.");
-		machines.add(new Machine(name[0], "", file));
+		this.description = "";
 		this.singleFile = true;
+		this.location = null;
+		this.machines = new ArrayList<>();
+		machines.add(new Machine(file.getName().split("\\.")[0], "", file));
+		this.preferences = new HashMap<>();
 	}
 
 	public String getName() {
@@ -46,8 +47,7 @@ public class Project {
 	}
 
 	public void addMachine(File machine) {
-		String name[] = machine.getName().split("\\.");
-		machines.add(new Machine(name[0], "", machine));
+		machines.add(new Machine(machine.getName().split("\\.")[0], "", machine));
 	}
 
 	public File getLocation() {
