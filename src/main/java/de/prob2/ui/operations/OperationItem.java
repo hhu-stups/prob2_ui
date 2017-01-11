@@ -48,11 +48,4 @@ public class OperationItem {
 		}
 		return sb.toString();
 	}
-
-	public boolean isEnabled() {
-		return this.status == OperationItem.Status.ENABLED;
-	}
-	public boolean isTimeOut() {
-		return this.status == OperationItem.Status.TIMEOUT;
-	}
 }
