@@ -22,10 +22,12 @@ import de.prob.model.classicalb.Operation;
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
 import de.prob.model.representation.AbstractElement;
+import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.BEvent;
 import de.prob.model.representation.Constant;
 import de.prob.model.representation.Machine;
+import de.prob.model.representation.Variable;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
@@ -187,29 +189,27 @@ public final class OperationsView extends AnchorPane {
 		currentTrace.addListener((observable, from, to) -> update(to));
 	}
 
-	private List<String> extractSetupConstantsParams(final Trace trace, final Transition transition) {
-		// It seems that there is no way to easily find out the constant values
-		// behind a $setup_constants transition.
-		// So we look at the values of all constants in the state after each
-		// transition.
-		final Set<IEvalElement> constantsFormulas = new HashSet<>();
-		for (final Constant c : trace.getStateSpace().getMainComponent().getChildrenOfType(Constant.class)) {
-			constantsFormulas.add(c.getFormula());
+	private List<String> extractParamsFromNextState(final Trace trace, final Transition transition, final Class<? extends AbstractFormulaElement> type) {
+		// It seems that there is no way to easily find out the constant/variable values which a specific $setup_constants or $initialise_machine transition would set.
+		// So we look at the values of all constants/variables in the transition's destination state.
+		final Set<IEvalElement> formulas = new HashSet<>();
+		for (final AbstractFormulaElement c : trace.getStateSpace().getMainComponent().getChildrenOfType(type)) {
+			formulas.add(c.getFormula());
 		}
 
-		for (final IEvalElement ee : constantsFormulas) {
+		for (final IEvalElement ee : formulas) {
 			trace.getStateSpace().subscribe(this, ee);
 		}
 
 		final List<String> params = new ArrayList<>();
 		final Map<IEvalElement, AbstractEvalResult> values = transition.getDestination().getValues();
 		for (final Map.Entry<IEvalElement, AbstractEvalResult> entry : values.entrySet()) {
-			if (constantsFormulas.contains(entry.getKey())) {
+			if (formulas.contains(entry.getKey())) {
 				params.add(entry.getKey() + "=" + entry.getValue());
 			}
 		}
 
-		for (final IEvalElement ee : constantsFormulas) {
+		for (final IEvalElement ee : formulas) {
 			trace.getStateSpace().unsubscribe(this, ee);
 		}
 
@@ -240,14 +240,15 @@ public final class OperationsView extends AnchorPane {
 
 			final List<String> params;
 			if ("SETUP_CONSTANTS".equals(name)) {
-				params = this.extractSetupConstantsParams(trace, transition);
+				params = this.extractParamsFromNextState(trace, transition, Constant.class);
+			} else if ("INITIALISATION".equals(name)) {
+				params = this.extractParamsFromNextState(trace, transition, Variable.class);
 			} else {
 				params = transition.getParams();
 			}
 
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
-			logger.trace("{} {}", name, errored);
 			OperationItem operationItem = new OperationItem(
 					transition.getId(),
 					name,
