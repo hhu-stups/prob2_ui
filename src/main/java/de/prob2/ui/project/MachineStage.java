@@ -28,7 +28,7 @@ public class MachineStage extends Stage {
 
 	private Machine machine;
 
-	private Set<String> machinesSet = new HashSet<String>();
+	private Set<String> machinesSet = new HashSet<>();
 
 	MachineStage(StageManager stageManager) {
 		stageManager.loadFXML(this, "add_machine_stage.fxml");
@@ -41,7 +41,7 @@ public class MachineStage extends Stage {
 			if (machinesSet.contains(to)) {
 				finishButton.setDisable(true);
 				errorExplanationLabel.setText("There is already a machine named '" + to + "'");
-			} else if (to.equals("")) {
+			} else if (to.isEmpty()) {
 				finishButton.setDisable(true);
 				errorExplanationLabel.setText("");
 			} else {
@@ -68,7 +68,7 @@ public class MachineStage extends Stage {
 		for (MachineTableItem i : machinesList) {
 			machinesSet.add(i.getName());
 		}
-		String n[] = machineFile.getName().split("\\.");
+		String[] n = machineFile.getName().split("\\.");
 		String name = n[0];
 		int i = 1;
 		while (machinesSet.contains(name)) {

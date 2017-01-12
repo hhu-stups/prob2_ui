@@ -49,7 +49,7 @@ public class AddProBPreferencesStage extends Stage {
 			if (preferencesSet.contains(to)) {
 				finishButton.setDisable(true);
 				errorExplanationLabel.setText("There is already a preference named '" + to + "'");
-			} else if (to.equals("")) {
+			} else if (to.isEmpty()) {
 				finishButton.setDisable(true);
 				errorExplanationLabel.setText("");
 			} else {
