@@ -141,10 +141,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 				this.animations.addNewAnimation(new Trace(stateSpace));
 			} catch (NullPointerException e) {
 				LOGGER.error("loading machine \"" + machine.getName() + "\" failed", e);
-				Platform.runLater(() -> {
-					stageManager.makeAlert(Alert.AlertType.ERROR,
-							"Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait();
-				});
+				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait());
 			}
 		}
 	}

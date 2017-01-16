@@ -19,7 +19,6 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.stats.StatsView;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -149,7 +148,7 @@ public final class DetachViewStageController extends Stage {
 		stage.setTitle(title);
 		stage.setOnCloseRequest(e -> {
 			checkBoxMap.get(node.getClass()).setSelected(false);
-			if (uiState.getGuiState().equals("main.fxml")) {
+			if ("main.fxml".equals(uiState.getGuiState())) {
 				this.apply();
 			}
 		});

@@ -84,9 +84,7 @@ public class NewProjectStage extends Stage {
 			final TableRow<MachineTableItem> row = new TableRow<>();
 			final ContextMenu contextMenu = new ContextMenu();
 			final MenuItem removeMenuItem = new MenuItem("Remove Machine");
-			removeMenuItem.setOnAction(event -> {
-				machinesTableView.getItems().remove(row.getItem());
-			});
+			removeMenuItem.setOnAction(event -> machinesTableView.getItems().remove(row.getItem()));
 			contextMenu.getItems().add(removeMenuItem);
 			row.setOnMouseClicked(event -> {
 				if (event.getButton() == MouseButton.SECONDARY) {
