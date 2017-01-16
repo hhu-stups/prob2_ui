@@ -54,6 +54,7 @@ public final class DetachViewStageController extends Stage {
 	
 	private final Map<Class<? extends Parent>, CheckBox> checkBoxMap;
 	private final Set<Stage> wrapperStages;
+	private final String guiStateDetached = "detached";
 
 	@Inject
 	private DetachViewStageController(final Injector injector, final StageManager stageManager, final UIState uiState) {
@@ -113,7 +114,7 @@ public final class DetachViewStageController extends Stage {
 		final SplitPane pane = findOfType(root.getChildrenUnmodifiable(), SplitPane.class);
 		final Accordion accordion = findOfType(pane.getItems(), Accordion.class);
 		removeTP(accordion, pane);
-		uiState.setGuiState("detached");
+		uiState.setGuiState(guiStateDetached);
 		this.hide();
 	}
 	
@@ -149,7 +150,7 @@ public final class DetachViewStageController extends Stage {
 		stage.setTitle(title);
 		stage.setOnCloseRequest(e -> {
 			checkBoxMap.get(node.getClass()).setSelected(false);
-			if (uiState.getGuiState().equals("main.fxml")) {
+			if (uiState.getGuiState().equals(guiStateDetached)) {
 				this.apply();
 			}
 		});
