@@ -61,6 +61,7 @@ public final class MenuController extends MenuBar {
 	private final RecentFiles recentFiles;
 	private final UIState uiState;
 	private final DetachViewStageController dvController;
+	private final AboutBoxController aboutController;
 	private Window window;
 
 	@FXML
@@ -86,13 +87,15 @@ public final class MenuController extends MenuBar {
 
 	@Inject
 	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
-			final DetachViewStageController dvController, @Nullable final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
+			final DetachViewStageController dvController, final AboutBoxController aboutController, @Nullable final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
+
 			final UIState uiState) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.dvController = dvController;
+		this.aboutController = aboutController;
 		if(IS_MAC) {
 			this.menuToolkit = injector.getInstance(MenuToolkit.class);
 		} else {
@@ -215,6 +218,11 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
+	private void handleAboutDialog() {
+		this.aboutController.showAndWait();
+	}
+
+	@FXML
 	private void handleLoadPerspective() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
@@ -261,7 +269,7 @@ public final class MenuController extends MenuBar {
 				return;
 			}
 		}
-		
+
 		Platform.runLater(() -> {
 			this.currentProject.changeCurrentProject(new Project(new File(path)));
 			injector.getInstance(ModelcheckingController.class).resetView();
@@ -294,7 +302,7 @@ public final class MenuController extends MenuBar {
 			stage.close();
 		}
 	}
-	
+
 	@FXML
 	private void handleReloadMachine() {
 		try {
@@ -352,11 +360,11 @@ public final class MenuController extends MenuBar {
 		}
 		return root;
 	}
-	
+
 	private boolean confirmReplacingProject() {
 		if (currentProject.exists()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
-			
+
 			if (currentProject.isSingleFile()) {
 				alert.setHeaderText("You've already opened a file.");
 				alert.setContentText("Do you want to close the current file?");
@@ -392,7 +400,7 @@ public final class MenuController extends MenuBar {
 		if (!confirmReplacingProject()) {
 			return;
 		}
-		
+
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Project");
 		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("ProB2 Projects", "*.json"));
