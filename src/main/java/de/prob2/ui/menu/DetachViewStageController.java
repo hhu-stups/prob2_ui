@@ -149,7 +149,9 @@ public final class DetachViewStageController extends Stage {
 		stage.setTitle(title);
 		stage.setOnCloseRequest(e -> {
 			checkBoxMap.get(node.getClass()).setSelected(false);
-			this.apply();
+			if (uiState.getGuiState().equals("main.fxml")) {
+				this.apply();
+			}
 		});
 		// Default bounds, replaced by saved ones from the config when show() is called
 		stage.setWidth(200);
