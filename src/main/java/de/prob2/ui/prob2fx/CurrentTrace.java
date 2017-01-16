@@ -1,15 +1,23 @@
 package de.prob2.ui.prob2fx;
 
+import java.io.IOException;
+import java.util.Map;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.animator.IAnimator;
+import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.model.representation.AbstractModel;
+import de.prob.scripting.Api;
+import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -24,31 +32,35 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 /**
- * A singleton writable property that represents the current {@link Trace}. It also provides convenience properties and methods for easy interaction with JavaFX components using property binding.
+ * A singleton writable property that represents the current {@link Trace}. It
+ * also provides convenience properties and methods for easy interaction with
+ * JavaFX components using property binding.
  */
 @Singleton
 public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	private final AnimationSelector animationSelector;
+	private final Api api;
 	
 	private final BooleanProperty exists;
 	private final BooleanProperty animatorBusy;
-	
+
 	private final CurrentState currentState;
 	private final CurrentStateSpace stateSpace;
 	private final CurrentModel model;
-	
+
 	private final ListProperty<Transition> transitionListWritable;
 	private final ListProperty<Transition> transitionList;
-	
+
 	private final BooleanProperty canGoBack;
 	private final BooleanProperty canGoForward;
-	
+
 	private final ObjectProperty<Trace> back;
 	private final ObjectProperty<Trace> forward;
-	
+
 	@Inject
 	private CurrentTrace(
 		final AnimationSelector animationSelector,
+		final Api api,
 		final CurrentState currentState,
 		final CurrentStateSpace currentStateSpace,
 		final CurrentModel currentModel
@@ -60,16 +72,17 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 			public void traceChange(final Trace currentTrace, final boolean currentAnimationChanged) {
 				CurrentTrace.this.set(currentTrace);
 			}
-			
+
 			@Override
 			public void animatorStatus(final boolean busy) {
 				CurrentTrace.this.animatorBusy.set(busy);
 			}
 		});
+		this.api = api;
 		
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
 		this.exists.bind(Bindings.isNotNull(this));
-		
+
 		this.animatorBusy = new SimpleBooleanProperty(this, "animatorBusy", false);
 		this.animatorBusy.addListener((observable, from, to) -> {
 			if (to) {
@@ -78,35 +91,37 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 				this.get().getStateSpace().endTransaction();
 			}
 		});
-		
+
 		this.currentState = currentState;
 		this.stateSpace = currentStateSpace;
 		this.model = currentModel;
-		
-		this.transitionListWritable = new SimpleListProperty<>(this, "transitionListWritable", FXCollections.observableArrayList());
-		this.transitionList = new SimpleListProperty<>(this, "transitionList", FXCollections.unmodifiableObservableList(this.transitionListWritable));
-		
+
+		this.transitionListWritable = new SimpleListProperty<>(this, "transitionListWritable",
+				FXCollections.observableArrayList());
+		this.transitionList = new SimpleListProperty<>(this, "transitionList",
+				FXCollections.unmodifiableObservableList(this.transitionListWritable));
+
 		this.canGoBack = new SimpleBooleanProperty(this, "canGoBack", false);
 		this.canGoForward = new SimpleBooleanProperty(this, "canGoForward", false);
-		
+
 		this.back = new SimpleObjectProperty<>(this, "back", null);
 		this.forward = new SimpleObjectProperty<>(this, "forward", null);
-		
+
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
 				clearProperties();
 			} else {
 				this.animationSelector.traceChange(to);
-				
+
 				this.currentState.set(to.getCurrentState());
 				this.stateSpace.set(to.getStateSpace());
 				this.model.set(to.getModel());
-				
+
 				this.transitionListWritable.setAll(to.getTransitionList());
-				
+
 				this.canGoBack.set(to.canGoBack());
 				this.canGoForward.set(to.canGoForward());
-				
+
 				this.back.set(to.back());
 				this.forward.set(to.forward());
 			}
@@ -128,14 +143,15 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	}
 
 	/**
-	 * A read-only boolean property indicating whether a current trace exists (i. e. is not null).
+	 * A read-only boolean property indicating whether a current trace exists
+	 * (i. e. is not null).
 	 * 
 	 * @return a boolean property indicating whether a current trace exists
 	 */
 	public ReadOnlyBooleanProperty existsProperty() {
 		return this.exists;
 	}
-	
+
 	/**
 	 * Return whether a current trace exists (i. e. is not null).
 	 * 
@@ -144,16 +160,21 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	public boolean exists() {
 		return this.existsProperty().get();
 	}
-	
+
 	/**
-	 * A writable property indicating whether the animator is currently busy. It holds the last value reported by {@link IAnimationChangeListener#animatorStatus(boolean)}. When written to, {@link IAnimator#startTransaction()} or {@link IAnimator#endTransaction()} is called on the current {@link StateSpace}.
+	 * A writable property indicating whether the animator is currently busy. It
+	 * holds the last value reported by
+	 * {@link IAnimationChangeListener#animatorStatus(boolean)}. When written
+	 * to, {@link IAnimator#startTransaction()} or
+	 * {@link IAnimator#endTransaction()} is called on the current
+	 * {@link StateSpace}.
 	 * 
 	 * @return a property indicating whether the animator is currently busy
 	 */
 	public BooleanProperty animatorBusyProperty() {
 		return this.animatorBusy;
 	}
-	
+
 	/**
 	 * Return whether the animator is currently busy.
 	 * 
@@ -162,25 +183,27 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	public boolean isAnimatorBusy() {
 		return this.animatorBusyProperty().get();
 	}
-	
+
 	/**
 	 * Set the animator's busy status.
 	 * 
-	 * @param busy the new busy status
+	 * @param busy
+	 *            the new busy status
 	 */
 	public void setAnimatorBusy(final boolean busy) {
 		this.animatorBusyProperty().set(busy);
 	}
-	
+
 	/**
 	 * A {@link CurrentState} holding the current {@link Trace}'s {@link State}.
 	 *
-	 * @return a {@link CurrentState} holding the current {@link Trace}'s {@link State}
+	 * @return a {@link CurrentState} holding the current {@link Trace}'s
+	 *         {@link State}
 	 */
 	public CurrentState currentStateProperty() {
 		return this.currentState;
 	}
-	
+
 	/**
 	 * Get the current {@link Trace}'s {@link State}.
 	 *
@@ -189,16 +212,18 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	public State getCurrentState() {
 		return this.currentStateProperty().get();
 	}
-	
+
 	/**
-	 * A {@link CurrentStateSpace} holding the current {@link Trace}'s {@link StateSpace}.
+	 * A {@link CurrentStateSpace} holding the current {@link Trace}'s
+	 * {@link StateSpace}.
 	 * 
-	 * @return a {@link CurrentStateSpace} holding the current {@link Trace}'s {@link StateSpace}
+	 * @return a {@link CurrentStateSpace} holding the current {@link Trace}'s
+	 *         {@link StateSpace}
 	 */
 	public CurrentStateSpace stateSpaceProperty() {
 		return this.stateSpace;
 	}
-	
+
 	/**
 	 * Get the current {@link Trace}'s {@link StateSpace}.
 	 * 
@@ -207,16 +232,18 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	public StateSpace getStateSpace() {
 		return this.stateSpaceProperty().get();
 	}
-	
+
 	/**
-	 * A {@link CurrentModel} holding the current {@link Trace}'s {@link AbstractModel}.
+	 * A {@link CurrentModel} holding the current {@link Trace}'s
+	 * {@link AbstractModel}.
 	 *
-	 * @return a {@link CurrentModel} holding the current {@link Trace}'s {@link AbstractModel}
+	 * @return a {@link CurrentModel} holding the current {@link Trace}'s
+	 *         {@link AbstractModel}
 	 */
 	public CurrentModel modelProperty() {
 		return this.model;
 	}
-	
+
 	/**
 	 * Get the current {@link Trace}'s {@link AbstractModel}.
 	 *
@@ -225,34 +252,40 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	public AbstractModel getModel() {
 		return this.modelProperty().get();
 	}
-	
+
 	/**
-	 * A read-only list property holding a read-only {@link ObservableList} version of the current {@link Trace}'s transition list.
+	 * A read-only list property holding a read-only {@link ObservableList}
+	 * version of the current {@link Trace}'s transition list.
 	 * 
-	 * @return a read-only list property holding a read-only observable list version of the current {@link Trace}'s transition list
+	 * @return a read-only list property holding a read-only observable list
+	 *         version of the current {@link Trace}'s transition list
 	 */
 	public ReadOnlyListProperty<Transition> transitionListProperty() {
 		return this.transitionList;
 	}
-	
+
 	/**
-	 * Get the current {@link Trace}'s transition list as a read-only {@link ObservableList}.
+	 * Get the current {@link Trace}'s transition list as a read-only
+	 * {@link ObservableList}.
 	 * 
-	 * @return the current {@link Trace}'s transition list as a read-only {@link ObservableList}
+	 * @return the current {@link Trace}'s transition list as a read-only
+	 *         {@link ObservableList}
 	 */
 	public ObservableList<Transition> getTransitionList() {
 		return this.transitionListProperty().get();
 	}
-	
+
 	/**
-	 * A read-only property indicating whether it is possible to go backward from the current trace.
+	 * A read-only property indicating whether it is possible to go backward
+	 * from the current trace.
 	 * 
-	 * @return a read-only property indicating whether it is possible to go backward from the current trace
+	 * @return a read-only property indicating whether it is possible to go
+	 *         backward from the current trace
 	 */
 	public ReadOnlyBooleanProperty canGoBackProperty() {
 		return this.canGoBack;
 	}
-	
+
 	/**
 	 * Return whether it is possible to go backward from the current trace.
 	 * 
@@ -261,16 +294,18 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	public boolean canGoBack() {
 		return this.canGoBackProperty().get();
 	}
-	
+
 	/**
-	 * A read-only property indicating whether it is possible to go forward from the current trace.
+	 * A read-only property indicating whether it is possible to go forward from
+	 * the current trace.
 	 *
-	 * @return a read-only property indicating whether it is possible to go forward from the current trace
+	 * @return a read-only property indicating whether it is possible to go
+	 *         forward from the current trace
 	 */
 	public ReadOnlyBooleanProperty canGoForwardProperty() {
 		return this.canGoForward;
 	}
-	
+
 	/**
 	 * Return whether it is possible to go forward from the current trace.
 	 *
@@ -279,40 +314,76 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	public boolean canGoForward() {
 		return this.canGoForwardProperty().get();
 	}
-	
+
 	/**
-	 * A read-only property holding the {@link Trace} that is one transition backward of the current one.
+	 * A read-only property holding the {@link Trace} that is one transition
+	 * backward of the current one.
 	 * 
-	 * @return a read-only property holding the {@link Trace} that is one transition backward of the current one
+	 * @return a read-only property holding the {@link Trace} that is one
+	 *         transition backward of the current one
 	 */
 	public ReadOnlyObjectProperty<Trace> backProperty() {
 		return this.back;
 	}
-	
+
 	/**
 	 * Get the {@link Trace} that is one transition backward of the current one.
 	 * 
-	 * @return the {@link Trace} that is one transition backward of the current one
+	 * @return the {@link Trace} that is one transition backward of the current
+	 *         one
 	 */
 	public Trace back() {
 		return this.backProperty().get();
 	}
-	
+
 	/**
-	 * A read-only property holding the {@link Trace} that is one transition forward of the current one.
+	 * A read-only property holding the {@link Trace} that is one transition
+	 * forward of the current one.
 	 *
-	 * @return a read-only property holding the {@link Trace} that is one transition forward of the current one
+	 * @return a read-only property holding the {@link Trace} that is one
+	 *         transition forward of the current one
 	 */
 	public ReadOnlyObjectProperty<Trace> forwardProperty() {
 		return this.forward;
 	}
-	
+
 	/**
 	 * Get the {@link Trace} that is one transition forward of the current one.
 	 *
-	 * @return the {@link Trace} that is one transition forward of the current one
+	 * @return the {@link Trace} that is one transition forward of the current
+	 *         one
 	 */
 	public Trace forward() {
 		return this.forwardProperty().get();
+	}
+	
+	/**
+	 * Reload the given trace's model and make the reloaded trace the current one. If the reload fails, the current trace is not changed.
+	 * 
+	 * @param trace the trace to reload
+	 * @param preferences preferences for the reloaded model
+	 * @throws IllegalStateException if there is no current trace
+	 * @throws IOException when thrown by {@link Api#b_load(String, Map)}
+	 * @throws ModelTranslationError when thrown by {@link Api#b_load(String, Map)}
+	 */
+	public void reload(final Trace trace, final Map<String, String> preferences) throws IOException, ModelTranslationError {
+		final String filename = trace.getModel().getModelFile().getAbsolutePath();
+		final Trace newTrace = new Trace(api.b_load(filename, preferences));
+		this.animationSelector.removeTrace(trace);
+		this.animationSelector.addNewAnimation(newTrace);
+	}
+	
+	/**
+	 * Reload the given trace's model and make the reloaded trace the current one. Preferences are maintained from the old model. If the reload fails, the current trace is not changed.
+	 *
+	 * @param trace the trace to reload
+	 * @throws IllegalStateException if there is no current trace
+	 * @throws IOException when thrown by {@link Api#b_load(String, Map)}
+	 * @throws ModelTranslationError when thrown by {@link Api#b_load(String, Map)}
+	 */
+	public void reload(final Trace trace) throws IOException, ModelTranslationError {
+		final GetCurrentPreferencesCommand cmd = new GetCurrentPreferencesCommand();
+		this.getStateSpace().execute(cmd);
+		this.reload(trace, cmd.getPreferences());
 	}
 }

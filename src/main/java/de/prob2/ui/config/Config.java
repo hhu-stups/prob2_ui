@@ -17,16 +17,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.Console;
@@ -37,13 +38,10 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.TablePersistenceHandler;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
-
 import javafx.geometry.BoundingBox;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
@@ -60,6 +58,7 @@ public final class Config {
 		private List<String> groovyObjectTabs;
 		private String currentPreference;
 		private List<String> expandedTitledPanes;
+		private String defaultProjectLocation;
 		private double[] horizontalDividerPositions;
 		private double[] verticalDividerPositions;
 		private double[] statesViewColumnsWidth;
@@ -85,6 +84,7 @@ public final class Config {
 	private final BConsole bConsole;
 	private final Injector injector;
 	private final UIState uiState;
+	private final CurrentProject currentProject;
 	
 	@Inject
 	private Config(final ClassBlacklist classBlacklist, 
@@ -92,7 +92,8 @@ public final class Config {
 					final UIState uiState, 
 					final GroovyConsole groovyConsole, 
 					final BConsole bConsole, 
-					final Injector injector) {
+					final Injector injector,
+					final CurrentProject currentProject) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.classBlacklist = classBlacklist;
 		this.recentFiles = recentFiles;
@@ -100,6 +101,7 @@ public final class Config {
 		this.groovyConsole = groovyConsole;
 		this.bConsole = bConsole;
 		this.injector = injector;
+		this.currentProject = currentProject;
 		
 		try (
 			final InputStream is = Config.class.getResourceAsStream("default.json");
@@ -153,6 +155,9 @@ public final class Config {
 		if(configData.expandedTitledPanes == null) {
 			configData.expandedTitledPanes = this.defaultData.expandedTitledPanes;
 		}
+		if(configData.defaultProjectLocation == null) {
+			configData.defaultProjectLocation = System.getProperty("user.home");
+		}
 		
 		MainController main = injector.getInstance(MainController.class);
 		
@@ -183,7 +188,7 @@ public final class Config {
 		if(configData.animationsViewSortedOrder == null) {
 			configData.animationsViewColumnsOrder = this.defaultData.animationsViewSortedOrder;
 		}
-		
+
 		if(configData.operationsSortMode == null) {
 			configData.operationsSortMode = this.defaultData.operationsSortMode;
 		}
@@ -209,6 +214,8 @@ public final class Config {
 		
 		this.recentFiles.setMaximum(configData.maxRecentFiles);
 		this.recentFiles.setAll(configData.recentFiles);
+		
+		this.currentProject.setDefaultLocation(configData.defaultProjectLocation);
 		
 		for (String name : configData.statesViewHiddenClasses) {
 			Class<? extends AbstractElement> clazz;
@@ -278,6 +285,7 @@ public final class Config {
 		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
+		configData.defaultProjectLocation = this.currentProject.getDefaultLocation();
 		configData.statesViewHiddenClasses = new ArrayList<>();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
 		configData.groovyConsoleSettings = groovyConsole.getSettings();

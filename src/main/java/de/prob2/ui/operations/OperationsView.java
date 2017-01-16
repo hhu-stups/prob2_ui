@@ -6,12 +6,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -29,7 +29,6 @@ import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
-import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -51,8 +50,9 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
-public final class OperationsView extends AnchorPane implements IComponents {
+import se.sawano.java.text.AlphanumericComparator;
+
+public final class OperationsView extends AnchorPane {
 	public enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
@@ -65,26 +65,41 @@ public final class OperationsView extends AnchorPane implements IComponents {
 				setText(item.toString());
 				setGraphicTextGap(10.0);
 				final FontAwesomeIconView icon;
-				if (item.isEnabled()) {
-					icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
-					icon.setFill(Color.LIMEGREEN);
-					setDisable(false);
-					if (!item.explored) {
-						getStyleClass().clear();
-						getStyleClass().add("unexplored");
-					} else if (item.errored) {
-						getStyleClass().clear();
-						getStyleClass().add("errored");
-					} else {
+				switch (item.status) {
+					case TIMEOUT:
+						icon = new FontAwesomeIconView(FontAwesomeIcon.CLOCK_ALT);
+						icon.setFill(Color.ORANGE);
+						setDisable(true);
 						getStyleClass().clear();
 						getStyleClass().add("normal");
-					}
-				} else {
-					icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
-					icon.setFill(Color.RED);
-					setDisable(true);
-					getStyleClass().clear();
-					getStyleClass().add("normal");
+						break;
+					
+					case ENABLED:
+						icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
+						icon.setFill(Color.LIMEGREEN);
+						setDisable(false);
+						if (!item.explored) {
+							getStyleClass().clear();
+							getStyleClass().add("unexplored");
+						} else if (item.errored) {
+							getStyleClass().clear();
+							getStyleClass().add("errored");
+						} else {
+							getStyleClass().clear();
+							getStyleClass().add("normal");
+						}
+						break;
+					
+					case DISABLED:
+						icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
+						icon.setFill(Color.RED);
+						setDisable(true);
+						getStyleClass().clear();
+						getStyleClass().add("normal");
+						break;
+					
+					default:
+						throw new IllegalStateException("Unhandled status: " + item.status);
 				}
 				setGraphic(icon);
 			} else {
@@ -94,24 +109,37 @@ public final class OperationsView extends AnchorPane implements IComponents {
 			}
 		}
 	}
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(OperationsView.class);
 	// Matches empty string or number
 	private static final Pattern NUMBER_OR_EMPTY_PATTERN = Pattern.compile("^$|^\\d+$");
 
-	@FXML private ListView<OperationItem> opsListView;
-	@FXML private Button backButton;
-	@FXML private Button forwardButton;
-	@FXML private Button searchButton;
-	@FXML private Button sortButton;
-	@FXML private ToggleButton disabledOpsToggle;
-	@FXML private TextField filterEvents;
-	@FXML private TextField randomText;
-	@FXML private MenuButton randomButton;
-	@FXML private MenuItem oneRandomEvent;
-	@FXML private MenuItem fiveRandomEvents;
-	@FXML private MenuItem tenRandomEvents;
-	@FXML private CustomMenuItem someRandomEvents;
+	@FXML
+	private ListView<OperationItem> opsListView;
+	@FXML
+	private Button backButton;
+	@FXML
+	private Button forwardButton;
+	@FXML
+	private Button searchButton;
+	@FXML
+	private Button sortButton;
+	@FXML
+	private ToggleButton disabledOpsToggle;
+	@FXML
+	private TextField filterEvents;
+	@FXML
+	private TextField randomText;
+	@FXML
+	private MenuButton randomButton;
+	@FXML
+	private MenuItem oneRandomEvent;
+	@FXML
+	private MenuItem fiveRandomEvents;
+	@FXML
+	private MenuItem tenRandomEvents;
+	@FXML
+	private CustomMenuItem someRandomEvents;
 
 	private AbstractModel currentModel;
 	private List<String> opNames = new ArrayList<>();
@@ -121,38 +149,13 @@ public final class OperationsView extends AnchorPane implements IComponents {
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
-	
-	private final Comparator<OperationItem> zToA = (o1, o2) -> {
-		if (o1.name.equals(o2.name)) {
-			return -compareParams(o1.params, o2.params);
-		} else if (o1.name.equalsIgnoreCase(o2.name)) {
-			return -o1.name.compareTo(o2.name);
-		} else {
-			return -o1.name.compareToIgnoreCase(o2.name);
-		}
-	};
-	
-	private final Comparator<OperationItem> aToZ = (o1, o2) -> {
-		if (o1.name.equals(o2.name)) {
-			return compareParams(o1.params, o2.params);
-		} else if (o1.name.equalsIgnoreCase(o2.name)) {
-			return o1.name.compareTo(o2.name);
-		} else {
-			return o1.name.compareToIgnoreCase(o2.name);
-		}
-	};
-	
-	private final Comparator<OperationItem> modelOrder = (o1, o2) -> {
-		if (o1.name.equals(o2.name)) {
-			return compareParams(o1.params, o2.params);
-		} else {
-			return Integer.compare(opNames.indexOf(o1.name), opNames.indexOf(o2.name));
-		}
-	};
+
+	private final Comparator<CharSequence> alphanumericComparator;
 
 	@Inject
-	private OperationsView(final CurrentTrace currentTrace, final StageManager stageManager) {
+	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager) {
 		this.currentTrace = currentTrace;
+		this.alphanumericComparator = new AlphanumericComparator(locale);
 
 		stageManager.loadFXML(this, "ops_view.fxml");
 	}
@@ -162,8 +165,9 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		opsListView.setCellFactory(lv -> new OperationsCell());
 
 		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null && newValue.isEnabled()) {
-				// Disable the operations list until the trace change is finished, the update method reenables it later
+			if (newValue != null && newValue.status == OperationItem.Status.ENABLED) {
+				// Disable the operations list until the trace change is
+				// finished, the update method reenables it later
 				opsListView.setDisable(true);
 				currentTrace.set(currentTrace.get().add(newValue.id));
 			}
@@ -172,29 +176,31 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 		randomButton.disableProperty().bind(currentTrace.existsProperty().not());
-		
+
 		randomText.textProperty().addListener((observable, from, to) -> {
 			if (!NUMBER_OR_EMPTY_PATTERN.matcher(to).matches() && NUMBER_OR_EMPTY_PATTERN.matcher(from).matches()) {
-				((StringProperty)observable).set(from);
+				((StringProperty) observable).set(from);
 			}
 		});
 
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
 	}
-	
+
 	private List<String> extractSetupConstantsParams(final Trace trace, final Transition transition) {
-		// It seems that there is no way to easily find out the constant values behind a $setup_constants transition.
-		// So we look at the values of all constants in the state after each transition.
+		// It seems that there is no way to easily find out the constant values
+		// behind a $setup_constants transition.
+		// So we look at the values of all constants in the state after each
+		// transition.
 		final Set<IEvalElement> constantsFormulas = new HashSet<>();
 		for (final Constant c : trace.getStateSpace().getMainComponent().getChildrenOfType(Constant.class)) {
 			constantsFormulas.add(c.getFormula());
 		}
-		
+
 		for (final IEvalElement ee : constantsFormulas) {
 			trace.getStateSpace().subscribe(this, ee);
 		}
-		
+
 		final List<String> params = new ArrayList<>();
 		final Map<IEvalElement, AbstractEvalResult> values = transition.getDestination().getValues();
 		for (final Map.Entry<IEvalElement, AbstractEvalResult> entry : values.entrySet()) {
@@ -202,11 +208,11 @@ public final class OperationsView extends AnchorPane implements IComponents {
 				params.add(entry.getKey() + "=" + entry.getValue());
 			}
 		}
-		
+
 		for (final IEvalElement ee : constantsFormulas) {
 			trace.getStateSpace().unsubscribe(this, ee);
 		}
-		
+
 		return params;
 	}
 
@@ -218,9 +224,9 @@ public final class OperationsView extends AnchorPane implements IComponents {
 			Platform.runLater(opsListView.getItems()::clear);
 			return;
 		}
-		
+
 		this.opsListView.setDisable(false);
-		
+
 		if (trace.getModel() != currentModel) {
 			updateModel(trace);
 		}
@@ -231,32 +237,32 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		for (Transition transition : operations) {
 			final String name = extractPrettyName(transition.getName());
 			notEnabled.remove(name);
-			
+
 			final List<String> params;
 			if ("SETUP_CONSTANTS".equals(name)) {
 				params = this.extractSetupConstantsParams(trace, transition);
 			} else {
 				params = transition.getParams();
 			}
-			
+
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			logger.debug("{} {}", name, errored);
 			OperationItem operationItem = new OperationItem(
-				transition.getId(),
-				name,
-				params,
-				transition.getReturnValues(),
-				withTimeout.contains(name) ? OperationItem.Status.TIMEOUT : OperationItem.Status.ENABLED,
-				explored,
-				errored
-			);
+					transition.getId(),
+					name,
+					params,
+					transition.getReturnValues(),
+					withTimeout.contains(name) ? OperationItem.Status.TIMEOUT : OperationItem.Status.ENABLED,
+					explored,
+					errored);
 			events.add(operationItem);
 		}
 		if (showDisabledOps) {
 			for (String s : notEnabled) {
 				if (!"INITIALISATION".equals(s)) {
-					events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(), OperationItem.Status.DISABLED, false, false));
+					events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(),
+							withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED, false, false));
 				}
 			}
 		}
@@ -264,7 +270,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 
 		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
 	}
-	
+
 	private static String extractPrettyName(final String name) {
 		if ("$setup_constants".equals(name)) {
 			return "SETUP_CONSTANTS";
@@ -274,27 +280,46 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		}
 		return name;
 	}
-	
+
 	private static String stripString(final String param) {
 		return param.replaceAll("\\{", "").replaceAll("\\}", "");
 	}
-	
-	private static int compareParams(final List<String> params1, final List<String> params2) {
-		for (int i = 0; i < params1.size(); i++) {
-			String p1 = stripString(params1.get(i));
-			String p2 = stripString(params2.get(i));
-			if (p1.compareTo(p2) != 0) {
-				return p1.compareTo(p2);
+
+	private int compareParams(final List<String> left, final List<String> right) {
+		int minSize = left.size() > right.size() ? left.size() : right.size();
+		for (int i = 0; i < minSize; i++) {
+			int cmp = alphanumericComparator.compare(stripString(left.get(i)), stripString(right.get(i)));
+			if (cmp != 0) {
+				return cmp;
 			}
-			
 		}
-		return 0;
+
+		// All elements are equal up to the end of the smaller list, order based
+		// on which one has more elements.
+		return Integer.compare(left.size(), right.size());
+	}
+
+	private int compareAlphanumeric(final OperationItem left, final OperationItem right) {
+		if (left.name.equals(right.name)) {
+			return compareParams(left.params, right.params);
+		} else {
+			return alphanumericComparator.compare(left.name, right.name);
+		}
+	}
+
+	private int compareModelOrder(final OperationItem left, final OperationItem right) {
+		if (left.name.equals(right.name)) {
+			return compareParams(left.params, right.params);
+		} else {
+			return Integer.compare(opNames.indexOf(left.name), opNames.indexOf(right.name));
+		}
 	}
 
 	@FXML
 	private void handleDisabledOpsToggle() {
 		showDisabledOps = disabledOpsToggle.isSelected();
-		FontAwesomeIconView icon = new FontAwesomeIconView(showDisabledOps ? FontAwesomeIcon.EYE : FontAwesomeIcon.EYE_SLASH);
+		FontAwesomeIconView icon = new FontAwesomeIconView(
+				showDisabledOps ? FontAwesomeIcon.EYE : FontAwesomeIcon.EYE_SLASH);
 		update(currentTrace.get());
 		icon.setSize("15");
 		icon.setStyleClass("icon-dark");
@@ -335,15 +360,15 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		final Comparator<OperationItem> comparator;
 		switch (sortMode) {
 		case MODEL_ORDER:
-			comparator = modelOrder;
+			comparator = this::compareModelOrder;
 			break;
 
 		case A_TO_Z:
-			comparator = aToZ;
+			comparator = this::compareAlphanumeric;
 			break;
 
 		case Z_TO_A:
-			comparator = zToA;
+			comparator = ((Comparator<OperationItem>) this::compareAlphanumeric).reversed();
 			break;
 
 		default:
@@ -412,8 +437,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 				opToParams.put(e.getName(), getParams(e));
 			}
 		}
-		
-		
+
 	}
 
 	private List<String> getParams(BEvent e) {
@@ -427,9 +451,9 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		}
 		return paramList;
 	}
-	
+
 	public void setSortMode(OperationsView.SortMode mode) {
-		sortMode = mode; 
+		sortMode = mode;
 		FontAwesomeIconView icon;
 		switch (sortMode) {
 		case A_TO_Z:
@@ -451,11 +475,11 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		icon.setStyleClass("icon-dark");
 		sortButton.setGraphic(icon);
 	}
-	
+
 	public SortMode getSortMode() {
 		return sortMode;
 	}
-	
+
 	public void setShowDisabledOps(boolean showDisabledOps) {
 		this.showDisabledOps = showDisabledOps;
 		FontAwesomeIconView icon;
@@ -470,7 +494,7 @@ public final class OperationsView extends AnchorPane implements IComponents {
 		icon.setStyleClass("icon-dark");
 		disabledOpsToggle.setGraphic(icon);
 	}
-	
+
 	public boolean getShowDisabledOps() {
 		return showDisabledOps;
 	}

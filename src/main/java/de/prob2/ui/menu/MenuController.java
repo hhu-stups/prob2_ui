@@ -4,18 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
-import de.prob.scripting.Api;
-import de.prob.scripting.ModelTranslationError;
-import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
 
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.b.BConsoleStage;
@@ -25,16 +20,19 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.NewProjectStage;
+import de.prob2.ui.project.Project;
 
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -53,42 +51,41 @@ public final class MenuController extends MenuBar {
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 
 	private final Injector injector;
-	private final Api api;
-	private final AnimationSelector animationSelector;
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final MenuToolkit menuToolkit;
 	private final RecentFiles recentFiles;
 	private final UIState uiState;
 	private final DetachViewStageController dvController;
-	
-	private final Object openLock;
 	private Window window;
 
-	@FXML private Menu recentFilesMenu;
-	@FXML private MenuItem recentFilesPlaceholder;
-	@FXML private MenuItem clearRecentFiles;
-	@FXML private Menu windowMenu;
-	@FXML private MenuItem preferencesItem;
-	@FXML private MenuItem enterFormulaForVisualization;
-	@FXML private MenuItem aboutItem;
-	
+	@FXML
+	private Menu recentFilesMenu;
+	@FXML
+	private MenuItem recentFilesPlaceholder;
+	@FXML
+	private MenuItem clearRecentFiles;
+	@FXML
+	private Menu windowMenu;
+	@FXML
+	private MenuItem preferencesItem;
+	@FXML
+	private MenuItem enterFormulaForVisualization;
+	@FXML
+	private MenuItem aboutItem;
+	@FXML
+	private MenuItem saveProjectItem;
+
+	private CurrentProject currentProject;
+
 	@Inject
-	private MenuController(
-		final StageManager stageManager,
-		final Injector injector,
-		final Api api,
-		final AnimationSelector animationSelector,
-		final CurrentTrace currentTrace,
-		final DetachViewStageController dvController,
-		final RecentFiles recentFiles,
-		final UIState uiState
-	) {
+	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
+			final DetachViewStageController dvController, final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
+			final UIState uiState) {
 		this.injector = injector;
-		this.api = api;
-		this.animationSelector = animationSelector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.dvController = dvController;
 		if(IS_MAC) {
 			this.menuToolkit = injector.getInstance(MenuToolkit.class);
@@ -97,55 +94,42 @@ public final class MenuController extends MenuBar {
 		}
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
-		
-		this.openLock = new Object();
 
 		stageManager.loadFXML(this, "menu.fxml");
 
 		if (menuToolkit != null) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
-			
+
 			// Remove About menu item from Help
 			aboutItem.getParentMenu().getItems().remove(aboutItem);
 			aboutItem.setText("About ProB 2");
-			
+
 			// Remove Preferences menu item from Edit
 			preferencesItem.getParentMenu().getItems().remove(preferencesItem);
 			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
-			
+
 			// Create Mac-style application menu
 			final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu("ProB 2");
 			this.getMenus().add(0, applicationMenu);
+
 			menuToolkit.setApplicationMenu(applicationMenu);
-			applicationMenu.getItems().setAll(
-				aboutItem,
-				new SeparatorMenuItem(),
-				preferencesItem,
-				new SeparatorMenuItem(),
-				menuToolkit.createHideMenuItem("ProB 2"),
-				menuToolkit.createHideOthersMenuItem(),
-				menuToolkit.createUnhideAllMenuItem(),
-				new SeparatorMenuItem(),
-				menuToolkit.createQuitMenuItem("ProB 2")
-			);
-			
+			applicationMenu.getItems().setAll(aboutItem, new SeparatorMenuItem(), preferencesItem,
+					new SeparatorMenuItem(), menuToolkit.createHideMenuItem("ProB 2"),
+					menuToolkit.createHideOthersMenuItem(), menuToolkit.createUnhideAllMenuItem(),
+					new SeparatorMenuItem(), menuToolkit.createQuitMenuItem("ProB 2"));
+
 			// Add Mac-style items to Window menu
-			windowMenu.getItems().addAll(
-				menuToolkit.createMinimizeMenuItem(),
-				menuToolkit.createZoomMenuItem(),
-				menuToolkit.createCycleWindowsItem(),
-				new SeparatorMenuItem(),
-				menuToolkit.createBringAllToFrontItem(),
-				new SeparatorMenuItem()
-			);
+			windowMenu.getItems().addAll(menuToolkit.createMinimizeMenuItem(), menuToolkit.createZoomMenuItem(),
+					menuToolkit.createCycleWindowsItem(), new SeparatorMenuItem(),
+					menuToolkit.createBringAllToFrontItem(), new SeparatorMenuItem());
 			menuToolkit.autoAddWindowMenuItems(windowMenu);
-			
+
 			// Make this the global menu bar
 			stageManager.setGlobalMacMenuBar(this);
 		}
 	}
-	
+
 	@FXML
 	public void initialize() {
 		this.sceneProperty().addListener((observable, from, to) -> {
@@ -153,33 +137,38 @@ public final class MenuController extends MenuBar {
 				to.windowProperty().addListener((observable1, from1, to1) -> this.window = to1);
 			}
 		});
-		
+
 		final ListChangeListener<String> recentFilesListener = change -> {
 			final ObservableList<MenuItem> recentItems = this.recentFilesMenu.getItems();
 			final List<MenuItem> newItems = getRecentFileItems();
 
-			// If there are no recent files, show a placeholder and disable clearing
+			// If there are no recent files, show a placeholder and disable
+			// clearing
 			this.clearRecentFiles.setDisable(newItems.isEmpty());
 			if (newItems.isEmpty()) {
 				newItems.add(this.recentFilesPlaceholder);
 			}
-			
+
 			// Add a shortcut for reopening the most recent file
 			newItems.get(0).setAccelerator(KeyCombination.valueOf("Shift+Shortcut+'O'"));
-			
-			// Keep the last two items (the separator and the "clear recent files" item)
-			newItems.addAll(recentItems.subList(recentItems.size()-2, recentItems.size()));
-			
+
+			// Keep the last two items (the separator and the "clear recent
+			// files" item)
+			newItems.addAll(recentItems.subList(recentItems.size() - 2, recentItems.size()));
+
 			// Replace the old recents with the new ones
 			this.recentFilesMenu.getItems().setAll(newItems);
 		};
 		this.recentFiles.addListener(recentFilesListener);
 		// Fire the listener once to populate the recent files menu
 		recentFilesListener.onChanged(null);
-		
-		this.enterFormulaForVisualization.disableProperty().bind(currentTrace.currentStateProperty().initializedProperty().not());
+
+		this.enterFormulaForVisualization.disableProperty()
+				.bind(currentTrace.currentStateProperty().initializedProperty().not());
+		this.saveProjectItem.disableProperty()
+				.bind(currentProject.existsProperty().not().or(currentProject.isSingleFileProperty()));
 	}
-	
+
 	@FXML
 	private void handleClearRecentFiles() {
 		this.recentFiles.clear();
@@ -212,12 +201,12 @@ public final class MenuController extends MenuBar {
 		uiState.getExpandedTitledPanes().clear();
 		loadPreset("stackedLists.fxml");
 	}
-	
+
 	@FXML
 	private void handleLoadDetached() {
 		this.dvController.showAndWait();
 	}
-	
+
 	@FXML
 	private void handleLoadPerspective() {
 		FileChooser fileChooser = new FileChooser();
@@ -239,56 +228,60 @@ public final class MenuController extends MenuBar {
 			}
 		}
 	}
-	
-	private void openAsync(String path) {
-		new Thread(() -> this.open(path), "File Opener Thread").start();
-	}
-	
+
 	private void open(String path) {
-		// NOTE: This method may be called from outside the JavaFX main thread, for example from openAsync.
-		// This means that all JavaFX calls must be wrapped in Platform.runLater.
-		
-		// Prevent multiple threads from loading a file at the same time
-		synchronized (this.openLock) {
-			final StateSpace newSpace;
-			try {
-				newSpace = this.api.b_load(path);
-			} catch (IOException | ModelTranslationError e) {
-				logger.error("loading file failed", e);
-				// Do not change to method reference if suggested by Sonar!
-				// This is a false positive - the makeAlert call has to run on the FX thread.
-				// When changed to a method reference, only showAndWait (and not makeAlert) runs on the FX thread.
-				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait());
+		if (currentProject.exists()) {
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
+
+			final ButtonType buttonTypeAdd = new ButtonType("Add");
+			final ButtonType buttonTypeClose = new ButtonType("Close");
+
+			if (currentProject.isSingleFile()) {
+				alert.setHeaderText("You've already opened a file.");
+				alert.setContentText("Do you want to close the current file?");
+				alert.getButtonTypes().setAll(buttonTypeClose, ButtonType.CANCEL);
+			} else {
+				alert.setHeaderText("You've already opened a project.");
+				alert.setContentText("Do you want to close the current project or add the selected file?");
+				alert.getButtonTypes().setAll(buttonTypeAdd, buttonTypeClose, ButtonType.CANCEL);
+			}
+			Optional<ButtonType> result = alert.showAndWait();
+
+			if (!result.isPresent() || ButtonType.CANCEL.equals(result.get())) {
+				return;
+			} else if (buttonTypeAdd.equals(result.get())) {
+				currentProject.addMachine(new File(path));
 				return;
 			}
-			
-			this.animationSelector.addNewAnimation(new Trace(newSpace));
-			Platform.runLater(() -> {
-				injector.getInstance(ModelcheckingController.class).resetView();
-				
-				// Remove the path first to avoid listing the same file twice.
-				this.recentFiles.remove(path);
-				this.recentFiles.add(0, path);
-			});
 		}
+		
+		Platform.runLater(() -> {
+			this.currentProject.changeCurrentProject(new Project(new File(path)));
+			injector.getInstance(ModelcheckingController.class).resetView();
+
+			// Remove the path first to avoid listing the same file twice.
+			this.recentFiles.remove(path);
+			this.recentFiles.add(0, path);
+		});
 	}
 
 	@FXML
-	private void handleOpen(ActionEvent event) {
+	private void handleOpen() {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
+		fileChooser.getExtensionFilters()
+				.add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
 
 		final File selectedFile = fileChooser.showOpenDialog(this.window);
 		if (selectedFile == null) {
 			return;
 		}
 
-		this.openAsync(selectedFile.getAbsolutePath());
+		this.open(selectedFile.getAbsolutePath());
 	}
 
 	@FXML
-	private void handleClose(final ActionEvent event) {
+	private void handleClose() {
 		final Stage stage = this.stageManager.getCurrent();
 		if (stage != null) {
 			stage.close();
@@ -315,39 +308,91 @@ public final class MenuController extends MenuBar {
 		groovyConsoleStage.show();
 		groovyConsoleStage.toFront();
 	}
-	
+
 	@FXML
 	private void handleBConsole() {
 		final Stage bConsoleStage = injector.getInstance(BConsoleStage.class);
 		bConsoleStage.show();
 		bConsoleStage.toFront();
 	}
-	
+
 	@FXML
 	private void handleReportBug() {
 		final Stage reportBugStage = injector.getInstance(ReportBugStage.class);
 		reportBugStage.show();
 		reportBugStage.toFront();
 	}
-	
+
 	public Parent loadPreset(String location) {
 		this.uiState.setGuiState(location);
 		final MainController root = injector.getInstance(MainController.class);
 		root.refresh();
 		window.getScene().setRoot(root);
-		
+
 		if (this.menuToolkit != null) {
 			this.menuToolkit.setApplicationMenu(this.getMenus().get(0));
 			this.stageManager.setGlobalMacMenuBar(this);
 		}
 		return root;
 	}
+	
+	private boolean confirmReplacingProject() {
+		if (currentProject.exists()) {
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
+			
+			if (currentProject.isSingleFile()) {
+				alert.setHeaderText("You've already opened a file.");
+				alert.setContentText("Do you want to close the current file?");
+			} else {
+				alert.setHeaderText("You've already opened a project.");
+				alert.setContentText("Do you want to close the current project?");
+			}
+			Optional<ButtonType> result = alert.showAndWait();
+			return result.isPresent() && ButtonType.OK.equals(result.get());
+		} else {
+			return true;
+		}
+	}
 
-	private List<MenuItem> getRecentFileItems(){
+	@FXML
+	private void createNewProject() {
+		if (!confirmReplacingProject()) {
+			return;
+		}
+
+		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
+		newProjectStage.showAndWait();
+		newProjectStage.toFront();
+	}
+
+	@FXML
+	private void saveProject() {
+		currentProject.save();
+	}
+
+	@FXML
+	private void openProject() {
+		if (!confirmReplacingProject()) {
+			return;
+		}
+		
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open Project");
+		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("ProB2 Projects", "*.json"));
+
+		final File selectedProject = fileChooser.showOpenDialog(this.window);
+		if (selectedProject == null) {
+			return;
+		}
+
+		currentProject.open(selectedProject);
+	}
+
+	private List<MenuItem> getRecentFileItems() {
 		final List<MenuItem> newItems = new ArrayList<>();
 		for (String s : this.recentFiles) {
 			final MenuItem item = new MenuItem(new File(s).getName());
-			item.setOnAction(event -> this.openAsync(s));
+			item.setOnAction(event -> this.open(s));
 			newItems.add(item);
 		}
 		return newItems;

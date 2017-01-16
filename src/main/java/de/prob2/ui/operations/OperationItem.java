@@ -48,8 +48,4 @@ public class OperationItem {
 		}
 		return sb.toString();
 	}
-
-	public boolean isEnabled() {
-		return this.status == OperationItem.Status.ENABLED;
-	}
 }

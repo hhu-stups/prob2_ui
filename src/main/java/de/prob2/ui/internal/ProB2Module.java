@@ -11,7 +11,6 @@ import com.google.inject.util.Providers;
 import de.codecentric.centerdevice.MenuToolkit;
 
 import de.prob.MainModule;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.config.Config;
@@ -31,7 +30,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
-
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
@@ -56,12 +54,14 @@ public class ProB2Module extends AbstractModule {
 		bind(GroovyConsole.class);
 		bind(BConsole.class);
 		bind(RecentFiles.class);
+		bind(Locale.class).toInstance(locale);
 		bind(ResourceBundle.class).toInstance(bundle);
 		if (IS_MAC) {
 			bind(MenuToolkit.class).toInstance(MenuToolkit.toolkit(locale));
 		} else {
 			bind(MenuToolkit.class).toProvider(Providers.of(null));
 		}
+		
 		// Controllers
 		bind(AnimationsView.class);
 		bind(HistoryView.class);

@@ -15,7 +15,6 @@ import de.prob.model.representation.Guard;
 import de.prob.model.representation.Invariant;
 import de.prob.model.representation.Set;
 import de.prob.model.representation.Variable;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 

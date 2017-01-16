@@ -6,16 +6,12 @@ import com.google.inject.Inject;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
-
-import de.prob2.ui.internal.IComponents;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -27,7 +23,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
-public class StatsView extends ScrollPane implements IComponents {
+public class StatsView extends ScrollPane {
 	@FXML
 	private Label totalTransitions;
 	@FXML
@@ -60,8 +56,8 @@ public class StatsView extends ScrollPane implements IComponents {
 	@FXML
 	public void initialize() {
 		extendedStatsBox.visibleProperty().bind(extendedStatsToggle.selectedProperty());
-		statsBox.visibleProperty().bind(currentTrace.existsProperty());
-		noStatsLabel.visibleProperty().bind(statsBox.visibleProperty().not());
+		noStatsLabel.visibleProperty().bind(currentTrace.existsProperty().not());
+		statsBox.visibleProperty().bind(noStatsLabel.visibleProperty().not());
 		extendedStatsBox.managedProperty().bind(extendedStatsBox.visibleProperty());
 		statsBox.managedProperty().bind(statsBox.visibleProperty());
 		noStatsLabel.managedProperty().bind(noStatsLabel.visibleProperty());

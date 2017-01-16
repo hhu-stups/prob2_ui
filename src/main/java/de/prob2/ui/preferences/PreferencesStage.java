@@ -4,28 +4,30 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import de.be4.classicalb.core.parser.exceptions.BException;
 
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.prolog.term.ListPrologTerm;
+import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentFiles;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -35,17 +37,16 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class PreferencesStage extends Stage {
@@ -73,6 +74,7 @@ public final class PreferencesStage extends Stage {
 
 	@FXML private Stage stage;
 	@FXML private Spinner<Integer> recentFilesCountSpinner;
+	@FXML private TextField defaultLocationField;
 	@FXML private Button undoButton;
 	@FXML private Button resetButton;
 	@FXML private Button applyButton;
@@ -95,6 +97,7 @@ public final class PreferencesStage extends Stage {
 	private final RecentFiles recentFiles;
 	private final StageManager stageManager;
 	private final StringProperty currentTab;
+	private final CurrentProject currentProjet;
 
 	@Inject
 	private PreferencesStage(
@@ -102,7 +105,8 @@ public final class PreferencesStage extends Stage {
 		final CurrentTrace currentTrace,
 		final ProBPreferences preferences,
 		final RecentFiles recentFiles,
-		final StageManager stageManager
+		final StageManager stageManager,
+		final CurrentProject currentProject
 	) {
 		this.classBlacklist = classBlacklist;
 		this.currentTrace = currentTrace;
@@ -111,6 +115,7 @@ public final class PreferencesStage extends Stage {
 		this.recentFiles = recentFiles;
 		this.stageManager = stageManager;
 		this.currentTab = new SimpleStringProperty(this, "currentTab", null);
+		this.currentProjet = currentProject;
 
 		stageManager.loadFXML(this, "preferences_stage.fxml", this.getClass().getName());
 	}
@@ -127,6 +132,9 @@ public final class PreferencesStage extends Stage {
 		valueFactory.setValue(this.recentFiles.getMaximum());
 		
 		this.recentFilesCountSpinner.setValueFactory(valueFactory);
+		
+		defaultLocationField.setText(this.currentProjet.getDefaultLocation());
+		this.currentProjet.defaultLocationProperty().bind(defaultLocationField.textProperty());
 		
 		// ProB Preferences
 
@@ -238,6 +246,13 @@ public final class PreferencesStage extends Stage {
 		this.tabPane.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> this.setCurrentTab(to.getId()));
 		this.setCurrentTab(this.tabPane.getSelectionModel().getSelectedItem().getId());
 	}
+	
+	@FXML
+	private void selectDefaultLocation(ActionEvent event) {
+		DirectoryChooser dirChooser = new DirectoryChooser();
+		dirChooser.setTitle("Select default location to store new projects");
+		defaultLocationField.setText(dirChooser.showDialog(this.getOwner()).getAbsolutePath());
+	}
 
 	private void updatePreferences() {
 		if (!this.preferences.hasStateSpace()) {
@@ -329,7 +344,7 @@ public final class PreferencesStage extends Stage {
 		try {
 			this.preferences.apply();
 			return true;
-		} catch (BException | IOException e) {
+		} catch (IOException | ModelTranslationError e) {
 			logger.error("Application of changes failed", e);
 			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e).showAndWait();
 			return false;
