@@ -20,11 +20,4 @@ public final class BConsole extends Console {
 		this.errors.clear();
 	}
 	
-	@Override
-	public void applySettings(Console.ConfigData settings) {
-		super.applySettings(settings);
-		if (settings != null && settings.getText().length() != 21) {
-			this.appendText("\n ---Engine reseted--- \n >");
-		}
-	}
 }

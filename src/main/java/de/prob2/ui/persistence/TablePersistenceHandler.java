@@ -62,12 +62,7 @@ public class TablePersistenceHandler {
 	public void setColumnsOrder(ObservableList<? extends TableColumnBase<?,?>> columns,  TablePersistenceEnum tableEnum) {
 		String[] order;
 		if(tableEnum == TablePersistenceEnum.ANIMATIONS_VIEW) {
-			if(columns instanceof SortedList) {
-				order = uiState.getAnimationsViewSortedOrder();
-				return;
-			} else {
-				order = uiState.getAnimationsViewColumnsOrder();
-			}
+			order = uiState.getAnimationsViewColumnsOrder();
 		} else {
 			order = uiState.getStatesViewColumnsOrder();
 		}
@@ -82,12 +77,8 @@ public class TablePersistenceHandler {
 			}
 		}	
 		
-		if(columns instanceof SortedList) {
-			//((ObservableList<TableColumnBase<?,?>>)columns).setAll(newColumns);
-		} else {
-			columns.clear();
-			((ObservableList<TableColumnBase<?,?>>)columns).addAll(newColumns);
-		}
+		columns.clear();
+		((ObservableList<TableColumnBase<?,?>>)columns).addAll(newColumns);
 	}
 	
 	
