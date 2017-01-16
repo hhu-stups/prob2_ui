@@ -1,5 +1,9 @@
-plugins {
-	id "edu.sc.seis.macAppBundle" version "2.1.6"
+boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
+
+if(IS_MAC) {
+	plugins {
+		id "edu.sc.seis.macAppBundle" version "2.1.6"
+	}
 }
 
 apply plugin: 'application'
@@ -24,17 +28,20 @@ repositories {
 
 mainClassName = "de.prob2.ui.ProB2"
 
-macAppBundle {
-	dmgName = "ProB-2.0-for-MacOS"
-	icon = "prob2.icns"
-	bundleJRE = true
-}
+if(IS_MAC) {
 
-macAppBundle.mainClassName = mainClassName
-
-if (hasProperty("macAppJRE")) {
-	// Used to set a custom JRE to bundle at the command line: -PmacAppJRE=/path/to/the/jre
-	macAppBundle.jreHome = macAppJRE
+	macAppBundle {
+		dmgName = "ProB-2.0-for-MacOS"
+		icon = "prob2.icns"
+		bundleJRE = true
+	}
+	
+	macAppBundle.mainClassName = mainClassName
+	
+	if (hasProperty("macAppJRE")) {
+		// Used to set a custom JRE to bundle at the command line: -PmacAppJRE=/path/to/the/jre
+		macAppBundle.jreHome = macAppJRE
+	}
 }
 
 sourceSets.main.java.srcDirs = []
