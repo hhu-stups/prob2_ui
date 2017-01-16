@@ -32,7 +32,7 @@ public class MachineStage extends Stage {
 
 	MachineStage(StageManager stageManager) {
 		stageManager.loadFXML(this, "add_machine_stage.fxml");
-		this.initModality(Modality.WINDOW_MODAL);
+		this.initModality(Modality.APPLICATION_MODAL);
 	}
 
 	@FXML

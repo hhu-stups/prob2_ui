@@ -19,7 +19,6 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.stats.StatsView;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -54,6 +53,7 @@ public final class DetachViewStageController extends Stage {
 	
 	private final Map<Class<? extends Parent>, CheckBox> checkBoxMap;
 	private final Set<Stage> wrapperStages;
+	private static final String guiStateDetached = "detached";
 
 	@Inject
 	private DetachViewStageController(final Injector injector, final StageManager stageManager, final UIState uiState) {
@@ -113,7 +113,7 @@ public final class DetachViewStageController extends Stage {
 		final SplitPane pane = findOfType(root.getChildrenUnmodifiable(), SplitPane.class);
 		final Accordion accordion = findOfType(pane.getItems(), Accordion.class);
 		removeTP(accordion, pane);
-		uiState.setGuiState("detached");
+		uiState.setGuiState(guiStateDetached);
 		this.hide();
 	}
 	
@@ -149,7 +149,9 @@ public final class DetachViewStageController extends Stage {
 		stage.setTitle(title);
 		stage.setOnCloseRequest(e -> {
 			checkBoxMap.get(node.getClass()).setSelected(false);
-			this.apply();
+			if (uiState.getGuiState().equals(guiStateDetached)) {
+				this.apply();
+			}
 		});
 		// Default bounds, replaced by saved ones from the config when show() is called
 		stage.setWidth(200);

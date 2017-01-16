@@ -142,7 +142,7 @@ public class UIState {
 	public String[] getAnimationsViewColumnsOrder() {
 		return animationsViewColumnsOrder;
 	}
-	
+		
 	public void setOperationsSortMode(OperationsView.SortMode mode) {
 		this.operationsSortMode = mode;
 	}

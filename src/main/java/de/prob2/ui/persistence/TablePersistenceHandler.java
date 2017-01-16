@@ -10,6 +10,7 @@ import de.prob2.ui.animations.Animation;
 import de.prob2.ui.states.StateTreeItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumnBase;
@@ -66,6 +67,7 @@ public class TablePersistenceHandler {
 			order = uiState.getStatesViewColumnsOrder();
 		}
 		
+		
 		ObservableList<? extends TableColumnBase<?,?>> newColumns = FXCollections.observableArrayList();
 		for(int i = 0; i < order.length; i++) {
 			for(TableColumnBase<?,?> column : columns) {
@@ -74,6 +76,7 @@ public class TablePersistenceHandler {
 				}
 			}
 		}	
+		
 		columns.clear();
 		((ObservableList<TableColumnBase<?,?>>)columns).addAll(newColumns);
 	}
@@ -85,6 +88,15 @@ public class TablePersistenceHandler {
 			order[i] = columns.get(i).getText();
 		}
 		return order;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public String[] getColumnsName(ObservableList<? extends TableColumnBase<?,?>> columns) {
+		String[] result = new String[columns.size()];
+		for(int i = 0; i < columns.size(); i++) {
+			result[i] = ((SortedList<? extends TableColumnBase<?,?>>)columns.sorted()).get(0).getText();
+		}
+		return result;
 	}
 	
 }

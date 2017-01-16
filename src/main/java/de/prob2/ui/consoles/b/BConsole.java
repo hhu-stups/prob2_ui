@@ -7,24 +7,12 @@ import de.prob2.ui.consoles.Console;
 
 @Singleton
 public final class BConsole extends Console {
+		
 	@Inject
 	private BConsole(BInterpreter interpreter) {
-		super();
+		super("ProB 2.0 B Console");
 		this.interpreter = interpreter;
-		this.appendText("ProB 2.0 B Console \n >");
+		this.appendText(header + " \n >");
 	}
-	
-	@Override
-	public void reset() {
-		this.replaceText("ProB 2.0 B Console");
-		this.errors.clear();
-	}
-	
-	@Override
-	public void applySettings(Console.ConfigData settings) {
-		super.applySettings(settings);
-		if (settings != null && settings.getText().length() != 21) {
-			this.appendText("\n ---Engine reseted--- \n >");
-		}
-	}
+		
 }

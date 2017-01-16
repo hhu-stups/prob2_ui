@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -84,7 +86,7 @@ public final class MenuController extends MenuBar {
 
 	@Inject
 	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
-			final DetachViewStageController dvController, final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
+			final DetachViewStageController dvController, @Nullable final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
 			final UIState uiState) {
 		this.injector = injector;
 		this.stageManager = stageManager;

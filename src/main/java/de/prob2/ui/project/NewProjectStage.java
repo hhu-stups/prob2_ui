@@ -68,8 +68,8 @@ public class NewProjectStage extends Stage {
 	private NewProjectStage(CurrentProject currentProject, StageManager stageManager) {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "new_project_stage.fxml");
-		this.initModality(Modality.WINDOW_MODAL);
 	}
 
 	@FXML
@@ -84,9 +84,7 @@ public class NewProjectStage extends Stage {
 			final TableRow<MachineTableItem> row = new TableRow<>();
 			final ContextMenu contextMenu = new ContextMenu();
 			final MenuItem removeMenuItem = new MenuItem("Remove Machine");
-			removeMenuItem.setOnAction(event -> {
-				machinesTableView.getItems().remove(row.getItem());
-			});
+			removeMenuItem.setOnAction(event -> machinesTableView.getItems().remove(row.getItem()));
 			contextMenu.getItems().add(removeMenuItem);
 			row.setOnMouseClicked(event -> {
 				if (event.getButton() == MouseButton.SECONDARY) {
@@ -157,7 +155,10 @@ public class NewProjectStage extends Stage {
 	void selectLocation(ActionEvent event) {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle("Select Location");
-		locationField.setText(dirChooser.showDialog(this.getOwner()).getAbsolutePath());
+		File file = dirChooser.showDialog(this.getOwner());		
+		if(file != null) {
+			locationField.setText(file.getAbsolutePath());
+		}
 	}
 
 	@FXML

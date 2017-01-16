@@ -183,10 +183,11 @@ public final class Config {
 		if(configData.animationsViewColumnsOrder == null) {
 			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder;
 		}
-
+		
 		if(configData.operationsSortMode == null) {
 			configData.operationsSortMode = this.defaultData.operationsSortMode;
 		}
+		
 	}
 	
 	public void load() {

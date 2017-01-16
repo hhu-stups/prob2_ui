@@ -21,23 +21,17 @@ import javafx.scene.input.TransferMode;
 
 @Singleton
 public class GroovyConsole extends Console {
-			
+				
 	@Inject
 	public GroovyConsole(GroovyInterpreter interpreter) {
-		super();
+		super("ProB 2.0 Groovy Console");
 		this.interpreter = interpreter;
 		interpreter.setCodeCompletion(this);
-		this.appendText("ProB 2.0 Groovy Console \n >");
+		this.appendText(header +" \n >");
 		setListeners();
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
 	}
-	
-	@Override
-	public void reset() {
-		this.replaceText("ProB 2.0 Groovy Console");
-		this.errors.clear();
-	}
-	
+		
 	public void setInterpreter(GroovyInterpreter interpreter) {
 		this.interpreter = interpreter;
 	}
@@ -110,15 +104,7 @@ public class GroovyConsole extends Console {
 			e.consume();
 		}
 	}
-	
-	@Override
-	public void applySettings(Console.ConfigData settings) {
-		super.applySettings(settings);
-		if (settings != null && settings.getText().length() != 26) {
-			this.appendText("\n ---Groovy Engine reseted--- \n >");
-		}
-	}
-	
+		
 	private void handleChooseSuggestion(CodeCompletionEvent e) {
 		String choice = e.getChoice();
 		String suggestion = e.getCurrentSuggestion();
