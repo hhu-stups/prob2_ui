@@ -6,9 +6,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -20,11 +17,13 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.MachineLoader;
+
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -37,6 +36,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
@@ -136,16 +138,16 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 	private void addAll(List<Machine> machines) {
 		for (Machine machine : machines) {
-			StateSpace stateSpace = machineLoader.load(machine);
+			StateSpace stateSpace;
 			try {
-				this.animations.addNewAnimation(new Trace(stateSpace));
-			} catch (NullPointerException e) {
-				LOGGER.error("loading machine \"" + machine.getName() + "\" failed", e);
-				Platform.runLater(() -> {
-					stageManager.makeAlert(Alert.AlertType.ERROR,
-							"Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait();
-				});
+				stateSpace = machineLoader.load(machine);
+			} catch (IOException | ModelTranslationError e) {
+				LOGGER.error("Loading machine \"" + machine.getName() + "\" failed", e);
+				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR,
+						"Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait());
+				return;
 			}
+			this.animations.addNewAnimation(new Trace(stateSpace));
 		}
 	}
 
