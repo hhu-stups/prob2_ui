@@ -47,6 +47,9 @@ public class BInterpreter implements IAnimationChangeListener, Executable {
 		String line = instruction.getInstruction();
 		String res = "";
 		try {
+			if("clear".equals(instruction.getInstruction())) {
+				return new ConsoleExecResult("clear","", ConsoleExecResultType.PASSED);
+			}
 			IEvalElement parsed = parse(line);
 			if (currentTrace == null) {
 				EvaluationCommand cmd = parsed.getCommand(defaultSS.getRoot());

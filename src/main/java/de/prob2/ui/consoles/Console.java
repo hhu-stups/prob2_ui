@@ -42,9 +42,11 @@ public abstract class Console extends StyleClassedTextArea {
 	protected ConsoleSearchHandler searchHandler;
 	protected List<IndexRange> errors;
 	protected Executable interpreter;
+	protected String header;
 	
 
-	protected Console() {
+	protected Console(String header) {
+		this.header = header;
 		this.instructions = new ArrayList<>();
 		this.errors = new ArrayList<>();
 		this.searchHandler = new ConsoleSearchHandler(this, instructions);
@@ -64,6 +66,7 @@ public abstract class Console extends StyleClassedTextArea {
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.R, KeyCombination.CONTROL_DOWN), e-> this.controlR()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.A, KeyCombination.CONTROL_DOWN), e-> this.controlA()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.E, KeyCombination.CONTROL_DOWN), e-> this.controlE()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.K, KeyCombination.CONTROL_DOWN), e-> this.reset()));
 				
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.UP), e-> this.handleUp()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DOWN), e-> this.handleDown()));
@@ -106,7 +109,7 @@ public abstract class Console extends StyleClassedTextArea {
 		super.copy();
 		goToLastPos();
 	}
-				
+					
 	private void mouseClicked() {
 		if(this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
 			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
@@ -186,7 +189,11 @@ public abstract class Console extends StyleClassedTextArea {
 		currentPosInLine = charCounterInLine;
 	}
 	
-	protected abstract void reset();
+	protected void reset() {
+		this.replaceText(header);
+		this.errors.clear();
+		this.appendText("\n >");
+	}
 		
 	protected void handleEnter() {
 		charCounterInLine = 0;
@@ -206,6 +213,7 @@ public abstract class Console extends StyleClassedTextArea {
 			ConsoleExecResult execResult = interpreter.exec(instruction);
 			if("clear".equals(execResult.getConsoleOutput())) {
 				reset();
+				return;
 			} else {
 				this.appendText("\n" + execResult);
 			}

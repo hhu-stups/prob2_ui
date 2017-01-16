@@ -7,17 +7,12 @@ import de.prob2.ui.consoles.Console;
 
 @Singleton
 public final class BConsole extends Console {
+		
 	@Inject
 	private BConsole(BInterpreter interpreter) {
-		super();
+		super("ProB 2.0 B Console");
 		this.interpreter = interpreter;
-		this.appendText("ProB 2.0 B Console \n >");
+		this.appendText(header + " \n >");
 	}
-	
-	@Override
-	public void reset() {
-		this.replaceText("ProB 2.0 B Console");
-		this.errors.clear();
-	}
-	
+		
 }

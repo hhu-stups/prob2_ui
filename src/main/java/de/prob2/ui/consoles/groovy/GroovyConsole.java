@@ -21,23 +21,17 @@ import javafx.scene.input.TransferMode;
 
 @Singleton
 public class GroovyConsole extends Console {
-			
+				
 	@Inject
 	public GroovyConsole(GroovyInterpreter interpreter) {
-		super();
+		super("ProB 2.0 Groovy Console");
 		this.interpreter = interpreter;
 		interpreter.setCodeCompletion(this);
-		this.appendText("ProB 2.0 Groovy Console \n >");
+		this.appendText(header +" \n >");
 		setListeners();
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
 	}
-	
-	@Override
-	public void reset() {
-		this.replaceText("ProB 2.0 Groovy Console");
-		this.errors.clear();
-	}
-	
+		
 	public void setInterpreter(GroovyInterpreter interpreter) {
 		this.interpreter = interpreter;
 	}
