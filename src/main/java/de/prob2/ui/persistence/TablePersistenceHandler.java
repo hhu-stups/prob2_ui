@@ -10,6 +10,7 @@ import de.prob2.ui.animations.Animation;
 import de.prob2.ui.states.StateTreeItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumnBase;
@@ -61,10 +62,16 @@ public class TablePersistenceHandler {
 	public void setColumnsOrder(ObservableList<? extends TableColumnBase<?,?>> columns,  TablePersistenceEnum tableEnum) {
 		String[] order;
 		if(tableEnum == TablePersistenceEnum.ANIMATIONS_VIEW) {
-			order = uiState.getAnimationsViewColumnsOrder();
+			if(columns instanceof SortedList) {
+				order = uiState.getAnimationsViewSortedOrder();
+				return;
+			} else {
+				order = uiState.getAnimationsViewColumnsOrder();
+			}
 		} else {
 			order = uiState.getStatesViewColumnsOrder();
 		}
+		
 		
 		ObservableList<? extends TableColumnBase<?,?>> newColumns = FXCollections.observableArrayList();
 		for(int i = 0; i < order.length; i++) {
@@ -74,8 +81,13 @@ public class TablePersistenceHandler {
 				}
 			}
 		}	
-		columns.clear();
-		((ObservableList<TableColumnBase<?,?>>)columns).addAll(newColumns);
+		
+		if(columns instanceof SortedList) {
+			//((ObservableList<TableColumnBase<?,?>>)columns).setAll(newColumns);
+		} else {
+			columns.clear();
+			((ObservableList<TableColumnBase<?,?>>)columns).addAll(newColumns);
+		}
 	}
 	
 	
@@ -85,6 +97,15 @@ public class TablePersistenceHandler {
 			order[i] = columns.get(i).getText();
 		}
 		return order;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public String[] getColumnsName(ObservableList<? extends TableColumnBase<?,?>> columns) {
+		String[] result = new String[columns.size()];
+		for(int i = 0; i < columns.size(); i++) {
+			result[i] = ((SortedList<? extends TableColumnBase<?,?>>)columns.sorted()).get(0).getText();
+		}
+		return result;
 	}
 	
 }

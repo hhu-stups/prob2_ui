@@ -4,7 +4,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import de.prob.cli.ProBInstanceProvider;
-
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
@@ -29,7 +28,6 @@ public class ProB2 extends Application {
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 		config = injector.getInstance(Config.class);
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
-		
 		Parent root = injector.getInstance(MainController.class);
 		Scene mainScene = new Scene(root, 1024, 768);
 		stage.setTitle("ProB 2.0");

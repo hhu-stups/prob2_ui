@@ -130,6 +130,7 @@ public final class UIPersistence {
 		tablePersistenceHandler.setColumnsOrder(statesView.getTable().getColumns(), TablePersistenceEnum.STATES_VIEW);
 		tablePersistenceHandler.setColumnsWidth(animationsView.getTable(), animationsView.getTable().getColumns(), TablePersistenceEnum.ANIMATIONS_VIEW);
 		tablePersistenceHandler.setColumnsOrder(animationsView.getTable().getColumns(), TablePersistenceEnum.ANIMATIONS_VIEW);
+		tablePersistenceHandler.setColumnsOrder(animationsView.getTable().getColumns().sorted(), TablePersistenceEnum.ANIMATIONS_VIEW);
 		
 		final OperationsView operationsView = injector.getInstance(OperationsView.class);
 		operationsView.setSortMode(uiState.getOperationsSortMode());

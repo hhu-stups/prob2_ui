@@ -31,6 +31,7 @@ public class UIState {
 	private String[] statesViewColumnsOrder;
 	private double[] animationsViewColumnsWidth;
 	private String[] animationsViewColumnsOrder;
+	private String[] animationsViewSortedOrder;
 	private OperationsView.SortMode operationsSortMode;
 	private boolean operationsShowNotEnabled;
 	private double[] horizontalDividerPositions;
@@ -48,6 +49,7 @@ public class UIState {
 		this.statesViewColumnsOrder = new String[3];
 		this.animationsViewColumnsWidth = new double[4];
 		this.animationsViewColumnsOrder = new String[4];
+		this.animationsViewSortedOrder = new String[4];
 	}
 	
 	public void setGuiState(String guiState) {
@@ -141,6 +143,14 @@ public class UIState {
 	
 	public String[] getAnimationsViewColumnsOrder() {
 		return animationsViewColumnsOrder;
+	}
+	
+	public void setAnimationsViewSortedOrder(String[] order) {
+		this.animationsViewSortedOrder = order;
+	}
+	
+	public String[] getAnimationsViewSortedOrder() {
+		return animationsViewSortedOrder;
 	}
 	
 	public void setOperationsSortMode(OperationsView.SortMode mode) {

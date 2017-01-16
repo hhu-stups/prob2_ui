@@ -66,6 +66,7 @@ public final class Config {
 		private String[] statesViewColumnsOrder;
 		private double[] animationsViewColumnsWidth;
 		private String[] animationsViewColumnsOrder;
+		private String[] animationsViewSortedOrder;
 		private OperationsView.SortMode operationsSortMode;
 		private boolean operationsShowNotEnabled;
 		private ConfigData() {}
@@ -179,9 +180,14 @@ public final class Config {
 			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder;
 		}
 		
+		if(configData.animationsViewSortedOrder == null) {
+			configData.animationsViewColumnsOrder = this.defaultData.animationsViewSortedOrder;
+		}
+		
 		if(configData.operationsSortMode == null) {
 			configData.operationsSortMode = this.defaultData.operationsSortMode;
 		}
+		
 	}
 	
 	public void load() {
@@ -246,6 +252,7 @@ public final class Config {
 		
 		this.uiState.setAnimationsViewColumnsWidth(configData.animationsViewColumnsWidth);
 		this.uiState.setAnimationsViewColumnsOrder(configData.animationsViewColumnsOrder);
+		this.uiState.setAnimationsViewColumnsOrder(configData.animationsViewSortedOrder);
 		
 		this.uiState.setHorizontalDividerPositions(configData.horizontalDividerPositions);
 		this.uiState.setVerticalDividerPositions(configData.verticalDividerPositions);
@@ -286,6 +293,7 @@ public final class Config {
 		AnimationsView animationsView = injector.getInstance(AnimationsView.class);
 		configData.animationsViewColumnsWidth = tablePersistenceHandler.getColumnsWidth(animationsView.getColumns());
 		configData.animationsViewColumnsOrder = tablePersistenceHandler.getColumnsOrder(animationsView.getColumns());
+		configData.animationsViewSortedOrder = tablePersistenceHandler.getColumnsName(animationsView.getColumns());
 		
 		MainController main = injector.getInstance(MainController.class);
 		
