@@ -1,5 +1,6 @@
 package de.prob2.ui.preferences;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
@@ -251,7 +252,10 @@ public final class PreferencesStage extends Stage {
 	private void selectDefaultLocation(ActionEvent event) {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle("Select default location to store new projects");
-		defaultLocationField.setText(dirChooser.showDialog(this.getOwner()).getAbsolutePath());
+		File file = dirChooser.showDialog(this.getOwner());
+		if(file != null) {
+			defaultLocationField.setText(file.getAbsolutePath());
+		}
 	}
 
 	private void updatePreferences() {
