@@ -11,7 +11,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Button?>
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.control.ListView?>
 
 <fx:root type="Stage" title="%addProBPreference.stage.stageTitle"
