@@ -155,7 +155,7 @@ public class UIState {
 		operationsShowNotEnabled = showNotEnabled;
 	}
 	
-	public boolean getOperationsShowNotEnbaled() {
+	public boolean getOperationsShowNotEnabled() {
 		return operationsShowNotEnabled;
 	}
 	

@@ -3,13 +3,10 @@ package de.prob2.ui.consoles.groovy;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
-import org.codehaus.groovy.GroovyBugError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
+
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.ConsoleInstruction;
@@ -19,7 +16,12 @@ import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.internal.StageManager;
 
-public class GroovyInterpreter implements Executable {
+import org.codehaus.groovy.GroovyBugError;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class GroovyInterpreter implements Executable {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
 	private final ScriptEngine engine;
 	private final GroovyCodeCompletion codeCompletion;
@@ -41,11 +43,11 @@ public class GroovyInterpreter implements Executable {
 		} else if("clear".equals(instruction.getInstruction())) {
 			return new ConsoleExecResult("clear","", ConsoleExecResultType.PASSED);
 		} else {
-			String resultString;
 			StringBuilder console = new StringBuilder();
-			ConsoleExecResultType resultType = ConsoleExecResultType.PASSED;
 			engine.put("__console", console);
 			logger.trace("Eval {} on {}", instruction.getInstruction(), engine);
+			String resultString;
+			ConsoleExecResultType resultType = ConsoleExecResultType.PASSED;
 			try {
 				Object eval = engine.eval(instruction.getInstruction());
 				resultString = eval.toString();

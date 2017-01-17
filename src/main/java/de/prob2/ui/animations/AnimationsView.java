@@ -157,14 +157,14 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	}
 
 	private void addAll(List<Machine> machines) {
-		for (Machine machine : machines) {
+		for (Machine mch : machines) {
 			StateSpace stateSpace;
 			try {
-				stateSpace = machineLoader.load(machine);
+				stateSpace = machineLoader.load(mch);
 			} catch (IOException | ModelTranslationError e) {
-				LOGGER.error("Loading machine \"" + machine.getName() + "\" failed", e);
+				LOGGER.error("Loading machine \"" + mch.getName() + "\" failed", e);
 				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR,
-					"Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait());
+					"Could not open machine \"" + mch.getName() + "\":\n" + e).showAndWait());
 				return;
 			}
 			this.animations.addNewAnimation(new Trace(stateSpace));
@@ -194,10 +194,10 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			boolean isProtected = animations.getProtectedTraces().contains(t.getUUID());
 			Animation a = new Animation(modelName, lastOp, steps, t, isCurrent, isProtected, getEditorStage(model));
 			Animation aa = contains(animationsTable, a);
-			if (aa != null) {
-				a.setTime(LocalDateTime.parse(aa.getTime(), DateTimeFormatter.ofPattern("HH:mm:ss d MMM uuuu")));
-			} else {
+			if (aa == null) {
 				a.setTime(LocalDateTime.now());
+			} else {
+				a.setTime(LocalDateTime.parse(aa.getTime(), DateTimeFormatter.ofPattern("HH:mm:ss d MMM uuuu")));
 			}
 			animList.add(a);
 		}

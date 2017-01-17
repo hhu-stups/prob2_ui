@@ -309,7 +309,7 @@
 .editor {
 	-fx-font-weight: bold;
 	-fx-font-family: monospace;
-	-fx-font-size: 15
+	-fx-font-size: 15;
 }
 
 .editor .editor_identifier {

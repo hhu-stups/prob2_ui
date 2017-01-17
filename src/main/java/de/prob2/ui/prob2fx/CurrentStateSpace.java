@@ -29,6 +29,7 @@ public final class CurrentStateSpace extends ReadOnlyObjectProperty<StateSpace> 
 		return null;
 	}
 	
+	@SuppressWarnings("MethodReturnAlwaysConstant")
 	@Override
 	public String getName() {
 		return "";

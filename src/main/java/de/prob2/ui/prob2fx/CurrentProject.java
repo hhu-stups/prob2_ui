@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class CurrentProject extends SimpleObjectProperty<Project> {
+public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
 	private static final Logger LOGGER = LoggerFactory.getLogger(CurrentProject.class);
 	

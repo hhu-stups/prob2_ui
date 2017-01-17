@@ -1,43 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.beditor.BEditor?>
+<?import de.prob2.ui.beditor.BEditorStage?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.BorderPane?>
-<?import de.prob2.ui.beditor.BEditorStage?>
-<?import de.prob2.ui.beditor.BEditor?>
 <?import javafx.scene.Scene?>
-
 <fx:root type="BEditorStage" minWidth="240" minHeight="160" width="800" height="600" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
 			<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
-			   <top>
-			      <MenuBar BorderPane.alignment="CENTER">
-			        <menus>
-			          <Menu mnemonicParsing="false" text="%menu.file">
-			            <items>
-			           	  <MenuItem onAction ="#handleSave" mnemonicParsing="false" accelerator="Ctrl + S" text="%menu.file.items.save" />
-			           	  <MenuItem onAction ="#handleSaveAs" mnemonicParsing="false" text="%menu.file.items.saveas" />
-			              <MenuItem onAction="#handleClose" mnemonicParsing="false" accelerator="Ctrl + W" text="%menu.file.items.close" />
-			            </items>
-			          </Menu>
-			          <Menu mnemonicParsing="false" text="%menu.edit">
-			            <items>
-			              <MenuItem mnemonicParsing="false" text="%menu.file.items.placeholder" />
-			            </items>
-			          </Menu>
-			          <Menu mnemonicParsing="false" text="%menu.help">
-			            <items>
-			              <MenuItem mnemonicParsing="false" text="%menu.help.items.about" />
-			            </items>
-			          </Menu>
-			        </menus>
-			      </MenuBar>
-			   </top>
-			   <center>
-			      <BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
-			   </center>
+				<top>
+					<MenuBar BorderPane.alignment="CENTER">
+						<Menu mnemonicParsing="false" text="%menu.file">
+							<MenuItem onAction="#handleSave" mnemonicParsing="false" accelerator="Shortcut+S" text="%menu.file.items.save"/>
+							<MenuItem onAction="#handleSaveAs" mnemonicParsing="false" text="%menu.file.items.saveas"/>
+							<MenuItem onAction="#handleClose" mnemonicParsing="false" accelerator="Shortcut+W" text="%menu.file.items.close"/>
+						</Menu>
+						<Menu mnemonicParsing="false" text="%menu.edit">
+							<MenuItem mnemonicParsing="false" text="%menu.file.items.placeholder"/>
+						</Menu>
+						<Menu mnemonicParsing="false" text="%menu.help">
+							<MenuItem mnemonicParsing="false" text="%menu.help.items.about"/>
+						</Menu>
+					</MenuBar>
+				</top>
+				<center>
+					<BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
+				</center>
 			</BorderPane>
 		</Scene>
 	</scene>

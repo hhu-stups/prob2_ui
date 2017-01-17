@@ -5,16 +5,16 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import org.fxmisc.richtext.StyleClassedTextArea;
-import org.fxmisc.wellbehaved.event.EventPattern;
-import org.fxmisc.wellbehaved.event.InputMap;
-import org.fxmisc.wellbehaved.event.Nodes;
-
 import javafx.scene.control.IndexRange;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
+
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
 
 
 public abstract class Console extends StyleClassedTextArea {
@@ -91,9 +91,9 @@ public abstract class Console extends StyleClassedTextArea {
 			goToLastPos();
 		}
 		String oldText = this.getText();
-		int posOfEnter = oldText.lastIndexOf('\n');
 		super.paste();
 		int diff = this.getLength() - oldText.length();
+		int posOfEnter = oldText.lastIndexOf('\n');
 		String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		if(currentLine.contains("\n")) {
 			this.deleteText(this.getText().length() - currentLine.length(), this.getText().length());
@@ -117,10 +117,10 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public void controlR() {
-		if(!searchHandler.isActive()) {
-			activateSearch();
-		} else {
+		if (searchHandler.isActive()) {
 			searchHandler.searchNext();
+		} else {
+			activateSearch();
 		}
 	}
 	
@@ -214,9 +214,8 @@ public abstract class Console extends StyleClassedTextArea {
 			if("clear".equals(execResult.getConsoleOutput())) {
 				reset();
 				return;
-			} else {
-				this.appendText("\n" + execResult);
 			}
+			this.appendText("\n" + execResult);
 			if(execResult.getResultType() == ConsoleExecResultType.ERROR) {
 				int begin = this.getText().length() - execResult.toString().length();
 				int end = this.getText().length();

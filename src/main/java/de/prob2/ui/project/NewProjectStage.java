@@ -10,13 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -24,7 +22,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -36,9 +33,11 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
-public class NewProjectStage extends Stage {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class NewProjectStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(NewProjectStage.class);
 
 	@FXML
@@ -119,12 +118,7 @@ public class NewProjectStage extends Stage {
 
 			TableColumn<MachineTableItem, Boolean> preferenceColumn = new TableColumn<>(preference.toString());
 			preferenceColumn.setEditable(true);
-			preferenceColumn.setCellFactory(
-					new Callback<TableColumn<MachineTableItem, Boolean>, TableCell<MachineTableItem, Boolean>>() {
-						public TableCell<MachineTableItem, Boolean> call(TableColumn<MachineTableItem, Boolean> p) {
-							return new CheckBoxTableCell<>();
-						}
-					});
+			preferenceColumn.setCellFactory(p -> new CheckBoxTableCell<>());
 			preferenceColumn.setCellValueFactory(cellData -> cellData.getValue().getPreferenceProperty(preference));
 			machinesTableView.getColumns().add(preferenceColumn);
 			machinesTableView.refresh();

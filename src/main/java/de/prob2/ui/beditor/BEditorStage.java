@@ -1,25 +1,26 @@
 package de.prob2.ui.beditor;
 
-
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
+
 import javafx.fxml.FXML;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BEditorStage extends Stage {
-	
 	private static final Logger logger = LoggerFactory.getLogger(BEditorStage.class);
+	private static final Charset EDITOR_CHARSET = Charset.forName("UTF-8");
 	
 	@FXML
 	private BEditor beditor;
@@ -41,7 +42,7 @@ public class BEditorStage extends Stage {
 	@FXML
 	public void handleSave() {
 		try {
-			Files.write(path, beditor.getText().getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+			Files.write(path, beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			logger.error("File not found", e);
 		}
@@ -53,19 +54,14 @@ public class BEditorStage extends Stage {
 		fileChooser.setTitle("Select Location");
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
 		File openFile = fileChooser.showSaveDialog(this.getOwner());
-		if(openFile != null) {
-			File newFile;
-			if(openFile.getAbsolutePath().contains(".")) {
-				newFile = new File(openFile.getAbsolutePath());
-			} else {
-				newFile = new File(openFile.getAbsolutePath() + ".mch");
-			}
+		if (openFile != null) {
+			File newFile = new File(openFile.getAbsolutePath() + (openFile.getName().contains(".") ? "" : ".mch"));
 			StandardOpenOption option = StandardOpenOption.CREATE;
 			if(newFile.exists()) {
 				option = StandardOpenOption.TRUNCATE_EXISTING;
 			}
 			try {
-				Files.write(newFile.toPath(), beditor.getText().getBytes(), option);
+				Files.write(newFile.toPath(), beditor.getText().getBytes(EDITOR_CHARSET), option);
 				this.setTitle(newFile.getName());
 				path = newFile.toPath();
 			} catch (IOException e) {

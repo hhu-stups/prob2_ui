@@ -5,7 +5,7 @@ import javafx.event.EventType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "CloneableClassWithoutClone"})
 public class CodeCompletionEvent extends Event {
 	public static final EventType<CodeCompletionEvent> CODECOMPLETION = new EventType<>(Event.ANY, "CODECOMPLETION");
 	
@@ -13,7 +13,6 @@ public class CodeCompletionEvent extends Event {
 	private KeyCode code;
 	private String choice;
 	private String currentSuggestion;
-	
 
 	public CodeCompletionEvent(Event event, String choice, String suggestion) {
 		super(CODECOMPLETION);

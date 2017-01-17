@@ -100,7 +100,7 @@ public class StatsView extends ScrollPane {
 			if (extendedStatsToggle.isSelected()) {
 				final ComputeCoverageCommand coverageCmd = new ComputeCoverageCommand();
 				trace.getStateSpace().execute(coverageCmd);
-				updatExtendedStats(coverageCmd.getResult());
+				updateExtendedStats(coverageCmd.getResult());
 			}
 		}
 	}
@@ -120,7 +120,7 @@ public class StatsView extends ScrollPane {
 		});
 	}
 
-	public void updatExtendedStats(ComputeCoverageCommand.ComputeCoverageResult result) {
+	public void updateExtendedStats(ComputeCoverageCommand.ComputeCoverageResult result) {
 		showStats(result.getNodes(), nodeStats);
 		showStats(result.getOps(), transStats);
 	}

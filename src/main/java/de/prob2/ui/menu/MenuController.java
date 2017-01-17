@@ -49,8 +49,6 @@ import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-
 @Singleton
 public final class MenuController extends MenuBar {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
@@ -104,11 +102,7 @@ public final class MenuController extends MenuBar {
 		this.currentProject = currentProject;
 		this.dvController = dvController;
 		this.aboutController = aboutController;
-		if(IS_MAC) {
-			this.menuToolkit = injector.getInstance(MenuToolkit.class);
-		} else {
-			this.menuToolkit = null;
-		}
+		this.menuToolkit = menuToolkit;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
 
@@ -246,7 +240,7 @@ public final class MenuController extends MenuBar {
 				Parent root = loader.load();
 				window.getScene().setRoot(root);
 			} catch (IOException e) {
-				logger.error("loading fxml failed", e);
+				logger.error("Loading fxml failed", e);
 				stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait();
 			}
 		}

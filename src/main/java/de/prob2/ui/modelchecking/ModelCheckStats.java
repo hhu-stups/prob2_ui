@@ -36,7 +36,6 @@ public final class ModelCheckStats extends AnchorPane {
 	@FXML private Label totalTransitions;
 
 	private Map<String, ModelChecker> jobs = new HashMap<>();
-	private Map<String, IModelCheckingResult> results = new HashMap<>();
 	private ModelcheckingController modelcheckingController;
 	private Result result;
 	private Trace trace;
@@ -69,8 +68,6 @@ public final class ModelCheckStats extends AnchorPane {
 	}
 
 	public void updateStats(final String id, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-		results.put(id, result);
-
 		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
 
 		if (stats != null) {
@@ -89,14 +86,12 @@ public final class ModelCheckStats extends AnchorPane {
 		if (modelChecker != null) {
 			ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
 			if (coverage != null) {
-				statsView.updatExtendedStats(coverage);
+				statsView.updateExtendedStats(coverage);
 			}
 		}
 	}
 
 	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-		results.put(id, result);
-
 		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
 		
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
@@ -114,7 +109,7 @@ public final class ModelCheckStats extends AnchorPane {
 		if (modelChecker != null) {
 			ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
 			if (coverage != null) {
-				statsView.updatExtendedStats(coverage);
+				statsView.updateExtendedStats(coverage);
 				Number numNodes = coverage.getTotalNumberOfNodes();
 				Number numTrans = coverage.getTotalNumberOfTransitions();
 

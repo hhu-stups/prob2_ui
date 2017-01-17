@@ -12,16 +12,18 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.fxmisc.richtext.StyleClassedTextArea;
-import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
+
 import javafx.concurrent.Task;
+
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BEditor extends StyleClassedTextArea {
 	
@@ -97,7 +99,7 @@ public class BEditor extends StyleClassedTextArea {
 		String text = this.getText();
 		Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
 			@Override
-			protected StyleSpans<Collection<String>> call() throws Exception {
+			protected StyleSpans<Collection<String>> call() {
 				return computeHighlighting(text);
 			}
 		};
@@ -114,13 +116,10 @@ public class BEditor extends StyleClassedTextArea {
 				t = lexer.next();
 				String string = syntaxClasses.get(t.getClass());
 				int length = t.getText().length();
-				if (t instanceof TStringLiteral)
-					length = length + 2;
-				if (string != null) {
-					spansBuilder.add(Collections.singleton(string), length);
-				} else {
-					spansBuilder.add(Collections.singleton("default"), length);
+				if (t instanceof TStringLiteral) {
+					length += 2;
 				}
+				spansBuilder.add(Collections.singleton(string == null ? "default" : string), length);
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
 			logger.error("BLexer Exception: ", e);

@@ -1,6 +1,5 @@
 package de.prob2.ui.persistence;
 
-
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -8,9 +7,9 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.animations.Animation;
 import de.prob2.ui.states.StateTreeItem;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
 import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumnBase;
@@ -19,7 +18,7 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
 @Singleton
-public class TablePersistenceHandler {
+public final class TablePersistenceHandler {
 	
 	private final UIState uiState;
 	
@@ -29,7 +28,7 @@ public class TablePersistenceHandler {
 	}
 
 	public double[] getColumnsWidth(List<? extends TableColumnBase<?,?>> columns) {
-		double[] result = new double[columns.size()];		
+		double[] result = new double[columns.size()];
 		for(int i = 0; i < columns.size(); i++) {
 			result[i] = columns.get(i).getWidth();
 		}
@@ -59,7 +58,7 @@ public class TablePersistenceHandler {
 	}
 		
 	@SuppressWarnings("unchecked")
-	public void setColumnsOrder(ObservableList<? extends TableColumnBase<?,?>> columns,  TablePersistenceEnum tableEnum) {
+	public void setColumnsOrder(ObservableList<? extends TableColumnBase<?,?>> columns, TablePersistenceEnum tableEnum) {
 		String[] order;
 		if(tableEnum == TablePersistenceEnum.ANIMATIONS_VIEW) {
 			order = uiState.getAnimationsViewColumnsOrder();
@@ -67,12 +66,11 @@ public class TablePersistenceHandler {
 			order = uiState.getStatesViewColumnsOrder();
 		}
 		
-		
 		ObservableList<? extends TableColumnBase<?,?>> newColumns = FXCollections.observableArrayList();
-		for(int i = 0; i < order.length; i++) {
-			for(TableColumnBase<?,?> column : columns) {
-				if(((TableColumnBase<?,?>)column).getText().equals(order[i])) {
-					((ObservableList<TableColumnBase<?,?>>)newColumns).add(column);
+		for (final String text : order) {
+			for (TableColumnBase<?, ?> column : columns) {
+				if (column.getText().equals(text)) {
+					((ObservableList<TableColumnBase<?, ?>>)newColumns).add(column);
 				}
 			}
 		}	
@@ -89,14 +87,4 @@ public class TablePersistenceHandler {
 		}
 		return order;
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public String[] getColumnsName(ObservableList<? extends TableColumnBase<?,?>> columns) {
-		String[] result = new String[columns.size()];
-		for(int i = 0; i < columns.size(); i++) {
-			result[i] = ((SortedList<? extends TableColumnBase<?,?>>)columns.sorted()).get(0).getText();
-		}
-		return result;
-	}
-	
 }

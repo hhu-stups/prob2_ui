@@ -148,7 +148,7 @@ public class MainController extends BorderPane {
 		}
 	}
 	
-	public void setVerticalDividerPostions(double[] pos) {
+	public void setVerticalDividerPositions(double[] pos) {
 		if(verticalSP != null) {
 			verticalSP.setDividerPositions(pos);
 		}

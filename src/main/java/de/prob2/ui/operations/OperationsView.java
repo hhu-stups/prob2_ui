@@ -205,6 +205,7 @@ public final class OperationsView extends AnchorPane {
 		final Map<IEvalElement, AbstractEvalResult> values = transition.getDestination().getValues();
 		for (final Map.Entry<IEvalElement, AbstractEvalResult> entry : values.entrySet()) {
 			if (formulas.contains(entry.getKey())) {
+				// noinspection ObjectToString
 				params.add(entry.getKey() + "=" + entry.getValue());
 			}
 		}
@@ -227,9 +228,10 @@ public final class OperationsView extends AnchorPane {
 
 		this.opsListView.setDisable(false);
 
-		if (trace.getModel() != currentModel) {
+		if (trace.getModel().equals(currentModel)) {
 			updateModel(trace);
 		}
+		
 		events = new ArrayList<>();
 		final Set<Transition> operations = trace.getNextTransitions(true);
 		final Set<String> notEnabled = new HashSet<>(opNames);
