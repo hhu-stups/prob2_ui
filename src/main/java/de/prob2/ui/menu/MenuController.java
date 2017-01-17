@@ -289,10 +289,7 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleClose() {
-		final Stage stage = this.stageManager.getCurrent();
-		if (stage != null) {
-			stage.close();
-		}
+		Platform.exit();
 	}
 	
 	@FXML
