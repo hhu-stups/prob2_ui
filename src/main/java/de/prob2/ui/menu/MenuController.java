@@ -49,6 +49,8 @@ import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+
 @Singleton
 public final class MenuController extends MenuBar {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
@@ -86,9 +88,15 @@ public final class MenuController extends MenuBar {
 	private CurrentProject currentProject;
 
 	@Inject
-	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
-			final DetachViewStageController dvController, final AboutBoxController aboutController, @Nullable final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
-
+	private MenuController(
+			final StageManager stageManager,
+			final Injector injector,
+			final CurrentTrace currentTrace,
+			final DetachViewStageController dvController,
+			final AboutBoxController aboutController,
+			@Nullable final MenuToolkit menuToolkit,
+			final RecentFiles recentFiles,
+			final CurrentProject currentProject,
 			final UIState uiState) {
 		this.injector = injector;
 		this.stageManager = stageManager;

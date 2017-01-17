@@ -16,8 +16,14 @@ public class Animation {
 	private String time;
 	private BEditorStage beditorStage;
 
-	public Animation(String modelName, String lastOperation, String steps, Trace trace, boolean isCurrent,
-			boolean isProtected, BEditorStage beditorStage) {
+	public Animation(
+			String modelName,
+			String lastOperation,
+			String steps,
+			Trace trace,
+			boolean isCurrent,
+			boolean isProtected,
+			BEditorStage beditorStage) {
 		this.modelName = modelName;
 		this.lastOperation = lastOperation;
 		this.steps = steps;

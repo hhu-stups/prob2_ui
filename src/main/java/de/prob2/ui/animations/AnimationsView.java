@@ -73,8 +73,13 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private Injector injector;
 
 	@Inject
-	private AnimationsView(final Injector injector, final AnimationSelector animations, final StageManager stageManager,
-			final MachineLoader machineLoader, CurrentProject currentProject, CurrentTrace currentTrace) {
+	private AnimationsView(
+			final Injector injector,
+			final AnimationSelector animations,
+			final StageManager stageManager,
+			final MachineLoader machineLoader,
+			CurrentProject currentProject,
+			CurrentTrace currentTrace) {
 		this.injector = injector;
 		this.animations = animations;
 		this.machineLoader = machineLoader;
