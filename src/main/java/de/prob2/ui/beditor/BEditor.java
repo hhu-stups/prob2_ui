@@ -15,6 +15,8 @@ import java.util.concurrent.Executors;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
@@ -22,6 +24,8 @@ import de.be4.classicalb.core.parser.node.*;
 import javafx.concurrent.Task;
 
 public class BEditor extends StyleClassedTextArea {
+	
+	private static final Logger logger = LoggerFactory.getLogger(BEditor.class);
 
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -104,7 +108,6 @@ public class BEditor extends StyleClassedTextArea {
 	private static StyleSpans<Collection<String>> computeHighlighting(String text) {
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
 		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-
 		try {
 			Token t;
 			do {
@@ -120,7 +123,7 @@ public class BEditor extends StyleClassedTextArea {
 				}
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
-			e.printStackTrace();
+			logger.error("BLexer Exception: ", e);
 		}
 		return spansBuilder.create();
 	}
