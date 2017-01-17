@@ -2,6 +2,7 @@ package de.prob2.ui.animations;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -208,12 +209,14 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private BEditorStage getEditorStage(AbstractModel model) {
 		BEditorStage editorStage = injector.getInstance(BEditorStage.class);
 		String editor = "";
+		Path path = null;
 		try {
-			editor = Files.lines(model.getModelFile().toPath()).collect(Collectors.joining(System.lineSeparator()));
+			path = model.getModelFile().toPath();
+			editor = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
 		} catch (IOException e) {
 			LOGGER.error("File not found", e);
 		}
-		editorStage.setTextEditor(editor);
+		editorStage.setTextEditor(editor, path);
 		editorStage.setTitle(model.getModelFile().getName());
 		return editorStage;
 	}

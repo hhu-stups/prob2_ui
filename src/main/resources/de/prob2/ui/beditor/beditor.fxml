@@ -18,9 +18,9 @@
 			        <menus>
 			          <Menu mnemonicParsing="false" text="%menu.file">
 			            <items>
-			           	  <MenuItem mnemonicParsing="false" accelerator="Ctrl + S" text="%menu.file.items.save" />
-			           	  <MenuItem mnemonicParsing="false" text="%menu.file.items.saveas" />
-			              <MenuItem mnemonicParsing="false" accelerator="Ctrl + W" text="%menu.file.items.close" />
+			           	  <MenuItem onAction ="#handleSave" mnemonicParsing="false" accelerator="Ctrl + S" text="%menu.file.items.save" />
+			           	  <MenuItem onAction ="#handleSaveAs" mnemonicParsing="false" text="%menu.file.items.saveas" />
+			              <MenuItem onAction="#handleClose" mnemonicParsing="false" accelerator="Ctrl + W" text="%menu.file.items.close" />
 			            </items>
 			          </Menu>
 			          <Menu mnemonicParsing="false" text="%menu.edit">
