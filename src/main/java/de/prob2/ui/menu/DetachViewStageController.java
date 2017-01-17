@@ -36,8 +36,6 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class DetachViewStageController extends Stage {
-	// FIXME Detached views sometimes resize themselves to zero height
-	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DetachViewStageController.class);
 	
 	@FXML private Button apply;
@@ -122,12 +120,8 @@ public final class DetachViewStageController extends Stage {
 		final HashSet<Stage> wrapperStagesCopy = new HashSet<>(wrapperStages);
 		wrapperStages.clear();
 		for (final Stage stage : wrapperStagesCopy) {
-			// Save the check box state so it isn't overwritten by the stage's onHidden handler.
-			final CheckBox checkBox = checkBoxMap.get(stage.getScene().getRoot().getClass());
-			final boolean savedState = checkBox.isSelected();
 			stage.setScene(null);
 			stage.hide();
-			checkBox.setSelected(savedState);
 		}
 		for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 			final TitledPane tp = it.next();
