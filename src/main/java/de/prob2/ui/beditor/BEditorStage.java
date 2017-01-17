@@ -22,7 +22,7 @@ public class BEditorStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(BEditorStage.class);
 	
 	@FXML
-	private Editor beditor;
+	private BEditor beditor;
 	
 	private Path path;
 	
@@ -35,6 +35,7 @@ public class BEditorStage extends Stage {
 		this.path = path;
 		beditor.clear();
 		beditor.appendText(text);
+		beditor.getStyleClass().add("editor");
 	}
 	
 	@FXML

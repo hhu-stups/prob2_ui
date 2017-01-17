@@ -5,7 +5,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.BorderPane?>
 <?import de.prob2.ui.beditor.BEditorStage?>
-<?import de.prob2.ui.beditor.Editor?>
+<?import de.prob2.ui.beditor.BEditor?>
 <?import javafx.scene.Scene?>
 
 <fx:root type="BEditorStage" minWidth="240" minHeight="160" width="800" height="600" xmlns:fx="http://javafx.com/fxml/1">
@@ -36,7 +36,7 @@
 			      </MenuBar>
 			   </top>
 			   <center>
-			      <Editor fx:id="beditor" BorderPane.alignment="CENTER" />
+			      <BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
 			   </center>
 			</BorderPane>
 		</Scene>
