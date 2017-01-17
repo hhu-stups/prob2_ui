@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
@@ -44,6 +45,7 @@ import javafx.scene.layout.AnchorPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
 	@FXML
 	private TableView<Animation> animationsTable;
