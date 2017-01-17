@@ -246,12 +246,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		// Not used
 	}
 
-	public ObservableList<TableColumn<Animation, ?>> getColumns() {
-		return animationsTable.getColumns();
-	}
-
 	public TableView<Animation> getTable() {
 		return animationsTable;
 	}
-
 }

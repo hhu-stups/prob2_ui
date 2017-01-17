@@ -27,7 +27,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -390,12 +389,7 @@ public final class StatesView extends AnchorPane {
 		this.currentTrace.addListener(traceChangeListener);
 	}
 	
-	public ObservableList<TreeTableColumn<StateTreeItem<?>, ?>> getColumns() {
-		return tv.getColumns();
-	}
-	
 	public TreeTableView<StateTreeItem<?>> getTable() {
 		return tv;
 	}
-	
 }
