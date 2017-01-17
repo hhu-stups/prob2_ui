@@ -43,10 +43,10 @@
 						<padding>
 							<Insets top="10.0" left="15.0" right="15.0"/>
 						</padding>
-						<RadioButton fx:id="asciiRadio" selected="true" text="%states.fullValue.ascii" HBox.hgrow="NEVER" toggleGroup="$asciiUnicodeGroup" onAction="#updateText"/>
-						<RadioButton fx:id="unicodeRadio" text="%states.fullValue.unicode" HBox.hgrow="NEVER" toggleGroup="$asciiUnicodeGroup" onAction="#updateText"/>
+						<RadioButton fx:id="asciiRadio" selected="true" text="%states.fullValue.ascii" HBox.hgrow="NEVER" toggleGroup="$asciiUnicodeGroup" onAction="#updateTabs"/>
+						<RadioButton fx:id="unicodeRadio" text="%states.fullValue.unicode" HBox.hgrow="NEVER" toggleGroup="$asciiUnicodeGroup" onAction="#updateTabs"/>
 						<Region minWidth="-Infinity" maxWidth="Infinity" minHeight="-Infinity" maxHeight="Infinity" HBox.hgrow="ALWAYS" />
-						<CheckBox fx:id="prettifyCheckBox" text="%states.fullValue.prettify" alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#updateText"/>
+						<CheckBox fx:id="prettifyCheckBox" text="%states.fullValue.prettify" alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#updateTabs"/>
 						<Button fx:id="saveAsButton" text="%states.fullValue.saveAs" alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#saveAs" />
 					</HBox>
 				</bottom>
