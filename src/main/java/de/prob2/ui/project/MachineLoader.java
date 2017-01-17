@@ -21,12 +21,11 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachineLoader {
-	private static final Logger logger = LoggerFactory.getLogger(MachineLoader.class);
-	private Object openLock;
-	private Api api;
-	private CurrentProject currentProject;
-	private StateSpace stateSpace;
-	private StageManager stageManager;
+	private static final Logger LOGGER = LoggerFactory.getLogger(MachineLoader.class);
+	private final Object openLock;
+	private final Api api;
+	private final CurrentProject currentProject;
+	private final StageManager stageManager;
 
 	@Inject
 	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager) {
@@ -37,11 +36,17 @@ public class MachineLoader {
 	}
 
 	public void loadAsync(Machine machine) {
-		new Thread(() -> this.load(machine), "File Opener Thread").start();
-		return;
+		new Thread(() -> {
+			try {
+				this.load(machine);
+			} catch (IOException | ModelTranslationError e) {
+				LOGGER.error("Loading machine \"" + machine.getName() + "\" failed", e);
+				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait());
+			}
+		}, "File Opener Thread").start();
 	}
 
-	public StateSpace load(Machine machine) {
+	public StateSpace load(Machine machine) throws IOException, ModelTranslationError {
 		// NOTE: This method may be called from outside the JavaFX main thread,
 		// for example from openAsync.
 		// This means that all JavaFX calls must be wrapped in
@@ -50,16 +55,11 @@ public class MachineLoader {
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
 			Map<String, String> prefs = currentProject.get().getPreferences(machine);
-			try {
-				if (!prefs.isEmpty()) {
-					stateSpace = api.b_load(machine.getPath(), prefs);
-				} else {
-					stateSpace = api.b_load(machine.getPath());
-				}
-			} catch (IOException | ModelTranslationError e) {
-				logger.error("loading file failed", e);
-				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait());
-				return null;
+			final StateSpace stateSpace;
+			if (prefs.isEmpty()) {
+				stateSpace = api.b_load(machine.getPath());
+			} else {
+				stateSpace = api.b_load(machine.getPath(), prefs);
 			}
 			return stateSpace;
 		}

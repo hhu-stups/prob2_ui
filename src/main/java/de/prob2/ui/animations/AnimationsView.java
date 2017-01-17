@@ -20,6 +20,7 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -150,13 +151,16 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 	private void addAll(List<Machine> machines) {
 		for (Machine machine : machines) {
-			StateSpace stateSpace = machineLoader.load(machine);
+			StateSpace stateSpace;
 			try {
-				this.animations.addNewAnimation(new Trace(stateSpace));
-			} catch (NullPointerException e) {
-				LOGGER.error("loading machine \"" + machine.getName() + "\" failed", e);
-				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait());
+				stateSpace = machineLoader.load(machine);
+			} catch (IOException | ModelTranslationError e) {
+				LOGGER.error("Loading machine \"" + machine.getName() + "\" failed", e);
+				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR,
+					"Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait());
+				return;
 			}
+			this.animations.addNewAnimation(new Trace(stateSpace));
 		}
 	}
 
