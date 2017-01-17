@@ -11,7 +11,10 @@ script:
 - sonar-scanner -Dsonar.login=$SONAR_TOKEN
 sudo: false
 addons:
-  sonarqube: true
+  sonarqube:
+    branches:
+      - master
+      - develop
   apt:
     packages:
     - oracle-java8-installer
