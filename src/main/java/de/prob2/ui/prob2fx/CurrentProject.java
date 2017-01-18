@@ -10,31 +10,30 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.Project;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class CurrentProject extends SimpleObjectProperty<Project> {
@@ -44,7 +43,7 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 	private final BooleanProperty exists;
 	private final BooleanProperty isSingleFile;
 	private final ListProperty<Machine> machines;
-	private final StringProperty defaultLocation;
+	private final ObjectProperty<Path> defaultLocation;
 	private final Gson gson;
 
 	@Inject
@@ -54,7 +53,7 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		this.exists.bind(Bindings.isNotNull(this));
 		this.isSingleFile = new SimpleBooleanProperty(this, "isSingleFile", false);
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
-		this.defaultLocation = new SimpleStringProperty(this, "defaultLocation", System.getProperty("user.home"));
+		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation", Paths.get(System.getProperty("user.home")));
 	}
 
 	@Override
@@ -120,6 +119,7 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		Project project;
 		try (final Reader reader = new InputStreamReader(new FileInputStream(file), PROJECT_CHARSET)) {
 			project = gson.fromJson(reader, Project.class);
+			project.setLocation(file.getParentFile());
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
 			return;
@@ -135,15 +135,15 @@ public class CurrentProject extends SimpleObjectProperty<Project> {
 		this.isSingleFile.set(false);
 	}
 
-	public StringProperty defaultLocationProperty() {
+	public ObjectProperty<Path> defaultLocationProperty() {
 		return this.defaultLocation;
 	}
 	
-	public String getDefaultLocation() {
+	public Path getDefaultLocation() {
 		return this.defaultLocationProperty().get();
 	}
 
-	public void setDefaultLocation(String defaultProjectLocation) {
+	public void setDefaultLocation(Path defaultProjectLocation) {
 		this.defaultLocationProperty().set(defaultProjectLocation);
 	}
 }

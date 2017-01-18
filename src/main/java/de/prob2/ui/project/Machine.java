@@ -41,7 +41,7 @@ public class Machine {
 		return this.name;
 	}
 
-	public String getPath() {
+	public String getRelativePath() {
 		return location.getPath();
 	}
 	

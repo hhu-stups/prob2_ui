@@ -9,7 +9,7 @@ import java.util.Map;
 public class Project {
 	private final String name;
 	private final String description;
-	private final File location;
+	private transient File location;
 	private final boolean singleFile;
 	private final List<Machine> machines;
 	private final Map<String, Preference> preferences;
@@ -72,5 +72,9 @@ public class Project {
 			}
 		}
 		return prefs;
+	}
+
+	public void setLocation(File location) {
+		this.location = location;
 	}
 }

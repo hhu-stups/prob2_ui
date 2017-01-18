@@ -1,6 +1,8 @@
 package de.prob2.ui.project;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -48,11 +50,13 @@ public class MachineLoader {
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
 			Map<String, String> prefs = currentProject.get().getPreferences(machine);
+			String projectLocation = currentProject.get().getLocation().getPath();
+			Path path = Paths.get(projectLocation, machine.getRelativePath());
 			try {
 				if (!prefs.isEmpty()) {
-					stateSpace = api.b_load(machine.getPath(), prefs);
+					stateSpace = api.b_load(path.toString(), prefs);
 				} else {
-					stateSpace = api.b_load(machine.getPath());
+					stateSpace = api.b_load(path.toString());
 				}
 			} catch (IOException | ModelTranslationError e) {
 				logger.error("loading file failed", e);

@@ -12,6 +12,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -209,7 +210,7 @@ public final class Config {
 		this.recentFiles.setMaximum(configData.maxRecentFiles);
 		this.recentFiles.setAll(configData.recentFiles);
 		
-		this.currentProject.setDefaultLocation(configData.defaultProjectLocation);
+		this.currentProject.setDefaultLocation(Paths.get(configData.defaultProjectLocation));
 		
 		for (String name : configData.statesViewHiddenClasses) {
 			Class<? extends AbstractElement> clazz;
@@ -278,7 +279,7 @@ public final class Config {
 		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
 		configData.recentFiles = new ArrayList<>(this.recentFiles);
-		configData.defaultProjectLocation = this.currentProject.getDefaultLocation();
+		configData.defaultProjectLocation = this.currentProject.getDefaultLocation().toString();
 		configData.statesViewHiddenClasses = new ArrayList<>();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
 		configData.groovyConsoleSettings = groovyConsole.getSettings();

@@ -1,6 +1,7 @@
 package de.prob2.ui.preferences;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 
@@ -133,8 +134,9 @@ public final class PreferencesStage extends Stage {
 		
 		this.recentFilesCountSpinner.setValueFactory(valueFactory);
 		
-		defaultLocationField.setText(this.currentProjet.getDefaultLocation());
-		this.currentProjet.defaultLocationProperty().bind(defaultLocationField.textProperty());
+		defaultLocationField.setText(this.currentProjet.getDefaultLocation().toString());
+		this.currentProjet.defaultLocationProperty().addListener((observable, from, to) -> defaultLocationField.textProperty());
+		defaultLocationField.textProperty().addListener((observable, from, to) -> this.currentProjet.setDefaultLocation(Paths.get(to)));
 		
 		// ProB Preferences
 

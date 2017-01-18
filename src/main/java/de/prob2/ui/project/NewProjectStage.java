@@ -1,17 +1,11 @@
 package de.prob2.ui.project;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
@@ -39,8 +33,6 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class NewProjectStage extends Stage {
-	private static final Logger logger = LoggerFactory.getLogger(NewProjectStage.class);
-
 	@FXML
 	private Button finishButton;
 	@FXML
@@ -75,7 +67,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	public void initialize() {
 		finishButton.disableProperty().bind(projectNameField.lengthProperty().lessThanOrEqualTo(0));
-		locationField.setText(this.currentProject.getDefaultLocation());
+		locationField.setText(this.currentProject.getDefaultLocation().toString());
 
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -172,8 +164,9 @@ public class NewProjectStage extends Stage {
 			errorExplanationLabel.setText("The location does not exist or is invalid");
 			return;
 		}
+		Path projectLoc = dir.toPath();
 		List<MachineTableItem> machineItems = machinesTableView.getItems();
-		List<Machine> machines = copyMachines(machineItems, dir);
+		List<Machine> machines = relativPaths(machineItems, projectLoc);
 		Map<String, Preference> preferences = preferencesMap;
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines,
 				preferences, dir);
@@ -182,22 +175,15 @@ public class NewProjectStage extends Stage {
 		this.close();
 	}
 
-	private List<Machine> copyMachines(List<MachineTableItem> machineItems, File dir) {
-		String path = dir.getAbsolutePath();
+	private List<Machine> relativPaths(List<MachineTableItem> machineItems, Path projectLoc) {
 		List<Machine> machines = new ArrayList<>();
 		for (MachineTableItem machineItem : machineItems) {
 			Machine machine = machineItem.get();
-			Path source = machine.getLocation().toPath();
-			File newLocation = new File(path + File.separator + machine.getLocation().getName());
+			Path absolute = machine.getLocation().toPath();
+			Path relative = projectLoc.relativize(absolute);
 			List<String> preferences = getSelectedPreferences(machineItem);
-			Machine newMachine = new Machine(machine.getName(), machine.getDescription(), preferences, newLocation);
-			try {
-				Files.copy(source, newLocation.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				machines.add(newMachine);
-			} catch (IOException e) {
-				logger.error(
-						"Could not copy file to the selected directory: " + machine.getLocation().getAbsolutePath(), e);
-			}
+			Machine newMachine = new Machine(machine.getName(), machine.getDescription(), preferences, new File(relative.toString()));
+			machines.add(newMachine);
 		}
 		return machines;
 	}
