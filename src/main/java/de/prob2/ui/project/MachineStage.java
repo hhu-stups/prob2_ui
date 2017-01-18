@@ -32,7 +32,7 @@ public class MachineStage extends Stage {
 
 	MachineStage(StageManager stageManager) {
 		stageManager.loadFXML(this, "add_machine_stage.fxml");
-		this.initModality(Modality.WINDOW_MODAL);
+		this.initModality(Modality.APPLICATION_MODAL);
 	}
 
 	@FXML
@@ -72,7 +72,8 @@ public class MachineStage extends Stage {
 		String name = n[0];
 		int i = 1;
 		while (machinesSet.contains(name)) {
-			name = n[0] + "(" + i++ + ")";
+			name = n[0] + "(" + i + ")";
+			i++;
 		}
 		nameField.setText(name);
 
@@ -85,7 +86,7 @@ public class MachineStage extends Stage {
 		this.file = machine.getLocation();
 		this.setTitle("Edit " + machine.getName());
 		for (MachineTableItem i : machinesList) {
-			if (i != item) {
+			if (item.equals(i)) {
 				machinesSet.add(i.getName());
 			}
 		}

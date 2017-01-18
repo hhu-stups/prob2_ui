@@ -1,15 +1,16 @@
 package de.prob2.ui.animations;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractElement;
@@ -20,11 +21,14 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
+import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.MachineLoader;
+
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -37,6 +41,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
@@ -62,10 +69,18 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 	private CurrentProject currentProject;
 	private MachineLoader machineLoader;
+	
+	private Injector injector;
 
 	@Inject
-	private AnimationsView(final AnimationSelector animations, final StageManager stageManager,
-			final MachineLoader machineLoader, CurrentProject currentProject, CurrentTrace currentTrace) {
+	private AnimationsView(
+			final Injector injector,
+			final AnimationSelector animations,
+			final StageManager stageManager,
+			final MachineLoader machineLoader,
+			CurrentProject currentProject,
+			CurrentTrace currentTrace) {
+		this.injector = injector;
 		this.animations = animations;
 		this.machineLoader = machineLoader;
 		this.animations.registerAnimationChangeListener(this);
@@ -132,20 +147,27 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 				addAll(to.getMachines());
 			}
 		});
+		
+		animationsTable.setOnMouseClicked(e-> {
+			Animation selectedItem = animationsTable.getSelectionModel().getSelectedItem();
+			if(e.getClickCount() >= 2 && selectedItem != null) {
+				selectedItem.openEditor();
+			}
+		});
 	}
 
 	private void addAll(List<Machine> machines) {
-		for (Machine machine : machines) {
-			StateSpace stateSpace = machineLoader.load(machine);
+		for (Machine mch : machines) {
+			StateSpace stateSpace;
 			try {
-				this.animations.addNewAnimation(new Trace(stateSpace));
-			} catch (NullPointerException e) {
-				LOGGER.error("loading machine \"" + machine.getName() + "\" failed", e);
-				Platform.runLater(() -> {
-					stageManager.makeAlert(Alert.AlertType.ERROR,
-							"Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait();
-				});
+				stateSpace = machineLoader.load(mch);
+			} catch (IOException | ModelTranslationError e) {
+				LOGGER.error("Loading machine \"" + mch.getName() + "\" failed", e);
+				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR,
+					"Could not open machine \"" + mch.getName() + "\":\n" + e).showAndWait());
+				return;
 			}
+			this.animations.addNewAnimation(new Trace(stateSpace));
 		}
 	}
 
@@ -170,12 +192,12 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			String steps = Integer.toString(t.getTransitionList().size());
 			boolean isCurrent = t.equals(currentTrace);
 			boolean isProtected = animations.getProtectedTraces().contains(t.getUUID());
-			Animation a = new Animation(modelName, lastOp, steps, t, isCurrent, isProtected);
+			Animation a = new Animation(modelName, lastOp, steps, t, isCurrent, isProtected, getEditorStage(model));
 			Animation aa = contains(animationsTable, a);
-			if (aa != null) {
-				a.setTime(LocalDateTime.parse(aa.getTime(), DateTimeFormatter.ofPattern("HH:mm:ss d MMM uuuu")));
-			} else {
+			if (aa == null) {
 				a.setTime(LocalDateTime.now());
+			} else {
+				a.setTime(LocalDateTime.parse(aa.getTime(), DateTimeFormatter.ofPattern("HH:mm:ss d MMM uuuu")));
 			}
 			animList.add(a);
 		}
@@ -191,6 +213,21 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			animationsTable.getFocusModel().focus(currentIndex);
 			previousSize = animationsList.size();
 		});
+	}
+	
+	private BEditorStage getEditorStage(AbstractModel model) {
+		BEditorStage editorStage = injector.getInstance(BEditorStage.class);
+		String editor = "";
+		Path path = null;
+		try {
+			path = model.getModelFile().toPath();
+			editor = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
+		} catch (IOException e) {
+			LOGGER.error("File not found", e);
+		}
+		editorStage.setTextEditor(editor, path);
+		editorStage.setTitle(model.getModelFile().getName());
+		return editorStage;
 	}
 
 	private Animation contains(TableView<Animation> animTable, Animation animation) {
@@ -209,12 +246,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		// Not used
 	}
 
-	public ObservableList<TableColumn<Animation, ?>> getColumns() {
-		return animationsTable.getColumns();
-	}
-
 	public TableView<Animation> getTable() {
 		return animationsTable;
 	}
-
 }

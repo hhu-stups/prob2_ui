@@ -80,7 +80,7 @@
 								</Button>
 							</AnchorPane>
 							<ListView fx:id="preferencesListView" styleClass="no-border"
-								prefHeight="200" />
+								prefHeight="100" />
 							<AnchorPane>
 								<Label text="%newProject.stage.machines"
 									AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="5" />
@@ -93,7 +93,7 @@
 									</graphic>
 								</Button>
 							</AnchorPane>
-							<TableView fx:id="machinesTableView" prefHeight="300" editable="true"> 
+							<TableView fx:id="machinesTableView" prefHeight="200" editable="true">
 								<columns>
 									<TableColumn fx:id="nameColumn" editable="false"
 										text="%newProject.stage.machinesTableView.name" />

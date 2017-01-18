@@ -38,7 +38,7 @@ public class AddProBPreferencesStage extends Stage {
 
 	AddProBPreferencesStage(StageManager stageManager) {
 		stageManager.loadFXML(this, "add_probpreferences_stage.fxml");
-		this.initModality(Modality.WINDOW_MODAL);
+		this.initModality(Modality.APPLICATION_MODAL);
 	}
 
 	@FXML

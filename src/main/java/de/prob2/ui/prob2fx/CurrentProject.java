@@ -36,7 +36,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
 @Singleton
-public class CurrentProject extends SimpleObjectProperty<Project> {
+public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
 	private static final Logger LOGGER = LoggerFactory.getLogger(CurrentProject.class);
 	

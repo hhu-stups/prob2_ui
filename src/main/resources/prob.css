@@ -302,11 +302,46 @@
 	-fx-fill:black;
 }
 
+/************************************************************************************
+ * BEditor																			*
+ ************************************************************************************/
+
+.editor {
+	-fx-font-weight: bold;
+	-fx-font-family: monospace;
+	-fx-font-size: 15;
+}
+
+.editor .editor_identifier {
+	-fx-fill:green;
+}
+
+.editor .editor_assignment_logical {
+	-fx-fill:gray;
+}
+
+.editor .editor_string {
+	-fx-fill:red;
+}
+
+.editor .editor_comment {
+	-fx-fill:brown;
+	-fx-font-style: italic
+}
+
+.editor .editor_ctrlkeyword {
+	-fx-fill:purple;
+}
+
+.editor .editor_keyword {
+	-fx-fill:blue;
+}
 
 
 /************************************************************************************
  * TabPane																			*
  ************************************************************************************/
+ 
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
 	-fx-text-fill: -prob-white;
 }

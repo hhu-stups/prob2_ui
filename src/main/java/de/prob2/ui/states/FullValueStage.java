@@ -11,18 +11,19 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.fxmisc.richtext.StyleClassedTextArea;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
+
 import difflib.DiffUtils;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -34,6 +35,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import org.fxmisc.richtext.StyleClassedTextArea;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FullValueStage extends Stage {
 	private static final Pattern PRETTIFY_DELIMITERS = Pattern.compile("[\\{\\}\\,]");
@@ -54,13 +60,24 @@ public class FullValueStage extends Stage {
 	
 	private final StageManager stageManager;
 	
-	private AsciiUnicodeString currentValue;
-	private AsciiUnicodeString previousValue;
+	private final ObjectProperty<AsciiUnicodeString> currentValue;
+	private final ObjectProperty<AsciiUnicodeString> previousValue;
+	private final BooleanProperty formattingEnabled;
 	
 	@Inject
 	public FullValueStage(final StageManager stageManager) {
 		this.stageManager = stageManager;
+		this.currentValue = new SimpleObjectProperty<>(this, "currentValue", null);
+		this.previousValue = new SimpleObjectProperty<>(this, "previousValue", null);
+		this.formattingEnabled = new SimpleBooleanProperty(this, "formattingEnabled", true);
 		stageManager.loadFXML(this, "full_value_stage.fxml");
+	}
+	
+	@FXML
+	private void initialize() {
+		this.asciiRadio.visibleProperty().bind(this.formattingEnabledProperty());
+		this.unicodeRadio.visibleProperty().bind(this.formattingEnabledProperty());
+		this.prettifyCheckBox.visibleProperty().bind(this.formattingEnabledProperty());
 	}
 	
 	private static String prettify(final String s) {
@@ -108,36 +125,95 @@ public class FullValueStage extends Stage {
 		return this.prettifyCheckBox.isSelected() ? prettify(s) : s;
 	}
 	
-	public AsciiUnicodeString getCurrentValue() {
+	public ObjectProperty<AsciiUnicodeString> currentValueProperty() {
 		return this.currentValue;
 	}
 	
+	public AsciiUnicodeString getCurrentValue() {
+		return this.currentValueProperty().get();
+	}
+	
 	public void setCurrentValue(final AsciiUnicodeString currentValue) {
-		Objects.requireNonNull(currentValue);
-		this.currentValue = currentValue;
-		this.updateText();
+		this.currentValueProperty().set(currentValue);
+		this.updateTabs();
 	}
 	
 	public String currentValueAsString() {
 		return asciiRadio.isSelected() ? this.getCurrentValue().toAscii() : this.getCurrentValue().toUnicode();
 	}
 	
-	public AsciiUnicodeString getPreviousValue() {
+	public ObjectProperty<AsciiUnicodeString> previousValueProperty() {
 		return this.previousValue;
 	}
 	
+	public AsciiUnicodeString getPreviousValue() {
+		return this.previousValueProperty().get();
+	}
+	
 	public void setPreviousValue(final AsciiUnicodeString previousValue) {
-		Objects.requireNonNull(previousValue);
-		this.previousValue = previousValue;
-		this.updateText();
+		this.previousValueProperty().set(previousValue);
+		this.updateTabs();
 	}
 	
 	public String previousValueAsString() {
 		return asciiRadio.isSelected() ? this.getPreviousValue().toAscii() : this.getPreviousValue().toUnicode();
 	}
 	
+	public BooleanProperty formattingEnabledProperty() {
+		return this.formattingEnabled;
+	}
+	
+	public boolean getFormattingEnabled() {
+		return this.formattingEnabledProperty().get();
+	}
+	
+	public void setFormattingEnabled(final boolean formattingEnabled) {
+		this.formattingEnabledProperty().set(formattingEnabled);
+	}
+	
+	private void updateDiff(final String cv, final String pv) {
+		final List<String> prevLines = Arrays.asList(pv.split("\n"));
+		final List<String> curLines = Arrays.asList(cv.split("\n"));
+		final List<String> uniDiffLines = DiffUtils.generateUnifiedDiff("", "", prevLines, DiffUtils.diff(prevLines, curLines), 3);
+		
+		this.diffTextarea.clear();
+		if (uniDiffLines.isEmpty()) {
+			return;
+		}
+		
+		// Don't display the "file names" in the first two lines
+		for (final String line : uniDiffLines.subList(2, uniDiffLines.size())) {
+			this.diffTextarea.appendText(line);
+			this.diffTextarea.appendText("\n");
+			
+			final List<String> styleClasses = new ArrayList<>();
+			switch (line.charAt(0)) {
+				case '@':
+					styleClasses.add("coords");
+					break;
+				
+				case '+':
+					styleClasses.add("insert");
+					break;
+				
+				case '-':
+					styleClasses.add("delete");
+					break;
+				
+				default:
+					// No style class
+			}
+			
+			this.diffTextarea.setStyle(
+				this.diffTextarea.getLength() - line.length() - 1,
+				this.diffTextarea.getLength() - 1,
+				styleClasses
+			);
+		}
+	}
+	
 	@FXML
-	private void updateText() {
+	private void updateTabs() {
 		final String cv = this.getCurrentValue() == null ? null : prettifyIfEnabled(this.currentValueAsString());
 		final String pv = this.getPreviousValue() == null ? null : prettifyIfEnabled(this.previousValueAsString());
 		if (cv != null) {
@@ -147,45 +223,12 @@ public class FullValueStage extends Stage {
 			this.previousValueTextarea.setText(pv);
 		}
 		if (cv != null && pv != null) {
-			final List<String> prevLines = Arrays.asList(pv.split("\n"));
-			final List<String> curLines = Arrays.asList(cv.split("\n"));
-			final List<String> uniDiffLines = DiffUtils.generateUnifiedDiff("", "", prevLines, DiffUtils.diff(prevLines, curLines), 3);
-			
-			this.diffTextarea.clear();
-			if (uniDiffLines.isEmpty()) {
-				return;
-			}
-			
-			// Don't display the "file names" in the first two lines
-			for (final String line : uniDiffLines.subList(2, uniDiffLines.size())) {
-				this.diffTextarea.appendText(line);
-				this.diffTextarea.appendText("\n");
-				
-				final List<String> styleClasses = new ArrayList<>();
-				switch (line.charAt(0)) {
-					case '@':
-						styleClasses.add("coords");
-						break;
-					
-					case '+':
-						styleClasses.add("insert");
-						break;
-					
-					case '-':
-						styleClasses.add("delete");
-						break;
-					
-					default:
-						// No style class
-				}
-				
-				this.diffTextarea.setStyle(
-					this.diffTextarea.getLength() - line.length() - 1,
-					this.diffTextarea.getLength() - 1,
-					styleClasses
-				);
-			}
+			this.updateDiff(cv, pv);
 		}
+		
+		this.currentValueTab.setDisable(cv == null);
+		this.previousValueTab.setDisable(pv == null);
+		this.diffTab.setDisable(cv == null || pv == null);
 	}
 	
 	@FXML

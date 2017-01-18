@@ -19,7 +19,6 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.stats.StatsView;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -37,8 +36,6 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class DetachViewStageController extends Stage {
-	// FIXME Detached views sometimes resize themselves to zero height
-	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DetachViewStageController.class);
 	
 	@FXML private Button apply;
@@ -54,7 +51,7 @@ public final class DetachViewStageController extends Stage {
 	
 	private final Map<Class<? extends Parent>, CheckBox> checkBoxMap;
 	private final Set<Stage> wrapperStages;
-
+	
 	@Inject
 	private DetachViewStageController(final Injector injector, final StageManager stageManager, final UIState uiState) {
 		this.injector = injector;
@@ -122,12 +119,8 @@ public final class DetachViewStageController extends Stage {
 		final HashSet<Stage> wrapperStagesCopy = new HashSet<>(wrapperStages);
 		wrapperStages.clear();
 		for (final Stage stage : wrapperStagesCopy) {
-			// Save the check box state so it isn't overwritten by the stage's onHidden handler.
-			final CheckBox checkBox = checkBoxMap.get(stage.getScene().getRoot().getClass());
-			final boolean savedState = checkBox.isSelected();
 			stage.setScene(null);
 			stage.hide();
-			checkBox.setSelected(savedState);
 		}
 		for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 			final TitledPane tp = it.next();
@@ -149,7 +142,9 @@ public final class DetachViewStageController extends Stage {
 		stage.setTitle(title);
 		stage.setOnCloseRequest(e -> {
 			checkBoxMap.get(node.getClass()).setSelected(false);
-			this.apply();
+			if ("detached".equals(uiState.getGuiState())) {
+				this.apply();
+			}
 		});
 		// Default bounds, replaced by saved ones from the config when show() is called
 		stage.setWidth(200);

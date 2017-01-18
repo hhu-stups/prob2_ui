@@ -29,6 +29,7 @@ public final class CurrentModel extends ReadOnlyObjectProperty<AbstractModel> {
 		return null;
 	}
 	
+	@SuppressWarnings("MethodReturnAlwaysConstant")
 	@Override
 	public String getName() {
 		return "";

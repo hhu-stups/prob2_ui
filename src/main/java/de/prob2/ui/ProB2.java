@@ -24,30 +24,29 @@ public class ProB2 extends Application {
 	}
 
 	@Override
-	public void start(Stage stage) throws Exception {
+	public void start(Stage primaryStage) {
 		ProB2Module module = new ProB2Module();
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 		config = injector.getInstance(Config.class);
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
-
 		Parent root = injector.getInstance(MainController.class);
 		Scene mainScene = new Scene(root, 1024, 768);
-		stage.setTitle("ProB 2.0");
-		stage.setScene(mainScene);
-		stage.setOnCloseRequest(e -> Platform.exit());
+		primaryStage.setTitle("ProB 2.0");
+		primaryStage.setScene(mainScene);
+		primaryStage.setOnCloseRequest(e -> Platform.exit());
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		currentProject.addListener((observable, from, to) -> {
 			if (to == null) {
-				stage.setTitle("ProB 2.0");
+				primaryStage.setTitle("ProB 2.0");
 			} else {
-				stage.setTitle("ProB 2.0 [" + to.getName() + "]");
+				primaryStage.setTitle("ProB 2.0 [" + to.getName() + "]");
 			}
 		});
 
-		injector.getInstance(StageManager.class).register(stage, this.getClass().getName());
+		injector.getInstance(StageManager.class).register(primaryStage, this.getClass().getName());
 
-		stage.show();
+		primaryStage.show();
 		uiPersistence.open();
 	}
 

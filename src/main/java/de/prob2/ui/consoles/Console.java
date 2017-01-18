@@ -5,16 +5,16 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import org.fxmisc.richtext.StyleClassedTextArea;
-import org.fxmisc.wellbehaved.event.EventPattern;
-import org.fxmisc.wellbehaved.event.InputMap;
-import org.fxmisc.wellbehaved.event.Nodes;
-
 import javafx.scene.control.IndexRange;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
+
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
 
 
 public abstract class Console extends StyleClassedTextArea {
@@ -42,9 +42,11 @@ public abstract class Console extends StyleClassedTextArea {
 	protected ConsoleSearchHandler searchHandler;
 	protected List<IndexRange> errors;
 	protected Executable interpreter;
+	protected String header;
 	
 
-	protected Console() {
+	protected Console(String header) {
+		this.header = header;
 		this.instructions = new ArrayList<>();
 		this.errors = new ArrayList<>();
 		this.searchHandler = new ConsoleSearchHandler(this, instructions);
@@ -64,6 +66,7 @@ public abstract class Console extends StyleClassedTextArea {
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.R, KeyCombination.CONTROL_DOWN), e-> this.controlR()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.A, KeyCombination.CONTROL_DOWN), e-> this.controlA()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.E, KeyCombination.CONTROL_DOWN), e-> this.controlE()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.K, KeyCombination.CONTROL_DOWN), e-> this.reset()));
 				
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.UP), e-> this.handleUp()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DOWN), e-> this.handleDown()));
@@ -88,9 +91,9 @@ public abstract class Console extends StyleClassedTextArea {
 			goToLastPos();
 		}
 		String oldText = this.getText();
-		int posOfEnter = oldText.lastIndexOf('\n');
 		super.paste();
 		int diff = this.getLength() - oldText.length();
+		int posOfEnter = oldText.lastIndexOf('\n');
 		String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
 		if(currentLine.contains("\n")) {
 			this.deleteText(this.getText().length() - currentLine.length(), this.getText().length());
@@ -106,7 +109,7 @@ public abstract class Console extends StyleClassedTextArea {
 		super.copy();
 		goToLastPos();
 	}
-				
+					
 	private void mouseClicked() {
 		if(this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
 			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
@@ -114,10 +117,10 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public void controlR() {
-		if(!searchHandler.isActive()) {
-			activateSearch();
-		} else {
+		if (searchHandler.isActive()) {
 			searchHandler.searchNext();
+		} else {
+			activateSearch();
 		}
 	}
 	
@@ -186,7 +189,11 @@ public abstract class Console extends StyleClassedTextArea {
 		currentPosInLine = charCounterInLine;
 	}
 	
-	protected abstract void reset();
+	protected void reset() {
+		this.replaceText(header);
+		this.errors.clear();
+		this.appendText("\n >");
+	}
 		
 	protected void handleEnter() {
 		charCounterInLine = 0;
@@ -206,9 +213,9 @@ public abstract class Console extends StyleClassedTextArea {
 			ConsoleExecResult execResult = interpreter.exec(instruction);
 			if("clear".equals(execResult.getConsoleOutput())) {
 				reset();
-			} else {
-				this.appendText("\n" + execResult);
+				return;
 			}
+			this.appendText("\n" + execResult);
 			if(execResult.getResultType() == ConsoleExecResultType.ERROR) {
 				int begin = this.getText().length() - execResult.toString().length();
 				int end = this.getText().length();

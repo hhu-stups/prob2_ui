@@ -11,6 +11,7 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -18,7 +19,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -30,7 +30,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
 public class NewProjectStage extends Stage {
 	@FXML
@@ -60,8 +59,8 @@ public class NewProjectStage extends Stage {
 	private NewProjectStage(CurrentProject currentProject, StageManager stageManager) {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "new_project_stage.fxml");
-		this.initModality(Modality.WINDOW_MODAL);
 	}
 
 	@FXML
@@ -76,9 +75,7 @@ public class NewProjectStage extends Stage {
 			final TableRow<MachineTableItem> row = new TableRow<>();
 			final ContextMenu contextMenu = new ContextMenu();
 			final MenuItem removeMenuItem = new MenuItem("Remove Machine");
-			removeMenuItem.setOnAction(event -> {
-				machinesTableView.getItems().remove(row.getItem());
-			});
+			removeMenuItem.setOnAction(event -> machinesTableView.getItems().remove(row.getItem()));
 			contextMenu.getItems().add(removeMenuItem);
 			row.setOnMouseClicked(event -> {
 				if (event.getButton() == MouseButton.SECONDARY) {
@@ -113,12 +110,7 @@ public class NewProjectStage extends Stage {
 
 			TableColumn<MachineTableItem, Boolean> preferenceColumn = new TableColumn<>(preference.toString());
 			preferenceColumn.setEditable(true);
-			preferenceColumn.setCellFactory(
-					new Callback<TableColumn<MachineTableItem, Boolean>, TableCell<MachineTableItem, Boolean>>() {
-						public TableCell<MachineTableItem, Boolean> call(TableColumn<MachineTableItem, Boolean> p) {
-							return new CheckBoxTableCell<>();
-						}
-					});
+			preferenceColumn.setCellFactory(p -> new CheckBoxTableCell<>());
 			preferenceColumn.setCellValueFactory(cellData -> cellData.getValue().getPreferenceProperty(preference));
 			machinesTableView.getColumns().add(preferenceColumn);
 			machinesTableView.refresh();
@@ -149,7 +141,10 @@ public class NewProjectStage extends Stage {
 	void selectLocation(ActionEvent event) {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle("Select Location");
-		locationField.setText(dirChooser.showDialog(this.getOwner()).getAbsolutePath());
+		File file = dirChooser.showDialog(this.getOwner());		
+		if(file != null) {
+			locationField.setText(file.getAbsolutePath());
+		}
 	}
 
 	@FXML

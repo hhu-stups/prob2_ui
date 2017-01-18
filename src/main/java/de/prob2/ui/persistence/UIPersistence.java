@@ -2,9 +2,6 @@ package de.prob2.ui.persistence;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -20,8 +17,12 @@ import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.states.StatesView;
+
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class UIPersistence {
@@ -125,7 +126,7 @@ public final class UIPersistence {
 		final AnimationsView animationsView = injector.getInstance(AnimationsView.class);
 		final TablePersistenceHandler tablePersistenceHandler = injector.getInstance(TablePersistenceHandler.class);
 		main.setHorizontalDividerPositions(uiState.getHorizontalDividerPositions());
-		main.setVerticalDividerPostions(uiState.getVerticalDividerPositions());
+		main.setVerticalDividerPositions(uiState.getVerticalDividerPositions());
 		tablePersistenceHandler.setColumnsWidth(statesView.getTable(), statesView.getTable().getColumns(), TablePersistenceEnum.STATES_VIEW);
 		tablePersistenceHandler.setColumnsOrder(statesView.getTable().getColumns(), TablePersistenceEnum.STATES_VIEW);
 		tablePersistenceHandler.setColumnsWidth(animationsView.getTable(), animationsView.getTable().getColumns(), TablePersistenceEnum.ANIMATIONS_VIEW);
@@ -133,6 +134,6 @@ public final class UIPersistence {
 		
 		final OperationsView operationsView = injector.getInstance(OperationsView.class);
 		operationsView.setSortMode(uiState.getOperationsSortMode());
-		operationsView.setShowDisabledOps(uiState.getOperationsShowNotEnbaled());
+		operationsView.setShowDisabledOps(uiState.getOperationsShowNotEnabled());
 	}
 }

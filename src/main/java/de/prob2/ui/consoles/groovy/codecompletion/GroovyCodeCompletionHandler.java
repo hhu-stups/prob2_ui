@@ -65,12 +65,11 @@ public class GroovyCodeCompletionHandler {
 		}
 		for (Package pack : packages) {
 			String fullClassName = pack.getName() + "." + methods[methods.length - 1];
-			Class<?> clazz = null;
 			try {
-				clazz = Class.forName(fullClassName);
+				Class<?> clazz = Class.forName(fullClassName);
 				fillAllMethodsAndProperties(clazz, GroovyMethodOption.STATIC);
 				showSuggestions(clazz, GroovyMethodOption.STATIC);
-			} catch (ClassNotFoundException ignored) { // NOSONAR
+			} catch (ClassNotFoundException ignored) {
 				// Just try with the next package if the current fullClassName does not fit any classes
 			}
 		}

@@ -5,28 +5,28 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.EvaluationErrorResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.animator.domainobjects.StateError;
 import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -39,6 +39,9 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class StatesView extends AnchorPane {
@@ -228,6 +231,14 @@ public final class StatesView extends AnchorPane {
 
 	private void updateRoot(final Trace trace) {
 		this.updateElements(trace, this.tvRootItem, trace.getModel().getChildrenOfType(Machine.class));
+		
+		final TreeItem<StateTreeItem<?>> errorsItem = new TreeItem<>(new StateTreeItem<>("Errors", "", "", null));
+		
+		for (final StateError error : trace.getCurrentState().getStateErrors()) {
+			errorsItem.getChildren().add(new TreeItem<>(new ErrorStateTreeItem(error)));
+		}
+		
+		this.tvRootItem.getChildren().add(errorsItem);
 	}
 
 	private void visualizeExpression(AbstractFormulaElement formula) {
@@ -275,35 +286,74 @@ public final class StatesView extends AnchorPane {
 			);
 			
 			final MenuItem showFullValueItem = new MenuItem("Show Full Value");
-			// Full value can only be shown if the row item is an ElementStateTreeItem containing an AbstractFormulaElement and the corresponding value is an EvalResult.
+			// Full value can only be shown if the row item is any of the following:
+			// * An ElementStateTreeItem containing an AbstractFormulaElement, and the corresponding value is an EvalResult.
+			// * An ErrorStateTreeItem
 			showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
 				() -> !(
 					row.getItem() instanceof ElementStateTreeItem
 					&& row.getItem().getContents() instanceof AbstractFormulaElement
 					&& this.currentValues.get(((AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents()).getFormula()) instanceof EvalResult
+					|| row.getItem() instanceof ErrorStateTreeItem
 				),
 				row.itemProperty()
 			));
 			showFullValueItem.setOnAction(event -> {
-				final AbstractFormulaElement element = (AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents();
-				final EvalResult value = (EvalResult)this.currentValues.get(element.getFormula());
-				final EvalResult previousValue;
-				if (this.previousValues != null && this.previousValues.get(element.getFormula()) instanceof EvalResult) {
-					previousValue = (EvalResult)this.previousValues.get(element.getFormula());
-				} else {
-					previousValue = null;
-				}
 				final FullValueStage stage = injector.getInstance(FullValueStage.class);
-				stage.setTitle(element.toString());
-				stage.setCurrentValue(AsciiUnicodeString.fromAscii(value.getValue()));
-				stage.setPreviousValue(AsciiUnicodeString.fromAscii(previousValue == null ? "(not initialized)" : previousValue.getValue()));
+				if (row.getItem() instanceof ElementStateTreeItem) {
+					final AbstractFormulaElement element = (AbstractFormulaElement)((ElementStateTreeItem)row.getItem()).getContents();
+					final EvalResult currentResult = (EvalResult)this.currentValues.get(element.getFormula());
+					stage.setTitle(element.toString());
+					stage.setCurrentValue(AsciiUnicodeString.fromAscii(currentResult.getValue()));
+					if (this.previousValues != null && this.previousValues.get(element.getFormula()) instanceof EvalResult) {
+						final EvalResult previousResult = (EvalResult)this.previousValues.get(element.getFormula());
+						stage.setPreviousValue(AsciiUnicodeString.fromAscii(previousResult.getValue()));
+					} else {
+						stage.setPreviousValue(null);
+					}
+					stage.setFormattingEnabled(true);
+				} else if (row.getItem() instanceof ErrorStateTreeItem) {
+					final StateError error = ((ErrorStateTreeItem)row.getItem()).getContents();
+					stage.setTitle(error.getEvent());
+					stage.setCurrentValue(AsciiUnicodeString.fromAscii(error.getLongDescription()));
+					stage.setPreviousValue(null);
+					stage.setFormattingEnabled(false);
+				} else {
+					throw new IllegalArgumentException("Invalid row item type: " + row.getItem().getClass());
+				}
 				stage.show();
+			});
+			
+			final MenuItem showErrorsItem = new MenuItem("Show Errors");
+			// Errors can only be shown if the row is an ElementStateTreeItem whose result is EvaluationErrorResult.
+			showErrorsItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> !(
+					row.getItem() instanceof ElementStateTreeItem
+					&& ((ElementStateTreeItem)row.getItem()).getResult() instanceof EvaluationErrorResult
+				),
+				row.itemProperty()
+			));
+			showErrorsItem.setOnAction(event -> {
+				final FullValueStage stage = injector.getInstance(FullValueStage.class);
+				if (row.getItem() instanceof ElementStateTreeItem) {
+					final AbstractEvalResult result = ((ElementStateTreeItem)row.getItem()).getResult(); 
+					if (result instanceof EvaluationErrorResult) {
+						stage.setTitle(row.getItem().getContents().toString());
+						stage.setCurrentValue(AsciiUnicodeString.fromAscii(String.join("\n", ((EvaluationErrorResult)result).getErrors())));
+						stage.setFormattingEnabled(false);
+						stage.show();
+					} else {
+						throw new IllegalArgumentException("Row item result is not an error: " + result.getClass());
+					}
+				} else {
+					throw new IllegalArgumentException("Invalid row item type: " + row.getItem().getClass());
+				}
 			});
 			
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu) null)
-				.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem))
+				.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem, showErrorsItem))
 			);
 			
 			// Double-click on an item triggers "show full value" if allowed.
@@ -339,12 +389,7 @@ public final class StatesView extends AnchorPane {
 		this.currentTrace.addListener(traceChangeListener);
 	}
 	
-	public ObservableList<TreeTableColumn<StateTreeItem<?>, ?>> getColumns() {
-		return tv.getColumns();
-	}
-	
 	public TreeTableView<StateTreeItem<?>> getTable() {
 		return tv;
 	}
-	
 }

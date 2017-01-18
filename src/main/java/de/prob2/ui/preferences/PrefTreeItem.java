@@ -7,7 +7,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public abstract class PrefTreeItem {
+public class PrefTreeItem {
 	private final StringProperty name;
 	private final StringProperty changed;
 	private final StringProperty value;

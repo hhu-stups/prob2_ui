@@ -43,10 +43,10 @@ public class ConsoleSearchHandler {
 	protected void searchResult(KeyEvent e) {
 		searchResults.clear();
 		String key = getSearchCurrent();
-		if(e.getCode() != KeyCode.BACK_SPACE) {
-			key += e.getText();
-		} else {
+		if (e.getCode() == KeyCode.BACK_SPACE) {
 			key = key.substring(0, Math.max(0, key.length() - 1));
+		} else {
+			key += e.getText();
 		}
 		for(int i = instructions.size() - 1; i >= 0; i--) {
 			if(instructions.get(i).getInstruction().contains(key)) {

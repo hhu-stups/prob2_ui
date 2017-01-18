@@ -1,12 +1,10 @@
 package de.prob2.ui.preferences;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -17,11 +15,13 @@ import de.prob.model.representation.AbstractElement;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -48,6 +48,9 @@ import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class PreferencesStage extends Stage {
@@ -98,7 +101,7 @@ public final class PreferencesStage extends Stage {
 	private final RecentFiles recentFiles;
 	private final StageManager stageManager;
 	private final StringProperty currentTab;
-	private final CurrentProject currentProjet;
+	private final CurrentProject currentProject;
 
 	@Inject
 	private PreferencesStage(
@@ -116,7 +119,7 @@ public final class PreferencesStage extends Stage {
 		this.recentFiles = recentFiles;
 		this.stageManager = stageManager;
 		this.currentTab = new SimpleStringProperty(this, "currentTab", null);
-		this.currentProjet = currentProject;
+		this.currentProject = currentProject;
 
 		stageManager.loadFXML(this, "preferences_stage.fxml", this.getClass().getName());
 	}
@@ -134,10 +137,10 @@ public final class PreferencesStage extends Stage {
 		
 		this.recentFilesCountSpinner.setValueFactory(valueFactory);
 		
-		defaultLocationField.setText(this.currentProjet.getDefaultLocation().toString());
-		this.currentProjet.defaultLocationProperty().addListener((observable, from, to) -> defaultLocationField.textProperty());
-		defaultLocationField.textProperty().addListener((observable, from, to) -> this.currentProjet.setDefaultLocation(Paths.get(to)));
-		
+		defaultLocationField.setText(this.currentProject.getDefaultLocation().toString());
+		this.currentProject.defaultLocationProperty().addListener((observable, from, to) -> defaultLocationField.textProperty());
+		defaultLocationField.textProperty().addListener((observable, from, to) -> this.currentProject.setDefaultLocation(Paths.get(to)));
+
 		// ProB Preferences
 
 		this.undoButton.disableProperty().bind(this.preferences.changesAppliedProperty());
@@ -253,7 +256,10 @@ public final class PreferencesStage extends Stage {
 	private void selectDefaultLocation(ActionEvent event) {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle("Select default location to store new projects");
-		defaultLocationField.setText(dirChooser.showDialog(this.getOwner()).getAbsolutePath());
+		File file = dirChooser.showDialog(this.getOwner());
+		if(file != null) {
+			defaultLocationField.setText(file.getAbsolutePath());
+		}
 	}
 
 	private void updatePreferences() {

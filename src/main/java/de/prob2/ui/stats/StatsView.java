@@ -31,6 +31,8 @@ public class StatsView extends ScrollPane {
 	@FXML
 	private Label processedNodes;
 	@FXML
+	private Label percentageProcessed;
+	@FXML
 	private GridPane nodeStats;
 	@FXML
 	private GridPane transStats;
@@ -65,7 +67,7 @@ public class StatsView extends ScrollPane {
 		this.currentTrace.addListener(traceChangeListener);
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 
-		this.setMinSize(200,100);
+		this.setMinSize(200, 100);
 	}
 
 	@FXML
@@ -98,7 +100,7 @@ public class StatsView extends ScrollPane {
 			if (extendedStatsToggle.isSelected()) {
 				final ComputeCoverageCommand coverageCmd = new ComputeCoverageCommand();
 				trace.getStateSpace().execute(coverageCmd);
-				updatExtendedStats(coverageCmd.getResult());
+				updateExtendedStats(coverageCmd.getResult());
 			}
 		}
 	}
@@ -112,10 +114,13 @@ public class StatsView extends ScrollPane {
 			totalNodes.setText(Integer.toString(nrTotalNodes));
 			totalTransitions.setText(Integer.toString(nrTotalTransitions));
 			processedNodes.setText(Integer.toString(nrProcessedNodes));
+			if (nrTotalNodes != 0) {
+				percentageProcessed.setText("("+Integer.toString(100 * nrProcessedNodes / nrTotalNodes)+"%)");
+			}
 		});
 	}
 
-	public void updatExtendedStats(ComputeCoverageCommand.ComputeCoverageResult result) {
+	public void updateExtendedStats(ComputeCoverageCommand.ComputeCoverageResult result) {
 		showStats(result.getNodes(), nodeStats);
 		showStats(result.getOps(), transStats);
 	}

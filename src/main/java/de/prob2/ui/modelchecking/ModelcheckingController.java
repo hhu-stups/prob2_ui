@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
@@ -16,9 +17,11 @@ import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
+
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -50,6 +53,11 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		
 		private ModelcheckingStageController(final StageManager stageManager) {
 			stageManager.loadFXML(this, "modelchecking_stage.fxml");
+		}
+		
+		@FXML
+		private void initialize() {
+			this.initModality(Modality.APPLICATION_MODAL);
 		}
 		
 		@FXML
@@ -124,7 +132,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	@FXML
 	public void addModelCheck() {
 		if(!stageController.isShowing()) {
-			this.stageController.initModality(Modality.APPLICATION_MODAL);
 			this.stageController.showAndWait();
 		}
 	}

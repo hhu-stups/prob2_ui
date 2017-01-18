@@ -42,6 +42,7 @@ public final class CurrentState extends ReadOnlyObjectProperty<State> {
 		return null;
 	}
 	
+	@SuppressWarnings("MethodReturnAlwaysConstant")
 	@Override
 	public String getName() {
 		return "";

@@ -61,7 +61,7 @@ public class MainController extends BorderPane {
 		this.uiState = uiState;
 		refresh();
 	}
-	
+		
 	public void refresh() {
 		String guiState = "main.fxml";
 		if (!"detached".equals(uiState.getGuiState())) {
@@ -148,7 +148,7 @@ public class MainController extends BorderPane {
 		}
 	}
 	
-	public void setVerticalDividerPostions(double[] pos) {
+	public void setVerticalDividerPositions(double[] pos) {
 		if(verticalSP != null) {
 			verticalSP.setDividerPositions(pos);
 		}

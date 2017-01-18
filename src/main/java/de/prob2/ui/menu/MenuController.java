@@ -6,11 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
+import de.prob.scripting.ModelTranslationError;
 
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.b.BConsoleStage;
@@ -57,6 +61,7 @@ public final class MenuController extends MenuBar {
 	private final RecentFiles recentFiles;
 	private final UIState uiState;
 	private final DetachViewStageController dvController;
+	private final AboutBoxController aboutController;
 	private Window window;
 
 	@FXML
@@ -68,30 +73,36 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private Menu windowMenu;
 	@FXML
+	private MenuItem saveProjectItem;
+	@FXML
+	private MenuItem reloadMachineItem;
+	@FXML
 	private MenuItem preferencesItem;
 	@FXML
 	private MenuItem enterFormulaForVisualization;
 	@FXML
 	private MenuItem aboutItem;
-	@FXML
-	private MenuItem saveProjectItem;
 
 	private CurrentProject currentProject;
 
 	@Inject
-	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
-			final DetachViewStageController dvController, final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
+	private MenuController(
+			final StageManager stageManager,
+			final Injector injector,
+			final CurrentTrace currentTrace,
+			final DetachViewStageController dvController,
+			final AboutBoxController aboutController,
+			@Nullable final MenuToolkit menuToolkit,
+			final RecentFiles recentFiles,
+			final CurrentProject currentProject,
 			final UIState uiState) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.dvController = dvController;
-		if(IS_MAC) {
-			this.menuToolkit = injector.getInstance(MenuToolkit.class);
-		} else {
-			this.menuToolkit = null;
-		}
+		this.aboutController = aboutController;
+		this.menuToolkit = menuToolkit;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
 
@@ -163,10 +174,11 @@ public final class MenuController extends MenuBar {
 		// Fire the listener once to populate the recent files menu
 		recentFilesListener.onChanged(null);
 
-		this.enterFormulaForVisualization.disableProperty()
-				.bind(currentTrace.currentStateProperty().initializedProperty().not());
 		this.saveProjectItem.disableProperty()
 				.bind(currentProject.existsProperty().not().or(currentProject.isSingleFileProperty()));
+		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not());
+		this.enterFormulaForVisualization.disableProperty()
+				.bind(currentTrace.currentStateProperty().initializedProperty().not());
 	}
 
 	@FXML
@@ -208,6 +220,11 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
+	private void handleAboutDialog() {
+		this.aboutController.showAndWait();
+	}
+
+	@FXML
 	private void handleLoadPerspective() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
@@ -223,7 +240,7 @@ public final class MenuController extends MenuBar {
 				Parent root = loader.load();
 				window.getScene().setRoot(root);
 			} catch (IOException e) {
-				logger.error("loading fxml failed", e);
+				logger.error("Loading fxml failed", e);
 				stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait();
 			}
 		}
@@ -254,7 +271,7 @@ public final class MenuController extends MenuBar {
 				return;
 			}
 		}
-		
+
 		Platform.runLater(() -> {
 			this.currentProject.changeCurrentProject(new Project(new File(path)));
 			injector.getInstance(ModelcheckingController.class).resetView();
@@ -285,6 +302,16 @@ public final class MenuController extends MenuBar {
 		final Stage stage = this.stageManager.getCurrent();
 		if (stage != null) {
 			stage.close();
+		}
+	}
+
+	@FXML
+	private void handleReloadMachine() {
+		try {
+			this.currentTrace.reload(this.currentTrace.get());
+		} catch (IOException | ModelTranslationError e) {
+			logger.error("Model reload failed", e);
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to reload model:\n" + e).showAndWait();
 		}
 	}
 
@@ -335,11 +362,11 @@ public final class MenuController extends MenuBar {
 		}
 		return root;
 	}
-	
+
 	private boolean confirmReplacingProject() {
 		if (currentProject.exists()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
-			
+
 			if (currentProject.isSingleFile()) {
 				alert.setHeaderText("You've already opened a file.");
 				alert.setContentText("Do you want to close the current file?");
@@ -375,7 +402,7 @@ public final class MenuController extends MenuBar {
 		if (!confirmReplacingProject()) {
 			return;
 		}
-		
+
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Project");
 		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("ProB2 Projects", "*.json"));
