@@ -11,6 +11,8 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TitledPane?>
 <?import de.prob2.ui.MainController?>
+<?import de.prob2.ui.machines.MachinesView?>
+
 <fx:root type="MainController" maxHeight="Infinity"
 			maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
 			prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
@@ -23,6 +25,9 @@
 					</TitledPane>
 					<TitledPane text="%tptitles.modelcheck" fx:id="modelcheckTP" onMouseClicked="#modelcheckTPClicked">
 						<ModelcheckingController/>
+					</TitledPane>
+					<TitledPane text="%tptitles.machines" fx:id = "machinesTP" onMouseClicked="#machinesTPClicked">
+						<MachinesView/>
 					</TitledPane>
 				</panes>
 			</Accordion>
