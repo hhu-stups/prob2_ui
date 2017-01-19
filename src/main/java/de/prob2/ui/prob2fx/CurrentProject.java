@@ -51,7 +51,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
 		this.exists.bind(Bindings.isNotNull(this));
-		this.isSingleFile = new SimpleBooleanProperty(this, "isSingleFile", false);
+		this.isSingleFile = new SimpleBooleanProperty(this, "isSingleFile", true);
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation", Paths.get(System.getProperty("user.home")));
 	}

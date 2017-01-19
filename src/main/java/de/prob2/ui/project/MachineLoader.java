@@ -1,9 +1,11 @@
 package de.prob2.ui.project;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -11,15 +13,10 @@ import com.google.inject.Singleton;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachineLoader {
@@ -57,13 +54,18 @@ public class MachineLoader {
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
 			Map<String, String> prefs = currentProject.get().getPreferences(machine);
-			String projectLocation = currentProject.get().getLocation().getPath();
-			Path path = Paths.get(projectLocation, machine.getRelativePath());
+			String path;
+			if(currentProject.isSingleFile()) {
+				path = machine.getRelativePath();
+			} else {
+				String projectLocation = currentProject.get().getLocation().getPath();
+				path = Paths.get(projectLocation, machine.getRelativePath()).toString();
+			}
 			final StateSpace stateSpace;
 			if (prefs.isEmpty()) {
-				stateSpace = api.b_load(path.toString());
+				stateSpace = api.b_load(path);
 			} else {
-				stateSpace = api.b_load(path.toString(), prefs);
+				stateSpace = api.b_load(path, prefs);
 			}
 			return stateSpace;
 		}
