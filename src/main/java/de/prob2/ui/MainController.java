@@ -45,6 +45,9 @@ public class MainController extends BorderPane {
 	private TitledPane animationsTP;
 	
 	@FXML
+	private TitledPane machinesTP;
+	
+	@FXML
 	private TitledPane statsTP;
 	
 	@FXML
@@ -95,6 +98,11 @@ public class MainController extends BorderPane {
 		handleTitledPaneClicked(animationsTP);
 	}
 	
+	@FXML
+	public void machinesTPClicked() {
+		handleTitledPaneClicked(machinesTP);
+	}
+	
 	public void handleTitledPaneClicked(TitledPane pane) {
 		for (TitledPane titledPane : ((Accordion) pane.getParent()).getPanes()) {
 			uiState.getExpandedTitledPanes().remove(titledPane.getText());
@@ -113,6 +121,7 @@ public class MainController extends BorderPane {
 		titledPanes.put("Animations", animationsTP);
 		titledPanes.put("Model Check", modelcheckTP);
 		titledPanes.put("Statistics", statsTP);
+		titledPanes.put("Machines", machinesTP);
 
 
 		if (!titledPanes.containsKey(titledPane)) {

@@ -3,6 +3,7 @@
 <?import de.prob2.ui.animations.AnimationsView?>
 <?import de.prob2.ui.history.HistoryView?>
 <?import de.prob2.ui.MainController?>
+<?import de.prob2.ui.machines.MachinesView?>
 <?import de.prob2.ui.menu.MenuController?>
 <?import de.prob2.ui.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.operations.OperationsView?>
@@ -30,6 +31,9 @@
 					</TitledPane>
 					<TitledPane text="%tptitles.animations" fx:id = "animationsTP" onMouseClicked="#animationsTPClicked">
 						<AnimationsView/>
+					</TitledPane>
+					<TitledPane text="%tptitles.machines" fx:id = "machinesTP" onMouseClicked="#machinesTPClicked">
+						<MachinesView/>
 					</TitledPane>
 				</panes>
 			</Accordion>
