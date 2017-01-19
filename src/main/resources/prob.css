@@ -468,6 +468,13 @@
 .table-row-cell:focused .table-cell {
 	-fx-font-weight: bold;
 }
+.tree-table-row-cell:focused .check-box > .box {
+	-fx-border-color: white;
+}
+.tree-table-row-cell:focused .check-box > .box > .mark {
+	-fx-background-color: white;
+}
+
 .table-view .column-header-background,
 .tree-table-view > .column-header-background {
 	-fx-background-color: white;
