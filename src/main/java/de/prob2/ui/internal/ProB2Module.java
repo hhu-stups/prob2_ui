@@ -24,6 +24,7 @@ import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentModel;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentState;
 import de.prob2.ui.prob2fx.CurrentStateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -49,6 +50,7 @@ public class ProB2Module extends AbstractModule {
 		bind(CurrentState.class);
 		bind(CurrentStateSpace.class);
 		bind(CurrentTrace.class);
+		bind(CurrentProject.class);
 		bind(FormulaGenerator.class);
 		bind(FormulaInputStage.class);
 		bind(GroovyConsole.class);

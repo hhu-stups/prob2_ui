@@ -273,7 +273,7 @@ public final class MenuController extends MenuBar {
 		}
 
 		Platform.runLater(() -> {
-			this.currentProject.changeCurrentProject(new Project(new File(path)));
+			this.currentProject.set(new Project(new File(path)));
 			injector.getInstance(ModelcheckingController.class).resetView();
 
 			// Remove the path first to avoid listing the same file twice.

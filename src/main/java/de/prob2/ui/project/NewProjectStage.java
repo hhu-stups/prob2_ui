@@ -165,7 +165,7 @@ public class NewProjectStage extends Stage {
 		Map<String, Preference> preferences = preferencesMap;
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines,
 				preferences, dir);
-		currentProject.changeCurrentProject(newProject);
+		currentProject.set(newProject);
 		currentProject.save();
 		this.close();
 	}
