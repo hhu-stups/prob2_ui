@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -21,14 +24,12 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.MachineLoader;
-
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -41,9 +42,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
@@ -69,17 +67,12 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 	private CurrentProject currentProject;
 	private MachineLoader machineLoader;
-	
+
 	private Injector injector;
 
 	@Inject
-	private AnimationsView(
-			final Injector injector,
-			final AnimationSelector animations,
-			final StageManager stageManager,
-			final MachineLoader machineLoader,
-			CurrentProject currentProject,
-			CurrentTrace currentTrace) {
+	private AnimationsView(final Injector injector, final AnimationSelector animations, final StageManager stageManager,
+			final MachineLoader machineLoader, CurrentProject currentProject, CurrentTrace currentTrace) {
 		this.injector = injector;
 		this.animations = animations;
 		this.machineLoader = machineLoader;
@@ -147,10 +140,10 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 				addAll(to.getMachines());
 			}
 		});
-		
-		animationsTable.setOnMouseClicked(e-> {
+
+		animationsTable.setOnMouseClicked(e -> {
 			Animation selectedItem = animationsTable.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() >= 2 && selectedItem != null) {
+			if (e.getClickCount() >= 2 && selectedItem != null) {
 				selectedItem.openEditor();
 			}
 		});
@@ -163,8 +156,9 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 				stateSpace = machineLoader.load(mch);
 			} catch (IOException | ModelTranslationError e) {
 				LOGGER.error("Loading machine \"" + mch.getName() + "\" failed", e);
-				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR,
-					"Could not open machine \"" + mch.getName() + "\":\n" + e).showAndWait());
+				Platform.runLater(() -> stageManager
+						.makeAlert(Alert.AlertType.ERROR, "Could not open machine \"" + mch.getName() + "\":\n" + e)
+						.showAndWait());
 				return;
 			}
 			this.animations.addNewAnimation(new Trace(stateSpace));
@@ -214,7 +208,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			previousSize = animationsList.size();
 		});
 	}
-	
+
 	private BEditorStage getEditorStage(AbstractModel model) {
 		BEditorStage editorStage = injector.getInstance(BEditorStage.class);
 		String editor = "";
