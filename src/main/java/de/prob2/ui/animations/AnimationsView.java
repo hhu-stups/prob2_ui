@@ -217,15 +217,15 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	
 	private BEditorStage getEditorStage(AbstractModel model) {
 		BEditorStage editorStage = injector.getInstance(BEditorStage.class);
-		String editor = "";
+		String text = "";
 		Path path = null;
 		try {
 			path = model.getModelFile().toPath();
-			editor = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
+			text = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
 		} catch (IOException e) {
 			LOGGER.error("File not found", e);
 		}
-		editorStage.setTextEditor(editor, path);
+		editorStage.setEditorText(text, path);
 		editorStage.setTitle(model.getModelFile().getName());
 		return editorStage;
 	}

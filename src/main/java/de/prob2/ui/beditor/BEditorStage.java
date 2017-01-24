@@ -32,7 +32,13 @@ public class BEditorStage extends Stage {
 		stageManager.loadFXML(this, "beditor.fxml");
 	}
 	
-	public void setTextEditor(String text, Path path) {
+	@FXML
+	private void initialize() {
+		this.setOnShowing(event -> beditor.startHighlighting());
+		this.setOnHiding(event -> beditor.stopHighlighting());
+	}
+	
+	public void setEditorText(String text, Path path) {
 		this.path = path;
 		beditor.clear();
 		beditor.appendText(text);

@@ -26,10 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BEditor extends StyleClassedTextArea {
-	
-	private static final Logger logger = LoggerFactory.getLogger(BEditor.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
 
-	private ExecutorService executor = Executors.newSingleThreadExecutor();
+	private ExecutorService executor;
 
 	private static final Map<Class<? extends Token>, String> syntaxClasses = new HashMap<>();
 	
@@ -78,10 +77,21 @@ public class BEditor extends StyleClassedTextArea {
 			if (t.isSuccess()) {
 				return Optional.of(t.get());
 			} else {
-				t.getFailure().printStackTrace();
+				LOGGER.info("Highlighting failed", t.getFailure());
 				return Optional.empty();
 			}
 		}).subscribe(this::applyHighlighting);
+	}
+	
+	public void startHighlighting() {
+		if (this.executor == null) {
+			this.executor = Executors.newSingleThreadExecutor();
+		}
+	}
+	
+	public void stopHighlighting() {
+		this.executor.shutdown();
+		this.executor = null;
 	}
 	
 	@SafeVarargs
@@ -96,15 +106,28 @@ public class BEditor extends StyleClassedTextArea {
 	}
 	
 	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
-		String text = this.getText();
-		Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
-			@Override
-			protected StyleSpans<Collection<String>> call() {
-				return computeHighlighting(text);
-			}
-		};
-		executor.execute(task);
-		return task;
+		final String text = this.getText();
+		if (executor == null) {
+			// No executor - run and return a dummy task that does no highlighting
+			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
+				@Override
+				protected StyleSpans<Collection<String>> call() {
+					return new StyleSpansBuilder<Collection<String>>().add(Collections.singleton("default"), text.length()).create();
+				}
+			};
+			task.run();
+			return task;
+		} else {
+			// Executor exists - do proper highlighting
+			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
+				@Override
+				protected StyleSpans<Collection<String>> call() {
+					return computeHighlighting(text);
+				}
+			};
+			executor.execute(task);
+			return task;
+		}
 	}
 	
 	private static StyleSpans<Collection<String>> computeHighlighting(String text) {
@@ -122,11 +145,8 @@ public class BEditor extends StyleClassedTextArea {
 				spansBuilder.add(Collections.singleton(string == null ? "default" : string), length);
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
-			logger.error("BLexer Exception: ", e);
+			LOGGER.info("Failed to lex", e);
 		}
 		return spansBuilder.create();
 	}
-	
-
-	
 }
