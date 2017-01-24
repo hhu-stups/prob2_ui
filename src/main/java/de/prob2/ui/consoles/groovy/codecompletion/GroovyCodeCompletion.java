@@ -1,16 +1,19 @@
 package de.prob2.ui.consoles.groovy.codecompletion;
 
-import javax.script.ScriptEngine;
+import java.util.Optional;
 
-import org.fxmisc.richtext.PopupAlignment;
+import javax.script.ScriptEngine;
 
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
 import de.prob2.ui.internal.StageManager;
+
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -84,7 +87,6 @@ public class GroovyCodeCompletion extends Popup {
 		}
 		sortSuggestions();
 		lvSuggestions.getSelectionModel().selectFirst();
-		parent.setPopupAlignment(PopupAlignment.CARET_BOTTOM);
 		this.show(parent.getScene().getWindow());
 	}
 	
@@ -254,7 +256,12 @@ public class GroovyCodeCompletion extends Popup {
 	
 	public void setParent(GroovyConsole parent) {
 		this.parent = parent;
-		parent.setPopupWindow(this);
+		final ChangeListener<Optional<Bounds>> listener = (observable, from, to) -> to.ifPresent(bounds -> {
+			this.setAnchorX((bounds.getMinX() + bounds.getMaxX()) / 2.0);
+			this.setAnchorY(bounds.getMaxY());
+		});
+		parent.caretBoundsProperty().addListener(listener);
+		listener.changed(parent.caretBoundsProperty(), Optional.empty(), parent.getCaretBounds());
 	}
 	
 	public GroovyConsole getParent() {
