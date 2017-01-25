@@ -27,7 +27,7 @@
 					</MenuBar>
 				</top>
 				<center>
-					<BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
+					<BEditor fx:id="beditor" BorderPane.alignment="CENTER" styleClass="editor" />
 				</center>
 			</BorderPane>
 		</Scene>

@@ -2,41 +2,44 @@ package de.prob2.ui.animations;
 
 import java.time.LocalDateTime;
 
+import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.Trace;
 
-import de.prob2.ui.beditor.BEditorStage;
-
 public class Animation {
-	private final String modelName;
+	private final String name;
+	private final AbstractModel model;
 	private final String lastOperation;
 	private final String steps;
 	private final Trace trace;
 	private final boolean isCurrent;
 	private final boolean isProtected;
 	private LocalDateTime time;
-	private BEditorStage bEditorStage;
 
 	public Animation(
-		String modelName,
+		String name,
+		AbstractModel model,
 		String lastOperation,
 		String steps,
 		Trace trace,
 		boolean isCurrent,
-		boolean isProtected,
-		BEditorStage bEditorStage
+		boolean isProtected
 	) {
-		this.modelName = modelName;
+		this.name = name;
+		this.model = model;
 		this.lastOperation = lastOperation;
 		this.steps = steps;
 		this.trace = trace;
 		this.isCurrent = isCurrent;
 		this.isProtected = isProtected;
 		this.time = null;
-		this.bEditorStage = bEditorStage;
 	}
 
-	public String getModelName() {
-		return modelName;
+	public String getName() {
+		return name;
+	}
+
+	public AbstractModel getModel() {
+		return model;
 	}
 
 	public String getLastOperation() {
@@ -65,9 +68,5 @@ public class Animation {
 
 	public void setTime(LocalDateTime time) {
 		this.time = time;
-	}
-	
-	public BEditorStage getBEditorStage() {
-		return bEditorStage;
 	}
 }
