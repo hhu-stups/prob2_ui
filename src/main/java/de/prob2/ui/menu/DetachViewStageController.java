@@ -117,12 +117,6 @@ public final class DetachViewStageController extends Stage {
 	
 	private void removeTP(Accordion accordion, SplitPane pane) {
 		uiState.updateSavedStageBoxes();
-		final HashSet<Stage> wrapperStagesCopy = new HashSet<>(wrapperStages);
-		wrapperStages.clear();
-		for (final Stage stage : wrapperStagesCopy) {
-			stage.setScene(null);
-			stage.hide();
-		}
 		for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 			final TitledPane tp = it.next();
 			if (checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
@@ -131,7 +125,6 @@ public final class DetachViewStageController extends Stage {
 			}
 		}
 		if (accordion.getPanes().isEmpty()) {
-			//pane.getItems().remove(accordion);
 			accordion.setVisible(false);
 			accordion.setMaxWidth(0);
 			pane.setDividerPositions(0);
@@ -146,7 +139,7 @@ public final class DetachViewStageController extends Stage {
 		((StackPane) stage.getScene().getRoot()).getChildren().add(node);
 		wrapperStages.add(stage);
 		stage.setTitle(title);
-		stage.setOnCloseRequest(e -> {
+		stage.setOnHidden(e -> {
 			checkBoxMap.get(node.getClass()).setSelected(false);
 			accordion.setVisible(true);
 			accordion.setMaxWidth(Double.POSITIVE_INFINITY);
@@ -154,9 +147,6 @@ public final class DetachViewStageController extends Stage {
 			pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(false));
 			tp.setContent(node);
 			accordion.getPanes().add(tp);
-			if ("detached".equals(uiState.getGuiState())) {
-				this.apply();
-			}
 		});
 		// Default bounds, replaced by saved ones from the config when show() is called
 		stage.setWidth(200);
