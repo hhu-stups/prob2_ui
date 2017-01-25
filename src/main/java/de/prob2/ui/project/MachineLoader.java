@@ -12,7 +12,9 @@ import com.google.inject.Singleton;
 
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
+import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.application.Platform;
@@ -25,13 +27,16 @@ public class MachineLoader {
 	private final Api api;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
+	private final AnimationSelector animations;
 
 	@Inject
-	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager) {
+	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager,
+			final AnimationSelector animations) {
 		this.api = api;
 		this.openLock = new Object();
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.animations = animations;
 	}
 
 	public void loadAsync(Machine machine) {
@@ -40,12 +45,14 @@ public class MachineLoader {
 				this.load(machine);
 			} catch (IOException | ModelTranslationError e) {
 				LOGGER.error("Loading machine \"" + machine.getName() + "\" failed", e);
-				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait());
+				Platform.runLater(() -> stageManager
+						.makeAlert(Alert.AlertType.ERROR, "Could not open machine \"" + machine.getName() + "\":\n" + e)
+						.showAndWait());
 			}
-		}, "File Opener Thread").start();
+		} , "File Opener Thread").start();
 	}
 
-	public StateSpace load(Machine machine) throws IOException, ModelTranslationError {
+	public void load(Machine machine) throws IOException, ModelTranslationError {
 		// NOTE: This method may be called from outside the JavaFX main thread,
 		// for example from openAsync.
 		// This means that all JavaFX calls must be wrapped in
@@ -55,7 +62,7 @@ public class MachineLoader {
 		synchronized (this.openLock) {
 			Map<String, String> prefs = currentProject.get().getPreferences(machine);
 			String path;
-			if(currentProject.isSingleFile()) {
+			if (currentProject.isSingleFile()) {
 				path = machine.getRelativePath();
 			} else {
 				String projectLocation = currentProject.get().getLocation().getPath();
@@ -67,7 +74,7 @@ public class MachineLoader {
 			} else {
 				stateSpace = api.b_load(path, prefs);
 			}
-			return stateSpace;
+			Platform.runLater(() -> this.animations.addNewAnimation(new Trace(stateSpace)));
 		}
 	}
 }

@@ -20,12 +20,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
 @Singleton
 public final class MachinesView extends AnchorPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MachinesView.class);
-	
+
 	@FXML
 	private TableView<Machine> machinesTable;
 	@FXML
@@ -52,22 +53,27 @@ public final class MachinesView extends AnchorPane {
 		name.setCellValueFactory(new PropertyValueFactory<>("name"));
 		machine.setCellValueFactory(cellData -> new SimpleObjectProperty<File>(cellData.getValue().getLocation()));
 		description.setCellValueFactory(new PropertyValueFactory<>("description"));
-		
+
 		machinesTable.setRowFactory(tableView -> {
-			final TableRow<Machine> row = new TableRow<>();	
+			final TableRow<Machine> row = new TableRow<>();
 			row.setOnMouseClicked(event -> {
-				Machine machine = row.getItem();
-				try {
-					machineLoader.load(machine);
-				} catch (Exception e) {
-					LOGGER.error("Loading machine \"" + machine.getName() + "\" failed", e);
-					Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR,
-						"Could not open machine \"" + machine.getName() + "\":\n" + e).showAndWait());
+				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					Machine machine = row.getItem();
+					try {
+						machineLoader.loadAsync(machine);
+					} catch (Exception e) {
+						LOGGER.error("Loading machine \"" + machine.getName() + "\" failed", e);
+						Platform.runLater(
+								() -> stageManager
+										.makeAlert(Alert.AlertType.ERROR,
+												"Could not open machine \"" + machine.getName() + "\":\n" + e)
+										.showAndWait());
+					}
 				}
 			});
 			return row;
 		});
-		
+
 		machinesTable.itemsProperty().bind(currentProject.machinesProperty());
 	}
 }

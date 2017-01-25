@@ -21,15 +21,12 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.Machine;
-import de.prob2.ui.project.MachineLoader;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -61,21 +58,18 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
+	private final CurrentProject currentProject;
 
 	private int currentIndex;
 	private int previousSize = 0;
-
-	private CurrentProject currentProject;
-	private MachineLoader machineLoader;
 
 	private Injector injector;
 
 	@Inject
 	private AnimationsView(final Injector injector, final AnimationSelector animations, final StageManager stageManager,
-			final MachineLoader machineLoader, CurrentProject currentProject, CurrentTrace currentTrace) {
+			final CurrentProject currentProject, CurrentTrace currentTrace) {
 		this.injector = injector;
 		this.animations = animations;
-		this.machineLoader = machineLoader;
 		this.animations.registerAnimationChangeListener(this);
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -134,35 +128,12 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		});
 		this.traceChange(animations.getCurrentTrace(), true);
 
-		currentProject.addListener((observable, from, to) -> {
-			if (to != null) {
-				removeAllTraces();
-				addAll(to.getMachines());
-			}
-		});
-
 		animationsTable.setOnMouseClicked(e -> {
 			Animation selectedItem = animationsTable.getSelectionModel().getSelectedItem();
 			if (e.getClickCount() >= 2 && selectedItem != null) {
 				selectedItem.openEditor();
 			}
 		});
-	}
-
-	private void addAll(List<Machine> machines) {
-		for (Machine mch : machines) {
-			StateSpace stateSpace;
-			try {
-				stateSpace = machineLoader.load(mch);
-			} catch (IOException | ModelTranslationError e) {
-				LOGGER.error("Loading machine \"" + mch.getName() + "\" failed", e);
-				Platform.runLater(() -> stageManager
-						.makeAlert(Alert.AlertType.ERROR, "Could not open machine \"" + mch.getName() + "\":\n" + e)
-						.showAndWait());
-				return;
-			}
-			this.animations.addNewAnimation(new Trace(stateSpace));
-		}
 	}
 
 	private void removeAllTraces() {
