@@ -25,7 +25,6 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -58,7 +57,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
-	private final CurrentProject currentProject;
 
 	private int currentIndex;
 	private int previousSize = 0;
@@ -67,11 +65,10 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 	@Inject
 	private AnimationsView(final Injector injector, final AnimationSelector animations, final StageManager stageManager,
-			final CurrentProject currentProject, CurrentTrace currentTrace) {
+			CurrentTrace currentTrace) {
 		this.injector = injector;
 		this.animations = animations;
 		this.animations.registerAnimationChangeListener(this);
-		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
 		this.stageManager.loadFXML(this, "animations_view.fxml");
@@ -91,9 +88,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 				Animation a = row.getItem();
 				animations.removeTrace(a.getTrace());
 				animationsTable.getItems().remove(a);
-				if (animationsTable.getItems().isEmpty()) {
-					currentProject.remove();
-				}
 			});
 			removeMenuItem.disableProperty().bind(row.emptyProperty());
 
@@ -101,7 +95,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 			removeAllMenuItem.setOnAction(event -> {
 				removeAllTraces();
-				currentProject.remove();
 			});
 
 			final MenuItem reloadMenuItem = new MenuItem("Reload");
