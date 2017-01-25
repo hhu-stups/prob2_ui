@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -30,6 +31,7 @@ import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.MachineLoader;
 
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -60,33 +62,36 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AnimationsView.class);
 
+	private final Injector injector;
 	private final AnimationSelector animations;
-	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
+	private final MachineLoader machineLoader;
+	private final CurrentProject currentProject;
+	private final CurrentTrace currentTrace;
+	private final Locale locale;
 
 	private int currentIndex;
 	private int previousSize = 0;
 
-	private CurrentProject currentProject;
-	private MachineLoader machineLoader;
-	
-	private Injector injector;
-
 	@Inject
 	private AnimationsView(
-			final Injector injector,
-			final AnimationSelector animations,
-			final StageManager stageManager,
-			final MachineLoader machineLoader,
-			CurrentProject currentProject,
-			CurrentTrace currentTrace) {
+		final Injector injector,
+		final AnimationSelector animations,
+		final StageManager stageManager,
+		final MachineLoader machineLoader,
+		final CurrentProject currentProject,
+		final CurrentTrace currentTrace,
+		final Locale locale
+	) {
 		this.injector = injector;
 		this.animations = animations;
+		this.stageManager = stageManager;
 		this.machineLoader = machineLoader;
-		this.animations.registerAnimationChangeListener(this);
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.stageManager = stageManager;
+		this.locale = locale;
+		
+		this.animations.registerAnimationChangeListener(this);
 		this.stageManager.loadFXML(this, "animations_view.fxml");
 	}
 
@@ -95,7 +100,9 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		machine.setCellValueFactory(new PropertyValueFactory<>("modelName"));
 		lastop.setCellValueFactory(new PropertyValueFactory<>("lastOperation"));
 		tracelength.setCellValueFactory(new PropertyValueFactory<>("steps"));
-		time.setCellValueFactory(new PropertyValueFactory<>("time"));
+		time.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(
+			data.getValue().getTime().format(DateTimeFormatter.ofPattern("HH:mm:ss d MMM uuuu", this.locale))
+		).getReadOnlyProperty());
 		animationsTable.setRowFactory(tableView -> {
 			final TableRow<Animation> row = new TableRow<>();
 
@@ -148,10 +155,10 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			}
 		});
 		
-		animationsTable.setOnMouseClicked(e-> {
+		animationsTable.setOnMouseClicked(e -> {
 			Animation selectedItem = animationsTable.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() >= 2 && selectedItem != null) {
-				selectedItem.openEditor();
+			if (e.getClickCount() >= 2 && selectedItem != null) {
+				selectedItem.getBEditorStage().show();
 			}
 		});
 	}
@@ -179,42 +186,17 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		animationsList.clear();
 	}
 
-	@Override
-	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
-		List<Trace> traces = animations.getTraces();
-		List<Animation> animList = new ArrayList<>();
-		for (Trace t : traces) {
-			AbstractModel model = t.getModel();
-			AbstractElement mainComponent = t.getStateSpace().getMainComponent();
-			String modelName = mainComponent == null ? model.getModelFile().getName() : mainComponent.toString();
-			Transition op = t.getCurrentTransition();
-			String lastOp = op == null ? "" : op.getPrettyRep().replace("<--", "←");
-			String steps = Integer.toString(t.getTransitionList().size());
-			boolean isCurrent = t.equals(currentTrace);
-			boolean isProtected = animations.getProtectedTraces().contains(t.getUUID());
-			Animation a = new Animation(modelName, lastOp, steps, t, isCurrent, isProtected, getEditorStage(model));
-			Animation aa = contains(animationsTable, a);
-			if (aa == null) {
-				a.setTime(LocalDateTime.now());
-			} else {
-				a.setTime(LocalDateTime.parse(aa.getTime(), DateTimeFormatter.ofPattern("HH:mm:ss d MMM uuuu")));
+	private static Animation findExistingAnimation(TableView<Animation> animTable, Animation animation) {
+		if (animTable != null) {
+			for (Animation a : animTable.getItems()) {
+				if (a.getTrace().getUUID().equals(animation.getTrace().getUUID())) {
+					return a;
+				}
 			}
-			animList.add(a);
 		}
-		Platform.runLater(() -> {
-			ObservableList<Animation> animationsList = animationsTable.getItems();
-			animationsList.clear();
-			animationsList.addAll(animList);
-			if (previousSize < animationsList.size()) {
-				currentIndex = animationsList.size() - 1;
-			} else if (previousSize > animationsList.size() && currentIndex > 0) {
-				currentIndex--;
-			}
-			animationsTable.getFocusModel().focus(currentIndex);
-			previousSize = animationsList.size();
-		});
+		return null;
 	}
-	
+
 	private BEditorStage getEditorStage(AbstractModel model) {
 		BEditorStage editorStage = injector.getInstance(BEditorStage.class);
 		String text = "";
@@ -230,17 +212,38 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		return editorStage;
 	}
 
-	private Animation contains(TableView<Animation> animTable, Animation animation) {
-		if (animTable != null) {
-			for (Animation a : animTable.getItems()) {
-				if (a.getTrace().getUUID().equals(animation.getTrace().getUUID())) {
-					return a;
-				}
-			}
+	@Override
+	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
+		List<Trace> traces = animations.getTraces();
+		List<Animation> newAnims = new ArrayList<>();
+		for (Trace t : traces) {
+			AbstractModel model = t.getModel();
+			AbstractElement mainComponent = t.getStateSpace().getMainComponent();
+			String modelName = mainComponent == null ? model.getModelFile().getName() : mainComponent.toString();
+			Transition op = t.getCurrentTransition();
+			String lastOp = op == null ? "" : op.getPrettyRep().replace("<--", "←");
+			String steps = Integer.toString(t.getTransitionList().size());
+			boolean isCurrent = t.equals(currentTrace);
+			boolean isProtected = animations.getProtectedTraces().contains(t.getUUID());
+			Animation newAnim = new Animation(modelName, lastOp, steps, t, isCurrent, isProtected, getEditorStage(model));
+			Animation oldAnim = findExistingAnimation(animationsTable, newAnim);
+			newAnim.setTime(oldAnim == null ? LocalDateTime.now() : oldAnim.getTime());
+			newAnims.add(newAnim);
 		}
-		return null;
+		Platform.runLater(() -> {
+			ObservableList<Animation> animationsList = animationsTable.getItems();
+			animationsList.clear();
+			animationsList.addAll(newAnims);
+			if (previousSize < animationsList.size()) {
+				currentIndex = animationsList.size() - 1;
+			} else if (previousSize > animationsList.size() && currentIndex > 0) {
+				currentIndex--;
+			}
+			animationsTable.getFocusModel().focus(currentIndex);
+			previousSize = animationsList.size();
+		});
 	}
-
+	
 	@Override
 	public void animatorStatus(boolean busy) {
 		// Not used

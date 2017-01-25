@@ -1,36 +1,38 @@
 package de.prob2.ui.animations;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.beditor.BEditorStage;
 
 public class Animation {
-	private String modelName;
-	private String lastOperation;
-	private String steps;
-	private Trace trace;
-	private boolean isCurrent;
-	private boolean isProtected;
-	private String time;
-	private BEditorStage beditorStage;
+	private final String modelName;
+	private final String lastOperation;
+	private final String steps;
+	private final Trace trace;
+	private final boolean isCurrent;
+	private final boolean isProtected;
+	private LocalDateTime time;
+	private BEditorStage bEditorStage;
 
 	public Animation(
-			String modelName,
-			String lastOperation,
-			String steps,
-			Trace trace,
-			boolean isCurrent,
-			boolean isProtected,
-			BEditorStage beditorStage) {
+		String modelName,
+		String lastOperation,
+		String steps,
+		Trace trace,
+		boolean isCurrent,
+		boolean isProtected,
+		BEditorStage bEditorStage
+	) {
 		this.modelName = modelName;
 		this.lastOperation = lastOperation;
 		this.steps = steps;
 		this.trace = trace;
 		this.isCurrent = isCurrent;
 		this.isProtected = isProtected;
-		this.beditorStage = beditorStage;
+		this.time = null;
+		this.bEditorStage = bEditorStage;
 	}
 
 	public String getModelName() {
@@ -57,16 +59,15 @@ public class Animation {
 		return isProtected;
 	}
 
-	public void setTime(LocalDateTime time) {
-		this.time = time.format(DateTimeFormatter.ofPattern("HH:mm:ss d MMM uuuu"));
-	}
-
-	public String getTime() {
+	public LocalDateTime getTime() {
 		return time;
 	}
-	
-	public void openEditor() {
-		beditorStage.show();
+
+	public void setTime(LocalDateTime time) {
+		this.time = time;
 	}
 	
+	public BEditorStage getBEditorStage() {
+		return bEditorStage;
+	}
 }
