@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.ModelTranslationError;
@@ -146,12 +147,28 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			final MenuItem editMenuItem = new MenuItem("Edit");
 			editMenuItem.setOnAction(event -> this.getEditorStage(row.getItem().getModel().getModelFile().toPath()).show());
 			editMenuItem.disableProperty().bind(row.emptyProperty());
+			
+			final MenuItem editExternalMenuItem = new MenuItem("Edit in External Editor");
+			editExternalMenuItem.setOnAction(event -> {
+				final StateSpace stateSpace = row.getItem().getTrace().getStateSpace();
+				final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR");
+				stateSpace.execute(cmd);
+				final ProcessBuilder processBuilder = new ProcessBuilder(cmd.getValue(), row.getItem().getModel().getModelFile().getAbsolutePath());
+				try {
+					processBuilder.start();
+				} catch (IOException e) {
+					LOGGER.error("Failed to start external editor", e);
+					stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to start external editor:\n" + e).showAndWait();
+				}
+			});
+			editExternalMenuItem.disableProperty().bind(row.emptyProperty());
 
 			row.setContextMenu(new ContextMenu(
 				removeMenuItem,
 				removeAllMenuItem,
 				reloadMenuItem,
-				editMenuItem
+				editMenuItem,
+				editExternalMenuItem
 			));
 
 			row.setOnMouseClicked(event -> {
