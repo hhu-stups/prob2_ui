@@ -34,15 +34,18 @@ public class BEditorStage extends Stage {
 	
 	@FXML
 	private void initialize() {
-		this.setOnShowing(event -> beditor.startHighlighting());
-		this.setOnHiding(event -> beditor.stopHighlighting());
+		this.showingProperty().addListener((observable, from, to) -> {
+			if (to) {
+				beditor.startHighlighting();
+			} else {
+				beditor.stopHighlighting();
+			}
+		});
 	}
 	
 	public void setEditorText(String text, Path path) {
 		this.path = path;
-		beditor.clear();
-		beditor.appendText(text);
-		beditor.getStyleClass().add("editor");
+		beditor.replaceText(text);
 	}
 	
 	@FXML
@@ -80,5 +83,4 @@ public class BEditorStage extends Stage {
 	public void handleClose() {
 		this.close();
 	}
-
 }
