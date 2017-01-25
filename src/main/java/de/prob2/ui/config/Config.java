@@ -173,19 +173,19 @@ public final class Config {
 		}
 				
 		if(configData.statesViewColumnsWidth == null) {
-			configData.statesViewColumnsWidth = this.defaultData.statesViewColumnsWidth;
+			configData.statesViewColumnsWidth = this.defaultData.statesViewColumnsWidth.clone();
 		}
 		
 		if(configData.statesViewColumnsOrder == null) {
-			configData.statesViewColumnsOrder = this.defaultData.statesViewColumnsOrder;
+			configData.statesViewColumnsOrder = this.defaultData.statesViewColumnsOrder.clone();
 		}
 		
 		if(configData.animationsViewColumnsWidth == null) {
-			configData.animationsViewColumnsWidth = this.defaultData.animationsViewColumnsWidth;
+			configData.animationsViewColumnsWidth = this.defaultData.animationsViewColumnsWidth.clone();
 		}
 		
 		if(configData.animationsViewColumnsOrder == null) {
-			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder;
+			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder.clone();
 		}
 		
 		if(configData.operationsSortMode == null) {

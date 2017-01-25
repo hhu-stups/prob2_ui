@@ -17,8 +17,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public final class TablePersistenceHandler {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TablePersistenceHandler.class);
 	
 	private final UIState uiState;
 	
@@ -29,8 +33,13 @@ public final class TablePersistenceHandler {
 
 	public double[] getColumnsWidth(List<? extends TableColumnBase<?,?>> columns) {
 		double[] result = new double[columns.size()];
-		for(int i = 0; i < columns.size(); i++) {
+		double sum = 0.0;
+		for (int i = 0; i < columns.size(); i++) {
 			result[i] = columns.get(i).getWidth();
+			sum += result[i];
+		}
+		for (int i = 0; i < result.length; i++) {
+			result[i] /= sum;
 		}
 		return result;
 	}
@@ -48,11 +57,16 @@ public final class TablePersistenceHandler {
 			widths = uiState.getStatesViewColumnsWidth();
 		}
 		
+		double sum = 0.0;
+		for (final TableColumnBase<?, ?> column : columns) {
+			sum += column.getWidth();
+		}
+		
 		for (int i = 0; i < columns.size() - 1; i++) {
-			if(tableEnum == TablePersistenceEnum.ANIMATIONS_VIEW) {
-				((TableView<Animation>)control).resizeColumn((TableColumn<Animation,?>) columns.get(i), widths[i] - columns.get(i).getPrefWidth());
+			if (tableEnum == TablePersistenceEnum.ANIMATIONS_VIEW) {
+				((TableView<Animation>)control).resizeColumn((TableColumn<Animation,?>) columns.get(i), widths[i]*sum - columns.get(i).getWidth());
 			} else {
-				((TreeTableView<StateTreeItem<?>>)control).resizeColumn((TreeTableColumn<StateTreeItem<?>,?>) columns.get(i), widths[i] - columns.get(i).getPrefWidth());
+				((TreeTableView<StateTreeItem<?>>)control).resizeColumn((TreeTableColumn<StateTreeItem<?>, ?>) columns.get(i), widths[i]*sum - columns.get(i).getWidth());
 			}
 		}
 	}
