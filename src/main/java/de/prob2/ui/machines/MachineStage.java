@@ -58,6 +58,7 @@ public class MachineStage extends Stage {
 
 	@FXML
 	void cancel(ActionEvent event) {
+		this.machine = null;
 		this.close();
 	}
 

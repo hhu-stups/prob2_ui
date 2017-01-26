@@ -40,7 +40,7 @@ public final class MachinesView extends AnchorPane {
 	private TableColumn<Machine, String> description;
 	@FXML
 	private Button addMachineButton;
-	
+
 	private final CurrentProject currentProject;
 	private final MachineLoader machineLoader;
 	private final StageManager stageManager;
@@ -83,7 +83,7 @@ public final class MachinesView extends AnchorPane {
 		machinesTable.itemsProperty().bind(currentProject.machinesProperty());
 		addMachineButton.disableProperty().bind(currentProject.existsProperty().not());
 	}
-	
+
 	@FXML
 	void addMachine(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
@@ -99,6 +99,8 @@ public final class MachinesView extends AnchorPane {
 		MachineStage machineStage = new MachineStage(stageManager, currentProject);
 		Machine machine = machineStage.addNewMachine(selectedFile, currentProject.getMachines());
 
-		currentProject.addMachine(machine);
+		if (machine != null) {
+			currentProject.addMachine(machine);
+		}
 	}
 }
