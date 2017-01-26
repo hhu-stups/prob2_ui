@@ -7,16 +7,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
-
 import javafx.fxml.FXML;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BEditorStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(BEditorStage.class);

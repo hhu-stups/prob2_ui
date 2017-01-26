@@ -4,25 +4,41 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 
 <fx:root minHeight="70.0" minWidth="200.0" stylesheets="@/prob.css"
 	type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
-	<TableView fx:id="machinesTable" AnchorPane.bottomAnchor="0.0"
-		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-		AnchorPane.topAnchor="0.0">
-		<columnResizePolicy>
-			<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-		</columnResizePolicy>
-		<columns>
-			<TableColumn fx:id="name" minWidth="100.0" prefWidth="100.0"
-				text="%machines.columns.name" />
-			<TableColumn fx:id="machine" minWidth="100.0" prefWidth="100.0"
-				text="%machines.columns.machine" />
-			<TableColumn fx:id="description" minWidth="100.0" prefWidth="100.0"
-				text="%machines.columns.description" />
-		</columns>
-		<placeholder>
-			<Label text="%machines.noMachines" />
-		</placeholder>
-	</TableView>
+	<VBox spacing="0" AnchorPane.topAnchor="0"
+		AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
+		AnchorPane.rightAnchor="0">
+		<AnchorPane styleClass="border">
+			<Button fx:id="addMachineButton" prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+				AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" onAction="#addMachine">
+				<graphic>
+					<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
+						size="26" />
+				</graphic>
+			</Button>
+		</AnchorPane>
+		<TableView fx:id="machinesTable" AnchorPane.bottomAnchor="0.0"
+			AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+			AnchorPane.topAnchor="0.0">
+			<columnResizePolicy>
+				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+			</columnResizePolicy>
+			<columns>
+				<TableColumn fx:id="name" minWidth="100.0" prefWidth="100.0"
+					text="%machines.columns.name" />
+				<TableColumn fx:id="machine" minWidth="100.0" prefWidth="100.0"
+					text="%machines.columns.machine" />
+				<TableColumn fx:id="description" minWidth="100.0"
+					prefWidth="100.0" text="%machines.columns.description" />
+			</columns>
+			<placeholder>
+				<Label text="%machines.noMachines" />
+			</placeholder>
+		</TableView>
+	</VBox>
 </fx:root>

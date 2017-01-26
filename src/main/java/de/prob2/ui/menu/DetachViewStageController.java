@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -18,7 +21,6 @@ import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.stats.StatsView;
-
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -31,9 +33,6 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class DetachViewStageController extends Stage {

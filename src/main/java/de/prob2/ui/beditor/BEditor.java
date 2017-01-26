@@ -12,18 +12,16 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import de.be4.classicalb.core.parser.BLexer;
-import de.be4.classicalb.core.parser.lexer.LexerException;
-import de.be4.classicalb.core.parser.node.*;
-
-import javafx.concurrent.Task;
-
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.be4.classicalb.core.parser.BLexer;
+import de.be4.classicalb.core.parser.lexer.LexerException;
+import de.be4.classicalb.core.parser.node.*;
+import javafx.concurrent.Task;
 
 public class BEditor extends StyleClassedTextArea {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);

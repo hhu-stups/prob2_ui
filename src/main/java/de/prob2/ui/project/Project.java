@@ -46,10 +46,6 @@ public class Project {
 		return singleFile;
 	}
 
-	public void addMachine(File machine) {
-		machines.add(new Machine(machine.getName().split("\\.")[0], "", machine));
-	}
-
 	public File getLocation() {
 		return location;
 	}

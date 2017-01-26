@@ -2,12 +2,14 @@ package de.prob2.ui.persistence;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.animations.Animation;
 import de.prob2.ui.states.StateTreeItem;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Control;
@@ -16,9 +18,6 @@ import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class TablePersistenceHandler {

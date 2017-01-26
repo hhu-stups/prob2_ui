@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -20,11 +23,9 @@ import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
@@ -39,9 +40,6 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class StatesView extends AnchorPane {

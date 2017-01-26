@@ -18,16 +18,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.Console;
@@ -41,11 +42,7 @@ import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
-
 import javafx.geometry.BoundingBox;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")

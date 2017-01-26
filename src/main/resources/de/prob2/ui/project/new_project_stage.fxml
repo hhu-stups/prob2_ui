@@ -81,32 +81,6 @@
 							</AnchorPane>
 							<ListView fx:id="preferencesListView" styleClass="no-border"
 								prefHeight="100" />
-							<AnchorPane>
-								<Label text="%newProject.stage.machines"
-									AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="5" />
-								<Button prefHeight="26.0" prefWidth="26.0"
-									contentDisplay="GRAPHIC_ONLY" AnchorPane.rightAnchor="0"
-									AnchorPane.topAnchor="10" onAction="#addMachine">
-									<graphic>
-										<FontAwesomeIconView fill="#555560"
-											glyphName="PLUS_CIRCLE" size="26" />
-									</graphic>
-								</Button>
-							</AnchorPane>
-							<TableView fx:id="machinesTableView" prefHeight="200" editable="true">
-								<columns>
-									<TableColumn fx:id="nameColumn" editable="false"
-										text="%newProject.stage.machinesTableView.name" />
-									<TableColumn fx:id="descriptionColumn" editable="false"
-										text="%newProject.stage.machinesTableView.description" />
-								</columns>
-								<columnResizePolicy>
-									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-								</columnResizePolicy>
-								<placeholder>
-									<Label text="%newProject.stage.machinesTableView.placeholder" />
-								</placeholder>
-							</TableView>
 						</VBox>
 					</AnchorPane>
 					<ButtonBar styleClass="dialog">
