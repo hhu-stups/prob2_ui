@@ -27,6 +27,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -116,35 +117,36 @@ public final class DetachViewStageController extends Stage {
 	
 	private void removeTP(Accordion accordion, SplitPane pane) {
 		uiState.updateSavedStageBoxes();
-		final HashSet<Stage> wrapperStagesCopy = new HashSet<>(wrapperStages);
-		wrapperStages.clear();
-		for (final Stage stage : wrapperStagesCopy) {
-			stage.setScene(null);
-			stage.hide();
-		}
 		for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 			final TitledPane tp = it.next();
 			if (checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
 				it.remove();
-				transferToNewWindow((Parent)tp.getContent(), tp.getText());
+				transferToNewWindow(tp, tp.getText(), accordion, pane);
 			}
 		}
 		if (accordion.getPanes().isEmpty()) {
-			pane.getItems().remove(accordion);
+			accordion.setVisible(false);
+			accordion.setMaxWidth(0);
 			pane.setDividerPositions(0);
 			pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(true));
 		}
 	}
 	
-	private void transferToNewWindow(Parent node, String title) {
-		Stage stage = stageManager.makeStage(new Scene(node), this.getClass().getName() + " detached " + node.getClass().getName());
+	private void transferToNewWindow(TitledPane tp, String title, Accordion accordion, SplitPane pane) {
+		Parent node = (Parent) tp.getContent();
+		tp.setContent(null);
+		Stage stage = stageManager.makeStage(new Scene(new StackPane()), this.getClass().getName() + " detached " + node.getClass().getName());
+		((StackPane) stage.getScene().getRoot()).getChildren().add(node);
 		wrapperStages.add(stage);
 		stage.setTitle(title);
-		stage.setOnCloseRequest(e -> {
+		stage.setOnHidden(e -> {
 			checkBoxMap.get(node.getClass()).setSelected(false);
-			if ("detached".equals(uiState.getGuiState())) {
-				this.apply();
-			}
+			accordion.setVisible(true);
+			accordion.setMaxWidth(Double.POSITIVE_INFINITY);
+			pane.setDividerPositions(uiState.getHorizontalDividerPositions());
+			pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(false));
+			tp.setContent(node);
+			accordion.getPanes().add(tp);
 		});
 		// Default bounds, replaced by saved ones from the config when show() is called
 		stage.setWidth(200);
