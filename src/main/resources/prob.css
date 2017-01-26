@@ -382,6 +382,26 @@
 	-fx-text-fill: red;
 }
 
+.text-area-with-border {
+	-fx-background-color: transparent;
+	-fx-background-radius: 0.9em;
+	-fx-border-color: -prob-grey-75;
+	-fx-border-width: 0.1em;
+	-fx-border-radius: 0.8em;
+}
+
+.text-area-with-border > .scroll-pane {
+	-fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.text-area-with-border .content {
+    -fx-background-color: transparent;
+}
+.text-area-with-border:focused .content {
+    -fx-background-color: transparent;
+}
+
 /************************************************************************************
  * TextField																		*
  ************************************************************************************/

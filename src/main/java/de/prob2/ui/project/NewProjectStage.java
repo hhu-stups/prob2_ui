@@ -14,6 +14,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
@@ -25,7 +26,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private TextField projectNameField;
 	@FXML
-	private TextField projectDescriptionField;
+	private TextArea projectDescriptionTextArea;
 	@FXML
 	private TextField locationField;
 	@FXML
@@ -84,7 +85,7 @@ public class NewProjectStage extends Stage {
 			return;
 		}
 		Map<String, Preference> preferences = preferencesMap;
-		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), new ArrayList<>(),
+		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), new ArrayList<>(),
 				preferences, dir);
 		currentProject.set(newProject);
 		currentProject.save();

@@ -13,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -23,7 +24,7 @@ public class MachineStage extends Stage {
 	@FXML
 	private TextField nameField;
 	@FXML
-	private TextField descriptionField;
+	private TextArea descriptionTextArea;
 	@FXML
 	private Label errorExplanationLabel;
 
@@ -67,7 +68,7 @@ public class MachineStage extends Stage {
 		Path projectLocation = currentProject.getLocation().toPath();
 		Path absolute = file.toPath();
 		Path relative = projectLocation.relativize(absolute);
-		machine = new Machine(nameField.getText(), descriptionField.getText(), new File(relative.toString()));
+		machine = new Machine(nameField.getText(), descriptionTextArea.getText(), new File(relative.toString()));
 		this.close();
 	}
 	
