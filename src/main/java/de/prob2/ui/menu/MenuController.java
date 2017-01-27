@@ -27,8 +27,9 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.Machine;
+import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
-import de.prob2.ui.project.Project;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -81,6 +82,7 @@ public final class MenuController extends MenuBar {
 	private MenuItem aboutItem;
 
 	private CurrentProject currentProject;
+	private MachineLoader machineLoader;
 
 	@Inject
 	private MenuController(
@@ -92,7 +94,8 @@ public final class MenuController extends MenuBar {
 			@Nullable final MenuToolkit menuToolkit,
 			final RecentFiles recentFiles,
 			final CurrentProject currentProject,
-			final UIState uiState) {
+			final UIState uiState,
+			final MachineLoader machineLoader) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
@@ -102,6 +105,7 @@ public final class MenuController extends MenuBar {
 		this.menuToolkit = menuToolkit;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
+		this.machineLoader = machineLoader;
 
 		stageManager.loadFXML(this, "menu.fxml");
 
@@ -242,43 +246,7 @@ public final class MenuController extends MenuBar {
 			}
 		}
 	}
-
-	private void open(String path) {
-		if (currentProject.exists()) {
-			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
-
-			final ButtonType buttonTypeAdd = new ButtonType("Add");
-			final ButtonType buttonTypeClose = new ButtonType("Close");
-
-			if (currentProject.isSingleFile()) {
-				alert.setHeaderText("You've already opened a file.");
-				alert.setContentText("Do you want to close the current file?");
-				alert.getButtonTypes().setAll(buttonTypeClose, ButtonType.CANCEL);
-			} else {
-				alert.setHeaderText("You've already opened a project.");
-				alert.setContentText("Do you want to close the current project or add the selected file?");
-				alert.getButtonTypes().setAll(buttonTypeAdd, buttonTypeClose, ButtonType.CANCEL);
-			}
-			Optional<ButtonType> result = alert.showAndWait();
-
-			if (!result.isPresent() || ButtonType.CANCEL.equals(result.get())) {
-				return;
-			} else if (buttonTypeAdd.equals(result.get())) {
-				currentProject.addMachine(new File(path));
-				return;
-			}
-		}
-
-		Platform.runLater(() -> {
-			this.currentProject.set(new Project(new File(path)));
-			injector.getInstance(ModelcheckingController.class).resetView();
-
-			// Remove the path first to avoid listing the same file twice.
-			this.recentFiles.remove(path);
-			this.recentFiles.add(0, path);
-		});
-	}
-
+	
 	@FXML
 	private void handleOpen() {
 		final FileChooser fileChooser = new FileChooser();
@@ -291,7 +259,18 @@ public final class MenuController extends MenuBar {
 			return;
 		}
 
-		this.open(selectedFile.getAbsolutePath());
+		this.open(selectedFile);
+	}
+
+	private void open(File file) {
+		machineLoader.loadAsync(new Machine(file.getName().split("\\.")[0], "", file.toPath()));
+		Platform.runLater(() -> {
+			injector.getInstance(ModelcheckingController.class).resetView();
+
+			// Remove the path first to avoid listing the same file twice.
+			this.recentFiles.remove(file.getAbsolutePath());
+			this.recentFiles.add(0, file.getAbsolutePath());
+		});
 	}
 
 	@FXML
@@ -415,8 +394,9 @@ public final class MenuController extends MenuBar {
 	private List<MenuItem> getRecentFileItems() {
 		final List<MenuItem> newItems = new ArrayList<>();
 		for (String s : this.recentFiles) {
-			final MenuItem item = new MenuItem(new File(s).getName());
-			item.setOnAction(event -> this.open(s));
+			File file = new File(s);
+			final MenuItem item = new MenuItem(file.getName());
+			item.setOnAction(event -> this.open(file));
 			newItems.add(item);
 		}
 		return newItems;

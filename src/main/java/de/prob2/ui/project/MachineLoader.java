@@ -3,6 +3,7 @@ package de.prob2.ui.project;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -61,7 +62,10 @@ public class MachineLoader {
 
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
-			Map<String, String> prefs = currentProject.get().getPreferences(machine);
+			Map<String, String> prefs = new HashMap<>();
+			if (currentProject.exists()) {
+				prefs = currentProject.get().getPreferences(machine);
+			}
 			Path path;
 			if (currentProject.isSingleFile()) {
 				path = machine.getPath();
