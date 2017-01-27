@@ -1,6 +1,7 @@
 package de.prob2.ui.project;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -61,18 +62,18 @@ public class MachineLoader {
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
 			Map<String, String> prefs = currentProject.get().getPreferences(machine);
-			String path;
+			Path path;
 			if (currentProject.isSingleFile()) {
-				path = machine.getRelativePath();
+				path = machine.getPath();
 			} else {
 				String projectLocation = currentProject.get().getLocation().getPath();
-				path = Paths.get(projectLocation, machine.getRelativePath()).toString();
+				path = Paths.get(projectLocation, machine.getPath().toString());
 			}
 			final StateSpace stateSpace;
 			if (prefs.isEmpty()) {
-				stateSpace = api.b_load(path);
+				stateSpace = api.b_load(path.toString());
 			} else {
-				stateSpace = api.b_load(path, prefs);
+				stateSpace = api.b_load(path.toString(), prefs);
 			}
 			Platform.runLater(() -> this.animations.addNewAnimation(new Trace(stateSpace)));
 		}

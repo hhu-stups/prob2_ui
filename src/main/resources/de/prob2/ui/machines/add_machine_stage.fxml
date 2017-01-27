@@ -55,19 +55,18 @@
 					</AnchorPane>
 					<ButtonBar styleClass="dialog">
 						<buttons>
-							<Button text="%common.cancel" cancelButton="true"
-								onAction="#cancel" />
+							<Button fx:id="cancelButton" text="%common.cancel"
+								cancelButton="true" />
 							<!--<Button fx:id="addMachineButton" text="%addMachine.stage.addMachineButton" 
 								onAction="#addMachine" /> -->
-							<Button fx:id="finishButton" text="%common.finish"
-								onAction="#finish" />
+							<Button fx:id="finishButton" text="%common.finish" />
 						</buttons>
 						<VBox.margin>
 							<Insets left="10" right="10" top="10" />
 						</VBox.margin>
 					</ButtonBar>
 				</VBox>
-				 <Label fx:id="errorExplanationLabel" textFill="#B77300"
+				<Label fx:id="errorExplanationLabel" textFill="#B77300"
 					AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="20"
 					AnchorPane.rightAnchor="200" />
 			</AnchorPane>

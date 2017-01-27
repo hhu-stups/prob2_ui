@@ -9,7 +9,6 @@ import java.util.Set;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Machine;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -22,15 +21,13 @@ public class MachineStage extends Stage {
 	@FXML
 	private Button finishButton;
 	@FXML
+	private Button cancelButton;
+	@FXML
 	private TextField nameField;
 	@FXML
 	private TextArea descriptionTextArea;
 	@FXML
 	private Label errorExplanationLabel;
-
-	private File file;
-
-	private Machine machine;
 
 	private Set<String> machineNamesSet = new HashSet<>();
 	private CurrentProject currentProject;
@@ -57,27 +54,14 @@ public class MachineStage extends Stage {
 		});
 	}
 
-	@FXML
-	void cancel(ActionEvent event) {
-		this.machine = null;
-		this.close();
-	}
-
-	@FXML
-	void finish(ActionEvent event) {
-		Path projectLocation = currentProject.getLocation().toPath();
-		Path absolute = file.toPath();
-		Path relative = projectLocation.relativize(absolute);
-		machine = new Machine(nameField.getText(), descriptionTextArea.getText(), new File(relative.toString()));
-		this.close();
-	}
-	
-	public Machine addNewMachine(File machineFile, List<Machine> machinesList) {
+	public void addNewMachine(File machineFile) {
 		this.setTitle("Add new Machine");
-		this.file = machineFile;
+		List<Machine> machinesList = currentProject.getMachines();
+		machineNamesSet.clear();
 		for (Machine m : machinesList) {
 			machineNamesSet.add(m.getName());
 		}
+
 		String[] n = machineFile.getName().split("\\.");
 		String name = n[0];
 		int i = 1;
@@ -87,23 +71,40 @@ public class MachineStage extends Stage {
 		}
 		nameField.setText(name);
 
+		finishButton.setOnAction(event -> {
+			Path projectLocation = currentProject.getLocation().toPath();
+			Path absolute = machineFile.toPath();
+			Path relative = projectLocation.relativize(absolute);
+			Machine machine = new Machine(nameField.getText(), descriptionTextArea.getText(), relative);
+			currentProject.addMachine(machine);
+			this.close();
+		});
+		
+		cancelButton.setOnAction(event -> this.close());
 		super.showAndWait();
-		return machine;
 	}
-	
-//	public Machine editMachine(MachineTableItem item, List<MachineTableItem> machinesList) {
-//		machine = item.get();
-//		this.file = machine.getLocation();
-//		this.setTitle("Edit " + machine.getName());
-//		for (MachineTableItem i : machinesList) {
-//			if (item.equals(i)) {
-//				machineNamesSet.add(i.getName());
-//			}
-//		}
-//		nameField.setText(machine.getName());
-//		descriptionField.setText(machine.getDescription());
-//
-//		super.showAndWait();
-//		return machine;
-//	}
+
+	public void editMachine(Machine machine) {
+		this.setTitle("Edit " + machine.getName());	
+		List<Machine> machinesList = currentProject.getMachines();
+		machineNamesSet.clear();
+		for (Machine m : machinesList) {
+			machineNamesSet.add(m.getName());
+		}
+		machineNamesSet.remove(machine.getName());
+
+		nameField.setText(machine.getName());
+		descriptionTextArea.setText(machine.getDescription());
+
+		finishButton.setOnAction(event -> {
+			Machine edited = new Machine(nameField.getText(), descriptionTextArea.getText(), machine.getPreferences(), machine.getPath());
+			currentProject.removeMachine(machine);
+			currentProject.addMachine(edited);
+			this.close();
+		});
+		
+		cancelButton.setOnAction(event -> this.close());
+		
+		super.showAndWait();
+	}
 }

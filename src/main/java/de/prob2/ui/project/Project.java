@@ -30,7 +30,7 @@ public class Project {
 		this.singleFile = true;
 		this.location = null;
 		this.machines = new ArrayList<>();
-		machines.add(new Machine(file.getName().split("\\.")[0], "", file));
+		machines.add(new Machine(file.getName().split("\\.")[0], "", file.toPath()));
 		this.preferences = new HashMap<>();
 	}
 

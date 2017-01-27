@@ -1,6 +1,7 @@
 package de.prob2.ui.machines;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -35,7 +38,7 @@ public final class MachinesView extends AnchorPane {
 	@FXML
 	private TableColumn<Machine, String> name;
 	@FXML
-	private TableColumn<Machine, File> machine;
+	private TableColumn<Machine, Path> machine;
 	@FXML
 	private TableColumn<Machine, String> description;
 	@FXML
@@ -57,14 +60,27 @@ public final class MachinesView extends AnchorPane {
 	@FXML
 	public void initialize() {
 		name.setCellValueFactory(new PropertyValueFactory<>("name"));
-		machine.setCellValueFactory(cellData -> new SimpleObjectProperty<File>(cellData.getValue().getLocation()));
+		machine.setCellValueFactory(cellData -> new SimpleObjectProperty<Path>(cellData.getValue().getPath()));
 		description.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 		machinesTable.setRowFactory(tableView -> {
 			final TableRow<Machine> row = new TableRow<>();
+			final ContextMenu contextMenu = new ContextMenu();
+			final MenuItem editMenuItem = new MenuItem("Edit Machine");
+			MachineStage machineStage = new MachineStage(stageManager, currentProject);
+			editMenuItem.setOnAction(event -> machineStage.editMachine(row.getItem()));
+			contextMenu.getItems().add(editMenuItem);
 			row.setOnMouseClicked(event -> {
-				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					Machine machine = row.getItem();
+				Machine machine = row.getItem();
+				if (event.getButton() == MouseButton.SECONDARY) {
+					if (row.isEmpty()) {
+						contextMenu.getItems().get(0).setDisable(true);
+					} else {
+						contextMenu.getItems().get(0).setDisable(false);
+					}
+					contextMenu.show(row, event.getScreenX(), event.getScreenY());
+				} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					
 					try {
 						machineLoader.loadAsync(machine);
 					} catch (Exception e) {
@@ -97,10 +113,6 @@ public final class MachinesView extends AnchorPane {
 		}
 
 		MachineStage machineStage = new MachineStage(stageManager, currentProject);
-		Machine machine = machineStage.addNewMachine(selectedFile, currentProject.getMachines());
-
-		if (machine != null) {
-			currentProject.addMachine(machine);
-		}
+		machineStage.addNewMachine(selectedFile);
 	}
 }

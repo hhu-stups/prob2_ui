@@ -95,7 +95,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void addMachine(File machine) {
 		if (!this.isSingleFile()) {
 			List<Machine> machinesList = this.getMachines();
-			machinesList.add(new Machine(machine.getName().split("\\.")[0], "", machine));
+			machinesList.add(new Machine(machine.getName().split("\\.")[0], "", machine.toPath()));
 			this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 					this.getLocation()));
 		}
@@ -104,6 +104,13 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void addMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.add(machine);
+		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
+				this.getLocation()));
+	}
+	
+	public void removeMachine(Machine machine) {
+		List<Machine> machinesList = this.getMachines();
+		machinesList.remove(machine);
 		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 				this.getLocation()));
 	}
