@@ -472,6 +472,9 @@
 	-fx-border-color: white;
 }
 .tree-table-row-cell:focused .check-box > .box > .mark {
+	-fx-background-color: none;
+}
+.tree-table-row-cell:focused .check-box:selected > .box > .mark {
 	-fx-background-color: white;
 }
 
