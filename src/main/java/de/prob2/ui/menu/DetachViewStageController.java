@@ -137,6 +137,7 @@ public final class DetachViewStageController extends Stage {
 		tp.setContent(null);
 		Stage stage = stageManager.makeStage(new Scene(new StackPane()), this.getClass().getName() + " detached " + node.getClass().getName());
 		((StackPane) stage.getScene().getRoot()).getChildren().add(node);
+		node.setVisible(true);
 		wrapperStages.add(stage);
 		stage.setTitle(title);
 		stage.setOnHidden(e -> {
