@@ -180,7 +180,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 	
 	public void save() {
-		File location = new File(this.get().getLocation() + File.separator + this.getName() + ".json");
+		File location = new File(this.getLocation() + File.separator + this.getName() + ".json");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(location), PROJECT_CHARSET)) {
 			gson.toJson(this.get(), writer);
 		} catch (FileNotFoundException exc) {

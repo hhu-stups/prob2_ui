@@ -11,7 +11,7 @@
 <?import javafx.scene.control.TitledPane?>
 <?import de.prob2.ui.stats.StatsView?>
 <?import de.prob2.ui.MainController?>
-<?import de.prob2.ui.machines.MachinesView?>
+<?import de.prob2.ui.project.ProjectView?>
 
 <fx:root type="MainController" maxHeight="Infinity"
             maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
@@ -29,8 +29,8 @@
                     <TitledPane text="%tptitles.animations" fx:id="animationsTP" onMouseClicked="#animationsTPClicked">
                         <AnimationsView/>
                     </TitledPane>
-                    <TitledPane text="%tptitles.machines" fx:id = "machinesTP" onMouseClicked="#machinesTPClicked">
-						<MachinesView/>
+                    <TitledPane text="%tptitles.project" fx:id = "projectTP" onMouseClicked="#projectTPClicked">
+						<ProjectView/>
 					</TitledPane>
                 </panes>
             </Accordion>

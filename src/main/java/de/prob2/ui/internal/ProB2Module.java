@@ -18,7 +18,6 @@ import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.history.HistoryView;
-import de.prob2.ui.machines.MachinesView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.modelchecking.ModelcheckingController;
@@ -28,6 +27,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentState;
 import de.prob2.ui.prob2fx.CurrentStateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
@@ -67,7 +67,7 @@ public class ProB2Module extends AbstractModule {
 		// Controllers
 		bind(AnimationsView.class);
 		bind(HistoryView.class);
-		bind(MachinesView.class);
+		bind(ProjectView.class);
 		bind(MenuController.class);
 		bind(MainController.class);
 		bind(ModelcheckingController.class);

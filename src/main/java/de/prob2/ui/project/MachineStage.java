@@ -1,4 +1,4 @@
-package de.prob2.ui.machines;
+package de.prob2.ui.project;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -8,7 +8,6 @@ import java.util.Set;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.Machine;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;

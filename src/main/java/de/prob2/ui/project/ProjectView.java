@@ -1,4 +1,4 @@
-package de.prob2.ui.machines;
+package de.prob2.ui.project;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -11,8 +11,6 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.Machine;
-import de.prob2.ui.project.MachineLoader;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -30,8 +28,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 
 @Singleton
-public final class MachinesView extends AnchorPane {
-	private static final Logger LOGGER = LoggerFactory.getLogger(MachinesView.class);
+public final class ProjectView extends AnchorPane {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectView.class);
 
 	@FXML
 	private TableView<Machine> machinesTable;
@@ -49,12 +47,12 @@ public final class MachinesView extends AnchorPane {
 	private final StageManager stageManager;
 
 	@Inject
-	private MachinesView(final StageManager stageManager, final CurrentProject currentProject,
+	private ProjectView(final StageManager stageManager, final CurrentProject currentProject,
 			final MachineLoader machineLoader) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.machineLoader = machineLoader;
-		stageManager.loadFXML(this, "machines_view.fxml");
+		stageManager.loadFXML(this, "project_view.fxml");
 	}
 
 	@FXML

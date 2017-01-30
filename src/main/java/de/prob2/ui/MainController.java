@@ -45,7 +45,7 @@ public class MainController extends BorderPane {
 	private TitledPane animationsTP;
 	
 	@FXML
-	private TitledPane machinesTP;
+	private TitledPane projectTP;
 	
 	@FXML
 	private TitledPane statsTP;
@@ -99,8 +99,8 @@ public class MainController extends BorderPane {
 	}
 	
 	@FXML
-	public void machinesTPClicked() {
-		handleTitledPaneClicked(machinesTP);
+	public void projectTPClicked() {
+		handleTitledPaneClicked(projectTP);
 	}
 	
 	public void handleTitledPaneClicked(TitledPane pane) {
@@ -121,7 +121,7 @@ public class MainController extends BorderPane {
 		titledPanes.put("Animations", animationsTP);
 		titledPanes.put("Model Check", modelcheckTP);
 		titledPanes.put("Statistics", statsTP);
-		titledPanes.put("Machines", machinesTP);
+		titledPanes.put("Project", projectTP);
 
 
 		if (!titledPanes.containsKey(titledPane)) {
