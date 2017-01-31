@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import de.prob2.ui.internal.StageManager;
 import javafx.event.ActionEvent;
@@ -65,9 +66,7 @@ public class MachineStage extends Stage {
 	public Machine addNewMachine(File machineFile, List<MachineTableItem> machinesList) {
 		this.setTitle("Add new Machine");
 		this.file = machineFile;
-		for (MachineTableItem i : machinesList) {
-			machinesSet.add(i.getName());
-		}
+		machinesSet.addAll(machinesList.stream().map(MachineTableItem::getName).collect(Collectors.toList()));
 		String[] n = machineFile.getName().split("\\.");
 		String name = n[0];
 		int i = 1;
@@ -85,11 +84,7 @@ public class MachineStage extends Stage {
 		machine = item.get();
 		this.file = machine.getLocation();
 		this.setTitle("Edit " + machine.getName());
-		for (MachineTableItem i : machinesList) {
-			if (item.equals(i)) {
-				machinesSet.add(i.getName());
-			}
-		}
+		machinesSet.addAll(machinesList.stream().filter(i -> item.equals(i)).map(MachineTableItem::getName).collect(Collectors.toList()));
 		nameField.setText(machine.getName());
 		descriptionField.setText(machine.getDescription());
 
