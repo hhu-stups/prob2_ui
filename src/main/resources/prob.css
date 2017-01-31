@@ -672,6 +672,10 @@
 	-fx-background-color: palegreen;
 }
 
+.tree-table-cell.errorresult {
+	-fx-background-color: palegoldenrod;
+}
+
 /* === FullValueStage === */
 
 .difftextarea .coords {
