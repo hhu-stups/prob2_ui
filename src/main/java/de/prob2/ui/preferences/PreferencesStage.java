@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -75,10 +78,12 @@ public final class PreferencesStage extends Stage {
 	};
 	
 	private static final Logger logger = LoggerFactory.getLogger(ListView.class);
+	private static final Pattern EMPTY_PATTERN = Pattern.compile("", Pattern.CASE_INSENSITIVE);
 
 	@FXML private Stage stage;
 	@FXML private Spinner<Integer> recentFilesCountSpinner;
 	@FXML private TextField defaultLocationField;
+	@FXML private TextField prefSearchField;
 	@FXML private Button undoButton;
 	@FXML private Button resetButton;
 	@FXML private Button applyButton;
@@ -142,6 +147,8 @@ public final class PreferencesStage extends Stage {
 		defaultLocationField.textProperty().addListener((observable, from, to) -> this.currentProject.setDefaultLocation(Paths.get(to)));
 
 		// ProB Preferences
+		
+		this.prefSearchField.textProperty().addListener(observable -> this.updatePreferences());
 
 		this.undoButton.disableProperty().bind(this.preferences.changesAppliedProperty());
 		this.resetButton.disableProperty().bind(this.currentTrace.existsProperty().not());
@@ -267,8 +274,29 @@ public final class PreferencesStage extends Stage {
 			this.tv.getRoot().getChildren().clear();
 			return;
 		}
+		
+		Pattern searchPattern;
+		try {
+			searchPattern = Pattern.compile(this.prefSearchField.getText(), Pattern.CASE_INSENSITIVE);
+		} catch (PatternSyntaxException e) {
+			logger.trace("Bad regex syntax", e);
+			if (!this.prefSearchField.getStyleClass().contains("badsearch")) {
+				this.prefSearchField.getStyleClass().add("badsearch");
+			}
+			searchPattern = null;
+		}
+		if (searchPattern == null) {
+			searchPattern = EMPTY_PATTERN;
+		} else {
+			this.prefSearchField.getStyleClass().remove("badsearch");
+		}
 
 		for (ProBPreference pref : this.preferences.getPreferences()) {
+			if (!searchPattern.matcher(pref.name).find()) {
+				// Preference's name doesn't match search, don't add it
+				continue;
+			}
+			
 			TreeItem<PrefTreeItem> category = null;
 			for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
 				if (ti.getValue().getName().equals(pref.category)) {
@@ -278,6 +306,7 @@ public final class PreferencesStage extends Stage {
 			if (category == null) {
 				category = new TreeItem<>(new CategoryPrefTreeItem(pref.category));
 				this.tv.getRoot().getChildren().add(category);
+				category.setExpanded(true);
 			}
 
 			TreeItem<PrefTreeItem> item = null;
@@ -303,6 +332,23 @@ public final class PreferencesStage extends Stage {
 				pref.defaultValue,
 				pref.description
 			));
+		}
+		
+		if (!searchPattern.pattern().isEmpty()) {
+			for (Iterator<TreeItem<PrefTreeItem>> itcat = this.tv.getRoot().getChildren().iterator(); itcat.hasNext();) {
+				final TreeItem<PrefTreeItem> category = itcat.next();
+				for (Iterator<TreeItem<PrefTreeItem>> itpref = category.getChildren().iterator(); itpref.hasNext();) {
+					final PrefTreeItem pref = itpref.next().getValue();
+					if (!searchPattern.matcher(pref.getName()).find()) {
+						// Existing preference's name doesn't match search, remove it
+						itpref.remove();
+					}
+				}
+				if (category.getChildren().isEmpty()) {
+					// Category has no visible preferences, remove it
+					itcat.remove();
+				}
+			}
 		}
 		
 		this.tv.getRoot().getChildren().sort(Comparator.comparing(c -> c.getValue().getName()));
