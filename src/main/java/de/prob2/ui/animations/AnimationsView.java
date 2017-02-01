@@ -151,7 +151,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			final MenuItem editExternalMenuItem = new MenuItem("Edit in External Editor");
 			editExternalMenuItem.setOnAction(event -> {
 				final StateSpace stateSpace = row.getItem().getTrace().getStateSpace();
-				final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR");
+				final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
 				stateSpace.execute(cmd);
 				final ProcessBuilder processBuilder = new ProcessBuilder(cmd.getValue(), row.getItem().getModel().getModelFile().getAbsolutePath());
 				try {
