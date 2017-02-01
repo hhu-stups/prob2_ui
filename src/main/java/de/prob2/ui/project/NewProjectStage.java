@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.google.inject.Inject;
 
@@ -11,7 +12,9 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
@@ -52,6 +55,32 @@ public class NewProjectStage extends Stage {
 		locationField.setText(this.currentProject.getDefaultLocation().toString());
 	}
 
+	private boolean confirmReplacingProject() {
+		if (currentProject.exists()) {
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
+
+			if (currentProject.isSingleFile()) {
+				alert.setHeaderText("You've already opened a file.");
+				alert.setContentText("Do you want to close the current file?");
+			} else {
+				alert.setHeaderText("You've already opened a project.");
+				alert.setContentText("Do you want to close the current project?");
+			}
+			Optional<ButtonType> result = alert.showAndWait();
+			return result.isPresent() && ButtonType.OK.equals(result.get());
+		} else {
+			return true;
+		}
+	}
+	
+	@Override
+	public void showAndWait() {
+		if (!confirmReplacingProject()) {
+			return;
+		}
+		super.showAndWait();
+	}
+	
 	@FXML
 	void addPreference(ActionEvent event) {
 		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(stageManager);

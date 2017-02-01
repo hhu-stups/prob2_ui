@@ -52,6 +52,17 @@
 .button-dark2:hover {
 	-fx-background-color: -prob-grey-75;
 }
+.button-blue {
+	-fx-background-color: -prob-aqua;
+	-fx-background-radius: 15;
+	-fx-border-color: transparent;
+	-fx-background-insets: 0.0,1.0,2.0;
+	-fx-text-fill: -prob-white;
+}
+.button-blue:hover {
+	-fx-background-color: -prob-grey-75;
+}
+
 .icon-dark {
 	-fx-fill: -prob-grey;
 	-fx-opacity: 0.8;

@@ -7,15 +7,22 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Button?>
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.scene.layout.StackPane?>
 
 <fx:root minHeight="70.0" minWidth="200.0" stylesheets="@/prob.css"
 	type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
-	<VBox spacing="0" AnchorPane.topAnchor="0"
+	<StackPane AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
+		AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+		<Button fx:id="newProjectButton" text="%menu.file.items.newProject"
+			onAction="#createNewProject" styleClass="button-blue" />
+	</StackPane>
+	<VBox fx:id="projectVBox" spacing="0" AnchorPane.topAnchor="0"
 		AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
 		AnchorPane.rightAnchor="0">
 		<AnchorPane styleClass="border">
-			<Button fx:id="addMachineButton" prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-				AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" onAction="#addMachine">
+			<Button fx:id="addMachineButton" prefHeight="26.0" prefWidth="26.0"
+				contentDisplay="GRAPHIC_ONLY" AnchorPane.rightAnchor="0"
+				AnchorPane.topAnchor="0" onAction="#addMachine">
 				<graphic>
 					<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
 						size="26" />

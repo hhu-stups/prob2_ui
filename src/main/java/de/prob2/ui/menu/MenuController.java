@@ -363,10 +363,6 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void createNewProject() {
-		if (!confirmReplacingProject()) {
-			return;
-		}
-
 		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();

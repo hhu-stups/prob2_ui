@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
@@ -25,7 +26,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 @Singleton
 public final class ProjectView extends AnchorPane {
@@ -41,22 +44,31 @@ public final class ProjectView extends AnchorPane {
 	private TableColumn<Machine, String> description;
 	@FXML
 	private Button addMachineButton;
+	@FXML
+	private VBox projectVBox;
+	@FXML
+	private Button newProjectButton;
 
 	private final CurrentProject currentProject;
 	private final MachineLoader machineLoader;
 	private final StageManager stageManager;
+	private final Injector injector;
 
 	@Inject
 	private ProjectView(final StageManager stageManager, final CurrentProject currentProject,
-			final MachineLoader machineLoader) {
+			final MachineLoader machineLoader, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.machineLoader = machineLoader;
+		this.injector =  injector;
 		stageManager.loadFXML(this, "project_view.fxml");
 	}
 
 	@FXML
 	public void initialize() {
+		projectVBox.visibleProperty().bind(currentProject.existsProperty());
+		newProjectButton.visibleProperty().bind(projectVBox.visibleProperty().not());
+		
 		name.setCellValueFactory(new PropertyValueFactory<>("name"));
 		machine.setCellValueFactory(cellData -> new SimpleObjectProperty<Path>(cellData.getValue().getPath()));
 		description.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -96,6 +108,13 @@ public final class ProjectView extends AnchorPane {
 
 		machinesTable.itemsProperty().bind(currentProject.machinesProperty());
 		addMachineButton.disableProperty().bind(currentProject.existsProperty().not());
+	}
+	
+	@FXML
+	private void createNewProject() {
+		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
+		newProjectStage.showAndWait();
+		newProjectStage.toFront();
 	}
 
 	@FXML
