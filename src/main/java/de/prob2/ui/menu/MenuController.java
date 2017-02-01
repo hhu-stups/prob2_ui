@@ -50,7 +50,6 @@ import javafx.stage.Window;
 
 @Singleton
 public final class MenuController extends MenuBar {
-	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 
 	private final Injector injector;

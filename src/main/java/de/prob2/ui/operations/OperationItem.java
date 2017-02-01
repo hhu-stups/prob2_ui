@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class OperationItem {
 	public enum Status {
-		DISABLED, ENABLED, TIMEOUT
+		DISABLED, ENABLED, TIMEOUT, MAX_REACHED
 	}
 	
 	private final String id;

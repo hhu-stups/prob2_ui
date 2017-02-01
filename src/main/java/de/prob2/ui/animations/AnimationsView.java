@@ -1,5 +1,6 @@
 package de.prob2.ui.animations;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +30,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.beditor.BEditorStage;
+import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
@@ -131,9 +133,19 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			final MenuItem editExternalMenuItem = new MenuItem("Edit in External Editor");
 			editExternalMenuItem.setOnAction(event -> {
 				final StateSpace stateSpace = row.getItem().getTrace().getStateSpace();
-				final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR");
+				final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
 				stateSpace.execute(cmd);
-				final ProcessBuilder processBuilder = new ProcessBuilder(cmd.getValue(), row.getItem().getModel().getModelFile().getAbsolutePath());
+				final File editor = new File(cmd.getValue());
+				final File modelFile = row.getItem().getModel().getModelFile();
+				final String[] cmdline;
+				if (ProB2Module.IS_MAC && editor.isDirectory()) {
+					// On Mac, use the open tool to start app bundles
+					cmdline = new String[] {"/usr/bin/open", "-a", editor.getAbsolutePath(), modelFile.getAbsolutePath()};
+				} else {
+					// Run normal executables directly
+					cmdline = new String[] {editor.getAbsolutePath(), modelFile.getAbsolutePath()};
+				}
+				final ProcessBuilder processBuilder = new ProcessBuilder(cmdline);
 				try {
 					processBuilder.start();
 				} catch (IOException e) {
