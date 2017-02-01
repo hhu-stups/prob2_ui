@@ -102,6 +102,14 @@ public final class OperationsView extends AnchorPane {
 						getStyleClass().add("normal");
 						break;
 					
+					case MAX_REACHED:
+						icon = new FontAwesomeIconView(FontAwesomeIcon.ELLIPSIS_H);
+						icon.setFill(Color.ORANGE);
+						setDisable(true);
+						getStyleClass().clear();
+						getStyleClass().add("normal");
+						break;
+					
 					default:
 						throw new IllegalStateException("Unhandled status: " + item.getStatus());
 				}
@@ -280,6 +288,18 @@ public final class OperationsView extends AnchorPane {
 		}
 		
 		doSort();
+		
+		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
+			events.add(new OperationItem(
+				"-",
+				"(possibly more - maximum operations reached)",
+				Collections.emptyList(),
+				Collections.emptyList(),
+				OperationItem.Status.MAX_REACHED,
+				false,
+				false
+			));
+		}
 
 		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
 	}
