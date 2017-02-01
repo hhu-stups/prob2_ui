@@ -47,6 +47,14 @@
 					</Tab>
 					<Tab fx:id="tabPreferences" id="preferences" text="%preferences.tabs.proBPreferences">
 						<BorderPane styleClass="dialog">
+							<top>
+								<HBox>
+									<padding>
+										<Insets top="10.0" bottom="10.0" left="10.0" right="10.0" />
+									</padding>
+									<TextField fx:id="prefSearchField" promptText="Search" HBox.hgrow="ALWAYS" />
+								</HBox>
+							</top>
 							<center>
 								<TreeTableView fx:id="tv" prefHeight="400.0"
 									prefWidth="600.0" editable="true" showRoot="false" styleClass="with-border">

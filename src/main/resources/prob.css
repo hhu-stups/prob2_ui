@@ -692,6 +692,10 @@
 	-fx-background-color: palegreen;
 }
 
+.tree-table-cell.errorresult {
+	-fx-background-color: palegoldenrod;
+}
+
 /* === FullValueStage === */
 
 .difftextarea .coords {
@@ -704,4 +708,10 @@
 
 .difftextarea .delete {
 	-fx-fill: red;
+}
+
+/* === PreferencesStage === */
+
+.text-field.badsearch {
+	-fx-border-color: red;
 }

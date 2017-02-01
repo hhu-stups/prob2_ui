@@ -21,6 +21,7 @@ import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.stats.StatsView;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -116,11 +117,14 @@ public final class DetachViewStageController extends Stage {
 	
 	private void removeTP(Accordion accordion, SplitPane pane) {
 		uiState.updateSavedStageBoxes();
+		for (Stage stage : wrapperStages){
+			Platform.runLater(stage::hide);
+		}
 		for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 			final TitledPane tp = it.next();
 			if (checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
 				it.remove();
-				transferToNewWindow(tp, tp.getText(), accordion, pane);
+				Platform.runLater(() -> transferToNewWindow(tp, tp.getText(), accordion, pane));
 			}
 		}
 		if (accordion.getPanes().isEmpty()) {
@@ -136,9 +140,10 @@ public final class DetachViewStageController extends Stage {
 		tp.setContent(null);
 		Stage stage = stageManager.makeStage(new Scene(new StackPane()), this.getClass().getName() + " detached " + node.getClass().getName());
 		((StackPane) stage.getScene().getRoot()).getChildren().add(node);
+		node.setVisible(true);
 		wrapperStages.add(stage);
 		stage.setTitle(title);
-		stage.setOnHidden(e -> {
+		stage.setOnCloseRequest(e -> {
 			checkBoxMap.get(node.getClass()).setSelected(false);
 			accordion.setVisible(true);
 			accordion.setMaxWidth(Double.POSITIVE_INFINITY);
@@ -146,6 +151,7 @@ public final class DetachViewStageController extends Stage {
 			pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(false));
 			tp.setContent(node);
 			accordion.getPanes().add(tp);
+			wrapperStages.remove(stage);
 		});
 		// Default bounds, replaced by saved ones from the config when show() is called
 		stage.setWidth(200);

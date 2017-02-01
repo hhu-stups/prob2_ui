@@ -9,7 +9,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.animations.Animation;
-import de.prob2.ui.states.StateTreeItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Control;
@@ -65,7 +64,7 @@ public final class TablePersistenceHandler {
 			if (tableEnum == TablePersistenceEnum.ANIMATIONS_VIEW) {
 				((TableView<Animation>)control).resizeColumn((TableColumn<Animation,?>) columns.get(i), widths[i]*sum - columns.get(i).getWidth());
 			} else {
-				((TreeTableView<StateTreeItem<?>>)control).resizeColumn((TreeTableColumn<StateTreeItem<?>, ?>) columns.get(i), widths[i]*sum - columns.get(i).getWidth());
+				((TreeTableView<Object>)control).resizeColumn((TreeTableColumn<Object, ?>) columns.get(i), widths[i]*sum - columns.get(i).getWidth());
 			}
 		}
 	}
