@@ -67,11 +67,11 @@ public class MachineLoader {
 				prefs = currentProject.get().getPreferences(machine);
 			}
 			Path path;
-			if (currentProject.isSingleFile()) {
-				path = machine.getPath();
-			} else {
+			if (currentProject.getMachines().contains(machine)) {
 				String projectLocation = currentProject.get().getLocation().getPath();
 				path = Paths.get(projectLocation, machine.getPath().toString());
+			} else {
+				path = machine.getPath();
 			}
 			final StateSpace stateSpace;
 			if (prefs.isEmpty()) {
