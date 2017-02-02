@@ -1,6 +1,7 @@
 package de.prob2.ui.project;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,19 +9,19 @@ public class Machine {
 	private String name;
 	private String description;
 	private List<String> preferences;
-	private Path location;
+	private String location;
 	
 	public Machine(String name, String description, List<String> preferences, Path location) {
 		this.name = name;
 		this.description = description;
 		this.preferences = preferences;
-		this.location = location;
+		this.location = location.toString();
 	}
 	
 	public Machine(String name, String description, Path location) {
 		this.name = name;
 		this.description = description;
-		this.location = location;
+		this.location = location.toString();
 		this.preferences = new ArrayList<>();
 	}
 	
@@ -37,7 +38,7 @@ public class Machine {
 	}
 	
 	public Path getPath() {
-		return location;
+		return Paths.get(location);
 	}
 	
 	@Override
