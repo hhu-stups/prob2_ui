@@ -21,7 +21,7 @@
 	<TabPane fx:id="projectTabPane" AnchorPane.topAnchor="0"
 		AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
 		AnchorPane.rightAnchor="0" minWidth="300">
-		<Tab text="Machines" closable="false">
+		<Tab text="%project.tabs.machines" closable="false">
 			<VBox spacing="0">
 				<AnchorPane styleClass="border">
 					<Button fx:id="addMachineButton" prefHeight="26.0"
@@ -51,9 +51,9 @@
 				</TableView>
 			</VBox>
 		</Tab>
-		<Tab text="Preferences" closable="false">
+		<Tab text="%project.tabs.preferences" closable="false">
 		</Tab>
-		<Tab text="Runconfigurations" closable="false">
+		<Tab text="%project.tabs.runconfigurations" closable="false">
 		</Tab>
 	</TabPane>
 </fx:root>
