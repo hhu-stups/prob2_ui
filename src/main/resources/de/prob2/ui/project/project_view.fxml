@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.ListView?>
 
 <fx:root minHeight="70.0" minWidth="200" stylesheets="@/prob.css"
 	type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
@@ -24,7 +25,7 @@
 		<Tab text="%project.tabs.machines" closable="false">
 			<VBox spacing="0">
 				<AnchorPane styleClass="border">
-					<Button fx:id="addMachineButton" prefHeight="26.0"
+					<Button prefHeight="26.0"
 						prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
 						AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" onAction="#addMachine">
 						<graphic>
@@ -52,6 +53,19 @@
 			</VBox>
 		</Tab>
 		<Tab text="%project.tabs.preferences" closable="false">
+			<VBox spacing="0">
+				<AnchorPane styleClass="border">
+					<Button prefHeight="26.0"
+						prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+						AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addPreference">
+						<graphic>
+							<FontAwesomeIconView fill="#555560"
+								glyphName="PLUS_CIRCLE" size="26" />
+						</graphic>
+					</Button>
+				</AnchorPane>
+				<ListView fx:id="preferencesListView" VBox.vgrow="always" styleClass="no-border"/>
+			</VBox>
 		</Tab>
 		<Tab text="%project.tabs.runconfigurations" closable="false">
 		</Tab>

@@ -1,10 +1,14 @@
 package de.prob2.ui.project;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -17,6 +21,8 @@ import javafx.stage.Stage;
 public class AddProBPreferencesStage extends Stage {
 	@FXML
 	private Button finishButton;
+	@FXML
+	private Button cancelButton;
 	@FXML
 	private Button addPreferenceButton;
 	@FXML
@@ -32,11 +38,11 @@ public class AddProBPreferencesStage extends Stage {
 
 	private Map<String, String> preferenceMap = new HashMap<>();
 
-	private Preference preference;
+	private Set<String> preferenceNamesSet = new HashSet<>();
+	private CurrentProject currentProject;
 
-	private Set<String> preferencesSet;
-
-	AddProBPreferencesStage(StageManager stageManager) {
+	AddProBPreferencesStage(StageManager stageManager, CurrentProject currentProject) {
+		this.currentProject = currentProject;
 		stageManager.loadFXML(this, "add_probpreferences_stage.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
@@ -46,7 +52,7 @@ public class AddProBPreferencesStage extends Stage {
 		addPreferenceButton.disableProperty().bind(preferenceNameField.lengthProperty().lessThanOrEqualTo(0)
 				.or(preferenceValueField.lengthProperty().lessThanOrEqualTo(0)));
 		nameField.textProperty().addListener((observable, from, to) -> {
-			if (preferencesSet.contains(to)) {
+			if (preferenceNamesSet.contains(to)) {
 				finishButton.setDisable(true);
 				errorExplanationLabel.setText("There is already a preference named '" + to + "'");
 			} else if (to.isEmpty()) {
@@ -66,20 +72,17 @@ public class AddProBPreferencesStage extends Stage {
 		preferencesListView.getItems().addAll(preferenceMap.entrySet());
 	}
 
-	@FXML
-	void cancel(ActionEvent event) {
-		this.close();
-	}
+	public void showStage() {
+		List<Preference> preferencesList = currentProject.getPreferences();
+		preferenceNamesSet.addAll(preferencesList.stream().map(Preference::getName).collect(Collectors.toList()));
 
-	@FXML
-	void finish(ActionEvent event) {
-		preference = new Preference(nameField.getText(), preferenceMap);
-		this.close();
-	}
-
-	public Preference showStage(Set<String> preferencesList) {
-		this.preferencesSet = preferencesList;
+		finishButton.setOnAction(event -> {
+			Preference preference = new Preference(nameField.getText(), preferenceMap);
+			currentProject.addPreference(preference);
+			this.close();
+		});
+		
+		cancelButton.setOnAction(event -> this.close());
 		super.showAndWait();
-		return preference;
 	}
 }

@@ -19,6 +19,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -43,7 +44,7 @@ public final class ProjectView extends AnchorPane {
 	@FXML
 	private TableColumn<Machine, String> description;
 	@FXML
-	private Button addMachineButton;
+	private ListView<Preference> preferencesListView;
 	@FXML
 	private TabPane projectTabPane;
 	@FXML
@@ -107,7 +108,7 @@ public final class ProjectView extends AnchorPane {
 		});
 
 		machinesTable.itemsProperty().bind(currentProject.machinesProperty());
-		addMachineButton.disableProperty().bind(currentProject.existsProperty().not());
+		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
 	}
 	
 	@FXML
@@ -131,5 +132,11 @@ public final class ProjectView extends AnchorPane {
 
 		MachineStage machineStage = new MachineStage(stageManager, currentProject);
 		machineStage.addNewMachine(selectedFile);
+	}
+	
+	@FXML
+	void addPreference(ActionEvent event) {
+		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(stageManager, currentProject);
+		addProBPreferencesStage.showStage();
 	}
 }

@@ -11,17 +11,24 @@ public class Project {
 	private final String description;
 	private transient File location;
 	private final boolean singleFile;
-	private final List<Machine> machines;
-	private final Map<String, Preference> preferences;
+	private final List<Machine> machines = new ArrayList<>();
+	private final List<Preference> preferences = new ArrayList<>();
 
-	public Project(String name, String description, List<Machine> machines, Map<String, Preference> preferences,
+	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
 			File location) {
 		this.name = name;
 		this.description = description;
 		this.singleFile = false;
-		this.machines = machines;
+		this.machines.addAll(machines);
 		this.location = location;
-		this.preferences = preferences;
+		this.preferences.addAll(preferences);
+	}
+
+	public Project(String name, String description, File location) {
+		this.name = name;
+		this.description = description;
+		this.singleFile = false;
+		this.location = location;
 	}
 
 	public Project(File file) {
@@ -29,9 +36,7 @@ public class Project {
 		this.description = "";
 		this.singleFile = true;
 		this.location = null;
-		this.machines = new ArrayList<>();
 		machines.add(new Machine(file.getName().split("\\.")[0], "", file.toPath()));
-		this.preferences = new HashMap<>();
 	}
 
 	public String getName() {
@@ -54,7 +59,7 @@ public class Project {
 		return description;
 	}
 
-	public Map<String, Preference> getPreferences() {
+	public List<Preference> getPreferences() {
 		return preferences;
 	}
 
@@ -62,9 +67,11 @@ public class Project {
 		List<String> prefNames = machine.getPreferences();
 		Map<String, String> prefs = new HashMap<>();
 		if (!prefNames.isEmpty()) {
-			for (String prefName : prefNames) {
-				Preference pref = preferences.get(prefName);
-				prefs.putAll(pref.getPreferences());
+			for (Preference pref : preferences) {
+				String name = pref.getName();
+				if (prefNames.contains(name)) {
+					prefs.putAll(pref.getPreferences());
+				}
 			}
 		}
 		return prefs;

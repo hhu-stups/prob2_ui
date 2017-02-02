@@ -53,10 +53,10 @@
 										<Font size="12" />
 									</font>
 								</TextField>
-								<Button fx:id="addPreferenceButton" styleClass="button-dark2" text="%addProBPreference.stage.add"
-									onAction="#addPreference" />
+								<Button fx:id="addPreferenceButton" styleClass="button-dark2"
+									text="%addProBPreference.stage.add" onAction="#addPreference" />
 								<VBox.margin>
-									<Insets top="10" bottom="10"/>
+									<Insets top="10" bottom="10" />
 								</VBox.margin>
 							</HBox>
 							<ListView fx:id="preferencesListView" styleClass="no-border"
@@ -65,10 +65,9 @@
 					</AnchorPane>
 					<ButtonBar styleClass="dialog">
 						<buttons>
-							<Button text="%common.cancel" cancelButton="true"
-								onAction="#cancel" />
-							<Button fx:id="finishButton" text="%common.finish"
-								onAction="#finish" />
+							<Button fx:id="cancelButton" text="%common.cancel"
+								cancelButton="true" />
+							<Button fx:id="finishButton" text="%common.finish" />
 						</buttons>
 						<VBox.margin>
 							<Insets left="10" right="10" top="10" />

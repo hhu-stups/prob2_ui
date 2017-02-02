@@ -1,9 +1,6 @@
 package de.prob2.ui.project;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import com.google.inject.Inject;
@@ -16,7 +13,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
@@ -33,12 +29,9 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private TextField locationField;
 	@FXML
-	private ListView<Preference> preferencesListView;
-	@FXML
 	private Label errorExplanationLabel;
 
 	private CurrentProject currentProject;
-	private Map<String, Preference> preferencesMap = new HashMap<>();
 	private StageManager stageManager;
 
 	@Inject
@@ -80,16 +73,6 @@ public class NewProjectStage extends Stage {
 		}
 		super.showAndWait();
 	}
-	
-	@FXML
-	void addPreference(ActionEvent event) {
-		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(stageManager);
-		Preference preference = addProBPreferencesStage.showStage(preferencesMap.keySet());
-		if (preference != null) {
-			preferencesListView.getItems().add(preference);
-			preferencesMap.put(preference.toString(), preference);
-		}
-	}
 
 	@FXML
 	void selectLocation(ActionEvent event) {
@@ -113,9 +96,7 @@ public class NewProjectStage extends Stage {
 			errorExplanationLabel.setText("The location does not exist or is invalid");
 			return;
 		}
-		Map<String, Preference> preferences = preferencesMap;
-		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), new ArrayList<>(),
-				preferences, dir);
+		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), dir);
 		currentProject.set(newProject);
 		currentProject.save();
 		this.close();

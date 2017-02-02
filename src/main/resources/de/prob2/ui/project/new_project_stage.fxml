@@ -68,20 +68,6 @@
 									<Insets top="20" />
 								</VBox.margin>
 							</VBox>
-							<AnchorPane>
-								<Label text="%newProject.stage.preferences"
-									AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="5" />
-								<Button prefHeight="26.0" prefWidth="26.0"
-									contentDisplay="GRAPHIC_ONLY" AnchorPane.rightAnchor="0"
-									AnchorPane.topAnchor="10" onAction="#addPreference">
-									<graphic>
-										<FontAwesomeIconView fill="#555560"
-											glyphName="PLUS_CIRCLE" size="26" />
-									</graphic>
-								</Button>
-							</AnchorPane>
-							<ListView fx:id="preferencesListView" styleClass="no-border"
-								prefHeight="100" />
 						</VBox>
 					</AnchorPane>
 					<ButtonBar styleClass="dialog">

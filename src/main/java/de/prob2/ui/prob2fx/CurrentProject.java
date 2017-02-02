@@ -13,7 +13,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +28,11 @@ import de.prob2.ui.project.Project;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.MapProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyListProperty;
-import javafx.beans.property.ReadOnlyMapProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -54,7 +50,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final StringProperty name;
 	private final StringProperty description;
 	private final ListProperty<Machine> machines;
-	private final MapProperty<String, Preference> preferences;
+	private final ListProperty<Preference> preferences;
 	private final ObjectProperty<File> location;
 	
 	private final ObjectProperty<Path> defaultLocation;
@@ -70,7 +66,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.name = new SimpleStringProperty(this, "name", "");
 		this.description = new SimpleStringProperty(this, "description", "");
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
-		this.preferences = new SimpleMapProperty<>(this, "preferences", FXCollections.observableHashMap());
+		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
 		this.location = new SimpleObjectProperty<>(this,"location", null);
 		
 		this.addListener((observable, from, to) -> {
@@ -85,7 +81,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.name.set(to.getName());
 				this.description.set(to.getDescription());
 				this.machines.setAll(to.getMachines());
-				this.preferences.putAll(to.getPreferences());
+				this.preferences.setAll(to.getPreferences());
 				this.location.set(to.getLocation());
 				this.isSingleFile.set(to.isSingleFile());
 			}
@@ -103,6 +99,13 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.remove(machine);
 		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
+				this.getLocation()));
+	}
+	
+	public void addPreference(Preference preference) {
+		List<Preference> preferencesList = this.getPreferences();
+		preferencesList.add(preference);
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
 				this.getLocation()));
 	}
 	
@@ -140,14 +143,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public List<Machine> getMachines() {
-		return this.get().getMachines();
+		return this.machinesProperty().get();
 	}
 	
-	public ReadOnlyMapProperty<String, Preference> preferencesProperty() {
+	public ReadOnlyListProperty<Preference> preferencesProperty() {
 		return this.preferences;
 	}
 	
-	public Map<String, Preference> getPreferences() {
+	public List<Preference> getPreferences() {
 		return this.preferencesProperty().get();
 	}
 	
