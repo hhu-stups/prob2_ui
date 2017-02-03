@@ -19,6 +19,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TabPane;
@@ -49,6 +50,11 @@ public final class ProjectView extends AnchorPane {
 	private TabPane projectTabPane;
 	@FXML
 	private Button newProjectButton;
+	@FXML
+	private Label runconfigsPlaceholder;
+	@FXML
+	private Button addRunconfigButton;
+	
 
 	private final CurrentProject currentProject;
 	private final MachineLoader machineLoader;
@@ -61,7 +67,7 @@ public final class ProjectView extends AnchorPane {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.machineLoader = machineLoader;
-		this.injector =  injector;
+		this.injector = injector;
 		stageManager.loadFXML(this, "project_view.fxml");
 	}
 
@@ -69,7 +75,7 @@ public final class ProjectView extends AnchorPane {
 	public void initialize() {
 		projectTabPane.visibleProperty().bind(currentProject.existsProperty());
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
-		
+
 		name.setCellValueFactory(new PropertyValueFactory<>("name"));
 		machine.setCellValueFactory(cellData -> new SimpleObjectProperty<Path>(cellData.getValue().getPath()));
 		description.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -91,7 +97,7 @@ public final class ProjectView extends AnchorPane {
 					}
 					contextMenu.show(row, event.getScreenX(), event.getScreenY());
 				} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					
+
 					try {
 						machineLoader.loadAsync(machine);
 					} catch (Exception e) {
@@ -109,8 +115,18 @@ public final class ProjectView extends AnchorPane {
 
 		machinesTable.itemsProperty().bind(currentProject.machinesProperty());
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
+		runconfigsPlaceholder.setText("Add machines first");
+		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
+			if (to) {
+				runconfigsPlaceholder.setText("Add machines first");
+				addRunconfigButton.setDisable(true);
+			} else {
+				runconfigsPlaceholder.setText("No Runconfigurations");
+				addRunconfigButton.setDisable(false);
+			}
+		});
 	}
-	
+
 	@FXML
 	private void createNewProject() {
 		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
@@ -133,10 +149,15 @@ public final class ProjectView extends AnchorPane {
 		MachineStage machineStage = new MachineStage(stageManager, currentProject);
 		machineStage.addNewMachine(selectedFile);
 	}
-	
+
 	@FXML
 	void addPreference(ActionEvent event) {
 		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(stageManager, currentProject);
 		addProBPreferencesStage.showStage();
+	}
+
+	@FXML
+	void addRunconfiguration(ActionEvent event) {
+		// TODO
 	}
 }

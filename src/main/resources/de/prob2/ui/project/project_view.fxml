@@ -25,8 +25,7 @@
 		<Tab text="%project.tabs.machines" closable="false">
 			<VBox spacing="0">
 				<AnchorPane styleClass="border">
-					<Button prefHeight="26.0"
-						prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+					<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
 						AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" onAction="#addMachine">
 						<graphic>
 							<FontAwesomeIconView fill="#555560"
@@ -40,14 +39,14 @@
 					</columnResizePolicy>
 					<columns>
 						<TableColumn fx:id="name" minWidth="100.0" prefWidth="100.0"
-							text="%machines.columns.name" />
+							text="%project.tabs.machines.columns.name" />
 						<TableColumn fx:id="machine" minWidth="100.0"
-							prefWidth="100.0" text="%machines.columns.machine" />
+							prefWidth="100.0" text="%project.tabs.machines.columns.machine" />
 						<TableColumn fx:id="description" minWidth="100.0"
-							prefWidth="100.0" text="%machines.columns.description" />
+							prefWidth="100.0" text="%project.tabs.machines.columns.description" />
 					</columns>
 					<placeholder>
-						<Label text="%machines.noMachines" />
+						<Label text="%project.tabs.machines.noMachines" />
 					</placeholder>
 				</TableView>
 			</VBox>
@@ -55,8 +54,7 @@
 		<Tab text="%project.tabs.preferences" closable="false">
 			<VBox spacing="0">
 				<AnchorPane styleClass="border">
-					<Button prefHeight="26.0"
-						prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+					<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
 						AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addPreference">
 						<graphic>
 							<FontAwesomeIconView fill="#555560"
@@ -64,10 +62,33 @@
 						</graphic>
 					</Button>
 				</AnchorPane>
-				<ListView fx:id="preferencesListView" VBox.vgrow="always" styleClass="no-border"/>
+				<ListView fx:id="preferencesListView" VBox.vgrow="always"
+					styleClass="no-border">
+					<placeholder>
+						<Label text="%project.tabs.preferences.noPreferences" />
+					</placeholder>
+				</ListView>
 			</VBox>
 		</Tab>
 		<Tab text="%project.tabs.runconfigurations" closable="false">
+			<VBox spacing="0">
+				<AnchorPane styleClass="border">
+					<Button fx:id="addRunconfigButton" prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+						AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10"
+						onAction="#addRunconfiguration" disable="true">
+						<graphic>
+							<FontAwesomeIconView fill="#555560"
+								glyphName="PLUS_CIRCLE" size="26" />
+						</graphic>
+					</Button>
+				</AnchorPane>
+				<ListView fx:id="runconfigurationsListView" VBox.vgrow="always"
+					styleClass="no-border">
+					<placeholder>
+						<Label fx:id="runconfigsPlaceholder" text="%project.tabs.runconfigurations.noRunconfigurations" />
+					</placeholder>
+				</ListView>
+			</VBox>
 		</Tab>
 	</TabPane>
 </fx:root>
