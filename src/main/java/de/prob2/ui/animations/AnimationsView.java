@@ -31,6 +31,7 @@ import de.prob2.ui.project.MachineLoader;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Worker.State;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
@@ -217,16 +218,26 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	
 	private BEditorStage getEditorStage(AbstractModel model) {
 		BEditorStage editorStage = injector.getInstance(BEditorStage.class);
-		String editor = "";
-		Path path = null;
+		final String editor;
+		final Path path;
 		try {
 			path = model.getModelFile().toPath();
 			editor = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
+		    editorStage.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+		    	if(newState == State.SUCCEEDED && !editorStage.getLoaded()) {
+		    		try {
+		    			editorStage.setTextEditor(editor,path);
+		    		}  catch (NullPointerException e) {
+		    			LOGGER.error("Javascript not loaded yet.", e);
+		    		}
+		    	}
+		    });
 		} catch (IOException e) {
 			LOGGER.error("File not found", e);
 		}
-		editorStage.setTextEditor(editor, path);
 		editorStage.setTitle(model.getModelFile().getName());
+
+		//editorStage.setTextEditor(editor, path);
 		return editorStage;
 	}
 
