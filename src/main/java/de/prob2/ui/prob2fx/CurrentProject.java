@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,15 +29,19 @@ import de.prob2.ui.project.Project;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.MapProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyListProperty;
+import javafx.beans.property.ReadOnlyMapProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.util.Pair;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -51,6 +56,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final StringProperty description;
 	private final ListProperty<Machine> machines;
 	private final ListProperty<Preference> preferences;
+	private final MapProperty<String, String> runconfigurations;
 	private final ObjectProperty<File> location;
 	
 	private final ObjectProperty<Path> defaultLocation;
@@ -67,6 +73,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.description = new SimpleStringProperty(this, "description", "");
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
 		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
+		this.runconfigurations = new SimpleMapProperty<>(this, "runconfigurations", FXCollections.observableHashMap());
 		this.location = new SimpleObjectProperty<>(this,"location", null);
 		
 		this.addListener((observable, from, to) -> {
@@ -82,6 +89,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.description.set(to.getDescription());
 				this.machines.setAll(to.getMachines());
 				this.preferences.setAll(to.getPreferences());
+				this.runconfigurations.putAll(to.getRunconfigurations());
 				this.location.set(to.getLocation());
 				this.isSingleFile.set(to.isSingleFile());
 			}
@@ -91,24 +99,31 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void addMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.add(machine);
-		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
+		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getRunconfigurations(),
 				this.getLocation()));
 	}
 	
 	public void removeMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.remove(machine);
-		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
+		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getRunconfigurations(),
 				this.getLocation()));
 	}
 	
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);
-		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getRunconfigurations(),
 				this.getLocation()));
 	}
 	
+	public void addRunconfiguration(Pair<Machine, Preference> runconfiguration) {
+		Map<String, String> runconfigurations = this.getRunconfigurations();
+		runconfigurations.put(runconfiguration.getKey().getName(), runconfiguration.getValue().getName());
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(), runconfigurations,
+				this.getLocation()));
+	}
+
 	public void remove() {
 		super.set(null);
 	}
@@ -154,6 +169,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return this.preferencesProperty().get();
 	}
 	
+	private ReadOnlyMapProperty<String, String> runconfigurationsProperty() {
+		return this.runconfigurations;
+	}
+	
+	private Map<String, String> getRunconfigurations() {
+		return this.runconfigurationsProperty().get();
+	}
+
 	public ObjectProperty<File> locationProperty() {
 		return this.location;
 	}

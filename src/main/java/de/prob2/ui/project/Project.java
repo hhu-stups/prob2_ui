@@ -9,19 +9,21 @@ import java.util.Map;
 public class Project {
 	private final String name;
 	private final String description;
-	private transient File location;
-	private final boolean singleFile;
 	private final List<Machine> machines = new ArrayList<>();
 	private final List<Preference> preferences = new ArrayList<>();
+	private Map<String, String> runconfigurations = new HashMap<>();
+	private transient File location;
+	private final boolean singleFile;
 
-	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
+	public Project(String name, String description, List<Machine> machines, List<Preference> preferences, Map<String, String> runconfigurations,
 			File location) {
 		this.name = name;
 		this.description = description;
-		this.singleFile = false;
 		this.machines.addAll(machines);
-		this.location = location;
 		this.preferences.addAll(preferences);
+		this.runconfigurations.putAll(runconfigurations);
+		this.location = location;
+		this.singleFile = false;
 	}
 
 	public Project(String name, String description, File location) {
@@ -61,6 +63,10 @@ public class Project {
 
 	public List<Preference> getPreferences() {
 		return preferences;
+	}
+	
+	public Map<String, String> getRunconfigurations() {
+		return runconfigurations ;
 	}
 
 	public Map<String, String> getPreferences(Machine machine) {

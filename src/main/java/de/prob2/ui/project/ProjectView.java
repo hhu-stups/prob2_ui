@@ -2,6 +2,7 @@ package de.prob2.ui.project;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
@@ -29,8 +34,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.util.Pair;
 
 @Singleton
 public final class ProjectView extends AnchorPane {
@@ -158,6 +166,30 @@ public final class ProjectView extends AnchorPane {
 
 	@FXML
 	void addRunconfiguration(ActionEvent event) {
-		// TODO
+		Dialog<Pair<Machine, Preference>> dialog = new Dialog<>();
+		dialog.setTitle("New Runconfiguration");
+		dialog.initStyle(StageStyle.UTILITY);
+		dialog.getDialogPane().getStylesheets().add("prob.css");
+		ButtonType addButtonType = new ButtonType("Add", ButtonData.OK_DONE);
+		dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+		GridPane grid = new GridPane();
+		grid.setHgap(10);
+		grid.setVgap(10);
+		ChoiceBox<Machine> machinesBox = new ChoiceBox<>(currentProject.machinesProperty());
+		grid.add(new Label("Machine:"), 0, 0);
+		grid.add(machinesBox, 1, 0);
+		ChoiceBox<Preference> prefsBox = new ChoiceBox<>(currentProject.preferencesProperty());
+		grid.add(new Label("Preference:"), 0, 1);
+		grid.add(prefsBox, 1, 1);
+		
+		dialog.getDialogPane().setContent(grid);
+		dialog.setResultConverter(dialogButton -> {
+		    if (dialogButton == addButtonType) {
+		        return new Pair<>(machinesBox.getValue(), prefsBox.getValue());
+		    }
+		    return null;
+		});
+		Optional<Pair<Machine, Preference>> result = dialog.showAndWait();
+		result.ifPresent(runconfiguration -> currentProject.addRunconfiguration(runconfiguration));
 	}
 }
