@@ -275,25 +275,32 @@ public final class PreferencesStage extends Stage {
 			return;
 		}
 		
-		Pattern searchPattern;
+		Pattern tempSearchPattern;
 		try {
-			searchPattern = Pattern.compile(this.prefSearchField.getText(), Pattern.CASE_INSENSITIVE);
+			tempSearchPattern = Pattern.compile(this.prefSearchField.getText(), Pattern.CASE_INSENSITIVE);
 		} catch (PatternSyntaxException e) {
-			logger.trace("Bad regex syntax", e);
+			logger.trace("Bad regex syntax, this is probably not an error!", e);
 			if (!this.prefSearchField.getStyleClass().contains("badsearch")) {
 				this.prefSearchField.getStyleClass().add("badsearch");
 			}
-			searchPattern = null;
+			tempSearchPattern = null;
 		}
-		if (searchPattern == null) {
+		
+		// Extra final variable is necessary so the lambda below can use it.
+		final Pattern searchPattern;
+		if (tempSearchPattern == null) {
 			searchPattern = EMPTY_PATTERN;
 		} else {
+			searchPattern = tempSearchPattern;
 			this.prefSearchField.getStyleClass().remove("badsearch");
 		}
 
 		for (ProBPreference pref : this.preferences.getPreferences()) {
-			if (!searchPattern.matcher(pref.name).find()) {
-				// Preference's name doesn't match search, don't add it
+			if (
+				!searchPattern.matcher(pref.name).find()
+				&& !searchPattern.matcher(pref.description).find()
+			) {
+				// Preference's name and description don't match search, don't add it
 				continue;
 			}
 			
@@ -337,13 +344,11 @@ public final class PreferencesStage extends Stage {
 		if (!searchPattern.pattern().isEmpty()) {
 			for (Iterator<TreeItem<PrefTreeItem>> itcat = this.tv.getRoot().getChildren().iterator(); itcat.hasNext();) {
 				final TreeItem<PrefTreeItem> category = itcat.next();
-				for (Iterator<TreeItem<PrefTreeItem>> itpref = category.getChildren().iterator(); itpref.hasNext();) {
-					final PrefTreeItem pref = itpref.next().getValue();
-					if (!searchPattern.matcher(pref.getName()).find()) {
-						// Existing preference's name doesn't match search, remove it
-						itpref.remove();
-					}
-				}
+				// Remove all items whose name and description don't match the search
+				category.getChildren().removeIf(item ->
+					!searchPattern.matcher(item.getValue().getName()).find()
+					&& !searchPattern.matcher(item.getValue().getDescription()).find()
+				);
 				if (category.getChildren().isEmpty()) {
 					// Category has no visible preferences, remove it
 					itcat.remove();
