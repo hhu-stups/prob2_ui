@@ -104,6 +104,12 @@ public class UIState {
 	}
 	
 	public void clearDetachedStages() {
+		for (Reference<Stage> stageRef : stages.values()){
+			Stage stage = stageRef.get();
+			if (!"de.prob2.ui.ProB2".equals(stage.getProperties().get("id"))) {
+				stage.close();
+			}
+		}
 		stages.keySet().removeAll(DETACHED);
 	}
 	

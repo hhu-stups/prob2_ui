@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -54,6 +55,7 @@ import org.slf4j.LoggerFactory;
 
 import se.sawano.java.text.AlphanumericComparator;
 
+@Singleton
 public final class OperationsView extends AnchorPane {
 	public enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
@@ -67,7 +69,7 @@ public final class OperationsView extends AnchorPane {
 				setText(item.toString());
 				setGraphicTextGap(10.0);
 				final FontAwesomeIconView icon;
-				switch (item.status) {
+				switch (item.getStatus()) {
 					case TIMEOUT:
 						icon = new FontAwesomeIconView(FontAwesomeIcon.CLOCK_ALT);
 						icon.setFill(Color.ORANGE);
@@ -80,10 +82,10 @@ public final class OperationsView extends AnchorPane {
 						icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
 						icon.setFill(Color.LIMEGREEN);
 						setDisable(false);
-						if (!item.explored) {
+						if (!item.isExplored()) {
 							getStyleClass().clear();
 							getStyleClass().add("unexplored");
-						} else if (item.errored) {
+						} else if (item.isErrored()) {
 							getStyleClass().clear();
 							getStyleClass().add("errored");
 						} else {
@@ -100,8 +102,16 @@ public final class OperationsView extends AnchorPane {
 						getStyleClass().add("normal");
 						break;
 					
+					case MAX_REACHED:
+						icon = new FontAwesomeIconView(FontAwesomeIcon.ELLIPSIS_H);
+						icon.setFill(Color.ORANGE);
+						setDisable(true);
+						getStyleClass().clear();
+						getStyleClass().add("normal");
+						break;
+					
 					default:
-						throw new IllegalStateException("Unhandled status: " + item.status);
+						throw new IllegalStateException("Unhandled status: " + item.getStatus());
 				}
 				setGraphic(icon);
 			} else {
@@ -167,11 +177,11 @@ public final class OperationsView extends AnchorPane {
 		opsListView.setCellFactory(lv -> new OperationsCell());
 
 		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null && newValue.status == OperationItem.Status.ENABLED) {
+			if (newValue != null && newValue.getStatus() == OperationItem.Status.ENABLED) {
 				// Disable the operations list until the trace change is
 				// finished, the update method reenables it later
 				opsListView.setDisable(true);
-				currentTrace.set(currentTrace.get().add(newValue.id));
+				currentTrace.set(currentTrace.get().add(newValue.getId()));
 			}
 		});
 
@@ -228,7 +238,7 @@ public final class OperationsView extends AnchorPane {
 
 		this.opsListView.setDisable(false);
 
-		if (trace.getModel().equals(currentModel)) {
+		if (!trace.getModel().equals(currentModel)) {
 			updateModel(trace);
 		}
 		
@@ -278,6 +288,18 @@ public final class OperationsView extends AnchorPane {
 		}
 		
 		doSort();
+		
+		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
+			events.add(new OperationItem(
+				"-",
+				"(possibly more - maximum operations reached)",
+				Collections.emptyList(),
+				Collections.emptyList(),
+				OperationItem.Status.MAX_REACHED,
+				false,
+				false
+			));
+		}
 
 		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
 	}
@@ -311,18 +333,18 @@ public final class OperationsView extends AnchorPane {
 	}
 
 	private int compareAlphanumeric(final OperationItem left, final OperationItem right) {
-		if (left.name.equals(right.name)) {
-			return compareParams(left.params, right.params);
+		if (left.getName().equals(right.getName())) {
+			return compareParams(left.getParams(), right.getParams());
 		} else {
-			return alphanumericComparator.compare(left.name, right.name);
+			return alphanumericComparator.compare(left.getName(), right.getName());
 		}
 	}
 
 	private int compareModelOrder(final OperationItem left, final OperationItem right) {
-		if (left.name.equals(right.name)) {
-			return compareParams(left.params, right.params);
+		if (left.getName().equals(right.getName())) {
+			return compareParams(left.getParams(), right.getParams());
 		} else {
-			return Integer.compare(opNames.indexOf(left.name), opNames.indexOf(right.name));
+			return Integer.compare(opNames.indexOf(left.getName()), opNames.indexOf(right.getName()));
 		}
 	}
 
@@ -360,7 +382,7 @@ public final class OperationsView extends AnchorPane {
 	private List<OperationItem> applyFilter(final String filter) {
 		List<OperationItem> newOps = new ArrayList<>();
 		for (OperationItem op : events) {
-			if (op.name.startsWith(filter)) {
+			if (op.getName().startsWith(filter)) {
 				newOps.add(op);
 			}
 		}

@@ -472,6 +472,9 @@
 	-fx-border-color: white;
 }
 .tree-table-row-cell:focused .check-box > .box > .mark {
+	-fx-background-color: none;
+}
+.tree-table-row-cell:focused .check-box:selected > .box > .mark {
 	-fx-background-color: white;
 }
 
@@ -669,6 +672,10 @@
 	-fx-background-color: palegreen;
 }
 
+.tree-table-cell.errorresult {
+	-fx-background-color: palegoldenrod;
+}
+
 /* === FullValueStage === */
 
 .difftextarea .coords {
@@ -681,4 +688,10 @@
 
 .difftextarea .delete {
 	-fx-fill: red;
+}
+
+/* === PreferencesStage === */
+
+.text-field.badsearch {
+	-fx-border-color: red;
 }

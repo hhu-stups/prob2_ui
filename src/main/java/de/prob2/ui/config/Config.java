@@ -105,7 +105,7 @@ public final class Config {
 		this.bConsole = bConsole;
 		this.injector = injector;
 		this.currentProject = currentProject;
-		
+
 		try (
 			final InputStream is = Config.class.getResourceAsStream("default.json");
 			final Reader defaultReader = new InputStreamReader(is, CONFIG_CHARSET)
@@ -173,19 +173,19 @@ public final class Config {
 		}
 				
 		if(configData.statesViewColumnsWidth == null) {
-			configData.statesViewColumnsWidth = this.defaultData.statesViewColumnsWidth;
+			configData.statesViewColumnsWidth = this.defaultData.statesViewColumnsWidth.clone();
 		}
 		
 		if(configData.statesViewColumnsOrder == null) {
-			configData.statesViewColumnsOrder = this.defaultData.statesViewColumnsOrder;
+			configData.statesViewColumnsOrder = this.defaultData.statesViewColumnsOrder.clone();
 		}
 		
 		if(configData.animationsViewColumnsWidth == null) {
-			configData.animationsViewColumnsWidth = this.defaultData.animationsViewColumnsWidth;
+			configData.animationsViewColumnsWidth = this.defaultData.animationsViewColumnsWidth.clone();
 		}
 		
 		if(configData.animationsViewColumnsOrder == null) {
-			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder;
+			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder.clone();
 		}
 		
 		if(configData.operationsSortMode == null) {
@@ -239,10 +239,8 @@ public final class Config {
 			final double[] v = entry.getValue();
 			this.uiState.getSavedStageBoxes().put(entry.getKey(), new BoundingBox(v[0], v[1], v[2], v[3]));
 		}
-		
-		for (String tab : configData.groovyObjectTabs) {
-			this.uiState.addGroovyObjectTab(tab);
-		}
+
+		configData.groovyObjectTabs.forEach(this.uiState::addGroovyObjectTab);
 		
 		for (String pane: configData.expandedTitledPanes) {
 			this.uiState.getExpandedTitledPanes().add(pane);
@@ -308,7 +306,7 @@ public final class Config {
 		OperationsView operationsView = injector.getInstance(OperationsView.class);
 		configData.operationsSortMode = operationsView.getSortMode();
 		configData.operationsShowNotEnabled = operationsView.getShowDisabledOps();
-		
+
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
 		}

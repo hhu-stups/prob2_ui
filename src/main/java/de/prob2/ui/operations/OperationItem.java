@@ -1,19 +1,21 @@
 package de.prob2.ui.operations;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class OperationItem {
 	public enum Status {
-		DISABLED, ENABLED, TIMEOUT
+		DISABLED, ENABLED, TIMEOUT, MAX_REACHED
 	}
 	
-	public final String name;
-	public final List<String> params;
-	public final String id;
-	public final Status status;
-	public final List<String> returnValues;
-	final boolean explored;
-	final boolean errored;
+	private final String id;
+	private final String name;
+	private final List<String> params;
+	private final List<String> returnValues;
+	private final OperationItem.Status status;
+	private final boolean explored;
+	private final boolean errored;
 
 	public OperationItem(
 		final String id,
@@ -24,13 +26,41 @@ public class OperationItem {
 		final boolean explored,
 		final boolean errored
 	) {
-		this.id = id;
-		this.name = name;
-		this.params = params;
-		this.returnValues = returnValues;
-		this.status = status;
+		this.id = Objects.requireNonNull(id);
+		this.name = Objects.requireNonNull(name);
+		this.params = Objects.requireNonNull(params);
+		this.returnValues = Objects.requireNonNull(returnValues);
+		this.status = Objects.requireNonNull(status);
 		this.explored = explored;
 		this.errored = errored;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public List<String> getParams() {
+		return new ArrayList<>(params);
+	}
+	
+	public String getId() {
+		return id;
+	}
+	
+	public OperationItem.Status getStatus() {
+		return status;
+	}
+	
+	public List<String> getReturnValues() {
+		return new ArrayList<>(returnValues);
+	}
+	
+	public boolean isExplored() {
+		return explored;
+	}
+	
+	public boolean isErrored() {
+		return errored;
 	}
 
 	@Override

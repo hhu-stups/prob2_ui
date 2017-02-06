@@ -41,6 +41,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -51,7 +52,6 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
-	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
 
 	private final Injector injector;
@@ -211,7 +211,10 @@ public final class MenuController extends MenuBar {
 	private void handleLoadStacked() {
 		uiState.clearDetachedStages();
 		uiState.getExpandedTitledPanes().clear();
-		loadPreset("stackedLists.fxml");
+		Parent root = loadPreset("stackedLists.fxml");
+		SplitPane main = (SplitPane) root.getChildrenUnmodifiable().get(1);
+		SplitPane vertical = (SplitPane) main.getItems().get(1);
+		vertical.getItems().get(1).setVisible(true);
 	}
 
 	@FXML
