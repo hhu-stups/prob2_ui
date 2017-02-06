@@ -15,7 +15,6 @@ import java.util.concurrent.Executors;
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
-
 import javafx.concurrent.Task;
 
 import org.fxmisc.richtext.StyleClassedTextArea;
@@ -25,16 +24,17 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BEditor extends StyleClassedTextArea {
+@Deprecated
+public class OldBEditor extends StyleClassedTextArea {
 	
-	private static final Logger logger = LoggerFactory.getLogger(BEditor.class);
+	private static final Logger logger = LoggerFactory.getLogger(OldBEditor.class);
 
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	private static final Map<Class<? extends Token>, String> syntaxClasses = new HashMap<>();
-	
+		
 	static {
-		addTokens("editor_identifier", TIdentifierLiteral.class);
+		addTokens("editor_identifier", TIdentifierLiteral.class, TIntegerLiteral.class, TPragmaIdentifierLiteral.class);
 		addTokens("editor_assignment_logical", TAssign.class, TOutputParameters.class, TDoubleVerticalBar.class, TAssert.class, 
 				TClosure.class, TClosure1.class, TConjunction.class, TDirectProduct.class, TDivision.class, TEmptySet.class, TDoubleColon.class,
 				TDoubleEqual.class, TEqual.class, TElementOf.class, TEquivalence.class, TGreaterEqual.class, TLessEqual.class, TNotEqual.class,
@@ -43,7 +43,7 @@ public class BEditor extends StyleClassedTextArea {
 				TTotalSurjectionRelation.class, TPartialBijection.class, TPartialFunction.class, TPartialInjection.class, TPartialSurjection.class, TSetRelation.class,
 				TFin.class, TFin1.class, TPerm.class, TSeq.class, TSeq1.class, TIseq.class,
 				TIseq1.class, TBool.class, TNat.class, TNat1.class, TNatural.class, TNatural1.class, TStruct.class,
-				TInteger.class, TInt.class, TString.class, TEither.class);
+				TInteger.class, TInt.class, TString.class, TEither.class, TAssertions.class);
 		addTokens("editor_string", TStringLiteral.class);
 		addTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class, TInfix.class, TArity.class,
 				TSubtree.class, TPow.class, TPow1.class, 
@@ -53,11 +53,11 @@ public class BEditor extends StyleClassedTextArea {
 		addTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class, TVar.class, TIn.class, TAny.class,
 				TWhile.class,
 				TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, 
-				TCase.class, TSelect.class, TAssert.class, TAssertions.class, TWhen.class, TPre.class, TBegin.class,
+				TCase.class, TSelect.class, TWhen.class, TPre.class, TBegin.class,
 				TChoice.class, TWhere.class, TOf.class, TEnd.class);
 
 		addTokens("editor_keyword", TMachine.class, TRefinement.class, TImplementation.class,
-				TOperations.class, TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
+				TOperations.class, TInitialisation.class, TSees.class, TPromotes.class,
 				TUses.class, TIncludes.class, TImports.class, TRefines.class, TExtends.class, TSystem.class,
 				TModel.class,
 				TInvariant.class, TConcreteVariables.class, TAbstractVariables.class, TVariables.class,
@@ -68,7 +68,7 @@ public class BEditor extends StyleClassedTextArea {
 	}
 	
 	
-	public BEditor() {
+	public OldBEditor() {
 		this.richChanges()
 		.filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
 		.successionEnds(Duration.ofMillis(500))

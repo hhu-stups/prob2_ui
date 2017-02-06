@@ -18,17 +18,18 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BEditorStage extends Stage {
-	private static final Logger logger = LoggerFactory.getLogger(BEditorStage.class);
+@Deprecated
+public class OldBEditorStage extends Stage {
+	private static final Logger logger = LoggerFactory.getLogger(OldBEditorStage.class);
 	private static final Charset EDITOR_CHARSET = Charset.forName("UTF-8");
 	
 	@FXML
-	private BEditor beditor;
+	private OldBEditor beditor;
 	
 	private Path path;
 	
 	@Inject
-	public BEditorStage(final StageManager stageManager) {
+	public OldBEditorStage(final StageManager stageManager) {
 		stageManager.loadFXML(this, "beditor.fxml");
 	}
 	
