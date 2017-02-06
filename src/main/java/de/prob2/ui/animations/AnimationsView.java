@@ -7,10 +7,8 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -36,6 +34,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Worker.State;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
@@ -46,7 +45,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 
 @Singleton
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
@@ -71,7 +69,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 	private int currentIndex;
 	private int previousSize;
-	private final Map<Path, Stage> editors;
 
 	@Inject
 	private AnimationsView(final Injector injector, final AnimationSelector animations, final StageManager stageManager,
@@ -84,7 +81,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		
 		this.currentIndex = 0;
 		this.previousSize = 0;
-		this.editors = new HashMap<>();
 		
 		this.animations.registerAnimationChangeListener(this);
 		this.stageManager.loadFXML(this, "animations_view.fxml");
@@ -127,7 +123,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			reloadMenuItem.disableProperty().bind(row.emptyProperty());
 
 			final MenuItem editMenuItem = new MenuItem("Edit");
-			editMenuItem.setOnAction(event -> this.getEditorStage(row.getItem().getModel().getModelFile().toPath()).show());
+			editMenuItem.setOnAction(event -> this.getEditorStage(row.getItem().getModel()).show());
 			editMenuItem.disableProperty().bind(row.emptyProperty());
 			
 			final MenuItem editExternalMenuItem = new MenuItem("Edit in External Editor");
@@ -197,26 +193,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		return null;
 	}
 
-	private Stage getEditorStage(Path path) {
-		return this.editors.computeIfAbsent(path, p -> {
-			BEditorStage editorStage = injector.getInstance(BEditorStage.class);
-			String text = "";
-			try {
-				text = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
-			} catch (IOException e) {
-				LOGGER.error("File not found", e);
-			}
-			editorStage.setEditorText(text, path);
-			editorStage.setTitle(path.getFileName().toString());
-			editorStage.showingProperty().addListener((observable, from, to) -> {
-				if (!to) {
-					this.editors.remove(p);
-				}
-			});
-			return editorStage;
-		});
-	}
-
 	@Override
 	public void traceChange(Trace currentTrace, boolean currentAnimationChanged) {
 		List<Trace> traces = animations.getTraces();
@@ -247,6 +223,49 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			animationsTable.getFocusModel().focus(currentIndex);
 			previousSize = animationsList.size();
 		});
+	}
+
+	/*private Stage getEditorStage(Path path) {
+		return this.editors.computeIfAbsent(path, p -> {
+			BEditorStage editorStage = injector.getInstance(BEditorStage.class);
+			String text = "";
+			try {
+				text = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
+			} catch (IOException e) {
+				LOGGER.error("File not found", e);
+			}
+			editorStage.setEditorText(text, path);
+			editorStage.setTitle(path.getFileName().toString());
+			editorStage.showingProperty().addListener((observable, from, to) -> {
+				if (!to) {
+					this.editors.remove(p);
+				}
+			});
+			return editorStage;
+		});
+	}*/
+	
+	private BEditorStage getEditorStage(AbstractModel model) {
+		BEditorStage editorStage = injector.getInstance(BEditorStage.class);
+		final String editor;
+		final Path path;
+		try {
+			path = model.getModelFile().toPath();
+			editor = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
+		    editorStage.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+		    	if(newState == State.SUCCEEDED && !editorStage.getLoaded()) {
+		    		try {
+		    			editorStage.setTextEditor(editor,path);
+		    		}  catch (NullPointerException e) {
+		    			LOGGER.error("Javascript not loaded yet.", e);
+		    		}
+		    	}
+		    });
+		} catch (IOException e) {
+			LOGGER.error("File not found", e);
+		}
+		editorStage.setTitle(model.getModelFile().getName());
+		return editorStage;
 	}
 
 	@Override

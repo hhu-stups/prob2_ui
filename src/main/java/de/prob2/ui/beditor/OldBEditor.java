@@ -12,26 +12,29 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.fxmisc.richtext.StyleClassedTextArea;
-import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
 import javafx.concurrent.Task;
 
-public class BEditor extends StyleClassedTextArea {
-	private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 
-	private ExecutorService executor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Deprecated
+public class OldBEditor extends StyleClassedTextArea {
+	
+	private static final Logger logger = LoggerFactory.getLogger(OldBEditor.class);
+
+	private ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	private static final Map<Class<? extends Token>, String> syntaxClasses = new HashMap<>();
-	
+		
 	static {
-		addTokens("editor_identifier", TIdentifierLiteral.class);
+		addTokens("editor_identifier", TIdentifierLiteral.class, TIntegerLiteral.class, TPragmaIdentifierLiteral.class);
 		addTokens("editor_assignment_logical", TAssign.class, TOutputParameters.class, TDoubleVerticalBar.class, TAssert.class, 
 				TClosure.class, TClosure1.class, TConjunction.class, TDirectProduct.class, TDivision.class, TEmptySet.class, TDoubleColon.class,
 				TDoubleEqual.class, TEqual.class, TElementOf.class, TEquivalence.class, TGreaterEqual.class, TLessEqual.class, TNotEqual.class,
@@ -40,7 +43,7 @@ public class BEditor extends StyleClassedTextArea {
 				TTotalSurjectionRelation.class, TPartialBijection.class, TPartialFunction.class, TPartialInjection.class, TPartialSurjection.class, TSetRelation.class,
 				TFin.class, TFin1.class, TPerm.class, TSeq.class, TSeq1.class, TIseq.class,
 				TIseq1.class, TBool.class, TNat.class, TNat1.class, TNatural.class, TNatural1.class, TStruct.class,
-				TInteger.class, TInt.class, TString.class, TEither.class);
+				TInteger.class, TInt.class, TString.class, TEither.class, TAssertions.class);
 		addTokens("editor_string", TStringLiteral.class);
 		addTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class, TInfix.class, TArity.class,
 				TSubtree.class, TPow.class, TPow1.class, 
@@ -50,11 +53,11 @@ public class BEditor extends StyleClassedTextArea {
 		addTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class, TVar.class, TIn.class, TAny.class,
 				TWhile.class,
 				TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, 
-				TCase.class, TSelect.class, TAssert.class, TAssertions.class, TWhen.class, TPre.class, TBegin.class,
+				TCase.class, TSelect.class, TWhen.class, TPre.class, TBegin.class,
 				TChoice.class, TWhere.class, TOf.class, TEnd.class);
 
 		addTokens("editor_keyword", TMachine.class, TRefinement.class, TImplementation.class,
-				TOperations.class, TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
+				TOperations.class, TInitialisation.class, TSees.class, TPromotes.class,
 				TUses.class, TIncludes.class, TImports.class, TRefines.class, TExtends.class, TSystem.class,
 				TModel.class,
 				TInvariant.class, TConcreteVariables.class, TAbstractVariables.class, TVariables.class,
@@ -65,7 +68,7 @@ public class BEditor extends StyleClassedTextArea {
 	}
 	
 	
-	public BEditor() {
+	public OldBEditor() {
 		this.richChanges()
 		.filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
 		.successionEnds(Duration.ofMillis(500))
@@ -75,21 +78,10 @@ public class BEditor extends StyleClassedTextArea {
 			if (t.isSuccess()) {
 				return Optional.of(t.get());
 			} else {
-				LOGGER.info("Highlighting failed", t.getFailure());
+				t.getFailure().printStackTrace();
 				return Optional.empty();
 			}
 		}).subscribe(this::applyHighlighting);
-	}
-	
-	public void startHighlighting() {
-		if (this.executor == null) {
-			this.executor = Executors.newSingleThreadExecutor();
-		}
-	}
-	
-	public void stopHighlighting() {
-		this.executor.shutdown();
-		this.executor = null;
 	}
 	
 	@SafeVarargs
@@ -104,28 +96,15 @@ public class BEditor extends StyleClassedTextArea {
 	}
 	
 	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
-		final String text = this.getText();
-		if (executor == null) {
-			// No executor - run and return a dummy task that does no highlighting
-			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
-				@Override
-				protected StyleSpans<Collection<String>> call() {
-					return new StyleSpansBuilder<Collection<String>>().add(Collections.singleton("default"), text.length()).create();
-				}
-			};
-			task.run();
-			return task;
-		} else {
-			// Executor exists - do proper highlighting
-			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
-				@Override
-				protected StyleSpans<Collection<String>> call() {
-					return computeHighlighting(text);
-				}
-			};
-			executor.execute(task);
-			return task;
-		}
+		String text = this.getText();
+		Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
+			@Override
+			protected StyleSpans<Collection<String>> call() {
+				return computeHighlighting(text);
+			}
+		};
+		executor.execute(task);
+		return task;
 	}
 	
 	private static StyleSpans<Collection<String>> computeHighlighting(String text) {
@@ -143,8 +122,11 @@ public class BEditor extends StyleClassedTextArea {
 				spansBuilder.add(Collections.singleton(string == null ? "default" : string), length);
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
-			LOGGER.info("Failed to lex", e);
+			logger.error("BLexer Exception: ", e);
 		}
 		return spansBuilder.create();
 	}
+	
+
+	
 }

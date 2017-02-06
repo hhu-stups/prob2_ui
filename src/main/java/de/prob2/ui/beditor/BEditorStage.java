@@ -14,45 +14,54 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class BEditorStage extends Stage {
-	private static final Logger logger = LoggerFactory.getLogger(BEditorStage.class);
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(BEditorStage.class);
 	private static final Charset EDITOR_CHARSET = Charset.forName("UTF-8");
 	
 	@FXML
-	private BEditor beditor;
+	private WebView beditor;
+	
+	private BEditorSupporter beditorSupporter;
 	
 	private Path path;
 	
+	private WebEngine engine;
+	
+	private boolean loaded = false;
+		
 	@Inject
-	public BEditorStage(final StageManager stageManager) {
+	public BEditorStage(final StageManager stageManager, final BEditorSupporter beditorSupporter) {
 		stageManager.loadFXML(this, "beditor.fxml");
+		engine = beditor.getEngine();
+		engine.load(getClass().getResource("beditor.html").toExternalForm());
+		engine.setJavaScriptEnabled(true);
+		this.beditorSupporter = beditorSupporter;
+		beditorSupporter.setEngine(engine);
 	}
 	
 	@FXML
 	private void initialize() {
 		this.showingProperty().addListener((observable, from, to) -> {
 			if (to) {
-				beditor.startHighlighting();
+				beditorSupporter.startHighlighting();
 			} else {
-				beditor.stopHighlighting();
+				beditorSupporter.stopHighlighting();
 			}
 		});
-	}
-	
-	public void setEditorText(String text, Path path) {
-		this.path = path;
-		beditor.replaceText(text);
 	}
 	
 	@FXML
 	public void handleSave() {
 		try {
-			Files.write(path, beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
+			Files.write(path, beditorSupporter.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
-			logger.error("File not found", e);
+			LOGGER.error("File not found", e);
 		}
 	}
 	
@@ -69,11 +78,11 @@ public class BEditorStage extends Stage {
 				option = StandardOpenOption.TRUNCATE_EXISTING;
 			}
 			try {
-				Files.write(newFile.toPath(), beditor.getText().getBytes(EDITOR_CHARSET), option);
+				Files.write(newFile.toPath(), beditorSupporter.getText().getBytes(EDITOR_CHARSET), option);
 				this.setTitle(newFile.getName());
 				path = newFile.toPath();
 			} catch (IOException e) {
-				logger.error("File not found", e);
+				LOGGER.error("File not found", e);
 			}
 		}
 	}
@@ -81,5 +90,23 @@ public class BEditorStage extends Stage {
 	@FXML
 	public void handleClose() {
 		this.close();
+	}
+	
+	public void setTextEditor(String editor, Path path) {
+		if(engine == null) {
+			return;
+		}
+		this.loaded = true;
+		this.path = path;
+		String jscallCode = "editor.setValue('" + editor.replaceAll("\\n", "\\\\n") + "')";
+		engine.executeScript(jscallCode);
+	}
+	
+	public WebEngine getEngine() {
+		return engine;
+	}
+	
+	public boolean getLoaded() {
+		return loaded;
 	}
 }
