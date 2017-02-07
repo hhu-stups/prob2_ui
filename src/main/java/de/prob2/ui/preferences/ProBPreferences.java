@@ -19,17 +19,19 @@ import de.prob.statespace.Trace;
 
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 
 public final class ProBPreferences {
 	private final CurrentTrace currentTrace;
 	
-	private StateSpace stateSpace;
+	private final ObjectProperty<StateSpace> stateSpace;
 	private final ObservableMap<String, ProBPreference> cachedPreferences;
 	private final ObservableMap<String, String> cachedPreferenceValues;
 	private final ObservableMap<String, String> changedPreferences;
@@ -39,14 +41,30 @@ public final class ProBPreferences {
 	private ProBPreferences(final CurrentTrace currentTrace) {
 		this.currentTrace = currentTrace;
 		
+		this.stateSpace = new SimpleObjectProperty<>(this, "stateSpace", null);
 		this.cachedPreferences = FXCollections.observableHashMap();
 		this.cachedPreferenceValues = FXCollections.observableHashMap();
 		this.changedPreferences = FXCollections.observableHashMap();
 		this.changesApplied = new SimpleBooleanProperty(this, "changesApplied", true);
-		this.changedPreferences.addListener((MapChangeListener<? super String, ? super String>)change ->
-			this.changesApplied.set(change.getMap().isEmpty())
-		);
-		this.stateSpace = null;
+		this.changesApplied.bind(Bindings.createBooleanBinding(this.changedPreferences::isEmpty, this.changedPreferences));
+		
+		this.stateSpace.addListener((observable, from, to) -> {
+			this.changedPreferences.clear();
+			if (to == null) {
+				this.cachedPreferences.clear();
+				this.cachedPreferenceValues.clear();
+			} else {
+				final GetDefaultPreferencesCommand cmd1 = new GetDefaultPreferencesCommand();
+				to.execute(cmd1);
+				for (ProBPreference pref : cmd1.getPreferences()) {
+					this.cachedPreferences.put(pref.name, pref);
+				}
+				
+				final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
+				to.execute(cmd2);
+				this.cachedPreferenceValues.putAll(cmd2.getPreferences());
+			}
+		});
 	}
 	
 	/**
@@ -79,13 +97,23 @@ public final class ProBPreferences {
 	}
 	
 	/**
+	 * Get a property holding the {@link StateSpace} currently used by this instance.
+	 * If this property is {@code null}, this instance has no {@link StateSpace}, and most methods will throw an {@link IllegalStateException} when called.
+	 *
+	 * @return a property holding the {@link StateSpace} currently used by this instance
+	 */
+	public ObjectProperty<StateSpace> stateSpaceProperty() {
+		return this.stateSpace;
+	}
+	
+	/**
 	 * Get the {@link StateSpace} currently used by this instance.
 	 * If this method returns {@code null}, this instance has no {@link StateSpace}, and most methods will throw an {@link IllegalStateException} when called.
 	 * 
 	 * @return the {@link StateSpace} currently used by this instance
 	 */
 	public StateSpace getStateSpace() {
-		return this.stateSpace;
+		return this.stateSpaceProperty().get();
 	}
 	
 	/**
@@ -94,32 +122,17 @@ public final class ProBPreferences {
 	 * @return whether this instance has a {@link StateSpace}
 	 */
 	public boolean hasStateSpace() {
-		return this.stateSpace != null;
+		return this.getStateSpace() != null;
 	}
 	
 	/**
 	 * Set a {@link StateSpace} to be used by this instance.
-	 * This method must be called with a non-null {@code stateSpace} before most of the other methods can be used, and will throw an {@link IllegalStateException} otherwise.
+	 * This method must be called with a non-null {@code stateSpace} before most of the other methods can be used.
 	 * 
 	 * @param stateSpace the {@link StateSpace} to use
 	 */
 	public void setStateSpace(final StateSpace stateSpace) {
-		this.stateSpace = stateSpace;
-		this.changedPreferences.clear();
-		if (this.stateSpace == null) {
-			this.cachedPreferences.clear();
-			this.cachedPreferenceValues.clear();
-		} else {
-			final GetDefaultPreferencesCommand cmd1 = new GetDefaultPreferencesCommand();
-			this.stateSpace.execute(cmd1);
-			for (ProBPreference pref : cmd1.getPreferences()) {
-				this.cachedPreferences.put(pref.name, pref);
-			}
-			
-			final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
-			this.stateSpace.execute(cmd2);
-			this.cachedPreferenceValues.putAll(cmd2.getPreferences());
-		}
+		this.stateSpaceProperty().set(stateSpace);
 	}
 	
 	/**
