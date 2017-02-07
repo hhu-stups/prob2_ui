@@ -12,38 +12,34 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.Preference;
 import de.prob2.ui.project.Project;
-
+import de.prob2.ui.project.Runconfiguration;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.MapProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyListProperty;
-import javafx.beans.property.ReadOnlyMapProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.util.Pair;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -58,7 +54,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final StringProperty description;
 	private final ListProperty<Machine> machines;
 	private final ListProperty<Preference> preferences;
-	private final MapProperty<String, String> runconfigurations;
+	private final ReadOnlyListProperty<Runconfiguration> runconfigurations;
 	private final ObjectProperty<File> location;
 	
 	private final ObjectProperty<Path> defaultLocation;
@@ -75,7 +71,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.description = new SimpleStringProperty(this, "description", "");
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
 		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
-		this.runconfigurations = new SimpleMapProperty<>(this, "runconfigurations", FXCollections.observableHashMap());
+		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations", FXCollections.observableArrayList());
 		this.location = new SimpleObjectProperty<>(this,"location", null);
 		
 		this.addListener((observable, from, to) -> {
@@ -91,7 +87,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.description.set(to.getDescription());
 				this.machines.setAll(to.getMachines());
 				this.preferences.setAll(to.getPreferences());
-				this.runconfigurations.putAll(to.getRunconfigurations());
+				this.runconfigurations.setAll(to.getRunconfigurations());
 				this.location.set(to.getLocation());
 				this.isSingleFile.set(to.isSingleFile());
 			}
@@ -120,8 +116,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 	
 	public void addRunconfiguration(Pair<Machine, Preference> runconfiguration) {
-		Map<String, String> runconfigurations = this.getRunconfigurations();
-		runconfigurations.put(runconfiguration.getKey().getName(), runconfiguration.getValue().getName());
+		List<Runconfiguration> runconfigurations = this.getRunconfigurations();
+		runconfigurations.add(new Runconfiguration(runconfiguration.getKey().getName(), runconfiguration.getValue().getName()));
 		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(), runconfigurations,
 				this.getLocation()));
 	}
@@ -171,11 +167,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return this.preferencesProperty().get();
 	}
 	
-	private ReadOnlyMapProperty<String, String> runconfigurationsProperty() {
+	public ReadOnlyListProperty<Runconfiguration> runconfigurationsProperty() {
 		return this.runconfigurations;
 	}
 	
-	private Map<String, String> getRunconfigurations() {
+	public List<Runconfiguration> getRunconfigurations() {
 		return this.runconfigurationsProperty().get();
 	}
 
@@ -223,6 +219,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		try (final Reader reader = new InputStreamReader(new FileInputStream(file), PROJECT_CHARSET)) {
 			project = gson.fromJson(reader, Project.class);
 			project.setLocation(file.getParentFile());
+			project = replaceMissingWithDefaults(project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
 			return;
@@ -231,5 +228,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			return;
 		}
 		this.set(project);
+	}
+
+	private Project replaceMissingWithDefaults(Project project) {
+		String name = (project.getName() == null) ? "" : project.getName();
+		String description = (project.getDescription() == null) ? "" : project.getDescription();
+		List<Machine> machines = (project.getMachines() == null) ? new ArrayList<>() : project.getMachines();
+		List<Preference> preferences = (project.getPreferences() == null) ? new ArrayList<>() : project.getPreferences();
+		List<Runconfiguration> runconfigurations = (project.getRunconfigurations() == null) ? new ArrayList<>() : project.getRunconfigurations();
+		return new Project(name, description, machines, preferences, runconfigurations, project.getLocation());
 	}
 }

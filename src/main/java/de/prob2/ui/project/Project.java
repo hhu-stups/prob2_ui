@@ -11,17 +11,17 @@ public class Project {
 	private final String description;
 	private final List<Machine> machines = new ArrayList<>();
 	private final List<Preference> preferences = new ArrayList<>();
-	private Map<String, String> runconfigurations = new HashMap<>();
+	private final List<Runconfiguration> runconfigurations = new ArrayList<>();
 	private transient File location;
 	private final boolean singleFile;
 
-	public Project(String name, String description, List<Machine> machines, List<Preference> preferences, Map<String, String> runconfigurations,
-			File location) {
+	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
+			List<Runconfiguration> runconfigurations, File location) {
 		this.name = name;
 		this.description = description;
 		this.machines.addAll(machines);
 		this.preferences.addAll(preferences);
-		this.runconfigurations.putAll(runconfigurations);
+		this.runconfigurations.addAll(runconfigurations);
 		this.location = location;
 		this.singleFile = false;
 	}
@@ -64,9 +64,9 @@ public class Project {
 	public List<Preference> getPreferences() {
 		return preferences;
 	}
-	
-	public Map<String, String> getRunconfigurations() {
-		return runconfigurations ;
+
+	public List<Runconfiguration> getRunconfigurations() {
+		return runconfigurations;
 	}
 
 	public Map<String, String> getPreferences(Machine machine) {

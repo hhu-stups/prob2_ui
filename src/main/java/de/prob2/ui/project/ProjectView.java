@@ -62,6 +62,8 @@ public final class ProjectView extends AnchorPane {
 	private Label runconfigsPlaceholder;
 	@FXML
 	private Button addRunconfigButton;
+	@FXML
+	private ListView<Runconfiguration> runconfigurationsListView;
 	
 
 	private final CurrentProject currentProject;
@@ -133,6 +135,7 @@ public final class ProjectView extends AnchorPane {
 				addRunconfigButton.setDisable(false);
 			}
 		});
+		runconfigurationsListView.itemsProperty().bind(currentProject.runconfigurationsProperty());
 	}
 
 	@FXML
