@@ -22,6 +22,7 @@ import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.prob2fx.CurrentModel;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentState;
@@ -72,6 +73,7 @@ public class ProB2Module extends AbstractModule {
 		bind(MainController.class);
 		bind(ModelcheckingController.class);
 		bind(OperationsView.class);
+		bind(PreferencesView.class);
 		bind(StatesView.class);
 		bind(StatsView.class);
 	}

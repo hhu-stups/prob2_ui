@@ -15,17 +15,16 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.Preference;
 import de.prob2.ui.project.Project;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -42,6 +41,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.util.Pair;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -199,7 +201,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	
 	public Path getDefaultLocation() {
 		return this.defaultLocationProperty().get();
-	}
+	}	
 
 	public void setDefaultLocation(Path defaultProjectLocation) {
 		this.defaultLocationProperty().set(defaultProjectLocation);

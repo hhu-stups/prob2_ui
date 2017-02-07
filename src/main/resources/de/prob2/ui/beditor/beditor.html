@@ -1,58 +1,56 @@
+<!DOCTYPE html>
 <html>
 <head>
 	<link rel='stylesheet' href='codemirror.css'>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 	<script src='codemirror.js'></script>
 	<!-- <script src='clike.js'></script>
-    <script src='closebrackets.js'></script>
-    <script src='matchbrackets.js'></script>-->
+	<script src='closebrackets.js'></script>
+	<script src='matchbrackets.js'></script>-->
 </head>
 <body>
 <div id="container">
-  <textarea id='code'></textarea>
-</div>  
+	<textarea id='code'></textarea>
+</div>
 <script>
-    var TO;
-    function compile(cm) {
-      //blexer.compile(type, cm.getValue());
-    }
-    function onChange(cm) {
-       clearTimeout(TO);
-       TO = setTimeout(function(){compile(cm);}, 500);
-    }
-    
-   
-    var code = document.getElementById('code');  
-    var editor = CodeMirror.fromTextArea(code, 
-                      { lineNumbers: true});
-                        
-    editor.on("change", onChange)                
-    function changeFontSize(size){
-       editor.getWrapperElement().style["font-size"] = size+"px";
-       editor.refresh();
-    }
-    function activate(color, fill){
-       var container = document.getElementById('container');  
-       container.style["border-color"] = color;
-       container.style["opacity"]=1; 
-       var container = document.getElementById('container');  
-       java.jslog(editor.style);
-       editor.getWrapperElement().style["background-color"] = fill;
-    }
-    
-    function deactivate(){
-       var container = document.getElementById('container');  
-       container.style["border-color"] = 'lightgray';
-       container.style["opacity"]=0.4; 
-       editor.getWrapperElement().style["background-color"] = 'white';
-       
-    }
-    
-    function clearHistory() {
-       editor.getDoc().clearHistory()
-    }
-    
-                        
+	var TO;
+	function compile(cm) {
+		//blexer.compile(type, cm.getValue());
+	}
+	
+	function onChange(cm) {
+		clearTimeout(TO);
+		TO = setTimeout(function(){compile(cm);}, 500);
+	}
+	
+	var code = document.getElementById('code');
+	var editor = CodeMirror.fromTextArea(code, {lineNumbers: true});
+	
+	editor.on("change", onChange);
+	function changeFontSize(size){
+		editor.getWrapperElement().style["font-size"] = size+"px";
+		editor.refresh();
+	}
+	
+	function activate(color, fill) {
+		var container = document.getElementById('container');
+		container.style["border-color"] = color;
+		container.style["opacity"]=1;
+		var container = document.getElementById('container');
+		java.jslog(editor.style);
+		editor.getWrapperElement().style["background-color"] = fill;
+	}
+	
+	function deactivate() {
+		var container = document.getElementById('container');
+		container.style["border-color"] = 'lightgray';
+		container.style["opacity"]=0.4;
+		editor.getWrapperElement().style["background-color"] = 'white';
+	}
+	
+	function clearHistory() {
+		editor.getDoc().clearHistory()
+	}
 </script>
 </body>
 </html>
