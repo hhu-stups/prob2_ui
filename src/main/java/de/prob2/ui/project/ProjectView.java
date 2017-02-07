@@ -64,7 +64,6 @@ public final class ProjectView extends AnchorPane {
 	private Button addRunconfigButton;
 	@FXML
 	private ListView<Runconfiguration> runconfigurationsListView;
-	
 
 	private final CurrentProject currentProject;
 	private final MachineLoader machineLoader;
@@ -184,13 +183,15 @@ public final class ProjectView extends AnchorPane {
 		ChoiceBox<Preference> prefsBox = new ChoiceBox<>(currentProject.preferencesProperty());
 		grid.add(new Label("Preference:"), 0, 1);
 		grid.add(prefsBox, 1, 1);
-		
+
 		dialog.getDialogPane().setContent(grid);
+		dialog.getDialogPane().lookupButton(addButtonType).disableProperty()
+				.bind(machinesBox.valueProperty().isNotNull().and(prefsBox.valueProperty().isNotNull()).not());
 		dialog.setResultConverter(dialogButton -> {
-		    if (dialogButton == addButtonType) {
-		        return new Pair<>(machinesBox.getValue(), prefsBox.getValue());
-		    }
-		    return null;
+			if (dialogButton == addButtonType) {
+				return new Pair<>(machinesBox.getValue(), prefsBox.getValue());
+			}
+			return null;
 		});
 		Optional<Pair<Machine, Preference>> result = dialog.showAndWait();
 		result.ifPresent(runconfiguration -> currentProject.addRunconfiguration(runconfiguration));
