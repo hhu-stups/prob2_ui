@@ -2,6 +2,8 @@ package de.prob2.ui.project;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -13,11 +15,9 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
@@ -97,7 +97,6 @@ public final class ProjectView extends AnchorPane {
 			editMenuItem.setOnAction(event -> machineStage.editMachine(row.getItem()));
 			contextMenu.getItems().add(editMenuItem);
 			row.setOnMouseClicked(event -> {
-				Machine machine = row.getItem();
 				if (event.getButton() == MouseButton.SECONDARY) {
 					if (row.isEmpty()) {
 						contextMenu.getItems().get(0).setDisable(true);
@@ -105,18 +104,6 @@ public final class ProjectView extends AnchorPane {
 						contextMenu.getItems().get(0).setDisable(false);
 					}
 					contextMenu.show(row, event.getScreenX(), event.getScreenY());
-				} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-
-					try {
-						machineLoader.loadAsync(machine);
-					} catch (Exception e) {
-						LOGGER.error("Loading machine \"" + machine.getName() + "\" failed", e);
-						Platform.runLater(
-								() -> stageManager
-										.makeAlert(Alert.AlertType.ERROR,
-												"Could not open machine \"" + machine.getName() + "\":\n" + e)
-										.showAndWait());
-					}
 				}
 			});
 			return row;
@@ -135,6 +122,19 @@ public final class ProjectView extends AnchorPane {
 			}
 		});
 		runconfigurationsListView.itemsProperty().bind(currentProject.runconfigurationsProperty());
+		runconfigurationsListView.setOnMouseClicked(event -> {
+			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+				Runconfiguration runconfig = runconfigurationsListView.getSelectionModel().getSelectedItem();
+				Machine machine = currentProject.getMachine(runconfig.getMachine());
+				Map<String, String> pref = new HashMap<>();
+				if (!runconfig.getPreference().equals("default")) {
+					pref = currentProject.getPreferencAsMap(runconfig.getPreference());
+				}
+				if (machine != null && pref != null) {
+					machineLoader.loadAsync(machine, pref);
+				}
+			}
+		});
 	}
 
 	@FXML

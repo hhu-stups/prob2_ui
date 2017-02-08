@@ -42,9 +42,17 @@ public class MachineLoader {
 	}
 
 	public void loadAsync(Machine machine) {
+		loadAsync(machine, new HashMap<>());
+	}
+
+	public void load(Machine machine) throws IOException, ModelTranslationError {
+		load(machine, new HashMap<>());
+	}
+
+	public void loadAsync(Machine machine, Map<String, String> pref) {
 		new Thread(() -> {
 			try {
-				this.load(machine);
+				this.load(machine, pref);
 			} catch (IOException | ModelTranslationError e) {
 				LOGGER.error("Loading machine \"" + machine.getName() + "\" failed", e);
 				Platform.runLater(() -> stageManager
@@ -54,7 +62,7 @@ public class MachineLoader {
 		} , "File Opener Thread").start();
 	}
 
-	public void load(Machine machine) throws IOException, ModelTranslationError {
+	private void load(Machine machine, Map<String, String> pref) throws IOException, ModelTranslationError {
 		// NOTE: This method may be called from outside the JavaFX main thread,
 		// for example from openAsync.
 		// This means that all JavaFX calls must be wrapped in
@@ -62,10 +70,6 @@ public class MachineLoader {
 
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
-			Map<String, String> prefs = new HashMap<>();
-			if (currentProject.exists()) {
-				prefs = currentProject.get().getPreferences(machine);
-			}
 			Path path;
 			if (currentProject.getMachines().contains(machine)) {
 				String projectLocation = currentProject.get().getLocation().getPath();
@@ -74,10 +78,10 @@ public class MachineLoader {
 				path = machine.getPath();
 			}
 			final StateSpace stateSpace;
-			if (prefs.isEmpty()) {
+			if (pref.isEmpty()) {
 				stateSpace = api.b_load(path.toString());
 			} else {
-				stateSpace = api.b_load(path.toString(), prefs);
+				stateSpace = api.b_load(path.toString(), pref);
 			}
 			Platform.runLater(() -> this.animations.addNewAnimation(new Trace(stateSpace)));
 		}

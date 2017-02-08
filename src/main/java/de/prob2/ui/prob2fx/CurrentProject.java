@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -237,5 +238,23 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		List<Preference> preferences = (project.getPreferences() == null) ? new ArrayList<>() : project.getPreferences();
 		List<Runconfiguration> runconfigurations = (project.getRunconfigurations() == null) ? new ArrayList<>() : project.getRunconfigurations();
 		return new Project(name, description, machines, preferences, runconfigurations, project.getLocation());
+	}
+
+	public Machine getMachine(String machine) {
+		for(Machine m : getMachines()) {
+			if(m.getName().equals(machine)) {
+				return m;
+			}
+		}
+		return null;
+	}
+
+	public Map<String, String> getPreferencAsMap(String preference) {
+		for(Preference p : getPreferences()) {
+			if(p.getName().equals(preference)) {
+				return p.getPreferences();
+			}
+		}
+		return null;
 	}
 }
