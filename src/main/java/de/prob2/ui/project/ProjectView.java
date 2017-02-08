@@ -180,7 +180,9 @@ public final class ProjectView extends AnchorPane {
 		ChoiceBox<Machine> machinesBox = new ChoiceBox<>(currentProject.machinesProperty());
 		grid.add(new Label("Machine:"), 0, 0);
 		grid.add(machinesBox, 1, 0);
-		ChoiceBox<Preference> prefsBox = new ChoiceBox<>(currentProject.preferencesProperty());
+		ChoiceBox<Preference> prefsBox = new ChoiceBox<>();
+		prefsBox.getItems().add(new Preference("default", null));
+		prefsBox.getItems().addAll(currentProject.getPreferences());
 		grid.add(new Label("Preference:"), 0, 1);
 		grid.add(prefsBox, 1, 1);
 
