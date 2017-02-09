@@ -19,7 +19,7 @@ public class Runconfiguration {
 	
 	@Override
 	public String toString() {
-		if(this.preference.equals("default")) 
+		if("default".equals(this.preference)) 
 			return this.machine;
 		return this.machine + "." + this.preference;
 	}

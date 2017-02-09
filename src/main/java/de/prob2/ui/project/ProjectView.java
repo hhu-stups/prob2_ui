@@ -142,7 +142,7 @@ public final class ProjectView extends AnchorPane {
 				Runconfiguration runconfig = runconfigurationsListView.getSelectionModel().getSelectedItem();
 				Machine machine = currentProject.getMachine(runconfig.getMachine());
 				Map<String, String> pref = new HashMap<>();
-				if (!runconfig.getPreference().equals("default")) {
+				if (!"default".equals(runconfig.getPreference())) {
 					pref = currentProject.getPreferencAsMap(runconfig.getPreference());
 				}
 				if (machine != null && pref != null) {
