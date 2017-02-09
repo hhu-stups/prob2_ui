@@ -13,8 +13,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -236,7 +238,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		String description = (project.getDescription() == null) ? "" : project.getDescription();
 		List<Machine> machines = (project.getMachines() == null) ? new ArrayList<>() : project.getMachines();
 		List<Preference> preferences = (project.getPreferences() == null) ? new ArrayList<>() : project.getPreferences();
-		List<Runconfiguration> runconfigurations = (project.getRunconfigurations() == null) ? new ArrayList<>() : project.getRunconfigurations();
+		Set<Runconfiguration> runconfigurations = (project.getRunconfigurations() == null) ? new HashSet<>() : project.getRunconfigurations();
 		return new Project(name, description, machines, preferences, runconfigurations, project.getLocation());
 	}
 
