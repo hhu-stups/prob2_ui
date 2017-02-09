@@ -11,6 +11,11 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.ScrollBar?>
+<?import javafx.scene.control.ScrollPane?>
 
 <fx:root minHeight="70.0" minWidth="200" stylesheets="@/prob.css"
 	type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
@@ -22,6 +27,25 @@
 	<TabPane fx:id="projectTabPane" AnchorPane.topAnchor="0"
 		AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
 		AnchorPane.rightAnchor="0" minWidth="300">
+		<Tab text="%project.tabs.project" closable="false">
+			<VBox spacing="0">
+				<AnchorPane styleClass="border">
+					<Label fx:id="projectNameLabel" AnchorPane.leftAnchor="6"
+						AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="4">
+						<font>
+							<Font size="18" />
+						</font>
+					</Label>
+				</AnchorPane>
+				<ScrollPane hbarPolicy="NEVER">
+					<AnchorPane>
+						<Text fx:id="projectDescriptionText" AnchorPane.leftAnchor="6"
+							AnchorPane.topAnchor="6" AnchorPane.rightAnchor="0"
+							AnchorPane.bottomAnchor="0" />
+					</AnchorPane>
+				</ScrollPane>
+			</VBox>
+		</Tab>
 		<Tab text="%project.tabs.machines" closable="false">
 			<VBox spacing="0">
 				<AnchorPane styleClass="border">
@@ -73,7 +97,8 @@
 		<Tab text="%project.tabs.runconfigurations" closable="false">
 			<VBox spacing="0">
 				<AnchorPane styleClass="border">
-					<Button fx:id="addRunconfigButton" prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+					<Button fx:id="addRunconfigButton" prefHeight="26.0"
+						prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
 						AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10"
 						onAction="#addRunconfiguration" disable="true">
 						<graphic>
@@ -85,7 +110,8 @@
 				<ListView fx:id="runconfigurationsListView" VBox.vgrow="always"
 					styleClass="no-border">
 					<placeholder>
-						<Label fx:id="runconfigsPlaceholder" text="%project.tabs.runconfigurations.noRunconfigurations" />
+						<Label fx:id="runconfigsPlaceholder"
+							text="%project.tabs.runconfigurations.noRunconfigurations" />
 					</placeholder>
 				</ListView>
 			</VBox>

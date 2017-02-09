@@ -35,6 +35,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -44,6 +45,10 @@ import javafx.util.Pair;
 public final class ProjectView extends AnchorPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectView.class);
 
+	@FXML
+	private Label projectNameLabel;
+	@FXML
+	private Text projectDescriptionText;
 	@FXML
 	private TableView<Machine> machinesTable;
 	@FXML
@@ -84,6 +89,16 @@ public final class ProjectView extends AnchorPane {
 	public void initialize() {
 		projectTabPane.visibleProperty().bind(currentProject.existsProperty());
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
+
+		projectNameLabel.textProperty().bind(currentProject.nameProperty());
+		projectDescriptionText.textProperty().bind(currentProject.descriptionProperty());
+		this.projectTabPane.widthProperty().addListener((observableValue, oldValue, newValue) -> {
+			if (newValue == null) {
+				projectDescriptionText.setWrappingWidth(0);
+				return;
+			}
+			projectDescriptionText.setWrappingWidth(newValue.doubleValue() - 20);
+		});
 
 		name.setCellValueFactory(new PropertyValueFactory<>("name"));
 		machine.setCellValueFactory(cellData -> new SimpleObjectProperty<Path>(cellData.getValue().getPath()));
