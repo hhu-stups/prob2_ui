@@ -107,9 +107,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 			final MenuItem removeAllMenuItem = new MenuItem("Remove All Traces");
 
-			removeAllMenuItem.setOnAction(event -> {
-				removeAllTraces();
-			});
+			removeAllMenuItem.setOnAction(event -> removeAllTraces());
 
 			final MenuItem reloadMenuItem = new MenuItem("Reload");
 			reloadMenuItem.setOnAction(event -> {

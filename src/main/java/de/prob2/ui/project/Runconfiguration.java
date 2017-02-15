@@ -29,8 +29,8 @@ public class Runconfiguration {
 	    if (object == null) {
 	        return false;
 	    }
-	    if (!Runconfiguration.class.isAssignableFrom(object.getClass())) {
-	        return false;
+	    if(!(object instanceof Runconfiguration)) {
+	    	return false;
 	    }
 	    final Runconfiguration runconfig = (Runconfiguration) object;
 	    if (this.machine == null || runconfig.machine == null || !this.machine.equals(runconfig.machine)) {
