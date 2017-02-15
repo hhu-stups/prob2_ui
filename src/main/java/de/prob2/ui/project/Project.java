@@ -87,8 +87,8 @@ public class Project {
 		Map<String, String> prefs = new HashMap<>();
 		if (!prefNames.isEmpty()) {
 			for (Preference pref : preferences) {
-				String name = pref.getName();
-				if (prefNames.contains(name)) {
+				String n = pref.getName();
+				if (prefNames.contains(n)) {
 					prefs.putAll(pref.getPreferences());
 				}
 			}

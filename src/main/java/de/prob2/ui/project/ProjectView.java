@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -43,8 +40,6 @@ import javafx.util.Pair;
 
 @Singleton
 public final class ProjectView extends AnchorPane {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectView.class);
-
 	@FXML
 	private Label projectNameLabel;
 	@FXML
@@ -140,13 +135,13 @@ public final class ProjectView extends AnchorPane {
 		runconfigurationsListView.setOnMouseClicked(event -> {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 				Runconfiguration runconfig = runconfigurationsListView.getSelectionModel().getSelectedItem();
-				Machine machine = currentProject.getMachine(runconfig.getMachine());
+				Machine m = currentProject.getMachine(runconfig.getMachine());
 				Map<String, String> pref = new HashMap<>();
 				if (!"default".equals(runconfig.getPreference())) {
 					pref = currentProject.getPreferencAsMap(runconfig.getPreference());
 				}
-				if (machine != null && pref != null) {
-					machineLoader.loadAsync(machine, pref);
+				if (m != null && pref != null) {
+					machineLoader.loadAsync(m, pref);
 				}
 			}
 		});

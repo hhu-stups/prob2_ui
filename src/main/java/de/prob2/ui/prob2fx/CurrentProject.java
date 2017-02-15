@@ -119,9 +119,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 	
 	public void addRunconfiguration(Pair<Machine, Preference> runconfiguration) {
-		List<Runconfiguration> runconfigurations = this.getRunconfigurations();
-		runconfigurations.add(new Runconfiguration(runconfiguration.getKey().getName(), runconfiguration.getValue().getName()));
-		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(), runconfigurations,
+		List<Runconfiguration> runconfigs = this.getRunconfigurations();
+		runconfigs.add(new Runconfiguration(runconfiguration.getKey().getName(), runconfiguration.getValue().getName()));
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(), runconfigs,
 				this.getLocation()));
 	}
 
@@ -207,8 +207,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 	
 	public void save() {
-		File location = new File(this.getLocation() + File.separator + this.getName() + ".json");
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(location), PROJECT_CHARSET)) {
+		File loc = new File(this.getLocation() + File.separator + this.getName() + ".json");
+		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(loc), PROJECT_CHARSET)) {
 			gson.toJson(this.get(), writer);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
@@ -234,12 +234,12 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	private Project replaceMissingWithDefaults(Project project) {
-		String name = (project.getName() == null) ? "" : project.getName();
-		String description = (project.getDescription() == null) ? "" : project.getDescription();
-		List<Machine> machines = (project.getMachines() == null) ? new ArrayList<>() : project.getMachines();
-		List<Preference> preferences = (project.getPreferences() == null) ? new ArrayList<>() : project.getPreferences();
-		Set<Runconfiguration> runconfigurations = (project.getRunconfigurations() == null) ? new HashSet<>() : project.getRunconfigurations();
-		return new Project(name, description, machines, preferences, runconfigurations, project.getLocation());
+		String nameString = (project.getName() == null) ? "" : project.getName();
+		String descriptionString = (project.getDescription() == null) ? "" : project.getDescription();
+		List<Machine> machineList = (project.getMachines() == null) ? new ArrayList<>() : project.getMachines();
+		List<Preference> preferenceList = (project.getPreferences() == null) ? new ArrayList<>() : project.getPreferences();
+		Set<Runconfiguration> runconfigurationSet = (project.getRunconfigurations() == null) ? new HashSet<>() : project.getRunconfigurations();
+		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet, project.getLocation());
 	}
 
 	public Machine getMachine(String machine) {
