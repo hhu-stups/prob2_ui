@@ -50,6 +50,7 @@ public final class Config {
 	private static final class ConfigData {
 		private int maxRecentFiles;
 		private List<String> recentFiles;
+		private List<String> recentProjects;
 		private Console.ConfigData groovyConsoleSettings;
 		private Console.ConfigData bConsoleSettings;
 		private List<String> statesViewHiddenClasses;
@@ -125,9 +126,11 @@ public final class Config {
 		// If some keys are null (for example when loading a config from a previous version that did not have those keys), replace them with their values from the default config.
 		if (configData.recentFiles == null) {
 			configData.maxRecentFiles = this.defaultData.maxRecentFiles;
-			configData.recentFiles = new ArrayList<>(this.defaultData.recentFiles);
+			configData.recentFiles = this.defaultData.recentFiles;
 		}
-		
+		if (configData.recentProjects == null) {
+			configData.recentProjects = this.defaultData.recentProjects;
+		}
 		if (configData.statesViewHiddenClasses == null) {
 			configData.statesViewHiddenClasses = new ArrayList<>(this.defaultData.statesViewHiddenClasses);
 		}
@@ -209,7 +212,8 @@ public final class Config {
 		this.replaceMissingWithDefaults(configData);
 		
 		this.recentFiles.setMaximum(configData.maxRecentFiles);
-		this.recentFiles.setAll(configData.recentFiles);
+		this.recentFiles.setRecentFiles(configData.recentFiles);
+		this.recentFiles.setRecentProjects(configData.recentProjects);
 		
 		this.currentProject.setDefaultLocation(Paths.get(configData.defaultProjectLocation));
 		
@@ -277,7 +281,8 @@ public final class Config {
 		}
 		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentFiles = this.recentFiles.getMaximum();
-		configData.recentFiles = new ArrayList<>(this.recentFiles);
+		configData.recentFiles = this.recentFiles.getRecentFiles();
+		configData.recentProjects = this.recentFiles.getRecentProjects();
 		configData.defaultProjectLocation = this.currentProject.getDefaultLocation().toString();
 		configData.statesViewHiddenClasses = new ArrayList<>();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
