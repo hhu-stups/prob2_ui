@@ -11,6 +11,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.PreferencesDialog;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -171,9 +172,8 @@ public final class ProjectView extends AnchorPane {
 	}
 
 	@FXML
-	void addPreference(ActionEvent event) {
-		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(stageManager, currentProject);
-		addProBPreferencesStage.showStage();
+	void addPreference() {
+		injector.getInstance(PreferencesDialog.class).showAndWait().ifPresent(currentProject::addPreference);
 	}
 
 	@FXML

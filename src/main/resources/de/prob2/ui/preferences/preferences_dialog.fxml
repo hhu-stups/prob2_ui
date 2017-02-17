@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.preferences.PreferencesView?>
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.Dialog?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+<fx:root type="Dialog" xmlns:fx="http://javafx.com/fxml/1">
+	<dialogPane>
+		<DialogPane stylesheets="@/prob.css">
+			<content>
+				<VBox>
+					<TextField fx:id="nameField" promptText="Name"/>
+					<PreferencesView fx:id="prefsView"/>
+				</VBox>
+			</content>
+			<ButtonType buttonData="CANCEL_CLOSE" text="%common.cancel"/>
+			<ButtonType buttonData="OK_DONE" text="%common.ok"/>
+		</DialogPane>
+	</dialogPane>
+</fx:root>

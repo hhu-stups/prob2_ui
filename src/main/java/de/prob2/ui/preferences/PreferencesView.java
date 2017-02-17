@@ -1,6 +1,5 @@
 package de.prob2.ui.preferences;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.regex.Pattern;
@@ -10,7 +9,6 @@ import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.prolog.term.ListPrologTerm;
-import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 
 import de.prob2.ui.internal.StageManager;
@@ -20,9 +18,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
@@ -40,10 +35,6 @@ public final class PreferencesView extends BorderPane {
 	private static final Pattern EMPTY_PATTERN = Pattern.compile("", Pattern.CASE_INSENSITIVE);
 	
 	@FXML private TextField prefSearchField;
-	@FXML private Button undoButton;
-	@FXML private Button resetButton;
-	@FXML private Button applyButton;
-	@FXML private Label applyWarning;
 	@FXML private TreeTableView<PrefTreeItem> tv;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvName;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvChanged;
@@ -51,14 +42,11 @@ public final class PreferencesView extends BorderPane {
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
-	private final StageManager stageManager;
 	private final ObjectProperty<ProBPreferences> preferences;
 	
 	@Inject
 	private PreferencesView(final StageManager stageManager) {
 		super();
-		
-		this.stageManager = stageManager;
 		
 		this.preferences = new SimpleObjectProperty<>(this, "preferences", null);
 		
@@ -80,7 +68,6 @@ public final class PreferencesView extends BorderPane {
 	@FXML
 	private void initialize() {
 		this.prefSearchField.textProperty().addListener(observable -> this.updatePreferences());
-		this.resetButton.disableProperty().bind(this.preferencesProperty().isNull());
 		
 		tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 		
@@ -96,10 +83,7 @@ public final class PreferencesView extends BorderPane {
 			return cell;
 		});
 		tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
-		tvValue.setOnEditCommit(event -> {
-			this.getPreferences().setPreferenceValue(event.getRowValue().getValue().getName(), event.getNewValue());
-			this.updatePreferences();
-		});
+		tvValue.setOnEditCommit(event -> this.getPreferences().setPreferenceValue(event.getRowValue().getValue().getName(), event.getNewValue()));
 		
 		tvDefaultValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("defaultValue"));
 		
@@ -115,18 +99,12 @@ public final class PreferencesView extends BorderPane {
 				from.getChangedPreferences().removeListener(updatePreferencesMCL);
 			}
 			
-			if (to == null) {
-				this.undoButton.setDisable(true);
-				this.applyWarning.setVisible(false);
-				this.applyButton.setDisable(true);
-			} else {
-				this.undoButton.disableProperty().bind(to.changesAppliedProperty());
-				this.applyWarning.visibleProperty().bind(to.changesAppliedProperty().not());
-				this.applyButton.disableProperty().bind(to.changesAppliedProperty());
-				
+			if (to != null) {
 				to.stateSpaceProperty().addListener(updatePreferencesCL);
 				to.getChangedPreferences().addListener(updatePreferencesMCL);
 			}
+			
+			this.updatePreferences();
 		});
 	}
 	
@@ -234,30 +212,6 @@ public final class PreferencesView extends BorderPane {
 			return new ProBPreferenceType(arr);
 		} else {
 			return new ProBPreferenceType(pref.type.getFunctor());
-		}
-	}
-	
-	@FXML
-	private void handleUndoChanges() {
-		this.getPreferences().rollback();
-	}
-	
-	@FXML
-	private void handleRestoreDefaults() {
-		for (ProBPreference pref : this.getPreferences().getPreferences()) {
-			this.getPreferences().setPreferenceValue(pref.name, pref.defaultValue);
-		}
-	}
-	
-	@FXML
-	private boolean handleApply() {
-		try {
-			this.getPreferences().apply();
-			return true;
-		} catch (IOException | ModelTranslationError e) {
-			LOGGER.error("Application of changes failed", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e).showAndWait();
-			return false;
 		}
 	}
 }

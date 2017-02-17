@@ -309,7 +309,7 @@
  ************************************************************************************/
 
 .console .error{
-    -fx-fill:red;
+	-fx-fill:red;
 }
 
 .console .current{
@@ -410,14 +410,14 @@
 
 .text-area-with-border > .scroll-pane {
 	-fx-background-color: transparent;
-    -fx-border-color: transparent;
+	-fx-border-color: transparent;
 }
 
 .text-area-with-border .content {
-    -fx-background-color: transparent;
+	-fx-background-color: transparent;
 }
 .text-area-with-border:focused .content {
-    -fx-background-color: transparent;
+	-fx-background-color: transparent;
 }
 
 /************************************************************************************

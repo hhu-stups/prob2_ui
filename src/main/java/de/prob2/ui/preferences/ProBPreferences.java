@@ -10,9 +10,12 @@ import java.util.Objects;
 
 import com.google.inject.Inject;
 
+import de.be4.classicalb.core.parser.node.*;
+
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
 import de.prob.animator.domainobjects.ProBPreference;
+import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -26,13 +29,30 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class ProBPreferences {
+	private static final Start EMPTY_MACHINE_AST = new Start(
+		new AAbstractMachineParseUnit( // pParseUnit
+			new AMachineMachineVariant(), // variant
+			new AMachineHeader( // header
+				Collections.singletonList(new TIdentifierLiteral("empty", 1, 9)), // name
+				Collections.emptyList() // parameters
+			),
+			Collections.emptyList() // machineClauses
+		),
+		new EOF(1, 18) // eof
+	);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPreferences.class);
+	
 	private final CurrentTrace currentTrace;
 	
 	private final ObjectProperty<StateSpace> stateSpace;
 	private final ObservableMap<String, ProBPreference> cachedPreferences;
 	private final ObservableMap<String, String> cachedPreferenceValues;
 	private final ObservableMap<String, String> changedPreferences;
+	private final ObservableMap<String, String> changedPreferencesUnmodifiable;
 	private final BooleanProperty changesApplied;
 	
 	@Inject
@@ -43,6 +63,7 @@ public final class ProBPreferences {
 		this.cachedPreferences = FXCollections.observableHashMap();
 		this.cachedPreferenceValues = FXCollections.observableHashMap();
 		this.changedPreferences = FXCollections.observableHashMap();
+		this.changedPreferencesUnmodifiable = FXCollections.unmodifiableObservableMap(this.changedPreferences);
 		this.changesApplied = new SimpleBooleanProperty(this, "changesApplied", true);
 		this.changesApplied.bind(Bindings.createBooleanBinding(this.changedPreferences::isEmpty, this.changedPreferences));
 		
@@ -63,6 +84,14 @@ public final class ProBPreferences {
 				this.cachedPreferenceValues.putAll(cmd2.getPreferences());
 			}
 		});
+	}
+	
+	public static StateSpace getEmptyStateSpace(final Api api) {
+		try {
+			return api.b_load(EMPTY_MACHINE_AST);
+		} catch (IOException | ModelTranslationError e) {
+			throw new IllegalStateException("Failed to load empty machine, this should never happen!", e);
+		}
 	}
 	
 	/**
@@ -205,7 +234,7 @@ public final class ProBPreferences {
 	 * @return a read-only observable map containing all changed preferences and their values
 	 */
 	public ObservableMap<String, String> getChangedPreferences() {
-		return FXCollections.unmodifiableObservableMap(this.changedPreferences);
+		return this.changedPreferencesUnmodifiable;
 	}
 	
 	/**

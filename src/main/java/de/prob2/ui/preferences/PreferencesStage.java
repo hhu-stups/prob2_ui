@@ -1,23 +1,25 @@
 package de.prob2.ui.preferences;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.model.representation.AbstractElement;
+import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -26,6 +28,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -36,6 +41,9 @@ import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class PreferencesStage extends Stage {
@@ -59,12 +67,15 @@ public final class PreferencesStage extends Stage {
 		}
 	};
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ListView.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesStage.class);
 
-	@FXML private Stage stage;
 	@FXML private Spinner<Integer> recentFilesCountSpinner;
 	@FXML private TextField defaultLocationField;
 	@FXML private PreferencesView prefsView;
+	@FXML private Button undoButton;
+	@FXML private Button resetButton;
+	@FXML private Button applyButton;
+	@FXML private Label applyWarning;
 	@FXML private ListView<Class<? extends AbstractElement>> blacklistView;
 	@FXML private TabPane tabPane;
 	@FXML private Tab tabGeneral;
@@ -75,8 +86,9 @@ public final class PreferencesStage extends Stage {
 	private final CurrentTrace currentTrace;
 	private final ProBPreferences preferences;
 	private final RecentFiles recentFiles;
-	private final StringProperty currentTab;
+	private final StageManager stageManager;
 	private final CurrentProject currentProject;
+	private final StringProperty currentTab;
 
 	@Inject
 	private PreferencesStage(
@@ -92,8 +104,9 @@ public final class PreferencesStage extends Stage {
 		this.preferences = preferences;
 		this.preferences.setStateSpace(currentTrace.exists() ? currentTrace.getStateSpace() : null);
 		this.recentFiles = recentFiles;
-		this.currentTab = new SimpleStringProperty(this, "currentTab", null);
+		this.stageManager = stageManager;
 		this.currentProject = currentProject;
+		this.currentTab = new SimpleStringProperty(this, "currentTab", null);
 
 		stageManager.loadFXML(this, "preferences_stage.fxml", this.getClass().getName());
 	}
@@ -122,6 +135,11 @@ public final class PreferencesStage extends Stage {
 		this.currentTrace.addListener(traceChangeListener);
 		// Fire the listener manually once to load the current preferences
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
+		
+		this.resetButton.disableProperty().bind(this.preferences.stateSpaceProperty().isNull());
+		this.undoButton.disableProperty().bind(this.preferences.changesAppliedProperty());
+		this.applyWarning.visibleProperty().bind(this.preferences.changesAppliedProperty().not());
+		this.applyButton.disableProperty().bind(this.preferences.changesAppliedProperty());
 
 		// States View
 
@@ -197,13 +215,37 @@ public final class PreferencesStage extends Stage {
 			defaultLocationField.setText(file.getAbsolutePath());
 		}
 	}
+	
+	@FXML
+	private void handleUndoChanges() {
+		this.preferences.rollback();
+	}
+	
+	@FXML
+	private void handleRestoreDefaults() {
+		for (ProBPreference pref : this.preferences.getPreferences()) {
+			this.preferences.setPreferenceValue(pref.name, pref.defaultValue);
+		}
+	}
+	
+	@FXML
+	private boolean handleApply() {
+		try {
+			this.preferences.apply();
+			return true;
+		} catch (IOException | ModelTranslationError e) {
+			LOGGER.error("Application of changes failed", e);
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e).showAndWait();
+			return false;
+		}
+	}
 
 	@FXML
 	private void handleClose() {
 		if (this.preferences.hasStateSpace()) {
 			this.preferences.rollback();
 		}
-		this.stage.close();
+		this.hide();
 	}
 	
 	public StringProperty currentTabProperty() {
