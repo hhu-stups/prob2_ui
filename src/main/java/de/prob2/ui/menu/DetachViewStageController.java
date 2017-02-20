@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import de.prob2.ui.project.ProjectView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,7 @@ public final class DetachViewStageController extends Stage {
 	@FXML private CheckBox detachHistory;
 	@FXML private CheckBox detachModelcheck;
 	@FXML private CheckBox detachStats;
+	@FXML private CheckBox detachProjects;
 	@FXML private CheckBox detachAnimations;
 	
 	private final Injector injector;
@@ -82,6 +84,7 @@ public final class DetachViewStageController extends Stage {
 		checkBoxMap.put(HistoryView.class, detachHistory);
 		checkBoxMap.put(ModelcheckingController.class, detachModelcheck);
 		checkBoxMap.put(StatsView.class, detachStats);
+		checkBoxMap.put(ProjectView.class, detachProjects);
 		checkBoxMap.put(AnimationsView.class, detachAnimations);
 	}
 	
