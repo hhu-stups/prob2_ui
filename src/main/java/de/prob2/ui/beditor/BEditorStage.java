@@ -38,6 +38,7 @@ public class BEditorStage extends Stage {
 	@Inject
 	public BEditorStage(final StageManager stageManager, final BEditorSupporter beditorSupporter) {
 		stageManager.loadFXML(this, "beditor.fxml");
+		beditor.setContextMenuEnabled(false);
 		engine = beditor.getEngine();
 		engine.load(getClass().getResource("beditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
@@ -78,7 +79,10 @@ public class BEditorStage extends Stage {
 				option = StandardOpenOption.TRUNCATE_EXISTING;
 			}
 			try {
-				Files.write(newFile.toPath(), beditorSupporter.getText().getBytes(EDITOR_CHARSET), option);
+				String beditorText = beditorSupporter.getText();
+				beditorText.replaceAll("\\", "\\\\");
+				beditorText.replaceAll("\\/", "\\\\/");
+				Files.write(newFile.toPath(), beditorText.getBytes(EDITOR_CHARSET), option);
 				this.setTitle(newFile.getName());
 				path = newFile.toPath();
 			} catch (IOException e) {

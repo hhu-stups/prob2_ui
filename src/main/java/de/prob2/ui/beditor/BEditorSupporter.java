@@ -94,6 +94,10 @@ public class BEditorSupporter {
         jsobj.setMember("type", "code");
 	}
 	
+	public void compile(String code) {
+		//computeHighlighting(code);
+	}
+	
 	public void startHighlighting() {
 		if (this.executor == null) {
 			this.executor = Executors.newSingleThreadExecutor();
@@ -153,7 +157,7 @@ public class BEditorSupporter {
 		}
 	}*/
 	
-	private static StyleSpans<Collection<String>> computeHighlighting(String text) {
+	private StyleSpans<Collection<String>> computeHighlighting(String text) {
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
 		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
 		try {
@@ -165,6 +169,7 @@ public class BEditorSupporter {
 				if (t instanceof TStringLiteral) {
 					length += 2;
 				}
+				engine.executeScript("editor.addClass(blexer, " + string);
 				spansBuilder.add(Collections.singleton(string == null ? "default" : string), length);
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
