@@ -7,6 +7,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import de.prob2.ui.project.ProjectView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -18,7 +22,6 @@ import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.stats.StatsView;
-
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -33,9 +36,6 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Singleton
 public final class DetachViewStageController extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DetachViewStageController.class);
@@ -45,6 +45,7 @@ public final class DetachViewStageController extends Stage {
 	@FXML private CheckBox detachHistory;
 	@FXML private CheckBox detachModelcheck;
 	@FXML private CheckBox detachStats;
+	@FXML private CheckBox detachProjects;
 	@FXML private CheckBox detachAnimations;
 	
 	private final Injector injector;
@@ -83,6 +84,7 @@ public final class DetachViewStageController extends Stage {
 		checkBoxMap.put(HistoryView.class, detachHistory);
 		checkBoxMap.put(ModelcheckingController.class, detachModelcheck);
 		checkBoxMap.put(StatsView.class, detachStats);
+		checkBoxMap.put(ProjectView.class, detachProjects);
 		checkBoxMap.put(AnimationsView.class, detachAnimations);
 	}
 	

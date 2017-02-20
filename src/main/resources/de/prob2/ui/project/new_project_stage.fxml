@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.text.Font?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ButtonBar?>
@@ -44,17 +45,6 @@
 								</TextField>
 							</HBox>
 							<HBox spacing="20" alignment="center_left">
-								<Label text="%newProject.stage.projectDescription" />
-								<TextField fx:id="projectDescriptionField" HBox.hgrow="always">
-									<font>
-										<Font size="12" />
-									</font>
-								</TextField>
-								<VBox.margin>
-									<Insets top="5" />
-								</VBox.margin>
-							</HBox>
-							<HBox spacing="20" alignment="center_left">
 								<Label text="%newProject.stage.location" />
 								<TextField fx:id="locationField" HBox.hgrow="always">
 									<font>
@@ -67,46 +57,17 @@
 									<Insets top="10" />
 								</VBox.margin>
 							</HBox>
-							<AnchorPane>
-								<Label text="%newProject.stage.preferences"
-									AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="5" />
-								<Button prefHeight="26.0" prefWidth="26.0"
-									contentDisplay="GRAPHIC_ONLY" AnchorPane.rightAnchor="0"
-									AnchorPane.topAnchor="10" onAction="#addPreference">
-									<graphic>
-										<FontAwesomeIconView fill="#555560"
-											glyphName="PLUS_CIRCLE" size="26" />
-									</graphic>
-								</Button>
-							</AnchorPane>
-							<ListView fx:id="preferencesListView" styleClass="no-border"
-								prefHeight="100" />
-							<AnchorPane>
-								<Label text="%newProject.stage.machines"
-									AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="5" />
-								<Button prefHeight="26.0" prefWidth="26.0"
-									contentDisplay="GRAPHIC_ONLY" AnchorPane.rightAnchor="0"
-									AnchorPane.topAnchor="10" onAction="#addMachine">
-									<graphic>
-										<FontAwesomeIconView fill="#555560"
-											glyphName="PLUS_CIRCLE" size="26" />
-									</graphic>
-								</Button>
-							</AnchorPane>
-							<TableView fx:id="machinesTableView" prefHeight="200" editable="true">
-								<columns>
-									<TableColumn fx:id="nameColumn" editable="false"
-										text="%newProject.stage.machinesTableView.name" />
-									<TableColumn fx:id="descriptionColumn" editable="false"
-										text="%newProject.stage.machinesTableView.description" />
-								</columns>
-								<columnResizePolicy>
-									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-								</columnResizePolicy>
-								<placeholder>
-									<Label text="%newProject.stage.machinesTableView.placeholder" />
-								</placeholder>
-							</TableView>
+							<VBox spacing="5" alignment="center_left">
+								<Label text="%newProject.stage.projectDescription" />
+								<TextArea fx:id="projectDescriptionTextArea" styleClass="text-area-with-border">
+									<font>
+										<Font size="12" />
+									</font>
+								</TextArea>
+								<VBox.margin>
+									<Insets top="20" />
+								</VBox.margin>
+							</VBox>
 						</VBox>
 					</AnchorPane>
 					<ButtonBar styleClass="dialog">

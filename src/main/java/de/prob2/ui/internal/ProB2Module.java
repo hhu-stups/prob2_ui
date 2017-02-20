@@ -9,7 +9,6 @@ import com.google.inject.Provides;
 import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob.MainModule;
 import de.prob2.ui.MainController;
 import de.prob2.ui.animations.AnimationsView;
@@ -23,10 +22,13 @@ import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.prob2fx.CurrentModel;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentState;
 import de.prob2.ui.prob2fx.CurrentStateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
@@ -49,6 +51,7 @@ public class ProB2Module extends AbstractModule {
 		bind(CurrentState.class);
 		bind(CurrentStateSpace.class);
 		bind(CurrentTrace.class);
+		bind(CurrentProject.class);
 		bind(FormulaGenerator.class);
 		bind(FormulaInputStage.class);
 		bind(GroovyConsole.class);
@@ -65,10 +68,12 @@ public class ProB2Module extends AbstractModule {
 		// Controllers
 		bind(AnimationsView.class);
 		bind(HistoryView.class);
+		bind(ProjectView.class);
 		bind(MenuController.class);
 		bind(MainController.class);
 		bind(ModelcheckingController.class);
 		bind(OperationsView.class);
+		bind(PreferencesView.class);
 		bind(StatesView.class);
 		bind(StatsView.class);
 	}

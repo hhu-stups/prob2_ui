@@ -8,14 +8,15 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob.scripting.ModelTranslationError;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
@@ -26,10 +27,11 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.Machine;
+import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
-import de.prob2.ui.project.Project;
-
 import javafx.application.Platform;
+import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -46,9 +48,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -71,6 +70,12 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private MenuItem clearRecentFiles;
 	@FXML
+	private Menu recentProjectsMenu;
+	@FXML
+	private MenuItem recentProjectsPlaceholder;
+	@FXML
+	private MenuItem clearRecentProjects;
+	@FXML
 	private Menu windowMenu;
 	@FXML
 	private MenuItem saveProjectItem;
@@ -84,18 +89,13 @@ public final class MenuController extends MenuBar {
 	private MenuItem aboutItem;
 
 	private CurrentProject currentProject;
+	private MachineLoader machineLoader;
 
 	@Inject
-	private MenuController(
-			final StageManager stageManager,
-			final Injector injector,
-			final CurrentTrace currentTrace,
-			final DetachViewStageController dvController,
-			final AboutBoxController aboutController,
-			@Nullable final MenuToolkit menuToolkit,
-			final RecentFiles recentFiles,
-			final CurrentProject currentProject,
-			final UIState uiState) {
+	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
+			final DetachViewStageController dvController, final AboutBoxController aboutController,
+			@Nullable final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
+			final UIState uiState, final MachineLoader machineLoader) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
@@ -105,6 +105,7 @@ public final class MenuController extends MenuBar {
 		this.menuToolkit = menuToolkit;
 		this.recentFiles = recentFiles;
 		this.uiState = uiState;
+		this.machineLoader = machineLoader;
 
 		stageManager.loadFXML(this, "menu.fxml");
 
@@ -151,7 +152,7 @@ public final class MenuController extends MenuBar {
 
 		final ListChangeListener<String> recentFilesListener = change -> {
 			final ObservableList<MenuItem> recentItems = this.recentFilesMenu.getItems();
-			final List<MenuItem> newItems = getRecentFileItems();
+			final List<MenuItem> newItems = getRecentFileItems(recentFiles.recentFilesProperty(), "files");
 
 			// If there are no recent files, show a placeholder and disable
 			// clearing
@@ -170,9 +171,22 @@ public final class MenuController extends MenuBar {
 			// Replace the old recents with the new ones
 			this.recentFilesMenu.getItems().setAll(newItems);
 		};
-		this.recentFiles.addListener(recentFilesListener);
+		this.recentFiles.recentFilesProperty().addListener(recentFilesListener);
 		// Fire the listener once to populate the recent files menu
 		recentFilesListener.onChanged(null);
+
+		final ListChangeListener<String> recentProjectsListener = change -> {
+			final ObservableList<MenuItem> recentItems = this.recentProjectsMenu.getItems();
+			final List<MenuItem> newItems = getRecentFileItems(recentFiles.recentProjectsProperty(), "projects");
+			this.clearRecentProjects.setDisable(newItems.isEmpty());
+			if (newItems.isEmpty()) {
+				newItems.add(this.recentProjectsPlaceholder);
+			}
+			newItems.addAll(recentItems.subList(recentItems.size() - 2, recentItems.size()));
+			this.recentProjectsMenu.getItems().setAll(newItems);
+		};
+		this.recentFiles.recentProjectsProperty().addListener(recentProjectsListener);
+		recentProjectsListener.onChanged(null);
 
 		this.saveProjectItem.disableProperty()
 				.bind(currentProject.existsProperty().not().or(currentProject.isSingleFileProperty()));
@@ -183,7 +197,12 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleClearRecentFiles() {
-		this.recentFiles.clear();
+		this.recentFiles.recentFilesProperty().clear();
+	}
+
+	@FXML
+	private void handleClearRecentProjects() {
+		this.recentFiles.recentProjectsProperty().clear();
 	}
 
 	@FXML
@@ -249,42 +268,6 @@ public final class MenuController extends MenuBar {
 		}
 	}
 
-	private void open(String path) {
-		if (currentProject.exists()) {
-			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
-
-			final ButtonType buttonTypeAdd = new ButtonType("Add");
-			final ButtonType buttonTypeClose = new ButtonType("Close");
-
-			if (currentProject.isSingleFile()) {
-				alert.setHeaderText("You've already opened a file.");
-				alert.setContentText("Do you want to close the current file?");
-				alert.getButtonTypes().setAll(buttonTypeClose, ButtonType.CANCEL);
-			} else {
-				alert.setHeaderText("You've already opened a project.");
-				alert.setContentText("Do you want to close the current project or add the selected file?");
-				alert.getButtonTypes().setAll(buttonTypeAdd, buttonTypeClose, ButtonType.CANCEL);
-			}
-			Optional<ButtonType> result = alert.showAndWait();
-
-			if (!result.isPresent() || ButtonType.CANCEL.equals(result.get())) {
-				return;
-			} else if (buttonTypeAdd.equals(result.get())) {
-				currentProject.addMachine(new File(path));
-				return;
-			}
-		}
-
-		Platform.runLater(() -> {
-			this.currentProject.changeCurrentProject(new Project(new File(path)));
-			injector.getInstance(ModelcheckingController.class).resetView();
-
-			// Remove the path first to avoid listing the same file twice.
-			this.recentFiles.remove(path);
-			this.recentFiles.add(0, path);
-		});
-	}
-
 	@FXML
 	private void handleOpen() {
 		final FileChooser fileChooser = new FileChooser();
@@ -297,7 +280,18 @@ public final class MenuController extends MenuBar {
 			return;
 		}
 
-		this.open(selectedFile.getAbsolutePath());
+		this.open(selectedFile);
+	}
+
+	private void open(File file) {
+		machineLoader.loadAsync(new Machine(file.getName().split("\\.")[0], "", file.toPath()));
+		Platform.runLater(() -> {
+			injector.getInstance(ModelcheckingController.class).resetView();
+
+			// Remove the path first to avoid listing the same file twice.
+			this.recentFiles.recentFilesProperty().remove(file.getAbsolutePath());
+			this.recentFiles.recentFilesProperty().add(0, file.getAbsolutePath());
+		});
 	}
 
 	@FXML
@@ -386,10 +380,6 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void createNewProject() {
-		if (!confirmReplacingProject()) {
-			return;
-		}
-
 		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();
@@ -415,14 +405,25 @@ public final class MenuController extends MenuBar {
 			return;
 		}
 
-		currentProject.open(selectedProject);
+		this.openProject(selectedProject);
+	}
+	
+	private void openProject(File file) {
+		currentProject.open(file);
+		this.recentFiles.recentProjectsProperty().remove(file.getAbsolutePath());
+		this.recentFiles.recentProjectsProperty().add(0, file.getAbsolutePath());
 	}
 
-	private List<MenuItem> getRecentFileItems() {
+	private List<MenuItem> getRecentFileItems(SimpleListProperty<String> recentListProperty, String filesOrProjects) {
 		final List<MenuItem> newItems = new ArrayList<>();
-		for (String s : this.recentFiles) {
-			final MenuItem item = new MenuItem(new File(s).getName());
-			item.setOnAction(event -> this.open(s));
+		for (String s : recentListProperty) {
+			File file = new File(s);
+			final MenuItem item = new MenuItem(file.getName());
+			if ("projects".equals(filesOrProjects)) {
+				item.setOnAction(event -> this.openProject(file));
+			} else if ("files".equals(filesOrProjects)) {
+				item.setOnAction(event -> this.open(file));
+			}
 			newItems.add(item);
 		}
 		return newItems;

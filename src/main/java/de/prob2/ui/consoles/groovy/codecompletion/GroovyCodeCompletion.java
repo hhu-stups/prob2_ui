@@ -7,7 +7,6 @@ import javax.script.ScriptEngine;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
 import de.prob2.ui.internal.StageManager;
-
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

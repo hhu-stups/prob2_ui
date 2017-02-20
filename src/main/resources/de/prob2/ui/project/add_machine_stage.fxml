@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.text.Font?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ButtonBar?>
@@ -39,34 +40,33 @@
 									</font>
 								</TextField>
 							</HBox>
-							<HBox spacing="20" alignment="center_left">
+							<VBox spacing="20" alignment="center_left">
 								<Label text="%addMachine.stage.description" />
-								<TextField fx:id="descriptionField" HBox.hgrow="always">
+								<TextArea fx:id="descriptionTextArea" styleClass="text-area-with-border">
 									<font>
 										<Font size="12" />
 									</font>
-								</TextField>
+								</TextArea>
 								<VBox.margin>
-									<Insets top="5" />
+									<Insets top="20" />
 								</VBox.margin>
-							</HBox>
+							</VBox>
 						</VBox>
 					</AnchorPane>
 					<ButtonBar styleClass="dialog">
 						<buttons>
-							<Button text="%common.cancel" cancelButton="true"
-								onAction="#cancel" />
+							<Button fx:id="cancelButton" text="%common.cancel"
+								cancelButton="true" />
 							<!--<Button fx:id="addMachineButton" text="%addMachine.stage.addMachineButton" 
 								onAction="#addMachine" /> -->
-							<Button fx:id="finishButton" text="%common.finish"
-								onAction="#finish" />
+							<Button fx:id="finishButton" text="%common.finish" />
 						</buttons>
 						<VBox.margin>
 							<Insets left="10" right="10" top="10" />
 						</VBox.margin>
 					</ButtonBar>
 				</VBox>
-				 <Label fx:id="errorExplanationLabel" textFill="#B77300"
+				<Label fx:id="errorExplanationLabel" textFill="#B77300"
 					AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="20"
 					AnchorPane.rightAnchor="200" />
 			</AnchorPane>

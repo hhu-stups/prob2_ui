@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.regex.Matcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +15,10 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.scene.web.WebEngine;
 
 public class BEditorStage extends Stage {
 	
@@ -59,11 +60,7 @@ public class BEditorStage extends Stage {
 	
 	@FXML
 	public void handleSave() {
-		try {
-			Files.write(path, beditorSupporter.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
-		} catch (IOException e) {
-			LOGGER.error("File not found", e);
-		}
+		saveFile(path);
 	}
 	
 	@FXML
@@ -74,20 +71,22 @@ public class BEditorStage extends Stage {
 		File openFile = fileChooser.showSaveDialog(this.getOwner());
 		if (openFile != null) {
 			File newFile = new File(openFile.getAbsolutePath() + (openFile.getName().contains(".") ? "" : ".mch"));
-			StandardOpenOption option = StandardOpenOption.CREATE;
-			if(newFile.exists()) {
-				option = StandardOpenOption.TRUNCATE_EXISTING;
-			}
-			try {
-				String beditorText = beditorSupporter.getText();
-				beditorText.replaceAll("\\", "\\\\");
-				beditorText.replaceAll("\\/", "\\\\/");
-				Files.write(newFile.toPath(), beditorText.getBytes(EDITOR_CHARSET), option);
-				this.setTitle(newFile.getName());
-				path = newFile.toPath();
-			} catch (IOException e) {
-				LOGGER.error("File not found", e);
-			}
+			saveFile(newFile.toPath());
+			this.setTitle(newFile.getName());
+			path = newFile.toPath();
+		}
+	}
+	
+	public void saveFile(Path path) {
+		StandardOpenOption option = StandardOpenOption.CREATE;
+		if(path.toFile().exists()) {
+			option = StandardOpenOption.TRUNCATE_EXISTING;
+		}
+		try {
+			String beditorText = beditorSupporter.getText();
+			Files.write(path, beditorText.getBytes(EDITOR_CHARSET), option);
+		} catch (IOException e) {
+			LOGGER.error("File not found", e);
 		}
 	}
 	
@@ -102,7 +101,9 @@ public class BEditorStage extends Stage {
 		}
 		this.loaded = true;
 		this.path = path;
-		String jscallCode = "editor.setValue('" + editor.replaceAll("\\n", "\\\\n") + "')";
+		editor = Matcher.quoteReplacement(editor);
+		editor = editor.replaceAll("\\n", "\\\\n");
+		String jscallCode = "editor.setValue('" + editor + "')";
 		engine.executeScript(jscallCode);
 	}
 	

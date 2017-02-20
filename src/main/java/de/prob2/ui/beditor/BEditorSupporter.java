@@ -3,12 +3,10 @@ package de.prob2.ui.beditor;
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.StringReader;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,8 +18,6 @@ import org.slf4j.LoggerFactory;
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
-import javafx.concurrent.Task;
-import javafx.scene.control.TextArea;
 import javafx.scene.web.WebEngine;
 import netscape.javascript.JSObject;
 
@@ -125,37 +121,6 @@ public class BEditorSupporter {
 		String jscallCode = "editor.getValue()";
 		return engine.executeScript(jscallCode).toString();
 	}
-		
-	
-
-	private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
-		//this.setStyleSpans(0, highlighting);
-	}
-	
-	/*private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
-		final String text = this.getText();
-		if (executor == null) {
-			// No executor - run and return a dummy task that does no highlighting
-			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
-				@Override
-				protected StyleSpans<Collection<String>> call() {
-					return new StyleSpansBuilder<Collection<String>>().add(Collections.singleton("default"), text.length()).create();
-				}
-			};
-			task.run();
-			return task;
-		} else {
-			// Executor exists - do proper highlighting
-			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
-				@Override
-				protected StyleSpans<Collection<String>> call() {
-					return computeHighlighting(text);
-				}
-			};
-			executor.execute(task);
-			return task;
-		}
-	}*/
 	
 	private StyleSpans<Collection<String>> computeHighlighting(String text) {
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));

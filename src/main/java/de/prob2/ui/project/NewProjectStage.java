@@ -1,33 +1,21 @@
 package de.prob2.ui.project;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -37,22 +25,13 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private TextField projectNameField;
 	@FXML
-	private TextField projectDescriptionField;
+	private TextArea projectDescriptionTextArea;
 	@FXML
 	private TextField locationField;
 	@FXML
-	private ListView<Preference> preferencesListView;
-	@FXML
 	private Label errorExplanationLabel;
-	@FXML
-	private TableView<MachineTableItem> machinesTableView;
-	@FXML
-	private TableColumn<MachineTableItem, String> nameColumn;
-	@FXML
-	private TableColumn<MachineTableItem, String> descriptionColumn;
 
 	private CurrentProject currentProject;
-	private Map<String, Preference> preferencesMap = new HashMap<>();
 	private StageManager stageManager;
 
 	@Inject
@@ -67,74 +46,32 @@ public class NewProjectStage extends Stage {
 	public void initialize() {
 		finishButton.disableProperty().bind(projectNameField.lengthProperty().lessThanOrEqualTo(0));
 		locationField.setText(this.currentProject.getDefaultLocation().toString());
-
-		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-
-		machinesTableView.setRowFactory(tableView -> {
-			final TableRow<MachineTableItem> row = new TableRow<>();
-			final ContextMenu contextMenu = new ContextMenu();
-			final MenuItem removeMenuItem = new MenuItem("Remove Machine");
-			removeMenuItem.setOnAction(event -> machinesTableView.getItems().remove(row.getItem()));
-			contextMenu.getItems().add(removeMenuItem);
-			row.setOnMouseClicked(event -> {
-				if (event.getButton() == MouseButton.SECONDARY) {
-					if (row.isEmpty()) {
-						contextMenu.getItems().get(0).setDisable(true);
-					} else {
-						contextMenu.getItems().get(0).setDisable(false);
-					}
-					contextMenu.show(row, event.getScreenX(), event.getScreenY());
-				} else if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-					MachineStage machineStage = new MachineStage(stageManager);
-					Machine machine = machineStage.editMachine(row.getItem(), machinesTableView.getItems());
-					row.getItem().setMachine(machine);
-					machinesTableView.refresh();
-				}
-			});
-			return row;
-		});
 	}
 
-	@FXML
-	void addPreference(ActionEvent event) {
-		AddProBPreferencesStage addProBPreferencesStage = new AddProBPreferencesStage(stageManager);
-		Preference preference = addProBPreferencesStage.showStage(preferencesMap.keySet());
-		if (preference != null) {
-			preferencesListView.getItems().add(preference);
-			preferencesMap.put(preference.toString(), preference);
+	private boolean confirmReplacingProject() {
+		if (currentProject.exists()) {
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
 
-			for (MachineTableItem item : machinesTableView.getItems()) {
-				item.addPreferenceProperty(preference);
+			if (currentProject.isSingleFile()) {
+				alert.setHeaderText("You've already opened a file.");
+				alert.setContentText("Do you want to close the current file?");
+			} else {
+				alert.setHeaderText("You've already opened a project.");
+				alert.setContentText("Do you want to close the current project?");
 			}
-
-			TableColumn<MachineTableItem, Boolean> preferenceColumn = new TableColumn<>(preference.toString());
-			preferenceColumn.setEditable(true);
-			preferenceColumn.setCellFactory(p -> new CheckBoxTableCell<>());
-			preferenceColumn.setCellValueFactory(cellData -> cellData.getValue().getPreferenceProperty(preference));
-			machinesTableView.getColumns().add(preferenceColumn);
-			machinesTableView.refresh();
+			Optional<ButtonType> result = alert.showAndWait();
+			return result.isPresent() && ButtonType.OK.equals(result.get());
+		} else {
+			return true;
 		}
 	}
-
-	@FXML
-	void addMachine(ActionEvent event) {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Add Machine");
-		fileChooser.getExtensionFilters()
-				.add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
-
-		final File selectedFile = fileChooser.showOpenDialog(this);
-		if (selectedFile == null) {
+	
+	@Override
+	public void showAndWait() {
+		if (!confirmReplacingProject()) {
 			return;
 		}
-
-		MachineStage machineStage = new MachineStage(stageManager);
-		Machine machine = machineStage.addNewMachine(selectedFile, machinesTableView.getItems());
-
-		if (machine != null) {
-			machinesTableView.getItems().add(new MachineTableItem(machine, preferencesListView.getItems()));
-		}
+		super.showAndWait();
 	}
 
 	@FXML
@@ -159,37 +96,9 @@ public class NewProjectStage extends Stage {
 			errorExplanationLabel.setText("The location does not exist or is invalid");
 			return;
 		}
-		Path projectLoc = dir.toPath();
-		List<MachineTableItem> machineItems = machinesTableView.getItems();
-		List<Machine> machines = relativPaths(machineItems, projectLoc);
-		Map<String, Preference> preferences = preferencesMap;
-		Project newProject = new Project(projectNameField.getText(), projectDescriptionField.getText(), machines,
-				preferences, dir);
-		currentProject.changeCurrentProject(newProject);
+		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), dir);
+		currentProject.set(newProject);
 		currentProject.save();
 		this.close();
-	}
-
-	private List<Machine> relativPaths(List<MachineTableItem> machineItems, Path projectLoc) {
-		List<Machine> machines = new ArrayList<>();
-		for (MachineTableItem machineItem : machineItems) {
-			Machine machine = machineItem.get();
-			Path absolute = machine.getLocation().toPath();
-			Path relative = projectLoc.relativize(absolute);
-			List<String> preferences = getSelectedPreferences(machineItem);
-			Machine newMachine = new Machine(machine.getName(), machine.getDescription(), preferences, new File(relative.toString()));
-			machines.add(newMachine);
-		}
-		return machines;
-	}
-
-	private List<String> getSelectedPreferences(MachineTableItem machineItem) {
-		List<String> prefs = new ArrayList<>();
-		for (Preference preference : preferencesListView.getItems()) {
-			if (machineItem.getPreferences().get(preference).get()) {
-				prefs.add(preference.toString());
-			}
-		}
-		return prefs;
 	}
 }

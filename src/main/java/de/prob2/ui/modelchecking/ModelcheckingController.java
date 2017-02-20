@@ -7,7 +7,6 @@ import com.google.inject.Inject;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
@@ -17,11 +16,9 @@ import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
-
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;

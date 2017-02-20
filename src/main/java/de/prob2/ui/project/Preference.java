@@ -20,4 +20,8 @@ public class Preference {
 	public Map<String, String> getPreferences() {
 		return preferences;
 	}
+
+	public String getName() {
+		return name;
+	}
 }

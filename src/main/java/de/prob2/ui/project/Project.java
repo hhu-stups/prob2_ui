@@ -3,25 +3,47 @@ package de.prob2.ui.project;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Project {
 	private final String name;
 	private final String description;
+	private final List<Machine> machines = new ArrayList<>();
+	private final List<Preference> preferences = new ArrayList<>();
+	private final Set<Runconfiguration> runconfigurations = new HashSet<>();
 	private transient File location;
 	private final boolean singleFile;
-	private final List<Machine> machines;
-	private final Map<String, Preference> preferences;
 
-	public Project(String name, String description, List<Machine> machines, Map<String, Preference> preferences,
-			File location) {
+	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
+			List<Runconfiguration> runconfigurations, File location) {
+		this.name = name;
+		this.description = description;
+		this.machines.addAll(machines);
+		this.preferences.addAll(preferences);
+		this.runconfigurations.addAll(runconfigurations);
+		this.location = location;
+		this.singleFile = false;
+	}
+	
+	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
+			Set<Runconfiguration> runconfigurations, File location) {
+		this.name = name;
+		this.description = description;
+		this.machines.addAll(machines);
+		this.preferences.addAll(preferences);
+		this.runconfigurations.addAll(runconfigurations);
+		this.location = location;
+		this.singleFile = false;
+	}
+
+	public Project(String name, String description, File location) {
 		this.name = name;
 		this.description = description;
 		this.singleFile = false;
-		this.machines = machines;
 		this.location = location;
-		this.preferences = preferences;
 	}
 
 	public Project(File file) {
@@ -29,9 +51,7 @@ public class Project {
 		this.description = "";
 		this.singleFile = true;
 		this.location = null;
-		this.machines = new ArrayList<>();
-		machines.add(new Machine(file.getName().split("\\.")[0], "", file));
-		this.preferences = new HashMap<>();
+		machines.add(new Machine(file.getName().split("\\.")[0], "", file.toPath()));
 	}
 
 	public String getName() {
@@ -46,10 +66,6 @@ public class Project {
 		return singleFile;
 	}
 
-	public void addMachine(File machine) {
-		machines.add(new Machine(machine.getName().split("\\.")[0], "", machine));
-	}
-
 	public File getLocation() {
 		return location;
 	}
@@ -58,17 +74,23 @@ public class Project {
 		return description;
 	}
 
-	public Map<String, Preference> getPreferences() {
+	public List<Preference> getPreferences() {
 		return preferences;
+	}
+
+	public Set<Runconfiguration> getRunconfigurations() {
+		return runconfigurations;
 	}
 
 	public Map<String, String> getPreferences(Machine machine) {
 		List<String> prefNames = machine.getPreferences();
 		Map<String, String> prefs = new HashMap<>();
 		if (!prefNames.isEmpty()) {
-			for (String prefName : prefNames) {
-				Preference pref = preferences.get(prefName);
-				prefs.putAll(pref.getPreferences());
+			for (Preference pref : preferences) {
+				String n = pref.getName();
+				if (prefNames.contains(n)) {
+					prefs.putAll(pref.getPreferences());
+				}
 			}
 		}
 		return prefs;

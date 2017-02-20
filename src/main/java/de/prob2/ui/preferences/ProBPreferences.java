@@ -10,43 +10,88 @@ import java.util.Objects;
 
 import com.google.inject.Inject;
 
+import de.be4.classicalb.core.parser.node.*;
+
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
 import de.prob.animator.domainobjects.ProBPreference;
+import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class ProBPreferences {
+	private static final Start EMPTY_MACHINE_AST = new Start(
+		new AAbstractMachineParseUnit( // pParseUnit
+			new AMachineMachineVariant(), // variant
+			new AMachineHeader( // header
+				Collections.singletonList(new TIdentifierLiteral("empty", 1, 9)), // name
+				Collections.emptyList() // parameters
+			),
+			Collections.emptyList() // machineClauses
+		),
+		new EOF(1, 18) // eof
+	);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPreferences.class);
+	
 	private final CurrentTrace currentTrace;
 	
-	private StateSpace stateSpace;
+	private final ObjectProperty<StateSpace> stateSpace;
 	private final ObservableMap<String, ProBPreference> cachedPreferences;
 	private final ObservableMap<String, String> cachedPreferenceValues;
 	private final ObservableMap<String, String> changedPreferences;
+	private final ObservableMap<String, String> changedPreferencesUnmodifiable;
 	private final BooleanProperty changesApplied;
 	
 	@Inject
 	private ProBPreferences(final CurrentTrace currentTrace) {
 		this.currentTrace = currentTrace;
 		
+		this.stateSpace = new SimpleObjectProperty<>(this, "stateSpace", null);
 		this.cachedPreferences = FXCollections.observableHashMap();
 		this.cachedPreferenceValues = FXCollections.observableHashMap();
 		this.changedPreferences = FXCollections.observableHashMap();
+		this.changedPreferencesUnmodifiable = FXCollections.unmodifiableObservableMap(this.changedPreferences);
 		this.changesApplied = new SimpleBooleanProperty(this, "changesApplied", true);
-		this.changedPreferences.addListener((MapChangeListener<? super String, ? super String>)change ->
-			this.changesApplied.set(change.getMap().isEmpty())
-		);
-		this.stateSpace = null;
+		this.changesApplied.bind(Bindings.createBooleanBinding(this.changedPreferences::isEmpty, this.changedPreferences));
+		
+		this.stateSpace.addListener((observable, from, to) -> {
+			this.changedPreferences.clear();
+			if (to == null) {
+				this.cachedPreferences.clear();
+				this.cachedPreferenceValues.clear();
+			} else {
+				final GetDefaultPreferencesCommand cmd1 = new GetDefaultPreferencesCommand();
+				to.execute(cmd1);
+				for (ProBPreference pref : cmd1.getPreferences()) {
+					this.cachedPreferences.put(pref.name, pref);
+				}
+				
+				final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
+				to.execute(cmd2);
+				this.cachedPreferenceValues.putAll(cmd2.getPreferences());
+			}
+		});
+	}
+	
+	public static StateSpace getEmptyStateSpace(final Api api) {
+		try {
+			return api.b_load(EMPTY_MACHINE_AST);
+		} catch (IOException | ModelTranslationError e) {
+			throw new IllegalStateException("Failed to load empty machine, this should never happen!", e);
+		}
 	}
 	
 	/**
@@ -79,13 +124,23 @@ public final class ProBPreferences {
 	}
 	
 	/**
+	 * Get a property holding the {@link StateSpace} currently used by this instance.
+	 * If this property is {@code null}, this instance has no {@link StateSpace}, and most methods will throw an {@link IllegalStateException} when called.
+	 *
+	 * @return a property holding the {@link StateSpace} currently used by this instance
+	 */
+	public ObjectProperty<StateSpace> stateSpaceProperty() {
+		return this.stateSpace;
+	}
+	
+	/**
 	 * Get the {@link StateSpace} currently used by this instance.
 	 * If this method returns {@code null}, this instance has no {@link StateSpace}, and most methods will throw an {@link IllegalStateException} when called.
 	 * 
 	 * @return the {@link StateSpace} currently used by this instance
 	 */
 	public StateSpace getStateSpace() {
-		return this.stateSpace;
+		return this.stateSpaceProperty().get();
 	}
 	
 	/**
@@ -94,32 +149,17 @@ public final class ProBPreferences {
 	 * @return whether this instance has a {@link StateSpace}
 	 */
 	public boolean hasStateSpace() {
-		return this.stateSpace != null;
+		return this.getStateSpace() != null;
 	}
 	
 	/**
 	 * Set a {@link StateSpace} to be used by this instance.
-	 * This method must be called with a non-null {@code stateSpace} before most of the other methods can be used, and will throw an {@link IllegalStateException} otherwise.
+	 * This method must be called with a non-null {@code stateSpace} before most of the other methods can be used.
 	 * 
 	 * @param stateSpace the {@link StateSpace} to use
 	 */
 	public void setStateSpace(final StateSpace stateSpace) {
-		this.stateSpace = stateSpace;
-		this.changedPreferences.clear();
-		if (this.stateSpace == null) {
-			this.cachedPreferences.clear();
-			this.cachedPreferenceValues.clear();
-		} else {
-			final GetDefaultPreferencesCommand cmd1 = new GetDefaultPreferencesCommand();
-			this.stateSpace.execute(cmd1);
-			for (ProBPreference pref : cmd1.getPreferences()) {
-				this.cachedPreferences.put(pref.name, pref);
-			}
-			
-			final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
-			this.stateSpace.execute(cmd2);
-			this.cachedPreferenceValues.putAll(cmd2.getPreferences());
-		}
+		this.stateSpaceProperty().set(stateSpace);
 	}
 	
 	/**
@@ -194,7 +234,7 @@ public final class ProBPreferences {
 	 * @return a read-only observable map containing all changed preferences and their values
 	 */
 	public ObservableMap<String, String> getChangedPreferences() {
-		return FXCollections.unmodifiableObservableMap(this.changedPreferences);
+		return this.changedPreferencesUnmodifiable;
 	}
 	
 	/**

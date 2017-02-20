@@ -14,12 +14,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
-
 import difflib.DiffUtils;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -35,11 +37,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import org.fxmisc.richtext.StyleClassedTextArea;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FullValueStage extends Stage {
 	private static final Pattern PRETTIFY_DELIMITERS = Pattern.compile("[\\{\\}\\,]");

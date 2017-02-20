@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TreeItem?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml/1" stylesheets="@/prob.css" maxWidth="Infinity" maxHeight="Infinity">
+	<top>
+		<HBox>
+			<padding>
+				<Insets top="10.0" bottom="10.0" left="10.0" right="10.0" />
+			</padding>
+			<TextField fx:id="prefSearchField" promptText="Search" HBox.hgrow="ALWAYS" />
+		</HBox>
+	</top>
+	<center>
+		<TreeTableView fx:id="tv" prefHeight="400.0" prefWidth="600.0" editable="true" showRoot="false" styleClass="with-border">
+			<columns>
+				<TreeTableColumn fx:id="tvName" editable="false" minWidth="80.0" prefWidth="320.0" text="%preferences.tabs.proBPreferences.columns.name" />
+				<TreeTableColumn fx:id="tvChanged" editable="false" resizable="false" prefWidth="20.0" text="%preferences.tabs.proBPreferences.columns.changed" />
+				<TreeTableColumn fx:id="tvValue" editable="true" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferences.tabs.proBPreferences.columns.value" />
+				<TreeTableColumn fx:id="tvDefaultValue" editable="false" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferences.tabs.proBPreferences.columns.defaultValue" />
+				<TreeTableColumn fx:id="tvDescription" editable="false" styleClass="left" minWidth="80.0" prefWidth="900.0" sortable="false" text="%preferences.tabs.proBPreferences.columns.description" />
+			</columns>
+			<placeholder>
+				<Label text="%common.noModelLoaded" />
+			</placeholder>
+			<TreeItem expanded="true" />
+		</TreeTableView>
+	</center>
+</fx:root>
