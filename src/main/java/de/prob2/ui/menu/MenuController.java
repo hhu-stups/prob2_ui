@@ -254,11 +254,14 @@ public final class MenuController extends MenuBar {
 		File selectedFile = fileChooser.showOpenDialog(window);
 		if (selectedFile != null) {
 			try {
+				MainController main = injector.getInstance(MainController.class);
 				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 				loader.setLocation(selectedFile.toURI().toURL());
-				uiState.setGuiState(selectedFile.toString());
+				uiState.setGuiState("custom " + selectedFile.toURI().toURL().toExternalForm());
 				uiState.clearDetachedStages();
 				uiState.getExpandedTitledPanes().clear();
+				loader.setRoot(main);
+				loader.setController(main);
 				Parent root = loader.load();
 				window.getScene().setRoot(root);
 			} catch (IOException e) {

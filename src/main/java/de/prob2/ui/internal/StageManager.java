@@ -2,6 +2,8 @@ package de.prob2.ui.internal;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -78,7 +80,15 @@ public final class StageManager {
 	 */
 	public void loadFXML(final Object controller, final String filename) {
 		final FXMLLoader loader = this.makeFXMLLoader();
-		loader.setLocation(controller.getClass().getResource(filename));
+		if(!filename.startsWith("custom")) {
+			loader.setLocation(controller.getClass().getResource(filename));
+		} else {
+			try {
+				loader.setLocation(new URL(filename.replace("custom ", "")));
+			} catch (MalformedURLException e) {
+				LOGGER.error("Loading fxml failed", e);
+			}
+		}
 		loader.setRoot(controller);
 		loader.setController(controller);
 		try {
