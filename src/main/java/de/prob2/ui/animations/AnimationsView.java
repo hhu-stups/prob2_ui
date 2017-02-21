@@ -2,6 +2,7 @@ package de.prob2.ui.animations;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -35,7 +36,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Worker.State;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
@@ -125,7 +126,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			reloadMenuItem.disableProperty().bind(row.emptyProperty());
 
 			final MenuItem editMenuItem = new MenuItem("Edit");
-			editMenuItem.setOnAction(event -> this.getEditorStage(row.getItem().getModel()).show());
+			editMenuItem.setOnAction(event -> this.showEditorStage(row.getItem().getModel()));
 			editMenuItem.disableProperty().bind(row.emptyProperty());
 			
 			final MenuItem editExternalMenuItem = new MenuItem("Edit in External Editor");
@@ -227,52 +228,29 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 		});
 	}
 
-	/*private Stage getEditorStage(Path path) {
-		return this.editors.computeIfAbsent(path, p -> {
-			BEditorStage editorStage = injector.getInstance(BEditorStage.class);
-			String text = "";
-			try {
-				text = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
-			} catch (IOException e) {
-				LOGGER.error("File not found", e);
-			}
-			editorStage.setEditorText(text, path);
-			editorStage.setTitle(path.getFileName().toString());
-			editorStage.showingProperty().addListener((observable, from, to) -> {
-				if (!to) {
-					this.editors.remove(p);
-				}
-			});
-			return editorStage;
-		});
-	}*/
-	
-	private BEditorStage getEditorStage(AbstractModel model) {
-		BEditorStage editorStage = injector.getInstance(BEditorStage.class);
-		final String editor;
-		final Path path;
-		try {
-			path = model.getModelFile().toPath();
-			editor = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
-		    editorStage.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-		    	if(newState == State.SUCCEEDED && !editorStage.getLoaded()) {
-		    		try {
-		    			editorStage.setTextEditor(editor,path);
-		    		}  catch (NullPointerException e) {
-		    			LOGGER.error("Javascript not loaded yet.", e);
-		    		}
-		    	}
-		    });
-		} catch (IOException e) {
-			LOGGER.error("File not found", e);
-		}
-		editorStage.setTitle(model.getModelFile().getName());
-		return editorStage;
-	}
-
 	@Override
 	public void animatorStatus(boolean busy) {
 		// Not used
+	}
+
+	private void showEditorStage(AbstractModel model) {
+		final BEditorStage editorStage = injector.getInstance(BEditorStage.class);
+		final Path path = model.getModelFile().toPath();
+		final String text;
+		try {
+			text = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
+		} catch (IOException | UncheckedIOException e) {
+			LOGGER.error("Could not read file", e);
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not read file:\n" + e).showAndWait();
+			return;
+		}
+		editorStage.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+			if (newState == Worker.State.SUCCEEDED && !editorStage.getLoaded()) {
+				editorStage.setTextEditor(text, path);
+			}
+		});
+		editorStage.setTitle(model.getModelFile().getName());
+		editorStage.show();
 	}
 
 	public TableView<Animation> getTable() {
