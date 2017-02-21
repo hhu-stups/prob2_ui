@@ -56,7 +56,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final Gson gson;
 
 	private final BooleanProperty exists;
-	private final BooleanProperty isSingleFile;
 	private final StringProperty name;
 	private final StringProperty description;
 	private final ListProperty<Machine> machines;
@@ -76,7 +75,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				Paths.get(System.getProperty("user.home")));
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
 		this.exists.bind(Bindings.isNotNull(this));
-		this.isSingleFile = new SimpleBooleanProperty(this, "isSingleFile", true);
 
 		this.name = new SimpleStringProperty(this, "name", "");
 		this.description = new SimpleStringProperty(this, "description", "");
@@ -93,7 +91,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.machines.clear();
 				this.preferences.clear();
 				this.location.set(null);
-				this.isSingleFile.set(true);
 			} else {
 				this.name.set(to.getName());
 				this.description.set(to.getDescription());
@@ -101,7 +98,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.preferences.setAll(to.getPreferences());
 				this.runconfigurations.setAll(to.getRunconfigurations());
 				this.location.set(to.getLocation());
-				this.isSingleFile.set(to.isSingleFile());
 			}
 		});
 	}
@@ -137,7 +133,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	@Override
 	public void set(Project project) {
-		if(confirmReplacingProject()) {
+		if (confirmReplacingProject()) {
 			super.set(project);
 		}
 	}
@@ -201,14 +197,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public File getLocation() {
 		return this.locationProperty().get();
-	}
-
-	public ReadOnlyBooleanProperty isSingleFileProperty() {
-		return this.isSingleFile;
-	}
-
-	public boolean isSingleFile() {
-		return this.isSingleFileProperty().get();
 	}
 
 	public ObjectProperty<Path> defaultLocationProperty() {
@@ -283,14 +271,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private boolean confirmReplacingProject() {
 		if (exists()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
-
-			if (isSingleFile()) {
-				alert.setHeaderText("You've already opened a file.");
-				alert.setContentText("Do you want to close the current file?");
-			} else {
-				alert.setHeaderText("You've already opened a project.");
-				alert.setContentText("Do you want to close the current project?");
-			}
+			alert.setHeaderText("You've already opened a project.");
+			alert.setContentText("Do you want to close the current project?");
 			Optional<ButtonType> result = alert.showAndWait();
 			return result.isPresent() && ButtonType.OK.equals(result.get());
 		} else {
