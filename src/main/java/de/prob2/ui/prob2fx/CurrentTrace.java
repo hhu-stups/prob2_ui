@@ -8,6 +8,8 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.IAnimator;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
+import de.prob.exception.CliError;
+import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
@@ -361,9 +363,11 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	 * 
 	 * @param trace the trace to reload
 	 * @param preferences preferences for the reloaded model
+	 * @throws CliError when thrown by {@link Api#b_load(String, Map)}
 	 * @throws IllegalStateException if there is no current trace
 	 * @throws IOException when thrown by {@link Api#b_load(String, Map)}
 	 * @throws ModelTranslationError when thrown by {@link Api#b_load(String, Map)}
+	 * @throws ProBError when thrown by {@link Api#b_load(String, Map)}
 	 */
 	public void reload(final Trace trace, final Map<String, String> preferences) throws IOException, ModelTranslationError {
 		final String filename = trace.getModel().getModelFile().getAbsolutePath();
@@ -376,9 +380,11 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	 * Reload the given trace's model and make the reloaded trace the current one. Preferences are maintained from the old model. If the reload fails, the current trace is not changed.
 	 *
 	 * @param trace the trace to reload
+	 * @throws CliError when thrown by {@link Api#b_load(String, Map)}
 	 * @throws IllegalStateException if there is no current trace
 	 * @throws IOException when thrown by {@link Api#b_load(String, Map)}
 	 * @throws ModelTranslationError when thrown by {@link Api#b_load(String, Map)}
+	 * @throws ProBError when thrown by {@link Api#b_load(String, Map)}
 	 */
 	public void reload(final Trace trace) throws IOException, ModelTranslationError {
 		final GetCurrentPreferencesCommand cmd = new GetCurrentPreferencesCommand();

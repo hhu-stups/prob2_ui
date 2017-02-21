@@ -6,21 +6,25 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.exception.CliError;
+import de.prob.exception.ProBError;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachineLoader {
@@ -53,7 +57,7 @@ public class MachineLoader {
 		new Thread(() -> {
 			try {
 				this.load(machine, pref);
-			} catch (IOException | ModelTranslationError e) {
+			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 				LOGGER.error("Loading machine \"" + machine.getName() + "\" failed", e);
 				Platform.runLater(() -> stageManager
 						.makeAlert(Alert.AlertType.ERROR, "Could not open machine \"" + machine.getName() + "\":\n" + e)

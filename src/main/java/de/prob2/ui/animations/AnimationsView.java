@@ -11,14 +11,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetPreferenceCommand;
+import de.prob.exception.CliError;
+import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.ModelTranslationError;
@@ -27,10 +26,12 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ObservableList;
@@ -45,6 +46,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
@@ -113,7 +117,7 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			reloadMenuItem.setOnAction(event -> {
 				try {
 					currentTrace.reload(row.getItem().getTrace());
-				} catch (IOException | ModelTranslationError e) {
+				} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 					LOGGER.error("Model reload failed", e);
 					stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to reload model:\n" + e).showAndWait();
 				}
