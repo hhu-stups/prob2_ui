@@ -45,6 +45,10 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public final class StageManager {
+	private enum PropertiesKey {
+		PERSISTENCE_ID, USE_GLOBAL_MAC_MENU_BAR
+	}
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(StageManager.class);
 	private static final String STYLESHEET = "prob.css";
 	private static final Image ICON = new Image("prob_128.gif");
@@ -133,20 +137,20 @@ public final class StageManager {
 	 */
 	public void register(final Stage stage, final String id) {
 		this.registered.put(stage, null);
-		stage.getProperties().put("id", id);
-		stage.getProperties().putIfAbsent("useGlobalMacMenuBar", true);
+		setPersistenceID(stage, id);
+		stage.getProperties().putIfAbsent(PropertiesKey.USE_GLOBAL_MAC_MENU_BAR, true);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
 		
 		stage.focusedProperty().addListener(e -> {
-			final String stageId = (String)stage.getProperties().get("id");
+			final String stageId = getPersistenceID(stage);
 			if(stageId != null) {
 				injector.getInstance(UIState.class).moveStageToEnd(stageId);
 			}
 		});
 		
 		stage.showingProperty().addListener((observable, from, to) -> {
-			final String stageId = (String)stage.getProperties().get("id");
+			final String stageId = getPersistenceID(stage);
 			if (to) {
 				if (stageId != null) {
 					final BoundingBox box = uiState.getSavedStageBoxes().get(stageId);
@@ -178,7 +182,7 @@ public final class StageManager {
 			}
 		});
 		
-		if (this.menuToolkit != null && this.globalMacMenuBar != null && Boolean.TRUE.equals(stage.getProperties().get("useGlobalMacMenuBar"))) {
+		if (this.menuToolkit != null && this.globalMacMenuBar != null && isUseGlobalMacMenuBar(stage)) {
 			this.menuToolkit.setMenuBar(stage, this.globalMacMenuBar);
 		}
 	}
@@ -258,6 +262,44 @@ public final class StageManager {
 	}
 	
 	/**
+	 * Get the persistence ID of the given stage.
+	 * 
+	 * @param stage the stage for which to get the persistence ID
+	 * @return the stage's persistence ID, or {@code null} if none
+	 */
+	public static String getPersistenceID(final Stage stage) {
+		Objects.requireNonNull(stage);
+		
+		return (String)stage.getProperties().get(PropertiesKey.PERSISTENCE_ID);
+	}
+	
+	/**
+	 * Set the given stage's persistence ID.
+	 * 
+	 * @param stage the stage for which to set the persistence ID
+	 * @param id the persistence ID to set, or {@code null} to remove it
+	 */
+	public static void setPersistenceID(final Stage stage, final String id) {
+		Objects.requireNonNull(stage);
+		
+		if (id == null) {
+			stage.getProperties().remove(PropertiesKey.PERSISTENCE_ID);
+		} else {
+			stage.getProperties().put(PropertiesKey.PERSISTENCE_ID, id);
+		}
+	}
+	
+	/**
+	 * Get whether the given stage uses the global Mac menu bar. On non-Mac systems this setting should not be used.
+	 * 
+	 * @param stage the stage for which to get this setting
+	 * @return whether the given stage uses the global Mac menu bar, or {@code false} if not set
+	 */
+	public static boolean isUseGlobalMacMenuBar(final Stage stage) {
+		return (boolean)stage.getProperties().getOrDefault(PropertiesKey.USE_GLOBAL_MAC_MENU_BAR, false);
+	}
+	
+	/**
 	 * On Mac, set the given stage's menu bar. On other systems this method does nothing.
 	 *
 	 * @param menuBar the menu bar to use, or {@code null} to use the global menu bar
@@ -269,7 +311,7 @@ public final class StageManager {
 			return;
 		}
 		
-		stage.getProperties().put("useGlobalMacMenuBar", menuBar == null);
+		stage.getProperties().put(PropertiesKey.USE_GLOBAL_MAC_MENU_BAR, menuBar == null);
 		final Scene scene = stage.getScene();
 		if (scene != null) {
 			final Parent root = scene.getRoot();
@@ -305,7 +347,7 @@ public final class StageManager {
 		
 		this.globalMacMenuBar = menuBar;
 		for (final Stage stage : this.getRegistered()) {
-			if (Boolean.TRUE.equals(stage.getProperties().get("useGlobalMacMenuBar"))) {
+			if (isUseGlobalMacMenuBar(stage)) {
 				this.setMacMenuBar(stage, null);
 			}
 		}

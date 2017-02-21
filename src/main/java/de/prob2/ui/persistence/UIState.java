@@ -13,6 +13,7 @@ import java.util.Set;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
@@ -106,8 +107,8 @@ public class UIState {
 	public void clearDetachedStages() {
 		for (Reference<Stage> stageRef : stages.values()){
 			Stage stage = stageRef.get();
-			if (!"de.prob2.ui.ProB2".equals(stage.getProperties().get("id"))) {
-				stage.close();
+			if (stage != null && !"de.prob2.ui.ProB2".equals(StageManager.getPersistenceID(stage))) {
+				stage.hide();
 			}
 		}
 		stages.keySet().removeAll(DETACHED);
