@@ -32,7 +32,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -317,19 +316,12 @@ public final class StageManager {
 			final Parent root = scene.getRoot();
 			if (root instanceof Pane) {
 				if (menuBar != null) {
-					final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu("ProB 2");
-					menuBar.getMenus().add(0, applicationMenu);
-					
-					menuToolkit.setApplicationMenu(applicationMenu);
-					applicationMenu.getItems().setAll(
-						menuToolkit.createHideMenuItem("ProB 2"),
-						menuToolkit.createHideOthersMenuItem(),
-						menuToolkit.createUnhideAllMenuItem(),
-						new SeparatorMenuItem(),
-						menuToolkit.createQuitMenuItem("ProB 2")
-					);
+					// Temporary placeholder for the application menu, is later replaced with the global application menu
+					menuBar.getMenus().add(0, new Menu("Invisible Application Menu"));
 				}
 				this.menuToolkit.setMenuBar((Pane)root, menuBar == null ? this.globalMacMenuBar : menuBar);
+				// Put the application menu from the global menu bar back
+				menuToolkit.setApplicationMenu(this.globalMacMenuBar.getMenus().get(0));
 			}
 		}
 	}
