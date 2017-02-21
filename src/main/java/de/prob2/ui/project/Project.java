@@ -15,7 +15,6 @@ public class Project {
 	private final List<Preference> preferences = new ArrayList<>();
 	private final Set<Runconfiguration> runconfigurations = new HashSet<>();
 	private transient File location;
-	private final boolean singleFile;
 
 	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
 			List<Runconfiguration> runconfigurations, File location) {
@@ -25,7 +24,6 @@ public class Project {
 		this.preferences.addAll(preferences);
 		this.runconfigurations.addAll(runconfigurations);
 		this.location = location;
-		this.singleFile = false;
 	}
 	
 	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
@@ -36,22 +34,12 @@ public class Project {
 		this.preferences.addAll(preferences);
 		this.runconfigurations.addAll(runconfigurations);
 		this.location = location;
-		this.singleFile = false;
 	}
 
 	public Project(String name, String description, File location) {
 		this.name = name;
 		this.description = description;
-		this.singleFile = false;
 		this.location = location;
-	}
-
-	public Project(File file) {
-		this.name = file.getName();
-		this.description = "";
-		this.singleFile = true;
-		this.location = null;
-		machines.add(new Machine(file.getName().split("\\.")[0], "", file.toPath()));
 	}
 
 	public String getName() {
@@ -60,10 +48,6 @@ public class Project {
 
 	public List<Machine> getMachines() {
 		return machines;
-	}
-
-	public boolean isSingleFile() {
-		return singleFile;
 	}
 
 	public File getLocation() {

@@ -186,8 +186,7 @@ public final class MenuController extends MenuBar {
 		this.recentFiles.recentProjectsProperty().addListener(recentProjectsListener);
 		recentProjectsListener.onChanged(null);
 
-		this.saveProjectItem.disableProperty()
-				.bind(currentProject.existsProperty().not().or(currentProject.isSingleFileProperty()));
+		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
 		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not());
 		this.enterFormulaForVisualization.disableProperty()
 				.bind(currentTrace.currentStateProperty().initializedProperty().not());
