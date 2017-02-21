@@ -43,11 +43,6 @@ public class NewProjectStage extends Stage {
 		locationField.setText(this.currentProject.getDefaultLocation().toString());
 	}
 	
-	@Override
-	public void showAndWait() {
-		super.showAndWait();
-	}
-
 	@FXML
 	void selectLocation(ActionEvent event) {
 		DirectoryChooser dirChooser = new DirectoryChooser();

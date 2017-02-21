@@ -13,11 +13,11 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesDialog;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
@@ -156,7 +156,7 @@ public final class ProjectView extends AnchorPane {
 	}
 
 	@FXML
-	void addMachine(ActionEvent event) {
+	void addMachine() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Add Machine");
 		fileChooser.getExtensionFilters()
@@ -177,12 +177,12 @@ public final class ProjectView extends AnchorPane {
 	}
 
 	@FXML
-	void addRunconfiguration(ActionEvent event) {
+	void addRunconfiguration() {
 		Dialog<Pair<Machine, Preference>> dialog = new Dialog<>();
 		dialog.setTitle("New Runconfiguration");
 		dialog.initStyle(StageStyle.UTILITY);
 		dialog.getDialogPane().getStylesheets().add("prob.css");
-		ButtonType addButtonType = new ButtonType("Add", ButtonData.OK_DONE);
+		ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
 		dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
 		GridPane grid = new GridPane();
 		grid.setHgap(10);
@@ -206,6 +206,6 @@ public final class ProjectView extends AnchorPane {
 			return null;
 		});
 		Optional<Pair<Machine, Preference>> result = dialog.showAndWait();
-		result.ifPresent(runconfiguration -> currentProject.addRunconfiguration(runconfiguration));
+		result.ifPresent(currentProject::addRunconfiguration);
 	}
 }

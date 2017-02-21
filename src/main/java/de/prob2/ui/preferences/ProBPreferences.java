@@ -19,7 +19,9 @@ import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -28,9 +30,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class ProBPreferences {
 	private static final Start EMPTY_MACHINE_AST = new Start(
@@ -44,7 +43,6 @@ public final class ProBPreferences {
 		),
 		new EOF(1, 18) // eof
 	);
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPreferences.class);
 	
 	private final CurrentTrace currentTrace;
 	
