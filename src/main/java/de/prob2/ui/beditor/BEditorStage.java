@@ -5,20 +5,22 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.regex.Matcher;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
+
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import netscape.javascript.JSObject;
 
 public class BEditorStage extends Stage {
 	
@@ -27,22 +29,29 @@ public class BEditorStage extends Stage {
 	
 	@FXML
 	private WebView beditor;
-		
+	
+	private final StageManager stageManager;
+	
 	private Path path;
 	
 	private WebEngine engine;
 	
 	private boolean loaded = false;
-		
+	
 	@Inject
 	public BEditorStage(final StageManager stageManager) {
+		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "beditor.fxml");
+	}
+	
+	@FXML
+	private void initialize() {
 		beditor.setContextMenuEnabled(false);
 		engine = beditor.getEngine();
 		engine.load(getClass().getResource("beditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
 	}
-		
+	
 	@FXML
 	public void handleSave() {
 		saveFile(path);
@@ -63,16 +72,13 @@ public class BEditorStage extends Stage {
 	}
 	
 	public void saveFile(Path path) {
-		StandardOpenOption option = StandardOpenOption.CREATE;
-		if(path.toFile().exists()) {
-			option = StandardOpenOption.TRUNCATE_EXISTING;
-		}
 		try {
-			String jscallCode = "editor.getValue()";
-			String beditorText = engine.executeScript(jscallCode).toString();
-			Files.write(path, beditorText.getBytes(EDITOR_CHARSET), option);
+			final JSObject editor = (JSObject)engine.executeScript("editor");
+			String beditorText = (String)editor.call("getValue");
+			Files.write(path, beditorText.getBytes(EDITOR_CHARSET));
 		} catch (IOException e) {
-			LOGGER.error("File not found", e);
+			LOGGER.error("Could not save file", e);
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not save file:\n" + e).showAndWait();
 		}
 	}
 	
@@ -81,16 +87,14 @@ public class BEditorStage extends Stage {
 		this.close();
 	}
 	
-	public void setTextEditor(String editor, Path path) {
-		if(engine == null) {
+	public void setTextEditor(String text, Path path) {
+		if (engine == null) {
 			return;
 		}
 		this.loaded = true;
 		this.path = path;
-		editor = Matcher.quoteReplacement(editor);
-		editor = editor.replaceAll("\\n", "\\\\n");
-		String jscallCode = "editor.setValue('" + editor + "')";
-		engine.executeScript(jscallCode);
+		final JSObject editor = (JSObject)engine.executeScript("editor");
+		editor.call("setValue", text);
 	}
 	
 	public WebEngine getEngine() {
