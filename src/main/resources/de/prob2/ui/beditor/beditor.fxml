@@ -7,23 +7,22 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.web.WebView?>
-
-<fx:root type="BEditorStage" minWidth="240" minHeight="160" width="1080" height="720" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="BEditorStage" minWidth="240" minHeight="160" width="1280" height="720" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
-			<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+			<BorderPane maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity">
 				<top>
-					<MenuBar BorderPane.alignment="CENTER">
-						<Menu mnemonicParsing="false" text="%menu.file">
-							<MenuItem onAction="#handleSave" mnemonicParsing="false" accelerator="Shortcut+S" text="%menu.file.items.save"/>
-							<MenuItem onAction="#handleSaveAs" mnemonicParsing="false" text="%menu.file.items.saveas"/>
-							<MenuItem onAction="#handleClose" mnemonicParsing="false" accelerator="Shortcut+W" text="%menu.file.items.close"/>
+					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+						<Menu text="%menu.file">
+							<MenuItem onAction="#handleSave" accelerator="Shortcut+S" text="%menu.file.items.save"/>
+							<MenuItem onAction="#handleSaveAs" text="%menu.file.items.saveas"/>
+							<MenuItem onAction="#handleClose" accelerator="Shortcut+W" text="%menu.file.items.close"/>
 						</Menu>
-						<Menu mnemonicParsing="false" text="%menu.edit">
-							<MenuItem mnemonicParsing="false" text="%menu.file.items.placeholder"/>
+						<Menu text="%menu.edit">
+							<MenuItem text="%menu.file.items.placeholder"/>
 						</Menu>
-						<Menu mnemonicParsing="false" text="%menu.help">
-							<MenuItem mnemonicParsing="false" text="%menu.help.items.about"/>
+						<Menu text="%menu.help">
+							<MenuItem text="%menu.help.items.about"/>
 						</Menu>
 					</MenuBar>
 				</top>

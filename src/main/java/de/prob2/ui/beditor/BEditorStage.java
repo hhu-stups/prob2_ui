@@ -12,6 +12,7 @@ import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.MenuBar;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -27,15 +28,13 @@ public class BEditorStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditorStage.class);
 	private static final Charset EDITOR_CHARSET = Charset.forName("UTF-8");
 	
-	@FXML
-	private WebView beditor;
+	@FXML private MenuBar menuBar;
+	@FXML private WebView beditor;
 	
 	private final StageManager stageManager;
 	
 	private Path path;
-	
 	private WebEngine engine;
-	
 	private boolean loaded = false;
 	
 	@Inject
@@ -46,6 +45,7 @@ public class BEditorStage extends Stage {
 	
 	@FXML
 	private void initialize() {
+		this.stageManager.setMacMenuBar(this, this.menuBar);
 		beditor.setContextMenuEnabled(false);
 		engine = beditor.getEngine();
 		engine.load(getClass().getResource("beditor.html").toExternalForm());

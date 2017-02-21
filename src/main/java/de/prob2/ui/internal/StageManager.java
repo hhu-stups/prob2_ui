@@ -6,20 +6,20 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob2.ui.persistence.UIState;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -30,10 +30,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W shortcut. Also provides some convenience methods for creating {@link Stage}s and {@link Alert}s and loading FXML files.
@@ -129,6 +134,7 @@ public final class StageManager {
 	public void register(final Stage stage, final String id) {
 		this.registered.put(stage, null);
 		stage.getProperties().put("id", id);
+		stage.getProperties().putIfAbsent("useGlobalMacMenuBar", true);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
 		
@@ -172,7 +178,7 @@ public final class StageManager {
 			}
 		});
 		
-		if (this.menuToolkit != null && this.globalMacMenuBar != null) {
+		if (this.menuToolkit != null && this.globalMacMenuBar != null && Boolean.TRUE.equals(stage.getProperties().get("useGlobalMacMenuBar"))) {
 			this.menuToolkit.setMenuBar(stage, this.globalMacMenuBar);
 		}
 	}
@@ -252,6 +258,41 @@ public final class StageManager {
 	}
 	
 	/**
+	 * On Mac, set the given stage's menu bar. On other systems this method does nothing.
+	 *
+	 * @param menuBar the menu bar to use, or {@code null} to use the global menu bar
+	 */
+	public void setMacMenuBar(final Stage stage, final MenuBar menuBar) {
+		Objects.requireNonNull(stage);
+		
+		if (this.menuToolkit == null) {
+			return;
+		}
+		
+		stage.getProperties().put("useGlobalMacMenuBar", menuBar == null);
+		final Scene scene = stage.getScene();
+		if (scene != null) {
+			final Parent root = scene.getRoot();
+			if (root instanceof Pane) {
+				if (menuBar != null) {
+					final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu("ProB 2");
+					menuBar.getMenus().add(0, applicationMenu);
+					
+					menuToolkit.setApplicationMenu(applicationMenu);
+					applicationMenu.getItems().setAll(
+						menuToolkit.createHideMenuItem("ProB 2"),
+						menuToolkit.createHideOthersMenuItem(),
+						menuToolkit.createUnhideAllMenuItem(),
+						new SeparatorMenuItem(),
+						menuToolkit.createQuitMenuItem("ProB 2")
+					);
+				}
+				this.menuToolkit.setMenuBar((Pane)root, menuBar == null ? this.globalMacMenuBar : menuBar);
+			}
+		}
+	}
+	
+	/**
 	 * <p>On Mac, set the given menu bar as the menu bar for all registered stages and any stages registered in the future. On other systems this method does nothing.</p>
 	 * <p>This method is similar to {@link MenuToolkit#setGlobalMenuBar(MenuBar)}, except that it only affects registered stages and handles stages with a null scene correctly.</p>
 	 * 
@@ -264,12 +305,8 @@ public final class StageManager {
 		
 		this.globalMacMenuBar = menuBar;
 		for (final Stage stage : this.getRegistered()) {
-			final Scene scene = stage.getScene();
-			if (scene != null) {
-				final Parent root = scene.getRoot();
-				if (root instanceof Pane) {
-					this.menuToolkit.setMenuBar((Pane)root, menuBar);
-				}
+			if (Boolean.TRUE.equals(stage.getProperties().get("useGlobalMacMenuBar"))) {
+				this.setMacMenuBar(stage, null);
 			}
 		}
 	}
