@@ -23,7 +23,7 @@ import javafx.scene.input.TransferMode;
 public class GroovyConsole extends Console {
 	
 	@Inject
-	public GroovyConsole(GroovyInterpreter interpreter) {
+	private GroovyConsole(GroovyInterpreter interpreter) {
 		super("ProB 2.0 Groovy Console");
 		this.interpreter = interpreter;
 		interpreter.setCodeCompletion(this);

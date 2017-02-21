@@ -27,9 +27,7 @@ public class BEditorStage extends Stage {
 	
 	@FXML
 	private WebView beditor;
-	
-	private BEditorSupporter beditorSupporter;
-	
+		
 	private Path path;
 	
 	private WebEngine engine;
@@ -37,27 +35,14 @@ public class BEditorStage extends Stage {
 	private boolean loaded = false;
 		
 	@Inject
-	public BEditorStage(final StageManager stageManager, final BEditorSupporter beditorSupporter) {
+	public BEditorStage(final StageManager stageManager) {
 		stageManager.loadFXML(this, "beditor.fxml");
 		beditor.setContextMenuEnabled(false);
 		engine = beditor.getEngine();
 		engine.load(getClass().getResource("beditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
-		this.beditorSupporter = beditorSupporter;
-		beditorSupporter.setEngine(engine);
 	}
-	
-	@FXML
-	private void initialize() {
-		this.showingProperty().addListener((observable, from, to) -> {
-			if (to) {
-				beditorSupporter.startHighlighting();
-			} else {
-				beditorSupporter.stopHighlighting();
-			}
-		});
-	}
-	
+		
 	@FXML
 	public void handleSave() {
 		saveFile(path);
@@ -83,7 +68,8 @@ public class BEditorStage extends Stage {
 			option = StandardOpenOption.TRUNCATE_EXISTING;
 		}
 		try {
-			String beditorText = beditorSupporter.getText();
+			String jscallCode = "editor.getValue()";
+			String beditorText = engine.executeScript(jscallCode).toString();
 			Files.write(path, beditorText.getBytes(EDITOR_CHARSET), option);
 		} catch (IOException e) {
 			LOGGER.error("File not found", e);
