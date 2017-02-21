@@ -11,7 +11,7 @@
 	<Menu text="%menu.file">
 		<MenuItem text="%menu.file.items.newProject" accelerator="Alt+Shortcut+N"
 			onAction="#createNewProject" />
-		<MenuItem text="%menu.file.items.openProject" accelerator="Alt+Shortcut+O" onAction="#openProject"/>
+		<MenuItem text="%menu.file.items.openProject" accelerator="Alt+Shortcut+O" onAction="#handleOpenProject"/>
 		<Menu fx:id="recentProjectsMenu" text="%menu.file.items.openRecentProject">
 			<MenuItem fx:id="recentProjectsPlaceholder" text="%menu.file.items.placeholder"
 				disable="true" />

@@ -1,7 +1,6 @@
 package de.prob2.ui.project;
 
 import java.io.File;
-import java.util.Optional;
 
 import com.google.inject.Inject;
 
@@ -9,9 +8,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -32,12 +29,10 @@ public class NewProjectStage extends Stage {
 	private Label errorExplanationLabel;
 
 	private CurrentProject currentProject;
-	private StageManager stageManager;
 
 	@Inject
 	private NewProjectStage(CurrentProject currentProject, StageManager stageManager) {
 		this.currentProject = currentProject;
-		this.stageManager = stageManager;
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "new_project_stage.fxml");
 	}
@@ -47,30 +42,9 @@ public class NewProjectStage extends Stage {
 		finishButton.disableProperty().bind(projectNameField.lengthProperty().lessThanOrEqualTo(0));
 		locationField.setText(this.currentProject.getDefaultLocation().toString());
 	}
-
-	private boolean confirmReplacingProject() {
-		if (currentProject.exists()) {
-			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
-
-			if (currentProject.isSingleFile()) {
-				alert.setHeaderText("You've already opened a file.");
-				alert.setContentText("Do you want to close the current file?");
-			} else {
-				alert.setHeaderText("You've already opened a project.");
-				alert.setContentText("Do you want to close the current project?");
-			}
-			Optional<ButtonType> result = alert.showAndWait();
-			return result.isPresent() && ButtonType.OK.equals(result.get());
-		} else {
-			return true;
-		}
-	}
 	
 	@Override
 	public void showAndWait() {
-		if (!confirmReplacingProject()) {
-			return;
-		}
 		super.showAndWait();
 	}
 

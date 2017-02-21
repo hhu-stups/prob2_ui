@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.Preference;
 import de.prob2.ui.project.Project;
@@ -42,15 +44,17 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.util.Pair;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
 	private static final Logger LOGGER = LoggerFactory.getLogger(CurrentProject.class);
-	
+
 	private final Gson gson;
-	
+
 	private final BooleanProperty exists;
 	private final BooleanProperty isSingleFile;
 	private final StringProperty name;
@@ -59,26 +63,31 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ListProperty<Preference> preferences;
 	private final ReadOnlyListProperty<Runconfiguration> runconfigurations;
 	private final ObjectProperty<File> location;
-	
+
 	private final ObjectProperty<Path> defaultLocation;
+	private final StageManager stageManager;
 
 	@Inject
-	private CurrentProject() {
+	private CurrentProject(final StageManager stageManager) {
+		this.stageManager = stageManager;
+
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
-		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation", Paths.get(System.getProperty("user.home")));
+		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
+				Paths.get(System.getProperty("user.home")));
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
 		this.exists.bind(Bindings.isNotNull(this));
 		this.isSingleFile = new SimpleBooleanProperty(this, "isSingleFile", true);
-		
+
 		this.name = new SimpleStringProperty(this, "name", "");
 		this.description = new SimpleStringProperty(this, "description", "");
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
 		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
-		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations", FXCollections.observableArrayList());
-		this.location = new SimpleObjectProperty<>(this,"location", null);
-		
+		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations",
+				FXCollections.observableArrayList());
+		this.location = new SimpleObjectProperty<>(this, "location", null);
+
 		this.addListener((observable, from, to) -> {
-			if(to == null) {
+			if (to == null) {
 				this.name.set("");
 				this.description.set("");
 				this.machines.clear();
@@ -94,41 +103,49 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.location.set(to.getLocation());
 				this.isSingleFile.set(to.isSingleFile());
 			}
-		}); 
+		});
 	}
-	
+
 	public void addMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.add(machine);
-		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getRunconfigurations(),
-				this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
+				this.getRunconfigurations(), this.getLocation()));
 	}
-	
+
 	public void removeMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.remove(machine);
-		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getRunconfigurations(),
-				this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
+				this.getRunconfigurations(), this.getLocation()));
 	}
-	
+
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);
-		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getRunconfigurations(),
-				this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
+				this.getRunconfigurations(), this.getLocation()));
 	}
-	
+
 	public void addRunconfiguration(Pair<Machine, Preference> runconfiguration) {
 		List<Runconfiguration> runconfigs = this.getRunconfigurations();
-		runconfigs.add(new Runconfiguration(runconfiguration.getKey().getName(), runconfiguration.getValue().getName()));
-		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(), runconfigs,
-				this.getLocation()));
+		runconfigs
+				.add(new Runconfiguration(runconfiguration.getKey().getName(), runconfiguration.getValue().getName()));
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
+				runconfigs, this.getLocation()));
+	}
+
+	@Override
+	public void set(Project project) {
+		if(confirmReplacingProject()) {
+			super.set(project);
+		}
 	}
 
 	public void remove() {
 		super.set(null);
 	}
-	
+
 	public ReadOnlyBooleanProperty existsProperty() {
 		return this.exists;
 	}
@@ -136,20 +153,20 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public boolean exists() {
 		return this.existsProperty().get();
 	}
-	
+
 	public StringProperty nameProperty() {
 		return this.name;
 	}
-	
+
 	@Override
 	public String getName() {
 		return this.nameProperty().get();
 	}
-	
+
 	public StringProperty descriptionProperty() {
 		return this.description;
 	}
-	
+
 	public String getDescription() {
 		return this.descriptionProperty().get();
 	}
@@ -161,19 +178,19 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public List<Machine> getMachines() {
 		return this.machinesProperty().get();
 	}
-	
+
 	public ReadOnlyListProperty<Preference> preferencesProperty() {
 		return this.preferences;
 	}
-	
+
 	public List<Preference> getPreferences() {
 		return this.preferencesProperty().get();
 	}
-	
+
 	public ReadOnlyListProperty<Runconfiguration> runconfigurationsProperty() {
 		return this.runconfigurations;
 	}
-	
+
 	public List<Runconfiguration> getRunconfigurations() {
 		return this.runconfigurationsProperty().get();
 	}
@@ -181,7 +198,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public ObjectProperty<File> locationProperty() {
 		return this.location;
 	}
-	
+
 	public File getLocation() {
 		return this.locationProperty().get();
 	}
@@ -197,15 +214,15 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public ObjectProperty<Path> defaultLocationProperty() {
 		return this.defaultLocation;
 	}
-	
+
 	public Path getDefaultLocation() {
 		return this.defaultLocationProperty().get();
-	}	
+	}
 
 	public void setDefaultLocation(Path defaultProjectLocation) {
 		this.defaultLocationProperty().set(defaultProjectLocation);
 	}
-	
+
 	public void save() {
 		File loc = new File(this.getLocation() + File.separator + this.getName() + ".json");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(loc), PROJECT_CHARSET)) {
@@ -237,14 +254,17 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		String nameString = (project.getName() == null) ? "" : project.getName();
 		String descriptionString = (project.getDescription() == null) ? "" : project.getDescription();
 		List<Machine> machineList = (project.getMachines() == null) ? new ArrayList<>() : project.getMachines();
-		List<Preference> preferenceList = (project.getPreferences() == null) ? new ArrayList<>() : project.getPreferences();
-		Set<Runconfiguration> runconfigurationSet = (project.getRunconfigurations() == null) ? new HashSet<>() : project.getRunconfigurations();
-		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet, project.getLocation());
+		List<Preference> preferenceList = (project.getPreferences() == null) ? new ArrayList<>()
+				: project.getPreferences();
+		Set<Runconfiguration> runconfigurationSet = (project.getRunconfigurations() == null) ? new HashSet<>()
+				: project.getRunconfigurations();
+		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet,
+				project.getLocation());
 	}
 
 	public Machine getMachine(String machine) {
-		for(Machine m : getMachines()) {
-			if(m.getName().equals(machine)) {
+		for (Machine m : getMachines()) {
+			if (m.getName().equals(machine)) {
 				return m;
 			}
 		}
@@ -252,11 +272,29 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public Map<String, String> getPreferencAsMap(String preference) {
-		for(Preference p : getPreferences()) {
-			if(p.getName().equals(preference)) {
+		for (Preference p : getPreferences()) {
+			if (p.getName().equals(preference)) {
 				return p.getPreferences();
 			}
 		}
 		return null;
+	}
+
+	private boolean confirmReplacingProject() {
+		if (exists()) {
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
+
+			if (isSingleFile()) {
+				alert.setHeaderText("You've already opened a file.");
+				alert.setContentText("Do you want to close the current file?");
+			} else {
+				alert.setHeaderText("You've already opened a project.");
+				alert.setContentText("Do you want to close the current project?");
+			}
+			Optional<ButtonType> result = alert.showAndWait();
+			return result.isPresent() && ButtonType.OK.equals(result.get());
+		} else {
+			return true;
+		}
 	}
 }

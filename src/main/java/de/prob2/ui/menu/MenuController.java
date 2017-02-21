@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -38,7 +37,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -298,6 +296,42 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
+	private void handleOpenProject() {
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open Project");
+		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("ProB2 Projects", "*.json"));
+
+		final File selectedProject = fileChooser.showOpenDialog(this.window);
+		if (selectedProject == null) {
+			return;
+		}
+
+		this.openProject(selectedProject);
+	}
+
+	private void openProject(File file) {
+		currentProject.open(file);
+
+		Platform.runLater(() -> {
+			injector.getInstance(ModelcheckingController.class).resetView();
+			this.recentFiles.recentProjectsProperty().remove(file.getAbsolutePath());
+			this.recentFiles.recentProjectsProperty().add(0, file.getAbsolutePath());
+		});
+	}
+
+	@FXML
+	private void createNewProject() {
+		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
+		newProjectStage.showAndWait();
+		newProjectStage.toFront();
+	}
+
+	@FXML
+	private void saveProject() {
+		currentProject.save();
+	}
+
+	@FXML
 	private void handleClose() {
 		final Stage stage = this.stageManager.getCurrent();
 		if (stage != null) {
@@ -361,60 +395,6 @@ public final class MenuController extends MenuBar {
 			this.stageManager.setGlobalMacMenuBar(this);
 		}
 		return root;
-	}
-
-	private boolean confirmReplacingProject() {
-		if (currentProject.exists()) {
-			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
-
-			if (currentProject.isSingleFile()) {
-				alert.setHeaderText("You've already opened a file.");
-				alert.setContentText("Do you want to close the current file?");
-			} else {
-				alert.setHeaderText("You've already opened a project.");
-				alert.setContentText("Do you want to close the current project?");
-			}
-			Optional<ButtonType> result = alert.showAndWait();
-			return result.isPresent() && ButtonType.OK.equals(result.get());
-		} else {
-			return true;
-		}
-	}
-
-	@FXML
-	private void createNewProject() {
-		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
-		newProjectStage.showAndWait();
-		newProjectStage.toFront();
-	}
-
-	@FXML
-	private void saveProject() {
-		currentProject.save();
-	}
-
-	@FXML
-	private void openProject() {
-		if (!confirmReplacingProject()) {
-			return;
-		}
-
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open Project");
-		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("ProB2 Projects", "*.json"));
-
-		final File selectedProject = fileChooser.showOpenDialog(this.window);
-		if (selectedProject == null) {
-			return;
-		}
-
-		this.openProject(selectedProject);
-	}
-	
-	private void openProject(File file) {
-		currentProject.open(file);
-		this.recentFiles.recentProjectsProperty().remove(file.getAbsolutePath());
-		this.recentFiles.recentProjectsProperty().add(0, file.getAbsolutePath());
 	}
 
 	private List<MenuItem> getRecentFileItems(SimpleListProperty<String> recentListProperty, String filesOrProjects) {
