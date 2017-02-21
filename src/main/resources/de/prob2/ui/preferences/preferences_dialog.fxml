@@ -17,8 +17,8 @@
 		<DialogPane stylesheets="@/prob.css">
 			<content>
 				<AnchorPane>
-					<VBox spacing="5" AnchorPane.topAnchor="25"
-						AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="-10"
+					<VBox spacing="5" AnchorPane.topAnchor="14"
+						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-10"
 						AnchorPane.rightAnchor="-10">
 						<Label text="%addProBPreference.stage.title">
 							<font>

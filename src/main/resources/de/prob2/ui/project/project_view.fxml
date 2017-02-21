@@ -37,7 +37,7 @@
 						</font>
 					</Label>
 				</AnchorPane>
-				<ScrollPane hbarPolicy="NEVER">
+				<ScrollPane hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
 					<AnchorPane>
 						<Text fx:id="projectDescriptionText" AnchorPane.leftAnchor="6"
 							AnchorPane.topAnchor="6" AnchorPane.rightAnchor="0"
