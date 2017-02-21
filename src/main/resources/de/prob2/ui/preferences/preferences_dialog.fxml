@@ -6,17 +6,54 @@
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.HBox?>
+
 <fx:root type="Dialog" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane stylesheets="@/prob.css">
 			<content>
-				<VBox>
-					<TextField fx:id="nameField" promptText="Name"/>
-					<PreferencesView fx:id="prefsView"/>
-				</VBox>
+				<AnchorPane>
+					<VBox spacing="5" AnchorPane.topAnchor="25"
+						AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="-10"
+						AnchorPane.rightAnchor="-10">
+						<Label text="%addProBPreference.stage.title">
+							<font>
+								<Font size="18" />
+							</font>
+							<VBox.margin>
+								<Insets left="10" right="10" />
+							</VBox.margin>
+						</Label>
+						<AnchorPane styleClass="border">
+							<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
+								AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
+								alignment="center_left">
+								<HBox spacing="20" alignment="center_left">
+									<Label text="%addProBPreference.stage.name" />
+									<TextField fx:id="nameField" promptText="Name"
+										HBox.hgrow="always">
+										<font>
+											<Font size="12" />
+										</font>
+									</TextField>
+								</HBox>
+								<Label text="%addProBPreference.stage.preferences">
+									<VBox.margin>
+										<Insets top="20" />
+									</VBox.margin>
+								</Label>
+								<PreferencesView fx:id="prefsView" />
+							</VBox>
+						</AnchorPane>
+					</VBox>
+				</AnchorPane>
 			</content>
-			<ButtonType buttonData="CANCEL_CLOSE" text="%common.cancel"/>
-			<ButtonType buttonData="OK_DONE" text="%common.ok"/>
+			<ButtonType buttonData="CANCEL_CLOSE" text="%common.cancel" />
+			<ButtonType buttonData="OK_DONE" text="%common.ok" />
 		</DialogPane>
 	</dialogPane>
 </fx:root>

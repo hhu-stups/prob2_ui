@@ -44,5 +44,6 @@ public class PreferencesDialog extends Dialog<Preference> {
 	@FXML
 	private void initialize() {
 		this.prefsView.setPreferences(this.prefs);
+		this.setTitle("Add ProB Preference");
 	}
 }
