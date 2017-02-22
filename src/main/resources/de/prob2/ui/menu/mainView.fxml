@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.Scene?>
+<?import de.prob2.ui.states.StatesView?>
+<?import de.prob2.ui.bmotion.BMotionView?>
+
+<fx:root type="AnchorPane" minWidth="240" minHeight="70" xmlns:fx="http://javafx.com/fxml/1">
+	<!-- TabPane *obviously* does not extend Pane, so we have to wrap it in a AnchorPane so we can add the menu bar to it on Mac. -->
+	<TabPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.91">
+		<tabs>
+			<Tab text="States View">
+				 <content>
+					<StatesView/>
+				</content>
+			</Tab>
+			<Tab text="BMotion Visualization">
+				 <content>
+				   <BMotionView/>
+				</content>
+			</Tab>
+		</tabs>
+	</TabPane>
+</fx:root>

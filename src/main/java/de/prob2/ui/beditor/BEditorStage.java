@@ -93,7 +93,7 @@ public class BEditorStage extends Stage {
 		}
 		this.loaded = true;
 		this.path = path;
-		final JSObject editor = (JSObject)engine.executeScript("editor");
+		final JSObject editor = (JSObject) engine.executeScript("editor");
 		editor.call("setValue", text);
 	}
 	

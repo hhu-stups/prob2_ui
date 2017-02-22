@@ -12,12 +12,14 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.MainController;
 import de.prob2.ui.animations.AnimationsView;
+import de.prob2.ui.bmotion.BMotionView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.history.HistoryView;
+import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.modelchecking.ModelcheckingController;
@@ -67,9 +69,11 @@ public class ProB2Module extends AbstractModule {
 		
 		// Controllers
 		bind(AnimationsView.class);
+		bind(BMotionView.class);
 		bind(HistoryView.class);
 		bind(ProjectView.class);
 		bind(MenuController.class);
+		bind(MainView.class);
 		bind(MainController.class);
 		bind(ModelcheckingController.class);
 		bind(OperationsView.class);

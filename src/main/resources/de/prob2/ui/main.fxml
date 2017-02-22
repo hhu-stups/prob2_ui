@@ -7,7 +7,7 @@
 <?import de.prob2.ui.menu.MenuController?>
 <?import de.prob2.ui.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.operations.OperationsView?>
-<?import de.prob2.ui.states.StatesView?>
+<?import de.prob2.ui.menu.MainView?>
 <?import de.prob2.ui.stats.StatsView?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
@@ -37,7 +37,7 @@
 					</TitledPane>
 				</panes>
 			</Accordion>
-			<StatesView/>
+			<MainView/>
 		</SplitPane>
 	</center>
 	<top>
