@@ -1,5 +1,6 @@
 package de.prob2.ui.project;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -27,6 +28,11 @@ public class Machine {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public String getFileName() {
+		String[] s = location.split(File.separator);
+		return s[s.length-1];
 	}
 	
 	public String getDescription() {

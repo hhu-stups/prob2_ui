@@ -1,22 +1,18 @@
 package de.prob2.ui.animations;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
@@ -24,19 +20,13 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
-import de.prob2.ui.beditor.BEditorStage;
-import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
@@ -47,9 +37,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class AnimationsView extends AnchorPane implements IAnimationChangeListener {
@@ -66,7 +53,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AnimationsView.class);
 
-	private final Injector injector;
 	private final AnimationSelector animations;
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
@@ -76,9 +62,8 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private int previousSize;
 
 	@Inject
-	private AnimationsView(final Injector injector, final AnimationSelector animations, final StageManager stageManager,
+	private AnimationsView(final AnimationSelector animations, final StageManager stageManager,
 			CurrentTrace currentTrace, final Locale locale) {
-		this.injector = injector;
 		this.animations = animations;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
@@ -125,41 +110,10 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 			});
 			reloadMenuItem.disableProperty().bind(row.emptyProperty());
 
-			final MenuItem editMenuItem = new MenuItem("Edit");
-			editMenuItem.setOnAction(event -> this.showEditorStage(row.getItem().getModel()));
-			editMenuItem.disableProperty().bind(row.emptyProperty());
-			
-			final MenuItem editExternalMenuItem = new MenuItem("Edit in External Editor");
-			editExternalMenuItem.setOnAction(event -> {
-				final StateSpace stateSpace = row.getItem().getTrace().getStateSpace();
-				final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
-				stateSpace.execute(cmd);
-				final File editor = new File(cmd.getValue());
-				final File modelFile = row.getItem().getModel().getModelFile();
-				final String[] cmdline;
-				if (ProB2Module.IS_MAC && editor.isDirectory()) {
-					// On Mac, use the open tool to start app bundles
-					cmdline = new String[] {"/usr/bin/open", "-a", editor.getAbsolutePath(), modelFile.getAbsolutePath()};
-				} else {
-					// Run normal executables directly
-					cmdline = new String[] {editor.getAbsolutePath(), modelFile.getAbsolutePath()};
-				}
-				final ProcessBuilder processBuilder = new ProcessBuilder(cmdline);
-				try {
-					processBuilder.start();
-				} catch (IOException e) {
-					LOGGER.error("Failed to start external editor", e);
-					stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to start external editor:\n" + e).showAndWait();
-				}
-			});
-			editExternalMenuItem.disableProperty().bind(row.emptyProperty());
-
 			row.setContextMenu(new ContextMenu(
 				removeMenuItem,
 				removeAllMenuItem,
-				reloadMenuItem,
-				editMenuItem,
-				editExternalMenuItem
+				reloadMenuItem
 			));
 
 			row.setOnMouseClicked(event -> {
@@ -167,9 +121,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 					currentIndex = row.getIndex();
 					Trace trace = row.getItem().getTrace();
 					animations.changeCurrentAnimation(trace);
-					if (event.getClickCount() >= 2 && !editMenuItem.isDisable()) {
-						editMenuItem.getOnAction().handle(null);
-					}
 				}
 			});
 			return row;
@@ -231,26 +182,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	@Override
 	public void animatorStatus(boolean busy) {
 		// Not used
-	}
-
-	private void showEditorStage(AbstractModel model) {
-		final BEditorStage editorStage = injector.getInstance(BEditorStage.class);
-		final Path path = model.getModelFile().toPath();
-		final String text;
-		try {
-			text = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
-		} catch (IOException | UncheckedIOException e) {
-			LOGGER.error("Could not read file", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not read file:\n" + e).showAndWait();
-			return;
-		}
-		editorStage.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-			if (newState == Worker.State.SUCCEEDED && !editorStage.getLoaded()) {
-				editorStage.setTextEditor(text, path);
-			}
-		});
-		editorStage.setTitle(model.getModelFile().getName());
-		editorStage.show();
 	}
 
 	public TableView<Animation> getTable() {

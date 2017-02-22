@@ -105,21 +105,21 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void addMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.add(machine);
-		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
+		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 				this.getRunconfigurations(), this.getLocation()));
 	}
 
 	public void removeMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.remove(machine);
-		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
+		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 				this.getRunconfigurations(), this.getLocation()));
 	}
 
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);
-		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
+		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
 				this.getRunconfigurations(), this.getLocation()));
 	}
 
@@ -127,7 +127,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		List<Runconfiguration> runconfigs = this.getRunconfigurations();
 		runconfigs
 				.add(new Runconfiguration(runconfiguration.getKey().getName(), runconfiguration.getValue().getName()));
-		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
+		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
 				runconfigs, this.getLocation()));
 	}
 
@@ -136,6 +136,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (confirmReplacingProject()) {
 			super.set(project);
 		}
+	}
+	
+	private void update(Project project) {
+		super.set(project);
 	}
 
 	public void remove() {
