@@ -1,21 +1,37 @@
 package de.prob2.ui.project;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.GetPreferenceCommand;
+import de.prob.scripting.Api;
+import de.prob.statespace.StateSpace;
+import de.prob2.ui.animations.AnimationsView;
+import de.prob2.ui.beditor.BEditorStage;
+import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesDialog;
+import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
-
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -66,18 +82,22 @@ public final class ProjectView extends AnchorPane {
 	@FXML
 	private ListView<Runconfiguration> runconfigurationsListView;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(AnimationsView.class);
+
 	private final CurrentProject currentProject;
 	private final MachineLoader machineLoader;
 	private final StageManager stageManager;
 	private final Injector injector;
+	private final Api api;
 
 	@Inject
 	private ProjectView(final StageManager stageManager, final CurrentProject currentProject,
-			final MachineLoader machineLoader, final Injector injector) {
+			final MachineLoader machineLoader, final Injector injector, final Api api) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.machineLoader = machineLoader;
 		this.injector = injector;
+		this.api = api;
 		stageManager.loadFXML(this, "project_view.fxml");
 	}
 
@@ -102,21 +122,44 @@ public final class ProjectView extends AnchorPane {
 
 		machinesTable.setRowFactory(tableView -> {
 			final TableRow<Machine> row = new TableRow<>();
-			final ContextMenu contextMenu = new ContextMenu();
 			final MenuItem editMenuItem = new MenuItem("Edit Machine");
 			MachineStage machineStage = new MachineStage(stageManager, currentProject);
 			editMenuItem.setOnAction(event -> machineStage.editMachine(row.getItem()));
-			contextMenu.getItems().add(editMenuItem);
-			row.setOnMouseClicked(event -> {
-				if (event.getButton() == MouseButton.SECONDARY) {
-					if (row.isEmpty()) {
-						contextMenu.getItems().get(0).setDisable(true);
-					} else {
-						contextMenu.getItems().get(0).setDisable(false);
-					}
-					contextMenu.show(row, event.getScreenX(), event.getScreenY());
+			editMenuItem.disableProperty().bind(row.emptyProperty());
+
+			final MenuItem editFileMenuItem = new MenuItem("Edit File");
+			editFileMenuItem.setOnAction(event -> this.showEditorStage(row.getItem()));
+			editFileMenuItem.disableProperty().bind(row.emptyProperty());
+
+			final MenuItem editExternalMenuItem = new MenuItem("Edit File in External Editor");
+			editExternalMenuItem.setOnAction(event -> {
+				final StateSpace stateSpace = ProBPreferences.getEmptyStateSpace(api);
+				final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
+				stateSpace.execute(cmd);
+				final File editor = new File(cmd.getValue());
+				Path machinePath = row.getItem().getPath();
+				final String[] cmdline;
+				if (ProB2Module.IS_MAC && editor.isDirectory()) {
+					// On Mac, use the open tool to start app bundles
+					cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(),
+							machinePath.toString() };
+				} else {
+					// Run normal executables directly
+					cmdline = new String[] { editor.getAbsolutePath(), machinePath.toString() };
+				}
+				final ProcessBuilder processBuilder = new ProcessBuilder(cmdline);
+				try {
+					processBuilder.start();
+				} catch (IOException e) {
+					LOGGER.error("Failed to start external editor", e);
+					stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to start external editor:\n" + e)
+							.showAndWait();
 				}
 			});
+			editExternalMenuItem.disableProperty().bind(row.emptyProperty());
+
+			row.setContextMenu(new ContextMenu(editMenuItem, editFileMenuItem, editExternalMenuItem));
+
 			return row;
 		});
 
@@ -207,5 +250,25 @@ public final class ProjectView extends AnchorPane {
 		});
 		Optional<Pair<Machine, Preference>> result = dialog.showAndWait();
 		result.ifPresent(currentProject::addRunconfiguration);
+	}
+
+	private void showEditorStage(Machine machine) {
+		final BEditorStage editorStage = injector.getInstance(BEditorStage.class);
+		final Path path = Paths.get(currentProject.get().getLocation().getPath(), machine.getPath().toString());
+		final String text;
+		try {
+			text = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
+		} catch (IOException | UncheckedIOException e) {
+			LOGGER.error("Could not read file " + path, e);
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not read file:\n" + path + "\n" + e).showAndWait();
+			return;
+		}
+		editorStage.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+			if (newState == Worker.State.SUCCEEDED && !editorStage.getLoaded()) {
+				editorStage.setTextEditor(text, path);
+			}
+		});
+		editorStage.setTitle(machine.getFileName());
+		editorStage.show();
 	}
 }
