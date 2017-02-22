@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.exception.CliError;
@@ -54,7 +53,6 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AnimationsView.class);
 
-	private final Injector injector;
 	private final AnimationSelector animations;
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
@@ -64,9 +62,8 @@ public final class AnimationsView extends AnchorPane implements IAnimationChange
 	private int previousSize;
 
 	@Inject
-	private AnimationsView(final Injector injector, final AnimationSelector animations, final StageManager stageManager,
+	private AnimationsView(final AnimationSelector animations, final StageManager stageManager,
 			CurrentTrace currentTrace, final Locale locale) {
-		this.injector = injector;
 		this.animations = animations;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
