@@ -227,7 +227,8 @@ public final class MenuController extends MenuBar {
 	private void handleLoadStacked() {
 		uiState.clearDetachedStages();
 		uiState.getExpandedTitledPanes().clear();
-		Parent root = loadPreset("stackedLists.fxml");
+		loadPreset("stackedLists.fxml");
+//		Parent root = loadPreset("stackedLists.fxml");
 //		SplitPane main = (SplitPane) root.getChildrenUnmodifiable().get(1);
 //		SplitPane vertical = (SplitPane) main.getItems().get(1);
 //		vertical.getItems().get(1).setVisible(true);
