@@ -141,8 +141,7 @@ public final class ProjectView extends AnchorPane {
 				final String[] cmdline;
 				if (ProB2Module.IS_MAC && editor.isDirectory()) {
 					// On Mac, use the open tool to start app bundles
-					cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(),
-							machinePath.toString() };
+					cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(), machinePath.toString() };
 				} else {
 					// Run normal executables directly
 					cmdline = new String[] { editor.getAbsolutePath(), machinePath.toString() };

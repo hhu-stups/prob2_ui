@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import de.prob.animator.domainobjects.StateError;
 import de.prob.model.representation.AbstractElement;
-
 import javafx.scene.control.TreeTableCell;
 
 class NameCell extends TreeTableCell<Object, Object> {

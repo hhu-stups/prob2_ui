@@ -6,6 +6,9 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -16,15 +19,11 @@ import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachineLoader {
@@ -34,15 +33,17 @@ public class MachineLoader {
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final AnimationSelector animations;
+	private final CurrentTrace currentTrace;
 
 	@Inject
 	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager,
-			final AnimationSelector animations) {
+			final AnimationSelector animations, final CurrentTrace currentTrace) {
 		this.api = api;
 		this.openLock = new Object();
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.animations = animations;
+		this.currentTrace = currentTrace;
 	}
 
 	public void loadAsync(Machine machine) {
@@ -87,7 +88,12 @@ public class MachineLoader {
 			} else {
 				stateSpace = api.b_load(path.toString(), pref);
 			}
-			Platform.runLater(() -> this.animations.addNewAnimation(new Trace(stateSpace)));
+			Platform.runLater(() -> {
+				if(currentTrace.exists()) {
+					this.animations.removeTrace(currentTrace.get());
+				}
+				this.animations.addNewAnimation(new Trace(stateSpace));
+			});
 		}
 	}
 }

@@ -2,6 +2,9 @@ package de.prob2.ui.states;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EnumerationWarning;
 import de.prob.animator.domainobjects.EvalResult;
@@ -12,11 +15,7 @@ import de.prob.animator.domainobjects.StateError;
 import de.prob.animator.domainobjects.WDError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
-
 import javafx.scene.control.TreeTableCell;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 final class ValueCell extends TreeTableCell<Object, Object> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ValueCell.class);

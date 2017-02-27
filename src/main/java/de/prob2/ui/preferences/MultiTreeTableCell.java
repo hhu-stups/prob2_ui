@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javafx.collections.FXCollections;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
@@ -20,9 +23,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S, String> {
 	private static final Logger logger = LoggerFactory.getLogger(MultiTreeTableCell.class);

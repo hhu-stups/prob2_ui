@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import de.prob2.ui.project.ProjectView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +20,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
+import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 import javafx.application.Platform;
 import javafx.fxml.FXML;

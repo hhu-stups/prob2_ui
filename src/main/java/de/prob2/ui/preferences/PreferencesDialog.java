@@ -5,10 +5,8 @@ import java.util.HashMap;
 import com.google.inject.Inject;
 
 import de.prob.scripting.Api;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.Preference;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.Dialog;

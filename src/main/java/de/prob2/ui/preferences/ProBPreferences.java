@@ -10,8 +10,12 @@ import java.util.Objects;
 
 import com.google.inject.Inject;
 
-import de.be4.classicalb.core.parser.node.*;
-
+import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
+import de.be4.classicalb.core.parser.node.AMachineHeader;
+import de.be4.classicalb.core.parser.node.AMachineMachineVariant;
+import de.be4.classicalb.core.parser.node.EOF;
+import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
 import de.prob.animator.domainobjects.ProBPreference;
@@ -19,9 +23,7 @@ import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;

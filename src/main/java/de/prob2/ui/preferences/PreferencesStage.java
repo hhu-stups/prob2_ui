@@ -6,6 +6,9 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -13,13 +16,11 @@ import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.model.representation.AbstractElement;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentFiles;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -41,9 +42,6 @@ import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class PreferencesStage extends Stage {
