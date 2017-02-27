@@ -11,7 +11,6 @@ import com.google.inject.util.Providers;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.MainController;
-import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.bmotion.BMotionView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.consoles.b.BConsole;
@@ -68,7 +67,6 @@ public class ProB2Module extends AbstractModule {
 		}
 		
 		// Controllers
-		bind(AnimationsView.class);
 		bind(BMotionView.class);
 		bind(HistoryView.class);
 		bind(ProjectView.class);

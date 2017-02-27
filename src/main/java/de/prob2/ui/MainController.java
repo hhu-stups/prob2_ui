@@ -42,9 +42,6 @@ public class MainController extends BorderPane {
 	private TitledPane historyTP;
 	
 	@FXML
-	private TitledPane animationsTP;
-	
-	@FXML
 	private TitledPane projectTP;
 	
 	@FXML
@@ -92,11 +89,6 @@ public class MainController extends BorderPane {
 	public void statsTPClicked() {
 		handleTitledPaneClicked(statsTP);
 	}
-		
-	@FXML
-	public void animationsTPClicked() {
-		handleTitledPaneClicked(animationsTP);
-	}
 	
 	@FXML
 	public void projectTPClicked() {
@@ -118,7 +110,6 @@ public class MainController extends BorderPane {
 		HashMap<String,TitledPane> titledPanes = new HashMap<>();
 		titledPanes.put("Operations", operationsTP);
 		titledPanes.put("History", historyTP);
-		titledPanes.put("Animations", animationsTP);
 		titledPanes.put("Model Check", modelcheckTP);
 		titledPanes.put("Statistics", statsTP);
 		titledPanes.put("Project", projectTP);

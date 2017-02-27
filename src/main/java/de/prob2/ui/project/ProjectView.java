@@ -21,7 +21,6 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.scripting.Api;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
@@ -82,7 +81,7 @@ public final class ProjectView extends AnchorPane {
 	@FXML
 	private ListView<Runconfiguration> runconfigurationsListView;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AnimationsView.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectView.class);
 
 	private final CurrentProject currentProject;
 	private final MachineLoader machineLoader;

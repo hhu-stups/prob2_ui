@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.modelchecking.ModelcheckingController;
@@ -85,7 +84,6 @@ public final class DetachViewStageController extends Stage {
 		checkBoxMap.put(ModelcheckingController.class, detachModelcheck);
 		checkBoxMap.put(StatsView.class, detachStats);
 		checkBoxMap.put(ProjectView.class, detachProjects);
-		checkBoxMap.put(AnimationsView.class, detachAnimations);
 	}
 	
 	public void selectForDetach(final String name) {

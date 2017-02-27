@@ -30,7 +30,6 @@ import com.google.inject.Singleton;
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
 import de.prob2.ui.MainController;
-import de.prob2.ui.animations.AnimationsView;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
@@ -295,10 +294,6 @@ public final class Config {
 		StatesView statesView = injector.getInstance(StatesView.class);
 		configData.statesViewColumnsWidth = tablePersistenceHandler.getColumnsWidth(statesView.getTable().getColumns());
 		configData.statesViewColumnsOrder = tablePersistenceHandler.getColumnsOrder(statesView.getTable().getColumns());
-		
-		AnimationsView animationsView = injector.getInstance(AnimationsView.class);
-		configData.animationsViewColumnsWidth = tablePersistenceHandler.getColumnsWidth(animationsView.getTable().getColumns());
-		configData.animationsViewColumnsOrder = tablePersistenceHandler.getColumnsOrder(animationsView.getTable().getColumns());
 		
 		MainController main = injector.getInstance(MainController.class);
 		

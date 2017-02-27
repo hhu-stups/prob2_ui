@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.animations.AnimationsView?>
 <?import de.prob2.ui.history.HistoryView?>
 <?import de.prob2.ui.MainController?>
 <?import de.prob2.ui.project.ProjectView?>
@@ -28,9 +27,6 @@
 					</TitledPane>
 					<TitledPane text="%tptitles.stats" fx:id ="statsTP" onMouseClicked="#statsTPClicked">
 						<StatsView/>
-					</TitledPane>
-					<TitledPane text="%tptitles.animations" fx:id = "animationsTP" onMouseClicked="#animationsTPClicked">
-						<AnimationsView/>
 					</TitledPane>
 					<TitledPane text="%tptitles.project" fx:id = "projectTP" onMouseClicked="#projectTPClicked">
 						<ProjectView/>

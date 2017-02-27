@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.animations.AnimationsView?>
 <?import de.prob2.ui.history.HistoryView?>
 <?import de.prob2.ui.menu.MenuController?>
 <?import de.prob2.ui.modelchecking.ModelcheckingController?>
@@ -33,7 +32,6 @@
 			</Accordion>
 			<SplitPane fx:id="verticalSP" dividerPositions="0.8" orientation="VERTICAL">
 				<StatesView/>
-				<AnimationsView/>
 			</SplitPane>
 			<Accordion fx:id = "rightAccordion">
 				<panes>
