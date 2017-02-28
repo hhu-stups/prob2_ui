@@ -24,6 +24,7 @@ span.cm-b-operator {
 
 span.cm-b-keyword {
 	color: #0000AA !important;
+	font-weight: bold;
 }
 
 span.cm-b-controlkeyword {
@@ -36,4 +37,5 @@ span.cm-b-unsupported {
 
 span.cm-b-comment {
 	color: #CCCCCC !important;
+	font-style: italic;
 }

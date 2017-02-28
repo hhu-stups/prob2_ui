@@ -4,7 +4,7 @@
 <?import de.prob2.ui.menu.MenuController?>
 <?import de.prob2.ui.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.operations.OperationsView?>
-<?import de.prob2.ui.states.StatesView?>
+<?import de.prob2.ui.menu.MainView?>
 <?import de.prob2.ui.stats.StatsView?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
@@ -31,7 +31,7 @@
 				</panes>
 			</Accordion>
 			<SplitPane fx:id="verticalSP" dividerPositions="0.8" orientation="VERTICAL">
-				<StatesView/>
+				<MainView/>
 			</SplitPane>
 			<Accordion fx:id = "rightAccordion">
 				<panes>
