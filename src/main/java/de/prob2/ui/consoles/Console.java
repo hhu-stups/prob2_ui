@@ -49,7 +49,7 @@ public abstract class Console extends StyleClassedTextArea {
 		this.header = header;
 		this.instructions = new ArrayList<>();
 		this.errors = new ArrayList<>();
-		this.searchHandler = new ConsoleSearchHandler(this, instructions);
+		this.searchHandler = new ConsoleSearchHandler(this);
 		this.requestFollowCaret();
 		setEvents();
 	}
@@ -371,5 +371,9 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	public int getCurrentPosInLine() {
 		return currentPosInLine;
+	}
+	
+	public List<ConsoleInstruction> getInstructions() {
+		return instructions;
 	}
 }

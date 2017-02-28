@@ -14,12 +14,10 @@ public class ConsoleSearchHandler {
 	public static final String FOUND = "(backward search) '':";
 	public static final String NOTFOUND = "(failed backward search) '':"; 
 	private final Console parent;
-	private final List<ConsoleInstruction> instructions;
 	
-	public ConsoleSearchHandler(Console parent, List<ConsoleInstruction> instructions) {
+	public ConsoleSearchHandler(Console parent) {
 		this.searchResults = new ArrayList<>();
 		this.parent = parent;
-		this.instructions = instructions;
 	}
 	
 	public boolean isActive() {
@@ -48,9 +46,9 @@ public class ConsoleSearchHandler {
 		} else {
 			key += e.getText();
 		}
-		for(int i = instructions.size() - 1; i >= 0; i--) {
-			if(instructions.get(i).getInstruction().contains(key)) {
-				searchResults.add(new SearchResult(instructions.get(i).getInstruction(),true));
+		for(int i = parent.getInstructions().size() - 1; i >= 0; i--) {
+			if(parent.getInstructions().get(i).getInstruction().contains(key)) {
+				searchResults.add(new SearchResult(parent.getInstructions().get(i).getInstruction(),true));
 			}
 		}
 		if(searchResults.isEmpty()) {
@@ -79,11 +77,6 @@ public class ConsoleSearchHandler {
 	
 	protected void handleEnter() {
 		if(isActive()) {
-			int posOfColon = parent.getCurrentLine().indexOf(':');
-			int posOfEnter = parent.getText().lastIndexOf("\n");
-			String addition = " >" + parent.getCurrentLine().substring(posOfColon + 1, parent.getCurrentLine().length());
-			parent.deleteText(posOfEnter + 1, parent.getText().length());
-			parent.appendText(addition);
 			deactivateSearch();
 		}
 	}
