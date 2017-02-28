@@ -121,42 +121,23 @@ public final class ProjectView extends AnchorPane {
 
 		machinesTable.setRowFactory(tableView -> {
 			final TableRow<Machine> row = new TableRow<>();
-			final MenuItem editMenuItem = new MenuItem("Edit Machine");
-			MachineStage machineStage = new MachineStage(stageManager, currentProject);
-			editMenuItem.setOnAction(event -> machineStage.editMachine(row.getItem()));
-			editMenuItem.disableProperty().bind(row.emptyProperty());
 
 			final MenuItem editFileMenuItem = new MenuItem("Edit File");
 			editFileMenuItem.setOnAction(event -> this.showEditorStage(row.getItem()));
 			editFileMenuItem.disableProperty().bind(row.emptyProperty());
 
 			final MenuItem editExternalMenuItem = new MenuItem("Edit File in External Editor");
-			editExternalMenuItem.setOnAction(event -> {
-				final StateSpace stateSpace = ProBPreferences.getEmptyStateSpace(api);
-				final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
-				stateSpace.execute(cmd);
-				final File editor = new File(cmd.getValue());
-				Path machinePath = row.getItem().getPath();
-				final String[] cmdline;
-				if (ProB2Module.IS_MAC && editor.isDirectory()) {
-					// On Mac, use the open tool to start app bundles
-					cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(), machinePath.toString() };
-				} else {
-					// Run normal executables directly
-					cmdline = new String[] { editor.getAbsolutePath(), machinePath.toString() };
-				}
-				final ProcessBuilder processBuilder = new ProcessBuilder(cmdline);
-				try {
-					processBuilder.start();
-				} catch (IOException e) {
-					LOGGER.error("Failed to start external editor", e);
-					stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to start external editor:\n" + e)
-							.showAndWait();
-				}
-			});
+			editExternalMenuItem.setOnAction(event -> this.showExternalEditor(row.getItem()));
 			editExternalMenuItem.disableProperty().bind(row.emptyProperty());
 
-			row.setContextMenu(new ContextMenu(editMenuItem, editFileMenuItem, editExternalMenuItem));
+			row.setContextMenu(new ContextMenu(editFileMenuItem, editExternalMenuItem));
+			
+			row.setOnMouseClicked(event -> {
+				if(event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					MachineStage machineStage = new MachineStage(stageManager, currentProject);
+					machineStage.editMachine(row.getItem());
+				}
+			});
 
 			return row;
 		});
@@ -268,5 +249,29 @@ public final class ProjectView extends AnchorPane {
 		});
 		editorStage.setTitle(machine.getFileName());
 		editorStage.show();
+	}
+	
+	private void showExternalEditor(Machine machine) {
+		final StateSpace stateSpace = ProBPreferences.getEmptyStateSpace(api);
+		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
+		stateSpace.execute(cmd);
+		final File editor = new File(cmd.getValue());
+		Path machinePath = machine.getPath();
+		final String[] cmdline;
+		if (ProB2Module.IS_MAC && editor.isDirectory()) {
+			// On Mac, use the open tool to start app bundles
+			cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(), machinePath.toString() };
+		} else {
+			// Run normal executables directly
+			cmdline = new String[] { editor.getAbsolutePath(), machinePath.toString() };
+		}
+		final ProcessBuilder processBuilder = new ProcessBuilder(cmdline);
+		try {
+			processBuilder.start();
+		} catch (IOException e) {
+			LOGGER.error("Failed to start external editor", e);
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to start external editor:\n" + e)
+					.showAndWait();
+		}
 	}
 }
