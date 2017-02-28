@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -24,7 +23,6 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.preferences.PreferencesDialog;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.beans.property.SimpleObjectProperty;
@@ -32,11 +30,7 @@ import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
@@ -47,12 +41,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.util.Pair;
 
 @Singleton
 public final class ProjectView extends AnchorPane {
@@ -63,11 +54,11 @@ public final class ProjectView extends AnchorPane {
 	@FXML
 	private TableView<Machine> machinesTable;
 	@FXML
-	private TableColumn<Machine, String> name;
+	private TableColumn<Machine, String> nameColumn;
 	@FXML
-	private TableColumn<Machine, Path> machine;
+	private TableColumn<Machine, Path> machineColumn;
 	@FXML
-	private TableColumn<Machine, String> description;
+	private TableColumn<Machine, String> descriptionColumn;
 	@FXML
 	private ListView<Preference> preferencesListView;
 	@FXML
@@ -102,6 +93,7 @@ public final class ProjectView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
+		//Project Tab
 		projectTabPane.visibleProperty().bind(currentProject.existsProperty());
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 
@@ -115,9 +107,10 @@ public final class ProjectView extends AnchorPane {
 			projectDescriptionText.setWrappingWidth(newValue.doubleValue() - 20);
 		});
 
-		name.setCellValueFactory(new PropertyValueFactory<>("name"));
-		machine.setCellValueFactory(cellData -> new SimpleObjectProperty<Path>(cellData.getValue().getPath()));
-		description.setCellValueFactory(new PropertyValueFactory<>("description"));
+		//MachinesTab
+		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		machineColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<Path>(cellData.getValue().getPath()));
+		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 		machinesTable.setRowFactory(tableView -> {
 			final TableRow<Machine> row = new TableRow<>();
@@ -141,9 +134,12 @@ public final class ProjectView extends AnchorPane {
 
 			return row;
 		});
-
 		machinesTable.itemsProperty().bind(currentProject.machinesProperty());
+		
+		//Preferences Tab
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
+		
+		//Runconfigurations Tab
 		runconfigsPlaceholder.setText("Add machines first");
 		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
 			if (to) {
@@ -200,35 +196,37 @@ public final class ProjectView extends AnchorPane {
 
 	@FXML
 	void addRunconfiguration() {
-		Dialog<Pair<Machine, Preference>> dialog = new Dialog<>();
-		dialog.setTitle("New Runconfiguration");
-		dialog.initStyle(StageStyle.UTILITY);
-		dialog.getDialogPane().getStylesheets().add("prob.css");
-		ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-		dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
-		GridPane grid = new GridPane();
-		grid.setHgap(10);
-		grid.setVgap(10);
-		ChoiceBox<Machine> machinesBox = new ChoiceBox<>(currentProject.machinesProperty());
-		grid.add(new Label("Machine:"), 0, 0);
-		grid.add(machinesBox, 1, 0);
-		ChoiceBox<Preference> prefsBox = new ChoiceBox<>();
-		prefsBox.getItems().add(new Preference("default", null));
-		prefsBox.getItems().addAll(currentProject.getPreferences());
-		grid.add(new Label("Preference:"), 0, 1);
-		grid.add(prefsBox, 1, 1);
-
-		dialog.getDialogPane().setContent(grid);
-		dialog.getDialogPane().lookupButton(addButtonType).disableProperty()
-				.bind(machinesBox.valueProperty().isNotNull().and(prefsBox.valueProperty().isNotNull()).not());
-		dialog.setResultConverter(dialogButton -> {
-			if (dialogButton == addButtonType) {
-				return new Pair<>(machinesBox.getValue(), prefsBox.getValue());
-			}
-			return null;
-		});
-		Optional<Pair<Machine, Preference>> result = dialog.showAndWait();
-		result.ifPresent(currentProject::addRunconfiguration);
+		injector.getInstance(RunconfigurationsDialog.class).showAndWait().ifPresent(currentProject::addRunconfiguration);
+		
+//		Dialog<Pair<Machine, Preference>> dialog = new Dialog<>();
+//		dialog.setTitle("New Runconfiguration");
+//		dialog.initStyle(StageStyle.UTILITY);
+//		dialog.getDialogPane().getStylesheets().add("prob.css");
+//		ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+//		dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+//		GridPane grid = new GridPane();
+//		grid.setHgap(10);
+//		grid.setVgap(10);
+//		ChoiceBox<Machine> machinesBox = new ChoiceBox<>(currentProject.machinesProperty());
+//		grid.add(new Label("Machine:"), 0, 0);
+//		grid.add(machinesBox, 1, 0);
+//		ChoiceBox<Preference> prefsBox = new ChoiceBox<>();
+//		prefsBox.getItems().add(new Preference("default", null));
+//		prefsBox.getItems().addAll(currentProject.getPreferences());
+//		grid.add(new Label("Preference:"), 0, 1);
+//		grid.add(prefsBox, 1, 1);
+//
+//		dialog.getDialogPane().setContent(grid);
+//		dialog.getDialogPane().lookupButton(addButtonType).disableProperty()
+//				.bind(machinesBox.valueProperty().isNotNull().and(prefsBox.valueProperty().isNotNull()).not());
+//		dialog.setResultConverter(dialogButton -> {
+//			if (dialogButton == addButtonType) {
+//				return new Pair<>(machinesBox.getValue(), prefsBox.getValue());
+//			}
+//			return null;
+//		});
+//		Optional<Pair<Machine, Preference>> result = dialog.showAndWait();
+//		result.ifPresent(currentProject::addRunconfiguration);
 	}
 
 	private void showEditorStage(Machine machine) {

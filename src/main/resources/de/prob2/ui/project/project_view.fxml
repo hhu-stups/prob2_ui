@@ -62,11 +62,11 @@
 						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 					</columnResizePolicy>
 					<columns>
-						<TableColumn fx:id="name" minWidth="100.0" prefWidth="100.0"
+						<TableColumn fx:id="nameColumn" minWidth="100.0" prefWidth="100.0"
 							text="%project.tabs.machines.columns.name" />
-						<TableColumn fx:id="machine" minWidth="100.0"
+						<TableColumn fx:id="machineColumn" minWidth="100.0"
 							prefWidth="100.0" text="%project.tabs.machines.columns.machine" />
-						<TableColumn fx:id="description" minWidth="100.0"
+						<TableColumn fx:id="descriptionColumn" minWidth="100.0"
 							prefWidth="100.0" text="%project.tabs.machines.columns.description" />
 					</columns>
 					<placeholder>

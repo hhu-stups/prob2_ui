@@ -46,7 +46,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.util.Pair;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -123,10 +122,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.getRunconfigurations(), this.getLocation()));
 	}
 
-	public void addRunconfiguration(Pair<Machine, Preference> runconfiguration) {
+	public void addRunconfiguration(Runconfiguration runconfiguration) {
 		List<Runconfiguration> runconfigs = this.getRunconfigurations();
-		runconfigs
-				.add(new Runconfiguration(runconfiguration.getKey().getName(), runconfiguration.getValue().getName()));
+		runconfigs.add(runconfiguration);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
 				runconfigs, this.getLocation()));
 	}
@@ -137,7 +135,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			super.set(project);
 		}
 	}
-	
+
 	private void update(Project project) {
 		super.set(project);
 	}

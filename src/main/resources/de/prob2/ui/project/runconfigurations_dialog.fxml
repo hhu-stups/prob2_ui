@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.Dialog?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.HBox?>
+
+<fx:root type="Dialog" xmlns:fx="http://javafx.com/fxml/1">
+	<dialogPane>
+		<DialogPane stylesheets="@/prob.css">
+			<content>
+				<AnchorPane>
+					<VBox spacing="5" AnchorPane.topAnchor="14"
+						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-10"
+						AnchorPane.rightAnchor="-10">
+						<Label text="%addRunconfigs.dialog.title">
+							<font>
+								<Font size="18" />
+							</font>
+							<VBox.margin>
+								<Insets left="10" right="10" />
+							</VBox.margin>
+						</Label>
+						<AnchorPane styleClass="border">
+							<GridPane AnchorPane.leftAnchor="15"
+								AnchorPane.rightAnchor="15" AnchorPane.topAnchor="20"
+								AnchorPane.bottomAnchor="20" alignment="center_left" Hgap="10"
+								Vgap="10">
+								<Label text="%addRunconfigs.dialog.machine"
+									GridPane.columnIndex="0" GridPane.rowIndex="0" />
+								<ChoiceBox fx:id="machinesBox" GridPane.columnIndex="1"
+									GridPane.rowIndex="0" />
+								<Label text="%addRunconfigs.dialog.preference"
+									GridPane.columnIndex="0" GridPane.rowIndex="1" />
+								<ChoiceBox fx:id="preferencesBox"
+									GridPane.columnIndex="1" GridPane.rowIndex="1" />
+							</GridPane>
+						</AnchorPane>
+					</VBox>
+				</AnchorPane>
+			</content>
+			<ButtonType buttonData="CANCEL_CLOSE" text="%common.cancel" />
+			<ButtonType fx:id = "okButtonType" buttonData="OK_DONE" text="%common.ok" />
+		</DialogPane>
+	</dialogPane>
+</fx:root>

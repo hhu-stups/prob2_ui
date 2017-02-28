@@ -55,7 +55,7 @@ public class MachineStage extends Stage {
 	}
 
 	public void addNewMachine(File machineFile) {
-		this.setTitle("Add new Machine");
+		this.setTitle("Add Machine");
 		List<Machine> machinesList = currentProject.getMachines();
 		machineNamesSet.addAll(machinesList.stream().map(Machine::getName).collect(Collectors.toList()));
 		
