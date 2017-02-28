@@ -192,6 +192,7 @@ public final class StatesView extends AnchorPane {
 	}
 
 	private void updateRoot(final Trace trace) {
+		int row = tv.getSelectionModel().getSelectedIndex();
 		this.updateElements(trace, this.tvRootItem, trace.getModel().getChildrenOfType(Machine.class));
 		
 		final TreeItem<Object> errorsItem = new TreeItem<>(StateError.class);
@@ -207,6 +208,7 @@ public final class StatesView extends AnchorPane {
 		}
 		
 		this.tv.refresh();
+		this.tv.getSelectionModel().select(row);
 	}
 
 	private void visualizeExpression(AbstractFormulaElement formula) {
