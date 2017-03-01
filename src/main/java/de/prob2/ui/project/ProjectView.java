@@ -42,7 +42,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 @Singleton
@@ -125,12 +124,12 @@ public final class ProjectView extends AnchorPane {
 
 			row.setContextMenu(new ContextMenu(editFileMenuItem, editExternalMenuItem));
 			
-			row.setOnMouseClicked(event -> {
-				if(event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					MachineStage machineStage = new MachineStage(stageManager, currentProject);
-					machineStage.editMachine(row.getItem());
-				}
-			});
+//			row.setOnMouseClicked(event -> {
+//				if(event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+//					MachinesDialog machineStage = new MachinesDialog(stageManager, currentProject);
+//					machineStage.editMachine(row.getItem());
+//				}
+//			});
 
 			return row;
 		});
@@ -167,18 +166,7 @@ public final class ProjectView extends AnchorPane {
 
 	@FXML
 	void addMachine() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Add Machine");
-		fileChooser.getExtensionFilters()
-				.add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
-
-		final File selectedFile = fileChooser.showOpenDialog(stageManager.getCurrent());
-		if (selectedFile == null) {
-			return;
-		}
-
-		MachineStage machineStage = new MachineStage(stageManager, currentProject);
-		machineStage.addNewMachine(selectedFile);
+		injector.getInstance(MachinesDialog.class).showAndWait().ifPresent(currentProject::addMachine);
 	}
 
 	@FXML
