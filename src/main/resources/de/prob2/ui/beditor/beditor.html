@@ -5,8 +5,6 @@
 		<link rel="stylesheet" href="beditor.css"/>
 		<script src="lib/jquery.js" type="text/javascript"></script>
 		<script src="lib/codemirror.js" type="text/javascript"></script>
-		<script src="lib/closebrackets.js" type="text/javascript"></script>
-		<script src="lib/matchbrackets.js" type="text/javascript"></script>
 		<script src="b.js" type="text/javascript"></script>
 	</head>
 	<body>
@@ -14,6 +12,17 @@
 			<textarea id="code"></textarea>
 		</div>
 		<script>
+		    var TO;
+		    
+    		function compile(cm) {
+    			blexer.computeHighlighting(editor.getValue());
+    		}
+    		
+    		function onChange(cm) {
+       			clearTimeout(TO);
+       			TO = setTimeout(function(){compile(cm);}, 500);
+    		}
+    		
 			var code = document.getElementById('code');
 			var editor = CodeMirror.fromTextArea(code, {
 				lineNumbers: true,
@@ -22,6 +31,8 @@
 				matchBrackets: true, 
 				mode: "text/b"
 			});
+						
+			editor.on("change", onChange)
 			
 			function changeFontSize(size) {
 				editor.getWrapperElement().style["font-size"] = size+"px";

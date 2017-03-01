@@ -30,6 +30,7 @@ public class BEditorStage extends Stage {
 	@FXML private WebView beditor;
 	
 	private final StageManager stageManager;
+	private BTokenProvider tokenProvider;
 	
 	private Path path;
 	private WebEngine engine;
@@ -48,6 +49,7 @@ public class BEditorStage extends Stage {
 		engine = beditor.getEngine();
 		engine.load(getClass().getResource("beditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
+		this.tokenProvider = new BTokenProvider(engine);
 	}
 	
 	@FXML
@@ -91,6 +93,7 @@ public class BEditorStage extends Stage {
 		}
 		this.loaded = true;
 		this.path = path;
+		tokenProvider.computeHighlighting(text);
 		final JSObject editor = (JSObject) engine.executeScript("editor");
 		editor.call("setValue", text);
 	}

@@ -10,16 +10,8 @@ span.cm-b-type {
 	color: #990000 !important;
 }
 
-span.cm-b-logical {
-	color: #FF9966 !important;
-}
-
-span.cm-b-assignment {
+span.cm-b-assignment-logical {
 	color: #F00 !important;
-}
-
-span.cm-b-operator {
-	color: #2FC7FA !important;
 }
 
 span.cm-b-keyword {
