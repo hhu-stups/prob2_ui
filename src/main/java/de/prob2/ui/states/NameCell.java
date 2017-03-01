@@ -6,34 +6,45 @@ import de.prob.animator.domainobjects.StateError;
 import de.prob.model.representation.AbstractElement;
 import javafx.scene.control.TreeTableCell;
 
-class NameCell extends TreeTableCell<Object, Object> {
-	public static String getName(final Object item) {
+class NameCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
+	public static String getName(final StateItem<?> item) {
 		Objects.requireNonNull(item);
 		
-		if (item instanceof String) {
-			return (String)item;
-		} else if (item instanceof Class<?>) {
-			String shortName = ((Class<?>)item).getSimpleName();
+		final Object contents = item.getContents();
+		
+		if (contents instanceof String) {
+			return (String)contents;
+		} else if (contents instanceof Class<?>) {
+			String shortName = ((Class<?>)contents).getSimpleName();
 			if (shortName.endsWith("y")) {
 				shortName = shortName.substring(0, shortName.length() - 1) + "ies";
 			} else {
 				shortName += "s";
 			}
 			return shortName;
-		} else if (item instanceof AbstractElement) {
-			return item.toString();
-		} else if (item instanceof StateError) {
-			return ((StateError)item).getEvent();
+		} else if (contents instanceof AbstractElement) {
+			return contents.toString();
+		} else if (contents instanceof StateError) {
+			return ((StateError)contents).getEvent();
 		} else {
-			throw new IllegalArgumentException("Don't know how to get the name of a " + item.getClass() + " instance");
+			throw new IllegalArgumentException("Don't know how to get the name of a " + contents.getClass() + " instance");
 		}
 	}
 	
 	@Override
-	protected void updateItem(final Object item, final boolean empty) {
+	protected void updateItem(final StateItem<?> item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		this.setText(item == null || empty ? null : getName(item));
+		this.getStyleClass().removeAll("errorresult");
+		
+		if (item == null || empty) {
+			this.setText(null);
+		} else {
+			this.setText(getName(item));
+			if (item.isErrored()) {
+				this.getStyleClass().add("errorresult");
+			}
+		}
 		this.setGraphic(null);
 	}
 }

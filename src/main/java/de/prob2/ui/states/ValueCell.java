@@ -2,9 +2,6 @@ package de.prob2.ui.states;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EnumerationWarning;
 import de.prob.animator.domainobjects.EvalResult;
@@ -15,9 +12,13 @@ import de.prob.animator.domainobjects.StateError;
 import de.prob.animator.domainobjects.WDError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
+
 import javafx.scene.control.TreeTableCell;
 
-final class ValueCell extends TreeTableCell<Object, Object> {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ValueCell.class);
 	
 	private final Map<IEvalElement, AbstractEvalResult> values;
@@ -31,7 +32,7 @@ final class ValueCell extends TreeTableCell<Object, Object> {
 	}
 	
 	@Override
-	protected void updateItem(final Object item, final boolean empty) {
+	protected void updateItem(final StateItem<?> item, final boolean empty) {
 		super.updateItem(item, empty);
 		
 		this.getStyleClass().removeAll("false", "true", "errorresult");
@@ -40,10 +41,12 @@ final class ValueCell extends TreeTableCell<Object, Object> {
 			super.setText(null);
 			super.setGraphic(null);
 		} else {
-			if (item instanceof String || item instanceof Class<?>) {
+			final Object contents = item.getContents();
+			
+			if (contents instanceof String || contents instanceof Class<?>) {
 				this.setText(null);
-			} else if (item instanceof AbstractFormulaElement) {
-				final AbstractEvalResult result = this.values.get(((AbstractFormulaElement)item).getFormula());
+			} else if (contents instanceof AbstractFormulaElement) {
+				final AbstractEvalResult result = this.values.get(((AbstractFormulaElement)contents).getFormula());
 				if (result == null) {
 					this.setText(null);
 				} else if (result instanceof EvalResult) {
@@ -71,12 +74,13 @@ final class ValueCell extends TreeTableCell<Object, Object> {
 					// noinspection ObjectToString
 					this.setText(result.getClass() + " toString: " + result);
 				}
-			} else if (item instanceof AbstractElement) {
+			} else if (contents instanceof AbstractElement) {
 				this.setText(null);
-			} else if (item instanceof StateError) {
-				this.setText(this.isCurrent ? ((StateError)item).getShortDescription() : null);
+			} else if (contents instanceof StateError) {
+				this.setText(this.isCurrent ? ((StateError)contents).getShortDescription() : null);
+				this.getStyleClass().add("errorresult");
 			} else {
-				throw new IllegalArgumentException("Don't know how to show the value of a " + item.getClass() + " instance");
+				throw new IllegalArgumentException("Don't know how to show the value of a " + contents.getClass() + " instance");
 			}
 			super.setGraphic(null);
 		}
