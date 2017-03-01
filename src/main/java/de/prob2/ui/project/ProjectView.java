@@ -92,7 +92,7 @@ public final class ProjectView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		//Project Tab
+		// Project Tab
 		projectTabPane.visibleProperty().bind(currentProject.existsProperty());
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 
@@ -106,7 +106,7 @@ public final class ProjectView extends AnchorPane {
 			projectDescriptionText.setWrappingWidth(newValue.doubleValue() - 20);
 		});
 
-		//MachinesTab
+		// MachinesTab
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		machineColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<Path>(cellData.getValue().getPath()));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -123,22 +123,22 @@ public final class ProjectView extends AnchorPane {
 			editExternalMenuItem.disableProperty().bind(row.emptyProperty());
 
 			row.setContextMenu(new ContextMenu(editFileMenuItem, editExternalMenuItem));
-			
-//			row.setOnMouseClicked(event -> {
-//				if(event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-//					MachinesDialog machineStage = new MachinesDialog(stageManager, currentProject);
-//					machineStage.editMachine(row.getItem());
-//				}
-//			});
+
+			row.setOnMouseClicked(event -> {
+				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					injector.getInstance(EditMachinesDialog.class).editAndShow(row.getItem())
+							.ifPresent(result -> currentProject.updateMachine(row.getItem(), result));
+				}
+			});
 
 			return row;
 		});
 		machinesTable.itemsProperty().bind(currentProject.machinesProperty());
-		
-		//Preferences Tab
+
+		// Preferences Tab
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
-		
-		//Runconfigurations Tab
+
+		// Runconfigurations Tab
 		runconfigsPlaceholder.setText("Add machines first");
 		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
 			if (to) {
@@ -166,7 +166,7 @@ public final class ProjectView extends AnchorPane {
 
 	@FXML
 	void addMachine() {
-		injector.getInstance(MachinesDialog.class).showAndWait().ifPresent(currentProject::addMachine);
+		injector.getInstance(AddMachinesDialog.class).showAndWait().ifPresent(currentProject::addMachine);
 	}
 
 	@FXML
@@ -176,9 +176,10 @@ public final class ProjectView extends AnchorPane {
 
 	@FXML
 	void addRunconfiguration() {
-		injector.getInstance(RunconfigurationsDialog.class).showAndWait().ifPresent(currentProject::addRunconfiguration);
+		injector.getInstance(RunconfigurationsDialog.class).showAndWait()
+				.ifPresent(currentProject::addRunconfiguration);
 	}
-	
+
 	private void startAnimation(Runconfiguration runconfiguration) {
 		Machine m = currentProject.getMachine(runconfiguration.getMachine());
 		Map<String, String> pref = new HashMap<>();
@@ -209,7 +210,7 @@ public final class ProjectView extends AnchorPane {
 		editorStage.setTitle(machine.getFileName());
 		editorStage.show();
 	}
-	
+
 	private void showExternalEditor(Machine machine) {
 		final StateSpace stateSpace = ProBPreferences.getEmptyStateSpace(api);
 		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
@@ -229,8 +230,7 @@ public final class ProjectView extends AnchorPane {
 			processBuilder.start();
 		} catch (IOException e) {
 			LOGGER.error("Failed to start external editor", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to start external editor:\n" + e)
-					.showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to start external editor:\n" + e).showAndWait();
 		}
 	}
 }

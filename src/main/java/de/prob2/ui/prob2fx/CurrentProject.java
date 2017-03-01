@@ -114,6 +114,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 				this.getRunconfigurations(), this.getLocation()));
 	}
+	
+	public void updateMachine(Machine oldMachine, Machine newMachine) {
+		this.removeMachine(oldMachine);
+		this.addMachine(newMachine);
+	}
 
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
