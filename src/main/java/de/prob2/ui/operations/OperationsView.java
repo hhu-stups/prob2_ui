@@ -72,18 +72,17 @@ public final class OperationsView extends AnchorPane {
 						break;
 					
 					case ENABLED:
-						icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
-						icon.setFill(Color.LIMEGREEN);
+						icon = new FontAwesomeIconView(item.isSkip() ? FontAwesomeIcon.REPEAT : FontAwesomeIcon.PLAY);
+						icon.setFill(item.isSkip() ? Color.LIGHTSKYBLUE : Color.LIMEGREEN);
 						setDisable(false);
 						if (!item.isExplored()) {
-							getStyleClass().clear();
-							getStyleClass().add("unexplored");
+							getStyleClass().setAll("unexplored");
 						} else if (item.isErrored()) {
-							getStyleClass().clear();
-							getStyleClass().add("errored");
+							getStyleClass().setAll("errored");
+						} else if (item.isSkip()) {
+							getStyleClass().setAll("skip");
 						} else {
-							getStyleClass().clear();
-							getStyleClass().add("normal");
+							getStyleClass().setAll("normal");
 						}
 						break;
 					
@@ -253,6 +252,7 @@ public final class OperationsView extends AnchorPane {
 
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
+			final boolean skip = transition.getSource().equals(transition.getDestination());
 			OperationItem operationItem = new OperationItem(
 					transition.getId(),
 					name,
@@ -260,22 +260,39 @@ public final class OperationsView extends AnchorPane {
 					transition.getReturnValues(),
 					OperationItem.Status.ENABLED,
 					explored,
-					errored);
+					errored,
+					skip
+				);
 			events.add(operationItem);
 		}
 		if (showDisabledOps) {
 			for (String s : notEnabled) {
 				if (!"INITIALISATION".equals(s)) {
-					events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(),
-							withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED, false, false));
+					events.add(new OperationItem(
+						s,
+						s,
+						opToParams.get(s),
+						Collections.emptyList(),
+						withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
+						false,
+						false,
+						false
+					));
 				}
 			}
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
-				events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(),
-					OperationItem.Status.TIMEOUT, false, false));
-				
+				events.add(new OperationItem(
+					s,
+					s,
+					opToParams.get(s),
+					Collections.emptyList(),
+					OperationItem.Status.TIMEOUT,
+					false,
+					false,
+					false
+				));
 			}
 		}
 		
@@ -288,6 +305,7 @@ public final class OperationsView extends AnchorPane {
 				Collections.emptyList(),
 				Collections.emptyList(),
 				OperationItem.Status.MAX_REACHED,
+				false,
 				false,
 				false
 			));
