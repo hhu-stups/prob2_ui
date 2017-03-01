@@ -1,6 +1,6 @@
-/*plugins {
+plugins {
 	id "edu.sc.seis.macAppBundle" version "2.1.6"
-}*/
+}
 
 apply plugin: 'application'
 apply plugin: 'eclipse'
@@ -24,7 +24,7 @@ repositories {
 
 mainClassName = "de.prob2.ui.ProB2"
 
-/*macAppBundle {
+macAppBundle {
 	dmgName = "ProB-2.0-for-MacOS"
 	icon = "prob2.icns"
 	bundleJRE = true
@@ -35,7 +35,7 @@ macAppBundle.mainClassName = mainClassName
 if (hasProperty("macAppJRE")) {
 	// Used to set a custom JRE to bundle at the command line: -PmacAppJRE=/path/to/the/jre
 	macAppBundle.jreHome = macAppJRE
-}*/
+}
 
 sourceSets.main.java.srcDirs = []
 sourceSets.main.groovy.srcDirs += ["src/main/java"]
