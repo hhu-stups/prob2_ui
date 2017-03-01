@@ -153,15 +153,7 @@ public final class ProjectView extends AnchorPane {
 		runconfigurationsListView.itemsProperty().bind(currentProject.runconfigurationsProperty());
 		runconfigurationsListView.setOnMouseClicked(event -> {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-				Runconfiguration runconfig = runconfigurationsListView.getSelectionModel().getSelectedItem();
-				Machine m = currentProject.getMachine(runconfig.getMachine());
-				Map<String, String> pref = new HashMap<>();
-				if (!"default".equals(runconfig.getPreference())) {
-					pref = currentProject.getPreferencAsMap(runconfig.getPreference());
-				}
-				if (m != null && pref != null) {
-					machineLoader.loadAsync(m, pref);
-				}
+				startAnimation(runconfigurationsListView.getSelectionModel().getSelectedItem());
 			}
 		});
 	}
@@ -197,36 +189,17 @@ public final class ProjectView extends AnchorPane {
 	@FXML
 	void addRunconfiguration() {
 		injector.getInstance(RunconfigurationsDialog.class).showAndWait().ifPresent(currentProject::addRunconfiguration);
-		
-//		Dialog<Pair<Machine, Preference>> dialog = new Dialog<>();
-//		dialog.setTitle("New Runconfiguration");
-//		dialog.initStyle(StageStyle.UTILITY);
-//		dialog.getDialogPane().getStylesheets().add("prob.css");
-//		ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-//		dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
-//		GridPane grid = new GridPane();
-//		grid.setHgap(10);
-//		grid.setVgap(10);
-//		ChoiceBox<Machine> machinesBox = new ChoiceBox<>(currentProject.machinesProperty());
-//		grid.add(new Label("Machine:"), 0, 0);
-//		grid.add(machinesBox, 1, 0);
-//		ChoiceBox<Preference> prefsBox = new ChoiceBox<>();
-//		prefsBox.getItems().add(new Preference("default", null));
-//		prefsBox.getItems().addAll(currentProject.getPreferences());
-//		grid.add(new Label("Preference:"), 0, 1);
-//		grid.add(prefsBox, 1, 1);
-//
-//		dialog.getDialogPane().setContent(grid);
-//		dialog.getDialogPane().lookupButton(addButtonType).disableProperty()
-//				.bind(machinesBox.valueProperty().isNotNull().and(prefsBox.valueProperty().isNotNull()).not());
-//		dialog.setResultConverter(dialogButton -> {
-//			if (dialogButton == addButtonType) {
-//				return new Pair<>(machinesBox.getValue(), prefsBox.getValue());
-//			}
-//			return null;
-//		});
-//		Optional<Pair<Machine, Preference>> result = dialog.showAndWait();
-//		result.ifPresent(currentProject::addRunconfiguration);
+	}
+	
+	private void startAnimation(Runconfiguration runconfiguration) {
+		Machine m = currentProject.getMachine(runconfiguration.getMachine());
+		Map<String, String> pref = new HashMap<>();
+		if (!"default".equals(runconfiguration.getPreference())) {
+			pref = currentProject.getPreferencAsMap(runconfiguration.getPreference());
+		}
+		if (m != null && pref != null) {
+			machineLoader.loadAsync(m, pref);
+		}
 	}
 
 	private void showEditorStage(Machine machine) {
