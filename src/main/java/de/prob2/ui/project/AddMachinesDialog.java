@@ -81,7 +81,7 @@ public class AddMachinesDialog extends Dialog<Machine> {
 		
 		nameField.textProperty().addListener((observable, from, to) -> {
 			Button okButton = (Button) this.getDialogPane().lookupButton(okButtonType);
-			if (machineNamesSet.contains((String) to)) {
+			if (machineNamesSet.contains(to)) {
 				okButton.setDisable(true);
 				errorExplanationLabel.setText("There is already a machine named '" + to + "'");
 			} else if (to.isEmpty()) {
