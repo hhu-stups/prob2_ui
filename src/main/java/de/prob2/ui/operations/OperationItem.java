@@ -16,6 +16,7 @@ public class OperationItem {
 	private final OperationItem.Status status;
 	private final boolean explored;
 	private final boolean errored;
+	private final boolean skip;
 
 	public OperationItem(
 		final String id,
@@ -24,7 +25,8 @@ public class OperationItem {
 		final List<String> returnValues,
 		final OperationItem.Status status,
 		final boolean explored,
-		final boolean errored
+		final boolean errored,
+		final boolean skip
 	) {
 		this.id = Objects.requireNonNull(id);
 		this.name = Objects.requireNonNull(name);
@@ -33,6 +35,7 @@ public class OperationItem {
 		this.status = Objects.requireNonNull(status);
 		this.explored = explored;
 		this.errored = errored;
+		this.skip = skip;
 	}
 	
 	public String getName() {
@@ -61,6 +64,10 @@ public class OperationItem {
 	
 	public boolean isErrored() {
 		return errored;
+	}
+	
+	public boolean isSkip() {
+		return skip;
 	}
 
 	@Override
