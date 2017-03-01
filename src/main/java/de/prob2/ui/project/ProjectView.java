@@ -5,13 +5,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -20,11 +16,13 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.scripting.Api;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -43,6 +41,9 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class ProjectView extends AnchorPane {
@@ -193,7 +194,7 @@ public final class ProjectView extends AnchorPane {
 
 	private void showEditorStage(Machine machine) {
 		final BEditorStage editorStage = injector.getInstance(BEditorStage.class);
-		final Path path = Paths.get(currentProject.get().getLocation().getPath(), machine.getPath().toString());
+		final Path path = currentProject.getLocation().toPath().resolve(machine.getPath());
 		final String text;
 		try {
 			text = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
@@ -216,14 +217,14 @@ public final class ProjectView extends AnchorPane {
 		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
 		stateSpace.execute(cmd);
 		final File editor = new File(cmd.getValue());
-		Path machinePath = machine.getPath();
+		final Path machinePath = currentProject.getLocation().toPath().resolve(machine.getPath());
 		final String[] cmdline;
 		if (ProB2Module.IS_MAC && editor.isDirectory()) {
 			// On Mac, use the open tool to start app bundles
-			cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(), machinePath.toString() };
+			cmdline = new String[] {"/usr/bin/open", "-a", editor.getAbsolutePath(), machinePath.toString()};
 		} else {
 			// Run normal executables directly
-			cmdline = new String[] { editor.getAbsolutePath(), machinePath.toString() };
+			cmdline = new String[] {editor.getAbsolutePath(), machinePath.toString()};
 		}
 		final ProcessBuilder processBuilder = new ProcessBuilder(cmdline);
 		try {
