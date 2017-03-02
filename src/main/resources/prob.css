@@ -11,6 +11,7 @@
 	-prob-white-20: #EFEFEF33;
 	-prob-white-50: #EFEFEF80;
 	-prob-white-75: #EFEFEFBF;
+	-prob-lightblue: #1284F7;
 	-fx-focus-color: -prob-aqua;
 	-fx-accent: -prob-aqua;
 }
@@ -658,11 +659,6 @@
 	-fx-text-fill: -prob-aqua;
 }
 
-.operations-cell.skip {
-	-fx-border-color: lightskyblue;
-	-fx-text-fill: black;
-}
-
 .operations-cell.errored .glyph-icon,
 .operations-cell.unexplored .glyph-icon,
 .operations-cell.normal .glyph-icon {
@@ -670,7 +666,7 @@
 }
 
 .operations-cell.skip .glyph-icon {
-	-fx-fill: lightskyblue;
+	-fx-fill: -prob-lightblue;
 }
 
 .operations-cell.timeout .glyph-icon {
@@ -700,7 +696,8 @@
 }
 
 .tree-table-cell.errorresult {
-	-fx-background-color: palegoldenrod;
+	-fx-font-weight: bold;
+	-fx-text-fill: -prob-orange;
 }
 
 /* === FullValueStage === */
