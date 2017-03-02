@@ -54,7 +54,6 @@
 			<MenuItem text="%menu.perspectives.preset.default" onAction="#handleLoadDefault" />
 			<MenuItem text="%menu.perspectives.preset.separated" onAction="#handleLoadSeparated" />
 			<MenuItem text="%menu.perspectives.preset.separated2" onAction="#handleLoadSeparated2" />
-			<MenuItem text="%menu.perspectives.preset.stacked" onAction="#handleLoadStacked" />
 		</Menu>
 		<MenuItem text="%menu.perspectives.detach" onAction="#handleLoadDetached"/>
 		<MenuItem text="%menu.perspectives.load" onAction="#handleLoadPerspective" />
