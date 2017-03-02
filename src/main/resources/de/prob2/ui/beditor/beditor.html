@@ -12,15 +12,8 @@
 			<textarea id="code"></textarea>
 		</div>
 		<script>
-		    var TO;
-		    
-    		function compile(cm) {
-    			blexer.computeHighlighting(editor.getValue());
-    		}
-    		
     		function onChange(cm) {
-       			clearTimeout(TO);
-       			TO = setTimeout(function(){compile(cm);}, 500);
+       			blexer.computeHighlighting(cm.getValue());
     		}
     		
 			var code = document.getElementById('code');
