@@ -636,34 +636,53 @@
 }
 
 /* ================= OPERATIONS VIEW ================= */
-.errored {
+
+.operations-cell {
+	-fx-border-color: transparent;
 	-fx-border-width: 0.0 0.0 0.0 0.3em;
+	-fx-graphic-text-gap: 10;
+	-fx-padding: 0.4em 0.0 0.4em 1.0em;
+}
+
+.operations-cell.enabled:hover {
+	-fx-background-color: -prob-grey-20;
+}
+
+.operations-cell.errored {
 	-fx-border-color: -prob-orange;
 	-fx-text-fill: -prob-orange;
-	-fx-padding: 0.4em 0.0 0.4em 1.0em;
 }
-.unexplored {
-	-fx-border-width: 0.0 0.0 0.0 0.3em;
+
+.operations-cell.unexplored {
 	-fx-border-color: -prob-aqua;
 	-fx-text-fill: -prob-aqua;
-	-fx-padding: 0.4em 0.0 0.4em 1.0em;
 }
-.skip {
-	-fx-border-width: 0.0 0.0 0.0 0.3em;
+
+.operations-cell.skip {
 	-fx-border-color: lightskyblue;
 	-fx-text-fill: black;
-	-fx-padding: 0.4em 0.0 0.4em 1.0em;
 }
-.normal {
-	-fx-border-width: 0.0 0.0 0.0 0.3em;
-	-fx-border-color: transparent;
-	-fx-text-fill: black;
-	-fx-padding: 0.4em 0.0 0.4em 1.0em;
+
+.operations-cell.errored .glyph-icon,
+.operations-cell.unexplored .glyph-icon,
+.operations-cell.normal .glyph-icon {
+	-fx-fill: limegreen;
 }
-.unexplored:hover,
-.errored:hover,
-.normal:hover {
-	-fx-background-color: -prob-grey-20;
+
+.operations-cell.skip .glyph-icon {
+	-fx-fill: lightskyblue;
+}
+
+.operations-cell.timeout .glyph-icon {
+	-fx-fill: orange;
+}
+
+.operations-cell.disabled .glyph-icon {
+	-fx-fill: red;
+}
+
+.operations-cell.max-reached .glyph-icon {
+	-fx-fill: orange;
 }
 
 /* =================== STATES VIEW =================== */

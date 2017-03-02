@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.classicalb.Operation;
@@ -30,8 +31,10 @@ import de.prob.model.representation.Machine;
 import de.prob.model.representation.Variable;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
@@ -45,7 +48,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
+
 import se.sawano.java.text.AlphanumericComparator;
 
 @Singleton
@@ -55,51 +58,49 @@ public final class OperationsView extends AnchorPane {
 	}
 
 	private static final class OperationsCell extends ListCell<OperationItem> {
+		public OperationsCell() {
+			super();
+			
+			getStyleClass().add("operations-cell");
+		}
+		
 		@Override
 		protected void updateItem(OperationItem item, boolean empty) {
 			super.updateItem(item, empty);
+			getStyleClass().removeAll("enabled", "timeout", "unexplored", "errored", "skip", "normal", "disabled", "max-reached");
 			if (item != null && !empty) {
 				setText(item.toString());
-				setGraphicTextGap(10.0);
+				setDisable(true);
 				final FontAwesomeIconView icon;
 				switch (item.getStatus()) {
 					case TIMEOUT:
 						icon = new FontAwesomeIconView(FontAwesomeIcon.CLOCK_ALT);
-						icon.setFill(Color.ORANGE);
-						setDisable(true);
-						getStyleClass().clear();
-						getStyleClass().add("normal");
+						getStyleClass().add("timeout");
 						break;
 					
 					case ENABLED:
 						icon = new FontAwesomeIconView(item.isSkip() ? FontAwesomeIcon.REPEAT : FontAwesomeIcon.PLAY);
-						icon.setFill(item.isSkip() ? Color.LIGHTSKYBLUE : Color.LIMEGREEN);
 						setDisable(false);
+						getStyleClass().add("enabled");
 						if (!item.isExplored()) {
-							getStyleClass().setAll("unexplored");
+							getStyleClass().add("unexplored");
 						} else if (item.isErrored()) {
-							getStyleClass().setAll("errored");
+							getStyleClass().add("errored");
 						} else if (item.isSkip()) {
-							getStyleClass().setAll("skip");
+							getStyleClass().add("skip");
 						} else {
-							getStyleClass().setAll("normal");
+							getStyleClass().add("normal");
 						}
 						break;
 					
 					case DISABLED:
 						icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
-						icon.setFill(Color.RED);
-						setDisable(true);
-						getStyleClass().clear();
-						getStyleClass().add("normal");
+						getStyleClass().add("disabled");
 						break;
 					
 					case MAX_REACHED:
 						icon = new FontAwesomeIconView(FontAwesomeIcon.ELLIPSIS_H);
-						icon.setFill(Color.ORANGE);
-						setDisable(true);
-						getStyleClass().clear();
-						getStyleClass().add("normal");
+						getStyleClass().add("max-reached");
 						break;
 					
 					default:
@@ -109,7 +110,6 @@ public final class OperationsView extends AnchorPane {
 			} else {
 				setGraphic(null);
 				setText(null);
-				getStyleClass().clear();
 			}
 		}
 	}
