@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -16,13 +19,11 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.scripting.Api;
 import de.prob.statespace.StateSpace;
-
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
-
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -41,9 +42,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class ProjectView extends AnchorPane {
@@ -115,6 +113,10 @@ public final class ProjectView extends AnchorPane {
 		machinesTable.setRowFactory(tableView -> {
 			final TableRow<Machine> row = new TableRow<>();
 
+			final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
+			removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(row.getItem()));
+			removeMachineMenuItem.disableProperty().bind(row.emptyProperty());
+			
 			final MenuItem editFileMenuItem = new MenuItem("Edit File");
 			editFileMenuItem.setOnAction(event -> this.showEditorStage(row.getItem()));
 			editFileMenuItem.disableProperty().bind(row.emptyProperty());
@@ -123,7 +125,7 @@ public final class ProjectView extends AnchorPane {
 			editExternalMenuItem.setOnAction(event -> this.showExternalEditor(row.getItem()));
 			editExternalMenuItem.disableProperty().bind(row.emptyProperty());
 
-			row.setContextMenu(new ContextMenu(editFileMenuItem, editExternalMenuItem));
+			row.setContextMenu(new ContextMenu(removeMachineMenuItem, editFileMenuItem, editExternalMenuItem));
 
 			row.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
