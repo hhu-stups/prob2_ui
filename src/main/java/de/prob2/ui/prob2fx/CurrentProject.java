@@ -126,10 +126,24 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
 				this.getRunconfigurations(), this.getLocation()));
 	}
+	
+	public void removePreference(Preference preference) {
+		List<Preference> preferencesList = this.getPreferences();
+		preferencesList.remove(preference);
+		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
+				this.getRunconfigurations(), this.getLocation()));
+	}
 
 	public void addRunconfiguration(Runconfiguration runconfiguration) {
 		List<Runconfiguration> runconfigs = this.getRunconfigurations();
 		runconfigs.add(runconfiguration);
+		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
+				runconfigs, this.getLocation()));
+	}
+	
+	public void removeRunconfiguration(Runconfiguration runconfiguration) {
+		List<Runconfiguration> runconfigs = this.getRunconfigurations();
+		runconfigs.remove(runconfiguration);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
 				runconfigs, this.getLocation()));
 	}
