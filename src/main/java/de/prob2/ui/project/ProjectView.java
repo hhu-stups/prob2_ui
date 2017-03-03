@@ -92,7 +92,13 @@ public final class ProjectView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		// Project Tab
+		initProjectTab();
+		initMachinesTab();
+		initPreferencesTab();
+		initRunconfigurationsTab();
+	}
+
+	private void initProjectTab() {
 		projectTabPane.visibleProperty().bind(currentProject.existsProperty());
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 
@@ -105,8 +111,9 @@ public final class ProjectView extends AnchorPane {
 			}
 			projectDescriptionText.setWrappingWidth(newValue.doubleValue() - 20);
 		});
-
-		// MachinesTab
+	}
+	
+	private void initMachinesTab() {
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		machineColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<Path>(cellData.getValue().getPath()));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -138,8 +145,9 @@ public final class ProjectView extends AnchorPane {
 			return row;
 		});
 		machinesTable.itemsProperty().bind(currentProject.machinesProperty());
-
-		// Preferences Tab
+	}
+	
+	private void initPreferencesTab() {
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
 		preferencesListView.setCellFactory(listView -> {
 			ListCell<Preference> cell = new ListCell<Preference>() {
@@ -164,8 +172,9 @@ public final class ProjectView extends AnchorPane {
 
 			return cell;
 		});
-
-		// Runconfigurations Tab
+	}
+	
+	public void initRunconfigurationsTab() {
 		runconfigsPlaceholder.setText("Add machines first");
 		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
 			if (to) {
