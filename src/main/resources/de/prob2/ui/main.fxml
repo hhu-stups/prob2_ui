@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.history.HistoryView?>
-<?import de.prob2.ui.MainController?>
-<?import de.prob2.ui.project.ProjectView?>
 <?import de.prob2.ui.menu.MenuController?>
 <?import de.prob2.ui.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.operations.OperationsView?>
@@ -11,29 +9,48 @@
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TitledPane?>
-<fx:root type="MainController" maxHeight="Infinity" maxWidth="Infinity" xmlns:fx="http://javafx.com/fxml/1">
+<?import de.prob2.ui.MainController?>
+<?import de.prob2.ui.project.ProjectView?>
+
+<fx:root type="MainController" maxHeight="Infinity"
+			maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
+			prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
-		<SplitPane fx:id="horizontalSP" dividerPositions="0.26">
-			<Accordion fx:id="leftAccordion">
+		<SplitPane fx:id="horizontalSP" dividerPositions="0.26,0.8">
+			<Accordion fx:id = "leftAccordion" expandedPane="$operationsTP">
 				<panes>
-					<TitledPane fx:id = "operationsTP" text="%tptitles.operations" onMouseClicked="#operationsTPClicked">
+					<TitledPane text="%tptitles.operations" fx:id="operationsTP" collapsible="true"  onMouseClicked="#operationsTPClicked">
 						<OperationsView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.history" fx:id ="historyTP" onMouseClicked="#historyTPClicked">
-						<HistoryView/>
-					</TitledPane>
-					<TitledPane text="%tptitles.modelcheck" fx:id = "modelcheckTP" onMouseClicked="#modelcheckTPClicked">
-						<ModelcheckingController/>
-					</TitledPane>
-					<TitledPane text="%tptitles.stats" fx:id ="statsTP" onMouseClicked="#statsTPClicked">
+				</panes>
+			</Accordion>
+			<SplitPane fx:id="verticalSP" dividerPositions="0.8" orientation="VERTICAL">
+				<MainView/>
+			</SplitPane>
+			<SplitPane fx:id="verticalSP2" dividerPositions="0.5" orientation="VERTICAL">
+				<Accordion fx:id = "rightAccordion1"  expandedPane="$statsTP">
+				<panes>
+					<TitledPane text="%tptitles.stats" fx:id="statsTP" onMouseClicked="#statsTPClicked">
 						<StatsView/>
+					</TitledPane>
+					<TitledPane text="%tptitles.modelcheck" fx:id="modelcheckTP" onMouseClicked="#modelcheckTPClicked">
+						<ModelcheckingController/>
 					</TitledPane>
 					<TitledPane text="%tptitles.project" fx:id = "projectTP" onMouseClicked="#projectTPClicked">
 						<ProjectView/>
 					</TitledPane>
 				</panes>
 			</Accordion>
-			<MainView/>
+				<Accordion fx:id = "rightAccordion2" expandedPane="$historyTP">
+				<panes>
+					<TitledPane text="%tptitles.history" fx:id="historyTP" onMouseClicked="#historyTPClicked">
+						<HistoryView/>
+					</TitledPane>
+				</panes>
+			</Accordion>
+			</SplitPane>
+			
+			
 		</SplitPane>
 	</center>
 	<top>
