@@ -24,6 +24,8 @@ public class BTokenProvider {
 	private static final Map<Class<? extends Token>, String> syntaxClasses = new HashMap<>();
 	
 	private LinkedList<Token> tokens;
+
+	private boolean initialized;
 					
 	static {
 			addTokens("b-type", TIdentifierLiteral.class);
@@ -63,6 +65,7 @@ public class BTokenProvider {
 		this.tokens = new LinkedList<>();
         JSObject jsobj = (JSObject) engine.executeScript("window");
         jsobj.setMember("blexer", this);
+        initialized = false;
 	}
 			
 	@SafeVarargs
@@ -73,22 +76,27 @@ public class BTokenProvider {
 	}
 	
 	public void computeHighlighting(String text) {
-		tokens.clear();
-		text.replaceAll("\n", " ");
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
 		try {
 			Token t;
 			do {
 				t = lexer.next();
-				tokens.add(t);
+				if(!"\n".equals(t.getText())) {
+					tokens.add(t);
+				}
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
 			LOGGER.error("Failed to lex", e);
 		}
+		initialized = true;
 	}
-	
+
 	public Token getNextToken() {
 		return tokens.poll();
+	}
+
+	public boolean isInitialized() {
+		return initialized;
 	}
 	
 	public String getStyleclassFromToken(Token t) {
@@ -96,7 +104,6 @@ public class BTokenProvider {
 		if(clazz == null) {
 			clazz = "b-nothing";
 		}
-		
 		return clazz;
 	}
 	
