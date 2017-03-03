@@ -65,6 +65,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		
 		private ModelCheckingOptions getOptions() {
 			ModelCheckingOptions options = new ModelCheckingOptions();
+			//TODO: Use selected strategy in modelchecking
 			if(selectSearchStrategy.getSelectionModel().isSelected(0)) {
 				options = options.breadthFirst(true);
 				options = options.depthFirst(false);
