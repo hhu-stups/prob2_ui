@@ -40,6 +40,13 @@ if (hasProperty("macAppJRE")) {
 sourceSets.main.java.srcDirs = []
 sourceSets.main.groovy.srcDirs += ["src/main/java"]
 
+tasks.withType(JavaCompile) {
+	options.encoding = "UTF-8"
+}
+
+tasks.withType(GroovyCompile) {
+	options.encoding = "UTF-8"
+}
 
 dependencies {
 	compile 'com.google.code.gson:gson:2.7'

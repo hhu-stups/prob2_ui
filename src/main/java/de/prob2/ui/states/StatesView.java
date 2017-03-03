@@ -20,6 +20,7 @@ import de.prob.animator.domainobjects.StateError;
 import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractFormulaElement;
+import de.prob.model.representation.Invariant;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 
@@ -141,6 +142,14 @@ public final class StatesView extends AnchorPane {
 			}
 
 			this.updateChildren(trace, childItem, e);
+			
+			// If an invariant is FALSE, mark it as errored
+			if (Invariant.class.equals(treeItem.getValue().getContents()) && e instanceof AbstractFormulaElement) {
+				final AbstractEvalResult result = this.currentValues.get(((AbstractFormulaElement)e).getFormula());
+				if (result instanceof EvalResult && "FALSE".equals(((EvalResult)result).getValue())) {
+					childItem.setValue(new StateItem<>(childItem.getValue().getContents(), true));
+				}
+			}
 
 			if (childItem.getValue().isErrored()) {
 				hasError = true;

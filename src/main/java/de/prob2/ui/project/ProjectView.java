@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -16,13 +19,11 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.scripting.Api;
 import de.prob.statespace.StateSpace;
-
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
-
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -30,6 +31,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TabPane;
@@ -41,9 +43,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class ProjectView extends AnchorPane {
@@ -93,7 +92,13 @@ public final class ProjectView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		// Project Tab
+		initProjectTab();
+		initMachinesTab();
+		initPreferencesTab();
+		initRunconfigurationsTab();
+	}
+
+	private void initProjectTab() {
 		projectTabPane.visibleProperty().bind(currentProject.existsProperty());
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 
@@ -106,14 +111,19 @@ public final class ProjectView extends AnchorPane {
 			}
 			projectDescriptionText.setWrappingWidth(newValue.doubleValue() - 20);
 		});
-
-		// MachinesTab
+	}
+	
+	private void initMachinesTab() {
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		machineColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<Path>(cellData.getValue().getPath()));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 		machinesTable.setRowFactory(tableView -> {
 			final TableRow<Machine> row = new TableRow<>();
+
+			final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
+			removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(row.getItem()));
+			removeMachineMenuItem.disableProperty().bind(row.emptyProperty());
 
 			final MenuItem editFileMenuItem = new MenuItem("Edit File");
 			editFileMenuItem.setOnAction(event -> this.showEditorStage(row.getItem()));
@@ -123,7 +133,7 @@ public final class ProjectView extends AnchorPane {
 			editExternalMenuItem.setOnAction(event -> this.showExternalEditor(row.getItem()));
 			editExternalMenuItem.disableProperty().bind(row.emptyProperty());
 
-			row.setContextMenu(new ContextMenu(editFileMenuItem, editExternalMenuItem));
+			row.setContextMenu(new ContextMenu(removeMachineMenuItem, editFileMenuItem, editExternalMenuItem));
 
 			row.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
@@ -135,11 +145,36 @@ public final class ProjectView extends AnchorPane {
 			return row;
 		});
 		machinesTable.itemsProperty().bind(currentProject.machinesProperty());
-
-		// Preferences Tab
+	}
+	
+	private void initPreferencesTab() {
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
+		preferencesListView.setCellFactory(listView -> {
+			ListCell<Preference> cell = new ListCell<Preference>() {
+				@Override
+				public void updateItem(Preference preference, boolean empty) {
+					super.updateItem(preference, empty);
+					if (empty) {
+						setText(null);
+						setGraphic(null);
+					} else {
+						setText(preference.getName());
+						setGraphic(null);
+					}
+				}
+			};
 
-		// Runconfigurations Tab
+			final MenuItem removePreferenceMenuItem = new MenuItem("Remove Preference");
+			removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
+			removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
+
+			cell.setContextMenu(new ContextMenu(removePreferenceMenuItem));
+
+			return cell;
+		});
+	}
+	
+	public void initRunconfigurationsTab() {
 		runconfigsPlaceholder.setText("Add machines first");
 		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
 			if (to) {
@@ -151,6 +186,29 @@ public final class ProjectView extends AnchorPane {
 			}
 		});
 		runconfigurationsListView.itemsProperty().bind(currentProject.runconfigurationsProperty());
+		runconfigurationsListView.setCellFactory(listView -> {
+			ListCell<Runconfiguration> cell = new ListCell<Runconfiguration>() {
+				@Override
+				public void updateItem(Runconfiguration runconfiguration, boolean empty) {
+					super.updateItem(runconfiguration, empty);
+					if (empty) {
+						setText(null);
+						setGraphic(null);
+					} else {
+						setText(runconfiguration.toString());
+						setGraphic(null);
+					}
+				}
+			};
+
+			final MenuItem removeRunconfigMenuItem = new MenuItem("Remove Runconfiguration");
+			removeRunconfigMenuItem.setOnAction(event -> currentProject.removeRunconfiguration(cell.getItem()));
+			removeRunconfigMenuItem.disableProperty().bind(cell.emptyProperty());
+
+			cell.setContextMenu(new ContextMenu(removeRunconfigMenuItem));
+
+			return cell;
+		});
 		runconfigurationsListView.setOnMouseClicked(event -> {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 				startAnimation(runconfigurationsListView.getSelectionModel().getSelectedItem());
@@ -221,10 +279,10 @@ public final class ProjectView extends AnchorPane {
 		final String[] cmdline;
 		if (ProB2Module.IS_MAC && editor.isDirectory()) {
 			// On Mac, use the open tool to start app bundles
-			cmdline = new String[] {"/usr/bin/open", "-a", editor.getAbsolutePath(), machinePath.toString()};
+			cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(), machinePath.toString() };
 		} else {
 			// Run normal executables directly
-			cmdline = new String[] {editor.getAbsolutePath(), machinePath.toString()};
+			cmdline = new String[] { editor.getAbsolutePath(), machinePath.toString() };
 		}
 		final ProcessBuilder processBuilder = new ProcessBuilder(cmdline);
 		try {
