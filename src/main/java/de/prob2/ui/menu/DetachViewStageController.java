@@ -46,7 +46,6 @@ public final class DetachViewStageController extends Stage {
 	@FXML private CheckBox detachModelcheck;
 	@FXML private CheckBox detachStats;
 	@FXML private CheckBox detachProjects;
-	@FXML private CheckBox detachAnimations;
 	
 	private final Injector injector;
 	private final StageManager stageManager;
@@ -143,6 +142,7 @@ public final class DetachViewStageController extends Stage {
 		if (accordion.getPanes().isEmpty()) {
 			accordion.setVisible(false);
 			accordion.setMaxWidth(0);
+			accordion.setMaxHeight(0);
 			pane.setDividerPositions(pane.getItems().indexOf(accordion));
 			pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(true));
 		}
@@ -160,6 +160,7 @@ public final class DetachViewStageController extends Stage {
 			checkBoxMap.get(node.getClass()).setSelected(false);
 			accordion.setVisible(true);
 			accordion.setMaxWidth(Double.POSITIVE_INFINITY);
+			accordion.setMaxHeight(Double.POSITIVE_INFINITY);
 			if (accordion.getExpandedPane()!=null) {
 				accordion.getExpandedPane().setExpanded(false);
 			}
