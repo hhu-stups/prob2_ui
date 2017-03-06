@@ -4,10 +4,10 @@ SETS
 	PID = {PID1,PID2,PID3}
 
 /* LTL Formulas:
-  G (e(del) -> {card(ready \\/ waiting)>0})  TRUE
-  G ({card(ready \\/ waiting)>0} -> e(del))    FALSE
-  G ({card(active)>0} -> (e(swap) U {card(active)=0}))  FALSE
-  G ({card(active)>0} -> ((G e(swap)) | (e(swap) U {card(active)=0})))  TRUE
+	G (e(del) -> {card(ready \\/ waiting)>0}) TRUE
+	G ({card(ready \\/ waiting)>0} -> e(del)) FALSE
+	G ({card(active)>0} -> (e(swap) U {card(active)=0})) FALSE
+	G ({card(active)>0} -> ((G e(swap)) | (e(swap) U {card(active)=0}))) TRUE
 */
 
 VARIABLES active, ready, waiting
@@ -15,18 +15,18 @@ VARIABLES active, ready, waiting
 DEFINITIONS
 	scope_PID == 1..3
 
-INVARIANT 
+INVARIANT
 	active : POW(PID) & ready : POW(PID) & waiting: POW(PID) & /* the types */
 	/* and now the rest of the invariant */
 	active <: PID &
-	ready <: PID   &
+	ready <: PID &
 	waiting <: PID &
 	(ready /\ waiting) = {} &
 	active /\ (ready \/ waiting) = {} &
 	card(active) <= 1 &
-	((active = {})  => (ready = {}))
+	((active = {}) => (ready = {}))
 
-INITIALISATION  
+INITIALISATION
 	active := {} || ready := {} || waiting := {}
 
 OPERATIONS
@@ -35,16 +35,16 @@ rr <-- nr_ready = rr:= card(ready);
 
 new(pp) =
 	SELECT
-		pp : PID  &
+		pp : PID &
 		pp /: active &
-		pp /: (ready \/ waiting) 
+		pp /: (ready \/ waiting)
 	THEN
 		waiting := (waiting \/ { pp })
 	END;
 
 del(pp) =
 	SELECT
-		pp : waiting 
+		pp : waiting
 	THEN
 		waiting := waiting - { pp }
 	END;
@@ -57,7 +57,7 @@ ready(rr) =
 		IF (active = {}) THEN
 			active := {rr}
 		ELSE
-			ready := ready \/ {rr} 
+			ready := ready \/ {rr}
 		END
 	END;
 
@@ -72,7 +72,7 @@ swap =
 			ANY pp WHERE pp : ready
 			THEN
 				active := {pp} ||
-				ready := ready - {pp} 
+				ready := ready - {pp}
 			END
 		END
 	END

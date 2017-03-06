@@ -19,7 +19,7 @@
 		<SplitPane fx:id="horizontalSP" dividerPositions="0.26,0.8">
 			<Accordion fx:id = "leftAccordion" expandedPane="$operationsTP">
 				<panes>
-					<TitledPane text="%tptitles.operations" fx:id="operationsTP" collapsible="false"  onMouseClicked="#operationsTPClicked">
+					<TitledPane text="%tptitles.operations" fx:id="operationsTP" collapsible="false" onMouseClicked="#operationsTPClicked">
 						<OperationsView/>
 					</TitledPane>
 				</panes>

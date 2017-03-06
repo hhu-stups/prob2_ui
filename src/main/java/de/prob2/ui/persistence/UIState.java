@@ -77,7 +77,7 @@ public class UIState {
 	}
 	
 	public void updateSavedStageBoxes() {
-		for (final Map.Entry<String, Reference<Stage>> entry : this.getStages().entrySet()) {	
+		for (final Map.Entry<String, Reference<Stage>> entry : this.getStages().entrySet()) {
 			final Stage stage = entry.getValue().get();
 			if (stage != null) {
 				this.getSavedStageBoxes().put(

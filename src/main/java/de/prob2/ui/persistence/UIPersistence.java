@@ -2,9 +2,6 @@ package de.prob2.ui.persistence;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -19,8 +16,12 @@ import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.states.StatesView;
+
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class UIPersistence {
@@ -114,7 +115,7 @@ public final class UIPersistence {
 			}
 		}
 		
-		for(String titledPane : new String[] {"Operations", "History", "Animations", "Model Check", "Statistics"}) {
+		for (String titledPane : new String[] {"Operations", "History", "Animations", "Model Check", "Statistics"}) {
 			if (uiState.getExpandedTitledPanes().contains(titledPane)) {
 				main.expandTitledPane(titledPane);
 			}

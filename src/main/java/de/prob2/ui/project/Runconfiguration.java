@@ -19,31 +19,32 @@ public class Runconfiguration {
 	
 	@Override
 	public String toString() {
-		if("default".equals(this.preference)) 
+		if ("default".equals(this.preference)) {
 			return this.machine;
+		}
 		return this.machine + "." + this.preference;
 	}
 	
 	@Override
 	public boolean equals(Object object) {
-	    if (object == null) {
-	        return false;
-	    }
-	    if(!(object instanceof Runconfiguration)) {
-	    	return false;
-	    }
-	    final Runconfiguration runconfig = (Runconfiguration) object;
-	    if (this.machine == null || runconfig.machine == null || !this.machine.equals(runconfig.machine)) {
-	        return false;
-	    }
-	    if (this.preference == null || runconfig.preference == null || !this.preference.equals(runconfig.preference) ) {
-	        return false;
-	    }
-	    return true;
+		if (object == null) {
+			return false;
+		}
+		if (!(object instanceof Runconfiguration)) {
+			return false;
+		}
+		final Runconfiguration runconfig = (Runconfiguration) object;
+		if (this.machine == null || runconfig.machine == null || !this.machine.equals(runconfig.machine)) {
+			return false;
+		}
+		if (this.preference == null || runconfig.preference == null || !this.preference.equals(runconfig.preference) ) {
+			return false;
+		}
+		return true;
 	}
 	
 	@Override
 	public int hashCode() {
-	    return this.machine.hashCode() + this.preference.hashCode();
+		return this.machine.hashCode() + this.preference.hashCode();
 	}
 }

@@ -12,20 +12,20 @@
 			<textarea id="code"></textarea>
 		</div>
 		<script>
-    		function onChange(cm) {
+			function onChange(cm) {
 				blexer.computeHighlighting(cm.getValue(), cm.getCursor().line + '');
-    		}
+			}
 
 			var code = document.getElementById('code');
 			var editor = CodeMirror.fromTextArea(code, {
 				lineNumbers: true,
 				indentUnit: 4,
 				autoCloseBrackets: true,
-				matchBrackets: true, 
+				matchBrackets: true,
 				mode: "text/b"
 			});
-						
-			editor.on("change", onChange)
+			
+			editor.on("change", onChange);
 			
 			function changeFontSize(size) {
 				editor.getWrapperElement().style["font-size"] = size+"px";

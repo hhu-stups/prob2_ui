@@ -137,7 +137,7 @@ public class GroovyClassStage extends Stage {
 	}
 	
 	private void handleArrays(Object object) {
-		if(object instanceof Object[]) {
+		if (object instanceof Object[]) {
 			// Check Array of Objects
 			Object[] objects = (Object[]) object;
 			for (int i = 0; i < objects.length; i++) {
@@ -150,7 +150,7 @@ public class GroovyClassStage extends Stage {
 		} else {
 			// Check Array of Primitives
 			int length = Array.getLength(object);
-			for(int i = 0; i < length; i++) {
+			for (int i = 0; i < length; i++) {
 				collectionData.add(new CollectionDataItem(i,Array.get(object, i)));
 			}
 		}

@@ -70,7 +70,7 @@
 }
 
 .icon-dark:hover, .menu-button:hover > .arrow-button > .arrow,
-.menu-button:hover .icon-dark  {
+.menu-button:hover .icon-dark {
 	-fx-opacity: 1.0;
 }
 
@@ -127,7 +127,7 @@
 	-fx-background-radius: 5.0;
 }
 .combo-box-popup > .list-view {
-	-fx-background-color: -prob-grey-75;  
+	-fx-background-color: -prob-grey-75;
 	-fx-background-radius: 3.0 3.0 3.0 3.0;
 }
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
@@ -609,7 +609,7 @@
 }
 
 .mcheckNoCheck {
-	-fx-background-color:  #eeeeee;
+	-fx-background-color: #eeeeee;
 	-fx-background-radius: 5.0 5.0 5.0 5.0;
 }
 

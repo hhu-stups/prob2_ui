@@ -49,14 +49,14 @@ public class FormulaView extends Stage {
 
 		});
 		graph.setOnMouseClicked(e -> {
-			if(e.getClickCount() < 2) {
+			if (e.getClickCount() < 2) {
 				return;
 			}
 
-			if(e.getButton() == MouseButton.PRIMARY) {
-				graph.getTransforms().add(new Scale(1.3, 1.3));	
+			if (e.getButton() == MouseButton.PRIMARY) {
+				graph.getTransforms().add(new Scale(1.3, 1.3));
 				dragFactor *= 1.3;
-			} else if(e.getButton() == MouseButton.SECONDARY) {
+			} else if (e.getButton() == MouseButton.SECONDARY) {
 				graph.getTransforms().add(new Scale(0.8, 0.8));
 				dragFactor *= 0.8;
 			}

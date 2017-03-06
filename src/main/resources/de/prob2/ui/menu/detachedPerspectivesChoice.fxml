@@ -8,20 +8,20 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <fx:root type="Stage" fx:id="detached" title="%menu.perspectives.detach" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
-    <scene>
-        <Scene fill="TRANSPARENT">
-            <AnchorPane stylesheets="@/prob.css" styleClass="dialog" minWidth="400">
-                <Label text="%menu.perspectives.detachStage" AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"/>
-                <VBox layoutX="11.0" layoutY="69.0" spacing="15.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="50.0" AnchorPane.topAnchor="40.0" styleClass="dark">
-                    <CheckBox fx:id="detachOperations" text="%menu.perspectives.detachStage.operations"/>
-                    <CheckBox fx:id="detachHistory" text="%menu.perspectives.detachStage.history"/>
-                    <CheckBox fx:id="detachModelcheck" text="%menu.perspectives.detachStage.modelcheck"/>
-                    <CheckBox fx:id="detachStats" text="%menu.perspectives.detachStage.stats"/>
-                    <CheckBox fx:id="detachProjects" text="%menu.perspectives.detachStage.projects"/>
-                    <CheckBox fx:id="detachAnimations" text="%menu.perspectives.detachStage.animations"/>
-                </VBox>
-                <Button fx:id="apply" onAction="#apply" text="%menu.perspectives.detachStage.apply" AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="270.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"/>
-            </AnchorPane>
-        </Scene>
-    </scene>
+	<scene>
+		<Scene fill="TRANSPARENT">
+			<AnchorPane stylesheets="@/prob.css" styleClass="dialog" minWidth="400">
+				<Label text="%menu.perspectives.detachStage" AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"/>
+				<VBox layoutX="11.0" layoutY="69.0" spacing="15.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="50.0" AnchorPane.topAnchor="40.0" styleClass="dark">
+					<CheckBox fx:id="detachOperations" text="%menu.perspectives.detachStage.operations"/>
+					<CheckBox fx:id="detachHistory" text="%menu.perspectives.detachStage.history"/>
+					<CheckBox fx:id="detachModelcheck" text="%menu.perspectives.detachStage.modelcheck"/>
+					<CheckBox fx:id="detachStats" text="%menu.perspectives.detachStage.stats"/>
+					<CheckBox fx:id="detachProjects" text="%menu.perspectives.detachStage.projects"/>
+					<CheckBox fx:id="detachAnimations" text="%menu.perspectives.detachStage.animations"/>
+				</VBox>
+				<Button fx:id="apply" onAction="#apply" text="%menu.perspectives.detachStage.apply" AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="270.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"/>
+			</AnchorPane>
+		</Scene>
+	</scene>
 </fx:root>

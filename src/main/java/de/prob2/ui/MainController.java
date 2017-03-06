@@ -137,27 +137,27 @@ public class MainController extends BorderPane {
 	}
 	
 	public double[] getHorizontalDividerPositions() {
-		if(horizontalSP != null) {
+		if (horizontalSP != null) {
 			return horizontalSP.getDividerPositions();
 		}
 		return new double[]{};
 	}
 	
 	public double[] getVerticalDividerPositions() {
-		if(verticalSP != null) {
+		if (verticalSP != null) {
 			return verticalSP.getDividerPositions();
 		}
 		return new double[]{};
 	}
 	
 	public void setHorizontalDividerPositions(double [] pos) {
-		if(horizontalSP != null) {
+		if (horizontalSP != null) {
 			horizontalSP.setDividerPositions(pos);
 		}
 	}
 	
 	public void setVerticalDividerPositions(double[] pos) {
-		if(verticalSP != null) {
+		if (verticalSP != null) {
 			verticalSP.setDividerPositions(pos);
 		}
 	}

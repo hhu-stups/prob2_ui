@@ -25,7 +25,7 @@ public class GroovyObjectItem extends GroovyAbstractItem {
 		this.clazz = object.getClass();
 		this.clazzname = new SimpleStringProperty(this, "clazzname", clazz.getSimpleName());
 		this.value = new SimpleStringProperty(this, "value", object.toString());
-		if(classstage == null) {
+		if (classstage == null) {
 			return;
 		}
 		this.classstage = classstage;
@@ -52,7 +52,7 @@ public class GroovyObjectItem extends GroovyAbstractItem {
 		classstage.setTitle(clazz.getSimpleName());
 		classstage.showMethodsAndFields(object);
 		classstage.show();
-		if(openBy == ShowEnum.DEFAULT) {
+		if (openBy == ShowEnum.DEFAULT) {
 			uiState.addGroovyObjectTab("Class");
 		} else {
 			classstage.openTab(uiState.getGroovyObjectTabs().get(index));

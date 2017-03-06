@@ -5,16 +5,16 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import org.fxmisc.richtext.StyleClassedTextArea;
-import org.fxmisc.wellbehaved.event.EventPattern;
-import org.fxmisc.wellbehaved.event.InputMap;
-import org.fxmisc.wellbehaved.event.Nodes;
-
 import javafx.scene.control.IndexRange;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
+
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
 
 
 public abstract class Console extends StyleClassedTextArea {
@@ -55,7 +55,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public void setEvents() {
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.mouseClicked(MouseButton.PRIMARY), e->  this.mouseClicked()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.mouseClicked(MouseButton.PRIMARY), e -> this.mouseClicked()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(), this::keyPressed));
 		
 		// GUI-style shortcuts, these should use the Shortcut key (i. e. Command on Mac, Control on other systems).
@@ -84,10 +84,10 @@ public abstract class Console extends StyleClassedTextArea {
 		
 	@Override
 	public void paste() {
-		if(searchHandler.isActive()) {
+		if (searchHandler.isActive()) {
 			return;
 		}
-		if(this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
+		if (this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
 			goToLastPos();
 		}
 		String oldText = this.getText();
@@ -95,7 +95,7 @@ public abstract class Console extends StyleClassedTextArea {
 		int diff = this.getLength() - oldText.length();
 		int posOfEnter = oldText.lastIndexOf('\n');
 		String currentLine = this.getText().substring(posOfEnter + 3, this.getText().length());
-		if(currentLine.contains("\n")) {
+		if (currentLine.contains("\n")) {
 			this.deleteText(this.getText().length() - currentLine.length(), this.getText().length());
 			goToLastPos();
 			return;
@@ -111,7 +111,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 					
 	private void mouseClicked() {
-		if(this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
+		if (this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
 			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 		}
 	}
@@ -125,16 +125,16 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	protected void keyPressed(KeyEvent e) {
-		if(REST.contains(e.getCode())) {
+		if (REST.contains(e.getCode())) {
 			return;
 		}
-		if(!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
+		if (!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey()) {
 			handleInsertChar(e);
 		}
 	}
 	
 	private void handleInsertChar(KeyEvent e) {
-		if(this.getLength() - this.getCaretPosition() > charCounterInLine) {
+		if (this.getLength() - this.getCaretPosition() > charCounterInLine) {
 			goToLastPos();
 		}
 		if (e.isControlDown() || e.isMetaDown() || e.getText().isEmpty()) {
@@ -147,14 +147,14 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	private void controlA() {
-		if(!searchHandler.isActive()) {
+		if (!searchHandler.isActive()) {
 			this.moveTo(this.getCaretPosition() - currentPosInLine);
 			currentPosInLine = 0;
 		}
 	}
 	
 	private void controlE() {
-		if(!searchHandler.isActive()) {
+		if (!searchHandler.isActive()) {
 			this.moveTo(this.getLength());
 			currentPosInLine = charCounterInLine;
 		}
@@ -171,7 +171,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	protected void deactivateSearch() {
-		if(searchHandler.isActive()) {
+		if (searchHandler.isActive()) {
 			int posOfEnter = this.getText().lastIndexOf('\n');
 			String searchResult = searchHandler.getCurrentSearchResult();
 			this.deleteText(posOfEnter + 1, this.getText().length());
@@ -199,11 +199,11 @@ public abstract class Console extends StyleClassedTextArea {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
 		String currentLine = getCurrentLine();
-		if(searchHandler.isActive()) {
+		if (searchHandler.isActive()) {
 			currentLine = searchHandler.getCurrentSearchResult();
 		}
-		if(!currentLine.isEmpty()) {
-			if(!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
+		if (!currentLine.isEmpty()) {
+			if (!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
 				instructions.set(instructions.size() - 1, new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
 			} else {
 				instructions.add(new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
@@ -211,12 +211,12 @@ public abstract class Console extends StyleClassedTextArea {
 			posInList = instructions.size() - 1;
 			ConsoleInstruction instruction = instructions.get(posInList);
 			ConsoleExecResult execResult = interpreter.exec(instruction);
-			if("clear".equals(execResult.getConsoleOutput())) {
+			if ("clear".equals(execResult.getConsoleOutput())) {
 				reset();
 				return;
 			}
 			this.appendText("\n" + execResult);
-			if(execResult.getResultType() == ConsoleExecResultType.ERROR) {
+			if (execResult.getResultType() == ConsoleExecResultType.ERROR) {
 				int begin = this.getText().length() - execResult.toString().length();
 				int end = this.getText().length();
 				this.setStyleClass(begin, end, "error");
@@ -234,7 +234,7 @@ public abstract class Console extends StyleClassedTextArea {
 		
 	private void handleDown() {
 		deactivateSearch();
-		if(posInList == instructions.size() - 1) {
+		if (posInList == instructions.size() - 1) {
 			return;
 		}
 		posInList = Math.min(posInList+1, instructions.size() - 1);
@@ -243,13 +243,13 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	private void handleUp() {
 		deactivateSearch();
-		if(posInList == -1) { 
+		if (posInList == -1) {
 			return;
 		}
-		if(posInList == instructions.size() - 1) {
+		if (posInList == instructions.size() - 1) {
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
-			if(!lastinstruction.equals(getCurrentLine()) && posInList == instructions.size() - 1) {
-				if(instructions.get(posInList).getOption() == ConsoleInstructionOption.UP) {
+			if (!lastinstruction.equals(getCurrentLine()) && posInList == instructions.size() - 1) {
+				if (instructions.get(posInList).getOption() == ConsoleInstructionOption.UP) {
 					instructions.set(instructions.size() - 1, new ConsoleInstruction(getCurrentLine(), ConsoleInstructionOption.UP));
 				} else {
 					instructions.add(new ConsoleInstruction(getCurrentLine(), ConsoleInstructionOption.UP));
@@ -264,17 +264,17 @@ public abstract class Console extends StyleClassedTextArea {
 		
 	private void handleLeft() {
 		deactivateSearch();
-		if(currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
+		if (currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine--;
 			this.moveTo(this.getCaretPosition() - 1);
-		} else if(currentPosInLine == 0) {
+		} else if (currentPosInLine == 0) {
 			super.deselect();
 		}
 	}
 	
 	private void handleRight() {
 		deactivateSearch();
-		if(currentPosInLine < charCounterInLine && this.getLength() - this.getCaretPosition() <= charCounterInLine) {		
+		if (currentPosInLine < charCounterInLine && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine++;
 			this.moveTo(this.getCaretPosition() + 1);
 		}
@@ -293,16 +293,16 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	private void handleDeletion(KeyEvent e) {
 		int maxPosInLine = charCounterInLine;
-		if(searchHandler.handleDeletion(e)) {
+		if (searchHandler.handleDeletion(e)) {
 			return;
 		}
-		if(searchHandler.isActive()) {
+		if (searchHandler.isActive()) {
 			maxPosInLine = charCounterInLine + 2 + searchHandler.getCurrentSearchResult().length();
 		}
-		if(!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine) {
+		if (!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine) {
 			return;
 		}
-		if(e.getCode().equals(KeyCode.BACK_SPACE)) {
+		if (e.getCode().equals(KeyCode.BACK_SPACE)) {
 			handleBackspace();
 		} else {
 			handleDelete();
@@ -310,22 +310,22 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	private void handleBackspace() {
-		if(currentPosInLine > 0) {
+		if (currentPosInLine > 0) {
 			currentPosInLine = Math.max(currentPosInLine - 1, 0);
-			charCounterInLine = Math.max(charCounterInLine - 1, 0);	
+			charCounterInLine = Math.max(charCounterInLine - 1, 0);
 			this.deletePreviousChar();
 		}
 	}
 	
 	private void handleDelete() {
-		if(currentPosInLine < charCounterInLine) {
+		if (currentPosInLine < charCounterInLine) {
 			charCounterInLine = Math.max(charCounterInLine - 1, 0);
 			this.deleteNextChar();
 		}
 	}
 	
 	public String getCurrentLine() {
-		if(this.getText(this.getParagraphs().size() - 1).length() < 2) {
+		if (this.getText(this.getParagraphs().size() - 1).length() < 2) {
 			return "";
 		}
 		return this.getText(this.getParagraphs().size() - 1).substring(2);
