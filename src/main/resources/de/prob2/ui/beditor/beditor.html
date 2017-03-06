@@ -12,10 +12,12 @@
 			<textarea id="code"></textarea>
 		</div>
 		<script>
-			var TO;
+			//var TO;
 			function onChange(cm) {
-				clearTimeout(TO);
-				TO = setTimeout(function(){blexer.computeHighlighting(cm.getValue(), cm.getCursor().line + '');}, 500);
+				line = editor.getCursor().line;
+				blexer.computeHighlighting(cm.getValue(), line + '');
+				//clearTimeout(TO);
+				//TO = setTimeout(function(){}, 500);
 			}
 
 			var code = document.getElementById('code');

@@ -6,7 +6,6 @@ CodeMirror.defineMode("b", function() {
 			};
 		},
 		token: function(stream, state) {
-			//blexer.jslog(stream.peek());
 			if (stream.match(/\/\*/, true)) {
 				blexer.getNextToken();
 				state.comment = true;
@@ -18,7 +17,7 @@ CodeMirror.defineMode("b", function() {
 				return 'b-comment';
 			}
 			
-			if (state.comment) {
+			if (state.comment == true) {
 				stream.next();
 				return 'b-comment';
 			} else {
@@ -27,6 +26,7 @@ CodeMirror.defineMode("b", function() {
 					return blexer.getStyleClassFromToken(t);
 				}
 				stream.next();
+				return 'b-nothing';
 			}
 		}
 	};
