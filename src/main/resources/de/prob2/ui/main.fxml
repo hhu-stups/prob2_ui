@@ -19,7 +19,7 @@
 		<SplitPane fx:id="horizontalSP" dividerPositions="0.26,0.8">
 			<Accordion fx:id = "leftAccordion" expandedPane="$operationsTP">
 				<panes>
-					<TitledPane text="%tptitles.operations" fx:id="operationsTP" collapsible="true"  onMouseClicked="#operationsTPClicked">
+					<TitledPane text="%tptitles.operations" fx:id="operationsTP" collapsible="false"  onMouseClicked="#operationsTPClicked">
 						<OperationsView/>
 					</TitledPane>
 				</panes>
@@ -43,7 +43,7 @@
 			</Accordion>
 				<Accordion fx:id = "rightAccordion2" expandedPane="$historyTP">
 				<panes>
-					<TitledPane text="%tptitles.history" fx:id="historyTP" onMouseClicked="#historyTPClicked">
+					<TitledPane text="%tptitles.history" fx:id="historyTP" collapsible="false" onMouseClicked="#historyTPClicked">
 						<HistoryView/>
 					</TitledPane>
 				</panes>
