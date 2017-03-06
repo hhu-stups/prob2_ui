@@ -13,9 +13,14 @@
 		</div>
 		<script>
     		function onChange(cm) {
-       			blexer.computeHighlighting(cm.getValue());
+    		    //if(blexer.isInitialized()) {
+    		    //    blexer.jslog(cm.getLine(editor.getCursor().line));
+                //    blexer.computeHighlighting(cm.getLine(editor.getCursor().line));
+                //} else {
+					blexer.computeHighlighting(cm.getValue());
+				//}
     		}
-    		
+
 			var code = document.getElementById('code');
 			var editor = CodeMirror.fromTextArea(code, {
 				lineNumbers: true,

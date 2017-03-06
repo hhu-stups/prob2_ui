@@ -25,12 +25,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -41,6 +36,7 @@ import javafx.stage.Stage;
 
 public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
 	private final class ModelcheckingStageController extends Stage {
+		@FXML private ChoiceBox selectSearchStrategy;
 		@FXML private CheckBox findDeadlocks;
 		@FXML private CheckBox findInvViolations;
 		@FXML private CheckBox findBAViolations;
@@ -69,7 +65,14 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		
 		private ModelCheckingOptions getOptions() {
 			ModelCheckingOptions options = new ModelCheckingOptions();
-			options = options.breadthFirst(true);
+			//TODO: Use selected strategy in modelchecking
+			if(selectSearchStrategy.getSelectionModel().isSelected(0)) {
+				options = options.breadthFirst(true);
+				options = options.depthFirst(false);
+			} else{
+				options = options.breadthFirst(false);
+				options = options.depthFirst(true);
+			}
 			options = options.checkDeadlocks(findDeadlocks.isSelected());
 			options = options.checkInvariantViolations(findInvViolations.isSelected());
 			options = options.checkAssertions(findBAViolations.isSelected());

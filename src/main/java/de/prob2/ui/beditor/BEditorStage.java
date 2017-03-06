@@ -93,11 +93,10 @@ public class BEditorStage extends Stage {
 		}
 		this.loaded = true;
 		this.path = path;
-		text = text.replaceAll("\n", " ");
-		tokenProvider.computeHighlighting(text);
 		final JSObject editor = (JSObject) engine.executeScript("editor");
 		editor.call("setValue", text);
 	}
+
 	
 	public WebEngine getEngine() {
 		return engine;
