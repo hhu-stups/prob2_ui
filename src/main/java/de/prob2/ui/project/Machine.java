@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Machine {
 	private String name;
@@ -31,8 +32,9 @@ public class Machine {
 	}
 	
 	public String getFileName() {
-		String[] s = location.split(File.separator);
-		return s[s.length-1];
+		String pattern = Pattern.quote(System.getProperty("file.separator"));
+		String[] splittedFileName = location.split(pattern);
+		return splittedFileName[splittedFileName.length-1];
 	}
 	
 	public String getDescription() {

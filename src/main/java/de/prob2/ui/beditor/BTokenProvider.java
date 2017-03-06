@@ -27,11 +27,7 @@ public class BTokenProvider {
 	private static final Map<Class<? extends Token>, String> syntaxClasses = new HashMap<>();
 	
 	private LinkedList<Token> tokens;
-	
-	private SimpleBooleanProperty loaded;
-	
-	private String text;
-						
+								
 	static {
 			addTokens("b-type", TIdentifierLiteral.class);
 			addTokens("b-assignment-logical", TAssign.class, TOutputParameters.class, TDoubleVerticalBar.class, TAssert.class,
@@ -70,14 +66,6 @@ public class BTokenProvider {
 		this.tokens = new LinkedList<>();
 		JSObject jsobj = (JSObject) engine.executeScript("window");
 		jsobj.setMember("blexer", this);
-		loaded = new SimpleBooleanProperty();
-		
-		loaded.addListener((observable, oldValue, newValue) -> {
-			if (newValue) {
-				final JSObject editor = (JSObject) engine.executeScript("editor");
-				editor.call("setValue", text);
-			}
-		});
 	}
 	
 	@SafeVarargs
@@ -94,18 +82,15 @@ public class BTokenProvider {
 		try {
 			Token t;
 			do {
-				t = lexer.next();
-				if (!"\n".equals(t.getText()) && t.getLine() >= currentLine) {
-					tokens.add(t);
+				t = lexer.next();			
+				if (!"\n".equals(t.getText())) {
+					if(t.getLine() -1 >= currentLine) {
+						tokens.add(t);
+					}
 				}
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
-			tokens.clear();
 			LOGGER.error("Failed to lex", e);
-		}
-		if (!loaded.get()) {
-			this.text = text;
-			loaded.set(true);
 		}
 	}
 
@@ -121,11 +106,11 @@ public class BTokenProvider {
 		return clazz;
 	}
 	
-	public boolean isEmpty() {
-		return tokens.isEmpty();
-	}
-	
 	public void jslog(String msg) {
 		LOGGER.debug(msg);
+	}
+	
+	public int getLength() {
+		return tokens.size();
 	}
 }

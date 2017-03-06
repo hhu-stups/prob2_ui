@@ -6,7 +6,9 @@ CodeMirror.defineMode("b", function() {
 			};
 		},
 		token: function(stream, state) {
+			//blexer.jslog(stream.peek());
 			if (stream.match(/\/\*/, true)) {
+				blexer.getNextToken();
 				state.comment = true;
 				return 'b-comment';
 			}
@@ -31,3 +33,6 @@ CodeMirror.defineMode("b", function() {
 });
 
 CodeMirror.defineMIME("text/b", "b");
+
+
+

@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.MenuBar;
@@ -95,6 +94,8 @@ public class BEditorStage extends Stage {
 		}
 		this.path = path;
 		tokenProvider.computeHighlighting(text, "0");
+		final JSObject editor = (JSObject) engine.executeScript("editor");
+		editor.call("setValue", text);
 	}
 
 
