@@ -13,12 +13,7 @@
 		</div>
 		<script>
     		function onChange(cm) {
-    		    //if(blexer.isInitialized()) {
-    		    //    blexer.jslog(cm.getLine(editor.getCursor().line));
-                //    blexer.computeHighlighting(cm.getLine(editor.getCursor().line));
-                //} else {
-					blexer.computeHighlighting(cm.getValue());
-				//}
+				blexer.computeHighlighting(cm.getValue(), cm.getCursor().line + '');
     		}
 
 			var code = document.getElementById('code');

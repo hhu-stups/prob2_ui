@@ -17,17 +17,15 @@ CodeMirror.defineMode("b", function() {
                 return 'b-comment'
             }
             if(state.comment == false) {
-
                 t = blexer.getNextToken();
                 if (stream.match(t.getText(), true)) {
-                    return blexer.getStyleclassFromToken(t);
+                    return blexer.getStyleClassFromToken(t);
                 }
-
+                stream.next();
             } else {
                 stream.next();
                 return 'b-comment';
             }
-            stream.next();
 		}
 	};
 });

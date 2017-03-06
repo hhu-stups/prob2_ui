@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.adapter.JavaBeanBooleanProperty;
+import javafx.beans.property.adapter.JavaBeanBooleanPropertyBuilder;
 import javafx.scene.web.WebEngine;
 import netscape.javascript.JSObject;
 
@@ -24,9 +27,11 @@ public class BTokenProvider {
 	private static final Map<Class<? extends Token>, String> syntaxClasses = new HashMap<>();
 	
 	private LinkedList<Token> tokens;
-
-	private boolean initialized;
-					
+	
+	private SimpleBooleanProperty loaded;
+	
+	private String text;
+						
 	static {
 			addTokens("b-type", TIdentifierLiteral.class);
 			addTokens("b-assignment-logical", TAssign.class, TOutputParameters.class, TDoubleVerticalBar.class, TAssert.class, 
@@ -65,7 +70,14 @@ public class BTokenProvider {
 		this.tokens = new LinkedList<>();
         JSObject jsobj = (JSObject) engine.executeScript("window");
         jsobj.setMember("blexer", this);
-        initialized = false;
+        loaded = new SimpleBooleanProperty();
+        
+		loaded.addListener((observable, oldValue, newValue) -> {
+			if(newValue == true) {
+				final JSObject editor = (JSObject) engine.executeScript("editor");
+				editor.call("setValue", text);
+			}
+		});
 	}
 			
 	@SafeVarargs
@@ -75,31 +87,33 @@ public class BTokenProvider {
 		}
 	}
 	
-	public void computeHighlighting(String text) {
+	public void computeHighlighting(String text, String line) {
+		tokens.clear();
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
+		int currentLine = Integer.parseInt(line);
 		try {
 			Token t;
 			do {
 				t = lexer.next();
-				if(!"\n".equals(t.getText())) {
+				if(!"\n".equals(t.getText()) && t.getLine() >= currentLine) {
 					tokens.add(t);
 				}
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
+			tokens.clear();
 			LOGGER.error("Failed to lex", e);
 		}
-		initialized = true;
+		if(loaded.get() == false) {
+			this.text = text;
+			loaded.set(true);
+		}
 	}
 
 	public Token getNextToken() {
 		return tokens.poll();
 	}
-
-	public boolean isInitialized() {
-		return initialized;
-	}
 	
-	public String getStyleclassFromToken(Token t) {
+	public String getStyleClassFromToken(Token t) {
 		String clazz = syntaxClasses.get(t.getClass());
 		if(clazz == null) {
 			clazz = "b-nothing";
@@ -107,12 +121,14 @@ public class BTokenProvider {
 		return clazz;
 	}
 	
+	public boolean isEmpty() {
+		return tokens.isEmpty();
+	}
+	
 	public void jslog(String msg) {
 		LOGGER.debug(msg);
 	}
 	
-	public int getLength() {
-		return tokens.size();
-	}
+	
 
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.EventListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
+import javafx.beans.property.adapter.JavaBeanBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.MenuBar;
@@ -21,7 +23,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import netscape.javascript.JSObject;
 
-public class BEditorStage extends Stage {
+public class BEditorStage extends Stage  {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditorStage.class);
 	private static final Charset EDITOR_CHARSET = Charset.forName("UTF-8");
@@ -34,7 +36,6 @@ public class BEditorStage extends Stage {
 	
 	private Path path;
 	private WebEngine engine;
-	private boolean loaded = false;
 	
 	@Inject
 	public BEditorStage(final StageManager stageManager) {
@@ -50,6 +51,7 @@ public class BEditorStage extends Stage {
 		engine.load(getClass().getResource("beditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
 		this.tokenProvider = new BTokenProvider(engine);
+
 	}
 	
 	@FXML
@@ -91,18 +93,14 @@ public class BEditorStage extends Stage {
 		if (engine == null) {
 			return;
 		}
-		this.loaded = true;
 		this.path = path;
-		final JSObject editor = (JSObject) engine.executeScript("editor");
-		editor.call("setValue", text);
+		tokenProvider.computeHighlighting(text, "0");
 	}
+
 
 	
 	public WebEngine getEngine() {
 		return engine;
 	}
-	
-	public boolean getLoaded() {
-		return loaded;
-	}
+
 }

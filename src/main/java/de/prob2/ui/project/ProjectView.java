@@ -262,7 +262,7 @@ public final class ProjectView extends AnchorPane {
 			return;
 		}
 		editorStage.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-			if (newState == Worker.State.SUCCEEDED && !editorStage.getLoaded()) {
+			if (newState == Worker.State.SUCCEEDED) {
 				editorStage.setTextEditor(text, path);
 			}
 		});
