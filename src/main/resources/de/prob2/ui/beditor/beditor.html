@@ -12,22 +12,23 @@
 			<textarea id="code"></textarea>
 		</div>
 		<script>
-		    var TO;
-    		function onChange(cm) {
-       			clearTimeout(TO);
-       			TO = setTimeout(function(){blexer.computeHighlighting(cm.getValue(), cm.getCursor().line + '');}, 500);
-    		}
+			var TO;
+			function onChange(cm) {
+				blexer.jslog(cm.getValue());
+				clearTimeout(TO);
+				TO = setTimeout(function(){blexer.computeHighlighting(cm.getValue(), cm.getCursor().line + '');}, 500);
+			}
 
 			var code = document.getElementById('code');
 			var editor = CodeMirror.fromTextArea(code, {
 				lineNumbers: true,
 				indentUnit: 4,
 				autoCloseBrackets: true,
-				matchBrackets: true, 
+				matchBrackets: true,
 				mode: "text/b"
 			});
-						
-			editor.on("change", onChange)
+			
+			editor.on("change", onChange);
 			
 			function changeFontSize(size) {
 				editor.getWrapperElement().style["font-size"] = size+"px";

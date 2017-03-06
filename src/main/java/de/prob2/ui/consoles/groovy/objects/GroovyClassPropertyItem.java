@@ -7,16 +7,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.codehaus.groovy.reflection.CachedClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import groovy.lang.GroovyRuntimeException;
 import groovy.lang.MetaMethod;
 import groovy.lang.MetaProperty;
 import groovy.lang.PropertyValue;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
+import org.codehaus.groovy.reflection.CachedClass;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GroovyClassPropertyItem extends GroovyAbstractItem {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyClassPropertyItem.class);
@@ -185,7 +187,7 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 	
 	@Override
 	public String toString() {
-		return getNameAndParams() +  " : " + getType() + " - " + getDeclarer();
+		return getNameAndParams() + " : " + getType() + " - " + getDeclarer();
 	}
 	
 	public Class<?> getReturnTypeClass() {

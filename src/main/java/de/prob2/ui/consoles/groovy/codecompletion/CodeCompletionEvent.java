@@ -20,7 +20,7 @@ public class CodeCompletionEvent extends Event {
 		this.choice = choice;
 		this.code = null;
 		this.currentSuggestion = suggestion;
-		if(event instanceof KeyEvent) {
+		if (event instanceof KeyEvent) {
 			this.code = ((KeyEvent) event).getCode();
 		}
 	}
@@ -30,7 +30,7 @@ public class CodeCompletionEvent extends Event {
 		this.event = event;
 		this.choice = "";
 		this.code = null;
-		if(event instanceof KeyEvent) {
+		if (event instanceof KeyEvent) {
 			this.code = ((KeyEvent) event).getCode();
 		}
 	}

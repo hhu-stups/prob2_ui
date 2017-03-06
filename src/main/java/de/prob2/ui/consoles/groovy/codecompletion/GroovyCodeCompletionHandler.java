@@ -31,28 +31,28 @@ public class GroovyCodeCompletionHandler {
 	
 	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action, ScriptEngine engine) {
 		String[] methods = getMethodsFromCurrentLine(currentLine);
-		if(methods.length == 0) {
+		if (methods.length == 0) {
 			return;
 		}
 		Object object = getObjectFromScope(methods[0], engine);
-		if(object == null) {
+		if (object == null) {
 			return;
 		}
 		Class<?> clazz = object.getClass();
-		for(int i = 1; i < methods.length; i++) {
+		for (int i = 1; i < methods.length; i++) {
 			fillAllMethodsAndProperties(clazz, GroovyMethodOption.NONSTATIC);
-			for(GroovyAbstractItem item: currentSuggestions) {
-				if(item.getNameAndParams().equals(methods[i])) {
+			for (GroovyAbstractItem item: currentSuggestions) {
+				if (item.getNameAndParams().equals(methods[i])) {
 						clazz = ((GroovyClassPropertyItem) item).getReturnTypeClass();
 						break;
 				}
-				if(item.equals(currentSuggestions.get(currentSuggestions.size() - 1))) {
+				if (item.equals(currentSuggestions.get(currentSuggestions.size() - 1))) {
 					return;
 				}
 			}
 		}
 		showSuggestions(clazz, GroovyMethodOption.NONSTATIC);
-		if(action == CodeCompletionTriggerAction.TRIGGER) {
+		if (action == CodeCompletionTriggerAction.TRIGGER) {
 			refresh(currentSuggestion);
 		}
 	}
@@ -60,7 +60,7 @@ public class GroovyCodeCompletionHandler {
 	public void handleStaticClasses(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action) {
 		String[] methods = getMethodsFromCurrentLine(currentLine);
 		Package[] packages = Package.getPackages();
-		if(methods.length == 0) {
+		if (methods.length == 0) {
 			return;
 		}
 		for (Package pack : packages) {
@@ -73,13 +73,13 @@ public class GroovyCodeCompletionHandler {
 				// Just try with the next package if the current fullClassName does not fit any classes
 			}
 		}
-		if(action == CodeCompletionTriggerAction.TRIGGER) {
+		if (action == CodeCompletionTriggerAction.TRIGGER) {
 			refresh(currentSuggestion);
 		}
 	}
 	
 	public void handleObjects(String currentSuggestion, CodeCompletionTriggerAction action, ScriptEngine engine) {
-		if(action == CodeCompletionTriggerAction.TRIGGER && suggestions.isEmpty()) {
+		if (action == CodeCompletionTriggerAction.TRIGGER && suggestions.isEmpty()) {
 			currentSuggestions.clear();
 			fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
 			fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
@@ -97,7 +97,7 @@ public class GroovyCodeCompletionHandler {
 	public void fillObjects(Bindings bindings) {
 		suggestions.clear();
 		for (final Map.Entry<String, Object> entry : bindings.entrySet()) {
-			if(entry == null || entry.getKey() == null || entry.getValue() == null) {
+			if (entry == null || entry.getKey() == null || entry.getValue() == null) {
 				continue;
 			}
 			currentSuggestions.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), null, null));
@@ -106,12 +106,12 @@ public class GroovyCodeCompletionHandler {
 	}
 		
 	private void fillMethodsAndProperties(Class <?> clazz, GroovyMethodOption option) {
-		for(Method m : clazz.getMethods()) {
-			if((option == GroovyMethodOption.ALL) || isNonstatic(option, m) || isStatic(option, m)) {
+		for (Method m : clazz.getMethods()) {
+			if ((option == GroovyMethodOption.ALL) || isNonstatic(option, m) || isStatic(option, m)) {
 				currentSuggestions.add(new GroovyClassPropertyItem(m));
 			}
 		}
-		for(Field f : clazz.getFields()) {
+		for (Field f : clazz.getFields()) {
 			currentSuggestions.add(new GroovyClassPropertyItem(f));
 		}
 	}
@@ -148,12 +148,12 @@ public class GroovyCodeCompletionHandler {
 		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
 		Object object = null;
-		if(currentLine.length() == 0) {
+		if (currentLine.length() == 0) {
 			return null;
 		}
-		if(engineScope.containsKey(currentLine)) {
+		if (engineScope.containsKey(currentLine)) {
 			object = engineScope.get(currentLine);
-		} else if(globalScope.containsKey(currentLine)) {
+		} else if (globalScope.containsKey(currentLine)) {
 			object = globalScope.get(currentLine);
 		}
 		return object;
@@ -162,7 +162,7 @@ public class GroovyCodeCompletionHandler {
 	
 	private String[] getMethodsFromCurrentLine(String currentLine) {
 		String currentInstruction = currentLine;
-		if(!currentInstruction.contains(".")) {
+		if (!currentInstruction.contains(".")) {
 			return new String[]{};
 		}
 		currentInstruction = currentInstruction.replaceAll("\\s","");

@@ -56,7 +56,7 @@ public final class GroovyObjectStage extends Stage {
 
 	private void fillList(Bindings binding) {
 		for (final Map.Entry<String, Object> entry : binding.entrySet()) {
-			if(entry == null || entry.getKey() == null || entry.getValue() == null) {
+			if (entry == null || entry.getKey() == null || entry.getValue() == null) {
 				continue;
 			}
 			GroovyClassStage stage = new GroovyClassStage(stageManager, uiState, entry.getKey());

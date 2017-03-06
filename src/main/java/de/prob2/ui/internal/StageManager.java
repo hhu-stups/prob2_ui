@@ -12,15 +12,14 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob2.ui.persistence.UIState;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -36,6 +35,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W shortcut. Also provides some convenience methods for creating {@link Stage}s and {@link Alert}s and loading FXML files.
@@ -86,7 +88,7 @@ public final class StageManager {
 	 */
 	public void loadFXML(final Object controller, final String filename) {
 		final FXMLLoader loader = this.makeFXMLLoader();
-		if(!filename.startsWith("custom")) {
+		if (!filename.startsWith("custom")) {
 			loader.setLocation(controller.getClass().getResource(filename));
 		} else {
 			try {
@@ -141,7 +143,7 @@ public final class StageManager {
 		
 		stage.focusedProperty().addListener(e -> {
 			final String stageId = getPersistenceID(stage);
-			if(stageId != null) {
+			if (stageId != null) {
 				injector.getInstance(UIState.class).moveStageToEnd(stageId);
 			}
 		});

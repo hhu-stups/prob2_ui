@@ -6,9 +6,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
@@ -19,9 +16,13 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import netscape.javascript.JSObject;
 
-public class BEditorStage extends Stage  {
+public class BEditorStage extends Stage {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditorStage.class);
 	private static final Charset EDITOR_CHARSET = Charset.forName("UTF-8");
@@ -93,6 +94,8 @@ public class BEditorStage extends Stage  {
 		}
 		this.path = path;
 		tokenProvider.computeHighlighting(text, "0");
+		final JSObject editor = (JSObject) engine.executeScript("editor");
+		editor.call("setValue", text);
 	}
 
 

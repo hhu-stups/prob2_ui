@@ -209,7 +209,7 @@ public final class PreferencesStage extends Stage {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle("Select default location to store new projects");
 		File file = dirChooser.showDialog(this.getOwner());
-		if(file != null) {
+		if (file != null) {
 			defaultLocationField.setText(file.getAbsolutePath());
 		}
 	}

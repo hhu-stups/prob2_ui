@@ -47,8 +47,8 @@ public class NewProjectStage extends Stage {
 	void selectLocation(ActionEvent event) {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle("Select Location");
-		File file = dirChooser.showDialog(this.getOwner());		
-		if(file != null) {
+		File file = dirChooser.showDialog(this.getOwner());
+		if (file != null) {
 			locationField.setText(file.getAbsolutePath());
 		}
 	}
