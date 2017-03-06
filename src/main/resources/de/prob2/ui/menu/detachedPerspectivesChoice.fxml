@@ -18,9 +18,8 @@
 					<CheckBox fx:id="detachModelcheck" text="%menu.perspectives.detachStage.modelcheck"/>
 					<CheckBox fx:id="detachStats" text="%menu.perspectives.detachStage.stats"/>
 					<CheckBox fx:id="detachProjects" text="%menu.perspectives.detachStage.projects"/>
-					<CheckBox fx:id="detachAnimations" text="%menu.perspectives.detachStage.animations"/>
 				</VBox>
-				<Button fx:id="apply" onAction="#apply" text="%menu.perspectives.detachStage.apply" AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="270.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"/>
+				<Button fx:id="apply" onAction="#apply" text="%menu.perspectives.detachStage.apply" AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="250.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"/>
 			</AnchorPane>
 		</Scene>
 	</scene>
