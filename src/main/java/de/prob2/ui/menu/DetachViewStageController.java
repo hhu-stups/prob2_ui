@@ -143,6 +143,7 @@ public final class DetachViewStageController extends Stage {
 			accordion.setVisible(false);
 			accordion.setMaxWidth(0);
 			accordion.setMaxHeight(0);
+			accordion.setStyle("-fx-padding: 0.0 0.0 0.0 0.0;");
 			pane.setDividerPositions(pane.getItems().indexOf(accordion));
 			pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(true));
 		}
@@ -161,6 +162,7 @@ public final class DetachViewStageController extends Stage {
 			accordion.setVisible(true);
 			accordion.setMaxWidth(Double.POSITIVE_INFINITY);
 			accordion.setMaxHeight(Double.POSITIVE_INFINITY);
+			accordion.setStyle("-fx-padding: 1.0em 0.0 0.0 0.0;");
 			if (accordion.getExpandedPane()!=null) {
 				accordion.getExpandedPane().setExpanded(false);
 			}
