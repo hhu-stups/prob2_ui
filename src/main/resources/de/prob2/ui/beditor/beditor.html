@@ -14,7 +14,6 @@
 		<script>
 			var TO;
 			function onChange(cm) {
-				blexer.jslog(cm.getValue());
 				clearTimeout(TO);
 				TO = setTimeout(function(){blexer.computeHighlighting(cm.getValue(), cm.getCursor().line + '');}, 500);
 			}
