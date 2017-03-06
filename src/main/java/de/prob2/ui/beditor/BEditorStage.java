@@ -93,7 +93,6 @@ public class BEditorStage extends Stage {
 			return;
 		}
 		this.path = path;
-		tokenProvider.computeHighlighting(text, "0");
 		final JSObject editor = (JSObject) engine.executeScript("editor");
 		editor.call("setValue", text);
 	}

@@ -30,7 +30,7 @@ public class BTokenProvider {
 	private SimpleBooleanProperty loaded;
 	
 	private String text;
-									
+										
 	static {
 			addTokens("b-type", TIdentifierLiteral.class);
 			addTokens("b-assignment-logical", TAssign.class, TOutputParameters.class, TDoubleVerticalBar.class, TAssert.class,
@@ -95,7 +95,7 @@ public class BTokenProvider {
 			do {
 				t = lexer.next();			
 				if (!"\n".equals(t.getText())) {
-					if(t.getLine() - 1 >= currentLine) {
+					if(t.getLine()-1 >= currentLine) {
 						tokens.add(t);
 					}
 				}
@@ -120,16 +120,9 @@ public class BTokenProvider {
 		}
 		return clazz;
 	}
-	
+		
 	public void jslog(String msg) {
 		LOGGER.debug(msg);
 	}
-	
-	public int getLength() {
-		return tokens.size();
-	}
-	
-	public boolean isLoaded() {
-		return loaded.get();
-	}
+		
 }
