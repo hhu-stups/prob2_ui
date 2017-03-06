@@ -28,29 +28,27 @@
 				<MainView/>
 			</SplitPane>
 			<SplitPane fx:id="verticalSP2" dividerPositions="0.5" orientation="VERTICAL">
-				<Accordion fx:id="rightAccordion1" expandedPane="$statsTP">
-				<panes>
-					<TitledPane text="%tptitles.stats" fx:id="statsTP" onMouseClicked="#statsTPClicked">
-						<StatsView/>
-					</TitledPane>
-					<TitledPane text="%tptitles.modelcheck" fx:id="modelcheckTP" onMouseClicked="#modelcheckTPClicked">
-						<ModelcheckingController/>
-					</TitledPane>
-					<TitledPane text="%tptitles.project" fx:id = "projectTP" onMouseClicked="#projectTPClicked">
-						<ProjectView/>
-					</TitledPane>
-				</panes>
-			</Accordion>
+				<Accordion fx:id = "rightAccordion1"  expandedPane="$statsTP">
+					<panes>
+						<TitledPane text="%tptitles.stats" fx:id="statsTP" onMouseClicked="#statsTPClicked">
+							<StatsView/>
+						</TitledPane>
+						<TitledPane text="%tptitles.modelcheck" fx:id="modelcheckTP" onMouseClicked="#modelcheckTPClicked">
+							<ModelcheckingController/>
+						</TitledPane>
+						<TitledPane text="%tptitles.project" fx:id = "projectTP" onMouseClicked="#projectTPClicked">
+							<ProjectView/>
+						</TitledPane>
+					</panes>
+				</Accordion>
 				<Accordion fx:id = "rightAccordion2" expandedPane="$historyTP">
-				<panes>
-					<TitledPane text="%tptitles.history" fx:id="historyTP" collapsible="false" onMouseClicked="#historyTPClicked">
-						<HistoryView/>
-					</TitledPane>
-				</panes>
-			</Accordion>
+					<panes>
+						<TitledPane text="%tptitles.history" fx:id="historyTP" collapsible="false" onMouseClicked="#historyTPClicked">
+							<HistoryView/>
+						</TitledPane>
+					</panes>
+				</Accordion>
 			</SplitPane>
-			
-			
 		</SplitPane>
 	</center>
 	<top>

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import de.prob2.ui.MainController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,9 +110,20 @@ public final class DetachViewStageController extends Stage {
 	@FXML
 	public void apply() {
 		final Parent root = injector.getInstance(MenuController.class).loadPreset("main.fxml");
-		final SplitPane pane = findOfType(root.getChildrenUnmodifiable(), SplitPane.class);
-		final Accordion accordion = findOfType(pane.getItems(), Accordion.class);
-		removeTP(accordion, pane);
+		final TitledPane[] titledPanes = ((MainController) root).getTitledPanes();
+		final Accordion[] accordions = ((MainController) root).getAccordions();
+		final SplitPane[] splitPanes = ((MainController) root).getSplitPanes();
+		for (SplitPane splitPane : splitPanes) {
+			for (Accordion accordion : accordions) {
+				if (splitPane.getItems().contains(accordion)) {
+					for (TitledPane tp : titledPanes) {
+						if (accordion.getPanes().contains(tp) && checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
+							removeTP(accordion, splitPane);
+						}
+					}
+				}
+			}
+		}
 		uiState.setGuiState("detached");
 		this.hide();
 	}
@@ -131,7 +143,7 @@ public final class DetachViewStageController extends Stage {
 		if (accordion.getPanes().isEmpty()) {
 			accordion.setVisible(false);
 			accordion.setMaxWidth(0);
-			pane.setDividerPositions(0);
+			pane.setDividerPositions(pane.getItems().indexOf(accordion));
 			pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(true));
 		}
 	}
@@ -148,6 +160,10 @@ public final class DetachViewStageController extends Stage {
 			checkBoxMap.get(node.getClass()).setSelected(false);
 			accordion.setVisible(true);
 			accordion.setMaxWidth(Double.POSITIVE_INFINITY);
+			if (accordion.getExpandedPane()!=null) {
+				accordion.getExpandedPane().setExpanded(false);
+			}
+			accordion.setExpandedPane(tp);
 			pane.setDividerPositions(uiState.getHorizontalDividerPositions());
 			pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(false));
 			tp.setContent(node);
