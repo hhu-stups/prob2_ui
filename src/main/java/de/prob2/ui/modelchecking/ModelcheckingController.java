@@ -66,10 +66,10 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		private ModelCheckingOptions getOptions() {
 			ModelCheckingOptions options = new ModelCheckingOptions();
 			//TODO: Use selected strategy in modelchecking
-			if(selectSearchStrategy.getSelectionModel().isSelected(0)) {
+			if (selectSearchStrategy.getSelectionModel().isSelected(0)) {
 				options = options.breadthFirst(true);
 				options = options.depthFirst(false);
-			} else{
+			} else {
 				options = options.breadthFirst(false);
 				options = options.depthFirst(true);
 			}
@@ -131,7 +131,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@FXML
 	public void addModelCheck() {
-		if(!stageController.isShowing()) {
+		if (!stageController.isShowing()) {
 			this.stageController.showAndWait();
 		}
 	}

@@ -23,17 +23,17 @@ public class FormulaNode extends Region {
 	public FormulaNode(ExpandedFormula data) {
 		next = new ArrayList<>();
 		text = new Text(data.getLabel());
-		if(data.getValue() instanceof String) {
+		if (data.getValue() instanceof String) {
 			text.setText(text.getText() + " = " + data.getValue());
 		}
 		width = text.getLayoutBounds().getWidth();
 		height = text.getLayoutBounds().getHeight();
 		rectangle = new Rectangle(width + 10, height * 2);
 		color = calculateColor(data);
-		if(data.getChildren() == null || data.getChildren().isEmpty()) {
+		if (data.getChildren() == null || data.getChildren().isEmpty()) {
 			return;
 		}
-		for(int i = 0; i < data.getChildren().size(); i++) {
+		for (int i = 0; i < data.getChildren().size(); i++) {
 			next.add(new FormulaNode(data.getChildren().get(i)));
 		}
 	}

@@ -3,17 +3,17 @@ package de.prob2.ui.formula;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
+
 import de.prob2.ui.internal.StageManager;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -24,6 +24,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FormulaInputStage extends Stage {
 	
@@ -62,7 +65,7 @@ public class FormulaInputStage extends Stage {
 		btcancel.setOnMouseClicked(e->close());
 		
 		tfFormula.setOnKeyReleased(e-> {
-			if(e.getCode() == KeyCode.ENTER) {
+			if (e.getCode() == KeyCode.ENTER) {
 				apply();
 			}
 		});

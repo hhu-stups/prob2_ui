@@ -1,8 +1,5 @@
 package de.prob2.ui.consoles.b;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob.animator.command.EvaluationCommand;
@@ -19,10 +16,14 @@ import de.prob.statespace.FormalismType;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.Executable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BInterpreter implements IAnimationChangeListener, Executable {
 
@@ -48,7 +49,7 @@ public class BInterpreter implements IAnimationChangeListener, Executable {
 		String line = instruction.getInstruction();
 		AbstractEvalResult res;
 		try {
-			if("clear".equals(instruction.getInstruction())) {
+			if ("clear".equals(instruction.getInstruction())) {
 				return new ConsoleExecResult("clear","", ConsoleExecResultType.PASSED);
 			}
 			IEvalElement parsed = parse(line);

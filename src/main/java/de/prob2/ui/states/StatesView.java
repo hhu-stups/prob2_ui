@@ -337,7 +337,7 @@ public final class StatesView extends AnchorPane {
 			showErrorsItem.setOnAction(event -> {
 				final FullValueStage stage = injector.getInstance(FullValueStage.class);
 				if (row.getItem().getContents() instanceof AbstractFormulaElement) {
-					final AbstractEvalResult result = this.currentValues.get(((AbstractFormulaElement)row.getItem().getContents()).getFormula()); 
+					final AbstractEvalResult result = this.currentValues.get(((AbstractFormulaElement)row.getItem().getContents()).getFormula());
 					if (result instanceof EvaluationErrorResult) {
 						stage.setTitle(row.getItem().toString());
 						stage.setCurrentValue(AsciiUnicodeString.fromAscii(String.join("\n", ((EvaluationErrorResult)result).getErrors())));

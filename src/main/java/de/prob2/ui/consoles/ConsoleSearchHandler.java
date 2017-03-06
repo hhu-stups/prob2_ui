@@ -12,7 +12,7 @@ public class ConsoleSearchHandler {
 	protected List<SearchResult> searchResults;
 	protected int currentSearchIndex = 0;
 	public static final String FOUND = "(backward search) '':";
-	public static final String NOTFOUND = "(failed backward search) '':"; 
+	public static final String NOTFOUND = "(failed backward search) '':";
 	private final Console parent;
 	
 	public ConsoleSearchHandler(Console parent) {
@@ -27,7 +27,7 @@ public class ConsoleSearchHandler {
 	public void activateSearch() {
 		currentSearchIndex = 0;
 		searchActive = true;
-		if(searchResults.isEmpty()) {
+		if (searchResults.isEmpty()) {
 			searchResults.add(new SearchResult(getCurrentSearchResult(), false));
 		}
 	}
@@ -46,12 +46,12 @@ public class ConsoleSearchHandler {
 		} else {
 			key += e.getText();
 		}
-		for(int i = parent.getInstructions().size() - 1; i >= 0; i--) {
-			if(parent.getInstructions().get(i).getInstruction().contains(key)) {
+		for (int i = parent.getInstructions().size() - 1; i >= 0; i--) {
+			if (parent.getInstructions().get(i).getInstruction().contains(key)) {
 				searchResults.add(new SearchResult(parent.getInstructions().get(i).getInstruction(),true));
 			}
 		}
-		if(searchResults.isEmpty()) {
+		if (searchResults.isEmpty()) {
 			searchResults.add(new SearchResult(getCurrentSearchResult(), false));
 		}
 	}
@@ -68,7 +68,7 @@ public class ConsoleSearchHandler {
 	}
 	
 	protected void handleKey(KeyEvent e) {
-		if(isActive()) {
+		if (isActive()) {
 			currentSearchIndex = 0;
 			searchResult(e);
 			refreshSearch();
@@ -76,17 +76,17 @@ public class ConsoleSearchHandler {
 	}
 	
 	protected void handleEnter() {
-		if(isActive()) {
+		if (isActive()) {
 			deactivateSearch();
 		}
 	}
 	
 	protected boolean handleDeletion(KeyEvent e) {
-		if(isActive()) {
-			if(e.getCode() == KeyCode.DELETE) {
+		if (isActive()) {
+			if (e.getCode() == KeyCode.DELETE) {
 				parent.deactivateSearch();
 				return true;
-			} else if(parent.getCaretPosition() != parent.getLength() - parent.getCurrentLine().length() + parent.getCurrentLine().indexOf("'") + 1) {
+			} else if (parent.getCaretPosition() != parent.getLength() - parent.getCurrentLine().length() + parent.getCurrentLine().indexOf("'") + 1) {
 				handleKey(e);
 			}
 		}
@@ -95,7 +95,7 @@ public class ConsoleSearchHandler {
 	
 	protected void refreshSearch() {
 		String searchPrefix = FOUND;
-		if(!searchResults.get(0).getFound()) {
+		if (!searchResults.get(0).getFound()) {
 			searchPrefix = NOTFOUND;
 		}
 		int posOfEnter = parent.getText().lastIndexOf("\n");

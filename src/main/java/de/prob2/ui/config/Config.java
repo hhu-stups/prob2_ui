@@ -18,17 +18,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
@@ -41,7 +40,11 @@ import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
+
 import javafx.geometry.BoundingBox;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
@@ -87,11 +90,11 @@ public final class Config {
 	private final CurrentProject currentProject;
 	
 	@Inject
-	private Config(final ClassBlacklist classBlacklist, 
-					final RecentFiles recentFiles, 
-					final UIState uiState, 
-					final GroovyConsole groovyConsole, 
-					final BConsole bConsole, 
+	private Config(final ClassBlacklist classBlacklist,
+					final RecentFiles recentFiles,
+					final UIState uiState,
+					final GroovyConsole groovyConsole,
+					final BConsole bConsole,
 					final Injector injector,
 					final CurrentProject currentProject) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
@@ -148,46 +151,46 @@ public final class Config {
 		if (configData.currentPreference == null) {
 			configData.currentPreference = this.defaultData.currentPreference;
 		}
-		if(configData.groovyConsoleSettings == null) {
+		if (configData.groovyConsoleSettings == null) {
 			configData.groovyConsoleSettings = this.defaultData.groovyConsoleSettings;
 		}
-		if(configData.bConsoleSettings == null) {
+		if (configData.bConsoleSettings == null) {
 			configData.bConsoleSettings = this.defaultData.bConsoleSettings;
 		}
-		if(configData.expandedTitledPanes == null) {
+		if (configData.expandedTitledPanes == null) {
 			configData.expandedTitledPanes = this.defaultData.expandedTitledPanes;
 		}
-		if(configData.defaultProjectLocation == null) {
+		if (configData.defaultProjectLocation == null) {
 			configData.defaultProjectLocation = System.getProperty("user.home");
 		}
 		
 		MainController main = injector.getInstance(MainController.class);
 		
-		if(configData.horizontalDividerPositions == null) {
+		if (configData.horizontalDividerPositions == null) {
 			configData.horizontalDividerPositions = main.getHorizontalDividerPositions();
 		}
 		
-		if(configData.verticalDividerPositions == null) {
+		if (configData.verticalDividerPositions == null) {
 			configData.verticalDividerPositions = main.getVerticalDividerPositions();
 		}
 				
-		if(configData.statesViewColumnsWidth == null) {
+		if (configData.statesViewColumnsWidth == null) {
 			configData.statesViewColumnsWidth = this.defaultData.statesViewColumnsWidth.clone();
 		}
 		
-		if(configData.statesViewColumnsOrder == null) {
+		if (configData.statesViewColumnsOrder == null) {
 			configData.statesViewColumnsOrder = this.defaultData.statesViewColumnsOrder.clone();
 		}
 		
-		if(configData.animationsViewColumnsWidth == null) {
+		if (configData.animationsViewColumnsWidth == null) {
 			configData.animationsViewColumnsWidth = this.defaultData.animationsViewColumnsWidth.clone();
 		}
 		
-		if(configData.animationsViewColumnsOrder == null) {
+		if (configData.animationsViewColumnsOrder == null) {
 			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder.clone();
 		}
 		
-		if(configData.operationsSortMode == null) {
+		if (configData.operationsSortMode == null) {
 			configData.operationsSortMode = this.defaultData.operationsSortMode;
 		}
 		
