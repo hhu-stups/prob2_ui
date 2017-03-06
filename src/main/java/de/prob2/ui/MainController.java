@@ -23,11 +23,16 @@ public class MainController extends BorderPane {
 	
 	@FXML
 	private Accordion rightAccordion;
-	
+
+	@FXML
+	private Accordion rightAccordion1;
+
+	@FXML
+	private Accordion rightAccordion2;
 	//If the user creates his own FXML and wants and accordion at the top
 	@FXML
 	private Accordion topAccordion;
-	
+
 	//If the user creates his own FXML and wants and accordion at the bottom
 	@FXML
 	private Accordion bottomAccordion;
@@ -52,6 +57,9 @@ public class MainController extends BorderPane {
 	
 	@FXML
 	private SplitPane verticalSP;
+
+	@FXML
+	private SplitPane verticalSP2;
 	
 	private final UIState uiState;
 	
@@ -152,5 +160,19 @@ public class MainController extends BorderPane {
 		if(verticalSP != null) {
 			verticalSP.setDividerPositions(pos);
 		}
+	}
+
+	// These methods are all needed for detaching views. Otherwise NPEs are triggered
+	// (for example operationsTP.getParent() returns null)
+	public TitledPane[] getTitledPanes() {
+		return new TitledPane[] {operationsTP, modelcheckTP, historyTP, projectTP, statsTP};
+	}
+
+	public Accordion[] getAccordions() {
+		return new Accordion[] {leftAccordion, rightAccordion1, rightAccordion2};
+	}
+
+	public SplitPane[] getSplitPanes() {
+		return new SplitPane[] {horizontalSP, verticalSP, verticalSP2};
 	}
 }
