@@ -14,8 +14,6 @@ import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.adapter.JavaBeanBooleanProperty;
-import javafx.beans.property.adapter.JavaBeanBooleanPropertyBuilder;
 import javafx.scene.web.WebEngine;
 import netscape.javascript.JSObject;
 
@@ -100,7 +98,6 @@ public class BTokenProvider {
 				}
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
-			tokens.clear();
 			LOGGER.error("Failed to lex", e);
 		}
 		if(loaded.get() == false) {
@@ -119,10 +116,6 @@ public class BTokenProvider {
 			clazz = "b-nothing";
 		}
 		return clazz;
-	}
-	
-	public boolean isEmpty() {
-		return tokens.isEmpty();
 	}
 	
 	public void jslog(String msg) {

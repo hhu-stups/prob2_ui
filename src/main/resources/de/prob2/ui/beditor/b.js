@@ -18,6 +18,10 @@ CodeMirror.defineMode("b", function() {
             }
             if(state.comment == false) {
                 t = blexer.getNextToken();
+                if(t == null) {
+                	stream.next();
+                	return 'b-nothing';
+                }
                 if (stream.match(t.getText(), true)) {
                     return blexer.getStyleClassFromToken(t);
                 }
