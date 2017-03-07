@@ -22,10 +22,6 @@ CodeMirror.defineMode("b", function() {
 				return 'b-comment';
 			} else {
 				var t = blexer.getNextToken();
-				if(t !== null) {
-					blexer.jslog(stream.peek());
-					blexer.jslog(t.getText());
-				}
 				if (t !== null && stream.match(t.getText(), true)) {
 					return blexer.getStyleClassFromToken(t);
 				}

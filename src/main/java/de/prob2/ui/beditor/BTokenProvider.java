@@ -29,8 +29,10 @@ public class BTokenProvider {
 	
 	private SimpleBooleanProperty loaded;
 	
+	private SimpleBooleanProperty initialized;
+	
 	private String text;
-										
+											
 	static {
 			addTokens("b-type", TIdentifierLiteral.class);
 			addTokens("b-assignment-logical", TAssign.class, TOutputParameters.class, TDoubleVerticalBar.class, TAssert.class,
@@ -70,9 +72,18 @@ public class BTokenProvider {
 		JSObject jsobj = (JSObject) engine.executeScript("window");
 		jsobj.setMember("blexer", this);
         loaded = new SimpleBooleanProperty(false);
+        initialized = new SimpleBooleanProperty(false);
         
 		loaded.addListener((observable, oldValue, newValue) -> {
 			if(newValue == true) {
+				final JSObject editor = (JSObject) engine.executeScript("editor");
+				editor.call("refresh");
+				loaded.setValue(false);
+			}
+		});
+		
+		initialized.addListener((observable, oldValue, newValue) -> {
+			if(newValue == true & oldValue == false) {
 				final JSObject editor = (JSObject) engine.executeScript("editor");
 				editor.call("setValue", text);
 			}
@@ -95,7 +106,7 @@ public class BTokenProvider {
 			do {
 				t = lexer.next();			
 				if (!"\n".equals(t.getText())) {
-					if(t.getLine()-1 >= currentLine) {
+					if(t.getLine() >= currentLine) {
 						tokens.add(t);
 					}
 				}
@@ -105,6 +116,7 @@ public class BTokenProvider {
 		}
 		if(loaded.get() == false) {
 			this.text = text;
+			initialized.setValue(true);
 			loaded.setValue(true);
 		}
 	}
@@ -120,9 +132,13 @@ public class BTokenProvider {
 		}
 		return clazz;
 	}
+	
+	public boolean isInitialized() {
+		return initialized.get();
+	}
 		
 	public void jslog(String msg) {
 		LOGGER.debug(msg);
 	}
-		
+			
 }
