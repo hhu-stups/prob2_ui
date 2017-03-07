@@ -67,7 +67,6 @@ public class NewProjectStage extends Stage {
 		}
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), dir);
 		currentProject.set(newProject);
-		currentProject.save();
 		this.close();
 	}
 }
