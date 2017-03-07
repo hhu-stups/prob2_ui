@@ -1,7 +1,6 @@
 package de.prob2.ui.modelchecking;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.check.IModelCheckingResult;
@@ -12,8 +11,10 @@ import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.stats.StatsView;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -35,7 +36,6 @@ public final class ModelCheckStats extends AnchorPane {
 	@FXML private Label totalNodes;
 	@FXML private Label totalTransitions;
 
-	private Map<String, ModelChecker> jobs = new HashMap<>();
 	private ModelcheckingController modelcheckingController;
 	private Result result;
 	private Trace trace;
@@ -49,25 +49,24 @@ public final class ModelCheckStats extends AnchorPane {
 	}
 
 	@FXML
-	public void initialize() {
-		Platform.runLater(() ->
-			this.modelcheckingController.widthProperty().addListener((observableValue, oldValue, newValue) -> {
-				if (newValue == null) {
-					resultText.setWrappingWidth(0);
-					return;
-				}
-				resultText.setWrappingWidth(newValue.doubleValue() - 60);
-			})
-		);
+	private void initialize() {
+		this.modelcheckingController.widthProperty().addListener((observableValue, oldValue, newValue) -> {
+			if (newValue == null) {
+				resultText.setWrappingWidth(0);
+				return;
+			}
+			resultText.setWrappingWidth(newValue.doubleValue() - 60);
+		});
 	}
 
-	void addJob(String jobId, ModelChecker checker) {
-		jobs.put(jobId, checker);
+	void startJob() {
 		statsBox.setVisible(true);
 		resultBackground.setVisible(false);
 	}
 
-	public void updateStats(final String id, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
+	public void updateStats(final ModelChecker modelChecker, final long timeElapsed, final StateSpaceStats stats) {
+		Objects.requireNonNull(modelChecker, "modelChecker");
+		
 		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
 
 		if (stats != null) {
@@ -82,16 +81,16 @@ public final class ModelCheckStats extends AnchorPane {
 			});
 		}
 		
-		ModelChecker modelChecker = jobs.get(id);
-		if (modelChecker != null) {
-			ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
-			if (coverage != null) {
-				statsView.updateExtendedStats(coverage);
-			}
+		ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
+		if (coverage != null) {
+			statsView.updateExtendedStats(coverage);
 		}
 	}
 
-	public void isFinished(final String id, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
+	public void isFinished(final ModelChecker modelChecker, final long timeElapsed, final IModelCheckingResult result) {
+		Objects.requireNonNull(modelChecker, "modelChecker");
+		Objects.requireNonNull(result, "result");
+		
 		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
 		
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
@@ -103,26 +102,21 @@ public final class ModelCheckStats extends AnchorPane {
 		}
 		String message = result.getMessage();
 
-		ModelChecker modelChecker = jobs.get(id);
-		jobs.remove(id);
+		ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
+		if (coverage != null) {
+			statsView.updateExtendedStats(coverage);
+			Number numNodes = coverage.getTotalNumberOfNodes();
+			Number numTrans = coverage.getTotalNumberOfTransitions();
 
-		if (modelChecker != null) {
-			ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
-			if (coverage != null) {
-				statsView.updateExtendedStats(coverage);
-				Number numNodes = coverage.getTotalNumberOfNodes();
-				Number numTrans = coverage.getTotalNumberOfTransitions();
-
-				Platform.runLater(() -> {
-					totalNodes.setText(String.valueOf(numNodes));
-					totalTransitions.setText(String.valueOf(numTrans));
-				});
-			}
-			
-			if (result instanceof ITraceDescription) {
-				StateSpace s = modelChecker.getStateSpace();
-				trace = ((ITraceDescription) result).getTrace(s);
-			}
+			Platform.runLater(() -> {
+				totalNodes.setText(String.valueOf(numNodes));
+				totalTransitions.setText(String.valueOf(numTrans));
+			});
+		}
+		
+		if (result instanceof ITraceDescription) {
+			StateSpace s = modelChecker.getStateSpace();
+			trace = ((ITraceDescription) result).getTrace(s);
 		}
 		showResult(message);
 	}

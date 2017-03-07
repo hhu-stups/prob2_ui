@@ -1,13 +1,17 @@
 package de.prob2.ui.modelchecking;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
@@ -17,16 +21,24 @@ import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
+
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -35,10 +47,13 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
 	private final class ModelcheckingStageController extends Stage {
-		@FXML private ChoiceBox selectSearchStrategy;
+		@FXML private ChoiceBox<String> selectSearchStrategy;
 		@FXML private CheckBox findDeadlocks;
 		@FXML private CheckBox findInvViolations;
 		@FXML private CheckBox findBAViolations;
@@ -56,7 +71,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		}
 		
 		@FXML
-		private void startModelCheck(ActionEvent event) {
+		private void startModelCheck() {
 			if (currentTrace.exists()) {
 				startModelchecking(getOptions(), animations.getCurrentTrace().getStateSpace());
 			} else {
@@ -86,11 +101,16 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		}
 		
 		@FXML
-		void cancel(ActionEvent event) {
-			cancelModelchecking();
+		private void cancel(ActionEvent event) {
+			if (checker != null) {
+				checker.cancel();
+			}
 			this.hide();
 		}
 	}
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingController.class);
+	private static final AtomicInteger threadCounter = new AtomicInteger(0);
 	
 	@FXML private AnchorPane statsPane;
 	@FXML private VBox historyBox;
@@ -102,6 +122,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private final ModelcheckingStageController stageController;
 	private final StageManager stageManager;
 
+	private final Map<String, ModelChecker> jobs;
 	private ModelChecker checker;
 	private ObservableList<Node> historyNodeList;
 	private ModelCheckStats currentStats;
@@ -122,6 +143,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		stageManager.loadFXML(this, "modelchecking_stats_view.fxml");
 		
 		this.stageController = new ModelcheckingStageController(stageManager);
+		this.jobs = new HashMap<>();
 	}
 
 	@FXML
@@ -138,13 +160,20 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		}
 	}
 
-	void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {
+	private void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {
 		currentOptions = options;
 		currentStats = new ModelCheckStats(stageManager, this, statsView);
 		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, this));
-		currentStats.addJob(checker.getJobId(), checker);
+		jobs.put(checker.getJobId(), checker);
+		currentStats.startJob();
 		showStats(currentStats);
 		checker.start();
+		new Thread(() -> {
+			final IModelCheckingResult result = checker.getResult();
+			// The consistency checker sometimes doesn't call isFinished, so we call it manually here with some dummy information.
+			// If the checker already called isFinished, this call won't do anything - on the first call, the checker was removed from the jobs map, so the second call returns right away.
+			this.isFinished(checker.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
+		}, "Model Check Result Waiter " + threadCounter.getAndIncrement()).start();
 	}
 
 	private Node toHistoryNode(HistoryItem item) {
@@ -156,7 +185,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			if (event.getButton() == MouseButton.PRIMARY) {
 				showStats(item.getStats());
 				updateSelectedItem(background);
-				if(event.getClickCount() >= 2 && item.getResult() == ModelCheckStats.Result.DANGER) {
+				if (event.getClickCount() >= 2 && item.getResult() == ModelCheckStats.Result.DANGER) {
 					animations.addNewAnimation(item.getStats().getTrace());
 				}
 			}
@@ -239,12 +268,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		return name;
 	}
 
-	void cancelModelchecking() {
-		if (checker != null) {
-			checker.cancel();
-		}
-	}
-
 	private void showStats(ModelCheckStats stats) {
 		statsPane.getChildren().setAll(stats);
 		AnchorPane.setTopAnchor(stats, 0.0);
@@ -260,12 +283,22 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@Override
 	public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-		currentStats.updateStats(jobId, timeElapsed, result, stats);
+		final ModelChecker modelChecker = jobs.get(jobId);
+		if (modelChecker == null) {
+			LOGGER.error("Model checker for ID {} is missing or null", jobId);
+			return;
+		}
+		currentStats.updateStats(modelChecker, timeElapsed, stats);
 	}
 
 	@Override
 	public void isFinished(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-		currentStats.isFinished(jobId, timeElapsed, result, stats);
+		final ModelChecker modelChecker = jobs.remove(jobId);
+		if (modelChecker == null) {
+			// isFinished was already called for this job
+			return;
+		}
+		currentStats.isFinished(modelChecker, timeElapsed, result);
 		HistoryItem historyItem = new HistoryItem(currentOptions, currentStats);
 		Node historyNode = toHistoryNode(historyItem);
 		Platform.runLater(() -> {
