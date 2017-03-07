@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -112,7 +114,7 @@ public final class ProjectView extends AnchorPane {
 			projectDescriptionText.setWrappingWidth(newValue.doubleValue() - 20);
 		});
 	}
-	
+
 	private void initMachinesTab() {
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		machineColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<Path>(cellData.getValue().getPath()));
@@ -122,7 +124,18 @@ public final class ProjectView extends AnchorPane {
 			final TableRow<Machine> row = new TableRow<>();
 
 			final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
-			removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(row.getItem()));
+			removeMachineMenuItem.setOnAction(event -> {
+				List<Runconfiguration> remove = new ArrayList<>();
+				for (Runconfiguration r : currentProject.getRunconfigurations()) {
+					if (r.getMachine().equals(row.getItem().getName())) {
+						remove.add(r);
+					}
+				}
+				for (Runconfiguration r : remove) {
+					currentProject.removeRunconfiguration(r);
+				}
+				currentProject.removeMachine(row.getItem());
+			});
 			removeMachineMenuItem.disableProperty().bind(row.emptyProperty());
 
 			final MenuItem editFileMenuItem = new MenuItem("Edit File");
@@ -146,7 +159,7 @@ public final class ProjectView extends AnchorPane {
 		});
 		machinesTable.itemsProperty().bind(currentProject.machinesProperty());
 	}
-	
+
 	private void initPreferencesTab() {
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
 		preferencesListView.setCellFactory(listView -> {
@@ -165,7 +178,18 @@ public final class ProjectView extends AnchorPane {
 			};
 
 			final MenuItem removePreferenceMenuItem = new MenuItem("Remove Preference");
-			removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
+			removePreferenceMenuItem.setOnAction(event -> {
+				List<Runconfiguration> remove = new ArrayList<>();
+				for (Runconfiguration r : currentProject.getRunconfigurations()) {
+					if (r.getPreference().equals(cell.getItem().getName())) {
+						remove.add(r);
+					}
+				}
+				for (Runconfiguration r : remove) {
+					currentProject.removeRunconfiguration(r);
+				}
+				currentProject.removePreference(cell.getItem());
+			});
 			removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
 
 			cell.setContextMenu(new ContextMenu(removePreferenceMenuItem));
@@ -173,7 +197,7 @@ public final class ProjectView extends AnchorPane {
 			return cell;
 		});
 	}
-	
+
 	public void initRunconfigurationsTab() {
 		runconfigsPlaceholder.setText("Add machines first");
 		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
@@ -247,6 +271,9 @@ public final class ProjectView extends AnchorPane {
 		}
 		if (m != null && pref != null) {
 			machineLoader.loadAsync(m, pref);
+		} else {
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not load machine \"" + runconfiguration.getMachine()
+					+ "\" with preferences: \"" + runconfiguration.getPreference() + "\"").showAndWait();
 		}
 	}
 
