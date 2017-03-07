@@ -4,7 +4,7 @@
 			<pattern>[%d, %relative sec] "%thread" [%level] %logger.%method\(%file:%line\): %msg%n%ex{full}</pattern>
 		</encoder>
 	</appender>
-	
+
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>./ProB2UI.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -16,7 +16,7 @@
 			<pattern>[%d, %relative sec] "%thread" [%level] %logger.%method\(%file:%line\): %msg%n%ex{full}</pattern>
 		</encoder>
 	</appender>
-	
+
 	<root level="TRACE">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="FILE" />
