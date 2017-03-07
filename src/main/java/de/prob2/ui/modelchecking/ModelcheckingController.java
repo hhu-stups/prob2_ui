@@ -154,6 +154,9 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			if (event.getButton() == MouseButton.PRIMARY) {
 				showStats(item.getStats());
 				updateSelectedItem(background);
+				if(event.getClickCount() >= 2 && item.getResult() == ModelCheckStats.Result.DANGER) {
+					animations.addNewAnimation(item.getStats().getTrace());
+				}
 			}
 			if (event.getButton() == MouseButton.SECONDARY) {
 				cm.show(background, event.getScreenX(), event.getScreenY());
