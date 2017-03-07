@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -124,18 +122,7 @@ public final class ProjectView extends AnchorPane {
 			final TableRow<Machine> row = new TableRow<>();
 
 			final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
-			removeMachineMenuItem.setOnAction(event -> {
-				List<Runconfiguration> remove = new ArrayList<>();
-				for (Runconfiguration r : currentProject.getRunconfigurations()) {
-					if (r.getMachine().equals(row.getItem().getName())) {
-						remove.add(r);
-					}
-				}
-				for (Runconfiguration r : remove) {
-					currentProject.removeRunconfiguration(r);
-				}
-				currentProject.removeMachine(row.getItem());
-			});
+			removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(row.getItem()));
 			removeMachineMenuItem.disableProperty().bind(row.emptyProperty());
 
 			final MenuItem editFileMenuItem = new MenuItem("Edit File");
@@ -178,18 +165,7 @@ public final class ProjectView extends AnchorPane {
 			};
 
 			final MenuItem removePreferenceMenuItem = new MenuItem("Remove Preference");
-			removePreferenceMenuItem.setOnAction(event -> {
-				List<Runconfiguration> remove = new ArrayList<>();
-				for (Runconfiguration r : currentProject.getRunconfigurations()) {
-					if (r.getPreference().equals(cell.getItem().getName())) {
-						remove.add(r);
-					}
-				}
-				for (Runconfiguration r : remove) {
-					currentProject.removeRunconfiguration(r);
-				}
-				currentProject.removePreference(cell.getItem());
-			});
+			removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
 			removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
 
 			cell.setContextMenu(new ContextMenu(removePreferenceMenuItem));
