@@ -85,6 +85,114 @@ public final class StatesView extends AnchorPane {
 
 		stageManager.loadFXML(this, "states_view.fxml");
 	}
+	
+	@FXML
+	private void initialize() {
+		tv.setRowFactory(view -> {
+			final TreeTableRow<StateItem<?>> row = new TreeTableRow<>();
+
+			row.itemProperty().addListener((observable, from, to) -> {
+				row.getStyleClass().remove("changed");
+				if (to != null && to.getContents() instanceof AbstractFormulaElement) {
+					final IEvalElement formula = ((AbstractFormulaElement) to.getContents()).getFormula();
+					final AbstractEvalResult current = this.currentValues.get(formula);
+					final AbstractEvalResult previous = this.previousValues.get(formula);
+
+					if (current != null && previous != null && (
+						!current.getClass().equals(previous.getClass())
+						|| current instanceof EvalResult && !((EvalResult)current).getValue().equals(((EvalResult)previous).getValue())
+					)) {
+						row.getStyleClass().add("changed");
+					}
+				}
+			});
+
+			final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
+			// Expression can only be shown if the row item contains an AbstractFormulaElement and the current state is initialized.
+			visualizeExpressionItem.disableProperty().bind(
+				Bindings.createBooleanBinding(() -> row.getItem() == null || !(row.getItem().getContents() instanceof AbstractFormulaElement), row.itemProperty())
+				.or(currentTrace.currentStateProperty().initializedProperty().not())
+			);
+			visualizeExpressionItem.setOnAction(event ->
+				visualizeExpression((AbstractFormulaElement)row.getItem().getContents())
+			);
+			
+			final MenuItem trackExpressionItem = new MenuItem("Track Expression");
+			trackExpressionItem.disableProperty().bind(
+				Bindings.createBooleanBinding(() -> row.getItem() == null || !(row.getItem().getContents() instanceof AbstractFormulaElement), row.itemProperty())
+			);
+			trackExpressionItem.setOnAction(event -> this.visualizeTracking(row.getItem()));
+
+			final MenuItem showFullValueItem = new MenuItem("Show Full Value");
+			// Full value can only be shown if the row item contains any of the following:
+			// * An AbstractFormulaElement, and the corresponding value is an EvalResult.
+			// * A StateError
+			showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> row.getItem() == null || !(
+					row.getItem().getContents() instanceof AbstractFormulaElement
+					&& this.currentValues.get(((AbstractFormulaElement)row.getItem().getContents()).getFormula()) instanceof EvalResult
+					|| row.getItem().getContents() instanceof StateError
+				),
+				row.itemProperty()
+			));
+			showFullValueItem.setOnAction(event -> this.showFullValue(row.getItem()));
+
+			final MenuItem showErrorsItem = new MenuItem("Show Errors");
+			// Errors can only be shown if the row contains an AbstractFormulaElement whose value is an EvaluationErrorResult.
+			showErrorsItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> row.getItem() == null || !(
+					row.getItem().getContents() instanceof AbstractFormulaElement
+					&& this.currentValues.get(((AbstractFormulaElement)row.getItem().getContents()).getFormula()) instanceof EvaluationErrorResult
+				),
+				row.itemProperty()
+			));
+			showErrorsItem.setOnAction(event -> this.showError(row.getItem()));
+
+			row.contextMenuProperty().bind(
+				Bindings.when(row.emptyProperty())
+				.then((ContextMenu) null)
+				.otherwise(new ContextMenu(visualizeExpressionItem, trackExpressionItem, showFullValueItem, showErrorsItem))
+			);
+
+			// Double-click on an item triggers "show full value" if allowed.
+			row.setOnMouseClicked(event -> {
+				if (!showFullValueItem.isDisable() && event.getButton() == MouseButton.PRIMARY
+						&& event.getClickCount() == 2) {
+					showFullValueItem.getOnAction().handle(null);
+				}
+			});
+
+			return row;
+		});
+
+		this.tvName.setCellFactory(col -> new NameCell());
+		this.tvValue.setCellFactory(col -> new ValueCell(this.currentValues, true));
+		this.tvPreviousValue.setCellFactory(col -> new ValueCell(this.previousValues, false));
+
+		final Callback<TreeTableColumn.CellDataFeatures<StateItem<?>, StateItem<?>>, ObservableValue<StateItem<?>>> cellValueFactory = data -> Bindings.createObjectBinding(data.getValue()::getValue, this.currentTrace);
+		this.tvName.setCellValueFactory(cellValueFactory);
+		this.tvValue.setCellValueFactory(cellValueFactory);
+		this.tvPreviousValue.setCellValueFactory(cellValueFactory);
+
+		this.tvRootItem.setValue(new StateItem<>(Machine.class, false));
+
+		this.classBlacklist.getBlacklist()
+				.addListener((SetChangeListener<? super Class<? extends AbstractElement>>) change -> {
+					if (this.currentTrace.exists()) {
+						this.updateRoot(this.currentTrace.get());
+					}
+				});
+
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
+			if (to == null) {
+				this.tvRootItem.getChildren().clear();
+			} else {
+				this.updateRoot(to);
+			}
+		};
+		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
+		this.currentTrace.addListener(traceChangeListener);
+	}
 
 	private boolean isError(final Object e) {
 		if (e instanceof AbstractFormulaElement) {
@@ -255,107 +363,9 @@ public final class StatesView extends AnchorPane {
 			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not visualize formula:\n" + e).showAndWait();
 		}
 	}
-
-	@FXML
-	private void initialize() {
-		tv.setRowFactory(view -> {
-			final TreeTableRow<StateItem<?>> row = new TreeTableRow<>();
-
-			row.itemProperty().addListener((observable, from, to) -> {
-				row.getStyleClass().remove("changed");
-				if (to != null && to.getContents() instanceof AbstractFormulaElement) {
-					final IEvalElement formula = ((AbstractFormulaElement) to.getContents()).getFormula();
-					final AbstractEvalResult current = this.currentValues.get(formula);
-					final AbstractEvalResult previous = this.previousValues.get(formula);
-
-					if (current != null && previous != null && (
-						!current.getClass().equals(previous.getClass())
-						|| current instanceof EvalResult && !((EvalResult)current).getValue().equals(((EvalResult)previous).getValue())
-					)) {
-						row.getStyleClass().add("changed");
-					}
-				}
-			});
-
-			final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
-			// Expression can only be shown if the row item contains an AbstractFormulaElement and the current state is initialized.
-			visualizeExpressionItem.disableProperty().bind(
-				Bindings.createBooleanBinding(() -> row.getItem() == null || !(row.getItem().getContents() instanceof AbstractFormulaElement), row.itemProperty())
-				.or(currentTrace.currentStateProperty().initializedProperty().not())
-			);
-			visualizeExpressionItem.setOnAction(event ->
-				visualizeExpression((AbstractFormulaElement)row.getItem().getContents())
-			);
-
-			final MenuItem showFullValueItem = new MenuItem("Show Full Value");
-			// Full value can only be shown if the row item contains any of the following:
-			// * An AbstractFormulaElement, and the corresponding value is an EvalResult.
-			// * A StateError
-			showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> row.getItem() == null || !(
-					row.getItem().getContents() instanceof AbstractFormulaElement
-					&& this.currentValues.get(((AbstractFormulaElement)row.getItem().getContents()).getFormula()) instanceof EvalResult
-					|| row.getItem().getContents() instanceof StateError
-				),
-				row.itemProperty()
-			));
-			showFullValueItem.setOnAction(event -> this.showFullValue(row.getItem()));
-
-			final MenuItem showErrorsItem = new MenuItem("Show Errors");
-			// Errors can only be shown if the row contains an AbstractFormulaElement whose value is an EvaluationErrorResult.
-			showErrorsItem.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> row.getItem() == null || !(
-					row.getItem().getContents() instanceof AbstractFormulaElement
-					&& this.currentValues.get(((AbstractFormulaElement)row.getItem().getContents()).getFormula()) instanceof EvaluationErrorResult
-				),
-				row.itemProperty()
-			));
-			showErrorsItem.setOnAction(event -> this.showError(row.getItem()));
-
-			row.contextMenuProperty().bind(
-				Bindings.when(row.emptyProperty())
-				.then((ContextMenu) null)
-				.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem, showErrorsItem))
-			);
-
-			// Double-click on an item triggers "show full value" if allowed.
-			row.setOnMouseClicked(event -> {
-				if (!showFullValueItem.isDisable() && event.getButton() == MouseButton.PRIMARY
-						&& event.getClickCount() == 2) {
-					showFullValueItem.getOnAction().handle(null);
-				}
-			});
-
-			return row;
-		});
-
-		this.tvName.setCellFactory(col -> new NameCell());
-		this.tvValue.setCellFactory(col -> new ValueCell(this.currentValues, true));
-		this.tvPreviousValue.setCellFactory(col -> new ValueCell(this.previousValues, false));
-
-		final Callback<TreeTableColumn.CellDataFeatures<StateItem<?>, StateItem<?>>, ObservableValue<StateItem<?>>> cellValueFactory = data -> Bindings.createObjectBinding(data.getValue()::getValue, this.currentTrace);
-		this.tvName.setCellValueFactory(cellValueFactory);
-		this.tvValue.setCellValueFactory(cellValueFactory);
-		this.tvPreviousValue.setCellValueFactory(cellValueFactory);
-
-		this.tvRootItem.setValue(new StateItem<>(Machine.class, false));
-
-		this.classBlacklist.getBlacklist()
-				.addListener((SetChangeListener<? super Class<? extends AbstractElement>>) change -> {
-					if (this.currentTrace.exists()) {
-						this.updateRoot(this.currentTrace.get());
-					}
-				});
-
-		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
-			if (to == null) {
-				this.tvRootItem.getChildren().clear();
-			} else {
-				this.updateRoot(to);
-			}
-		};
-		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
-		this.currentTrace.addListener(traceChangeListener);
+	
+	private void visualizeTracking(StateItem<?> stateItem) {
+		System.out.println(this.currentValues.get(((AbstractFormulaElement)stateItem.getContents()).getFormula()));
 	}
 
 	private void showError(StateItem<?> stateItem) {
