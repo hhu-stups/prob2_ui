@@ -25,9 +25,11 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.Preference;
 import de.prob2.ui.project.Project;
@@ -64,10 +66,12 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	private final ObjectProperty<Path> defaultLocation;
 	private final StageManager stageManager;
+	private final Injector injector;
 
 	@Inject
-	private CurrentProject(final StageManager stageManager) {
+	private CurrentProject(final StageManager stageManager, final Injector injector) {
 		this.stageManager = stageManager;
+		this.injector = injector;
 
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
@@ -90,6 +94,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.machines.clear();
 				this.preferences.clear();
 				this.location.set(null);
+				this.injector.getInstance(ModelcheckingController.class).resetView();
 			} else {
 				this.name.set(to.getName());
 				this.description.set(to.getDescription());
