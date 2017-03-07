@@ -13,9 +13,9 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob.check.ConsistencyChecker;
+import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
-import de.prob.check.ModelChecker;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
@@ -28,7 +28,6 @@ import de.prob2.ui.stats.StatsView;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -53,6 +52,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
 	private final class ModelcheckingStageController extends Stage {
+		@FXML private Button startButton;
 		@FXML private ChoiceBox<String> selectSearchStrategy;
 		@FXML private CheckBox findDeadlocks;
 		@FXML private CheckBox findInvViolations;
@@ -101,11 +101,18 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		}
 		
 		@FXML
-		private void cancel(ActionEvent event) {
-			if (checker != null) {
-				checker.cancel();
+		private void cancel() {
+			if (currentJob != null) {
+				currentJob.getStateSpace().sendInterrupt();
+			}
+			if (currentJobThread != null) {
+				currentJobThread.interrupt();
 			}
 			this.hide();
+		}
+		
+		private void setDisableStart(final boolean disableStart) {
+			Platform.runLater(() -> this.startButton.setDisable(disableStart));
 		}
 	}
 	
@@ -122,8 +129,9 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private final ModelcheckingStageController stageController;
 	private final StageManager stageManager;
 
-	private final Map<String, ModelChecker> jobs;
-	private ModelChecker checker;
+	private final Map<String, IModelCheckJob> jobs;
+	private IModelCheckJob currentJob;
+	private Thread currentJobThread;
 	private ObservableList<Node> historyNodeList;
 	private ModelCheckStats currentStats;
 	private ModelCheckingOptions currentOptions;
@@ -144,6 +152,8 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		
 		this.stageController = new ModelcheckingStageController(stageManager);
 		this.jobs = new HashMap<>();
+		this.currentJob = null;
+		this.currentJobThread = null;
 	}
 
 	@FXML
@@ -161,19 +171,30 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	}
 
 	private void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {
+		stageController.setDisableStart(true);
 		currentOptions = options;
 		currentStats = new ModelCheckStats(stageManager, this, statsView);
-		checker = new ModelChecker(new ConsistencyChecker(currentStateSpace, options, null, this));
-		jobs.put(checker.getJobId(), checker);
+		currentJob = new ConsistencyChecker(currentStateSpace, options, null, this);
+		jobs.put(currentJob.getJobId(), currentJob);
 		currentStats.startJob();
 		showStats(currentStats);
-		checker.start();
-		new Thread(() -> {
-			final IModelCheckingResult result = checker.getResult();
+		currentJobThread = new Thread(() -> {
+			final IModelCheckingResult result;
+			try {
+				result = currentJob.call();
+			} catch (Exception e) {
+				LOGGER.error("Exception while running model check job", e);
+				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Exception while running model check job:\n" + e).show());
+				return;
+			} finally {
+				currentJobThread = null;
+				stageController.setDisableStart(false);
+			}
 			// The consistency checker sometimes doesn't call isFinished, so we call it manually here with some dummy information.
 			// If the checker already called isFinished, this call won't do anything - on the first call, the checker was removed from the jobs map, so the second call returns right away.
-			this.isFinished(checker.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
-		}, "Model Check Result Waiter " + threadCounter.getAndIncrement()).start();
+			this.isFinished(currentJob.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
+		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
+		currentJobThread.start();
 	}
 
 	private Node toHistoryNode(HistoryItem item) {
@@ -255,8 +276,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	}
 
 	private String toPrettyString(ModelCheckingOptions options) {
-		ModelChecker modelChecker = checker;
-		AbstractElement main = modelChecker.getStateSpace().getMainComponent();
+		AbstractElement main = currentJob.getStateSpace().getMainComponent();
 		List<String> optsList = new ArrayList<>();
 		for (ModelCheckingOptions.Options opts : options.getPrologOptions()) {
 			optsList.add(opts.getDescription());
@@ -283,27 +303,37 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@Override
 	public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-		final ModelChecker modelChecker = jobs.get(jobId);
-		if (modelChecker == null) {
-			LOGGER.error("Model checker for ID {} is missing or null", jobId);
-			return;
+		try {
+			final IModelCheckJob job = jobs.get(jobId);
+			if (job == null) {
+				LOGGER.error("Model check job for ID {} is missing or null", jobId);
+				return;
+			}
+			currentStats.updateStats(job, timeElapsed, stats);
+		} catch (RuntimeException e) {
+			LOGGER.error("Exception in updateStats", e);
+			Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Exception in updateStats:\n" + e).show());
 		}
-		currentStats.updateStats(modelChecker, timeElapsed, stats);
 	}
 
 	@Override
 	public void isFinished(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-		final ModelChecker modelChecker = jobs.remove(jobId);
-		if (modelChecker == null) {
-			// isFinished was already called for this job
-			return;
+		try {
+			final IModelCheckJob job = jobs.remove(jobId);
+			if (job == null) {
+				// isFinished was already called for this job
+				return;
+			}
+			currentStats.isFinished(job, timeElapsed, result);
+			HistoryItem historyItem = new HistoryItem(currentOptions, currentStats);
+			Node historyNode = toHistoryNode(historyItem);
+			Platform.runLater(() -> {
+				historyNodeList.add(historyNode);
+				this.stageController.hide();
+			});
+		} catch (RuntimeException e) {
+			LOGGER.error("Exception in isFinished", e);
+			Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Exception in isFinished:\n" + e).show());
 		}
-		currentStats.isFinished(modelChecker, timeElapsed, result);
-		HistoryItem historyItem = new HistoryItem(currentOptions, currentStats);
-		Node historyNode = toHistoryNode(historyItem);
-		Platform.runLater(() -> {
-			historyNodeList.add(historyNode);
-			this.stageController.hide();
-		});
 	}
 }

@@ -3,10 +3,10 @@ package de.prob2.ui.modelchecking;
 import java.util.Objects;
 
 import de.prob.animator.command.ComputeCoverageCommand;
+import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLOk;
 import de.prob.check.ModelCheckOk;
-import de.prob.check.ModelChecker;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
@@ -64,7 +64,7 @@ public final class ModelCheckStats extends AnchorPane {
 		resultBackground.setVisible(false);
 	}
 
-	public void updateStats(final ModelChecker modelChecker, final long timeElapsed, final StateSpaceStats stats) {
+	public void updateStats(final IModelCheckJob modelChecker, final long timeElapsed, final StateSpaceStats stats) {
 		Objects.requireNonNull(modelChecker, "modelChecker");
 		
 		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
@@ -81,13 +81,17 @@ public final class ModelCheckStats extends AnchorPane {
 			});
 		}
 		
-		ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
+		final StateSpace stateSpace = modelChecker.getStateSpace();
+		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
+		stateSpace.execute(cmd);
+		final ComputeCoverageCommand.ComputeCoverageResult coverage = cmd.getResult();
+		
 		if (coverage != null) {
 			statsView.updateExtendedStats(coverage);
 		}
 	}
 
-	public void isFinished(final ModelChecker modelChecker, final long timeElapsed, final IModelCheckingResult result) {
+	public void isFinished(final IModelCheckJob modelChecker, final long timeElapsed, final IModelCheckingResult result) {
 		Objects.requireNonNull(modelChecker, "modelChecker");
 		Objects.requireNonNull(result, "result");
 		
@@ -102,7 +106,11 @@ public final class ModelCheckStats extends AnchorPane {
 		}
 		String message = result.getMessage();
 
-		ComputeCoverageCommand.ComputeCoverageResult coverage = modelChecker.getCoverage();
+		final StateSpace stateSpace = modelChecker.getStateSpace();
+		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
+		stateSpace.execute(cmd);
+		final ComputeCoverageCommand.ComputeCoverageResult coverage = cmd.getResult();
+		
 		if (coverage != null) {
 			statsView.updateExtendedStats(coverage);
 			Number numNodes = coverage.getTotalNumberOfNodes();
