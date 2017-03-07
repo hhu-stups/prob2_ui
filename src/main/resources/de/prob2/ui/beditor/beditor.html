@@ -14,10 +14,15 @@
 		<script>
 			var TO;
 			function onChange(cm) {
-				//get currentLine instead. Fixing this, fixing everything
 				line = editor.getCursor().line;
-				clearTimeout(TO);
-				TO = setTimeout(function(){blexer.computeHighlighting(cm.getValue(), line + '');}, 100);
+				if(!blexer.isInitialized()) {
+					clearTimeout(TO);
+					TO = setTimeout(function(){
+						blexer.computeHighlighting(cm.getValue(), line + '');
+					}, 100);
+				} else {
+					blexer.computeHighlighting(cm.getValue(), line + '');
+				}
 			}
 
 			var code = document.getElementById('code');
@@ -28,7 +33,7 @@
 				matchBrackets: true,
 				mode: "text/b"
 			});
-			
+						
 			editor.on("change", onChange);
 			
 			function changeFontSize(size) {
