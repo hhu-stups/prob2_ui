@@ -14,7 +14,7 @@
 		<script>
 			var TO;
 			function onChange(cm) {
-				line = cm.getCursor().line;
+				line = editor.getCursor().line;
 				if(!blexer.isInitialized()) {
 					clearTimeout(TO);
 					TO = setTimeout(function(){
