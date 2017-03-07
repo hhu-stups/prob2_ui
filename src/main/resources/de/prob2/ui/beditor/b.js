@@ -17,7 +17,7 @@ CodeMirror.defineMode("b", function() {
 				return 'b-comment';
 			}
 			
-			if (state.comment == true) {
+			if (state.comment) {
 				stream.next();
 				return 'b-comment';
 			} else {

@@ -32,7 +32,7 @@ public class BTokenProvider {
 	private SimpleBooleanProperty initialized;
 	
 	private String text;
-											
+	
 	static {
 			addTokens("b-type", TIdentifierLiteral.class);
 			addTokens("b-assignment-logical", TAssign.class, TOutputParameters.class, TDoubleVerticalBar.class, TAssert.class,
@@ -71,19 +71,19 @@ public class BTokenProvider {
 		this.tokens = new LinkedList<>();
 		JSObject jsobj = (JSObject) engine.executeScript("window");
 		jsobj.setMember("blexer", this);
-        loaded = new SimpleBooleanProperty(false);
-        initialized = new SimpleBooleanProperty(false);
-        
+		loaded = new SimpleBooleanProperty(false);
+		initialized = new SimpleBooleanProperty(false);
+		
 		loaded.addListener((observable, oldValue, newValue) -> {
-			if(newValue == true) {
+			if (newValue) {
 				final JSObject editor = (JSObject) engine.executeScript("editor");
 				editor.call("refresh");
-				loaded.setValue(false);
+				loaded.set(false);
 			}
 		});
 		
 		initialized.addListener((observable, oldValue, newValue) -> {
-			if(newValue == true & oldValue == false) {
+			if (newValue && !oldValue) {
 				final JSObject editor = (JSObject) engine.executeScript("editor");
 				editor.call("setValue", text);
 			}
@@ -104,20 +104,18 @@ public class BTokenProvider {
 		try {
 			Token t;
 			do {
-				t = lexer.next();			
-				if (!"\n".equals(t.getText())) {
-					if(t.getLine() >= currentLine) {
-						tokens.add(t);
-					}
+				t = lexer.next();
+				if (!"\n".equals(t.getText()) && t.getLine() >= currentLine) {
+					tokens.add(t);
 				}
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
 			LOGGER.error("Failed to lex", e);
 		}
-		if(loaded.get() == false) {
+		if (!loaded.get()) {
 			this.text = text;
-			initialized.setValue(true);
-			loaded.setValue(true);
+			initialized.set(true);
+			loaded.set(true);
 		}
 	}
 
@@ -136,9 +134,8 @@ public class BTokenProvider {
 	public boolean isInitialized() {
 		return initialized.get();
 	}
-		
+	
 	public void jslog(String msg) {
 		LOGGER.debug(msg);
 	}
-			
 }
