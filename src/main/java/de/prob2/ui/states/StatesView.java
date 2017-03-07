@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -23,11 +26,9 @@ import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Invariant;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -43,9 +44,6 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class StatesView extends AnchorPane {
@@ -369,27 +367,20 @@ public final class StatesView extends AnchorPane {
 	private void showError(StateItem<?> stateItem) {
 		final FullValueStage stage = injector.getInstance(FullValueStage.class);
 		if (stateItem.getContents() instanceof AbstractFormulaElement) {
-			final AbstractFormulaElement element = (AbstractFormulaElement) stateItem.getContents();
-			final EvalResult currentResult = (EvalResult) this.currentValues.get(element.getFormula());
-			stage.setTitle(element.toString());
-			stage.setCurrentValue(AsciiUnicodeString.fromAscii(currentResult.getValue()));
-			if (this.previousValues != null && this.previousValues.get(element.getFormula()) instanceof EvalResult) {
-				final EvalResult previousResult = (EvalResult) this.previousValues.get(element.getFormula());
-				stage.setPreviousValue(AsciiUnicodeString.fromAscii(previousResult.getValue()));
+			final AbstractEvalResult result = this.currentValues
+					.get(((AbstractFormulaElement) stateItem.getContents()).getFormula());
+			if (result instanceof EvaluationErrorResult) {
+				stage.setTitle(stateItem.toString());
+				stage.setCurrentValue(
+						AsciiUnicodeString.fromAscii(String.join("\n", ((EvaluationErrorResult) result).getErrors())));
+				stage.setFormattingEnabled(false);
+				stage.show();
 			} else {
-				stage.setPreviousValue(null);
+				throw new IllegalArgumentException("Row item result is not an error: " + result.getClass());
 			}
-			stage.setFormattingEnabled(true);
-		} else if (stateItem.getContents() instanceof StateError) {
-			final StateError error = (StateError) stateItem.getContents();
-			stage.setTitle(error.getEvent());
-			stage.setCurrentValue(AsciiUnicodeString.fromAscii(error.getLongDescription()));
-			stage.setPreviousValue(null);
-			stage.setFormattingEnabled(false);
 		} else {
 			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());
 		}
-		stage.show();
 	}
 
 	private void showFullValue(StateItem<?> stateItem) {
