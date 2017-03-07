@@ -42,6 +42,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 @Singleton
@@ -225,7 +226,16 @@ public final class ProjectView extends AnchorPane {
 
 	@FXML
 	void addMachine() {
-		injector.getInstance(AddMachinesDialog.class).showAndWait().ifPresent(currentProject::addMachine);
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Add Machine");
+		fileChooser.getExtensionFilters()
+				.add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
+		
+		File machineFile = fileChooser.showOpenDialog(stageManager.getCurrent());
+		if (machineFile == null) {
+			return;
+		}
+		injector.getInstance(AddMachinesDialog.class).showAndWait(machineFile);
 	}
 
 	@FXML

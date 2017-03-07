@@ -19,7 +19,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
 
 public class AddMachinesDialog extends Dialog<Machine> {
 	@FXML
@@ -32,15 +31,13 @@ public class AddMachinesDialog extends Dialog<Machine> {
 	private ButtonType okButtonType;
 
 	private final CurrentProject currentProject;
-	private final StageManager stageManager;
 	private File machineFile;
 
 	@Inject
 	public AddMachinesDialog(final StageManager stageManager, final CurrentProject currentProject) {
 		super();
-		this.stageManager = stageManager;
 		this.currentProject = currentProject;
-
+				
 		this.setResultConverter(type -> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
@@ -53,23 +50,13 @@ public class AddMachinesDialog extends Dialog<Machine> {
 		});
 		stageManager.loadFXML(this, "machines_dialog.fxml");
 	}
-
-	@FXML
-	public void initialize() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Add Machine");
-		fileChooser.getExtensionFilters()
-				.add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
-
-		machineFile = fileChooser.showOpenDialog(stageManager.getCurrent());
-		if (machineFile == null) {
-			this.close();
-		}
-
+	
+	public void showAndWait(File machineFile) {
+		this.machineFile = machineFile;
 		List<Machine> machinesList = currentProject.getMachines();
 		Set<String> machineNamesSet = new HashSet<>();
 		machineNamesSet.addAll(machinesList.stream().map(Machine::getName).collect(Collectors.toList()));
-
+		
 		String[] n = machineFile.getName().split("\\.");
 		String name = n[0];
 		int i = 1;
@@ -92,5 +79,8 @@ public class AddMachinesDialog extends Dialog<Machine> {
 				errorExplanationLabel.setText("");
 			}
 		});
+		showAndWait().ifPresent(currentProject::addMachine);
 	}
+
+
 }
