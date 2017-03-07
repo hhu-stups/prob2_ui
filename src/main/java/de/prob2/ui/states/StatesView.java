@@ -6,9 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -26,9 +23,11 @@ import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.Invariant;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -45,20 +44,18 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public final class StatesView extends AnchorPane {
 	private static final Logger logger = LoggerFactory.getLogger(StatesView.class);
 
-	@FXML
-	private TreeTableView<StateItem<?>> tv;
-	@FXML
-	private TreeTableColumn<StateItem<?>, StateItem<?>> tvName;
-	@FXML
-	private TreeTableColumn<StateItem<?>, StateItem<?>> tvValue;
-	@FXML
-	private TreeTableColumn<StateItem<?>, StateItem<?>> tvPreviousValue;
-	@FXML
-	private TreeItem<StateItem<?>> tvRootItem;
+	@FXML private TreeTableView<StateItem<?>> tv;
+	@FXML private TreeTableColumn<StateItem<?>, StateItem<?>> tvName;
+	@FXML private TreeTableColumn<StateItem<?>, StateItem<?>> tvValue;
+	@FXML private TreeTableColumn<StateItem<?>, StateItem<?>> tvPreviousValue;
+	@FXML private TreeItem<StateItem<?>> tvRootItem;
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
@@ -70,8 +67,13 @@ public final class StatesView extends AnchorPane {
 	private final Map<IEvalElement, AbstractEvalResult> previousValues;
 
 	@Inject
-	private StatesView(final Injector injector, final CurrentTrace currentTrace, final ClassBlacklist classBlacklist,
-			final FormulaGenerator formulaGenerator, final StageManager stageManager) {
+	private StatesView(
+		final Injector injector,
+		final CurrentTrace currentTrace,
+		final ClassBlacklist classBlacklist,
+		final FormulaGenerator formulaGenerator,
+		final StageManager stageManager
+	) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.classBlacklist = classBlacklist;
@@ -109,8 +111,7 @@ public final class StatesView extends AnchorPane {
 		}
 	}
 
-	private void updateElements(final Trace trace, final TreeItem<StateItem<?>> treeItem,
-			final List<? extends AbstractElement> elements) {
+	private void updateElements(final Trace trace, final TreeItem<StateItem<?>> treeItem, final List<? extends AbstractElement> elements) {
 		for (AbstractElement e : elements) {
 			if (e instanceof AbstractFormulaElement) {
 				((AbstractFormulaElement) e).subscribe(trace.getStateSpace());
@@ -176,8 +177,7 @@ public final class StatesView extends AnchorPane {
 		treeItem.getChildren().sort(Comparator.comparing(a -> NameCell.getName(a.getValue())));
 	}
 
-	private void updateChildren(final Trace trace, final TreeItem<StateItem<?>> treeItem,
-			final AbstractElement element) {
+	private void updateChildren(final Trace trace, final TreeItem<StateItem<?>> treeItem, final AbstractElement element) {
 		this.classBlacklist.getKnownClasses().addAll(element.getChildren().keySet());
 		boolean hasError = this.isError(treeItem.getValue().getContents());
 		for (Class<? extends AbstractElement> clazz : element.getChildren().keySet()) {
@@ -258,10 +258,7 @@ public final class StatesView extends AnchorPane {
 
 	@FXML
 	private void initialize() {
-		tv.setRowFactory(view -> { // NOSONAR // Sonar counts every if statement
-									// in a lambda as a conditional expression
-									// and complains if there are more than 3.
-									// This is not a reasonable limit here.
+		tv.setRowFactory(view -> {
 			final TreeTableRow<StateItem<?>> row = new TreeTableRow<>();
 
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -271,57 +268,55 @@ public final class StatesView extends AnchorPane {
 					final AbstractEvalResult current = this.currentValues.get(formula);
 					final AbstractEvalResult previous = this.previousValues.get(formula);
 
-					if (current != null && previous != null
-							&& (!current.getClass().equals(previous.getClass()) || current instanceof EvalResult
-									&& !((EvalResult) current).getValue().equals(((EvalResult) previous).getValue()))) {
+					if (current != null && previous != null && (
+						!current.getClass().equals(previous.getClass())
+						|| current instanceof EvalResult && !((EvalResult)current).getValue().equals(((EvalResult)previous).getValue())
+					)) {
 						row.getStyleClass().add("changed");
 					}
 				}
 			});
 
 			final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
-			// Expression can only be shown if the row item contains an
-			// AbstractFormulaElement and the current state is initialized.
-			visualizeExpressionItem.disableProperty()
-					.bind(Bindings
-							.createBooleanBinding(
-									() -> row.getItem() == null
-											|| !(row.getItem().getContents() instanceof AbstractFormulaElement),
-									row.itemProperty())
-							.or(currentTrace.currentStateProperty().initializedProperty().not()));
-			visualizeExpressionItem
-					.setOnAction(event -> visualizeExpression((AbstractFormulaElement) row.getItem().getContents()));
+			// Expression can only be shown if the row item contains an AbstractFormulaElement and the current state is initialized.
+			visualizeExpressionItem.disableProperty().bind(
+				Bindings.createBooleanBinding(() -> row.getItem() == null || !(row.getItem().getContents() instanceof AbstractFormulaElement), row.itemProperty())
+				.or(currentTrace.currentStateProperty().initializedProperty().not())
+			);
+			visualizeExpressionItem.setOnAction(event ->
+				visualizeExpression((AbstractFormulaElement)row.getItem().getContents())
+			);
 
 			final MenuItem showFullValueItem = new MenuItem("Show Full Value");
-			// Full value can only be shown if the row item contains any of the
-			// following:
-			// * An AbstractFormulaElement, and the corresponding value is an
-			// EvalResult.
+			// Full value can only be shown if the row item contains any of the following:
+			// * An AbstractFormulaElement, and the corresponding value is an EvalResult.
 			// * A StateError
-			showFullValueItem.disableProperty()
-					.bind(Bindings.createBooleanBinding(() -> row.getItem() == null
-							|| !(row.getItem().getContents() instanceof AbstractFormulaElement
-									&& this.currentValues.get(((AbstractFormulaElement) row.getItem().getContents())
-											.getFormula()) instanceof EvalResult
-					|| row.getItem().getContents() instanceof StateError), row.itemProperty()));
+			showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> row.getItem() == null || !(
+					row.getItem().getContents() instanceof AbstractFormulaElement
+					&& this.currentValues.get(((AbstractFormulaElement)row.getItem().getContents()).getFormula()) instanceof EvalResult
+					|| row.getItem().getContents() instanceof StateError
+				),
+				row.itemProperty()
+			));
 			showFullValueItem.setOnAction(event -> this.showFullValue(row.getItem()));
 
 			final MenuItem showErrorsItem = new MenuItem("Show Errors");
-			// Errors can only be shown if the row contains an
-			// AbstractFormulaElement whose value is an EvaluationErrorResult.
-			showErrorsItem.disableProperty()
-					.bind(Bindings
-							.createBooleanBinding(
-									() -> row.getItem() == null
-											|| !(row.getItem().getContents() instanceof AbstractFormulaElement
-													&& this.currentValues
-															.get(((AbstractFormulaElement) row.getItem().getContents())
-																	.getFormula()) instanceof EvaluationErrorResult),
-							row.itemProperty()));
+			// Errors can only be shown if the row contains an AbstractFormulaElement whose value is an EvaluationErrorResult.
+			showErrorsItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> row.getItem() == null || !(
+					row.getItem().getContents() instanceof AbstractFormulaElement
+					&& this.currentValues.get(((AbstractFormulaElement)row.getItem().getContents()).getFormula()) instanceof EvaluationErrorResult
+				),
+				row.itemProperty()
+			));
 			showErrorsItem.setOnAction(event -> this.showError(row.getItem()));
 
-			row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null)
-					.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem, showErrorsItem)));
+			row.contextMenuProperty().bind(
+				Bindings.when(row.emptyProperty())
+				.then((ContextMenu) null)
+				.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem, showErrorsItem))
+			);
 
 			// Double-click on an item triggers "show full value" if allowed.
 			row.setOnMouseClicked(event -> {
@@ -338,8 +333,7 @@ public final class StatesView extends AnchorPane {
 		this.tvValue.setCellFactory(col -> new ValueCell(this.currentValues, true));
 		this.tvPreviousValue.setCellFactory(col -> new ValueCell(this.previousValues, false));
 
-		final Callback<TreeTableColumn.CellDataFeatures<StateItem<?>, StateItem<?>>, ObservableValue<StateItem<?>>> cellValueFactory = data -> Bindings
-				.createObjectBinding(data.getValue()::getValue, this.currentTrace);
+		final Callback<TreeTableColumn.CellDataFeatures<StateItem<?>, StateItem<?>>, ObservableValue<StateItem<?>>> cellValueFactory = data -> Bindings.createObjectBinding(data.getValue()::getValue, this.currentTrace);
 		this.tvName.setCellValueFactory(cellValueFactory);
 		this.tvValue.setCellValueFactory(cellValueFactory);
 		this.tvPreviousValue.setCellValueFactory(cellValueFactory);
