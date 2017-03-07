@@ -35,9 +35,14 @@
 								not work here) -->
 							<String fx:value="Breadth First" />
 							<String fx:value="Depth First" />
-							<!-- <String fx:value="Mixed DF/BF" /> <String fx:value="Heuristic Function/Random" /> <String fx:value="Hash-Random"
-								/> <String fx:value="Random" /> <String fx:value="Out-Degree for Deadlock
-								Checking" /> <String fx:value="Disabled Transitions in State" /> -->
+							<!--
+							<String fx:value="Mixed DF/BF" />
+							<String fx:value="Heuristic Function/Random" />
+							<String fx:value="Hash-Random" />
+							<String fx:value="Random" />
+							<String fx:value="Out-Degree for Deadlock Checking" />
+							<String fx:value="Disabled Transitions in State" />
+							-->
 						</FXCollections>
 					</items>
 				</ChoiceBox>
