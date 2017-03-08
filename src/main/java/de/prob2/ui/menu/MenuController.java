@@ -22,6 +22,7 @@ import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.modelchecking.ModelcheckingController;
+import de.prob2.ui.modelchecking.ltl.LTLStage;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -349,6 +350,13 @@ public final class MenuController extends MenuBar {
 		final Stage formulaInputStage = injector.getInstance(FormulaInputStage.class);
 		formulaInputStage.showAndWait();
 		formulaInputStage.toFront();
+	}
+	
+	@FXML
+	private void handleLTL() {
+		final Stage ltlStage = injector.getInstance(LTLStage.class);
+		ltlStage.show();
+		ltlStage.toFront();
 	}
 
 	@FXML

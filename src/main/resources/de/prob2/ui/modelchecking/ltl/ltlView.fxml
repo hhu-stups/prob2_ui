@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import de.prob2.ui.modelchecking.ltl.LTLStage?>
+<?import javafx.scene.Scene?>
+
+<fx:root type="LTLStage" resizable="false" title="LTL Modelchecking" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene stylesheets="@/prob.css" height="600" width="800.0">
+			<TabPane fx:id="formulaPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.91">
+			  <tabs>
+			    <Tab fx:id="addTab" text="+">
+			      <content>
+			        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+			      </content>
+			    </Tab>
+			  </tabs>
+			</TabPane>
+		</Scene>
+	</scene>
+</fx:root>

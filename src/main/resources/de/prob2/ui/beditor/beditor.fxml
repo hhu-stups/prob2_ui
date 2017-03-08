@@ -9,7 +9,7 @@
 <?import javafx.scene.web.WebView?>
 <fx:root type="BEditorStage" minWidth="240" minHeight="160" width="1280" height="720" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
-		<Scene>
+		<Scene stylesheets="@/prob.css">
 			<BorderPane maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity">
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
