@@ -26,9 +26,7 @@ public class BTokenProvider {
 	private static final Map<Class<? extends Token>, String> syntaxClasses = new HashMap<>();
 	
 	private LinkedList<Token> tokens;
-	
-	private SimpleBooleanProperty loaded;
-	
+		
 	private SimpleBooleanProperty initialized;
 	
 	private String text;
@@ -71,16 +69,7 @@ public class BTokenProvider {
 		this.tokens = new LinkedList<>();
 		JSObject jsobj = (JSObject) engine.executeScript("window");
 		jsobj.setMember("blexer", this);
-		loaded = new SimpleBooleanProperty(false);
 		initialized = new SimpleBooleanProperty(false);
-		
-		loaded.addListener((observable, oldValue, newValue) -> {
-			if (newValue) {
-				final JSObject editor = (JSObject) engine.executeScript("editor");
-				editor.call("refresh");
-				loaded.set(false);
-			}
-		});
 		
 		initialized.addListener((observable, oldValue, newValue) -> {
 			if (newValue && !oldValue) {
@@ -105,17 +94,16 @@ public class BTokenProvider {
 			Token t;
 			do {
 				t = lexer.next();
-				if (!"\n".equals(t.getText()) && t.getLine() >= currentLine) {
+				if (!"\n".equals(t.getText()) && t.getLine() - 1 >= currentLine) {
 					tokens.add(t);
 				}
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
 			LOGGER.error("Failed to lex", e);
 		}
-		if (!loaded.get()) {
+		if (!initialized.get()) {
 			this.text = text;
 			initialized.set(true);
-			loaded.set(true);
 		}
 	}
 

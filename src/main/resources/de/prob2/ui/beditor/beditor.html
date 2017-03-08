@@ -13,16 +13,25 @@
 		</div>
 		<script>
 			var TO;
+			var lines;
+			
 			function onChange(cm) {
-				line = editor.getCursor().line;
+				var line = cm.getCursor().line;
 				if(!blexer.isInitialized()) {
 					clearTimeout(TO);
 					TO = setTimeout(function(){
 						blexer.computeHighlighting(cm.getValue(), line + '');
 					}, 500);
 				} else {
+					if(lines + 1 == cm.lineCount()) {
+						line -= 1;
+					}
 					blexer.computeHighlighting(cm.getValue(), line + '');
 				}
+			}
+			
+			function beforeChange(cm) {
+				lines = cm.lineCount();
 			}
 
 			var code = document.getElementById('code');
@@ -33,8 +42,9 @@
 				matchBrackets: true,
 				mode: "text/b"
 			});
-						
-			editor.on("change", onChange);
+			
+			editor.on("change", onChange);			
+			editor.on("beforeChange", beforeChange);
 			
 			function changeFontSize(size) {
 				editor.getWrapperElement().style["font-size"] = size+"px";

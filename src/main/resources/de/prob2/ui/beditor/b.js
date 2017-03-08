@@ -16,7 +16,7 @@ CodeMirror.defineMode("b", function() {
 				state.comment = false;
 				return 'b-comment';
 			}
-			
+
 			if (state.comment) {
 				stream.next();
 				return 'b-comment';
