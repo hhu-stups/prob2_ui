@@ -63,7 +63,7 @@ public class ConsoleSearchHandler {
 	}
 	
 	public String getCurrentSearchResult() {
-		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf("\n") + 4;
+		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf("\n") + 5;
 		return parent.getText().substring(posOfColon, parent.getText().length());
 	}
 	
@@ -102,7 +102,7 @@ public class ConsoleSearchHandler {
 		String addition = searchPrefix.substring(0,searchPrefix.length() - 2) + getSearchCurrent() + "':" + searchResults.get(currentSearchIndex).getResult();
 		parent.deleteText(posOfEnter + 1, parent.getText().length());
 		parent.appendText(addition);
-		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf("\n") + 3;
+		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf("\n") + 4;
 		parent.moveTo(posOfColon -1);
 		parent.setEstimatedScrollY(Double.MAX_VALUE);
 	}

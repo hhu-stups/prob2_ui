@@ -12,7 +12,7 @@ public final class BConsole extends Console {
 	private BConsole(BInterpreter interpreter) {
 		super("ProB 2.0 B Console");
 		this.interpreter = interpreter;
-		this.appendText(header + " \n >");
+		this.appendText(header + " \n > ");
 	}
 		
 }

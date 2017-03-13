@@ -28,7 +28,7 @@ public class GroovyConsole extends Console {
 		super("ProB 2.0 Groovy Console");
 		this.interpreter = interpreter;
 		interpreter.setCodeCompletion(this);
-		this.appendText(header +" \n >");
+		this.appendText(header +" \n > ");
 		setListeners();
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
 	}

@@ -175,7 +175,7 @@ public abstract class Console extends StyleClassedTextArea {
 			int posOfEnter = this.getText().lastIndexOf('\n');
 			String searchResult = searchHandler.getCurrentSearchResult();
 			this.deleteText(posOfEnter + 1, this.getText().length());
-			this.appendText(" >" + searchResult);
+			this.appendText(" > " + searchResult);
 			this.moveTo(this.getText().length());
 			charCounterInLine = searchResult.length();
 			currentPosInLine = charCounterInLine;
@@ -192,7 +192,7 @@ public abstract class Console extends StyleClassedTextArea {
 	protected void reset() {
 		this.replaceText(header);
 		this.errors.clear();
-		this.appendText("\n >");
+		this.appendText("\n > ");
 	}
 		
 	protected void handleEnter() {
@@ -226,8 +226,8 @@ public abstract class Console extends StyleClassedTextArea {
 			this.appendText("\nnull");
 		}
 		searchHandler.handleEnter();
-		this.appendText("\n >");
-		this.setStyleClass(this.getText().length() - 2, this.getText().length(), "current");
+		this.appendText("\n > ");
+		this.setStyleClass(this.getText().length() - 3, this.getText().length(), "current");
 		this.setEstimatedScrollY(Double.MAX_VALUE);
 		goToLastPos();
 	}
@@ -264,7 +264,7 @@ public abstract class Console extends StyleClassedTextArea {
 		
 	private void handleLeft() {
 		deactivateSearch();
-		if (currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
+		if (currentPosInLine > 0 && this.getLength() - this.getCaretPosition()  <= charCounterInLine) {
 			currentPosInLine--;
 			this.moveTo(this.getCaretPosition() - 1);
 		} else if (currentPosInLine == 0) {
@@ -284,7 +284,7 @@ public abstract class Console extends StyleClassedTextArea {
 	private void setTextAfterArrowKey() {
 		int posOfEnter = this.getText().lastIndexOf('\n');
 		String currentLine = instructions.get(posInList).getInstruction();
-		this.deleteText(posOfEnter + 3, this.getText().length());
+		this.deleteText(posOfEnter + 4, this.getText().length());
 		this.appendText(currentLine);
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
@@ -325,10 +325,10 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public String getCurrentLine() {
-		if (this.getText(this.getParagraphs().size() - 1).length() < 2) {
+		if (this.getText(this.getParagraphs().size() - 1).length() < 3) {
 			return "";
 		}
-		return this.getText(this.getParagraphs().size() - 1).substring(2);
+		return this.getText(this.getParagraphs().size() - 1).substring(3);
 	}
 	
 	public Console.ConfigData getSettings() {
