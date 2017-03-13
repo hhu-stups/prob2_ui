@@ -121,6 +121,8 @@
 				</tooltip>
 			</MenuButton>
 		</AnchorPane>
-		<ListView fx:id="opsListView" prefHeight="673.0" prefWidth="296.0"/>
 	</VBox>
+	<ListView fx:id="opsListView" prefHeight="673.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0"
+		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+		AnchorPane.topAnchor="100.0"/>
 </fx:root>
