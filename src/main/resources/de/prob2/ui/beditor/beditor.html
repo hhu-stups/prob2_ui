@@ -13,7 +13,7 @@
 		</div>
 		<script>
 			var TO;
-			var lines;
+			var oldLine;
 			
 			function onChange(cm) {
 				var line = cm.getCursor().line;
@@ -23,7 +23,7 @@
 						blexer.computeHighlighting(cm.getValue(), line + '');
 					}, 500);
 				} else {
-					if(lines + 1 == cm.lineCount()) {
+					if(oldLine + 1 == line) {
 						line -= 1;
 					}
 					blexer.computeHighlighting(cm.getValue(), line + '');
@@ -31,7 +31,7 @@
 			}
 			
 			function beforeChange(cm) {
-				lines = cm.lineCount();
+				oldLine = cm.getCursor().line;
 			}
 
 			var code = document.getElementById('code');

@@ -7,7 +7,7 @@ CodeMirror.defineMode("b", function() {
 		},
 		token: function(stream, state) {
 			if (stream.match(/\/\*/, true)) {
-				blexer.getNextToken();
+				blexer.poll();
 				state.comment = true;
 				return 'b-comment';
 			}
@@ -21,9 +21,18 @@ CodeMirror.defineMode("b", function() {
 				stream.next();
 				return 'b-comment';
 			} else {
-				var t = blexer.getNextToken();
-				if (t !== null && stream.match(t.getText(), true)) {
-					return blexer.getStyleClassFromToken(t);
+				var t = blexer.peek();
+				if (t !== null) {
+					if(stream.match(t.getText(), true)) {
+						blexer.poll();
+						return blexer.getStyleClassFromToken(t);
+					} else {
+						t = blexer.firstLinePeek();
+						if(stream.match(t.getText(), true)) {
+							blexer.firstLinePoll();
+							return blexer.getStyleClassFromToken(t);
+						}
+					}
 				}
 				stream.next();
 			}
