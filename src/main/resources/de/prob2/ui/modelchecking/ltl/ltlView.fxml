@@ -23,7 +23,7 @@
 						<TitledPane fx:id="formulaTP" collapsible="false" text="%tptitles.ltlformula">
 							<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="339.0" prefWidth="145.0">
 								<children>
-									<Button contentDisplay="GRAPHIC_ONLY" prefHeight="26.0" prefWidth="26.0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+									<Button contentDisplay="GRAPHIC_ONLY" prefHeight="26.0" prefWidth="26.0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" onAction ="#addFormula">
 										<graphic>
 											<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE" size="26" />
 										</graphic>
