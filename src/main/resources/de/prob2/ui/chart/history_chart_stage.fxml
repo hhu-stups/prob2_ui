@@ -1,22 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" minWidth="100.0" minHeight="100.0">
+<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" minWidth="320" minHeight="160" title="%historychart.title">
 	<scene>
-		<Scene>
+		<Scene width="800" height="400">
 			<AnchorPane maxWidth="Infinity" maxHeight="Infinity">
-				<LineChart fx:id="chart" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-					<xAxis>
-						<NumberAxis tickUnit="1"/>
-					</xAxis>
-					<yAxis>
-						<NumberAxis tickUnit="1"/>
-					</yAxis>
-				</LineChart>
+				<SplitPane dividerPositions="0.25" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+					<BorderPane minWidth="80">
+						<top>
+							<ToolBar>
+								<Button fx:id="addButton" onAction="#handleAdd">
+									<graphic>
+										<FontAwesomeIconView glyphName="PLUS_CIRCLE"/>
+									</graphic>
+								</Button>
+								<Button fx:id="removeButton" onAction="#handleRemove">
+									<graphic>
+										<FontAwesomeIconView glyphName="MINUS_CIRCLE"/>
+									</graphic>
+								</Button>
+							</ToolBar>
+						</top>
+						<center>
+							<ListView fx:id="formulaList" editable="true"/>
+						</center>
+					</BorderPane>
+					<LineChart fx:id="chart" minWidth="160">
+						<xAxis>
+							<NumberAxis tickUnit="1"/>
+						</xAxis>
+						<yAxis>
+							<NumberAxis tickUnit="1"/>
+						</yAxis>
+					</LineChart>
+				</SplitPane>
 			</AnchorPane>
 		</Scene>
 	</scene>
