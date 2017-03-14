@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" minWidth="100.0" minHeight="100.0">
+	<scene>
+		<Scene>
+			<AnchorPane maxWidth="Infinity" maxHeight="Infinity">
+				<LineChart fx:id="chart" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+					<xAxis>
+						<NumberAxis tickUnit="1"/>
+					</xAxis>
+					<yAxis>
+						<NumberAxis tickUnit="1"/>
+					</yAxis>
+				</LineChart>
+			</AnchorPane>
+		</Scene>
+	</scene>
+</fx:root>

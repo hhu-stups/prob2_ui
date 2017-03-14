@@ -7,16 +7,16 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob.scripting.ModelTranslationError;
+
 import de.prob2.ui.MainController;
+import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.formula.FormulaInputStage;
@@ -30,6 +30,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -46,6 +47,9 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -350,6 +354,13 @@ public final class MenuController extends MenuBar {
 		final Stage formulaInputStage = injector.getInstance(FormulaInputStage.class);
 		formulaInputStage.showAndWait();
 		formulaInputStage.toFront();
+	}
+	
+	@FXML
+	private void handleHistoryChart() {
+		final Stage chartStage = injector.getInstance(HistoryChartStage.class);
+		chartStage.show();
+		chartStage.toFront();
 	}
 	
 	@FXML

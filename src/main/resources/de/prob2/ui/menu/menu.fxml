@@ -44,6 +44,7 @@
 	<Menu text="%menu.formula">
 		<MenuItem fx:id="enterFormulaForVisualization"
 			text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />
+		<MenuItem text="%menu.formula.items.showHistoryChart" onAction="#handleHistoryChart" />
 	</Menu>
 	<Menu text="%menu.consoles">
 		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole" />
