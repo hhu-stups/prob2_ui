@@ -25,14 +25,19 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void initialize() {
+		lv_formula.setOnMouseClicked(e-> {
+			if(e.getClickCount() == 2) {
+				if(lv_formula.getSelectionModel().getSelectedItem() != null) {
+					lv_formula.getSelectionModel().getSelectedItem().show();
+				}
+			}
+		});
 		
 	}
 	
 	@FXML
 	public void addFormula() {
-		injector.getInstance(AddLTLFormulaDialog.class).showAndWait().ifPresent(t-> {
-			lv_formula.getItems().add(t);	
-		});
+		injector.getInstance(AddLTLFormulaDialog.class).showAndWait().ifPresent(lv_formula.getItems()::add);
 	}
 
 }

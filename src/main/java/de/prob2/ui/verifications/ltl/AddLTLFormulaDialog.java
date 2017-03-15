@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.ltl;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
@@ -15,13 +16,15 @@ public class AddLTLFormulaDialog extends Dialog<LTLFormulaItem> {
 	private TextField tf_name;
 
 	@Inject
-	public AddLTLFormulaDialog(final StageManager stageManager) {
+	public AddLTLFormulaDialog(final StageManager stageManager, final Injector injector) {
 		super();
 		this.setResultConverter(type -> {
 			if(type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				return new LTLFormulaItem(tf_name.getText());
+				LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
+				formulaStage.setTitle(tf_name.getText());
+				return new LTLFormulaItem(tf_name.getText(), formulaStage);
 			}
 		});
 		this.initModality(Modality.APPLICATION_MODAL);

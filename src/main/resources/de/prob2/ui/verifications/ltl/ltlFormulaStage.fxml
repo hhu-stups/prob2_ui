@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.verifications.ltl.LTLFormulaStage?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.Scene?>
+
+<fx:root type="LTLFormulaStage" minWidth="240" minHeight="160" width="600" height="480" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene stylesheets="@/prob.css"> 
+			<BorderPane maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+				<top>
+					<MenuBar BorderPane.alignment="CENTER">
+						<Menu text="%menu.file">
+							<MenuItem accelerator="Shortcut+S" onAction="#handleSave" text="%menu.file.items.save" />
+							<MenuItem accelerator="Shortcut+W" onAction="#handleClose" text="%menu.file.items.close" />
+						</Menu>
+						<Menu text="%menu.edit">
+							<MenuItem text="%menu.file.items.placeholder" />
+						</Menu>
+						<Menu text="%menu.help">
+							<MenuItem text="%menu.help.items.about" />
+						</Menu>
+					</MenuBar>
+				</top>
+				<center>
+					<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="300.0" prefWidth="480.0">
+						<children>
+							<Button onAction="#checkFormula" prefHeight="20.0" prefWidth="150.0" text="Check formula" 
+								AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" styleClass="button-blue" />
+							<TextArea fx:id="ta_formula" prefHeight="314.0" prefWidth="480.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
+						</children>
+					</AnchorPane>
+				</center>
+			</BorderPane>
+		</Scene>
+	</scene>
+</fx:root>
