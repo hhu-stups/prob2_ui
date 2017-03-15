@@ -115,7 +115,7 @@ public final class UIPersistence {
 			}
 		}
 		
-		for (String titledPane : new String[] {"Operations", "History", "Animations", "Model Check", "Statistics"}) {
+		for (String titledPane : new String[] {"Operations", "History", "Project", "Verifications", "Statistics"}) {
 			if (uiState.getExpandedTitledPanes().contains(titledPane)) {
 				main.expandTitledPane(titledPane);
 			}

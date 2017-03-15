@@ -1,11 +1,11 @@
 package de.prob2.ui.verifications.ltl;
 
-public class LTLFormula {
+public class LTLFormulaItem {
 	
 	private String name;
 	private String formula;
 	
-	public LTLFormula(String name) {
+	public LTLFormulaItem(String name) {
 		this.name = name;
 	}
 	

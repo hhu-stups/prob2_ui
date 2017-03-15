@@ -4,7 +4,7 @@
 <?import de.prob2.ui.MainController?>
 <?import de.prob2.ui.project.ProjectView?>
 <?import de.prob2.ui.menu.MenuController?>
-<?import de.prob2.ui.verifications.modelchecking.ModelcheckingController?>
+<?import de.prob2.ui.verifications.VerificationsView?>
 <?import de.prob2.ui.operations.OperationsView?>
 <?import de.prob2.ui.menu.MainView?>
 <?import de.prob2.ui.stats.StatsView?>
@@ -22,8 +22,8 @@
 					<TitledPane text="%tptitles.history" fx:id ="historyTP" onMouseClicked="#historyTPClicked">
 						<HistoryView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.modelcheck" fx:id = "modelcheckTP" onMouseClicked="#modelcheckTPClicked">
-						<ModelcheckingController/>
+					<TitledPane text="%tptitles.verifications" fx:id = "verificationsTP" onMouseClicked="#verificationsTPClicked">
+						<VerificationsView/>
 					</TitledPane>
 					<TitledPane text="%tptitles.stats" fx:id ="statsTP" onMouseClicked="#statsTPClicked">
 						<StatsView/>

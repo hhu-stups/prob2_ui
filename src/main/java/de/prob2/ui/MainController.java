@@ -41,7 +41,7 @@ public class MainController extends BorderPane {
 	private TitledPane operationsTP;
 	
 	@FXML
-	private TitledPane modelcheckTP;
+	private TitledPane verificationsTP;
 	
 	@FXML
 	private TitledPane historyTP;
@@ -89,8 +89,8 @@ public class MainController extends BorderPane {
 	}
 	
 	@FXML
-	public void modelcheckTPClicked() {
-		handleTitledPaneClicked(modelcheckTP);
+	public void verificationsTPClicked() {
+		handleTitledPaneClicked(verificationsTP);
 	}
 	
 	@FXML
@@ -118,7 +118,7 @@ public class MainController extends BorderPane {
 		HashMap<String,TitledPane> titledPanes = new HashMap<>();
 		titledPanes.put("Operations", operationsTP);
 		titledPanes.put("History", historyTP);
-		titledPanes.put("Model Check", modelcheckTP);
+		titledPanes.put("Verifications", verificationsTP);
 		titledPanes.put("Statistics", statsTP);
 		titledPanes.put("Project", projectTP);
 
@@ -165,7 +165,7 @@ public class MainController extends BorderPane {
 	// These methods are all needed for detaching views. Otherwise NPEs are triggered
 	// (for example operationsTP.getParent() returns null)
 	public TitledPane[] getTitledPanes() {
-		return new TitledPane[] {operationsTP, modelcheckTP, historyTP, projectTP, statsTP};
+		return new TitledPane[] {operationsTP, verificationsTP, historyTP, projectTP, statsTP};
 	}
 
 	public Accordion[] getAccordions() {

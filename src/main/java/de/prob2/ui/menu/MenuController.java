@@ -28,7 +28,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
-import de.prob2.ui.verifications.ltl.LTLStage;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
@@ -362,13 +361,6 @@ public final class MenuController extends MenuBar {
 		chartStage.toFront();
 	}
 	
-	@FXML
-	private void handleLTL() {
-		final Stage ltlStage = injector.getInstance(LTLStage.class);
-		ltlStage.show();
-		ltlStage.toFront();
-	}
-
 	@FXML
 	private void handleGroovyConsole() {
 		final Stage groovyConsoleStage = injector.getInstance(GroovyConsoleStage.class);

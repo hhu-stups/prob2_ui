@@ -21,7 +21,7 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+import de.prob2.ui.verifications.VerificationsView;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -43,7 +43,7 @@ public final class DetachViewStageController extends Stage {
 	@FXML private Button apply;
 	@FXML private CheckBox detachOperations;
 	@FXML private CheckBox detachHistory;
-	@FXML private CheckBox detachModelcheck;
+	@FXML private CheckBox detachVerifications;
 	@FXML private CheckBox detachStats;
 	@FXML private CheckBox detachProjects;
 	
@@ -81,7 +81,7 @@ public final class DetachViewStageController extends Stage {
 	public void initialize() {
 		checkBoxMap.put(OperationsView.class, detachOperations);
 		checkBoxMap.put(HistoryView.class, detachHistory);
-		checkBoxMap.put(ModelcheckingController.class, detachModelcheck);
+		checkBoxMap.put(VerificationsView.class, detachVerifications);
 		checkBoxMap.put(StatsView.class, detachStats);
 		checkBoxMap.put(ProjectView.class, detachProjects);
 	}

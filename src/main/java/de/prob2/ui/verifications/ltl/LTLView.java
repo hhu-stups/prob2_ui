@@ -7,18 +7,18 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
-import javafx.stage.Stage;
+import javafx.scene.layout.AnchorPane;
 
 @Singleton
-public class LTLStage extends Stage{
+public class LTLView extends AnchorPane{
 	
 	@FXML
-	private ListView<LTLFormula> lv_formula;
+	private ListView<LTLFormulaItem> lv_formula;
 	
 	private final Injector injector;
 	
 	@Inject
-	public LTLStage(final StageManager stageManager, final Injector injector) {
+	public LTLView(final StageManager stageManager, final Injector injector) {
 		this.injector = injector;
 		stageManager.loadFXML(this, "ltlView.fxml");
 	}

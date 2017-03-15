@@ -9,7 +9,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 
-public class AddLTLFormulaDialog extends Dialog<LTLFormula> {
+public class AddLTLFormulaDialog extends Dialog<LTLFormulaItem> {
 	
 	@FXML
 	private TextField tf_name;
@@ -21,7 +21,7 @@ public class AddLTLFormulaDialog extends Dialog<LTLFormula> {
 			if(type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				return new LTLFormula(tf_name.getText());
+				return new LTLFormulaItem(tf_name.getText());
 			}
 		});
 		this.initModality(Modality.APPLICATION_MODAL);

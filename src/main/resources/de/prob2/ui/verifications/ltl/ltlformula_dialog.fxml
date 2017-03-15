@@ -10,7 +10,7 @@
 <?import javafx.geometry.Insets?>
 <?import de.prob2.ui.verifications.ltl.AddLTLFormulaDialog?>
 
-<fx:root type ="AddLTLFormulaDialog" title="%ltl.title.dialog" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type ="AddLTLFormulaDialog" title="%ltl.dialog.title" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="480.0" stylesheets="@/prob.css" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 		    <header>

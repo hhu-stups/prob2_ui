@@ -32,6 +32,8 @@ import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.verifications.VerificationsView;
+import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.fxml.FXMLLoader;
 
@@ -70,6 +72,7 @@ public class ProB2Module extends AbstractModule {
 		bind(BMotionView.class);
 		bind(HistoryView.class);
 		bind(ProjectView.class);
+		bind(LTLView.class);
 		bind(MenuController.class);
 		bind(MainView.class);
 		bind(MainController.class);
@@ -78,6 +81,7 @@ public class ProB2Module extends AbstractModule {
 		bind(PreferencesView.class);
 		bind(StatesView.class);
 		bind(StatsView.class);
+		bind(VerificationsView.class);
 	}
 
 	@Provides

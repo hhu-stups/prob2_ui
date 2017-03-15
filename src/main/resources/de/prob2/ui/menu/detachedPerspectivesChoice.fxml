@@ -15,7 +15,7 @@
 				<VBox layoutX="11.0" layoutY="69.0" spacing="15.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="50.0" AnchorPane.topAnchor="40.0" styleClass="dark">
 					<CheckBox fx:id="detachOperations" text="%menu.perspectives.detachStage.operations"/>
 					<CheckBox fx:id="detachHistory" text="%menu.perspectives.detachStage.history"/>
-					<CheckBox fx:id="detachModelcheck" text="%menu.perspectives.detachStage.modelcheck"/>
+					<CheckBox fx:id="detachVerifications" text="%menu.perspectives.detachStage.verifications"/>
 					<CheckBox fx:id="detachStats" text="%menu.perspectives.detachStage.stats"/>
 					<CheckBox fx:id="detachProjects" text="%menu.perspectives.detachStage.projects"/>
 				</VBox>

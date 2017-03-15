@@ -50,9 +50,6 @@
 		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole" />
 		<MenuItem text="%menu.consoles.items.b" onAction="#handleBConsole" />
 	</Menu>
-		<Menu text="%menu.verify">
-		<MenuItem text="%menu.verify.ltl" onAction="#handleLTL" />
-	</Menu>
 	<Menu text="%menu.perspectives">
 		<Menu text="%menu.perspectives.preset">
 			<MenuItem text="%menu.perspectives.preset.default" onAction="#handleLoadDefault" />
