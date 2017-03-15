@@ -17,11 +17,11 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;

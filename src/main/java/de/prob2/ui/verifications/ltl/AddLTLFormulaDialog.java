@@ -1,4 +1,4 @@
-package de.prob2.ui.modelchecking.ltl;
+package de.prob2.ui.verifications.ltl;
 
 import com.google.inject.Inject;
 

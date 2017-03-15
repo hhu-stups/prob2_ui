@@ -1,4 +1,4 @@
-package de.prob2.ui.modelchecking;
+package de.prob2.ui.verifications.modelchecking;
 
 import java.util.Objects;
 

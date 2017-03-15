@@ -1,6 +1,4 @@
-package de.prob2.ui.modelchecking.ltl;
-
-import java.util.Optional;
+package de.prob2.ui.verifications.ltl;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -32,8 +30,9 @@ public class LTLStage extends Stage{
 	
 	@FXML
 	public void addFormula() {
-		Optional<LTLFormula> op = injector.getInstance(AddLTLFormulaDialog.class).showAndWait();
-		lv_formula.getItems().add(op.get());
+		injector.getInstance(AddLTLFormulaDialog.class).showAndWait().ifPresent(t-> {
+			lv_formula.getItems().add(t);	
+		});
 	}
 
 }

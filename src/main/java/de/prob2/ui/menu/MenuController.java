@@ -21,8 +21,6 @@ import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.modelchecking.ModelcheckingController;
-import de.prob2.ui.modelchecking.ltl.LTLStage;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -30,7 +28,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
-
+import de.prob2.ui.verifications.ltl.LTLStage;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;

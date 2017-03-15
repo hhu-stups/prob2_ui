@@ -4,7 +4,7 @@
 <?import de.prob2.ui.MainController?>
 <?import de.prob2.ui.project.ProjectView?>
 <?import de.prob2.ui.menu.MenuController?>
-<?import de.prob2.ui.modelchecking.ModelcheckingController?>
+<?import de.prob2.ui.verifications.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.operations.OperationsView?>
 <?import de.prob2.ui.menu.MainView?>
 <?import de.prob2.ui.stats.StatsView?>

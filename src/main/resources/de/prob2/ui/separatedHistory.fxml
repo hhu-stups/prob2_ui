@@ -2,7 +2,7 @@
 
 <?import de.prob2.ui.history.HistoryView?>
 <?import de.prob2.ui.menu.MenuController?>
-<?import de.prob2.ui.modelchecking.ModelcheckingController?>
+<?import de.prob2.ui.verifications.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.operations.OperationsView?>
 <?import de.prob2.ui.menu.MainView?>
 <?import javafx.scene.control.Accordion?>

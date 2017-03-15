@@ -21,7 +21,6 @@ import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.RecentFiles;
-import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.prob2fx.CurrentModel;
@@ -33,6 +32,7 @@ import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {

@@ -29,11 +29,11 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.modelchecking.ModelcheckingController;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.Preference;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.Runconfiguration;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
