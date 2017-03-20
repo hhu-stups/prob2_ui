@@ -28,6 +28,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.statespace.AnimationSelector;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.Preference;
@@ -67,11 +68,16 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ObjectProperty<Path> defaultLocation;
 	private final StageManager stageManager;
 	private final Injector injector;
+	private AnimationSelector animations;
+	private CurrentTrace currentTrace;
 
 	@Inject
-	private CurrentProject(final StageManager stageManager, final Injector injector) {
+	private CurrentProject(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
+			final CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
 		this.injector = injector;
+		this.animations = animations;
+		this.currentTrace = currentTrace;
 
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
@@ -126,7 +132,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 				runconfigsList, this.getLocation()));
 	}
-	
+
 	public void updateMachine(Machine oldMachine, Machine newMachine) {
 		this.removeMachine(oldMachine);
 		this.addMachine(newMachine);
@@ -138,7 +144,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
 				this.getRunconfigurations(), this.getLocation()));
 	}
-	
+
 	public void removePreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.remove(preference);
@@ -159,7 +165,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
 				runconfigs, this.getLocation()));
 	}
-	
+
 	public void removeRunconfiguration(Runconfiguration runconfiguration) {
 		List<Runconfiguration> runconfigs = this.getRunconfigurations();
 		runconfigs.remove(runconfiguration);
@@ -170,6 +176,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	@Override
 	public void set(Project project) {
 		if (confirmReplacingProject()) {
+			if(currentTrace.exists()) {
+				animations.removeTrace(currentTrace.get());
+			}
 			super.set(project);
 		}
 	}
