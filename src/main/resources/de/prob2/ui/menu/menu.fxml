@@ -11,18 +11,19 @@
 	<Menu text="%menu.file">
 		<MenuItem text="%menu.file.items.newProject" accelerator="Alt+Shortcut+N"
 			onAction="#createNewProject" />
-		<MenuItem text="%menu.file.items.openProject" accelerator="Alt+Shortcut+O" onAction="#handleOpenProject"/>
+		<MenuItem text="%menu.file.items.newProjectFromFile"
+			accelerator="Shortcut+O" onAction="#handleNewProjectFromFile" />
+		<SeparatorMenuItem />
+		<MenuItem text="%menu.file.items.openProject" accelerator="Alt+Shortcut+O"
+			onAction="#handleOpenProject" />
 		<Menu fx:id="recentProjectsMenu" text="%menu.file.items.openRecentProject">
 			<MenuItem fx:id="recentProjectsPlaceholder" text="%menu.file.items.placeholder"
 				disable="true" />
 			<SeparatorMenuItem />
 			<MenuItem fx:id="clearRecentProjects"
-				text="%menu.file.items.openRecentProject.items.clear" onAction="#handleClearRecentProjects"/>
+				text="%menu.file.items.openRecentProject.items.clear" onAction="#handleClearRecentProjects" />
 		</Menu>
-		<SeparatorMenuItem />
-		<MenuItem text="%menu.file.items.openFile" accelerator="Shortcut+O"
-			onAction="#handleOpen" />
-		<Menu fx:id="recentFilesMenu" text="%menu.file.items.openRecentFile">
+		<Menu fx:id="recentFilesMenu" text="%menu.file.items.openRecentFile" disable="true" visible="false">
 			<MenuItem fx:id="recentFilesPlaceholder" text="%menu.file.items.placeholder"
 				disable="true" />
 			<SeparatorMenuItem />
@@ -37,14 +38,16 @@
 			onAction="#handleClose" />
 	</Menu>
 	<Menu text="%menu.edit">
-		<MenuItem fx:id="reloadMachineItem" text="%menu.edit.items.reloadMachine" accelerator="Shortcut+R" onAction="#handleReloadMachine" />
+		<MenuItem fx:id="reloadMachineItem" text="%menu.edit.items.reloadMachine"
+			accelerator="Shortcut+R" onAction="#handleReloadMachine" />
 		<MenuItem fx:id="preferencesItem" text="%menu.edit.items.preferences"
 			onAction="#handlePreferences" />
 	</Menu>
 	<Menu text="%menu.formula">
 		<MenuItem fx:id="enterFormulaForVisualization"
 			text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />
-		<MenuItem text="%menu.formula.items.showHistoryChart" onAction="#handleHistoryChart" />
+		<MenuItem text="%menu.formula.items.showHistoryChart"
+			onAction="#handleHistoryChart" />
 	</Menu>
 	<Menu text="%menu.consoles">
 		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole" />
@@ -53,17 +56,20 @@
 	<Menu text="%menu.perspectives">
 		<Menu text="%menu.perspectives.preset">
 			<MenuItem text="%menu.perspectives.preset.default" onAction="#handleLoadDefault" />
-			<MenuItem text="%menu.perspectives.preset.separated" onAction="#handleLoadSeparated" />
-			<MenuItem text="%menu.perspectives.preset.separated2" onAction="#handleLoadSeparated2" />
+			<MenuItem text="%menu.perspectives.preset.separated"
+				onAction="#handleLoadSeparated" />
+			<MenuItem text="%menu.perspectives.preset.separated2"
+				onAction="#handleLoadSeparated2" />
 		</Menu>
-		<MenuItem text="%menu.perspectives.detach" onAction="#handleLoadDetached"/>
+		<MenuItem text="%menu.perspectives.detach" onAction="#handleLoadDetached" />
 		<MenuItem text="%menu.perspectives.load" onAction="#handleLoadPerspective" />
 	</Menu>
 	<Menu fx:id="windowMenu" text="%menu.window">
 
 	</Menu>
 	<Menu text="%menu.help">
-		<MenuItem fx:id="aboutItem" onAction="#handleAboutDialog" text="%menu.help.items.about" />
+		<MenuItem fx:id="aboutItem" onAction="#handleAboutDialog"
+			text="%menu.help.items.about" />
 		<MenuItem text="%menu.help.reportBug" onAction="#handleReportBug" />
 	</Menu>
 </fx:root>

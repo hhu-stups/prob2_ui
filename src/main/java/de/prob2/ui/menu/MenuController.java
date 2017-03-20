@@ -7,14 +7,15 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob.scripting.ModelTranslationError;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.consoles.b.BConsoleStage;
@@ -28,6 +29,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
@@ -45,9 +47,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -261,7 +260,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	private void handleOpen() {
+	private void handleNewProjectFromFile() {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open File");
 		fileChooser.getExtensionFilters()
@@ -271,19 +270,10 @@ public final class MenuController extends MenuBar {
 		if (selectedFile == null) {
 			return;
 		}
-
-		this.open(selectedFile);
-	}
-
-	private void open(File file) {
-		machineLoader.loadAsync(new Machine(file.getName().split("\\.")[0], "", file.toPath()));
-		Platform.runLater(() -> {
-			injector.getInstance(ModelcheckingController.class).resetView();
-
-			// Remove the path first to avoid listing the same file twice.
-			this.recentFiles.recentFilesProperty().remove(file.getAbsolutePath());
-			this.recentFiles.recentFilesProperty().add(0, file.getAbsolutePath());
-		});
+		currentProject.set(new Project(selectedFile.getName(),
+				"(this project was created automatically from file " + selectedFile.getAbsolutePath() + ")",
+				new Machine(selectedFile.getName(), "", selectedFile.toPath()),
+				currentProject.getDefaultLocation().toFile()));
 	}
 
 	@FXML
@@ -353,14 +343,14 @@ public final class MenuController extends MenuBar {
 		formulaInputStage.showAndWait();
 		formulaInputStage.toFront();
 	}
-	
+
 	@FXML
 	private void handleHistoryChart() {
 		final Stage chartStage = injector.getInstance(HistoryChartStage.class);
 		chartStage.show();
 		chartStage.toFront();
 	}
-	
+
 	@FXML
 	private void handleGroovyConsole() {
 		final Stage groovyConsoleStage = injector.getInstance(GroovyConsoleStage.class);
@@ -403,7 +393,7 @@ public final class MenuController extends MenuBar {
 			if ("projects".equals(filesOrProjects)) {
 				item.setOnAction(event -> this.openProject(file));
 			} else if ("files".equals(filesOrProjects)) {
-				item.setOnAction(event -> this.open(file));
+				// item.setOnAction(event -> this.open(file));
 			}
 			newItems.add(item);
 		}

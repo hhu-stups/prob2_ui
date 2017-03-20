@@ -42,6 +42,13 @@ public class Project {
 		this.location = location;
 	}
 
+	public Project(String name, String description, Machine machine, File location) {
+		this.name = name;
+		this.description = description;
+		machines.add(machine);
+		this.location = location;
+	}
+
 	public String getName() {
 		return name;
 	}
