@@ -27,7 +27,6 @@ import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Machine;
-import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
@@ -56,18 +55,12 @@ public final class MenuController extends MenuBar {
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final MenuToolkit menuToolkit;
-	private final RecentFiles recentFiles;
+	private final RecentProjects recentProjects;
 	private final UIState uiState;
 	private final DetachViewStageController dvController;
 	private final AboutBoxController aboutController;
 	private Window window;
 
-	@FXML
-	private Menu recentFilesMenu;
-	@FXML
-	private MenuItem recentFilesPlaceholder;
-	@FXML
-	private MenuItem clearRecentFiles;
 	@FXML
 	private Menu recentProjectsMenu;
 	@FXML
@@ -88,13 +81,12 @@ public final class MenuController extends MenuBar {
 	private MenuItem aboutItem;
 
 	private CurrentProject currentProject;
-	private MachineLoader machineLoader;
 
 	@Inject
 	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
 			final DetachViewStageController dvController, final AboutBoxController aboutController,
-			@Nullable final MenuToolkit menuToolkit, final RecentFiles recentFiles, final CurrentProject currentProject,
-			final UIState uiState, final MachineLoader machineLoader) {
+			@Nullable final MenuToolkit menuToolkit, final RecentProjects recentProjects, final CurrentProject currentProject,
+			final UIState uiState) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
@@ -102,10 +94,8 @@ public final class MenuController extends MenuBar {
 		this.dvController = dvController;
 		this.aboutController = aboutController;
 		this.menuToolkit = menuToolkit;
-		this.recentFiles = recentFiles;
+		this.recentProjects = recentProjects;
 		this.uiState = uiState;
-		this.machineLoader = machineLoader;
-
 		stageManager.loadFXML(this, "menu.fxml");
 
 		if (menuToolkit != null) {
@@ -149,34 +139,9 @@ public final class MenuController extends MenuBar {
 			}
 		});
 
-		final ListChangeListener<String> recentFilesListener = change -> {
-			final ObservableList<MenuItem> recentItems = this.recentFilesMenu.getItems();
-			final List<MenuItem> newItems = getRecentFileItems(recentFiles.recentFilesProperty(), "files");
-
-			// If there are no recent files, show a placeholder and disable
-			// clearing
-			this.clearRecentFiles.setDisable(newItems.isEmpty());
-			if (newItems.isEmpty()) {
-				newItems.add(this.recentFilesPlaceholder);
-			}
-
-			// Add a shortcut for reopening the most recent file
-			newItems.get(0).setAccelerator(KeyCombination.valueOf("Shift+Shortcut+'O'"));
-
-			// Keep the last two items (the separator and the "clear recent
-			// files" item)
-			newItems.addAll(recentItems.subList(recentItems.size() - 2, recentItems.size()));
-
-			// Replace the old recents with the new ones
-			this.recentFilesMenu.getItems().setAll(newItems);
-		};
-		this.recentFiles.recentFilesProperty().addListener(recentFilesListener);
-		// Fire the listener once to populate the recent files menu
-		recentFilesListener.onChanged(null);
-
 		final ListChangeListener<String> recentProjectsListener = change -> {
 			final ObservableList<MenuItem> recentItems = this.recentProjectsMenu.getItems();
-			final List<MenuItem> newItems = getRecentFileItems(recentFiles.recentProjectsProperty(), "projects");
+			final List<MenuItem> newItems = getRecentProjectItems(recentProjects);
 			this.clearRecentProjects.setDisable(newItems.isEmpty());
 			if (newItems.isEmpty()) {
 				newItems.add(this.recentProjectsPlaceholder);
@@ -184,7 +149,7 @@ public final class MenuController extends MenuBar {
 			newItems.addAll(recentItems.subList(recentItems.size() - 2, recentItems.size()));
 			this.recentProjectsMenu.getItems().setAll(newItems);
 		};
-		this.recentFiles.recentProjectsProperty().addListener(recentProjectsListener);
+		this.recentProjects.addListener(recentProjectsListener);
 		recentProjectsListener.onChanged(null);
 
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
@@ -195,12 +160,12 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleClearRecentFiles() {
-		this.recentFiles.recentFilesProperty().clear();
+		this.recentProjects.clear();
 	}
 
 	@FXML
 	private void handleClearRecentProjects() {
-		this.recentFiles.recentProjectsProperty().clear();
+		this.recentProjects.clear();
 	}
 
 	@FXML
@@ -295,8 +260,8 @@ public final class MenuController extends MenuBar {
 
 		Platform.runLater(() -> {
 			injector.getInstance(ModelcheckingController.class).resetView();
-			this.recentFiles.recentProjectsProperty().remove(file.getAbsolutePath());
-			this.recentFiles.recentProjectsProperty().add(0, file.getAbsolutePath());
+			this.recentProjects.remove(file.getAbsolutePath());
+			this.recentProjects.add(0, file.getAbsolutePath());
 		});
 	}
 
@@ -385,16 +350,12 @@ public final class MenuController extends MenuBar {
 		return root;
 	}
 
-	private List<MenuItem> getRecentFileItems(SimpleListProperty<String> recentListProperty, String filesOrProjects) {
+	private List<MenuItem> getRecentProjectItems(SimpleListProperty<String> recentListProperty) {
 		final List<MenuItem> newItems = new ArrayList<>();
 		for (String s : recentListProperty) {
 			File file = new File(s);
 			final MenuItem item = new MenuItem(file.getName());
-			if ("projects".equals(filesOrProjects)) {
-				item.setOnAction(event -> this.openProject(file));
-			} else if ("files".equals(filesOrProjects)) {
-				// item.setOnAction(event -> this.open(file));
-			}
+			item.setOnAction(event -> this.openProject(file));
 			newItems.add(item);
 		}
 		return newItems;

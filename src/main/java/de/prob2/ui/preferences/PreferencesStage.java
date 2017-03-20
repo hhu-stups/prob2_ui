@@ -17,7 +17,7 @@ import de.prob.model.representation.AbstractElement;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.RecentFiles;
+import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
@@ -83,7 +83,7 @@ public final class PreferencesStage extends Stage {
 	private final ClassBlacklist classBlacklist;
 	private final CurrentTrace currentTrace;
 	private final ProBPreferences preferences;
-	private final RecentFiles recentFiles;
+	private final RecentProjects recentProjects;
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final StringProperty currentTab;
@@ -93,7 +93,7 @@ public final class PreferencesStage extends Stage {
 		final ClassBlacklist classBlacklist,
 		final CurrentTrace currentTrace,
 		final ProBPreferences preferences,
-		final RecentFiles recentFiles,
+		final RecentProjects recentProjects,
 		final StageManager stageManager,
 		final CurrentProject currentProject
 	) {
@@ -101,7 +101,7 @@ public final class PreferencesStage extends Stage {
 		this.currentTrace = currentTrace;
 		this.preferences = preferences;
 		this.preferences.setStateSpace(currentTrace.exists() ? currentTrace.getStateSpace() : null);
-		this.recentFiles = recentFiles;
+		this.recentProjects = recentProjects;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTab = new SimpleStringProperty(this, "currentTab", null);
@@ -116,9 +116,9 @@ public final class PreferencesStage extends Stage {
 		final SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 50);
 		
 		// bindBidirectional doesn't work properly here, don't ask why
-		this.recentFiles.maximumProperty().addListener((observable, from, to) -> valueFactory.setValue((Integer)to));
-		valueFactory.valueProperty().addListener((observable, from, to) -> this.recentFiles.setMaximum(to));
-		valueFactory.setValue(this.recentFiles.getMaximum());
+		this.recentProjects.maximumProperty().addListener((observable, from, to) -> valueFactory.setValue((Integer)to));
+		valueFactory.valueProperty().addListener((observable, from, to) -> this.recentProjects.setMaximum(to));
+		valueFactory.setValue(this.recentProjects.getMaximum());
 		
 		this.recentFilesCountSpinner.setValueFactory(valueFactory);
 		

@@ -20,7 +20,7 @@ import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
-import de.prob2.ui.menu.RecentFiles;
+import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.prob2fx.CurrentModel;
@@ -59,7 +59,7 @@ public class ProB2Module extends AbstractModule {
 		bind(FormulaInputStage.class);
 		bind(GroovyConsole.class);
 		bind(BConsole.class);
-		bind(RecentFiles.class);
+		bind(RecentProjects.class);
 		bind(Locale.class).toInstance(locale);
 		bind(ResourceBundle.class).toInstance(bundle);
 		if (IS_MAC) {

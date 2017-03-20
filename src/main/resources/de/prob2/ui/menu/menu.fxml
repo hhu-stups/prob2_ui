@@ -23,13 +23,6 @@
 			<MenuItem fx:id="clearRecentProjects"
 				text="%menu.file.items.openRecentProject.items.clear" onAction="#handleClearRecentProjects" />
 		</Menu>
-		<Menu fx:id="recentFilesMenu" text="%menu.file.items.openRecentFile" disable="true" visible="false">
-			<MenuItem fx:id="recentFilesPlaceholder" text="%menu.file.items.placeholder"
-				disable="true" />
-			<SeparatorMenuItem />
-			<MenuItem fx:id="clearRecentFiles"
-				text="%menu.file.items.openRecentFile.items.clear" onAction="#handleClearRecentFiles" />
-		</Menu>
 		<SeparatorMenuItem />
 		<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject"
 			accelerator="Shortcut+S" onAction="#saveProject" />
