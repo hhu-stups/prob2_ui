@@ -22,13 +22,17 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -79,18 +83,23 @@ public final class HistoryChartStage extends Stage {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HistoryChartStage.class);
 	
-	@FXML private LineChart<Number, Number> chart;
+	@FXML private FlowPane chartsPane;
+	@FXML private LineChart<Number, Number> singleChart;
 	@FXML private ListView<ClassicalB> formulaList;
 	@FXML private Button addButton;
 	@FXML private Button removeButton;
+	@FXML private CheckBox separateChartsCheckBox;
 	
 	private final CurrentTrace currentTrace;
+	
+	private final ObservableList<LineChart<Number, Number>> separateCharts;
 	
 	@Inject
 	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace) {
 		super();
 		
 		this.currentTrace = currentTrace;
+		this.separateCharts = FXCollections.observableArrayList();
 		
 		stageManager.loadFXML(this, "history_chart_stage.fxml", this.getClass().getName());
 	}
@@ -101,20 +110,28 @@ public final class HistoryChartStage extends Stage {
 		this.formulaList.getItems().addListener((ListChangeListener<ClassicalB>)change -> {
 			while (change.next()) {
 				if (change.wasRemoved()) {
-					LOGGER.debug("Removed {} ({} to {})", change.getRemoved(), change.getFrom(), change.getFrom()+change.getRemovedSize());
-					this.chart.getData().remove(change.getFrom(), change.getFrom()+change.getRemovedSize());
+					this.removeCharts(change.getFrom(), change.getFrom() + change.getRemovedSize());
 				}
+				
 				if (change.wasAdded()) {
-					for (int i = change.getFrom(); i < change.getTo(); i++) {
-						LOGGER.debug("Added {} at {}", change.getList().get(i), i);
-						this.chart.getData().add(i, new XYChart.Series<>(change.getList().get(i).getCode(), FXCollections.observableArrayList()));
-					}
+					this.addCharts(change.getFrom(), change.getTo(), change.getList());
 				}
 			}
 			this.update(this.currentTrace.get());
 		});
 		
 		this.removeButton.disableProperty().bind(Bindings.isEmpty(this.formulaList.getSelectionModel().getSelectedIndices()));
+		
+		this.separateChartsCheckBox.selectedProperty().addListener((observable, from, to) -> {
+			if (to) {
+				this.chartsPane.getChildren().setAll(this.separateCharts);
+			} else {
+				this.chartsPane.getChildren().setAll(this.singleChart);
+			}
+		});
+		
+		this.singleChart.prefWidthProperty().bind(this.chartsPane.widthProperty());
+		this.singleChart.prefHeightProperty().bind(this.chartsPane.heightProperty());
 		
 		this.currentTrace.addListener((observable, from, to) -> this.update(to));
 	}
@@ -130,9 +147,54 @@ public final class HistoryChartStage extends Stage {
 		this.formulaList.getItems().remove(this.formulaList.getSelectionModel().getSelectedIndex());
 	}
 	
+	private void removeCharts(final int start, final int end) {
+		this.singleChart.getData().remove(start, end);
+		this.separateCharts.remove(start, end);
+		if (this.separateChartsCheckBox.isSelected()) {
+			this.chartsPane.getChildren().remove(start, end);
+		}
+	}
+	
+	private void addCharts(final int start, final int end, final List<? extends ClassicalB> charts) {
+		for (int i = start; i < end; i++) {
+			final XYChart.Series<Number, Number> seriesSingle = new XYChart.Series<>(charts.get(i).getCode(), FXCollections.observableArrayList());
+			this.singleChart.getData().add(i, seriesSingle);
+			
+			final XYChart.Series<Number, Number> seriesSeparate = new XYChart.Series<>(charts.get(i).getCode(), FXCollections.observableArrayList());
+			final LineChart<Number, Number> separateChart = new LineChart<>(new NumberAxis(), new NumberAxis(), FXCollections.singletonObservableList(seriesSeparate));
+			// Update the separate chart series whenever the single chart series is updated.
+			seriesSingle.getData().addListener((ListChangeListener<XYChart.Data<Number, Number>>)change -> {
+				while (change.next()) {
+					if (change.wasRemoved()) {
+						seriesSeparate.getData().remove(change.getFrom(), change.getFrom()+change.getRemovedSize());
+					}
+					
+					if (change.wasAdded()) {
+						seriesSeparate.getData().addAll(change.getFrom(), change.getAddedSubList());
+					}
+				}
+			});
+			
+			separateChart.setMinWidth(160);
+			separateChart.setMinHeight(80);
+			separateChart.setMaxWidth(Double.POSITIVE_INFINITY);
+			separateChart.setMaxHeight(Double.POSITIVE_INFINITY);
+			
+			// Adjust the sizes of all separate charts so they always fill the entire flow pane, and are as close as possible to 320px * 160px.
+			// We subtract 1.0 from the resulting width/height, to ensure that the sum is not larger than the flow pane's width/height. Otherwise the charts jump around as the flow pane tries to make them fit.
+			separateChart.prefWidthProperty().bind(Bindings.createDoubleBinding(() -> (chartsPane.getWidth() / Math.round(chartsPane.getWidth() / 320.0)) - 1.0, chartsPane.widthProperty()));
+			separateChart.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> (chartsPane.getHeight() / Math.round(chartsPane.getHeight() / 160.0)) - 1.0, chartsPane.heightProperty()));
+			
+			this.separateCharts.add(i, separateChart);
+			if (this.separateChartsCheckBox.isSelected()) {
+				this.chartsPane.getChildren().add(i, separateChart);
+			}
+		}
+	}
+	
 	private void update(final Trace trace) {
 		final List<List<XYChart.Data<Number, Number>>> newDatas = new ArrayList<>();
-		for (int i = 0; i < this.chart.getData().size(); i++) {
+		for (int i = 0; i < this.singleChart.getData().size(); i++) {
 			newDatas.add(new ArrayList<>());
 		}
 		
@@ -171,7 +233,7 @@ public final class HistoryChartStage extends Stage {
 				newData.get(j).setXValue(j);
 			}
 			
-			this.chart.getData().get(i).getData().setAll(newData);
+			this.singleChart.getData().get(i).getData().setAll(newData);
 		}
 	}
 	

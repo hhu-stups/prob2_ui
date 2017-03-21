@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" minWidth="320" minHeight="160" title="%historychart.title">
@@ -34,15 +37,24 @@
 						<center>
 							<ListView fx:id="formulaList" editable="true"/>
 						</center>
+						<bottom>
+							<CheckBox fx:id="separateChartsCheckBox" text="%historychart.separateCharts">
+								<padding>
+									<Insets topRightBottomLeft="5.0"/>
+								</padding>
+							</CheckBox>
+						</bottom>
 					</BorderPane>
-					<LineChart fx:id="chart" minWidth="160">
-						<xAxis>
-							<NumberAxis tickUnit="1"/>
-						</xAxis>
-						<yAxis>
-							<NumberAxis tickUnit="1"/>
-						</yAxis>
-					</LineChart>
+					<FlowPane fx:id="chartsPane" minWidth="160" minHeight="160" maxWidth="Infinity" maxHeight="Infinity" prefWrapLength="640">
+						<LineChart fx:id="singleChart">
+							<xAxis>
+								<NumberAxis tickUnit="1"/>
+							</xAxis>
+							<yAxis>
+								<NumberAxis tickUnit="1"/>
+							</yAxis>
+						</LineChart>
+					</FlowPane>
 				</SplitPane>
 			</AnchorPane>
 		</Scene>
