@@ -47,6 +47,7 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 
 import se.sawano.java.text.AlphanumericComparator;
@@ -76,6 +77,7 @@ public final class OperationsView extends AnchorPane {
 					case TIMEOUT:
 						icon = new FontAwesomeIconView(FontAwesomeIcon.CLOCK_ALT);
 						getStyleClass().add("timeout");
+						setTooltip(new Tooltip("Operation with timeout"));
 						break;
 					
 					case ENABLED:
@@ -84,10 +86,13 @@ public final class OperationsView extends AnchorPane {
 						getStyleClass().add("enabled");
 						if (!item.isExplored()) {
 							getStyleClass().add("unexplored");
+							setTooltip(new Tooltip("Reaches unexplored State"));
 						} else if (item.isErrored()) {
 							getStyleClass().add("errored");
+							setTooltip(new Tooltip("Reaches errored State"));
 						} else if (item.isSkip()) {
 							getStyleClass().add("skip");
+							setTooltip(new Tooltip("Skip Operation"));
 						} else {
 							getStyleClass().add("normal");
 						}
@@ -96,6 +101,7 @@ public final class OperationsView extends AnchorPane {
 					case DISABLED:
 						icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
 						getStyleClass().add("disabled");
+						setTooltip(new Tooltip("Disabled Operation"));
 						break;
 					
 					case MAX_REACHED:
