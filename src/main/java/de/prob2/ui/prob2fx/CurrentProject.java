@@ -68,16 +68,18 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ObjectProperty<Path> defaultLocation;
 	private final StageManager stageManager;
 	private final Injector injector;
-	private AnimationSelector animations;
-	private CurrentTrace currentTrace;
+	private final AnimationSelector animations;
+	private final CurrentTrace currentTrace;
+	private final ModelcheckingController modelCheckController;
 
 	@Inject
 	private CurrentProject(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
-			final CurrentTrace currentTrace) {
+			final CurrentTrace currentTrace, final ModelcheckingController modelCheckController) {
 		this.stageManager = stageManager;
 		this.injector = injector;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
+		this.modelCheckController = modelCheckController;
 
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
@@ -178,6 +180,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (confirmReplacingProject()) {
 			if(currentTrace.exists()) {
 				animations.removeTrace(currentTrace.get());
+				modelCheckController.resetView();
 			}
 			super.set(project);
 		}
