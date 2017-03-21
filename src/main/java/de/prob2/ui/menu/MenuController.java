@@ -2,6 +2,7 @@ package de.prob2.ui.menu;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -235,9 +236,12 @@ public final class MenuController extends MenuBar {
 		if (selectedFile == null) {
 			return;
 		}
+		Path projectLocation = currentProject.getDefaultLocation();
+		Path absolute = selectedFile.toPath();
+		Path relative = projectLocation.relativize(absolute);
 		currentProject.set(new Project(selectedFile.getName(),
 				"(this project was created automatically from file " + selectedFile.getAbsolutePath() + ")",
-				new Machine(selectedFile.getName(), "", selectedFile.toPath()),
+				new Machine(selectedFile.getName(), "", relative),
 				currentProject.getDefaultLocation().toFile()));
 	}
 
