@@ -339,7 +339,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (exists()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
 			alert.setHeaderText("You've already opened a project.");
-			alert.setContentText("Do you want to close the current project?");
+			alert.setContentText("Do you want to close the current project?\n(Unsaved changes will be lost)");
 			Optional<ButtonType> result = alert.showAndWait();
 			return result.isPresent() && ButtonType.OK.equals(result.get());
 		} else {

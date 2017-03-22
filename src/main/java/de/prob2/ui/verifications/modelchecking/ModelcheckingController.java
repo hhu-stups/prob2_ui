@@ -207,6 +207,9 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				showStats(item.getStats());
 				updateSelectedItem(background);
 				if (event.getClickCount() >= 2 && item.getResult() == ModelCheckStats.Result.DANGER) {
+					if (currentTrace.exists()) {
+						this.animations.removeTrace(currentTrace.get());
+					}
 					animations.addNewAnimation(item.getStats().getTrace());
 				}
 			}
@@ -239,7 +242,12 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private ContextMenu createContextMenu(HistoryItem item) {
 		ContextMenu cm = new ContextMenu();
 		MenuItem mItem = new MenuItem("Show Trace To Error State");
-		mItem.setOnAction(event -> animations.addNewAnimation(item.getStats().getTrace()));
+		mItem.setOnAction(event -> {
+			if (currentTrace.exists()) {
+				this.animations.removeTrace(currentTrace.get());
+			}
+			animations.addNewAnimation(item.getStats().getTrace());
+		});
 		cm.getItems().add(mItem);
 		return cm;
 	}
