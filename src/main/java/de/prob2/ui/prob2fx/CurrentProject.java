@@ -112,7 +112,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.preferences.setAll(to.getPreferences());
 				this.runconfigurations.setAll(to.getRunconfigurations());
 				this.location.set(to.getLocation());
-				if(!to.equals(from)) {
+				if (!to.equals(from)) {
 					this.saved.set(false);
 				}
 			}
@@ -180,10 +180,15 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				runconfigs, this.getLocation()));
 	}
 
+	public void changeName(String newName) {
+		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(),
+				this.getRunconfigurations(), this.getLocation()));
+	}
+
 	@Override
 	public void set(Project project) {
 		if (confirmReplacingProject()) {
-			if(currentTrace.exists()) {
+			if (currentTrace.exists()) {
 				animations.removeTrace(currentTrace.get());
 				modelCheckController.resetView();
 			}
@@ -267,7 +272,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void setDefaultLocation(Path defaultProjectLocation) {
 		this.defaultLocationProperty().set(defaultProjectLocation);
 	}
-	
+
 	public ReadOnlyBooleanProperty savedProperty() {
 		return this.saved;
 	}

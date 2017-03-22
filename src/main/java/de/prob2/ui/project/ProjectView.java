@@ -38,7 +38,9 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
@@ -49,6 +51,8 @@ import javafx.stage.Stage;
 public final class ProjectView extends AnchorPane {
 	@FXML
 	private Label projectNameLabel;
+	@FXML
+	private TextField projectNameTextField;
 	@FXML
 	private Text projectDescriptionText;
 	@FXML
@@ -104,6 +108,21 @@ public final class ProjectView extends AnchorPane {
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 
 		projectNameLabel.textProperty().bind(currentProject.nameProperty());
+		projectNameLabel.setOnMouseClicked(event -> {
+			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+				projectNameTextField.setManaged(true);
+				projectNameTextField.setVisible(true);
+				projectNameTextField.setText(projectNameLabel.getText());
+				projectNameTextField.requestFocus();
+				projectNameTextField.setOnKeyPressed(keyEvent -> {
+					if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+						currentProject.changeName(projectNameTextField.getText());
+						projectNameTextField.setManaged(false);
+						projectNameTextField.setVisible(false);
+					}
+				});
+			}
+		});
 		projectDescriptionText.textProperty().bind(currentProject.descriptionProperty());
 		this.projectTabPane.widthProperty().addListener((observableValue, oldValue, newValue) -> {
 			if (newValue == null) {
@@ -230,7 +249,7 @@ public final class ProjectView extends AnchorPane {
 		fileChooser.setTitle("Add Machine");
 		fileChooser.getExtensionFilters()
 				.add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
-		
+
 		File machineFile = fileChooser.showOpenDialog(stageManager.getCurrent());
 		if (machineFile == null) {
 			return;
