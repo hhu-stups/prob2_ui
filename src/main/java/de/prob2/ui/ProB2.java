@@ -42,6 +42,9 @@ public class ProB2 extends Application {
 			title.append(" - ");
 		}
 		title.append("ProB 2.0");
+		if(!currentProject.isSaved()) {
+			title.append("*");
+		}
 		
 		this.primaryStage.setTitle(title.toString());
 	}
@@ -60,6 +63,7 @@ public class ProB2 extends Application {
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		currentProject.addListener((observable, from, to) -> this.updateTitle());
+		currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle());
 		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 		currentTrace.addListener((observable, from, to) -> this.updateTitle());
 		this.updateTitle();

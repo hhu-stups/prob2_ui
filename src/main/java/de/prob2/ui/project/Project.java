@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class Project {
@@ -25,7 +26,7 @@ public class Project {
 		this.runconfigurations.addAll(runconfigurations);
 		this.location = location;
 	}
-	
+
 	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
 			Set<Runconfiguration> runconfigurations, File location) {
 		this.name = name;
@@ -89,5 +90,31 @@ public class Project {
 
 	public void setLocation(File location) {
 		this.location = location;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (other == this) {
+			return true;
+		}
+		if (!(other instanceof Project)) {
+			return false;
+		}
+		Project otherProject = (Project) other;
+
+		if(otherProject.name.equals(this.name) &&
+				otherProject.description.equals(this.description) &&
+				otherProject.machines.equals(this.machines) &&
+				otherProject.preferences.equals(this.preferences) &&
+				otherProject.runconfigurations.equals(this.runconfigurations) &&
+				otherProject.location.equals(this.location)) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		 return Objects.hash(name, description, machines, preferences, runconfigurations, location);
 	}
 }

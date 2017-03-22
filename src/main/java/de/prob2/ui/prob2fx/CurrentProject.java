@@ -64,6 +64,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ListProperty<Preference> preferences;
 	private final ReadOnlyListProperty<Runconfiguration> runconfigurations;
 	private final ObjectProperty<File> location;
+	private final BooleanProperty saved;
 
 	private final ObjectProperty<Path> defaultLocation;
 	private final StageManager stageManager;
@@ -86,7 +87,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				Paths.get(System.getProperty("user.home")));
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
 		this.exists.bind(Bindings.isNotNull(this));
-
 		this.name = new SimpleStringProperty(this, "name", "");
 		this.description = new SimpleStringProperty(this, "description", "");
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
@@ -94,6 +94,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations",
 				FXCollections.observableArrayList());
 		this.location = new SimpleObjectProperty<>(this, "location", null);
+		this.saved = new SimpleBooleanProperty(this, "saved", true);
 
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
@@ -103,6 +104,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.preferences.clear();
 				this.location.set(null);
 				this.injector.getInstance(ModelcheckingController.class).resetView();
+				this.saved.set(true);
 			} else {
 				this.name.set(to.getName());
 				this.description.set(to.getDescription());
@@ -110,6 +112,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.preferences.setAll(to.getPreferences());
 				this.runconfigurations.setAll(to.getRunconfigurations());
 				this.location.set(to.getLocation());
+				if(!to.equals(from)) {
+					this.saved.set(false);
+				}
 			}
 		});
 	}
@@ -262,6 +267,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void setDefaultLocation(Path defaultProjectLocation) {
 		this.defaultLocationProperty().set(defaultProjectLocation);
 	}
+	
+	public ReadOnlyBooleanProperty savedProperty() {
+		return this.saved;
+	}
+
+	public boolean isSaved() {
+		return this.savedProperty().get();
+	}
 
 	public void save() {
 		File loc = new File(this.getLocation() + File.separator + this.getName() + ".json");
@@ -272,6 +285,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		} catch (IOException exc) {
 			LOGGER.warn("Failed to save project", exc);
 		}
+		this.saved.set(true);
 	}
 
 	public void open(File file) {
@@ -288,6 +302,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			return;
 		}
 		this.set(project);
+		this.saved.set(true);
 	}
 
 	private Project replaceMissingWithDefaults(Project project) {
