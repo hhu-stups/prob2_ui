@@ -121,6 +121,12 @@ public final class ProjectView extends AnchorPane {
 						projectNameTextField.setVisible(false);
 					}
 				});
+				projectNameTextField.focusedProperty().addListener((observable, from, to) -> {
+					if(!to) {
+						projectNameTextField.setManaged(false);
+						projectNameTextField.setVisible(false);
+					}
+				});
 			}
 		});
 		projectDescriptionText.textProperty().bind(currentProject.descriptionProperty());
