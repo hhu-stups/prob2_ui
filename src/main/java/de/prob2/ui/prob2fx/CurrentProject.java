@@ -184,6 +184,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(),
 				this.getRunconfigurations(), this.getLocation()));
 	}
+	
+	public void changeDescription(String newDescription) {
+		this.update(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(),
+				this.getRunconfigurations(), this.getLocation()));
+	}
 
 	@Override
 	public void set(Project project) {

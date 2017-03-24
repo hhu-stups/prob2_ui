@@ -17,6 +17,7 @@
 <?import javafx.scene.control.ScrollBar?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
 
 <fx:root minHeight="70.0" minWidth="200" stylesheets="@/prob.css"
 	type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
@@ -45,13 +46,24 @@
 						</font>
 					</TextField>
 				</AnchorPane>
-				<ScrollPane hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
-					<AnchorPane>
-						<Text fx:id="projectDescriptionText" AnchorPane.leftAnchor="6"
-							AnchorPane.topAnchor="6" AnchorPane.rightAnchor="0"
-							AnchorPane.bottomAnchor="0" />
-					</AnchorPane>
-				</ScrollPane>
+				<AnchorPane VBox.vgrow="ALWAYS">
+					<ScrollPane hbarPolicy="NEVER" AnchorPane.leftAnchor="0"
+						AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"
+						AnchorPane.bottomAnchor="0">
+						<AnchorPane>
+							<Text fx:id="projectDescriptionText" AnchorPane.leftAnchor="6"
+								AnchorPane.topAnchor="6" AnchorPane.rightAnchor="6"
+								AnchorPane.bottomAnchor="6" />
+							<TextArea fx:id="projectDescriptionTextArea"
+								AnchorPane.leftAnchor="5" AnchorPane.topAnchor="5"
+								AnchorPane.rightAnchor="5" AnchorPane.bottomAnchor="5" managed="false"
+								visible="false" />
+						</AnchorPane>
+					</ScrollPane>
+					<Button fx:id="applyButton" text="%common.apply" AnchorPane.rightAnchor="16"
+						AnchorPane.bottomAnchor="6" styleClass="button-blue" managed="false"
+								visible="false"/>
+				</AnchorPane>
 			</VBox>
 		</Tab>
 		<Tab text="%project.tabs.machines" closable="false">

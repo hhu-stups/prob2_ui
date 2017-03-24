@@ -24,6 +24,7 @@ import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -38,6 +39,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
@@ -55,6 +57,10 @@ public final class ProjectView extends AnchorPane {
 	private TextField projectNameTextField;
 	@FXML
 	private Text projectDescriptionText;
+	@FXML
+	private TextArea projectDescriptionTextArea;
+	@FXML
+	private Button applyButton;
 	@FXML
 	private TableView<Machine> machinesTable;
 	@FXML
@@ -122,7 +128,7 @@ public final class ProjectView extends AnchorPane {
 					}
 				});
 				projectNameTextField.focusedProperty().addListener((observable, from, to) -> {
-					if(!to) {
+					if (!to) {
 						projectNameTextField.setManaged(false);
 						projectNameTextField.setVisible(false);
 					}
@@ -130,6 +136,30 @@ public final class ProjectView extends AnchorPane {
 			}
 		});
 		projectDescriptionText.textProperty().bind(currentProject.descriptionProperty());
+		projectDescriptionText.setOnMouseClicked(event -> {
+			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+				projectDescriptionTextArea.setManaged(true);
+				projectDescriptionTextArea.setVisible(true);
+				applyButton.setManaged(true);
+				applyButton.setVisible(true);
+				projectDescriptionTextArea.setText(projectDescriptionText.getText());
+				projectDescriptionTextArea.requestFocus();
+				applyButton.setOnMouseClicked(mouseEvent -> {
+					currentProject.changeDescription(projectDescriptionTextArea.getText());
+					projectNameTextField.setManaged(false);
+					projectNameTextField.setVisible(false);
+					applyButton.setManaged(false);
+					applyButton.setVisible(false);
+				});
+				projectDescriptionTextArea.focusedProperty().addListener((observable, from, to) -> {
+					if (!to) {
+						projectDescriptionTextArea.setManaged(false);
+						projectDescriptionTextArea.setVisible(false);
+					}
+				});
+			}
+		});
+		projectDescriptionTextArea.maxWidthProperty().bind(this.widthProperty().subtract(50));
 		this.projectTabPane.widthProperty().addListener((observableValue, oldValue, newValue) -> {
 			if (newValue == null) {
 				projectDescriptionText.setWrappingWidth(0);
