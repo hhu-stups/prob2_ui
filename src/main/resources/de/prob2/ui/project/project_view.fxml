@@ -42,7 +42,7 @@
 						AnchorPane.leftAnchor="6" AnchorPane.topAnchor="10"
 						AnchorPane.bottomAnchor="4" managed="false" visible="false">
 						<font>
-							<Font size="14" />
+							<Font size="12" />
 						</font>
 					</TextField>
 				</AnchorPane>

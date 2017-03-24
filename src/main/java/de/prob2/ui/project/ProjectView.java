@@ -24,7 +24,6 @@ import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -144,6 +143,7 @@ public final class ProjectView extends AnchorPane {
 				applyButton.setVisible(true);
 				projectDescriptionTextArea.setText(projectDescriptionText.getText());
 				projectDescriptionTextArea.requestFocus();
+				projectDescriptionTextArea.positionCaret(projectDescriptionTextArea.getText().length());
 				applyButton.setOnMouseClicked(mouseEvent -> {
 					currentProject.changeDescription(projectDescriptionTextArea.getText());
 					projectNameTextField.setManaged(false);
