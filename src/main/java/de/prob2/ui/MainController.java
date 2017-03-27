@@ -1,6 +1,7 @@
 package de.prob2.ui;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -14,7 +15,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 
 @Singleton
-public class MainController extends BorderPane {
+public class MainController extends BorderPane implements IDetachableMainViews {
 	
 	private StageManager stageManager;
 	
@@ -162,17 +163,13 @@ public class MainController extends BorderPane {
 		}
 	}
 
-	// These methods are all needed for detaching views. Otherwise NPEs are triggered
-	// (for example operationsTP.getParent() returns null)
-	public TitledPane[] getTitledPanes() {
-		return new TitledPane[] {operationsTP, verificationsTP, historyTP, projectTP, statsTP};
-	}
-
-	public Accordion[] getAccordions() {
-		return new Accordion[] {leftAccordion, rightAccordion1, rightAccordion2};
-	}
-
-	public SplitPane[] getSplitPanes() {
-		return new SplitPane[] {horizontalSP, verticalSP, verticalSP2};
+	public Map<TitledPane,Accordion> getParentMap() {
+		Map<TitledPane,Accordion> parentMap = new HashMap<>();
+		parentMap.put(operationsTP,leftAccordion);
+		parentMap.put(historyTP,rightAccordion2);
+		parentMap.put(verificationsTP,rightAccordion1);
+		parentMap.put(projectTP,rightAccordion1);
+		parentMap.put(statsTP,rightAccordion1);
+		return parentMap;
 	}
 }

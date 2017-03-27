@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import de.prob2.ui.MainController;
+import de.prob2.ui.IDetachableMainViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
@@ -109,17 +108,11 @@ public final class DetachViewStageController extends Stage {
 	@FXML
 	public void apply() {
 		final Parent root = injector.getInstance(MenuController.class).loadPreset("main.fxml");
-		final TitledPane[] titledPanes = ((MainController) root).getTitledPanes();
-		final Accordion[] accordions = ((MainController) root).getAccordions();
-		final SplitPane[] splitPanes = ((MainController) root).getSplitPanes();
-		for (SplitPane splitPane : splitPanes) {
-			for (Accordion accordion : accordions) {
-				if (splitPane.getItems().contains(accordion)) {
-					for (TitledPane tp : titledPanes) {
-						if (accordion.getPanes().contains(tp) && checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
-							removeTP(accordion, splitPane);
-						}
-					}
+		final Map<TitledPane,Accordion> parentMap = ((IDetachableMainViews) root).getParentMap();
+		for (Accordion parent : parentMap.values()) {
+			for (TitledPane node : parentMap.keySet()) {
+				if (parent.getPanes().contains(node) && checkBoxMap.get(node.getContent().getClass()).isSelected()) {
+					removeTP(parent);
 				}
 			}
 		}
@@ -127,7 +120,7 @@ public final class DetachViewStageController extends Stage {
 		this.hide();
 	}
 	
-	private void removeTP(Accordion accordion, SplitPane pane) {
+	private void removeTP(Accordion accordion) {
 		uiState.updateSavedStageBoxes();
 		for (Stage stage : wrapperStages){
 			Platform.runLater(stage::hide);
@@ -136,7 +129,7 @@ public final class DetachViewStageController extends Stage {
 			final TitledPane tp = it.next();
 			if (checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
 				it.remove();
-				Platform.runLater(() -> transferToNewWindow(tp, tp.getText(), accordion, pane));
+				Platform.runLater(() -> transferToNewWindow(tp, tp.getText(), accordion));
 			}
 		}
 		if (accordion.getPanes().isEmpty()) {
@@ -144,12 +137,10 @@ public final class DetachViewStageController extends Stage {
 			accordion.setMaxWidth(0);
 			accordion.setMaxHeight(0);
 			accordion.setStyle("-fx-padding: 0.0 0.0 0.0 0.0;");
-			pane.setDividerPositions(pane.getItems().indexOf(accordion));
-			pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(true));
 		}
 	}
 	
-	private void transferToNewWindow(TitledPane tp, String title, Accordion accordion, SplitPane pane) {
+	private void transferToNewWindow(TitledPane tp, String title, Accordion accordion) {
 		Parent node = (Parent) tp.getContent();
 		tp.setContent(null);
 		Stage stage = stageManager.makeStage(new Scene(new StackPane()), this.getClass().getName() + " detached " + node.getClass().getName());
@@ -167,8 +158,6 @@ public final class DetachViewStageController extends Stage {
 				accordion.getExpandedPane().setExpanded(false);
 			}
 			accordion.setExpandedPane(tp);
-			pane.setDividerPositions(uiState.getHorizontalDividerPositions());
-			pane.lookupAll(".split-pane-divider").forEach(div -> div.setMouseTransparent(false));
 			tp.setContent(node);
 			accordion.getPanes().add(tp);
 			wrapperStages.remove(stage);
