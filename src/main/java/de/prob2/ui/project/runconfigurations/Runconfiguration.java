@@ -1,4 +1,4 @@
-package de.prob2.ui.project;
+package de.prob2.ui.project.runconfigurations;
 
 public class Runconfiguration {
 	private String machine;

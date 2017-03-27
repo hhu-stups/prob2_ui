@@ -1,8 +1,5 @@
 package de.prob2.ui.project;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -10,15 +7,9 @@ import com.google.inject.Singleton;
 import de.prob.scripting.Api;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -44,35 +35,19 @@ public final class ProjectView extends AnchorPane {
 	private TabPane projectTabPane;
 	@FXML
 	private Button newProjectButton;
-	@FXML
-	private Label runconfigsPlaceholder;
-	@FXML
-	private Button addRunconfigButton;
-	@FXML
-	private ListView<Runconfiguration> runconfigurationsListView;
 
 	private final CurrentProject currentProject;
-	private final MachineLoader machineLoader;
-	private final StageManager stageManager;
 	private final Injector injector;
 
 	@Inject
-	private ProjectView(final StageManager stageManager, final CurrentProject currentProject,
-			final MachineLoader machineLoader, final Injector injector, final Api api) {
-		this.stageManager = stageManager;
+	private ProjectView(final StageManager stageManager, final CurrentProject currentProject, final Injector injector, final Api api) {
 		this.currentProject = currentProject;
-		this.machineLoader = machineLoader;
 		this.injector = injector;
 		stageManager.loadFXML(this, "project_view.fxml");
 	}
 
 	@FXML
 	public void initialize() {
-		initProjectTab();
-		initRunconfigurationsTab();
-	}
-
-	private void initProjectTab() {
 		projectTabPane.visibleProperty().bind(currentProject.existsProperty());
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 
@@ -133,72 +108,10 @@ public final class ProjectView extends AnchorPane {
 		});
 	}
 
-	public void initRunconfigurationsTab() {
-		runconfigsPlaceholder.setText("Add machines first");
-		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
-			if (to) {
-				runconfigsPlaceholder.setText("Add machines first");
-				addRunconfigButton.setDisable(true);
-			} else {
-				runconfigsPlaceholder.setText("No Runconfigurations");
-				addRunconfigButton.setDisable(false);
-			}
-		});
-		runconfigurationsListView.itemsProperty().bind(currentProject.runconfigurationsProperty());
-		runconfigurationsListView.setCellFactory(listView -> {
-			ListCell<Runconfiguration> cell = new ListCell<Runconfiguration>() {
-				@Override
-				public void updateItem(Runconfiguration runconfiguration, boolean empty) {
-					super.updateItem(runconfiguration, empty);
-					if (empty) {
-						setText(null);
-						setGraphic(null);
-					} else {
-						setText(runconfiguration.toString());
-						setGraphic(null);
-					}
-				}
-			};
-
-			final MenuItem removeRunconfigMenuItem = new MenuItem("Remove Runconfiguration");
-			removeRunconfigMenuItem.setOnAction(event -> currentProject.removeRunconfiguration(cell.getItem()));
-			removeRunconfigMenuItem.disableProperty().bind(cell.emptyProperty());
-
-			cell.setContextMenu(new ContextMenu(removeRunconfigMenuItem));
-
-			return cell;
-		});
-		runconfigurationsListView.setOnMouseClicked(event -> {
-			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-				startAnimation(runconfigurationsListView.getSelectionModel().getSelectedItem());
-			}
-		});
-	}
-
 	@FXML
 	private void createNewProject() {
 		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();
-	}
-
-	@FXML
-	void addRunconfiguration() {
-		injector.getInstance(RunconfigurationsDialog.class).showAndWait()
-				.ifPresent(currentProject::addRunconfiguration);
-	}
-
-	private void startAnimation(Runconfiguration runconfiguration) {
-		Machine m = currentProject.getMachine(runconfiguration.getMachine());
-		Map<String, String> pref = new HashMap<>();
-		if (!"default".equals(runconfiguration.getPreference())) {
-			pref = currentProject.getPreferencAsMap(runconfiguration.getPreference());
-		}
-		if (m != null && pref != null) {
-			machineLoader.loadAsync(m, pref);
-		} else {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not load machine \"" + runconfiguration.getMachine()
-					+ "\" with preferences: \"" + runconfiguration.getPreference() + "\"").showAndWait();
-		}
 	}
 }

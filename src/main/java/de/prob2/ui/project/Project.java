@@ -9,6 +9,7 @@ import java.util.Set;
 
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.project.runconfigurations.Runconfiguration;
 
 public class Project {
 	private final String name;

@@ -1,4 +1,4 @@
-package de.prob2.ui.project;
+package de.prob2.ui.project.runconfigurations;
 
 import com.google.inject.Inject;
 
