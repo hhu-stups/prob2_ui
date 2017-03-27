@@ -1,6 +1,5 @@
 package de.prob2.ui.project;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +30,7 @@ public class AddMachinesDialog extends Dialog<Machine> {
 	private ButtonType okButtonType;
 
 	private final CurrentProject currentProject;
-	private File machineFile;
+	private Path machinePath;
 
 	@Inject
 	public AddMachinesDialog(final StageManager stageManager, final CurrentProject currentProject) {
@@ -42,22 +41,19 @@ public class AddMachinesDialog extends Dialog<Machine> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				Path projectLocation = currentProject.getLocation().toPath();
-				Path absolute = machineFile.toPath();
-				Path relative = projectLocation.relativize(absolute);
-				return new Machine(nameField.getText(), descriptionTextArea.getText(), relative);
+				return new Machine(nameField.getText(), descriptionTextArea.getText(), machinePath);
 			}
 		});
 		stageManager.loadFXML(this, "machines_dialog.fxml");
 	}
 	
-	public void showAndWait(File machineFile) {
-		this.machineFile = machineFile;
+	public void showAndWait(Path machinePath) {
+		this.machinePath = machinePath;
 		List<Machine> machinesList = currentProject.getMachines();
 		Set<String> machineNamesSet = new HashSet<>();
 		machineNamesSet.addAll(machinesList.stream().map(Machine::getName).collect(Collectors.toList()));
 		
-		String[] n = machineFile.getName().split("\\.");
+		String[] n = machinePath.toFile().getName().split("\\.");
 		String name = n[0];
 		int i = 1;
 		while (machineNamesSet.contains(name)) {

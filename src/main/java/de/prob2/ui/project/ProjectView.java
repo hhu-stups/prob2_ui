@@ -290,7 +290,15 @@ public final class ProjectView extends AnchorPane {
 		if (machineFile == null) {
 			return;
 		}
-		injector.getInstance(AddMachinesDialog.class).showAndWait(machineFile);
+		Path projectLocation = currentProject.getLocation().toPath();
+		Path absolute = machineFile.toPath();
+		Path relative = projectLocation.relativize(absolute);
+		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
+			stageManager.makeAlert(Alert.AlertType.ERROR, "The machine \"" + machineFile
+			+ "\" already exists in the current project.").showAndWait();
+			return;
+		}
+		injector.getInstance(AddMachinesDialog.class).showAndWait(relative);
 	}
 
 	@FXML

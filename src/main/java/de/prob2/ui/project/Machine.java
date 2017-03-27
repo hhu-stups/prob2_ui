@@ -2,6 +2,7 @@ package de.prob2.ui.project;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class Machine {
@@ -36,5 +37,26 @@ public class Machine {
 	@Override
 	public String toString() {
 		return this.name;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (other == this) {
+			return true;
+		}
+		if (!(other instanceof Machine)) {
+			return false;
+		}
+		Machine otherMachine = (Machine) other;
+
+		if (otherMachine.location.equals(this.location)) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(location);
 	}
 }
