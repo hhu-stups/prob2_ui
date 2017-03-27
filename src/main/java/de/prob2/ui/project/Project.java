@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import de.prob2.ui.project.machines.Machine;
+
 public class Project {
 	private final String name;
 	private final String description;

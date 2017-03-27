@@ -29,6 +29,7 @@ import de.prob2.ui.prob2fx.CurrentState;
 import de.prob2.ui.prob2fx.CurrentStateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectView;
+import de.prob2.ui.project.machines.MachinesTab;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
@@ -71,14 +72,15 @@ public class ProB2Module extends AbstractModule {
 		// Controllers
 		bind(BMotionView.class);
 		bind(HistoryView.class);
-		bind(ProjectView.class);
 		bind(LTLView.class);
-		bind(MenuController.class);
+		bind(MachinesTab.class);
 		bind(MainView.class);
 		bind(MainController.class);
+		bind(MenuController.class);
 		bind(ModelcheckingController.class);
 		bind(OperationsView.class);
 		bind(PreferencesView.class);
+		bind(ProjectView.class);
 		bind(StatesView.class);
 		bind(StatsView.class);
 		bind(VerificationsView.class);

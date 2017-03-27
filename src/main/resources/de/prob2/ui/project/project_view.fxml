@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.project.machines.MachinesTab?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Button?>
@@ -66,35 +65,7 @@
 				</AnchorPane>
 			</VBox>
 		</Tab>
-		<Tab text="%project.tabs.machines" closable="false">
-			<VBox spacing="0">
-				<AnchorPane styleClass="border">
-					<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-						AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" onAction="#addMachine">
-						<graphic>
-							<FontAwesomeIconView fill="#555560"
-								glyphName="PLUS_CIRCLE" size="26" />
-						</graphic>
-					</Button>
-				</AnchorPane>
-				<TableView fx:id="machinesTable" VBox.vgrow="always">
-					<columnResizePolicy>
-						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-					</columnResizePolicy>
-					<columns>
-						<TableColumn fx:id="nameColumn" minWidth="100.0"
-							prefWidth="100.0" text="%project.tabs.machines.columns.name" />
-						<TableColumn fx:id="machineColumn" minWidth="100.0"
-							prefWidth="100.0" text="%project.tabs.machines.columns.machine" />
-						<TableColumn fx:id="descriptionColumn" minWidth="100.0"
-							prefWidth="100.0" text="%project.tabs.machines.columns.description" />
-					</columns>
-					<placeholder>
-						<Label text="%project.tabs.machines.noMachines" />
-					</placeholder>
-				</TableView>
-			</VBox>
-		</Tab>
+		<MachinesTab />
 		<Tab text="%project.tabs.preferences" closable="false">
 			<VBox spacing="0">
 				<AnchorPane styleClass="border">

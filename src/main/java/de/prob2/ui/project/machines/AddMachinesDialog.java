@@ -1,4 +1,4 @@
-package de.prob2.ui.project;
+package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
 import java.util.HashSet;
@@ -77,6 +77,4 @@ public class AddMachinesDialog extends Dialog<Machine> {
 		});
 		showAndWait().ifPresent(currentProject::addMachine);
 	}
-
-
 }
