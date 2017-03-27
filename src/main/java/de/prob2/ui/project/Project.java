@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.Preference;
 
 public class Project {
 	private final String name;

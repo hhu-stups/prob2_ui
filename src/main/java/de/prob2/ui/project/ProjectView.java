@@ -3,9 +3,6 @@ package de.prob2.ui.project;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -44,8 +41,6 @@ public final class ProjectView extends AnchorPane {
 	@FXML
 	private Button applyButton;
 	@FXML
-	private ListView<Preference> preferencesListView;
-	@FXML
 	private TabPane projectTabPane;
 	@FXML
 	private Button newProjectButton;
@@ -55,8 +50,6 @@ public final class ProjectView extends AnchorPane {
 	private Button addRunconfigButton;
 	@FXML
 	private ListView<Runconfiguration> runconfigurationsListView;
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectView.class);
 
 	private final CurrentProject currentProject;
 	private final MachineLoader machineLoader;
@@ -76,7 +69,6 @@ public final class ProjectView extends AnchorPane {
 	@FXML
 	public void initialize() {
 		initProjectTab();
-		initPreferencesTab();
 		initRunconfigurationsTab();
 	}
 
@@ -141,33 +133,6 @@ public final class ProjectView extends AnchorPane {
 		});
 	}
 
-	private void initPreferencesTab() {
-		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
-		preferencesListView.setCellFactory(listView -> {
-			ListCell<Preference> cell = new ListCell<Preference>() {
-				@Override
-				public void updateItem(Preference preference, boolean empty) {
-					super.updateItem(preference, empty);
-					if (empty) {
-						setText(null);
-						setGraphic(null);
-					} else {
-						setText(preference.getName());
-						setGraphic(null);
-					}
-				}
-			};
-
-			final MenuItem removePreferenceMenuItem = new MenuItem("Remove Preference");
-			removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
-			removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
-
-			cell.setContextMenu(new ContextMenu(removePreferenceMenuItem));
-
-			return cell;
-		});
-	}
-
 	public void initRunconfigurationsTab() {
 		runconfigsPlaceholder.setText("Add machines first");
 		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
@@ -215,11 +180,6 @@ public final class ProjectView extends AnchorPane {
 		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();
-	}
-
-	@FXML
-	void addPreference() {
-		injector.getInstance(PreferencesDialog.class).showAndWait().ifPresent(currentProject::addPreference);
 	}
 
 	@FXML

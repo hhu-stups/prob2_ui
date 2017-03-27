@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.project.machines.MachinesTab?>
+<?import de.prob2.ui.project.preferences.PreferencesTab?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
@@ -66,25 +67,7 @@
 			</VBox>
 		</Tab>
 		<MachinesTab />
-		<Tab text="%project.tabs.preferences" closable="false">
-			<VBox spacing="0">
-				<AnchorPane styleClass="border">
-					<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-						AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addPreference">
-						<graphic>
-							<FontAwesomeIconView fill="#555560"
-								glyphName="PLUS_CIRCLE" size="26" />
-						</graphic>
-					</Button>
-				</AnchorPane>
-				<ListView fx:id="preferencesListView" VBox.vgrow="always"
-					styleClass="no-border">
-					<placeholder>
-						<Label text="%project.tabs.preferences.noPreferences" />
-					</placeholder>
-				</ListView>
-			</VBox>
-		</Tab>
+		<PreferencesTab />
 		<Tab text="%project.tabs.runconfigurations" closable="false">
 			<VBox spacing="0">
 				<AnchorPane styleClass="border">
