@@ -28,6 +28,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentState;
 import de.prob2.ui.prob2fx.CurrentStateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.ProjectTab;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.project.machines.MachinesTab;
 import de.prob2.ui.project.preferences.PreferencesTab;
@@ -84,6 +85,7 @@ public class ProB2Module extends AbstractModule {
 		bind(PreferencesTab.class);
 		bind(PreferencesView.class);
 		bind(ProjectView.class);
+		bind(ProjectTab.class);
 		bind(RunconfigurationsTab.class);
 		bind(StatesView.class);
 		bind(StatsView.class);
