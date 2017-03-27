@@ -98,13 +98,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
-				this.name.set("");
-				this.description.set("");
-				this.machines.clear();
-				this.preferences.clear();
-				this.location.set(null);
-				this.injector.getInstance(ModelcheckingController.class).resetView();
-				this.saved.set(true);
+				clearProperties();
 			} else {
 				this.name.set(to.getName());
 				this.description.set(to.getDescription());
@@ -117,6 +111,16 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				}
 			}
 		});
+	}
+
+	private void clearProperties() {
+		this.name.set("");
+		this.description.set("");
+		this.machines.clear();
+		this.preferences.clear();
+		this.location.set(null);
+		this.injector.getInstance(ModelcheckingController.class).resetView();
+		this.saved.set(true);
 	}
 
 	public void addMachine(Machine machine) {
