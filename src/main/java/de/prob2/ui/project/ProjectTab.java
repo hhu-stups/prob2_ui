@@ -39,51 +39,67 @@ public class ProjectTab extends Tab {
 
 	@FXML
 	public void initialize() {
+		initName();
+		initDescription();
+	}
+
+	private void initName() {
 		projectNameLabel.textProperty().bind(currentProject.nameProperty());
 		projectNameLabel.setOnMouseClicked(event -> {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-				projectNameTextField.setManaged(true);
-				projectNameTextField.setVisible(true);
-				projectNameTextField.setText(projectNameLabel.getText());
-				projectNameTextField.requestFocus();
-				projectNameTextField.setOnKeyPressed(keyEvent -> {
-					if (keyEvent.getCode().equals(KeyCode.ENTER)) {
-						currentProject.changeName(projectNameTextField.getText());
-						projectNameTextField.setManaged(false);
-						projectNameTextField.setVisible(false);
-					}
-				});
-				projectNameTextField.focusedProperty().addListener((observable, from, to) -> {
-					if (!to) {
-						projectNameTextField.setManaged(false);
-						projectNameTextField.setVisible(false);
-					}
-				});
+				editName();
 			}
 		});
+	}
+	
+	private void editName() {
+		projectNameTextField.setManaged(true);
+		projectNameTextField.setVisible(true);
+		projectNameTextField.setText(projectNameLabel.getText());
+		projectNameTextField.requestFocus();
+		projectNameTextField.setOnKeyPressed(keyEvent -> {
+			if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+				currentProject.changeName(projectNameTextField.getText());
+				projectNameTextField.setManaged(false);
+				projectNameTextField.setVisible(false);
+			}
+		});
+		projectNameTextField.focusedProperty().addListener((observable, from, to) -> {
+			if (!to) {
+				projectNameTextField.setManaged(false);
+				projectNameTextField.setVisible(false);
+			}
+		});
+	}
+
+	private void initDescription() {
 		projectDescriptionText.textProperty().bind(currentProject.descriptionProperty());
 		projectDescriptionText.setOnMouseClicked(event -> {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-				projectDescriptionTextArea.setManaged(true);
-				projectDescriptionTextArea.setVisible(true);
-				applyButton.setManaged(true);
-				applyButton.setVisible(true);
-				projectDescriptionTextArea.setText(projectDescriptionText.getText());
-				projectDescriptionTextArea.requestFocus();
-				projectDescriptionTextArea.positionCaret(projectDescriptionTextArea.getText().length());
-				applyButton.setOnMouseClicked(mouseEvent -> {
-					currentProject.changeDescription(projectDescriptionTextArea.getText());
-					projectNameTextField.setManaged(false);
-					projectNameTextField.setVisible(false);
-					applyButton.setManaged(false);
-					applyButton.setVisible(false);
-				});
-				projectDescriptionTextArea.focusedProperty().addListener((observable, from, to) -> {
-					if (!to) {
-						projectDescriptionTextArea.setManaged(false);
-						projectDescriptionTextArea.setVisible(false);
-					}
-				});
+				editDescription();
+			}
+		});
+	}
+
+	private void editDescription() {
+		projectDescriptionTextArea.setManaged(true);
+		projectDescriptionTextArea.setVisible(true);
+		applyButton.setManaged(true);
+		applyButton.setVisible(true);
+		projectDescriptionTextArea.setText(projectDescriptionText.getText());
+		projectDescriptionTextArea.requestFocus();
+		projectDescriptionTextArea.positionCaret(projectDescriptionTextArea.getText().length());
+		applyButton.setOnMouseClicked(mouseEvent -> {
+			currentProject.changeDescription(projectDescriptionTextArea.getText());
+			projectNameTextField.setManaged(false);
+			projectNameTextField.setVisible(false);
+			applyButton.setManaged(false);
+			applyButton.setVisible(false);
+		});
+		projectDescriptionTextArea.focusedProperty().addListener((observable, from, to) -> {
+			if (!to) {
+				projectDescriptionTextArea.setManaged(false);
+				projectDescriptionTextArea.setVisible(false);
 			}
 		});
 	}
