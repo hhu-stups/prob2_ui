@@ -47,6 +47,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -116,10 +117,16 @@ public final class MenuController extends MenuBar {
 			this.getMenus().add(0, applicationMenu);
 
 			menuToolkit.setApplicationMenu(applicationMenu);
+			MenuItem quit = menuToolkit.createQuitMenuItem("ProB 2");
+			quit.setOnAction(event -> {
+				for(Stage stage : stageManager.getRegistered()) {
+					stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+				}
+			});
 			applicationMenu.getItems().setAll(aboutItem, new SeparatorMenuItem(), preferencesItem,
 					new SeparatorMenuItem(), menuToolkit.createHideMenuItem("ProB 2"),
 					menuToolkit.createHideOthersMenuItem(), menuToolkit.createUnhideAllMenuItem(),
-					new SeparatorMenuItem(), menuToolkit.createQuitMenuItem("ProB 2"));
+					new SeparatorMenuItem(), quit);
 
 			// Add Mac-style items to Window menu
 			windowMenu.getItems().addAll(menuToolkit.createMinimizeMenuItem(), menuToolkit.createZoomMenuItem(),
@@ -285,7 +292,7 @@ public final class MenuController extends MenuBar {
 	private void handleClose() {
 		final Stage stage = this.stageManager.getCurrent();
 		if (stage != null) {
-			stage.close();
+			stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
 		}
 	}
 

@@ -1,37 +1,40 @@
 package de.prob2.ui;
 
+import java.util.Optional;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import de.prob.cli.ProBInstanceProvider;
-
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
 public class ProB2 extends Application {
 	private Injector injector;
 	private Config config;
-	
+
 	private Stage primaryStage;
 
 	public static void main(String... args) {
 		launch(args);
 	}
-	
+
 	private void updateTitle() {
 		final CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		final CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
-		
+
 		final StringBuilder title = new StringBuilder();
 		if (currentTrace.exists()) {
 			title.append(currentTrace.getModel().getModelFile().getName());
@@ -42,10 +45,10 @@ public class ProB2 extends Application {
 			title.append(" - ");
 		}
 		title.append("ProB 2.0");
-		if(!currentProject.isSaved()) {
+		if (!currentProject.isSaved()) {
 			title.append("*");
 		}
-		
+
 		this.primaryStage.setTitle(title.toString());
 	}
 
@@ -68,7 +71,26 @@ public class ProB2 extends Application {
 		currentTrace.addListener((observable, from, to) -> this.updateTitle());
 		this.updateTitle();
 
-		injector.getInstance(StageManager.class).register(primaryStage, this.getClass().getName());
+		StageManager stageManager = injector.getInstance(StageManager.class);
+		stageManager.register(primaryStage, this.getClass().getName());
+
+		primaryStage.setOnCloseRequest(event -> {
+			if (!currentProject.isSaved()) {
+				ButtonType save = new ButtonType("Save", ButtonBar.ButtonData.YES);
+				ButtonType doNotSave = new ButtonType("Do not save", ButtonBar.ButtonData.NO);
+				Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+						"The current project \"" + currentProject.getName()
+								+ "\" contains unsaved changes.\nDo you want to save the project?",
+						save, ButtonType.CANCEL, doNotSave);
+				Optional<ButtonType> result = alert.showAndWait();
+				if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
+					event.consume();
+				} else if (result.isPresent() && result.get().equals(save)) {
+					currentProject.save();
+					Platform.exit();
+				}
+			}
+		});
 
 		primaryStage.show();
 		uiPersistence.open();
