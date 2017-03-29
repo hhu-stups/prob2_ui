@@ -7,6 +7,7 @@
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.SplitPane?>
 
 <fx:root type="Tab" text="%project.tabs.preferences" closable="false"
 	xmlns:fx="http://javafx.com/fxml/1">
@@ -20,12 +21,14 @@
 				</graphic>
 			</Button>
 		</AnchorPane>
-		<ListView fx:id="preferencesListView" VBox.vgrow="always"
-			styleClass="no-border">
-			<placeholder>
-				<Label text="%project.tabs.preferences.noPreferences" />
-			</placeholder>
-		</ListView>
+		<SplitPane fx:id="splitPane">
+			<ListView fx:id="preferencesListView"
+				styleClass="no-border">
+				<placeholder>
+					<Label text="%project.tabs.preferences.noPreferences" />
+				</placeholder>
+			</ListView>
+		</SplitPane>
 	</VBox>
 </fx:root>
 

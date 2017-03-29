@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.ScrollPane?>
+
+<fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
+	<VBox spacing="5" AnchorPane.topAnchor="6"
+		AnchorPane.bottomAnchor="-4" AnchorPane.leftAnchor="0"
+		AnchorPane.rightAnchor="0">
+		<Label fx:id="titelLabel">
+			<font>
+				<Font size="14" />
+			</font>
+			<VBox.margin>
+				<Insets left="10" right="10" />
+			</VBox.margin>
+		</Label>
+		<AnchorPane styleClass="border" VBox.vgrow="always">
+			<ScrollPane AnchorPane.leftAnchor="0"
+				AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"
+				AnchorPane.bottomAnchor="0">
+				<AnchorPane>
+					<Text fx:id="prefText" AnchorPane.topAnchor="10"
+						AnchorPane.bottomAnchor="4" AnchorPane.leftAnchor="5"
+						AnchorPane.rightAnchor="5" />
+				</AnchorPane>
+			</ScrollPane>
+		</AnchorPane>
+	</VBox>
+</fx:root>
+

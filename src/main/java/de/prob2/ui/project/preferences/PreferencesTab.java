@@ -11,24 +11,31 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
+import javafx.scene.input.MouseButton;
 
 @Singleton
 public class PreferencesTab extends Tab {
 
 	@FXML
 	private ListView<Preference> preferencesListView;
-	
+	@FXML
+	private SplitPane splitPane;
+
 	private final CurrentProject currentProject;
 	private final Injector injector;
-	
+	private final StageManager stageManager;
+
 	@Inject
-	private PreferencesTab(final StageManager stageManager, final CurrentProject currentProject, final Injector injector) {
+	private PreferencesTab(final StageManager stageManager, final CurrentProject currentProject,
+			final Injector injector) {
+		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "preferences_tab.fxml");
 	}
-	
+
 	@FXML
 	public void initialize() {
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
@@ -53,10 +60,19 @@ public class PreferencesTab extends Tab {
 
 			cell.setContextMenu(new ContextMenu(removePreferenceMenuItem));
 
+			cell.setOnMouseClicked(event -> {
+				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					if (splitPane.getItems().size() >= 2) {
+						splitPane.getItems().remove(0);
+					}
+					splitPane.getItems().add(0, new PreferenceView(cell.getItem(), stageManager));
+				}
+			});
+
 			return cell;
 		});
 	}
-	
+
 	@FXML
 	void addPreference() {
 		injector.getInstance(PreferencesDialog.class).showAndWait().ifPresent(currentProject::addPreference);
