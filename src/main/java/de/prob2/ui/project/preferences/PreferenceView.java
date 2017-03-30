@@ -24,10 +24,11 @@ public class PreferenceView extends AnchorPane {
 	public void initialize() {
 		titelLabel.setText(preference.getName());
 		
-		String prefs = "";
+		StringBuilder builder = new StringBuilder();
 		for(String pref : preference.getPreferences().keySet()) {
-			prefs += pref + " = " + preference.getPreferences().get(pref) + "\n\n";
+			builder.append(pref + " = " + preference.getPreferences().get(pref) + "\n\n");
 		}
+		String prefs = builder.toString();
 		prefText.setText(prefs);
 	}
 
