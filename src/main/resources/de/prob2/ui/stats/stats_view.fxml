@@ -59,23 +59,6 @@
 						<Insets bottom="0.0" left="10.0" right="10.0" top="15.0" />
 					</VBox.margin>
 				</HBox>
-				<!--
-				<HBox prefHeight="12.0" spacing="7.0">
-					<Label text="%stats.totalNodes">
-						<font>
-							<Font name="System Bold" size="13.5" />
-						</font>
-					</Label>
-					<Label fx:id="totalNodes">
-						<font>
-							<Font size="13.5" />
-						</font>
-					</Label>
-					<VBox.margin>
-						<Insets bottom="0.0" left="10.0" right="10.0" top="0.0" />
-					</VBox.margin>
-				</HBox>
-				-->
 				<HBox prefHeight="12.0" spacing="7.0">
 					<Label text="%stats.totalTransitions" minWidth="120.0">
 						<font>
