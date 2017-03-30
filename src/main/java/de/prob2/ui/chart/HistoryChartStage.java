@@ -162,10 +162,13 @@ public final class HistoryChartStage extends Stage {
 			
 			final XYChart.Series<Number, Number> seriesSeparate = new XYChart.Series<>(charts.get(i).getCode(), FXCollections.observableArrayList());
 			final NumberAxis separateXAxis = new NumberAxis();
+			separateXAxis.getStyleClass().add("time-axis");
 			separateXAxis.setAutoRanging(false);
+			separateXAxis.setTickUnit(1.0);
 			separateXAxis.setUpperBound(1.0);
 			final NumberAxis separateYAxis = new NumberAxis();
 			final LineChart<Number, Number> separateChart = new LineChart<>(separateXAxis, separateYAxis, FXCollections.singletonObservableList(seriesSeparate));
+			separateChart.getStyleClass().add("history-chart");
 			
 			seriesSingle.getData().addListener((ListChangeListener<XYChart.Data<Number, Number>>)change -> {
 				// Update the separate chart series whenever the single chart series is updated.

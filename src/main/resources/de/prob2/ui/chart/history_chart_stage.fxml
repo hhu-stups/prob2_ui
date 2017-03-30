@@ -16,7 +16,7 @@
 <?import javafx.stage.Stage?>
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" minWidth="320" minHeight="160" title="%historychart.title">
 	<scene>
-		<Scene width="800" height="400">
+		<Scene width="800" height="400" stylesheets="@/prob.css">
 			<AnchorPane maxWidth="Infinity" maxHeight="Infinity">
 				<SplitPane dividerPositions="0.25" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
 					<BorderPane minWidth="80">
@@ -46,9 +46,9 @@
 						</bottom>
 					</BorderPane>
 					<FlowPane fx:id="chartsPane" minWidth="160" minHeight="160" maxWidth="Infinity" maxHeight="Infinity" prefWrapLength="640">
-						<LineChart fx:id="singleChart">
+						<LineChart fx:id="singleChart" styleClass="history-chart">
 							<xAxis>
-								<NumberAxis autoRanging="false" tickUnit="1.0" upperBound="1.0"/>
+								<NumberAxis styleClass="time-axis" autoRanging="false" tickUnit="1.0" upperBound="1.0"/>
 							</xAxis>
 							<yAxis>
 								<NumberAxis/>
