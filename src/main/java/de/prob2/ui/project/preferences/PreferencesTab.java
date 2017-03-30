@@ -58,7 +58,13 @@ public class PreferencesTab extends Tab {
 		};
 
 		final MenuItem removePreferenceMenuItem = new MenuItem("Remove Preference");
-		removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
+		removePreferenceMenuItem.setOnAction(event -> {
+			if (splitPane.getItems().size() >= 2
+					&& ((PreferenceView) splitPane.getItems().get(0)).getPreference() == cell.getItem()) {
+				closePreferenceView();
+			}
+			currentProject.removePreference(cell.getItem());
+		});
 		removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
 
 		final MenuItem editCopyMenuItem = new MenuItem("Edit copy");

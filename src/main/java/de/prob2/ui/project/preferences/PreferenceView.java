@@ -40,4 +40,8 @@ public class PreferenceView extends AnchorPane {
 	public void closePreferenceView() {
 		injector.getInstance(PreferencesTab.class).closePreferenceView();
 	}
+
+	Preference getPreference() {
+		return this.preference;
+	}
 }
