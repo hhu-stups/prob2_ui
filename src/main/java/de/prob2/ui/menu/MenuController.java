@@ -8,15 +8,14 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob.scripting.ModelTranslationError;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.consoles.b.BConsoleStage;
@@ -31,6 +30,7 @@ import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -48,6 +48,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -164,11 +167,6 @@ public final class MenuController extends MenuBar {
 		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not());
 		this.enterFormulaForVisualization.disableProperty()
 				.bind(currentTrace.currentStateProperty().initializedProperty().not());
-	}
-
-	@FXML
-	private void handleClearRecentFiles() {
-		this.recentProjects.clear();
 	}
 
 	@FXML

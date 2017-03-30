@@ -31,8 +31,8 @@
 								<Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
 							</padding>
 							<HBox spacing="10.0" alignment="CENTER_LEFT">
-								<Label text="%preferences.tabs.general.recentFilesLimitLabel"/>
-								<Spinner fx:id="recentFilesCountSpinner"/>
+								<Label text="%preferences.tabs.general.recentProjectsLimitLabel"/>
+								<Spinner fx:id="recentProjectsCountSpinner"/>
 							</HBox>
 							<HBox spacing="10.0" alignment="CENTER_LEFT">
 								<Label text="%preferences.tabs.general.defaultLocationForProjectsLabel"/>
