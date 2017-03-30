@@ -61,7 +61,15 @@ public class PreferencesTab extends Tab {
 		removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
 		removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
 
-		cell.setContextMenu(new ContextMenu(removePreferenceMenuItem));
+		final MenuItem editCopyMenuItem = new MenuItem("Edit copy");
+		editCopyMenuItem.setOnAction(event -> {
+			PreferencesDialog prefDialog = injector.getInstance(PreferencesDialog.class);
+			prefDialog.setPreference(cell.getItem());
+			prefDialog.showAndWait().ifPresent(currentProject::addPreference);
+		});
+		editCopyMenuItem.disableProperty().bind(cell.emptyProperty());
+
+		cell.setContextMenu(new ContextMenu(editCopyMenuItem, removePreferenceMenuItem));
 
 		cell.setOnMouseClicked(event -> {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {

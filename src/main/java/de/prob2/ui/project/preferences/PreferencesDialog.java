@@ -1,6 +1,7 @@
 package de.prob2.ui.project.preferences;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -27,12 +28,13 @@ public class PreferencesDialog extends Dialog<Preference> {
 	private final ResourceBundle bundle;
 
 	@Inject
-	private PreferencesDialog(final StageManager stageManager, final Api api, final ProBPreferences prefs, final ResourceBundle bundle) {
+	private PreferencesDialog(final StageManager stageManager, final Api api, final ProBPreferences prefs,
+			final ResourceBundle bundle) {
 		super();
 
 		this.prefs = prefs;
 		this.prefs.setStateSpace(ProBPreferences.getEmptyStateSpace(api));
-		
+
 		this.bundle = bundle;
 
 		this.setResultConverter(type -> {
@@ -50,7 +52,13 @@ public class PreferencesDialog extends Dialog<Preference> {
 	private void initialize() {
 		this.prefsView.setPreferences(this.prefs);
 		this.setTitle(bundle.getString("addProBPreference.stage.stageTitle"));
-		this.getDialogPane().lookupButton(okButtonType).disableProperty()
-				.bind(this.nameField.textProperty().isEmpty());
+		this.getDialogPane().lookupButton(okButtonType).disableProperty().bind(this.nameField.textProperty().isEmpty());
+	}
+
+	void setPreference(Preference preference) {
+		nameField.setText(preference.getName() + "(copy)");
+		for (Entry<String, String> pref : preference.getPreferences().entrySet()) {
+			prefs.setPreferenceValue(pref.getKey(), pref.getValue());
+		}
 	}
 }
