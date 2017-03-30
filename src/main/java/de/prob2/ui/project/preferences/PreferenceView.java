@@ -1,5 +1,7 @@
 package de.prob2.ui.project.preferences;
 
+import com.google.inject.Injector;
+
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -14,9 +16,11 @@ public class PreferenceView extends AnchorPane {
 	private Text prefText;
 	
 	private final Preference preference;
+	private final Injector injector;
 	
-	PreferenceView(final Preference preference, final StageManager stageManager) {
+	PreferenceView(final Preference preference, final StageManager stageManager, final Injector injector) {
 		this.preference = preference;
+		this.injector = injector;
 		stageManager.loadFXML(this, "preference_view.fxml");
 	}
 
@@ -32,4 +36,8 @@ public class PreferenceView extends AnchorPane {
 		prefText.setText(prefs);
 	}
 
+	@FXML
+	public void closePreferenceView() {
+		injector.getInstance(PreferencesTab.class).closePreferenceView();
+	}
 }

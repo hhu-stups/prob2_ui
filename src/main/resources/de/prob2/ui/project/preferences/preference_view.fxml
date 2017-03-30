@@ -7,6 +7,8 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Button?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 
 <fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
 	<VBox spacing="5" AnchorPane.topAnchor="6"
@@ -32,5 +34,11 @@
 			</ScrollPane>
 		</AnchorPane>
 	</VBox>
+	<Button AnchorPane.rightAnchor="2.0" onAction="#closePreferenceView">
+		<graphic>
+			<FontAwesomeIconView fill="#555560" glyphName="CLOSE"
+				size="16" />
+		</graphic>
+	</Button>
 </fx:root>
 

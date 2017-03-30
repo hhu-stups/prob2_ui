@@ -68,7 +68,7 @@ public class PreferencesTab extends Tab {
 				if (splitPane.getItems().size() >= 2) {
 					splitPane.getItems().remove(0);
 				}
-				splitPane.getItems().add(0, new PreferenceView(cell.getItem(), stageManager));
+				splitPane.getItems().add(0, new PreferenceView(cell.getItem(), stageManager, injector));
 			}
 		});
 
@@ -78,5 +78,9 @@ public class PreferencesTab extends Tab {
 	@FXML
 	void addPreference() {
 		injector.getInstance(PreferencesDialog.class).showAndWait().ifPresent(currentProject::addPreference);
+	}
+
+	public void closePreferenceView() {
+		splitPane.getItems().remove(0);
 	}
 }
