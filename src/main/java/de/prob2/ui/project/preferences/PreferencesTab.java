@@ -39,38 +39,40 @@ public class PreferencesTab extends Tab {
 	@FXML
 	public void initialize() {
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
-		preferencesListView.setCellFactory(listView -> {
-			ListCell<Preference> cell = new ListCell<Preference>() {
-				@Override
-				public void updateItem(Preference preference, boolean empty) {
-					super.updateItem(preference, empty);
-					if (empty) {
-						setText(null);
-						setGraphic(null);
-					} else {
-						setText(preference.getName());
-						setGraphic(null);
-					}
+		preferencesListView.setCellFactory(listView -> initListCell());
+	}
+
+	private ListCell<Preference> initListCell() {
+		ListCell<Preference> cell = new ListCell<Preference>() {
+			@Override
+			public void updateItem(Preference preference, boolean empty) {
+				super.updateItem(preference, empty);
+				if (empty) {
+					setText(null);
+					setGraphic(null);
+				} else {
+					setText(preference.getName());
+					setGraphic(null);
 				}
-			};
+			}
+		};
 
-			final MenuItem removePreferenceMenuItem = new MenuItem("Remove Preference");
-			removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
-			removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
+		final MenuItem removePreferenceMenuItem = new MenuItem("Remove Preference");
+		removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
+		removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
 
-			cell.setContextMenu(new ContextMenu(removePreferenceMenuItem));
+		cell.setContextMenu(new ContextMenu(removePreferenceMenuItem));
 
-			cell.setOnMouseClicked(event -> {
-				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					if (splitPane.getItems().size() >= 2) {
-						splitPane.getItems().remove(0);
-					}
-					splitPane.getItems().add(0, new PreferenceView(cell.getItem(), stageManager));
+		cell.setOnMouseClicked(event -> {
+			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+				if (splitPane.getItems().size() >= 2) {
+					splitPane.getItems().remove(0);
 				}
-			});
-
-			return cell;
+				splitPane.getItems().add(0, new PreferenceView(cell.getItem(), stageManager));
+			}
 		});
+
+		return cell;
 	}
 
 	@FXML
