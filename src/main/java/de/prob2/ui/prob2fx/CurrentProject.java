@@ -30,10 +30,10 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.AnimationSelector;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.project.Machine;
-import de.prob2.ui.project.Preference;
 import de.prob2.ui.project.Project;
-import de.prob2.ui.project.Runconfiguration;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -98,13 +98,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
-				this.name.set("");
-				this.description.set("");
-				this.machines.clear();
-				this.preferences.clear();
-				this.location.set(null);
-				this.injector.getInstance(ModelcheckingController.class).resetView();
-				this.saved.set(true);
+				clearProperties();
 			} else {
 				this.name.set(to.getName());
 				this.description.set(to.getDescription());
@@ -117,6 +111,16 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				}
 			}
 		});
+	}
+
+	private void clearProperties() {
+		this.name.set("");
+		this.description.set("");
+		this.machines.clear();
+		this.preferences.clear();
+		this.location.set(null);
+		this.injector.getInstance(ModelcheckingController.class).resetView();
+		this.saved.set(true);
 	}
 
 	public void addMachine(Machine machine) {
@@ -182,6 +186,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void changeName(String newName) {
 		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(),
+				this.getRunconfigurations(), this.getLocation()));
+	}
+	
+	public void changeDescription(String newDescription) {
+		this.update(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(),
 				this.getRunconfigurations(), this.getLocation()));
 	}
 

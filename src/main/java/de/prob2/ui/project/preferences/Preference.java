@@ -1,4 +1,4 @@
-package de.prob2.ui.project;
+package de.prob2.ui.project.preferences;
 
 import java.util.Map;
 

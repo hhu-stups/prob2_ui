@@ -161,9 +161,17 @@ public final class HistoryChartStage extends Stage {
 			this.singleChart.getData().add(i, seriesSingle);
 			
 			final XYChart.Series<Number, Number> seriesSeparate = new XYChart.Series<>(charts.get(i).getCode(), FXCollections.observableArrayList());
-			final LineChart<Number, Number> separateChart = new LineChart<>(new NumberAxis(), new NumberAxis(), FXCollections.singletonObservableList(seriesSeparate));
-			// Update the separate chart series whenever the single chart series is updated.
+			final NumberAxis separateXAxis = new NumberAxis();
+			separateXAxis.getStyleClass().add("time-axis");
+			separateXAxis.setAutoRanging(false);
+			separateXAxis.setTickUnit(1.0);
+			separateXAxis.setUpperBound(1.0);
+			final NumberAxis separateYAxis = new NumberAxis();
+			final LineChart<Number, Number> separateChart = new LineChart<>(separateXAxis, separateYAxis, FXCollections.singletonObservableList(seriesSeparate));
+			separateChart.getStyleClass().add("history-chart");
+			
 			seriesSingle.getData().addListener((ListChangeListener<XYChart.Data<Number, Number>>)change -> {
+				// Update the separate chart series whenever the single chart series is updated.
 				while (change.next()) {
 					if (change.wasRemoved()) {
 						seriesSeparate.getData().remove(change.getFrom(), change.getFrom()+change.getRemovedSize());
@@ -173,6 +181,9 @@ public final class HistoryChartStage extends Stage {
 						seriesSeparate.getData().addAll(change.getFrom(), change.getAddedSubList());
 					}
 				}
+				
+				// Update the upper bound of the X axis of the separate chart
+				separateXAxis.setUpperBound(change.getList().isEmpty() ? 1.0 : change.getList().get(change.getList().size()-1).getXValue().doubleValue());
 			});
 			
 			separateChart.setMinWidth(160);
@@ -198,6 +209,7 @@ public final class HistoryChartStage extends Stage {
 			newDatas.add(new ArrayList<>());
 		}
 		
+		int elementCounter = 0;
 		if (trace != null) {
 			final StateSpace stateSpace = trace.getStateSpace();
 			
@@ -219,22 +231,32 @@ public final class HistoryChartStage extends Stage {
 						LOGGER.debug("Not convertible to int, ignoring", e);
 						continue;
 					}
-					newDatas.get(i).add(0, new XYChart.Data<>(-1, value));
+					newDatas.get(i).add(0, new XYChart.Data<>(elementCounter, value));
 				}
 				
 				element = element.getPrevious();
+				elementCounter++;
 			}
 		}
 		
+		double maxXBound = 1.0;
 		for (int i = 0; i < newDatas.size(); i++) {
 			final List<XYChart.Data<Number, Number>> newData = newDatas.get(i);
 			
-			for (int j = 0; j < newData.size(); j++) {
-				newData.get(j).setXValue(j);
+			for (XYChart.Data<Number, Number> newDatum : newData) {
+				newDatum.setXValue(elementCounter - newDatum.getXValue().intValue() - 1);
+			}
+			
+			if (!newData.isEmpty()) {
+				final double lastX = newData.get(newData.size()-1).getXValue().doubleValue();
+				if (lastX > maxXBound) {
+					maxXBound = lastX;
+				}
 			}
 			
 			this.singleChart.getData().get(i).getData().setAll(newData);
 		}
+		((NumberAxis)this.singleChart.getXAxis()).setUpperBound(maxXBound);
 	}
 	
 	private static int resultToInt(final AbstractEvalResult aer) {

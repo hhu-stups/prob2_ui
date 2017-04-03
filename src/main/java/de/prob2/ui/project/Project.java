@@ -2,12 +2,14 @@ package de.prob2.ui.project;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.project.runconfigurations.Runconfiguration;
 
 public class Project {
 	private final String name;
@@ -72,20 +74,6 @@ public class Project {
 
 	public Set<Runconfiguration> getRunconfigurations() {
 		return runconfigurations;
-	}
-
-	public Map<String, String> getPreferences(Machine machine) {
-		List<String> prefNames = machine.getPreferences();
-		Map<String, String> prefs = new HashMap<>();
-		if (!prefNames.isEmpty()) {
-			for (Preference pref : preferences) {
-				String n = pref.getName();
-				if (prefNames.contains(n)) {
-					prefs.putAll(pref.getPreferences());
-				}
-			}
-		}
-		return prefs;
 	}
 
 	public void setLocation(File location) {

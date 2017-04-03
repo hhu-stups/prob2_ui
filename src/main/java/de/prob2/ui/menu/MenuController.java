@@ -8,15 +8,14 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob.scripting.ModelTranslationError;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.consoles.b.BConsoleStage;
@@ -27,10 +26,11 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.Machine;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -47,6 +47,10 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.stage.WindowEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -116,10 +120,16 @@ public final class MenuController extends MenuBar {
 			this.getMenus().add(0, applicationMenu);
 
 			menuToolkit.setApplicationMenu(applicationMenu);
+			MenuItem quit = menuToolkit.createQuitMenuItem("ProB 2");
+			quit.setOnAction(event -> {
+				for(Stage stage : stageManager.getRegistered()) {
+					stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+				}
+			});
 			applicationMenu.getItems().setAll(aboutItem, new SeparatorMenuItem(), preferencesItem,
 					new SeparatorMenuItem(), menuToolkit.createHideMenuItem("ProB 2"),
 					menuToolkit.createHideOthersMenuItem(), menuToolkit.createUnhideAllMenuItem(),
-					new SeparatorMenuItem(), menuToolkit.createQuitMenuItem("ProB 2"));
+					new SeparatorMenuItem(), quit);
 
 			// Add Mac-style items to Window menu
 			windowMenu.getItems().addAll(menuToolkit.createMinimizeMenuItem(), menuToolkit.createZoomMenuItem(),
@@ -157,11 +167,6 @@ public final class MenuController extends MenuBar {
 		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not());
 		this.enterFormulaForVisualization.disableProperty()
 				.bind(currentTrace.currentStateProperty().initializedProperty().not());
-	}
-
-	@FXML
-	private void handleClearRecentFiles() {
-		this.recentProjects.clear();
 	}
 
 	@FXML
@@ -285,7 +290,7 @@ public final class MenuController extends MenuBar {
 	private void handleClose() {
 		final Stage stage = this.stageManager.getCurrent();
 		if (stage != null) {
-			stage.close();
+			stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
 		}
 	}
 

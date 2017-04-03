@@ -720,3 +720,18 @@
 .text-field.badsearch {
 	-fx-border-color: red;
 }
+
+/* === HistoryChartStage === */
+
+/* Hide chart symbols in the chart content, but not in the legend */
+.history-chart .chart-content .chart-line-symbol {
+	-fx-background-color: transparent;
+	-fx-background-insets: 0;
+	-fx-background-radius: 0;
+	-fx-padding: 0;
+}
+
+/* Hide minor tick marks on the time axes, because our times are integers */
+.history-chart .axis.time-axis .axis-minor-tick-mark {
+	-fx-stroke: transparent;
+}

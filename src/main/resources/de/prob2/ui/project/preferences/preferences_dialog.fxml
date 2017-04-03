@@ -31,7 +31,7 @@
 						<AnchorPane styleClass="border">
 							<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
 								AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
-								alignment="center_left">
+								alignment="center_right">
 								<HBox spacing="20" alignment="center_left">
 									<Label text="%addProBPreference.stage.name" />
 									<TextField fx:id="nameField" promptText="Name"
@@ -41,19 +41,27 @@
 										</font>
 									</TextField>
 								</HBox>
-								<Label text="%addProBPreference.stage.preferences">
+								<Label fx:id="errorExplanationLabel" textFill="#B77300">
 									<VBox.margin>
-										<Insets top="20" />
+										<Insets top="5" />
 									</VBox.margin>
 								</Label>
-								<PreferencesView fx:id="prefsView" />
+								<VBox alignment="center_left">
+									<Label text="%addProBPreference.stage.preferences">
+										<VBox.margin>
+											<Insets top="10" />
+										</VBox.margin>
+									</Label>
+									<PreferencesView fx:id="prefsView" />
+								</VBox>
 							</VBox>
 						</AnchorPane>
 					</VBox>
 				</AnchorPane>
 			</content>
 			<ButtonType buttonData="CANCEL_CLOSE" text="%common.cancel" />
-			<ButtonType fx:id="okButtonType" buttonData="OK_DONE" text="%common.ok" />
+			<ButtonType fx:id="okButtonType" buttonData="OK_DONE"
+				text="%common.ok" />
 		</DialogPane>
 	</dialogPane>
 </fx:root>

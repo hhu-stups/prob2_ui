@@ -95,18 +95,20 @@ public final class OperationsView extends AnchorPane {
 							setTooltip(new Tooltip("Skip Operation"));
 						} else {
 							getStyleClass().add("normal");
+							setTooltip(null);
 						}
 						break;
 					
 					case DISABLED:
 						icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
 						getStyleClass().add("disabled");
-						setTooltip(new Tooltip("Disabled Operation"));
+						setTooltip(null);
 						break;
 					
 					case MAX_REACHED:
 						icon = new FontAwesomeIconView(FontAwesomeIcon.ELLIPSIS_H);
 						getStyleClass().add("max-reached");
+						setTooltip(null);
 						break;
 					
 					default:
