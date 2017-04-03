@@ -191,10 +191,10 @@ public final class HistoryChartStage extends Stage {
 			separateChart.setMaxWidth(Double.POSITIVE_INFINITY);
 			separateChart.setMaxHeight(Double.POSITIVE_INFINITY);
 			
-			// Adjust the sizes of all separate charts so they always fill the entire flow pane, and are as close as possible to 320px * 160px.
+			// Adjust the sizes of all separate charts so they always fill the entire flow pane, and are as close as possible to 320px * 240px.
 			// We subtract 1.0 from the resulting width/height, to ensure that the sum is not larger than the flow pane's width/height. Otherwise the charts jump around as the flow pane tries to make them fit.
 			separateChart.prefWidthProperty().bind(Bindings.createDoubleBinding(() -> (chartsPane.getWidth() / Math.round(chartsPane.getWidth() / 320.0)) - 1.0, chartsPane.widthProperty()));
-			separateChart.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> (chartsPane.getHeight() / Math.round(chartsPane.getHeight() / 160.0)) - 1.0, chartsPane.heightProperty()));
+			separateChart.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> (chartsPane.getHeight() / Math.round(chartsPane.getHeight() / 240.0)) - 1.0, chartsPane.heightProperty()));
 			
 			this.separateCharts.add(i, separateChart);
 			if (this.separateChartsCheckBox.isSelected()) {
