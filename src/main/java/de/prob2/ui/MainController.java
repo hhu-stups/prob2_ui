@@ -167,7 +167,7 @@ public class MainController extends BorderPane implements IDetachableMainViews {
 		Map<TitledPane,Accordion> parentMap = new HashMap<>();
 		String guiState = uiState.getGuiState();
 		if (guiState.contains("detached")) {
-			guiState.replace("detached","");
+			guiState = guiState.replace("detached","");
 		}
 		switch (guiState) {
 			case "main.fxml":

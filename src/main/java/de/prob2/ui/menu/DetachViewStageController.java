@@ -107,11 +107,13 @@ public final class DetachViewStageController extends Stage {
 
 	@FXML
 	public void apply() {
-		// TODO find solution for detach persistence
-		if (uiState.getGuiState().contains("detached")){
-			uiState.setGuiState(uiState.getGuiState().replace("detached",""));
+		//FIXME detaching sometimes results in empty boxes
+		//FIXME unselecting detachable views does NOT close stage with detached view
+		String guiState = uiState.getGuiState();
+		if (guiState.contains("detached")){
+			guiState = guiState.replace("detached","");
 		}
-		final Parent root = injector.getInstance(MenuController.class).loadPreset(uiState.getGuiState());
+		final Parent root = injector.getInstance(MenuController.class).loadPreset(guiState);
 		final Map<TitledPane,Accordion> parentMap = ((IDetachableMainViews) root).getParentMap();
 		for (Accordion parent : parentMap.values()) {
 			for (TitledPane node : parentMap.keySet()) {
@@ -120,7 +122,9 @@ public final class DetachViewStageController extends Stage {
 				}
 			}
 		}
-		uiState.setGuiState(uiState.getGuiState()+"detached");
+		if (!uiState.getGuiState().contains("detached")) {
+			uiState.setGuiState(uiState.getGuiState() + "detached");
+		}
 		this.hide();
 	}
 	
@@ -165,6 +169,9 @@ public final class DetachViewStageController extends Stage {
 			tp.setContent(node);
 			accordion.getPanes().add(tp);
 			wrapperStages.remove(stage);
+			if (wrapperStages.isEmpty()) {
+				uiState.setGuiState(uiState.getGuiState().replace("detached",""));
+			}
 		});
 		// Default bounds, replaced by saved ones from the config when show() is called
 		stage.setWidth(200);
