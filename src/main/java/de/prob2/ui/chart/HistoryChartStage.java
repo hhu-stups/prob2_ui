@@ -129,6 +129,7 @@ public final class HistoryChartStage extends Stage {
 				this.chartsPane.getChildren().setAll(this.singleChart);
 			}
 		});
+		this.separateChartsCheckBox.setSelected(true);
 		
 		this.singleChart.prefWidthProperty().bind(this.chartsPane.widthProperty());
 		this.singleChart.prefHeightProperty().bind(this.chartsPane.heightProperty());
