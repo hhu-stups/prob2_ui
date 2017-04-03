@@ -99,8 +99,8 @@ public final class UIPersistence {
 		for (final String id : uiState.getSavedVisibleStages()) {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
 		}
-		
-		if ("detached".equals(uiState.getGuiState())) {
+
+		if (uiState.getGuiState().contains("detached")) {
 			injector.getInstance(DetachViewStageController.class).apply();
 		} else {
 			menu.loadPreset(uiState.getGuiState());

@@ -62,7 +62,6 @@ public class ProB2 extends Application {
 		Parent root = injector.getInstance(MainController.class);
 		Scene mainScene = new Scene(root, 1024, 768);
 		primaryStage.setScene(mainScene);
-		primaryStage.setOnCloseRequest(e -> Platform.exit());
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		currentProject.addListener((observable, from, to) -> this.updateTitle());
@@ -89,6 +88,8 @@ public class ProB2 extends Application {
 					currentProject.save();
 					Platform.exit();
 				}
+			} else {
+				Platform.exit();
 			}
 		});
 

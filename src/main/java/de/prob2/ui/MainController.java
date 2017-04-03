@@ -73,7 +73,7 @@ public class MainController extends BorderPane implements IDetachableMainViews {
 		
 	public void refresh() {
 		String guiState = "main.fxml";
-		if (!"detached".equals(uiState.getGuiState())) {
+		if (!uiState.getGuiState().contains("detached")) {
 			guiState = uiState.getGuiState();
 		}
 		stageManager.loadFXML(this, guiState);
@@ -165,11 +165,33 @@ public class MainController extends BorderPane implements IDetachableMainViews {
 
 	public Map<TitledPane,Accordion> getParentMap() {
 		Map<TitledPane,Accordion> parentMap = new HashMap<>();
-		parentMap.put(operationsTP,leftAccordion);
-		parentMap.put(historyTP,rightAccordion2);
-		parentMap.put(verificationsTP,rightAccordion1);
-		parentMap.put(projectTP,rightAccordion1);
-		parentMap.put(statsTP,rightAccordion1);
+		String guiState = uiState.getGuiState();
+		if (guiState.contains("detached")) {
+			guiState.replace("detached","");
+		}
+		switch (guiState) {
+			case "main.fxml":
+				parentMap.put(operationsTP, leftAccordion);
+				parentMap.put(historyTP, rightAccordion2);
+				parentMap.put(verificationsTP, rightAccordion1);
+				parentMap.put(projectTP, rightAccordion1);
+				parentMap.put(statsTP, rightAccordion1);
+				break;
+			case "separatedHistory.fxml":
+				parentMap.put(operationsTP, leftAccordion);
+				parentMap.put(historyTP, rightAccordion);
+				parentMap.put(verificationsTP, leftAccordion);
+				parentMap.put(projectTP, leftAccordion);
+				parentMap.put(statsTP, leftAccordion);
+				break;
+			case "separatedHistoryAndStatistics.fxml":
+				parentMap.put(operationsTP, leftAccordion);
+				parentMap.put(historyTP, rightAccordion);
+				parentMap.put(verificationsTP, leftAccordion);
+				parentMap.put(projectTP, leftAccordion);
+				parentMap.put(statsTP, rightAccordion);
+				break;
+		}
 		return parentMap;
 	}
 }

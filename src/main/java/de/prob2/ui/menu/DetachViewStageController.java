@@ -107,7 +107,11 @@ public final class DetachViewStageController extends Stage {
 
 	@FXML
 	public void apply() {
-		final Parent root = injector.getInstance(MenuController.class).loadPreset("main.fxml");
+		// TODO find solution for detach persistence
+		if (uiState.getGuiState().contains("detached")){
+			uiState.setGuiState(uiState.getGuiState().replace("detached",""));
+		}
+		final Parent root = injector.getInstance(MenuController.class).loadPreset(uiState.getGuiState());
 		final Map<TitledPane,Accordion> parentMap = ((IDetachableMainViews) root).getParentMap();
 		for (Accordion parent : parentMap.values()) {
 			for (TitledPane node : parentMap.keySet()) {
@@ -116,7 +120,7 @@ public final class DetachViewStageController extends Stage {
 				}
 			}
 		}
-		uiState.setGuiState("detached");
+		uiState.setGuiState(uiState.getGuiState()+"detached");
 		this.hide();
 	}
 	
