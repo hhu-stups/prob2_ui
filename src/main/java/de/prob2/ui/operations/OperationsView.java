@@ -92,7 +92,7 @@ public final class OperationsView extends AnchorPane {
 							setTooltip(new Tooltip("Reaches errored State"));
 						} else if (item.isSkip()) {
 							getStyleClass().add("skip");
-							setTooltip(new Tooltip("Skip Operation"));
+							setTooltip(new Tooltip("Does not change State"));
 						} else {
 							getStyleClass().add("normal");
 							setTooltip(null);
