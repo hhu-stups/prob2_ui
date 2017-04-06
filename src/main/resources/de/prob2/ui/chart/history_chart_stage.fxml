@@ -6,12 +6,15 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" minWidth="320" minHeight="160" title="%historychart.title">
@@ -38,11 +41,18 @@
 							<ListView fx:id="formulaList" editable="true"/>
 						</center>
 						<bottom>
-							<CheckBox fx:id="separateChartsCheckBox" text="%historychart.separateCharts">
+							<VBox spacing="5.0">
 								<padding>
 									<Insets topRightBottomLeft="5.0"/>
 								</padding>
-							</CheckBox>
+								<CheckBox fx:id="separateChartsCheckBox" text="%historychart.separateCharts"/>
+								<Label text="%historychart.startPosition">
+									<labelFor>
+										<ChoiceBox fx:id="startChoiceBox"/>
+									</labelFor>
+								</Label>
+								<fx:reference source="startChoiceBox"/>
+							</VBox>
 						</bottom>
 					</BorderPane>
 					<FlowPane fx:id="chartsPane" minWidth="160" minHeight="160" maxWidth="Infinity" maxHeight="Infinity" prefWrapLength="640">
