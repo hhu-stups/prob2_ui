@@ -27,16 +27,7 @@ public final class HistoryView extends AnchorPane {
 			if (item == null) {
 				setGraphic(new Text());
 			} else {
-				Text text;
-				if (item.transition == null) {
-					// Root item has no transition
-					text = new Text("---root---");
-				} else {
-					// Evaluate the transition so the pretty rep includes
-					// argument list and result
-					item.transition.evaluate();
-					text = new Text(item.transition.getPrettyRep().replace("<--", "←"));
-				}
+				final Text text = new Text(transitionToString(item.transition));
 
 				switch (item.status) {
 				case PAST:
@@ -118,6 +109,17 @@ public final class HistoryView extends AnchorPane {
 				currentTrace.set(currentTrace.forward());
 			}
 		});
+	}
+	
+	public static String transitionToString(final Transition transition) {
+		if (transition == null) {
+			// Root item has no transition
+			return "---root---";
+		} else {
+			// Evaluate the transition so the pretty rep includes argument list and result
+			transition.evaluate();
+			return transition.getPrettyRep().replace("<--", "←");
+		}
 	}
 
 	private int getCurrentIndex() {
