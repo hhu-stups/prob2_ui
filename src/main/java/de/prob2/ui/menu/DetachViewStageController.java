@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import de.prob2.ui.IDetachableMainViews;
+import de.prob2.ui.MainController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +114,7 @@ public final class DetachViewStageController extends Stage {
 			guiState = guiState.replace("detached","");
 		}
 		final Parent root = injector.getInstance(MenuController.class).loadPreset(guiState);
-		final Map<TitledPane,Accordion> parentMap = ((IDetachableMainViews) root).getParentMap();
+		final Map<TitledPane,Accordion> parentMap = ((MainController) root).getParentMap();
 		for (Accordion parent : parentMap.values()) {
 			for (TitledPane node : parentMap.keySet()) {
 				if (parent.getPanes().contains(node) && checkBoxMap.get(node.getContent().getClass()).isSelected()) {

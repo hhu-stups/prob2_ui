@@ -1,6 +1,8 @@
 package de.prob2.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
@@ -15,7 +17,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 
 @Singleton
-public class MainController extends BorderPane implements IDetachableMainViews {
+public class MainController extends BorderPane {
 	
 	private StageManager stageManager;
 	
@@ -116,13 +118,7 @@ public class MainController extends BorderPane implements IDetachableMainViews {
 	}
 	
 	public void expandTitledPane(String titledPane) {
-		HashMap<String,TitledPane> titledPanes = new HashMap<>();
-		titledPanes.put("Operations", operationsTP);
-		titledPanes.put("History", historyTP);
-		titledPanes.put("Verifications", verificationsTP);
-		titledPanes.put("Statistics", statsTP);
-		titledPanes.put("Project", projectTP);
-
+		HashMap<String,TitledPane> titledPanes = getTitledPanesMap();
 
 		if (!titledPanes.containsKey(titledPane)) {
 			return;
@@ -135,6 +131,16 @@ public class MainController extends BorderPane implements IDetachableMainViews {
 				accordion.setExpandedPane(titledPanes.get(titledPane));
 			}
 		}
+	}
+
+	private HashMap<String,TitledPane> getTitledPanesMap() {
+		HashMap<String,TitledPane> titledPanes = new HashMap<>();
+		titledPanes.put("Operations", operationsTP);
+		titledPanes.put("History", historyTP);
+		titledPanes.put("Verifications", verificationsTP);
+		titledPanes.put("Statistics", statsTP);
+		titledPanes.put("Project", projectTP);
+		return titledPanes;
 	}
 	
 	public double[] getHorizontalDividerPositions() {
@@ -165,33 +171,24 @@ public class MainController extends BorderPane implements IDetachableMainViews {
 
 	public Map<TitledPane,Accordion> getParentMap() {
 		Map<TitledPane,Accordion> parentMap = new HashMap<>();
-		String guiState = uiState.getGuiState();
-		if (guiState.contains("detached")) {
-			guiState = guiState.replace("detached","");
-		}
-		switch (guiState) {
-			case "main.fxml":
-				parentMap.put(operationsTP, leftAccordion);
-				parentMap.put(historyTP, rightAccordion2);
-				parentMap.put(verificationsTP, rightAccordion1);
-				parentMap.put(projectTP, rightAccordion1);
-				parentMap.put(statsTP, rightAccordion1);
-				break;
-			case "separatedHistory.fxml":
-				parentMap.put(operationsTP, leftAccordion);
-				parentMap.put(historyTP, rightAccordion);
-				parentMap.put(verificationsTP, leftAccordion);
-				parentMap.put(projectTP, leftAccordion);
-				parentMap.put(statsTP, leftAccordion);
-				break;
-			case "separatedHistoryAndStatistics.fxml":
-				parentMap.put(operationsTP, leftAccordion);
-				parentMap.put(historyTP, rightAccordion);
-				parentMap.put(verificationsTP, leftAccordion);
-				parentMap.put(projectTP, leftAccordion);
-				parentMap.put(statsTP, rightAccordion);
-				break;
+		for (Accordion accordion : getAccordionList()){
+			if (accordion!=null) {
+				for (TitledPane pane : getTitledPanesMap().values())
+					if (accordion.getPanes().contains(pane))
+						parentMap.put(pane,accordion);
+			}
 		}
 		return parentMap;
+	}
+
+	private List<Accordion> getAccordionList() {
+		List<Accordion> accordionList = new ArrayList<>();
+		accordionList.add(leftAccordion);
+		accordionList.add(rightAccordion);
+		accordionList.add(rightAccordion1);
+		accordionList.add(rightAccordion2);
+		accordionList.add(topAccordion);
+		accordionList.add(bottomAccordion);
+		return accordionList;
 	}
 }
