@@ -5,7 +5,9 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 
@@ -15,11 +17,17 @@ public class LTLView extends AnchorPane{
 	@FXML
 	private ListView<LTLFormulaItem> lv_formula;
 	
+	@FXML
+	private Button addLTLButton;
+	
 	private final Injector injector;
 	
+	private CurrentTrace currentTrace;
+	
 	@Inject
-	public LTLView(final StageManager stageManager, final Injector injector) {
+	private LTLView(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace) {
 		this.injector = injector;
+		this.currentTrace = currentTrace;
 		stageManager.loadFXML(this, "ltlView.fxml");
 	}
 	
@@ -32,7 +40,7 @@ public class LTLView extends AnchorPane{
 				}
 			}
 		});
-		
+		addLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 	
 	@FXML
