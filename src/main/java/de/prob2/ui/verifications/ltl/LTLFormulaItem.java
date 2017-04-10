@@ -6,7 +6,6 @@ public class LTLFormulaItem {
 	
 	private SimpleStringProperty name;
 	private SimpleStringProperty description;
-	private String formula;
 	
 	private LTLFormulaStage formulaStage;
 	
@@ -16,8 +15,8 @@ public class LTLFormulaItem {
 		this.formulaStage = formulaStage;
 	}
 	
-	public void setFormula(String formula) {
-		this.formula = formula;
+	public void checkFormula() {
+		formulaStage.checkFormula();
 	}
 	
 	public void show() {

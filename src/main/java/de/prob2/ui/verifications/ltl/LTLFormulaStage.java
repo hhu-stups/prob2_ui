@@ -23,7 +23,7 @@ public class LTLFormulaStage extends Stage {
 	private TextArea ta_formula;
 	
 	private final CurrentTrace currentTrace;
-	
+		
 	@Inject
 	private LTLFormulaStage(final StageManager stageManager, final CurrentTrace currentTrace) {
 		stageManager.loadFXML(this, "ltlFormulaStage.fxml");
@@ -41,7 +41,7 @@ public class LTLFormulaStage extends Stage {
 	}
 	
 	@FXML
-	private void checkFormula() {
+	public void checkFormula() {
 		LTL formula = null;
 		try {
 			formula = new LTL(ta_formula.getText());
@@ -56,10 +56,5 @@ public class LTLFormulaStage extends Stage {
 			String result = lcc.getValue().toString();
 			System.out.println(result);
 		}
-	}
-	
-	private String getFormula() {
-		return ta_formula.getText();
-	}
-	
+	}	
 }
