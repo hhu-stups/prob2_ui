@@ -1,29 +1,26 @@
 package de.prob2.ui.preferences;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import com.google.inject.Inject;
 
-import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
-import de.be4.classicalb.core.parser.node.AMachineHeader;
-import de.be4.classicalb.core.parser.node.AMachineMachineVariant;
-import de.be4.classicalb.core.parser.node.EOF;
-import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.*;
+
+import de.prob.animator.command.ComposedCommand;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
+import de.prob.animator.command.SetPreferenceCommand;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
-import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -46,8 +43,6 @@ public final class ProBPreferences {
 		new EOF(1, 18) // eof
 	);
 	
-	private final CurrentTrace currentTrace;
-	
 	private final ObjectProperty<StateSpace> stateSpace;
 	private final ObservableMap<String, ProBPreference> cachedPreferences;
 	private final ObservableMap<String, String> cachedPreferenceValues;
@@ -56,9 +51,7 @@ public final class ProBPreferences {
 	private final BooleanProperty changesApplied;
 	
 	@Inject
-	private ProBPreferences(final CurrentTrace currentTrace) {
-		this.currentTrace = currentTrace;
-		
+	private ProBPreferences() {
 		this.stateSpace = new SimpleObjectProperty<>(this, "stateSpace", null);
 		this.cachedPreferences = FXCollections.observableHashMap();
 		this.cachedPreferenceValues = FXCollections.observableHashMap();
@@ -68,27 +61,19 @@ public final class ProBPreferences {
 		this.changesApplied.bind(Bindings.createBooleanBinding(this.changedPreferences::isEmpty, this.changedPreferences));
 		
 		this.stateSpace.addListener((observable, from, to) -> {
-			this.changedPreferences.clear();
-			if (to == null) {
+			if (this.getStateSpace() == null) {
+				this.changedPreferences.clear();
 				this.cachedPreferences.clear();
 				this.cachedPreferenceValues.clear();
 			} else {
-				final GetDefaultPreferencesCommand cmd1 = new GetDefaultPreferencesCommand();
-				to.execute(cmd1);
-				for (ProBPreference pref : cmd1.getPreferences()) {
-					this.cachedPreferences.put(pref.name, pref);
-				}
-				
-				final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
-				to.execute(cmd2);
-				this.cachedPreferenceValues.putAll(cmd2.getPreferences());
+				this.apply();
 			}
 		});
 	}
 	
-	public static StateSpace getEmptyStateSpace(final Api api) {
+	public static StateSpace getEmptyStateSpace(final Api api, final Map<String, String> prefs) {
 		try {
-			return api.b_load(EMPTY_MACHINE_AST);
+			return api.b_load(EMPTY_MACHINE_AST, prefs);
 		} catch (IOException | ModelTranslationError e) {
 			throw new IllegalStateException("Failed to load empty machine, this should never happen!", e);
 		}
@@ -171,10 +156,10 @@ public final class ProBPreferences {
 	 * @see #getPreferenceValue(String)
 	 * @see #getPreferenceValues()
 	 */
-	public Collection<ProBPreference> getPreferences() {
+	public Map<String, ProBPreference> getPreferences() {
 		this.checkStateSpace();
 		
-		return Collections.unmodifiableSet(new HashSet<>(this.cachedPreferences.values()));
+		return Collections.unmodifiableMap(new HashMap<>(this.cachedPreferences));
 	}
 	
 	/**
@@ -210,12 +195,10 @@ public final class ProBPreferences {
 	
 	/**
 	 * Set the value of the given preference.
-	 * Note that for some preferences to take effect, the current model needs to be reloaded using {@link #apply()}.
+	 * Note that for some preferences to take effect, the current model needs to be reloaded.
 	 * 
 	 * @param name the preference to set
 	 * @param value the value to set the preference to
-	 * 
-	 * @see #apply()
 	 */
 	public void setPreferenceValue(String name, String value) {
 		Objects.requireNonNull(name);
@@ -238,22 +221,35 @@ public final class ProBPreferences {
 	}
 	
 	/**
-	 * Reload the current model and apply all preference changes.
-	 *
-	 * @throws IllegalStateException when thrown by {@link CurrentTrace#reload(Trace, Map)}
-	 * @throws IOException when thrown by {@link CurrentTrace#reload(Trace, Map)}
-	 * @throws ModelTranslationError when thrown by {@link CurrentTrace#reload(Trace, Map)}
+	 * Apply all preference changes. This causes {@link #getChangedPreferences()} to be cleared, and its contents are merged into the current preferences.
 	 * 
 	 * @see #setPreferenceValue(String, String)
 	 * @see #rollback()
-	 * @see CurrentTrace#reload(Trace, Map)
 	 */
-	public void apply() throws IOException, ModelTranslationError {
-		this.currentTrace.reload(this.currentTrace.get(), this.getPreferenceValues());
+	public void apply() {
+		this.checkStateSpace();
+		
+		final List<SetPreferenceCommand> setCmds = new ArrayList<>();
+		for (final Map.Entry<String, String> entry : this.changedPreferences.entrySet()) {
+			setCmds.add(new SetPreferenceCommand(entry.getKey(), entry.getValue()));
+		}
+		this.getStateSpace().execute(new ComposedCommand(setCmds));
+		
+		final GetDefaultPreferencesCommand cmd1 = new GetDefaultPreferencesCommand();
+		this.getStateSpace().execute(cmd1);
+		for (ProBPreference pref : cmd1.getPreferences()) {
+			this.cachedPreferences.put(pref.name, pref);
+		}
+		
+		final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
+		this.getStateSpace().execute(cmd2);
+		this.cachedPreferenceValues.putAll(cmd2.getPreferences());
+		
+		this.changedPreferences.clear();
 	}
 	
 	/**
-	 * Rollback all preference changes made since the last model reload.
+	 * Rollback all preference changes made since the last {@link #apply()} call. This clears {@link #getChangedPreferences()} and undoes all changes.
 	 * 
 	 * @see #apply()
 	 */

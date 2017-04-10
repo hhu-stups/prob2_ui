@@ -6,9 +6,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -19,12 +16,18 @@ import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachineLoader {
@@ -35,24 +38,18 @@ public class MachineLoader {
 	private final StageManager stageManager;
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
+	private final GlobalPreferences globalPreferences;
 
 	@Inject
 	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager,
-			final AnimationSelector animations, final CurrentTrace currentTrace) {
+			final AnimationSelector animations, final CurrentTrace currentTrace, final GlobalPreferences globalPreferences) {
 		this.api = api;
 		this.openLock = new Object();
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
-	}
-
-	public void loadAsync(Machine machine) {
-		loadAsync(machine, new HashMap<>());
-	}
-
-	public void load(Machine machine) throws IOException, ModelTranslationError {
-		load(machine, new HashMap<>());
+		this.globalPreferences = globalPreferences;
 	}
 
 	public void loadAsync(Machine machine, Map<String, String> pref) {
@@ -68,7 +65,7 @@ public class MachineLoader {
 		} , "File Opener Thread").start();
 	}
 
-	private void load(Machine machine, Map<String, String> pref) throws IOException, ModelTranslationError {
+	private void load(Machine machine, Map<String, String> prefs) throws IOException, ModelTranslationError {
 		// NOTE: This method may be called from outside the JavaFX main thread,
 		// for example from openAsync.
 		// This means that all JavaFX calls must be wrapped in
@@ -76,19 +73,16 @@ public class MachineLoader {
 
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
-			Path path;
+			final Path path;
 			if (currentProject.getMachines().contains(machine)) {
-				String projectLocation = currentProject.get().getLocation().getPath();
+				final String projectLocation = currentProject.get().getLocation().getPath();
 				path = Paths.get(projectLocation, machine.getPath().toString());
 			} else {
 				path = machine.getPath();
 			}
-			final StateSpace stateSpace;
-			if (pref.isEmpty()) {
-				stateSpace = api.b_load(path.toString());
-			} else {
-				stateSpace = api.b_load(path.toString(), pref);
-			}
+			final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
+			allPrefs.putAll(prefs);
+			final StateSpace stateSpace = api.b_load(path.toString(), allPrefs);
 			Platform.runLater(() -> {
 				if (currentTrace.exists()) {
 					this.animations.removeTrace(currentTrace.get());
