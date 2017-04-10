@@ -12,6 +12,7 @@ import com.google.inject.Inject;
 
 import de.prob.scripting.Api;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -39,13 +40,13 @@ public class PreferencesDialog extends Dialog<Preference> {
 
 	@Inject
 	private PreferencesDialog(final StageManager stageManager, final Api api, final ProBPreferences prefs,
-			final ResourceBundle bundle, CurrentProject currentProject) {
+			final GlobalPreferences globalPreferences, final ResourceBundle bundle, CurrentProject currentProject) {
 		super();
 
 		this.currentProject = currentProject;
 
 		this.prefs = prefs;
-		this.prefs.setStateSpace(ProBPreferences.getEmptyStateSpace(api));
+		this.prefs.setStateSpace(ProBPreferences.getEmptyStateSpace(api, globalPreferences));
 
 		this.bundle = bundle;
 

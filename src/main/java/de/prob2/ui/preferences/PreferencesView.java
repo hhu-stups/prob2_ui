@@ -133,7 +133,7 @@ public final class PreferencesView extends BorderPane {
 			this.prefSearchField.getStyleClass().remove("badsearch");
 		}
 		
-		for (ProBPreference pref : this.getPreferences().getPreferences()) {
+		for (ProBPreference pref : this.getPreferences().getPreferences().values()) {
 			if (
 				!searchPattern.matcher(pref.name).find()
 					&& !searchPattern.matcher(pref.description).find()

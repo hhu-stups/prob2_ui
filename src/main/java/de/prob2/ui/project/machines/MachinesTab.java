@@ -7,9 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -17,11 +14,14 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.scripting.Api;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -35,6 +35,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachinesTab extends Tab {
@@ -51,16 +54,18 @@ public class MachinesTab extends Tab {
 	private final StageManager stageManager;
 	private final Injector injector;
 	private final Api api;
+	private final GlobalPreferences globalPreferences;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MachinesTab.class);
 
 	@Inject
 	private MachinesTab(final StageManager stageManager, final CurrentProject currentProject, final Injector injector,
-			final Api api) {
+			final Api api, final GlobalPreferences globalPreferences) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.api = api;
+		this.globalPreferences = globalPreferences;
 		stageManager.loadFXML(this, "machines_tab.fxml");
 	}
 
@@ -142,7 +147,7 @@ public class MachinesTab extends Tab {
 	}
 
 	private void showExternalEditor(Machine machine) {
-		final StateSpace stateSpace = ProBPreferences.getEmptyStateSpace(api);
+		final StateSpace stateSpace = ProBPreferences.getEmptyStateSpace(api, globalPreferences);
 		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
 		stateSpace.execute(cmd);
 		final File editor = new File(cmd.getValue());
