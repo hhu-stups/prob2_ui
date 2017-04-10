@@ -8,17 +8,25 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
 @Singleton
 public class LTLView extends AnchorPane{
 	
 	@FXML
-	private ListView<LTLFormulaItem> lv_formula;
+	private TableView<LTLFormulaItem> tv_formula;
 	
 	@FXML
 	private Button addLTLButton;
+	
+	@FXML
+	private TableColumn<LTLFormulaItem, String> nameColumn;
+	
+	@FXML
+	private TableColumn<LTLFormulaItem, String> descriptionColumn;
 	
 	private final Injector injector;
 	
@@ -33,19 +41,21 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void initialize() {
-		lv_formula.setOnMouseClicked(e-> {
+		tv_formula.setOnMouseClicked(e-> {
 			if(e.getClickCount() == 2) {
-				if(lv_formula.getSelectionModel().getSelectedItem() != null) {
-					lv_formula.getSelectionModel().getSelectedItem().show();
+				if(tv_formula.getSelectionModel().getSelectedItem() != null) {
+					tv_formula.getSelectionModel().getSelectedItem().show();
 				}
 			}
 		});
+		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		addLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 	
 	@FXML
 	public void addFormula() {
-		injector.getInstance(AddLTLFormulaDialog.class).showAndWait().ifPresent(lv_formula.getItems()::add);
+		injector.getInstance(AddLTLFormulaDialog.class).showAndWait().ifPresent(tv_formula.getItems()::add);
 	}
 
 }
