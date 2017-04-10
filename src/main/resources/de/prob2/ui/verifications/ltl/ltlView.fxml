@@ -23,8 +23,10 @@
 					<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 				</columnResizePolicy>
 				<columns>
-					<TableColumn fx:id="nameColumn" minWidth="100.0"
-						prefWidth="100.0" text="%ltl.formula.columns.name" />
+					<TableColumn fx:id="statusColumn" minWidth="80.0" maxWidth="80.0"
+						prefWidth="80.0" text="%ltl.formula.columns.status" />
+					<TableColumn fx:id="nameColumn" minWidth="120.0" maxWidth = "200.0"
+						prefWidth="120.0" text="%ltl.formula.columns.name" />
 					<TableColumn fx:id="descriptionColumn" minWidth="100.0"
 						prefWidth="100.0" text="%ltl.formula.columns.description" />
 				</columns>

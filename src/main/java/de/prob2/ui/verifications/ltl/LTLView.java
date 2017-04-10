@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
@@ -21,6 +22,9 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	private Button addLTLButton;
+	
+	@FXML
+	private TableColumn<LTLFormulaItem, FontAwesomeIconView> statusColumn;
 	
 	@FXML
 	private TableColumn<LTLFormulaItem, String> nameColumn;
@@ -48,6 +52,8 @@ public class LTLView extends AnchorPane{
 				}
 			}
 		});
+		
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		addLTLButton.disableProperty().bind(currentTrace.existsProperty().not());

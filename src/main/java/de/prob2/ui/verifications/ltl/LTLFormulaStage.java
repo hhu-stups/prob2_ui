@@ -7,7 +7,11 @@ import com.google.inject.Inject;
 
 import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.animator.command.EvaluationCommand;
+import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.LTL;
+import de.prob.check.LTLCounterExample;
+import de.prob.check.LTLError;
+import de.prob.check.LTLOk;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -53,8 +57,12 @@ public class LTLFormulaStage extends Stage {
 			State stateid = currentTrace.getCurrentState();
 			EvaluationCommand lcc = formula.getCommand(stateid);
 			currentTrace.getStateSpace().execute(lcc);
-			String result = lcc.getValue().toString();
-			System.out.println(result);
+			AbstractEvalResult result = lcc.getValue();
+			if(result instanceof LTLOk) {
+				
+			} else if(result instanceof LTLCounterExample || result instanceof LTLError) {
+				
+			}
 		}
 	}	
 }
