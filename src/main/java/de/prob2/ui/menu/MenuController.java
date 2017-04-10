@@ -29,6 +29,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 
 import javafx.application.Platform;
@@ -244,10 +245,14 @@ public final class MenuController extends MenuBar {
 		Path projectLocation = currentProject.getDefaultLocation();
 		Path absolute = selectedFile.toPath();
 		Path relative = projectLocation.relativize(absolute);
-		currentProject.set(new Project(selectedFile.getName(),
+		Machine machine = new Machine(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf(".")), "", relative);
+		currentProject.set(new Project(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf(".")),
 				"(this project was created automatically from file " + selectedFile.getAbsolutePath() + ")",
-				new Machine(selectedFile.getName(), "", relative),
+				machine,
 				currentProject.getDefaultLocation().toFile()));
+		Runconfiguration defaultRunconfig = new Runconfiguration(machine.getName(), "default");
+		currentProject.addRunconfiguration(defaultRunconfig);
+		currentProject.startAnimation(defaultRunconfig);
 	}
 
 	@FXML

@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.AnimationSelector;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
@@ -121,6 +123,21 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.location.set(null);
 		this.injector.getInstance(ModelcheckingController.class).resetView();
 		this.saved.set(true);
+	}
+	
+	public void startAnimation(Runconfiguration runconfiguration) {
+		Machine m = getMachine(runconfiguration.getMachine());
+		Map<String, String> pref = new HashMap<>();
+		if (!"default".equals(runconfiguration.getPreference())) {
+			pref = getPreferencAsMap(runconfiguration.getPreference());
+		}
+		if (m != null && pref != null) {
+			MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
+			machineLoader.loadAsync(m, pref);
+		} else {
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not load machine \"" + runconfiguration.getMachine()
+					+ "\" with preferences: \"" + runconfiguration.getPreference() + "\"").showAndWait();
+		}
 	}
 
 	public void addMachine(Machine machine) {

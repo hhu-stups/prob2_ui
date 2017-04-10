@@ -15,7 +15,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
