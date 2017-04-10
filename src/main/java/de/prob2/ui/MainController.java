@@ -169,7 +169,7 @@ public class MainController extends BorderPane {
 		}
 	}
 
-	public Map<TitledPane,Accordion> getParentMap() {
+	public Map<TitledPane,Accordion> getAccordionMap() {
 		Map<TitledPane,Accordion> parentMap = new HashMap<>();
 		for (Accordion accordion : getAccordionList()){
 			if (accordion!=null) {

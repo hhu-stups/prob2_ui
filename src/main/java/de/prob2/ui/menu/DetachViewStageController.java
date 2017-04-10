@@ -114,11 +114,11 @@ public final class DetachViewStageController extends Stage {
 			guiState = guiState.replace("detached","");
 		}
 		final Parent root = injector.getInstance(MenuController.class).loadPreset(guiState);
-		final Map<TitledPane,Accordion> parentMap = ((MainController) root).getParentMap();
-		for (Accordion parent : parentMap.values()) {
-			for (TitledPane node : parentMap.keySet()) {
-				if (parent.getPanes().contains(node) && checkBoxMap.get(node.getContent().getClass()).isSelected()) {
-					removeTP(parent);
+		final Map<TitledPane,Accordion> accordionMap = ((MainController) root).getAccordionMap();
+		for (Accordion accordion : accordionMap.values()) {
+			for (TitledPane titledPane : accordionMap.keySet()) {
+				if (accordion.getPanes().contains(titledPane) && checkBoxMap.get(titledPane.getContent().getClass()).isSelected()) {
+					removeTP(accordion);
 				}
 			}
 		}
