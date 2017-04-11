@@ -4,15 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ProBPreference;
+import de.prob.exception.CliError;
+import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractElement;
+import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
-import de.prob.statespace.Trace;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentProjects;
@@ -20,11 +24,12 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.states.ClassBlacklist;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
+import javafx.collections.MapChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -71,7 +76,7 @@ public final class PreferencesStage extends Stage {
 
 	@FXML private Spinner<Integer> recentProjectsCountSpinner;
 	@FXML private TextField defaultLocationField;
-	@FXML private PreferencesView prefsView;
+	@FXML private PreferencesView globalPrefsView;
 	@FXML private Button undoButton;
 	@FXML private Button resetButton;
 	@FXML private Button applyButton;
@@ -84,7 +89,8 @@ public final class PreferencesStage extends Stage {
 
 	private final ClassBlacklist classBlacklist;
 	private final CurrentTrace currentTrace;
-	private final ProBPreferences preferences;
+	private final GlobalPreferences globalPreferences;
+	private final ProBPreferences globalProBPrefs;
 	private final RecentProjects recentProjects;
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
@@ -94,15 +100,18 @@ public final class PreferencesStage extends Stage {
 	private PreferencesStage(
 		final ClassBlacklist classBlacklist,
 		final CurrentTrace currentTrace,
-		final ProBPreferences preferences,
+		final GlobalPreferences globalPreferences,
+		final ProBPreferences globalProBPrefs,
+		final Api api,
 		final RecentProjects recentProjects,
 		final StageManager stageManager,
 		final CurrentProject currentProject
 	) {
 		this.classBlacklist = classBlacklist;
 		this.currentTrace = currentTrace;
-		this.preferences = preferences;
-		this.preferences.setStateSpace(currentTrace.exists() ? currentTrace.getStateSpace() : null);
+		this.globalPreferences = globalPreferences;
+		this.globalProBPrefs = globalProBPrefs;
+		this.globalProBPrefs.setStateSpace(ProBPreferences.getEmptyStateSpace(api, this.globalPreferences));
 		this.recentProjects = recentProjects;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -128,18 +137,26 @@ public final class PreferencesStage extends Stage {
 		this.currentProject.defaultLocationProperty().addListener((observable, from, to) -> defaultLocationField.textProperty());
 		defaultLocationField.textProperty().addListener((observable, from, to) -> this.currentProject.setDefaultLocation(Paths.get(to)));
 
-		// ProB Preferences
+		// Global Preferences
 		
-		this.prefsView.setPreferences(this.preferences);
-		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> this.preferences.setStateSpace(to == null ? null : to.getStateSpace());
-		this.currentTrace.addListener(traceChangeListener);
-		// Fire the listener manually once to load the current preferences
-		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
+		this.globalPrefsView.setPreferences(this.globalProBPrefs);
 		
-		this.resetButton.disableProperty().bind(this.preferences.stateSpaceProperty().isNull());
-		this.undoButton.disableProperty().bind(this.preferences.changesAppliedProperty());
-		this.applyWarning.visibleProperty().bind(this.preferences.changesAppliedProperty().not());
-		this.applyButton.disableProperty().bind(this.preferences.changesAppliedProperty());
+		this.globalPreferences.addListener((InvalidationListener)observable -> {
+			for (final Map.Entry<String, String> entry : this.globalPreferences.entrySet()) {
+				this.globalProBPrefs.setPreferenceValue(entry.getKey(), entry.getValue());
+			}
+			this.globalProBPrefs.apply();
+		});
+		this.globalPreferences.addListener((MapChangeListener<String, String>)change -> {
+			if (change.wasRemoved() && !change.wasAdded()) {
+				this.globalProBPrefs.setPreferenceValue(change.getKey(), this.globalProBPrefs.getPreferences().get(change.getKey()).defaultValue);
+				this.globalProBPrefs.apply();
+			}
+		});
+		
+		this.undoButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
+		this.applyWarning.visibleProperty().bind(this.globalProBPrefs.changesAppliedProperty().not());
+		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
 
 		// States View
 
@@ -218,33 +235,42 @@ public final class PreferencesStage extends Stage {
 	
 	@FXML
 	private void handleUndoChanges() {
-		this.preferences.rollback();
+		this.globalProBPrefs.rollback();
 	}
 	
 	@FXML
 	private void handleRestoreDefaults() {
-		for (ProBPreference pref : this.preferences.getPreferences()) {
-			this.preferences.setPreferenceValue(pref.name, pref.defaultValue);
+		for (ProBPreference pref : this.globalProBPrefs.getPreferences().values()) {
+			this.globalProBPrefs.setPreferenceValue(pref.name, pref.defaultValue);
 		}
 	}
 	
 	@FXML
-	private boolean handleApply() {
-		try {
-			this.preferences.apply();
-			return true;
-		} catch (IOException | ModelTranslationError e) {
-			LOGGER.error("Application of changes failed", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e).showAndWait();
-			return false;
+	private void handleApply() {
+		final Map<String, String> changed = new HashMap<>(this.globalProBPrefs.getChangedPreferences());
+		this.globalProBPrefs.apply();
+		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();
+		for (final Map.Entry<String, String> entry : changed.entrySet()) {
+			if (defaults.get(entry.getKey()).defaultValue.equals(entry.getValue())) {
+				this.globalPreferences.remove(entry.getKey());
+			} else {
+				this.globalPreferences.put(entry.getKey(), entry.getValue());
+			}
+		}
+		
+		if (this.currentTrace.exists()) {
+			try {
+				this.currentTrace.reload(this.currentTrace.get(), this.globalPreferences);
+			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
+				LOGGER.error("Failed to reload machine", e);
+				this.stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to reload machine").show();
+			}
 		}
 	}
 
 	@FXML
 	private void handleClose() {
-		if (this.preferences.hasStateSpace()) {
-			this.preferences.rollback();
-		}
+		this.globalProBPrefs.rollback();
 		this.hide();
 	}
 	

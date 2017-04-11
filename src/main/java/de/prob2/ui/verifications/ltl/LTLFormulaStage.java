@@ -4,15 +4,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 import de.be4.ltl.core.parser.LtlParseException;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.EvaluationCommand;
+import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.LTL;
+import de.prob.check.LTLCounterExample;
+import de.prob.check.LTLError;
+import de.prob.check.LTLOk;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class LTLFormulaStage extends Stage {
@@ -24,10 +32,20 @@ public class LTLFormulaStage extends Stage {
 	
 	private final CurrentTrace currentTrace;
 	
+	private LTLFormulaItem item;
+	
+	private Injector injector;
+		
 	@Inject
-	private LTLFormulaStage(final StageManager stageManager, final CurrentTrace currentTrace) {
+	private LTLFormulaStage(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace) {
 		stageManager.loadFXML(this, "ltlFormulaStage.fxml");
+		this.injector = injector;
 		this.currentTrace = currentTrace;
+		this.item = null;
+	}
+	
+	public void setItem(LTLFormulaItem item) {
+		this.item = item;
 	}
 	
 	@FXML
@@ -41,25 +59,39 @@ public class LTLFormulaStage extends Stage {
 	}
 	
 	@FXML
-	private void checkFormula() {
+	public void checkFormula() {
 		LTL formula = null;
+		boolean parseError = false;
 		try {
 			formula = new LTL(ta_formula.getText());
 		} catch (LtlParseException e) {
+			setCheckedFailed();
+			parseError = true;
 			logger.error("Could not parse LTL formula", e);
-			return;
 		}
-		if (currentTrace != null) {
+		if (currentTrace != null && !parseError) {
 			State stateid = currentTrace.getCurrentState();
 			EvaluationCommand lcc = formula.getCommand(stateid);
 			currentTrace.getStateSpace().execute(lcc);
-			String result = lcc.getValue().toString();
-			System.out.println(result);
+			AbstractEvalResult result = lcc.getValue();
+			if(result instanceof LTLOk) {
+				setCheckedSuccessful();
+			} else if(result instanceof LTLCounterExample || result instanceof LTLError) {
+				setCheckedFailed();
+			}
 		}
+		injector.getInstance(LTLView.class).refresh();
 	}
 	
-	private String getFormula() {
-		return ta_formula.getText();
+	private void setCheckedSuccessful() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
+		icon.setFill(Color.GREEN);
+		item.setStatus(icon);
 	}
 	
+	private void setCheckedFailed() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
+		icon.setFill(Color.RED);
+		item.setStatus(icon);
+	}
 }

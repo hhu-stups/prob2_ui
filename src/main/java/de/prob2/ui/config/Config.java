@@ -18,17 +18,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob.model.representation.AbstractElement;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
@@ -37,11 +36,16 @@ import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.TablePersistenceHandler;
 import de.prob2.ui.persistence.UIState;
+import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
+
 import javafx.geometry.BoundingBox;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
@@ -67,6 +71,7 @@ public final class Config {
 		private String[] animationsViewColumnsOrder;
 		private OperationsView.SortMode operationsSortMode;
 		private boolean operationsShowNotEnabled;
+		private Map<String, String> globalPreferences;
 
 		private ConfigData() {
 		}
@@ -87,11 +92,12 @@ public final class Config {
 	private final Injector injector;
 	private final UIState uiState;
 	private final CurrentProject currentProject;
+	private final GlobalPreferences globalPreferences;
 
 	@Inject
 	private Config(final ClassBlacklist classBlacklist, final RecentProjects recentProjects, final UIState uiState,
 			final GroovyConsole groovyConsole, final BConsole bConsole, final Injector injector,
-			final CurrentProject currentProject) {
+			final CurrentProject currentProject, final GlobalPreferences globalPreferences) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.classBlacklist = classBlacklist;
 		this.recentProjects = recentProjects;
@@ -100,6 +106,7 @@ public final class Config {
 		this.bConsole = bConsole;
 		this.injector = injector;
 		this.currentProject = currentProject;
+		this.globalPreferences = globalPreferences;
 
 		try (final InputStream is = Config.class.getResourceAsStream("default.json");
 				final Reader defaultReader = new InputStreamReader(is, CONFIG_CHARSET)) {
@@ -186,6 +193,9 @@ public final class Config {
 			configData.operationsSortMode = this.defaultData.operationsSortMode;
 		}
 
+		if (configData.globalPreferences == null) {
+			configData.globalPreferences = new HashMap<>();
+		}
 	}
 
 	public void load() {
@@ -254,6 +264,8 @@ public final class Config {
 
 		this.uiState.setOperationsSortMode(configData.operationsSortMode);
 		this.uiState.setOperationsShowNotEnabled(configData.operationsShowNotEnabled);
+		
+		this.globalPreferences.putAll(configData.globalPreferences);
 	}
 
 	public void save() {
@@ -294,6 +306,8 @@ public final class Config {
 		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
 			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
 		}
+		
+		configData.globalPreferences = new HashMap<>(this.globalPreferences);
 
 		try (final OutputStream os = new FileOutputStream(LOCATION);
 				final Writer writer = new OutputStreamWriter(os, CONFIG_CHARSET)) {
