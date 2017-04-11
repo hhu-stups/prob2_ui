@@ -7,6 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -14,19 +17,19 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.scripting.Api;
 import de.prob.statespace.StateSpace;
-
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
-
+import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
@@ -35,9 +38,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachinesTab extends Tab {
@@ -90,7 +90,20 @@ public class MachinesTab extends Tab {
 			editExternalMenuItem.setOnAction(event -> this.showExternalEditor(row.getItem()));
 			editExternalMenuItem.disableProperty().bind(row.emptyProperty());
 
-			row.setContextMenu(new ContextMenu(removeMachineMenuItem, editFileMenuItem, editExternalMenuItem));
+			final Menu startAnimationMenu = new Menu("Start Animation...");
+			startAnimationMenu.disableProperty().bind(row.emptyProperty());
+			
+			row.setContextMenu(
+					new ContextMenu(removeMachineMenuItem, editFileMenuItem, editExternalMenuItem, startAnimationMenu));
+			
+			row.setOnContextMenuRequested(event -> {
+				startAnimationMenu.getItems().clear();
+				for (Runconfiguration runconfiguration : currentProject.getRunconfigurations(row.getItem())) {
+					final MenuItem item = new MenuItem(runconfiguration.toString());
+					item.setOnAction(e -> currentProject.startAnimation(runconfiguration));
+					startAnimationMenu.getItems().add(item);
+				}
+			});
 
 			row.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
@@ -119,8 +132,8 @@ public class MachinesTab extends Tab {
 		Path absolute = machineFile.toPath();
 		Path relative = projectLocation.relativize(absolute);
 		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "The machine \"" + machineFile
-			+ "\" already exists in the current project.").showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR,
+					"The machine \"" + machineFile + "\" already exists in the current project.").showAndWait();
 			return;
 		}
 		injector.getInstance(AddMachinesDialog.class).showAndWait(relative);
