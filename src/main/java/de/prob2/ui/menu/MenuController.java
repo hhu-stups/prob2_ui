@@ -245,8 +245,8 @@ public final class MenuController extends MenuBar {
 		Path projectLocation = currentProject.getDefaultLocation();
 		Path absolute = selectedFile.toPath();
 		Path relative = projectLocation.relativize(absolute);
-		Machine machine = new Machine(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf(".")), "", relative);
-		currentProject.set(new Project(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf(".")),
+		Machine machine = new Machine(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')), "", relative);
+		currentProject.set(new Project(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')),
 				"(this project was created automatically from file " + selectedFile.getAbsolutePath() + ")",
 				machine,
 				currentProject.getDefaultLocation().toFile()));
