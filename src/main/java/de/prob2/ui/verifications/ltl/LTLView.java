@@ -24,6 +24,9 @@ public class LTLView extends AnchorPane{
 	private Button addLTLButton;
 	
 	@FXML
+	private Button checkAllButton;
+	
+	@FXML
 	private TableColumn<LTLFormulaItem, FontAwesomeIconView> statusColumn;
 	
 	@FXML
@@ -57,11 +60,23 @@ public class LTLView extends AnchorPane{
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		addLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkAllButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 	
 	@FXML
 	public void addFormula() {
 		injector.getInstance(AddLTLFormulaDialog.class).showAndWait().ifPresent(tv_formula.getItems()::add);
+	}
+	
+	@FXML
+	public void checkAll() {
+		for(LTLFormulaItem item : tv_formula.getItems()) {
+			item.checkFormula();
+		}
+	}
+	
+	public void refresh() {
+		tv_formula.refresh();
 	}
 
 }

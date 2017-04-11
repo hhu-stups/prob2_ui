@@ -17,6 +17,7 @@ public class LTLFormulaItem {
 		this.name = new SimpleStringProperty(this, "name", name);
 		this.description = new SimpleStringProperty(this, "description", description);
 		this.formulaStage = formulaStage;
+		formulaStage.setItem(this);
 	}
 	
 	public void checkFormula() {
@@ -42,6 +43,10 @@ public class LTLFormulaItem {
 	
 	public FontAwesomeIconView getStatus() {
 		return status.get();
+	}
+	
+	public void setStatus(FontAwesomeIconView status) {
+		this.status.set(status);
 	}
 
 }
