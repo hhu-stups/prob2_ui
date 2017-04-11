@@ -200,6 +200,16 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
 				runconfigs, this.getLocation()));
 	}
+	
+	public List<Runconfiguration> getRunconfigurations(Machine machine) {
+		List<Runconfiguration> runconfigsList = new ArrayList<>();
+		for(Runconfiguration runconfig : getRunconfigurations()) {
+			if (runconfig.getMachine().equals(machine.getName())) {
+				runconfigsList.add(runconfig);
+			}
+		}
+		return runconfigsList;
+	}
 
 	public void changeName(String newName) {
 		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(),
