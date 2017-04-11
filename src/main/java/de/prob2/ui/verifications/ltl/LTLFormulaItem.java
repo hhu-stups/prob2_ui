@@ -1,8 +1,10 @@
 package de.prob2.ui.verifications.ltl;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.paint.Color;
 
 public class LTLFormulaItem {
 	
@@ -12,8 +14,10 @@ public class LTLFormulaItem {
 	
 	private LTLFormulaStage formulaStage;
 	
-	public LTLFormulaItem(FontAwesomeIconView status, String name, String description, LTLFormulaStage formulaStage) {
-		this.status = new SimpleObjectProperty<>(this, "status", status);
+	public LTLFormulaItem(String name, String description, LTLFormulaStage formulaStage) {
+		FontAwesomeIconView newStatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		newStatus.setFill(Color.BLUE);
+		this.status = new SimpleObjectProperty<>(this, "status", newStatus);
 		this.name = new SimpleStringProperty(this, "name", name);
 		this.description = new SimpleStringProperty(this, "description", description);
 		this.formulaStage = formulaStage;
