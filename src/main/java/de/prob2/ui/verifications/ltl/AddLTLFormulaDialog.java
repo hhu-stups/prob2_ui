@@ -40,4 +40,12 @@ public class AddLTLFormulaDialog extends Dialog<LTLFormulaItem> {
 		stageManager.loadFXML(this, "ltlformula_dialog.fxml");
 	}
 	
+	public void setName(String name) {
+		tf_name.setText(name);
+	}
+	
+	public void setDescription(String description) {
+		ta_description.setText(description);
+	}
+	
 }

@@ -32,13 +32,21 @@ public class LTLFormulaItem {
 	public String toString() {
 		return "Name: " + name + ", Description: " + description;
 	}
-	
+		
 	public String getName() {
 		return name.get();
 	}
 	
+	public void setName(String name) {
+		this.name.set(name);
+	}
+	
 	public String getDescription() {
 		return description.get();
+	}
+	
+	public void setDescription(String description) {
+		this.description.set(description);
 	}
 	
 	public FontAwesomeIconView getStatus() {
