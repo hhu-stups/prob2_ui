@@ -114,6 +114,50 @@
 }
 
 /************************************************************************************
+ * ColorPicker																		*
+ ************************************************************************************/
+ .color-picker {
+	-fx-background-color: transparent;
+	-fx-text-fill: -prob-grey;
+	-fx-border-radius: 5.0;
+	-fx-border-color: -prob-grey;
+}
+.color-picker:hover {
+	-fx-background-color: -prob-grey-20;
+	-fx-background-radius: 5.0;
+}
+
+/* =============== CUSTOM COLOR DIALOG =============== */
+.custom-color-dialog .button {
+	-fx-background-color: transparent;
+	-fx-border-color: -prob-grey;
+	-fx-border-radius: 6.0;
+	-fx-background-insets: 0.0,1.0,2.0;
+	-fx-text-fill: -prob-grey;
+	-fx-font-weight: bold;
+}
+.custom-color-dialog .button:hover {
+	-fx-text-fill: -prob-grey-75;
+	-fx-border-color: -prob-grey-75;
+}
+.custom-color-dialog .toggle-button {
+	-fx-background-color: -prob-grey;
+	-fx-text-fill: white;
+}
+.custom-color-dialog .toggle-button:selected {
+    -fx-background-insets: 0 0 -1 0;
+    -fx-background-color: -prob-grey-75;
+}
+.custom-color-dialog .slider .thumb {
+	-fx-background-color: -prob-grey;
+	-fx-padding: 0.44em;
+}
+.custom-color-dialog .slider .track {
+	-fx-background-color: -prob-grey;
+	-fx-padding: 0.08em;
+}
+ 
+/************************************************************************************
  * ComboBox																			*
  ************************************************************************************/
 .combo-box {
