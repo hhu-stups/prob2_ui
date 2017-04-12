@@ -3,6 +3,9 @@ package de.prob2.ui.verifications.ltl;
 
 
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,14 +25,18 @@ import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 
 @Singleton
 public class LTLView extends AnchorPane{
@@ -125,8 +132,8 @@ public class LTLView extends AnchorPane{
 			formula = new LTL(item.getFormula());
 		} catch (LtlParseException e) {
 			item.setCheckedFailed();
+			showParseError(item, e);
 			logger.error("Could not parse LTL formula", e);
-			//TODO: show ParseError
 		}
 		if (currentTrace != null && formula != null) {
 			State stateid = currentTrace.getCurrentState();
@@ -136,16 +143,42 @@ public class LTLView extends AnchorPane{
 			if(result instanceof LTLOk) {
 				item.setCheckedSuccessful();
 			} else if(result instanceof LTLCounterExample) {
-				System.out.println(((LTLCounterExample) result).getMessage());
+				System.out.println(((LTLCounterExample) result).getOpList());
 				item.setCheckedFailed();
 				//TODO: case CounterExample
 			} else if(result instanceof LTLError) {
-				System.out.println(((LTLError) result).getMessage());
+				showError(item, (LTLError) result);
 				item.setCheckedFailed();
 			}
 		}
 		refresh();
 	}
+	
+	private void showParseError(LTLFormulaItem item, LtlParseException e) {
+		TextArea exceptionText = new TextArea();
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle(item.getName());
+		alert.setHeaderText("LtLParseException occured");
+		alert.setContentText("Could not parse LTL formula");
+		StringWriter sw = new StringWriter();
+		try (PrintWriter pw = new PrintWriter(sw)) {
+			e.printStackTrace(pw);
+			exceptionText.setText(sw.toString());;
+		}
+		alert.getDialogPane().setExpandableContent(new StackPane(exceptionText));
+		alert.getDialogPane().setExpanded(true);
+		alert.showAndWait();
+	}
+	
+	private void showError(LTLFormulaItem item, LTLError error) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle(item.getName());
+		alert.setHeaderText("Error while executing formula");
+		alert.setContentText(error.getMessage());
+		alert.showAndWait();
+	}
+	
+	
 	
 	@FXML
 	public void checkAll() {
