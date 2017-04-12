@@ -37,9 +37,7 @@ public class LTLFormulaStage extends Stage {
 	
 	@FXML
 	public void initialize() {
-		ta_formula.textProperty().addListener((observable, oldValue, newValue) -> {
-			item.setFormula(newValue);
-		});
+		ta_formula.textProperty().addListener((observable, oldValue, newValue) -> item.setFormula(newValue));
 		checkFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 	

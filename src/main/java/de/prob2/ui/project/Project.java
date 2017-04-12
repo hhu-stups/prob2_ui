@@ -118,16 +118,13 @@ public class Project {
 		}
 		Project otherProject = (Project) other;
 
-		if(otherProject.name.equals(this.name) &&
+		return otherProject.name.equals(this.name) &&
 				otherProject.description.equals(this.description) &&
 				otherProject.machines.equals(this.machines) &&
 				otherProject.preferences.equals(this.preferences) &&
 				otherProject.runconfigurations.equals(this.runconfigurations) &&
 				otherProject.location.equals(this.location) &&
-				otherProject.ltlFormulas.equals(this.ltlFormulas)) {
-			return true;
-		}
-		return false;
+				otherProject.ltlFormulas.equals(this.ltlFormulas);
 	}
 
 	@Override

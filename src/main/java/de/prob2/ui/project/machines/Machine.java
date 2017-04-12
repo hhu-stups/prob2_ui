@@ -48,11 +48,7 @@ public class Machine {
 			return false;
 		}
 		Machine otherMachine = (Machine) other;
-
-		if (otherMachine.location.equals(this.location)) {
-			return true;
-		}
-		return false;
+		return otherMachine.location.equals(this.location);
 	}
 
 	@Override

@@ -69,10 +69,8 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void initialize() {
 		tv_formula.setOnMouseClicked(e-> {
-			if(e.getClickCount() == 2) {
-				if(tv_formula.getSelectionModel().getSelectedItem() != null) {
-					tv_formula.getSelectionModel().getSelectedItem().show();
-				}
+			if(e.getClickCount() == 2 && tv_formula.getSelectionModel().getSelectedItem() != null) {
+				tv_formula.getSelectionModel().getSelectedItem().show();
 			}
 		});
 		
@@ -118,16 +116,15 @@ public class LTLView extends AnchorPane{
 	
 	public void checkFormula(LTLFormulaItem item) {
 		LTL formula = null;
-		boolean parseError = false;
 		try {
 			formula = new LTL(item.getFormula());
 		} catch (LtlParseException e) {
 			item.setCheckedFailed();
-			parseError = true;
 			logger.error("Could not parse LTL formula", e);
 			//TODO: show ParseError
+			return;
 		}
-		if (currentTrace != null && !parseError) {
+		if (currentTrace != null) {
 			State stateid = currentTrace.getCurrentState();
 			EvaluationCommand lcc = formula.getCommand(stateid);
 			currentTrace.getStateSpace().execute(lcc);
