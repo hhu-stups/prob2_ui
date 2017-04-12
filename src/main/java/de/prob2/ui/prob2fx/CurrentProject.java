@@ -103,6 +103,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
+		LTLView ltlView = injector.getInstance(LTLView.class);
+		ltlView.getTable().itemsProperty().bind(this.ltlFormulasProperty());
 
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
@@ -115,11 +117,19 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.runconfigurations.setAll(to.getRunconfigurations());
 				this.ltlFormulas.setAll(to.getLtLFormulas());
 				this.location.set(to.getLocation());
+				if(from == null) {
+					for(LTLFormulaItem item : ltlFormulas) {
+						item.initializeStatus();
+						LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
+						item.setFormulaStage(formulaStage);
+					}
+				}
 				if (!to.equals(from)) {
 					this.saved.set(false);
 				}
 			}
 		});
+
 	}
 
 	private void clearProperties() {
@@ -336,10 +346,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void save() {
 		File loc = new File(this.getLocation() + File.separator + this.getName() + ".json");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(loc), PROJECT_CHARSET)) {
-			LTLView ltlView = injector.getInstance(LTLView.class);
-			ltlFormulas.addAll(ltlView.getFormulas());
+
+			
 			this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(), 
-									this.getRunconfigurations(), ltlView.getFormulas(),this.getLocation()));
+									this.getRunconfigurations(), this.getLtlFormulas(),this.getLocation()));
 			gson.toJson(this.get(), writer);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
@@ -355,7 +365,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			project = gson.fromJson(reader, Project.class);
 			project.setLocation(file.getParentFile());
 			project = replaceMissingWithDefaults(project);
-			loadLTLFormulas(project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
 			return;
@@ -365,17 +374,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 		this.set(project);
 		this.saved.set(true);
-	}
-	
-	private void loadLTLFormulas(Project project) {
-		LTLView ltlView = injector.getInstance(LTLView.class);
-		ltlView.getFormulas().clear();
-		ltlView.getFormulas().addAll(project.getLtLFormulas());
-		for(LTLFormulaItem item : ltlView.getFormulas()) {
-			item.initializeStatus();
-			LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-			item.setFormulaStage(formulaStage);
-		}
 	}
 
 	private Project replaceMissingWithDefaults(Project project) {

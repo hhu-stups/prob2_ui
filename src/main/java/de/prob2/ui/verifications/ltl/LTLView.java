@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.ltl;
 
 
 
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +106,12 @@ public class LTLView extends AnchorPane{
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		addLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkAllButton.disableProperty().bind(currentTrace.existsProperty().not());
+		
+		tv_formula.itemsProperty().addListener((observable, oldValue, newValue) -> {
+			System.out.println("test");
+		});
+		
+		
 	}
 	
 	@FXML
@@ -130,9 +135,13 @@ public class LTLView extends AnchorPane{
 			AbstractEvalResult result = lcc.getValue();
 			if(result instanceof LTLOk) {
 				item.setCheckedSuccessful();
-			} else if(result instanceof LTLCounterExample || result instanceof LTLError) {
+			} else if(result instanceof LTLCounterExample) {
+				System.out.println(((LTLCounterExample) result).getMessage());
 				item.setCheckedFailed();
 				//TODO: case CounterExample
+			} else if(result instanceof LTLError) {
+				System.out.println(((LTLError) result).getMessage());
+				item.setCheckedFailed();
 			}
 		}
 		refresh();
@@ -149,8 +158,9 @@ public class LTLView extends AnchorPane{
 		tv_formula.refresh();
 	}
 	
-	public List<LTLFormulaItem> getFormulas() {
-		return tv_formula.getItems();
+	public TableView<LTLFormulaItem> getTable() {
+		return tv_formula;
 	}
+	
 
 }
