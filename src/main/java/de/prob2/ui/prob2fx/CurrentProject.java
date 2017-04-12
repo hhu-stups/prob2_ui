@@ -36,6 +36,9 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+import de.prob2.ui.verifications.ltl.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.LTLFormulaStage;
+import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -65,6 +68,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ListProperty<Machine> machines;
 	private final ListProperty<Preference> preferences;
 	private final ReadOnlyListProperty<Runconfiguration> runconfigurations;
+	private final ListProperty<LTLFormulaItem> ltlFormulas;
 	private final ObjectProperty<File> location;
 	private final BooleanProperty saved;
 
@@ -83,8 +87,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.animations = animations;
 		this.currentTrace = currentTrace;
 		this.modelCheckController = modelCheckController;
-
+		
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
+		
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
 				Paths.get(System.getProperty("user.home")));
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
@@ -95,6 +100,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
 		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations",
 				FXCollections.observableArrayList());
+		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
 
@@ -107,6 +113,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.machines.setAll(to.getMachines());
 				this.preferences.setAll(to.getPreferences());
 				this.runconfigurations.setAll(to.getRunconfigurations());
+				this.ltlFormulas.setAll(to.getLtLFormulas());
 				this.location.set(to.getLocation());
 				if (!to.equals(from)) {
 					this.saved.set(false);
@@ -120,6 +127,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.description.set("");
 		this.machines.clear();
 		this.preferences.clear();
+		this.ltlFormulas.clear();
 		this.location.set(null);
 		this.injector.getInstance(ModelcheckingController.class).resetView();
 		this.saved.set(true);
@@ -129,7 +137,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		Machine m = getMachine(runconfiguration.getMachine());
 		Map<String, String> pref = new HashMap<>();
 		if (!"default".equals(runconfiguration.getPreference())) {
-			pref = getPreferencAsMap(runconfiguration.getPreference());
+			pref = getPreferenceAsMap(runconfiguration.getPreference());
 		}
 		if (m != null && pref != null) {
 			MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
@@ -158,7 +166,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			}
 		}
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
-				runconfigsList, this.getLocation()));
+				runconfigsList,  this.getLocation()));
 	}
 
 	public void updateMachine(Machine oldMachine, Machine newMachine) {
@@ -210,7 +218,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 		return runconfigsList;
 	}
-
+	
 	public void changeName(String newName) {
 		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(),
 				this.getRunconfigurations(), this.getLocation()));
@@ -288,6 +296,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public List<Runconfiguration> getRunconfigurations() {
 		return this.runconfigurationsProperty().get();
 	}
+	
+	public ReadOnlyListProperty<LTLFormulaItem> ltlFormulasProperty() {
+		return this.ltlFormulas;
+	}
+	
+	public List<LTLFormulaItem> getLtlFormulas() {
+		return this.ltlFormulasProperty().get();
+	}
 
 	public ObjectProperty<File> locationProperty() {
 		return this.location;
@@ -320,6 +336,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void save() {
 		File loc = new File(this.getLocation() + File.separator + this.getName() + ".json");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(loc), PROJECT_CHARSET)) {
+			LTLView ltlView = injector.getInstance(LTLView.class);
+			ltlFormulas.addAll(ltlView.getFormulas());
+			this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(), 
+									this.getRunconfigurations(), ltlView.getFormulas(),this.getLocation()));
 			gson.toJson(this.get(), writer);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
@@ -335,6 +355,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			project = gson.fromJson(reader, Project.class);
 			project.setLocation(file.getParentFile());
 			project = replaceMissingWithDefaults(project);
+			loadLTLFormulas(project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
 			return;
@@ -345,6 +366,17 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.set(project);
 		this.saved.set(true);
 	}
+	
+	private void loadLTLFormulas(Project project) {
+		LTLView ltlView = injector.getInstance(LTLView.class);
+		ltlView.getFormulas().clear();
+		ltlView.getFormulas().addAll(project.getLtLFormulas());
+		for(LTLFormulaItem item : ltlView.getFormulas()) {
+			item.initializeStatus();
+			LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
+			item.setFormulaStage(formulaStage);
+		}
+	}
 
 	private Project replaceMissingWithDefaults(Project project) {
 		String nameString = (project.getName() == null) ? "" : project.getName();
@@ -354,8 +386,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				: project.getPreferences();
 		Set<Runconfiguration> runconfigurationSet = (project.getRunconfigurations() == null) ? new HashSet<>()
 				: project.getRunconfigurations();
-		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet,
-				project.getLocation());
+		List<LTLFormulaItem> ltlFormulaList = (project.getLtLFormulas() == null) ? new ArrayList<>() : project.getLtLFormulas();
+		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet, ltlFormulaList,
+				project.getLocation());		
 	}
 
 	public Machine getMachine(String machine) {
@@ -367,7 +400,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return null;
 	}
 
-	public Map<String, String> getPreferencAsMap(String preference) {
+	public Map<String, String> getPreferenceAsMap(String preference) {
 		for (Preference p : getPreferences()) {
 			if (p.getName().equals(preference)) {
 				return p.getPreferences();

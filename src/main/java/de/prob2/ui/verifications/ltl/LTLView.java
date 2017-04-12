@@ -1,5 +1,9 @@
 package de.prob2.ui.verifications.ltl;
 
+
+
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -9,7 +13,10 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
@@ -38,12 +45,12 @@ public class LTLView extends AnchorPane{
 	private final Injector injector;
 	
 	private CurrentTrace currentTrace;
-	
+		
 	@Inject
 	private LTLView(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
-		stageManager.loadFXML(this, "ltlView.fxml");
+		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
 	@FXML
@@ -54,6 +61,34 @@ public class LTLView extends AnchorPane{
 					tv_formula.getSelectionModel().getSelectedItem().show();
 				}
 			}
+		});
+		
+		tv_formula.setRowFactory(table -> {
+			final TableRow<LTLFormulaItem> row = new TableRow<>();
+			
+			MenuItem removeItem = new MenuItem("Remove formula");
+			removeItem.setOnAction(e-> {
+				LTLFormulaItem item = tv_formula.getSelectionModel().getSelectedItem();
+				tv_formula.getItems().remove(item);
+			});
+			removeItem.disableProperty().bind(row.emptyProperty());
+			
+			MenuItem renameItem = new MenuItem("Rename formula");
+			renameItem.setOnAction(e-> {
+				LTLFormulaItem item = tv_formula.getSelectionModel().getSelectedItem();
+				AddLTLFormulaDialog formulaDialog = injector.getInstance(AddLTLFormulaDialog.class);
+				formulaDialog.setName(item.getName());
+				formulaDialog.setDescription(item.getDescription());
+				formulaDialog.showAndWait().ifPresent(result-> {
+					item.setName(result.getName());
+					item.setDescription(result.getDescription());
+				});
+				refresh();
+			});
+			renameItem.disableProperty().bind(row.emptyProperty());
+			
+			row.setContextMenu(new ContextMenu(removeItem,renameItem));
+			return row;
 		});
 		
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -77,6 +112,10 @@ public class LTLView extends AnchorPane{
 	
 	public void refresh() {
 		tv_formula.refresh();
+	}
+	
+	public List<LTLFormulaItem> getFormulas() {
+		return tv_formula.getItems();
 	}
 
 }

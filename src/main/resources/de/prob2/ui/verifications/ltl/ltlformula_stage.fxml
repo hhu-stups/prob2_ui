@@ -32,7 +32,7 @@
 				<center>
 					<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="300.0" prefWidth="480.0">
 						<children>
-							<Button onAction="#checkFormula" prefHeight="20.0" prefWidth="150.0" text="Check formula" 
+							<Button fx:id="checkFormulaButton" disable="true" onAction="#checkFormula" prefHeight="20.0" prefWidth="150.0" text="Check formula" 
 								AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" styleClass="button-blue" />
 							<TextArea fx:id="ta_formula" prefHeight="314.0" prefWidth="480.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
 						</children>

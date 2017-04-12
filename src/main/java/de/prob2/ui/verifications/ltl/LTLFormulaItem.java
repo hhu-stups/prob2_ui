@@ -1,21 +1,31 @@
 package de.prob2.ui.verifications.ltl;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.paint.Color;
 
 public class LTLFormulaItem {
 	
-	private SimpleObjectProperty<FontAwesomeIconView> status;
-	private SimpleStringProperty name;
-	private SimpleStringProperty description;
+	private transient FontAwesomeIconView status;
+	private String name;
+	private String description;
+	private String formula;
 	
-	private LTLFormulaStage formulaStage;
+	private transient LTLFormulaStage formulaStage;
 	
-	public LTLFormulaItem(FontAwesomeIconView status, String name, String description, LTLFormulaStage formulaStage) {
-		this.status = new SimpleObjectProperty<>(this, "status", status);
-		this.name = new SimpleStringProperty(this, "name", name);
-		this.description = new SimpleStringProperty(this, "description", description);
+	public LTLFormulaItem(String name, String description) {
+		initializeStatus();
+		this.name = name;
+		this.description = description;
+	}
+	
+	public void initializeStatus() {
+		FontAwesomeIconView newStatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		newStatus.setFill(Color.BLUE);
+		this.status = newStatus;
+	}
+	
+	public void setFormulaStage(LTLFormulaStage formulaStage) {
 		this.formulaStage = formulaStage;
 		formulaStage.setItem(this);
 	}
@@ -32,21 +42,37 @@ public class LTLFormulaItem {
 	public String toString() {
 		return "Name: " + name + ", Description: " + description;
 	}
-	
+		
 	public String getName() {
-		return name.get();
+		return name;
+	}
+		
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	public String getDescription() {
-		return description.get();
+		return description;
+	}
+		
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
+	public void setFormula(String formula) {
+		this.formula = formula;
+	}
+	
+	public String getFormula() {
+		return formula;
 	}
 	
 	public FontAwesomeIconView getStatus() {
-		return status.get();
+		return status;
+	}
+		
+	public void setStatus(FontAwesomeIconView status) {
+		this.status = status;
 	}
 	
-	public void setStatus(FontAwesomeIconView status) {
-		this.status.set(status);
-	}
-
 }

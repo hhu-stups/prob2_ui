@@ -19,6 +19,7 @@ import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -30,6 +31,9 @@ public class LTLFormulaStage extends Stage {
 	@FXML
 	private TextArea ta_formula;
 	
+	@FXML
+	private Button checkFormulaButton;
+	
 	private final CurrentTrace currentTrace;
 	
 	private LTLFormulaItem item;
@@ -38,14 +42,23 @@ public class LTLFormulaStage extends Stage {
 		
 	@Inject
 	private LTLFormulaStage(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace) {
-		stageManager.loadFXML(this, "ltlFormulaStage.fxml");
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.item = null;
+		stageManager.loadFXML(this, "ltlformula_stage.fxml");
+	}
+	
+	@FXML
+	public void initialize() {
+		ta_formula.textProperty().addListener((observable, oldValue, newValue) -> {
+			item.setFormula(newValue);
+		});
+		checkFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 	
 	public void setItem(LTLFormulaItem item) {
 		this.item = item;
+		ta_formula.setText(item.getFormula());
 	}
 	
 	@FXML
