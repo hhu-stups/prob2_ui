@@ -4,11 +4,22 @@ package de.prob2.ui.verifications.ltl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.be4.ltl.core.parser.LtlParseException;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob.animator.command.EvaluationCommand;
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.LTL;
+import de.prob.check.LTLCounterExample;
+import de.prob.check.LTLError;
+import de.prob.check.LTLOk;
+import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
@@ -23,6 +34,8 @@ import javafx.scene.layout.AnchorPane;
 
 @Singleton
 public class LTLView extends AnchorPane{
+	
+	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
 	
 	@FXML
 	private TableView<LTLFormulaItem> tv_formula;
@@ -101,6 +114,32 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void addFormula() {
 		injector.getInstance(AddLTLFormulaDialog.class).showAndWait().ifPresent(tv_formula.getItems()::add);
+	}
+	
+	public void checkFormula(LTLFormulaItem item) {
+		LTL formula = null;
+		boolean parseError = false;
+		try {
+			formula = new LTL(item.getFormula());
+		} catch (LtlParseException e) {
+			item.setCheckedFailed();
+			parseError = true;
+			logger.error("Could not parse LTL formula", e);
+			//TODO: show ParseError
+		}
+		if (currentTrace != null && !parseError) {
+			State stateid = currentTrace.getCurrentState();
+			EvaluationCommand lcc = formula.getCommand(stateid);
+			currentTrace.getStateSpace().execute(lcc);
+			AbstractEvalResult result = lcc.getValue();
+			if(result instanceof LTLOk) {
+				item.setCheckedSuccessful();
+			} else if(result instanceof LTLCounterExample || result instanceof LTLError) {
+				item.setCheckedFailed();
+				//TODO: case CounterExample
+			}
+		}
+		refresh();
 	}
 	
 	@FXML
