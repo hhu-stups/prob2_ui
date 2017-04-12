@@ -122,9 +122,8 @@ public class LTLView extends AnchorPane{
 			item.setCheckedFailed();
 			logger.error("Could not parse LTL formula", e);
 			//TODO: show ParseError
-			return;
 		}
-		if (currentTrace != null) {
+		if (currentTrace != null && formula != null) {
 			State stateid = currentTrace.getCurrentState();
 			EvaluationCommand lcc = formula.getCommand(stateid);
 			currentTrace.getStateSpace().execute(lcc);
