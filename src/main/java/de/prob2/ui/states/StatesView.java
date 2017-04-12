@@ -117,12 +117,6 @@ public final class StatesView extends AnchorPane {
 				visualizeExpression((AbstractFormulaElement)row.getItem().getContents())
 			);
 			
-			final MenuItem trackExpressionItem = new MenuItem("Track Expression");
-			trackExpressionItem.disableProperty().bind(
-				Bindings.createBooleanBinding(() -> row.getItem() == null || !(row.getItem().getContents() instanceof AbstractFormulaElement), row.itemProperty())
-			);
-			trackExpressionItem.setOnAction(event -> this.visualizeTracking(row.getItem()));
-
 			final MenuItem showFullValueItem = new MenuItem("Show Full Value");
 			// Full value can only be shown if the row item contains any of the following:
 			// * An AbstractFormulaElement, and the corresponding value is an EvalResult.
@@ -151,7 +145,7 @@ public final class StatesView extends AnchorPane {
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu) null)
-				.otherwise(new ContextMenu(visualizeExpressionItem, trackExpressionItem, showFullValueItem, showErrorsItem))
+				.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem, showErrorsItem))
 			);
 
 			// Double-click on an item triggers "show full value" if allowed.
@@ -364,10 +358,6 @@ public final class StatesView extends AnchorPane {
 		}
 	}
 	
-	private void visualizeTracking(StateItem<?> stateItem) {
-		System.out.println(this.currentValues.get(((AbstractFormulaElement)stateItem.getContents()).getFormula()));
-	}
-
 	private void showError(StateItem<?> stateItem) {
 		final FullValueStage stage = injector.getInstance(FullValueStage.class);
 		if (stateItem.getContents() instanceof AbstractFormulaElement) {

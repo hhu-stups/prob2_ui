@@ -37,10 +37,7 @@ public class Runconfiguration {
 		if (this.machine == null || runconfig.machine == null || !this.machine.equals(runconfig.machine)) {
 			return false;
 		}
-		if (this.preference == null || runconfig.preference == null || !this.preference.equals(runconfig.preference) ) {
-			return false;
-		}
-		return true;
+		return !(this.preference == null || runconfig.preference == null || !this.preference.equals(runconfig.preference));
 	}
 	
 	@Override

@@ -17,6 +17,7 @@ public class LTLFormulaItem {
 		initializeStatus();
 		this.name = name;
 		this.description = description;
+		this.formula = "";
 	}
 	
 	public void initializeStatus() {
@@ -73,6 +74,18 @@ public class LTLFormulaItem {
 		
 	public void setStatus(FontAwesomeIconView status) {
 		this.status = status;
+	}
+	
+	public void setCheckedSuccessful() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
+		icon.setFill(Color.GREEN);
+		this.setStatus(icon);
+	}
+	
+	public void setCheckedFailed() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
+		icon.setFill(Color.RED);
+		this.setStatus(icon);
 	}
 	
 }
