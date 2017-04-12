@@ -28,7 +28,9 @@ public class AddLTLFormulaDialog extends Dialog<LTLFormulaItem> {
 			} else {
 				LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
 				formulaStage.setTitle(tf_name.getText());
-				return new LTLFormulaItem(tf_name.getText(), ta_description.getText(), formulaStage);
+				LTLFormulaItem item = new LTLFormulaItem(tf_name.getText(), ta_description.getText());
+				item.setFormulaStage(formulaStage);
+				return item;
 			}
 		});
 		this.initModality(Modality.APPLICATION_MODAL);

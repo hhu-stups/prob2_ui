@@ -10,6 +10,7 @@ import java.util.Set;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+import de.prob2.ui.verifications.ltl.LTLFormulaItem;
 
 public class Project {
 	private final String name;
@@ -17,6 +18,7 @@ public class Project {
 	private final List<Machine> machines = new ArrayList<>();
 	private final List<Preference> preferences = new ArrayList<>();
 	private final Set<Runconfiguration> runconfigurations = new HashSet<>();
+	private final List<LTLFormulaItem> ltlFormulas = new ArrayList<>();
 	private transient File location;
 
 	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
@@ -28,6 +30,17 @@ public class Project {
 		this.runconfigurations.addAll(runconfigurations);
 		this.location = location;
 	}
+	
+	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
+			List<Runconfiguration> runconfigurations, List<LTLFormulaItem> ltlFormulas, File location) {
+		this.name = name;
+		this.description = description;
+		this.machines.addAll(machines);
+		this.preferences.addAll(preferences);
+		this.runconfigurations.addAll(runconfigurations);
+		this.ltlFormulas.addAll(ltlFormulas);
+		this.location = location;
+	}
 
 	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
 			Set<Runconfiguration> runconfigurations, File location) {
@@ -36,6 +49,17 @@ public class Project {
 		this.machines.addAll(machines);
 		this.preferences.addAll(preferences);
 		this.runconfigurations.addAll(runconfigurations);
+		this.location = location;
+	}
+	
+	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
+			Set<Runconfiguration> runconfigurations, List<LTLFormulaItem> ltlFormulas, File location) {
+		this.name = name;
+		this.description = description;
+		this.machines.addAll(machines);
+		this.preferences.addAll(preferences);
+		this.runconfigurations.addAll(runconfigurations);
+		this.ltlFormulas.addAll(ltlFormulas);
 		this.location = location;
 	}
 
@@ -75,6 +99,10 @@ public class Project {
 	public Set<Runconfiguration> getRunconfigurations() {
 		return runconfigurations;
 	}
+	
+	public List<LTLFormulaItem> getLtLFormulas() {
+		return ltlFormulas;
+	}
 
 	public void setLocation(File location) {
 		this.location = location;
@@ -95,7 +123,8 @@ public class Project {
 				otherProject.machines.equals(this.machines) &&
 				otherProject.preferences.equals(this.preferences) &&
 				otherProject.runconfigurations.equals(this.runconfigurations) &&
-				otherProject.location.equals(this.location)) {
+				otherProject.location.equals(this.location) &&
+				otherProject.ltlFormulas.equals(this.ltlFormulas)) {
 			return true;
 		}
 		return false;
@@ -103,6 +132,6 @@ public class Project {
 
 	@Override
 	public int hashCode() {
-		 return Objects.hash(name, description, machines, preferences, runconfigurations, location);
+		 return Objects.hash(name, description, machines, preferences, runconfigurations, ltlFormulas ,location);
 	}
 }

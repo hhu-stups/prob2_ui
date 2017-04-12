@@ -252,6 +252,7 @@ public final class MenuController extends MenuBar {
 				currentProject.getDefaultLocation().toFile()));
 		Runconfiguration defaultRunconfig = new Runconfiguration(machine.getName(), "default");
 		currentProject.addRunconfiguration(defaultRunconfig);
+		
 		currentProject.startAnimation(defaultRunconfig);
 	}
 

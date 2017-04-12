@@ -1,6 +1,9 @@
 package de.prob2.ui.verifications.ltl;
 
 
+
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -42,12 +45,12 @@ public class LTLView extends AnchorPane{
 	private final Injector injector;
 	
 	private CurrentTrace currentTrace;
-	
+		
 	@Inject
 	private LTLView(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
-		stageManager.loadFXML(this, "ltlView.fxml");
+		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
 	@FXML
@@ -109,6 +112,10 @@ public class LTLView extends AnchorPane{
 	
 	public void refresh() {
 		tv_formula.refresh();
+	}
+	
+	public List<LTLFormulaItem> getFormulas() {
+		return tv_formula.getItems();
 	}
 
 }
