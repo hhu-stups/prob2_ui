@@ -1,5 +1,8 @@
 package de.prob2.ui.project.runconfigurations;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
@@ -10,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 
 public class RunconfigurationsDialog extends Dialog<Runconfiguration> {
@@ -17,7 +21,7 @@ public class RunconfigurationsDialog extends Dialog<Runconfiguration> {
 	@FXML
 	private ChoiceBox<Machine> machinesBox;
 	@FXML
-	private ChoiceBox<Preference> preferencesBox;
+	private ComboBox<Preference> preferencesBox;
 	@FXML
 	private ButtonType okButtonType;
 	private CurrentProject currentProject;
@@ -45,6 +49,22 @@ public class RunconfigurationsDialog extends Dialog<Runconfiguration> {
 		machinesBox.itemsProperty().bind(currentProject.machinesProperty());
 		preferencesBox.getItems().add(new Preference("default", null));
 		preferencesBox.getItems().addAll(currentProject.getPreferences());
+		machinesBox.valueProperty().addListener((observable, from, to) -> {
+			if (to != null) {
+				List<String> prefs = new ArrayList<>();
+				for (Runconfiguration runconfig : currentProject.getRunconfigurations(to)) {
+					prefs.add(runconfig.getPreference());
+				}
+				List<Preference> remove = new ArrayList<>();
+				for (Preference p : preferencesBox.getItems()) {
+					if (prefs.contains(p.getName())) {
+						remove.add(p);
+					}
+				}
+				preferencesBox.getItems().removeAll(remove);
+			}
+		});
+		machinesBox.getSelectionModel().selectFirst();
 		this.getDialogPane().lookupButton(okButtonType).disableProperty()
 				.bind(machinesBox.valueProperty().isNotNull().and(preferencesBox.valueProperty().isNotNull()).not());
 	}

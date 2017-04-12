@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Dialog?>
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -12,9 +13,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.HBox?>
 
-<fx:root type="Dialog" xmlns:fx="http://javafx.com/fxml/1" >
+<fx:root type="Dialog" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
-		<DialogPane stylesheets="@/prob.css" minWidth="300" minHeight="200">
+		<DialogPane stylesheets="@/prob.css" minWidth="300"
+			minHeight="200">
 			<content>
 				<AnchorPane>
 					<VBox spacing="5" AnchorPane.topAnchor="14"
@@ -35,11 +37,11 @@
 								Vgap="10">
 								<Label text="%addRunconfigs.dialog.machine"
 									GridPane.columnIndex="0" GridPane.rowIndex="0" />
-								<ChoiceBox fx:id="machinesBox" GridPane.columnIndex="1"
-									GridPane.rowIndex="0" />
+								<ChoiceBox fx:id="machinesBox" minWidth="100"
+									GridPane.columnIndex="1" GridPane.rowIndex="0" />
 								<Label text="%addRunconfigs.dialog.preference"
 									GridPane.columnIndex="0" GridPane.rowIndex="1" />
-								<ChoiceBox fx:id="preferencesBox"
+								<ComboBox fx:id="preferencesBox" minWidth="100"
 									GridPane.columnIndex="1" GridPane.rowIndex="1" />
 							</GridPane>
 						</AnchorPane>
@@ -47,7 +49,8 @@
 				</AnchorPane>
 			</content>
 			<ButtonType buttonData="CANCEL_CLOSE" text="%common.cancel" />
-			<ButtonType fx:id = "okButtonType" buttonData="OK_DONE" text="%common.ok" />
+			<ButtonType fx:id="okButtonType" buttonData="OK_DONE"
+				text="%common.ok" />
 		</DialogPane>
 	</dialogPane>
 </fx:root>
