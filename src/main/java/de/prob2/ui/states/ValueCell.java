@@ -10,8 +10,8 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.animator.domainobjects.StateError;
 import de.prob.animator.domainobjects.WDError;
-import de.prob.model.representation.AbstractElement;
-import de.prob.model.representation.AbstractFormulaElement;
+import de.prob.animator.prologast.ASTCategory;
+import de.prob.animator.prologast.ASTFormula;
 
 import javafx.scene.control.TreeTableCell;
 
@@ -38,15 +38,15 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 		this.getStyleClass().removeAll("false", "true", "errorresult");
 		
 		if (item == null || empty) {
-			super.setText(null);
-			super.setGraphic(null);
+			this.setText(null);
+			this.setGraphic(null);
 		} else {
 			final Object contents = item.getContents();
 			
-			if (contents instanceof String || contents instanceof Class<?>) {
+			if (contents instanceof String || contents instanceof ASTCategory) {
 				this.setText(null);
-			} else if (contents instanceof AbstractFormulaElement) {
-				final AbstractEvalResult result = this.values.get(((AbstractFormulaElement)contents).getFormula());
+			} else if (contents instanceof ASTFormula) {
+				final AbstractEvalResult result = this.values.get(((ASTFormula)contents).getFormula());
 				if (result == null) {
 					this.setText(null);
 				} else if (result instanceof EvalResult) {
@@ -74,15 +74,13 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 					// noinspection ObjectToString
 					this.setText(result.getClass() + " toString: " + result);
 				}
-			} else if (contents instanceof AbstractElement) {
-				this.setText(null);
 			} else if (contents instanceof StateError) {
 				this.setText(this.isCurrent ? ((StateError)contents).getShortDescription() : null);
 				this.getStyleClass().add("errorresult");
 			} else {
 				throw new IllegalArgumentException("Don't know how to show the value of a " + contents.getClass() + " instance");
 			}
-			super.setGraphic(null);
+			this.setGraphic(null);
 		}
 	}
 }
