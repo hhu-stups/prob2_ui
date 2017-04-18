@@ -52,7 +52,7 @@ dependencies {
 	compile 'com.google.code.gson:gson:2.7'
 	compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
 	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.4'
-	compile 'de.hhu.stups:de.prob2.kernel:3.2.1'
+	compile 'de.hhu.stups:de.prob2.kernel:3.2.2-SNAPSHOT'
 	compile 'de.hhu.stups:ltlparser:2.8.0'
 	compile 'de.jensd:fontawesomefx:8.9'
 	compile 'org.codehaus.groovy:groovy-all:2.4.7'
