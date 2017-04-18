@@ -13,6 +13,7 @@ import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationErrorResult;
 import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.StateError;
 import de.prob.animator.prologast.ASTFormula;
@@ -253,11 +254,11 @@ public final class StatesView extends AnchorPane {
 		final FullValueStage stage = injector.getInstance(FullValueStage.class);
 		if (stateItem.getContents() instanceof ASTFormula) {
 			final ASTFormula element = (ASTFormula)stateItem.getContents();
-			final EvalResult currentResult = (EvalResult) this.currentValues.get(element.getFormula());
+			final EvalResult currentResult = (EvalResult)this.currentTrace.getCurrentState().eval(element.getFormula(FormulaExpand.expand));
 			stage.setTitle(element.toString());
 			stage.setCurrentValue(AsciiUnicodeString.fromAscii(currentResult.getValue()));
 			if (this.previousValues.get(element.getFormula()) instanceof EvalResult) {
-				final EvalResult previousResult = (EvalResult) this.previousValues.get(element.getFormula());
+				final EvalResult previousResult = (EvalResult)this.currentTrace.get().getPreviousState().eval(element.getFormula(FormulaExpand.expand));
 				stage.setPreviousValue(AsciiUnicodeString.fromAscii(previousResult.getValue()));
 			} else {
 				stage.setPreviousValue(null);
