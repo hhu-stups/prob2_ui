@@ -18,7 +18,6 @@ import de.prob.animator.domainobjects.StateError;
 import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
 import de.prob.exception.ProBError;
-import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.formula.FormulaGenerator;
@@ -28,7 +27,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
@@ -56,7 +54,6 @@ public final class StatesView extends AnchorPane {
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
-	private final ClassBlacklist classBlacklist;
 	private final FormulaGenerator formulaGenerator;
 	private final StageManager stageManager;
 
@@ -67,13 +64,11 @@ public final class StatesView extends AnchorPane {
 	private StatesView(
 		final Injector injector,
 		final CurrentTrace currentTrace,
-		final ClassBlacklist classBlacklist,
 		final FormulaGenerator formulaGenerator,
 		final StageManager stageManager
 	) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
-		this.classBlacklist = classBlacklist;
 		this.formulaGenerator = formulaGenerator;
 		this.stageManager = stageManager;
 
@@ -171,13 +166,6 @@ public final class StatesView extends AnchorPane {
 		this.tvPreviousValue.setCellValueFactory(cellValueFactory);
 
 		this.tvRootItem.setValue(new StateItem<>("Machine (this root item should be invisible)", false));
-
-		this.classBlacklist.getBlacklist()
-				.addListener((SetChangeListener<? super Class<? extends AbstractElement>>) change -> {
-					if (this.currentTrace.exists()) {
-						this.updateRoot(this.currentTrace.get());
-					}
-				});
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			if (to == null) {

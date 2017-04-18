@@ -9,7 +9,9 @@ import com.google.inject.Provides;
 import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob.MainModule;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.bmotion.BMotionView;
 import de.prob2.ui.config.Config;
@@ -33,12 +35,12 @@ import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.project.machines.MachinesTab;
 import de.prob2.ui.project.preferences.PreferencesTab;
 import de.prob2.ui.project.runconfigurations.RunconfigurationsTab;
-import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
@@ -52,7 +54,6 @@ public class ProB2Module extends AbstractModule {
 		install(new MainModule());
 		
 		// General stuff
-		bind(ClassBlacklist.class);
 		bind(Config.class);
 		bind(CurrentModel.class);
 		bind(CurrentState.class);
