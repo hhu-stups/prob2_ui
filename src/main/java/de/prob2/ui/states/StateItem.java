@@ -22,4 +22,9 @@ public class StateItem<T> {
 	public boolean isErrored() {
 		return this.errored;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("%s{contents=%s, errored=%s}", this.getClass().getName(), this.getContents(), this.isErrored());
+	}
 }

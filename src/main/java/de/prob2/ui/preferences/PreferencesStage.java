@@ -3,9 +3,7 @@ package de.prob2.ui.preferences;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
@@ -14,7 +12,6 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
-import de.prob.model.representation.AbstractElement;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 
@@ -22,56 +19,29 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.states.ClassBlacklist;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.MapChangeListener;
-import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class PreferencesStage extends Stage {
-	private static final StringConverter<Class<? extends AbstractElement>> ELEMENT_CLASS_STRING_CONVERTER = new StringConverter<Class<? extends AbstractElement>>() {
-		@Override
-		public Class<? extends AbstractElement> fromString(final String s) {
-			final Class<?> clazz;
-
-			try {
-				clazz = Class.forName(s);
-			} catch (ClassNotFoundException e) {
-				throw new IllegalArgumentException(e);
-			}
-
-			return clazz.asSubclass(AbstractElement.class);
-		}
-
-		@Override
-		public String toString(final Class<? extends AbstractElement> clazz) {
-			return clazz == null ? "null" : clazz.getSimpleName();
-		}
-	};
-	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesStage.class);
 
 	@FXML private Spinner<Integer> recentProjectsCountSpinner;
@@ -81,13 +51,10 @@ public final class PreferencesStage extends Stage {
 	@FXML private Button resetButton;
 	@FXML private Button applyButton;
 	@FXML private Label applyWarning;
-	@FXML private ListView<Class<? extends AbstractElement>> blacklistView;
 	@FXML private TabPane tabPane;
 	@FXML private Tab tabGeneral;
 	@FXML private Tab tabPreferences;
-	@FXML private Tab tabStatesView;
 
-	private final ClassBlacklist classBlacklist;
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final ProBPreferences globalProBPrefs;
@@ -98,7 +65,6 @@ public final class PreferencesStage extends Stage {
 
 	@Inject
 	private PreferencesStage(
-		final ClassBlacklist classBlacklist,
 		final CurrentTrace currentTrace,
 		final GlobalPreferences globalPreferences,
 		final ProBPreferences globalProBPrefs,
@@ -107,7 +73,6 @@ public final class PreferencesStage extends Stage {
 		final StageManager stageManager,
 		final CurrentProject currentProject
 	) {
-		this.classBlacklist = classBlacklist;
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.globalProBPrefs = globalProBPrefs;
@@ -157,49 +122,6 @@ public final class PreferencesStage extends Stage {
 		this.undoButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
 		this.applyWarning.visibleProperty().bind(this.globalProBPrefs.changesAppliedProperty().not());
 		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
-
-		// States View
-
-		this.blacklistView.setCellFactory(CheckBoxListCell.forListView(clazz -> {
-			final BooleanProperty prop = new SimpleBooleanProperty(!this.classBlacklist.getBlacklist().contains(clazz));
-
-			prop.addListener((changed, from, to) -> {
-				if (to) {
-					this.classBlacklist.getBlacklist().remove(clazz);
-				} else {
-					this.classBlacklist.getBlacklist().add(clazz);
-				}
-			});
-
-			this.classBlacklist.getBlacklist()
-					.addListener((SetChangeListener<? super Class<? extends AbstractElement>>) change -> {
-				if (clazz.equals(change.getElementAdded()) || clazz.equals(change.getElementRemoved())) {
-					prop.set(change.wasRemoved());
-				}
-			});
-
-			return prop;
-		}, ELEMENT_CLASS_STRING_CONVERTER));
-		
-		this.blacklistView.getItems().setAll(this.classBlacklist.getKnownClasses());
-		this.blacklistView.getItems().sort(Comparator.comparing(Class::getSimpleName));
-
-		this.classBlacklist.getKnownClasses()
-				.addListener((SetChangeListener<? super Class<? extends AbstractElement>>) change -> {
-					final List<Class<? extends AbstractElement>> items = this.blacklistView.getItems();
-					final Class<? extends AbstractElement> added = change.getElementAdded();
-					final Class<? extends AbstractElement> removed = change.getElementRemoved();
-
-					if (change.wasAdded() && !items.contains(added)) {
-						items.add(added);
-						items.sort(Comparator.comparing(Class::getSimpleName));
-					} else if (change.wasRemoved() && items.contains(removed)) {
-						if (this.classBlacklist.getBlacklist().contains(removed)) {
-							this.classBlacklist.getBlacklist().remove(removed);
-						}
-						items.remove(removed);
-					}
-				});
 		
 		this.currentTabProperty().addListener((observable, from, to) -> {
 			switch (to) {
@@ -209,10 +131,6 @@ public final class PreferencesStage extends Stage {
 				
 				case "preferences":
 					this.tabPane.getSelectionModel().select(this.tabPreferences);
-					break;
-				
-				case "statesView":
-					this.tabPane.getSelectionModel().select(this.tabStatesView);
 					break;
 				
 				default:

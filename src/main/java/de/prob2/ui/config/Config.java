@@ -26,7 +26,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
-import de.prob.model.representation.AbstractElement;
 
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.Console;
@@ -39,7 +38,6 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.states.ClassBlacklist;
 import de.prob2.ui.states.StatesView;
 
 import javafx.geometry.BoundingBox;
@@ -55,7 +53,6 @@ public final class Config {
 		private List<String> recentProjects;
 		private Console.ConfigData groovyConsoleSettings;
 		private Console.ConfigData bConsoleSettings;
-		private List<String> statesViewHiddenClasses;
 		private String guiState;
 		private List<String> visibleStages;
 		private Map<String, double[]> stageBoxes;
@@ -84,7 +81,6 @@ public final class Config {
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
 	private final Gson gson;
-	private final ClassBlacklist classBlacklist;
 	private final RecentProjects recentProjects;
 	private final ConfigData defaultData;
 	private final GroovyConsole groovyConsole;
@@ -95,11 +91,16 @@ public final class Config {
 	private final GlobalPreferences globalPreferences;
 
 	@Inject
-	private Config(final ClassBlacklist classBlacklist, final RecentProjects recentProjects, final UIState uiState,
-			final GroovyConsole groovyConsole, final BConsole bConsole, final Injector injector,
-			final CurrentProject currentProject, final GlobalPreferences globalPreferences) {
+	private Config(
+		final RecentProjects recentProjects,
+		final UIState uiState,
+		final GroovyConsole groovyConsole,
+		final BConsole bConsole,
+		final Injector injector,
+		final CurrentProject currentProject,
+		final GlobalPreferences globalPreferences
+	) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
-		this.classBlacklist = classBlacklist;
 		this.recentProjects = recentProjects;
 		this.uiState = uiState;
 		this.groovyConsole = groovyConsole;
@@ -131,9 +132,6 @@ public final class Config {
 		if (configData.recentProjects == null) {
 			configData.maxRecentProjects = this.defaultData.maxRecentProjects;
 			configData.recentProjects = new ArrayList<>(this.defaultData.recentProjects);
-		}
-		if (configData.statesViewHiddenClasses == null) {
-			configData.statesViewHiddenClasses = new ArrayList<>(this.defaultData.statesViewHiddenClasses);
 		}
 		if (configData.guiState == null || configData.guiState.isEmpty()) {
 			configData.guiState = this.defaultData.guiState;
@@ -218,21 +216,6 @@ public final class Config {
 
 		this.currentProject.setDefaultLocation(Paths.get(configData.defaultProjectLocation));
 
-		for (String name : configData.statesViewHiddenClasses) {
-			Class<? extends AbstractElement> clazz;
-			try {
-				clazz = Class.forName(name).asSubclass(AbstractElement.class);
-			} catch (ClassNotFoundException exc) {
-				logger.warn("Class not found, cannot add to states view blacklist", exc);
-				continue;
-			} catch (ClassCastException exc) {
-				logger.warn("Class is not a subclass of AbstractElement, cannot add to states view blacklist", exc);
-				continue;
-			}
-			classBlacklist.getKnownClasses().add(clazz);
-			classBlacklist.getBlacklist().add(clazz);
-		}
-
 		this.uiState.setGuiState(configData.guiState);
 		this.uiState.getSavedVisibleStages().clear();
 		this.uiState.getSavedVisibleStages().addAll(configData.visibleStages);
@@ -282,7 +265,6 @@ public final class Config {
 		configData.maxRecentProjects = this.recentProjects.getMaximum();
 		configData.recentProjects = new ArrayList<>(this.recentProjects);
 		configData.defaultProjectLocation = this.currentProject.getDefaultLocation().toString();
-		configData.statesViewHiddenClasses = new ArrayList<>();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
 		configData.groovyConsoleSettings = groovyConsole.getSettings();
 		configData.bConsoleSettings = bConsole.getSettings();
@@ -302,10 +284,6 @@ public final class Config {
 		OperationsView operationsView = injector.getInstance(OperationsView.class);
 		configData.operationsSortMode = operationsView.getSortMode();
 		configData.operationsShowNotEnabled = operationsView.getShowDisabledOps();
-
-		for (Class<? extends AbstractElement> clazz : classBlacklist.getBlacklist()) {
-			configData.statesViewHiddenClasses.add(clazz.getCanonicalName());
-		}
 		
 		configData.globalPreferences = new HashMap<>(this.globalPreferences);
 
