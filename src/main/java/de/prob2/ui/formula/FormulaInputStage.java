@@ -85,7 +85,6 @@ public class FormulaInputStage extends Stage {
 			}
 			parent.setExpanded(true);
 			lbHeader.setText("Could not parse or visualize formula");
-			tfFormula.getStyleClass().add("text-field-error");
 			icon.setIcon(FontAwesomeIcon.MINUS_CIRCLE);
 		}
 	}

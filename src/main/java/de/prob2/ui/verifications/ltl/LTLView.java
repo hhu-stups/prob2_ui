@@ -115,7 +115,7 @@ public class LTLView extends AnchorPane{
 		checkAllButton.disableProperty().bind(currentTrace.existsProperty().not());
 		
 		tv_formula.itemsProperty().addListener((observable, oldValue, newValue) -> {
-			System.out.println("test");
+			//TODO: register unsave changes
 		});
 		
 		
@@ -131,8 +131,8 @@ public class LTLView extends AnchorPane{
 		try {
 			formula = new LTL(item.getFormula());
 		} catch (LtlParseException e) {
-			item.setCheckedFailed();
 			showParseError(item, e);
+			item.setCheckedFailed();
 			logger.error("Could not parse LTL formula", e);
 		}
 		if (currentTrace != null && formula != null) {
@@ -141,6 +141,7 @@ public class LTLView extends AnchorPane{
 			currentTrace.getStateSpace().execute(lcc);
 			AbstractEvalResult result = lcc.getValue();
 			if(result instanceof LTLOk) {
+				showSuccess(item);
 				item.setCheckedSuccessful();
 			} else if(result instanceof LTLCounterExample) {
 				System.out.println(((LTLCounterExample) result).getOpList());
@@ -157,15 +158,19 @@ public class LTLView extends AnchorPane{
 	private void showParseError(LTLFormulaItem item, LtlParseException e) {
 		TextArea exceptionText = new TextArea();
 		Alert alert = new Alert(AlertType.ERROR);
+		alert.getDialogPane().getStylesheets().add(getClass().getResource("/prob.css").toExternalForm());
 		alert.setTitle(item.getName());
-		alert.setHeaderText("LtLParseException occured");
-		alert.setContentText("Could not parse LTL formula");
+		alert.setHeaderText("Could not parse LTL formula");
+		alert.setContentText("Message: ");
 		StringWriter sw = new StringWriter();
 		try (PrintWriter pw = new PrintWriter(sw)) {
 			e.printStackTrace(pw);
-			exceptionText.setText(sw.toString());;
+			exceptionText.setText(sw.toString());
+			exceptionText.setEditable(false);
 		}
-		alert.getDialogPane().setExpandableContent(new StackPane(exceptionText));
+		StackPane pane = new StackPane(exceptionText);
+		pane.setPrefSize(320, 120);
+		alert.getDialogPane().setExpandableContent(pane);
 		alert.getDialogPane().setExpanded(true);
 		alert.showAndWait();
 	}
@@ -178,7 +183,13 @@ public class LTLView extends AnchorPane{
 		alert.showAndWait();
 	}
 	
-	
+	private void showSuccess(LTLFormulaItem item) {
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle(item.getName());
+		alert.setHeaderText("Success");
+		alert.setContentText("LTL Check succeeded");
+		alert.showAndWait();
+	}
 	
 	@FXML
 	public void checkAll() {

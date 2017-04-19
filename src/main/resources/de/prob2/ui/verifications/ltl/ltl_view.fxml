@@ -9,7 +9,7 @@
 <?import javafx.scene.control.Label?>
 
 
-<fx:root type="LTLView" minHeight="0.0" minWidth="0.0" prefHeight="339.0" prefWidth="145.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root stylesheets="@/prob.css" type="LTLView" minHeight="0.0" minWidth="0.0" prefHeight="339.0" prefWidth="145.0" xmlns:fx="http://javafx.com/fxml/1">
 	<children>
 		<Button fx:id="addLTLButton" disable="true" contentDisplay="GRAPHIC_ONLY" 
 				prefHeight="26.0" prefWidth="26.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" onAction ="#addFormula">
