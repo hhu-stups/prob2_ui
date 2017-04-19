@@ -17,6 +17,7 @@ import de.be4.ltl.core.parser.LtlParseException;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
@@ -144,7 +145,7 @@ public class LTLView extends AnchorPane{
 				showSuccess(item);
 				item.setCheckedSuccessful();
 			} else if(result instanceof LTLCounterExample) {
-				System.out.println(((LTLCounterExample) result).getOpList());
+				//currentTrace.getCurrentState().setTransitions(((LTLCounterExample) result).getOpList());
 				item.setCheckedFailed();
 				//TODO: case CounterExample
 			} else if(result instanceof LTLError) {
@@ -167,6 +168,7 @@ public class LTLView extends AnchorPane{
 			e.printStackTrace(pw);
 			exceptionText.setText(sw.toString());
 			exceptionText.setEditable(false);
+			exceptionText.getStyleClass().add("text-area-error");
 		}
 		StackPane pane = new StackPane(exceptionText);
 		pane.setPrefSize(320, 120);
