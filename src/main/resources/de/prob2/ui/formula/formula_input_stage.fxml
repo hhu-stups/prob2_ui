@@ -37,7 +37,7 @@
 				</content>
 				<expandableContent>
 					<StackPane prefHeight="300.0" prefWidth="720.0">
-						<TextArea editable="false" styleClass="text-area-error" fx:id="exceptionText" prefHeight="300.0" prefWidth="720.0"/>
+						<TextArea editable="false" fx:id="exceptionText" prefHeight="300.0" prefWidth="720.0"/>
 					</StackPane>
 				</expandableContent>
 				<ButtonType fx:constant="CANCEL"/>

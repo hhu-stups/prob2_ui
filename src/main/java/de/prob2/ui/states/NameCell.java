@@ -3,7 +3,9 @@ package de.prob2.ui.states;
 import java.util.Objects;
 
 import de.prob.animator.domainobjects.StateError;
-import de.prob.model.representation.AbstractElement;
+import de.prob.animator.prologast.ASTCategory;
+import de.prob.animator.prologast.ASTFormula;
+
 import javafx.scene.control.TreeTableCell;
 
 class NameCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
@@ -14,16 +16,10 @@ class NameCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 		
 		if (contents instanceof String) {
 			return (String)contents;
-		} else if (contents instanceof Class<?>) {
-			String shortName = ((Class<?>)contents).getSimpleName();
-			if (shortName.endsWith("y")) {
-				shortName = shortName.substring(0, shortName.length() - 1) + "ies";
-			} else {
-				shortName += "s";
-			}
-			return shortName;
-		} else if (contents instanceof AbstractElement) {
-			return contents.toString();
+		} else if (contents instanceof ASTCategory) {
+			return ((ASTCategory)contents).getName();
+		} else if (contents instanceof ASTFormula) {
+			return ((ASTFormula)contents).getFormula().toString();
 		} else if (contents instanceof StateError) {
 			return ((StateError)contents).getEvent();
 		} else {
