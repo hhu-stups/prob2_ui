@@ -9,6 +9,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.ScrollPane?>
 
 <fx:root type="Tab" text="%project.tabs.machines" closable="false"
 	xmlns:fx="http://javafx.com/fxml/1">
@@ -23,12 +24,18 @@
 			</Button>
 		</AnchorPane>
 		<AnchorPane VBox.vgrow="always">
-			<VBox fx:id="machinesVBox" spacing="5" AnchorPane.leftAnchor="6"
-				AnchorPane.topAnchor="4" AnchorPane.rightAnchor="6">
-				<StackPane fx:id="noMachinesStack" VBox.vgrow="always">
-					<Label text="%project.tabs.machines.noMachines" />
-				</StackPane>
-			</VBox>
+			<ScrollPane AnchorPane.leftAnchor="0"
+				AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"
+				AnchorPane.bottomAnchor="0">
+				<AnchorPane>
+					<VBox fx:id="machinesVBox" spacing="5" AnchorPane.leftAnchor="6"
+						AnchorPane.topAnchor="4" AnchorPane.rightAnchor="6">
+						<StackPane fx:id="noMachinesStack" VBox.vgrow="always">
+							<Label text="%project.tabs.machines.noMachines" />
+						</StackPane>
+					</VBox>
+				</AnchorPane>
+			</ScrollPane>
 		</AnchorPane>
 	</VBox>
 </fx:root>
