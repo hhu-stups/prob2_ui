@@ -1,8 +1,6 @@
 package de.prob2.ui.verifications.ltl;
 
 
-
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -17,11 +15,11 @@ import de.be4.ltl.core.parser.LtlParseException;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLOk;
+import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -65,11 +63,15 @@ public class LTLView extends AnchorPane{
 	private final Injector injector;
 	
 	private CurrentTrace currentTrace;
+	
+	private AnimationSelector animations;
 		
 	@Inject
-	private LTLView(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace) {
+	private LTLView(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
+					final CurrentTrace currentTrace) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
+		this.animations = animations;
 		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
@@ -104,7 +106,7 @@ public class LTLView extends AnchorPane{
 				refresh();
 			});
 			renameItem.disableProperty().bind(row.emptyProperty());
-			
+						
 			row.setContextMenu(new ContextMenu(removeItem,renameItem));
 			return row;
 		});
@@ -145,7 +147,10 @@ public class LTLView extends AnchorPane{
 				showSuccess(item);
 				item.setCheckedSuccessful();
 			} else if(result instanceof LTLCounterExample) {
-				//currentTrace.getCurrentState().setTransitions(((LTLCounterExample) result).getOpList());
+				if (currentTrace.exists()) {
+					this.animations.removeTrace(currentTrace.get());
+				}
+				animations.addNewAnimation(((LTLCounterExample)result).getTrace(stateid.getStateSpace()));
 				item.setCheckedFailed();
 				//TODO: case CounterExample
 			} else if(result instanceof LTLError) {

@@ -87,5 +87,5 @@ public class LTLFormulaItem {
 		icon.setFill(Color.RED);
 		this.setStatus(icon);
 	}
-	
+		
 }

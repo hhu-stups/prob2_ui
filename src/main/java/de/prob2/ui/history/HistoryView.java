@@ -65,7 +65,6 @@ public final class HistoryView extends AnchorPane {
 		this.setMinWidth(100);
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			lvHistory.getItems().clear();
-			
 			if (to != null) {
 				int currentPos = to.getCurrent().getIndex();
 				addItems(lvHistory,currentPos);
