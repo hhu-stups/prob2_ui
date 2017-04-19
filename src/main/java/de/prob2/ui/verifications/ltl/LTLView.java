@@ -34,6 +34,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 
@@ -62,9 +63,9 @@ public class LTLView extends AnchorPane{
 	
 	private final Injector injector;
 	
-	private CurrentTrace currentTrace;
+	private final CurrentTrace currentTrace;
 	
-	private AnimationSelector animations;
+	private final AnimationSelector animations;
 		
 	@Inject
 	private LTLView(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
@@ -76,13 +77,14 @@ public class LTLView extends AnchorPane{
 	}
 	
 	@FXML
-	public void initialize() {
+	public void initialize() {	
 		tv_formula.setOnMouseClicked(e-> {
 			if(e.getClickCount() == 2 && tv_formula.getSelectionModel().getSelectedItem() != null) {
 				tv_formula.getSelectionModel().getSelectedItem().show();
 			}
+
 		});
-		
+						
 		tv_formula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
 			
@@ -106,8 +108,29 @@ public class LTLView extends AnchorPane{
 				refresh();
 			});
 			renameItem.disableProperty().bind(row.emptyProperty());
-						
-			row.setContextMenu(new ContextMenu(removeItem,renameItem));
+			
+			MenuItem showCounterExampleItem = new MenuItem("Show Counter Example");
+			showCounterExampleItem.setOnAction(e-> {
+				LTLFormulaItem item = tv_formula.getSelectionModel().getSelectedItem();
+				if (currentTrace.exists()) {
+					this.animations.removeTrace(currentTrace.get());
+				}
+				animations.addNewAnimation(item.getCounterExampleInformation().getTrace());
+			});
+			showCounterExampleItem.setDisable(true);
+			
+			row.setOnMouseClicked(e-> {
+				if(e.getButton() == MouseButton.SECONDARY) {
+					LTLFormulaItem item = tv_formula.getSelectionModel().getSelectedItem();
+					if(row.emptyProperty().get() || item.getCounterExampleInformation() == null) {
+						showCounterExampleItem.setDisable(true);
+					} else {
+						showCounterExampleItem.setDisable(false);
+					}
+				}
+			});
+			
+			row.setContextMenu(new ContextMenu(removeItem,renameItem, showCounterExampleItem));
 			return row;
 		});
 		
@@ -147,10 +170,7 @@ public class LTLView extends AnchorPane{
 				showSuccess(item);
 				item.setCheckedSuccessful();
 			} else if(result instanceof LTLCounterExample) {
-				if (currentTrace.exists()) {
-					this.animations.removeTrace(currentTrace.get());
-				}
-				animations.addNewAnimation(((LTLCounterExample)result).getTrace(stateid.getStateSpace()));
+				item.setCounterExampleInformation(new LTLCounterExampleInformation((LTLCounterExample) result, stateid.getStateSpace()));
 				item.setCheckedFailed();
 				//TODO: case CounterExample
 			} else if(result instanceof LTLError) {

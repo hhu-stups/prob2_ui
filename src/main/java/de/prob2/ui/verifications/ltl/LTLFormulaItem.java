@@ -11,6 +11,7 @@ public class LTLFormulaItem {
 	private String description;
 	private String formula;
 	
+	private LTLCounterExampleInformation information;
 	private transient LTLFormulaStage formulaStage;
 	
 	public LTLFormulaItem(String name, String description) {
@@ -18,6 +19,7 @@ public class LTLFormulaItem {
 		this.name = name;
 		this.description = description;
 		this.formula = "";
+		this.information = null;
 	}
 	
 	public void initializeStatus() {
@@ -86,6 +88,14 @@ public class LTLFormulaItem {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
 		icon.setFill(Color.RED);
 		this.setStatus(icon);
+	}
+	
+	public void setCounterExampleInformation(LTLCounterExampleInformation information) {
+		this.information = information;
+	}
+	
+	public LTLCounterExampleInformation getCounterExampleInformation() {
+		return information;
 	}
 		
 }
