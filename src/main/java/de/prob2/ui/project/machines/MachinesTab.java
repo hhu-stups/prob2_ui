@@ -24,7 +24,6 @@ import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -32,23 +31,17 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 @Singleton
 public class MachinesTab extends Tab {
 	@FXML
-	private TableView<Machine> machinesTable;
+	private VBox machinesVBox;
 	@FXML
-	private TableColumn<Machine, String> nameColumn;
-	@FXML
-	private TableColumn<Machine, Path> machineColumn;
-	@FXML
-	private TableColumn<Machine, String> descriptionColumn;
+	private StackPane noMachinesStack;
 
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
@@ -71,50 +64,48 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	public void initialize() {
-		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-		machineColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<Path>(cellData.getValue().getPath()));
-		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		noMachinesStack.managedProperty().bind(currentProject.machinesProperty().emptyProperty());
+		noMachinesStack.visibleProperty().bind(currentProject.machinesProperty().emptyProperty());
 
-		machinesTable.setRowFactory(tableView -> {
-			final TableRow<Machine> row = new TableRow<>();
+		currentProject.machinesProperty().addListener((observable, from, to) -> {
+			machinesVBox.getChildren().clear();
+			for (Machine machine : to) {
+				MachinesItem machinesItem = new MachinesItem(machine, stageManager);
+				machinesVBox.getChildren().add(machinesItem);
 
-			final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
-			removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(row.getItem()));
-			removeMachineMenuItem.disableProperty().bind(row.emptyProperty());
+				final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
+				removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(machine));
 
-			final MenuItem editFileMenuItem = new MenuItem("Edit File");
-			editFileMenuItem.setOnAction(event -> this.showEditorStage(row.getItem()));
-			editFileMenuItem.disableProperty().bind(row.emptyProperty());
+				final MenuItem editFileMenuItem = new MenuItem("Edit File");
+				editFileMenuItem.setOnAction(event -> this.showEditorStage(machine));
 
-			final MenuItem editExternalMenuItem = new MenuItem("Edit File in External Editor");
-			editExternalMenuItem.setOnAction(event -> this.showExternalEditor(row.getItem()));
-			editExternalMenuItem.disableProperty().bind(row.emptyProperty());
+				final MenuItem editExternalMenuItem = new MenuItem("Edit File in External Editor");
+				editExternalMenuItem.setOnAction(event -> this.showExternalEditor(machine));
 
-			final Menu startAnimationMenu = new Menu("Start Animation...");
-			startAnimationMenu.disableProperty().bind(row.emptyProperty());
-			
-			row.setContextMenu(
-					new ContextMenu(removeMachineMenuItem, editFileMenuItem, editExternalMenuItem, startAnimationMenu));
-			
-			row.setOnContextMenuRequested(event -> {
-				startAnimationMenu.getItems().clear();
-				for (Runconfiguration runconfiguration : currentProject.getRunconfigurations(row.getItem())) {
-					final MenuItem item = new MenuItem(runconfiguration.toString());
-					item.setOnAction(e -> currentProject.startAnimation(runconfiguration));
-					startAnimationMenu.getItems().add(item);
-				}
-			});
+				final Menu startAnimationMenu = new Menu("Start Animation...");
 
-			row.setOnMouseClicked(event -> {
-				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					injector.getInstance(EditMachinesDialog.class).editAndShow(row.getItem())
-							.ifPresent(result -> currentProject.updateMachine(row.getItem(), result));
-				}
-			});
+				ContextMenu menu = new ContextMenu(removeMachineMenuItem, editFileMenuItem, editExternalMenuItem,
+						startAnimationMenu);
 
-			return row;
+				machinesItem.setOnMouseClicked(event -> {
+					if (event.getButton().equals(MouseButton.SECONDARY) && event.getClickCount() == 1) {
+						startAnimationMenu.getItems().clear();
+						for (Runconfiguration runconfiguration : currentProject.getRunconfigurations(machine)) {
+							final MenuItem item = new MenuItem(runconfiguration.toString());
+							item.setOnAction(e -> currentProject.startAnimation(runconfiguration));
+							startAnimationMenu.getItems().add(item);
+						}
+						if (startAnimationMenu.getItems().size() == 0) {
+							startAnimationMenu.setDisable(true);
+						}
+						menu.show(machinesItem, event.getScreenX(), event.getScreenY());
+					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+						injector.getInstance(EditMachinesDialog.class).editAndShow(machine)
+								.ifPresent(result -> currentProject.updateMachine(machine, result));
+					}
+				});
+			}
 		});
-		machinesTable.itemsProperty().bind(currentProject.machinesProperty());
 	}
 
 	@FXML
