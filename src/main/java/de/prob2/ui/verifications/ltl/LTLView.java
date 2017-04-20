@@ -115,7 +115,7 @@ public class LTLView extends AnchorPane{
 					newFormulas.set(index, new LTLFormulaItem(item));
 					currentProject.refreshLTLFormulas(newFormulas);
 				});
-				this.refresh();
+				refresh();
 			});
 			renameItem.disableProperty().bind(row.emptyProperty());
 			
@@ -178,6 +178,7 @@ public class LTLView extends AnchorPane{
 				item.setCheckedSuccessful();
 				item.setCounterExample(null);
 			} else if(result instanceof LTLCounterExample) {
+				showCounterExampleFound(item);
 				item.setCheckedFailed();
 				item.setCounterExample(currentTrace.get());
 			} else if(result instanceof LTLError) {
@@ -223,6 +224,14 @@ public class LTLView extends AnchorPane{
 		alert.setTitle(item.getName());
 		alert.setHeaderText("Success");
 		alert.setContentText("LTL Check succeeded");
+		alert.showAndWait();
+	}
+	
+	private void showCounterExampleFound(LTLFormulaItem item) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle(item.getName());
+		alert.setHeaderText("Counter Example found");
+		alert.setContentText("LTL Counter Example has been found");
 		alert.showAndWait();
 	}
 	
