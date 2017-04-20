@@ -38,7 +38,6 @@ import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.LTLFormulaStage;
-import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -103,8 +102,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
-		LTLView ltlView = injector.getInstance(LTLView.class);
-		ltlView.getTable().itemsProperty().bind(this.ltlFormulasProperty());
 
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
@@ -115,7 +112,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.machines.setAll(to.getMachines());
 				this.preferences.setAll(to.getPreferences());
 				this.runconfigurations.setAll(to.getRunconfigurations());
-				this.ltlFormulas.setAll(to.getLtLFormulas());
+				this.ltlFormulas.setAll(to.getLTLFormulas());
 				this.location.set(to.getLocation());
 				if(from == null) {
 					for(LTLFormulaItem item : ltlFormulas) {
@@ -129,7 +126,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				}
 			}
 		});
-
 	}
 
 	private void clearProperties() {
@@ -162,7 +158,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.add(machine);
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
-				this.getRunconfigurations(), this.getLocation()));
+				this.getRunconfigurations(), this.getLtlFormulas(), this.getLocation()));
 	}
 
 	public void removeMachine(Machine machine) {
@@ -176,19 +172,19 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			}
 		}
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
-				runconfigsList,  this.getLocation()));
+				runconfigsList, this.getLtlFormulas(),  this.getLocation()));
 	}
 
 	public void updateMachine(Machine oldMachine, Machine newMachine) {
 		this.removeMachine(oldMachine);
 		this.addMachine(newMachine);
 	}
-
+	
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
-				this.getRunconfigurations(), this.getLocation()));
+				this.getRunconfigurations(), this.getLtlFormulas(), this.getLocation()));
 	}
 
 	public void removePreference(Preference preference) {
@@ -202,21 +198,21 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			}
 		}
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
-				runconfigsList, this.getLocation()));
+				runconfigsList, this.getLtlFormulas(), this.getLocation()));
 	}
 
 	public void addRunconfiguration(Runconfiguration runconfiguration) {
 		List<Runconfiguration> runconfigs = this.getRunconfigurations();
 		runconfigs.add(runconfiguration);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
-				runconfigs, this.getLocation()));
+				runconfigs, this.getLtlFormulas(), this.getLocation()));
 	}
 
 	public void removeRunconfiguration(Runconfiguration runconfiguration) {
 		List<Runconfiguration> runconfigs = this.getRunconfigurations();
 		runconfigs.remove(runconfiguration);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
-				runconfigs, this.getLocation()));
+				runconfigs, this.getLtlFormulas(), this.getLocation()));
 	}
 	
 	public List<Runconfiguration> getRunconfigurations(Machine machine) {
@@ -229,14 +225,33 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return runconfigsList;
 	}
 	
+	public void addLTLFormula(LTLFormulaItem formula) {
+		List<LTLFormulaItem> formulas = this.getLtlFormulas();
+		formulas.add(formula);
+		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
+				this.getRunconfigurations(), formulas, this.getLocation()));
+	}
+
+	public void removeLTLFormula(LTLFormulaItem formula) {
+		List<LTLFormulaItem> formulas = this.getLtlFormulas();
+		formulas.remove(formula);
+		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
+				this.getRunconfigurations(), formulas, this.getLocation()));
+	}
+	
+	public void refreshLTLFormulas(List<LTLFormulaItem> newFormulas) {
+		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
+				this.getRunconfigurations(), newFormulas, this.getLocation()));
+	}
+		
 	public void changeName(String newName) {
 		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(),
-				this.getRunconfigurations(), this.getLocation()));
+				this.getRunconfigurations(), this.getLtlFormulas(), this.getLocation()));
 	}
 	
 	public void changeDescription(String newDescription) {
 		this.update(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(),
-				this.getRunconfigurations(), this.getLocation()));
+				this.getRunconfigurations(), this.getLtlFormulas(), this.getLocation()));
 	}
 
 	@Override
@@ -249,7 +264,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			super.set(project);
 		}
 	}
-
+	
 	private void update(Project project) {
 		super.set(project);
 	}
@@ -384,7 +399,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				: project.getPreferences();
 		Set<Runconfiguration> runconfigurationSet = (project.getRunconfigurations() == null) ? new HashSet<>()
 				: project.getRunconfigurations();
-		List<LTLFormulaItem> ltlFormulaList = (project.getLtLFormulas() == null) ? new ArrayList<>() : project.getLtLFormulas();
+		List<LTLFormulaItem> ltlFormulaList = (project.getLTLFormulas() == null) ? new ArrayList<>() : project.getLTLFormulas();
 		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet, ltlFormulaList,
 				project.getLocation());		
 	}

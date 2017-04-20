@@ -21,15 +21,6 @@ public class Project {
 	private final List<LTLFormulaItem> ltlFormulas = new ArrayList<>();
 	private transient File location;
 
-	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
-			List<Runconfiguration> runconfigurations, File location) {
-		this.name = name;
-		this.description = description;
-		this.machines.addAll(machines);
-		this.preferences.addAll(preferences);
-		this.runconfigurations.addAll(runconfigurations);
-		this.location = location;
-	}
 	
 	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
 			List<Runconfiguration> runconfigurations, List<LTLFormulaItem> ltlFormulas, File location) {
@@ -42,15 +33,6 @@ public class Project {
 		this.location = location;
 	}
 
-	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
-			Set<Runconfiguration> runconfigurations, File location) {
-		this.name = name;
-		this.description = description;
-		this.machines.addAll(machines);
-		this.preferences.addAll(preferences);
-		this.runconfigurations.addAll(runconfigurations);
-		this.location = location;
-	}
 	
 	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
 			Set<Runconfiguration> runconfigurations, List<LTLFormulaItem> ltlFormulas, File location) {
@@ -100,7 +82,7 @@ public class Project {
 		return runconfigurations;
 	}
 	
-	public List<LTLFormulaItem> getLtLFormulas() {
+	public List<LTLFormulaItem> getLTLFormulas() {
 		return ltlFormulas;
 	}
 

@@ -233,7 +233,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	public StateSpace getStateSpace() {
 		return this.stateSpaceProperty().get();
 	}
-
+	
 	/**
 	 * A {@link CurrentModel} holding the current {@link Trace}'s
 	 * {@link AbstractModel}.

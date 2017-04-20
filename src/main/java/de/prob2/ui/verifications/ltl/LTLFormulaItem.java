@@ -1,7 +1,10 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.util.Objects;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob.statespace.Trace;
 import javafx.scene.paint.Color;
 
 public class LTLFormulaItem {
@@ -11,7 +14,7 @@ public class LTLFormulaItem {
 	private String description;
 	private String formula;
 	
-	private LTLCounterExampleInformation information;
+	private transient Trace counterExample;
 	private transient LTLFormulaStage formulaStage;
 	
 	public LTLFormulaItem(String name, String description) {
@@ -19,7 +22,16 @@ public class LTLFormulaItem {
 		this.name = name;
 		this.description = description;
 		this.formula = "";
-		this.information = null;
+		this.counterExample = null;
+	}
+	
+	public LTLFormulaItem(LTLFormulaItem item) {
+		this.status = item.status;
+		this.name = item.name;
+		this.description = item.description;
+		this.formula = item.formula;
+		this.counterExample = item.counterExample;
+		this.formulaStage = item.formulaStage;
 	}
 	
 	public void initializeStatus() {
@@ -90,12 +102,28 @@ public class LTLFormulaItem {
 		this.setStatus(icon);
 	}
 	
-	public void setCounterExampleInformation(LTLCounterExampleInformation information) {
-		this.information = information;
+	public void setCounterExample(Trace counterExample) {
+		this.counterExample = counterExample;
 	}
 	
-	public LTLCounterExampleInformation getCounterExampleInformation() {
-		return information;
+	public Trace getCounterExample() {
+		return counterExample;
+	}
+		
+	@Override
+	public boolean equals(Object other) {
+		LTLFormulaItem otherFormulaItem = (LTLFormulaItem) other;
+		if(this.name.equals(otherFormulaItem.getName()) && 
+				this.description.equals(otherFormulaItem.getDescription()) &&
+				this.formula.equals(otherFormulaItem.getFormula())) {
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, description, formula);
 	}
 		
 }
