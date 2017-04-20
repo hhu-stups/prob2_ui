@@ -161,31 +161,31 @@ public class LTLView extends AnchorPane{
 		LTL formula = null;
 		try {
 			formula = new LTL(item.getFormula());
+			if (currentTrace != null) {
+				State stateid = currentTrace.getCurrentState();
+				EvaluationCommand lcc = formula.getCommand(stateid);
+				currentTrace.getStateSpace().execute(lcc);
+				AbstractEvalResult result = lcc.getValue();
+				
+				if(result instanceof LTLOk) {
+					showSuccess(item);
+					item.setCheckedSuccessful();
+					item.setCounterExample(null);
+				} else if(result instanceof LTLCounterExample) {
+					showCounterExampleFound(item);
+					item.setCheckedFailed();
+					item.setCounterExample(currentTrace.get());
+				} else if(result instanceof LTLError) {
+					showError(item, (LTLError) result);
+					item.setCheckedFailed();
+					item.setCounterExample(null);
+				}
+			}
 		} catch (LtlParseException e) {
 			showParseError(item, e);
 			item.setCheckedFailed();
 			item.setCounterExample(null);
 			logger.error("Could not parse LTL formula", e);
-		}
-		if (currentTrace != null && formula != null) {
-			State stateid = currentTrace.getCurrentState();
-			EvaluationCommand lcc = formula.getCommand(stateid);
-			currentTrace.getStateSpace().execute(lcc);
-			AbstractEvalResult result = lcc.getValue();
-			
-			if(result instanceof LTLOk) {
-				showSuccess(item);
-				item.setCheckedSuccessful();
-				item.setCounterExample(null);
-			} else if(result instanceof LTLCounterExample) {
-				showCounterExampleFound(item);
-				item.setCheckedFailed();
-				item.setCounterExample(currentTrace.get());
-			} else if(result instanceof LTLError) {
-				showError(item, (LTLError) result);
-				item.setCheckedFailed();
-				item.setCounterExample(null);
-			}
 		}
 		refresh();
 	}
