@@ -131,7 +131,7 @@ public final class DetachViewStageController extends Stage {
 	private void removeTP(Accordion accordion) {
 		uiState.updateSavedStageBoxes();
 		for (Stage stage : wrapperStages){
-			Platform.runLater(stage::hide);
+			stage.hide();
 		}
 		for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 			final TitledPane tp = it.next();

@@ -254,11 +254,11 @@ public final class StatesView extends AnchorPane {
 		final FullValueStage stage = injector.getInstance(FullValueStage.class);
 		if (stateItem.getContents() instanceof ASTFormula) {
 			final ASTFormula element = (ASTFormula)stateItem.getContents();
-			final EvalResult currentResult = (EvalResult)this.currentTrace.getCurrentState().eval(element.getFormula(FormulaExpand.expand));
+			final EvalResult currentResult = (EvalResult)this.currentTrace.getCurrentState().eval(element.getFormula());
 			stage.setTitle(element.toString());
 			stage.setCurrentValue(AsciiUnicodeString.fromAscii(currentResult.getValue()));
 			if (this.previousValues.get(element.getFormula()) instanceof EvalResult) {
-				final EvalResult previousResult = (EvalResult)this.currentTrace.get().getPreviousState().eval(element.getFormula(FormulaExpand.expand));
+				final EvalResult previousResult = (EvalResult)this.currentTrace.get().getPreviousState().eval(element.getFormula());
 				stage.setPreviousValue(AsciiUnicodeString.fromAscii(previousResult.getValue()));
 			} else {
 				stage.setPreviousValue(null);

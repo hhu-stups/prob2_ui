@@ -23,6 +23,12 @@ public class MainController extends BorderPane {
 	
 	@FXML
 	private Accordion leftAccordion;
+
+	@FXML
+	private Accordion leftAccordion1;
+
+	@FXML
+	private Accordion leftAccordion2;
 	
 	@FXML
 	private Accordion rightAccordion;
@@ -36,9 +42,27 @@ public class MainController extends BorderPane {
 	@FXML
 	private Accordion topAccordion;
 
+	@FXML
+	private Accordion topAccordion1;
+
+	@FXML
+	private Accordion topAccordion2;
+
+	@FXML
+	private Accordion topAccordion3;
+
 	//If the user creates his own FXML and wants and accordion at the bottom
 	@FXML
 	private Accordion bottomAccordion;
+
+	@FXML
+	private Accordion bottomAccordion1;
+
+	@FXML
+	private Accordion bottomAccordion2;
+
+	@FXML
+	private Accordion bottomAccordion3;
 	
 	@FXML
 	private TitledPane operationsTP;
@@ -77,6 +101,10 @@ public class MainController extends BorderPane {
 		String guiState = "main.fxml";
 		if (!uiState.getGuiState().contains("detached")) {
 			guiState = uiState.getGuiState();
+		}
+		for (TitledPane tp : getTitledPanesMap().values()) {
+			if (tp!=null && tp.getContent()!=null)
+				tp.getContent().setVisible(true);
 		}
 		stageManager.loadFXML(this, guiState);
 	}
@@ -184,11 +212,19 @@ public class MainController extends BorderPane {
 	private List<Accordion> getAccordionList() {
 		List<Accordion> accordionList = new ArrayList<>();
 		accordionList.add(leftAccordion);
+		accordionList.add(leftAccordion1);
+		accordionList.add(leftAccordion2);
 		accordionList.add(rightAccordion);
 		accordionList.add(rightAccordion1);
 		accordionList.add(rightAccordion2);
 		accordionList.add(topAccordion);
+		accordionList.add(topAccordion1);
+		accordionList.add(topAccordion2);
+		accordionList.add(topAccordion3);
 		accordionList.add(bottomAccordion);
+		accordionList.add(bottomAccordion1);
+		accordionList.add(bottomAccordion2);
+		accordionList.add(bottomAccordion3);
 		return accordionList;
 	}
 }
