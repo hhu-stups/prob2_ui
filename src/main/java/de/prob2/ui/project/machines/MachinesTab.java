@@ -24,16 +24,21 @@ import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 
 @Singleton
@@ -42,6 +47,14 @@ public class MachinesTab extends Tab {
 	private VBox machinesVBox;
 	@FXML
 	private StackPane noMachinesStack;
+	@FXML
+	private AnchorPane descriptionView;
+	@FXML
+	private Label descriptionViewTitelLabel;
+	@FXML
+	private Text descriptionText;
+	@FXML
+	private SplitPane splitPane;
 
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
@@ -67,11 +80,17 @@ public class MachinesTab extends Tab {
 		noMachinesStack.managedProperty().bind(currentProject.machinesProperty().emptyProperty());
 		noMachinesStack.visibleProperty().bind(currentProject.machinesProperty().emptyProperty());
 
+		splitPane.getItems().remove(descriptionView);
+
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			machinesVBox.getChildren().clear();
 			for (Machine machine : to) {
 				MachinesItem machinesItem = new MachinesItem(machine, stageManager);
 				machinesVBox.getChildren().add(machinesItem);
+
+				final MenuItem editMachineMenuItem = new MenuItem("Edit Machine");
+				editMachineMenuItem.setOnAction(event -> injector.getInstance(EditMachinesDialog.class)
+						.editAndShow(machine).ifPresent(result -> currentProject.updateMachine(machine, result)));
 
 				final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
 				removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(machine));
@@ -84,7 +103,7 @@ public class MachinesTab extends Tab {
 
 				final Menu startAnimationMenu = new Menu("Start Animation...");
 
-				ContextMenu menu = new ContextMenu(removeMachineMenuItem, editFileMenuItem, editExternalMenuItem,
+				ContextMenu menu = new ContextMenu(editMachineMenuItem, removeMachineMenuItem, editFileMenuItem, editExternalMenuItem,
 						startAnimationMenu);
 
 				machinesItem.setOnMouseClicked(event -> {
@@ -100,8 +119,11 @@ public class MachinesTab extends Tab {
 						}
 						menu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-						injector.getInstance(EditMachinesDialog.class).editAndShow(machine)
-								.ifPresent(result -> currentProject.updateMachine(machine, result));
+						if (splitPane.getItems().size() < 2) {
+							splitPane.getItems().add(0, descriptionView);
+						}
+						descriptionViewTitelLabel.textProperty().bind(new SimpleStringProperty(machine.getName()));
+						descriptionText.textProperty().bind(new SimpleStringProperty(machine.getDescription()));
 					}
 				});
 			}
@@ -128,6 +150,11 @@ public class MachinesTab extends Tab {
 			return;
 		}
 		injector.getInstance(AddMachinesDialog.class).showAndWait(relative);
+	}
+
+	@FXML
+	private void closeDescriptionView() {
+		splitPane.getItems().remove(descriptionView);
 	}
 
 	private void showEditorStage(Machine machine) {
