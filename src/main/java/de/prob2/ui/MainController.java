@@ -38,6 +38,7 @@ public class MainController extends BorderPane {
 
 	@FXML
 	private Accordion rightAccordion2;
+
 	//If the user creates his own FXML and wants and accordion at the top
 	@FXML
 	private Accordion topAccordion;
@@ -151,7 +152,7 @@ public class MainController extends BorderPane {
 		if (!titledPanes.containsKey(titledPane)) {
 			return;
 		}
-		for (Accordion accordion : new Accordion[] {leftAccordion, rightAccordion, bottomAccordion, topAccordion}) {
+		for (Accordion accordion : getAccordionList()) {
 			if (accordion == null) {
 				continue;
 			}

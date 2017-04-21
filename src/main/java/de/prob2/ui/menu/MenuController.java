@@ -177,22 +177,19 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleLoadDefault() {
-		uiState.clearDetachedStages();
-		uiState.getExpandedTitledPanes().clear();
+		reset();
 		loadPreset("main.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated() {
-		uiState.clearDetachedStages();
-		uiState.getExpandedTitledPanes().clear();
+		reset();
 		loadPreset("separatedHistory.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated2() {
-		uiState.clearDetachedStages();
-		uiState.getExpandedTitledPanes().clear();
+		reset();
 		loadPreset("separatedHistoryAndStatistics.fxml");
 	}
 
@@ -218,8 +215,7 @@ public final class MenuController extends MenuBar {
 				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 				loader.setLocation(selectedFile.toURI().toURL());
 				uiState.setGuiState("custom " + selectedFile.toURI().toURL().toExternalForm());
-				uiState.clearDetachedStages();
-				uiState.getExpandedTitledPanes().clear();
+				reset();
 				loader.setRoot(main);
 				loader.setController(main);
 				Parent root = loader.load();
@@ -229,6 +225,12 @@ public final class MenuController extends MenuBar {
 				stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait();
 			}
 		}
+	}
+
+	private void reset() {
+		uiState.clearDetachedStages();
+		uiState.getExpandedTitledPanes().clear();
+		dvController.resetCheckboxes();
 	}
 
 	@FXML

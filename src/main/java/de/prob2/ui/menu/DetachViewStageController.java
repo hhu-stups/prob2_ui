@@ -127,6 +127,12 @@ public final class DetachViewStageController extends Stage {
 		}
 		this.hide();
 	}
+
+	public void resetCheckboxes() {
+		for (CheckBox cb : checkBoxMap.values()) {
+			cb.setSelected(false);
+		}
+	}
 	
 	private void removeTP(Accordion accordion) {
 		uiState.updateSavedStageBoxes();
