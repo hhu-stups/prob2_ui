@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 public class LTLFormulaStage extends Stage {
 	
 	@FXML
-	private TextArea ta_formula;
+	private TextArea taFormula;
 	
 	@FXML
 	private Button checkFormulaButton;
@@ -43,7 +43,7 @@ public class LTLFormulaStage extends Stage {
 	
 	@FXML
 	public void initialize() {
-		ta_formula.textProperty().addListener((observable, oldValue, newValue) -> {
+		taFormula.textProperty().addListener((observable, oldValue, newValue) -> {
 			List<LTLFormulaItem> newFormulas = new ArrayList<>(currentProject.getLtlFormulas());
 			int index = newFormulas.indexOf(item);
 			item.setFormula(newValue);
@@ -57,7 +57,7 @@ public class LTLFormulaStage extends Stage {
 	
 	public void setItem(LTLFormulaItem item) {
 		this.item = item;
-		ta_formula.setText(item.getFormula());
+		taFormula.setText(item.getFormula());
 	}
 	
 	@FXML
