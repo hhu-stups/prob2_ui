@@ -759,12 +759,6 @@
 	-fx-fill: red;
 }
 
-/* === PreferencesStage === */
-
-.text-field.badsearch {
-	-fx-border-color: red;
-}
-
 /* === HistoryChartStage === */
 
 /* Hide chart symbols in the chart content, but not in the legend */
