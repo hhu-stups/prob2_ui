@@ -113,11 +113,10 @@ public final class DetachViewStageController extends Stage {
 		}
 		final Parent root = injector.getInstance(MenuController.class).loadPreset(guiState);
 		final Map<TitledPane,Accordion> accordionMap = ((MainController) root).getAccordionMap();
-		for (Accordion accordion : accordionMap.values()) {
-			for (TitledPane titledPane : accordionMap.keySet()) {
-				if (accordion.getPanes().contains(titledPane) && checkBoxMap.get(titledPane.getContent().getClass()).isSelected()) {
-					removeTP(accordion);
-				}
+		for (TitledPane titledPane : accordionMap.keySet()) {
+			Accordion accordion = accordionMap.get(titledPane);
+			if (checkBoxMap.get(titledPane.getContent().getClass()).isSelected()) {
+				removeTP(accordion);
 			}
 		}
 		if (!uiState.getGuiState().contains("detached")) {
