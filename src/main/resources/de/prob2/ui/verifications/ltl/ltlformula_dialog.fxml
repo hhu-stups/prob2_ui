@@ -41,7 +41,7 @@
 						alignment="center_right">
 			            <HBox spacing="20" alignment="center_left">
 							<Label text="%verifications.ltl.dialog.enterFormula" />
-							<TextField fx:id="tf_name" HBox.hgrow="always">
+							<TextField fx:id="tfName" HBox.hgrow="always">
 								<font>
 									<Font size="12" />
 								</font>
@@ -49,7 +49,7 @@
 						</HBox>
 						<VBox spacing="20" alignment="center_left">
 							<Label text="%verifications.ltl.dialog.description" />
-							<TextArea fx:id="ta_description" styleClass="text-area-with-border">
+							<TextArea fx:id="taDescription" styleClass="text-area-with-border">
 								<font>
 									<Font size="12" />
 								</font>

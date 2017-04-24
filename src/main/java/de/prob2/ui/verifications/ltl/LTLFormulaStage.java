@@ -1,9 +1,6 @@
 package de.prob2.ui.verifications.ltl;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -43,14 +40,10 @@ public class LTLFormulaStage extends Stage {
 	
 	@FXML
 	public void initialize() {
-		taFormula.textProperty().addListener((observable, oldValue, newValue) -> {
-			List<LTLFormulaItem> newFormulas = new ArrayList<>(currentProject.getLtlFormulas());
-			int index = newFormulas.indexOf(item);
-			item.setFormula(newValue);
-			if(index != -1) {
-				newFormulas.set(index, new LTLFormulaItem(item));
+		taFormula.textProperty().addListener((observable, from, to) -> {
+			if(from != null) {
+				currentProject.setSaved(false);
 			}
-			currentProject.refreshLTLFormulas(newFormulas);
 		});
 		checkFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}

@@ -16,6 +16,7 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.StateError;
+import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
 import de.prob.exception.ProBError;
@@ -188,7 +189,10 @@ public final class StatesView extends AnchorPane {
 			trace.getStateSpace().subscribe(this, ee);
 		}
 		
-		final TreeItem<StateItem<?>> subTreeItem = new TreeItem<>(new StateItem<>(node, false)); 
+		final TreeItem<StateItem<?>> subTreeItem = new TreeItem<>(new StateItem<>(node, false));
+		if (node instanceof ASTCategory && ((ASTCategory)node).isExpanded()) {
+			subTreeItem.setExpanded(true);
+		}
 		treeItem.getChildren().add(subTreeItem);
 		for (final PrologASTNode subNode : node.getSubnodes()) {
 			this.updateNode(trace, subTreeItem, subNode);
@@ -221,12 +225,8 @@ public final class StatesView extends AnchorPane {
 		}
 
 		errorsItem.setValue(new StateItem<>("State Errors", !errorsItem.getChildren().isEmpty()));
-
+		errorsItem.setExpanded(true);
 		this.tvRootItem.getChildren().add(errorsItem);
-
-		for (final TreeItem<?> child : this.tvRootItem.getChildren()) {
-			child.setExpanded(true);
-		}
 
 		this.tv.refresh();
 		this.tv.getSelectionModel().select(row);
