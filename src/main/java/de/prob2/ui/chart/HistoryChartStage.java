@@ -66,18 +66,18 @@ public final class HistoryChartStage extends Stage {
 			
 			final TextField textField = new TextField(this.getText());
 			textField.setOnAction(event -> {
-				textField.getStyleClass().remove("badsearch");
+				textField.getStyleClass().remove("text-field-error");
 				final ClassicalB formula;
 				try {
 					formula = new ClassicalB(textField.getText());
 				} catch (EvaluationException e) {
 					LOGGER.debug("Could not parse user-entered formula", e);
-					textField.getStyleClass().add("badsearch");
+					textField.getStyleClass().add("text-field-error");
 					return;
 				}
 				this.commitEdit(formula);
 			});
-			textField.textProperty().addListener(observable -> textField.getStyleClass().remove("badsearch"));
+			textField.textProperty().addListener(observable -> textField.getStyleClass().remove("text-field-error"));
 			
 			this.setText(null);
 			this.setGraphic(textField);
