@@ -21,15 +21,20 @@ import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.formula.FormulaInputStage;
+import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
+import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 
 import javafx.application.Platform;
@@ -231,6 +236,11 @@ public final class MenuController extends MenuBar {
 		uiState.clearDetachedStages();
 		uiState.getExpandedTitledPanes().clear();
 		dvController.resetCheckboxes();
+		injector.getInstance(OperationsView.class).setVisible(true);
+		injector.getInstance(HistoryView.class).setVisible(true);
+		injector.getInstance(StatsView.class).setVisible(true);
+		injector.getInstance(VerificationsView.class).setVisible(true);
+		injector.getInstance(ProjectView.class).setVisible(true);
 	}
 
 	@FXML
