@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import de.prob2.ui.MainController;
+import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,9 +115,8 @@ public final class DetachViewStageController extends Stage {
 		final Parent root = injector.getInstance(MenuController.class).loadPreset(guiState);
 		final Map<TitledPane,Accordion> accordionMap = ((MainController) root).getAccordionMap();
 		for (TitledPane titledPane : accordionMap.keySet()) {
-			Accordion accordion = accordionMap.get(titledPane);
 			if (checkBoxMap.get(titledPane.getContent().getClass()).isSelected()) {
-				removeTP(accordion);
+				removeTP(accordionMap.get(titledPane));
 			}
 		}
 		if (!uiState.getGuiState().contains("detached")) {
@@ -133,9 +133,7 @@ public final class DetachViewStageController extends Stage {
 	
 	private void removeTP(Accordion accordion) {
 		uiState.updateSavedStageBoxes();
-		for (Stage stage : wrapperStages){
-			stage.hide();
-		}
+		wrapperStages.forEach(Window::hide);
 		for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 			final TitledPane tp = it.next();
 			if (checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
