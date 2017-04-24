@@ -238,12 +238,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
 				this.getRunconfigurations(), formulas, this.getLocation()));
 	}
-	
-	public void refreshLTLFormulas(List<LTLFormulaItem> newFormulas) {
-		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
-				this.getRunconfigurations(), newFormulas, this.getLocation()));
-	}
-		
+			
 	public void changeName(String newName) {
 		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(),
 				this.getRunconfigurations(), this.getLtlFormulas(), this.getLocation()));
@@ -352,6 +347,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public ReadOnlyBooleanProperty savedProperty() {
 		return this.saved;
+	}
+	
+	public void setSaved(boolean saved) {
+		this.saved.set(saved);
 	}
 
 	public boolean isSaved() {

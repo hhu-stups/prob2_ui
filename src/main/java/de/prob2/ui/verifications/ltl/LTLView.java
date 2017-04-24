@@ -3,8 +3,6 @@ package de.prob2.ui.verifications.ltl;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,19 +101,18 @@ public class LTLView extends AnchorPane{
 			
 			MenuItem renameItem = new MenuItem("Rename formula");
 			renameItem.setOnAction(e-> {
-				List<LTLFormulaItem> newFormulas = new ArrayList<>(tv_formula.getItems());
-				int index = tv_formula.getSelectionModel().getSelectedIndex();
-				LTLFormulaItem item = newFormulas.get(index);
+				LTLFormulaItem item = tv_formula.getSelectionModel().getSelectedItem();
 				AddLTLFormulaDialog formulaDialog = injector.getInstance(AddLTLFormulaDialog.class);
 				formulaDialog.setName(item.getName());
 				formulaDialog.setDescription(item.getDescription());
 				formulaDialog.showAndWait().ifPresent(result-> {
-					item.setName(result.getName());
-					item.setDescription(result.getDescription());
-					newFormulas.set(index, new LTLFormulaItem(item));
-					currentProject.refreshLTLFormulas(newFormulas);
+					if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription())) {
+						item.setName(result.getName());
+						item.setDescription(result.getDescription());
+						refresh();
+						currentProject.setSaved(false);
+					}
 				});
-				refresh();
 			});
 			renameItem.disableProperty().bind(row.emptyProperty());
 			
