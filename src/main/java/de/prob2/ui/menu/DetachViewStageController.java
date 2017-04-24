@@ -107,8 +107,6 @@ public final class DetachViewStageController extends Stage {
 
 	@FXML
 	public void apply() {
-		//FIXME detaching sometimes results in empty boxes
-		//FIXME unselecting detachable views does NOT close stage with detached view
 		String guiState = uiState.getGuiState();
 		if (guiState.contains("detached")){
 			guiState = guiState.replace("detached","");
