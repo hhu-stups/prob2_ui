@@ -1,8 +1,11 @@
 package de.prob2.ui.states;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -179,24 +182,46 @@ public final class StatesView extends AnchorPane {
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
 	}
+	
+	private static boolean isSameNode(final PrologASTNode x, final PrologASTNode y) {
+		final boolean isSameCategory = x instanceof ASTCategory && y instanceof ASTCategory && ((ASTCategory)x).getName().equals(((ASTCategory)y).getName());
+		final boolean isSameFormula = x instanceof ASTFormula && y instanceof ASTFormula && ((ASTFormula)x).getFormula().equals(((ASTFormula)y).getFormula());
+		return isSameCategory || isSameFormula;
+	}
 
-	private void updateNode(final Trace trace, final TreeItem<StateItem<?>> treeItem, final PrologASTNode node) {
+	private void updateNodes(final Trace trace, final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
 		Objects.requireNonNull(treeItem);
-		Objects.requireNonNull(node);
+		Objects.requireNonNull(nodes);
 		
-		if (node instanceof ASTFormula) {
-			final IEvalElement ee = ((ASTFormula)node).getFormula();
-			trace.getStateSpace().subscribe(this, ee);
+		final Set<TreeItem<StateItem<?>>> toRemove = new HashSet<>(treeItem.getChildren());
+		for (final PrologASTNode node : nodes) {
+			if (node instanceof ASTFormula) {
+				final IEvalElement ee = ((ASTFormula)node).getFormula();
+				trace.getStateSpace().subscribe(this, ee);
+			}
+			
+			TreeItem<StateItem<?>> subTreeItem = null;
+			for (final TreeItem<StateItem<?>> it : treeItem.getChildren()) {
+				final Object contents = it.getValue().getContents();
+				if (contents instanceof PrologASTNode && isSameNode((PrologASTNode)contents, node)) {
+					subTreeItem = it;
+					toRemove.remove(subTreeItem);
+					break;
+				}
+			}
+			if (subTreeItem == null) {
+				subTreeItem = new TreeItem<>();
+				if (node instanceof ASTCategory && ((ASTCategory)node).isExpanded()) {
+					subTreeItem.setExpanded(true);
+				}
+				treeItem.getChildren().add(subTreeItem);
+			}
+			
+			subTreeItem.setValue(new StateItem<>(node, false));
+			this.updateNodes(trace, subTreeItem, node.getSubnodes());
 		}
-		
-		final TreeItem<StateItem<?>> subTreeItem = new TreeItem<>(new StateItem<>(node, false));
-		if (node instanceof ASTCategory && ((ASTCategory)node).isExpanded()) {
-			subTreeItem.setExpanded(true);
-		}
-		treeItem.getChildren().add(subTreeItem);
-		for (final PrologASTNode subNode : node.getSubnodes()) {
-			this.updateNode(trace, subTreeItem, subNode);
-		}
+		// Remove all TreeItems for which no node was found anymore in the nodes list.
+		treeItem.getChildren().removeAll(toRemove);
 	}
 
 	private void updateRoot(final Trace trace) {
@@ -210,22 +235,26 @@ public final class StatesView extends AnchorPane {
 		}
 		
 		final int row = tv.getSelectionModel().getSelectedIndex();
-		this.tvRootItem.getChildren().clear();
+		
+		final TreeItem<StateItem<?>> errorsItem;
+		if (this.tvRootItem.getChildren().isEmpty()) {
+			errorsItem = new TreeItem<>();
+			errorsItem.setExpanded(true);
+		} else {
+			errorsItem = this.tvRootItem.getChildren().remove(this.tvRootItem.getChildren().size()-1);
+			assert "State Errors".equals(errorsItem.getValue().getContents());
+		}
 		
 		final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
 		trace.getStateSpace().execute(cmd);
-		for (final PrologASTNode node : cmd.getPrologASTList()) {
-			this.updateNode(trace, this.tvRootItem, node);
-		}
+		this.updateNodes(trace, this.tvRootItem, cmd.getPrologASTList());
 
-		final TreeItem<StateItem<?>> errorsItem = new TreeItem<>();
-
+		errorsItem.getChildren().clear();
 		for (final StateError error : trace.getCurrentState().getStateErrors()) {
 			errorsItem.getChildren().add(new TreeItem<>(new StateItem<>(error, true)));
 		}
 
 		errorsItem.setValue(new StateItem<>("State Errors", !errorsItem.getChildren().isEmpty()));
-		errorsItem.setExpanded(true);
 		this.tvRootItem.getChildren().add(errorsItem);
 
 		this.tv.refresh();
