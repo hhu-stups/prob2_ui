@@ -103,31 +103,39 @@ public class MachinesTab extends Tab {
 
 				final Menu startAnimationMenu = new Menu("Start Animation...");
 
-				ContextMenu menu = new ContextMenu(editMachineMenuItem, removeMachineMenuItem, editFileMenuItem, editExternalMenuItem,
-						startAnimationMenu);
+				ContextMenu contextMenu = new ContextMenu(editMachineMenuItem, removeMachineMenuItem, editFileMenuItem,
+						editExternalMenuItem, startAnimationMenu);
 
 				machinesItem.setOnMouseClicked(event -> {
 					if (event.getButton().equals(MouseButton.SECONDARY) && event.getClickCount() == 1) {
-						startAnimationMenu.getItems().clear();
-						for (Runconfiguration runconfiguration : currentProject.getRunconfigurations(machine)) {
-							final MenuItem item = new MenuItem(runconfiguration.toString());
-							item.setOnAction(e -> currentProject.startAnimation(runconfiguration));
-							startAnimationMenu.getItems().add(item);
-						}
-						if (startAnimationMenu.getItems().size() == 0) {
-							startAnimationMenu.setDisable(true);
-						}
-						menu.show(machinesItem, event.getScreenX(), event.getScreenY());
+						updateAnimationMenu(startAnimationMenu, machine);
+						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-						if (splitPane.getItems().size() < 2) {
-							splitPane.getItems().add(0, descriptionView);
-						}
-						descriptionViewTitelLabel.textProperty().bind(new SimpleStringProperty(machine.getName()));
-						descriptionText.textProperty().bind(new SimpleStringProperty(machine.getDescription()));
+						showDescription(machine);
 					}
 				});
 			}
 		});
+	}
+
+	private void showDescription(Machine machine) {
+		if (splitPane.getItems().size() < 2) {
+			splitPane.getItems().add(0, descriptionView);
+		}
+		descriptionViewTitelLabel.textProperty().bind(new SimpleStringProperty(machine.getName()));
+		descriptionText.textProperty().bind(new SimpleStringProperty(machine.getDescription()));
+	}
+
+	private void updateAnimationMenu(final Menu startAnimationMenu, Machine machine) {
+		startAnimationMenu.getItems().clear();
+		for (Runconfiguration runconfiguration : currentProject.getRunconfigurations(machine)) {
+			final MenuItem item = new MenuItem(runconfiguration.toString());
+			item.setOnAction(e -> currentProject.startAnimation(runconfiguration));
+			startAnimationMenu.getItems().add(item);
+		}
+		if (startAnimationMenu.getItems().size() == 0) {
+			startAnimationMenu.setDisable(true);
+		}
 	}
 
 	@FXML

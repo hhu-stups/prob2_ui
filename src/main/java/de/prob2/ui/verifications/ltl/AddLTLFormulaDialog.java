@@ -14,10 +14,10 @@ import javafx.stage.Modality;
 public class AddLTLFormulaDialog extends Dialog<LTLFormulaItem> {
 	
 	@FXML
-	private TextField tf_name;
+	private TextField tfName;
 	
 	@FXML
-	private TextArea ta_description;
+	private TextArea taDescription;
 
 	@Inject
 	public AddLTLFormulaDialog(final StageManager stageManager, final Injector injector) {
@@ -27,8 +27,8 @@ public class AddLTLFormulaDialog extends Dialog<LTLFormulaItem> {
 				return null;
 			} else {
 				LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-				formulaStage.setTitle(tf_name.getText());
-				LTLFormulaItem item = new LTLFormulaItem(tf_name.getText(), ta_description.getText());
+				formulaStage.setTitle(tfName.getText());
+				LTLFormulaItem item = new LTLFormulaItem(tfName.getText(), taDescription.getText());
 				item.setFormulaStage(formulaStage);
 				return item;
 			}
@@ -38,11 +38,11 @@ public class AddLTLFormulaDialog extends Dialog<LTLFormulaItem> {
 	}
 	
 	public void setName(String name) {
-		tf_name.setText(name);
+		tfName.setText(name);
 	}
 	
 	public void setDescription(String description) {
-		ta_description.setText(description);
+		taDescription.setText(description);
 	}
 	
 }

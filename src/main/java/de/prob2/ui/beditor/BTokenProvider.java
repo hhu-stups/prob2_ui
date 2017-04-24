@@ -27,7 +27,7 @@ public class BTokenProvider {
 	
 	private LinkedList<Token> tokens;
 	
-	private LinkedList<Token> firstLine_tokens;
+	private LinkedList<Token> firstLineTokens;
 		
 	private SimpleBooleanProperty initialized;
 	
@@ -69,7 +69,7 @@ public class BTokenProvider {
 	
 	public BTokenProvider(WebEngine engine) {
 		this.tokens = new LinkedList<>();
-		this.firstLine_tokens = new LinkedList<>();
+		this.firstLineTokens = new LinkedList<>();
 		JSObject jsobj = (JSObject) engine.executeScript("window");
 		jsobj.setMember("blexer", this);
 		initialized = new SimpleBooleanProperty(false);
@@ -91,7 +91,7 @@ public class BTokenProvider {
 	
 	public void computeHighlighting(String text, String line) {
 		tokens.clear();
-		firstLine_tokens.clear();
+		firstLineTokens.clear();
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
 		int currentLine = Integer.parseInt(line);
 		try {
@@ -100,7 +100,7 @@ public class BTokenProvider {
 				t = lexer.next();
 				if (!"\n".equals(t.getText())) {
 					if(t.getLine() == currentLine) {
-						firstLine_tokens.add(t);
+						firstLineTokens.add(t);
 					} else  if (t.getLine() - 1 >= currentLine) {
 						tokens.add(t);
 					}
@@ -124,11 +124,11 @@ public class BTokenProvider {
 	}
 	
 	public Token firstLinePeek() {
-		return firstLine_tokens.peek();
+		return firstLineTokens.peek();
 	}
 	
 	public Token firstLinePoll() {
-		return firstLine_tokens.poll();
+		return firstLineTokens.poll();
 	}
 	
 	public String getStyleClassFromToken(Token t) {

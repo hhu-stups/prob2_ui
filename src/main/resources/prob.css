@@ -745,7 +745,7 @@
 	-fx-text-fill: -prob-orange;
 }
 
-/* === FullValueStage === */
+/* ================= FULL VALUE STAGE ================ */
 
 .difftextarea .coords {
 	-fx-fill: teal;
@@ -759,7 +759,7 @@
 	-fx-fill: red;
 }
 
-/* === HistoryChartStage === */
+/* =============== HISTORY CHART STAGE =============== */
 
 /* Hide chart symbols in the chart content, but not in the legend */
 .history-chart .chart-content .chart-line-symbol {
