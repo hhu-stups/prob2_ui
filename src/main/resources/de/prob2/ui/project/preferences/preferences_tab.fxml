@@ -9,7 +9,7 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
 
-<fx:root type="Tab" text="%project.tabs.preferences" closable="false"
+<fx:root type="Tab" text="%project.preferences.tab.title" closable="false"
 	xmlns:fx="http://javafx.com/fxml/1">
 	<VBox stylesheets="@/prob.css" spacing="0">
 		<AnchorPane styleClass="border">
@@ -25,7 +25,7 @@
 			<ListView fx:id="preferencesListView"
 				styleClass="no-border">
 				<placeholder>
-					<Label text="%project.tabs.preferences.noPreferences" />
+					<Label text="%project.preferences.tab.noPreferences" />
 				</placeholder>
 			</ListView>
 		</SplitPane>

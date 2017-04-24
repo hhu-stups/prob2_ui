@@ -8,7 +8,7 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Label?>
 
-<fx:root type="Tab" text="%project.tabs.runconfigurations"
+<fx:root type="Tab" text="%project.runconfigurations.tab.title"
 	closable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<VBox stylesheets="@/prob.css" spacing="0">
 		<AnchorPane styleClass="border">
@@ -26,7 +26,7 @@
 			styleClass="no-border">
 			<placeholder>
 				<Label fx:id="runconfigsPlaceholder"
-					text="%project.tabs.runconfigurations.noRunconfigurations" />
+					text="%project.runconfigurations.tab.noRunconfigurations" />
 			</placeholder>
 		</ListView>
 	</VBox>

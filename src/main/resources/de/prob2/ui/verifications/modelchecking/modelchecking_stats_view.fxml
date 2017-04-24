@@ -22,7 +22,7 @@
 						size="26" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%modelchecking.stats.addModelCheck.tooltip" />
+					<Tooltip text="%verifications.modelchecking.stats.addModelCheck.tooltip" />
 				</tooltip>
 			</Button>
 		</AnchorPane>

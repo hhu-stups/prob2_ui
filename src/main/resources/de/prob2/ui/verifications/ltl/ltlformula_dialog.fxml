@@ -12,7 +12,7 @@
 <?import de.prob2.ui.verifications.ltl.AddLTLFormulaDialog?>
 <?import javafx.scene.control.TextArea?>
 
-<fx:root type ="AddLTLFormulaDialog" title="%ltl.dialog.title" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type ="AddLTLFormulaDialog" title="%verifications.ltl.dialog.title" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="540.0" stylesheets="@/prob.css" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 		    <header>
@@ -21,7 +21,7 @@
 		         	<VBox spacing="5" AnchorPane.topAnchor="20"
 						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
 						AnchorPane.rightAnchor="0">
-		            	<Label layoutX="7.0" layoutY="20.0" prefHeight="31.0" prefWidth="188.0" text="%ltl.dialog.header">
+		            	<Label layoutX="7.0" layoutY="20.0" prefHeight="31.0" prefWidth="188.0" text="%verifications.ltl.dialog.header">
 		               		<font>
 		                  		<Font size="18.0" />
 		               		</font>          	
@@ -40,7 +40,7 @@
 						AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
 						alignment="center_right">
 			            <HBox spacing="20" alignment="center_left">
-							<Label text="%ltl.dialog.enterFormula" />
+							<Label text="%verifications.ltl.dialog.enterFormula" />
 							<TextField fx:id="tf_name" HBox.hgrow="always">
 								<font>
 									<Font size="12" />
@@ -48,7 +48,7 @@
 							</TextField>
 						</HBox>
 						<VBox spacing="20" alignment="center_left">
-							<Label text="%ltl.formula.columns.description" />
+							<Label text="%verifications.ltl.dialog.description" />
 							<TextArea fx:id="ta_description" styleClass="text-area-with-border">
 								<font>
 									<Font size="12" />

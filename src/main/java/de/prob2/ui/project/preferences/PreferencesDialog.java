@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,20 +34,17 @@ public class PreferencesDialog extends Dialog<Preference> {
 	private Label errorExplanationLabel;
 
 	private final ProBPreferences prefs;
-	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 
 	@Inject
 	private PreferencesDialog(final StageManager stageManager, final Api api, final ProBPreferences prefs,
-			final GlobalPreferences globalPreferences, final ResourceBundle bundle, CurrentProject currentProject) {
+			final GlobalPreferences globalPreferences, CurrentProject currentProject) {
 		super();
 
 		this.currentProject = currentProject;
 
 		this.prefs = prefs;
 		this.prefs.setStateSpace(ProBPreferences.getEmptyStateSpace(api, globalPreferences));
-
-		this.bundle = bundle;
 
 		this.setResultConverter(type -> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
@@ -64,7 +60,6 @@ public class PreferencesDialog extends Dialog<Preference> {
 	@FXML
 	private void initialize() {
 		this.prefsView.setPreferences(this.prefs);
-		this.setTitle(bundle.getString("addProBPreference.stage.stageTitle"));
 
 		List<Preference> preferencesList = currentProject.getPreferences();
 		Set<String> preferencesNamesSet = new HashSet<>();
