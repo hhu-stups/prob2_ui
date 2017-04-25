@@ -13,7 +13,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.HBox?>
 
-<fx:root type="Dialog" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Dialog" title="%project.runconfigurations.dialog.dialogTitle"
+	xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane stylesheets="@/prob.css" minWidth="300"
 			minHeight="200">
@@ -22,7 +23,7 @@
 					<VBox spacing="5" AnchorPane.topAnchor="14"
 						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-10"
 						AnchorPane.rightAnchor="-10">
-						<Label text="%addRunconfigs.dialog.title">
+						<Label text="%project.runconfigurations.dialog.title">
 							<font>
 								<Font size="18" />
 							</font>
@@ -35,11 +36,11 @@
 								AnchorPane.rightAnchor="15" AnchorPane.topAnchor="20"
 								AnchorPane.bottomAnchor="20" alignment="center_left" Hgap="10"
 								Vgap="10">
-								<Label text="%addRunconfigs.dialog.machine"
+								<Label text="%project.runconfigurations.dialog.machine"
 									GridPane.columnIndex="0" GridPane.rowIndex="0" />
 								<ChoiceBox fx:id="machinesBox" minWidth="100"
 									GridPane.columnIndex="1" GridPane.rowIndex="0" />
-								<Label text="%addRunconfigs.dialog.preference"
+								<Label text="%project.runconfigurations.dialog.preference"
 									GridPane.columnIndex="0" GridPane.rowIndex="1" />
 								<ComboBox fx:id="preferencesBox" minWidth="100"
 									GridPane.columnIndex="1" GridPane.rowIndex="1" />

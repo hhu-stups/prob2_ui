@@ -243,11 +243,11 @@ public final class OperationsView extends AnchorPane {
 		
 		events = new ArrayList<>();
 		final Set<Transition> operations = trace.getNextTransitions(true);
-		final Set<String> notEnabled = new HashSet<>(opNames);
+		final Set<String> disabled = new HashSet<>(opNames);
 		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		for (Transition transition : operations) {
 			final String name = extractPrettyName(transition.getName());
-			notEnabled.remove(name);
+			disabled.remove(name);
 
 			final List<String> params;
 			if ("SETUP_CONSTANTS".equals(name)) {
@@ -273,6 +273,27 @@ public final class OperationsView extends AnchorPane {
 				);
 			events.add(operationItem);
 		}
+		showDisabledAndWithTimeout(disabled, withTimeout);
+		
+		doSort();
+		
+		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
+			events.add(new OperationItem(
+				"-",
+				"(possibly more - maximum operations reached)",
+				Collections.emptyList(),
+				Collections.emptyList(),
+				OperationItem.Status.MAX_REACHED,
+				false,
+				false,
+				false
+			));
+		}
+
+		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
+	}
+
+	private void showDisabledAndWithTimeout(final Set<String> notEnabled, final Set<String> withTimeout) {
 		if (showDisabledOps) {
 			for (String s : notEnabled) {
 				if (!"INITIALISATION".equals(s)) {
@@ -303,23 +324,6 @@ public final class OperationsView extends AnchorPane {
 				));
 			}
 		}
-		
-		doSort();
-		
-		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
-			events.add(new OperationItem(
-				"-",
-				"(possibly more - maximum operations reached)",
-				Collections.emptyList(),
-				Collections.emptyList(),
-				OperationItem.Status.MAX_REACHED,
-				false,
-				false,
-				false
-			));
-		}
-
-		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
 	}
 
 	private static String extractPrettyName(final String name) {

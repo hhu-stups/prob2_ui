@@ -11,7 +11,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 
-<fx:root type="Tab" text="%project.tabs.project" closable="false"
+<fx:root type="Tab" text="%project.tab.title" closable="false"
 	xmlns:fx="http://javafx.com/fxml/1">
 	<VBox stylesheets="@/prob.css" spacing="0">
 		<AnchorPane styleClass="border">

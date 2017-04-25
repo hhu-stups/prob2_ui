@@ -12,7 +12,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.HBox?>
 
-<fx:root type="Dialog" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Dialog" title="%project.preferences.dialog.dialogTitle"
+	xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane stylesheets="@/prob.css">
 			<content>
@@ -20,7 +21,7 @@
 					<VBox spacing="5" AnchorPane.topAnchor="14"
 						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-10"
 						AnchorPane.rightAnchor="-10">
-						<Label text="%addProBPreference.stage.title">
+						<Label text="%project.preferences.dialog.title">
 							<font>
 								<Font size="18" />
 							</font>
@@ -33,7 +34,7 @@
 								AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
 								alignment="center_right">
 								<HBox spacing="20" alignment="center_left">
-									<Label text="%addProBPreference.stage.name" />
+									<Label text="%project.preferences.dialog.name" />
 									<TextField fx:id="nameField" promptText="Name"
 										HBox.hgrow="always">
 										<font>
@@ -47,7 +48,7 @@
 									</VBox.margin>
 								</Label>
 								<VBox alignment="center_left">
-									<Label text="%addProBPreference.stage.preferences">
+									<Label text="%project.preferences.dialog.preferences">
 										<VBox.margin>
 											<Insets top="10" />
 										</VBox.margin>

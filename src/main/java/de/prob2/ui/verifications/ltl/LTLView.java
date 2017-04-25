@@ -3,8 +3,6 @@ package de.prob2.ui.verifications.ltl;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +45,7 @@ public class LTLView extends AnchorPane{
 	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
 	
 	@FXML
-	private TableView<LTLFormulaItem> tv_formula;
+	private TableView<LTLFormulaItem> tvFormula;
 	
 	@FXML
 	private Button addLTLButton;
@@ -84,44 +82,43 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void initialize() {	
-		tv_formula.setOnMouseClicked(e-> {
-			if(e.getClickCount() == 2 && tv_formula.getSelectionModel().getSelectedItem() != null) {
-				tv_formula.getSelectionModel().getSelectedItem().show();
+		tvFormula.setOnMouseClicked(e-> {
+			if(e.getClickCount() == 2 && tvFormula.getSelectionModel().getSelectedItem() != null) {
+				tvFormula.getSelectionModel().getSelectedItem().show();
 			}
 
 		});
 						
-		tv_formula.setRowFactory(table -> {
+		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
 			
 			MenuItem removeItem = new MenuItem("Remove formula");
 			removeItem.setOnAction(e-> {
-				LTLFormulaItem item = tv_formula.getSelectionModel().getSelectedItem();
+				LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 				currentProject.removeLTLFormula(item);
 			});
 			removeItem.disableProperty().bind(row.emptyProperty());
 			
 			MenuItem renameItem = new MenuItem("Rename formula");
 			renameItem.setOnAction(e-> {
-				List<LTLFormulaItem> newFormulas = new ArrayList<>(tv_formula.getItems());
-				int index = tv_formula.getSelectionModel().getSelectedIndex();
-				LTLFormulaItem item = newFormulas.get(index);
+				LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 				AddLTLFormulaDialog formulaDialog = injector.getInstance(AddLTLFormulaDialog.class);
 				formulaDialog.setName(item.getName());
 				formulaDialog.setDescription(item.getDescription());
 				formulaDialog.showAndWait().ifPresent(result-> {
-					item.setName(result.getName());
-					item.setDescription(result.getDescription());
-					newFormulas.set(index, new LTLFormulaItem(item));
-					currentProject.refreshLTLFormulas(newFormulas);
+					if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription())) {
+						item.setName(result.getName());
+						item.setDescription(result.getDescription());
+						refresh();
+						currentProject.setSaved(false);
+					}
 				});
-				refresh();
 			});
 			renameItem.disableProperty().bind(row.emptyProperty());
 			
 			MenuItem showCounterExampleItem = new MenuItem("Show Counter Example");
 			showCounterExampleItem.setOnAction(e-> {
-				LTLFormulaItem item = tv_formula.getSelectionModel().getSelectedItem();
+				LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 				if (currentTrace.exists()) {
 					this.animations.removeTrace(currentTrace.get());
 				}
@@ -131,7 +128,7 @@ public class LTLView extends AnchorPane{
 			
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
-					LTLFormulaItem item = tv_formula.getSelectionModel().getSelectedItem();
+					LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 					if(row.emptyProperty().get() || item.getCounterExample() == null) {
 						showCounterExampleItem.setDisable(true);
 					} else {
@@ -149,7 +146,7 @@ public class LTLView extends AnchorPane{
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		addLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkAllButton.disableProperty().bind(currentTrace.existsProperty().not());
-		tv_formula.itemsProperty().bind(currentProject.ltlFormulasProperty());	
+		tvFormula.itemsProperty().bind(currentProject.ltlFormulasProperty());	
 	}
 	
 	@FXML
@@ -237,17 +234,17 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void checkAll() {
-		for(LTLFormulaItem item : tv_formula.getItems()) {
+		for(LTLFormulaItem item : tvFormula.getItems()) {
 			item.checkFormula();
 		}
 	}
 	
 	public void refresh() {
-		tv_formula.refresh();
+		tvFormula.refresh();
 	}
 	
 	public TableView<LTLFormulaItem> getTable() {
-		return tv_formula;
+		return tvFormula;
 	}
 	
 

@@ -12,17 +12,17 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 
-<fx:root type="Stage" fx:id="mcheckStage" title="%modelchecking.stage.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" fx:id="mcheckStage" title="%verifications.modelchecking.stage.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
 			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
-				<Button fx:id="startButton" layoutX="103.0" layoutY="223.0" onAction="#startModelCheck" text="%modelchecking.stage.start" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="105.0" AnchorPane.bottomAnchor="15.0" />
+				<Button fx:id="startButton" layoutX="103.0" layoutY="223.0" onAction="#startModelCheck" text="%verifications.modelchecking.stage.start" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="105.0" AnchorPane.bottomAnchor="15.0" />
 				<Button layoutX="225.0" layoutY="260.0" onAction="#cancel" text="%common.cancel" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.leftAnchor="205.0" />
 				<ChoiceBox fx:id="selectSearchStrategy" layoutX="118.0" layoutY="44.0" prefHeight="26.0"
-					prefWidth="134.0" value="%modelchecking.stage.strategy.items.breadthFirst"
+					prefWidth="134.0" value="%verifications.modelchecking.stage.strategy.items.breadthFirst"
 					AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
 					<tooltip>
-						<Tooltip text="%modelchecking.stage.strategy.tooltip" />
+						<Tooltip text="%verifications.modelchecking.stage.strategy.tooltip" />
 					</tooltip>
 					<items>
 						<FXCollections fx:factory="observableArrayList">
@@ -46,20 +46,20 @@
 					AnchorPane.bottomAnchor="60.0" AnchorPane.topAnchor="70.0"
 					styleClass="dark">
 					<CheckBox fx:id="findDeadlocks" selected="true"
-						text="%modelchecking.stage.options.findDeadlocks" />
+						text="%verifications.modelchecking.stage.options.findDeadlocks" />
 					<CheckBox fx:id="findInvViolations" selected="true"
-						text="%modelchecking.stage.options.findInvViolations"
+						text="%verifications.modelchecking.stage.options.findInvViolations"
 						textAlignment="CENTER" />
 					<CheckBox fx:id="findBAViolations"
-						text="%modelchecking.stage.options.findBAViolations" />
-					<CheckBox fx:id="findGoal" text="%modelchecking.stage.options.findGoal" />
+						text="%verifications.modelchecking.stage.options.findBAViolations" />
+					<CheckBox fx:id="findGoal" text="%verifications.modelchecking.stage.options.findGoal" />
 					<CheckBox fx:id="stopAtFullCoverage"
-						text="%modelchecking.stage.options.stopAtFullCoverage" />
+						text="%verifications.modelchecking.stage.options.stopAtFullCoverage" />
 					<CheckBox fx:id="searchForNewErrors" selected="true"
-						text="%modelchecking.stage.options.searchForNewErrors" />
+						text="%verifications.modelchecking.stage.options.searchForNewErrors" />
 				</VBox>
 				<Label layoutX="10.0" layoutY="49.0"
-					text="%modelchecking.stage.strategyLabel" AnchorPane.leftAnchor="20.0"
+					text="%verifications.modelchecking.stage.strategyLabel" AnchorPane.leftAnchor="20.0"
 					AnchorPane.topAnchor="25.0" />
 			</AnchorPane>
 		</Scene>

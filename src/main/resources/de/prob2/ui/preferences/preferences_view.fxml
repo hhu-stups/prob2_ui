@@ -20,11 +20,11 @@
 	<center>
 		<TreeTableView fx:id="tv" prefHeight="400.0" prefWidth="600.0" editable="true" showRoot="false" styleClass="with-border">
 			<columns>
-				<TreeTableColumn fx:id="tvName" editable="false" minWidth="80.0" prefWidth="320.0" text="%preferencesView.columns.name" />
-				<TreeTableColumn fx:id="tvChanged" editable="false" resizable="false" prefWidth="20.0" text="%preferencesView.columns.changed" />
-				<TreeTableColumn fx:id="tvValue" editable="true" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferencesView.columns.value" />
-				<TreeTableColumn fx:id="tvDefaultValue" editable="false" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferencesView.columns.defaultValue" />
-				<TreeTableColumn fx:id="tvDescription" editable="false" styleClass="left" minWidth="80.0" prefWidth="900.0" sortable="false" text="%preferencesView.columns.description" />
+				<TreeTableColumn fx:id="tvName" editable="false" minWidth="80.0" prefWidth="320.0" text="%preferences.view.columns.name" />
+				<TreeTableColumn fx:id="tvChanged" editable="false" resizable="false" prefWidth="20.0" text="%preferences.view.columns.changed" />
+				<TreeTableColumn fx:id="tvValue" editable="true" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferences.view.columns.value" />
+				<TreeTableColumn fx:id="tvDefaultValue" editable="false" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferences.view.columns.defaultValue" />
+				<TreeTableColumn fx:id="tvDescription" editable="false" styleClass="left" minWidth="80.0" prefWidth="900.0" sortable="false" text="%preferences.view.columns.description" />
 			</columns>
 			<placeholder>
 				<Label text="%common.noModelLoaded" />

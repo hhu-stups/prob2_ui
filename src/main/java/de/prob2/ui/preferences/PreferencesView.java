@@ -118,8 +118,8 @@ public final class PreferencesView extends BorderPane {
 			tempSearchPattern = Pattern.compile(this.prefSearchField.getText(), Pattern.CASE_INSENSITIVE);
 		} catch (PatternSyntaxException e) {
 			LOGGER.trace("Bad regex syntax, this is probably not an error!", e);
-			if (!this.prefSearchField.getStyleClass().contains("badsearch")) {
-				this.prefSearchField.getStyleClass().add("badsearch");
+			if (!this.prefSearchField.getStyleClass().contains("text-field-error")) {
+				this.prefSearchField.getStyleClass().add("text-field-error");
 			}
 			tempSearchPattern = null;
 		}
@@ -130,7 +130,7 @@ public final class PreferencesView extends BorderPane {
 			searchPattern = EMPTY_PATTERN;
 		} else {
 			searchPattern = tempSearchPattern;
-			this.prefSearchField.getStyleClass().remove("badsearch");
+			this.prefSearchField.getStyleClass().remove("text-field-error");
 		}
 		
 		for (ProBPreference pref : this.getPreferences().getPreferences().values()) {

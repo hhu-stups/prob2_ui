@@ -15,7 +15,7 @@
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.control.SplitPane?>
 
-<fx:root type="Tab" text="%project.tabs.machines" closable="false"
+<fx:root type="Tab" text="%project.machines.tab.title" closable="false"
 	xmlns:fx="http://javafx.com/fxml/1">
 	<VBox stylesheets="@/prob.css" spacing="0">
 		<AnchorPane styleClass="border">
@@ -67,7 +67,7 @@
 						<VBox fx:id="machinesVBox" spacing="5" AnchorPane.leftAnchor="6"
 							AnchorPane.topAnchor="4" AnchorPane.rightAnchor="6">
 							<StackPane fx:id="noMachinesStack" VBox.vgrow="always">
-								<Label text="%project.tabs.machines.noMachines" />
+								<Label text="%project.machines.tab.noMachines" />
 							</StackPane>
 						</VBox>
 					</AnchorPane>

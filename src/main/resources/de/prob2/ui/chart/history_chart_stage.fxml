@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" minWidth="320" minHeight="160" title="%historychart.title">
+<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" minWidth="320" minHeight="160" title="%chart.historychart.title">
 	<scene>
 		<Scene width="800" height="400" stylesheets="@/prob.css">
 			<AnchorPane maxWidth="Infinity" maxHeight="Infinity">
@@ -45,8 +45,8 @@
 								<padding>
 									<Insets topRightBottomLeft="5.0"/>
 								</padding>
-								<CheckBox fx:id="separateChartsCheckBox" text="%historychart.separateCharts"/>
-								<Label text="%historychart.startPosition">
+								<CheckBox fx:id="separateChartsCheckBox" text="%chart.historychart.separateCharts"/>
+								<Label text="%chart.historychart.startPosition">
 									<labelFor>
 										<ChoiceBox fx:id="startChoiceBox"/>
 									</labelFor>

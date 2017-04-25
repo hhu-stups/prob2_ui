@@ -47,15 +47,15 @@
 		<MenuItem text="%menu.consoles.items.b" onAction="#handleBConsole" />
 	</Menu>
 	<Menu text="%menu.perspectives">
-		<Menu text="%menu.perspectives.preset">
-			<MenuItem text="%menu.perspectives.preset.default" onAction="#handleLoadDefault" />
-			<MenuItem text="%menu.perspectives.preset.separated"
+		<Menu text="%menu.perspectives.items.preset">
+			<MenuItem text="%menu.perspectives.items.preset.default" onAction="#handleLoadDefault" />
+			<MenuItem text="%menu.perspectives.items.preset.separated"
 				onAction="#handleLoadSeparated" />
-			<MenuItem text="%menu.perspectives.preset.separated2"
+			<MenuItem text="%menu.perspectives.items.preset.separated2"
 				onAction="#handleLoadSeparated2" />
 		</Menu>
-		<MenuItem text="%menu.perspectives.detach" onAction="#handleLoadDetached" />
-		<MenuItem text="%menu.perspectives.load" onAction="#handleLoadPerspective" />
+		<MenuItem text="%menu.perspectives.items.detach" onAction="#handleLoadDetached" />
+		<MenuItem text="%menu.perspectives.items.load" onAction="#handleLoadPerspective" />
 	</Menu>
 	<Menu fx:id="windowMenu" text="%menu.window">
 
@@ -63,6 +63,6 @@
 	<Menu text="%menu.help">
 		<MenuItem fx:id="aboutItem" onAction="#handleAboutDialog"
 			text="%menu.help.items.about" />
-		<MenuItem text="%menu.help.reportBug" onAction="#handleReportBug" />
+		<MenuItem text="%menu.help.items.reportBug" onAction="#handleReportBug" />
 	</Menu>
 </fx:root>
