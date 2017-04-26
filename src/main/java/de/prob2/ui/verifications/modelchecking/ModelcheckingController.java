@@ -52,37 +52,75 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
 	private final class ModelcheckingStageController extends Stage {
-		@FXML private Button startButton;
-		@FXML private ChoiceBox<String> selectSearchStrategy;
-		@FXML private CheckBox findDeadlocks;
-		@FXML private CheckBox findInvViolations;
-		@FXML private CheckBox findBAViolations;
-		@FXML private CheckBox findGoal;
-		@FXML private CheckBox stopAtFullCoverage;
-		@FXML private CheckBox searchForNewErrors;
-		
+		@FXML
+		private Button startButton;
+		@FXML
+		private ChoiceBox<String> selectSearchStrategy;
+		@FXML
+		private CheckBox findDeadlocks;
+		@FXML
+		private CheckBox findInvViolations;
+		@FXML
+		private CheckBox findBAViolations;
+		@FXML
+		private CheckBox findGoal;
+		@FXML
+		private CheckBox stopAtFullCoverage;
+		@FXML
+		private CheckBox searchForNewErrors;
+
 		private ModelcheckingStageController(final StageManager stageManager) {
 			stageManager.loadFXML(this, "modelchecking_stage.fxml");
 		}
-		
+
 		@FXML
 		private void initialize() {
 			this.initModality(Modality.APPLICATION_MODAL);
 		}
-		
+
 		@FXML
 		private void startModelCheck() {
 			if (currentTrace.exists()) {
-				startModelchecking(getOptions(), animations.getCurrentTrace().getStateSpace());
+				updateCurrentValues(getOptions(), animations.getCurrentTrace().getStateSpace());
+				startModelchecking();
 			} else {
-				stageManager.makeAlert(Alert.AlertType.ERROR, "No specification file loaded. Cannot run model checker.").showAndWait();
+				stageManager.makeAlert(Alert.AlertType.ERROR, "No specification file loaded. Cannot run model checker.")
+						.showAndWait();
 				this.hide();
 			}
 		}
-		
+
+		private void startModelchecking() {
+			stageController.setDisableStart(true);
+			jobs.put(currentJob.getJobId(), currentJob);
+			currentStats.startJob();
+			showStats(currentStats);
+			currentJobThread = new Thread(() -> {
+				final IModelCheckingResult result;
+				try {
+					result = currentJob.call();
+				} catch (Exception e) {
+					LOGGER.error("Exception while running model check job", e);
+					Platform.runLater(() -> stageManager
+							.makeAlert(Alert.AlertType.ERROR, "Exception while running model check job:\n" + e).show());
+					return;
+				} finally {
+					currentJobThread = null;
+					stageController.setDisableStart(false);
+				}
+				// The consistency checker sometimes doesn't call isFinished, so
+				// we call it manually here with some dummy information.
+				// If the checker already called isFinished, this call won't do
+				// anything - on the first call, the checker was removed from
+				// the jobs map, so the second call returns right away.
+				isFinished(currentJob.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
+			} , "Model Check Result Waiter " + threadCounter.getAndIncrement());
+			currentJobThread.start();
+		}
+
 		private ModelCheckingOptions getOptions() {
 			ModelCheckingOptions options = new ModelCheckingOptions();
-			//TODO: Use selected strategy in modelchecking
+			// TODO: Use selected strategy in modelchecking
 			if (selectSearchStrategy.getSelectionModel().isSelected(0)) {
 				options = options.breadthFirst(true);
 				options = options.depthFirst(false);
@@ -96,10 +134,10 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			options = options.checkGoal(findGoal.isSelected());
 			options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
 			options = options.recheckExisting(!searchForNewErrors.isSelected());
-			
+
 			return options;
 		}
-		
+
 		@FXML
 		private void cancel() {
 			if (currentJob != null) {
@@ -110,19 +148,22 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			}
 			this.hide();
 		}
-		
+
 		private void setDisableStart(final boolean disableStart) {
 			Platform.runLater(() -> this.startButton.setDisable(disableStart));
 		}
 	}
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingController.class);
 	private static final AtomicInteger threadCounter = new AtomicInteger(0);
-	
-	@FXML private AnchorPane statsPane;
-	@FXML private VBox historyBox;
-	@FXML private Button addModelCheckButton;
-	
+
+	@FXML
+	private AnchorPane statsPane;
+	@FXML
+	private VBox historyBox;
+	@FXML
+	private Button addModelCheckButton;
+
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 	private final StatsView statsView;
@@ -137,19 +178,15 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private ModelCheckingOptions currentOptions;
 
 	@Inject
-	private ModelcheckingController(
-		final AnimationSelector animations,
-		final CurrentTrace currentTrace,
-		final StageManager stageManager,
-		final StatsView statsView
-	) {
+	private ModelcheckingController(final AnimationSelector animations, final CurrentTrace currentTrace,
+			final StageManager stageManager, final StatsView statsView) {
 		this.animations = animations;
 		this.currentTrace = currentTrace;
 		this.statsView = statsView;
 		this.stageManager = stageManager;
-		
+
 		stageManager.loadFXML(this, "modelchecking_stats_view.fxml");
-		
+
 		this.stageController = new ModelcheckingStageController(stageManager);
 		this.jobs = new HashMap<>();
 		this.currentJob = null;
@@ -168,33 +205,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		if (!stageController.isShowing()) {
 			this.stageController.showAndWait();
 		}
-	}
-
-	private void startModelchecking(ModelCheckingOptions options, StateSpace currentStateSpace) {
-		stageController.setDisableStart(true);
-		currentOptions = options;
-		currentStats = new ModelCheckStats(stageManager, this, statsView);
-		currentJob = new ConsistencyChecker(currentStateSpace, options, null, this);
-		jobs.put(currentJob.getJobId(), currentJob);
-		currentStats.startJob();
-		showStats(currentStats);
-		currentJobThread = new Thread(() -> {
-			final IModelCheckingResult result;
-			try {
-				result = currentJob.call();
-			} catch (Exception e) {
-				LOGGER.error("Exception while running model check job", e);
-				Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Exception while running model check job:\n" + e).show());
-				return;
-			} finally {
-				currentJobThread = null;
-				stageController.setDisableStart(false);
-			}
-			// The consistency checker sometimes doesn't call isFinished, so we call it manually here with some dummy information.
-			// If the checker already called isFinished, this call won't do anything - on the first call, the checker was removed from the jobs map, so the second call returns right away.
-			this.isFinished(currentJob.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
-		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
-		currentJobThread.start();
 	}
 
 	private Node toHistoryNode(HistoryItem item) {
@@ -251,7 +261,13 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		cm.getItems().add(mItem);
 		return cm;
 	}
-
+	
+	public void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
+		currentOptions = options;
+		currentStats = new ModelCheckStats(stageManager, this, statsView);
+		currentJob = new ConsistencyChecker(stateSpace, options, null, this);
+	}
+	
 	private void updateSelectedItem(Node selected) {
 		for (Node node : historyNodeList) {
 			node.getStyleClass().remove("historyItemBackgroundSelected");
@@ -263,20 +279,20 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private FontAwesomeIconView selectIcon(ModelCheckStats.Result res) {
 		FontAwesomeIcon icon;
 		switch (res) {
-			case SUCCESS:
-				icon = FontAwesomeIcon.CHECK_CIRCLE_ALT;
-				break;
-			
-			case DANGER:
-				icon = FontAwesomeIcon.TIMES_CIRCLE_ALT;
-				break;
-			
-			case WARNING:
-				icon = FontAwesomeIcon.EXCLAMATION_TRIANGLE;
-				break;
-			
-			default:
-				throw new IllegalArgumentException("Invalid result: " + res);
+		case SUCCESS:
+			icon = FontAwesomeIcon.CHECK_CIRCLE_ALT;
+			break;
+
+		case DANGER:
+			icon = FontAwesomeIcon.TIMES_CIRCLE_ALT;
+			break;
+
+		case WARNING:
+			icon = FontAwesomeIcon.EXCLAMATION_TRIANGLE;
+			break;
+
+		default:
+			throw new IllegalArgumentException("Invalid result: " + res);
 		}
 		FontAwesomeIconView iconView = new FontAwesomeIconView(icon);
 		iconView.setSize("15");
@@ -320,7 +336,8 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			currentStats.updateStats(job, timeElapsed, stats);
 		} catch (RuntimeException e) {
 			LOGGER.error("Exception in updateStats", e);
-			Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Exception in updateStats:\n" + e).show());
+			Platform.runLater(
+					() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Exception in updateStats:\n" + e).show());
 		}
 	}
 
@@ -341,7 +358,8 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			});
 		} catch (RuntimeException e) {
 			LOGGER.error("Exception in isFinished", e);
-			Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Exception in isFinished:\n" + e).show());
+			Platform.runLater(
+					() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Exception in isFinished:\n" + e).show());
 		}
 	}
 }

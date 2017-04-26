@@ -115,11 +115,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.ltlFormulas.setAll(to.getLTLFormulas());
 				this.location.set(to.getLocation());
 				if(from == null) {
-					for(LTLFormulaItem item : ltlFormulas) {
-						item.initializeStatus();
-						LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-						item.setFormulaStage(formulaStage);
-					}
+					initializeLTLFormulas();
 				}
 				if (!to.equals(from)) {
 					this.saved.set(false);
@@ -225,6 +221,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return runconfigsList;
 	}
 	
+	public void initializeLTLFormulas() {
+		for(LTLFormulaItem item : ltlFormulas) {
+			item.initializeStatus();
+			LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
+			item.setFormulaStage(formulaStage);
+		}
+	}
+	
 	public void addLTLFormula(LTLFormulaItem formula) {
 		List<LTLFormulaItem> formulas = this.getLtlFormulas();
 		formulas.add(formula);
@@ -257,6 +261,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				modelCheckController.resetView();
 			}
 			super.set(project);
+			initializeLTLFormulas();
 		}
 	}
 	
