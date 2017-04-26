@@ -121,6 +121,13 @@ public final class DetachViewStageController extends Stage {
 				removeTP(accordionMap.get(titledPane));
 			}
 		}
+		for (Stage stage : wrapperStages) {
+			List<Node> child = stage.getScene().getRoot().getChildrenUnmodifiable();
+			if (!child.isEmpty() && !checkBoxMap.get(child.get(0).getClass()).isSelected()) {
+				stage.hide();
+				Platform.runLater(() -> wrapperStages.remove(stage));
+			}
+		}
 		if (!uiState.getGuiState().contains("detached")) {
 			uiState.setGuiState(uiState.getGuiState() + "detached");
 		}
