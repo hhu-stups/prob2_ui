@@ -92,6 +92,7 @@ public final class MenuController extends MenuBar {
 	private MenuItem aboutItem;
 
 	private CurrentProject currentProject;
+	private static final String PROB2 = "ProB 2";
 
 	@Inject
 	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
@@ -122,18 +123,18 @@ public final class MenuController extends MenuBar {
 			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
 
 			// Create Mac-style application menu
-			final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu("ProB 2");
+			final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu(PROB2);
 			this.getMenus().add(0, applicationMenu);
 
 			menuToolkit.setApplicationMenu(applicationMenu);
-			MenuItem quit = menuToolkit.createQuitMenuItem("ProB 2");
+			MenuItem quit = menuToolkit.createQuitMenuItem(PROB2);
 			quit.setOnAction(event -> {
 				for(Stage stage : stageManager.getRegistered()) {
 					stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
 				}
 			});
 			applicationMenu.getItems().setAll(aboutItem, new SeparatorMenuItem(), preferencesItem,
-					new SeparatorMenuItem(), menuToolkit.createHideMenuItem("ProB 2"),
+					new SeparatorMenuItem(), menuToolkit.createHideMenuItem(PROB2),
 					menuToolkit.createHideOthersMenuItem(), menuToolkit.createUnhideAllMenuItem(),
 					new SeparatorMenuItem(), quit);
 

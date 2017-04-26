@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -162,6 +163,8 @@ public final class OperationsView extends AnchorPane {
 	private final CurrentTrace currentTrace;
 
 	private final Comparator<CharSequence> alphanumericComparator;
+	private static final String INITIALISATION = "INITIALISATION";
+	private static final String ICON_DARK = "icon-dark";
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager) {
@@ -252,7 +255,7 @@ public final class OperationsView extends AnchorPane {
 			final List<String> params;
 			if ("SETUP_CONSTANTS".equals(name)) {
 				params = this.extractParamsFromNextState(trace, transition, Constant.class);
-			} else if ("INITIALISATION".equals(name)) {
+			} else if (INITIALISATION.equals(name)) {
 				params = this.extractParamsFromNextState(trace, transition, Variable.class);
 			} else {
 				params = transition.getParams();
@@ -296,7 +299,7 @@ public final class OperationsView extends AnchorPane {
 	private void showDisabledAndWithTimeout(final Set<String> notEnabled, final Set<String> withTimeout) {
 		if (showDisabledOps) {
 			for (String s : notEnabled) {
-				if (!"INITIALISATION".equals(s)) {
+				if (!INITIALISATION.equals(s)) {
 					events.add(new OperationItem(
 						s,
 						s,
@@ -331,7 +334,7 @@ public final class OperationsView extends AnchorPane {
 			return "SETUP_CONSTANTS";
 		}
 		if ("$initialise_machine".equals(name)) {
-			return "INITIALISATION";
+			return INITIALISATION;
 		}
 		return name;
 	}
@@ -377,7 +380,7 @@ public final class OperationsView extends AnchorPane {
 				showDisabledOps ? FontAwesomeIcon.EYE : FontAwesomeIcon.EYE_SLASH);
 		update(currentTrace.get());
 		icon.setSize("15");
-		icon.setStyleClass("icon-dark");
+		icon.setStyleClass(ICON_DARK);
 		disabledOpsToggle.setGraphic(icon);
 	}
 
@@ -402,12 +405,7 @@ public final class OperationsView extends AnchorPane {
 	}
 
 	private List<OperationItem> applyFilter(final String filter) {
-		List<OperationItem> newOps = new ArrayList<>();
-		for (OperationItem op : events) {
-			if (op.getName().startsWith(filter)) {
-				newOps.add(op);
-			}
-		}
+		List<OperationItem> newOps = events.stream().filter(op -> op.getName().startsWith(filter)).collect(Collectors.toList());
 		return newOps;
 	}
 
@@ -459,7 +457,7 @@ public final class OperationsView extends AnchorPane {
 		doSort();
 		opsListView.getItems().setAll(applyFilter(filter));
 		icon.setSize("15");
-		icon.setStyleClass("icon-dark");
+		icon.setStyleClass(ICON_DARK);
 		sortButton.setGraphic(icon);
 	}
 
@@ -498,9 +496,7 @@ public final class OperationsView extends AnchorPane {
 	private List<String> getParams(BEvent e) {
 		List<String> paramList = new ArrayList<>();
 		if (e instanceof Event) {
-			for (EventParameter eParam : ((Event) e).getParameters()) {
-				paramList.add(eParam.getName());
-			}
+			paramList.addAll(((Event) e).getParameters().stream().map(EventParameter::getName).collect(Collectors.toList()));
 		} else if (e instanceof Operation) {
 			paramList.addAll(((Operation) e).getParameters());
 		}
@@ -527,7 +523,7 @@ public final class OperationsView extends AnchorPane {
 			throw new IllegalStateException("Unhandled sort mode: " + sortMode);
 		}
 		icon.setSize("15");
-		icon.setStyleClass("icon-dark");
+		icon.setStyleClass(ICON_DARK);
 		sortButton.setGraphic(icon);
 	}
 
@@ -546,7 +542,7 @@ public final class OperationsView extends AnchorPane {
 			disabledOpsToggle.setSelected(false);
 		}
 		icon.setSize("15");
-		icon.setStyleClass("icon-dark");
+		icon.setStyleClass(ICON_DARK);
 		disabledOpsToggle.setGraphic(icon);
 	}
 
