@@ -356,6 +356,21 @@ public final class MenuController extends MenuBar {
 		bConsoleStage.show();
 		bConsoleStage.toFront();
 	}
+	
+	@FXML
+	private void handleDefaultFontSize() {
+		//TODO
+	}
+	
+	@FXML
+	private void handleIncreaseFontSize() {
+		//TODO
+	}
+	
+	@FXML
+	private void handleDecreaseFontSize() {
+		//TODO
+	}
 
 	@FXML
 	private void handleReportBug() {
