@@ -3,11 +3,13 @@ package de.prob2.ui.menu;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
 import de.prob2.ui.MainController;
+import javafx.scene.Node;
 import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,6 +124,16 @@ public final class DetachViewStageController extends Stage {
 		if (!uiState.getGuiState().contains("detached")) {
 			uiState.setGuiState(uiState.getGuiState() + "detached");
 		}
+		this.setOnCloseRequest(e -> {
+			if (!wrapperStages.isEmpty()) {
+				for (Stage stage : wrapperStages) {
+					List<Node> child = stage.getScene().getRoot().getChildrenUnmodifiable();
+					if (!child.isEmpty()) {
+						checkBoxMap.get(child.get(0).getClass()).setSelected(true);
+					}
+				}
+			}
+		});
 		this.hide();
 	}
 
