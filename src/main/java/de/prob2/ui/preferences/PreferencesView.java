@@ -132,52 +132,7 @@ public final class PreferencesView extends BorderPane {
 			searchPattern = tempSearchPattern;
 			this.prefSearchField.getStyleClass().remove("text-field-error");
 		}
-		
-		for (ProBPreference pref : this.getPreferences().getPreferences().values()) {
-			if (
-				!searchPattern.matcher(pref.name).find()
-					&& !searchPattern.matcher(pref.description).find()
-				) {
-				// Preference's name and description don't match search, don't add it
-				continue;
-			}
-			
-			TreeItem<PrefTreeItem> category = null;
-			for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
-				if (ti.getValue().getName().equals(pref.category)) {
-					category = ti;
-				}
-			}
-			if (category == null) {
-				category = new TreeItem<>(new CategoryPrefTreeItem(pref.category));
-				this.tv.getRoot().getChildren().add(category);
-				category.setExpanded(true);
-			}
-			
-			TreeItem<PrefTreeItem> item = null;
-			for (TreeItem<PrefTreeItem> ti : category.getChildren()) {
-				if (ti.getValue().getName().equals(pref.name)) {
-					item = ti;
-				}
-			}
-			
-			final ProBPreferenceType type = createType(pref);
-			
-			final String value = this.getPreferences().getPreferenceValue(pref.name);
-			
-			if (item == null) {
-				item = new TreeItem<>();
-				category.getChildren().add(item);
-			}
-			item.setValue(new RealPrefTreeItem(
-				pref.name,
-				value.equals(pref.defaultValue) ? "" : "*",
-				value,
-				type,
-				pref.defaultValue,
-				pref.description
-			));
-		}
+		generateTreeItems(searchPattern);
 		
 		if (!searchPattern.pattern().isEmpty()) {
 			for (Iterator<TreeItem<PrefTreeItem>> itcat = this.tv.getRoot().getChildren().iterator(); itcat.hasNext();) {
@@ -198,6 +153,51 @@ public final class PreferencesView extends BorderPane {
 		
 		for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
 			ti.getChildren().sort(Comparator.comparing(c -> c.getValue().getName()));
+		}
+	}
+
+	private void generateTreeItems(final Pattern searchPattern) {
+		for (ProBPreference pref : this.getPreferences().getPreferences().values()) {
+			if (!searchPattern.matcher(pref.name).find() && !searchPattern.matcher(pref.description).find()) {
+				// Preference's name and description don't match search, don't add it
+				continue;
+			}
+
+			TreeItem<PrefTreeItem> category = null;
+			for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
+				if (ti.getValue().getName().equals(pref.category)) {
+					category = ti;
+				}
+			}
+			if (category == null) {
+				category = new TreeItem<>(new CategoryPrefTreeItem(pref.category));
+				this.tv.getRoot().getChildren().add(category);
+				category.setExpanded(true);
+			}
+
+			TreeItem<PrefTreeItem> item = null;
+			for (TreeItem<PrefTreeItem> ti : category.getChildren()) {
+				if (ti.getValue().getName().equals(pref.name)) {
+					item = ti;
+				}
+			}
+
+			final ProBPreferenceType type = createType(pref);
+
+			final String value = this.getPreferences().getPreferenceValue(pref.name);
+
+			if (item == null) {
+				item = new TreeItem<>();
+				category.getChildren().add(item);
+			}
+			item.setValue(new RealPrefTreeItem(
+				pref.name,
+				value.equals(pref.defaultValue) ? "" : "*",
+				value,
+				type,
+				pref.defaultValue,
+				pref.description
+			));
 		}
 	}
 	

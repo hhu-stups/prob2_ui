@@ -47,33 +47,7 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 				this.setText(null);
 			} else if (contents instanceof ASTFormula) {
 				final AbstractEvalResult result = this.values.get(((ASTFormula)contents).getFormula());
-				if (result == null) {
-					this.setText(null);
-				} else if (result instanceof EvalResult) {
-					final EvalResult eresult = (EvalResult)result;
-					this.setText(eresult.getValue());
-					if ("FALSE".equals(eresult.getValue())) {
-						this.getStyleClass().add("false");
-					} else if ("TRUE".equals(eresult.getValue())) {
-						this.getStyleClass().add("true");
-					}
-				} else if (result instanceof IdentifierNotInitialised) {
-					this.setText("(not initialized)");
-					this.getStyleClass().add("errorresult");
-				} else if (result instanceof WDError) {
-					this.setText("(not well-defined)");
-					this.getStyleClass().add("errorresult");
-				} else if (result instanceof EvaluationErrorResult) {
-					this.setText("Error: " + ((EvaluationErrorResult) result).getResult());
-					this.getStyleClass().add("errorresult");
-				} else if (result instanceof EnumerationWarning) {
-					this.setText("(enumeration warning)");
-					this.getStyleClass().add("errorresult");
-				} else {
-					LOGGER.warn("Unknown result type, falling back to toString: {}", result.getClass());
-					// noinspection ObjectToString
-					this.setText(result.getClass() + " toString: " + result);
-				}
+				checkResult(result);
 			} else if (contents instanceof StateError) {
 				this.setText(this.isCurrent ? ((StateError)contents).getShortDescription() : null);
 				this.getStyleClass().add("errorresult");
@@ -81,6 +55,36 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 				throw new IllegalArgumentException("Don't know how to show the value of a " + contents.getClass() + " instance");
 			}
 			this.setGraphic(null);
+		}
+	}
+
+	private void checkResult(final AbstractEvalResult result) {
+		if (result == null) {
+			this.setText(null);
+		} else if (result instanceof EvalResult) {
+			final EvalResult eresult = (EvalResult)result;
+			this.setText(eresult.getValue());
+			if ("FALSE".equals(eresult.getValue())) {
+				this.getStyleClass().add("false");
+			} else if ("TRUE".equals(eresult.getValue())) {
+				this.getStyleClass().add("true");
+			}
+		} else if (result instanceof IdentifierNotInitialised) {
+			this.setText("(not initialized)");
+			this.getStyleClass().add("errorresult");
+		} else if (result instanceof WDError) {
+			this.setText("(not well-defined)");
+			this.getStyleClass().add("errorresult");
+		} else if (result instanceof EvaluationErrorResult) {
+			this.setText("Error: " + ((EvaluationErrorResult) result).getResult());
+			this.getStyleClass().add("errorresult");
+		} else if (result instanceof EnumerationWarning) {
+			this.setText("(enumeration warning)");
+			this.getStyleClass().add("errorresult");
+		} else {
+			LOGGER.warn("Unknown result type, falling back to toString: {}", result.getClass());
+			// noinspection ObjectToString
+			this.setText(result.getClass() + " toString: " + result);
 		}
 	}
 }
