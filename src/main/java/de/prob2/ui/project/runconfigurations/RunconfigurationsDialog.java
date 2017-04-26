@@ -65,6 +65,7 @@ public class RunconfigurationsDialog extends Dialog<Runconfiguration> {
 			}
 		});
 		machinesBox.getSelectionModel().selectFirst();
+		preferencesBox.getSelectionModel().selectFirst();
 		this.getDialogPane().lookupButton(okButtonType).disableProperty()
 				.bind(machinesBox.valueProperty().isNotNull().and(preferencesBox.valueProperty().isNotNull()).not());
 	}
