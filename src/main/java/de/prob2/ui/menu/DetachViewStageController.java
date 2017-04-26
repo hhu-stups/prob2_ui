@@ -52,7 +52,7 @@ public final class DetachViewStageController extends Stage {
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final UIState uiState;
-	private final String DETACHED = "detached";
+	private static final String detached = "detached";
 	
 	private final Map<Class<? extends Parent>, CheckBox> checkBoxMap;
 	private final Set<Stage> wrapperStages;
@@ -112,8 +112,8 @@ public final class DetachViewStageController extends Stage {
 	@FXML
 	public void apply() {
 		String guiState = uiState.getGuiState();
-		if (guiState.contains(DETACHED)){
-			guiState = guiState.replace(DETACHED,"");
+		if (guiState.contains(detached)){
+			guiState = guiState.replace(detached,"");
 		}
 		final Parent root = injector.getInstance(MenuController.class).loadPreset(guiState);
 		final Map<TitledPane,Accordion> accordionMap = ((MainController) root).getAccordionMap();
@@ -123,8 +123,8 @@ public final class DetachViewStageController extends Stage {
 			}
 		}
 		updateWrapperStages();
-		if (!uiState.getGuiState().contains(DETACHED)) {
-			uiState.setGuiState(uiState.getGuiState() + DETACHED);
+		if (!uiState.getGuiState().contains(detached)) {
+			uiState.setGuiState(uiState.getGuiState() + detached);
 		}
 		this.setOnCloseRequest(e -> {
 			if (!wrapperStages.isEmpty()) {
@@ -195,7 +195,7 @@ public final class DetachViewStageController extends Stage {
 			accordion.getPanes().add(tp);
 			wrapperStages.remove(stage);
 			if (wrapperStages.isEmpty()) {
-				uiState.setGuiState(uiState.getGuiState().replace(DETACHED,""));
+				uiState.setGuiState(uiState.getGuiState().replace(detached,""));
 			}
 		});
 		// Default bounds, replaced by saved ones from the config when show() is called
