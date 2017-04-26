@@ -163,7 +163,6 @@ public class LTLView extends AnchorPane{
 				EvaluationCommand lcc = formula.getCommand(stateid);
 				currentTrace.getStateSpace().execute(lcc);
 				AbstractEvalResult result = lcc.getValue();
-				
 				if(result instanceof LTLOk) {
 					showSuccess(item);
 					item.setCheckedSuccessful();
@@ -171,7 +170,7 @@ public class LTLView extends AnchorPane{
 				} else if(result instanceof LTLCounterExample) {
 					showCounterExampleFound(item);
 					item.setCheckedFailed();
-					item.setCounterExample(currentTrace.get());
+					item.setCounterExample(((LTLCounterExample) result).getTrace(stateid.getStateSpace()));
 				} else if(result instanceof LTLError) {
 					showError(item, (LTLError) result);
 					item.setCheckedFailed();

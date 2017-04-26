@@ -44,6 +44,7 @@ public class LTLFormulaStage extends Stage {
 			if(from != null) {
 				currentProject.setSaved(false);
 			}
+			item.setFormula(taFormula.getText());
 		});
 		checkFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
