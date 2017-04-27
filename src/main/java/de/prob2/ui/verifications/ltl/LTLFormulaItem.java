@@ -56,6 +56,7 @@ public class LTLFormulaItem {
 
 	public void setFormula(String formula) {
 		this.formula = formula;
+		initializeStatus();
 	}
 
 	public String getFormula() {
