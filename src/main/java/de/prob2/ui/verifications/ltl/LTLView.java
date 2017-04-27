@@ -84,35 +84,21 @@ public class LTLView extends AnchorPane{
 	public void initialize() {	
 		tvFormula.setOnMouseClicked(e-> {
 			if(e.getClickCount() == 2 && tvFormula.getSelectionModel().getSelectedItem() != null) {
-				tvFormula.getSelectionModel().getSelectedItem().show();
+				showCurrentItemDialog();
 			}
-
 		});
 						
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
-			
 			MenuItem removeItem = new MenuItem("Remove formula");
 			removeItem.setOnAction(e-> {
-				LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-				currentProject.removeLTLFormula(item);
+				currentProject.removeLTLFormula(tvFormula.getSelectionModel().getSelectedItem());
 			});
 			removeItem.disableProperty().bind(row.emptyProperty());
 			
 			MenuItem renameItem = new MenuItem("Rename formula");
 			renameItem.setOnAction(e-> {
-				LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-				AddLTLFormulaDialog formulaDialog = injector.getInstance(AddLTLFormulaDialog.class);
-				formulaDialog.setName(item.getName());
-				formulaDialog.setDescription(item.getDescription());
-				formulaDialog.showAndWait().ifPresent(result-> {
-					if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription())) {
-						item.setName(result.getName());
-						item.setDescription(result.getDescription());
-						refresh();
-						currentProject.setSaved(false);
-					}
-				});
+				showCurrentItemDialog();
 			});
 			renameItem.disableProperty().bind(row.emptyProperty());
 			
@@ -149,9 +135,16 @@ public class LTLView extends AnchorPane{
 		tvFormula.itemsProperty().bind(currentProject.ltlFormulasProperty());	
 	}
 	
+	private void showCurrentItemDialog() {
+		if(tvFormula.getSelectionModel().getSelectedItem().showAndRegisterChange()) {
+			tvFormula.refresh();
+			currentProject.setSaved(false);
+		}
+	}
+	
 	@FXML
 	public void addFormula() {
-		injector.getInstance(AddLTLFormulaDialog.class).showAndWait().ifPresent(currentProject::addLTLFormula);
+		injector.getInstance(LTLFormulaDialog.class).showAndWait().ifPresent(currentProject::addLTLFormula);
 	}
 	
 	public void checkFormula(LTLFormulaItem item) {
@@ -183,7 +176,7 @@ public class LTLView extends AnchorPane{
 			item.setCounterExample(null);
 			logger.error("Could not parse LTL formula", e);
 		}
-		refresh();
+		tvFormula.refresh();
 	}
 	
 	private void showParseError(LTLFormulaItem item, LtlParseException e) {
@@ -234,12 +227,8 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void checkAll() {
 		for(LTLFormulaItem item : tvFormula.getItems()) {
-			item.checkFormula();
+			checkFormula(item);
 		}
-	}
-	
-	public void refresh() {
-		tvFormula.refresh();
 	}
 	
 	public TableView<LTLFormulaItem> getTable() {

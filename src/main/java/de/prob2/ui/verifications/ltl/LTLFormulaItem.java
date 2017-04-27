@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -15,42 +16,21 @@ public class LTLFormulaItem {
 	private String formula;
 
 	private transient Trace counterExample;
-	private transient LTLFormulaStage formulaStage;
+	private transient LTLFormulaDialog formulaDialog;
 
-	public LTLFormulaItem(String name, String description) {
+	public LTLFormulaItem(LTLFormulaDialog formulaDialog, String name, String description, String formula) {
 		initializeStatus();
 		this.name = name;
 		this.description = description;
-		this.formula = "";
+		this.formula = formula;
 		this.counterExample = null;
+		this.formulaDialog = formulaDialog;
 	}
-
-	public LTLFormulaItem(LTLFormulaItem item) {
-		this.status = item.status;
-		this.name = item.name;
-		this.description = item.description;
-		this.formula = item.formula;
-		this.counterExample = item.counterExample;
-		this.formulaStage = item.formulaStage;
-	}
-
+	
 	public void initializeStatus() {
 		FontAwesomeIconView newStatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		newStatus.setFill(Color.BLUE);
 		this.status = newStatus;
-	}
-
-	public void setFormulaStage(LTLFormulaStage formulaStage) {
-		this.formulaStage = formulaStage;
-		formulaStage.setItem(this);
-	}
-
-	public void checkFormula() {
-		formulaStage.checkFormula();
-	}
-
-	public void show() {
-		formulaStage.show();
 	}
 
 	@Override
@@ -108,6 +88,28 @@ public class LTLFormulaItem {
 
 	public Trace getCounterExample() {
 		return counterExample;
+	}
+	
+	public void setFormulaDialog(LTLFormulaDialog formulaDialog) {
+		this.formulaDialog = formulaDialog;
+	}
+	
+	public boolean showAndRegisterChange() {
+		formulaDialog.setName(getName());
+		formulaDialog.setDescription(getDescription());
+		formulaDialog.setFormula(getFormula());
+		ArrayList<Boolean> changed = new ArrayList<>();
+		changed.add(new Boolean(false));
+		formulaDialog.showAndWait().ifPresent(result-> {
+			if(!getName().equals(result.getName()) || !getDescription().equals(result.getDescription()) || 
+					!getFormula().equals(result.getFormula())) {
+				setName(result.getName());
+				setDescription(result.getDescription());
+				setFormula(result.getFormula());
+				changed.set(0, new Boolean(true));
+			}
+		});
+		return changed.get(0).booleanValue();
 	}
 
 	@Override
