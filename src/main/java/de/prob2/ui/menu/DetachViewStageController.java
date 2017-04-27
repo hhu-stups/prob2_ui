@@ -52,7 +52,7 @@ public final class DetachViewStageController extends Stage {
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final UIState uiState;
-	private static final String detached = "detached";
+	private static final String DETACHED = "detached";
 	
 	private final Map<Class<? extends Parent>, CheckBox> checkBoxMap;
 	private final Set<Stage> wrapperStages;
@@ -112,8 +112,8 @@ public final class DetachViewStageController extends Stage {
 	@FXML
 	public void apply() {
 		String guiState = uiState.getGuiState();
-		if (guiState.contains(detached)){
-			guiState = guiState.replace(detached,"");
+		if (guiState.contains(DETACHED)){
+			guiState = guiState.replace(DETACHED,"");
 		}
 		final Parent root = injector.getInstance(MenuController.class).loadPreset(guiState);
 		final Map<TitledPane,Accordion> accordionMap = ((MainController) root).getAccordionMap();
@@ -123,8 +123,8 @@ public final class DetachViewStageController extends Stage {
 			}
 		}
 		updateWrapperStages();
-		if (!uiState.getGuiState().contains(detached)) {
-			uiState.setGuiState(uiState.getGuiState() + detached);
+		if (!uiState.getGuiState().contains(DETACHED)) {
+			uiState.setGuiState(uiState.getGuiState() + DETACHED);
 		}
 		this.setOnCloseRequest(e -> {
 			if (!wrapperStages.isEmpty()) {
@@ -176,7 +176,7 @@ public final class DetachViewStageController extends Stage {
 	private void transferToNewWindow(TitledPane tp, String title, Accordion accordion) {
 		Parent node = (Parent) tp.getContent();
 		tp.setContent(null);
-		Stage stage = stageManager.makeStage(new Scene(new StackPane()), this.getClass().getName() + " detached " + node.getClass().getName());
+		Stage stage = stageManager.makeStage(new Scene(new StackPane()), this.getClass().getName() + " DETACHED " + node.getClass().getName());
 		((StackPane) stage.getScene().getRoot()).getChildren().add(node);
 		node.setVisible(true);
 		wrapperStages.add(stage);
@@ -195,7 +195,7 @@ public final class DetachViewStageController extends Stage {
 			accordion.getPanes().add(tp);
 			wrapperStages.remove(stage);
 			if (wrapperStages.isEmpty()) {
-				uiState.setGuiState(uiState.getGuiState().replace(detached,""));
+				uiState.setGuiState(uiState.getGuiState().replace(DETACHED,""));
 			}
 		});
 		// Default bounds, replaced by saved ones from the config when show() is called
