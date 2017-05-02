@@ -25,13 +25,25 @@ public class LTLFormulaItem {
 		this.formula = formula;
 		this.counterExample = null;
 		this.formulaDialog = formulaDialog;
-
 	}
 	
-	public void initializeStatus() {
+	private void setData(String name, String description, String formula) {
+		initializeStatus();
+		this.name = name;
+		this.description = description;
+		this.formula = formula;
+	}
+	
+	private void initializeStatus() {
 		FontAwesomeIconView newStatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		newStatus.setFill(Color.BLUE);
 		this.status = newStatus;
+	}
+	
+	public void initialize(LTLFormulaDialog formulaDialog) {
+		initializeStatus();
+		this.formulaDialog = formulaDialog;
+		this.formulaDialog.setData(getName(), getDescription(), getFormula());
 	}
 
 	@Override
@@ -43,21 +55,8 @@ public class LTLFormulaItem {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getDescription() {
 		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public void setFormula(String formula) {
-		this.formula = formula;
-		initializeStatus();
 	}
 
 	public String getFormula() {
@@ -68,20 +67,16 @@ public class LTLFormulaItem {
 		return status;
 	}
 
-	public void setStatus(FontAwesomeIconView status) {
-		this.status = status;
-	}
-
 	public void setCheckedSuccessful() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
 		icon.setFill(Color.GREEN);
-		this.setStatus(icon);
+		this.status = icon;
 	}
 
 	public void setCheckedFailed() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
 		icon.setFill(Color.RED);
-		this.setStatus(icon);
+		this.status = icon;
 	}
 
 	public void setCounterExample(Trace counterExample) {
@@ -92,20 +87,13 @@ public class LTLFormulaItem {
 		return counterExample;
 	}
 	
-	public void setFormulaDialog(LTLFormulaDialog formulaDialog) {
-		this.formulaDialog = formulaDialog;
-		this.formulaDialog.loadDialog(getName(), getDescription(), getFormula());
-	}
-	
 	public boolean showAndRegisterChange() {
 		ArrayList<Boolean> changed = new ArrayList<>();
 		changed.add(false);
 		formulaDialog.showAndWait().ifPresent(result-> {
 			if(!getName().equals(result.getName()) || !getDescription().equals(result.getDescription()) || 
 					!getFormula().equals(result.getFormula())) {
-				setName(result.getName());
-				setDescription(result.getDescription());
-				setFormula(result.getFormula());
+				setData(result.getName(), result.getDescription(), result.getFormula());
 				changed.set(0, true);
 			}
 		});

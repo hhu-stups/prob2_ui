@@ -36,7 +36,7 @@ public class LTLFormulaDialog extends Dialog<LTLFormulaItem> {
 		stageManager.loadFXML(this, "ltlformula_dialog.fxml");
 	}
 	
-	public void loadDialog(String name, String description, String formula) {
+	public void setData(String name, String description, String formula) {
 		tfName.setText(name);
 		taDescription.setText(description);
 		taFormula.setText(formula);

@@ -220,9 +220,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	
 	public void initializeLTLFormulas() {
 		for(LTLFormulaItem item : ltlFormulas) {
-			item.initializeStatus();
-			LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
-			item.setFormulaDialog(formulaDialog);
+			item.initialize(injector.getInstance(LTLFormulaDialog.class));
 		}
 	}
 	
