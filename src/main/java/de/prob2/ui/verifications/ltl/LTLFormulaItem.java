@@ -25,6 +25,7 @@ public class LTLFormulaItem {
 		this.formula = formula;
 		this.counterExample = null;
 		this.formulaDialog = formulaDialog;
+
 	}
 	
 	public void initializeStatus() {
@@ -93,24 +94,22 @@ public class LTLFormulaItem {
 	
 	public void setFormulaDialog(LTLFormulaDialog formulaDialog) {
 		this.formulaDialog = formulaDialog;
+		this.formulaDialog.loadDialog(getName(), getDescription(), getFormula());
 	}
 	
 	public boolean showAndRegisterChange() {
-		formulaDialog.setName(getName());
-		formulaDialog.setDescription(getDescription());
-		formulaDialog.setFormula(getFormula());
 		ArrayList<Boolean> changed = new ArrayList<>();
-		changed.add(new Boolean(false));
+		changed.add(false);
 		formulaDialog.showAndWait().ifPresent(result-> {
 			if(!getName().equals(result.getName()) || !getDescription().equals(result.getDescription()) || 
 					!getFormula().equals(result.getFormula())) {
 				setName(result.getName());
 				setDescription(result.getDescription());
 				setFormula(result.getFormula());
-				changed.set(0, new Boolean(true));
+				changed.set(0, true);
 			}
 		});
-		return changed.get(0).booleanValue();
+		return changed.get(0);
 	}
 
 	@Override

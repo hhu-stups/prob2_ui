@@ -114,9 +114,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.runconfigurations.setAll(to.getRunconfigurations());
 				this.ltlFormulas.setAll(to.getLTLFormulas());
 				this.location.set(to.getLocation());
-				if(from == null) {
-					initializeLTLFormulas();
-				}
 				if (!to.equals(from)) {
 					this.saved.set(false);
 				}
