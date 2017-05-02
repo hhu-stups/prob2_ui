@@ -94,11 +94,7 @@ public class LTLView extends AnchorPane{
 			MenuItem removeItem = new MenuItem("Remove formula");
 			removeItem.setOnAction(e-> currentProject.removeLTLFormula(tvFormula.getSelectionModel().getSelectedItem()));
 			removeItem.disableProperty().bind(row.emptyProperty());
-			
-			MenuItem renameItem = new MenuItem("Rename formula");
-			renameItem.setOnAction(e-> showCurrentItemDialog());
-			renameItem.disableProperty().bind(row.emptyProperty());
-			
+						
 			MenuItem showCounterExampleItem = new MenuItem("Show Counter Example");
 			showCounterExampleItem.setOnAction(e-> showCounterExample());
 			showCounterExampleItem.setDisable(true);
@@ -114,7 +110,7 @@ public class LTLView extends AnchorPane{
 				}
 			});
 			
-			row.setContextMenu(new ContextMenu(removeItem,renameItem, showCounterExampleItem));
+			row.setContextMenu(new ContextMenu(removeItem, showCounterExampleItem));
 			return row;
 		});
 		
