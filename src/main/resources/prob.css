@@ -44,9 +44,9 @@
 }
 .button-dark2 {
 	-fx-background-color: -prob-grey;
-	-fx-background-radius: 6 6 6 6;
+	-fx-background-radius: 0.5em 0.5em 0.5em 0.5em;
 	-fx-border-color: transparent;
-	-fx-background-insets: 0.0,1.0,2.0;
+	-fx-background-insets: 0.0em,0.1em,0.2em;
 	-fx-text-fill: -prob-white;
 	-fx-font-weight: bold;
 }
@@ -55,9 +55,9 @@
 }
 .button-blue {
 	-fx-background-color: -prob-aqua;
-	-fx-background-radius: 15;
+	-fx-background-radius: 1.5em;
 	-fx-border-color: transparent;
-	-fx-background-insets: 0.0,1.0,2.0;
+	-fx-background-insets: 0.0em,0.1em,0.2em;
 	-fx-text-fill: -prob-white;
 }
 .button-blue:hover {

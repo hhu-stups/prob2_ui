@@ -89,8 +89,7 @@
 						glyphName="EYE" size="15"/>
 				</graphic>
 			</ToggleButton>
-			<MenuButton fx:id="randomButton" layoutX="160.0"
-				layoutY="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+			<MenuButton fx:id="randomButton" maxHeight="-Infinity" maxWidth="-Infinity"
 				minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
 				prefHeight="26.0" prefWidth="45.0" stylesheets="@/prob.css"
 				AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="5.0"
