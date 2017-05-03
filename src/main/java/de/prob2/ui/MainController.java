@@ -1,9 +1,6 @@
 package de.prob2.ui;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -197,9 +194,9 @@ public class MainController extends BorderPane {
 
 	public Map<TitledPane,Accordion> getAccordionMap() {
 		Map<TitledPane,Accordion> parentMap = new HashMap<>();
-		getAccordionList().stream().filter(accordion -> accordion != null).forEach(accordion -> {
-			getTitledPanesMap().values().stream().filter(pane -> accordion.getPanes().contains(pane)).forEach(pane -> parentMap.put(pane, accordion));
-		});
+		getAccordionList().stream().filter(Objects::nonNull).forEach(accordion ->
+			getTitledPanesMap().values().stream().filter(pane -> accordion.getPanes().contains(pane)).forEach(pane -> parentMap.put(pane, accordion))
+		);
 		return parentMap;
 	}
 
