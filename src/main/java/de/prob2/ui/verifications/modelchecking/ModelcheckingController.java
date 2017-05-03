@@ -208,7 +208,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		}
 	}
 
-	private Node toHistoryNode(HistoryItem item) {
+	private Node toHistoryNode(ModelCheckingItem item) {
 		ContextMenu cm = createContextMenu(item);
 
 		AnchorPane background = new AnchorPane();
@@ -250,7 +250,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		return background;
 	}
 
-	private ContextMenu createContextMenu(HistoryItem item) {
+	private ContextMenu createContextMenu(ModelCheckingItem item) {
 		ContextMenu cm = new ContextMenu();
 		MenuItem mItem = new MenuItem("Show Trace To Error State");
 		mItem.setOnAction(event -> {
@@ -348,8 +348,8 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				return;
 			}
 			currentStats.isFinished(job, timeElapsed, result);
-			HistoryItem historyItem = new HistoryItem(currentOptions, currentStats);
-			Node historyNode = toHistoryNode(historyItem);
+			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats);
+			Node historyNode = toHistoryNode(modelcheckingItem);
 			Platform.runLater(() -> {
 				historyNodeList.add(historyNode);
 				this.stageController.hide();
