@@ -359,6 +359,11 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
+	private void handleOpenHelp() {
+		//TODO Find suitable Help System
+	}
+
+	@FXML
 	private void handleReportBug() {
 		final Stage reportBugStage = injector.getInstance(ReportBugStage.class);
 		reportBugStage.show();
