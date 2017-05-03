@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -159,11 +160,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		machinesList.remove(machine);
 		List<Runconfiguration> runconfigsList = new ArrayList<>();
 		runconfigsList.addAll(this.getRunconfigurations());
-		for (Runconfiguration r : this.getRunconfigurations()) {
-			if (r.getMachine().equals(machine.getName())) {
-				runconfigsList.remove(r);
-			}
-		}
+		this.getRunconfigurations().stream().filter(r -> r.getMachine().equals(machine.getName())).forEach(runconfigsList::remove);
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 				runconfigsList, this.getLtlFormulas(),  this.getLocation()));
 	}
@@ -185,11 +182,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		preferencesList.remove(preference);
 		List<Runconfiguration> runconfigsList = new ArrayList<>();
 		runconfigsList.addAll(this.getRunconfigurations());
-		for (Runconfiguration r : this.getRunconfigurations()) {
-			if (r.getPreference().equals(preference.getName())) {
-				runconfigsList.remove(r);
-			}
-		}
+		this.getRunconfigurations().stream().filter(r -> r.getPreference().equals(preference.getName())).forEach(runconfigsList::remove);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
 				runconfigsList, this.getLtlFormulas(), this.getLocation()));
 	}
@@ -209,13 +202,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 	
 	public List<Runconfiguration> getRunconfigurations(Machine machine) {
-		List<Runconfiguration> runconfigsList = new ArrayList<>();
-		for(Runconfiguration runconfig : getRunconfigurations()) {
-			if (runconfig.getMachine().equals(machine.getName())) {
-				runconfigsList.add(runconfig);
-			}
-		}
-		return runconfigsList;
+		return getRunconfigurations().stream().filter(runconfig -> runconfig.getMachine().equals(machine.getName())).collect(Collectors.toList());
 	}
 	
 	public void initializeLTLFormulas() {

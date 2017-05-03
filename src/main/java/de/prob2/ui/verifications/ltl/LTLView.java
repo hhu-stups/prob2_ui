@@ -216,8 +216,6 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void checkAll() {
-		for(LTLFormulaItem item : tvFormula.getItems()) {
-			checkFormula(item);
-		}
+		tvFormula.getItems().forEach(this::checkFormula);
 	}
 }

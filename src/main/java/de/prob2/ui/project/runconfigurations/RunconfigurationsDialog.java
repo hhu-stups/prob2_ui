@@ -1,7 +1,7 @@
 package de.prob2.ui.project.runconfigurations;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
@@ -51,19 +51,11 @@ public class RunconfigurationsDialog extends Dialog<Runconfiguration> {
 		preferencesBox.getItems().addAll(currentProject.getPreferences());
 		machinesBox.valueProperty().addListener((observable, from, to) -> {
 			if (to != null) {
-				List<String> prefs = new ArrayList<>();
-				for (Runconfiguration runconfig : currentProject.getRunconfigurations(to)) {
-					prefs.add(runconfig.getPreference());
-				}			
+				List<String> prefs = currentProject.getRunconfigurations(to).stream().map(Runconfiguration::getPreference).collect(Collectors.toList());
 				preferencesBox.getItems().clear();
 				preferencesBox.getItems().add(new Preference("default", null));
 				preferencesBox.getItems().addAll(currentProject.getPreferences());			
-				List<Preference> remove = new ArrayList<>();
-				for (Preference p : preferencesBox.getItems()) {
-					if (prefs.contains(p.getName())) {
-						remove.add(p);
-					}
-				}
+				List<Preference> remove = preferencesBox.getItems().stream().filter(p -> prefs.contains(p.getName())).collect(Collectors.toList());
 				preferencesBox.getItems().removeAll(remove);
 				preferencesBox.getSelectionModel().selectFirst();
 			}

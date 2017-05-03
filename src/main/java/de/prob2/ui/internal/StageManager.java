@@ -344,10 +344,8 @@ public final class StageManager {
 		}
 		
 		this.globalMacMenuBar = menuBar;
-		for (final Stage stage : this.getRegistered()) {
-			if (isUseGlobalMacMenuBar(stage)) {
-				this.setMacMenuBar(stage, null);
-			}
-		}
+		this.getRegistered().stream().filter(stage -> isUseGlobalMacMenuBar(stage)).forEach(stage -> {
+			this.setMacMenuBar(stage, null);
+		});
 	}
 }
