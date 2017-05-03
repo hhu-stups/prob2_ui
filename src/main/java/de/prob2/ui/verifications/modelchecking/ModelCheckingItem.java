@@ -4,12 +4,12 @@ import java.util.Objects;
 
 import de.prob.check.ModelCheckingOptions;
 
-public class HistoryItem {
+public class ModelCheckingItem {
 
 	private final ModelCheckingOptions options;
 	private final ModelCheckStats stats;
 
-	public HistoryItem(ModelCheckingOptions options, ModelCheckStats stats) {
+	public ModelCheckingItem(ModelCheckingOptions options, ModelCheckStats stats) {
 		Objects.requireNonNull(options);
 		Objects.requireNonNull(stats);
 		

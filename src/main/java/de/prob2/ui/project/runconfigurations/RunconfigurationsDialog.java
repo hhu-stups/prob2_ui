@@ -54,7 +54,10 @@ public class RunconfigurationsDialog extends Dialog<Runconfiguration> {
 				List<String> prefs = new ArrayList<>();
 				for (Runconfiguration runconfig : currentProject.getRunconfigurations(to)) {
 					prefs.add(runconfig.getPreference());
-				}
+				}			
+				preferencesBox.getItems().clear();
+				preferencesBox.getItems().add(new Preference("default", null));
+				preferencesBox.getItems().addAll(currentProject.getPreferences());			
 				List<Preference> remove = new ArrayList<>();
 				for (Preference p : preferencesBox.getItems()) {
 					if (prefs.contains(p.getName())) {
@@ -62,6 +65,7 @@ public class RunconfigurationsDialog extends Dialog<Runconfiguration> {
 					}
 				}
 				preferencesBox.getItems().removeAll(remove);
+				preferencesBox.getSelectionModel().selectFirst();
 			}
 		});
 		machinesBox.getSelectionModel().selectFirst();
