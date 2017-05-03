@@ -361,22 +361,19 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleDefaultFontSize() {
-		injector.getInstance(FontSize.class).set(12);
-		System.out.println(injector.getInstance(FontSize.class).get());
+		injector.getInstance(FontSize.class).set(10);
 	}
 
 	@FXML
 	private void handleIncreaseFontSize() {
 		FontSize fontSize = injector.getInstance(FontSize.class);
 		fontSize.set(fontSize.get() + 1);
-		System.out.println(injector.getInstance(FontSize.class).get());
 	}
 
 	@FXML
 	private void handleDecreaseFontSize() {
 		FontSize fontSize = injector.getInstance(FontSize.class);
 		fontSize.set(fontSize.get() - 1);
-		System.out.println(injector.getInstance(FontSize.class).get());
 	}
 
 	@FXML

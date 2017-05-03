@@ -10,6 +10,6 @@ public class FontSize extends SimpleIntegerProperty {
 
 	@Inject
 	public FontSize() {
-		this.set(12);
+		this.set(10);
 	}
 }
