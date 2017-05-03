@@ -59,7 +59,8 @@
 		<MenuItem text="%menu.perspectives.items.load" onAction="#handleLoadPerspective" />
 	</Menu>
 	<Menu text="%menu.view">
-		<MenuItem text="%menu.view.default" onAction="#handleDefaultFontSize" />
+		<MenuItem text="%menu.view.default" onAction="#handleDefaultFontSize"
+			accelerator="Shortcut+D" />
 		<MenuItem text="%menu.view.bigger" accelerator="Alt+Shortcut+PLUS"
 			onAction="#handleIncreaseFontSize" />
 		<MenuItem text="%menu.view.smaller" accelerator="Alt+Shortcut+MINUS"
