@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -301,10 +302,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	private String toPrettyString(ModelCheckingOptions options) {
 		AbstractElement main = currentJob.getStateSpace().getMainComponent();
-		List<String> optsList = new ArrayList<>();
-		for (ModelCheckingOptions.Options opts : options.getPrologOptions()) {
-			optsList.add(opts.getDescription());
-		}
+		List<String> optsList = options.getPrologOptions().stream().map(ModelCheckingOptions.Options::getDescription).collect(Collectors.toList());
 		String name = main == null ? "Model Check" : main.toString();
 		if (!optsList.isEmpty()) {
 			name += " with " + String.join(", ", optsList);

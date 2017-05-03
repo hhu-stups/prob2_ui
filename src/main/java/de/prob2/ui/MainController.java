@@ -103,10 +103,7 @@ public class MainController extends BorderPane {
 		if (!uiState.getGuiState().contains("detached")) {
 			guiState = uiState.getGuiState();
 		}
-		for (TitledPane tp : getTitledPanesMap().values()) {
-			if (tp!=null && tp.getContent()!=null)
-				tp.getContent().setVisible(true);
-		}
+		getTitledPanesMap().values().stream().filter(tp -> tp != null && tp.getContent() != null).forEach(tp -> tp.getContent().setVisible(true));
 		stageManager.loadFXML(this, guiState);
 	}
 		
@@ -200,13 +197,9 @@ public class MainController extends BorderPane {
 
 	public Map<TitledPane,Accordion> getAccordionMap() {
 		Map<TitledPane,Accordion> parentMap = new HashMap<>();
-		for (Accordion accordion : getAccordionList()){
-			if (accordion!=null) {
-				for (TitledPane pane : getTitledPanesMap().values())
-					if (accordion.getPanes().contains(pane))
-						parentMap.put(pane,accordion);
-			}
-		}
+		getAccordionList().stream().filter(accordion -> accordion != null).forEach(accordion -> {
+			getTitledPanesMap().values().stream().filter(pane -> accordion.getPanes().contains(pane)).forEach(pane -> parentMap.put(pane, accordion));
+		});
 		return parentMap;
 	}
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javafx.scene.control.IndexRange;
 import javafx.scene.input.KeyCode;
@@ -334,9 +335,7 @@ public abstract class Console extends StyleClassedTextArea {
 	public Console.ConfigData getSettings() {
 		final Console.ConfigData configData = new Console.ConfigData();
 		configData.instructions = new ArrayList<>();
-		for (final ConsoleInstruction instruction : instructions) {
-			configData.instructions.add(instruction.getInstruction());
-		}
+		configData.instructions.addAll(instructions.stream().map(ConsoleInstruction::getInstruction).collect(Collectors.toList()));
 		configData.text = getText();
 		configData.charCounterInLine = charCounterInLine;
 		configData.currentPosInLine = currentPosInLine;
