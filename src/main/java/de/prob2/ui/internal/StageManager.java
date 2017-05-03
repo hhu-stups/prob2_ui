@@ -338,8 +338,6 @@ public final class StageManager {
 		}
 		
 		this.globalMacMenuBar = menuBar;
-		this.getRegistered().stream().filter(stage -> isUseGlobalMacMenuBar(stage)).forEach(stage -> {
-			this.setMacMenuBar(stage, null);
-		});
+		this.getRegistered().stream().filter(StageManager::isUseGlobalMacMenuBar).forEach(stage -> this.setMacMenuBar(stage, null));
 	}
 }
