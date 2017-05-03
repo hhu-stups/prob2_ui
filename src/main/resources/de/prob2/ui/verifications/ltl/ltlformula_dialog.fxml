@@ -9,19 +9,19 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
-<?import de.prob2.ui.verifications.ltl.AddLTLFormulaDialog?>
+<?import de.prob2.ui.verifications.ltl.LTLFormulaDialog?>
 <?import javafx.scene.control.TextArea?>
 
-<fx:root type ="AddLTLFormulaDialog" title="%verifications.ltl.dialog.title" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type ="LTLFormulaDialog" title="%verifications.ltl.dialog.title" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
-		<DialogPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="540.0" stylesheets="@/prob.css" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+		<DialogPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" stylesheets="@/prob.css" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 		    <header>
 		      <AnchorPane styleClass="border" minHeight="0.0" minWidth="0.0" prefHeight="77.0" prefWidth="480.0">
 		         <children>
 		         	<VBox spacing="5" AnchorPane.topAnchor="20"
 						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
 						AnchorPane.rightAnchor="0">
-		            	<Label layoutX="7.0" layoutY="20.0" prefHeight="31.0" prefWidth="188.0" text="%verifications.ltl.dialog.header">
+		            	<Label layoutX="7.0" layoutY="20.0" prefHeight="31.0" prefWidth="188.0" text="%verifications.ltl.dialog.title">
 		               		<font>
 		                  		<Font size="18.0" />
 		               		</font>          	
@@ -34,7 +34,7 @@
 		      </AnchorPane>
 		    </header>
 		    <content>
-		      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="114.0" prefWidth="480.0">
+		      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="400.0" prefWidth="720.0">
          		<children>
          			<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
 						AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
@@ -47,7 +47,7 @@
 								</font>
 							</TextField>
 						</HBox>
-						<VBox spacing="20" alignment="center_left">
+						<VBox spacing="10" alignment="center_left">
 							<Label text="%verifications.ltl.dialog.description" />
 							<TextArea fx:id="taDescription" styleClass="text-area-with-border">
 								<font>
@@ -56,6 +56,17 @@
 							</TextArea>
 							<VBox.margin>
 								<Insets top="40" />
+							</VBox.margin>
+						</VBox>
+						<VBox spacing="10" alignment="center_left">
+							<Label text="%verifications.ltl.dialog.formula" />
+							<TextArea fx:id="taFormula" styleClass="text-area-with-border">
+								<font>
+									<Font size="12" />
+								</font>
+							</TextArea>
+							<VBox.margin>
+								<Insets top="50" />
 							</VBox.margin>
 						</VBox>
 					</VBox>

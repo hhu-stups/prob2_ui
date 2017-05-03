@@ -36,8 +36,8 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+import de.prob2.ui.verifications.ltl.LTLFormulaDialog;
 import de.prob2.ui.verifications.ltl.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.LTLFormulaStage;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -114,9 +114,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.runconfigurations.setAll(to.getRunconfigurations());
 				this.ltlFormulas.setAll(to.getLTLFormulas());
 				this.location.set(to.getLocation());
-				if(from == null) {
-					initializeLTLFormulas();
-				}
 				if (!to.equals(from)) {
 					this.saved.set(false);
 				}
@@ -223,9 +220,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	
 	public void initializeLTLFormulas() {
 		for(LTLFormulaItem item : ltlFormulas) {
-			item.initializeStatus();
-			LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-			item.setFormulaStage(formulaStage);
+			item.initialize(injector.getInstance(LTLFormulaDialog.class));
 		}
 	}
 	

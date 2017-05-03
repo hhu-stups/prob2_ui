@@ -25,12 +25,12 @@
 			AnchorPane.topAnchor="25.0" fx:id="statsBox">
 			<VBox spacing="8.0" styleClass="border">
 				<HBox prefHeight="12.0" minWidth="150.0" spacing="7.0">
-					<Label text="%stats.processedNodes" minWidth="120.0">
+					<Label text="%stats.processedStates" minWidth="120.0">
 						<font>
 							<Font name="System Bold" size="13.5" />
 						</font>
 					</Label>
-					<Label fx:id="processedNodes">
+					<Label fx:id="processedStates">
 						<font>
 							<Font size="13.5" />
 						</font>
@@ -40,7 +40,7 @@
 							<Font size="13.5" />
 						</font>
 					</Label>
-					<Label fx:id="totalNodes">
+					<Label fx:id="totalStates">
 						<font>
 							<Font size="13.5" />
 						</font>
@@ -91,7 +91,7 @@
 					AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
 					AnchorPane.bottomAnchor="5.0" visible="false" spacing="10.0">
 					<AnchorPane>
-						<Label alignment="CENTER" prefHeight="16.0" text="%stats.nodeStats"
+						<Label alignment="CENTER" prefHeight="16.0" text="%stats.stateStats"
 							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
 							<font>
@@ -113,7 +113,7 @@
 							</rowConstraints>
 							<AnchorPane
 								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
-								<Label text="%stats.nodeStats.status"
+								<Label text="%stats.stateStats.status"
 									AnchorPane.leftAnchor="10.0">
 									<font>
 										<Font name="System Bold" size="14.0" />
@@ -123,7 +123,7 @@
 							<AnchorPane
 								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
 								GridPane.columnIndex="1">
-								<Label text="%stats.nodeStats.numberOfNodes"
+								<Label text="%stats.stateStats.numberOfStates"
 									AnchorPane.rightAnchor="10.0">
 									<font>
 										<Font name="System Bold" size="14.0" />
@@ -131,7 +131,7 @@
 								</Label>
 							</AnchorPane>
 						</GridPane>
-						<GridPane fx:id="nodeStats">
+						<GridPane fx:id="stateStats">
 							<columnConstraints>
 								<ColumnConstraints hgrow="SOMETIMES" minWidth="120.0"
 									prefWidth="120.0" />

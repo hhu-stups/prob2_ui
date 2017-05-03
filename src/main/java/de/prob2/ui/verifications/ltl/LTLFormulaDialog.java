@@ -11,38 +11,35 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 
-public class AddLTLFormulaDialog extends Dialog<LTLFormulaItem> {
+public class LTLFormulaDialog extends Dialog<LTLFormulaItem> {
 	
 	@FXML
 	private TextField tfName;
 	
 	@FXML
 	private TextArea taDescription;
+	
+	@FXML
+	private TextArea taFormula;
 
 	@Inject
-	public AddLTLFormulaDialog(final StageManager stageManager, final Injector injector) {
+	public LTLFormulaDialog(final StageManager stageManager, final Injector injector) {
 		super();
 		this.setResultConverter(type -> {
 			if(type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-				formulaStage.setTitle(tfName.getText());
-				LTLFormulaItem item = new LTLFormulaItem(tfName.getText(), taDescription.getText());
-				item.setFormulaStage(formulaStage);
-				return item;
+				return new LTLFormulaItem(this, tfName.getText(), taDescription.getText(), taFormula.getText());
 			}
 		});
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "ltlformula_dialog.fxml");
 	}
 	
-	public void setName(String name) {
+	public void setData(String name, String description, String formula) {
 		tfName.setText(name);
-	}
-	
-	public void setDescription(String description) {
 		taDescription.setText(description);
+		taFormula.setText(formula);
 	}
-	
+			
 }

@@ -21,6 +21,7 @@ import de.prob.check.LTLError;
 import de.prob.check.LTLOk;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.State;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -84,46 +85,18 @@ public class LTLView extends AnchorPane{
 	public void initialize() {	
 		tvFormula.setOnMouseClicked(e-> {
 			if(e.getClickCount() == 2 && tvFormula.getSelectionModel().getSelectedItem() != null) {
-				tvFormula.getSelectionModel().getSelectedItem().show();
+				showCurrentItemDialog();
 			}
-
 		});
 						
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
-			
 			MenuItem removeItem = new MenuItem("Remove formula");
-			removeItem.setOnAction(e-> {
-				LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-				currentProject.removeLTLFormula(item);
-			});
+			removeItem.setOnAction(e-> currentProject.removeLTLFormula(tvFormula.getSelectionModel().getSelectedItem()));
 			removeItem.disableProperty().bind(row.emptyProperty());
-			
-			MenuItem renameItem = new MenuItem("Rename formula");
-			renameItem.setOnAction(e-> {
-				LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-				AddLTLFormulaDialog formulaDialog = injector.getInstance(AddLTLFormulaDialog.class);
-				formulaDialog.setName(item.getName());
-				formulaDialog.setDescription(item.getDescription());
-				formulaDialog.showAndWait().ifPresent(result-> {
-					if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription())) {
-						item.setName(result.getName());
-						item.setDescription(result.getDescription());
-						refresh();
-						currentProject.setSaved(false);
-					}
-				});
-			});
-			renameItem.disableProperty().bind(row.emptyProperty());
-			
+						
 			MenuItem showCounterExampleItem = new MenuItem("Show Counter Example");
-			showCounterExampleItem.setOnAction(e-> {
-				LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-				if (currentTrace.exists()) {
-					this.animations.removeTrace(currentTrace.get());
-				}
-				animations.addNewAnimation(item.getCounterExample());
-			});
+			showCounterExampleItem.setOnAction(e-> showCounterExample());
 			showCounterExampleItem.setDisable(true);
 			
 			row.setOnMouseClicked(e-> {
@@ -137,7 +110,7 @@ public class LTLView extends AnchorPane{
 				}
 			});
 			
-			row.setContextMenu(new ContextMenu(removeItem,renameItem, showCounterExampleItem));
+			row.setContextMenu(new ContextMenu(removeItem, showCounterExampleItem));
 			return row;
 		});
 		
@@ -148,10 +121,10 @@ public class LTLView extends AnchorPane{
 		checkAllButton.disableProperty().bind(currentTrace.existsProperty().not());
 		tvFormula.itemsProperty().bind(currentProject.ltlFormulasProperty());	
 	}
-	
+		
 	@FXML
 	public void addFormula() {
-		injector.getInstance(AddLTLFormulaDialog.class).showAndWait().ifPresent(currentProject::addLTLFormula);
+		injector.getInstance(LTLFormulaDialog.class).showAndWait().ifPresent(currentProject::addLTLFormula);
 	}
 	
 	public void checkFormula(LTLFormulaItem item) {
@@ -165,34 +138,25 @@ public class LTLView extends AnchorPane{
 				AbstractEvalResult result = lcc.getValue();
 				if(result instanceof LTLOk) {
 					showSuccess(item);
-					item.setCheckedSuccessful();
-					item.setCounterExample(null);
 				} else if(result instanceof LTLCounterExample) {
-					showCounterExampleFound(item);
-					item.setCheckedFailed();
-					item.setCounterExample(((LTLCounterExample) result).getTrace(stateid.getStateSpace()));
+					showCounterExampleFound(item, ((LTLCounterExample) result).getTrace(stateid.getStateSpace()));
 				} else if(result instanceof LTLError) {
 					showError(item, (LTLError) result);
-					item.setCheckedFailed();
-					item.setCounterExample(null);
 				}
 			}
 		} catch (LtlParseException e) {
 			showParseError(item, e);
-			item.setCheckedFailed();
-			item.setCounterExample(null);
 			logger.error("Could not parse LTL formula", e);
 		}
-		refresh();
+		tvFormula.refresh();
 	}
 	
 	private void showParseError(LTLFormulaItem item, LtlParseException e) {
 		TextArea exceptionText = new TextArea();
-		Alert alert = new Alert(AlertType.ERROR);
+		Alert alert = new Alert(AlertType.ERROR, "Message: ");
 		alert.getDialogPane().getStylesheets().add(getClass().getResource("/prob.css").toExternalForm());
 		alert.setTitle(item.getName());
 		alert.setHeaderText("Could not parse LTL formula");
-		alert.setContentText("Message: ");
 		StringWriter sw = new StringWriter();
 		try (PrintWriter pw = new PrintWriter(sw)) {
 			e.printStackTrace(pw);
@@ -205,46 +169,55 @@ public class LTLView extends AnchorPane{
 		alert.getDialogPane().setExpandableContent(pane);
 		alert.getDialogPane().setExpanded(true);
 		alert.showAndWait();
+		item.setCheckedFailed();
+		item.setCounterExample(null);
 	}
 	
 	private void showError(LTLFormulaItem item, LTLError error) {
-		Alert alert = new Alert(AlertType.ERROR);
+		Alert alert = new Alert(AlertType.ERROR, error.getMessage());
 		alert.setTitle(item.getName());
 		alert.setHeaderText("Error while executing formula");
-		alert.setContentText(error.getMessage());
 		alert.showAndWait();
+		item.setCheckedFailed();
+		item.setCounterExample(null);
 	}
 	
 	private void showSuccess(LTLFormulaItem item) {
-		Alert alert = new Alert(AlertType.INFORMATION);
+		Alert alert = new Alert(AlertType.INFORMATION, "LTL Check succeeded");
 		alert.setTitle(item.getName());
 		alert.setHeaderText("Success");
-		alert.setContentText("LTL Check succeeded");
 		alert.showAndWait();
+		item.setCheckedSuccessful();
+		item.setCounterExample(null);
 	}
 	
-	private void showCounterExampleFound(LTLFormulaItem item) {
-		Alert alert = new Alert(AlertType.ERROR);
+	private void showCounterExampleFound(LTLFormulaItem item, Trace trace) {
+		Alert alert = new Alert(AlertType.ERROR, "LTL Counter Example has been found");
 		alert.setTitle(item.getName());
 		alert.setHeaderText("Counter Example found");
-		alert.setContentText("LTL Counter Example has been found");
 		alert.showAndWait();
+		item.setCheckedFailed();
+		item.setCounterExample(trace);
+	}
+	
+	private void showCurrentItemDialog() {
+		if(tvFormula.getSelectionModel().getSelectedItem().showAndRegisterChange()) {
+			tvFormula.refresh();
+			currentProject.setSaved(false);
+		}
+	}
+	
+	private void showCounterExample() {
+		if (currentTrace.exists()) {
+			this.animations.removeTrace(currentTrace.get());
+		}
+		animations.addNewAnimation(tvFormula.getSelectionModel().getSelectedItem().getCounterExample());
 	}
 	
 	@FXML
 	public void checkAll() {
 		for(LTLFormulaItem item : tvFormula.getItems()) {
-			item.checkFormula();
+			checkFormula(item);
 		}
 	}
-	
-	public void refresh() {
-		tvFormula.refresh();
-	}
-	
-	public TableView<LTLFormulaItem> getTable() {
-		return tvFormula;
-	}
-	
-
 }

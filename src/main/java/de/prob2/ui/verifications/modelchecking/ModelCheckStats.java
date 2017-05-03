@@ -32,8 +32,8 @@ public final class ModelCheckStats extends AnchorPane {
 	@FXML private Text resultText;
 	@FXML private VBox statsBox;
 	@FXML private Label elapsedTime;
-	@FXML private Label processedNodes;
-	@FXML private Label totalNodes;
+	@FXML private Label processedStates;
+	@FXML private Label totalStates;
 	@FXML private Label totalTransitions;
 
 	private ModelcheckingController modelcheckingController;
@@ -75,8 +75,8 @@ public final class ModelCheckStats extends AnchorPane {
 			int nrTotalTransitions = stats.getNrTotalTransitions();
 			int percent = nrProcessedNodes * 100 / nrTotalNodes;
 			Platform.runLater(() -> {
-				processedNodes.setText(nrProcessedNodes + " (" + percent + " %)");
-				totalNodes.setText(String.valueOf(nrTotalNodes));
+				processedStates.setText(nrProcessedNodes + " (" + percent + " %)");
+				totalStates.setText(String.valueOf(nrTotalNodes));
 				totalTransitions.setText(String.valueOf(nrTotalTransitions));
 			});
 		}
@@ -117,7 +117,7 @@ public final class ModelCheckStats extends AnchorPane {
 			Number numTrans = coverage.getTotalNumberOfTransitions();
 
 			Platform.runLater(() -> {
-				totalNodes.setText(String.valueOf(numNodes));
+				totalStates.setText(String.valueOf(numNodes));
 				totalTransitions.setText(String.valueOf(numTrans));
 			});
 		}

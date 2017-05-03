@@ -11,6 +11,9 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
 import de.prob2.ui.consoles.groovy.MetaPropertiesHandler;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
@@ -19,6 +22,8 @@ import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import javafx.collections.ObservableList;
 
 public class GroovyCodeCompletionHandler {
+	
+	private static final Logger logger = LoggerFactory.getLogger(GroovyCodeCompletionHandler.class);
 	
 	private final List<GroovyAbstractItem> currentSuggestions;
 	
@@ -71,6 +76,7 @@ public class GroovyCodeCompletionHandler {
 				showSuggestions(clazz, GroovyMethodOption.STATIC);
 			} catch (ClassNotFoundException ignored) {
 				// Just try with the next package if the current fullClassName does not fit any classes
+				logger.error(ignored.getMessage());
 			}
 		}
 		if (action == CodeCompletionTriggerAction.TRIGGER) {
