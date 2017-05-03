@@ -35,20 +35,20 @@
 				</HBox>
 				<VBox spacing="3.0">
 					<HBox prefHeight="12.0" spacing="7.0">
-						<Label text="%verifications.modelchecking.stats.processedNodes">
+						<Label text="%verifications.modelchecking.stats.processedStates">
 							<font>
 								<Font name="System Bold" />
 							</font>
 						</Label>
-						<Label fx:id="processedNodes" />
+						<Label fx:id="processedStates" />
 					</HBox>
 					<HBox prefHeight="12.0" spacing="7.0">
-						<Label text="%verifications.modelchecking.stats.totalNodes">
+						<Label text="%verifications.modelchecking.stats.totalStates">
 							<font>
 								<Font name="System Bold" />
 							</font>
 						</Label>
-						<Label fx:id="totalNodes" />
+						<Label fx:id="totalStates" />
 					</HBox>
 					<HBox prefHeight="12.0" spacing="7.0">
 						<Label text="%verifications.modelchecking.stats.totalTransitions">
