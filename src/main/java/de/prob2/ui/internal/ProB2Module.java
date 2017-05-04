@@ -37,6 +37,7 @@ import de.prob2.ui.project.preferences.PreferencesTab;
 import de.prob2.ui.project.runconfigurations.RunconfigurationsTab;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
@@ -90,6 +91,7 @@ public class ProB2Module extends AbstractModule {
 		bind(RunconfigurationsTab.class);
 		bind(StatesView.class);
 		bind(StatsView.class);
+		bind(StatusBar.class);
 		bind(VerificationsView.class);
 	}
 

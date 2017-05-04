@@ -773,3 +773,19 @@
 .history-chart .axis.time-axis .axis-minor-tick-mark {
 	-fx-stroke: transparent;
 }
+
+/* === Status Bar === */
+
+.statusbar {
+	-fx-background-color: lightgray;
+}
+
+.statusbar .invariantOkLabel.true {
+	-fx-background-color: lightgreen;
+	-fx-text-fill: black;
+}
+
+.statusbar .invariantOkLabel.false {
+	-fx-background-color: red;
+	-fx-text-fill: white;
+}
