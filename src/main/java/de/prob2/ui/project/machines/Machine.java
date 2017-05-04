@@ -5,15 +5,21 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import javafx.scene.paint.Color;
+
 public class Machine {
 	private String name;
 	private String description;
 	private String location;
+	private transient FontAwesomeIconView status;
 
 	public Machine(String name, String description, Path location) {
 		this.name = name;
 		this.description = description;
 		this.location = location.toString();
+		initializeStatus();
 	}
 
 	public String getName() {
@@ -28,6 +34,15 @@ public class Machine {
 
 	public String getDescription() {
 		return description;
+	}
+	
+	public FontAwesomeIconView getStatus() {
+		return status;
+	}
+	
+	public void initializeStatus() {
+		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		status.setFill(Color.BLUE);
 	}
 
 	public Path getPath() {

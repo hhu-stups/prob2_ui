@@ -25,6 +25,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -62,6 +63,15 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	private TableColumn<LTLFormulaItem, String> descriptionColumn;
+	
+	@FXML
+	private TableView<Machine> tvMachines;
+	
+	@FXML
+	private TableColumn<LTLFormulaItem, FontAwesomeIconView> machineStatusColumn;
+	
+	@FXML
+	private TableColumn<LTLFormulaItem, String> machineNameColumn;	
 	
 	private final Injector injector;
 	
@@ -117,9 +127,12 @@ public class LTLView extends AnchorPane{
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		addLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkAllButton.disableProperty().bind(currentTrace.existsProperty().not());
-		tvFormula.itemsProperty().bind(currentProject.ltlFormulasProperty());	
+		tvFormula.itemsProperty().bind(currentProject.ltlFormulasProperty());
+		tvMachines.itemsProperty().bind(currentProject.machinesProperty());
 	}
 		
 	@FXML
@@ -218,4 +231,5 @@ public class LTLView extends AnchorPane{
 	public void checkAll() {
 		tvFormula.getItems().forEach(this::checkFormula);
 	}
+
 }

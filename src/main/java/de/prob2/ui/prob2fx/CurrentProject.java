@@ -209,6 +209,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		for(LTLFormulaItem item : ltlFormulas) {
 			item.initialize(injector.getInstance(LTLFormulaDialog.class));
 		}
+		
+		for(Machine machine : machines) {
+			machine.initializeStatus();
+		}
 	}
 	
 	public void addLTLFormula(LTLFormulaItem formula) {

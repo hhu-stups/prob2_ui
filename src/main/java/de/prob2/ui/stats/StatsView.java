@@ -3,6 +3,7 @@ package de.prob2.ui.stats;
 import java.util.List;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -23,6 +24,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
+@Singleton
 public class StatsView extends ScrollPane {
 	@FXML
 	private Label totalTransitions;
@@ -51,7 +53,6 @@ public class StatsView extends ScrollPane {
 	@Inject
 	public StatsView(final StageManager stageManager, final CurrentTrace currentTrace) {
 		this.currentTrace = currentTrace;
-
 		stageManager.loadFXML(this, "stats_view.fxml");
 	}
 
