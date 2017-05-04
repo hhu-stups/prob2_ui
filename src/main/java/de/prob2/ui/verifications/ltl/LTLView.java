@@ -45,6 +45,10 @@ import javafx.scene.layout.StackPane;
 @Singleton
 public class LTLView extends AnchorPane{
 	
+	public enum Checked {
+		SUCCESS, FAIL;
+	}
+	
 	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
 	
 	@FXML
@@ -158,8 +162,9 @@ public class LTLView extends AnchorPane{
 		});
 	}
 	
-	public void checkFormula(LTLFormulaItem item) {
+	public Checked checkFormula(LTLFormulaItem item) {
 		LTL formula = null;
+		Checked checked = Checked.SUCCESS;
 		try {
 			formula = new LTL(item.getFormula());
 			if (currentTrace != null) {
@@ -171,15 +176,19 @@ public class LTLView extends AnchorPane{
 					showSuccess(item);
 				} else if(result instanceof LTLCounterExample) {
 					showCounterExampleFound(item, ((LTLCounterExample) result).getTrace(stateid.getStateSpace()));
+					checked = Checked.FAIL;
 				} else if(result instanceof LTLError) {
 					showError(item, (LTLError) result);
+					checked = Checked.FAIL;
 				}
 			}
 		} catch (LtlParseException e) {
 			showParseError(item, e);
+			checked = Checked.FAIL;
 			logger.error("Could not parse LTL formula", e);
 		}
 		tvFormula.refresh();
+		return checked;
 	}
 	
 	private void showParseError(LTLFormulaItem item, LtlParseException e) {
@@ -247,7 +256,12 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void checkAll() {
-		tvFormula.getItems().forEach(this::checkFormula);
+		tvFormula.getItems().forEach(item-> {
+			if(this.checkFormula(item) == Checked.FAIL) {
+				tvMachines.getFocusModel().getFocusedItem().setCheckedFailed();
+			};
+		});
+		tvMachines.refresh();
 	}
 
 }

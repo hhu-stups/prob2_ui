@@ -76,6 +76,18 @@ public class Machine {
 		ltlFormulas.remove(formula);
 	}
 	
+	public void setCheckedSuccessful() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
+		icon.setFill(Color.GREEN);
+		this.status = icon;
+	}
+
+	public void setCheckedFailed() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
+		icon.setFill(Color.RED);
+		this.status = icon;
+	}
+	
 	public Path getPath() {
 		return Paths.get(location);
 	}
