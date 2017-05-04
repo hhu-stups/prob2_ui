@@ -3,5 +3,5 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
 <fx:root type="HBox" xmlns:fx="http://javafx.com/fxml/1" styleClass="statusbar" maxWidth="Infinity" minHeight="16.0" maxHeight="16.0">
-	<Label fx:id="invariantOkLabel" styleClass="invariantOkLabel" text="%common.noModelLoaded" prefWidth="200.0" HBox.hgrow="NEVER"/>
+	<Label fx:id="errorsLabel" styleClass="errorsLabel" text="%common.noModelLoaded" HBox.hgrow="NEVER"/>
 </fx:root>

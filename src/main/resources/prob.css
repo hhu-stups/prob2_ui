@@ -780,12 +780,12 @@
 	-fx-background-color: lightgray;
 }
 
-.statusbar .invariantOkLabel.true {
+.statusbar .errorsLabel.noErrors {
 	-fx-background-color: lightgreen;
 	-fx-text-fill: black;
 }
 
-.statusbar .invariantOkLabel.false {
+.statusbar .errorsLabel.someErrors {
 	-fx-background-color: red;
 	-fx-text-fill: white;
 }
