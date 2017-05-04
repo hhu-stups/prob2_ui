@@ -2,11 +2,17 @@ package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob2.ui.verifications.ltl.LTLFormulaDialog;
+import de.prob2.ui.verifications.ltl.LTLFormulaItem;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
 
 public class Machine {
@@ -14,12 +20,14 @@ public class Machine {
 	private String description;
 	private String location;
 	private transient FontAwesomeIconView status;
+	private final ListProperty<LTLFormulaItem> ltlFormulas;
 
 	public Machine(String name, String description, Path location) {
 		this.name = name;
 		this.description = description;
 		this.location = location.toString();
 		initializeStatus();
+		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 	}
 
 	public String getName() {
@@ -40,11 +48,34 @@ public class Machine {
 		return status;
 	}
 	
-	public void initializeStatus() {
+	private void initializeStatus() {
 		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		status.setFill(Color.BLUE);
 	}
-
+	
+	public void initializeFormulas(LTLFormulaDialog formulaDialog) {
+		initializeStatus();
+		for(LTLFormulaItem item : ltlFormulas) {
+			item.initialize(formulaDialog);
+		}
+	}
+	
+	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {
+		return ltlFormulas;
+	}
+	
+	public List<LTLFormulaItem> getFormulas() {
+		return ltlFormulasProperty().get();
+	}
+	
+	public void addLTLFormula(LTLFormulaItem formula) {
+		ltlFormulas.add(formula);
+	}
+	
+	public void removeLTLFormula(LTLFormulaItem formula) {
+		ltlFormulas.remove(formula);
+	}
+	
 	public Path getPath() {
 		return Paths.get(location);
 	}

@@ -21,11 +21,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hildan.fxgson.FxGson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -38,7 +38,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.ltl.LTLFormulaDialog;
-import de.prob2.ui.verifications.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -68,7 +67,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ListProperty<Machine> machines;
 	private final ListProperty<Preference> preferences;
 	private final ReadOnlyListProperty<Runconfiguration> runconfigurations;
-	private final ListProperty<LTLFormulaItem> ltlFormulas;
+	
 	private final ObjectProperty<File> location;
 	private final BooleanProperty saved;
 
@@ -88,7 +87,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.currentTrace = currentTrace;
 		this.modelCheckController = modelCheckController;
 		
-		this.gson = new GsonBuilder().setPrettyPrinting().create();
+		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 		
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
 				Paths.get(System.getProperty("user.home")));
@@ -100,7 +99,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
 		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations",
 				FXCollections.observableArrayList());
-		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
 
@@ -113,7 +111,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.machines.setAll(to.getMachines());
 				this.preferences.setAll(to.getPreferences());
 				this.runconfigurations.setAll(to.getRunconfigurations());
-				this.ltlFormulas.setAll(to.getLTLFormulas());
 				this.location.set(to.getLocation());
 				if (!to.equals(from)) {
 					this.saved.set(false);
@@ -127,7 +124,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.description.set("");
 		this.machines.clear();
 		this.preferences.clear();
-		this.ltlFormulas.clear();
 		this.location.set(null);
 		this.injector.getInstance(ModelcheckingController.class).resetView();
 		this.saved.set(true);
@@ -152,7 +148,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.add(machine);
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
-				this.getRunconfigurations(), this.getLtlFormulas(), this.getLocation()));
+				this.getRunconfigurations(), this.getLocation()));
 	}
 
 	public void removeMachine(Machine machine) {
@@ -162,7 +158,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		runconfigsList.addAll(this.getRunconfigurations());
 		this.getRunconfigurations().stream().filter(r -> r.getMachine().equals(machine.getName())).forEach(runconfigsList::remove);
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
-				runconfigsList, this.getLtlFormulas(),  this.getLocation()));
+				runconfigsList, this.getLocation()));
 	}
 
 	public void updateMachine(Machine oldMachine, Machine newMachine) {
@@ -174,7 +170,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
-				this.getRunconfigurations(), this.getLtlFormulas(), this.getLocation()));
+				this.getRunconfigurations(), this.getLocation()));
 	}
 
 	public void removePreference(Preference preference) {
@@ -184,59 +180,41 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		runconfigsList.addAll(this.getRunconfigurations());
 		this.getRunconfigurations().stream().filter(r -> r.getPreference().equals(preference.getName())).forEach(runconfigsList::remove);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
-				runconfigsList, this.getLtlFormulas(), this.getLocation()));
+				runconfigsList, this.getLocation()));
 	}
 
 	public void addRunconfiguration(Runconfiguration runconfiguration) {
 		List<Runconfiguration> runconfigs = this.getRunconfigurations();
 		runconfigs.add(runconfiguration);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
-				runconfigs, this.getLtlFormulas(), this.getLocation()));
+				runconfigs, this.getLocation()));
 	}
 
 	public void removeRunconfiguration(Runconfiguration runconfiguration) {
 		List<Runconfiguration> runconfigs = this.getRunconfigurations();
 		runconfigs.remove(runconfiguration);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
-				runconfigs, this.getLtlFormulas(), this.getLocation()));
+				runconfigs, this.getLocation()));
 	}
 	
 	public List<Runconfiguration> getRunconfigurations(Machine machine) {
 		return getRunconfigurations().stream().filter(runconfig -> runconfig.getMachine().equals(machine.getName())).collect(Collectors.toList());
 	}
 	
-	public void initializeLTLFormulas() {
-		for(LTLFormulaItem item : ltlFormulas) {
-			item.initialize(injector.getInstance(LTLFormulaDialog.class));
-		}
-		
+	public void initializeLTLFormulas() {		
 		for(Machine machine : machines) {
-			machine.initializeStatus();
+			machine.initializeFormulas(injector.getInstance(LTLFormulaDialog.class));
 		}
-	}
-	
-	public void addLTLFormula(LTLFormulaItem formula) {
-		List<LTLFormulaItem> formulas = this.getLtlFormulas();
-		formulas.add(formula);
-		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
-				this.getRunconfigurations(), formulas, this.getLocation()));
-	}
-
-	public void removeLTLFormula(LTLFormulaItem formula) {
-		List<LTLFormulaItem> formulas = this.getLtlFormulas();
-		formulas.remove(formula);
-		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
-				this.getRunconfigurations(), formulas, this.getLocation()));
 	}
 			
 	public void changeName(String newName) {
 		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(),
-				this.getRunconfigurations(), this.getLtlFormulas(), this.getLocation()));
+				this.getRunconfigurations(), this.getLocation()));
 	}
 	
 	public void changeDescription(String newDescription) {
 		this.update(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(),
-				this.getRunconfigurations(), this.getLtlFormulas(), this.getLocation()));
+				this.getRunconfigurations(), this.getLocation()));
 	}
 
 	@Override
@@ -251,7 +229,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 	}
 	
-	private void update(Project project) {
+	public void update(Project project) {
 		super.set(project);
 	}
 
@@ -307,15 +285,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public List<Runconfiguration> getRunconfigurations() {
 		return this.runconfigurationsProperty().get();
 	}
-	
-	public ReadOnlyListProperty<LTLFormulaItem> ltlFormulasProperty() {
-		return this.ltlFormulas;
-	}
-	
-	public List<LTLFormulaItem> getLtlFormulas() {
-		return this.ltlFormulasProperty().get();
-	}
-
+		
 	public ObjectProperty<File> locationProperty() {
 		return this.location;
 	}
@@ -354,7 +324,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 			
 			this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(), 
-									this.getRunconfigurations(), this.getLtlFormulas(),this.getLocation()));
+									this.getRunconfigurations(), this.getLocation()));
 			gson.toJson(this.get(), writer);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
@@ -389,9 +359,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				: project.getPreferences();
 		Set<Runconfiguration> runconfigurationSet = (project.getRunconfigurations() == null) ? new HashSet<>()
 				: project.getRunconfigurations();
-		List<LTLFormulaItem> ltlFormulaList = (project.getLTLFormulas() == null) ? new ArrayList<>() : project.getLTLFormulas();
-		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet, ltlFormulaList,
-				project.getLocation());		
+		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet, project.getLocation());		
 	}
 
 	public Machine getMachine(String machine) {
