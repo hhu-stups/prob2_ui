@@ -12,4 +12,13 @@ public class FontSize extends SimpleIntegerProperty {
 	public FontSize() {
 		this.set(13);
 	}
+	
+	@Override
+	public void set(int newValue) {
+		if(newValue <= 0) {
+			newValue = 1;
+		}
+		super.set(newValue);
+		System.out.println(newValue);
+	}
 }
