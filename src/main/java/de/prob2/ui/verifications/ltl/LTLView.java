@@ -25,6 +25,8 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.Project;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -42,6 +44,10 @@ import javafx.scene.layout.StackPane;
 
 @Singleton
 public class LTLView extends AnchorPane{
+	
+	public enum Checked {
+		SUCCESS, FAIL;
+	}
 	
 	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
 	
@@ -63,6 +69,15 @@ public class LTLView extends AnchorPane{
 	@FXML
 	private TableColumn<LTLFormulaItem, String> descriptionColumn;
 	
+	@FXML
+	private TableView<Machine> tvMachines;
+	
+	@FXML
+	private TableColumn<LTLFormulaItem, FontAwesomeIconView> machineStatusColumn;
+	
+	@FXML
+	private TableColumn<LTLFormulaItem, String> machineNameColumn;	
+	
 	private final Injector injector;
 	
 	private final CurrentTrace currentTrace;
@@ -82,7 +97,7 @@ public class LTLView extends AnchorPane{
 	}
 	
 	@FXML
-	public void initialize() {	
+	public void initialize() {		
 		tvFormula.setOnMouseClicked(e-> {
 			if(e.getClickCount() == 2 && tvFormula.getSelectionModel().getSelectedItem() != null) {
 				showCurrentItemDialog();
@@ -92,7 +107,14 @@ public class LTLView extends AnchorPane{
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem("Remove formula");
-			removeItem.setOnAction(e-> currentProject.removeLTLFormula(tvFormula.getSelectionModel().getSelectedItem()));
+			removeItem.setOnAction(e -> {
+				Machine machine = tvMachines.getFocusModel().getFocusedItem();
+				LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+				machine.removeLTLFormula(item);
+				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+						currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+						currentProject.getLocation()));
+			});
 			removeItem.disableProperty().bind(row.emptyProperty());
 						
 			MenuItem showCounterExampleItem = new MenuItem("Show Counter Example");
@@ -117,18 +139,32 @@ public class LTLView extends AnchorPane{
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		addLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkAllButton.disableProperty().bind(currentTrace.existsProperty().not());
-		tvFormula.itemsProperty().bind(currentProject.ltlFormulasProperty());	
+		tvMachines.itemsProperty().bind(currentProject.machinesProperty());
+		tvMachines.getFocusModel().focusedIndexProperty().addListener((observable, from, to) -> {
+			if(to.intValue() >= 0) {
+				tvFormula.itemsProperty().bind(tvMachines.getItems().get(to.intValue()).ltlFormulasProperty());
+			}
+		});
 	}
 		
 	@FXML
 	public void addFormula() {
-		injector.getInstance(LTLFormulaDialog.class).showAndWait().ifPresent(currentProject::addLTLFormula);
+		Machine machine = tvMachines.getFocusModel().getFocusedItem();
+		injector.getInstance(LTLFormulaDialog.class).showAndWait().ifPresent(item -> {
+			machine.addLTLFormula(item);
+			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+					currentProject.getLocation()));
+		});
 	}
 	
-	public void checkFormula(LTLFormulaItem item) {
+	public Checked checkFormula(LTLFormulaItem item) {
 		LTL formula = null;
+		Checked checked = Checked.SUCCESS;
 		try {
 			formula = new LTL(item.getFormula());
 			if (currentTrace != null) {
@@ -140,15 +176,19 @@ public class LTLView extends AnchorPane{
 					showSuccess(item);
 				} else if(result instanceof LTLCounterExample) {
 					showCounterExampleFound(item, ((LTLCounterExample) result).getTrace(stateid.getStateSpace()));
+					checked = Checked.FAIL;
 				} else if(result instanceof LTLError) {
 					showError(item, (LTLError) result);
+					checked = Checked.FAIL;
 				}
 			}
 		} catch (LtlParseException e) {
 			showParseError(item, e);
+			checked = Checked.FAIL;
 			logger.error("Could not parse LTL formula", e);
 		}
 		tvFormula.refresh();
+		return checked;
 	}
 	
 	private void showParseError(LTLFormulaItem item, LtlParseException e) {
@@ -216,6 +256,12 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void checkAll() {
-		tvFormula.getItems().forEach(this::checkFormula);
+		tvFormula.getItems().forEach(item-> {
+			if(this.checkFormula(item) == Checked.FAIL) {
+				tvMachines.getFocusModel().getFocusedItem().setCheckedFailed();
+			};
+		});
+		tvMachines.refresh();
 	}
+
 }

@@ -13,6 +13,7 @@ import de.prob.animator.domainobjects.WDError;
 import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
 
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeTableCell;
 
 import org.slf4j.Logger;
@@ -29,6 +30,8 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 		
 		this.values = values;
 		this.isCurrent = isCurrent;
+		
+		this.setTextOverrun(OverrunStyle.CENTER_WORD_ELLIPSIS);
 	}
 	
 	@Override
