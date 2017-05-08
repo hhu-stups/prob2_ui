@@ -37,7 +37,6 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-import de.prob2.ui.verifications.ltl.LTLFormulaDialog;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -203,7 +202,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	
 	public void initializeLTLFormulas() {		
 		for(Machine machine : machines) {
-			machine.initializeFormulas(injector.getInstance(LTLFormulaDialog.class));
+			machine.initializeStatus();
 		}
 	}
 			
@@ -354,7 +353,13 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private Project replaceMissingWithDefaults(Project project) {
 		String nameString = (project.getName() == null) ? "" : project.getName();
 		String descriptionString = (project.getDescription() == null) ? "" : project.getDescription();
-		List<Machine> machineList = (project.getMachines() == null) ? new ArrayList<>() : project.getMachines();
+		List<Machine> machineList = new ArrayList<>();
+		if(project.getMachines() != null) {
+			machineList = project.getMachines();
+			for(Machine machine : machineList) {
+				machine.replaceMissingWithDefaults();
+			}
+		}
 		List<Preference> preferenceList = (project.getPreferences() == null) ? new ArrayList<>()
 				: project.getPreferences();
 		Set<Runconfiguration> runconfigurationSet = (project.getRunconfigurations() == null) ? new HashSet<>()

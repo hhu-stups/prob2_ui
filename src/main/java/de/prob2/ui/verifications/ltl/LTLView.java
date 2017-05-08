@@ -3,6 +3,9 @@ package de.prob2.ui.verifications.ltl;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+
+import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +50,30 @@ public class LTLView extends AnchorPane{
 	
 	public enum Checked {
 		SUCCESS, FAIL;
+	}
+	
+	private class LTLResultItem {
+		
+		private AlertType type;
+		private Checked checked;
+		private String message;
+		private String header;
+		private String exceptionText;
+		private boolean isParseError;
+		
+		private LTLResultItem(AlertType type, Checked checked, String message, String header) {
+			this.type = type;
+			this.checked = checked;
+			this.message = message;
+			this.header = header;
+		}
+		
+		private LTLResultItem(AlertType type, Checked checked, String message, String header, 
+								String exceptionText) {
+			this(type, checked, message, header);
+			this.exceptionText = exceptionText;
+			this.isParseError = true;
+		}
 	}
 	
 	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
@@ -99,11 +126,12 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void initialize() {		
 		tvFormula.setOnMouseClicked(e-> {
-			if(e.getClickCount() == 2 && tvFormula.getSelectionModel().getSelectedItem() != null) {
-				showCurrentItemDialog();
+			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+			if(e.getClickCount() == 2 &&  item != null) {
+				showCurrentItemDialog(item);
 			}
 		});
-						
+								
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem("Remove formula");
@@ -164,7 +192,8 @@ public class LTLView extends AnchorPane{
 	
 	public Checked checkFormula(LTLFormulaItem item) {
 		LTL formula = null;
-		Checked checked = Checked.SUCCESS;
+		LTLResultItem resultItem = null;
+		Trace trace = null;
 		try {
 			formula = new LTL(item.getFormula());
 			if (currentTrace != null) {
@@ -173,78 +202,71 @@ public class LTLView extends AnchorPane{
 				currentTrace.getStateSpace().execute(lcc);
 				AbstractEvalResult result = lcc.getValue();
 				if(result instanceof LTLOk) {
-					showSuccess(item);
+					resultItem = new LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "LTL Check succeeded", "Success");
 				} else if(result instanceof LTLCounterExample) {
-					showCounterExampleFound(item, ((LTLCounterExample) result).getTrace(stateid.getStateSpace()));
-					checked = Checked.FAIL;
+					trace = ((LTLCounterExample) result).getTrace(stateid.getStateSpace());
+					resultItem = new LTLResultItem(AlertType.ERROR, Checked.FAIL, "LTL Counter Example has been found", 
+													"Counter Example Found");
 				} else if(result instanceof LTLError) {
-					showError(item, (LTLError) result);
-					checked = Checked.FAIL;
+					resultItem = new LTLResultItem(AlertType.ERROR, Checked.FAIL, ((LTLError) result).getMessage(), 
+													"Error while executing formula");
 				}
 			}
 		} catch (LtlParseException e) {
-			showParseError(item, e);
-			checked = Checked.FAIL;
+			StringWriter sw = new StringWriter();
+			try (PrintWriter pw = new PrintWriter(sw)) {
+				e.printStackTrace(pw);
+			}
+			resultItem = new LTLResultItem(AlertType.ERROR, Checked.FAIL, "Message: ", "Could not parse formula", 
+											sw.toString());
 			logger.error("Could not parse LTL formula", e);
 		}
+		showResult(resultItem, item, trace);
 		tvFormula.refresh();
-		return checked;
+		if(resultItem != null) {
+			return resultItem.checked;
+		}
+		return Checked.FAIL;
 	}
 	
-	private void showParseError(LTLFormulaItem item, LtlParseException e) {
-		TextArea exceptionText = new TextArea();
-		Alert alert = new Alert(AlertType.ERROR, "Message: ");
-		alert.getDialogPane().getStylesheets().add(getClass().getResource("/prob.css").toExternalForm());
+	private void showResult(LTLResultItem resultItem, LTLFormulaItem item, @Nullable Trace trace) {
+		if(resultItem == null) {
+			return;
+		}
+		Alert alert = new Alert(resultItem.type, resultItem.message);
 		alert.setTitle(item.getName());
-		alert.setHeaderText("Could not parse LTL formula");
-		StringWriter sw = new StringWriter();
-		try (PrintWriter pw = new PrintWriter(sw)) {
-			e.printStackTrace(pw);
-			exceptionText.setText(sw.toString());
+		alert.setHeaderText(resultItem.header);
+		if(resultItem.isParseError) {
+			alert.getDialogPane().getStylesheets().add(getClass().getResource("/prob.css").toExternalForm());
+			TextArea exceptionText = new TextArea(resultItem.exceptionText);
 			exceptionText.setEditable(false);
 			exceptionText.getStyleClass().add("text-area-error");
+			StackPane pane = new StackPane(exceptionText);
+			pane.setPrefSize(320, 120);
+			alert.getDialogPane().setExpandableContent(pane);
+			alert.getDialogPane().setExpanded(true);
 		}
-		StackPane pane = new StackPane(exceptionText);
-		pane.setPrefSize(320, 120);
-		alert.getDialogPane().setExpandableContent(pane);
-		alert.getDialogPane().setExpanded(true);
 		alert.showAndWait();
-		item.setCheckedFailed();
-		item.setCounterExample(null);
-	}
-	
-	private void showError(LTLFormulaItem item, LTLError error) {
-		Alert alert = new Alert(AlertType.ERROR, error.getMessage());
-		alert.setTitle(item.getName());
-		alert.setHeaderText("Error while executing formula");
-		alert.showAndWait();
-		item.setCheckedFailed();
-		item.setCounterExample(null);
-	}
-	
-	private void showSuccess(LTLFormulaItem item) {
-		Alert alert = new Alert(AlertType.INFORMATION, "LTL Check succeeded");
-		alert.setTitle(item.getName());
-		alert.setHeaderText("Success");
-		alert.showAndWait();
-		item.setCheckedSuccessful();
-		item.setCounterExample(null);
-	}
-	
-	private void showCounterExampleFound(LTLFormulaItem item, Trace trace) {
-		Alert alert = new Alert(AlertType.ERROR, "LTL Counter Example has been found");
-		alert.setTitle(item.getName());
-		alert.setHeaderText("Counter Example found");
-		alert.showAndWait();
-		item.setCheckedFailed();
+		if(resultItem.type != AlertType.ERROR) {
+			item.setCheckedSuccessful();
+		} else {
+			item.setCheckedFailed();
+		}
 		item.setCounterExample(trace);
 	}
-	
-	private void showCurrentItemDialog() {
-		if(tvFormula.getSelectionModel().getSelectedItem().showAndRegisterChange()) {
-			tvFormula.refresh();
-			currentProject.setSaved(false);
-		}
+		
+	private void showCurrentItemDialog(LTLFormulaItem item) {
+		LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
+		formulaDialog.setData(item.getName(), item.getDescription(), item.getFormula());
+		formulaDialog.showAndWait().ifPresent(result-> {
+			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) || 
+					!item.getFormula().equals(result.getFormula())) {
+				item.setData(result.getName(), result.getDescription(), result.getFormula());
+				tvFormula.refresh();
+				currentProject.setSaved(false);
+			}
+		});
+		formulaDialog.clear();
 	}
 	
 	private void showCounterExample() {
@@ -256,11 +278,17 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void checkAll() {
+		ArrayList<Boolean> success = new ArrayList<>();
+		success.add(true);
 		tvFormula.getItems().forEach(item-> {
 			if(this.checkFormula(item) == Checked.FAIL) {
 				tvMachines.getFocusModel().getFocusedItem().setCheckedFailed();
-			};
+				success.set(0, false);
+			}
 		});
+		if(success.get(0)) {
+			tvMachines.getFocusModel().getFocusedItem().setCheckedSuccessful();
+		}
 		tvMachines.refresh();
 	}
 

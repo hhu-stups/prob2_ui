@@ -6,32 +6,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob2.ui.verifications.ltl.LTLFormulaDialog;
+import de.prob2.ui.verifications.ltl.LTLCheckableItem;
 import de.prob2.ui.verifications.ltl.LTLFormulaItem;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-import javafx.scene.paint.Color;
 
-public class Machine {
-	private String name;
-	private String description;
+public class Machine extends LTLCheckableItem {
 	private String location;
-	private transient FontAwesomeIconView status;
-	private final ListProperty<LTLFormulaItem> ltlFormulas;
+	private ListProperty<LTLFormulaItem> ltlFormulas;
 
 	public Machine(String name, String description, Path location) {
-		this.name = name;
-		this.description = description;
+		super(name,description);
 		this.location = location.toString();
-		initializeStatus();
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
-	}
-
-	public String getName() {
-		return name;
 	}
 
 	public String getFileName() {
@@ -39,27 +27,15 @@ public class Machine {
 		String[] splittedFileName = location.split(pattern);
 		return splittedFileName[splittedFileName.length - 1];
 	}
-
-	public String getDescription() {
-		return description;
-	}
 	
-	public FontAwesomeIconView getStatus() {
-		return status;
-	}
-	
-	private void initializeStatus() {
-		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
-		status.setFill(Color.BLUE);
-	}
-	
-	public void initializeFormulas(LTLFormulaDialog formulaDialog) {
-		initializeStatus();
-		for(LTLFormulaItem item : ltlFormulas) {
-			item.initialize(formulaDialog);
+	@Override
+	public void initializeStatus() {
+		super.initializeStatus();
+		for (LTLFormulaItem item: ltlFormulas) {
+			item.initializeStatus();
 		}
 	}
-	
+		
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {
 		return ltlFormulas;
 	}
@@ -75,26 +51,15 @@ public class Machine {
 	public void removeLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.remove(formula);
 	}
-	
-	public void setCheckedSuccessful() {
-		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
-		icon.setFill(Color.GREEN);
-		this.status = icon;
-	}
-
-	public void setCheckedFailed() {
-		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
-		icon.setFill(Color.RED);
-		this.status = icon;
+		
+	public void replaceMissingWithDefaults() {
+		if(ltlFormulas == null) {
+			this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
+		}
 	}
 	
 	public Path getPath() {
 		return Paths.get(location);
-	}
-
-	@Override
-	public String toString() {
-		return this.name;
 	}
 
 	@Override
@@ -108,9 +73,16 @@ public class Machine {
 		Machine otherMachine = (Machine) other;
 		return otherMachine.location.equals(this.location);
 	}
+	
+	@Override
+	public String toString() {
+		return this.name;
+	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(location);
 	}
+	
+
 }

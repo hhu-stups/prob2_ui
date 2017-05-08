@@ -14,33 +14,34 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.fxmisc.richtext.StyleClassedTextArea;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
+
 import difflib.DiffUtils;
+
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.ToggleGroup;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import org.fxmisc.richtext.StyleClassedTextArea;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FullValueStage extends Stage {
 	private static final Pattern PRETTIFY_DELIMITERS = Pattern.compile("[\\{\\}\\,]");
-	private static final Logger logger = LoggerFactory.getLogger(FullValueStage.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FullValueStage.class);
 	
 	@FXML private TabPane tabPane;
 	@FXML private Tab currentValueTab;
@@ -49,31 +50,26 @@ public class FullValueStage extends Stage {
 	@FXML private TextArea currentValueTextarea;
 	@FXML private TextArea previousValueTextarea;
 	@FXML private StyleClassedTextArea diffTextarea;
-	@FXML private ToggleGroup asciiUnicodeGroup;
-	@FXML private RadioButton asciiRadio;
-	@FXML private RadioButton unicodeRadio;
 	@FXML private CheckBox prettifyCheckBox;
 	@FXML private Button saveAsButton;
 	
 	private final StageManager stageManager;
 	
-	private final ObjectProperty<AsciiUnicodeString> currentValue;
-	private final ObjectProperty<AsciiUnicodeString> previousValue;
+	private final StringProperty currentValue;
+	private final StringProperty previousValue;
 	private final BooleanProperty formattingEnabled;
 	
 	@Inject
 	public FullValueStage(final StageManager stageManager) {
 		this.stageManager = stageManager;
-		this.currentValue = new SimpleObjectProperty<>(this, "currentValue", null);
-		this.previousValue = new SimpleObjectProperty<>(this, "previousValue", null);
+		this.currentValue = new SimpleStringProperty(this, "currentValue", null);
+		this.previousValue = new SimpleStringProperty(this, "previousValue", null);
 		this.formattingEnabled = new SimpleBooleanProperty(this, "formattingEnabled", true);
 		stageManager.loadFXML(this, "full_value_stage.fxml");
 	}
 	
 	@FXML
 	private void initialize() {
-		this.asciiRadio.visibleProperty().bind(this.formattingEnabledProperty());
-		this.unicodeRadio.visibleProperty().bind(this.formattingEnabledProperty());
 		this.prettifyCheckBox.visibleProperty().bind(this.formattingEnabledProperty());
 	}
 	
@@ -122,45 +118,37 @@ public class FullValueStage extends Stage {
 		return this.prettifyCheckBox.isSelected() ? prettify(s) : s;
 	}
 	
-	public ObjectProperty<AsciiUnicodeString> currentValueProperty() {
+	public StringProperty currentValueProperty() {
 		return this.currentValue;
 	}
 	
-	public AsciiUnicodeString getCurrentValue() {
+	public String getCurrentValue() {
 		return this.currentValueProperty().get();
 	}
 	
-	public void setCurrentValue(final AsciiUnicodeString currentValue) {
+	public void setCurrentValue(final String currentValue) {
 		this.currentValueProperty().set(currentValue);
 		this.updateTabs();
 	}
 	
-	public String currentValueAsString() {
-		return asciiRadio.isSelected() ? this.getCurrentValue().toAscii() : this.getCurrentValue().toUnicode();
-	}
-	
-	public ObjectProperty<AsciiUnicodeString> previousValueProperty() {
+	public StringProperty previousValueProperty() {
 		return this.previousValue;
 	}
 	
-	public AsciiUnicodeString getPreviousValue() {
+	public String getPreviousValue() {
 		return this.previousValueProperty().get();
 	}
 	
-	public void setPreviousValue(final AsciiUnicodeString previousValue) {
+	public void setPreviousValue(final String previousValue) {
 		this.previousValueProperty().set(previousValue);
 		this.updateTabs();
-	}
-	
-	public String previousValueAsString() {
-		return asciiRadio.isSelected() ? this.getPreviousValue().toAscii() : this.getPreviousValue().toUnicode();
 	}
 	
 	public BooleanProperty formattingEnabledProperty() {
 		return this.formattingEnabled;
 	}
 	
-	public boolean getFormattingEnabled() {
+	public boolean isFormattingEnabled() {
 		return this.formattingEnabledProperty().get();
 	}
 	
@@ -211,8 +199,8 @@ public class FullValueStage extends Stage {
 	
 	@FXML
 	private void updateTabs() {
-		final String cv = this.getCurrentValue() == null ? null : prettifyIfEnabled(this.currentValueAsString());
-		final String pv = this.getPreviousValue() == null ? null : prettifyIfEnabled(this.previousValueAsString());
+		final String cv = this.getCurrentValue() == null ? null : prettifyIfEnabled(this.getCurrentValue());
+		final String pv = this.getPreviousValue() == null ? null : prettifyIfEnabled(this.getCurrentValue());
 		if (cv != null) {
 			this.currentValueTextarea.setText(cv);
 		}
@@ -258,15 +246,15 @@ public class FullValueStage extends Stage {
 			} else if (diffTab.isSelected()) {
 				value = this.diffTextarea.getText();
 			} else {
-				logger.error("No known tab selected");
+				LOGGER.error("No known tab selected");
 				return;
 			}
 			out.write(value);
 		} catch (FileNotFoundException e) {
-			logger.error("Could not open file for writing", e);
+			LOGGER.error("Could not open file for writing", e);
 			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file for writing:\n" + e.getMessage()).showAndWait();
 		} catch (IOException e) {
-			logger.error("Failed to save value to file", e);
+			LOGGER.error("Failed to save value to file", e);
 			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to save file:\n" + e.getMessage()).showAndWait();
 		}
 	}
