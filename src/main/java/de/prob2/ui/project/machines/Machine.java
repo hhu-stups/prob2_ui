@@ -31,8 +31,10 @@ public class Machine extends LTLCheckableItem {
 	@Override
 	public void initializeStatus() {
 		super.initializeStatus();
-		for (LTLFormulaItem item: ltlFormulas) {
-			item.initializeStatus();
+		if (ltlFormulas != null) {
+			for (LTLFormulaItem item : ltlFormulas) {
+				item.initializeStatus();
+			}
 		}
 	}
 		
