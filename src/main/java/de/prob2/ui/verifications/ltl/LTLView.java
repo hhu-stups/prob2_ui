@@ -42,6 +42,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 
+//TODO: Refactor class and fix focused/selected bug
+
 @Singleton
 public class LTLView extends AnchorPane{
 	
@@ -99,11 +101,12 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void initialize() {		
 		tvFormula.setOnMouseClicked(e-> {
-			if(e.getClickCount() == 2 && tvFormula.getSelectionModel().getSelectedItem() != null) {
-				showCurrentItemDialog();
+			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+			if(e.getClickCount() == 2 &&  item != null) {
+				showCurrentItemDialog(item);
 			}
 		});
-						
+								
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem("Remove formula");
@@ -240,11 +243,18 @@ public class LTLView extends AnchorPane{
 		item.setCounterExample(trace);
 	}
 	
-	private void showCurrentItemDialog() {
-		if(tvFormula.getSelectionModel().getSelectedItem().showAndRegisterChange()) {
-			tvFormula.refresh();
-			currentProject.setSaved(false);
-		}
+	private void showCurrentItemDialog(LTLFormulaItem item) {
+		LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
+		formulaDialog.setData(item.getName(), item.getDescription(), item.getFormula());
+		formulaDialog.showAndWait().ifPresent(result-> {
+			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) || 
+					!item.getFormula().equals(result.getFormula())) {
+				item.setData(result.getName(), result.getDescription(), result.getFormula());
+				tvFormula.refresh();
+				currentProject.setSaved(false);
+			}
+		});
+		formulaDialog.clear();
 	}
 	
 	private void showCounterExample() {

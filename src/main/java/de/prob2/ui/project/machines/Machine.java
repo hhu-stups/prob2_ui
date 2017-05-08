@@ -8,13 +8,13 @@ import java.util.regex.Pattern;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob2.ui.verifications.ltl.LTLFormulaDialog;
 import de.prob2.ui.verifications.ltl.LTLFormulaItem;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
 
+//TODO: Refactor this and LTLFormulaItem
 public class Machine {
 	private String name;
 	private String description;
@@ -48,18 +48,14 @@ public class Machine {
 		return status;
 	}
 	
-	private void initializeStatus() {
+	public void initializeStatus() {
 		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		status.setFill(Color.BLUE);
-	}
-	
-	public void initializeFormulas(LTLFormulaDialog formulaDialog) {
-		initializeStatus();
-		for(LTLFormulaItem item : ltlFormulas) {
-			item.initialize(formulaDialog);
+		for (LTLFormulaItem item: ltlFormulas) {
+			item.initializeStatus();
 		}
 	}
-	
+		
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {
 		return ltlFormulas;
 	}

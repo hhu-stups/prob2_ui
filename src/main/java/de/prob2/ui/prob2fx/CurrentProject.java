@@ -37,7 +37,6 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-import de.prob2.ui.verifications.ltl.LTLFormulaDialog;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -203,7 +202,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	
 	public void initializeLTLFormulas() {		
 		for(Machine machine : machines) {
-			machine.initializeFormulas(injector.getInstance(LTLFormulaDialog.class));
+			machine.initializeStatus();;
 		}
 	}
 			
