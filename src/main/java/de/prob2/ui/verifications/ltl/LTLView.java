@@ -223,7 +223,10 @@ public class LTLView extends AnchorPane{
 		}
 		showResult(resultItem, item, trace);
 		tvFormula.refresh();
-		return resultItem.checked;
+		if(resultItem != null) {
+			return resultItem.checked;
+		}
+		return Checked.FAIL;
 	}
 	
 	private void showResult(LTLResultItem resultItem, LTLFormulaItem item, @Nullable Trace trace) {
