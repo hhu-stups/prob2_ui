@@ -5,6 +5,7 @@
 	-prob-grey-20: #55556033;
 	-prob-grey-50: #55556080;
 	-prob-grey-75: #555560BF;
+	-prob-lightgrey: #E5E5E5;
 	-prob-orange: #B77300;
 	-prob-aqua: #037875;
 	-prob-white: #EFEFEF;
@@ -64,7 +65,13 @@
 	-fx-background-color: -prob-grey-75;
 }
 
+.icon-basic {
+	/*-fx-font-size: 1em;*/
+	-fx-fill: -prob-lightgrey;
+}
+
 .icon-dark {
+	/*-fx-font-size: 1em;*/
 	-fx-fill: -prob-grey;
 	-fx-opacity: 0.8;
 }
