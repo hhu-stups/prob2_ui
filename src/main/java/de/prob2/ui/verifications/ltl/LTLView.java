@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +69,7 @@ public class LTLView extends AnchorPane{
 		}
 		
 		private LTLResultItem(AlertType type, Checked checked, String message, String header, 
-								String exceptionText, boolean isParseError) {
+								String exceptionText) {
 			this(type, checked, message, header);
 			this.exceptionText = exceptionText;
 			this.isParseError = true;
@@ -216,7 +218,7 @@ public class LTLView extends AnchorPane{
 				e.printStackTrace(pw);
 			}
 			resultItem = new LTLResultItem(AlertType.ERROR, Checked.FAIL, "Message: ", "Could not parse formula", 
-											sw.toString(), true);
+											sw.toString());
 			logger.error("Could not parse LTL formula", e);
 		}
 		showResult(resultItem, item, trace);
@@ -224,7 +226,7 @@ public class LTLView extends AnchorPane{
 		return resultItem.checked;
 	}
 	
-	private void showResult(LTLResultItem resultItem, LTLFormulaItem item, Trace trace) {
+	private void showResult(LTLResultItem resultItem, LTLFormulaItem item, @Nullable Trace trace) {
 		Alert alert = new Alert(resultItem.type, resultItem.message);
 		alert.setTitle(item.getName());
 		alert.setHeaderText(resultItem.header);
@@ -276,7 +278,7 @@ public class LTLView extends AnchorPane{
 			if(this.checkFormula(item) == Checked.FAIL) {
 				tvMachines.getFocusModel().getFocusedItem().setCheckedFailed();
 				success.set(0, false);
-			};
+			}
 		});
 		if(success.get(0)) {
 			tvMachines.getFocusModel().getFocusedItem().setCheckedSuccessful();

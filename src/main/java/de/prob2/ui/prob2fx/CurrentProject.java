@@ -202,7 +202,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	
 	public void initializeLTLFormulas() {		
 		for(Machine machine : machines) {
-			machine.initializeStatus();;
+			machine.initializeStatus();
 		}
 	}
 			
