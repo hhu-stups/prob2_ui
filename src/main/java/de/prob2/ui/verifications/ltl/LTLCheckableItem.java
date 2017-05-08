@@ -43,11 +43,6 @@ public class LTLCheckableItem {
 		icon.setFill(Color.RED);
 		this.status = icon;
 	}
-	
-	@Override
-	public String toString() {
-		return "Name: " + name + ", Description: " + description;
-	}
-	
+		
 	
 }

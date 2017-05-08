@@ -227,6 +227,9 @@ public class LTLView extends AnchorPane{
 	}
 	
 	private void showResult(LTLResultItem resultItem, LTLFormulaItem item, @Nullable Trace trace) {
+		if(resultItem == null) {
+			return;
+		}
 		Alert alert = new Alert(resultItem.type, resultItem.message);
 		alert.setTitle(item.getName());
 		alert.setHeaderText(resultItem.header);

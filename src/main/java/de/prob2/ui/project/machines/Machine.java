@@ -73,9 +73,16 @@ public class Machine extends LTLCheckableItem {
 		Machine otherMachine = (Machine) other;
 		return otherMachine.location.equals(this.location);
 	}
+	
+	@Override
+	public String toString() {
+		return this.name;
+	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(location);
 	}
+	
+
 }
