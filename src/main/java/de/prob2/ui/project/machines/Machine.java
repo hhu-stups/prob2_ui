@@ -20,7 +20,7 @@ public class Machine {
 	private String description;
 	private String location;
 	private transient FontAwesomeIconView status;
-	private final ListProperty<LTLFormulaItem> ltlFormulas;
+	private ListProperty<LTLFormulaItem> ltlFormulas;
 
 	public Machine(String name, String description, Path location) {
 		this.name = name;
@@ -82,6 +82,12 @@ public class Machine {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
 		icon.setFill(Color.RED);
 		this.status = icon;
+	}
+	
+	public void replaceMissingWithDefaults() {
+		if(ltlFormulas == null) {
+			this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
+		}
 	}
 	
 	public Path getPath() {
