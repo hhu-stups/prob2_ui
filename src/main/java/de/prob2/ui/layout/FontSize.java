@@ -8,9 +8,11 @@ import javafx.beans.property.SimpleIntegerProperty;
 @Singleton
 public class FontSize extends SimpleIntegerProperty {
 
+	private int defaultFontSize = 13;
+	
 	@Inject
 	public FontSize() {
-		this.set(13);
+		this.setDefault();
 	}
 	
 	@Override
@@ -19,6 +21,9 @@ public class FontSize extends SimpleIntegerProperty {
 			newValue = 1;
 		}
 		super.set(newValue);
-		System.out.println(newValue);
+	}
+	
+	public void setDefault() {
+		this.set(defaultFontSize);
 	}
 }
