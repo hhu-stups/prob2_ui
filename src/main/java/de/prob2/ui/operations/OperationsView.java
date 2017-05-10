@@ -57,7 +57,7 @@ public final class OperationsView extends AnchorPane {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
 
-	private static final class OperationsCell extends ListCell<OperationItem> {
+	private final class OperationsCell extends ListCell<OperationItem> {
 		public OperationsCell() {
 			super();
 
@@ -114,6 +114,8 @@ public final class OperationsView extends AnchorPane {
 				default:
 					throw new IllegalStateException("Unhandled status: " + item.getStatus());
 				}
+				FontSize fontsize = injector.getInstance(FontSize.class);
+				icon.glyphSizeProperty().bind(fontsize);
 				setGraphic(icon);
 			} else {
 				setGraphic(null);
@@ -160,7 +162,7 @@ public final class OperationsView extends AnchorPane {
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
-	private Injector injector;
+	private final Injector injector;
 	private final Comparator<CharSequence> alphanumericComparator;
 
 	private static final String INITIALISATION = "INITIALISATION";
@@ -168,7 +170,7 @@ public final class OperationsView extends AnchorPane {
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
-			Injector injector) {
+			final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
@@ -208,16 +210,16 @@ public final class OperationsView extends AnchorPane {
 	private void bindIconSizeToFontSize() {
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (searchButton.getGraphic())).glyphSizeProperty().bind(fontsize);
-		((FontAwesomeIconView) (backButton.getGraphic())).glyphSizeProperty().bind(fontsize);
-		((FontAwesomeIconView) (forwardButton.getGraphic())).glyphSizeProperty().bind(fontsize);
+		((FontAwesomeIconView) (backButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
+		((FontAwesomeIconView) (forwardButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 		sortButton.graphicProperty().addListener((observable, from, to) -> {
-			((FontAwesomeIconView) (sortButton.getGraphic())).glyphSizeProperty().bind(fontsize);
+			((FontAwesomeIconView) (sortButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 		});
 		
 		disabledOpsToggle.graphicProperty().addListener((observable, from, to) -> {
-			((FontAwesomeIconView) (disabledOpsToggle.getGraphic())).glyphSizeProperty().bind(fontsize);
+			((FontAwesomeIconView) (disabledOpsToggle.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 		});
-		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize);
+		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 		
 		
 		searchButton.widthProperty().addListener((observable, from, to) -> {
