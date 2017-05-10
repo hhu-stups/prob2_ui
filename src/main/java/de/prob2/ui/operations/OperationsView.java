@@ -218,6 +218,12 @@ public final class OperationsView extends AnchorPane {
 			((FontAwesomeIconView) (disabledOpsToggle.getGraphic())).glyphSizeProperty().bind(fontsize);
 		});
 		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize);
+		
+		
+		searchButton.widthProperty().addListener((observable, from, to) -> {
+			searchButton.setPrefHeight(searchButton.getWidth());
+			Platform.runLater(() -> searchButton.autosize());
+		});
 	}
 
 	private List<String> extractParamsFromNextState(final Trace trace, final Transition transition,
