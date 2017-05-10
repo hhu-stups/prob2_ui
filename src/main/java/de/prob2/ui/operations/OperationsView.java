@@ -202,8 +202,22 @@ public final class OperationsView extends AnchorPane {
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
 
+		bindIconSizeToFontSize();
+	}
+
+	private void bindIconSizeToFontSize() {
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (searchButton.getGraphic())).glyphSizeProperty().bind(fontsize);
+		((FontAwesomeIconView) (backButton.getGraphic())).glyphSizeProperty().bind(fontsize);
+		((FontAwesomeIconView) (forwardButton.getGraphic())).glyphSizeProperty().bind(fontsize);
+		sortButton.graphicProperty().addListener((observable, from, to) -> {
+			((FontAwesomeIconView) (sortButton.getGraphic())).glyphSizeProperty().bind(fontsize);
+		});
+		
+		disabledOpsToggle.graphicProperty().addListener((observable, from, to) -> {
+			((FontAwesomeIconView) (disabledOpsToggle.getGraphic())).glyphSizeProperty().bind(fontsize);
+		});
+		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize);
 	}
 
 	private List<String> extractParamsFromNextState(final Trace trace, final Transition transition,

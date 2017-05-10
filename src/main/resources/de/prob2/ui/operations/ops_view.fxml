@@ -39,7 +39,7 @@
 					AnchorPane.topAnchor="2.0" AnchorPane.rightAnchor="5.0">
 					<HBox HBox.hgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
 						<Button fx:id="backButton" mnemonicParsing="false"
-							onAction="#handleBackButton" prefHeight="26.0" prefWidth="26.0">
+							onAction="#handleBackButton">
 							<graphic>
 								<FontAwesomeIconView styleClass="icon-dark"
 									glyphName="CHEVRON_LEFT" size="15" />
@@ -49,7 +49,7 @@
 							</tooltip>
 						</Button>
 						<Button fx:id="forwardButton" mnemonicParsing="false"
-							onAction="#handleForwardButton" prefHeight="26.0" prefWidth="26.0">
+							onAction="#handleForwardButton">
 							<graphic>
 								<FontAwesomeIconView styleClass="icon-dark"
 									glyphName="CHEVRON_RIGHT" size="15" />
@@ -61,7 +61,7 @@
 					</HBox>
 					<HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
 						<Button fx:id="sortButton" mnemonicParsing="false"
-							onAction="#handleSortButton" prefHeight="26.0" prefWidth="26.0">
+							onAction="#handleSortButton">
 							<graphic>
 								<FontAwesomeIconView styleClass="icon-dark"
 									glyphName="SORT" size="15" />
@@ -72,14 +72,13 @@
 						</Button>
 						<ToggleButton fx:id="disabledOpsToggle"
 							mnemonicParsing="false" onAction="#handleDisabledOpsToggle"
-							prefHeight="26.0" prefWidth="26.0" selected="true">
+							selected="true">
 							<graphic>
 								<FontAwesomeIconView styleClass="icon-dark"
 									glyphName="EYE" size="15" />
 							</graphic>
 						</ToggleButton>
-						<MenuButton fx:id="randomButton" mnemonicParsing="false"
-							prefHeight="26.0" prefWidth="45.0">
+						<MenuButton fx:id="randomButton" mnemonicParsing="false">
 							<items>
 								<MenuItem fx:id="oneRandomEvent" mnemonicParsing="false"
 									onAction="#random" text="%operations.random.one" />
