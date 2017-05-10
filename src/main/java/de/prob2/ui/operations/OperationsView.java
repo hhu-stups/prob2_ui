@@ -13,11 +13,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.classicalb.Operation;
@@ -32,10 +32,9 @@ import de.prob.model.representation.Machine;
 import de.prob.model.representation.Variable;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
@@ -50,7 +49,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
-
 import se.sawano.java.text.AlphanumericComparator;
 
 @Singleton
@@ -62,58 +60,59 @@ public final class OperationsView extends AnchorPane {
 	private static final class OperationsCell extends ListCell<OperationItem> {
 		public OperationsCell() {
 			super();
-			
+
 			getStyleClass().add("operations-cell");
 		}
-		
+
 		@Override
 		protected void updateItem(OperationItem item, boolean empty) {
 			super.updateItem(item, empty);
-			getStyleClass().removeAll("enabled", "timeout", "unexplored", "errored", "skip", "normal", "disabled", "max-reached");
+			getStyleClass().removeAll("enabled", "timeout", "unexplored", "errored", "skip", "normal", "disabled",
+					"max-reached");
 			if (item != null && !empty) {
 				setText(item.toString());
 				setDisable(true);
 				final FontAwesomeIconView icon;
 				switch (item.getStatus()) {
-					case TIMEOUT:
-						icon = new FontAwesomeIconView(FontAwesomeIcon.CLOCK_ALT);
-						getStyleClass().add("timeout");
-						setTooltip(new Tooltip("Operation with timeout"));
-						break;
-					
-					case ENABLED:
-						icon = new FontAwesomeIconView(item.isSkip() ? FontAwesomeIcon.REPEAT : FontAwesomeIcon.PLAY);
-						setDisable(false);
-						getStyleClass().add("enabled");
-						if (!item.isExplored()) {
-							getStyleClass().add("unexplored");
-							setTooltip(new Tooltip("Reaches unexplored State"));
-						} else if (item.isErrored()) {
-							getStyleClass().add("errored");
-							setTooltip(new Tooltip("Reaches errored State"));
-						} else if (item.isSkip()) {
-							getStyleClass().add("skip");
-							setTooltip(new Tooltip("Does not change State"));
-						} else {
-							getStyleClass().add("normal");
-							setTooltip(null);
-						}
-						break;
-					
-					case DISABLED:
-						icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
-						getStyleClass().add("disabled");
+				case TIMEOUT:
+					icon = new FontAwesomeIconView(FontAwesomeIcon.CLOCK_ALT);
+					getStyleClass().add("timeout");
+					setTooltip(new Tooltip("Operation with timeout"));
+					break;
+
+				case ENABLED:
+					icon = new FontAwesomeIconView(item.isSkip() ? FontAwesomeIcon.REPEAT : FontAwesomeIcon.PLAY);
+					setDisable(false);
+					getStyleClass().add("enabled");
+					if (!item.isExplored()) {
+						getStyleClass().add("unexplored");
+						setTooltip(new Tooltip("Reaches unexplored State"));
+					} else if (item.isErrored()) {
+						getStyleClass().add("errored");
+						setTooltip(new Tooltip("Reaches errored State"));
+					} else if (item.isSkip()) {
+						getStyleClass().add("skip");
+						setTooltip(new Tooltip("Does not change State"));
+					} else {
+						getStyleClass().add("normal");
 						setTooltip(null);
-						break;
-					
-					case MAX_REACHED:
-						icon = new FontAwesomeIconView(FontAwesomeIcon.ELLIPSIS_H);
-						getStyleClass().add("max-reached");
-						setTooltip(null);
-						break;
-					
-					default:
-						throw new IllegalStateException("Unhandled status: " + item.getStatus());
+					}
+					break;
+
+				case DISABLED:
+					icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
+					getStyleClass().add("disabled");
+					setTooltip(null);
+					break;
+
+				case MAX_REACHED:
+					icon = new FontAwesomeIconView(FontAwesomeIcon.ELLIPSIS_H);
+					getStyleClass().add("max-reached");
+					setTooltip(null);
+					break;
+
+				default:
+					throw new IllegalStateException("Unhandled status: " + item.getStatus());
 				}
 				setGraphic(icon);
 			} else {
@@ -161,15 +160,18 @@ public final class OperationsView extends AnchorPane {
 	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
-
+	private Injector injector;
 	private final Comparator<CharSequence> alphanumericComparator;
+
 	private static final String INITIALISATION = "INITIALISATION";
 	private static final String ICON_DARK = "icon-dark";
 
 	@Inject
-	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager) {
+	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
+			Injector injector) {
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
+		this.injector = injector;
 
 		stageManager.loadFXML(this, "ops_view.fxml");
 	}
@@ -199,11 +201,18 @@ public final class OperationsView extends AnchorPane {
 
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
+
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) (searchButton.getGraphic())).glyphSizeProperty().bind(fontsize);
 	}
 
-	private List<String> extractParamsFromNextState(final Trace trace, final Transition transition, final Class<? extends AbstractFormulaElement> type) {
-		// It seems that there is no way to easily find out the constant/variable values which a specific $setup_constants or $initialise_machine transition would set.
-		// So we look at the values of all constants/variables in the transition's destination state.
+	private List<String> extractParamsFromNextState(final Trace trace, final Transition transition,
+			final Class<? extends AbstractFormulaElement> type) {
+		// It seems that there is no way to easily find out the
+		// constant/variable values which a specific $setup_constants or
+		// $initialise_machine transition would set.
+		// So we look at the values of all constants/variables in the
+		// transition's destination state.
 		final Set<IEvalElement> formulas = new HashSet<>();
 		for (final AbstractFormulaElement c : trace.getStateSpace().getMainComponent().getChildrenOfType(type)) {
 			formulas.add(c.getFormula());
@@ -243,7 +252,7 @@ public final class OperationsView extends AnchorPane {
 		if (!trace.getModel().equals(currentModel)) {
 			updateModel(trace);
 		}
-		
+
 		events = new ArrayList<>();
 		final Set<Transition> operations = trace.getNextTransitions(true);
 		final Set<String> disabled = new HashSet<>(opNames);
@@ -264,33 +273,17 @@ public final class OperationsView extends AnchorPane {
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			final boolean skip = transition.getSource().equals(transition.getDestination());
-			OperationItem operationItem = new OperationItem(
-					transition.getId(),
-					name,
-					params,
-					transition.getReturnValues(),
-					OperationItem.Status.ENABLED,
-					explored,
-					errored,
-					skip
-				);
+			OperationItem operationItem = new OperationItem(transition.getId(), name, params,
+					transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip);
 			events.add(operationItem);
 		}
 		showDisabledAndWithTimeout(disabled, withTimeout);
-		
+
 		doSort();
-		
+
 		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
-			events.add(new OperationItem(
-				"-",
-				"(possibly more - maximum operations reached)",
-				Collections.emptyList(),
-				Collections.emptyList(),
-				OperationItem.Status.MAX_REACHED,
-				false,
-				false,
-				false
-			));
+			events.add(new OperationItem("-", "(possibly more - maximum operations reached)", Collections.emptyList(),
+					Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
 		}
 
 		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
@@ -300,31 +293,16 @@ public final class OperationsView extends AnchorPane {
 		if (showDisabledOps) {
 			for (String s : notEnabled) {
 				if (!INITIALISATION.equals(s)) {
-					events.add(new OperationItem(
-						s,
-						s,
-						opToParams.get(s),
-						Collections.emptyList(),
-						withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
-						false,
-						false,
-						false
-					));
+					events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(),
+							withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
+							false, false, false));
 				}
 			}
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
-				events.add(new OperationItem(
-					s,
-					s,
-					opToParams.get(s),
-					Collections.emptyList(),
-					OperationItem.Status.TIMEOUT,
-					false,
-					false,
-					false
-				));
+				events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(),
+						OperationItem.Status.TIMEOUT, false, false, false));
 			}
 		}
 	}
@@ -495,7 +473,8 @@ public final class OperationsView extends AnchorPane {
 	private List<String> getParams(BEvent e) {
 		List<String> paramList = new ArrayList<>();
 		if (e instanceof Event) {
-			paramList.addAll(((Event) e).getParameters().stream().map(EventParameter::getName).collect(Collectors.toList()));
+			paramList.addAll(
+					((Event) e).getParameters().stream().map(EventParameter::getName).collect(Collectors.toList()));
 		} else if (e instanceof Operation) {
 			paramList.addAll(((Operation) e).getParameters());
 		}

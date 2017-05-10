@@ -66,12 +66,10 @@
 }
 
 .icon-basic {
-	/*-fx-font-size: 1em;*/
 	-fx-fill: -prob-lightgrey;
 }
 
 .icon-dark {
-	/*-fx-font-size: 1em;*/
 	-fx-fill: -prob-grey;
 	-fx-opacity: 0.8;
 }

@@ -13,8 +13,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 
-<fx:root minHeight="200.0" minWidth="200.0" type="AnchorPane"
-	xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65"
+	xmlns:fx="http://javafx.com/fxml/1">
 	<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
 		<VBox spacing="5.0">
@@ -24,10 +24,10 @@
 					AnchorPane.bottomAnchor="10.0" alignment="CENTER">
 					<Button fx:id="searchButton" styleClass="button-dark"
 						alignment="CENTER" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
-						onAction="#handleSearchButton" prefHeight="26.0" prefWidth="26.0">
+						onAction="#handleSearchButton" HBox.hgrow="ALWAYS">
 						<graphic>
 							<FontAwesomeIconView glyphName="SEARCH"
-								styleClass="icon-basic" size="15" />
+								styleClass="icon-basic" />
 						</graphic>
 					</Button>
 					<TextField fx:id="filterEvents" onAction="#handleSearchButton"
