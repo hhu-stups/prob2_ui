@@ -113,6 +113,10 @@ public final class StageManager {
 			Stage controllerStage = (Stage) controller;
 			FontSize fontSize = injector.getInstance(FontSize.class);
 			controllerStage.getScene().getRoot().styleProperty().bind(Bindings.format("-fx-font-size: %dpx;", fontSize));
+		} else if (controller instanceof Dialog) {
+			Dialog controllerDialog = (Dialog) controller;
+			FontSize fontSize = injector.getInstance(FontSize.class);
+			controllerDialog.getDialogPane().styleProperty().bind(Bindings.format("-fx-font-size: %dpx;", fontSize));
 		}
 	}
 	
