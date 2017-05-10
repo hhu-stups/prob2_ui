@@ -2,6 +2,10 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.util.Objects;
 
+import javax.inject.Inject;
+
+import com.google.inject.Singleton;
+
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckingResult;
@@ -23,6 +27,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
+
+@Singleton
 public final class ModelCheckStats extends AnchorPane {
 	public enum Result {
 		SUCCESS, DANGER, WARNING
@@ -42,7 +48,8 @@ public final class ModelCheckStats extends AnchorPane {
 	
 	private final StatsView statsView;
 	
-	public ModelCheckStats(StageManager stageManager, ModelcheckingController modelcheckingController, StatsView statsView) {
+	@Inject
+	public ModelCheckStats(final StageManager stageManager, final ModelcheckingController modelcheckingController, final StatsView statsView) {
 		this.modelcheckingController = modelcheckingController;
 		this.statsView = statsView;
 		stageManager.loadFXML(this, "modelchecking_stats.fxml");

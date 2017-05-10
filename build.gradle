@@ -58,4 +58,5 @@ dependencies {
 	compile 'org.fxmisc.richtext:richtextfx:1.0.0-SNAPSHOT'
 	compile 'org.fxmisc.wellbehaved:wellbehavedfx:0.3'
 	compile 'se.sawano.java:alphanumeric-comparator:1.4.1'
+	compile 'org.hildan.fxgson:fx-gson:3.1.0'
 }

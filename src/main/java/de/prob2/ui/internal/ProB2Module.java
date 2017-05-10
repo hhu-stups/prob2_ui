@@ -14,22 +14,11 @@ import de.prob.MainModule;
 
 import de.prob2.ui.MainController;
 import de.prob2.ui.bmotion.BMotionView;
-import de.prob2.ui.config.Config;
-import de.prob2.ui.consoles.b.BConsole;
-import de.prob2.ui.consoles.groovy.GroovyConsole;
-import de.prob2.ui.formula.FormulaGenerator;
-import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
-import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.preferences.PreferencesView;
-import de.prob2.ui.prob2fx.CurrentModel;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentState;
-import de.prob2.ui.prob2fx.CurrentStateSpace;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectTab;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.project.machines.MachinesTab;
@@ -37,6 +26,7 @@ import de.prob2.ui.project.preferences.PreferencesTab;
 import de.prob2.ui.project.runconfigurations.RunconfigurationsTab;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
@@ -54,17 +44,6 @@ public class ProB2Module extends AbstractModule {
 		install(new MainModule());
 		
 		// General stuff
-		bind(Config.class);
-		bind(CurrentModel.class);
-		bind(CurrentState.class);
-		bind(CurrentStateSpace.class);
-		bind(CurrentTrace.class);
-		bind(CurrentProject.class);
-		bind(FormulaGenerator.class);
-		bind(FormulaInputStage.class);
-		bind(GroovyConsole.class);
-		bind(BConsole.class);
-		bind(RecentProjects.class);
 		bind(Locale.class).toInstance(locale);
 		bind(ResourceBundle.class).toInstance(bundle);
 		if (IS_MAC) {
@@ -90,13 +69,12 @@ public class ProB2Module extends AbstractModule {
 		bind(RunconfigurationsTab.class);
 		bind(StatesView.class);
 		bind(StatsView.class);
+		bind(StatusBar.class);
 		bind(VerificationsView.class);
 	}
 
 	@Provides
-	public FXMLLoader provideLoader(final Injector injector, GuiceBuilderFactory builderFactory,
-			ResourceBundle bundle) {
-
+	public FXMLLoader provideLoader(final Injector injector, GuiceBuilderFactory builderFactory, ResourceBundle bundle) { 
 		FXMLLoader fxmlLoader = new FXMLLoader();
 		fxmlLoader.setBuilderFactory(builderFactory);
 		fxmlLoader.setControllerFactory(injector::getInstance);

@@ -2,22 +2,24 @@ package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class Machine {
-	private String name;
-	private String description;
+import de.prob2.ui.verifications.ltl.LTLCheckableItem;
+import de.prob2.ui.verifications.ltl.LTLFormulaItem;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+
+public class Machine extends LTLCheckableItem {
 	private String location;
+	private ListProperty<LTLFormulaItem> ltlFormulas;
 
 	public Machine(String name, String description, Path location) {
-		this.name = name;
-		this.description = description;
+		super(name,description);
 		this.location = location.toString();
-	}
-
-	public String getName() {
-		return name;
+		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 	}
 
 	public String getFileName() {
@@ -25,18 +27,41 @@ public class Machine {
 		String[] splittedFileName = location.split(pattern);
 		return splittedFileName[splittedFileName.length - 1];
 	}
-
-	public String getDescription() {
-		return description;
+	
+	@Override
+	public void initializeStatus() {
+		super.initializeStatus();
+		if (ltlFormulas != null) {
+			for (LTLFormulaItem item : ltlFormulas) {
+				item.initializeStatus();
+			}
+		}
 	}
-
+		
+	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {
+		return ltlFormulas;
+	}
+	
+	public List<LTLFormulaItem> getFormulas() {
+		return ltlFormulasProperty().get();
+	}
+	
+	public void addLTLFormula(LTLFormulaItem formula) {
+		ltlFormulas.add(formula);
+	}
+	
+	public void removeLTLFormula(LTLFormulaItem formula) {
+		ltlFormulas.remove(formula);
+	}
+		
+	public void replaceMissingWithDefaults() {
+		if(ltlFormulas == null) {
+			this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
+		}
+	}
+	
 	public Path getPath() {
 		return Paths.get(location);
-	}
-
-	@Override
-	public String toString() {
-		return this.name;
 	}
 
 	@Override
@@ -50,9 +75,16 @@ public class Machine {
 		Machine otherMachine = (Machine) other;
 		return otherMachine.location.equals(this.location);
 	}
+	
+	@Override
+	public String toString() {
+		return this.name;
+	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(location);
 	}
+	
+
 }

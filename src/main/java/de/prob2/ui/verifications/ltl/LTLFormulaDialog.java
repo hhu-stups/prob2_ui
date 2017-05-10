@@ -2,6 +2,7 @@ package de.prob2.ui.verifications.ltl;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
@@ -11,6 +12,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 
+@Singleton
 public class LTLFormulaDialog extends Dialog<LTLFormulaItem> {
 	
 	@FXML
@@ -29,7 +31,7 @@ public class LTLFormulaDialog extends Dialog<LTLFormulaItem> {
 			if(type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				return new LTLFormulaItem(this, tfName.getText(), taDescription.getText(), taFormula.getText());
+				return new LTLFormulaItem(tfName.getText(), taDescription.getText(), taFormula.getText());
 			}
 		});
 		this.initModality(Modality.APPLICATION_MODAL);
@@ -40,6 +42,12 @@ public class LTLFormulaDialog extends Dialog<LTLFormulaItem> {
 		tfName.setText(name);
 		taDescription.setText(description);
 		taFormula.setText(formula);
+	}
+	
+	public void clear() {
+		this.tfName.clear();
+		this.taDescription.clear();
+		this.taFormula.clear();
 	}
 			
 }
