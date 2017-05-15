@@ -6,6 +6,7 @@
 <?import de.prob2.ui.verifications.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.verifications.VerificationsView?>
 <?import de.prob2.ui.verifications.ltl.LTLView?>
+<?import de.prob2.ui.verifications.ltl.patterns.LTLPatternView?>
 
 <fx:root type="VerificationsView" xmlns:fx="http://javafx.com/fxml/1">
 	<TabPane tabClosingPolicy="UNAVAILABLE" prefHeight="400.0" prefWidth="100.0"
@@ -19,6 +20,11 @@
 			<Tab text="LTL Verifications">
 				<content>
 					<LTLView />
+				</content>
+			</Tab>
+			<Tab text="LTL Patterns">
+				<content>
+					<LTLPatternView />
 				</content>
 			</Tab>
 		</tabs>
