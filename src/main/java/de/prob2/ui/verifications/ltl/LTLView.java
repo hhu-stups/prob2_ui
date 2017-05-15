@@ -105,6 +105,9 @@ public class LTLView extends AnchorPane{
 	@FXML
 	private TableColumn<LTLFormulaItem, String> machineNameColumn;	
 	
+	@FXML
+	private TableColumn<LTLFormulaItem, String> machineDescriptionColumn;
+	
 	private final Injector injector;
 	
 	private final CurrentTrace currentTrace;
@@ -169,6 +172,7 @@ public class LTLView extends AnchorPane{
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		machineDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		addLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkAllButton.disableProperty().bind(currentTrace.existsProperty().not());
 		tvMachines.itemsProperty().bind(currentProject.machinesProperty());
