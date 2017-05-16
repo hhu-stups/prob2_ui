@@ -42,7 +42,7 @@ public class EditMachinesDialog extends Dialog<Machine> {
 				return null;
 			} else {
 				return new Machine(nameField.getText(), descriptionTextArea.getText(), editMachine.getPath(), 
-									editMachine.ltlFormulasProperty());
+									editMachine.ltlFormulasProperty(), editMachine.ltlPatternsProperty());
 			}
 		});
 		stageManager.loadFXML(this, "machines_dialog.fxml");
