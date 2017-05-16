@@ -41,7 +41,8 @@ public class EditMachinesDialog extends Dialog<Machine> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				return new Machine(nameField.getText(), descriptionTextArea.getText(), editMachine.getPath());
+				return new Machine(nameField.getText(), descriptionTextArea.getText(), editMachine.getPath(), 
+									editMachine.ltlFormulasProperty());
 			}
 		});
 		stageManager.loadFXML(this, "machines_dialog.fxml");
