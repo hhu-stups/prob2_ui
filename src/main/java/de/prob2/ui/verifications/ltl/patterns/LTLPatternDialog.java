@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.verifications.ltl.LTLFormulaItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.Dialog;
@@ -12,7 +11,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 
-public class LTLPatternDialog extends Dialog<Object> {
+public class LTLPatternDialog extends Dialog<LTLPatternItem> {
 	
 	@FXML
 	private TextField tfName;
@@ -21,8 +20,7 @@ public class LTLPatternDialog extends Dialog<Object> {
 	private TextArea taDescription;
 	
 	@FXML
-	private TextArea taFormula;
-	
+	private TextArea taPattern;
 	
 	@Inject
 	public LTLPatternDialog(final StageManager stageManager, final Injector injector) {
@@ -31,7 +29,7 @@ public class LTLPatternDialog extends Dialog<Object> {
 			if(type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				return new LTLFormulaItem(tfName.getText(), taDescription.getText(), taFormula.getText());
+				return new LTLPatternItem(tfName.getText(), taDescription.getText(), taPattern.getText());
 			}
 		});
 		this.initModality(Modality.APPLICATION_MODAL);

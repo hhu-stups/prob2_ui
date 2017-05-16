@@ -28,10 +28,10 @@
 				<columns>
 					<TableColumn fx:id="machineStatusColumn" minWidth="80.0" maxWidth="80.0"
 						prefWidth="80.0" text="%verifications.ltl.columns.status" />
-					<TableColumn fx:id="machineNameColumn" minWidth="120.0" maxWidth="120.0"
+					<TableColumn fx:id="machineNameColumn" minWidth="120.0" maxWidth="240.0"
 						prefWidth="120.0" text="%project.machines.dialog.title" />
 					<TableColumn fx:id="machineDescriptionColumn" minWidth="120.0"
-						prefWidth="100.0" text="%verifications.ltl.columns.description" />
+						prefWidth="120.0" text="%verifications.ltl.columns.description" />
 				</columns>
 				<placeholder>
 					<Label text="%project.machines.tab.noMachines" />
@@ -45,10 +45,10 @@
 				<columns>
 					<TableColumn fx:id="statusColumn" minWidth="80.0" maxWidth="80.0"
 						prefWidth="80.0" text="%verifications.ltl.columns.status" />
-					<TableColumn fx:id="nameColumn" minWidth="120.0" maxWidth = "120.0"
-						prefWidth="120.0" text="%verifications.ltl.pattern.columns.name" />
-					<TableColumn fx:id="descriptionColumn" minWidth="100.0"
-						prefWidth="100.0" text="%verifications.ltl.columns.description" />
+					<TableColumn fx:id="nameColumn" minWidth="120.0" maxWidth = "240.0"
+						prefWidth="240.0" text="%verifications.ltl.pattern.columns.name" />
+					<TableColumn fx:id="descriptionColumn" minWidth="120.0"
+						prefWidth="120.0" text="%verifications.ltl.columns.description" />
 				</columns>
 				<placeholder>
 					<Label text="%verifications.ltl.pattern.noPattern" />

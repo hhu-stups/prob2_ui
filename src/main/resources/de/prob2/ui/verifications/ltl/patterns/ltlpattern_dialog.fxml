@@ -60,7 +60,7 @@
 						</VBox>
 						<VBox spacing="10" alignment="center_left">
 							<Label text="%verifications.ltl.dialog.pattern" />
-							<TextArea fx:id="taFormula" styleClass="text-area-with-border">
+							<TextArea fx:id="taPattern" styleClass="text-area-with-border">
 								<font>
 									<Font size="12" />
 								</font>

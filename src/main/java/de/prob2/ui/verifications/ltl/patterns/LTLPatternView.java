@@ -10,11 +10,11 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.ltl.LTLFormulaItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
 
@@ -31,22 +31,25 @@ public class LTLPatternView extends AnchorPane {
 	private TableView<Machine> tvMachines;
 	
 	@FXML
-	private TableColumn<LTLFormulaItem, FontAwesomeIconView> machineStatusColumn;
+	private TableColumn<LTLPatternItem, FontAwesomeIconView> machineStatusColumn;
 	
 	@FXML
-	private TableColumn<LTLFormulaItem, String> machineNameColumn;
+	private TableColumn<LTLPatternItem, String> machineNameColumn;
 	
 	@FXML
-	private TableView<LTLFormulaItem> tvPattern;
+	private TableColumn<LTLPatternItem, String> machineDescriptionColumn;
 	
 	@FXML
-	private TableColumn<LTLFormulaItem, FontAwesomeIconView> statusColumn;
+	private TableView<LTLPatternItem> tvPattern;
 	
 	@FXML
-	private TableColumn<LTLFormulaItem, String> nameColumn;
+	private TableColumn<LTLPatternItem, FontAwesomeIconView> statusColumn;
 	
 	@FXML
-	private TableColumn<LTLFormulaItem, String> descriptionColumn;
+	private TableColumn<LTLPatternItem, String> nameColumn;
+	
+	@FXML
+	private TableColumn<LTLPatternItem, String> descriptionColumn;
 	
 	private Injector injector;
 	
@@ -67,6 +70,16 @@ public class LTLPatternView extends AnchorPane {
 	}
 	
 	@FXML
+	public void initialize() {
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		machineDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+	}
+	
+	@FXML
 	public void addPattern() {
 		Machine machine = tvMachines.getFocusModel().getFocusedItem();
 		injector.getInstance(LTLPatternDialog.class).showAndWait().ifPresent(item -> {
@@ -74,6 +87,7 @@ public class LTLPatternView extends AnchorPane {
 			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
 					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 					currentProject.getLocation()));*/
+			
 		});
 	}
 	
