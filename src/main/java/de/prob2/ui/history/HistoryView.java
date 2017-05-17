@@ -4,10 +4,13 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -53,10 +56,12 @@ public final class HistoryView extends AnchorPane {
 	@FXML private Button btForward;
 
 	private final CurrentTrace currentTrace;
+	private final Injector injector;
 
 	@Inject
-	private HistoryView(StageManager stageManager, CurrentTrace currentTrace) {
+	private HistoryView(StageManager stageManager, CurrentTrace currentTrace, Injector injector) {
 		this.currentTrace = currentTrace;
+		this.injector = injector;
 		stageManager.loadFXML(this, "history_view.fxml");
 	}
 
@@ -108,6 +113,15 @@ public final class HistoryView extends AnchorPane {
 				currentTrace.set(currentTrace.forward());
 			}
 		});
+		
+		bindIconSizeToFontSize();
+	}
+	
+	private void bindIconSizeToFontSize() {
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) (btBack.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
+		((FontAwesomeIconView) (btForward.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
+		((FontAwesomeIconView) (tbReverse.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 	}
 	
 	public static String transitionToString(final Transition transition) {

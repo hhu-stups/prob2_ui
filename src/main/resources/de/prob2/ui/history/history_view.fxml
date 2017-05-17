@@ -6,41 +6,49 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
-<fx:root stylesheets="@/prob.css" type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
-	<ListView fx:id="lvHistory" AnchorPane.bottomAnchor="0.0"
-		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-		AnchorPane.topAnchor="50.0"/>
-	<Button fx:id="btBack" maxHeight="-Infinity" maxWidth="-Infinity"
-		minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-		prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="10.0"
-		AnchorPane.topAnchor="15.0">
-		<graphic>
-			<FontAwesomeIconView styleClass="icon-dark" glyphName="CHEVRON_LEFT" size="15"/>
-		</graphic>
-		<tooltip>
-			<Tooltip text="%history.buttons.back.tooltip"/>
-		</tooltip>
-	</Button>
-	<Button fx:id="btForward" maxHeight="-Infinity" maxWidth="-Infinity"
-		minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-		prefHeight="26.0" prefWidth="26.0" AnchorPane.leftAnchor="50.0"
-		AnchorPane.topAnchor="15.0">
-		<graphic>
-			<FontAwesomeIconView styleClass="icon-dark" glyphName="CHEVRON_RIGHT" size="15"/>
-		</graphic>
-		<tooltip>
-			<Tooltip text="%history.buttons.forward.tooltip"/>
-		</tooltip>
-	</Button>
-	<ToggleButton fx:id="tbReverse" maxHeight="-Infinity"
-		maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-		mnemonicParsing="false" prefHeight="26.0" prefWidth="26.0"
-		AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="15.0">
-		<graphic>
-			<FontAwesomeIconView styleClass="icon-dark" glyphName="SORT" size="15"/>
-		</graphic>
-		<tooltip>
-			<Tooltip text="%history.buttons.reverse.tooltip"/>
-		</tooltip>
-	</ToggleButton>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<fx:root stylesheets="@/prob.css" type="AnchorPane"
+	xmlns:fx="http://javafx.com/fxml/1">
+	<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="15.0" spacing="10.0">
+		<AnchorPane>
+			<HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="8.0"
+				AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="0.0">
+				<HBox HBox.hgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
+					<Button fx:id="btBack" mnemonicParsing="false">
+						<graphic>
+							<FontAwesomeIconView styleClass="icon-dark"
+								glyphName="CHEVRON_LEFT" size="15" />
+						</graphic>
+						<tooltip>
+							<Tooltip text="%history.buttons.back.tooltip" />
+						</tooltip>
+					</Button>
+					<Button fx:id="btForward" mnemonicParsing="false">
+						<graphic>
+							<FontAwesomeIconView styleClass="icon-dark"
+								glyphName="CHEVRON_RIGHT" size="15" />
+						</graphic>
+						<tooltip>
+							<Tooltip text="%history.buttons.forward.tooltip" />
+						</tooltip>
+					</Button>
+				</HBox>
+				<HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
+					<ToggleButton fx:id="tbReverse" mnemonicParsing="false">
+						<graphic>
+							<FontAwesomeIconView styleClass="icon-dark"
+								glyphName="SORT" size="15" />
+						</graphic>
+						<tooltip>
+							<Tooltip text="%history.buttons.reverse.tooltip" />
+						</tooltip>
+					</ToggleButton>
+				</HBox>
+			</HBox>
+		</AnchorPane>
+		<ListView fx:id="lvHistory" />
+	</VBox>
 </fx:root>

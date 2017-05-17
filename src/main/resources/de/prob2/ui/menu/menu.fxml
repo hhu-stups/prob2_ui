@@ -48,7 +48,8 @@
 	</Menu>
 	<Menu text="%menu.perspectives">
 		<Menu text="%menu.perspectives.items.preset">
-			<MenuItem text="%menu.perspectives.items.preset.default" onAction="#handleLoadDefault" />
+			<MenuItem text="%menu.perspectives.items.preset.default"
+				onAction="#handleLoadDefault" />
 			<MenuItem text="%menu.perspectives.items.preset.separated"
 				onAction="#handleLoadSeparated" />
 			<MenuItem text="%menu.perspectives.items.preset.separated2"
@@ -57,9 +58,15 @@
 		<MenuItem text="%menu.perspectives.items.detach" onAction="#handleLoadDetached" />
 		<MenuItem text="%menu.perspectives.items.load" onAction="#handleLoadPerspective" />
 	</Menu>
-	<Menu fx:id="windowMenu" text="%menu.window">
-
+	<Menu text="%menu.view">
+		<MenuItem text="%menu.view.default" onAction="#handleDefaultFontSize"
+			accelerator="Shortcut+D" />
+		<MenuItem text="%menu.view.bigger" accelerator="Alt+Shortcut+PLUS"
+			onAction="#handleIncreaseFontSize" />
+		<MenuItem text="%menu.view.smaller" accelerator="Alt+Shortcut+MINUS"
+			onAction="#handleDecreaseFontSize" />
 	</Menu>
+	<Menu fx:id="windowMenu" text="%menu.window" />
 	<Menu text="%menu.help">
 		<MenuItem fx:id="aboutItem" onAction="#handleAboutDialog"
 			text="%menu.help.items.about" />
