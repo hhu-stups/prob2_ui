@@ -195,7 +195,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return getRunconfigurations().stream().filter(runconfig -> runconfig.getMachine().equals(machine.getName())).collect(Collectors.toList());
 	}
 	
-	public void initializeLTLFormulas() {		
+	public void initializeMachines() {		
 		for(Machine machine : machines) {
 			machine.initializeStatus();
 		}
@@ -219,7 +219,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				modelCheckController.resetView();
 			}
 			super.set(project);
-			initializeLTLFormulas();
+			initializeMachines();
 		}
 	}
 	
