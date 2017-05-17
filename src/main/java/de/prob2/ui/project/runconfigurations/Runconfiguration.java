@@ -17,10 +17,6 @@ public class Runconfiguration {
 		return preference;
 	}
 	
-	public void setMachine(String machine) {
-		this.machine = machine;
-	}
-	
 	@Override
 	public String toString() {
 		if ("default".equals(this.preference)) {

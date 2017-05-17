@@ -10,6 +10,7 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
@@ -41,8 +42,11 @@ public class EditMachinesDialog extends Dialog<Machine> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				currentProject.getRunconfigurations().stream().filter(runconfig -> runconfig.getMachine().equals(editMachine.getName()))
-				.forEach(runconfig -> runconfig.setMachine(nameField.getText()));
+				List<Runconfiguration> runconfigList = currentProject.getRunconfigurations();
+				runconfigList.stream().filter(runconfig -> runconfig.getMachine().equals(editMachine.getName()))
+						.forEach(runconfig -> currentProject.runconfigurationsProperty().set(
+								runconfigList.indexOf(runconfig),
+								new Runconfiguration(nameField.getText(), runconfig.getPreference())));
 				editMachine.setName(nameField.getText());
 				editMachine.setDescription(descriptionTextArea.getText());
 				return editMachine;
@@ -59,7 +63,7 @@ public class EditMachinesDialog extends Dialog<Machine> {
 		Set<String> machineNamesSet = new HashSet<>();
 		machineNamesSet.addAll(machinesList.stream().map(Machine::getName).collect(Collectors.toList()));
 		machineNamesSet.remove(machine.getName());
-		
+
 		nameField.textProperty().addListener((observable, from, to) -> {
 			Button okButton = (Button) this.getDialogPane().lookupButton(okButtonType);
 			if (machineNamesSet.contains((String) to)) {
