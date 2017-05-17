@@ -21,6 +21,12 @@ public class Machine extends LTLCheckableItem {
 		this.location = location.toString();
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 	}
+	
+	public Machine(String name, String description, Path location, ListProperty<LTLFormulaItem> ltlFormulas) {
+		super(name,description);
+		this.location = location.toString();
+		this.ltlFormulas = ltlFormulas;
+	}
 
 	public String getFileName() {
 		String pattern = Pattern.quote(System.getProperty("file.separator"));
