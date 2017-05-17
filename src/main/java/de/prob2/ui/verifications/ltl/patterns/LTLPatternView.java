@@ -30,16 +30,7 @@ public class LTLPatternView extends AnchorPane {
 	
 	@FXML
 	private TableView<Machine> tvMachines;
-	
-	@FXML
-	private TableColumn<LTLPatternItem, FontAwesomeIconView> machineStatusColumn;
-	
-	@FXML
-	private TableColumn<LTLPatternItem, String> machineNameColumn;
-	
-	@FXML
-	private TableColumn<LTLPatternItem, String> machineDescriptionColumn;
-	
+		
 	@FXML
 	private TableView<LTLPatternItem> tvPattern;
 	
@@ -75,12 +66,9 @@ public class LTLPatternView extends AnchorPane {
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-		machineDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+
 		addPatternButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkAllButton.disableProperty().bind(currentTrace.existsProperty().not());
-		tvMachines.itemsProperty().bind(currentProject.machinesProperty());
 		tvMachines.getFocusModel().focusedIndexProperty().addListener((observable, from, to) -> {
 			if(to.intValue() >= 0) {
 				tvPattern.itemsProperty().bind(tvMachines.getItems().get(to.intValue()).ltlPatternsProperty());

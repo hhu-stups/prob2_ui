@@ -17,12 +17,12 @@
 					<ModelcheckingController />
 				</content>
 			</Tab>
-			<Tab text="LTL Verifications">
+			<Tab fx:id="tabLTLFormula" text="LTL Verifications">
 				<content>
 					<LTLView />
 				</content>
 			</Tab>
-			<Tab text="LTL Patterns">
+			<Tab fx:id="tabLTLPatterns" text="LTL Patterns">
 				<content>
 					<LTLPatternView />
 				</content>
