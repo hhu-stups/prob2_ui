@@ -98,16 +98,7 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	private TableView<Machine> tvMachines;
-	
-	@FXML
-	private TableColumn<LTLFormulaItem, FontAwesomeIconView> machineStatusColumn;
-	
-	@FXML
-	private TableColumn<LTLFormulaItem, String> machineNameColumn;	
-	
-	@FXML
-	private TableColumn<LTLFormulaItem, String> machineDescriptionColumn;
-	
+		
 	private final Injector injector;
 	
 	private final CurrentTrace currentTrace;
@@ -170,12 +161,8 @@ public class LTLView extends AnchorPane{
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-		machineDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		addLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkAllButton.disableProperty().bind(currentTrace.existsProperty().not());
-		tvMachines.itemsProperty().bind(currentProject.machinesProperty());
 		tvMachines.getFocusModel().focusedIndexProperty().addListener((observable, from, to) -> {
 			if(to.intValue() >= 0) {
 				tvFormula.itemsProperty().bind(tvMachines.getItems().get(to.intValue()).ltlFormulasProperty());

@@ -6,10 +6,10 @@ import de.prob2.ui.internal.StageManager;
 import javafx.scene.layout.AnchorPane;
 
 public class VerificationsView extends AnchorPane {
-	
+		
 	@Inject
-	public VerificationsView(StageManager stageManager) {
+	private VerificationsView(final StageManager stageManager) {
 		stageManager.loadFXML(this, "verificationsView.fxml");
 	}
-
+	
 }

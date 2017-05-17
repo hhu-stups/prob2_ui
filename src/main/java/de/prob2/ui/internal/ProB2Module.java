@@ -29,6 +29,7 @@ import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.ltl.LTLView;
+import de.prob2.ui.verifications.ltl.MachineTableView;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 
@@ -56,8 +57,9 @@ public class ProB2Module extends AbstractModule {
 		// Controllers
 		bind(BMotionView.class);
 		bind(HistoryView.class);
-		bind(LTLView.class);
+		bind(MachineTableView.class);
 		bind(LTLPatternView.class);
+		bind(LTLView.class);
 		bind(MachinesTab.class);
 		bind(MainView.class);
 		bind(MainController.class);
