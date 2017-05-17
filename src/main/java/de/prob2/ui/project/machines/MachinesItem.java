@@ -3,7 +3,6 @@ package de.prob2.ui.project.machines;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -24,7 +23,11 @@ public class MachinesItem extends VBox {
 
 	@FXML
 	public void initialize() {
-		nameLabel.textProperty().bind(new SimpleStringProperty(machine.getName()));
+		nameLabel.setText(machine.getName());
 		locationLabel.setText(machine.getPath().toString());
+	}
+
+	public void refresh() {
+		nameLabel.setText(machine.getName());
 	}
 }

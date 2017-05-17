@@ -32,6 +32,14 @@ public class LTLCheckableItem {
 		return description;
 	}
 	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
 	public void setCheckedSuccessful() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
 		icon.setFill(Color.GREEN);

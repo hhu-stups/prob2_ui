@@ -12,13 +12,13 @@ public class Runconfiguration {
 	public String getMachine() {
 		return machine;
 	}
-	
-	public void setMachine(String machine) {
-		this.machine = machine;
-	}
 
 	public String getPreference() {
 		return preference;
+	}
+	
+	public void setMachine(String machine) {
+		this.machine = machine;
 	}
 	
 	@Override
