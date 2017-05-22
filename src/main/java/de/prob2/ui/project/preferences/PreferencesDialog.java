@@ -65,14 +65,15 @@ public class PreferencesDialog extends Dialog<Preference> {
 		Set<String> preferencesNamesSet = new HashSet<>();
 		preferencesNamesSet.addAll(preferencesList.stream().map(Preference::getName).collect(Collectors.toList()));
 
+		Button okButton = (Button) this.getDialogPane().lookupButton(okButtonType);
+		okButton.setDisable(true);
 		nameField.textProperty().addListener((observable, from, to) -> {
-			Button okButton = (Button) this.getDialogPane().lookupButton(okButtonType);
 			if (preferencesNamesSet.contains(to)) {
 				okButton.setDisable(true);
 				errorExplanationLabel.setText("There is already a preference named '" + to + "'");
 			} else if (to.isEmpty()) {
 				okButton.setDisable(true);
-				errorExplanationLabel.setText("");
+				errorExplanationLabel.setText("Name cannot be empty");
 			} else {
 				okButton.setDisable(false);
 				errorExplanationLabel.setText("");
