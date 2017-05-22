@@ -158,8 +158,9 @@ public class LTLView extends AnchorPane{
 				LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 				machine.removeLTLFormula(item);
 				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-						currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+						tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 						currentProject.getLocation()));
+				currentProject.setSaved(false);
 			});
 			removeItem.disableProperty().bind(row.emptyProperty());
 						
@@ -179,6 +180,23 @@ public class LTLView extends AnchorPane{
 			});
 			
 			row.setContextMenu(new ContextMenu(removeItem, showCounterExampleItem));
+			return row;
+		});
+		
+		tvPattern.setRowFactory(table -> {
+			final TableRow<LTLPatternItem> row = new TableRow<>();
+			MenuItem removeItem = new MenuItem("Remove Pattern");
+			removeItem.setOnAction(e -> {
+				Machine machine = tvMachines.getFocusModel().getFocusedItem();
+				LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
+				machine.removeLTLPattern(item);
+				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+						tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+						currentProject.getLocation()));
+				currentProject.setSaved(false);
+			});
+			removeItem.disableProperty().bind(row.emptyProperty());
+			row.setContextMenu(new ContextMenu(removeItem));
 			return row;
 		});
 		
@@ -305,9 +323,9 @@ public class LTLView extends AnchorPane{
 	}
 	
 	private void showCurrentItemDialog(LTLPatternItem item) {
-		LTLPatternDialog formulaDialog = injector.getInstance(LTLPatternDialog.class);
-		formulaDialog.setData(item.getName(), item.getDescription(), item.getPattern());
-		formulaDialog.showAndWait().ifPresent(result-> {
+		LTLPatternDialog patternDialog = injector.getInstance(LTLPatternDialog.class);
+		patternDialog.setData(item.getName(), item.getDescription(), item.getPattern());
+		patternDialog.showAndWait().ifPresent(result-> {
 			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) || 
 					!item.getPattern().equals(result.getPattern())) {
 				item.setData(result.getName(), result.getDescription(), result.getPattern());
@@ -315,7 +333,7 @@ public class LTLView extends AnchorPane{
 				currentProject.setSaved(false);
 			}
 		});
-		formulaDialog.clear();
+		patternDialog.clear();
 	}
 	
 	private void showCounterExample() {
