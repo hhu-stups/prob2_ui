@@ -2,8 +2,6 @@ package de.prob2.ui.verifications.ltl;
 
 import javax.inject.Inject;
 
-import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;

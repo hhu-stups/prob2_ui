@@ -14,5 +14,12 @@ public class LTLPatternItem extends LTLCheckableItem {
 	public String getPattern() {
 		return pattern;
 	}
+	
+	public void setData(String name, String description, String pattern) {
+		initializeStatus();
+		this.name = name;
+		this.description = description;
+		this.pattern = pattern;
+	}
 
 }
