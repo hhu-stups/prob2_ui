@@ -105,18 +105,20 @@ public final class StageManager {
 		} catch (IOException e) {
 			LOGGER.error("Loading fxml failed", e);
 		}
+		
+		String fontSizeCssString = "-fx-font-size: %dpx;";
 		if (controller instanceof Node) {
 			Node controllerNode = (Node) controller;
 			FontSize fontSize = injector.getInstance(FontSize.class);
-			controllerNode.styleProperty().bind(Bindings.format("-fx-font-size: %dpx;", fontSize));
+			controllerNode.styleProperty().bind(Bindings.format(fontSizeCssString, fontSize));
 		} else if (controller instanceof Stage) {
 			Stage controllerStage = (Stage) controller;
 			FontSize fontSize = injector.getInstance(FontSize.class);
-			controllerStage.getScene().getRoot().styleProperty().bind(Bindings.format("-fx-font-size: %dpx;", fontSize));
+			controllerStage.getScene().getRoot().styleProperty().bind(Bindings.format(fontSizeCssString, fontSize));
 		} else if (controller instanceof Dialog) {
 			Dialog controllerDialog = (Dialog) controller;
 			FontSize fontSize = injector.getInstance(FontSize.class);
-			controllerDialog.getDialogPane().styleProperty().bind(Bindings.format("-fx-font-size: %dpx;", fontSize));
+			controllerDialog.getDialogPane().styleProperty().bind(Bindings.format(fontSizeCssString, fontSize));
 		}
 	}
 	

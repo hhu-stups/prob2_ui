@@ -212,16 +212,13 @@ public final class OperationsView extends AnchorPane {
 		((FontAwesomeIconView) (searchButton.getGraphic())).glyphSizeProperty().bind(fontsize);
 		((FontAwesomeIconView) (backButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 		((FontAwesomeIconView) (forwardButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
-		sortButton.graphicProperty().addListener((observable, from, to) -> {
-			((FontAwesomeIconView) (sortButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
-		});
-		
-		disabledOpsToggle.graphicProperty().addListener((observable, from, to) -> {
-			((FontAwesomeIconView) (disabledOpsToggle.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
-		});
+		sortButton.graphicProperty().addListener((observable, from,
+				to) -> ((FontAwesomeIconView) (sortButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2)));
+		disabledOpsToggle.graphicProperty()
+				.addListener((observable, from, to) -> ((FontAwesomeIconView) (disabledOpsToggle.getGraphic()))
+						.glyphSizeProperty().bind(fontsize.add(2)));
 		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
-		
-		
+
 		searchButton.widthProperty().addListener((observable, from, to) -> {
 			searchButton.setPrefHeight(searchButton.getWidth());
 			Platform.runLater(() -> searchButton.autosize());

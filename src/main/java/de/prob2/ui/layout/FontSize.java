@@ -18,9 +18,11 @@ public class FontSize extends SimpleIntegerProperty {
 	@Override
 	public void set(int newValue) {
 		if(newValue <= 1) {
-			newValue = 2;
-		} 
-		super.set(newValue);
+			super.set(2);
+		} else {
+			super.set(newValue);
+		}
+		
 	}
 	
 	public void setDefault() {
