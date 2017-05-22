@@ -29,6 +29,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.project.Project;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -79,22 +81,37 @@ public class LTLView extends AnchorPane{
 	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
 	
 	@FXML
-	private TableView<LTLFormulaItem> tvFormula;
+	private Button addFormulaButton;
 	
 	@FXML
-	private Button addLTLButton;
+	private Button addPatternButton;
 	
 	@FXML
 	private Button checkAllButton;
 	
 	@FXML
-	private TableColumn<LTLFormulaItem, FontAwesomeIconView> statusColumn;
+	private TableView<LTLPatternItem> tvPattern;
 	
 	@FXML
-	private TableColumn<LTLFormulaItem, String> nameColumn;
+	private TableColumn<LTLPatternItem, FontAwesomeIconView> patternStatusColumn;
 	
 	@FXML
-	private TableColumn<LTLFormulaItem, String> descriptionColumn;
+	private TableColumn<LTLPatternItem, String> patternNameColumn;
+	
+	@FXML
+	private TableColumn<LTLPatternItem, String> patternDescriptionColumn;
+	
+	@FXML
+	private TableView<LTLFormulaItem> tvFormula;
+	
+	@FXML
+	private TableColumn<LTLFormulaItem, FontAwesomeIconView> formulaStatusColumn;
+	
+	@FXML
+	private TableColumn<LTLFormulaItem, String> formulaNameColumn;
+	
+	@FXML
+	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	
 	@FXML
 	private TableView<Machine> tvMachines;
@@ -121,6 +138,13 @@ public class LTLView extends AnchorPane{
 	public void initialize() {		
 		tvFormula.setOnMouseClicked(e-> {
 			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+			if(e.getClickCount() == 2 &&  item != null) {
+				showCurrentItemDialog(item);
+			}
+		});
+		
+		tvPattern.setOnMouseClicked(e-> {
+			LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 &&  item != null) {
 				showCurrentItemDialog(item);
 			}
@@ -158,14 +182,20 @@ public class LTLView extends AnchorPane{
 			return row;
 		});
 		
-		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		addLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
+		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		
+		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		patternNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
+		addPatternButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkAllButton.disableProperty().bind(currentTrace.existsProperty().not());
 		tvMachines.getFocusModel().focusedIndexProperty().addListener((observable, from, to) -> {
 			if(to.intValue() >= 0) {
 				tvFormula.itemsProperty().bind(tvMachines.getItems().get(to.intValue()).ltlFormulasProperty());
+				tvPattern.itemsProperty().bind(tvMachines.getItems().get(to.intValue()).ltlPatternsProperty());
 			}
 		});
 	}
@@ -179,6 +209,20 @@ public class LTLView extends AnchorPane{
 					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 					currentProject.getLocation()));
 		});
+		tvFormula.refresh();
+	}
+	
+	@FXML
+	public void addPattern() {
+		Machine machine = tvMachines.getFocusModel().getFocusedItem();
+		injector.getInstance(LTLPatternDialog.class).showAndWait().ifPresent(item -> {
+			machine.addLTLPattern(item);
+			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+					currentProject.getLocation()));
+			
+		});
+		tvFormula.refresh();
 	}
 	
 	public Checked checkFormula(LTLFormulaItem item) {
@@ -253,6 +297,20 @@ public class LTLView extends AnchorPane{
 			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) || 
 					!item.getFormula().equals(result.getFormula())) {
 				item.setData(result.getName(), result.getDescription(), result.getFormula());
+				tvFormula.refresh();
+				currentProject.setSaved(false);
+			}
+		});
+		formulaDialog.clear();
+	}
+	
+	private void showCurrentItemDialog(LTLPatternItem item) {
+		LTLPatternDialog formulaDialog = injector.getInstance(LTLPatternDialog.class);
+		formulaDialog.setData(item.getName(), item.getDescription(), item.getPattern());
+		formulaDialog.showAndWait().ifPresent(result-> {
+			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) || 
+					!item.getPattern().equals(result.getPattern())) {
+				item.setData(result.getName(), result.getDescription(), result.getPattern());
 				tvFormula.refresh();
 				currentProject.setSaved(false);
 			}

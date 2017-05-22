@@ -35,5 +35,17 @@ public class LTLPatternDialog extends Dialog<LTLPatternItem> {
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "ltlpattern_dialog.fxml");
 	}
+	
+	public void setData(String name, String description, String formula) {
+		tfName.setText(name);
+		taDescription.setText(description);
+		taPattern.setText(formula);
+	}
+	
+	public void clear() {
+		this.tfName.clear();
+		this.taDescription.clear();
+		this.taPattern.clear();
+	}
 
 }
