@@ -91,6 +91,10 @@ public final class ModelCheckStats extends AnchorPane {
 		final StateSpace stateSpace = modelChecker.getStateSpace();
 		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
 		stateSpace.execute(cmd);
+		if (cmd.isInterrupted()) {
+			Thread.currentThread().interrupt();
+			return;
+		}
 		final ComputeCoverageCommand.ComputeCoverageResult coverage = cmd.getResult();
 		
 		if (coverage != null) {
