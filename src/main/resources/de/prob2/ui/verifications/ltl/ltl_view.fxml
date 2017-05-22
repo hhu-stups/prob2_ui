@@ -18,8 +18,8 @@
 		<Button fx:id="addPatternButton" disable="true" prefHeight="26.0" prefWidth="150.0" 
 			AnchorPane.rightAnchor="160.0" AnchorPane.topAnchor="10.0" onAction ="#addPattern" styleClass="button-blue" text="Add LTL Pattern">
 		</Button>
-		<Button fx:id="checkAllButton" disable="true" text="%verifications.ltl.checkAll"
-				prefHeight="26.0" prefWidth="100.0" AnchorPane.leftAnchor="0.0" 
+		<Button fx:id="checkAllButton" disable="true" text="%verifications.ltl.checkSelectedMachine"
+				prefHeight="26.0" prefWidth="180.0" AnchorPane.leftAnchor="0.0" 
 				AnchorPane.topAnchor="10.0" onAction ="#checkAll" styleClass="button-blue"/>
 		<AnchorPane styleClass="border" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
 			<MachineTableView fx:id="tvMachines" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
