@@ -216,10 +216,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	@Override
 	public void set(Project project) {
-		if (!saved.get()) {
-			if (!confirmReplacingProject()) {
-				return;
-			}
+		if (!saved.get() && !confirmReplacingProject()) {
+			return;
 		}
 		if (currentTrace.exists()) {
 			animations.removeTrace(currentTrace.get());
