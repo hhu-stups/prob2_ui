@@ -9,58 +9,90 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 
-<fx:root type="Stage" fx:id="mcheckStage" title="%verifications.modelchecking.stage.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" fx:id="mcheckStage"
+	title="%verifications.modelchecking.stage.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
 			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
-				<Button fx:id="startButton" layoutX="103.0" layoutY="223.0" onAction="#startModelCheck" text="%verifications.modelchecking.stage.start" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="105.0" AnchorPane.bottomAnchor="15.0" />
-				<Button layoutX="225.0" layoutY="260.0" onAction="#cancel" text="%common.cancel" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.leftAnchor="205.0" />
-				<ChoiceBox fx:id="selectSearchStrategy" layoutX="118.0" layoutY="44.0" prefHeight="26.0"
-					prefWidth="134.0" value="%verifications.modelchecking.stage.strategy.items.breadthFirst"
-					AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
-					<tooltip>
-						<Tooltip text="%verifications.modelchecking.stage.strategy.tooltip" />
-					</tooltip>
-					<items>
-						<FXCollections fx:factory="observableArrayList">
-							<!-- TODO: Get these strings from resource bundle (% references does
-								not work here) -->
-							<String fx:value="Breadth First" />
-							<String fx:value="Depth First" />
-							<!--
-							<String fx:value="Mixed DF/BF" />
-							<String fx:value="Heuristic Function/Random" />
-							<String fx:value="Hash-Random" />
-							<String fx:value="Random" />
-							<String fx:value="Out-Degree for Deadlock Checking" />
-							<String fx:value="Disabled Transitions in State" />
-							-->
-						</FXCollections>
-					</items>
-				</ChoiceBox>
-				<VBox layoutX="11.0" layoutY="69.0" spacing="15.0"
+				<VBox spacing="20.0" AnchorPane.topAnchor="20.0"
 					AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-					AnchorPane.bottomAnchor="60.0" AnchorPane.topAnchor="70.0"
-					styleClass="dark">
-					<CheckBox fx:id="findDeadlocks" selected="true"
-						text="%verifications.modelchecking.stage.options.findDeadlocks" />
-					<CheckBox fx:id="findInvViolations" selected="true"
-						text="%verifications.modelchecking.stage.options.findInvViolations"
-						textAlignment="CENTER" />
-					<CheckBox fx:id="findBAViolations"
-						text="%verifications.modelchecking.stage.options.findBAViolations" />
-					<CheckBox fx:id="findGoal" text="%verifications.modelchecking.stage.options.findGoal" />
-					<CheckBox fx:id="stopAtFullCoverage"
-						text="%verifications.modelchecking.stage.options.stopAtFullCoverage" />
-					<CheckBox fx:id="searchForNewErrors" selected="true"
-						text="%verifications.modelchecking.stage.options.searchForNewErrors" />
+					AnchorPane.bottomAnchor="0.0">
+					<AnchorPane>
+						<HBox AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0"
+							alignment="CENTER_LEFT">
+							<Label text="%verifications.modelchecking.stage.strategyLabel"
+								textAlignment="LEFT" />
+							<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+								<ChoiceBox fx:id="selectSearchStrategy"
+									value="%verifications.modelchecking.stage.strategy.items.breadthFirst">
+									<tooltip>
+										<Tooltip text="%verifications.modelchecking.stage.strategy.tooltip" />
+									</tooltip>
+									<items>
+										<FXCollections fx:factory="observableArrayList">
+											<!-- TODO: Get these strings from resource bundle (% references 
+												does not work here) -->
+											<String fx:value="Breadth First" />
+											<String fx:value="Depth First" />
+											<!-- <String fx:value="Mixed DF/BF" /> <String fx:value="Heuristic 
+												Function/Random" /> <String fx:value="Hash-Random" /> <String fx:value="Random" 
+												/> <String fx:value="Out-Degree for Deadlock Checking" /> <String fx:value="Disabled 
+												Transitions in State" /> -->
+										</FXCollections>
+									</items>
+								</ChoiceBox>
+							</HBox>
+						</HBox>
+					</AnchorPane>
+					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS"
+						alignment="CENTER_LEFT">
+						<AnchorPane VBox.vgrow="ALWAYS">
+							<CheckBox fx:id="findDeadlocks" selected="true"
+								text="%verifications.modelchecking.stage.options.findDeadlocks"
+								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
+						</AnchorPane>
+						<AnchorPane VBox.vgrow="ALWAYS">
+							<CheckBox fx:id="findInvViolations" selected="true"
+								text="%verifications.modelchecking.stage.options.findInvViolations"
+								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
+						</AnchorPane>
+						<AnchorPane VBox.vgrow="ALWAYS">
+							<CheckBox fx:id="findBAViolations"
+								text="%verifications.modelchecking.stage.options.findBAViolations"
+								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
+						</AnchorPane>
+						<AnchorPane VBox.vgrow="ALWAYS">
+							<CheckBox fx:id="findGoal"
+								text="%verifications.modelchecking.stage.options.findGoal"
+								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
+						</AnchorPane>
+						<AnchorPane VBox.vgrow="ALWAYS">
+							<CheckBox fx:id="stopAtFullCoverage"
+								text="%verifications.modelchecking.stage.options.stopAtFullCoverage"
+								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
+						</AnchorPane>
+						<AnchorPane VBox.vgrow="ALWAYS">
+							<CheckBox fx:id="searchForNewErrors" selected="true"
+								text="%verifications.modelchecking.stage.options.searchForNewErrors"
+								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
+						</AnchorPane>
+					</VBox>
+					<AnchorPane>
+						<HBox AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0"
+							AnchorPane.bottomAnchor="15.0" spacing="10.0">
+							<AnchorPane HBox.hgrow="ALWAYS">
+								<Button fx:id="startButton" onAction="#startModelCheck"
+									text="%verifications.modelchecking.stage.start"
+									AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+							</AnchorPane>
+							<Button onAction="#cancel" text="%common.cancel" />
+						</HBox>
+					</AnchorPane>
 				</VBox>
-				<Label layoutX="10.0" layoutY="49.0"
-					text="%verifications.modelchecking.stage.strategyLabel" AnchorPane.leftAnchor="20.0"
-					AnchorPane.topAnchor="25.0" />
 			</AnchorPane>
 		</Scene>
 	</scene>
