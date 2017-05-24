@@ -80,33 +80,19 @@ public class BInterpreter implements IAnimationChangeListener, Executable {
 		if (currentAnimationChanged) {
 			if (currentTrace == null) {
 				modelName = null;
-				notifyModelChange(null);
 			} else if (currentTrace.getModel().getFormalismType() == FormalismType.B) {
 				// ignore models that are not B models
 				String mainModelName = currentTrace.getStateSpace().getMainComponent().toString();
 				if (!mainModelName.equals(this.modelName)) {
 					this.modelName = mainModelName;
-					notifyModelChange(this.modelName);
 				}
 			}
 			this.currentTrace = currentTrace;
 		}
 	}
 
-	public void notifyModelChange(final String name) {
-		logger.trace("BConsole.modelChange\n modelloaded");
-		String output = name == null ? "" : name;
-		logger.trace(output);
-	}
-
 	@Override
 	public void animatorStatus(final boolean busy) {
-		if (busy) {
-			logger.trace("BConsole.disable");
-		} else {
-			logger.trace("BConsole.enable");
-		}
+		// Not used
 	}
-
-
 }
