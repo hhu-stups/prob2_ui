@@ -21,6 +21,7 @@ import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.formula.FormulaInputStage;
+import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -361,9 +362,12 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleOpenHelp() {
-		//TODO Find suitable Help System
+		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
+		helpSystemStage.show();
+		helpSystemStage.toFront();
 	}
 
+	@FXML
 	private void handleDefaultFontSize() {
 		FontSize fontSize = injector.getInstance(FontSize.class);
 		fontSize.setDefault();

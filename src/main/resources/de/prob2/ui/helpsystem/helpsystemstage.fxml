@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.stage.Stage?>
+<?import javafx.scene.Scene?>
+<?import de.prob2.ui.helpsystem.HelpSystem?>
+<fx:root type="Stage" title="%helpsystem.stage.title" xmlns:fx="http://javafx.com/fxml/1">
+    <scene>
+        <Scene stylesheets="@/prob.css">
+            <HelpSystem/>
+        </Scene>
+    </scene>
+</fx:root>
