@@ -8,19 +8,20 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob.scripting.ModelTranslationError;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
-import de.prob2.ui.formula.FormulaInputStage;
+import de.prob2.ui.formula.FormulaInputDialog;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -37,7 +38,6 @@ import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
-
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -46,6 +46,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -55,9 +56,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -333,9 +331,8 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleFormulaInput() {
-		final Stage formulaInputStage = injector.getInstance(FormulaInputStage.class);
+		final Dialog<Void> formulaInputStage = injector.getInstance(FormulaInputDialog.class);
 		formulaInputStage.showAndWait();
-		formulaInputStage.toFront();
 	}
 
 	@FXML

@@ -776,7 +776,7 @@
 	-fx-stroke: transparent;
 }
 
-/* === Status Bar === */
+/* ==================== STATUS BAR =================== */
 
 .statusbar {
 	-fx-background-color: lightgray;
