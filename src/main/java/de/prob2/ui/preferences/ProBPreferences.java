@@ -233,19 +233,22 @@ public final class ProBPreferences {
 		for (final Map.Entry<String, String> entry : this.changedPreferences.entrySet()) {
 			setCmds.add(new SetPreferenceCommand(entry.getKey(), entry.getValue()));
 		}
-		this.getStateSpace().execute(new ComposedCommand(setCmds));
 		
-		final GetDefaultPreferencesCommand cmd1 = new GetDefaultPreferencesCommand();
-		this.getStateSpace().execute(cmd1);
-		for (ProBPreference pref : cmd1.getPreferences()) {
-			this.cachedPreferences.put(pref.name, pref);
+		try {
+			this.getStateSpace().execute(new ComposedCommand(setCmds));
+		} finally {
+			final GetDefaultPreferencesCommand cmd1 = new GetDefaultPreferencesCommand();
+			this.getStateSpace().execute(cmd1);
+			for (ProBPreference pref : cmd1.getPreferences()) {
+				this.cachedPreferences.put(pref.name, pref);
+			}
+			
+			final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
+			this.getStateSpace().execute(cmd2);
+			this.cachedPreferenceValues.putAll(cmd2.getPreferences());
+			
+			this.changedPreferences.clear();
 		}
-		
-		final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
-		this.getStateSpace().execute(cmd2);
-		this.cachedPreferenceValues.putAll(cmd2.getPreferences());
-		
-		this.changedPreferences.clear();
 	}
 	
 	/**
