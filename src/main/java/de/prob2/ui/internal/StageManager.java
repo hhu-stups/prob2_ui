@@ -12,16 +12,15 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -39,6 +38,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W shortcut. Also provides some convenience methods for creating {@link Stage}s and {@link Alert}s and loading FXML files.
@@ -115,8 +117,8 @@ public final class StageManager {
 			Stage controllerStage = (Stage) controller;
 			FontSize fontSize = injector.getInstance(FontSize.class);
 			controllerStage.getScene().getRoot().styleProperty().bind(Bindings.format(fontSizeCssString, fontSize));
-		} else if (controller instanceof Dialog) {
-			Dialog controllerDialog = (Dialog) controller;
+		} else if (controller instanceof Dialog<?>) {
+			Dialog<?> controllerDialog = (Dialog<?>) controller;
 			FontSize fontSize = injector.getInstance(FontSize.class);
 			controllerDialog.getDialogPane().styleProperty().bind(Bindings.format(fontSizeCssString, fontSize));
 		}
