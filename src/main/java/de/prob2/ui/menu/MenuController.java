@@ -23,6 +23,7 @@ import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.formula.FormulaInputStage;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.preferences.PreferencesStage;
@@ -97,8 +98,8 @@ public final class MenuController extends MenuBar {
 	@Inject
 	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
 			final DetachViewStageController dvController, final AboutBoxController aboutController,
-			@Nullable final MenuToolkit menuToolkit, final RecentProjects recentProjects, final CurrentProject currentProject,
-			final UIState uiState) {
+			@Nullable final MenuToolkit menuToolkit, final RecentProjects recentProjects,
+			final CurrentProject currentProject, final UIState uiState) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
@@ -129,7 +130,7 @@ public final class MenuController extends MenuBar {
 			menuToolkit.setApplicationMenu(applicationMenu);
 			MenuItem quit = menuToolkit.createQuitMenuItem(PROB2);
 			quit.setOnAction(event -> {
-				for(Stage stage : stageManager.getRegistered()) {
+				for (Stage stage : stageManager.getRegistered()) {
 					stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
 				}
 			});
@@ -258,14 +259,14 @@ public final class MenuController extends MenuBar {
 		Path projectLocation = currentProject.getDefaultLocation();
 		Path absolute = selectedFile.toPath();
 		Path relative = projectLocation.relativize(absolute);
-		Machine machine = new Machine(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')), "", relative);
+		Machine machine = new Machine(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')), "",
+				relative);
 		currentProject.set(new Project(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')),
-				"(this project was created automatically from file " + selectedFile.getAbsolutePath() + ")",
-				machine,
+				"(this project was created automatically from file " + selectedFile.getAbsolutePath() + ")", machine,
 				currentProject.getDefaultLocation().toFile()));
 		Runconfiguration defaultRunconfig = new Runconfiguration(machine.getName(), "default");
 		currentProject.addRunconfiguration(defaultRunconfig);
-		
+
 		currentProject.startAnimation(defaultRunconfig);
 	}
 
@@ -361,6 +362,23 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private void handleOpenHelp() {
 		//TODO Find suitable Help System
+	}
+
+	private void handleDefaultFontSize() {
+		FontSize fontSize = injector.getInstance(FontSize.class);
+		fontSize.setDefault();
+	}
+
+	@FXML
+	private void handleIncreaseFontSize() {
+		FontSize fontSize = injector.getInstance(FontSize.class);
+		fontSize.set(fontSize.get() + 1);
+	}
+
+	@FXML
+	private void handleDecreaseFontSize() {
+		FontSize fontSize = injector.getInstance(FontSize.class);
+		fontSize.set(fontSize.get() - 1);
 	}
 
 	@FXML

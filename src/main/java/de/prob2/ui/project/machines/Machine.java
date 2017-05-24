@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import de.prob2.ui.verifications.ltl.LTLCheckableItem;
 import de.prob2.ui.verifications.ltl.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -15,11 +16,21 @@ import javafx.collections.FXCollections;
 public class Machine extends LTLCheckableItem {
 	private String location;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
+	private ListProperty<LTLPatternItem> ltlPatterns;
 
 	public Machine(String name, String description, Path location) {
 		super(name,description);
 		this.location = location.toString();
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
+		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
+}
+	
+	public Machine(String name, String description, Path location, ListProperty<LTLFormulaItem> ltlFormulas, 
+					ListProperty<LTLPatternItem> ltlPatterns) {
+		super(name,description);
+		this.location = location.toString();
+		this.ltlFormulas = ltlFormulas;
+		this.ltlPatterns = ltlPatterns;
 	}
 
 	public String getFileName() {
@@ -33,6 +44,11 @@ public class Machine extends LTLCheckableItem {
 		super.initializeStatus();
 		if (ltlFormulas != null) {
 			for (LTLFormulaItem item : ltlFormulas) {
+				item.initializeStatus();
+			}
+		}
+		if (ltlPatterns != null) {
+			for (LTLPatternItem item : ltlPatterns) {
 				item.initializeStatus();
 			}
 		}
@@ -53,10 +69,30 @@ public class Machine extends LTLCheckableItem {
 	public void removeLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.remove(formula);
 	}
+	
+	public ListProperty<LTLPatternItem> ltlPatternsProperty() {
+		return ltlPatterns;
+	}
+	
+	public List<LTLPatternItem> getPatterns() {
+		return ltlPatternsProperty().get();
+	}
+	
+	public void addLTLPattern(LTLPatternItem pattern) {
+		ltlPatterns.add(pattern);
+	}
+	
+	public void removeLTLPattern(LTLPatternItem pattern) {
+		ltlPatterns.remove(pattern);
+	}
+	
 		
 	public void replaceMissingWithDefaults() {
 		if(ltlFormulas == null) {
 			this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
+		}
+		if(ltlPatterns == null) {
+			this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		}
 	}
 	

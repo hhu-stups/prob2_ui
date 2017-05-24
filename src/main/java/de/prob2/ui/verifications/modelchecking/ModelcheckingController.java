@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -23,6 +24,7 @@ import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 
@@ -169,6 +171,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private final StatsView statsView;
 	private final ModelcheckingStageController stageController;
 	private final StageManager stageManager;
+	private final Injector injector;
 
 	private final Map<String, IModelCheckJob> jobs;
 	private IModelCheckJob currentJob;
@@ -179,11 +182,12 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@Inject
 	private ModelcheckingController(final AnimationSelector animations, final CurrentTrace currentTrace,
-			final StageManager stageManager, final StatsView statsView) {
+			final StageManager stageManager, final StatsView statsView, final Injector injector) {
 		this.animations = animations;
 		this.currentTrace = currentTrace;
 		this.statsView = statsView;
 		this.stageManager = stageManager;
+		this.injector = injector;
 
 		stageManager.loadFXML(this, "modelchecking_stats_view.fxml");
 
@@ -198,6 +202,9 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		showStats(new ModelCheckStats(stageManager, this, statsView));
 		historyNodeList = historyBox.getChildren();
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not());
+		
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) (addModelCheckButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 	}
 
 	@FXML

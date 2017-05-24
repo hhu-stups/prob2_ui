@@ -42,7 +42,8 @@
 										</font>
 									</TextField>
 								</HBox>
-								<Label fx:id="errorExplanationLabel" textFill="#B77300">
+								<Label fx:id="errorExplanationLabel" textFill="#B77300"
+									text="Name cannot be empty">
 									<VBox.margin>
 										<Insets top="5" />
 									</VBox.margin>

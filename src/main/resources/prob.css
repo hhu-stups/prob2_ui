@@ -5,6 +5,7 @@
 	-prob-grey-20: #55556033;
 	-prob-grey-50: #55556080;
 	-prob-grey-75: #555560BF;
+	-prob-lightgrey: #E5E5E5;
 	-prob-orange: #B77300;
 	-prob-aqua: #037875;
 	-prob-white: #EFEFEF;
@@ -21,7 +22,7 @@
  ************************************************************************************/
 .accordion {
 	-fx-background-color: -prob-grey;
-	-fx-padding: 1.0em 0.0 0.0 0.0;
+	-fx-padding: 1.0em 0.0em 0.0em 0.0em;
 }
 
 /************************************************************************************
@@ -44,9 +45,9 @@
 }
 .button-dark2 {
 	-fx-background-color: -prob-grey;
-	-fx-background-radius: 6 6 6 6;
+	-fx-background-radius: 0.5em 0.5em 0.5em 0.5em;
 	-fx-border-color: transparent;
-	-fx-background-insets: 0.0,1.0,2.0;
+	-fx-background-insets: 0.0em,0.1em,0.2em;
 	-fx-text-fill: -prob-white;
 	-fx-font-weight: bold;
 }
@@ -55,13 +56,17 @@
 }
 .button-blue {
 	-fx-background-color: -prob-aqua;
-	-fx-background-radius: 15;
+	-fx-background-radius: 1.5em;
 	-fx-border-color: transparent;
-	-fx-background-insets: 0.0,1.0,2.0;
+	-fx-background-insets: 0.0em,0.1em,0.2em;
 	-fx-text-fill: -prob-white;
 }
 .button-blue:hover {
 	-fx-background-color: -prob-grey-75;
+}
+
+.icon-basic {
+	-fx-fill: -prob-lightgrey;
 }
 
 .icon-dark {
@@ -621,20 +626,17 @@
 #past {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: normal;
-	-fx-font-size: 12px;
 }
 
 #present {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: bold;
-	-fx-font-size: 12px;
 }
 
 #future {
 	-fx-font-family: ARIAL;
 	-fx-fill: -prob-grey-75;
 	-fx-font-style: italic;
-	-fx-font-size: 12px;
 }
 
 /* ================ MODELCHECKING VIEW =============== */

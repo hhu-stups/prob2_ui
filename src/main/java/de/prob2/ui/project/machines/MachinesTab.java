@@ -90,7 +90,7 @@ public class MachinesTab extends Tab {
 
 				final MenuItem editMachineMenuItem = new MenuItem("Edit Machine");
 				editMachineMenuItem.setOnAction(event -> injector.getInstance(EditMachinesDialog.class)
-						.editAndShow(machine).ifPresent(result -> currentProject.updateMachine(machine, result)));
+						.editAndShow(machine).ifPresent(result -> machinesItem.refresh()));
 
 				final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
 				removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(machine));

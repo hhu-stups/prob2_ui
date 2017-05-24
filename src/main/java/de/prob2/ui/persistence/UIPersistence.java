@@ -1,5 +1,6 @@
 package de.prob2.ui.persistence;
 
+import java.util.HashSet;
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -96,7 +97,7 @@ public final class UIPersistence {
 		final MenuController menu = injector.getInstance(MenuController.class);
 		final MainController main = injector.getInstance(MainController.class);
 		
-		for (final String id : uiState.getSavedVisibleStages()) {
+		for (final String id : new HashSet<>(uiState.getSavedVisibleStages())) {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
 		}
 

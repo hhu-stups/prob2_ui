@@ -66,7 +66,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ListProperty<Machine> machines;
 	private final ListProperty<Preference> preferences;
 	private final ReadOnlyListProperty<Runconfiguration> runconfigurations;
-	
+
 	private final ObjectProperty<File> location;
 	private final BooleanProperty saved;
 
@@ -85,9 +85,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.animations = animations;
 		this.currentTrace = currentTrace;
 		this.modelCheckController = modelCheckController;
-		
+
 		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-		
+
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
 				Paths.get(System.getProperty("user.home")));
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
@@ -127,7 +127,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.injector.getInstance(ModelcheckingController.class).resetView();
 		this.saved.set(true);
 	}
-	
+
 	public void startAnimation(Runconfiguration runconfiguration) {
 		Machine m = getMachine(runconfiguration.getMachine());
 		Map<String, String> pref = new HashMap<>();
@@ -155,16 +155,12 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		machinesList.remove(machine);
 		List<Runconfiguration> runconfigsList = new ArrayList<>();
 		runconfigsList.addAll(this.getRunconfigurations());
-		this.getRunconfigurations().stream().filter(r -> r.getMachine().equals(machine.getName())).forEach(runconfigsList::remove);
+		this.getRunconfigurations().stream().filter(r -> r.getMachine().equals(machine.getName()))
+				.forEach(runconfigsList::remove);
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 				runconfigsList, this.getLocation()));
 	}
 
-	public void updateMachine(Machine oldMachine, Machine newMachine) {
-		this.removeMachine(oldMachine);
-		this.addMachine(newMachine);
-	}
-	
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);
@@ -177,7 +173,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		preferencesList.remove(preference);
 		List<Runconfiguration> runconfigsList = new ArrayList<>();
 		runconfigsList.addAll(this.getRunconfigurations());
-		this.getRunconfigurations().stream().filter(r -> r.getPreference().equals(preference.getName())).forEach(runconfigsList::remove);
+		this.getRunconfigurations().stream().filter(r -> r.getPreference().equals(preference.getName()))
+				.forEach(runconfigsList::remove);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
 				runconfigsList, this.getLocation()));
 	}
@@ -195,22 +192,23 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
 				runconfigs, this.getLocation()));
 	}
-	
+
 	public List<Runconfiguration> getRunconfigurations(Machine machine) {
-		return getRunconfigurations().stream().filter(runconfig -> runconfig.getMachine().equals(machine.getName())).collect(Collectors.toList());
+		return getRunconfigurations().stream().filter(runconfig -> runconfig.getMachine().equals(machine.getName()))
+				.collect(Collectors.toList());
 	}
-	
-	public void initializeLTLFormulas() {		
-		for(Machine machine : machines) {
+
+	public void initializeMachines() {
+		for (Machine machine : machines) {
 			machine.initializeStatus();
 		}
 	}
-			
+
 	public void changeName(String newName) {
 		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(),
 				this.getRunconfigurations(), this.getLocation()));
 	}
-	
+
 	public void changeDescription(String newDescription) {
 		this.update(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(),
 				this.getRunconfigurations(), this.getLocation()));
@@ -218,16 +216,17 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	@Override
 	public void set(Project project) {
-		if (confirmReplacingProject()) {
-			if (currentTrace.exists()) {
-				animations.removeTrace(currentTrace.get());
-				modelCheckController.resetView();
-			}
-			super.set(project);
-			initializeLTLFormulas();
+		if (!saved.get() && !confirmReplacingProject()) {
+			return;
 		}
+		if (currentTrace.exists()) {
+			animations.removeTrace(currentTrace.get());
+			modelCheckController.resetView();
+		}
+		super.set(project);
+		initializeMachines();
 	}
-	
+
 	public void update(Project project) {
 		super.set(project);
 	}
@@ -284,7 +283,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public List<Runconfiguration> getRunconfigurations() {
 		return this.runconfigurationsProperty().get();
 	}
-		
+
 	public ObjectProperty<File> locationProperty() {
 		return this.location;
 	}
@@ -308,7 +307,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public ReadOnlyBooleanProperty savedProperty() {
 		return this.saved;
 	}
-	
+
 	public void setSaved(boolean saved) {
 		this.saved.set(saved);
 	}
@@ -321,9 +320,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		File loc = new File(this.getLocation() + File.separator + this.getName() + ".json");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(loc), PROJECT_CHARSET)) {
 
-			
-			this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(), 
-									this.getRunconfigurations(), this.getLocation()));
+			this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
+					this.getRunconfigurations(), this.getLocation()));
 			gson.toJson(this.get(), writer);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
@@ -354,9 +352,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		String nameString = (project.getName() == null) ? "" : project.getName();
 		String descriptionString = (project.getDescription() == null) ? "" : project.getDescription();
 		List<Machine> machineList = new ArrayList<>();
-		if(project.getMachines() != null) {
+		if (project.getMachines() != null) {
 			machineList = project.getMachines();
-			for(Machine machine : machineList) {
+			for (Machine machine : machineList) {
 				machine.replaceMissingWithDefaults();
 			}
 		}
@@ -364,7 +362,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				: project.getPreferences();
 		Set<Runconfiguration> runconfigurationSet = (project.getRunconfigurations() == null) ? new HashSet<>()
 				: project.getRunconfigurations();
-		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet, project.getLocation());		
+		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet,
+				project.getLocation());
 	}
 
 	public Machine getMachine(String machine) {

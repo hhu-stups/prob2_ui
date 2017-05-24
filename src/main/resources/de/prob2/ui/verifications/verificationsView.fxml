@@ -16,7 +16,7 @@
 					<ModelcheckingController />
 				</content>
 			</Tab>
-			<Tab text="LTL Verifications">
+			<Tab fx:id="tabLTLFormula" text="LTL Verifications">
 				<content>
 					<LTLView />
 				</content>
