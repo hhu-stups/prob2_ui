@@ -110,7 +110,12 @@ public final class PreferencesStage extends Stage {
 			for (final Map.Entry<String, String> entry : this.globalPreferences.entrySet()) {
 				this.globalProBPrefs.setPreferenceValue(entry.getKey(), entry.getValue());
 			}
-			this.globalProBPrefs.apply();
+			
+			try {
+				this.globalProBPrefs.apply();
+			} catch (final ProBError e) {
+				LOGGER.warn("Ignoring global preference changes because of exception", e);
+			}
 		});
 		this.globalPreferences.addListener((MapChangeListener<String, String>)change -> {
 			if (change.wasRemoved() && !change.wasAdded()) {
@@ -166,7 +171,14 @@ public final class PreferencesStage extends Stage {
 	@FXML
 	private void handleApply() {
 		final Map<String, String> changed = new HashMap<>(this.globalProBPrefs.getChangedPreferences());
-		this.globalProBPrefs.apply();
+		
+		try {
+			this.globalProBPrefs.apply();
+		} catch (final ProBError e) {
+			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e).show();
+		}
+		
 		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();
 		for (final Map.Entry<String, String> entry : changed.entrySet()) {
 			if (defaults.get(entry.getKey()).defaultValue.equals(entry.getValue())) {

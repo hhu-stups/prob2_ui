@@ -7,9 +7,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javafx.collections.FXCollections;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
@@ -23,6 +20,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S, String> {
 	private static final Logger logger = LoggerFactory.getLogger(MultiTreeTableCell.class);
@@ -297,7 +297,17 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 	
 	@Override
 	public void updateItem(final String item, final boolean empty) {
+		// If the cell is currently being edited, commit the edit to save the value before it gets out of view.
+		if (this.isEditing()) {
+			if (this.getGraphic() instanceof TextField) {
+				this.commitEdit(((TextField)this.getGraphic()).getText());
+			} else if (this.getGraphic() instanceof Spinner<?>) {
+				this.commitEdit(((Spinner<?>)this.getGraphic()).getEditor().getText());
+			}
+		}
+		
 		super.updateItem(item, empty);
+		
 		if (this.getTreeTableRow() != null && this.getTreeTableRow().getItem() != null) {
 			// Item is available, which means we can do fancy stuff!
 			final PrefTreeItem pti = this.getTreeTableRow().getItem();
