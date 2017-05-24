@@ -41,11 +41,15 @@ public final class PreferencesView extends BorderPane {
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
+	private final StageManager stageManager;
+	
 	private final ObjectProperty<ProBPreferences> preferences;
 	
 	@Inject
 	private PreferencesView(final StageManager stageManager) {
 		super();
+		
+		this.stageManager = stageManager;
 		
 		this.preferences = new SimpleObjectProperty<>(this, "preferences", null);
 		
@@ -73,7 +77,7 @@ public final class PreferencesView extends BorderPane {
 		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
 		
 		tvValue.setCellFactory(col -> {
-			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell<>();
+			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell<>(this.stageManager);
 			cell.tableRowProperty().addListener((observable, from, to) ->
 				to.treeItemProperty().addListener((observable1, from1, to1) ->
 					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem)

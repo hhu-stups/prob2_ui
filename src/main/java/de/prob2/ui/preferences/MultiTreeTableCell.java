@@ -7,7 +7,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.prob2.ui.internal.StageManager;
+
 import javafx.collections.FXCollections;
+import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
@@ -79,6 +82,8 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 	// Value types that are always editable, such as bool (CheckBox) or [] (ComboBox).
 	private static final Set<String> ALWAYS_EDITABLE;
 	
+	private final StageManager stageManager;
+	
 	static {
 		final Set<String> alwaysEditable = new HashSet<>();
 		alwaysEditable.add("bool");
@@ -88,8 +93,10 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 		ALWAYS_EDITABLE = Collections.unmodifiableSet(alwaysEditable);
 	}
 	
-	public MultiTreeTableCell() {
+	public MultiTreeTableCell(final StageManager stageManager) {
 		super();
+		
+		this.stageManager = stageManager;
 	}
 	
 	// Edit this cell and commit an edit with newValue right away.
@@ -107,11 +114,32 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 		}
 	}
 	
+	private boolean tryCommitSpinnerValue(final Spinner<Integer> spinner) {
+		final int value;
+		try {
+			value = spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText());
+		} catch (final NumberFormatException e) {
+			logger.debug("User entered invalid number", e);
+			stageManager.makeAlert(Alert.AlertType.ERROR, "Not a valid number: " + spinner.getEditor().getText()).show();
+			return false;
+		}
+		spinner.getValueFactory().setValue(value);
+		this.commitEdit(spinner.getEditor().getText());
+		return true;
+	}
+	
 	private void editAsSpinner(final int min, final int max, final String initial) {
-		final Spinner<Integer> spinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, Integer.parseInt(initial)));
+		int initialValue;
+		try {
+			initialValue = Integer.parseInt(initial);
+		} catch (NumberFormatException e) {
+			logger.debug("Invalid number in initial preference value", e);
+			initialValue = 0;
+		}
+		final Spinner<Integer> spinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, initialValue));
 		spinner.setEditable(true);
 		// Commit by pressing Enter in the spinner editor.
-		spinner.getEditor().setOnAction(event -> this.commitEdit(spinner.getEditor().getText()));
+		spinner.getEditor().setOnAction(event -> this.tryCommitSpinnerValue(spinner));
 		// Cancel by pressing Escape in the spinner editor.
 		spinner.getEditor().setOnKeyReleased(event -> {
 			if (event.getCode() == KeyCode.ESCAPE) {
@@ -302,7 +330,11 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 			if (this.getGraphic() instanceof TextField) {
 				this.commitEdit(((TextField)this.getGraphic()).getText());
 			} else if (this.getGraphic() instanceof Spinner<?>) {
-				this.commitEdit(((Spinner<?>)this.getGraphic()).getEditor().getText());
+				@SuppressWarnings("unchecked")
+				final Spinner<Integer> spinner = (Spinner<Integer>)this.getGraphic();
+				if (!this.tryCommitSpinnerValue(spinner)) {
+					this.cancelEdit();
+				}
 			}
 		}
 		
