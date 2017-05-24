@@ -12,7 +12,6 @@ import de.prob.exception.ProBError;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.FormalismType;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -29,7 +28,6 @@ public class BInterpreter implements IAnimationChangeListener, Executable {
 
 	private static final Logger logger = LoggerFactory.getLogger(BInterpreter.class);
 	private final StateSpace defaultSS;
-	private String modelName;
 	private Trace currentTrace;
 
 	@Inject
@@ -78,15 +76,6 @@ public class BInterpreter implements IAnimationChangeListener, Executable {
 	@Override
 	public void traceChange(final Trace currentTrace, final boolean currentAnimationChanged) {
 		if (currentAnimationChanged) {
-			if (currentTrace == null) {
-				modelName = null;
-			} else if (currentTrace.getModel().getFormalismType() == FormalismType.B) {
-				// ignore models that are not B models
-				String mainModelName = currentTrace.getStateSpace().getMainComponent().toString();
-				if (!mainModelName.equals(this.modelName)) {
-					this.modelName = mainModelName;
-				}
-			}
 			this.currentTrace = currentTrace;
 		}
 	}
