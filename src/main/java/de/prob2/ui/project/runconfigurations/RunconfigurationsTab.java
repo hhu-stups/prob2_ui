@@ -26,7 +26,7 @@ public class RunconfigurationsTab extends Tab {
 
 	private final CurrentProject currentProject;
 	private final Injector injector;
-	
+
 	@Inject
 	private RunconfigurationsTab(final StageManager stageManager, final CurrentProject currentProject,
 			final Injector injector) {
@@ -34,7 +34,7 @@ public class RunconfigurationsTab extends Tab {
 		this.injector = injector;
 		stageManager.loadFXML(this, "runconfigurations_tab.fxml");
 	}
-	
+
 	@FXML
 	public void initialize() {
 		runconfigsPlaceholder.setText("Add machines first");
@@ -73,11 +73,14 @@ public class RunconfigurationsTab extends Tab {
 		});
 		runconfigurationsListView.setOnMouseClicked(event -> {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-				currentProject.startAnimation(runconfigurationsListView.getSelectionModel().getSelectedItem());
+				Runconfiguration selectedItem = runconfigurationsListView.getSelectionModel().getSelectedItem();
+				if (selectedItem != null) {
+					currentProject.startAnimation(selectedItem);
+				}
 			}
 		});
 	}
-	
+
 	@FXML
 	void addRunconfiguration() {
 		injector.getInstance(RunconfigurationsDialog.class).showAndWait()
