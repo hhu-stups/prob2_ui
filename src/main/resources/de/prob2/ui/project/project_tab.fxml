@@ -16,18 +16,10 @@
 	<VBox stylesheets="@/prob.css" spacing="0">
 		<AnchorPane styleClass="border">
 			<Label fx:id="projectNameLabel" AnchorPane.leftAnchor="6"
-				AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="4">
-				<font>
-					<Font size="18" />
-				</font>
-			</Label>
+				AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="4" style="-fx-font-size: 1.5em;" />
 			<TextField fx:id="projectNameTextField"
-				AnchorPane.leftAnchor="6" AnchorPane.topAnchor="10"
-				AnchorPane.bottomAnchor="4" managed="false" visible="false">
-				<font>
-					<Font size="12" />
-				</font>
-			</TextField>
+				AnchorPane.leftAnchor="6" AnchorPane.topAnchor="20"
+				AnchorPane.bottomAnchor="4" managed="false" visible="false" />
 		</AnchorPane>
 		<AnchorPane VBox.vgrow="ALWAYS">
 			<ScrollPane hbarPolicy="NEVER" AnchorPane.leftAnchor="0"

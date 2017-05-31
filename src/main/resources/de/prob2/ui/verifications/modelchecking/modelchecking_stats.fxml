@@ -28,9 +28,9 @@
 				AnchorPane.topAnchor="5.0" AnchorPane.bottomAnchor="5.0">
 				<HBox prefHeight="12.0" spacing="7.0">
 					<Label text="%verifications.modelchecking.stats.elapsedTime"
-						style="-fx-font-size: 1em;">
+						>
 						<font>
-							<Font name="System Bold" />
+							<Font name="System Bold" size="15"/>
 						</font>
 					</Label>
 					<Label fx:id="elapsedTime" />
