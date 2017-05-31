@@ -7,27 +7,44 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Tooltip?>
 
+<?import javafx.scene.layout.HBox?>
 <fx:root type="ScrollPane" fitToHeight="true" fitToWidth="true"
-	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
+		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<VBox>
 		<AnchorPane>
 			<VBox AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="5.0"
 				AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="6.0" alignment="CENTER_RIGHT"
 				spacing="-4">
-				<AnchorPane>
-					<Button fx:id="addModelCheckButton" AnchorPane.rightAnchor="-8.0" disable="true"
-						prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-						onAction="#addModelCheck">
-						<graphic>
-							<FontAwesomeIconView fill="#555560"
-								glyphName="PLUS_CIRCLE" size="26" />
-						</graphic>
-						<tooltip>
-							<Tooltip
-								text="%verifications.modelchecking.stats.addModelCheck.tooltip" />
-						</tooltip>
-					</Button>
-				</AnchorPane>
+				<HBox alignment="CENTER_RIGHT">
+					<AnchorPane>
+						<Button fx:id="addModelCheckButton" AnchorPane.rightAnchor="-8.0" disable="true"
+							prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+							onAction="#addModelCheck">
+							<graphic>
+								<FontAwesomeIconView fill="#555560"
+									glyphName="PLUS_CIRCLE" size="26" />
+							</graphic>
+							<tooltip>
+								<Tooltip
+									text="%verifications.modelchecking.stats.addModelCheck.tooltip" />
+							</tooltip>
+						</Button>
+					</AnchorPane>
+					<AnchorPane>
+						<Button fx:id="help" AnchorPane.rightAnchor="-8.0"
+								prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+								onAction="#openHelp">
+							<graphic>
+								<FontAwesomeIconView fill="#555560"
+													 glyphName="QUESTION_CIRCLE" size="26" />
+							</graphic>
+							<tooltip>
+								<Tooltip
+										text="%menu.help" />
+							</tooltip>
+						</Button>
+					</AnchorPane>
+				</HBox>
 				<VBox fx:id="historyBox" style="-fx-border-color: grey;" />
 			</VBox>
 		</AnchorPane>

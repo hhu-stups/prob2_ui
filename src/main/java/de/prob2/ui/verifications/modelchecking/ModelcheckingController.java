@@ -23,6 +23,7 @@ import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 
+import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -212,6 +213,13 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		if (!stageController.isShowing()) {
 			this.stageController.showAndWait();
 		}
+	}
+
+	@FXML
+	public void openHelp() {
+		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
+		helpSystemStage.show();
+		helpSystemStage.toFront();
 	}
 
 	private Node toHistoryNode(ModelCheckingItem item) {

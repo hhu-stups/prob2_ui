@@ -1,8 +1,10 @@
 package de.prob2.ui.project;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.fxml.FXML;
@@ -14,6 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
 @Singleton
 public class ProjectTab extends Tab {
@@ -30,10 +33,12 @@ public class ProjectTab extends Tab {
 	private Button applyButton;
 
 	private final CurrentProject currentProject;
+	private final Injector injector;
 
 	@Inject
-	private ProjectTab(final StageManager stageManager, final CurrentProject currentProject) {
+	private ProjectTab(final StageManager stageManager, final CurrentProject currentProject, final Injector injector) {
 		this.currentProject = currentProject;
+		this.injector = injector;
 		stageManager.loadFXML(this, "project_tab.fxml");
 	}
 
@@ -41,6 +46,13 @@ public class ProjectTab extends Tab {
 	public void initialize() {
 		initName();
 		initDescription();
+	}
+
+	@FXML
+	public void openHelp() {
+		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
+		helpSystemStage.show();
+		helpSystemStage.toFront();
 	}
 
 	private void initName() {

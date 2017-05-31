@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
+import de.prob2.ui.helpsystem.HelpSystemStage;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,6 +119,13 @@ public class MachinesTab extends Tab {
 			}
 		});
 	}
+
+	/*@FXML
+	public void openHelp() {
+		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
+		helpSystemStage.show();
+		helpSystemStage.toFront();
+	}*/
 
 	private void showDescription(Machine machine) {
 		if (splitPane.getItems().size() < 2) {

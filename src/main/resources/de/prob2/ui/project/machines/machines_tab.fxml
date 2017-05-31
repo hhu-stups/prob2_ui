@@ -15,18 +15,34 @@
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.control.SplitPane?>
 
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
 <fx:root type="Tab" text="%project.machines.tab.title" closable="false"
-	xmlns:fx="http://javafx.com/fxml/1">
+		 xmlns:fx="http://javafx.com/fxml/1">
 	<VBox stylesheets="@/prob.css" spacing="0">
-		<AnchorPane styleClass="border">
-			<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-				AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" onAction="#addMachine">
-				<graphic>
-					<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
-						size="26" />
-				</graphic>
-			</Button>
-		</AnchorPane>
+		<!--<HBox alignment="CENTER_RIGHT">-->
+			<AnchorPane styleClass="border">
+				<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+					AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" onAction="#addMachine">
+					<graphic>
+						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
+							size="26" />
+					</graphic>
+				</Button>
+			</AnchorPane>
+			<!--<AnchorPane>
+				<Button fx:id="help" AnchorPane.rightAnchor="-8.0"
+						prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+						onAction="#openHelp">
+					<graphic>
+						<FontAwesomeIconView fill="#555560" glyphName="QUESTION_CIRCLE" size="26" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%menu.help" />
+					</tooltip>
+				</Button>
+			</AnchorPane>-->
+		<!--</HBox>-->
 		<SplitPane fx:id="splitPane" VBox.vgrow="always">
 			<AnchorPane fx:id="descriptionView">
 				<VBox spacing="5" AnchorPane.topAnchor="6"
