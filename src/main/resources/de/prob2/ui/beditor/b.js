@@ -28,7 +28,7 @@ CodeMirror.defineMode("b", function() {
 						return blexer.getStyleClassFromToken(t);
 					} else {
 						t = blexer.firstLinePeek();
-						if(stream.match(t.getText(), true)) {
+						if (t !== null && stream.match(t.getText(), true)) {
 							blexer.firstLinePoll();
 							return blexer.getStyleClassFromToken(t);
 						}

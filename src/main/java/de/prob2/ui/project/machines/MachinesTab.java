@@ -16,12 +16,14 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.scripting.Api;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -30,6 +32,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -57,6 +60,10 @@ public class MachinesTab extends Tab {
 	private Text descriptionText;
 	@FXML
 	private SplitPane splitPane;
+	@FXML
+	private Button addMachineButton;
+	@FXML
+	private Button closeDescriptionButton;
 
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
@@ -118,6 +125,10 @@ public class MachinesTab extends Tab {
 				});
 			}
 		});
+		
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) (addMachineButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
+		((FontAwesomeIconView) (closeDescriptionButton.getGraphic())).glyphSizeProperty().bind(fontsize);
 	}
 
 	@FXML

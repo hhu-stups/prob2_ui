@@ -20,11 +20,8 @@
 		<AnchorPane styleClass="border">
 			<HBox alignment="CENTER_RIGHT" AnchorPane.leftAnchor="6"
 				  AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="4">
-				<Label fx:id="projectNameLabel" HBox.hgrow="ALWAYS">
-					<font>
-						<Font size="18" />
-					</font>
-				</Label>
+				<Label fx:id="projectNameLabel" HBox.hgrow="ALWAYS" AnchorPane.leftAnchor="6"
+					   AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="4" id="project-name" />
 				<AnchorPane>
 					<Button fx:id="help" AnchorPane.rightAnchor="-8.0"
 							prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
@@ -39,12 +36,8 @@
 				</AnchorPane>
 			</HBox>
 			<TextField fx:id="projectNameTextField"
-				AnchorPane.leftAnchor="6" AnchorPane.topAnchor="10"
-				AnchorPane.bottomAnchor="4" managed="false" visible="false">
-				<font>
-					<Font size="12" />
-				</font>
-			</TextField>
+				AnchorPane.leftAnchor="6" AnchorPane.topAnchor="20"
+				AnchorPane.bottomAnchor="4" managed="false" visible="false" />
 		</AnchorPane>
 		<AnchorPane VBox.vgrow="ALWAYS">
 			<ScrollPane hbarPolicy="NEVER" AnchorPane.leftAnchor="0"

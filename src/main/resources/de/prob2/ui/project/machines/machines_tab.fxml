@@ -22,20 +22,18 @@
 	<VBox stylesheets="@/prob.css" spacing="0">
 		<HBox alignment="CENTER_RIGHT">
 			<AnchorPane styleClass="border" HBox.hgrow="ALWAYS">
-				<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+				<Button contentDisplay="GRAPHIC_ONLY"
 					AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addMachine">
 					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
-							size="26" />
+						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"/>
 					</graphic>
 				</Button>
 			</AnchorPane>
 			<AnchorPane styleClass="border">
 				<Button fx:id="help" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10"
-						prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-						onAction="#openHelp">
+						contentDisplay="GRAPHIC_ONLY" onAction="#openHelp">
 					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="QUESTION_CIRCLE" size="26" />
+						<FontAwesomeIconView fill="#555560" glyphName="QUESTION_CIRCLE"/>
 					</graphic>
 					<tooltip>
 						<Tooltip text="%menu.help" />
@@ -48,10 +46,7 @@
 				<VBox spacing="5" AnchorPane.topAnchor="6"
 					AnchorPane.bottomAnchor="-4" AnchorPane.leftAnchor="0"
 					AnchorPane.rightAnchor="0">
-					<Label fx:id="descriptionViewTitelLabel">
-						<font>
-							<Font size="14" />
-						</font>
+					<Label fx:id="descriptionViewTitelLabel" id="machines-details-name">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>
@@ -68,10 +63,10 @@
 						</ScrollPane>
 					</AnchorPane>
 				</VBox>
-				<Button AnchorPane.rightAnchor="2.0" onAction="#closeDescriptionView">
+				<Button fx:id="closeDescriptionButton" AnchorPane.topAnchor="2.0"
+					AnchorPane.rightAnchor="2.0" onAction="#closeDescriptionView">
 					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="CLOSE"
-							size="16" />
+						<FontAwesomeIconView fill="#555560" glyphName="CLOSE" />
 					</graphic>
 				</Button>
 			</AnchorPane>

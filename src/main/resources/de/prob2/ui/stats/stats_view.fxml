@@ -25,29 +25,20 @@
 			AnchorPane.topAnchor="25.0" fx:id="statsBox">
 			<VBox spacing="8.0" styleClass="border">
 				<HBox spacing="7.0">
-					<Label text="%stats.processedStates" HBox.hgrow="ALWAYS"
-						style="-fx-font-size: 1.04em;">
-						<font>
-							<Font name="System Bold" />
-						</font>
-					</Label>
-					<Label fx:id="processedStates" style="-fx-font-size: 1.04em;" />
-					<Label text="/" style="-fx-font-size: 1.04em;" />
-					<Label fx:id="totalStates" style="-fx-font-size: 1.04em;" />
-					<Label text=" " style="-fx-font-size: 1.04em;" />
-					<Label fx:id="percentageProcessed" style="-fx-font-size: 1.04em;" />
+					<Label text="%stats.processedStates" HBox.hgrow="ALWAYS" id="bold" />
+					<Label fx:id="processedStates" />
+					<Label text="/" />
+					<Label fx:id="totalStates" />
+					<Label text=" " />
+					<Label fx:id="percentageProcessed" />
 					<VBox.margin>
 						<Insets bottom="0.0" left="10.0" right="10.0" top="15.0" />
 					</VBox.margin>
 				</HBox>
 				<HBox spacing="7.0">
 					<Label text="%stats.totalTransitions" HBox.hgrow="ALWAYS"
-						style="-fx-font-size: 1.04em;">
-						<font>
-							<Font name="System Bold" />
-						</font>
-					</Label>
-					<Label fx:id="totalTransitions" style="-fx-font-size: 1.04em;" />
+						id="bold" />
+					<Label fx:id="totalTransitions" />
 					<VBox.margin>
 						<Insets bottom="15.0" left="10.0" right="10.0" top="0.0" />
 					</VBox.margin>
@@ -71,11 +62,7 @@
 						<Label alignment="CENTER" text="%stats.stateStats"
 							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0"
-							style="-fx-font-size: 1.2em;">
-							<font>
-								<Font name="System Bold" />
-							</font>
-						</Label>
+							id="stats-titel" />
 					</AnchorPane>
 					<VBox>
 						<GridPane fx:id="stateStatsHeader">
@@ -86,21 +73,13 @@
 							<AnchorPane
 								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
 								<Label text="%stats.stateStats.status"
-									AnchorPane.leftAnchor="10.0" style="-fx-font-size: 1.1em;">
-									<font>
-										<Font name="System Bold" />
-									</font>
-								</Label>
+									AnchorPane.leftAnchor="10.0" id="stats-header" />
 							</AnchorPane>
 							<AnchorPane fx:id="numberOfStatesAnchorPane"
 								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
 								GridPane.columnIndex="1">
 								<Label text="%stats.stateStats.numberOfStates"
-									AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0" style="-fx-font-size: 1.1em;">
-									<font>
-										<Font name="System Bold" />
-									</font>
-								</Label>
+									AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0" id="stats-header"/>
 							</AnchorPane>
 						</GridPane>
 						<GridPane fx:id="stateStats">
@@ -114,11 +93,7 @@
 						<Label alignment="CENTER" prefHeight="16.0"
 							text="%stats.transitionStats" AnchorPane.bottomAnchor="0.0"
 							AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-							AnchorPane.topAnchor="5.0" style="-fx-font-size: 1.2em;">
-							<font>
-								<Font name="System Bold" />
-							</font>
-						</Label>
+							AnchorPane.topAnchor="20.0" id="stats-titel" />
 					</AnchorPane>
 					<VBox>
 						<GridPane fx:id="transStatsHeader">
@@ -129,21 +104,13 @@
 							<AnchorPane
 								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
 								<Label text="%stats.transitionStats.name"
-									AnchorPane.leftAnchor="10.0" style="-fx-font-size: 1.1em;">
-									<font>
-										<Font name="System Bold" />
-									</font>
-								</Label>
+									AnchorPane.leftAnchor="10.0" id="stats-header" />
 							</AnchorPane>
 							<AnchorPane  fx:id="numberOfTransitionsAnchorPane"
 								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
 								GridPane.columnIndex="1">
 								<Label text="%stats.transitionStats.numberOfTransitions"
-									AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0" style="-fx-font-size: 1.1em;">
-									<font>
-										<Font name="System Bold" />
-									</font>
-								</Label>
+									AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0" id="stats-header" />
 							</AnchorPane>
 						</GridPane>
 						<GridPane fx:id="transStats">
