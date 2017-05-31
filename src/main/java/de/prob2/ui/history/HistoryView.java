@@ -7,12 +7,17 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
@@ -133,6 +138,10 @@ public final class HistoryView extends AnchorPane {
 			transition.evaluate();
 			return transition.getPrettyRep().replace("<--", "←");
 		}
+	}
+
+	public ObservableIntegerValue getObservableHistorySize() {
+		return Bindings.size(this.lvHistory.itemsProperty().get());
 	}
 
 	private int getCurrentIndex() {
