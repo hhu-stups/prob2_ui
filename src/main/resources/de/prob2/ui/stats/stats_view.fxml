@@ -24,52 +24,30 @@
 			AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0"
 			AnchorPane.topAnchor="25.0" fx:id="statsBox">
 			<VBox spacing="8.0" styleClass="border">
-				<HBox prefHeight="12.0" minWidth="150.0" spacing="7.0">
-					<Label text="%stats.processedStates" minWidth="120.0">
+				<HBox spacing="7.0">
+					<Label text="%stats.processedStates" HBox.hgrow="ALWAYS"
+						style="-fx-font-size: 1.04em;">
 						<font>
-							<Font name="System Bold" size="13.5" />
+							<Font name="System Bold" />
 						</font>
 					</Label>
-					<Label fx:id="processedStates">
-						<font>
-							<Font size="13.5" />
-						</font>
-					</Label>
-					<Label text="/">
-						<font>
-							<Font size="13.5" />
-						</font>
-					</Label>
-					<Label fx:id="totalStates">
-						<font>
-							<Font size="13.5" />
-						</font>
-					</Label>
-					<Label text=" ">
-						<font>
-							<Font size="13.5" />
-						</font>
-					</Label>
-					<Label fx:id="percentageProcessed">
-						<font>
-							<Font size="13.5" />
-						</font>
-					</Label>
+					<Label fx:id="processedStates" style="-fx-font-size: 1.04em;" />
+					<Label text="/" style="-fx-font-size: 1.04em;" />
+					<Label fx:id="totalStates" style="-fx-font-size: 1.04em;" />
+					<Label text=" " style="-fx-font-size: 1.04em;" />
+					<Label fx:id="percentageProcessed" style="-fx-font-size: 1.04em;" />
 					<VBox.margin>
 						<Insets bottom="0.0" left="10.0" right="10.0" top="15.0" />
 					</VBox.margin>
 				</HBox>
-				<HBox prefHeight="12.0" spacing="7.0">
-					<Label text="%stats.totalTransitions" minWidth="120.0">
+				<HBox spacing="7.0">
+					<Label text="%stats.totalTransitions" HBox.hgrow="ALWAYS"
+						style="-fx-font-size: 1.04em;">
 						<font>
-							<Font name="System Bold" size="13.5" />
+							<Font name="System Bold" />
 						</font>
 					</Label>
-					<Label fx:id="totalTransitions">
-						<font>
-							<Font size="13.5" />
-						</font>
-					</Label>
+					<Label fx:id="totalTransitions" style="-fx-font-size: 1.04em;" />
 					<VBox.margin>
 						<Insets bottom="15.0" left="10.0" right="10.0" top="0.0" />
 					</VBox.margin>
@@ -80,8 +58,7 @@
 					onAction="#handleExtendedStatsToggle" fx:id="extendedStatsToggle"
 					text="%stats.showExtendedStats">
 					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
-							size="16" />
+						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE" />
 					</graphic>
 					<tooltip>
 						<Tooltip text="%stats.showExtendedStats" />
@@ -91,52 +68,45 @@
 					AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
 					AnchorPane.bottomAnchor="5.0" visible="false" spacing="10.0">
 					<AnchorPane>
-						<Label alignment="CENTER" prefHeight="16.0" text="%stats.stateStats"
+						<Label alignment="CENTER" text="%stats.stateStats"
 							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0"
+							style="-fx-font-size: 1.2em;">
 							<font>
-								<Font name="System Bold" size="15.0" />
+								<Font name="System Bold" />
 							</font>
 						</Label>
 					</AnchorPane>
 					<VBox>
-						<GridPane>
+						<GridPane fx:id="stateStatsHeader">
 							<columnConstraints>
-								<ColumnConstraints hgrow="SOMETIMES" minWidth="160.0"
-									prefWidth="160.0" />
-								<ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0"
-									prefWidth="120.0" />
+								<ColumnConstraints hgrow="ALWAYS" />
+								<ColumnConstraints hgrow="NEVER" />
 							</columnConstraints>
-							<rowConstraints>
-								<RowConstraints minHeight="20.0" prefHeight="20.0"
-									vgrow="SOMETIMES" />
-							</rowConstraints>
 							<AnchorPane
 								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
 								<Label text="%stats.stateStats.status"
-									AnchorPane.leftAnchor="10.0">
+									AnchorPane.leftAnchor="10.0" style="-fx-font-size: 1.1em;">
 									<font>
-										<Font name="System Bold" size="14.0" />
+										<Font name="System Bold" />
 									</font>
 								</Label>
 							</AnchorPane>
-							<AnchorPane
+							<AnchorPane fx:id="numberOfStatesAnchorPane"
 								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
 								GridPane.columnIndex="1">
 								<Label text="%stats.stateStats.numberOfStates"
-									AnchorPane.rightAnchor="10.0">
+									AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0" style="-fx-font-size: 1.1em;">
 									<font>
-										<Font name="System Bold" size="14.0" />
+										<Font name="System Bold" />
 									</font>
 								</Label>
 							</AnchorPane>
 						</GridPane>
 						<GridPane fx:id="stateStats">
 							<columnConstraints>
-								<ColumnConstraints hgrow="SOMETIMES" minWidth="120.0"
-									prefWidth="120.0" />
-								<ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES"
-									maxWidth="120.0" prefWidth="120.0" />
+								<ColumnConstraints hgrow="ALWAYS" />
+								<ColumnConstraints halignment="RIGHT" hgrow="NEVER" />
 							</columnConstraints>
 						</GridPane>
 					</VBox>
@@ -144,50 +114,42 @@
 						<Label alignment="CENTER" prefHeight="16.0"
 							text="%stats.transitionStats" AnchorPane.bottomAnchor="0.0"
 							AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-							AnchorPane.topAnchor="5.0">
+							AnchorPane.topAnchor="5.0" style="-fx-font-size: 1.2em;">
 							<font>
-								<Font name="System Bold" size="15.0" />
+								<Font name="System Bold" />
 							</font>
 						</Label>
 					</AnchorPane>
 					<VBox>
-						<GridPane>
+						<GridPane fx:id="transStatsHeader">
 							<columnConstraints>
-								<ColumnConstraints hgrow="SOMETIMES" minWidth="120.0"
-									prefWidth="140.0" />
-								<ColumnConstraints hgrow="SOMETIMES"
-									prefWidth="140.0" />
+								<ColumnConstraints hgrow="ALWAYS" />
+								<ColumnConstraints hgrow="NEVER" />
 							</columnConstraints>
-							<rowConstraints>
-								<RowConstraints minHeight="-Infinity" prefHeight="20.0"
-									vgrow="SOMETIMES" />
-							</rowConstraints>
-							<AnchorPane prefHeight="18.0"
+							<AnchorPane
 								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
 								<Label text="%stats.transitionStats.name"
-									AnchorPane.leftAnchor="10.0">
+									AnchorPane.leftAnchor="10.0" style="-fx-font-size: 1.1em;">
 									<font>
-										<Font name="System Bold" size="14.0" />
+										<Font name="System Bold" />
 									</font>
 								</Label>
 							</AnchorPane>
-							<AnchorPane prefHeight="18.0"
+							<AnchorPane  fx:id="numberOfTransitionsAnchorPane"
 								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
 								GridPane.columnIndex="1">
 								<Label text="%stats.transitionStats.numberOfTransitions"
-									AnchorPane.rightAnchor="10.0">
+									AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0" style="-fx-font-size: 1.1em;">
 									<font>
-										<Font name="System Bold" size="14.0" />
+										<Font name="System Bold" />
 									</font>
 								</Label>
 							</AnchorPane>
 						</GridPane>
 						<GridPane fx:id="transStats">
 							<columnConstraints>
-								<ColumnConstraints hgrow="SOMETIMES" minWidth="140.0"
-									prefWidth="140.0" />
-								<ColumnConstraints hgrow="SOMETIMES" maxWidth="140.0"
-									prefWidth="140.0" />
+								<ColumnConstraints hgrow="ALWAYS" />
+								<ColumnConstraints hgrow="ALWAYS" />
 							</columnConstraints>
 						</GridPane>
 					</VBox>

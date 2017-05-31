@@ -6,34 +6,29 @@ import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.ModelTranslationError;
-import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.FormalismType;
-import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
 
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.Executable;
+import de.prob2.ui.prob2fx.CurrentTrace;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BInterpreter implements IAnimationChangeListener, Executable {
+public class BInterpreter implements Executable {
 
 	private static final Logger logger = LoggerFactory.getLogger(BInterpreter.class);
 	private final StateSpace defaultSS;
-	private String modelName;
-	private Trace currentTrace;
+	private CurrentTrace currentTrace;
 
 	@Inject
-	public BInterpreter(final ClassicalBFactory bfactory, final AnimationSelector animations) {
+	public BInterpreter(final ClassicalBFactory bfactory, final CurrentTrace currentTrace) {
 		StateSpace s = null;
 		try {
 			s = bfactory.create("MACHINE Empty END").load();
@@ -41,7 +36,7 @@ public class BInterpreter implements IAnimationChangeListener, Executable {
 			logger.error("loading a model into ProB failed!", e);
 		}
 		defaultSS = s;
-		animations.registerAnimationChangeListener(this);
+		this.currentTrace = currentTrace;
 	}
 
 	@Override
@@ -52,13 +47,12 @@ public class BInterpreter implements IAnimationChangeListener, Executable {
 			if ("clear".equals(instruction.getInstruction())) {
 				return new ConsoleExecResult("clear","", ConsoleExecResultType.PASSED);
 			}
-			IEvalElement parsed = parse(line);
-			if (currentTrace == null) {
-				EvaluationCommand cmd = parsed.getCommand(defaultSS.getRoot());
+			if (currentTrace.exists()) {
+				res = currentTrace.get().evalCurrent(currentTrace.getModel().parseFormula(line));
+			} else {
+				EvaluationCommand cmd = new ClassicalB(line).getCommand(defaultSS.getRoot());
 				defaultSS.execute(cmd);
 				res = cmd.getValue();
-			} else {
-				res = currentTrace.evalCurrent(parsed);
 			}
 		} catch (CliError | EvaluationException | ProBError e) {
 			logger.info("B evaluation failed", e);
@@ -67,46 +61,4 @@ public class BInterpreter implements IAnimationChangeListener, Executable {
 		// noinspection ObjectToString
 		return new ConsoleExecResult("", res.toString(), ConsoleExecResultType.PASSED);
 	}
-	
-	public IEvalElement parse(final String line) {
-		if (currentTrace == null) {
-			return new ClassicalB(line);
-		}
-		return currentTrace.getModel().parseFormula(line);
-	}
-		
-	@Override
-	public void traceChange(final Trace currentTrace, final boolean currentAnimationChanged) {
-		if (currentAnimationChanged) {
-			if (currentTrace == null) {
-				modelName = null;
-				notifyModelChange(null);
-			} else if (currentTrace.getModel().getFormalismType() == FormalismType.B) {
-				// ignore models that are not B models
-				String mainModelName = currentTrace.getStateSpace().getMainComponent().toString();
-				if (!mainModelName.equals(this.modelName)) {
-					this.modelName = mainModelName;
-					notifyModelChange(this.modelName);
-				}
-			}
-			this.currentTrace = currentTrace;
-		}
-	}
-
-	public void notifyModelChange(final String name) {
-		logger.trace("BConsole.modelChange\n modelloaded");
-		String output = name == null ? "" : name;
-		logger.trace(output);
-	}
-
-	@Override
-	public void animatorStatus(final boolean busy) {
-		if (busy) {
-			logger.trace("BConsole.disable");
-		} else {
-			logger.trace("BConsole.enable");
-		}
-	}
-
-
 }
