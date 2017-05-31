@@ -117,7 +117,11 @@ public class ProB2 extends Application {
 
 	@Override
 	public void stop() {
-		config.save();
-		injector.getInstance(ProBInstanceProvider.class).shutdownAll();
+		if (config != null) {
+			config.save();
+		}
+		if (injector != null) {
+			injector.getInstance(ProBInstanceProvider.class).shutdownAll();
+		}
 	}
 }
