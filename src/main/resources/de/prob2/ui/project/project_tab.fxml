@@ -16,7 +16,7 @@
 	<VBox stylesheets="@/prob.css" spacing="0">
 		<AnchorPane styleClass="border">
 			<Label fx:id="projectNameLabel" AnchorPane.leftAnchor="6"
-				AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="4" style="-fx-font-size: 1.5em;" />
+				AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="4" id="project-name" />
 			<TextField fx:id="projectNameTextField"
 				AnchorPane.leftAnchor="6" AnchorPane.topAnchor="20"
 				AnchorPane.bottomAnchor="4" managed="false" visible="false" />

@@ -15,52 +15,30 @@
 			<Text fx:id="resultText" fill="#8a8a8a" strokeType="OUTSIDE"
 				strokeWidth="0.0" text="%verifications.modelchecking.stats.placeholder"
 				AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0"
-				AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0"
-				style="-fx-font-size: 1.02em;">
-				<font>
-					<Font name="System Bold" />
-				</font>
-			</Text>
+				AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0" id="bold" />
 		</AnchorPane>
 		<AnchorPane>
 			<VBox fx:id="statsBox" spacing="13.0" visible="false"
 				AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
 				AnchorPane.topAnchor="5.0" AnchorPane.bottomAnchor="5.0">
 				<HBox prefHeight="12.0" spacing="7.0">
-					<Label text="%verifications.modelchecking.stats.elapsedTime"
-						>
-						<font>
-							<Font name="System Bold" size="15"/>
-						</font>
-					</Label>
+					<Label text="%verifications.modelchecking.stats.elapsedTime" id="bold" />
 					<Label fx:id="elapsedTime" />
 				</HBox>
 				<VBox spacing="3.0">
 					<HBox prefHeight="12.0" spacing="7.0">
 						<Label text="%verifications.modelchecking.stats.processedStates"
-							style="-fx-font-size: 1em;">
-							<font>
-								<Font name="System Bold" />
-							</font>
-						</Label>
+							id="bold" />
 						<Label fx:id="processedStates" />
 					</HBox>
 					<HBox prefHeight="12.0" spacing="7.0">
 						<Label text="%verifications.modelchecking.stats.totalStates"
-							style="-fx-font-size: 1em;">
-							<font>
-								<Font name="System Bold" />
-							</font>
-						</Label>
+							id="bold" />
 						<Label fx:id="totalStates" />
 					</HBox>
 					<HBox prefHeight="12.0" spacing="7.0">
 						<Label text="%verifications.modelchecking.stats.totalTransitions"
-							style="-fx-font-size: 1em;">
-							<font>
-								<Font name="System bold" />
-							</font>
-						</Label>
+							id="bold" />
 						<Label fx:id="totalTransitions" />
 					</HBox>
 				</VBox>

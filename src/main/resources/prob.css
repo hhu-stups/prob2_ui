@@ -570,6 +570,12 @@
 	-fx-border-width: 0 0 0 0;
 }
 
+#bold {
+	-fx-font-family: ARIAL;
+	-fx-font-weight: bold;
+	-fx-font-size: 1.04em;
+}
+
 /* ===================== DIALOG ====================== */
 .dialog > .label {
 	-fx-text-fill: -prob-grey;
@@ -620,6 +626,12 @@
 }
 .dark .check-box:selected:hover > .box > .mark {
 	-fx-background-color: -prob-white-75;
+}
+
+/* ================== FORMULA DIALOG ================= */
+
+#formula-dialog-header {
+	-fx-font-size: 1.6em;
 }
 
 /* ================= FULL VALUE STAGE ================ */
@@ -759,7 +771,12 @@
 
 /* =================== PROJECT VIEW ================== */
 
-/* Machines */
+/* Project Tab */
+#project-name {
+	-fx-font-size: 1.5em;
+}
+
+/* Machines Tab */
 #machines-details-name {
 	-fx-font-size: 1.2em; 
 }
@@ -791,6 +808,17 @@
 .tree-table-cell.errorresult {
 	-fx-font-weight: bold;
 	-fx-text-fill: -prob-orange;
+}
+
+/* ==================== STATS VIEW =================== */
+
+#stats-titel {
+	-fx-font-family: ARIAL;
+	-fx-font-size: 1.3em;
+}
+#stats-header {
+	-fx-font-family: ARIAL;
+	-fx-font-size: 1.1em;
 }
 
 /* ==================== STATUS BAR =================== */

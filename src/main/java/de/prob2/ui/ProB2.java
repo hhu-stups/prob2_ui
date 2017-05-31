@@ -2,18 +2,19 @@ package de.prob2.ui;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import de.prob.cli.ProBInstanceProvider;
-
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -23,12 +24,9 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class ProB2 extends Application {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProB2.class);
-	
+
 	private Injector injector;
 	private Config config;
 
@@ -64,18 +62,20 @@ public class ProB2 extends Application {
 		this.primaryStage = primaryStage;
 		ProB2Module module = new ProB2Module();
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
-		
+
 		StageManager stageManager = injector.getInstance(StageManager.class);
 		Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
 			LOGGER.error("Uncaught exception on thread {}", thread, exc);
 			Platform.runLater(() -> {
 				final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR);
 				alert.setHeaderText("Uncaught internal exception");
-				alert.setContentText(String.format("An internal exception occurred and was not caught. This is probably a bug.%n%nException: %s%nThread: %s%n%nThe full stack trace can be found in the log file.", exc, thread));
+				alert.setContentText(String.format(
+						"An internal exception occurred and was not caught. This is probably a bug.%n%nException: %s%nThread: %s%n%nThe full stack trace can be found in the log file.",
+						exc, thread));
 				alert.show();
 			});
 		});
-		
+
 		config = injector.getInstance(Config.class);
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
 		Parent root = injector.getInstance(MainController.class);
