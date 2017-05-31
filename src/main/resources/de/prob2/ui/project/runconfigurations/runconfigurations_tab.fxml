@@ -8,20 +8,36 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Label?>
 
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
 <fx:root type="Tab" text="%project.runconfigurations.tab.title"
-	closable="false" xmlns:fx="http://javafx.com/fxml/1">
+		 closable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<VBox stylesheets="@/prob.css" spacing="0">
-		<AnchorPane styleClass="border">
-			<Button fx:id="addRunconfigButton" prefHeight="26.0"
-				prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-				AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10"
-				onAction="#addRunconfiguration" disable="true">
-				<graphic>
-					<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
-						size="26" />
-				</graphic>
-			</Button>
-		</AnchorPane>
+		<HBox alignment="CENTER_RIGHT">
+			<AnchorPane styleClass="border" HBox.hgrow="ALWAYS">
+				<Button fx:id="addRunconfigButton" prefHeight="26.0"
+					prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+					AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10"
+					onAction="#addRunconfiguration" disable="true">
+					<graphic>
+						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
+							size="26" />
+					</graphic>
+				</Button>
+			</AnchorPane>
+			<AnchorPane styleClass="border">
+				<Button fx:id="help" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10"
+						prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+						onAction="#openHelp">
+					<graphic>
+						<FontAwesomeIconView fill="#555560" glyphName="QUESTION_CIRCLE" size="26" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%menu.help" />
+					</tooltip>
+				</Button>
+			</AnchorPane>
+		</HBox>
 		<ListView fx:id="runconfigurationsListView" VBox.vgrow="always"
 			styleClass="no-border">
 			<placeholder>

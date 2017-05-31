@@ -120,12 +120,12 @@ public class MachinesTab extends Tab {
 		});
 	}
 
-	/*@FXML
+	@FXML
 	public void openHelp() {
 		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
 		helpSystemStage.show();
 		helpSystemStage.toFront();
-	}*/
+	}
 
 	private void showDescription(Machine machine) {
 		if (splitPane.getItems().size() < 2) {

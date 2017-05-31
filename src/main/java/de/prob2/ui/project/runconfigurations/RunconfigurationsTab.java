@@ -3,6 +3,7 @@ package de.prob2.ui.project.runconfigurations;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.fxml.FXML;
@@ -14,6 +15,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.input.MouseButton;
+import javafx.stage.Stage;
 
 public class RunconfigurationsTab extends Tab {
 
@@ -85,5 +87,12 @@ public class RunconfigurationsTab extends Tab {
 	void addRunconfiguration() {
 		injector.getInstance(RunconfigurationsDialog.class).showAndWait()
 				.ifPresent(currentProject::addRunconfiguration);
+	}
+
+	@FXML
+	public void openHelp() {
+		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
+		helpSystemStage.show();
+		helpSystemStage.toFront();
 	}
 }

@@ -9,18 +9,34 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
 
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Tooltip?>
 <fx:root type="Tab" text="%project.preferences.tab.title" closable="false"
-	xmlns:fx="http://javafx.com/fxml/1">
+		 xmlns:fx="http://javafx.com/fxml/1">
 	<VBox stylesheets="@/prob.css" spacing="0">
-		<AnchorPane styleClass="border">
-			<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-				AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addPreference">
-				<graphic>
-					<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
-						size="26" />
-				</graphic>
-			</Button>
-		</AnchorPane>
+		<HBox alignment="CENTER_RIGHT">
+			<AnchorPane styleClass="border" HBox.hgrow="ALWAYS">
+				<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+					AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addPreference">
+					<graphic>
+						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
+							size="26" />
+					</graphic>
+				</Button>
+			</AnchorPane>
+			<AnchorPane styleClass="border">
+				<Button fx:id="help" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10"
+						prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+						onAction="#openHelp">
+					<graphic>
+						<FontAwesomeIconView fill="#555560" glyphName="QUESTION_CIRCLE" size="26" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%menu.help" />
+					</tooltip>
+				</Button>
+			</AnchorPane>
+		</HBox>
 		<SplitPane fx:id="splitPane">
 			<ListView fx:id="preferencesListView"
 				styleClass="no-border">
