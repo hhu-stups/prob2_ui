@@ -2,19 +2,18 @@ package de.prob2.ui;
 
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import de.prob.cli.ProBInstanceProvider;
+
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -22,7 +21,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProB2 extends Application {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProB2.class);
@@ -31,6 +35,7 @@ public class ProB2 extends Application {
 	private Config config;
 
 	private Stage primaryStage;
+	private Stage loadingStage;
 
 	public static void main(String... args) {
 		launch(args);
@@ -60,6 +65,15 @@ public class ProB2 extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
+		this.loadingStage = new Stage();
+		this.loadingStage.setTitle("Loading ProB 2.0...");
+		final Parent root = new BorderPane(new ImageView(ProB2.class.getResource("/prob_logo.gif").toExternalForm()));
+		this.loadingStage.setScene(new Scene(root));
+		this.loadingStage.show();
+		Platform.runLater(this::realStart);
+	}
+
+	private void realStart() {
 		ProB2Module module = new ProB2Module();
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 
@@ -113,6 +127,7 @@ public class ProB2 extends Application {
 
 		primaryStage.show();
 		uiPersistence.open();
+		this.loadingStage.hide();
 	}
 
 	@Override
