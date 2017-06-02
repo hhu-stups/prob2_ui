@@ -15,11 +15,14 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -64,6 +67,23 @@ public class FormulaInputDialog extends Dialog<Void> {
 
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		icon.glyphSizeProperty().bind(fontsize.multiply(6));
+
+		Platform.runLater(() -> {
+			DialogPane dialogPane = this.getDialogPane();
+			Hyperlink detailsButton= (Hyperlink) dialogPane.lookup(".details-button");
+			FontAwesomeIconView detailsInitIcon = new FontAwesomeIconView(
+					dialogPane.isExpanded() ? FontAwesomeIcon.CHEVRON_UP: FontAwesomeIcon.CHEVRON_DOWN);
+			detailsInitIcon.setStyleClass("icon-dark");
+			detailsInitIcon.glyphSizeProperty().bind(fontsize);
+			detailsButton.setGraphic(detailsInitIcon);
+			dialogPane.expandedProperty().addListener((observable, from, to) -> {
+				FontAwesomeIconView detailsIcon = new FontAwesomeIconView(
+						to ? FontAwesomeIcon.CHEVRON_UP: FontAwesomeIcon.CHEVRON_DOWN);
+				detailsIcon.setStyleClass("icon-dark");
+				detailsIcon.glyphSizeProperty().bind(fontsize);
+				detailsButton.setGraphic(detailsIcon);
+			});
+		});
 	}
 
 	private void apply() {

@@ -570,6 +570,12 @@
 	-fx-border-width: 0 0 0 0;
 }
 
+#bold {
+	-fx-font-family: ARIAL;
+	-fx-font-weight: bold;
+	-fx-font-size: 1.04em;
+}
+
 /* ===================== DIALOG ====================== */
 .dialog > .label {
 	-fx-text-fill: -prob-grey;
@@ -622,6 +628,26 @@
 	-fx-background-color: -prob-white-75;
 }
 
+/* ================== FORMULA DIALOG ================= */
+
+#formula-dialog-header {
+	-fx-font-size: 1.6em;
+}
+
+/* ================= FULL VALUE STAGE ================ */
+
+.difftextarea .coords {
+	-fx-fill: teal;
+}
+
+.difftextarea .insert {
+	-fx-fill: green;
+}
+
+.difftextarea .delete {
+	-fx-fill: red;
+}
+
 /* ================== HISTORY VIEW =================== */
 #past {
 	-fx-font-family: ARIAL;
@@ -637,6 +663,21 @@
 	-fx-font-family: ARIAL;
 	-fx-fill: -prob-grey-75;
 	-fx-font-style: italic;
+}
+
+/* =============== HISTORY CHART STAGE =============== */
+
+/* Hide chart symbols in the chart content, but not in the legend */
+.history-chart .chart-content .chart-line-symbol {
+	-fx-background-color: transparent;
+	-fx-background-insets: 0;
+	-fx-background-radius: 0;
+	-fx-padding: 0;
+}
+
+/* Hide minor tick marks on the time axes, because our times are integers */
+.history-chart .axis.time-axis .axis-minor-tick-mark {
+	-fx-stroke: transparent;
 }
 
 /* ================ MODELCHECKING VIEW =============== */
@@ -728,6 +769,28 @@
 	-fx-fill: orange;
 }
 
+/* =================== PROJECT VIEW ================== */
+
+/* Project Tab */
+#project-name {
+	-fx-font-size: 1.5em;
+}
+
+/* Machines Tab */
+#machines-details-name {
+	-fx-font-size: 1.2em; 
+}
+#machines-item-name {
+	-fx-font-family: ARIAL;
+	-fx-font-weight: bold;
+	-fx-font-size: 1.1em; 
+}
+#machines-item-location {
+	-fx-font-family: ARIAL;
+	-fx-font-style: italic;
+	-fx-font-size: 0.9em;
+}
+
 /* =================== STATES VIEW =================== */
 
 .changed .tree-table-cell {
@@ -747,33 +810,15 @@
 	-fx-text-fill: -prob-orange;
 }
 
-/* ================= FULL VALUE STAGE ================ */
+/* ==================== STATS VIEW =================== */
 
-.difftextarea .coords {
-	-fx-fill: teal;
+#stats-titel {
+	-fx-font-family: ARIAL;
+	-fx-font-size: 1.3em;
 }
-
-.difftextarea .insert {
-	-fx-fill: green;
-}
-
-.difftextarea .delete {
-	-fx-fill: red;
-}
-
-/* =============== HISTORY CHART STAGE =============== */
-
-/* Hide chart symbols in the chart content, but not in the legend */
-.history-chart .chart-content .chart-line-symbol {
-	-fx-background-color: transparent;
-	-fx-background-insets: 0;
-	-fx-background-radius: 0;
-	-fx-padding: 0;
-}
-
-/* Hide minor tick marks on the time axes, because our times are integers */
-.history-chart .axis.time-axis .axis-minor-tick-mark {
-	-fx-stroke: transparent;
+#stats-header {
+	-fx-font-family: ARIAL;
+	-fx-font-size: 1.1em;
 }
 
 /* ==================== STATUS BAR =================== */

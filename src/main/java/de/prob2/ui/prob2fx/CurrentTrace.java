@@ -19,6 +19,8 @@ import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -71,12 +73,12 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
 			@Override
 			public void traceChange(final Trace currentTrace, final boolean currentAnimationChanged) {
-				CurrentTrace.this.set(currentTrace);
+				Platform.runLater(() -> CurrentTrace.this.set(currentTrace));
 			}
 
 			@Override
 			public void animatorStatus(final boolean busy) {
-				CurrentTrace.this.animatorBusy.set(busy);
+				Platform.runLater(() -> CurrentTrace.this.animatorBusy.set(busy));
 			}
 		});
 		this.api = api;

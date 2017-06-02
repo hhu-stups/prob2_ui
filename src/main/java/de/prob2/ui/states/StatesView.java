@@ -16,12 +16,14 @@ import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationErrorResult;
 import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.StateError;
 import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
 import de.prob.exception.ProBError;
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.formula.FormulaGenerator;
@@ -277,19 +279,18 @@ public final class StatesView extends AnchorPane {
 		}
 	}
 
+	private static String getResultValue(final ASTFormula element, final State state) {
+		final AbstractEvalResult result = state.eval(element.getFormula(FormulaExpand.expand));
+		return result instanceof EvalResult ? ((EvalResult)result).getValue() : null;
+	}
+
 	private void showFullValue(StateItem<?> stateItem) {
 		final FullValueStage stage = injector.getInstance(FullValueStage.class);
 		if (stateItem.getContents() instanceof ASTFormula) {
 			final ASTFormula element = (ASTFormula)stateItem.getContents();
-			final EvalResult currentResult = (EvalResult)this.currentTrace.getCurrentState().eval(element.getFormula());
-			stage.setTitle(element.toString());
-			stage.setCurrentValue(currentResult.getValue());
-			if (this.previousValues.get(element.getFormula()) instanceof EvalResult) {
-				final EvalResult previousResult = (EvalResult)this.currentTrace.get().getPreviousState().eval(element.getFormula());
-				stage.setPreviousValue(previousResult.getValue());
-			} else {
-				stage.setPreviousValue(null);
-			}
+			stage.setTitle(element.getFormula().toString());
+			stage.setCurrentValue(getResultValue(element, this.currentTrace.getCurrentState()));
+			stage.setPreviousValue(getResultValue(element, this.currentTrace.get().getPreviousState()));
 			stage.setFormattingEnabled(true);
 		} else if (stateItem.getContents() instanceof StateError) {
 			final StateError error = (StateError) stateItem.getContents();

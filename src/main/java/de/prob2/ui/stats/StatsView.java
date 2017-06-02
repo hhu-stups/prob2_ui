@@ -3,6 +3,7 @@ package de.prob2.ui.stats;
 import java.util.List;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -12,6 +13,7 @@ import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -21,6 +23,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
@@ -39,6 +42,10 @@ public class StatsView extends ScrollPane {
 	@FXML
 	private GridPane transStats;
 	@FXML
+	private GridPane stateStatsHeader;
+	@FXML
+	private GridPane transStatsHeader;
+	@FXML
 	private VBox statsBox;
 	@FXML
 	private VBox extendedStatsBox;
@@ -46,13 +53,19 @@ public class StatsView extends ScrollPane {
 	private Label noStatsLabel;
 	@FXML
 	private ToggleButton extendedStatsToggle;
+	@FXML
+	private AnchorPane numberOfStatesAnchorPane;
+	@FXML
+	private AnchorPane numberOfTransitionsAnchorPane;
 
 	private final CurrentTrace currentTrace;
 	private final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> computeStats(to);
+	private final Injector injector;
 
 	@Inject
-	public StatsView(final StageManager stageManager, final CurrentTrace currentTrace) {
+	public StatsView(final StageManager stageManager, final CurrentTrace currentTrace, final Injector injector) {
 		this.currentTrace = currentTrace;
+		this.injector = injector;
 		stageManager.loadFXML(this, "stats_view.fxml");
 	}
 
@@ -68,13 +81,25 @@ public class StatsView extends ScrollPane {
 		this.currentTrace.addListener(traceChangeListener);
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 
-		this.setMinSize(200, 100);
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) extendedStatsToggle.getGraphic()).glyphSizeProperty().bind(fontsize.multiply(1.2));
+
+		numberOfStatesAnchorPane.widthProperty().addListener((observable, from, to) -> {
+			stateStats.getColumnConstraints().get(1).setMinWidth(to.doubleValue());
+			stateStatsHeader.getColumnConstraints().get(1).setMinWidth(to.doubleValue());
+		});
+		numberOfTransitionsAnchorPane.widthProperty().addListener((observable, from, to) -> {
+			transStats.getColumnConstraints().get(1).setMinWidth(to.doubleValue());
+			transStatsHeader.getColumnConstraints().get(1).setMinWidth(to.doubleValue());
+		});
+
 	}
 
 	@FXML
 	private void handleExtendedStatsToggle() {
 		FontAwesomeIconView icon;
 		Tooltip tooltip;
+		FontSize fontsize = injector.getInstance(FontSize.class);
 		if (extendedStatsToggle.isSelected()) {
 			traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 
@@ -86,7 +111,7 @@ public class StatsView extends ScrollPane {
 			tooltip = new Tooltip("Show Extended Stats");
 			extendedStatsToggle.setText("Show Extended Stats");
 		}
-		icon.setSize("16");
+		icon.glyphSizeProperty().bind(fontsize.multiply(1.2));
 		icon.setStyle("-fx-fill: -prob-grey;");
 		extendedStatsToggle.setGraphic(icon);
 		extendedStatsToggle.setTooltip(tooltip);
@@ -116,7 +141,7 @@ public class StatsView extends ScrollPane {
 			totalTransitions.setText(Integer.toString(nrTotalTransitions));
 			processedStates.setText(Integer.toString(nrProcessedNodes));
 			if (nrTotalNodes != 0) {
-				percentageProcessed.setText("("+Integer.toString(100 * nrProcessedNodes / nrTotalNodes)+"%)");
+				percentageProcessed.setText("(" + Integer.toString(100 * nrProcessedNodes / nrTotalNodes) + "%)");
 			}
 		});
 	}
