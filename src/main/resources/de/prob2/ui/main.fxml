@@ -43,6 +43,7 @@
 				</Accordion>
 				<Accordion fx:id = "rightAccordion2" expandedPane="$historyTP">
 					<panes>
+						<!-- Note: The title text of historyTP is changed in MainController.initialize to include the history size. -->
 						<TitledPane text="%tptitles.history" fx:id="historyTP" collapsible="false" onMouseClicked="#historyTPClicked">
 							<HistoryView/>
 						</TitledPane>
