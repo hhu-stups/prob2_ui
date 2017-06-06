@@ -10,14 +10,11 @@
 <?import javafx.scene.control.Button?>
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 
-<fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1" stylesheets="@/prob.css">
 	<VBox spacing="5" AnchorPane.topAnchor="6"
 		AnchorPane.bottomAnchor="-4" AnchorPane.leftAnchor="0"
 		AnchorPane.rightAnchor="0">
-		<Label fx:id="titelLabel">
-			<font>
-				<Font size="14" />
-			</font>
+		<Label fx:id="titelLabel" id="details-titel">
 			<VBox.margin>
 				<Insets left="10" right="10" />
 			</VBox.margin>
@@ -34,10 +31,9 @@
 			</ScrollPane>
 		</AnchorPane>
 	</VBox>
-	<Button AnchorPane.rightAnchor="2.0" onAction="#closePreferenceView">
+	<Button fx:id="closePreferenceViewButton" AnchorPane.rightAnchor="2.0" onAction="#closePreferenceView">
 		<graphic>
-			<FontAwesomeIconView fill="#555560" glyphName="CLOSE"
-				size="16" />
+			<FontAwesomeIconView fill="#555560" glyphName="CLOSE" />
 		</graphic>
 	</Button>
 </fx:root>
