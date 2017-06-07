@@ -16,17 +16,13 @@
 <fx:root type="Dialog" title="%project.runconfigurations.dialog.dialogTitle"
 	xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
-		<DialogPane stylesheets="@/prob.css" minWidth="300"
-			minHeight="200">
+		<DialogPane stylesheets="@/prob.css">
 			<content>
 				<AnchorPane>
 					<VBox spacing="5" AnchorPane.topAnchor="14"
 						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-10"
 						AnchorPane.rightAnchor="-10">
-						<Label text="%project.runconfigurations.dialog.title">
-							<font>
-								<Font size="18" />
-							</font>
+						<Label text="%project.runconfigurations.dialog.title" id="title">
 							<VBox.margin>
 								<Insets left="10" right="10" />
 							</VBox.margin>
@@ -38,12 +34,12 @@
 								Vgap="10">
 								<Label text="%project.runconfigurations.dialog.machine"
 									GridPane.columnIndex="0" GridPane.rowIndex="0" />
-								<ChoiceBox fx:id="machinesBox" minWidth="100"
-									GridPane.columnIndex="1" GridPane.rowIndex="0" />
+								<ChoiceBox fx:id="machinesBox" GridPane.columnIndex="1"
+									GridPane.rowIndex="0" />
 								<Label text="%project.runconfigurations.dialog.preference"
 									GridPane.columnIndex="0" GridPane.rowIndex="1" />
-								<ComboBox fx:id="preferencesBox" minWidth="100"
-									GridPane.columnIndex="1" GridPane.rowIndex="1" />
+								<ComboBox fx:id="preferencesBox" GridPane.columnIndex="1"
+									GridPane.rowIndex="1" />
 							</GridPane>
 						</AnchorPane>
 					</VBox>
