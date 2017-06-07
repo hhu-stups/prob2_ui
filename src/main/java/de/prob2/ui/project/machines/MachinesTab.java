@@ -8,8 +8,6 @@ import java.nio.file.Path;
 import java.util.stream.Collectors;
 
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.helpsystem.HelpSystemStage;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
