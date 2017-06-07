@@ -17,54 +17,66 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" minWidth="320" minHeight="160" title="%chart.historychart.title">
+
+<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%chart.historychart.title">
 	<scene>
-		<Scene width="800" height="400" stylesheets="@/prob.css">
-			<AnchorPane maxWidth="Infinity" maxHeight="Infinity">
-				<SplitPane dividerPositions="0.25" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-					<BorderPane minWidth="80">
+		<Scene stylesheets="@/prob.css">
+			<AnchorPane>
+				<SplitPane dividerPositions="0.25" AnchorPane.topAnchor="0.0"
+					AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+					AnchorPane.rightAnchor="0.0">
+					<BorderPane>
 						<top>
 							<ToolBar>
-								<Button fx:id="addButton" onAction="#handleAdd">
+								<Button fx:id="addButton" onAction="#handleAdd"
+									alignment="CENTER" contentDisplay="GRAPHIC_ONLY">
 									<graphic>
-										<FontAwesomeIconView glyphName="PLUS_CIRCLE"/>
+										<FontAwesomeIconView glyphName="PLUS_CIRCLE" />
 									</graphic>
 								</Button>
-								<Button fx:id="removeButton" onAction="#handleRemove">
+								<Button fx:id="removeButton" onAction="#handleRemove"
+									alignment="CENTER" contentDisplay="GRAPHIC_ONLY">
 									<graphic>
-										<FontAwesomeIconView glyphName="MINUS_CIRCLE"/>
+										<FontAwesomeIconView glyphName="MINUS_CIRCLE" />
 									</graphic>
 								</Button>
 							</ToolBar>
 						</top>
 						<center>
-							<ListView fx:id="formulaList" editable="true"/>
+							<ListView fx:id="formulaList" editable="true" />
 						</center>
 						<bottom>
-							<VBox spacing="5.0">
+							<VBox spacing="10.0">
 								<padding>
-									<Insets topRightBottomLeft="5.0"/>
+									<Insets top="12.0" bottom="12.0" right="10.0" left="10.0" />
 								</padding>
-								<CheckBox fx:id="separateChartsCheckBox" text="%chart.historychart.separateCharts"/>
-								<Label text="%chart.historychart.startPosition">
-									<labelFor>
-										<ChoiceBox fx:id="startChoiceBox"/>
-									</labelFor>
-								</Label>
-								<fx:reference source="startChoiceBox"/>
+								<CheckBox fx:id="separateChartsCheckBox" text="%chart.historychart.separateCharts" />
+								<VBox spacing="5.0">
+									<Label text="%chart.historychart.startPosition">
+										<labelFor>
+											<ChoiceBox fx:id="startChoiceBox" />
+										</labelFor>
+									</Label>
+									<fx:reference source="startChoiceBox" />
+								</VBox>
 							</VBox>
 						</bottom>
 					</BorderPane>
-					<FlowPane fx:id="chartsPane" minWidth="160" minHeight="160" maxWidth="Infinity" maxHeight="Infinity" prefWrapLength="640">
-						<LineChart fx:id="singleChart" styleClass="history-chart">
-							<xAxis>
-								<NumberAxis styleClass="time-axis" autoRanging="false" tickUnit="1.0" upperBound="1.0"/>
-							</xAxis>
-							<yAxis>
-								<NumberAxis/>
-							</yAxis>
-						</LineChart>
-					</FlowPane>
+					<AnchorPane>
+						<FlowPane fx:id="chartsPane" AnchorPane.topAnchor="0.0"
+					AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+					AnchorPane.rightAnchor="0.0">
+							<LineChart fx:id="singleChart" styleClass="history-chart">
+								<xAxis>
+									<NumberAxis styleClass="time-axis" autoRanging="false"
+										tickUnit="1.0" upperBound="1.0" />
+								</xAxis>
+								<yAxis>
+									<NumberAxis />
+								</yAxis>
+							</LineChart>
+						</FlowPane>
+					</AnchorPane>
 				</SplitPane>
 			</AnchorPane>
 		</Scene>
