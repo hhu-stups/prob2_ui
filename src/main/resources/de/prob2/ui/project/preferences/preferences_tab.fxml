@@ -8,7 +8,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
-
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Tooltip?>
 <fx:root type="Tab" text="%project.preferences.tab.title" closable="false"
@@ -16,11 +15,11 @@
 	<VBox stylesheets="@/prob.css" spacing="0">
 		<HBox alignment="CENTER_RIGHT">
 			<AnchorPane styleClass="border" HBox.hgrow="ALWAYS">
-				<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-					AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addPreference">
+				<Button fx:id="addPreferenceButton" prefHeight="26.0"
+						prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
+						AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addPreference">
 					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
-							size="26" />
+						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE" />
 					</graphic>
 				</Button>
 			</AnchorPane>
@@ -38,8 +37,7 @@
 			</AnchorPane>
 		</HBox>
 		<SplitPane fx:id="splitPane">
-			<ListView fx:id="preferencesListView"
-				styleClass="no-border">
+			<ListView fx:id="preferencesListView" styleClass="no-border">
 				<placeholder>
 					<Label text="%project.preferences.tab.noPreferences" />
 				</placeholder>

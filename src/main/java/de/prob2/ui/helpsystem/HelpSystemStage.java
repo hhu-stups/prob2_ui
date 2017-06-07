@@ -16,4 +16,8 @@ public class HelpSystemStage extends Stage {
         this.setScene(new Scene(new HelpSystem(stageManager)));
         stageManager.register(this, this.getClass().getName());
     }
+
+    public void setContent(String pathToHelp) {
+        ((HelpSystem) this.getScene().getRoot()).webEngine.load(pathToHelp);
+    }
 }

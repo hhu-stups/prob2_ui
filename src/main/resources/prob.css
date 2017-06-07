@@ -776,8 +776,8 @@
 	-fx-font-size: 1.5em;
 }
 
-/* Machines Tab */
-#machines-details-name {
+/* Machines Tab, Preferences Tab */
+#details-titel {
 	-fx-font-size: 1.2em; 
 }
 #machines-item-name {

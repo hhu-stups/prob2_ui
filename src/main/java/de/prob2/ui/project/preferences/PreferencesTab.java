@@ -5,9 +5,12 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.helpsystem.HelpSystemStage;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -24,6 +27,8 @@ public class PreferencesTab extends Tab {
 	private ListView<Preference> preferencesListView;
 	@FXML
 	private SplitPane splitPane;
+	@FXML
+	private Button addPreferenceButton;
 
 	private final CurrentProject currentProject;
 	private final Injector injector;
@@ -42,6 +47,9 @@ public class PreferencesTab extends Tab {
 	public void initialize() {
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
 		preferencesListView.setCellFactory(listView -> initListCell());
+		
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) (addPreferenceButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 	}
 
 	@FXML
