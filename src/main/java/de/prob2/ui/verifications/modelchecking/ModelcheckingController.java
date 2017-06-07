@@ -24,7 +24,6 @@ import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
