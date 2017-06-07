@@ -17,14 +17,11 @@
 	<dialogPane>
 		<DialogPane stylesheets="@/prob.css">
 			<content>
-				<AnchorPane minWidth="500">
+				<AnchorPane>
 					<VBox spacing="5" AnchorPane.topAnchor="14"
 						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-10"
 						AnchorPane.rightAnchor="-10">
-						<Label text="%project.machines.dialog.title">
-							<font>
-								<Font size="18" />
-							</font>
+						<Label text="%project.machines.dialog.title" id="title">
 							<VBox.margin>
 								<Insets left="10" right="10" />
 							</VBox.margin>
@@ -35,11 +32,7 @@
 								alignment="center_right">
 								<HBox spacing="20" alignment="center_left">
 									<Label text="%project.machines.dialog.name" />
-									<TextField fx:id="nameField" HBox.hgrow="always">
-										<font>
-											<Font size="12" />
-										</font>
-									</TextField>
+									<TextField fx:id="nameField" HBox.hgrow="always" />
 								</HBox>
 								<Label fx:id="errorExplanationLabel" textFill="#B77300">
 									<VBox.margin>
@@ -48,11 +41,7 @@
 								</Label>
 								<VBox spacing="20" alignment="center_left">
 									<Label text="%project.machines.dialog.description" />
-									<TextArea fx:id="descriptionTextArea" styleClass="text-area-with-border">
-										<font>
-											<Font size="12" />
-										</font>
-									</TextArea>
+									<TextArea fx:id="descriptionTextArea" styleClass="text-area-with-border" />
 									<VBox.margin>
 										<Insets top="20" />
 									</VBox.margin>

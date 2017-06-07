@@ -31,7 +31,7 @@
 				<VBox spacing="5" AnchorPane.topAnchor="6"
 					AnchorPane.bottomAnchor="-4" AnchorPane.leftAnchor="0"
 					AnchorPane.rightAnchor="0">
-					<Label fx:id="descriptionViewTitelLabel" id="details-titel">
+					<Label fx:id="descriptionViewTitelLabel" id="details-title">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>
