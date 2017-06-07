@@ -8,6 +8,7 @@
 <?import javafx.scene.control.Tooltip?>
 
 <?import javafx.scene.layout.HBox?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <fx:root type="ScrollPane" fitToHeight="true" fitToWidth="true"
 		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<VBox>
@@ -31,18 +32,7 @@
 						</Button>
 					</AnchorPane>
 					<AnchorPane>
-						<Button fx:id="help" AnchorPane.rightAnchor="-8.0"
-								prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-								onAction="#openHelp">
-							<graphic>
-								<FontAwesomeIconView fill="#555560"
-													 glyphName="QUESTION_CIRCLE" size="26" />
-							</graphic>
-							<tooltip>
-								<Tooltip
-										text="%menu.help" />
-							</tooltip>
-						</Button>
+						<HelpButton fx:id="helpButton" AnchorPane.rightAnchor="-8"/>
 					</AnchorPane>
 				</HBox>
 				<VBox fx:id="historyBox" style="-fx-border-color: grey;" />

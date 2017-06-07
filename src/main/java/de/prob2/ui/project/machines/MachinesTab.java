@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -64,6 +65,8 @@ public class MachinesTab extends Tab {
 	private Button addMachineButton;
 	@FXML
 	private Button closeDescriptionButton;
+	@FXML
+	private HelpButton helpButton;
 
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
@@ -86,6 +89,7 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	public void initialize() {
+		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/Developer_Manual");
 		noMachinesStack.managedProperty().bind(currentProject.machinesProperty().emptyProperty());
 		noMachinesStack.visibleProperty().bind(currentProject.machinesProperty().emptyProperty());
 
@@ -129,13 +133,6 @@ public class MachinesTab extends Tab {
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addMachineButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 		((FontAwesomeIconView) (closeDescriptionButton.getGraphic())).glyphSizeProperty().bind(fontsize);
-	}
-
-	@FXML
-	public void openHelp() {
-		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
-		helpSystemStage.show();
-		helpSystemStage.toFront();
 	}
 
 	private void showDescription(Machine machine) {

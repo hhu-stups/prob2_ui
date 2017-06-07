@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.statespace.AnimationSelector;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -38,6 +39,9 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	private Button checkSelectedMachineButton;
+
+	@FXML
+	private HelpButton helpButton;
 	
 	@FXML
 	private TableView<LTLPatternItem> tvPattern;
@@ -88,7 +92,8 @@ public class LTLView extends AnchorPane{
 	}
 	
 	@FXML
-	public void initialize() {		
+	public void initialize() {
+		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/The_ProB_Animator_and_Model_Checker");
 		tvFormula.setOnMouseClicked(e-> {
 			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 &&  item != null) {
@@ -194,13 +199,6 @@ public class LTLView extends AnchorPane{
 			
 		});
 		tvFormula.refresh();
-	}
-
-	@FXML
-	public void openHelp() {
-		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
-		helpSystemStage.show();
-		helpSystemStage.toFront();
 	}
 	
 	public void checkFormula(LTLFormulaItem item) {

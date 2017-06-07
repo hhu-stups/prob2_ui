@@ -14,8 +14,9 @@
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.control.Tooltip?>
 
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <fx:root type="ScrollPane" fitToHeight="true" fitToWidth="true"
-	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.65">
+		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.65">
 	<AnchorPane>
 		<Label text="%common.noModelLoaded" AnchorPane.bottomAnchor="0.0"
 			AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"
@@ -45,7 +46,8 @@
 				</HBox>
 			</VBox>
 			<AnchorPane>
-				<ToggleButton AnchorPane.leftAnchor="2.0"
+				<HelpButton fx:id="helpButton" AnchorPane.leftAnchor="2" />
+				<ToggleButton AnchorPane.leftAnchor="20.0"
 					onAction="#handleExtendedStatsToggle" fx:id="extendedStatsToggle"
 					text="%stats.showExtendedStats">
 					<graphic>

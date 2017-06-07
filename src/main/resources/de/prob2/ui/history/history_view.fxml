@@ -9,8 +9,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <fx:root stylesheets="@/prob.css" type="AnchorPane"
-	xmlns:fx="http://javafx.com/fxml/1">
+		 xmlns:fx="http://javafx.com/fxml/1">
 	<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="15.0" spacing="10.0">
 		<AnchorPane>
@@ -46,6 +47,7 @@
 							<Tooltip text="%history.buttons.reverse.tooltip" />
 						</tooltip>
 					</ToggleButton>
+					<HelpButton fx:id="helpButton"/>
 				</HBox>
 			</HBox>
 		</AnchorPane>

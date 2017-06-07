@@ -35,6 +35,7 @@ import de.prob.model.representation.Variable;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -158,6 +159,8 @@ public final class OperationsView extends AnchorPane {
 	private MenuItem tenRandomEvents;
 	@FXML
 	private CustomMenuItem someRandomEvents;
+	@FXML
+	private HelpButton helpButton;
 
 	private AbstractModel currentModel;
 	private List<String> opNames = new ArrayList<>();
@@ -185,6 +188,7 @@ public final class OperationsView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
+		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/The_ProB_Animator_and_Model_Checker");
 		opsListView.setCellFactory(lv -> new OperationsCell());
 
 		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {

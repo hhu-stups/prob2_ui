@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
@@ -29,6 +30,8 @@ public class PreferencesTab extends Tab {
 	private SplitPane splitPane;
 	@FXML
 	private Button addPreferenceButton;
+	@FXML
+	private HelpButton helpButton;
 
 	private final CurrentProject currentProject;
 	private final Injector injector;
@@ -45,18 +48,12 @@ public class PreferencesTab extends Tab {
 
 	@FXML
 	public void initialize() {
+		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/ProBLicence");
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
 		preferencesListView.setCellFactory(listView -> initListCell());
 		
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addPreferenceButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
-	}
-
-	@FXML
-	public void openHelp() {
-		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
-		helpSystemStage.show();
-		helpSystemStage.toFront();
 	}
 
 	private ListCell<Preference> initListCell() {

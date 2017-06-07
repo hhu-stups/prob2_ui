@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -31,6 +32,8 @@ public class ProjectTab extends Tab {
 	TextArea projectDescriptionTextArea;
 	@FXML
 	private Button applyButton;
+	@FXML
+	private HelpButton helpButton;
 
 	private final CurrentProject currentProject;
 	private final Injector injector;
@@ -44,15 +47,9 @@ public class ProjectTab extends Tab {
 
 	@FXML
 	public void initialize() {
+		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/The_ProB_Animator_and_Model_Checker");
 		initName();
 		initDescription();
-	}
-
-	@FXML
-	public void openHelp() {
-		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
-		helpSystemStage.show();
-		helpSystemStage.toFront();
 	}
 
 	private void initName() {

@@ -17,6 +17,7 @@
 
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <fx:root type="Tab" text="%project.machines.tab.title" closable="false"
 		 xmlns:fx="http://javafx.com/fxml/1">
 	<VBox stylesheets="@/prob.css" spacing="0">
@@ -30,15 +31,7 @@
 				</Button>
 			</AnchorPane>
 			<AnchorPane styleClass="border">
-				<Button fx:id="help" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10"
-						contentDisplay="GRAPHIC_ONLY" onAction="#openHelp">
-					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="QUESTION_CIRCLE"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%menu.help" />
-					</tooltip>
-				</Button>
+				<HelpButton fx:id="helpButton" AnchorPane.topAnchor="10"/>
 			</AnchorPane>
 		</HBox>
 		<SplitPane fx:id="splitPane" VBox.vgrow="always">
