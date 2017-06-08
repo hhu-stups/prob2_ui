@@ -4,16 +4,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.text.Font?>
 
-<fx:root type="VBox" xmlns:fx="http://javafx.com/fxml/1">
-	<Label fx:id="nameLabel">
-		<font>
-			<Font name="sans-serif bold" size="14" />
-		</font>
-	</Label>
-	<Label fx:id="locationLabel">
-		<font>
-			<Font name="sans-serif italic" />
-		</font>
-	</Label>
+<fx:root type="VBox" xmlns:fx="http://javafx.com/fxml/1" stylesheets="@/prob.css">
+	<Label fx:id="nameLabel" id="machines-item-name" />
+	<Label fx:id="locationLabel" id="machines-item-location" />
 </fx:root>
 

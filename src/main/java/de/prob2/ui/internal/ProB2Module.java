@@ -12,6 +12,7 @@ import de.codecentric.centerdevice.MenuToolkit;
 
 import de.prob.MainModule;
 import de.prob2.ui.verifications.ltl.LTLFormulaChecker;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.MainController;
 import de.prob2.ui.bmotion.BMotionView;
 import de.prob2.ui.history.HistoryView;
@@ -58,6 +59,7 @@ public class ProB2Module extends AbstractModule {
 		bind(HistoryView.class);
 		bind(MainController.class);
 		bind(LTLFormulaChecker.class);
+		bind(HelpButton.class);
 		bind(MachineTableView.class);
 		bind(LTLView.class);
 		bind(MachinesTab.class);

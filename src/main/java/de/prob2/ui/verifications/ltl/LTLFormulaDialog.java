@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.ltl;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -13,7 +12,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 
-@Singleton
 public class LTLFormulaDialog extends Dialog<LTLFormulaItem> {
 	
 	@FXML

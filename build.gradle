@@ -5,6 +5,7 @@ plugins {
 apply plugin: 'application'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
+apply plugin: 'antlr'
 
 sourceCompatibility="1.8"
 targetCompatibility="1.8"
@@ -49,10 +50,12 @@ tasks.withType(GroovyCompile) {
 }
 
 dependencies {
+	antlr "org.antlr:antlr4:4.5"
 	compile 'com.google.code.gson:gson:2.7'
 	compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
 	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.4'
 	compile 'de.hhu.stups:de.prob2.kernel:3.2.2-SNAPSHOT'
+	compile group: 'de.hhu.stups', name: 'ltl-dsl', version: '0.1.0'
 	compile 'de.jensd:fontawesomefx:8.9'
 	compile 'org.codehaus.groovy:groovy-all:2.4.7'
 	compile 'org.fxmisc.richtext:richtextfx:1.0.0-SNAPSHOT'

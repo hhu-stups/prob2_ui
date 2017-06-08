@@ -28,7 +28,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.StackPane;
 
-public class LTLChecker {
+public class LTLFormulaChecker {
 	
 	public enum Checked {
 		SUCCESS, FAIL;
@@ -58,14 +58,14 @@ public class LTLChecker {
 		}
 	}
 	
-	private static final Logger logger = LoggerFactory.getLogger(LTLChecker.class);
+	private static final Logger logger = LoggerFactory.getLogger(LTLFormulaChecker.class);
 	
 	private final CurrentTrace currentTrace;
 	
 	private final Injector injector;
 	
 	@Inject
-	private LTLChecker(final CurrentTrace currentTrace, final Injector injector) {
+	private LTLFormulaChecker(final CurrentTrace currentTrace, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 	}
@@ -122,7 +122,7 @@ public class LTLChecker {
 		}
 		return Checked.FAIL;
 	}
-	
+		
 	private void showResult(LTLResultItem resultItem, LTLFormulaItem item, @Nullable Trace trace) {
 		if(resultItem == null) {
 			return;

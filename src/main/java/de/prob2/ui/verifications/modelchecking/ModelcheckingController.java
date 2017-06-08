@@ -23,6 +23,7 @@ import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -165,6 +166,8 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private VBox historyBox;
 	@FXML
 	private Button addModelCheckButton;
+	@FXML
+	private HelpButton helpButton;
 
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
@@ -199,6 +202,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@FXML
 	public void initialize() {
+		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/The_ProB_Animator_and_Model_Checker");
 		showStats(new ModelCheckStats(stageManager, this, statsView));
 		historyNodeList = historyBox.getChildren();
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not());

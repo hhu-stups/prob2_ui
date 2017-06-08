@@ -1,8 +1,10 @@
 package de.prob2.ui.project;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.fxml.FXML;
@@ -28,6 +30,8 @@ public class ProjectTab extends Tab {
 	TextArea projectDescriptionTextArea;
 	@FXML
 	private Button applyButton;
+	@FXML
+	private HelpButton helpButton;
 
 	private final CurrentProject currentProject;
 
@@ -39,6 +43,7 @@ public class ProjectTab extends Tab {
 
 	@FXML
 	public void initialize() {
+		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/The_ProB_Animator_and_Model_Checker");
 		initName();
 		initDescription();
 	}

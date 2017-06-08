@@ -12,6 +12,7 @@ import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -57,6 +58,8 @@ public class StatsView extends ScrollPane {
 	private AnchorPane numberOfStatesAnchorPane;
 	@FXML
 	private AnchorPane numberOfTransitionsAnchorPane;
+	@FXML
+	private HelpButton helpButton;
 
 	private final CurrentTrace currentTrace;
 	private final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> computeStats(to);
@@ -71,6 +74,7 @@ public class StatsView extends ScrollPane {
 
 	@FXML
 	public void initialize() {
+		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/The_ProB_Animator_and_Model_Checker");
 		extendedStatsBox.visibleProperty().bind(extendedStatsToggle.selectedProperty());
 		noStatsLabel.visibleProperty().bind(currentTrace.existsProperty().not());
 		statsBox.visibleProperty().bind(noStatsLabel.visibleProperty().not());
@@ -83,6 +87,7 @@ public class StatsView extends ScrollPane {
 
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) extendedStatsToggle.getGraphic()).glyphSizeProperty().bind(fontsize.multiply(1.2));
+		((FontAwesomeIconView) helpButton.getGraphic()).glyphSizeProperty().bind(fontsize.multiply(1.2));
 
 		numberOfStatesAnchorPane.widthProperty().addListener((observable, from, to) -> {
 			stateStats.getColumnConstraints().get(1).setMinWidth(to.doubleValue());

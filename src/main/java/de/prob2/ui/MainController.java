@@ -3,10 +3,15 @@ package de.prob2.ui;
 import java.util.*;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.SplitPane;
@@ -15,9 +20,6 @@ import javafx.scene.layout.BorderPane;
 
 @Singleton
 public class MainController extends BorderPane {
-	
-	private StageManager stageManager;
-	
 	@FXML
 	private Accordion leftAccordion;
 
@@ -86,12 +88,17 @@ public class MainController extends BorderPane {
 	@FXML
 	private SplitPane verticalSP2;
 	
+	private final Injector injector;
+	private final StageManager stageManager;
 	private final UIState uiState;
+	private final ResourceBundle resourceBundle;
 	
 	@Inject
-	public MainController(StageManager stageManager, UIState uiState) {
+	public MainController(Injector injector, StageManager stageManager, UIState uiState, ResourceBundle resourceBundle) {
+		this.injector = injector;
 		this.stageManager = stageManager;
 		this.uiState = uiState;
+		this.resourceBundle = resourceBundle;
 		refresh();
 	}
 			
@@ -103,7 +110,13 @@ public class MainController extends BorderPane {
 		getTitledPanesMap().values().stream().filter(tp -> tp != null && tp.getContent() != null).forEach(tp -> tp.getContent().setVisible(true));
 		stageManager.loadFXML(this, guiState);
 	}
-		
+	
+	@FXML
+	private void initialize() {
+		final ObservableIntegerValue size = this.injector.getInstance(HistoryView.class).getObservableHistorySize();
+		this.historyTP.textProperty().bind(Bindings.format(this.resourceBundle.getString("tptitles.historyWithSize"), size));
+	}
+	
 	@FXML
 	public void operationsTPClicked() {
 		handleTitledPaneClicked(operationsTP);

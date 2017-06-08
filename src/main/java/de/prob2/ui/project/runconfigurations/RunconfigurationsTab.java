@@ -3,7 +3,10 @@ package de.prob2.ui.project.runconfigurations;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.prob2.ui.helpsystem.HelpButton;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -22,6 +25,8 @@ public class RunconfigurationsTab extends Tab {
 	@FXML
 	private Button addRunconfigButton;
 	@FXML
+	private HelpButton helpButton;
+	@FXML
 	private ListView<Runconfiguration> runconfigurationsListView;
 
 	private final CurrentProject currentProject;
@@ -37,6 +42,7 @@ public class RunconfigurationsTab extends Tab {
 
 	@FXML
 	public void initialize() {
+		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/Tutorial");
 		runconfigsPlaceholder.setText("Add machines first");
 		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
 			if (to) {
@@ -79,6 +85,9 @@ public class RunconfigurationsTab extends Tab {
 				}
 			}
 		});
+		
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) (addRunconfigButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 	}
 
 	@FXML

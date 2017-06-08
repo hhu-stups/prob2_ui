@@ -9,72 +9,43 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
-<?import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog?>
+<?import javafx.scene.control.Dialog?>
 <?import javafx.scene.control.TextArea?>
 
-<fx:root type ="LTLPatternDialog" title="%verifications.ltl.dialog.pattern.title" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Dialog" title="%verifications.ltl.dialog.pattern.title"
+	xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
-		<DialogPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" stylesheets="@/prob.css" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
-		    <header>
-		      <AnchorPane styleClass="border" minHeight="0.0" minWidth="0.0" prefHeight="77.0" prefWidth="480.0">
-		         <children>
-		         	<VBox spacing="5" AnchorPane.topAnchor="20"
-						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
-						AnchorPane.rightAnchor="0">
-		            	<Label layoutX="7.0" layoutY="20.0" prefHeight="31.0" prefWidth="188.0" text="%verifications.ltl.dialog.pattern.title">
-		               		<font>
-		                  		<Font size="18.0" />
-		               		</font>          	
-							<VBox.margin>
-								<Insets left="10" right="10" />
-							</VBox.margin>
-		                </Label>
-		            </VBox>
-		         </children>
-		      </AnchorPane>
-		    </header>
-		    <content>
-		      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="400.0" prefWidth="720.0">
-         		<children>
-         			<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
-						AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
-						alignment="center_right">
-			            <HBox spacing="20" alignment="center_left">
+		<DialogPane stylesheets="@/prob.css">
+			<header>
+				<AnchorPane>
+					<Label text="%verifications.ltl.dialog.pattern.title" id="title"
+						AnchorPane.topAnchor="14" AnchorPane.bottomAnchor="5"
+						AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" />
+				</AnchorPane>
+			</header>
+			<content>
+				<AnchorPane styleClass="border">
+					<VBox spacing="20" AnchorPane.leftAnchor="15"
+						AnchorPane.rightAnchor="15" AnchorPane.topAnchor="20"
+						AnchorPane.bottomAnchor="20" alignment="center_right">
+						<HBox spacing="20" alignment="center_left">
 							<Label text="%verifications.ltl.dialog.enterPattern" />
-							<TextField fx:id="tfName" HBox.hgrow="always">
-								<font>
-									<Font size="12" />
-								</font>
-							</TextField>
+							<TextField fx:id="tfName" HBox.hgrow="always"/>
 						</HBox>
 						<VBox spacing="10" alignment="center_left">
 							<Label text="%verifications.ltl.dialog.description" />
-							<TextArea fx:id="taDescription" styleClass="text-area-with-border">
-								<font>
-									<Font size="12" />
-								</font>
-							</TextArea>
-							<VBox.margin>
-								<Insets top="40" />
-							</VBox.margin>
+							<TextArea fx:id="taDescription" styleClass="text-area-with-border" />
 						</VBox>
 						<VBox spacing="10" alignment="center_left">
 							<Label text="%verifications.ltl.dialog.pattern" />
-							<TextArea fx:id="taPattern" styleClass="text-area-with-border">
-								<font>
-									<Font size="12" />
-								</font>
-							</TextArea>
-							<VBox.margin>
-								<Insets top="50" />
-							</VBox.margin>
+							<TextArea fx:id="taPattern" styleClass="text-area-with-border" />
 						</VBox>
 					</VBox>
-        		 </children>
-        	  </AnchorPane>
-		    </content>
-		    <ButtonType buttonData="CANCEL_CLOSE" text="%common.cancel" />
-			<ButtonType fx:id="okButtonType" buttonData="OK_DONE" text="%common.ok" />
+				</AnchorPane>
+			</content>
+			<ButtonType buttonData="CANCEL_CLOSE" text="%common.cancel" />
+			<ButtonType fx:id="okButtonType" buttonData="OK_DONE"
+				text="%common.ok" />
 		</DialogPane>
 	</dialogPane>
 </fx:root>

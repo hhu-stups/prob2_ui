@@ -34,7 +34,7 @@
 							</HBox>
 							<HBox spacing="10.0" alignment="CENTER_LEFT">
 								<Label text="%preferences.stage.tabs.general.defaultLocationForProjectsLabel"/>
-								<TextField fx:id="defaultLocationField" HBox.hgrow="always"/>
+								<TextField fx:id="defaultLocationField" HBox.hgrow="ALWAYS"/>
 								<Button styleClass="button-dark2" text="%preferences.stage.tabs.general.selectLocation"
 									onAction="#selectDefaultLocation" />
 							</HBox>

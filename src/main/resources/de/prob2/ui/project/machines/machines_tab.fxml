@@ -15,27 +15,31 @@
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.control.SplitPane?>
 
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <fx:root type="Tab" text="%project.machines.tab.title" closable="false"
-	xmlns:fx="http://javafx.com/fxml/1">
+		 xmlns:fx="http://javafx.com/fxml/1">
 	<VBox stylesheets="@/prob.css" spacing="0">
-		<AnchorPane styleClass="border">
-			<Button prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
-				AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" onAction="#addMachine">
-				<graphic>
-					<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"
-						size="26" />
-				</graphic>
-			</Button>
-		</AnchorPane>
+		<HBox alignment="CENTER_RIGHT">
+			<AnchorPane styleClass="border" HBox.hgrow="ALWAYS">
+				<Button fx:id="addMachineButton" contentDisplay="GRAPHIC_ONLY"
+					AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addMachine">
+					<graphic>
+						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE"/>
+					</graphic>
+				</Button>
+			</AnchorPane>
+			<AnchorPane styleClass="border">
+				<HelpButton fx:id="helpButton" AnchorPane.topAnchor="10"/>
+			</AnchorPane>
+		</HBox>
 		<SplitPane fx:id="splitPane" VBox.vgrow="always">
 			<AnchorPane fx:id="descriptionView">
 				<VBox spacing="5" AnchorPane.topAnchor="6"
 					AnchorPane.bottomAnchor="-4" AnchorPane.leftAnchor="0"
 					AnchorPane.rightAnchor="0">
-					<Label fx:id="descriptionViewTitelLabel">
-						<font>
-							<Font size="14" />
-						</font>
+					<Label fx:id="descriptionViewTitelLabel" id="details-title">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>
@@ -52,10 +56,10 @@
 						</ScrollPane>
 					</AnchorPane>
 				</VBox>
-				<Button AnchorPane.rightAnchor="2.0" onAction="#closeDescriptionView">
+				<Button fx:id="closeDescriptionButton" AnchorPane.topAnchor="2.0"
+					AnchorPane.rightAnchor="2.0" onAction="#closeDescriptionView">
 					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="CLOSE"
-							size="16" />
+						<FontAwesomeIconView fill="#555560" glyphName="CLOSE" />
 					</graphic>
 				</Button>
 			</AnchorPane>

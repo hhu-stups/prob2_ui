@@ -68,8 +68,8 @@
 	</Menu>
 	<Menu fx:id="windowMenu" text="%menu.window" />
 	<Menu text="%menu.help">
-		<MenuItem fx:id="aboutItem" onAction="#handleAboutDialog"
-			text="%menu.help.items.about" />
+		<MenuItem text="%menu.help.openHelp" onAction="#handleOpenHelp" />
+		<MenuItem fx:id="aboutItem" onAction="#handleAboutDialog" text="%menu.help.items.about" />
 		<MenuItem text="%menu.help.items.reportBug" onAction="#handleReportBug" />
 	</Menu>
 </fx:root>

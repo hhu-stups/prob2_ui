@@ -21,6 +21,7 @@ import de.prob2.ui.MainController;
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
+import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.formula.FormulaInputDialog;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
@@ -354,6 +355,13 @@ public final class MenuController extends MenuBar {
 		final Stage bConsoleStage = injector.getInstance(BConsoleStage.class);
 		bConsoleStage.show();
 		bConsoleStage.toFront();
+	}
+
+	@FXML
+	private void handleOpenHelp() {
+		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
+		helpSystemStage.show();
+		helpSystemStage.toFront();
 	}
 
 	@FXML

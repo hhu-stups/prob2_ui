@@ -8,12 +8,18 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
@@ -56,6 +62,7 @@ public final class HistoryView extends AnchorPane {
 	@FXML private ToggleButton tbReverse;
 	@FXML private Button btBack;
 	@FXML private Button btForward;
+	@FXML private HelpButton helpButton;
 
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
@@ -69,6 +76,7 @@ public final class HistoryView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
+		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/The_ProB_Animator_and_Model_Checker");
 		this.setMinWidth(100);
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			lvHistory.getItems().clear();
@@ -135,6 +143,10 @@ public final class HistoryView extends AnchorPane {
 			transition.evaluate();
 			return transition.getPrettyRep().replace("<--", "←");
 		}
+	}
+
+	public ObservableIntegerValue getObservableHistorySize() {
+		return Bindings.size(this.lvHistory.itemsProperty().get());
 	}
 
 	private int getCurrentIndex() {

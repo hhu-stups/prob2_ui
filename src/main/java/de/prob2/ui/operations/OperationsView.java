@@ -18,7 +18,9 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.classicalb.Operation;
 import de.prob.model.eventb.Event;
@@ -32,9 +34,12 @@ import de.prob.model.representation.Machine;
 import de.prob.model.representation.Variable;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
@@ -49,6 +54,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
+
 import se.sawano.java.text.AlphanumericComparator;
 
 @Singleton
@@ -153,6 +159,8 @@ public final class OperationsView extends AnchorPane {
 	private MenuItem tenRandomEvents;
 	@FXML
 	private CustomMenuItem someRandomEvents;
+	@FXML
+	private HelpButton helpButton;
 
 	private AbstractModel currentModel;
 	private List<String> opNames = new ArrayList<>();
@@ -180,6 +188,7 @@ public final class OperationsView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
+		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/The_ProB_Animator_and_Model_Checker");
 		opsListView.setCellFactory(lv -> new OperationsCell());
 
 		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -237,21 +246,17 @@ public final class OperationsView extends AnchorPane {
 			formulas.add(c.getFormula());
 		}
 
-		for (final IEvalElement ee : formulas) {
-			trace.getStateSpace().subscribe(this, ee);
-		}
-
 		final List<String> params = new ArrayList<>();
-		final Map<IEvalElement, AbstractEvalResult> values = transition.getDestination().getValues();
-		for (final Map.Entry<IEvalElement, AbstractEvalResult> entry : values.entrySet()) {
-			if (formulas.contains(entry.getKey())) {
-				// noinspection ObjectToString
-				params.add(entry.getKey() + "=" + entry.getValue());
-			}
-		}
-
 		for (final IEvalElement ee : formulas) {
-			trace.getStateSpace().unsubscribe(this, ee);
+			final AbstractEvalResult value = transition.getDestination().eval(ee);
+			final String valueString;
+			if (value instanceof EvalResult) {
+				valueString = ((EvalResult)value).getValue();
+			} else {
+				// noinspection ObjectToString
+				valueString = value.toString();
+			}
+			params.add(ee.getCode() + '=' + valueString);
 		}
 
 		return params;

@@ -200,7 +200,7 @@ public class FullValueStage extends Stage {
 	@FXML
 	private void updateTabs() {
 		final String cv = this.getCurrentValue() == null ? null : prettifyIfEnabled(this.getCurrentValue());
-		final String pv = this.getPreviousValue() == null ? null : prettifyIfEnabled(this.getCurrentValue());
+		final String pv = this.getPreviousValue() == null ? null : prettifyIfEnabled(this.getPreviousValue());
 		if (cv != null) {
 			this.currentValueTextarea.setText(cv);
 		}
