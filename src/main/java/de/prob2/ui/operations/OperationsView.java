@@ -21,7 +21,6 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.classicalb.Operation;
 import de.prob.model.eventb.Event;

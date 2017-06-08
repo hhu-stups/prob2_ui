@@ -11,10 +11,10 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
 @Singleton
-public class HelpSystem extends SplitPane{
-    @FXML private TreeView treeView;
+public class HelpSystem extends SplitPane {
+    @FXML private TreeView<String> treeView;
     @FXML private WebView webView;
-    public WebEngine webEngine;
+    WebEngine webEngine;
 
     @Inject
     public HelpSystem(final StageManager stageManager) {
