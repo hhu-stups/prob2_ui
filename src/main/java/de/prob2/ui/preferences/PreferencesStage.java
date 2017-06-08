@@ -99,7 +99,6 @@ public final class PreferencesStage extends Stage {
 		this.recentProjectsCountSpinner.setValueFactory(valueFactory);
 		
 		defaultLocationField.setText(this.currentProject.getDefaultLocation().toString());
-		this.currentProject.defaultLocationProperty().addListener((observable, from, to) -> defaultLocationField.textProperty());
 		defaultLocationField.textProperty().addListener((observable, from, to) -> this.currentProject.setDefaultLocation(Paths.get(to)));
 
 		// Global Preferences
