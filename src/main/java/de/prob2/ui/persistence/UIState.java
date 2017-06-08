@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 
 @Singleton
 public class UIState {
-	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList(new String[] {"History", "Operations", "Model Check", "Statistics", "Animations"}));
+	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList("History", "Operations", "Model Check", "Statistics", "Animations"));
 	
 	private String guiState;
 	private final Set<String> savedVisibleStages;
