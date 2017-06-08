@@ -13,6 +13,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.project.Project;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -72,16 +73,20 @@ public class LTLView extends AnchorPane{
 	
 	private final AnimationSelector animations;
 	
-	private final LTLChecker checker;
+	private final LTLFormulaChecker checker;
+	
+	private final LTLPatternParser patternParser;
 		
 	@Inject
 	private LTLView(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
-					final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLChecker checker) {
+					final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLFormulaChecker checker,
+					final LTLPatternParser patternParser) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.animations = animations;
 		this.checker = checker;
+		this.patternParser = patternParser;
 		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
@@ -129,7 +134,6 @@ public class LTLView extends AnchorPane{
 					}
 				}
 			});
-			
 			row.setContextMenu(new ContextMenu(removeItem, showCounterExampleItem));
 			return row;
 		});
@@ -236,6 +240,7 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void checkSelectedMachine() {
 		checker.checkMachine(tvMachines.getFocusModel().getFocusedItem());
+		patternParser.parseMachine(tvMachines.getFocusModel().getFocusedItem());
 		tvMachines.refresh();
 	}
 	
