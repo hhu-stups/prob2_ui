@@ -2,16 +2,18 @@ package de.prob2.ui.helpsystem;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.internal.StageManager;
+
 import javafx.fxml.FXML;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
 @Singleton
-public class HelpSystem extends SplitPane {
+public class HelpSystem extends StackPane {
     @FXML private TreeView<String> treeView;
     @FXML private WebView webView;
     WebEngine webEngine;
