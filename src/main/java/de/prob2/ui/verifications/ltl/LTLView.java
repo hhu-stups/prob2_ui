@@ -86,8 +86,8 @@ public class LTLView extends AnchorPane{
 	
 	private final LTLPatternParser patternParser;
 	
-	private final PatternManager patternManager;
-		
+	private final PatternManager patternManager;	
+			
 	@Inject
 	private LTLView(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
 					final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLFormulaChecker checker,
@@ -221,11 +221,20 @@ public class LTLView extends AnchorPane{
 			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
 					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 					currentProject.getLocation()));
-			patternManager.getPatterns().clear();
-			patternManager.getPatterns().addAll(itemsToPatterns(machine.getPatterns()));
+			addPattern(item);
 			patternParser.parsePattern(item, patternManager);
 		});
 		tvFormula.refresh();
+	}
+	
+	private void addPattern(LTLPatternItem item) {
+		//TODO: Test if Pattern Manager already contains pattern
+		Pattern pattern = new Pattern();
+		pattern.setBuiltin(false);
+		pattern.setName(item.getName());
+		pattern.setDescription(item.getDescription());
+		pattern.setCode(item.getCode());
+		patternManager.getPatterns().add(pattern);
 	}
 	
 	public void checkFormula(LTLFormulaItem item) {
@@ -253,8 +262,8 @@ public class LTLView extends AnchorPane{
 			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) || 
 					!item.getCode().equals(result.getCode())) {
 				item.setData(result.getName(), result.getDescription(), result.getCode());
-				patternManager.getPatterns().clear();
-				patternManager.getPatterns().addAll(itemsToPatterns(tvMachines.getItems().get(tvMachines.getFocusModel().getFocusedIndex()).getPatterns()));
+				patternManager.removePattern(patternManager.getUserPattern(item.getName()));
+				addPattern(item);
 				patternParser.parsePattern(item, patternManager);
 				tvPattern.refresh();
 				currentProject.setSaved(false);
