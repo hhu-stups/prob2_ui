@@ -8,12 +8,13 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Injector;
+
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.ltl.parser.semantic.PatternDefinition;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
-import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
-import javafx.scene.control.Alert.AlertType;
+import de.prob2.ui.verifications.ltl.LTLView;
 
 public class LTLPatternParser {
 	
@@ -21,9 +22,12 @@ public class LTLPatternParser {
 	
 	private final LTLResultHandler resultHandler;
 	
+	private final Injector injector;
+	
 	@Inject
-	private LTLPatternParser(final LTLResultHandler resultHandler) {
+	private LTLPatternParser(final LTLResultHandler resultHandler, final Injector injector) {
 		this.resultHandler = resultHandler;
+		this.injector = injector;
 	}
 		
 	public void parsePattern(LTLPatternItem item, PatternManager patternManager) {
@@ -39,7 +43,6 @@ public class LTLPatternParser {
 		patternManager.addUpdateListener(parseListener);
 		parser.parse();
 		System.out.println(patternManager.getPatterns().size());*/
-		LTLResultHandler.LTLResultItem resultItem = null;
 		if(!patternManager.patternExists(item.getName())) {
 			Pattern pattern = new Pattern();
 			pattern.setBuiltin(false);
@@ -55,9 +58,8 @@ public class LTLPatternParser {
 			pattern.addWarningListener(parseListener);
 			pattern.addUpdateListener(parseListener);
 			pattern.updateDefinitions(patternManager);
-			for (LTLPatternMarker marker: parseListener.getErrorMarkers()) {
-				resultItem = new LTLResultHandler.LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "LTL Check succeeded", "Success");
-			}
+			resultHandler.handlePatternResult(parseListener, item);
+			injector.getInstance(LTLView.class).refreshPattern();
 		}
 	}
 	

@@ -16,6 +16,8 @@ import de.prob.check.LTLError;
 import de.prob.check.LTLOk;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.verifications.ltl.patterns.LTLParseListener;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternMarker;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Alert.AlertType;
@@ -27,7 +29,7 @@ public class LTLResultHandler {
 	private static final Logger logger = LoggerFactory.getLogger(LTLResultHandler.class);
 	
 	public enum Checked {
-		SUCCESS, FAIL;
+		SUCCESS, FAIL, EXCEPTION;
 	}
 	
 	public static class LTLResultItem {
@@ -37,7 +39,6 @@ public class LTLResultHandler {
 		private String message;
 		private String header;
 		private String exceptionText;
-		private boolean isParseError;
 		
 		public LTLResultItem(AlertType type, Checked checked, String message, String header) {
 			this.type = type;
@@ -50,7 +51,6 @@ public class LTLResultHandler {
 								String exceptionText) {
 			this(type, checked, message, header);
 			this.exceptionText = exceptionText;
-			this.isParseError = true;
 		}
 		
 		public Checked getChecked() {
@@ -66,7 +66,7 @@ public class LTLResultHandler {
 		Alert alert = new Alert(resultItem.type, resultItem.message);
 		alert.setTitle(item.getName());
 		alert.setHeaderText(resultItem.header);
-		if(resultItem.isParseError) {
+		if(resultItem.checked == Checked.EXCEPTION) {
 			alert.getDialogPane().getStylesheets().add(getClass().getResource("/prob.css").toExternalForm());
 			TextArea exceptionText = new TextArea(resultItem.exceptionText);
 			exceptionText.setEditable(false);
@@ -91,20 +91,20 @@ public class LTLResultHandler {
 		LTLResultItem resultItem = null;
 		Trace trace = null;
 		if(result instanceof LTLOk) {
-			resultItem = new LTLResultHandler.LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "LTL Check succeeded", "Success");
+			resultItem = new LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "LTL Formula Check succeeded", "Success");
 		} else if(result instanceof LTLCounterExample) {
 			trace = ((LTLCounterExample) result).getTrace(stateid.getStateSpace());
-			resultItem = new LTLResultHandler.LTLResultItem(AlertType.ERROR, Checked.FAIL, "LTL Counter Example has been found", 
+			resultItem = new LTLResultItem(AlertType.ERROR, Checked.FAIL, "LTL Counter Example has been found", 
 											"Counter Example Found");
 		} else if(result instanceof LTLError) {
-			resultItem = new LTLResultHandler.LTLResultItem(AlertType.ERROR, Checked.FAIL, ((LTLError) result).getMessage(), 
+			resultItem = new LTLResultItem(AlertType.ERROR, Checked.FAIL, ((LTLError) result).getMessage(), 
 											"Error while executing formula");
 		} else if(result instanceof LtlParseException) {
 			StringWriter sw = new StringWriter();
 			try (PrintWriter pw = new PrintWriter(sw)) {
 				((Throwable) result).printStackTrace(pw);
 			}
-			resultItem = new LTLResultHandler.LTLResultItem(AlertType.ERROR, Checked.FAIL, "Message: ", "Could not parse formula", 
+			resultItem = new LTLResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse formula", 
 											sw.toString());
 			logger.error("Could not parse LTL formula", result);
 		}
@@ -114,5 +114,19 @@ public class LTLResultHandler {
 			return resultItem.getChecked();
 		}
 		return Checked.FAIL;
+	}
+	
+	public void handlePatternResult(LTLParseListener parseListener, LTLCheckableItem item) {
+		LTLResultItem resultItem = null;
+		if(parseListener.getErrorMarkers().size() == 0) {
+			resultItem = new LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "Parsing LTL Pattern succeeded", "Success");
+		} else {
+			String msg = "";
+			for (LTLPatternMarker marker: parseListener.getErrorMarkers()) {
+				msg += marker.getMsg();
+			}
+			resultItem = new LTLResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse pattern", msg);
+		}
+		this.showResult(resultItem, item, null);
 	}
 }

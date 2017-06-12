@@ -276,5 +276,9 @@ public class LTLView extends AnchorPane{
 	public void refreshFormula() {
 		tvFormula.refresh();
 	}
+	
+	public void refreshPattern() {
+		tvPattern.refresh();
+	}
 
 }
