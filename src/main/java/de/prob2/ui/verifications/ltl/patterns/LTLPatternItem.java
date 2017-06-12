@@ -1,12 +1,9 @@
 package de.prob2.ui.verifications.ltl.patterns;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.verifications.ltl.LTLCheckableItem;
 
 public class LTLPatternItem extends LTLCheckableItem {
-	
-	protected transient FontAwesomeIconView status;
-	
+		
 	private String code;
 	
 	public LTLPatternItem(String name, String description, String code) {
@@ -21,6 +18,7 @@ public class LTLPatternItem extends LTLCheckableItem {
 		setDescription(description);
 		setCode(code);
 	}
+	
 	
 	public void setCode(String code) {
 		this.code = code;

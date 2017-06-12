@@ -4,15 +4,11 @@ package de.prob2.ui.verifications.ltl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.Token;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob.ltl.parser.WarningListener;
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.statespace.AnimationSelector;
@@ -21,7 +17,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.ltl.patterns.LTLParseListener;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
@@ -226,34 +221,11 @@ public class LTLView extends AnchorPane{
 			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
 					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 					currentProject.getLocation()));
-			addPattern(item);
+			patternParser.parsePattern(item, patternManager);
 		});
-		tvFormula.refresh();
+		tvPattern.refresh();
 	}
-	
-	private void addPattern(LTLPatternItem item) {
-		if(!patternManager.patternExists(item.getName())) {
-			Pattern pattern = new Pattern();
-			pattern.setBuiltin(false);
-			pattern.setName(item.getName());
-			pattern.setDescription(item.getDescription());
-			pattern.setCode(item.getCode());
-			patternManager.getPatterns().add(pattern);
-			parsePattern(pattern);
-		}
-	}
-	
-	private void parsePattern(Pattern pattern) {
-		LTLParseListener parseListener = new LTLParseListener();
-		pattern.removeErrorListeners();
-		pattern.removeWarningListeners();
-		pattern.removeUpdateListeners();
-		pattern.addErrorListener(parseListener);
-		pattern.addWarningListener(parseListener);
-		pattern.addUpdateListener(parseListener);
-		pattern.updateDefinitions(patternManager);
-	}
-	
+			
 	public void checkFormula(LTLFormulaItem item) {
 		checker.checkFormula(item);
 	}
@@ -283,7 +255,7 @@ public class LTLView extends AnchorPane{
 				currentProject.setSaved(false);
 			}
 			patternManager.removePattern(patternManager.getUserPattern(item.getName()));
-			addPattern(item);
+			patternParser.parsePattern(item, patternManager);
 		});
 		patternDialog.clear();
 	}

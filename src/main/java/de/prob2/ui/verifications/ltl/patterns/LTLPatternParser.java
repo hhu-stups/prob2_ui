@@ -6,17 +6,17 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.prob.ltl.parser.LtlParser;
+import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.ltl.parser.semantic.PatternDefinition;
 
 public class LTLPatternParser {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LTLPatternParser.class);
-						
+		
 	public void parsePattern(LTLPatternItem item, PatternManager patternManager) {
 		logger.trace("Parse ltl pattern");
-		LtlParser parser = new LtlParser(item.getCode());
+		/*LtlParser parser = new LtlParser(item.getCode());
 		LTLParseListener parseListener = new LTLParseListener();
 		parser.setPatternManager(patternManager);		
 		parser.removeErrorListeners();
@@ -26,7 +26,23 @@ public class LTLPatternParser {
 		patternManager.removeUpdateListeners();
 		patternManager.addUpdateListener(parseListener);
 		parser.parse();
-		System.out.println(patternManager.getPatterns().size());
+		System.out.println(patternManager.getPatterns().size());*/
+		if(!patternManager.patternExists(item.getName())) {
+			Pattern pattern = new Pattern();
+			pattern.setBuiltin(false);
+			pattern.setName(item.getName());
+			pattern.setDescription(item.getDescription());
+			pattern.setCode(item.getCode());
+			patternManager.getPatterns().add(pattern);
+			LTLParseListener parseListener = new LTLParseListener();
+			pattern.removeErrorListeners();
+			pattern.removeWarningListeners();
+			pattern.removeUpdateListeners();
+			pattern.addErrorListener(parseListener);
+			pattern.addWarningListener(parseListener);
+			pattern.addUpdateListener(parseListener);
+			pattern.updateDefinitions(patternManager);
+		}
 	}
 		
 

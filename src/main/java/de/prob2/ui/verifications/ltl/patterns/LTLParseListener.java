@@ -52,7 +52,6 @@ public class LTLParseListener extends BaseErrorListener implements WarningListen
 
 	@Override
 	public void patternUpdated(Pattern pattern, PatternManager patternManager) {
-		// TODO Auto-generated method stub
 		logger.trace("Pattern updated {}", pattern.getName());
 	}
 	
