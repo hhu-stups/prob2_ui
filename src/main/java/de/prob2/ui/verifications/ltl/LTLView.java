@@ -1,11 +1,16 @@
 package de.prob2.ui.verifications.ltl;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob.ltl.parser.pattern.Pattern;
+import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.statespace.AnimationSelector;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
@@ -14,6 +19,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.project.Project;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -76,16 +82,23 @@ public class LTLView extends AnchorPane{
 	
 	private final AnimationSelector animations;
 	
-	private final LTLChecker checker;
-		
+	private final LTLFormulaChecker checker;
+	
+	private final LTLPatternParser patternParser;
+	
+	private final PatternManager patternManager;	
+			
 	@Inject
 	private LTLView(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
-					final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLChecker checker) {
+					final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLFormulaChecker checker,
+					final LTLPatternParser patternParser, final PatternManager patternManager) {
+		this.patternManager = patternManager;
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.animations = animations;
 		this.checker = checker;
+		this.patternParser = patternParser;
 		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
@@ -134,7 +147,6 @@ public class LTLView extends AnchorPane{
 					}
 				}
 			});
-			
 			row.setContextMenu(new ContextMenu(removeItem, showCounterExampleItem));
 			return row;
 		});
@@ -170,8 +182,23 @@ public class LTLView extends AnchorPane{
 			if(to.intValue() >= 0) {
 				tvFormula.itemsProperty().bind(tvMachines.getItems().get(to.intValue()).ltlFormulasProperty());
 				tvPattern.itemsProperty().bind(tvMachines.getItems().get(to.intValue()).ltlPatternsProperty());
+				patternManager.getPatterns().clear();
+				patternManager.getPatterns().addAll(itemsToPatterns(tvMachines.getItems().get(to.intValue()).getPatterns()));
 			}
 		});
+	}
+	
+	private ArrayList<Pattern> itemsToPatterns(List<LTLPatternItem> patterns) {
+		ArrayList<Pattern> result = new ArrayList<>();
+		for(LTLPatternItem item : patterns) {
+			Pattern pattern = new Pattern();
+			pattern.setBuiltin(false);
+			pattern.setName(item.getName());
+			pattern.setDescription(item.getDescription());
+			pattern.setCode(item.getCode());
+			result.add(pattern);
+		}
+		return result;
 	}
 		
 	@FXML
@@ -194,11 +221,11 @@ public class LTLView extends AnchorPane{
 			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
 					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 					currentProject.getLocation()));
-			
+			patternParser.parsePattern(item, patternManager);
 		});
-		tvFormula.refresh();
+		tvPattern.refresh();
 	}
-	
+			
 	public void checkFormula(LTLFormulaItem item) {
 		checker.checkFormula(item);
 	}
@@ -219,14 +246,16 @@ public class LTLView extends AnchorPane{
 	
 	private void showCurrentItemDialog(LTLPatternItem item) {
 		LTLPatternDialog patternDialog = injector.getInstance(LTLPatternDialog.class);
-		patternDialog.setData(item.getName(), item.getDescription(), item.getPattern());
+		patternDialog.setData(item.getName(), item.getDescription(), item.getCode());
 		patternDialog.showAndWait().ifPresent(result-> {
 			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) || 
-					!item.getPattern().equals(result.getPattern())) {
-				item.setData(result.getName(), result.getDescription(), result.getPattern());
-				tvFormula.refresh();
+					!item.getCode().equals(result.getCode())) {
+				item.setData(result.getName(), result.getDescription(), result.getCode());
+				tvPattern.refresh();
 				currentProject.setSaved(false);
 			}
+			patternManager.removePattern(patternManager.getUserPattern(item.getName()));
+			patternParser.parsePattern(item, patternManager);
 		});
 		patternDialog.clear();
 	}
@@ -246,6 +275,10 @@ public class LTLView extends AnchorPane{
 	
 	public void refreshFormula() {
 		tvFormula.refresh();
+	}
+	
+	public void refreshPattern() {
+		tvPattern.refresh();
 	}
 
 }

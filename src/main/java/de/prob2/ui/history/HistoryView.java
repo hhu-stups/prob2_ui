@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
@@ -28,6 +29,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 
+@Singleton
 public final class HistoryView extends AnchorPane {
 	private static class TransitionCell extends ListCell<HistoryItem> {
 		@Override
@@ -170,4 +172,5 @@ public final class HistoryView extends AnchorPane {
 	private void addItems(ListView<HistoryItem> lvHistory, int currentPos) {
 		lvHistory.getItems().add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST));
 	}
+	
 }

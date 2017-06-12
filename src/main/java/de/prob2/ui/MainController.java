@@ -101,7 +101,7 @@ public class MainController extends BorderPane {
 		this.resourceBundle = resourceBundle;
 		refresh();
 	}
-		
+			
 	public void refresh() {
 		String guiState = "main.fxml";
 		if (!uiState.getGuiState().contains("detached")) {

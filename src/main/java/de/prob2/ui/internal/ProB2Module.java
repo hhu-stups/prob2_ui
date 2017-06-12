@@ -11,8 +11,8 @@ import com.google.inject.util.Providers;
 import de.codecentric.centerdevice.MenuToolkit;
 
 import de.prob.MainModule;
+import de.prob2.ui.verifications.ltl.LTLFormulaChecker;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.verifications.ltl.LTLChecker;
 import de.prob2.ui.MainController;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MainView;
@@ -56,13 +56,13 @@ public class ProB2Module extends AbstractModule {
 		// Controllers
 		bind(VisualisationView.class);
 		bind(HistoryView.class);
+		bind(MainController.class);
+		bind(LTLFormulaChecker.class);
 		bind(HelpButton.class);
-		bind(LTLChecker.class);
 		bind(MachineTableView.class);
 		bind(LTLView.class);
 		bind(MachinesTab.class);
 		bind(MainView.class);
-		bind(MainController.class);
 		bind(MenuController.class);
 		bind(ModelcheckingController.class);
 		bind(OperationsView.class);
