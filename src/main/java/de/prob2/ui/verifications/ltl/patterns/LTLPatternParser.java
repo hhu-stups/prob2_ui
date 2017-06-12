@@ -3,16 +3,28 @@ package de.prob2.ui.verifications.ltl.patterns;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.ltl.parser.semantic.PatternDefinition;
+import de.prob2.ui.verifications.ltl.LTLResultHandler;
+import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
+import javafx.scene.control.Alert.AlertType;
 
 public class LTLPatternParser {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LTLPatternParser.class);
+	
+	private final LTLResultHandler resultHandler;
+	
+	@Inject
+	private LTLPatternParser(final LTLResultHandler resultHandler) {
+		this.resultHandler = resultHandler;
+	}
 		
 	public void parsePattern(LTLPatternItem item, PatternManager patternManager) {
 		logger.trace("Parse ltl pattern");
@@ -27,6 +39,7 @@ public class LTLPatternParser {
 		patternManager.addUpdateListener(parseListener);
 		parser.parse();
 		System.out.println(patternManager.getPatterns().size());*/
+		LTLResultHandler.LTLResultItem resultItem = null;
 		if(!patternManager.patternExists(item.getName())) {
 			Pattern pattern = new Pattern();
 			pattern.setBuiltin(false);
@@ -42,8 +55,13 @@ public class LTLPatternParser {
 			pattern.addWarningListener(parseListener);
 			pattern.addUpdateListener(parseListener);
 			pattern.updateDefinitions(patternManager);
+			for (LTLPatternMarker marker: parseListener.getErrorMarkers()) {
+				resultItem = new LTLResultHandler.LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "LTL Check succeeded", "Success");
+			}
 		}
 	}
+	
+	
 		
 
 	private ArrayList<LTLPatternMarker> getPatternMarkers(List<PatternDefinition> patterns) {

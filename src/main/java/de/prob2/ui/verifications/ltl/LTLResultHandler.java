@@ -1,14 +1,30 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.inject.Singleton;
+
+import de.be4.ltl.core.parser.LtlParseException;
+import de.prob.check.LTLCounterExample;
+import de.prob.check.LTLError;
+import de.prob.check.LTLOk;
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.StackPane;
 
+@Singleton
 public class LTLResultHandler {
+	
+	private static final Logger logger = LoggerFactory.getLogger(LTLResultHandler.class);
 	
 	public enum Checked {
 		SUCCESS, FAIL;
@@ -69,5 +85,34 @@ public class LTLResultHandler {
 		if(item instanceof LTLFormulaItem) {
 			((LTLFormulaItem) item).setCounterExample(trace);
 		}
+	}
+	
+	public Checked handleFormulaResult(LTLFormulaItem item, Object result, State stateid) {
+		LTLResultItem resultItem = null;
+		Trace trace = null;
+		if(result instanceof LTLOk) {
+			resultItem = new LTLResultHandler.LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "LTL Check succeeded", "Success");
+		} else if(result instanceof LTLCounterExample) {
+			trace = ((LTLCounterExample) result).getTrace(stateid.getStateSpace());
+			resultItem = new LTLResultHandler.LTLResultItem(AlertType.ERROR, Checked.FAIL, "LTL Counter Example has been found", 
+											"Counter Example Found");
+		} else if(result instanceof LTLError) {
+			resultItem = new LTLResultHandler.LTLResultItem(AlertType.ERROR, Checked.FAIL, ((LTLError) result).getMessage(), 
+											"Error while executing formula");
+		} else if(result instanceof LtlParseException) {
+			StringWriter sw = new StringWriter();
+			try (PrintWriter pw = new PrintWriter(sw)) {
+				((Throwable) result).printStackTrace(pw);
+			}
+			resultItem = new LTLResultHandler.LTLResultItem(AlertType.ERROR, Checked.FAIL, "Message: ", "Could not parse formula", 
+											sw.toString());
+			logger.error("Could not parse LTL formula", result);
+		}
+		
+		this.showResult(resultItem, item, trace);
+		if(resultItem != null) {
+			return resultItem.getChecked();
+		}
+		return Checked.FAIL;
 	}
 }
