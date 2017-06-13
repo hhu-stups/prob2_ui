@@ -60,7 +60,6 @@ public class VisualisationView extends AnchorPane {
 							String imageURL = images.get(imageMatrix[r][c]);
 							final String projectLocation = currentProject.get().getLocation().getPath();
 							Path imagePath = Paths.get(projectLocation, imageURL);
-							System.out.println(imagePath);
 							ImageView imageView = new ImageView(new Image("file:" + imagePath.toString()));
 							visualisationGridPane.add(imageView, c, r);
 						}
