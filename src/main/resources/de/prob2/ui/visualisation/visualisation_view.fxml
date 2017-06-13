@@ -5,6 +5,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.ScrollPane?>
 
 <fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
 	<StackPane fx:id="probLogoStackPane" AnchorPane.bottomAnchor="0.0"
@@ -16,8 +17,14 @@
 			</image>
 		</ImageView>
 	</StackPane>
-	<GridPane fx:id="visualisationGridPane" AnchorPane.bottomAnchor="10.0"
-		AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
-		AnchorPane.topAnchor="10.0" alignment="CENTER"/>
+	<ScrollPane fx:id="visualisationScrollPane" AnchorPane.bottomAnchor="0.0"
+		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+		AnchorPane.topAnchor="0.0" visible="false">
+		<AnchorPane>
+			<GridPane fx:id="visualisationGridPane" alignment="CENTER"
+				AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0"
+				AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" />
+		</AnchorPane>
+	</ScrollPane>
 </fx:root>
 

@@ -15,6 +15,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -25,6 +26,8 @@ import javafx.scene.layout.StackPane;
 public class VisualisationView extends AnchorPane {
 	@FXML
 	private StackPane probLogoStackPane;
+	@FXML
+	private ScrollPane visualisationScrollPane;
 	@FXML
 	private GridPane visualisationGridPane;
 
@@ -41,9 +44,11 @@ public class VisualisationView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
+		visualisationScrollPane.visibleProperty().bind(probLogoStackPane.visibleProperty().not());
+		
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
 			visualisationGridPane.getChildren().clear();
-			
+
 			if (to != null) {
 				StateSpace stateSpace = to.getStateSpace();
 
@@ -70,7 +75,7 @@ public class VisualisationView extends AnchorPane {
 		int[][] imageMatrix = getImagesForStateCommand.getMatrix();
 		int rowNr = getImagesForStateCommand.getRows();
 		int columnNr = getImagesForStateCommand.getColumns();
-		
+
 		for (int r = 0; r < rowNr; r++) {
 			for (int c = 0; c < columnNr; c++) {
 				String imageURL = images.get(imageMatrix[r][c]);
