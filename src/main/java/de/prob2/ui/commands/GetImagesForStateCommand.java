@@ -48,12 +48,14 @@ public class GetImagesForStateCommand extends AbstractCommand {
 		rows = maxRow - minRow + 1;
 		columns = maxColumn - minColumn + 1;
 		matrix = new int[rows][columns];
-		
+
 		for (PrologTerm t : matrixterm) {
 			int row = BindingGenerator.getInteger(t.getArgument(1)).getValue().intValue();
 			int col = BindingGenerator.getInteger(t.getArgument(2)).getValue().intValue();
 			int id = BindingGenerator.getInteger(t.getArgument(3).getArgument(1)).getValue().intValue();
-			matrix[row-1][col-1] = id;
+			if (row > 0 && row <= rows && col > 0 && col <= columns) {
+				matrix[row - 1][col - 1] = id;
+			}
 		}
 
 	}

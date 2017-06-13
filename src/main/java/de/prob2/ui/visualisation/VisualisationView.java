@@ -1,5 +1,7 @@
 package de.prob2.ui.visualisation;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import com.google.inject.Inject;
@@ -9,9 +11,11 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.commands.GetImagesForMachineCommand;
 import de.prob2.ui.commands.GetImagesForStateCommand;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -24,10 +28,12 @@ public class VisualisationView extends AnchorPane {
 	private GridPane visualisationGridPane;
 
 	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 
 	@Inject
-	public VisualisationView(final CurrentTrace currentTrace, final StageManager stageManager) {
+	public VisualisationView(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager) {
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		stageManager.loadFXML(this, "visualisation_view.fxml");
 	}
 
@@ -51,8 +57,12 @@ public class VisualisationView extends AnchorPane {
 					int columnNr = getImagesForStateCommand.getColumns();
 					for (int r = 0; r < rowNr; r++) {
 						for (int c = 0; c < columnNr; c++) {
-							Label label = new Label(Integer.toString(imageMatrix[r][c]));
-							visualisationGridPane.add(label, c, r);
+							String imageURL = images.get(imageMatrix[r][c]);
+							final String projectLocation = currentProject.get().getLocation().getPath();
+							Path imagePath = Paths.get(projectLocation, imageURL);
+							System.out.println(imagePath);
+							ImageView imageView = new ImageView(new Image("file:" + imagePath.toString()));
+							visualisationGridPane.add(imageView, c, r);
 						}
 					}
 				} else {
