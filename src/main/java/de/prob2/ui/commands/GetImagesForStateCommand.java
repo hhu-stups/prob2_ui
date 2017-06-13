@@ -53,9 +53,7 @@ public class GetImagesForStateCommand extends AbstractCommand {
 			int row = BindingGenerator.getInteger(t.getArgument(1)).getValue().intValue();
 			int col = BindingGenerator.getInteger(t.getArgument(2)).getValue().intValue();
 			int id = BindingGenerator.getInteger(t.getArgument(3).getArgument(1)).getValue().intValue();
-			if (row > 0 && row <= rows && col > 0 && col <= columns) {
-				matrix[row - 1][col - 1] = id;
-			}
+			matrix[row - minRow][col - minColumn] = id;
 		}
 
 	}
