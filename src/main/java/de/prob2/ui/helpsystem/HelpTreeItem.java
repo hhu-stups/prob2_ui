@@ -15,9 +15,6 @@ public class HelpTreeItem extends TreeItem<String>{
     public HelpTreeItem(final File f) {
         super(f.getName());
         this.f = f;
-        if (isLeaf()) {
-
-        }
     }
 
     @Override public ObservableList<TreeItem<String>> getChildren() {
@@ -54,5 +51,9 @@ public class HelpTreeItem extends TreeItem<String>{
 
     private TreeItem<String> createNode(final File f) {
         return new HelpTreeItem(f);
+    }
+
+    public File getFile() {
+        return f;
     }
 }

@@ -25,12 +25,12 @@ public class HelpSystem extends StackPane {
     @Inject
     public HelpSystem(final StageManager stageManager) throws URISyntaxException {
         stageManager.loadFXML(this, "helpsystem.fxml");
-        treeView.setRoot(createNode(new File(ProB2.class.getResource("/").toURI())));
-        treeView.getRoot().setExpanded(true);
+        treeView.setRoot(createNode(new File(ProB2.class.getResource("").toURI())));
+        treeView.setShowRoot(false);
         treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (((HelpTreeItem) newVal).isLeaf()){
+            if (newVal.isLeaf()){
                 //TODO Öffnen von HTML Files dem Baum entsprechend
-                //System.out.println("Selected Text : " + ((TreeItem<String>) newVal).getValue());
+                System.out.println("Selected File: " + ((HelpTreeItem) newVal).getFile());
             }
         });
         webEngine = webView.getEngine();
