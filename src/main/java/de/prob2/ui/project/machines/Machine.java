@@ -33,7 +33,15 @@ public class Machine extends LTLCheckableItem {
 	public enum Type {
 		B(Api::b_load, new String[] {"*.mch", "*.ref", "*.imp"}),
 		EVENTB(Api::eventb_load, new String[] {"*.eventb", "*.bum", "*.buc"}),
-		CSP(Api::csp_load, new String[] {"*.cspm"}),
+		CSP((api, file, prefs) -> { // FIXME Replace this lambda with Api::csp_load once the kernel builds again
+			try {
+				return api.csp_load(file, prefs);
+			} catch (IOException | ModelTranslationError | RuntimeException | Error e) {
+				throw e;
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+		}, new String[] {"*.cspm"}),
 		TLA(Api::tla_load, new String[] {"*.tla"}),
 		;
 		
