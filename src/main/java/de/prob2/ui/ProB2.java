@@ -1,5 +1,6 @@
 package de.prob2.ui;
 
+import java.io.File;
 import java.util.Optional;
 
 import com.google.inject.Guice;
@@ -47,8 +48,11 @@ public class ProB2 extends Application {
 
 		final StringBuilder title = new StringBuilder();
 		if (currentTrace.exists()) {
-			title.append(currentTrace.getModel().getModelFile().getName());
-			title.append(" - ");
+			final File modelFile = currentTrace.getModel().getModelFile();
+			if (modelFile != null) {
+				title.append(modelFile.getName());
+				title.append(" - ");
+			}
 		}
 		if (currentProject.exists()) {
 			title.append(currentProject.getName());
