@@ -3,14 +3,12 @@ package de.prob2.ui.chart;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EvalResult;
@@ -20,10 +18,12 @@ import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.TraceElement;
+
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -32,6 +32,7 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -41,6 +42,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class HistoryChartStage extends Stage {
@@ -116,6 +120,7 @@ public final class HistoryChartStage extends Stage {
 	@FXML
 	private ChoiceBox<TraceElement> startChoiceBox;
 
+	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 
@@ -126,6 +131,7 @@ public final class HistoryChartStage extends Stage {
 			final Injector injector) {
 		super();
 
+		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.separateCharts = FXCollections.observableArrayList();
 		this.injector = injector;
@@ -297,6 +303,7 @@ public final class HistoryChartStage extends Stage {
 
 			TraceElement element = this.currentTrace.get().getCurrent();
 			TraceElement prevElement = element;
+			boolean showErrors = true;
 			while (element != null && prevElement != startElement) {
 				final List<AbstractEvalResult> results = stateSpace.eval(element.getCurrentState(), formulas);
 
@@ -307,7 +314,7 @@ public final class HistoryChartStage extends Stage {
 					}
 					final int value;
 					try {
-						value = resultToInt(result);
+						value = resultToInt(result, showErrors);
 					} catch (IllegalArgumentException e) {
 						LOGGER.debug("Not convertible to int, ignoring", e);
 						continue;
@@ -318,6 +325,8 @@ public final class HistoryChartStage extends Stage {
 				prevElement = element;
 				element = element.getPrevious();
 				elementCounter++;
+				// Only display errors to the user for the current state (otherwise errors are repeated for every state)
+				showErrors = false;
 			}
 		}
 
@@ -341,7 +350,7 @@ public final class HistoryChartStage extends Stage {
 		((NumberAxis) this.singleChart.getXAxis()).setUpperBound(maxXBound);
 	}
 
-	private static int resultToInt(final AbstractEvalResult aer) {
+	private int resultToInt(final AbstractEvalResult aer, final boolean showErrors) {
 		if (aer instanceof EvalResult) {
 			final String value = ((EvalResult) aer).getValue();
 			if ("TRUE".equals(value)) {
@@ -352,10 +361,16 @@ public final class HistoryChartStage extends Stage {
 				try {
 					return Integer.parseInt(value);
 				} catch (NumberFormatException e) {
+					if (showErrors) {
+						stageManager.makeAlert(Alert.AlertType.ERROR, "Not a valid integer: " + e.getMessage()).show();
+					}
 					throw new IllegalArgumentException("Not a valid integer", e);
 				}
 			}
 		} else {
+			if (showErrors) {
+				stageManager.makeAlert(Alert.AlertType.ERROR, "Invalid result: " + aer).show();
+			}
 			throw new IllegalArgumentException("Expected an EvalResult, not " + aer.getClass().getName());
 		}
 	}
