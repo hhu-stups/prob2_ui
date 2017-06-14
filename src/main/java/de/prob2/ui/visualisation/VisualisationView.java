@@ -49,7 +49,7 @@ public class VisualisationView extends AnchorPane {
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
 			visualisationGridPane.getChildren().clear();
 
-			if (to != null) {
+			if (to != null && to.isInitialised()) {
 				StateSpace stateSpace = to.getStateSpace();
 
 				GetImagesForMachineCommand getImagesForMachineCommand = new GetImagesForMachineCommand();
