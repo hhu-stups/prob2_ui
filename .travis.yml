@@ -7,7 +7,7 @@ branches:
   - develop
 script:
 - ./gradlew check
-- ./gradlew sonarqube -Dsonar.login=$SONAR_TOKEN --info --stacktrace
+- ./gradlew sonarqube -Dsonar.host.url=http://sonarcloud.io -Dsonar.login=$SONAR_TOKEN --info --stacktrace
 - ./gradlew distZip
 sudo: false
 addons:
