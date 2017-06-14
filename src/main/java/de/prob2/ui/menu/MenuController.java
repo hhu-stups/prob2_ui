@@ -249,26 +249,21 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleNewProjectFromFile() {
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open File");
-		fileChooser.getExtensionFilters()
-				.add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
-
-		final File selectedFile = fileChooser.showOpenDialog(this.window);
-		if (selectedFile == null) {
+		final Machine.FileAndType selected = Machine.askForFile(this.window);
+		if (selected == null) {
 			return;
 		}
-		Path projectLocation = currentProject.getDefaultLocation();
-		Path absolute = selectedFile.toPath();
-		Path relative = projectLocation.relativize(absolute);
-		Machine machine = new Machine(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')), "",
-				relative, Machine.Type.B);
-		currentProject.set(new Project(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')),
-				"(this project was created automatically from file " + selectedFile.getAbsolutePath() + ")", machine,
-				currentProject.getDefaultLocation().toFile()));
-		Runconfiguration defaultRunconfig = new Runconfiguration(machine.getName(), "default");
+		
+		final Path projectLocation = currentProject.getDefaultLocation();
+		final Path absolute = selected.getFile().toPath();
+		final Path relative = projectLocation.relativize(absolute);
+		final String shortName = selected.getFile().getName().substring(0, selected.getFile().getName().lastIndexOf('.'));
+		final String description = "(this project was created automatically from file " + absolute + ')';
+		final Machine machine = new Machine(shortName, "", relative, selected.getType());
+		currentProject.set(new Project(shortName, description, machine, currentProject.getDefaultLocation().toFile()));
+		
+		final Runconfiguration defaultRunconfig = new Runconfiguration(machine.getName(), "default");
 		currentProject.addRunconfiguration(defaultRunconfig);
-
 		currentProject.startAnimation(defaultRunconfig);
 	}
 

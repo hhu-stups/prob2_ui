@@ -1,8 +1,7 @@
 package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +31,7 @@ public class AddMachinesDialog extends Dialog<Machine> {
 
 	private final CurrentProject currentProject;
 	private Path machinePath;
+	private Machine.Type machineType;
 
 	@Inject
 	public AddMachinesDialog(final StageManager stageManager, final CurrentProject currentProject) {
@@ -42,17 +42,16 @@ public class AddMachinesDialog extends Dialog<Machine> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				return new Machine(nameField.getText(), descriptionTextArea.getText(), machinePath, Machine.Type.B);
+				return new Machine(nameField.getText(), descriptionTextArea.getText(), machinePath, machineType);
 			}
 		});
 		stageManager.loadFXML(this, "machines_dialog.fxml");
 	}
 	
-	public void showAndWait(Path machinePath) {
+	public Optional<Machine> showAndWait(Path machinePath, Machine.Type machineType) {
 		this.machinePath = machinePath;
-		List<Machine> machinesList = currentProject.getMachines();
-		Set<String> machineNamesSet = new HashSet<>();
-		machineNamesSet.addAll(machinesList.stream().map(Machine::getName).collect(Collectors.toList()));
+		this.machineType = machineType;
+		final Set<String> machineNamesSet = currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toSet());
 		
 		String[] n = machinePath.toFile().getName().split("\\.");
 		String name = n[0];
@@ -76,6 +75,6 @@ public class AddMachinesDialog extends Dialog<Machine> {
 				errorExplanationLabel.setText("");
 			}
 		});
-		showAndWait().ifPresent(currentProject::addMachine);
+		return showAndWait();
 	}
 }

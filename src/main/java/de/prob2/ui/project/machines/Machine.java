@@ -1,5 +1,6 @@
 package de.prob2.ui.project.machines;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
@@ -20,6 +21,8 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
 public class Machine extends LTLCheckableItem {
 	@FunctionalInterface
@@ -34,20 +37,43 @@ public class Machine extends LTLCheckableItem {
 		TLA(Api::tla_load, new String[] {"*.tla"}),
 		;
 		
-		private final Loader loader;
+		private final Machine.Loader loader;
 		private final String[] extensions;
 		
-		private Type(final Loader loader, final String[] extensions) {
+		private Type(final Machine.Loader loader, final String[] extensions) {
 			this.loader = loader;
 			this.extensions = extensions;
 		}
 		
-		public Loader getLoader() {
+		public Machine.Loader getLoader() {
 			return this.loader;
 		}
 		
 		public String[] getExtensions() {
 			return this.extensions.clone();
+		}
+	}
+	
+	public static final class FileAndType {
+		private final File file;
+		private final Machine.Type type;
+		
+		public FileAndType(final File file, final Machine.Type type) {
+			super();
+			
+			Objects.requireNonNull(file);
+			Objects.requireNonNull(type);
+			
+			this.file = file;
+			this.type = type;
+		}
+		
+		public File getFile() {
+			return this.file;
+		}
+		
+		public Machine.Type getType() {
+			return this.type;
 		}
 	}
 	
@@ -62,6 +88,38 @@ public class Machine extends LTLCheckableItem {
 		this.type = type;
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
+	}
+	
+	public static Machine.FileAndType askForFile(final Window window) {
+		final FileChooser.ExtensionFilter classicalB = new FileChooser.ExtensionFilter("Classical B Files", Machine.Type.B.getExtensions());
+		final FileChooser.ExtensionFilter eventB = new FileChooser.ExtensionFilter("EventB Files", Machine.Type.EVENTB.getExtensions());
+		final FileChooser.ExtensionFilter csp = new FileChooser.ExtensionFilter("CSP Files", Machine.Type.CSP.getExtensions());
+		final FileChooser.ExtensionFilter tla = new FileChooser.ExtensionFilter("TLA Files", Machine.Type.TLA.getExtensions());
+		
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Select Machine");
+		fileChooser.getExtensionFilters().addAll(classicalB, eventB, csp, tla);
+		
+		final File file = fileChooser.showOpenDialog(window);
+		if (file == null) {
+			return null;
+		}
+		
+		final FileChooser.ExtensionFilter xf = fileChooser.getSelectedExtensionFilter();
+		final Machine.Type type;
+		if (xf == classicalB) {
+			type = Machine.Type.B;
+		} else if (xf == eventB) {
+			type = Machine.Type.EVENTB;
+		} else if (xf == csp) {
+			type = Machine.Type.CSP;
+		} else if (xf == tla) {
+			type = Machine.Type.TLA;
+		} else {
+			throw new IllegalArgumentException("Unhandled file type: " + xf);
+		}
+		
+		return new Machine.FileAndType(file, type);
 	}
 
 	public String getFileName() {
