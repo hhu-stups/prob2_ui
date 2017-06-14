@@ -50,26 +50,22 @@ public class Project {
 	public Project(String name, String description, Machine machine, File location) {
 		this.name = name;
 		this.description = description;
-		machines.add(machine);
+		this.machines.add(machine);
 		this.location = location;
 	}
 
 	public String getName() {
 		return name;
 	}
-
-	public List<Machine> getMachines() {
-		return machines;
-	}
-
-	public File getLocation() {
-		return location;
-	}
-
+	
 	public String getDescription() {
 		return description;
 	}
 
+	public List<Machine> getMachines() {
+		return machines;
+	}
+	
 	public List<Preference> getPreferences() {
 		return preferences;
 	}
@@ -78,10 +74,16 @@ public class Project {
 		return runconfigurations;
 	}
 	
+	public File getLocation() {
+		return location;
+	}
+
+	
 	public void setLocation(File location) {
 		this.location = location;
 	}
 
+	
 	@Override
 	public boolean equals(Object other) {
 		if (other == this) {

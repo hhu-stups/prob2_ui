@@ -12,16 +12,17 @@ public class Preference {
 		this.preferences = preferences;
 	}
 	
-	@Override
-	public String toString() {
-		return this.name;
+	public String getName() {
+		return name;
 	}
 	
 	public Map<String, String> getPreferences() {
 		return preferences;
 	}
-
-	public String getName() {
-		return name;
+	
+	
+	@Override
+	public String toString() {
+		return this.name;
 	}
 }
