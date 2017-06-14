@@ -21,16 +21,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hildan.fxgson.FxGson;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.AnimationSelector;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
@@ -38,12 +36,14 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyListProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -52,6 +52,11 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+
+import org.hildan.fxgson.FxGson;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -66,6 +71,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ListProperty<Machine> machines;
 	private final ListProperty<Preference> preferences;
 	private final ReadOnlyListProperty<Runconfiguration> runconfigurations;
+	private final ObjectProperty<Runconfiguration> currentRunconfiguration;
 
 	private final ObjectProperty<File> location;
 	private final BooleanProperty saved;
@@ -98,6 +104,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
 		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations",
 				FXCollections.observableArrayList());
+		this.currentRunconfiguration = new SimpleObjectProperty<>(this, "currentRunconfiguration", null);
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
 
@@ -137,6 +144,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (m != null && pref != null) {
 			MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 			machineLoader.loadAsync(m, pref);
+			this.currentRunconfiguration.set(runconfiguration);
 		} else {
 			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not load machine \"" + runconfiguration.getMachine()
 					+ "\" with preferences: \"" + runconfiguration.getPreference() + "\"").showAndWait();
@@ -196,6 +204,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public List<Runconfiguration> getRunconfigurations(Machine machine) {
 		return getRunconfigurations().stream().filter(runconfig -> runconfig.getMachine().equals(machine.getName()))
 				.collect(Collectors.toList());
+	}
+	
+	public ReadOnlyObjectProperty<Runconfiguration> currentRunconfigurationProperty() {
+		return this.currentRunconfiguration;
+	}
+	
+	public Runconfiguration getCurrentRunconfiguration() {
+		return this.currentRunconfigurationProperty().get();
 	}
 
 	public void initializeMachines() {
