@@ -21,14 +21,11 @@
 	resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<AnchorPane minWidth="500">
+			<AnchorPane>
 				<VBox spacing="5" AnchorPane.topAnchor="25"
 					AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0"
 					AnchorPane.rightAnchor="0">
-					<Label text="%project.newProject.stage.title">
-						<font>
-							<Font size="18" />
-						</font>
+					<Label text="%project.newProject.stage.title" id="title">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>
@@ -38,19 +35,11 @@
 							AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" alignment="center_right">
 							<HBox spacing="20" alignment="center_left">
 								<Label text="%project.newProject.stage.name" />
-								<TextField fx:id="projectNameField" HBox.hgrow="always">
-									<font>
-										<Font size="12" />
-									</font>
-								</TextField>
+								<TextField fx:id="projectNameField" HBox.hgrow="always" />
 							</HBox>
 							<HBox spacing="20" alignment="center_left">
 								<Label text="%project.newProject.stage.location" />
-								<TextField fx:id="locationField" HBox.hgrow="always">
-									<font>
-										<Font size="12" />
-									</font>
-								</TextField>
+								<TextField fx:id="locationField" HBox.hgrow="always" />
 								<Button styleClass="button-dark2" text="%project.newProject.stage.selectLocation"
 									onAction="#selectLocation" />
 								<VBox.margin>
@@ -59,11 +48,7 @@
 							</HBox>
 							<VBox spacing="5" alignment="center_left">
 								<Label text="%project.newProject.stage.description" />
-								<TextArea fx:id="projectDescriptionTextArea" styleClass="text-area-with-border">
-									<font>
-										<Font size="12" />
-									</font>
-								</TextArea>
+								<TextArea fx:id="projectDescriptionTextArea" styleClass="text-area-with-border" />
 								<VBox.margin>
 									<Insets top="20" />
 								</VBox.margin>

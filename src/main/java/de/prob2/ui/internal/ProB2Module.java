@@ -11,10 +11,9 @@ import com.google.inject.util.Providers;
 import de.codecentric.centerdevice.MenuToolkit;
 
 import de.prob.MainModule;
+import de.prob2.ui.verifications.ltl.LTLFormulaChecker;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.verifications.ltl.LTLChecker;
 import de.prob2.ui.MainController;
-import de.prob2.ui.bmotion.BMotionView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
@@ -32,7 +31,7 @@ import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.ltl.MachineTableView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
-
+import de.prob2.ui.visualisation.VisualisationView;
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
@@ -55,15 +54,15 @@ public class ProB2Module extends AbstractModule {
 		}
 		
 		// Controllers
-		bind(BMotionView.class);
+		bind(VisualisationView.class);
 		bind(HistoryView.class);
+		bind(MainController.class);
+		bind(LTLFormulaChecker.class);
 		bind(HelpButton.class);
-		bind(LTLChecker.class);
 		bind(MachineTableView.class);
 		bind(LTLView.class);
 		bind(MachinesTab.class);
 		bind(MainView.class);
-		bind(MainController.class);
 		bind(MenuController.class);
 		bind(ModelcheckingController.class);
 		bind(OperationsView.class);

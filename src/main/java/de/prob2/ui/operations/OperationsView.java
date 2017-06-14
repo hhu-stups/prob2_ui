@@ -45,6 +45,7 @@ import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -53,6 +54,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
 import se.sawano.java.text.AlphanumericComparator;
@@ -68,6 +70,22 @@ public final class OperationsView extends AnchorPane {
 			super();
 
 			getStyleClass().add("operations-cell");
+			
+			this.setOnMouseClicked(event -> {
+				if (event.getButton() == MouseButton.PRIMARY && this.getItem() != null && this.getItem().getStatus() == OperationItem.Status.ENABLED) {
+					// Disable the operations list until the trace change is finished, the update method reenables it later
+					opsListView.setDisable(true);
+					currentTrace.set(currentTrace.get().add(this.getItem().getId()));
+				}
+			});
+			
+			final MenuItem showDetailsItem = new MenuItem("Show Details");
+			showDetailsItem.setOnAction(event -> {
+				final OperationDetailsStage stage = injector.getInstance(OperationDetailsStage.class);
+				stage.setItem(this.getItem());
+				stage.show();
+			});
+			this.setContextMenu(new ContextMenu(showDetailsItem));
 		}
 
 		@Override
@@ -190,15 +208,6 @@ public final class OperationsView extends AnchorPane {
 	public void initialize() {
 		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/The_ProB_Animator_and_Model_Checker");
 		opsListView.setCellFactory(lv -> new OperationsCell());
-
-		opsListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null && newValue.getStatus() == OperationItem.Status.ENABLED) {
-				// Disable the operations list until the trace change is
-				// finished, the update method reenables it later
-				opsListView.setDisable(true);
-				currentTrace.set(currentTrace.get().add(newValue.getId()));
-			}
-		});
 
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());

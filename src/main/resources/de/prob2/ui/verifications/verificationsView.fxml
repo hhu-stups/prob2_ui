@@ -8,8 +8,8 @@
 <?import de.prob2.ui.verifications.ltl.LTLView?>
 
 <fx:root type="VerificationsView" xmlns:fx="http://javafx.com/fxml/1">
-	<TabPane tabClosingPolicy="UNAVAILABLE" prefHeight="400.0" prefWidth="100.0"
-	AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+	<TabPane tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 		<tabs>
 			<Tab text="Modelchecking">
 				<content>
