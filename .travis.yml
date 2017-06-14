@@ -7,8 +7,8 @@ branches:
   - develop
 script:
 - ./gradlew check
+- ./gradlew sonarqube -Dsonar.login=$SONAR_TOKEN
 - ./gradlew distZip
-- sonar-scanner -Dsonar.login=$SONAR_TOKEN
 sudo: false
 addons:
   sonarqube:
