@@ -10,6 +10,7 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
@@ -41,7 +42,7 @@ public class AddMachinesDialog extends Dialog<Machine> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				return new Machine(nameField.getText(), descriptionTextArea.getText(), machinePath);
+				return new Machine(nameField.getText(), descriptionTextArea.getText(), machinePath, Machine.Type.B);
 			}
 		});
 		stageManager.loadFXML(this, "machines_dialog.fxml");

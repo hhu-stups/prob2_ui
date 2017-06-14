@@ -8,21 +8,20 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob.scripting.ModelTranslationError;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
-import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.formula.FormulaInputDialog;
+import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -39,6 +38,7 @@ import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -57,6 +57,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class MenuController extends MenuBar {
@@ -259,7 +262,7 @@ public final class MenuController extends MenuBar {
 		Path absolute = selectedFile.toPath();
 		Path relative = projectLocation.relativize(absolute);
 		Machine machine = new Machine(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')), "",
-				relative);
+				relative, Machine.Type.B);
 		currentProject.set(new Project(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')),
 				"(this project was created automatically from file " + selectedFile.getAbsolutePath() + ")", machine,
 				currentProject.getDefaultLocation().toFile()));

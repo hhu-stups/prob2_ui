@@ -1,42 +1,77 @@
 package de.prob2.ui.project.machines;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
+
+import de.prob.scripting.Api;
+import de.prob.scripting.ModelTranslationError;
+import de.prob.statespace.StateSpace;
 
 import de.prob2.ui.verifications.ltl.LTLCheckableItem;
 import de.prob2.ui.verifications.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 
 public class Machine extends LTLCheckableItem {
+	@FunctionalInterface
+	public interface Loader extends Serializable {
+		StateSpace load(final Api api, final String file, final Map<String, String> prefs) throws IOException, ModelTranslationError;
+	}
+
+	public enum Type {
+		B(Api::b_load, new String[] {"*.mch", "*.ref", "*.imp"}),
+		EVENTB(Api::eventb_load, new String[] {"*.eventb", "*.bum", "*.buc"}),
+		CSP(Api::csp_load, new String[] {"*.cspm"}),
+		TLA(Api::tla_load, new String[] {"*.tla"}),
+		;
+		
+		private final Loader loader;
+		private final String[] extensions;
+		
+		private Type(final Loader loader, final String[] extensions) {
+			this.loader = loader;
+			this.extensions = extensions;
+		}
+		
+		public Loader getLoader() {
+			return this.loader;
+		}
+		
+		public String[] getExtensions() {
+			return this.extensions.clone();
+		}
+	}
+	
 	private String location;
+	private Machine.Type type;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 
-	public Machine(String name, String description, Path location) {
+	public Machine(String name, String description, Path location, Machine.Type type) {
 		super(name,description);
 		this.location = location.toString();
+		this.type = type;
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
-}
-	
-	public Machine(String name, String description, Path location, ListProperty<LTLFormulaItem> ltlFormulas, 
-					ListProperty<LTLPatternItem> ltlPatterns) {
-		super(name,description);
-		this.location = location.toString();
-		this.ltlFormulas = ltlFormulas;
-		this.ltlPatterns = ltlPatterns;
 	}
 
 	public String getFileName() {
 		String pattern = Pattern.quote(System.getProperty("file.separator"));
 		String[] splittedFileName = location.split(pattern);
 		return splittedFileName[splittedFileName.length - 1];
+	}
+	
+	public Machine.Type getType() {
+		return this.type;
 	}
 	
 	@Override
@@ -88,6 +123,9 @@ public class Machine extends LTLCheckableItem {
 	
 		
 	public void replaceMissingWithDefaults() {
+		if (type == null) {
+			this.type = Machine.Type.B;
+		}
 		if(ltlFormulas == null) {
 			this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		}
