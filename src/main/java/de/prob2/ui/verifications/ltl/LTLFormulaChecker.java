@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 import com.google.inject.Injector;
 
+import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.LTL;
@@ -57,7 +58,7 @@ public class LTLFormulaChecker {
 			parser.addWarningListener(parseListener);
 			parser.setPatternManager(patternManager);
 			parser.parse();
-			formula = new LTL(item.getFormula());
+			formula = new LTL(item.getFormula(), new ClassicalBParser(), patternManager);
 			if (currentTrace != null) {
 				EvaluationCommand lcc = formula.getCommand(stateid);
 				currentTrace.getStateSpace().execute(lcc);
