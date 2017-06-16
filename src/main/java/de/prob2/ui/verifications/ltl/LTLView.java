@@ -227,7 +227,7 @@ public class LTLView extends AnchorPane{
 	}
 			
 	public void checkFormula(LTLFormulaItem item) {
-		checker.checkFormula(item);
+		checker.checkFormula(item, patternManager);
 	}
 			
 	private void showCurrentItemDialog(LTLFormulaItem item) {
@@ -269,7 +269,7 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void checkSelectedMachine() {
-		checker.checkMachine(tvMachines.getFocusModel().getFocusedItem());
+		checker.checkMachine(tvMachines.getFocusModel().getFocusedItem(), patternManager);
 		tvMachines.refresh();
 	}
 	

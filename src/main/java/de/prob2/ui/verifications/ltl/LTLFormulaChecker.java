@@ -8,10 +8,13 @@ import com.google.inject.Injector;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.LTL;
+import de.prob.ltl.parser.LtlParser;
+import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.statespace.State;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
+import de.prob2.ui.verifications.ltl.patterns.LTLParseListener;
 
 public class LTLFormulaChecker {
 				
@@ -28,11 +31,11 @@ public class LTLFormulaChecker {
 		this.resultHandler = resultHandler;
 	}
 	
-	public void checkMachine(Machine machine) {
+	public void checkMachine(Machine machine, PatternManager patternManager) {
 		ArrayList<Boolean> success = new ArrayList<>();
 		success.add(true);
 		machine.getFormulas().forEach(item-> {
-			if(this.checkFormula(item) == Checked.FAIL) {
+			if(this.checkFormula(item, patternManager) == Checked.FAIL) {
 				machine.setCheckedFailed();
 				success.set(0, false);
 			}
@@ -42,11 +45,18 @@ public class LTLFormulaChecker {
 		}
 	}
 	
-	public Checked checkFormula(LTLFormulaItem item) {
+	public Checked checkFormula(LTLFormulaItem item, PatternManager patternManager) {
 		LTL formula = null;
 		Object result = null;
 		State stateid = currentTrace.getCurrentState();
 		try {
+			LtlParser parser = new LtlParser(item.getFormula());
+			LTLParseListener parseListener = new LTLParseListener();
+			parser.removeErrorListeners();
+			parser.addErrorListener(parseListener);
+			parser.addWarningListener(parseListener);
+			parser.setPatternManager(patternManager);
+			parser.parse();
 			formula = new LTL(item.getFormula());
 			if (currentTrace != null) {
 				EvaluationCommand lcc = formula.getCommand(stateid);
