@@ -50,22 +50,18 @@ public class LTLFormulaChecker {
 		LTL formula = null;
 		Object result = null;
 		State stateid = currentTrace.getCurrentState();
-		try {
-			LtlParser parser = new LtlParser(item.getFormula());
-			LTLParseListener parseListener = new LTLParseListener();
-			parser.removeErrorListeners();
-			parser.addErrorListener(parseListener);
-			parser.addWarningListener(parseListener);
-			parser.setPatternManager(patternManager);
-			parser.parse();
-			formula = new LTL(item.getFormula(), new ClassicalBParser(), patternManager);
-			if (currentTrace != null) {
-				EvaluationCommand lcc = formula.getCommand(stateid);
-				currentTrace.getStateSpace().execute(lcc);
-				result = lcc.getValue();
-			}
-		} catch (LtlParseException e) {
-			result = e;
+		LtlParser parser = new LtlParser(item.getFormula());
+		LTLParseListener parseListener = new LTLParseListener();
+		parser.removeErrorListeners();
+		parser.addErrorListener(parseListener);
+		parser.addWarningListener(parseListener);
+		parser.setPatternManager(patternManager);
+		parser.parse();
+		formula = new LTL(item.getFormula(), new ClassicalBParser(), patternManager);
+		if (currentTrace != null) {
+			EvaluationCommand lcc = formula.getCommand(stateid);
+			currentTrace.getStateSpace().execute(lcc);
+			result = lcc.getValue();
 		}
 		Checked checked = resultHandler.handleFormulaResult(item, result, stateid);
 		injector.getInstance(LTLView.class).refreshFormula();
