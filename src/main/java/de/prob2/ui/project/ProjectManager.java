@@ -11,8 +11,10 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hildan.fxgson.FxGson;
@@ -20,9 +22,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.inject.Inject;
 
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 
@@ -32,19 +36,20 @@ public class ProjectManager {
 
 	private final Gson gson;
 	private final CurrentProject currentProject;
-	
+
+	@Inject
 	public ProjectManager(CurrentProject currentProject) {
 		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 		this.currentProject = currentProject;
 	}
 
-	public void save() {
+	public void saveCurrentProject() {
 		Project project = currentProject.get();
 		File loc = new File(project.getLocation() + File.separator + project.getName() + ".json");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(loc), PROJECT_CHARSET)) {
 
-			currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(), project.getPreferences(),
-					project.getRunconfigurations(), project.getLocation()));
+			currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(),
+					project.getPreferences(), project.getRunconfigurations(), project.getLocation()));
 			gson.toJson(project, writer);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
@@ -53,13 +58,14 @@ public class ProjectManager {
 		}
 		currentProject.setSaved(true);
 	}
-	
+
 	public void openProject(File file) {
 		Project project;
 		try (final Reader reader = new InputStreamReader(new FileInputStream(file), PROJECT_CHARSET)) {
 			project = gson.fromJson(reader, Project.class);
 			project.setLocation(file.getParentFile());
-			project = replaceMissingWithDefaults(project);
+			replaceMissingWithDefaults(project);
+			setupRunconfigurations(project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
 			return;
@@ -70,10 +76,10 @@ public class ProjectManager {
 		currentProject.set(project);
 		currentProject.setSaved(true);
 	}
-	
-	private Project replaceMissingWithDefaults(Project project) {
-		String nameString = (project.getName() == null) ? "" : project.getName();
-		String descriptionString = (project.getDescription() == null) ? "" : project.getDescription();
+
+	private void replaceMissingWithDefaults(Project project) {
+		project.setName((project.getName() == null) ? "" : project.getName());
+		project.setDescription((project.getDescription() == null) ? "" : project.getDescription());
 		List<Machine> machineList = new ArrayList<>();
 		if (project.getMachines() != null) {
 			machineList = project.getMachines();
@@ -81,11 +87,40 @@ public class ProjectManager {
 				machine.replaceMissingWithDefaults();
 			}
 		}
-		List<Preference> preferenceList = (project.getPreferences() == null) ? new ArrayList<>()
-				: project.getPreferences();
-		Set<Runconfiguration> runconfigurationSet = (project.getRunconfigurations() == null) ? new HashSet<>()
-				: project.getRunconfigurations();
-		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet,
-				project.getLocation());
+		project.setMachines(machineList);
+		project.setPreferences((project.getPreferences() == null) ? new ArrayList<>() : project.getPreferences());
+		project.setRunconfigurations(
+				(project.getRunconfigurations() == null) ? new HashSet<>() : project.getRunconfigurations());
+	}
+	
+	private void setupRunconfigurations(Project project) {
+		Set<Runconfiguration> newRunconfigs = new HashSet<>();
+		Map<String, Machine> machinesMap = getMachinesAsMap(project);
+		Map<String, Preference> prefsMap = getPreferencesAsMap(project);
+		for (Runconfiguration runconfig : project.getRunconfigurations()) {
+			Machine m = machinesMap.get(runconfig.getMachineName());
+			Preference p = prefsMap.get(runconfig.getPreferenceName());
+			if(p == null) {
+				p = new DefaultPreference();
+			}
+			newRunconfigs.add(new Runconfiguration(m, p));
+		}
+		project.setRunconfigurations(newRunconfigs);
+	}
+
+	private Map<String, Preference> getPreferencesAsMap(Project project) {
+		Map<String, Preference> prefsMap = new HashMap<>();
+		for(Preference p: project.getPreferences()) {
+			prefsMap.put(p.getName(), p);
+		}
+		return prefsMap;
+	}
+
+	private Map<String, Machine> getMachinesAsMap(Project project) {
+		Map<String, Machine> machinesMap = new HashMap<>();
+		for (Machine m : project.getMachines()) {
+			machinesMap.put(m.getName(), m);
+		}
+		return machinesMap;
 	}
 }

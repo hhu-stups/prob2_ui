@@ -31,7 +31,8 @@ public class EditMachinesDialog extends Dialog<Machine> {
 	private ButtonType okButtonType;
 
 	private final CurrentProject currentProject;
-	private Machine editMachine;
+	private Machine machine;
+	private Machine editedMachine;
 
 	@Inject
 	public EditMachinesDialog(final StageManager stageManager, final CurrentProject currentProject) {
@@ -42,14 +43,13 @@ public class EditMachinesDialog extends Dialog<Machine> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
+				editedMachine = new Machine(nameField.getText(), descriptionTextArea.getText(), machine.getPath());
 				List<Runconfiguration> runconfigList = currentProject.getRunconfigurations();
-				runconfigList.stream().filter(runconfig -> runconfig.getMachine().equals(editMachine.getName()))
+				runconfigList.stream().filter(runconfig -> runconfig.getMachine().equals(machine))
 						.forEach(runconfig -> currentProject.runconfigurationsProperty().set(
 								runconfigList.indexOf(runconfig),
-								new Runconfiguration(nameField.getText(), runconfig.getPreference())));
-				editMachine.setName(nameField.getText());
-				editMachine.setDescription(descriptionTextArea.getText());
-				return editMachine;
+								new Runconfiguration(editedMachine, runconfig.getPreference())));			
+				return editedMachine;
 			}
 		});
 		stageManager.loadFXML(this, "machines_dialog.fxml");
@@ -57,7 +57,7 @@ public class EditMachinesDialog extends Dialog<Machine> {
 
 	public Optional<Machine> editAndShow(Machine machine) {
 		this.setTitle("Edit " + machine.getName());
-		editMachine = machine;
+		this.machine = machine;
 
 		List<Machine> machinesList = currentProject.getMachines();
 		Set<String> machineNamesSet = new HashSet<>();

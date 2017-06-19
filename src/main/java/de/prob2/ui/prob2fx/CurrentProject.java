@@ -19,6 +19,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
@@ -106,10 +107,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public void startAnimation(Runconfiguration runconfiguration) {
-		Machine m = getMachine(runconfiguration.getMachine());
+		Machine m = runconfiguration.getMachine();
 		Map<String, String> pref = new HashMap<>();
-		if (!"default".equals(runconfiguration.getPreference())) {
-			pref = getPreferenceAsMap(runconfiguration.getPreference());
+		if (!(runconfiguration.getPreference() instanceof DefaultPreference)) {
+			pref = runconfiguration.getPreference().getPreferences();
 		}
 		if (m != null && pref != null) {
 			MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
@@ -132,8 +133,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		machinesList.remove(machine);
 		List<Runconfiguration> runconfigsList = new ArrayList<>();
 		runconfigsList.addAll(this.getRunconfigurations());
-		this.getRunconfigurations().stream().filter(r -> r.getMachine().equals(machine.getName()))
-				.forEach(runconfigsList::remove);
+		this.getRunconfigurations(machine).stream().forEach(runconfigsList::remove);
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 				runconfigsList, this.getLocation()));
 	}
@@ -171,7 +171,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public List<Runconfiguration> getRunconfigurations(Machine machine) {
-		return getRunconfigurations().stream().filter(runconfig -> runconfig.getMachine().equals(machine.getName()))
+		return getRunconfigurations().stream().filter(runconfig -> machine.equals(runconfig.getMachine()))
 				.collect(Collectors.toList());
 	}
 

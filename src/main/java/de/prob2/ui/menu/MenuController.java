@@ -21,8 +21,8 @@ import de.prob2.ui.MainController;
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
-import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.formula.FormulaInputDialog;
+import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -33,8 +33,10 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
+import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
@@ -264,7 +266,7 @@ public final class MenuController extends MenuBar {
 				+ selectedFile.getAbsolutePath() + ")";
 		currentProject
 				.set(new Project(name, projectDescription, machine, currentProject.getDefaultLocation().toFile()));
-		Runconfiguration defaultRunconfig = new Runconfiguration(machine.getName(), "default");
+		Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
 		currentProject.addRunconfiguration(defaultRunconfig);
 
 		currentProject.startAnimation(defaultRunconfig);
@@ -285,7 +287,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	private void openProject(File file) {
-		currentProject.open(file);
+		injector.getInstance(ProjectManager.class).openProject(file);
 
 		Platform.runLater(() -> {
 			injector.getInstance(ModelcheckingController.class).resetView();
@@ -303,7 +305,7 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void saveProject() {
-		currentProject.save();
+		injector.getInstance(ProjectManager.class).saveCurrentProject();
 	}
 
 	@FXML

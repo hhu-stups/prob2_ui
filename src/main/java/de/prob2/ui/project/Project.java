@@ -12,11 +12,11 @@ import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 
 public class Project {
-	private final String name;
-	private final String description;
-	private final List<Machine> machines = new ArrayList<>();
-	private final List<Preference> preferences = new ArrayList<>();
-	private final Set<Runconfiguration> runconfigurations = new HashSet<>();
+	private String name;
+	private String description;
+	private List<Machine> machines = new ArrayList<>();
+	private List<Preference> preferences = new ArrayList<>();
+	private Set<Runconfiguration> runconfigurations = new HashSet<>();
 	private transient File location;
 
 	
@@ -58,31 +58,49 @@ public class Project {
 		return name;
 	}
 	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	public String getDescription() {
 		return description;
+	}
+	
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public List<Machine> getMachines() {
 		return machines;
 	}
 	
+	public void setMachines(List<Machine> machines) {
+		this.machines = machines;
+	}
+	
 	public List<Preference> getPreferences() {
 		return preferences;
 	}
 
+	public void setPreferences(List<Preference> preferences) {
+		this.preferences = preferences;
+	}
+	
 	public Set<Runconfiguration> getRunconfigurations() {
 		return runconfigurations;
+	}
+	
+	public void setRunconfigurations(Set<Runconfiguration> runconfigurations) {
+		this.runconfigurations = runconfigurations;
 	}
 	
 	public File getLocation() {
 		return location;
 	}
-
 	
-	public void setLocation(File location) {
+	void setLocation(File location) {
 		this.location = location;
 	}
-
 	
 	@Override
 	public boolean equals(Object other) {
