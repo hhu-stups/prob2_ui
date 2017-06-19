@@ -29,6 +29,7 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyListProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -46,6 +47,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ListProperty<Machine> machines;
 	private final ListProperty<Preference> preferences;
 	private final ReadOnlyListProperty<Runconfiguration> runconfigurations;
+	private final ObjectProperty<Runconfiguration> currentRunconfiguration;
 
 	private final ObjectProperty<File> location;
 	private final BooleanProperty saved;
@@ -76,6 +78,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
 		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations",
 				FXCollections.observableArrayList());
+		this.currentRunconfiguration = new SimpleObjectProperty<>(this, "currentRunconfiguration", null);
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
 
@@ -115,6 +118,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (m != null && pref != null) {
 			MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 			machineLoader.loadAsync(m, pref);
+			this.currentRunconfiguration.set(runconfiguration);
 		} else {
 			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not load machine \"" + runconfiguration.getMachine()
 					+ "\" with preferences: \"" + runconfiguration.getPreference() + "\"").showAndWait();
@@ -174,6 +178,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return getRunconfigurations().stream().filter(runconfig -> machine.equals(runconfig.getMachine()))
 				.collect(Collectors.toList());
 	}
+	
+	public ReadOnlyObjectProperty<Runconfiguration> currentRunconfigurationProperty() {
+		return this.currentRunconfiguration;
+	}
+	
+	public Runconfiguration getCurrentRunconfiguration() {
+		return this.currentRunconfigurationProperty().get();
+	}
 
 	public void initializeMachines() {
 		for (Machine machine : machines) {
@@ -196,6 +208,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (!saved.get() && !confirmReplacingProject()) {
 			return;
 		}
+		currentRunconfiguration.set(null);
 		if (currentTrace.exists()) {
 			animations.removeTrace(currentTrace.get());
 			modelCheckController.resetView();

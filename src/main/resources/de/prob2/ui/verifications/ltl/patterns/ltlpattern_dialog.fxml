@@ -33,12 +33,12 @@
 							<TextField fx:id="tfName" HBox.hgrow="always"/>
 						</HBox>
 						<VBox spacing="10" alignment="center_left">
-							<Label text="%verifications.ltl.dialog.description" />
-							<TextArea fx:id="taDescription" styleClass="text-area-with-border" />
-						</VBox>
-						<VBox spacing="10" alignment="center_left">
 							<Label text="%verifications.ltl.dialog.pattern" />
 							<TextArea fx:id="taPattern" styleClass="text-area-with-border" />
+						</VBox>
+						<VBox spacing="10" alignment="center_left">
+							<Label text="%verifications.ltl.dialog.description" />
+							<TextArea fx:id="taDescription" styleClass="text-area-with-border" maxHeight="15"/>
 						</VBox>
 					</VBox>
 				</AnchorPane>

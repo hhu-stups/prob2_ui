@@ -7,19 +7,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
-import de.prob2.ui.helpsystem.HelpButton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.scripting.Api;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.beditor.BEditorStage;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -27,6 +26,7 @@ import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -43,7 +43,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachinesTab extends Tab {
@@ -155,24 +157,19 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	void addMachine() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Add Machine");
-		fileChooser.getExtensionFilters()
-				.add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
-
-		File machineFile = fileChooser.showOpenDialog(stageManager.getCurrent());
-		if (machineFile == null) {
+		final Machine.FileAndType selected = Machine.askForFile(this.getContent().getScene().getWindow());
+		if (selected == null) {
 			return;
 		}
-		Path projectLocation = currentProject.getLocation().toPath();
-		Path absolute = machineFile.toPath();
-		Path relative = projectLocation.relativize(absolute);
-		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
-			stageManager.makeAlert(Alert.AlertType.ERROR,
-					"The machine \"" + machineFile + "\" already exists in the current project.").showAndWait();
+		
+		final Path projectLocation = currentProject.getLocation().toPath();
+		final Path absolute = selected.getFile().toPath();
+		final Path relative = projectLocation.relativize(absolute);
+		if (currentProject.getMachines().contains(new Machine("", "", relative, selected.getType()))) {
+			stageManager.makeAlert(Alert.AlertType.ERROR, "The machine \"" + relative + "\" already exists in the current project.").showAndWait();
 			return;
 		}
-		injector.getInstance(AddMachinesDialog.class).showAndWait(relative);
+		injector.getInstance(AddMachinesDialog.class).showAndWait(relative, selected.getType()).ifPresent(currentProject::addMachine);
 	}
 
 	@FXML
