@@ -121,6 +121,4 @@ public class Machine extends LTLCheckableItem {
 	public int hashCode() {
 		return Objects.hash(location);
 	}
-	
-
 }
