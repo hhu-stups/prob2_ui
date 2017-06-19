@@ -15,6 +15,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
 import de.prob2.ui.verifications.ltl.patterns.LTLParseListener;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternMarker;
 
 public class LTLFormulaChecker {
 				
@@ -56,11 +57,19 @@ public class LTLFormulaChecker {
 		parser.addWarningListener(parseListener);
 		parser.setPatternManager(patternManager);
 		parser.parse();
-		formula = new LTL(item.getFormula(), new ClassicalBParser(), parser);
-		if (currentTrace != null) {
-			EvaluationCommand lcc = formula.getCommand(stateid);
-			currentTrace.getStateSpace().execute(lcc);
-			result = lcc.getValue();
+		if(parseListener.getErrorMarkers().size() > 0) {
+			String message = "";
+			for(LTLPatternMarker error : parseListener.getErrorMarkers()) {
+				message += error.getMsg()+"\n";
+			}
+			result = new LTLParseError(message);
+		} else {
+			formula = new LTL(item.getFormula(), new ClassicalBParser(), parser);
+			if (currentTrace != null) {
+				EvaluationCommand lcc = formula.getCommand(stateid);
+				currentTrace.getStateSpace().execute(lcc);
+				result = lcc.getValue();
+			}
 		}
 		Checked checked = resultHandler.handleFormulaResult(item, result, stateid);
 		injector.getInstance(LTLView.class).refreshFormula();

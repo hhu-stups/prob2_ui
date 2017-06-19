@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Singleton;
 
-import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLOk;
@@ -99,12 +98,12 @@ public class LTLResultHandler {
 		} else if(result instanceof LTLError) {
 			resultItem = new LTLResultItem(AlertType.ERROR, Checked.FAIL, ((LTLError) result).getMessage(), 
 											"Error while executing formula");
-		} else if(result instanceof LtlParseException) {
+		} else if(result instanceof LTLParseError) {
 			StringWriter sw = new StringWriter();
 			try (PrintWriter pw = new PrintWriter(sw)) {
 				((Throwable) result).printStackTrace(pw);
 			}
-			resultItem = new LTLResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse formula", 
+			resultItem = new LTLResultItem(AlertType.ERROR, Checked.FAIL, "Message: ", "Could not parse formula", 
 											sw.toString());
 			logger.error("Could not parse LTL formula", result);
 		}
