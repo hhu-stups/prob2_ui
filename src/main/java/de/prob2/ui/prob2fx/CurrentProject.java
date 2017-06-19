@@ -235,6 +235,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (!saved.get() && !confirmReplacingProject()) {
 			return;
 		}
+		currentRunconfiguration.set(null);
 		if (currentTrace.exists()) {
 			animations.removeTrace(currentTrace.get());
 			modelCheckController.resetView();
