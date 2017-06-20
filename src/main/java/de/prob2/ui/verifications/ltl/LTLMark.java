@@ -1,20 +1,20 @@
-package de.prob2.ui.verifications.ltl.patterns;
+package de.prob2.ui.verifications.ltl;
 
 import org.antlr.v4.runtime.Token;
 
-public class LTLPatternMark {
+public class LTLMark {
 
 	private int line;
 	private int pos;
 	private int length;
 
-	public LTLPatternMark(int line, int pos, int length) {
+	public LTLMark(int line, int pos, int length) {
 		this.line = line;
 		this.pos = pos;
 		this.length = length;
 	}
 
-	public LTLPatternMark(Token token, int length) {
+	public LTLMark(Token token, int length) {
 		this(token.getLine(), token.getCharPositionInLine(), length);
 	}
 

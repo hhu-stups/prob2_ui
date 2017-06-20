@@ -8,21 +8,20 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob.scripting.ModelTranslationError;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.consoles.b.BConsoleStage;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
-import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.formula.FormulaInputDialog;
+import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -33,12 +32,15 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
+import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -58,18 +60,21 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public final class MenuController extends MenuBar {
 	private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
+	private static final String PROB2 = "ProB 2";
 
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 	private final MenuToolkit menuToolkit;
 	private final RecentProjects recentProjects;
-	private final UIState uiState;
-	private final DetachViewStageController dvController;
-	private final AboutBoxController aboutController;
+	
 	private Window window;
 
 	@FXML
@@ -91,23 +96,21 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private MenuItem aboutItem;
 
-	private CurrentProject currentProject;
-	private static final String PROB2 = "ProB 2";
-
 	@Inject
-	private MenuController(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace,
-			final DetachViewStageController dvController, final AboutBoxController aboutController,
-			@Nullable final MenuToolkit menuToolkit, final RecentProjects recentProjects,
-			final CurrentProject currentProject, final UIState uiState) {
+	private MenuController(
+		final Injector injector,
+		final StageManager stageManager,
+		final CurrentTrace currentTrace,
+		final CurrentProject currentProject,
+		@Nullable final MenuToolkit menuToolkit,
+		final RecentProjects recentProjects
+	) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.dvController = dvController;
-		this.aboutController = aboutController;
 		this.menuToolkit = menuToolkit;
 		this.recentProjects = recentProjects;
-		this.uiState = uiState;
 		stageManager.loadFXML(this, "menu.fxml");
 
 		if (menuToolkit != null) {
@@ -201,12 +204,12 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleLoadDetached() {
-		this.dvController.showAndWait();
+		injector.getInstance(DetachViewStageController.class).showAndWait();
 	}
 
 	@FXML
 	private void handleAboutDialog() {
-		this.aboutController.showAndWait();
+		injector.getInstance(AboutBoxController.class).showAndWait();
 	}
 
 	@FXML
@@ -220,7 +223,7 @@ public final class MenuController extends MenuBar {
 				MainController main = injector.getInstance(MainController.class);
 				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 				loader.setLocation(selectedFile.toURI().toURL());
-				uiState.setGuiState("custom " + selectedFile.toURI().toURL().toExternalForm());
+				injector.getInstance(UIState.class).setGuiState("custom " + selectedFile.toURI().toURL().toExternalForm());
 				reset();
 				loader.setRoot(main);
 				loader.setController(main);
@@ -234,9 +237,9 @@ public final class MenuController extends MenuBar {
 	}
 
 	private void reset() {
-		uiState.clearDetachedStages();
-		uiState.getExpandedTitledPanes().clear();
-		dvController.resetCheckboxes();
+		injector.getInstance(UIState.class).clearDetachedStages();
+		injector.getInstance(UIState.class).getExpandedTitledPanes().clear();
+		injector.getInstance(DetachViewStageController.class).resetCheckboxes();
 		injector.getInstance(OperationsView.class).setVisible(true);
 		injector.getInstance(HistoryView.class).setVisible(true);
 		injector.getInstance(StatsView.class).setVisible(true);
@@ -246,26 +249,20 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void handleNewProjectFromFile() {
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open File");
-		fileChooser.getExtensionFilters()
-				.add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
-
-		final File selectedFile = fileChooser.showOpenDialog(this.window);
-		if (selectedFile == null) {
+		final Machine.FileAndType selected = Machine.askForFile(this.window);
+		if (selected == null) {
 			return;
 		}
-		Path projectLocation = currentProject.getDefaultLocation();
-		Path absolute = selectedFile.toPath();
-		Path relative = projectLocation.relativize(absolute);
-		Machine machine = new Machine(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')), "",
-				relative);
-		currentProject.set(new Project(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')),
-				"(this project was created automatically from file " + selectedFile.getAbsolutePath() + ")", machine,
-				currentProject.getDefaultLocation().toFile()));
-		Runconfiguration defaultRunconfig = new Runconfiguration(machine.getName(), "default");
+		final Path projectLocation = currentProject.getDefaultLocation();
+		final Path absolute = selected.getFile().toPath();
+		final Path relative = projectLocation.relativize(absolute);
+		final String shortName = selected.getFile().getName().substring(0, selected.getFile().getName().lastIndexOf('.'));
+		final String description = "(this project was created automatically from file " + absolute + ')';
+		final Machine machine = new Machine(shortName, "", relative, selected.getType());
+		currentProject.set(new Project(shortName, description, machine, currentProject.getDefaultLocation().toFile()));
+		
+		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
 		currentProject.addRunconfiguration(defaultRunconfig);
-
 		currentProject.startAnimation(defaultRunconfig);
 	}
 
@@ -284,7 +281,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	private void openProject(File file) {
-		currentProject.open(file);
+		injector.getInstance(ProjectManager.class).openProject(file);
 
 		Platform.runLater(() -> {
 			injector.getInstance(ModelcheckingController.class).resetView();
@@ -302,7 +299,7 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void saveProject() {
-		currentProject.save();
+		injector.getInstance(ProjectManager.class).saveCurrentProject();
 	}
 
 	@FXML
@@ -390,7 +387,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	public Parent loadPreset(String location) {
-		this.uiState.setGuiState(location);
+		injector.getInstance(UIState.class).setGuiState(location);
 		final MainController root = injector.getInstance(MainController.class);
 		root.refresh();
 		window.getScene().setRoot(root);

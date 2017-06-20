@@ -1,30 +1,50 @@
 package de.prob2.ui.project.runconfigurations;
 
-public class Runconfiguration {
-	private String machine;
-	private String preference;
+import java.util.Objects;
 
-	public Runconfiguration(String machine, String preference) {
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.DefaultPreference;
+import de.prob2.ui.project.preferences.Preference;
+
+public class Runconfiguration {
+	private String name;
+	private transient Machine machine;
+	private transient Preference preference;
+
+	public Runconfiguration(Machine machine, Preference preference) {
 		this.machine = machine;
 		this.preference = preference;
+		this.name = machine.getName() + "." + preference.getName();
 	}
-
-	public String getMachine() {
+	
+	public String getName() {
+		return name;
+	}
+	
+	public Machine getMachine() {
 		return machine;
 	}
 
-	public String getPreference() {
+	public Preference getPreference() {
 		return preference;
 	}
 	
-	@Override
-	public String toString() {
-		if ("default".equals(this.preference)) {
-			return this.machine;
-		}
-		return this.machine + "." + this.preference;
+	public String getMachineName() {
+		return name.split("\\.")[0];
 	}
 	
+	public String getPreferenceName() {
+		return name.split("\\.")[1];
+	}
+
+	@Override
+	public String toString() {
+		if(this.preference instanceof DefaultPreference) {
+			return this.machine.getName();
+		}
+		return this.name;
+	}
+
 	@Override
 	public boolean equals(Object object) {
 		if (object == null) {
@@ -34,14 +54,18 @@ public class Runconfiguration {
 			return false;
 		}
 		final Runconfiguration runconfig = (Runconfiguration) object;
+		if (this.name == null || runconfig.name == null || !this.name.equals(runconfig.name)) {
+			return false;
+		}
 		if (this.machine == null || runconfig.machine == null || !this.machine.equals(runconfig.machine)) {
 			return false;
 		}
-		return !(this.preference == null || runconfig.preference == null || !this.preference.equals(runconfig.preference));
+		return !(this.preference == null || runconfig.preference == null
+				|| !this.preference.equals(runconfig.preference));
 	}
-	
+
 	@Override
 	public int hashCode() {
-		return this.machine.hashCode() + this.preference.hashCode();
+		return Objects.hash(this.name);
 	}
 }

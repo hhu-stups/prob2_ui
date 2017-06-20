@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import javafx.fxml.FXML;
 import javafx.scene.control.ButtonBar;
@@ -36,7 +37,7 @@ public class RunconfigurationsDialog extends Dialog<Runconfiguration> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				return new Runconfiguration(machinesBox.getValue().getName(), preferencesBox.getValue().getName());
+				return new Runconfiguration(machinesBox.getValue(), preferencesBox.getValue());
 			}
 		});
 
@@ -51,11 +52,13 @@ public class RunconfigurationsDialog extends Dialog<Runconfiguration> {
 		preferencesBox.getItems().addAll(currentProject.getPreferences());
 		machinesBox.valueProperty().addListener((observable, from, to) -> {
 			if (to != null) {
-				List<String> prefs = currentProject.getRunconfigurations(to).stream().map(Runconfiguration::getPreference).collect(Collectors.toList());
+				List<String> prefs = currentProject.getRunconfigurations(to).stream()
+						.map(runconfig -> runconfig.getPreference().getName()).collect(Collectors.toList());
 				preferencesBox.getItems().clear();
-				preferencesBox.getItems().add(new Preference("default", null));
-				preferencesBox.getItems().addAll(currentProject.getPreferences());			
-				List<Preference> remove = preferencesBox.getItems().stream().filter(p -> prefs.contains(p.getName())).collect(Collectors.toList());
+				preferencesBox.getItems().add(new DefaultPreference());
+				preferencesBox.getItems().addAll(currentProject.getPreferences());
+				List<Preference> remove = preferencesBox.getItems().stream().filter(p -> prefs.contains(p.getName()))
+						.collect(Collectors.toList());
 				preferencesBox.getItems().removeAll(remove);
 				preferencesBox.getSelectionModel().selectFirst();
 			}

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.IAnimator;
@@ -19,6 +20,8 @@ import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
+import de.prob2.ui.project.machines.Machine;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -41,6 +44,7 @@ import javafx.collections.ObservableList;
  */
 @Singleton
 public final class CurrentTrace extends SimpleObjectProperty<Trace> {
+	private final Injector injector;
 	private final AnimationSelector animationSelector;
 	private final Api api;
 	
@@ -62,6 +66,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 
 	@Inject
 	private CurrentTrace(
+		final Injector injector,
 		final AnimationSelector animationSelector,
 		final Api api,
 		final CurrentState currentState,
@@ -69,6 +74,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		final CurrentModel currentModel
 	) {
 		super(null);
+		this.injector = injector;
 		this.animationSelector = animationSelector;
 		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
 			@Override
@@ -365,15 +371,22 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	 * 
 	 * @param trace the trace to reload
 	 * @param preferences preferences for the reloaded model
-	 * @throws CliError when thrown by {@link Api#b_load(String, Map)}
+	 * @throws CliError when thrown by the loader method
 	 * @throws IllegalStateException if there is no current trace
-	 * @throws IOException when thrown by {@link Api#b_load(String, Map)}
-	 * @throws ModelTranslationError when thrown by {@link Api#b_load(String, Map)}
-	 * @throws ProBError when thrown by {@link Api#b_load(String, Map)}
+	 * @throws IOException when thrown by the loader method
+	 * @throws ModelTranslationError when thrown by the loader method
+	 * @throws ProBError when thrown by the loader method
 	 */
 	public void reload(final Trace trace, final Map<String, String> preferences) throws IOException, ModelTranslationError {
+		if (!this.exists()) {
+			return;
+		}
+		
+		final CurrentProject currentProject = this.injector.getInstance(CurrentProject.class);
+		final Machine currentMachine = currentProject.getCurrentRunconfiguration().getMachine();
+		assert currentMachine != null;
 		final String filename = trace.getModel().getModelFile().getAbsolutePath();
-		final Trace newTrace = new Trace(api.b_load(filename, preferences));
+		final Trace newTrace = new Trace(currentMachine.getType().getLoader().load(api, filename, preferences));
 		this.animationSelector.removeTrace(trace);
 		this.animationSelector.addNewAnimation(newTrace);
 	}
@@ -382,13 +395,17 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	 * Reload the given trace's model and make the reloaded trace the current one. Preferences are maintained from the old model. If the reload fails, the current trace is not changed.
 	 *
 	 * @param trace the trace to reload
-	 * @throws CliError when thrown by {@link Api#b_load(String, Map)}
+	 * @throws CliError when thrown by the loader method
 	 * @throws IllegalStateException if there is no current trace
-	 * @throws IOException when thrown by {@link Api#b_load(String, Map)}
-	 * @throws ModelTranslationError when thrown by {@link Api#b_load(String, Map)}
-	 * @throws ProBError when thrown by {@link Api#b_load(String, Map)}
+	 * @throws IOException when thrown by the loader method
+	 * @throws ModelTranslationError when thrown by the loader method
+	 * @throws ProBError when thrown by the loader method
 	 */
 	public void reload(final Trace trace) throws IOException, ModelTranslationError {
+		if (!this.exists()) {
+			return;
+		}
+		
 		final GetCurrentPreferencesCommand cmd = new GetCurrentPreferencesCommand();
 		this.getStateSpace().execute(cmd);
 		this.reload(trace, cmd.getPreferences());

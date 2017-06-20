@@ -1,5 +1,8 @@
 package de.prob2.ui.verifications.ltl.patterns;
 
+import java.util.Objects;
+
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLCheckableItem;
 
 public class LTLPatternItem extends LTLCheckableItem {
@@ -26,6 +29,23 @@ public class LTLPatternItem extends LTLCheckableItem {
 	
 	public String getCode() {
 		return code;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof Machine)) {
+			return false;
+		}
+		LTLPatternItem otherItem = (LTLPatternItem) obj;
+		return otherItem.getName().equals(this.getName());
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, description, code);
 	}
 	
 }

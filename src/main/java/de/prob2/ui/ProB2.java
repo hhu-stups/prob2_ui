@@ -1,5 +1,6 @@
 package de.prob2.ui;
 
+import java.io.File;
 import java.util.Optional;
 
 import com.google.inject.Guice;
@@ -13,7 +14,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import de.prob2.ui.project.ProjectManager;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -46,17 +47,30 @@ public class ProB2 extends Application {
 		final CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 
 		final StringBuilder title = new StringBuilder();
-		if (currentTrace.exists()) {
-			title.append(currentTrace.getModel().getModelFile().getName());
+		
+		if (currentProject.getCurrentRunconfiguration() != null) {
+			title.append(currentProject.getCurrentRunconfiguration());
+			if (currentTrace.exists()) {
+				final File modelFile = currentTrace.getModel().getModelFile();
+				if (modelFile != null) {
+					title.append(" (");
+					title.append(modelFile.getName());
+					title.append(')');
+				}
+			}
+			
 			title.append(" - ");
 		}
+		
 		if (currentProject.exists()) {
 			title.append(currentProject.getName());
 			title.append(" - ");
 		}
+		
 		title.append("ProB 2.0");
+		
 		if (!currentProject.isSaved()) {
-			title.append("*");
+			title.append('*');
 		}
 
 		this.primaryStage.setTitle(title.toString());
@@ -117,7 +131,7 @@ public class ProB2 extends Application {
 				if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
 					event.consume();
 				} else if (result.isPresent() && result.get().equals(save)) {
-					currentProject.save();
+					injector.getInstance(ProjectManager.class).saveCurrentProject();
 					Platform.exit();
 				}
 			} else {

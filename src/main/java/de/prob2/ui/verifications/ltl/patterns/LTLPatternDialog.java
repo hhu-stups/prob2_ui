@@ -30,7 +30,6 @@ public class LTLPatternDialog extends Dialog<LTLPatternItem> {
 			if(type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				currentProject.setSaved(false);
 				return new LTLPatternItem(tfName.getText(), taDescription.getText(), taPattern.getText());
 			}
 		});
