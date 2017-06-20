@@ -43,7 +43,7 @@ public class EditMachinesDialog extends Dialog<Machine> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				editedMachine = new Machine(nameField.getText(), descriptionTextArea.getText(), machine.getPath());
+				editedMachine = new Machine(nameField.getText(), descriptionTextArea.getText(), machine.getPath(), machine.getType());
 				List<Runconfiguration> runconfigList = currentProject.getRunconfigurations();
 				runconfigList.stream().filter(runconfig -> runconfig.getMachine().equals(machine))
 						.forEach(runconfig -> currentProject.runconfigurationsProperty().set(
