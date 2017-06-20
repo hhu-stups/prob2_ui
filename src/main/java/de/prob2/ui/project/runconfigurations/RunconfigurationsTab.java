@@ -8,6 +8,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -54,6 +55,11 @@ public class RunconfigurationsTab extends Tab {
 			}
 		});
 		runconfigurationsListView.itemsProperty().bind(currentProject.runconfigurationsProperty());
+		this.selectedProperty().addListener((observable, from, to) -> {
+			if(to) {
+				runconfigurationsListView.refresh();
+			}
+		});
 		runconfigurationsListView.setCellFactory(listView -> {
 			ListCell<Runconfiguration> cell = new ListCell<Runconfiguration>() {
 				@Override
@@ -68,7 +74,7 @@ public class RunconfigurationsTab extends Tab {
 					}
 				}
 			};
-
+			
 			final MenuItem removeRunconfigMenuItem = new MenuItem("Remove Runconfiguration");
 			removeRunconfigMenuItem.setOnAction(event -> currentProject.removeRunconfiguration(cell.getItem()));
 			removeRunconfigMenuItem.disableProperty().bind(cell.emptyProperty());

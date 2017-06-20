@@ -10,7 +10,6 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
@@ -32,7 +31,6 @@ public class EditMachinesDialog extends Dialog<Machine> {
 
 	private final CurrentProject currentProject;
 	private Machine machine;
-	private Machine editedMachine;
 
 	@Inject
 	public EditMachinesDialog(final StageManager stageManager, final CurrentProject currentProject) {
@@ -43,13 +41,9 @@ public class EditMachinesDialog extends Dialog<Machine> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				editedMachine = new Machine(nameField.getText(), descriptionTextArea.getText(), machine.getPath(), machine.getType());
-				List<Runconfiguration> runconfigList = currentProject.getRunconfigurations();
-				runconfigList.stream().filter(runconfig -> runconfig.getMachine().equals(machine))
-						.forEach(runconfig -> currentProject.runconfigurationsProperty().set(
-								runconfigList.indexOf(runconfig),
-								new Runconfiguration(editedMachine, runconfig.getPreference())));			
-				return editedMachine;
+				machine.setName(nameField.getText());
+				machine.setDescription(descriptionTextArea.getText());
+				return machine;
 			}
 		});
 		stageManager.loadFXML(this, "machines_dialog.fxml");
