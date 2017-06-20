@@ -36,6 +36,10 @@ import javafx.scene.layout.AnchorPane;
 
 @Singleton
 public class LTLView extends AnchorPane{
+	
+	private enum LTLItemType {
+		Formula,Pattern;
+	}
 			
 	@FXML
 	private Button addFormulaButton;
@@ -207,10 +211,14 @@ public class LTLView extends AnchorPane{
 	public void addFormula() {
 		Machine machine = tvMachines.getFocusModel().getFocusedItem();
 		injector.getInstance(LTLFormulaDialog.class).showAndWait().ifPresent(item -> {
-			machine.addLTLFormula(item);
-			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
-					currentProject.getLocation()));
+			if(!machine.getFormulas().contains(item)) {
+				machine.addLTLFormula(item);
+				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+						currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+						currentProject.getLocation()));
+			} else {
+				showAlreadyExists(LTLItemType.Formula);
+			}
 		});
 		tvFormula.refresh();
 	}
@@ -219,25 +227,24 @@ public class LTLView extends AnchorPane{
 	public void addPattern() {
 		Machine machine = tvMachines.getFocusModel().getFocusedItem();
 		injector.getInstance(LTLPatternDialog.class).showAndWait().ifPresent(item -> {
-			if(!patternManager.patternExists(item.getName())) {
+			if(machine.getPatterns().contains(item)) {
 				machine.addLTLPattern(item);
 				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
 						currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 						currentProject.getLocation()));
 				patternParser.parsePattern(item, patternManager);
 			} else {
-				showPatternExists();
+				showAlreadyExists(LTLItemType.Pattern);
 			}
 		});
 		tvPattern.refresh();
 	}
 	
-	private void showPatternExists() {
+	private void showAlreadyExists(LTLItemType type) {
 		Alert alert = new Alert(AlertType.INFORMATION);
-		alert.setTitle("Pattern already exists");
-		alert.setHeaderText("Pattern already exists");
-		alert.setContentText("Declared pattern already exists");
-
+		alert.setTitle(type.name() + " already exists");
+		alert.setHeaderText(type.name() + " already exists");
+		alert.setContentText("Declared " + type.name() + " already exists");
 		alert.showAndWait();
 	}
 			
@@ -249,8 +256,8 @@ public class LTLView extends AnchorPane{
 		LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
 		formulaDialog.setData(item.getName(), item.getDescription(), item.getFormula());
 		formulaDialog.showAndWait().ifPresent(result-> {
-			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) || 
-					!item.getFormula().equals(result.getFormula())) {
+			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) ||
+				!item.getFormula().equals(result.getFormula())) {
 				item.setData(result.getName(), result.getDescription(), result.getFormula());
 				tvFormula.refresh();
 				currentProject.setSaved(false);
@@ -263,7 +270,7 @@ public class LTLView extends AnchorPane{
 		LTLPatternDialog patternDialog = injector.getInstance(LTLPatternDialog.class);
 		patternDialog.setData(item.getName(), item.getDescription(), item.getCode());
 		patternDialog.showAndWait().ifPresent(result-> {
-			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) || 
+			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) ||
 					!item.getCode().equals(result.getCode())) {
 				item.setData(result.getName(), result.getDescription(), result.getCode());
 				tvPattern.refresh();

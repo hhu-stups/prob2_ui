@@ -42,9 +42,7 @@ public class LTLFormulaItem extends LTLCheckableItem {
 			return false;
 		}
 		LTLFormulaItem otherFormulaItem = (LTLFormulaItem) other;
-		return this.name.equals(otherFormulaItem.getName())
-				&& this.description.equals(otherFormulaItem.getDescription())
-				&& this.formula.equals(otherFormulaItem.getFormula());
+		return this.name.equals(otherFormulaItem.getName());
 	}
 
 	@Override
