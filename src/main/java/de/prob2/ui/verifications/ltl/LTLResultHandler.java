@@ -103,7 +103,7 @@ public class LTLResultHandler {
 			try (PrintWriter pw = new PrintWriter(sw)) {
 				((Throwable) result).printStackTrace(pw);
 			}
-			resultItem = new LTLResultItem(AlertType.ERROR, Checked.FAIL, "Message: ", "Could not parse formula", 
+			resultItem = new LTLResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse formula", 
 											sw.toString());
 			logger.error("Could not parse LTL formula", result);
 		}

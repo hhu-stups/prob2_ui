@@ -22,6 +22,8 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.project.Project;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -217,13 +219,26 @@ public class LTLView extends AnchorPane{
 	public void addPattern() {
 		Machine machine = tvMachines.getFocusModel().getFocusedItem();
 		injector.getInstance(LTLPatternDialog.class).showAndWait().ifPresent(item -> {
-			machine.addLTLPattern(item);
-			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
-					currentProject.getLocation()));
-			patternParser.parsePattern(item, patternManager);
+			if(!patternManager.patternExists(item.getName())) {
+				machine.addLTLPattern(item);
+				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+						currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+						currentProject.getLocation()));
+				patternParser.parsePattern(item, patternManager);
+			} else {
+				showPatternExists();
+			}
 		});
 		tvPattern.refresh();
+	}
+	
+	private void showPatternExists() {
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("Pattern already exists");
+		alert.setHeaderText("Pattern already exists");
+		alert.setContentText("Declared pattern already exists");
+
+		alert.showAndWait();
 	}
 			
 	public void checkFormula(LTLFormulaItem item) {

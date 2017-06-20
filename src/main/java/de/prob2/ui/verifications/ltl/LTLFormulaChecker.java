@@ -36,7 +36,8 @@ public class LTLFormulaChecker {
 		ArrayList<Boolean> success = new ArrayList<>();
 		success.add(true);
 		machine.getFormulas().forEach(item-> {
-			if(this.checkFormula(item, patternManager) == Checked.FAIL) {
+			Checked result = this.checkFormula(item, patternManager);
+			if(result == Checked.FAIL || result == Checked.EXCEPTION) {
 				machine.setCheckedFailed();
 				success.set(0, false);
 			}

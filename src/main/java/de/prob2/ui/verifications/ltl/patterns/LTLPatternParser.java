@@ -29,24 +29,22 @@ public class LTLPatternParser {
 		
 	public void parsePattern(LTLPatternItem item, PatternManager patternManager) {
 		logger.trace("Parse ltl pattern");
-		if(!patternManager.patternExists(item.getName())) {
-			Pattern pattern = new Pattern();
-			pattern.setBuiltin(false);
-			pattern.setName(item.getName());
-			pattern.setDescription(item.getDescription());
-			pattern.setCode(item.getCode());
-			patternManager.getPatterns().add(pattern);
-			LTLParseListener parseListener = new LTLParseListener();
-			pattern.removeErrorListeners();
-			pattern.removeWarningListeners();
-			pattern.removeUpdateListeners();
-			pattern.addErrorListener(parseListener);
-			pattern.addWarningListener(parseListener);
-			pattern.addUpdateListener(parseListener);
-			pattern.updateDefinitions(patternManager);
-			resultHandler.handlePatternResult(parseListener, item);
-			injector.getInstance(LTLView.class).refreshPattern();
-		}
+		Pattern pattern = new Pattern();
+		pattern.setBuiltin(false);
+		pattern.setName(item.getName());
+		pattern.setDescription(item.getDescription());
+		pattern.setCode(item.getCode());
+		patternManager.getPatterns().add(pattern);
+		LTLParseListener parseListener = new LTLParseListener();
+		pattern.removeErrorListeners();
+		pattern.removeWarningListeners();
+		pattern.removeUpdateListeners();
+		pattern.addErrorListener(parseListener);
+		pattern.addWarningListener(parseListener);
+		pattern.addUpdateListener(parseListener);
+		pattern.updateDefinitions(patternManager);
+		resultHandler.handlePatternResult(parseListener, item);
+		injector.getInstance(LTLView.class).refreshPattern();
 	}
 	
 }
