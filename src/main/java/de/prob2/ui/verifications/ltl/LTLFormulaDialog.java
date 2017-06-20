@@ -19,9 +19,10 @@ public class LTLFormulaDialog extends Dialog<LTLFormulaItem> {
 	
 	@FXML
 	private TextArea taDescription;
-	
+		
 	@FXML
 	private TextArea taFormula;
+	
 	
 	@Inject
 	public LTLFormulaDialog(final StageManager stageManager, final Injector injector, final CurrentProject currentProject) {
@@ -30,14 +31,13 @@ public class LTLFormulaDialog extends Dialog<LTLFormulaItem> {
 			if(type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				currentProject.setSaved(false);
 				return new LTLFormulaItem(tfName.getText(), taDescription.getText(), taFormula.getText());
 			}
 		});
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "ltlformula_dialog.fxml");
 	}
-		
+	
 	public void setData(String name, String description, String formula) {
 		tfName.setText(name);
 		taDescription.setText(description);
