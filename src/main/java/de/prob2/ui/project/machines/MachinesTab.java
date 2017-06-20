@@ -103,7 +103,10 @@ public class MachinesTab extends Tab {
 
 				final MenuItem editMachineMenuItem = new MenuItem("Edit Machine");
 				editMachineMenuItem.setOnAction(event -> injector.getInstance(EditMachinesDialog.class)
-						.editAndShow(machine).ifPresent(result -> machinesItem.refresh()));
+						.editAndShow(machine).ifPresent(result -> {
+					machinesItem.refresh();
+					showDescriptionView(machine);
+				}));
 
 				final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
 				removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(machine));
@@ -124,18 +127,18 @@ public class MachinesTab extends Tab {
 						updateAnimationMenu(startAnimationMenu, machine);
 						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-						showDescription(machine);
+						showDescriptionView(machine);
 					}
 				});
 			}
 		});
-		
+
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addMachineButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 		((FontAwesomeIconView) (closeDescriptionButton.getGraphic())).glyphSizeProperty().bind(fontsize);
 	}
 
-	private void showDescription(Machine machine) {
+	private void showDescriptionView(Machine machine) {
 		if (splitPane.getItems().size() < 2) {
 			splitPane.getItems().add(0, descriptionView);
 		}
@@ -161,15 +164,17 @@ public class MachinesTab extends Tab {
 		if (selected == null) {
 			return;
 		}
-		
+
 		final Path projectLocation = currentProject.getLocation().toPath();
 		final Path absolute = selected.getFile().toPath();
 		final Path relative = projectLocation.relativize(absolute);
 		if (currentProject.getMachines().contains(new Machine("", "", relative, selected.getType()))) {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "The machine \"" + relative + "\" already exists in the current project.").showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR,
+					"The machine \"" + relative + "\" already exists in the current project.").showAndWait();
 			return;
 		}
-		injector.getInstance(AddMachinesDialog.class).showAndWait(relative, selected.getType()).ifPresent(currentProject::addMachine);
+		injector.getInstance(AddMachinesDialog.class).showAndWait(relative, selected.getType())
+				.ifPresent(currentProject::addMachine);
 	}
 
 	@FXML

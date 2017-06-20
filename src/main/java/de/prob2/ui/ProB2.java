@@ -14,7 +14,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import de.prob2.ui.project.ProjectManager;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -131,7 +131,7 @@ public class ProB2 extends Application {
 				if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
 					event.consume();
 				} else if (result.isPresent() && result.get().equals(save)) {
-					currentProject.save();
+					injector.getInstance(ProjectManager.class).saveCurrentProject();
 					Platform.exit();
 				}
 			} else {

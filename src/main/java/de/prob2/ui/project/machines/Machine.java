@@ -205,7 +205,7 @@ public class Machine extends LTLCheckableItem {
 			return false;
 		}
 		Machine otherMachine = (Machine) other;
-		return otherMachine.location.equals(this.location);
+		return otherMachine.location.equals(this.location) && otherMachine.name.equals(this.name);
 	}
 	
 	@Override
@@ -217,6 +217,4 @@ public class Machine extends LTLCheckableItem {
 	public int hashCode() {
 		return Objects.hash(location);
 	}
-	
-
 }

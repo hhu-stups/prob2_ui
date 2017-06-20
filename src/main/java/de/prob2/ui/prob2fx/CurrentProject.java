@@ -1,42 +1,28 @@
 package de.prob2.ui.prob2fx;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.google.gson.Gson;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.AnimationSelector;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -53,18 +39,8 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
-import org.hildan.fxgson.FxGson;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
-	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
-	private static final Logger LOGGER = LoggerFactory.getLogger(CurrentProject.class);
-
-	private final Gson gson;
-
 	private final BooleanProperty exists;
 	private final StringProperty name;
 	private final StringProperty description;
@@ -91,8 +67,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.animations = animations;
 		this.currentTrace = currentTrace;
 		this.modelCheckController = modelCheckController;
-
-		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
 				Paths.get(System.getProperty("user.home")));
@@ -136,10 +110,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public void startAnimation(Runconfiguration runconfiguration) {
-		Machine m = getMachine(runconfiguration.getMachine());
+		Machine m = runconfiguration.getMachine();
 		Map<String, String> pref = new HashMap<>();
-		if (!"default".equals(runconfiguration.getPreference())) {
-			pref = getPreferenceAsMap(runconfiguration.getPreference());
+		if (!(runconfiguration.getPreference() instanceof DefaultPreference)) {
+			pref = runconfiguration.getPreference().getPreferences();
 		}
 		if (m != null && pref != null) {
 			MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
@@ -163,8 +137,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		machinesList.remove(machine);
 		List<Runconfiguration> runconfigsList = new ArrayList<>();
 		runconfigsList.addAll(this.getRunconfigurations());
-		this.getRunconfigurations().stream().filter(r -> r.getMachine().equals(machine.getName()))
-				.forEach(runconfigsList::remove);
+		this.getRunconfigurations(machine).stream().forEach(runconfigsList::remove);
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 				runconfigsList, this.getLocation()));
 	}
@@ -202,7 +175,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public List<Runconfiguration> getRunconfigurations(Machine machine) {
-		return getRunconfigurations().stream().filter(runconfig -> runconfig.getMachine().equals(machine.getName()))
+		return getRunconfigurations().stream().filter(runconfig -> machine.equals(runconfig.getMachine()))
 				.collect(Collectors.toList());
 	}
 	
@@ -333,56 +306,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return this.savedProperty().get();
 	}
 
-	public void save() {
-		File loc = new File(this.getLocation() + File.separator + this.getName() + ".json");
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(loc), PROJECT_CHARSET)) {
-
-			this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
-					this.getRunconfigurations(), this.getLocation()));
-			gson.toJson(this.get(), writer);
-		} catch (FileNotFoundException exc) {
-			LOGGER.warn("Failed to create project data file", exc);
-		} catch (IOException exc) {
-			LOGGER.warn("Failed to save project", exc);
-		}
-		this.saved.set(true);
-	}
-
-	public void open(File file) {
-		Project project;
-		try (final Reader reader = new InputStreamReader(new FileInputStream(file), PROJECT_CHARSET)) {
-			project = gson.fromJson(reader, Project.class);
-			project.setLocation(file.getParentFile());
-			project = replaceMissingWithDefaults(project);
-		} catch (FileNotFoundException exc) {
-			LOGGER.warn("Project file not found", exc);
-			return;
-		} catch (IOException exc) {
-			LOGGER.warn("Failed to open project file", exc);
-			return;
-		}
-		this.set(project);
-		this.saved.set(true);
-	}
-
-	private Project replaceMissingWithDefaults(Project project) {
-		String nameString = (project.getName() == null) ? "" : project.getName();
-		String descriptionString = (project.getDescription() == null) ? "" : project.getDescription();
-		List<Machine> machineList = new ArrayList<>();
-		if (project.getMachines() != null) {
-			machineList = project.getMachines();
-			for (Machine machine : machineList) {
-				machine.replaceMissingWithDefaults();
-			}
-		}
-		List<Preference> preferenceList = (project.getPreferences() == null) ? new ArrayList<>()
-				: project.getPreferences();
-		Set<Runconfiguration> runconfigurationSet = (project.getRunconfigurations() == null) ? new HashSet<>()
-				: project.getRunconfigurations();
-		return new Project(nameString, descriptionString, machineList, preferenceList, runconfigurationSet,
-				project.getLocation());
-	}
-
 	public Machine getMachine(String machine) {
 		for (Machine m : getMachines()) {
 			if (m.getName().equals(machine)) {
@@ -400,7 +323,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 		return null;
 	}
-
+	
 	private boolean confirmReplacingProject() {
 		if (exists()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);

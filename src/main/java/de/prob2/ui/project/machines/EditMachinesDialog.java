@@ -10,7 +10,6 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
@@ -31,7 +30,7 @@ public class EditMachinesDialog extends Dialog<Machine> {
 	private ButtonType okButtonType;
 
 	private final CurrentProject currentProject;
-	private Machine editMachine;
+	private Machine machine;
 
 	@Inject
 	public EditMachinesDialog(final StageManager stageManager, final CurrentProject currentProject) {
@@ -42,14 +41,9 @@ public class EditMachinesDialog extends Dialog<Machine> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				List<Runconfiguration> runconfigList = currentProject.getRunconfigurations();
-				runconfigList.stream().filter(runconfig -> runconfig.getMachine().equals(editMachine.getName()))
-						.forEach(runconfig -> currentProject.runconfigurationsProperty().set(
-								runconfigList.indexOf(runconfig),
-								new Runconfiguration(nameField.getText(), runconfig.getPreference())));
-				editMachine.setName(nameField.getText());
-				editMachine.setDescription(descriptionTextArea.getText());
-				return editMachine;
+				machine.setName(nameField.getText());
+				machine.setDescription(descriptionTextArea.getText());
+				return machine;
 			}
 		});
 		stageManager.loadFXML(this, "machines_dialog.fxml");
@@ -57,7 +51,7 @@ public class EditMachinesDialog extends Dialog<Machine> {
 
 	public Optional<Machine> editAndShow(Machine machine) {
 		this.setTitle("Edit " + machine.getName());
-		editMachine = machine;
+		this.machine = machine;
 
 		List<Machine> machinesList = currentProject.getMachines();
 		Set<String> machineNamesSet = new HashSet<>();

@@ -32,8 +32,10 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
+import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
@@ -251,7 +253,6 @@ public final class MenuController extends MenuBar {
 		if (selected == null) {
 			return;
 		}
-		
 		final Path projectLocation = currentProject.getDefaultLocation();
 		final Path absolute = selected.getFile().toPath();
 		final Path relative = projectLocation.relativize(absolute);
@@ -260,7 +261,7 @@ public final class MenuController extends MenuBar {
 		final Machine machine = new Machine(shortName, "", relative, selected.getType());
 		currentProject.set(new Project(shortName, description, machine, currentProject.getDefaultLocation().toFile()));
 		
-		final Runconfiguration defaultRunconfig = new Runconfiguration(machine.getName(), "default");
+		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
 		currentProject.addRunconfiguration(defaultRunconfig);
 		currentProject.startAnimation(defaultRunconfig);
 	}
@@ -280,7 +281,7 @@ public final class MenuController extends MenuBar {
 	}
 
 	private void openProject(File file) {
-		currentProject.open(file);
+		injector.getInstance(ProjectManager.class).openProject(file);
 
 		Platform.runLater(() -> {
 			injector.getInstance(ModelcheckingController.class).resetView();
@@ -298,7 +299,7 @@ public final class MenuController extends MenuBar {
 
 	@FXML
 	private void saveProject() {
-		currentProject.save();
+		injector.getInstance(ProjectManager.class).saveCurrentProject();
 	}
 
 	@FXML

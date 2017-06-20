@@ -71,6 +71,9 @@ public class PreferencesDialog extends Dialog<Preference> {
 			if (preferencesNamesSet.contains(to)) {
 				okButton.setDisable(true);
 				errorExplanationLabel.setText("There is already a preference named '" + to + "'");
+			} else if ("default".equals(to)) {
+				okButton.setDisable(true);
+				errorExplanationLabel.setText("Name cannot be 'default'");
 			} else if (to.isEmpty()) {
 				okButton.setDisable(true);
 				errorExplanationLabel.setText("Name cannot be empty");
