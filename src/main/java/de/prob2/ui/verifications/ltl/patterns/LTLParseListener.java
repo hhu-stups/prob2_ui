@@ -21,8 +21,8 @@ public class LTLParseListener extends BaseErrorListener implements WarningListen
 
 	private final Logger logger = LoggerFactory.getLogger(LTLParseListener.class);
 
-	private List<LTLPatternMarker> warningMarkers = new LinkedList<LTLPatternMarker>();
-	private List<LTLPatternMarker> errorMarkers = new LinkedList<LTLPatternMarker>();
+	private List<LTLPatternMarker> warningMarkers = new LinkedList<>();
+	private List<LTLPatternMarker> errorMarkers = new LinkedList<>();
 
 	@Override
 	public void warning(Token token, String msg) {

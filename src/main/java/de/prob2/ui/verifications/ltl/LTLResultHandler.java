@@ -120,11 +120,11 @@ public class LTLResultHandler {
 		if(parseListener.getErrorMarkers().size() == 0) {
 			resultItem = new LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "Parsing LTL Pattern succeeded", "Success");
 		} else {
-			String msg = "";
+			StringBuilder msg = new StringBuilder();
 			for (LTLPatternMarker marker: parseListener.getErrorMarkers()) {
-				msg += marker.getMsg();
+				msg.append(marker.getMsg()+ "\n");
 			}
-			resultItem = new LTLResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse pattern", msg);
+			resultItem = new LTLResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse pattern", msg.toString());
 		}
 		this.showResult(resultItem, item, null);
 	}

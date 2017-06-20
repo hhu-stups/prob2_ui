@@ -59,18 +59,16 @@ public class LTLFormulaChecker {
 		parser.setPatternManager(patternManager);
 		parser.parse();
 		if(parseListener.getErrorMarkers().size() > 0) {
-			String message = "";
+			StringBuilder msg = new StringBuilder();
 			for(LTLPatternMarker error : parseListener.getErrorMarkers()) {
-				message += error.getMsg()+"\n";
+				msg.append(error.getMsg()+"\n");
 			}
-			result = new LTLParseError(message);
+			result = new LTLParseError(msg.toString());
 		} else {
 			formula = new LTL(item.getFormula(), new ClassicalBParser(), parser);
-			if (currentTrace != null) {
-				EvaluationCommand lcc = formula.getCommand(stateid);
-				currentTrace.getStateSpace().execute(lcc);
-				result = lcc.getValue();
-			}
+			EvaluationCommand lcc = formula.getCommand(stateid);
+			currentTrace.getStateSpace().execute(lcc);
+			result = lcc.getValue();
 		}
 		Checked checked = resultHandler.handleFormulaResult(item, result, stateid);
 		injector.getInstance(LTLView.class).refreshFormula();
