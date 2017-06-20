@@ -164,6 +164,7 @@ public class LTLView extends AnchorPane{
 				Machine machine = tvMachines.getFocusModel().getFocusedItem();
 				LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
 				machine.removeLTLPattern(item);
+				patternParser.removePattern(item, patternManager);
 				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
 						tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 						currentProject.getLocation()));
