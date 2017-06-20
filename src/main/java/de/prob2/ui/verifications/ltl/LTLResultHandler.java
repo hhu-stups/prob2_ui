@@ -15,8 +15,8 @@ import de.prob.check.LTLError;
 import de.prob.check.LTLOk;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import de.prob2.ui.verifications.ltl.patterns.LTLParseListener;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternMarker;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.formula.LTLParseError;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Alert.AlertType;
@@ -121,7 +121,7 @@ public class LTLResultHandler {
 			resultItem = new LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "Parsing LTL Pattern succeeded", "Success");
 		} else {
 			StringBuilder msg = new StringBuilder();
-			for (LTLPatternMarker marker: parseListener.getErrorMarkers()) {
+			for (LTLMarker marker: parseListener.getErrorMarkers()) {
 				msg.append(marker.getMsg()+ "\n");
 			}
 			resultItem = new LTLResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse pattern", msg.toString());

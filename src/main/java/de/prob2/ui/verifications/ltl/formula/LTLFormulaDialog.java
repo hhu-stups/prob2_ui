@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.ltl;
+package de.prob2.ui.verifications.ltl.formula;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;

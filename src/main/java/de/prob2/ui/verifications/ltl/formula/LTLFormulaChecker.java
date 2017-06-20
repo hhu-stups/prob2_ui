@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.ltl;
+package de.prob2.ui.verifications.ltl.formula;
 
 import java.util.ArrayList;
 
@@ -13,9 +13,11 @@ import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.statespace.State;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.ltl.LTLMarker;
+import de.prob2.ui.verifications.ltl.LTLParseListener;
+import de.prob2.ui.verifications.ltl.LTLResultHandler;
+import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
-import de.prob2.ui.verifications.ltl.patterns.LTLParseListener;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternMarker;
 
 public class LTLFormulaChecker {
 				
@@ -60,7 +62,7 @@ public class LTLFormulaChecker {
 		parser.parse();
 		if(parseListener.getErrorMarkers().size() > 0) {
 			StringBuilder msg = new StringBuilder();
-			for(LTLPatternMarker error : parseListener.getErrorMarkers()) {
+			for(LTLMarker error : parseListener.getErrorMarkers()) {
 				msg.append(error.getMsg()+"\n");
 			}
 			result = new LTLParseError(msg.toString());

@@ -15,7 +15,7 @@ import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 
 import de.prob2.ui.verifications.ltl.LTLCheckableItem;
-import de.prob2.ui.verifications.ltl.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
 import javafx.beans.property.ListProperty;

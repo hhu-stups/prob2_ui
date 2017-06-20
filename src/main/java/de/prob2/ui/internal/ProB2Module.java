@@ -11,7 +11,6 @@ import com.google.inject.util.Providers;
 import de.codecentric.centerdevice.MenuToolkit;
 
 import de.prob.MainModule;
-import de.prob2.ui.verifications.ltl.LTLFormulaChecker;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.MainController;
 import de.prob2.ui.history.HistoryView;
@@ -30,6 +29,7 @@ import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.ltl.MachineTableView;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import de.prob2.ui.visualisation.VisualisationView;
 import javafx.fxml.FXMLLoader;
