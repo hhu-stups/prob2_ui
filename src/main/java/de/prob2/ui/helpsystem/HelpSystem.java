@@ -30,7 +30,7 @@ public class HelpSystem extends StackPane {
         treeView.setRoot(createNode(f));
         treeView.setShowRoot(false);
         treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.isLeaf()){
+            if (newVal!=null && newVal.isLeaf()){
                 webEngine.load(((HelpTreeItem) newVal).getFile().toURI().toString());
             }
         });
