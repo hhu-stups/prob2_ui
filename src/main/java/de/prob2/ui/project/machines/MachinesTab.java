@@ -3,6 +3,7 @@ package de.prob2.ui.project.machines;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.scripting.Api;
 import de.prob.statespace.StateSpace;
 
+import de.prob2.ui.ProB2;
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.ProB2Module;
@@ -88,8 +90,8 @@ public class MachinesTab extends Tab {
 	}
 
 	@FXML
-	public void initialize() {
-		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/Developer_Manual");
+	public void initialize() throws URISyntaxException {
+		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
 		noMachinesStack.managedProperty().bind(currentProject.machinesProperty().emptyProperty());
 		noMachinesStack.visibleProperty().bind(currentProject.machinesProperty().emptyProperty());
 

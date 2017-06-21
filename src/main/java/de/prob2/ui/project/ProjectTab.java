@@ -3,6 +3,7 @@ package de.prob2.ui.project;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -15,6 +16,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.text.Text;
+
+import java.net.URISyntaxException;
 
 @Singleton
 public class ProjectTab extends Tab {
@@ -41,8 +44,8 @@ public class ProjectTab extends Tab {
 	}
 
 	@FXML
-	public void initialize() {
-		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/The_ProB_Animator_and_Model_Checker");
+	public void initialize() throws URISyntaxException {
+		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
 		initName();
 		initDescription();
 	}
