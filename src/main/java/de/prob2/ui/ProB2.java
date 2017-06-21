@@ -15,6 +15,7 @@ import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -95,11 +96,9 @@ public class ProB2 extends Application {
 		Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
 			LOGGER.error("Uncaught exception on thread {}", thread, exc);
 			Platform.runLater(() -> {
-				final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR);
+				final String message = String.format("An internal exception occurred and was not caught. This is probably a bug.%nThread: %s", thread);
+				final Alert alert = stageManager.makeExceptionAlert(Alert.AlertType.ERROR, message, exc);
 				alert.setHeaderText("Uncaught internal exception");
-				alert.setContentText(String.format(
-						"An internal exception occurred and was not caught. This is probably a bug.%n%nException: %s%nThread: %s%n%nThe full stack trace can be found in the log file.",
-						exc, thread));
 				alert.show();
 			});
 		});
