@@ -27,9 +27,9 @@ public class HelpButton extends Button{
 
     @FXML
     public void openHelp() {
-        final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
+        final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
         if (!pathToHelp.isEmpty()) {
-            ((HelpSystemStage) helpSystemStage).setContent(pathToHelp);
+            helpSystemStage.setContent(pathToHelp);
         }
         helpSystemStage.show();
         helpSystemStage.toFront();

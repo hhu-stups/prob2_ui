@@ -3,6 +3,7 @@ package de.prob2.ui.project.runconfigurations;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
@@ -17,6 +18,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.input.MouseButton;
+
+import java.net.URISyntaxException;
 
 public class RunconfigurationsTab extends Tab {
 
@@ -41,8 +44,8 @@ public class RunconfigurationsTab extends Tab {
 	}
 
 	@FXML
-	public void initialize() {
-		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/Tutorial");
+	public void initialize() throws URISyntaxException {
+		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
 		runconfigsPlaceholder.setText("Add machines first");
 		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
 			if (to) {
