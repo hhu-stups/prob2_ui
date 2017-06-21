@@ -1,8 +1,12 @@
 package de.prob2.ui.visualisation;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -15,6 +19,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -24,6 +29,8 @@ import javafx.scene.layout.StackPane;
 
 @Singleton
 public class VisualisationView extends AnchorPane {
+	private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationView.class);
+	
 	@FXML
 	private StackPane probLogoStackPane;
 	@FXML
@@ -33,12 +40,14 @@ public class VisualisationView extends AnchorPane {
 
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
+	private final StageManager stageManager;
 
 	@Inject
 	public VisualisationView(final CurrentTrace currentTrace, final CurrentProject currentProject,
 			final StageManager stageManager) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "visualisation_view.fxml");
 	}
 
@@ -55,10 +64,16 @@ public class VisualisationView extends AnchorPane {
 				GetImagesForMachineCommand getImagesForMachineCommand = new GetImagesForMachineCommand();
 				stateSpace.execute(getImagesForMachineCommand);
 				Map<Integer, String> images = getImagesForMachineCommand.getImages();
-
 				if (!images.isEmpty()) {
-					probLogoStackPane.setVisible(false);
-					showImages(to, stateSpace, images);
+					try {
+						showImages(to, stateSpace, images);
+						probLogoStackPane.setVisible(false);
+					} catch (IllegalArgumentException e) {
+						LOGGER.warn("Failed to open images for visualisation", e);
+						Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, e.getMessage());
+						alert.setHeaderText("Visualisation not possible");
+						alert.showAndWait();
+					}
 				} else {
 					probLogoStackPane.setVisible(true);
 				}
@@ -69,7 +84,7 @@ public class VisualisationView extends AnchorPane {
 
 	}
 
-	private void showImages(State state, StateSpace stateSpace, Map<Integer, String> images) {
+	private void showImages(State state, StateSpace stateSpace, Map<Integer, String> images) throws IllegalArgumentException {
 		GetImagesForStateCommand getImagesForStateCommand = new GetImagesForStateCommand(state.getId());
 		stateSpace.execute(getImagesForStateCommand);
 		int[][] imageMatrix = getImagesForStateCommand.getMatrix();
@@ -81,6 +96,10 @@ public class VisualisationView extends AnchorPane {
 				String imageURL = images.get(imageMatrix[r][c]);
 				final String projectLocation = currentProject.get().getLocation().getPath();
 				Path imagePath = Paths.get(projectLocation, imageURL);
+				File imageFile = new File(imagePath.toString());				
+				if(!imageFile.exists()) {
+					throw new IllegalArgumentException("Invalid path to image: " + imagePath);
+				}
 				ImageView imageView = new ImageView(new Image("file:" + imagePath.toString()));
 				visualisationGridPane.add(imageView, c, r);
 			}
