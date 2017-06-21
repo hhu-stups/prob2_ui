@@ -231,7 +231,7 @@ public class LTLView extends AnchorPane{
 	public void addPattern() {
 		Machine machine = tvMachines.getFocusModel().getFocusedItem();
 		injector.getInstance(LTLPatternDialog.class).showAndWait().ifPresent(item -> {
-			if(machine.getPatterns().contains(item)) {
+			if(!machine.getPatterns().contains(item)) {
 				machine.addLTLPattern(item);
 				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
 						currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
