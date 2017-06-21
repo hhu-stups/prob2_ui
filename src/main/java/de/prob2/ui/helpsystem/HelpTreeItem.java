@@ -6,12 +6,9 @@ import javafx.scene.control.TreeItem;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +26,7 @@ public class HelpTreeItem extends TreeItem<String>{
             text = text.replaceAll("\\s+", " ");
             Pattern p = Pattern.compile("<title>(.*?)</title>");
             Matcher m = p.matcher(text);
-            while (m.find() == true) {
+            while (m.find()) {
                 this.setValue(m.group(1));
             }
         }
@@ -56,9 +53,9 @@ public class HelpTreeItem extends TreeItem<String>{
     }
 
     private ObservableList<TreeItem<String>> buildChildren(HelpTreeItem helpTreeItem) throws IOException {
-        File f = helpTreeItem.f;
-        if (f != null && f.isDirectory()) {
-            File[] files = f.listFiles();
+        File file = helpTreeItem.f;
+        if (file != null && file.isDirectory()) {
+            File[] files = file.listFiles();
             if (files != null) {
                 ObservableList<TreeItem<String>> children = FXCollections.observableArrayList();
                 for (File childFile : files) {
