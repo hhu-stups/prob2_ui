@@ -9,7 +9,6 @@ import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.ltl.parser.LtlParser;
-import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.statespace.State;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -34,11 +33,11 @@ public class LTLFormulaChecker {
 		this.resultHandler = resultHandler;
 	}
 	
-	public void checkMachine(Machine machine, PatternManager patternManager) {
+	public void checkMachine(Machine machine) {
 		ArrayList<Boolean> success = new ArrayList<>();
 		success.add(true);
 		machine.getFormulas().forEach(item-> {
-			Checked result = this.checkFormula(item, patternManager);
+			Checked result = this.checkFormula(item, machine);
 			if(result == Checked.FAIL || result == Checked.EXCEPTION) {
 				machine.setCheckedFailed();
 				success.set(0, false);
@@ -49,10 +48,10 @@ public class LTLFormulaChecker {
 		}
 	}
 	
-	public Checked checkFormula(LTLFormulaItem item, PatternManager patternManager) {
+	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
 		State stateid = currentTrace.getCurrentState();
 		LtlParser parser = new LtlParser(item.getFormula());
-		parser.setPatternManager(patternManager);
+		parser.setPatternManager(machine.getPatternManager());
 		Checked checked = resultHandler.handleFormulaResult(item, getResult(parser, item), stateid);
 		injector.getInstance(LTLView.class).refreshFormula();
 		return checked;

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
@@ -81,6 +82,7 @@ public class Machine extends LTLCheckableItem {
 	private Machine.Type type;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
+	private transient PatternManager patternManager;
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
 		super(name,description);
@@ -145,6 +147,7 @@ public class Machine extends LTLCheckableItem {
 				item.initializeStatus();
 			}
 		}
+		patternManager = new PatternManager();
 	}
 		
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {
@@ -216,5 +219,13 @@ public class Machine extends LTLCheckableItem {
 	@Override
 	public int hashCode() {
 		return Objects.hash(location);
+	}
+	
+	public PatternManager getPatternManager() {
+		return patternManager;
+	}
+	
+	public void clearPatternManager() {
+		patternManager.getPatterns().clear();
 	}
 }

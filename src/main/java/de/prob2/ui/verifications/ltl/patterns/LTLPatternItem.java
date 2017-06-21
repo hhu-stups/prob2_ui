@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.ltl.patterns;
 
 import java.util.Objects;
 
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLCheckableItem;
 
 public class LTLPatternItem extends LTLCheckableItem {
@@ -36,7 +35,7 @@ public class LTLPatternItem extends LTLCheckableItem {
 		if (obj == this) {
 			return true;
 		}
-		if (!(obj instanceof Machine)) {
+		if (!(obj instanceof LTLPatternItem)) {
 			return false;
 		}
 		LTLPatternItem otherItem = (LTLPatternItem) obj;
