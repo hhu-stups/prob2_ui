@@ -3,6 +3,7 @@ package de.prob2.ui.helpsystem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,7 +41,7 @@ public class HelpTreeItem extends TreeItem<String>{
             try {
                 super.getChildren().setAll(buildChildren(this));
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(HelpTreeItem.class).error("Can not build children",e);
             }
         }
         return super.getChildren();
