@@ -104,25 +104,25 @@ public class VisualisationView extends AnchorPane {
 
 	private Image getImage(String imageURL) throws FileNotFoundException {
 		String imagePath;
-		//first look in project folder
 		final String projectFolder = currentProject.get().getLocation().getPath();
-		imagePath = Paths.get(projectFolder, imageURL).toString();
-		File imageInProjectFolder = new File(imagePath);
-		if (!imageInProjectFolder.exists()) {
-			//look in machine folder
-			File machineFile = new File(currentProject.getCurrentRunconfiguration().getMachine().getPath().toString());
-			String machineFolder = Paths.get(projectFolder, machineFile.getParent()).toString();
-			imagePath = Paths.get(machineFolder, imageURL).toString();
-			File imageInMachineFolder = new File(imagePath);
-			if(!imageInMachineFolder.exists()) {
+		//look in machine folder
+		File machineFile = new File(currentProject.getCurrentRunconfiguration().getMachine().getPath().toString());
+		String machineFolder = Paths.get(projectFolder, machineFile.getParent()).toString();
+		imagePath = Paths.get(machineFolder, imageURL).toString();
+		File imageInMachineFolder = new File(imagePath);
+		//look in project folder
+		if (!imageInMachineFolder.exists()) {
+			imagePath = Paths.get(projectFolder, imageURL).toString();
+			File imageInProjectFolder = new File(imagePath);
+			if(!imageInProjectFolder.exists()) {
 				//look in ProB folder
 				String probFolder = Main.getProBDirectory();
 				imagePath = Paths.get(probFolder, imageURL).toString();
 				File imageInProbFolder = new File(imagePath);
 				if(!imageInProbFolder.exists()) {
 					String imageName = new File(imagePath).getName();
-					throw new FileNotFoundException("Image " + imageName + " not found in project folder (" + imageInProjectFolder.getParent() 
-							+ ") and machine folder (" + imageInMachineFolder.getParent() + ") and ProB folder (" + imageInProbFolder.getParent() + ")");
+					throw new FileNotFoundException("Image " + imageName + " not found in machine folder (" + imageInMachineFolder.getParent() 
+							+ ") and project folder (" + imageInProjectFolder.getParent() + ") and ProB folder (" + imageInProbFolder.getParent() + ")");
 				}
 			}
 		}
