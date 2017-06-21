@@ -32,6 +32,11 @@ public class LTLPatternParser {
 		logger.trace("Parse ltl pattern");
 		Pattern pattern = itemToPattern(item);
 		patternManager.getPatterns().add(pattern);
+		resultHandler.handlePatternResult(checkDefinition(pattern, patternManager), item);
+		injector.getInstance(LTLView.class).refreshPattern();
+	}
+	
+	private LTLParseListener checkDefinition(Pattern pattern, PatternManager patternManager) {
 		LTLParseListener parseListener = new LTLParseListener();
 		pattern.removeErrorListeners();
 		pattern.removeWarningListeners();
@@ -40,8 +45,7 @@ public class LTLPatternParser {
 		pattern.addWarningListener(parseListener);
 		pattern.addUpdateListener(parseListener);
 		pattern.updateDefinitions(patternManager);
-		resultHandler.handlePatternResult(parseListener, item);
-		injector.getInstance(LTLView.class).refreshPattern();
+		return parseListener;
 	}
 	
 	public void removePattern(LTLPatternItem item, PatternManager patternManager) {
