@@ -50,16 +50,18 @@ public class LTLFormulaChecker {
 	}
 	
 	public Checked checkFormula(LTLFormulaItem item, PatternManager patternManager) {
-		LTL formula = null;
-		Object result = null;
 		State stateid = currentTrace.getCurrentState();
 		LtlParser parser = new LtlParser(item.getFormula());
-		LTLParseListener parseListener = new LTLParseListener();
-		parser.removeErrorListeners();
-		parser.addErrorListener(parseListener);
-		parser.addWarningListener(parseListener);
 		parser.setPatternManager(patternManager);
-		parser.parse();
+		Checked checked = resultHandler.handleFormulaResult(item, getResult(parser, item), stateid);
+		injector.getInstance(LTLView.class).refreshFormula();
+		return checked;
+	}
+	
+	private Object getResult(LtlParser parser, LTLFormulaItem item) {
+		Object result = null;
+		State stateid = currentTrace.getCurrentState();
+		LTLParseListener parseListener = parseFormula(parser);
 		if(parseListener.getErrorMarkers().size() > 0) {
 			StringBuilder msg = new StringBuilder();
 			for(LTLMarker error : parseListener.getErrorMarkers()) {
@@ -67,14 +69,21 @@ public class LTLFormulaChecker {
 			}
 			result = new LTLParseError(msg.toString());
 		} else {
-			formula = new LTL(item.getFormula(), new ClassicalBParser(), parser);
+			LTL formula = new LTL(item.getFormula(), new ClassicalBParser(), parser);
 			EvaluationCommand lcc = formula.getCommand(stateid);
 			currentTrace.getStateSpace().execute(lcc);
 			result = lcc.getValue();
 		}
-		Checked checked = resultHandler.handleFormulaResult(item, result, stateid);
-		injector.getInstance(LTLView.class).refreshFormula();
-		return checked;
+		return result;
+	}
+	
+	private LTLParseListener parseFormula(LtlParser parser) {
+		LTLParseListener parseListener = new LTLParseListener();
+		parser.removeErrorListeners();
+		parser.addErrorListener(parseListener);
+		parser.addWarningListener(parseListener);
+		parser.parse();
+		return parseListener;
 	}
 		
 }
