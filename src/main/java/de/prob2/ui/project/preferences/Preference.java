@@ -1,7 +1,6 @@
 package de.prob2.ui.project.preferences;
 
 import java.util.Map;
-import java.util.Objects;
 
 public class Preference {
 

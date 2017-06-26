@@ -1,7 +1,7 @@
 package de.prob2.ui.visualisation;
 
 import java.io.File;
-import java.nio.file.Path;
+import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.Main;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.commands.GetImagesForMachineCommand;
@@ -68,7 +69,7 @@ public class VisualisationView extends AnchorPane {
 					try {
 						showImages(to, stateSpace, images);
 						probLogoStackPane.setVisible(false);
-					} catch (IllegalArgumentException e) {
+					} catch (FileNotFoundException e) {
 						LOGGER.warn("Failed to open images for visualisation", e);
 						Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, e.getMessage());
 						alert.setHeaderText("Visualisation not possible");
@@ -84,7 +85,7 @@ public class VisualisationView extends AnchorPane {
 
 	}
 
-	private void showImages(State state, StateSpace stateSpace, Map<Integer, String> images) throws IllegalArgumentException {
+	private void showImages(State state, StateSpace stateSpace, Map<Integer, String> images) throws FileNotFoundException {
 		GetImagesForStateCommand getImagesForStateCommand = new GetImagesForStateCommand(state.getId());
 		stateSpace.execute(getImagesForStateCommand);
 		int[][] imageMatrix = getImagesForStateCommand.getMatrix();
@@ -94,15 +95,37 @@ public class VisualisationView extends AnchorPane {
 		for (int r = 0; r < rowNr; r++) {
 			for (int c = 0; c < columnNr; c++) {
 				String imageURL = images.get(imageMatrix[r][c]);
-				final String projectLocation = currentProject.get().getLocation().getPath();
-				Path imagePath = Paths.get(projectLocation, imageURL);
-				File imageFile = new File(imagePath.toString());				
-				if(!imageFile.exists()) {
-					throw new IllegalArgumentException("Invalid path to image: " + imagePath);
-				}
-				ImageView imageView = new ImageView(new Image("file:" + imagePath.toString()));
+				Image image = getImage(imageURL);
+				ImageView imageView = new ImageView(image);
 				visualisationGridPane.add(imageView, c, r);
 			}
 		}
+	}
+
+	private Image getImage(String imageURL) throws FileNotFoundException {
+		String imagePath;
+		final String projectFolder = currentProject.get().getLocation().getPath();
+		//look in machine folder
+		File machineFile = new File(currentProject.getCurrentRunconfiguration().getMachine().getPath().toString());
+		String machineFolder = Paths.get(projectFolder, machineFile.getParent()).toString();
+		imagePath = Paths.get(machineFolder, imageURL).toString();
+		File imageInMachineFolder = new File(imagePath);
+		//look in project folder
+		if (!imageInMachineFolder.exists()) {
+			imagePath = Paths.get(projectFolder, imageURL).toString();
+			File imageInProjectFolder = new File(imagePath);
+			if(!imageInProjectFolder.exists()) {
+				//look in ProB folder
+				String probFolder = Main.getProBDirectory();
+				imagePath = Paths.get(probFolder, imageURL).toString();
+				File imageInProbFolder = new File(imagePath);
+				if(!imageInProbFolder.exists()) {
+					String imageName = new File(imagePath).getName();
+					throw new FileNotFoundException("Image " + imageName + " not found in machine folder (" + imageInMachineFolder.getParent() 
+							+ ") and project folder (" + imageInProjectFolder.getParent() + ") and ProB folder (" + imageInProbFolder.getParent() + ")");
+				}
+			}
+		}
+		return new Image("file:" + imagePath);
 	}
 }

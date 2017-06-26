@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
@@ -18,6 +19,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.input.MouseButton;
+
+import java.net.URISyntaxException;
 
 @Singleton
 public class PreferencesTab extends Tab {
@@ -45,8 +48,8 @@ public class PreferencesTab extends Tab {
 	}
 
 	@FXML
-	public void initialize() {
-		helpButton.setPathToHelp("https://www3.hhu.de/stups/prob/index.php/ProBLicence");
+	public void initialize() throws URISyntaxException {
+		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
 		preferencesListView.setCellFactory(listView -> initListCell());
 		

@@ -3,6 +3,7 @@ package de.prob2.ui.helpsystem;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
@@ -12,6 +13,10 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 @Singleton
 public class HelpSystem extends StackPane {
     @FXML private TreeView<String> treeView;
@@ -19,18 +24,21 @@ public class HelpSystem extends StackPane {
     WebEngine webEngine;
 
     @Inject
-    public HelpSystem(final StageManager stageManager) {
+    public HelpSystem(final StageManager stageManager) throws URISyntaxException, IOException {
         stageManager.loadFXML(this, "helpsystem.fxml");
-        TreeItem<String> root = new TreeItem<>("Root Node");
-        root.setExpanded(true);
-        root.getChildren().addAll(
-                new TreeItem<>("Item 1"),
-                new TreeItem<>("Item 2"),
-                new TreeItem<>("Item 3")
-        );
-        treeView.setRoot(root);
-        //treeView.setMaxWidth(0);
+        File f = new File(ProB2.class.getClassLoader().getResource("help/").toURI());
+        treeView.setRoot(createNode(f));
+        treeView.setShowRoot(false);
+        treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.isLeaf()){
+                webEngine.load(((HelpTreeItem) newVal).getFile().toURI().toString());
+            }
+        });
         webEngine = webView.getEngine();
-        webEngine.load("https://www3.hhu.de/stups/prob/index.php/Main_Page");
+        webEngine.load(((HelpTreeItem) treeView.getRoot().getChildren().get(0)).getFile().toURI().toString());
+    }
+
+    private TreeItem<String> createNode(final File f) throws IOException {
+        return new HelpTreeItem(f);
     }
 }

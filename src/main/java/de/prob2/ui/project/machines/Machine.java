@@ -91,7 +91,7 @@ public class Machine extends LTLCheckableItem {
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 	}
-	
+		
 	public static Machine.FileAndType askForFile(final Window window) {
 		final FileChooser.ExtensionFilter classicalB = new FileChooser.ExtensionFilter("Classical B Files", Machine.Type.B.getExtensions());
 		final FileChooser.ExtensionFilter eventB = new FileChooser.ExtensionFilter("EventB Files", Machine.Type.EVENTB.getExtensions());

@@ -29,14 +29,11 @@ public class LTLPatternParser {
 		this.injector = injector;
 	}
 		
-	public void parsePattern(LTLPatternItem item, Machine machine) {
-		if(machine.getPatternManager() == null) {
-			return;
-		}
+	public void parsePattern(LTLPatternItem item, Machine machine, boolean byInit) {
 		logger.trace("Parse ltl pattern");
 		Pattern pattern = itemToPattern(item);
 		machine.getPatternManager().getPatterns().add(pattern);
-		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item);
+		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item, byInit);
 		injector.getInstance(LTLView.class).refreshPattern();
 	}
 	
@@ -68,7 +65,7 @@ public class LTLPatternParser {
 	
 	public void parseMachine(Machine machine) {
 		machine.getPatterns().forEach(item-> {
-			this.parsePattern(item, machine);
+			this.parsePattern(item, machine, true);
 		});
 	}
 	
