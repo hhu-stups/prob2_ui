@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.ltl.formula;
 
+import java.util.Objects;
+
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
@@ -30,6 +32,11 @@ public class LTLFormulaItem extends LTLPatternItem {
 		}
 		LTLFormulaItem otherFormulaItem = (LTLFormulaItem) other;
 		return this.name.equals(otherFormulaItem.getName());
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, description, code);
 	}
 
 }
