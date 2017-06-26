@@ -261,12 +261,12 @@ public class LTLView extends AnchorPane{
 		patternDialog.showAndWait().ifPresent(result-> {
 			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) ||
 					!item.getCode().equals(result.getCode())) {
-				item.setData(result.getName(), result.getDescription(), result.getCode());
-				tvPattern.refresh();
-				currentProject.setSaved(false);
 				Machine machine = tvMachines.getFocusModel().getFocusedItem();
 				machine.getPatternManager().removePattern(machine.getPatternManager().getUserPattern(item.getName()));
+				item.setData(result.getName(), result.getDescription(), result.getCode());
 				patternParser.parsePattern(item, machine, false);
+				tvPattern.refresh();
+				currentProject.setSaved(false);
 			}
 		});
 		patternDialog.clear();
