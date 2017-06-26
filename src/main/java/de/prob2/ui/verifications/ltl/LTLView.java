@@ -126,14 +126,14 @@ public class LTLView extends AnchorPane{
 	private void setOnItemClicked() {
 		tvFormula.setOnMouseClicked(e-> {
 			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 &&  item != null) {
+			if(e.getClickCount() == 2 &&  item != null && currentTrace.exists()) {
 				showCurrentItemDialog(item);
 			}
 		});
 		
 		tvPattern.setOnMouseClicked(e-> {
 			LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 &&  item != null) {
+			if(e.getClickCount() == 2 &&  item != null && currentTrace.exists()) {
 				showCurrentItemDialog(item);
 			}
 		});
