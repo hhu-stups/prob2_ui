@@ -74,9 +74,12 @@ public final class OperationsView extends AnchorPane {
 			getStyleClass().add("operations-cell");
 			
 			this.setOnMouseClicked(event -> {
-				if (event.getButton() == MouseButton.PRIMARY && this.getItem() != null && this.getItem().getStatus() == OperationItem.Status.ENABLED) {
-					// Disable the operations list until the trace change is finished, the update method reenables it later
-					opsListView.setDisable(true);
+				if (
+					event.getButton() == MouseButton.PRIMARY
+					&& this.getItem() != null
+					&& this.getItem().getStatus() == OperationItem.Status.ENABLED
+					&& this.getItem().getTrace().equals(currentTrace.get())
+				) {
 					currentTrace.set(currentTrace.get().add(this.getItem().getId()));
 				}
 			});
@@ -303,27 +306,27 @@ public final class OperationsView extends AnchorPane {
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			final boolean skip = transition.getSource().equals(transition.getDestination());
-			OperationItem operationItem = new OperationItem(transition.getId(), name, params,
+			OperationItem operationItem = new OperationItem(trace, transition.getId(), name, params,
 					transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip);
 			events.add(operationItem);
 		}
-		showDisabledAndWithTimeout(disabled, withTimeout);
+		showDisabledAndWithTimeout(trace, disabled, withTimeout);
 
 		doSort();
 
 		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
-			events.add(new OperationItem("-", "(possibly more - maximum operations reached)", Collections.emptyList(),
+			events.add(new OperationItem(trace, "-", "(possibly more - maximum operations reached)", Collections.emptyList(),
 					Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
 		}
 
 		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
 	}
 
-	private void showDisabledAndWithTimeout(final Set<String> notEnabled, final Set<String> withTimeout) {
+	private void showDisabledAndWithTimeout(final Trace trace, final Set<String> notEnabled, final Set<String> withTimeout) {
 		if (showDisabledOps) {
 			for (String s : notEnabled) {
 				if (!INITIALISATION.equals(s)) {
-					events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(),
+					events.add(new OperationItem(trace, s, s, opToParams.get(s), Collections.emptyList(),
 							withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
 							false, false, false));
 				}
@@ -331,7 +334,7 @@ public final class OperationsView extends AnchorPane {
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
-				events.add(new OperationItem(s, s, opToParams.get(s), Collections.emptyList(),
+				events.add(new OperationItem(trace, s, s, opToParams.get(s), Collections.emptyList(),
 						OperationItem.Status.TIMEOUT, false, false, false));
 			}
 		}
