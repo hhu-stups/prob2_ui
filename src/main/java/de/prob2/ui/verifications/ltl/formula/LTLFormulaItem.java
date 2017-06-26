@@ -1,31 +1,17 @@
 package de.prob2.ui.verifications.ltl.formula;
 
-import java.util.Objects;
 import de.prob.statespace.Trace;
-import de.prob2.ui.verifications.ltl.LTLCheckableItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
-public class LTLFormulaItem extends LTLCheckableItem {
+public class LTLFormulaItem extends LTLPatternItem {
 
-	private String formula;
 	private transient Trace counterExample;
 
-	public LTLFormulaItem(String name, String description, String formula) {
-		super(name, description);
-		this.formula = formula;
+	public LTLFormulaItem(String name, String description, String code) {
+		super(name, description, code);
 		this.counterExample = null;
 	}
-	
-	public void setData(String name, String description, String formula) {
-		initializeStatus();
-		this.name = name;
-		this.description = description;
-		this.formula = formula;
-	}
-		
-	public String getFormula() {
-		return formula;
-	}
-
+			
 	public void setCounterExample(Trace counterExample) {
 		this.counterExample = counterExample;
 	}
@@ -44,11 +30,6 @@ public class LTLFormulaItem extends LTLCheckableItem {
 		}
 		LTLFormulaItem otherFormulaItem = (LTLFormulaItem) other;
 		return this.name.equals(otherFormulaItem.getName());
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(name, description, formula);
 	}
 
 }

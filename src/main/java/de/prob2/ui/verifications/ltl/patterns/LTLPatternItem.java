@@ -1,7 +1,5 @@
 package de.prob2.ui.verifications.ltl.patterns;
 
-import java.util.Objects;
-
 import de.prob2.ui.verifications.ltl.LTLCheckableItem;
 
 public class LTLPatternItem extends LTLCheckableItem {
@@ -10,17 +8,15 @@ public class LTLPatternItem extends LTLCheckableItem {
 	
 	public LTLPatternItem(String name, String description, String code) {
 		super(name, description);
-		initializeStatus();
-		setData(name, description, code);
-		
+		setCode(code);
 	}	
 	
 	public void setData(String name, String description, String code) {
+		initializeStatus();
 		setName(name);
 		setDescription(description);
 		setCode(code);
 	}
-	
 	
 	public void setCode(String code) {
 		this.code = code;
@@ -41,10 +37,5 @@ public class LTLPatternItem extends LTLCheckableItem {
 		LTLPatternItem otherItem = (LTLPatternItem) obj;
 		return otherItem.getName().equals(this.getName());
 	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(name, description, code);
-	}
-	
+		
 }

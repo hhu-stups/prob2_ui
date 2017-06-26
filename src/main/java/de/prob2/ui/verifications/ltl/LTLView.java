@@ -243,11 +243,11 @@ public class LTLView extends AnchorPane{
 			
 	private void showCurrentItemDialog(LTLFormulaItem item) {
 		LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
-		formulaDialog.setData(item.getName(), item.getDescription(), item.getFormula());
+		formulaDialog.setData(item.getName(), item.getDescription(), item.getCode());
 		formulaDialog.showAndWait().ifPresent(result-> {
 			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) ||
-				!item.getFormula().equals(result.getFormula())) {
-				item.setData(result.getName(), result.getDescription(), result.getFormula());
+				!item.getCode().equals(result.getCode())) {
+				item.setData(result.getName(), result.getDescription(), result.getCode());
 				tvFormula.refresh();
 				currentProject.setSaved(false);
 			}
