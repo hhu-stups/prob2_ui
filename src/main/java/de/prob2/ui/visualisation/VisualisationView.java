@@ -2,11 +2,9 @@ package de.prob2.ui.visualisation;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -14,11 +12,13 @@ import com.google.inject.Singleton;
 import de.prob.Main;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.commands.GetImagesForMachineCommand;
 import de.prob2.ui.commands.GetImagesForStateCommand;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ScrollPane;
@@ -27,6 +27,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class VisualisationView extends AnchorPane {
@@ -103,29 +106,26 @@ public class VisualisationView extends AnchorPane {
 	}
 
 	private Image getImage(String imageURL) throws FileNotFoundException {
-		String imagePath;
-		final String projectFolder = currentProject.get().getLocation().getPath();
+		final Path projectFolder = Paths.get(currentProject.get().getLocation().getPath());
 		//look in machine folder
-		File machineFile = new File(currentProject.getCurrentRunconfiguration().getMachine().getPath().toString());
-		String machineFolder = Paths.get(projectFolder, machineFile.getParent()).toString();
-		imagePath = Paths.get(machineFolder, imageURL).toString();
-		File imageInMachineFolder = new File(imagePath);
+		final Path machineFile = currentProject.getCurrentRunconfiguration().getMachine().getPath();
+		final Path machineFolder = projectFolder.resolve(machineFile).getParent();
+		File imagePath = machineFolder.resolve(imageURL).toFile();
+		final File imageInMachineFolder = imagePath;
 		//look in project folder
 		if (!imageInMachineFolder.exists()) {
-			imagePath = Paths.get(projectFolder, imageURL).toString();
-			File imageInProjectFolder = new File(imagePath);
+			imagePath = projectFolder.resolve(imageURL).toFile();
+			final File imageInProjectFolder = imagePath;
 			if(!imageInProjectFolder.exists()) {
 				//look in ProB folder
-				String probFolder = Main.getProBDirectory();
-				imagePath = Paths.get(probFolder, imageURL).toString();
-				File imageInProbFolder = new File(imagePath);
+				imagePath = Paths.get(Main.getProBDirectory()).resolve(imageURL).toFile();
+				final File imageInProbFolder = imagePath;
 				if(!imageInProbFolder.exists()) {
-					String imageName = new File(imagePath).getName();
-					throw new FileNotFoundException("Image " + imageName + " not found in machine folder (" + imageInMachineFolder.getParent() 
+					throw new FileNotFoundException("Image " + imagePath.getName() + " not found in machine folder (" + imageInMachineFolder.getParent() 
 							+ ") and project folder (" + imageInProjectFolder.getParent() + ") and ProB folder (" + imageInProbFolder.getParent() + ")");
 				}
 			}
 		}
-		return new Image("file:" + imagePath);
+		return new Image(imagePath.toURI().toString());
 	}
 }
