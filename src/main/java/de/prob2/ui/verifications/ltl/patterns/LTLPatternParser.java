@@ -68,9 +68,7 @@ public class LTLPatternParser {
 	}
 	
 	public void parseMachine(Machine machine) {
-		machine.getPatterns().forEach(item-> {
-			this.parsePattern(item, machine, true);
-		});
+		machine.getPatterns().forEach(item-> this.parsePattern(item, machine, true));
 	}
 	
 }

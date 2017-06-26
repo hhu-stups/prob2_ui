@@ -7,7 +7,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.stage.Stage;
 
 public class HelpButton extends Button{
     private Injector injector;
