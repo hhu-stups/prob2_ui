@@ -108,6 +108,22 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void initialize() throws URISyntaxException {
 		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+		setOnItemClicked();
+		setContextMenus();
+		setBindings();
+		tvMachines.getFocusModel().focusedIndexProperty().addListener((observable, from, to) -> {
+			if(to.intValue() >= 0) {
+				Machine newMachine = tvMachines.getItems().get(to.intValue());
+				if(from.intValue() >= 0) {
+					Machine oldMachine = tvMachines.getItems().get(from.intValue());
+					oldMachine.clearPatternManager();
+				}
+				bindMachine(newMachine);
+			}
+		});
+	}
+	
+	private void setOnItemClicked() {
 		tvFormula.setOnMouseClicked(e-> {
 			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 &&  item != null) {
@@ -121,18 +137,14 @@ public class LTLView extends AnchorPane{
 				showCurrentItemDialog(item);
 			}
 		});
-								
+	}
+	
+	private void setContextMenus() {
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem("Remove formula");
 			removeItem.setOnAction(e -> {
-				Machine machine = tvMachines.getFocusModel().getFocusedItem();
-				LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-				machine.removeLTLFormula(item);
-				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-						tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
-						currentProject.getLocation()));
-				currentProject.setSaved(false);
+				removeFormula();
 			});
 			removeItem.disableProperty().bind(row.emptyProperty());
 						
@@ -158,75 +170,92 @@ public class LTLView extends AnchorPane{
 			final TableRow<LTLPatternItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem("Remove Pattern");
 			removeItem.setOnAction(e -> {
-				Machine machine = tvMachines.getFocusModel().getFocusedItem();
-				LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
-				machine.removeLTLPattern(item);
-				patternParser.removePattern(item, machine);
-				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-						tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
-						currentProject.getLocation()));
-				currentProject.setSaved(false);
+				removePattern();
 			});
 			removeItem.disableProperty().bind(row.emptyProperty());
 			row.setContextMenu(new ContextMenu(removeItem));
 			return row;
 		});
-		
+	}
+	
+	private void setBindings() {
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		
 		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		patternNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		addPatternButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
-		tvMachines.getFocusModel().focusedIndexProperty().addListener((observable, from, to) -> {
-			if(to.intValue() >= 0) {
-				Machine newMachine = tvMachines.getItems().get(to.intValue());
-				if(from.intValue() >= 0) {
-					Machine oldMachine = tvMachines.getItems().get(from.intValue());
-					oldMachine.clearPatternManager();
-				}
-				tvFormula.itemsProperty().bind(newMachine.ltlFormulasProperty());
-				tvPattern.itemsProperty().bind(newMachine.ltlPatternsProperty());
-				parseMachine(newMachine);
-			}
-		});
+	}
+	
+	private void bindMachine(Machine machine) {
+		tvFormula.itemsProperty().bind(machine.ltlFormulasProperty());
+		tvPattern.itemsProperty().bind(machine.ltlPatternsProperty());
+		parseMachine(machine);
 	}
 		
 	@FXML
 	public void addFormula() {
 		Machine machine = tvMachines.getFocusModel().getFocusedItem();
 		injector.getInstance(LTLFormulaDialog.class).showAndWait().ifPresent(item -> {
-			if(!machine.getFormulas().contains(item)) {
-				machine.addLTLFormula(item);
-				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-						currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
-						currentProject.getLocation()));
-			} else {
-				showAlreadyExists(LTLItemType.Formula);
-			}
+			addFormula(machine, item);
 		});
 		tvFormula.refresh();
+	}
+	
+	private void addFormula(Machine machine, LTLFormulaItem item) {
+		if(!machine.getFormulas().contains(item)) {
+			machine.addLTLFormula(item);
+			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+					currentProject.getLocation()));
+		} else {
+			showAlreadyExists(LTLItemType.Formula);
+		}
+	}
+	
+	private void removeFormula() {
+		Machine machine = tvMachines.getFocusModel().getFocusedItem();
+		LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+		machine.removeLTLFormula(item);
+		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+				tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+				currentProject.getLocation()));
+		currentProject.setSaved(false);
 	}
 	
 	@FXML
 	public void addPattern() {
 		Machine machine = tvMachines.getFocusModel().getFocusedItem();
 		injector.getInstance(LTLPatternDialog.class).showAndWait().ifPresent(item -> {
-			if(!machine.getPatterns().contains(item)) {
-				machine.addLTLPattern(item);
-				currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-						currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
-						currentProject.getLocation()));
-				patternParser.parsePattern(item, machine, false);
-			} else {
-				showAlreadyExists(LTLItemType.Pattern);
-			}
+			addPattern(machine, item);
 		});
 		tvPattern.refresh();
+	}
+	
+	private void addPattern(Machine machine, LTLPatternItem item) {
+		if(!machine.getPatterns().contains(item)) {
+			machine.addLTLPattern(item);
+			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+					currentProject.getLocation()));
+			patternParser.parsePattern(item, machine, false);
+		} else {
+			showAlreadyExists(LTLItemType.Pattern);
+		}
+	}
+	
+	private void removePattern() {
+		Machine machine = tvMachines.getFocusModel().getFocusedItem();
+		LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
+		machine.removeLTLPattern(item);
+		patternParser.removePattern(item, machine);
+		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+				tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+				currentProject.getLocation()));
+		currentProject.setSaved(false);
 	}
 	
 	private void showAlreadyExists(LTLItemType type) {
@@ -245,31 +274,39 @@ public class LTLView extends AnchorPane{
 		LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
 		formulaDialog.setData(item.getName(), item.getDescription(), item.getCode());
 		formulaDialog.showAndWait().ifPresent(result-> {
-			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) ||
-				!item.getCode().equals(result.getCode())) {
-				item.setData(result.getName(), result.getDescription(), result.getCode());
-				tvFormula.refresh();
-				currentProject.setSaved(false);
-			}
+			changeFormula(item, result);
 		});
 		formulaDialog.clear();
+	}
+	
+	private void changeFormula(LTLFormulaItem item, LTLFormulaItem result) {
+		if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) ||
+			!item.getCode().equals(result.getCode())) {
+			item.setData(result.getName(), result.getDescription(), result.getCode());
+			tvFormula.refresh();
+			currentProject.setSaved(false);
+		}
 	}
 	
 	private void showCurrentItemDialog(LTLPatternItem item) {
 		LTLPatternDialog patternDialog = injector.getInstance(LTLPatternDialog.class);
 		patternDialog.setData(item.getName(), item.getDescription(), item.getCode());
 		patternDialog.showAndWait().ifPresent(result-> {
-			if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) ||
-					!item.getCode().equals(result.getCode())) {
-				Machine machine = tvMachines.getFocusModel().getFocusedItem();
-				machine.getPatternManager().removePattern(machine.getPatternManager().getUserPattern(item.getName()));
-				item.setData(result.getName(), result.getDescription(), result.getCode());
-				patternParser.parsePattern(item, machine, false);
-				tvPattern.refresh();
-				currentProject.setSaved(false);
-			}
+			changePattern(item, result);
 		});
 		patternDialog.clear();
+	}
+	
+	private void changePattern(LTLPatternItem item, LTLPatternItem result) {
+		if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) ||
+				!item.getCode().equals(result.getCode())) {
+			Machine machine = tvMachines.getFocusModel().getFocusedItem();
+			machine.getPatternManager().removePattern(machine.getPatternManager().getUserPattern(item.getName()));
+			item.setData(result.getName(), result.getDescription(), result.getCode());
+			patternParser.parsePattern(item, machine, false);
+			tvPattern.refresh();
+			currentProject.setSaved(false);
+		}
 	}
 	
 	private void showCounterExample() {
