@@ -58,22 +58,23 @@ public class LTLFormulaChecker {
 	}
 	
 	private Object getResult(LtlParser parser, LTLFormulaItem item) {
-		Object result = null;
 		State stateid = currentTrace.getCurrentState();
 		LTLParseListener parseListener = parseFormula(parser);
 		if(parseListener.getErrorMarkers().size() > 0) {
-			StringBuilder msg = new StringBuilder();
-			for(LTLMarker error : parseListener.getErrorMarkers()) {
-				msg.append(error.getMsg()+"\n");
-			}
-			result = new LTLParseError(msg.toString());
-		} else {
-			LTL formula = new LTL(item.getFormula(), new ClassicalBParser(), parser);
-			EvaluationCommand lcc = formula.getCommand(stateid);
-			currentTrace.getStateSpace().execute(lcc);
-			result = lcc.getValue();
+			return getFailedResult(parseListener);
 		}
-		return result;
+		LTL formula = new LTL(item.getFormula(), new ClassicalBParser(), parser);
+		EvaluationCommand lcc = formula.getCommand(stateid);
+		currentTrace.getStateSpace().execute(lcc);
+		return lcc.getValue();
+	}
+	
+	private Object getFailedResult(LTLParseListener parseListener) {
+		StringBuilder msg = new StringBuilder();
+		for(LTLMarker error : parseListener.getErrorMarkers()) {
+			msg.append(error.getMsg()+"\n");
+		}
+		return new LTLParseError(msg.toString());
 	}
 	
 	private LTLParseListener parseFormula(LtlParser parser) {

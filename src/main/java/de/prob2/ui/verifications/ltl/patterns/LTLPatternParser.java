@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.ltl.patterns;
 
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -38,6 +37,12 @@ public class LTLPatternParser {
 	}
 	
 	private LTLParseListener checkDefinition(Pattern pattern, Machine machine) {
+		LTLParseListener parseListener = initializeParseListener(pattern);
+		pattern.updateDefinitions(machine.getPatternManager());
+		return parseListener;
+	}
+	
+	private LTLParseListener initializeParseListener(Pattern pattern) {
 		LTLParseListener parseListener = new LTLParseListener();
 		pattern.removeErrorListeners();
 		pattern.removeWarningListeners();
@@ -45,7 +50,6 @@ public class LTLPatternParser {
 		pattern.addErrorListener(parseListener);
 		pattern.addWarningListener(parseListener);
 		pattern.addUpdateListener(parseListener);
-		pattern.updateDefinitions(machine.getPatternManager());
 		return parseListener;
 	}
 	
