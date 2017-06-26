@@ -143,9 +143,7 @@ public class LTLView extends AnchorPane{
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem("Remove formula");
-			removeItem.setOnAction(e -> {
-				removeFormula();
-			});
+			removeItem.setOnAction(e -> removeFormula());
 			removeItem.disableProperty().bind(row.emptyProperty());
 						
 			MenuItem showCounterExampleItem = new MenuItem("Show Counter Example");
@@ -169,9 +167,7 @@ public class LTLView extends AnchorPane{
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem("Remove Pattern");
-			removeItem.setOnAction(e -> {
-				removePattern();
-			});
+			removeItem.setOnAction(e -> removePattern());
 			removeItem.disableProperty().bind(row.emptyProperty());
 			row.setContextMenu(new ContextMenu(removeItem));
 			return row;
@@ -199,9 +195,7 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void addFormula() {
 		Machine machine = tvMachines.getFocusModel().getFocusedItem();
-		injector.getInstance(LTLFormulaDialog.class).showAndWait().ifPresent(item -> {
-			addFormula(machine, item);
-		});
+		injector.getInstance(LTLFormulaDialog.class).showAndWait().ifPresent(item -> addFormula(machine, item));
 		tvFormula.refresh();
 	}
 	
@@ -229,9 +223,7 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void addPattern() {
 		Machine machine = tvMachines.getFocusModel().getFocusedItem();
-		injector.getInstance(LTLPatternDialog.class).showAndWait().ifPresent(item -> {
-			addPattern(machine, item);
-		});
+		injector.getInstance(LTLPatternDialog.class).showAndWait().ifPresent(item -> addPattern(machine, item));
 		tvPattern.refresh();
 	}
 	
@@ -273,9 +265,7 @@ public class LTLView extends AnchorPane{
 	private void showCurrentItemDialog(LTLFormulaItem item) {
 		LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
 		formulaDialog.setData(item.getName(), item.getDescription(), item.getCode());
-		formulaDialog.showAndWait().ifPresent(result-> {
-			changeFormula(item, result);
-		});
+		formulaDialog.showAndWait().ifPresent(result-> changeFormula(item, result));
 		formulaDialog.clear();
 	}
 	
@@ -291,9 +281,7 @@ public class LTLView extends AnchorPane{
 	private void showCurrentItemDialog(LTLPatternItem item) {
 		LTLPatternDialog patternDialog = injector.getInstance(LTLPatternDialog.class);
 		patternDialog.setData(item.getName(), item.getDescription(), item.getCode());
-		patternDialog.showAndWait().ifPresent(result-> {
-			changePattern(item, result);
-		});
+		patternDialog.showAndWait().ifPresent(result-> changePattern(item, result));
 		patternDialog.clear();
 	}
 	
