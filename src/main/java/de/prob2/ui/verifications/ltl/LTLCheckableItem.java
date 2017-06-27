@@ -4,7 +4,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.scene.paint.Color;
 
-public class LTLCheckableItem {
+public abstract class LTLCheckableItem {
 	protected transient FontAwesomeIconView status;
 	protected String name;
 	protected String description;

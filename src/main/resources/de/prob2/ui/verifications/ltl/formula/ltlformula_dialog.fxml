@@ -35,7 +35,7 @@
 						</HBox>
 						<VBox spacing="10" alignment="center_left">
 							<Label text="%verifications.ltl.dialog.formula" />
-							<WebView fx:id="taFormula"/>
+							<WebView fx:id="taCode"/>
 						</VBox>
 						<VBox spacing="10" alignment="center_left">
 							<Label text="%verifications.ltl.dialog.description" />
