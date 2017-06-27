@@ -52,8 +52,10 @@ public class LTLPatternDialog extends Dialog<LTLPatternItem> {
 		engine.load(getClass().getResource("../LTLEditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
 		engine.documentProperty().addListener(listener -> {
-			final JSObject editor = (JSObject) engine.executeScript("editor");
-			editor.call("setValue", text);
+			if(text != null) {
+				final JSObject editor = (JSObject) engine.executeScript("editor");
+				editor.call("setValue", text);
+			}
 		});
 	}
 	
@@ -61,7 +63,12 @@ public class LTLPatternDialog extends Dialog<LTLPatternItem> {
 		if(engine == null) {
 			return;
 		}
-		this.text = text;
+		if(this.text == null) {
+			this.text = text;
+		} else {
+			final JSObject editor = (JSObject) engine.executeScript("editor");
+			editor.call("setValue", text);
+		}
 	}
 	
 	public void setData(String name, String description, String formula) {

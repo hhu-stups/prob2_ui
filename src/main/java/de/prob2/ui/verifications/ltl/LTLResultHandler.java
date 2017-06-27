@@ -13,6 +13,7 @@ import com.google.inject.Singleton;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLOk;
+import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -98,14 +99,14 @@ public class LTLResultHandler {
 		} else if(result instanceof LTLError) {
 			resultItem = new LTLResultItem(AlertType.ERROR, Checked.FAIL, ((LTLError) result).getMessage(), 
 											"Error while executing formula");
-		} else if(result instanceof LTLParseError) {
+		} else if(result instanceof LTLParseError || result instanceof ProBError) {
 			StringWriter sw = new StringWriter();
 			try (PrintWriter pw = new PrintWriter(sw)) {
 				((Throwable) result).printStackTrace(pw);
 			}
 			resultItem = new LTLResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse formula", 
 											sw.toString());
-			logger.error("Could not parse LTL formula", result);
+			logger.error("Could not parse LTL formula", result);			
 		}
 		
 		this.showResult(resultItem, item, trace);

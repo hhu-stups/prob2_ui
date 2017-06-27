@@ -33,6 +33,7 @@ public class LTLFormulaDialog extends Dialog<LTLFormulaItem> {
 	@Inject
 	public LTLFormulaDialog(final StageManager stageManager, final Injector injector, final CurrentProject currentProject) {
 		super();
+		this.text = null;
 		this.setResultConverter(type -> {
 			if(type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
@@ -52,8 +53,10 @@ public class LTLFormulaDialog extends Dialog<LTLFormulaItem> {
 		engine.load(getClass().getResource("../LTLEditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
 		engine.documentProperty().addListener(listener -> {
-			final JSObject editor = (JSObject) engine.executeScript("editor");
-			editor.call("setValue", text);
+			if(text != null) {
+				final JSObject editor = (JSObject) engine.executeScript("editor");
+				editor.call("setValue", text);
+			}
 		});
 	}
 		
@@ -61,7 +64,12 @@ public class LTLFormulaDialog extends Dialog<LTLFormulaItem> {
 		if(engine == null) {
 			return;
 		}
-		this.text = text;
+		if(this.text == null) {
+			this.text = text;
+		} else {
+			final JSObject editor = (JSObject) engine.executeScript("editor");
+			editor.call("setValue", text);
+		}
 	}
 	
 	public void setData(String name, String description, String formula) {

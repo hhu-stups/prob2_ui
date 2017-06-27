@@ -3,11 +3,16 @@ package de.prob2.ui.verifications.ltl.formula;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Injector;
 
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.LTL;
+import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
 import de.prob.statespace.State;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -19,6 +24,8 @@ import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
 
 public class LTLFormulaChecker {
+	
+	private static final Logger logger = LoggerFactory.getLogger(LTLFormulaChecker.class);
 				
 	private final CurrentTrace currentTrace;
 	
@@ -63,9 +70,15 @@ public class LTLFormulaChecker {
 		if(parseListener.getErrorMarkers().size() > 0) {
 			return getFailedResult(parseListener);
 		}
-		LTL formula = new LTL(item.getCode(), new ClassicalBParser(), parser);
-		EvaluationCommand lcc = formula.getCommand(stateid);
-		currentTrace.getStateSpace().execute(lcc);
+		EvaluationCommand lcc = null;
+		try {
+			LTL formula = new LTL(item.getCode(), new ClassicalBParser(), parser);
+			lcc = formula.getCommand(stateid);
+			currentTrace.getStateSpace().execute(lcc);
+		} catch (ProBError error) {
+			logger.error("Could not parse LTL formula", error.getMessage());
+			return error;
+		}
 		return lcc.getValue();
 	}
 	
