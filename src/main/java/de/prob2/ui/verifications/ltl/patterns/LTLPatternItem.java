@@ -2,32 +2,14 @@ package de.prob2.ui.verifications.ltl.patterns;
 
 import java.util.Objects;
 
-import de.prob2.ui.verifications.ltl.LTLCheckableItem;
+import de.prob2.ui.verifications.ltl.LTLAbstractItem;
 
-public class LTLPatternItem extends LTLCheckableItem {
-		
-	protected String code;
+public class LTLPatternItem extends LTLAbstractItem {
 	
 	public LTLPatternItem(String name, String description, String code) {
-		super(name, description);
-		setCode(code);
+		super(name, description, code);
 	}	
-	
-	public void setData(String name, String description, String code) {
-		initializeStatus();
-		setName(name);
-		setDescription(description);
-		setCode(code);
-	}
-	
-	public void setCode(String code) {
-		this.code = code;
-	}
-	
-	public String getCode() {
-		return code;
-	}
-	
+		
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {

@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,12 +41,26 @@ public class Machine extends LTLCheckableItem {
 		TLA(Api::tla_load, new String[] {"*.tla"}),
 		;
 		
+		private static final Map<String, Machine.Type> extensionToTypeMap;
+		static {
+			extensionToTypeMap = new HashMap<>();
+			for (final Machine.Type type : Machine.Type.values()) {
+				for (final String ext : type.getExtensions()) {
+					extensionToTypeMap.put(ext, type);
+				}
+			}
+		}
+		
 		private final Machine.Loader loader;
 		private final String[] extensions;
 		
 		private Type(final Machine.Loader loader, final String[] extensions) {
 			this.loader = loader;
 			this.extensions = extensions;
+		}
+		
+		public static Map<String, Machine.Type> getExtensionToTypeMap() {
+			return Collections.unmodifiableMap(extensionToTypeMap);
 		}
 		
 		public Machine.Loader getLoader() {
@@ -93,6 +110,9 @@ public class Machine extends LTLCheckableItem {
 	}
 		
 	public static Machine.FileAndType askForFile(final Window window) {
+		final List<String> allExts = new ArrayList<>(Machine.Type.getExtensionToTypeMap().keySet());
+		allExts.sort(String::compareTo);
+		final FileChooser.ExtensionFilter all = new FileChooser.ExtensionFilter("All ProB Files", allExts);
 		final FileChooser.ExtensionFilter classicalB = new FileChooser.ExtensionFilter("Classical B Files", Machine.Type.B.getExtensions());
 		final FileChooser.ExtensionFilter eventB = new FileChooser.ExtensionFilter("EventB Files", Machine.Type.EVENTB.getExtensions());
 		final FileChooser.ExtensionFilter csp = new FileChooser.ExtensionFilter("CSP Files", Machine.Type.CSP.getExtensions());
@@ -100,7 +120,7 @@ public class Machine extends LTLCheckableItem {
 		
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Select Machine");
-		fileChooser.getExtensionFilters().addAll(classicalB, eventB, csp, tla);
+		fileChooser.getExtensionFilters().addAll(all, classicalB, eventB, csp, tla);
 		
 		final File file = fileChooser.showOpenDialog(window);
 		if (file == null) {
@@ -109,7 +129,14 @@ public class Machine extends LTLCheckableItem {
 		
 		final FileChooser.ExtensionFilter xf = fileChooser.getSelectedExtensionFilter();
 		final Machine.Type type;
-		if (xf == classicalB) {
+		if (xf == all) {
+			final String[] parts = file.getName().split("\\.");
+			final String ext = parts[parts.length-1];
+			type = Machine.Type.getExtensionToTypeMap().get("*." + ext);
+			if (type == null) {
+				throw new IllegalArgumentException(String.format("Could not determine machine type for file %s (extension: %s)", file.getName(), ext));
+			}
+		} else if (xf == classicalB) {
 			type = Machine.Type.B;
 		} else if (xf == eventB) {
 			type = Machine.Type.EVENTB;
