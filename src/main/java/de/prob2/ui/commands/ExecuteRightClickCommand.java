@@ -7,7 +7,7 @@ import de.prob.prolog.term.PrologTerm;
 
 public class ExecuteRightClickCommand extends AbstractCommand {
 
-	private static final String PROLOG_COMMAND_NAME = "react_to_item_right_click";
+	private static final String PROLOG_COMMAND_NAME = "react_to_item_right_click_option_for_state";
 	private String stateId;
 	private int row;
 	private int column;
