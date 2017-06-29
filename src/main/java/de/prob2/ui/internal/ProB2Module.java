@@ -41,8 +41,6 @@ public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 	
 	private final RuntimeOptions runtimeOptions;
-	private final Locale locale = new Locale("en");
-	private final ResourceBundle bundle = ResourceBundle.getBundle("bundles.prob2", locale);
 	
 	public ProB2Module(final RuntimeOptions runtimeOptions) {
 		super();
@@ -55,7 +53,9 @@ public class ProB2Module extends AbstractModule {
 		install(new MainModule());
 		
 		// General stuff
+		final Locale locale = Locale.ENGLISH;
 		bind(Locale.class).toInstance(locale);
+		final ResourceBundle bundle = ResourceBundle.getBundle("bundles.prob2", locale);
 		bind(ResourceBundle.class).toInstance(bundle);
 		final MenuToolkit toolkit = IS_MAC ? MenuToolkit.toolkit(locale) : null;
 		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
