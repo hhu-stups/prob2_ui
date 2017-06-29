@@ -13,6 +13,7 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 
 import de.prob2.ui.MainController;
+import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MainView;
@@ -39,8 +40,15 @@ import javafx.fxml.FXMLLoader;
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 	
+	private final RuntimeOptions runtimeOptions;
 	private final Locale locale = new Locale("en");
 	private final ResourceBundle bundle = ResourceBundle.getBundle("bundles.prob2", locale);
+	
+	public ProB2Module(final RuntimeOptions runtimeOptions) {
+		super();
+		
+		this.runtimeOptions = runtimeOptions;
+	}
 
 	@Override
 	protected void configure() {
@@ -51,6 +59,7 @@ public class ProB2Module extends AbstractModule {
 		bind(ResourceBundle.class).toInstance(bundle);
 		final MenuToolkit toolkit = IS_MAC ? MenuToolkit.toolkit(locale) : null;
 		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
+		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
 		
 		// Controllers
 		bind(VisualisationView.class);
