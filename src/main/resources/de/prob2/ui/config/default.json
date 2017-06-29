@@ -1,34 +1,30 @@
 {
-	"maxRecentFiles": 10,
-	"recentFiles": [],
+	"maxRecentProjects": 10,
 	"recentProjects": [],
-	"statesViewHiddenClasses": [
-		"de.prob.model.representation.Action"
-	],
+	"groovyConsoleSettings": null,
+	"bConsoleSettings": null,
 	"guiState": "main.fxml",
 	"visibleStages": [],
 	"stageBoxes": {},
-	"groovyConsoleSettings": null,
-	"bConsoleSettings": null,
-	"currentPreference": "general",
-	"openedPerspectives": [],
 	"groovyObjectTabs": [],
-	"expandedTitledPanes" : [],
-	"horizontalDividerPositions": [],
-	"verticalDividerPositions": [],
-	"animationsViewColumnsWidth": [
-		0.30,
+	"currentPreference": "general",
+	"expandedTitledPanes": [],
+	"horizontalDividerPositions": [
 		0.25,
-		0.25,
-		0.20
+		0.8
 	],
-	"animationsViewColumnsOrder": ["Machine/Context", "Last Operation", "Trace Length", "Time"],
+	"verticalDividerPositions": [],
 	"statesViewColumnsWidth": [
 		0.3333333333333333,
 		0.3333333333333333,
 		0.3333333333333333
 	],
-	"statesViewColumnsOrder": ["Name", "Value", "Previous Value"],
-	"operationsSortMode" : "MODEL_ORDER",
-	"operationsShowNotEnabled": true
+	"statesViewColumnsOrder": [
+		"Name",
+		"Value",
+		"Previous Value"
+	],
+	"operationsSortMode": "MODEL_ORDER",
+	"operationsShowNotEnabled": true,
+	"globalPreferences": {}
 }
