@@ -36,19 +36,12 @@ public final class TablePersistenceHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void setColumnsWidth(Control control, ObservableList<? extends TableColumnBase<?, ?>> columns,
-			TablePersistenceEnum tableEnum) {
+	public void setColumnsWidth(Control control, ObservableList<? extends TableColumnBase<?, ?>> columns) {
 		if (!(control instanceof TreeTableView || control instanceof TableView)) {
 			return;
 		}
 
-		double[] widths;
-		if (tableEnum == TablePersistenceEnum.ANIMATIONS_VIEW) {
-			widths = uiState.getAnimationsViewColumnsWidth();
-		} else {
-			widths = uiState.getStatesViewColumnsWidth();
-		}
-
+		double[] widths = uiState.getStatesViewColumnsWidth();
 		double sum = 0.0;
 		for (final TableColumnBase<?, ?> column : columns) {
 			sum += column.getWidth();
@@ -61,17 +54,9 @@ public final class TablePersistenceHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void setColumnsOrder(ObservableList<? extends TableColumnBase<?, ?>> columns,
-			TablePersistenceEnum tableEnum) {
-		String[] order;
-		if (tableEnum == TablePersistenceEnum.ANIMATIONS_VIEW) {
-			order = uiState.getAnimationsViewColumnsOrder();
-		} else {
-			order = uiState.getStatesViewColumnsOrder();
-		}
-
+	public void setColumnsOrder(ObservableList<? extends TableColumnBase<?, ?>> columns) {
 		ObservableList<? extends TableColumnBase<?, ?>> newColumns = FXCollections.observableArrayList();
-		for (final String text : order) {
+		for (final String text : uiState.getStatesViewColumnsOrder()) {
 			for (TableColumnBase<?, ?> column : columns) {
 				if (column.getText().equals(text)) {
 					((ObservableList<TableColumnBase<?, ?>>) newColumns).add(column);

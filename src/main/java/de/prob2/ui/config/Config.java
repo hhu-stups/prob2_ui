@@ -64,8 +64,6 @@ public final class Config {
 		private double[] verticalDividerPositions;
 		private double[] statesViewColumnsWidth;
 		private String[] statesViewColumnsOrder;
-		private double[] animationsViewColumnsWidth;
-		private String[] animationsViewColumnsOrder;
 		private OperationsView.SortMode operationsSortMode;
 		private boolean operationsShowNotEnabled;
 		private Map<String, String> globalPreferences;
@@ -184,14 +182,6 @@ public final class Config {
 			configData.statesViewColumnsOrder = this.defaultData.statesViewColumnsOrder.clone();
 		}
 
-		if (configData.animationsViewColumnsWidth == null) {
-			configData.animationsViewColumnsWidth = this.defaultData.animationsViewColumnsWidth.clone();
-		}
-
-		if (configData.animationsViewColumnsOrder == null) {
-			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder.clone();
-		}
-
 		if (configData.operationsSortMode == null) {
 			configData.operationsSortMode = this.defaultData.operationsSortMode;
 		}
@@ -249,9 +239,6 @@ public final class Config {
 
 		this.uiState.setStatesViewColumnsWidth(configData.statesViewColumnsWidth);
 		this.uiState.setStatesViewColumnsOrder(configData.statesViewColumnsOrder);
-
-		this.uiState.setAnimationsViewColumnsWidth(configData.animationsViewColumnsWidth);
-		this.uiState.setAnimationsViewColumnsOrder(configData.animationsViewColumnsOrder);
 
 		this.uiState.setHorizontalDividerPositions(configData.horizontalDividerPositions);
 		this.uiState.setVerticalDividerPositions(configData.verticalDividerPositions);
