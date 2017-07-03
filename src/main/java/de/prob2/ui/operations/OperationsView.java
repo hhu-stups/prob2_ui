@@ -92,6 +92,40 @@ public final class OperationsView extends AnchorPane {
 			});
 			this.setContextMenu(new ContextMenu(showDetailsItem));
 		}
+		
+		private String getPrettyName(final String name) {
+			switch (name) {
+				case "$setup_constants":
+					return "SETUP_CONSTANTS";
+				
+				case "$initialise_machine":
+					return "INITIALISATION";
+				
+				default:
+					return name;
+			}
+		}
+		
+		private String formatOperationItem(final OperationItem item) {
+			StringBuilder sb = new StringBuilder();
+			
+			final List<String> returnValues = item.getReturnValues();
+			if (!returnValues.isEmpty()) {
+				sb.append(String.join(", ", returnValues));
+				sb.append(" ← ");
+			}
+			
+			sb.append(getPrettyName(item.getName()));
+			
+			final List<String> params = item.getParams();
+			if (!params.isEmpty()) {
+				sb.append('(');
+				sb.append(String.join(", ", params));
+				sb.append(')');
+			}
+			
+			return sb.toString();
+		}
 
 		@Override
 		protected void updateItem(OperationItem item, boolean empty) {
@@ -99,7 +133,7 @@ public final class OperationsView extends AnchorPane {
 			getStyleClass().removeAll("enabled", "timeout", "unexplored", "errored", "skip", "normal", "disabled",
 					"max-reached");
 			if (item != null && !empty) {
-				setText(item.toString());
+				setText(formatOperationItem(item));
 				setDisable(true);
 				final FontAwesomeIconView icon;
 				switch (item.getStatus()) {
@@ -196,7 +230,6 @@ public final class OperationsView extends AnchorPane {
 	private final Injector injector;
 	private final Comparator<CharSequence> alphanumericComparator;
 
-	private static final String INITIALISATION = "INITIALISATION";
 	private static final String ICON_DARK = "icon-dark";
 
 	@Inject
@@ -291,22 +324,26 @@ public final class OperationsView extends AnchorPane {
 		final Set<String> disabled = new HashSet<>(opNames);
 		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		for (Transition transition : operations) {
-			final String name = extractPrettyName(transition.getName());
-			disabled.remove(name);
+			disabled.remove(transition.getName());
 
 			final List<String> params;
-			if ("SETUP_CONSTANTS".equals(name)) {
-				params = this.extractParamsFromNextState(trace, transition, Constant.class);
-			} else if (INITIALISATION.equals(name)) {
-				params = this.extractParamsFromNextState(trace, transition, Variable.class);
-			} else {
-				params = transition.getParams();
+			switch (transition.getName()) {
+				case "$setup_constants":
+					params = this.extractParamsFromNextState(trace, transition, Constant.class);
+					break;
+				
+				case "$initialise_machine":
+					params = this.extractParamsFromNextState(trace, transition, Variable.class);
+					break;
+				
+				default:
+					params = transition.getParams();
 			}
 
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			final boolean skip = transition.getSource().equals(transition.getDestination());
-			OperationItem operationItem = new OperationItem(trace, transition.getId(), name, params,
+			OperationItem operationItem = new OperationItem(trace, transition.getId(), transition.getName(), params,
 					transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip);
 			events.add(operationItem);
 		}
@@ -325,7 +362,7 @@ public final class OperationsView extends AnchorPane {
 	private void showDisabledAndWithTimeout(final Trace trace, final Set<String> notEnabled, final Set<String> withTimeout) {
 		if (showDisabledOps) {
 			for (String s : notEnabled) {
-				if (!INITIALISATION.equals(s)) {
+				if (!"$initialise_machine".equals(s)) {
 					events.add(new OperationItem(trace, s, s, opToParams.get(s), Collections.emptyList(),
 							withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
 							false, false, false));
@@ -334,20 +371,10 @@ public final class OperationsView extends AnchorPane {
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
-				events.add(new OperationItem(trace, s, s, opToParams.get(s), Collections.emptyList(),
+				events.add(new OperationItem(trace, s, s, Collections.emptyList(), Collections.emptyList(),
 						OperationItem.Status.TIMEOUT, false, false, false));
 			}
 		}
-	}
-
-	private static String extractPrettyName(final String name) {
-		if ("$setup_constants".equals(name)) {
-			return "SETUP_CONSTANTS";
-		}
-		if ("$initialise_machine".equals(name)) {
-			return INITIALISATION;
-		}
-		return name;
 	}
 
 	private static String stripString(final String param) {

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.base.MoreObjects;
+
 import de.prob.statespace.Trace;
 
 public class OperationItem {
@@ -81,17 +83,16 @@ public class OperationItem {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		if (!returnValues.isEmpty()) {
-			sb.append(String.join(", ", returnValues));
-			sb.append(" ← ");
-		}
-		sb.append(name);
-		if (!params.isEmpty()) {
-			sb.append("(");
-			sb.append(String.join(", ", params));
-			sb.append(")");
-		}
-		return sb.toString();
+		return MoreObjects.toStringHelper(this)
+			.add("trace", trace)
+			.add("id", id)
+			.add("name", name)
+			.add("params", params)
+			.add("returnValues", returnValues)
+			.add("status", status)
+			.add("explored", explored)
+			.add("errored", errored)
+			.add("skip", skip)
+			.toString();
 	}
 }
