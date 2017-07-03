@@ -334,7 +334,7 @@ public final class OperationsView extends AnchorPane {
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
-				events.add(new OperationItem(trace, s, s, opToParams.get(s), Collections.emptyList(),
+				events.add(new OperationItem(trace, s, s, Collections.emptyList(), Collections.emptyList(),
 						OperationItem.Status.TIMEOUT, false, false, false));
 			}
 		}
