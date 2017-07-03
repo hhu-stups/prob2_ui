@@ -190,7 +190,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void initializeMachines() {
 		for (Machine machine : machines) {
-			machine.initializeStatus();
+			machine.initializeLTLStatus();
 			injector.getInstance(LTLView.class).parseMachine(machine);
 		}
 	}

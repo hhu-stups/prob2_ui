@@ -13,22 +13,24 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 
-import de.prob2.ui.verifications.ltl.LTLCheckableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
-public class Machine extends LTLCheckableItem {
+public class Machine {
 	@FunctionalInterface
 	public interface Loader extends Serializable {
 		StateSpace load(final Api api, final String file, final Map<String, String> prefs) throws IOException, ModelTranslationError;
@@ -95,6 +97,9 @@ public class Machine extends LTLCheckableItem {
 		}
 	}
 	
+	protected transient FontAwesomeIconView ltlstatus;
+	private String name;
+	private String description;
 	private String location;
 	private Machine.Type type;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
@@ -102,7 +107,9 @@ public class Machine extends LTLCheckableItem {
 	private transient PatternManager patternManager;
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
-		super(name,description);
+		initializeLTLStatus();
+		this.name = name;
+		this.description = description;
 		this.location = location.toString();
 		this.type = type;
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
@@ -161,9 +168,9 @@ public class Machine extends LTLCheckableItem {
 		return this.type;
 	}
 	
-	@Override
-	public void initializeStatus() {
-		super.initializeStatus();
+	public void initializeLTLStatus() {
+		this.ltlstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		this.ltlstatus.setFill(Color.BLUE);
 		if (ltlFormulas != null) {
 			for (LTLFormulaItem item : ltlFormulas) {
 				item.initializeStatus();
@@ -175,6 +182,38 @@ public class Machine extends LTLCheckableItem {
 			}
 		}
 		patternManager = new PatternManager();
+	}
+	
+	public FontAwesomeIconView getLtlStatus() {
+		return ltlstatus;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
+	public void setLTLCheckedSuccessful() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
+		icon.setFill(Color.GREEN);
+		this.ltlstatus = icon;
+	}
+
+	public void setLTLCheckedFailed() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
+		icon.setFill(Color.RED);
+		this.ltlstatus = icon;
 	}
 		
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {

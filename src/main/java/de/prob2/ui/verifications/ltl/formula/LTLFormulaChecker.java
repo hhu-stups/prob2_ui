@@ -46,12 +46,12 @@ public class LTLFormulaChecker {
 		machine.getFormulas().forEach(item-> {
 			Checked result = this.checkFormula(item, machine);
 			if(result == Checked.FAIL || result == Checked.EXCEPTION) {
-				machine.setCheckedFailed();
+				machine.setLTLCheckedFailed();
 				success.set(0, false);
 			}
 		});
 		if(success.get(0)) {
-			machine.setCheckedSuccessful();
+			machine.setLTLCheckedSuccessful();
 		}
 	}
 	
