@@ -9,8 +9,8 @@ import com.google.inject.Singleton;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.verifications.ltl.MachineTableView;
-import de.prob2.ui.verifications.ltl.MachineTableView.CheckingType;
+import de.prob2.ui.verifications.MachineTableView;
+import de.prob2.ui.verifications.MachineTableView.CheckingType;
 import javafx.fxml.FXML;
 import javafx.scene.layout.AnchorPane;
 

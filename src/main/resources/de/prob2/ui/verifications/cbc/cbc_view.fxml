@@ -6,7 +6,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.Label?>
-<?import de.prob2.ui.verifications.ltl.MachineTableView?>
+<?import de.prob2.ui.verifications.MachineTableView?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.ScrollPane?>
