@@ -16,6 +16,7 @@ import de.prob.check.LTLOk;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLParseError;
 import javafx.scene.control.Alert;
@@ -59,7 +60,7 @@ public class LTLResultHandler {
 	
 	}
 	
-	public void showResult(LTLResultItem resultItem, LTLCheckableItem item, @Nullable Trace trace) {
+	public void showResult(LTLResultItem resultItem, AbstractCheckableItem item, @Nullable Trace trace) {
 		if(resultItem == null) {
 			return;
 		}
@@ -116,7 +117,7 @@ public class LTLResultHandler {
 		return Checked.FAIL;
 	}
 	
-	public void handlePatternResult(LTLParseListener parseListener, LTLCheckableItem item, boolean byInit) {
+	public void handlePatternResult(LTLParseListener parseListener, AbstractCheckableItem item, boolean byInit) {
 		LTLResultItem resultItem = null;
 		if(parseListener.getErrorMarkers().size() == 0) {
 			resultItem = new LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "Parsing LTL Pattern succeeded", "Success");

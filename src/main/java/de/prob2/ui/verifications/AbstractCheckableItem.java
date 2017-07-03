@@ -1,20 +1,29 @@
-package de.prob2.ui.verifications.ltl;
+package de.prob2.ui.verifications;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.scene.paint.Color;
 
-public abstract class LTLCheckableItem {
+public abstract class AbstractCheckableItem {
 	protected transient FontAwesomeIconView status;
 	protected String name;
 	protected String description;
+	protected String code;
 	
-	public LTLCheckableItem(String name, String description) {
+	public AbstractCheckableItem(String name, String description, String code) {
 		initializeStatus();
 		this.name = name;
 		this.description = description;
-	}
+		this.code = code;
+	}	
 	
+	public void setData(String name, String description, String code) {
+		initializeStatus();
+		setName(name);
+		setDescription(description);
+		setCode(code);
+	}
+		
 	public void initializeStatus() {
 		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.status.setFill(Color.BLUE);
@@ -38,6 +47,14 @@ public abstract class LTLCheckableItem {
 	
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	public void setCode(String code) {
+		this.code = code;
+	}
+	
+	public String getCode() {
+		return code;
 	}
 	
 	public void setCheckedSuccessful() {
