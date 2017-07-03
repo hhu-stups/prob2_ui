@@ -29,6 +29,7 @@ import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.VerificationsView;
+import de.prob2.ui.verifications.cbc.CBCView;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.ltl.MachineTableView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
@@ -44,7 +45,6 @@ public class ProB2Module extends AbstractModule {
 	
 	public ProB2Module(final RuntimeOptions runtimeOptions) {
 		super();
-		
 		this.runtimeOptions = runtimeOptions;
 	}
 
@@ -62,6 +62,7 @@ public class ProB2Module extends AbstractModule {
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
 		
 		// Controllers
+		bind(CBCView.class);
 		bind(VisualisationView.class);
 		bind(HistoryView.class);
 		bind(MainController.class);
