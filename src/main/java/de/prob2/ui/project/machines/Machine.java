@@ -98,6 +98,7 @@ public class Machine {
 	}
 	
 	protected transient FontAwesomeIconView ltlstatus;
+	protected transient FontAwesomeIconView cbcstatus;
 	private String name;
 	private String description;
 	private String location;
@@ -108,6 +109,7 @@ public class Machine {
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
 		initializeLTLStatus();
+		initializeCBCStatus();
 		this.name = name;
 		this.description = description;
 		this.location = location.toString();
@@ -184,8 +186,17 @@ public class Machine {
 		patternManager = new PatternManager();
 	}
 	
+	public void initializeCBCStatus() {
+		this.cbcstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		this.cbcstatus.setFill(Color.BLUE);
+	}
+	
 	public FontAwesomeIconView getLtlStatus() {
 		return ltlstatus;
+	}
+	
+	public FontAwesomeIconView getCbcStatus() {
+		return cbcstatus;
 	}
 	
 	public String getName() {
@@ -214,6 +225,18 @@ public class Machine {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
 		icon.setFill(Color.RED);
 		this.ltlstatus = icon;
+	}
+	
+	public void setCBCCheckedSuccessful() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
+		icon.setFill(Color.GREEN);
+		this.cbcstatus = icon;
+	}
+
+	public void setCBCCheckedFailed() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
+		icon.setFill(Color.RED);
+		this.cbcstatus = icon;
 	}
 		
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {

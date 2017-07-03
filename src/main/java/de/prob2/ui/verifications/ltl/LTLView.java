@@ -14,6 +14,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.ltl.MachineTableView.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaDialog;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -78,7 +79,7 @@ public class LTLView extends AnchorPane{
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	
 	@FXML
-	private TableView<Machine> tvMachines;
+	private MachineTableView tvMachines;
 		
 	private final Injector injector;
 	
@@ -108,6 +109,7 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void initialize() throws URISyntaxException {
 		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+		tvMachines.setCheckingType(CheckingType.LTL);
 		setOnItemClicked();
 		setContextMenus();
 		setBindings();

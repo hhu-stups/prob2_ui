@@ -112,6 +112,7 @@ public class ProjectManager {
 	private void initializeLTL(Project project) {
 		for(Machine machine: project.getMachines()) {
 			machine.initializeLTLStatus();
+			machine.initializeCBCStatus();
 		}
 	}
 

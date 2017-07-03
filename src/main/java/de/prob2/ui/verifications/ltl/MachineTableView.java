@@ -44,7 +44,13 @@ public class MachineTableView extends TableView<Machine> {
 	
 	@FXML
 	public void initialize() {
-		machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("ltlStatus"));
+		typeProperty.addListener((observable, from, to) -> {
+			if(to == CheckingType.LTL) {
+				machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("ltlStatus"));
+			} else {
+				machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("cbcStatus"));
+			}
+		});
 		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		machineDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		this.itemsProperty().bind(currentProject.machinesProperty());

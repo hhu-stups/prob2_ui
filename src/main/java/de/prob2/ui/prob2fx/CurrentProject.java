@@ -191,6 +191,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void initializeMachines() {
 		for (Machine machine : machines) {
 			machine.initializeLTLStatus();
+			machine.initializeCBCStatus();
 			injector.getInstance(LTLView.class).parseMachine(machine);
 		}
 	}
