@@ -44,7 +44,7 @@ public class StateVisualisationView extends AnchorPane {
 	public void visualiseState(State state) throws FileNotFoundException {
 		visualisationGridPane.getChildren().clear();
 		visualisationPossible.set(false);
-		if(state == null || !state.isInitialised()) {
+		if(state == null || !state.isInitialised() || currentProject.getCurrentRunconfiguration() == null) {
 			return;
 		}
 		StateSpace stateSpace = state.getStateSpace();
