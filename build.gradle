@@ -62,4 +62,5 @@ dependencies {
 	compile 'org.fxmisc.wellbehaved:wellbehavedfx:0.3'
 	compile 'se.sawano.java:alphanumeric-comparator:1.4.1'
 	compile 'org.hildan.fxgson:fx-gson:3.1.0'
+    testCompile group: "org.loadui", name: "testFx", version: "3.1.2"
 }

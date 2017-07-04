@@ -1,10 +1,10 @@
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import de.prob2.ui.MainController;
+import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.preferences.PreferencesStage;
 import javafx.scene.Parent;
-import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.stage.Stage;
 import org.junit.Test;
@@ -16,11 +16,14 @@ public class PreferencesTest extends GuiTest{
 
     @Override
     public Parent getRootNode(){
+        RuntimeOptions runtimeOptions = new RuntimeOptions();
+        runtimeOptions.setProject(null);
+        runtimeOptions.setRunconfig(null);
+        runtimeOptions.setResetPreferences(true);
+        Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module(runtimeOptions));
         if(mainStage) {
-            Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module());
             return injector.getInstance(MainController.class);
         } else{
-            Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module());
             final Stage preferencesStage = injector.getInstance(PreferencesStage.class);
             preferencesStage.showAndWait();
             preferencesStage.toFront();
@@ -30,10 +33,11 @@ public class PreferencesTest extends GuiTest{
 
     @Test
     public void fileMenuTest() throws Exception{
-        //Test click for every item
         click("#editMenu");
         click("#preferencesItem");
         mainStage = false;
+        //Give Preferences Stage time to set up
+        sleep(3000);
         click("#defaultLocationField");
         type("FXMLTestingxyz");
         Spinner spinner = find("#recentProjectsCountSpinner");

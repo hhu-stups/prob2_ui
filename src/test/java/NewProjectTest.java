@@ -1,6 +1,7 @@
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import de.prob2.ui.MainController;
+import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.project.NewProjectStage;
 import javafx.scene.Parent;
@@ -14,11 +15,15 @@ public class NewProjectTest extends GuiTest{
 
     @Override
     public Parent getRootNode(){
+        RuntimeOptions runtimeOptions = new RuntimeOptions();
+        runtimeOptions.setProject(null);
+        runtimeOptions.setRunconfig(null);
+        runtimeOptions.setResetPreferences(true);
         if(mainStage) {
-            Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module());
+            Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module(runtimeOptions));
             return injector.getInstance(MainController.class);
         } else {
-            Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module());
+            Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module(runtimeOptions));
             final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
             newProjectStage.showAndWait();
             newProjectStage.toFront();
@@ -35,6 +40,5 @@ public class NewProjectTest extends GuiTest{
         type("Test");
         click("#finishButton");
         mainStage = true;
-        //Add machine
     }
 }

@@ -12,8 +12,10 @@ public class MachineTest extends GuiTest{
     @Override
     public Parent getRootNode(){
         RuntimeOptions runtimeOptions = new RuntimeOptions();
-        runtimeOptions.setProject(null);
-        runtimeOptions.setRunconfig(null);
+        //Set this to a lift0.json file..
+        runtimeOptions.setProject("lift0.bum");
+        //Set this to default
+        runtimeOptions.setRunconfig("default");
         runtimeOptions.setResetPreferences(true);
         Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module(runtimeOptions));
         return injector.getInstance(MainController.class);
@@ -21,6 +23,8 @@ public class MachineTest extends GuiTest{
 
     @Test
     public void newProjectTest() throws Exception{
-        click("#helpButton");
+        sleep(3000);
+        click("#projectTP");
+        //test all
     }
 }

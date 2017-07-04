@@ -1,6 +1,7 @@
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import de.prob2.ui.MainController;
+import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
 import javafx.scene.Parent;
 import org.junit.Test;
@@ -10,7 +11,11 @@ public class TitlePaneClickTest extends GuiTest{
 
     @Override
     public Parent getRootNode(){
-        Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module());
+        RuntimeOptions runtimeOptions = new RuntimeOptions();
+        runtimeOptions.setProject(null);
+        runtimeOptions.setRunconfig(null);
+        runtimeOptions.setResetPreferences(true);
+        Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module(runtimeOptions));
         return injector.getInstance(MainController.class);
     }
 
