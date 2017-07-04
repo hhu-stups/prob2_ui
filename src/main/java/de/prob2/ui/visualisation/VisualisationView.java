@@ -25,7 +25,9 @@ public class VisualisationView extends AnchorPane {
 	@FXML
 	private ScrollPane visualisationScrollPane;
 	@FXML
-	private StateVisualisationView stateVisualisationView;
+	private StateVisualisationView currentStateVisualisation;
+	@FXML
+	private StateVisualisationView previousStateVisualisation;
 
 	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
@@ -40,11 +42,12 @@ public class VisualisationView extends AnchorPane {
 	@FXML
 	public void initialize() {
 		visualisationScrollPane.visibleProperty().bind(probLogoStackPane.visibleProperty().not());
-		probLogoStackPane.visibleProperty().bind(stateVisualisationView.visualisationPossibleProperty().not());
+		probLogoStackPane.visibleProperty().bind(currentStateVisualisation.visualisationPossibleProperty().not());
 
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
 			try {
-				stateVisualisationView.visualiseState(to);
+				currentStateVisualisation.visualiseState(to);
+				previousStateVisualisation.visualiseState(from);
 			} catch (FileNotFoundException e) {
 				LOGGER.warn("Failed to open images for visualisation", e);
 				Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, e.getMessage());

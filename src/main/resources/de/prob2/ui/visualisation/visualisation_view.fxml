@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.control.ScrollPane?>
 <?import de.prob2.ui.visualisation.StateVisualisationView?>
+<?import javafx.scene.layout.FlowPane?>
 
 <fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
 	<StackPane fx:id="probLogoStackPane" AnchorPane.bottomAnchor="0.0"
@@ -17,10 +18,14 @@
 			</image>
 		</ImageView>
 	</StackPane>
-	<ScrollPane fx:id="visualisationScrollPane" AnchorPane.bottomAnchor="0.0"
-		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-		AnchorPane.topAnchor="0.0" visible="false" fitToWidth="TRUE" fitToHeight="TRUE">
-		<StateVisualisationView fx:id="stateVisualisationView" />
+	<ScrollPane fx:id="visualisationScrollPane"
+		AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" visible="false"
+		fitToWidth="TRUE" fitToHeight="TRUE">
+		<FlowPane>
+			<StateVisualisationView fx:id="currentStateVisualisation" />
+			<StateVisualisationView fx:id="previousStateVisualisation" />
+		</FlowPane>
 	</ScrollPane>
 </fx:root>
 
