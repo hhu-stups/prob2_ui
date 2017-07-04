@@ -15,6 +15,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 @Singleton
 public class VisualisationView extends AnchorPane {
@@ -28,6 +29,8 @@ public class VisualisationView extends AnchorPane {
 	private StateVisualisationView currentStateVisualisation;
 	@FXML
 	private StateVisualisationView previousStateVisualisation;
+	@FXML
+	private VBox previousStateVBox;
 
 	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
@@ -43,6 +46,8 @@ public class VisualisationView extends AnchorPane {
 	public void initialize() {
 		visualisationScrollPane.visibleProperty().bind(probLogoStackPane.visibleProperty().not());
 		probLogoStackPane.visibleProperty().bind(currentStateVisualisation.visualisationPossibleProperty().not());
+		previousStateVBox.managedProperty().bind(previousStateVisualisation.visualisationPossibleProperty());
+		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
 
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
 			try {
