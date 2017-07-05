@@ -13,6 +13,9 @@
 
 <fx:root type="Stage" fx:id="cbcChoice" title="%verifications.cbc.choice.title"
 	resizable="false" xmlns:fx="http://javafx.com/fxml/1" width="600">
+	<fx:define>
+		<ToggleGroup fx:id ="tgChoice"></ToggleGroup>
+	</fx:define>
 	<scene>
 		<Scene fill="TRANSPARENT">
 			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
@@ -25,14 +28,15 @@
 						</VBox.margin>
 					</Label>
 					<VBox spacing="15.0" styleClass="dark">
-					<ToggleGroup>
 						<RadioButton fx:id="rbInvariant"
-							text="%verifications.cbc.choice.invariant" />
+							text="%verifications.cbc.choice.invariant" 
+							toggleGroup ="$tgChoice"/>
 						<RadioButton fx:id="rbSequence"
-							text="%verifications.cbc.choice.sequence" />
+							text="%verifications.cbc.choice.sequence" 
+							toggleGroup ="$tgChoice"/>
 						<RadioButton fx:id="rbDeadlock"
-							text="%verifications.cbc.choice.deadlock" />
-					</ToggleGroup>
+							text="%verifications.cbc.choice.deadlock" 
+							toggleGroup ="$tgChoice"/>
 					</VBox>
 					<Button fx:id="btchoose" onAction="#choose"
 						text="%verifications.cbc.choice.choose">
