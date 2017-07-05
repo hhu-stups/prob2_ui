@@ -16,7 +16,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import netscape.javascript.JSObject;
 
-public abstract class LTLDialog<T> extends Dialog<AbstractCheckableItem> {
+public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 
 	@FXML
 	private TextField tfName;

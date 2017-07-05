@@ -29,12 +29,12 @@ public class MachineTableView extends TableView<Machine> {
 	
 	private CurrentProject currentProject;
 	
-	public SimpleObjectProperty<CheckingType> typeProperty;
+	private SimpleObjectProperty<CheckingType> typeProperty;
 	
 	@Inject
 	private MachineTableView(final StageManager stageManager, final CurrentProject currentProject) {
 		this.currentProject = currentProject;
-		this.typeProperty = new SimpleObjectProperty<CheckingType>();
+		this.typeProperty = new SimpleObjectProperty<>();
 		stageManager.loadFXML(this, "machineTableView.fxml");
 	}
 	

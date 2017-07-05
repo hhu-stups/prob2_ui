@@ -8,14 +8,14 @@ import de.prob.prolog.term.PrologTerm;
 public class ExecuteRightClickCommand extends AbstractCommand {
 
 	private static final String PROLOG_COMMAND_NAME = "react_to_item_right_click_option_for_state";
+	private static final String TRANSITION = "TransitionId";
+	private static final String NEW_STATE = "NewStateId";
+	
 	private String stateId;
 	private int row;
 	private int column;
 	private String option;
-	private String transition = "TransitionId";
-	private String newState = "NewStateId";
 	private String transitionID;
-	// private String newStateId;
 
 	public ExecuteRightClickCommand(String stateId, int row, int column, String option) {
 		this.stateId = stateId;
@@ -31,15 +31,14 @@ public class ExecuteRightClickCommand extends AbstractCommand {
 		pto.printNumber(row);
 		pto.printNumber(column);
 		pto.printAtom(option);
-		pto.printVariable(transition);
-		pto.printVariable(newState);
+		pto.printVariable(TRANSITION);
+		pto.printVariable(NEW_STATE);
 		pto.closeTerm();
 	}
 
 	@Override
 	public void processResult(ISimplifiedROMap<String, PrologTerm> bindings) {
-		transitionID = bindings.get(transition).getFunctor();
-		// newStateId = bindings.get(newState).getFunctor();
+		transitionID = bindings.get(TRANSITION).getFunctor();
 	}
 
 	public String getTransitionID() {

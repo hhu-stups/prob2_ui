@@ -31,7 +31,6 @@ public class BEditorStage extends Stage {
 	@FXML private WebView beditor;
 	
 	private final StageManager stageManager;
-	private BTokenProvider tokenProvider;
 	
 	private Path path;
 	private WebEngine engine;
@@ -49,7 +48,7 @@ public class BEditorStage extends Stage {
 		engine = beditor.getEngine();
 		engine.load(getClass().getResource("beditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
-		this.tokenProvider = new BTokenProvider(engine);
+		new BTokenProvider(engine);
 
 	}
 	

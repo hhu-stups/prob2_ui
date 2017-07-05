@@ -107,9 +107,7 @@ LtlEditor = (function() {
 	
 	/* Operand highlighting */
 	function refreshOperandHighlighting(ms) {
-		var delay;
-		clearTimeout(delay);
-		delay = setTimeout(getOperatorAtCursorPosition, ms);	
+		setTimeout(getOperatorAtCursorPosition, ms);
 	}
 	
 	function getOperatorAtCursorPosition() {
