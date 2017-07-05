@@ -201,8 +201,8 @@ public final class DetachViewStageController extends Stage {
 		// Default bounds, replaced by saved ones from the config when show() is called
 		stage.setWidth(200);
 		stage.setHeight(100);
-		stage.setX(Screen.getPrimary().getVisualBounds().getWidth()-stage.getWidth()/2);
-		stage.setY(Screen.getPrimary().getVisualBounds().getHeight()-stage.getHeight()/2);
+		stage.setX((Screen.getPrimary().getVisualBounds().getWidth()-stage.getWidth())/2);
+		stage.setY((Screen.getPrimary().getVisualBounds().getHeight()-stage.getHeight())/2);
 		stage.show();
 	}
 }
