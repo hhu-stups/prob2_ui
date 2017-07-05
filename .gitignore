@@ -22,3 +22,6 @@ gradle-app.setting
 *.log.*
 prob_log.txt
 *.prob
+
+# TestFX screenshots
+screenshot*.png
