@@ -12,6 +12,10 @@ public class ExecuteRightClickCommand extends AbstractCommand {
 	private int row;
 	private int column;
 	private String option;
+	private String transition = "TransitionId";
+	private String newState = "NewStateId";
+	private String transitionID;
+	// private String newStateId;
 
 	public ExecuteRightClickCommand(String stateId, int row, int column, String option) {
 		this.stateId = stateId;
@@ -27,12 +31,19 @@ public class ExecuteRightClickCommand extends AbstractCommand {
 		pto.printNumber(row);
 		pto.printNumber(column);
 		pto.printAtom(option);
+		pto.printVariable(transition);
+		pto.printVariable(newState);
 		pto.closeTerm();
 	}
 
 	@Override
 	public void processResult(ISimplifiedROMap<String, PrologTerm> bindings) {
-		// nothing to do here
+		transitionID = bindings.get(transition).getFunctor();
+		// newStateId = bindings.get(newState).getFunctor();
+	}
+
+	public String getTransitionID() {
+		return transitionID;
 	}
 
 }
