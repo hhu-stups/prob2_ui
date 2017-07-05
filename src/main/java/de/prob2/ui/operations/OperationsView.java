@@ -283,14 +283,15 @@ public final class OperationsView extends AnchorPane {
 		// $initialise_machine transition would set.
 		// So we look at the values of all constants/variables in the
 		// transition's destination state.
-		final Set<IEvalElement> formulas = new HashSet<>();
+		final List<IEvalElement> formulas = new ArrayList<>();
 		for (final AbstractFormulaElement c : trace.getStateSpace().getMainComponent().getChildrenOfType(type)) {
 			formulas.add(c.getFormula());
 		}
 
 		final List<String> params = new ArrayList<>();
-		for (final IEvalElement ee : formulas) {
-			final AbstractEvalResult value = transition.getDestination().eval(ee);
+		final List<AbstractEvalResult> results = transition.getDestination().eval(formulas);
+		for (int i = 0; i < formulas.size(); i++) {
+			final AbstractEvalResult value = results.get(i);
 			final String valueString;
 			if (value instanceof EvalResult) {
 				valueString = ((EvalResult)value).getValue();
@@ -298,7 +299,7 @@ public final class OperationsView extends AnchorPane {
 				// noinspection ObjectToString
 				valueString = value.toString();
 			}
-			params.add(ee.getCode() + '=' + valueString);
+			params.add(formulas.get(i).getCode() + '=' + valueString);
 		}
 
 		return params;

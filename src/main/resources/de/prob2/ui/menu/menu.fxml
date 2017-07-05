@@ -8,7 +8,7 @@
 
 <fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml"
 	BorderPane.alignment="CENTER">
-	<Menu text="%menu.file">
+	<Menu fx:id="fileMenu" text="%menu.file">
 		<MenuItem text="%menu.file.items.newProject" accelerator="Alt+Shortcut+N"
 			onAction="#createNewProject" />
 		<MenuItem text="%menu.file.items.newProjectFromFile"
@@ -30,23 +30,23 @@
 		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"
 			onAction="#handleClose" />
 	</Menu>
-	<Menu text="%menu.edit">
+	<Menu fx:id="editMenu" text="%menu.edit">
 		<MenuItem fx:id="reloadMachineItem" text="%menu.edit.items.reloadMachine"
 			accelerator="Shortcut+R" onAction="#handleReloadMachine" />
 		<MenuItem fx:id="preferencesItem" text="%menu.edit.items.preferences"
 			onAction="#handlePreferences" />
 	</Menu>
-	<Menu text="%menu.formula">
+	<Menu fx:id="formulaMenu" text="%menu.formula">
 		<MenuItem fx:id="enterFormulaForVisualization"
 			text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />
 		<MenuItem text="%menu.formula.items.showHistoryChart"
 			onAction="#handleHistoryChart" />
 	</Menu>
-	<Menu text="%menu.consoles">
+	<Menu fx:id="consolesMenu" text="%menu.consoles">
 		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole" />
 		<MenuItem text="%menu.consoles.items.b" onAction="#handleBConsole" />
 	</Menu>
-	<Menu text="%menu.perspectives">
+	<Menu fx:id="perspectivesMenu" text="%menu.perspectives">
 		<Menu text="%menu.perspectives.items.preset">
 			<MenuItem text="%menu.perspectives.items.preset.default"
 				onAction="#handleLoadDefault" />
@@ -58,12 +58,12 @@
 		<MenuItem text="%menu.perspectives.items.detach" onAction="#handleLoadDetached" />
 		<MenuItem text="%menu.perspectives.items.load" onAction="#handleLoadPerspective" />
 	</Menu>
-	<Menu text="%menu.view">
-		<MenuItem text="%menu.view.default" onAction="#handleDefaultFontSize"
+	<Menu fx:id="viewMenu" text="%menu.view">
+		<MenuItem fx:id="viewMenu_default" text="%menu.view.default" onAction="#handleDefaultFontSize"
 			accelerator="Shortcut+D" />
-		<MenuItem text="%menu.view.bigger" accelerator="Alt+Shortcut+PLUS"
+		<MenuItem fx:id="viewMenu_bigger" text="%menu.view.bigger" accelerator="Alt+Shortcut+PLUS"
 			onAction="#handleIncreaseFontSize" />
-		<MenuItem text="%menu.view.smaller" accelerator="Alt+Shortcut+MINUS"
+		<MenuItem fx:id="viewMenu_smaller" text="%menu.view.smaller" accelerator="Alt+Shortcut+MINUS"
 			onAction="#handleDecreaseFontSize" />
 	</Menu>
 	<Menu fx:id="windowMenu" text="%menu.window" />

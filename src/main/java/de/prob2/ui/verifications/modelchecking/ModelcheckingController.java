@@ -4,6 +4,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -50,17 +51,42 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
+	private enum SearchStrategy {
+		MIXED_BF_DF("verifications.modelchecking.stage.strategy.items.mixedBfDf"),
+		BREADTH_FIRST("verifications.modelchecking.stage.strategy.items.breadthFirst"),
+		DEPTH_FIRST("verifications.modelchecking.stage.strategy.items.depthFirst"),
+		//HEURISTIC_FUNCTION("verifications.modelchecking.stage.strategy.items.heuristicFunction"),
+		//HASH_RANDOM("verifications.modelchecking.stage.strategy.items.hashRandom"),
+		//RANDOM("verifications.modelchecking.stage.strategy.items.random"),
+		//OUT_DEGREE("verifications.modelchecking.stage.strategy.items.outDegree"),
+		//DISABLED_TRANSITIONS("verifications.modelchecking.stage.strategy.items.disabledTransitions"),
+		;
+		
+		private final String name;
+		
+		private SearchStrategy(final String name) {
+			this.name = name;
+		}
+		
+		public String getName() {
+			return this.name;
+		}
+	}
+	
 	private final class ModelcheckingStageController extends Stage {
+		private final ResourceBundle bundle;
+		
 		@FXML
 		private Button startButton;
 		@FXML
-		private ChoiceBox<String> selectSearchStrategy;
+		private ChoiceBox<SearchStrategy> selectSearchStrategy;
 		@FXML
 		private CheckBox findDeadlocks;
 		@FXML
@@ -74,13 +100,27 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		@FXML
 		private CheckBox searchForNewErrors;
 
-		private ModelcheckingStageController(final StageManager stageManager) {
+		private ModelcheckingStageController(final StageManager stageManager, final ResourceBundle bundle) {
+			this.bundle = bundle;
 			stageManager.loadFXML(this, "modelchecking_stage.fxml");
 		}
 
 		@FXML
 		private void initialize() {
 			this.initModality(Modality.APPLICATION_MODAL);
+			this.selectSearchStrategy.getItems().setAll(SearchStrategy.values());
+			this.selectSearchStrategy.setValue(SearchStrategy.MIXED_BF_DF);
+			this.selectSearchStrategy.setConverter(new StringConverter<SearchStrategy>() {
+				@Override
+				public String toString(final SearchStrategy object) {
+					return bundle.getString(object.getName());
+				}
+				
+				@Override
+				public SearchStrategy fromString(final String string) {
+					throw new UnsupportedOperationException("Conversion from String to SearchStrategy not supported");
+				}
+			});
 		}
 
 		@FXML
@@ -125,14 +165,23 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 		private ModelCheckingOptions getOptions() {
 			ModelCheckingOptions options = new ModelCheckingOptions();
-			// TODO: Use selected strategy in modelchecking
-			if (selectSearchStrategy.getSelectionModel().isSelected(0)) {
-				options = options.breadthFirst(true);
-				options = options.depthFirst(false);
-			} else {
-				options = options.breadthFirst(false);
-				options = options.depthFirst(true);
+			
+			switch (selectSearchStrategy.getValue()) {
+				case MIXED_BF_DF:
+					break;
+				
+				case BREADTH_FIRST:
+					options = options.breadthFirst(true);
+					break;
+				
+				case DEPTH_FIRST:
+					options = options.depthFirst(true);
+					break;
+				
+				default:
+					throw new IllegalArgumentException("Unhandled search strategy: " + selectSearchStrategy.getValue());
 			}
+			
 			options = options.checkDeadlocks(findDeadlocks.isSelected());
 			options = options.checkInvariantViolations(findInvViolations.isSelected());
 			options = options.checkAssertions(findBAViolations.isSelected());
@@ -187,7 +236,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@Inject
 	private ModelcheckingController(final AnimationSelector animations, final CurrentTrace currentTrace,
-			final StageManager stageManager, final StatsView statsView, final Injector injector) {
+			final StageManager stageManager, final StatsView statsView, final Injector injector, final ResourceBundle bundle) {
 		this.animations = animations;
 		this.currentTrace = currentTrace;
 		this.statsView = statsView;
@@ -196,7 +245,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 		stageManager.loadFXML(this, "modelchecking_stats_view.fxml");
 
-		this.stageController = new ModelcheckingStageController(stageManager);
+		this.stageController = new ModelcheckingStageController(stageManager, bundle);
 		this.jobs = new HashMap<>();
 		this.currentJob = null;
 		this.currentJobThread = null;

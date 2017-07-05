@@ -9,9 +9,7 @@ import com.google.inject.Provides;
 import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob.MainModule;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -34,8 +32,8 @@ import de.prob2.ui.verifications.cbc.CBCView;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
-
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
@@ -63,7 +61,6 @@ public class ProB2Module extends AbstractModule {
 		
 		// Controllers
 		bind(CBCView.class);
-		bind(VisualisationView.class);
 		bind(HistoryView.class);
 		bind(MainController.class);
 		bind(LTLFormulaChecker.class);
@@ -84,6 +81,8 @@ public class ProB2Module extends AbstractModule {
 		bind(StatsView.class);
 		bind(StatusBar.class);
 		bind(VerificationsView.class);
+		bind(VisualisationView.class);
+		bind(StateVisualisationView.class);
 	}
 
 	@Provides
