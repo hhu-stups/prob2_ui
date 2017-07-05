@@ -35,7 +35,6 @@ addons:
 before_install:
 - rvm install 2.0.0
 - gem install travis-custom-deploy
-- chmod +x .ci/before_install.sh
 - .ci/before_install.sh
 install: true
 before_script:
