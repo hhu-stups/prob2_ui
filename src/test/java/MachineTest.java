@@ -22,7 +22,7 @@ public class MachineTest extends GuiTest{
     }
 
     @Test
-    public void newProjectTest() throws Exception{
+    public void machineTest() throws Exception{
         sleep(3000);
         click("#projectTP");
         //test all
