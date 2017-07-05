@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ToggleGroup?>
+
+<fx:root type="Stage" fx:id="cbcChoice" title="%verifications.cbc.choice.title"
+	resizable="false" xmlns:fx="http://javafx.com/fxml/1" width="600">
+	<scene>
+		<Scene fill="TRANSPARENT">
+			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
+				<VBox spacing="10" AnchorPane.topAnchor="10.0"
+					AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0"
+					AnchorPane.rightAnchor="0.0">
+					<Label text="%verifications.cbc.choice.text">
+						<VBox.margin>
+							<Insets left="10" right="10" />
+						</VBox.margin>
+					</Label>
+					<VBox spacing="15.0" styleClass="dark">
+					<ToggleGroup>
+						<RadioButton fx:id="rbInvariant"
+							text="%verifications.cbc.choice.invariant" />
+						<RadioButton fx:id="rbSequence"
+							text="%verifications.cbc.choice.sequence" />
+						<RadioButton fx:id="rbDeadlock"
+							text="%verifications.cbc.choice.deadlock" />
+					</ToggleGroup>
+					</VBox>
+					<Button fx:id="btchoose" onAction="#choose"
+						text="%verifications.cbc.choice.choose">
+						<VBox.margin>
+							<Insets left="10" right="10" />
+						</VBox.margin>
+					</Button>
+				</VBox>
+			</AnchorPane>
+		</Scene>
+	</scene>
+</fx:root>
