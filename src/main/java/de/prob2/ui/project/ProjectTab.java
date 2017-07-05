@@ -46,6 +46,13 @@ public class ProjectTab extends Tab {
 	@FXML
 	public void initialize() throws URISyntaxException {
 		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+		applyButton.managedProperty().bind(projectDescriptionTextArea.managedProperty());
+		applyButton.visibleProperty().bind(projectDescriptionTextArea.visibleProperty());
+		projectDescriptionText.visibleProperty().bind(projectDescriptionTextArea.visibleProperty().not());
+		projectDescriptionText.managedProperty().bind(projectDescriptionTextArea.managedProperty().not());
+		projectNameLabel.visibleProperty().bind(projectNameTextField.visibleProperty().not());
+		projectNameLabel.managedProperty().bind(projectNameTextField.managedProperty().not());
+		
 		initName();
 		initDescription();
 	}
@@ -91,17 +98,13 @@ public class ProjectTab extends Tab {
 	private void editDescription() {
 		projectDescriptionTextArea.setManaged(true);
 		projectDescriptionTextArea.setVisible(true);
-		applyButton.setManaged(true);
-		applyButton.setVisible(true);
 		projectDescriptionTextArea.setText(projectDescriptionText.getText());
 		projectDescriptionTextArea.requestFocus();
 		projectDescriptionTextArea.positionCaret(projectDescriptionTextArea.getText().length());
 		applyButton.setOnMouseClicked(mouseEvent -> {
 			currentProject.changeDescription(projectDescriptionTextArea.getText());
-			projectNameTextField.setManaged(false);
-			projectNameTextField.setVisible(false);
-			applyButton.setManaged(false);
-			applyButton.setVisible(false);
+			projectDescriptionTextArea.setManaged(false);
+			projectDescriptionTextArea.setVisible(false);
 		});
 		projectDescriptionTextArea.focusedProperty().addListener((observable, from, to) -> {
 			if (!to) {
