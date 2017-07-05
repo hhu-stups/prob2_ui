@@ -802,6 +802,11 @@
 	-fx-font-style: italic;
 	-fx-font-size: 0.9em;
 }
+#project-location {
+	-fx-font-family: ARIAL;
+	-fx-font-style: italic;
+	-fx-font-size: 1em;
+}
 
 /* =================== STATES VIEW =================== */
 

@@ -1,5 +1,7 @@
 package de.prob2.ui.project;
 
+import java.net.URISyntaxException;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -17,8 +19,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.text.Text;
 
-import java.net.URISyntaxException;
-
 @Singleton
 public class ProjectTab extends Tab {
 
@@ -34,6 +34,8 @@ public class ProjectTab extends Tab {
 	private Button applyButton;
 	@FXML
 	private HelpButton helpButton;
+	@FXML
+	private Label locationLabel;
 
 	private final CurrentProject currentProject;
 
@@ -52,6 +54,9 @@ public class ProjectTab extends Tab {
 		projectDescriptionText.managedProperty().bind(projectDescriptionTextArea.managedProperty().not());
 		projectNameLabel.visibleProperty().bind(projectNameTextField.visibleProperty().not());
 		projectNameLabel.managedProperty().bind(projectNameTextField.managedProperty().not());
+		
+		locationLabel.textProperty().bind(currentProject.locationProperty().asString());
+		locationLabel.getTooltip().textProperty().bind(locationLabel.textProperty());
 		
 		initName();
 		initDescription();
@@ -84,6 +89,7 @@ public class ProjectTab extends Tab {
 				projectNameTextField.setVisible(false);
 			}
 		});
+		System.out.println(currentProject.locationProperty().get());
 	}
 
 	private void initDescription() {
