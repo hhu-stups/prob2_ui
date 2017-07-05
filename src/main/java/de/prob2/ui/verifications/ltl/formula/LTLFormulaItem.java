@@ -3,9 +3,9 @@ package de.prob2.ui.verifications.ltl.formula;
 import java.util.Objects;
 
 import de.prob.statespace.Trace;
-import de.prob2.ui.verifications.ltl.LTLAbstractItem;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 
-public class LTLFormulaItem extends LTLAbstractItem {
+public class LTLFormulaItem extends AbstractCheckableItem {
 
 	private transient Trace counterExample;
 

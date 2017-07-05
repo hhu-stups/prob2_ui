@@ -1,5 +1,6 @@
 package de.prob2.ui.helpsystem;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +32,8 @@ public class HelpTreeItem extends TreeItem<String>{
                 this.setValue(m.group(1));
             }
         }
+        this.setExpanded(true);
+        Platform.runLater(() -> this.setExpanded(false));
     }
 
     @Override public ObservableList<TreeItem<String>> getChildren() {
@@ -69,7 +73,11 @@ public class HelpTreeItem extends TreeItem<String>{
     }
 
     private TreeItem<String> createNode(final File f) throws IOException {
-        return new HelpTreeItem(f);
+        HelpTreeItem hti = new HelpTreeItem(f);
+        if (hti.isLeaf()) {
+            HelpSystem.fileMap.put(f, hti);
+        }
+        return hti;
     }
 
     public File getFile() {

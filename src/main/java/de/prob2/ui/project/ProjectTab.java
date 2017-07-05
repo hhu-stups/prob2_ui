@@ -1,5 +1,7 @@
 package de.prob2.ui.project;
 
+import java.net.URISyntaxException;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -17,8 +19,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.text.Text;
 
-import java.net.URISyntaxException;
-
 @Singleton
 public class ProjectTab extends Tab {
 
@@ -34,6 +34,8 @@ public class ProjectTab extends Tab {
 	private Button applyButton;
 	@FXML
 	private HelpButton helpButton;
+	@FXML
+	private Label locationLabel;
 
 	private final CurrentProject currentProject;
 
@@ -46,6 +48,16 @@ public class ProjectTab extends Tab {
 	@FXML
 	public void initialize() throws URISyntaxException {
 		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+		applyButton.managedProperty().bind(projectDescriptionTextArea.managedProperty());
+		applyButton.visibleProperty().bind(projectDescriptionTextArea.visibleProperty());
+		projectDescriptionText.visibleProperty().bind(projectDescriptionTextArea.visibleProperty().not());
+		projectDescriptionText.managedProperty().bind(projectDescriptionTextArea.managedProperty().not());
+		projectNameLabel.visibleProperty().bind(projectNameTextField.visibleProperty().not());
+		projectNameLabel.managedProperty().bind(projectNameTextField.managedProperty().not());
+		
+		locationLabel.textProperty().bind(currentProject.locationProperty().asString());
+		locationLabel.getTooltip().textProperty().bind(locationLabel.textProperty());
+		
 		initName();
 		initDescription();
 	}
@@ -91,17 +103,13 @@ public class ProjectTab extends Tab {
 	private void editDescription() {
 		projectDescriptionTextArea.setManaged(true);
 		projectDescriptionTextArea.setVisible(true);
-		applyButton.setManaged(true);
-		applyButton.setVisible(true);
 		projectDescriptionTextArea.setText(projectDescriptionText.getText());
 		projectDescriptionTextArea.requestFocus();
 		projectDescriptionTextArea.positionCaret(projectDescriptionTextArea.getText().length());
 		applyButton.setOnMouseClicked(mouseEvent -> {
 			currentProject.changeDescription(projectDescriptionTextArea.getText());
-			projectNameTextField.setManaged(false);
-			projectNameTextField.setVisible(false);
-			applyButton.setManaged(false);
-			applyButton.setVisible(false);
+			projectDescriptionTextArea.setManaged(false);
+			projectDescriptionTextArea.setVisible(false);
 		});
 		projectDescriptionTextArea.focusedProperty().addListener((observable, from, to) -> {
 			if (!to) {

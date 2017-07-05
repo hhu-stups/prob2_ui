@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.ltl;
 import java.lang.reflect.Type;
 import java.lang.reflect.ParameterizedType;
 
+import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import javafx.fxml.FXML;
@@ -15,7 +16,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import netscape.javascript.JSObject;
 
-public abstract class LTLDialog<T> extends Dialog<LTLAbstractItem> {
+public abstract class LTLDialog<T> extends Dialog<AbstractCheckableItem> {
 
 	@FXML
 	private TextField tfName;

@@ -14,27 +14,28 @@
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.control.Tooltip?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import javafx.geometry.Insets?>
 
 <fx:root type="Tab" text="%project.tab.title" closable="false"
-		 xmlns:fx="http://javafx.com/fxml/1">
+	xmlns:fx="http://javafx.com/fxml/1">
 	<VBox stylesheets="@/prob.css" spacing="0">
 		<AnchorPane styleClass="border">
 			<HBox alignment="CENTER_RIGHT" AnchorPane.leftAnchor="6"
-				  AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="4">
-				<Label fx:id="projectNameLabel" HBox.hgrow="ALWAYS" AnchorPane.leftAnchor="6"
-					   AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="4" id="title" />
-				<AnchorPane>
-					<HelpButton fx:id="helpButton" AnchorPane.rightAnchor="-8"/>
-				</AnchorPane>
+				AnchorPane.rightAnchor="6" AnchorPane.topAnchor="10">
+				<HBox HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
+					<Label fx:id="projectNameLabel" HBox.hgrow="ALWAYS" id="title" />
+					<TextField fx:id="projectNameTextField" managed="false"
+						visible="false" />
+				</HBox>
+				<HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
+					<HelpButton fx:id="helpButton" />
+				</HBox>
 			</HBox>
-			<TextField fx:id="projectNameTextField"
-				AnchorPane.leftAnchor="6" AnchorPane.topAnchor="20"
-				AnchorPane.bottomAnchor="4" managed="false" visible="false" />
 		</AnchorPane>
 		<AnchorPane VBox.vgrow="ALWAYS">
 			<ScrollPane hbarPolicy="NEVER" AnchorPane.leftAnchor="0"
 				AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"
-				AnchorPane.bottomAnchor="0">
+				AnchorPane.bottomAnchor="0" fitToHeight="true" fitToWidth="true">
 				<AnchorPane>
 					<Text fx:id="projectDescriptionText" AnchorPane.leftAnchor="6"
 						AnchorPane.topAnchor="6" AnchorPane.rightAnchor="6"
@@ -49,6 +50,14 @@
 				AnchorPane.rightAnchor="16" AnchorPane.bottomAnchor="6" styleClass="button-blue"
 				managed="false" visible="false" />
 		</AnchorPane>
+		<Label fx:id="locationLabel" id="project-location">
+			<tooltip>
+				<Tooltip />
+			</tooltip>
+			<padding>
+				<Insets bottom="4" top="2" left="4" right="4" />
+			</padding>
+		</Label>
 	</VBox>
 </fx:root>
 

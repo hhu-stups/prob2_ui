@@ -18,16 +18,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
@@ -40,7 +39,11 @@ import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.states.StatesView;
+
 import javafx.geometry.BoundingBox;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
@@ -61,8 +64,6 @@ public final class Config {
 		private double[] verticalDividerPositions;
 		private double[] statesViewColumnsWidth;
 		private String[] statesViewColumnsOrder;
-		private double[] animationsViewColumnsWidth;
-		private String[] animationsViewColumnsOrder;
 		private OperationsView.SortMode operationsSortMode;
 		private boolean operationsShowNotEnabled;
 		private Map<String, String> globalPreferences;
@@ -86,6 +87,8 @@ public final class Config {
 	private final UIState uiState;
 	private final CurrentProject currentProject;
 	private final GlobalPreferences globalPreferences;
+	
+	private boolean ignoreConfig;
 
 	@Inject
 	private Config(
@@ -95,7 +98,8 @@ public final class Config {
 		final BConsole bConsole,
 		final Injector injector,
 		final CurrentProject currentProject,
-		final GlobalPreferences globalPreferences
+		final GlobalPreferences globalPreferences,
+		final RuntimeOptions runtimeOptions
 	) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.recentProjects = recentProjects;
@@ -105,6 +109,8 @@ public final class Config {
 		this.injector = injector;
 		this.currentProject = currentProject;
 		this.globalPreferences = globalPreferences;
+		
+		this.ignoreConfig = runtimeOptions.isResetPreferences();
 
 		try (final InputStream is = Config.class.getResourceAsStream("default.json");
 				final Reader defaultReader = new InputStreamReader(is, CONFIG_CHARSET)) {
@@ -176,14 +182,6 @@ public final class Config {
 			configData.statesViewColumnsOrder = this.defaultData.statesViewColumnsOrder.clone();
 		}
 
-		if (configData.animationsViewColumnsWidth == null) {
-			configData.animationsViewColumnsWidth = this.defaultData.animationsViewColumnsWidth.clone();
-		}
-
-		if (configData.animationsViewColumnsOrder == null) {
-			configData.animationsViewColumnsOrder = this.defaultData.animationsViewColumnsOrder.clone();
-		}
-
 		if (configData.operationsSortMode == null) {
 			configData.operationsSortMode = this.defaultData.operationsSortMode;
 		}
@@ -195,15 +193,21 @@ public final class Config {
 
 	public void load() {
 		ConfigData configData;
-		try (final InputStream is = new FileInputStream(LOCATION);
-				final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)) {
-			configData = gson.fromJson(reader, ConfigData.class);
-		} catch (FileNotFoundException exc) {
-			logger.info("Config file not found, loading default settings", exc);
+		if (this.ignoreConfig) {
+			logger.info("Preferences reset requested via runtime options, loading default settings");
+			this.ignoreConfig = false;
 			configData = this.defaultData;
-		} catch (IOException exc) {
-			logger.warn("Failed to open config file", exc);
-			return;
+		} else {
+			try (final InputStream is = new FileInputStream(LOCATION);
+					final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)) {
+				configData = gson.fromJson(reader, ConfigData.class);
+			} catch (FileNotFoundException exc) {
+				logger.info("Config file not found, loading default settings", exc);
+				configData = this.defaultData;
+			} catch (IOException exc) {
+				logger.warn("Failed to open config file", exc);
+				return;
+			}
 		}
 
 		this.replaceMissingWithDefaults(configData);
@@ -235,9 +239,6 @@ public final class Config {
 
 		this.uiState.setStatesViewColumnsWidth(configData.statesViewColumnsWidth);
 		this.uiState.setStatesViewColumnsOrder(configData.statesViewColumnsOrder);
-
-		this.uiState.setAnimationsViewColumnsWidth(configData.animationsViewColumnsWidth);
-		this.uiState.setAnimationsViewColumnsOrder(configData.animationsViewColumnsOrder);
 
 		this.uiState.setHorizontalDividerPositions(configData.horizontalDividerPositions);
 		this.uiState.setVerticalDividerPositions(configData.verticalDividerPositions);

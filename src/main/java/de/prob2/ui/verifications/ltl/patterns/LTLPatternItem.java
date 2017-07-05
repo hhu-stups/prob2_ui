@@ -2,9 +2,9 @@ package de.prob2.ui.verifications.ltl.patterns;
 
 import java.util.Objects;
 
-import de.prob2.ui.verifications.ltl.LTLAbstractItem;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 
-public class LTLPatternItem extends LTLAbstractItem {
+public class LTLPatternItem extends AbstractCheckableItem {
 	
 	public LTLPatternItem(String name, String description, String code) {
 		super(name, description, code);
