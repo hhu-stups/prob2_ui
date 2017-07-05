@@ -2,7 +2,6 @@ package de.prob2.ui.project;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,8 +88,7 @@ public class MachineLoader {
 				setLoadingStatus(StatusBar.LoadingStatus.LOADING_FILE);
 				final Path path;
 				if (currentProject.getMachines().contains(machine)) {
-					final String projectLocation = currentProject.get().getLocation().getPath();
-					path = Paths.get(projectLocation, machine.getPath().toString());
+					path = currentProject.get().getLocation().toPath().resolve(machine.getPath());
 				} else {
 					path = machine.getPath();
 				}

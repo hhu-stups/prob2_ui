@@ -4,7 +4,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.Label?>
-<?import de.prob2.ui.verifications.ltl.MachineTableView?>
+<?import de.prob2.ui.verifications.MachineTableView?>
 
 <fx:root stylesheets="@/prob.css" minHeight="150" type="MachineTableView"
 	xmlns:fx="http://javafx.com/fxml/1">
@@ -13,11 +13,11 @@
 	</columnResizePolicy>
 	<columns>
 		<TableColumn fx:id="machineStatusColumn" minWidth="80.0"
-			maxWidth="80.0" prefWidth="80.0" text="%verifications.ltl.columns.status" />
+			maxWidth="80.0" prefWidth="80.0" text="%verifications.columns.status" />
 		<TableColumn fx:id="machineNameColumn" minWidth="120.0"
 			maxWidth="240.0" prefWidth="120.0" text="%project.machines.dialog.title" />
 		<TableColumn fx:id="machineDescriptionColumn" minWidth="120.0"
-			prefWidth="120.0" text="%verifications.ltl.columns.description" />
+			prefWidth="120.0" text="%verifications.columns.description" />
 	</columns>
 	<placeholder>
 		<Label text="%project.machines.tab.noMachines" />

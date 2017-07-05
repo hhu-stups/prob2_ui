@@ -9,10 +9,10 @@ import com.google.inject.Provides;
 import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob.MainModule;
-import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.MainController;
+import de.prob2.ui.config.RuntimeOptions;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
@@ -26,35 +26,41 @@ import de.prob2.ui.project.runconfigurations.RunconfigurationsTab;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
+import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.VerificationsView;
+import de.prob2.ui.verifications.cbc.CBCView;
 import de.prob2.ui.verifications.ltl.LTLView;
-import de.prob2.ui.verifications.ltl.MachineTableView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 	
-	private final Locale locale = new Locale("en");
-	private final ResourceBundle bundle = ResourceBundle.getBundle("bundles.prob2", locale);
+	private final RuntimeOptions runtimeOptions;
+	
+	public ProB2Module(final RuntimeOptions runtimeOptions) {
+		super();
+		this.runtimeOptions = runtimeOptions;
+	}
 
 	@Override
 	protected void configure() {
 		install(new MainModule());
 		
 		// General stuff
+		final Locale locale = Locale.ENGLISH;
 		bind(Locale.class).toInstance(locale);
+		final ResourceBundle bundle = ResourceBundle.getBundle("bundles.prob2", locale);
 		bind(ResourceBundle.class).toInstance(bundle);
-		if (IS_MAC) {
-			bind(MenuToolkit.class).toInstance(MenuToolkit.toolkit(locale));
-		} else {
-			bind(MenuToolkit.class).toProvider(Providers.of(null));
-		}
+		final MenuToolkit toolkit = IS_MAC ? MenuToolkit.toolkit(locale) : null;
+		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
+		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
 		
 		// Controllers
-		bind(VisualisationView.class);
+		bind(CBCView.class);
 		bind(HistoryView.class);
 		bind(MainController.class);
 		bind(LTLFormulaChecker.class);
@@ -75,6 +81,8 @@ public class ProB2Module extends AbstractModule {
 		bind(StatsView.class);
 		bind(StatusBar.class);
 		bind(VerificationsView.class);
+		bind(VisualisationView.class);
+		bind(StateVisualisationView.class);
 	}
 
 	@Provides

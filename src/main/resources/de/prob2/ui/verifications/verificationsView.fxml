@@ -6,6 +6,7 @@
 <?import de.prob2.ui.verifications.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.verifications.VerificationsView?>
 <?import de.prob2.ui.verifications.ltl.LTLView?>
+<?import de.prob2.ui.verifications.cbc.CBCView?>
 
 <fx:root type="VerificationsView" xmlns:fx="http://javafx.com/fxml/1">
 	<TabPane tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -19,6 +20,11 @@
 			<Tab fx:id="tabLTLFormula" text="LTL Verifications">
 				<content>
 					<LTLView />
+				</content>
+			</Tab>
+			<Tab fx:id="tabCBC" text="Constraint Based Checking">
+				<content>
+					<CBCView />
 				</content>
 			</Tab>
 		</tabs>

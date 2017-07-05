@@ -22,6 +22,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -189,7 +190,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void initializeMachines() {
 		for (Machine machine : machines) {
-			machine.initializeStatus();
+			machine.initializeLTLStatus();
+			machine.initializeCBCStatus();
+			injector.getInstance(LTLView.class).parseMachine(machine);
 		}
 	}
 

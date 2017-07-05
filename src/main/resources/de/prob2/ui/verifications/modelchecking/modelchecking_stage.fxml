@@ -27,23 +27,10 @@
 							<Label text="%verifications.modelchecking.stage.strategyLabel"
 								textAlignment="LEFT" />
 							<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-								<ChoiceBox fx:id="selectSearchStrategy"
-									value="%verifications.modelchecking.stage.strategy.items.breadthFirst">
+								<ChoiceBox fx:id="selectSearchStrategy">
 									<tooltip>
 										<Tooltip text="%verifications.modelchecking.stage.strategy.tooltip" />
 									</tooltip>
-									<items>
-										<FXCollections fx:factory="observableArrayList">
-											<!-- TODO: Get these strings from resource bundle (% references 
-												does not work here) -->
-											<String fx:value="Breadth First" />
-											<String fx:value="Depth First" />
-											<!-- <String fx:value="Mixed DF/BF" /> <String fx:value="Heuristic 
-												Function/Random" /> <String fx:value="Hash-Random" /> <String fx:value="Random" 
-												/> <String fx:value="Out-Degree for Deadlock Checking" /> <String fx:value="Disabled 
-												Transitions in State" /> -->
-										</FXCollections>
-									</items>
 								</ChoiceBox>
 							</HBox>
 						</HBox>

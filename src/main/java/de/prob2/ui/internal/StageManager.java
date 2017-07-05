@@ -1,6 +1,8 @@
 package de.prob2.ui.internal;
 
+import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -12,16 +14,15 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -36,10 +37,14 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W shortcut. Also provides some convenience methods for creating {@link Stage}s and {@link Alert}s and loading FXML files.
@@ -249,6 +254,17 @@ public final class StageManager {
 		final Alert alert = new Alert(alertType);
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		this.register(alert);
+		return alert;
+	}
+	
+	public Alert makeExceptionAlert(final Alert.AlertType alertType, final String contentText, final Throwable exc) {
+		final Alert alert = this.makeAlert(alertType, contentText);
+		final TextArea textArea = new TextArea();
+		try (final CharArrayWriter caw = new CharArrayWriter(); final PrintWriter pw = new PrintWriter(caw)) {
+			exc.printStackTrace(pw);
+			textArea.setText(caw.toString());
+		}
+		alert.getDialogPane().setExpandableContent(textArea);
 		return alert;
 	}
 	

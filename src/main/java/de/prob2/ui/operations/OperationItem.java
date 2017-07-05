@@ -4,11 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.base.MoreObjects;
+
+import de.prob.statespace.Trace;
+
 public class OperationItem {
 	public enum Status {
 		DISABLED, ENABLED, TIMEOUT, MAX_REACHED
 	}
 	
+	private final Trace trace;
 	private final String id;
 	private final String name;
 	private final List<String> params;
@@ -19,6 +24,7 @@ public class OperationItem {
 	private final boolean skip;
 
 	public OperationItem(
+		final Trace trace,
 		final String id,
 		final String name,
 		final List<String> params,
@@ -28,6 +34,7 @@ public class OperationItem {
 		final boolean errored,
 		final boolean skip
 	) {
+		this.trace = Objects.requireNonNull(trace);
 		this.id = Objects.requireNonNull(id);
 		this.name = Objects.requireNonNull(name);
 		this.params = Objects.requireNonNull(params);
@@ -36,6 +43,10 @@ public class OperationItem {
 		this.explored = explored;
 		this.errored = errored;
 		this.skip = skip;
+	}
+	
+	public Trace getTrace() {
+		return this.trace;
 	}
 	
 	public String getName() {
@@ -72,17 +83,16 @@ public class OperationItem {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		if (!returnValues.isEmpty()) {
-			sb.append(String.join(", ", returnValues));
-			sb.append(" ← ");
-		}
-		sb.append(name);
-		if (!params.isEmpty()) {
-			sb.append("(");
-			sb.append(String.join(", ", params));
-			sb.append(")");
-		}
-		return sb.toString();
+		return MoreObjects.toStringHelper(this)
+			.add("trace", trace)
+			.add("id", id)
+			.add("name", name)
+			.add("params", params)
+			.add("returnValues", returnValues)
+			.add("status", status)
+			.add("explored", explored)
+			.add("errored", errored)
+			.add("skip", skip)
+			.toString();
 	}
 }

@@ -7,7 +7,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.Label?>
-<?import de.prob2.ui.verifications.ltl.MachineTableView?>
+<?import de.prob2.ui.verifications.MachineTableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.ScrollPane?>
@@ -55,13 +55,13 @@
 						</columnResizePolicy>
 						<columns>
 							<TableColumn fx:id="formulaStatusColumn" minWidth="80.0"
-								maxWidth="80.0" prefWidth="80.0" text="%verifications.ltl.columns.status" />
+								maxWidth="80.0" prefWidth="80.0" text="%verifications.columns.status" />
 							<TableColumn fx:id="formulaNameColumn" minWidth="120.0"
 								maxWidth="240.0" prefWidth="120.0"
-								text="%verifications.ltl.formula.columns.name" />
+								text="%verifications.formula.columns.name" />
 							<TableColumn fx:id="formulaDescriptionColumn"
 								minWidth="120.0" prefWidth="120.0"
-								text="%verifications.ltl.columns.description" />
+								text="%verifications.columns.description" />
 						</columns>
 						<placeholder>
 							<Label text="%verifications.ltl.formula.noFormulas" />
@@ -73,13 +73,13 @@
 						</columnResizePolicy>
 						<columns>
 							<TableColumn fx:id="patternStatusColumn" minWidth="80.0"
-								maxWidth="80.0" prefWidth="80.0" text="%verifications.ltl.columns.status" />
+								maxWidth="80.0" prefWidth="80.0" text="%verifications.columns.status" />
 							<TableColumn fx:id="patternNameColumn" minWidth="120.0"
 								maxWidth="240.0" prefWidth="240.0"
 								text="%verifications.ltl.pattern.columns.name" />
 							<TableColumn fx:id="patternDescriptionColumn"
 								minWidth="120.0" prefWidth="120.0"
-								text="%verifications.ltl.columns.description" />
+								text="%verifications.columns.description" />
 						</columns>
 						<placeholder>
 							<Label text="%verifications.ltl.pattern.noPattern" />

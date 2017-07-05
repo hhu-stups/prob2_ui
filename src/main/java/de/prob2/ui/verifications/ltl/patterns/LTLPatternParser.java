@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.ltl.patterns;
 
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -10,6 +9,7 @@ import com.google.inject.Injector;
 
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.LTLView;
@@ -28,15 +28,21 @@ public class LTLPatternParser {
 		this.injector = injector;
 	}
 		
-	public void parsePattern(LTLPatternItem item, PatternManager patternManager) {
+	public void parsePattern(LTLPatternItem item, Machine machine, boolean byInit) {
 		logger.trace("Parse ltl pattern");
 		Pattern pattern = itemToPattern(item);
-		patternManager.getPatterns().add(pattern);
-		resultHandler.handlePatternResult(checkDefinition(pattern, patternManager), item);
+		machine.getPatternManager().getPatterns().add(pattern);
+		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item, byInit);
 		injector.getInstance(LTLView.class).refreshPattern();
 	}
 	
-	private LTLParseListener checkDefinition(Pattern pattern, PatternManager patternManager) {
+	private LTLParseListener checkDefinition(Pattern pattern, Machine machine) {
+		LTLParseListener parseListener = initializeParseListener(pattern);
+		pattern.updateDefinitions(machine.getPatternManager());
+		return parseListener;
+	}
+	
+	private LTLParseListener initializeParseListener(Pattern pattern) {
 		LTLParseListener parseListener = new LTLParseListener();
 		pattern.removeErrorListeners();
 		pattern.removeWarningListeners();
@@ -44,11 +50,11 @@ public class LTLPatternParser {
 		pattern.addErrorListener(parseListener);
 		pattern.addWarningListener(parseListener);
 		pattern.addUpdateListener(parseListener);
-		pattern.updateDefinitions(patternManager);
 		return parseListener;
 	}
 	
-	public void removePattern(LTLPatternItem item, PatternManager patternManager) {
+	public void removePattern(LTLPatternItem item, Machine machine) {
+		PatternManager patternManager = machine.getPatternManager();
 		patternManager.removePattern(patternManager.getUserPattern(item.getName()));
 	}
 	
@@ -59,6 +65,10 @@ public class LTLPatternParser {
 		pattern.setDescription(item.getDescription());
 		pattern.setCode(item.getCode());
 		return pattern;
+	}
+	
+	public void parseMachine(Machine machine) {
+		machine.getPatterns().forEach(item-> this.parsePattern(item, machine, true));
 	}
 	
 }

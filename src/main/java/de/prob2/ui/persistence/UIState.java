@@ -30,8 +30,6 @@ public class UIState {
 	private List<String> expandedTitledPanes;
 	private double[] statesViewColumnsWidth;
 	private String[] statesViewColumnsOrder;
-	private double[] animationsViewColumnsWidth;
-	private String[] animationsViewColumnsOrder;
 	private OperationsView.SortMode operationsSortMode;
 	private boolean operationsShowNotEnabled;
 	private double[] horizontalDividerPositions;
@@ -47,8 +45,6 @@ public class UIState {
 		this.expandedTitledPanes = new ArrayList<>();
 		this.statesViewColumnsWidth = new double[3];
 		this.statesViewColumnsOrder = new String[3];
-		this.animationsViewColumnsWidth = new double[4];
-		this.animationsViewColumnsOrder = new String[4];
 	}
 	
 	public void setGuiState(String guiState) {
@@ -134,22 +130,6 @@ public class UIState {
 		return statesViewColumnsOrder;
 	}
 	
-	public void setAnimationsViewColumnsWidth(double[] width) {
-		this.animationsViewColumnsWidth = width;
-	}
-	
-	public double[] getAnimationsViewColumnsWidth() {
-		return animationsViewColumnsWidth;
-	}
-	
-	public void setAnimationsViewColumnsOrder(String[] order) {
-		this.animationsViewColumnsOrder = order;
-	}
-	
-	public String[] getAnimationsViewColumnsOrder() {
-		return animationsViewColumnsOrder;
-	}
-		
 	public void setOperationsSortMode(OperationsView.SortMode mode) {
 		this.operationsSortMode = mode;
 	}

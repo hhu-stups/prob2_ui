@@ -126,8 +126,8 @@ public final class UIPersistence {
 		final TablePersistenceHandler tablePersistenceHandler = injector.getInstance(TablePersistenceHandler.class);
 		main.setHorizontalDividerPositions(uiState.getHorizontalDividerPositions());
 		main.setVerticalDividerPositions(uiState.getVerticalDividerPositions());
-		tablePersistenceHandler.setColumnsOrder(statesView.getTable().getColumns(), TablePersistenceEnum.STATES_VIEW);
-		tablePersistenceHandler.setColumnsWidth(statesView.getTable(), statesView.getTable().getColumns(), TablePersistenceEnum.STATES_VIEW);
+		tablePersistenceHandler.setColumnsOrder(statesView.getTable().getColumns());
+		tablePersistenceHandler.setColumnsWidth(statesView.getTable(), statesView.getTable().getColumns());
 		
 		final OperationsView operationsView = injector.getInstance(OperationsView.class);
 		operationsView.setSortMode(uiState.getOperationsSortMode());

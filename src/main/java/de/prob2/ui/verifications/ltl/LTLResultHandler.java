@@ -13,8 +13,10 @@ import com.google.inject.Singleton;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLOk;
+import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLParseError;
 import javafx.scene.control.Alert;
@@ -58,7 +60,7 @@ public class LTLResultHandler {
 	
 	}
 	
-	public void showResult(LTLResultItem resultItem, LTLCheckableItem item, @Nullable Trace trace) {
+	public void showResult(LTLResultItem resultItem, AbstractCheckableItem item, @Nullable Trace trace) {
 		if(resultItem == null) {
 			return;
 		}
@@ -98,14 +100,14 @@ public class LTLResultHandler {
 		} else if(result instanceof LTLError) {
 			resultItem = new LTLResultItem(AlertType.ERROR, Checked.FAIL, ((LTLError) result).getMessage(), 
 											"Error while executing formula");
-		} else if(result instanceof LTLParseError) {
+		} else if(result instanceof LTLParseError || result instanceof ProBError) {
 			StringWriter sw = new StringWriter();
 			try (PrintWriter pw = new PrintWriter(sw)) {
 				((Throwable) result).printStackTrace(pw);
 			}
 			resultItem = new LTLResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse formula", 
 											sw.toString());
-			logger.error("Could not parse LTL formula", result);
+			logger.error("Could not parse LTL formula", result);			
 		}
 		
 		this.showResult(resultItem, item, trace);
@@ -115,17 +117,21 @@ public class LTLResultHandler {
 		return Checked.FAIL;
 	}
 	
-	public void handlePatternResult(LTLParseListener parseListener, LTLCheckableItem item) {
+	public void handlePatternResult(LTLParseListener parseListener, AbstractCheckableItem item, boolean byInit) {
 		LTLResultItem resultItem = null;
 		if(parseListener.getErrorMarkers().size() == 0) {
 			resultItem = new LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "Parsing LTL Pattern succeeded", "Success");
+			item.setCheckedSuccessful();
 		} else {
 			StringBuilder msg = new StringBuilder();
 			for (LTLMarker marker: parseListener.getErrorMarkers()) {
 				msg.append(marker.getMsg()+ "\n");
 			}
 			resultItem = new LTLResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse pattern", msg.toString());
+			item.setCheckedFailed();
 		}
-		this.showResult(resultItem, item, null);
+		if(!byInit) {
+			this.showResult(resultItem, item, null);
+		}
 	}
 }

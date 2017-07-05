@@ -66,6 +66,7 @@ public class ProjectManager {
 			project.setLocation(file.getParentFile());
 			replaceMissingWithDefaults(project);
 			setupRunconfigurations(project);
+			initializeLTL(project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
 			return;
@@ -106,6 +107,13 @@ public class ProjectManager {
 			newRunconfigs.add(new Runconfiguration(m, p));
 		}
 		project.setRunconfigurations(newRunconfigs);
+	}
+	
+	private void initializeLTL(Project project) {
+		for(Machine machine: project.getMachines()) {
+			machine.initializeLTLStatus();
+			machine.initializeCBCStatus();
+		}
 	}
 
 	private Map<String, Preference> getPreferencesAsMap(Project project) {

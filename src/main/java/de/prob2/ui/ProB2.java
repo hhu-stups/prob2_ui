@@ -8,6 +8,7 @@ import com.google.inject.Injector;
 
 import de.prob.cli.ProBInstanceProvider;
 
+import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
@@ -15,6 +16,8 @@ import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
+import de.prob2.ui.project.runconfigurations.Runconfiguration;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -25,6 +28,12 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,20 +95,62 @@ public class ProB2 extends Application {
 		this.loadingStage.show();
 		Platform.runLater(this::realStart);
 	}
+	
+	private static IllegalStateException die(final String message, final int exitCode) {
+		System.err.println(message);
+		Platform.exit();
+		System.exit(exitCode);
+		return new IllegalStateException(message);
+	}
+	
+	private static RuntimeOptions parseRuntimeOptions(final String[] args) {
+		LOGGER.info("Parsing arguments: {}", (Object)args);
+		
+		final Options options = new Options();
+		
+		options.addOption(null, "project", true, "Open the specified project on startup.");
+		options.addOption(null, "runconfig", true, "Run the specified run configuration on startup. Requires a project to be loaded first (using --open-project).");
+		options.addOption(null, "reset-preferences", false, "Reset all preferences to their defaults.");
+		
+		final CommandLineParser clParser = new PosixParser();
+		final CommandLine cl;
+		try {
+			cl = clParser.parse(options, args);
+		} catch (ParseException e) {
+			LOGGER.error("Failed to parse command line", e);
+			throw die(e.getLocalizedMessage(), 2);
+		}
+		LOGGER.info("Parsed command line: args {}, options {}", cl.getArgs(), cl.getOptions());
+		
+		if (!cl.getArgList().isEmpty()) {
+			throw die("Positional arguments are not allowed: " + cl.getArgList(), 2);
+		}
+		
+		if (cl.hasOption("runconfig") && !cl.hasOption("project")) {
+			throw die("Invalid combination of options: --runconfig requires --project", 2);
+		}
+		
+		final RuntimeOptions runtimeOpts = new RuntimeOptions();
+		runtimeOpts.setProject(cl.getOptionValue("project"));
+		runtimeOpts.setRunconfig(cl.getOptionValue("runconfig"));
+		runtimeOpts.setResetPreferences(cl.hasOption("reset-preferences"));
+		LOGGER.info("Created runtime options: {}", runtimeOpts);
+		
+		return runtimeOpts;
+	}
 
 	private void realStart() {
-		ProB2Module module = new ProB2Module();
+		final RuntimeOptions runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
+		ProB2Module module = new ProB2Module(runtimeOptions);
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 
 		StageManager stageManager = injector.getInstance(StageManager.class);
 		Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
 			LOGGER.error("Uncaught exception on thread {}", thread, exc);
 			Platform.runLater(() -> {
-				final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR);
+				final String message = String.format("An internal exception occurred and was not caught. This is probably a bug.%nThread: %s", thread);
+				final Alert alert = stageManager.makeExceptionAlert(Alert.AlertType.ERROR, message, exc);
 				alert.setHeaderText("Uncaught internal exception");
-				alert.setContentText(String.format(
-						"An internal exception occurred and was not caught. This is probably a bug.%n%nException: %s%nThread: %s%n%nThe full stack trace can be found in the log file.",
-						exc, thread));
 				alert.show();
 			});
 		});
@@ -141,6 +192,27 @@ public class ProB2 extends Application {
 
 		primaryStage.show();
 		uiPersistence.open();
+		
+		if (runtimeOptions.getProject() != null) {
+			injector.getInstance(ProjectManager.class).openProject(new File(runtimeOptions.getProject()));
+		}
+		
+		if (runtimeOptions.getRunconfig() != null) {
+			Runconfiguration found = null;
+			for (final Runconfiguration r : currentProject.getRunconfigurations()) {
+				if (r.getName().equals(runtimeOptions.getRunconfig())) {
+					found = r;
+					break;
+				}
+			}
+			
+			if (found == null) {
+				stageManager.makeAlert(Alert.AlertType.ERROR, String.format("No runconfiguration %s exists in project %s.", runtimeOptions.getRunconfig(), currentProject.getName())).show();
+			} else {
+				currentProject.startAnimation(found);
+			}
+		}
+		
 		this.loadingStage.hide();
 	}
 
