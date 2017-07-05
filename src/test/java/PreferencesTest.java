@@ -32,7 +32,7 @@ public class PreferencesTest extends GuiTest{
     }
 
     @Test
-    public void fileMenuTest() throws Exception{
+    public void preferencesTest() throws Exception{
         click("#editMenu");
         click("#preferencesItem");
         mainStage = false;
