@@ -1,5 +1,6 @@
 package de.prob2.ui.helpsystem;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
@@ -32,6 +33,7 @@ public class HelpTreeItem extends TreeItem<String>{
             }
         }
         this.setExpanded(true);
+        Platform.runLater(() -> this.setExpanded(false));
     }
 
     @Override public ObservableList<TreeItem<String>> getChildren() {

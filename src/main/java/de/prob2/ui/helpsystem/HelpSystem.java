@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
+import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.TreeItem;
@@ -46,13 +47,13 @@ public class HelpSystem extends StackPane {
                     try {
                         if (file.toURI().toURL().sameFile(new URL(webEngine.getLocation()))) {
                             hti = fileMap.get(file);
+                            expandTree(hti);
+                            HelpTreeItem finalHti = hti;
+                            Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(finalHti)));
                         }
                     } catch (IOException e) {
                         LoggerFactory.getLogger(HelpSystem.class).error("Can not locate file",e);
                     }
-                }
-                if (hti!=null) {
-                    treeView.getSelectionModel().select(treeView.getRow(hti));
                 }
             }
         });
@@ -64,5 +65,14 @@ public class HelpSystem extends StackPane {
             fileMap.put(f, hti);
         }
         return hti;
+    }
+
+    private void expandTree(TreeItem ti) {
+        if (ti!=null) {
+            expandTree(ti.getParent());
+            if (!ti.isLeaf()) {
+                Platform.runLater(() -> ti.setExpanded(true));
+            }
+        }
     }
 }
