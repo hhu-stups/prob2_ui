@@ -89,7 +89,6 @@ public class ProjectTab extends Tab {
 				projectNameTextField.setVisible(false);
 			}
 		});
-		System.out.println(currentProject.locationProperty().get());
 	}
 
 	private void initDescription() {
