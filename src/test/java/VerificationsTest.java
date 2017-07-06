@@ -1,7 +1,3 @@
-/**
- * Created by root on 06.07.17.
- *
- */
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import de.prob2.ui.MainController;
@@ -71,7 +67,8 @@ public class VerificationsTest extends GuiTest{
         sleep(6000);
         click("#verificationsTP");
         click((Node) find("SETUP_CONSTANTS"));
-        click((Node) find("INITIALISATION"));
+        sleep(500);
+        click((Node) find("INITIALISATION(level=L0)"));
         click("#tabModelchecking");
         click("#addModelCheckButton");
         mainStage = false;
