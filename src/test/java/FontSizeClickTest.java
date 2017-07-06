@@ -21,6 +21,7 @@ public class FontSizeClickTest extends GuiTest {
 
     @Test
     public void fontSizeTest() throws Exception{
+        sleep(3000);
         click("#viewMenu");
         click("#viewMenu_bigger");
         click("#viewMenu");

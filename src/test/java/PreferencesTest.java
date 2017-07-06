@@ -33,6 +33,7 @@ public class PreferencesTest extends GuiTest{
 
     @Test
     public void preferencesTest() throws Exception{
+        sleep(3000);
         click("#editMenu");
         click("#preferencesItem");
         mainStage = false;
@@ -56,7 +57,6 @@ public class PreferencesTest extends GuiTest{
         click("#resetButton");
         click("#applyButton");
         click("#general");
-        click("#defaultLocationButton");
     }
 
 }

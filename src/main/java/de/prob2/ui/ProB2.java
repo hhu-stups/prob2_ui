@@ -102,7 +102,10 @@ public class ProB2 extends Application {
 		System.exit(exitCode);
 		return new IllegalStateException(message);
 	}
-	
+
+	/**
+	 * Set manually like this: String args[] = new String[]{"--project", "src/test/res/Lift/Lift0.json", "--runconfig", "lift0.default", "--reset-preferences"};
+	 */
 	private static RuntimeOptions parseRuntimeOptions(final String[] args) {
 		LOGGER.info("Parsing arguments: {}", (Object)args);
 		

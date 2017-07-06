@@ -33,9 +33,11 @@ public class NewProjectTest extends GuiTest{
 
     @Test
     public void newProjectTest() throws Exception{
+        sleep(3000);
         click("#projectTP");
         click("#newProjectButton");
         mainStage = false;
+        sleep(2000);
         click("#projectNameField");
         type("Test");
         click("#finishButton");

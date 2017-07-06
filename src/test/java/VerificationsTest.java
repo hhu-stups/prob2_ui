@@ -1,3 +1,7 @@
+/**
+ * Created by root on 06.07.17.
+ *
+ */
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import de.prob2.ui.MainController;
@@ -6,6 +10,7 @@ import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.input.KeyCode;
@@ -17,9 +22,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-public class MachineTest extends GuiTest{
+public class VerificationsTest extends GuiTest{
     private static final Logger LOGGER = LoggerFactory.getLogger(MachineTest.class);
 
+    private boolean mainStage = true;
 
     @Override
     public Parent getRootNode(){
@@ -54,45 +60,27 @@ public class MachineTest extends GuiTest{
                 currentProject.startAnimation(found);
             }
         }
-
+        if(!mainStage){
+            return injector.getInstance(ModelcheckingController.class);
+        }
         return injector.getInstance(MainController.class);
     }
 
     @Test
-    public void randomEventsInMachineTest() throws Exception{
+    public void verificationsTest() throws Exception{
         sleep(6000);
-        click("#projectTP");
-        click("#projectTab");
-        click("#machinesTab");
-        doubleClick("#machines-item-name");
-        click("#closeDescriptionButton");
-        click("#preferencesTab");
-        click("#preferencesListView");
-        doubleClick((Node) find("Design"));
-        click("#closePreferenceViewButton");
         click("#verificationsTP");
-
-        //triggering relatively random events
         click((Node) find("SETUP_CONSTANTS"));
+        click((Node) find("INITIALISATION"));
+        click("#tabModelchecking");
+        click("#addModelCheckButton");
+        mainStage = false;
+        click("#findDeadlocks");
+        click("#startButton");
+        mainStage = true;
         sleep(500);
-        click((Node) find("INITIALISATION(level=L0)"));
-        sleep(500);
-        doubleClick((Node) find("CONSTANTS"));
-        for(int i = 0; i < 5; i++) {
-            click((Node) find("up"));
-            sleep(500);
-        }
-        for(int i = 0; i < 4; i++) {
-            click((Node) find("randomCrazyJump(L" + i + ")"));
-            sleep(500);
-        }
-        click((Node) find("down"));
-
-        //FIXME: Cannot be tested if window is too small because button is not visible
-        //click("#runconfigurationsTab");
-        //click("#runconfigurationsListView");
-        //click("#addRunconfigButton");
-        //press(KeyCode.ENTER);
+        click("#tabLTLFormula");
+        //Add test when fully implemented
     }
 
     /**

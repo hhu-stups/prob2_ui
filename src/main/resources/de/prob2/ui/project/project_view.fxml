@@ -20,8 +20,8 @@
 		AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
 		AnchorPane.rightAnchor="0" minWidth="300">
 		<ProjectTab fx:id="projectTab"/>
-		<MachinesTab />
-		<PreferencesTab />
-		<RunconfigurationsTab />
+		<MachinesTab fx:id="machinesTab" />
+		<PreferencesTab fx:id="preferencesTab" />
+		<RunconfigurationsTab fx:id="runconfigurationsTab" />
 	</TabPane>
 </fx:root>

@@ -12,7 +12,7 @@
 	<TabPane tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 		<tabs>
-			<Tab text="Modelchecking">
+			<Tab fx:id="tabModelchecking" text="Modelchecking">
 				<content>
 					<ModelcheckingController />
 				</content>

@@ -21,6 +21,7 @@ public class TitlePaneClickTest extends GuiTest{
 
     @Test
     public void clickTest() throws Exception{
+        sleep(3000);
         click("#statsTP");
         click("#historyTP");
         click("#projectTP");
