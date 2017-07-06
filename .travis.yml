@@ -6,7 +6,7 @@ branches:
   - develop
 script:
 - ./gradlew assemble
-- ./gradlew check
+- ./gradlew -Pheadless=true check
 - ./gradlew distZip
 - sonar-scanner -Dsonar.login=$SONAR_TOKEN
 sudo: false
