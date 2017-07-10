@@ -248,36 +248,17 @@ public final class MenuController extends MenuBar {
 	}
 
 	@FXML
-	private void handleNewProjectFromFile() {
-		final Machine.FileAndType selected = Machine.askForFile(this.window);
+	private void handleOpen() {
+		final File selected = FileAsker.askForProjectOrMachine(window);
 		if (selected == null) {
 			return;
 		}
-		final Path projectLocation = currentProject.getDefaultLocation();
-		final Path absolute = selected.getFile().toPath();
-		final Path relative = projectLocation.relativize(absolute);
-		final String shortName = selected.getFile().getName().substring(0, selected.getFile().getName().lastIndexOf('.'));
-		final String description = "(this project was created automatically from file " + absolute + ')';
-		final Machine machine = new Machine(shortName, "", relative, selected.getType());
-		currentProject.set(new Project(shortName, description, machine, currentProject.getDefaultLocation().toFile()));
-		
-		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
-		currentProject.addRunconfiguration(defaultRunconfig);
-		currentProject.startAnimation(defaultRunconfig);
-	}
-
-	@FXML
-	private void handleOpenProject() {
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open Project");
-		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("ProB2 Projects", "*.json"));
-
-		final File selectedProject = fileChooser.showOpenDialog(this.window);
-		if (selectedProject == null) {
-			return;
+		final String ext = FileAsker.getExtension(selected.getName());
+		if ("json".equals(ext)) {
+			this.openProject(selected);
+		} else {
+			this.createProjectFromFile(selected);
 		}
-
-		this.openProject(selectedProject);
 	}
 
 	private void openProject(File file) {
@@ -288,6 +269,20 @@ public final class MenuController extends MenuBar {
 			this.recentProjects.remove(file.getAbsolutePath());
 			this.recentProjects.add(0, file.getAbsolutePath());
 		});
+	}
+	
+	private void createProjectFromFile(File file) {
+		final Path projectLocation = currentProject.getDefaultLocation();
+		final Path absolute = file.toPath();
+		final Path relative = projectLocation.relativize(absolute);
+		final String shortName = file.getName().substring(0, file.getName().lastIndexOf('.'));
+		final String description = "(this project was created automatically from file " + absolute + ')';
+		final Machine machine = new Machine(shortName, "", relative);
+		currentProject.set(new Project(shortName, description, machine, currentProject.getDefaultLocation().toFile()));
+		
+		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
+		currentProject.addRunconfiguration(defaultRunconfig);
+		currentProject.startAnimation(defaultRunconfig);
 	}
 
 	@FXML

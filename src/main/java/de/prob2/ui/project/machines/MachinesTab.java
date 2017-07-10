@@ -24,6 +24,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.menu.FileAsker;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -162,21 +163,20 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	void addMachine() {
-		final Machine.FileAndType selected = Machine.askForFile(this.getContent().getScene().getWindow());
+		final File selected = FileAsker.askForMachine(this.getContent().getScene().getWindow());
 		if (selected == null) {
 			return;
 		}
 
 		final Path projectLocation = currentProject.getLocation().toPath();
-		final Path absolute = selected.getFile().toPath();
+		final Path absolute = selected.toPath();
 		final Path relative = projectLocation.relativize(absolute);
-		if (currentProject.getMachines().contains(new Machine("", "", relative, selected.getType()))) {
+		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
 			stageManager.makeAlert(Alert.AlertType.ERROR,
 					"The machine \"" + relative + "\" already exists in the current project.").showAndWait();
 			return;
 		}
-		injector.getInstance(AddMachinesDialog.class).showAndWait(relative, selected.getType())
-				.ifPresent(currentProject::addMachine);
+		injector.getInstance(AddMachinesDialog.class).showAndWait(relative).ifPresent(currentProject::addMachine);
 	}
 
 	@FXML
