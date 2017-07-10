@@ -383,7 +383,7 @@ public final class OperationsView extends AnchorPane {
 	}
 
 	private int compareParams(final List<String> left, final List<String> right) {
-		int minSize = left.size() > right.size() ? left.size() : right.size();
+		int minSize = left.size() < right.size() ? left.size() : right.size();
 		for (int i = 0; i < minSize; i++) {
 			int cmp = alphanumericComparator.compare(stripString(left.get(i)), stripString(right.get(i)));
 			if (cmp != 0) {
