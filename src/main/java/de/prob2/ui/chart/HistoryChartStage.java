@@ -173,6 +173,11 @@ public final class HistoryChartStage extends Stage {
 		this.singleChart.prefWidthProperty().bind(this.chartsPane.widthProperty());
 		this.singleChart.prefHeightProperty().bind(this.chartsPane.heightProperty());
 
+		this.showingProperty().addListener((observable, from, to) -> {
+			if (to) {
+				this.updateStartChoiceBox();
+			}
+		});
 		this.currentTrace.addListener((observable, from, to) -> this.updateStartChoiceBox());
 		this.updateStartChoiceBox();
 
@@ -264,6 +269,10 @@ public final class HistoryChartStage extends Stage {
 	}
 
 	private void updateStartChoiceBox() {
+		if (!this.isShowing()) {
+			return;
+		}
+		
 		if (this.currentTrace.exists()) {
 			final TraceElement startElement = this.startChoiceBox.getValue();
 			this.startChoiceBox.getItems().clear();
@@ -287,6 +296,10 @@ public final class HistoryChartStage extends Stage {
 	}
 
 	private void updateCharts() {
+		if (!this.isShowing()) {
+			return;
+		}
+		
 		final List<List<XYChart.Data<Number, Number>>> newDatas = new ArrayList<>();
 		for (int i = 0; i < this.singleChart.getData().size(); i++) {
 			newDatas.add(new ArrayList<>());
