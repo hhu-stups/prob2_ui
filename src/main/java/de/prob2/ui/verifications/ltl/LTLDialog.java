@@ -57,11 +57,11 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 		engine.setJavaScriptEnabled(true);
 		engine.getLoadWorker().stateProperty().addListener((observable, from, to) -> {
 			if(to == Worker.State.SUCCEEDED) {
+				loaded = true;
 				if(text != null) {
 					final JSObject editor = (JSObject) engine.executeScript("editor");
 					editor.call("setValue", text);
 				}
-				loaded = true;
 			}
 		});
 	}
@@ -73,7 +73,7 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 			editor.call("setValue", text);
 		}
 	}
-	
+		
 	public void setData(String name, String description, String code) {
 		tfName.setText(name);
 		taDescription.setText(description);
