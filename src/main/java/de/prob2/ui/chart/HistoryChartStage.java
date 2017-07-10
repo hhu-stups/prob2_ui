@@ -173,6 +173,11 @@ public final class HistoryChartStage extends Stage {
 		this.singleChart.prefWidthProperty().bind(this.chartsPane.widthProperty());
 		this.singleChart.prefHeightProperty().bind(this.chartsPane.heightProperty());
 
+		this.showingProperty().addListener((observable, from, to) -> {
+			if (to) {
+				this.updateStartChoiceBox();
+			}
+		});
 		this.currentTrace.addListener((observable, from, to) -> this.updateStartChoiceBox());
 		this.updateStartChoiceBox();
 
@@ -264,6 +269,10 @@ public final class HistoryChartStage extends Stage {
 	}
 
 	private void updateStartChoiceBox() {
+		if (!this.isShowing()) {
+			return;
+		}
+		
 		if (this.currentTrace.exists()) {
 			final TraceElement startElement = this.startChoiceBox.getValue();
 			this.startChoiceBox.getItems().clear();
@@ -287,6 +296,10 @@ public final class HistoryChartStage extends Stage {
 	}
 
 	private void updateCharts() {
+		if (!this.isShowing()) {
+			return;
+		}
+		
 		final List<List<XYChart.Data<Number, Number>>> newDatas = new ArrayList<>();
 		for (int i = 0; i < this.singleChart.getData().size(); i++) {
 			newDatas.add(new ArrayList<>());
@@ -362,16 +375,16 @@ public final class HistoryChartStage extends Stage {
 					return Integer.parseInt(value);
 				} catch (NumberFormatException e) {
 					if (showErrors) {
-						stageManager.makeAlert(Alert.AlertType.ERROR, "Not a valid integer: " + e.getMessage()).show();
+						stageManager.makeAlert(Alert.AlertType.ERROR, "Could not evaluate formula for history chart: Not a valid integer: " + e.getMessage()).show();
 					}
-					throw new IllegalArgumentException("Not a valid integer", e);
+					throw new IllegalArgumentException("Could not evaluate formula for history chart: Not a valid integer", e);
 				}
 			}
 		} else {
 			if (showErrors) {
-				stageManager.makeAlert(Alert.AlertType.ERROR, "Invalid result: " + aer).show();
+				stageManager.makeAlert(Alert.AlertType.ERROR, "Could not evaluate formula for history chart: Invalid result: " + aer).show();
 			}
-			throw new IllegalArgumentException("Expected an EvalResult, not " + aer.getClass().getName());
+			throw new IllegalArgumentException("Could not evaluate formula for history chart: Expected an EvalResult, not " + aer.getClass().getName());
 		}
 	}
 }
