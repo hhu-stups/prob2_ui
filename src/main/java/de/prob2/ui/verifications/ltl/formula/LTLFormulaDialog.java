@@ -8,7 +8,7 @@ public class LTLFormulaDialog extends LTLDialog {
 			
 	@Inject
 	public LTLFormulaDialog(final StageManager stageManager) {
-		super();
+		super(LTLFormulaItem.class);
 		stageManager.loadFXML(this, "ltlformula_dialog.fxml");
 	}
 	

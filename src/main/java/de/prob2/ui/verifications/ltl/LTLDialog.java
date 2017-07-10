@@ -1,11 +1,10 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.lang.reflect.Type;
-import java.lang.reflect.ParameterizedType;
 
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.Dialog;
@@ -29,19 +28,20 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 	
 	protected WebEngine engine;
 	
-	protected String text;	
+	private volatile boolean loaded;
 	
-	public LTLDialog() {
+	private volatile String text;
+			
+	public LTLDialog(Class<? extends AbstractCheckableItem> clazz) {
 		super();
+		loaded = false;
 		this.setResultConverter(type -> {
 			if(type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
 				final JSObject editor = (JSObject) engine.executeScript("editor");
 				String code = editor.call("getValue").toString();
-				Type superClass = this.getClass().getGenericSuperclass();
-				Type genericType = ((ParameterizedType) superClass).getActualTypeArguments()[0];
-				if(genericType.getTypeName() == LTLPatternItem.class.getTypeName()) {
+				if(clazz == LTLPatternItem.class) {
 					return new LTLPatternItem(tfName.getText(), taDescription.getText(), code);	
 				}
 				return new LTLFormulaItem(tfName.getText(), taDescription.getText(), code);	
@@ -55,21 +55,20 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 		engine = taCode.getEngine();
 		engine.load(getClass().getResource("../LTLEditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
-		engine.documentProperty().addListener(listener -> {
-			if(text != null) {
-				final JSObject editor = (JSObject) engine.executeScript("editor");
-				editor.call("setValue", text);
+		engine.getLoadWorker().stateProperty().addListener((observable, from, to) -> {
+			if(to == Worker.State.SUCCEEDED) {
+				if(text != null) {
+					final JSObject editor = (JSObject) engine.executeScript("editor");
+					editor.call("setValue", text);
+				}
+				loaded = true;
 			}
 		});
 	}
 	
 	private void setTextEditor(String text) {
-		if(engine == null) {
-			return;
-		}
-		if(this.text == null) {
-			this.text = text;
-		} else {
+		this.text = text;
+		if(loaded) {
 			final JSObject editor = (JSObject) engine.executeScript("editor");
 			editor.call("setValue", text);
 		}
@@ -85,5 +84,5 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 		this.tfName.clear();
 		this.taDescription.clear();
 	}
-	
+		
 }

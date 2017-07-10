@@ -8,7 +8,7 @@ public class LTLPatternDialog extends LTLDialog {
 		
 	@Inject
 	public LTLPatternDialog(final StageManager stageManager) {
-		super();
+		super(LTLPatternItem.class);
 		stageManager.loadFXML(this, "ltlpattern_dialog.fxml");
 	}
 	
