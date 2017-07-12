@@ -62,21 +62,16 @@
 							</VBox>
 						</bottom>
 					</BorderPane>
-					<AnchorPane>
-						<FlowPane fx:id="chartsPane" AnchorPane.topAnchor="0.0"
-					AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-					AnchorPane.rightAnchor="0.0">
-							<LineChart fx:id="singleChart" styleClass="history-chart">
-								<xAxis>
-									<NumberAxis styleClass="time-axis" autoRanging="false"
-										tickUnit="1.0" upperBound="1.0" />
-								</xAxis>
-								<yAxis>
-									<NumberAxis />
-								</yAxis>
-							</LineChart>
-						</FlowPane>
-					</AnchorPane>
+					<FlowPane fx:id="chartsPane" minWidth="160" minHeight="160" maxWidth="Infinity" maxHeight="Infinity" prefWrapLength="640">
+						<LineChart fx:id="singleChart" styleClass="history-chart">
+							<xAxis>
+								<NumberAxis styleClass="time-axis" autoRanging="false" tickUnit="1.0" upperBound="1.0" />
+							</xAxis>
+							<yAxis>
+								<NumberAxis />
+							</yAxis>
+						</LineChart>
+					</FlowPane>
 				</SplitPane>
 			</AnchorPane>
 		</Scene>
