@@ -52,8 +52,8 @@ public class VisualisationView extends AnchorPane {
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
 			try {
 				currentStateVisualisation.visualiseState(to);
-				if (to != null) {
-					previousStateVisualisation.visualiseState(from);
+				if (to != null && currentTrace.canGoBack()) {
+					previousStateVisualisation.visualiseState(currentTrace.get().getPreviousState());
 				}
 			} catch (FileNotFoundException e) {
 				LOGGER.warn("Failed to open images for visualisation", e);
