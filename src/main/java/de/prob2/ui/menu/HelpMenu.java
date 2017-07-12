@@ -32,7 +32,9 @@ public class HelpMenu extends Menu {
 	
 	@FXML
 	private void handleAboutDialog() {
-		injector.getInstance(AboutBoxController.class).showAndWait();
+		final Stage aboutBox = injector.getInstance(AboutBox.class);
+		aboutBox.show();
+		aboutBox.toFront();
 	}
 
 	@FXML

@@ -17,6 +17,9 @@
 .gradle/
 gradle-app.setting
 
+# Build info
+/src/main/resources/de/prob2/ui/build.properties
+
 # ProB
 *.log
 *.log.*

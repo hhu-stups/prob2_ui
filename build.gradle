@@ -1,3 +1,7 @@
+import java.text.DateFormat
+import java.time.ZoneId
+import java.time.ZoneOffset
+
 plugins {
 	id "edu.sc.seis.macAppBundle" version "2.1.6"
 }
@@ -68,4 +72,21 @@ dependencies {
 	testCompile 'org.testfx:testfx-core:4.0.+'
 	testCompile 'org.testfx:testfx-junit:4.0.+'
 	testRuntime 'org.testfx:openjfx-monocle:1.8.0_20'
+}
+
+processResources {
+	doFirst {
+		def f = file("src/main/resources/de/prob2/ui/build.properties")
+		f.delete()
+		def dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.ROOT)
+		dateFormat.timeZone = TimeZone.getTimeZone(ZoneId.from(ZoneOffset.UTC))
+		f.append("buildTime=${dateFormat.format(new Date())}\n")
+		def proc = new ProcessBuilder("git", "rev-parse", "HEAD").directory(buildDir).start()
+		def exitCode = proc.waitFor()
+		if (exitCode != 0) {
+			throw new IllegalStateException("Command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
+		}
+		def hash = proc.in.readLines()[0]
+		f.append("commit=${hash}\n")
+	}
 }
