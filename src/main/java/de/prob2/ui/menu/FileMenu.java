@@ -78,22 +78,30 @@ public class FileMenu extends Menu {
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();
 	}
-
+	
 	@FXML
-	private void handleNewProjectFromFile() {
-		final Machine.FileAndType selected = Machine.askForFile(stageManager.getMainStage());
+	private void handleOpen() {
+		final File selected = FileAsker.askForProjectOrMachine(stageManager.getMainStage());
 		if (selected == null) {
 			return;
 		}
+		final String ext = FileAsker.getExtension(selected.getName());
+		if ("json".equals(ext)) {
+			this.openProject(selected);
+		} else {
+			this.createProjectFromFile(selected);
+		}
+	}
+	
+	private void createProjectFromFile(File file) {
 		final Path projectLocation = currentProject.getDefaultLocation();
-		final Path absolute = selected.getFile().toPath();
+		final Path absolute = file.toPath();
 		final Path relative = projectLocation.relativize(absolute);
-		final String shortName = selected.getFile().getName().substring(0,
-				selected.getFile().getName().lastIndexOf('.'));
+		final String shortName = file.getName().substring(0, file.getName().lastIndexOf('.'));
 		final String description = "(this project was created automatically from file " + absolute + ')';
-		final Machine machine = new Machine(shortName, "", relative, selected.getType());
+		final Machine machine = new Machine(shortName, "", relative);
 		currentProject.set(new Project(shortName, description, machine, currentProject.getDefaultLocation().toFile()));
-
+		
 		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
 		currentProject.addRunconfiguration(defaultRunconfig);
 		currentProject.startAnimation(defaultRunconfig);

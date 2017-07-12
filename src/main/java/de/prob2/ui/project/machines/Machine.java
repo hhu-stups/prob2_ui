@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -15,11 +14,13 @@ import java.util.regex.Pattern;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 
+import de.prob2.ui.menu.FileAsker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
@@ -27,8 +28,6 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
-import javafx.stage.FileChooser;
-import javafx.stage.Window;
 
 public class Machine {
 	@FunctionalInterface
@@ -63,6 +62,14 @@ public class Machine {
 		
 		public static Map<String, Machine.Type> getExtensionToTypeMap() {
 			return Collections.unmodifiableMap(extensionToTypeMap);
+		}
+		
+		public static Machine.Type fromExtension(final String ext) {
+			final Machine.Type type = getExtensionToTypeMap().get("*." + ext);
+			if (type == null) {
+				throw new IllegalArgumentException(String.format("Could not determine machine type for extension %s", ext));
+			}
+			return type;
 		}
 		
 		public Machine.Loader getLoader() {
@@ -117,47 +124,10 @@ public class Machine {
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 	}
-		
-	public static Machine.FileAndType askForFile(final Window window) {
-		final List<String> allExts = new ArrayList<>(Machine.Type.getExtensionToTypeMap().keySet());
-		allExts.sort(String::compareTo);
-		final FileChooser.ExtensionFilter all = new FileChooser.ExtensionFilter("All ProB Files", allExts);
-		final FileChooser.ExtensionFilter classicalB = new FileChooser.ExtensionFilter("Classical B Files", Machine.Type.B.getExtensions());
-		final FileChooser.ExtensionFilter eventB = new FileChooser.ExtensionFilter("EventB Files", Machine.Type.EVENTB.getExtensions());
-		final FileChooser.ExtensionFilter csp = new FileChooser.ExtensionFilter("CSP Files", Machine.Type.CSP.getExtensions());
-		final FileChooser.ExtensionFilter tla = new FileChooser.ExtensionFilter("TLA Files", Machine.Type.TLA.getExtensions());
-		
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Select Machine");
-		fileChooser.getExtensionFilters().addAll(all, classicalB, eventB, csp, tla);
-		
-		final File file = fileChooser.showOpenDialog(window);
-		if (file == null) {
-			return null;
-		}
-		
-		final FileChooser.ExtensionFilter xf = fileChooser.getSelectedExtensionFilter();
-		final Machine.Type type;
-		if (xf == all) {
-			final String[] parts = file.getName().split("\\.");
-			final String ext = parts[parts.length-1];
-			type = Machine.Type.getExtensionToTypeMap().get("*." + ext);
-			if (type == null) {
-				throw new IllegalArgumentException(String.format("Could not determine machine type for file %s (extension: %s)", file.getName(), ext));
-			}
-		} else if (xf == classicalB) {
-			type = Machine.Type.B;
-		} else if (xf == eventB) {
-			type = Machine.Type.EVENTB;
-		} else if (xf == csp) {
-			type = Machine.Type.CSP;
-		} else if (xf == tla) {
-			type = Machine.Type.TLA;
-		} else {
-			throw new IllegalArgumentException("Unhandled file type: " + xf);
-		}
-		
-		return new Machine.FileAndType(file, type);
+	
+	public Machine(String name, String description, Path location) {
+		this(name, description, location,
+			Machine.Type.fromExtension(FileAsker.getExtension(location.getFileName().toString())));
 	}
 
 	public String getFileName() {

@@ -31,8 +31,7 @@ public class AddMachinesDialog extends Dialog<Machine> {
 
 	private final CurrentProject currentProject;
 	private Path machinePath;
-	private Machine.Type machineType;
-
+	
 	@Inject
 	public AddMachinesDialog(final StageManager stageManager, final CurrentProject currentProject) {
 		super();
@@ -42,15 +41,14 @@ public class AddMachinesDialog extends Dialog<Machine> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				return new Machine(nameField.getText(), descriptionTextArea.getText(), machinePath, machineType);
+				return new Machine(nameField.getText(), descriptionTextArea.getText(), machinePath);
 			}
 		});
 		stageManager.loadFXML(this, "machines_dialog.fxml");
 	}
 	
-	public Optional<Machine> showAndWait(Path machinePath, Machine.Type machineType) {
+	public Optional<Machine> showAndWait(Path machinePath) {
 		this.machinePath = machinePath;
-		this.machineType = machineType;
 		final Set<String> machineNamesSet = currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toSet());
 		
 		String[] n = machinePath.toFile().getName().split("\\.");
