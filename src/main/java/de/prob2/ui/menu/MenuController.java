@@ -78,10 +78,6 @@ public final class MenuController extends MenuBar {
 		}
 	}
 
-	@FXML
-	public void initialize() {
-	}
-
 	public void setMacMenu() {
 		if (this.menuToolkit != null) {
 			this.menuToolkit.setApplicationMenu(this.getMenus().get(0));

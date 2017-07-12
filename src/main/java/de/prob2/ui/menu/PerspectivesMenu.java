@@ -38,10 +38,6 @@ public class PerspectivesMenu extends Menu {
 	}
 
 	@FXML
-	public void initialize() {
-	}
-
-	@FXML
 	private void handleLoadDefault() {
 		reset();
 		loadPreset("main.fxml");

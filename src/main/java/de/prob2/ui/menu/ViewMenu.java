@@ -19,10 +19,6 @@ public class ViewMenu extends Menu {
 	}
 
 	@FXML
-	public void initialize() {
-	}
-
-	@FXML
 	private void handleDefaultFontSize() {
 		FontSize fontSize = injector.getInstance(FontSize.class);
 		fontSize.setDefault();

@@ -24,10 +24,6 @@ public class HelpMenu extends Menu {
 	}
 
 	@FXML
-	public void initialize() {
-	}
-
-	@FXML
 	private void handleOpenHelp() {
 		final Stage helpSystemStage = injector.getInstance(HelpSystemStage.class);
 		helpSystemStage.show();

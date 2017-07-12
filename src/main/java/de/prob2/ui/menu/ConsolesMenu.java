@@ -21,10 +21,6 @@ public class ConsolesMenu extends Menu {
 	}
 
 	@FXML
-	public void initialize() {
-	}
-
-	@FXML
 	private void handleGroovyConsole() {
 		final Stage groovyConsoleStage = injector.getInstance(GroovyConsoleStage.class);
 		groovyConsoleStage.show();
