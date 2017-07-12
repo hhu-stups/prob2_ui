@@ -29,8 +29,8 @@
 					</Label>
 					<VBox spacing="15.0" styleClass="dark">
 						<RadioButton fx:id="rbInvariant"
-							text="%verifications.cbc.choice.invariant" 
-							toggleGroup ="$tgChoice"/>
+							text="%verifications.cbc.choice.invariant"
+							toggleGroup ="$tgChoice" selected="true"/>
 						<RadioButton fx:id="rbSequence"
 							text="%verifications.cbc.choice.sequence" 
 							toggleGroup ="$tgChoice"/>
