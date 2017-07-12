@@ -50,14 +50,16 @@ public class VisualisationView extends AnchorPane {
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
 
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
-			try {
-				currentStateVisualisation.visualiseState(to);
-				previousStateVisualisation.visualiseState(from);
-			} catch (FileNotFoundException e) {
-				LOGGER.warn("Failed to open images for visualisation", e);
-				Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, e.getMessage());
-				alert.setHeaderText("Visualisation not possible");
-				alert.showAndWait();
+			if (to != null) {
+				try {
+					currentStateVisualisation.visualiseState(to);
+					previousStateVisualisation.visualiseState(from);
+				} catch (FileNotFoundException e) {
+					LOGGER.warn("Failed to open images for visualisation", e);
+					Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, e.getMessage());
+					alert.setHeaderText("Visualisation not possible");
+					alert.showAndWait();
+				}
 			}
 		});
 	}
