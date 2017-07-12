@@ -1,5 +1,6 @@
 package de.prob2.ui.states;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -190,17 +191,28 @@ public final class StatesView extends AnchorPane {
 		return isSameCategory || isSameFormula;
 	}
 
-	private void updateNodes(final Trace trace, final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
+	private static void getFormulasToSubscribe(final List<PrologASTNode> nodes, final List<IEvalElement> formulas) {
+		for (final PrologASTNode node : nodes) {
+			if (node instanceof ASTFormula) {
+				formulas.add(((ASTFormula)node).getFormula());
+			}
+			
+			getFormulasToSubscribe(node.getSubnodes(), formulas);
+		}
+	}
+	
+	private static List<IEvalElement> getFormulasToSubscribe(final List<PrologASTNode> nodes) {
+		final List<IEvalElement> formulas = new ArrayList<>();
+		getFormulasToSubscribe(nodes, formulas);
+		return formulas;
+	}
+
+	private static void updateNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(nodes);
 		
 		final Set<TreeItem<StateItem<?>>> toRemove = new HashSet<>(treeItem.getChildren());
 		for (final PrologASTNode node : nodes) {
-			if (node instanceof ASTFormula) {
-				final IEvalElement ee = ((ASTFormula)node).getFormula();
-				trace.getStateSpace().subscribe(this, ee);
-			}
-			
 			TreeItem<StateItem<?>> subTreeItem = null;
 			for (final TreeItem<StateItem<?>> it : treeItem.getChildren()) {
 				final Object contents = it.getValue().getContents();
@@ -219,7 +231,7 @@ public final class StatesView extends AnchorPane {
 			}
 			
 			subTreeItem.setValue(new StateItem<>(node, false));
-			this.updateNodes(trace, subTreeItem, node.getSubnodes());
+			updateNodes(subTreeItem, node.getSubnodes());
 		}
 		// Remove all TreeItems for which no node was found anymore in the nodes list.
 		treeItem.getChildren().removeAll(toRemove);
@@ -227,13 +239,6 @@ public final class StatesView extends AnchorPane {
 
 	private void updateRoot(final Trace trace) {
 		Objects.requireNonNull(trace);
-		
-		this.currentValues.clear();
-		this.currentValues.putAll(trace.getCurrentState().getValues());
-		this.previousValues.clear();
-		if (trace.canGoBack()) {
-			this.previousValues.putAll(trace.getPreviousState().getValues());
-		}
 		
 		final int row = tv.getSelectionModel().getSelectedIndex();
 		
@@ -248,7 +253,18 @@ public final class StatesView extends AnchorPane {
 		
 		final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
 		trace.getStateSpace().execute(cmd);
-		this.updateNodes(trace, this.tvRootItem, cmd.getPrologASTList());
+		final List<PrologASTNode> rootNodes = cmd.getPrologASTList();
+		
+		trace.getStateSpace().subscribe(this, getFormulasToSubscribe(rootNodes));
+		
+		this.currentValues.clear();
+		this.currentValues.putAll(trace.getCurrentState().getValues());
+		this.previousValues.clear();
+		if (trace.canGoBack()) {
+			this.previousValues.putAll(trace.getPreviousState().getValues());
+		}
+		
+		updateNodes(this.tvRootItem, rootNodes);
 
 		errorsItem.getChildren().clear();
 		for (final StateError error : trace.getCurrentState().getStateErrors()) {
