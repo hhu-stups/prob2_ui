@@ -104,7 +104,7 @@ public class MachinesTab extends Tab {
 				MachinesItem machinesItem = new MachinesItem(machine, stageManager);
 				machinesVBox.getChildren().add(machinesItem);
 
-				final MenuItem editMachineMenuItem = new MenuItem("Edit Machine");
+				final MenuItem editMachineMenuItem = new MenuItem("Edit Machine Configuration");
 				editMachineMenuItem.setOnAction(event -> injector.getInstance(EditMachinesDialog.class)
 						.editAndShow(machine).ifPresent(result -> {
 					machinesItem.refresh();
@@ -114,10 +114,10 @@ public class MachinesTab extends Tab {
 				final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
 				removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(machine));
 
-				final MenuItem editFileMenuItem = new MenuItem("Edit File");
+				final MenuItem editFileMenuItem = new MenuItem("Edit Machine File");
 				editFileMenuItem.setOnAction(event -> this.showEditorStage(machine));
 
-				final MenuItem editExternalMenuItem = new MenuItem("Edit File in External Editor");
+				final MenuItem editExternalMenuItem = new MenuItem("Edit Machine File in External Editor");
 				editExternalMenuItem.setOnAction(event -> this.showExternalEditor(machine));
 
 				final Menu startAnimationMenu = new Menu("Start Animation...");
