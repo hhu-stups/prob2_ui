@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+
+<fx:root type="Menu" text="%menu.edit" xmlns:fx="http://javafx.com/fxml/1">
+	<MenuItem fx:id="reloadMachineItem" text="%menu.edit.items.reloadMachine"
+		accelerator="Shortcut+R" onAction="#handleReloadMachine" />
+	<MenuItem fx:id="preferencesItem" text="%menu.edit.items.preferences"
+		onAction="#handlePreferences" />
+</fx:root>
+

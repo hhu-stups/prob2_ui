@@ -66,6 +66,7 @@ public final class StageManager {
 	private final ObjectProperty<Stage> current;
 	private final Map<Stage, Void> registered;
 	private MenuBar globalMacMenuBar;
+	private Stage mainStage;
 	
 	@Inject
 	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState) {
@@ -208,6 +209,11 @@ public final class StageManager {
 		}
 	}
 	
+	public void registerMainStage(Stage primaryStage, String name) {
+		this.mainStage = primaryStage;
+		this.register(primaryStage, name);
+	}
+	
 	/**
 	 * Create with the given {@link Scene} as its scene, and register it automatically.
 	 *
@@ -284,6 +290,15 @@ public final class StageManager {
 	 */
 	public Stage getCurrent() {
 		return this.currentProperty().get();
+	}
+	
+	/**
+	 * Get the main stage.
+	 * 
+	 * @return the main stage
+	 */
+	public Stage getMainStage() {
+		return this.mainStage;
 	}
 	
 	/**

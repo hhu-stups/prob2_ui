@@ -171,7 +171,7 @@ public class ProB2 extends Application {
 		currentTrace.addListener((observable, from, to) -> this.updateTitle());
 		this.updateTitle();
 
-		stageManager.register(primaryStage, this.getClass().getName());
+		stageManager.registerMainStage(primaryStage, this.getClass().getName());
 
 		primaryStage.setOnCloseRequest(event -> {
 			if (!currentProject.isSaved()) {

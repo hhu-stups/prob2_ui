@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+
+<fx:root type="Menu" text="%menu.formula" xmlns:fx="http://javafx.com/fxml/1">
+		<MenuItem fx:id="enterFormulaForVisualization"
+			text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />
+		<MenuItem text="%menu.formula.items.showHistoryChart"
+			onAction="#handleHistoryChart" />
+</fx:root>
+

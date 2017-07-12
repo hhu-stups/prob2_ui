@@ -8,9 +8,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import de.prob2.ui.MainController;
-import javafx.scene.Node;
-import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.MainController;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
@@ -27,6 +25,7 @@ import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
@@ -37,6 +36,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 @Singleton
 public final class DetachViewStageController extends Stage {
@@ -115,7 +115,7 @@ public final class DetachViewStageController extends Stage {
 		if (guiState.contains(DETACHED)){
 			guiState = guiState.replace(DETACHED,"");
 		}
-		final Parent root = injector.getInstance(MenuController.class).loadPreset(guiState);
+		final Parent root = injector.getInstance(PerspectivesMenu.class).loadPreset(guiState);
 		final Map<TitledPane,Accordion> accordionMap = ((MainController) root).getAccordionMap();
 		for (TitledPane titledPane : accordionMap.keySet()) {
 			if (checkBoxMap.get(titledPane.getContent().getClass()).isSelected()) {

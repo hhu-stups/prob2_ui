@@ -2,74 +2,17 @@
 
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.layout.BorderPane?>
+<?import de.prob2.ui.menu.*?>
 
-<fx:root type="javafx.scene.control.MenuBar" xmlns:fx="http://javafx.com/fxml"
+<fx:root type="MenuBar" xmlns:fx="http://javafx.com/fxml"
 	BorderPane.alignment="CENTER">
-	<Menu fx:id="fileMenu" text="%menu.file">
-		<MenuItem text="%menu.file.items.newProject" accelerator="Alt+Shortcut+N"
-			onAction="#createNewProject" />
-		<MenuItem text="%menu.file.items.newProjectFromFile"
-			accelerator="Shortcut+O" onAction="#handleNewProjectFromFile" />
-		<SeparatorMenuItem />
-		<MenuItem text="%menu.file.items.openProject" accelerator="Alt+Shortcut+O"
-			onAction="#handleOpenProject" />
-		<Menu fx:id="recentProjectsMenu" text="%menu.file.items.openRecentProject">
-			<MenuItem fx:id="recentProjectsPlaceholder" text="%menu.file.items.placeholder"
-				disable="true" />
-			<SeparatorMenuItem />
-			<MenuItem fx:id="clearRecentProjects"
-				text="%menu.file.items.openRecentProject.items.clear" onAction="#handleClearRecentProjects" />
-		</Menu>
-		<SeparatorMenuItem />
-		<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject"
-			accelerator="Shortcut+S" onAction="#saveProject" />
-		<SeparatorMenuItem />
-		<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"
-			onAction="#handleClose" />
-	</Menu>
-	<Menu fx:id="editMenu" text="%menu.edit">
-		<MenuItem fx:id="reloadMachineItem" text="%menu.edit.items.reloadMachine"
-			accelerator="Shortcut+R" onAction="#handleReloadMachine" />
-		<MenuItem fx:id="preferencesItem" text="%menu.edit.items.preferences"
-			onAction="#handlePreferences" />
-	</Menu>
-	<Menu fx:id="formulaMenu" text="%menu.formula">
-		<MenuItem fx:id="enterFormulaForVisualization"
-			text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />
-		<MenuItem text="%menu.formula.items.showHistoryChart"
-			onAction="#handleHistoryChart" />
-	</Menu>
-	<Menu fx:id="consolesMenu" text="%menu.consoles">
-		<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole" />
-		<MenuItem text="%menu.consoles.items.b" onAction="#handleBConsole" />
-	</Menu>
-	<Menu fx:id="perspectivesMenu" text="%menu.perspectives">
-		<Menu text="%menu.perspectives.items.preset">
-			<MenuItem text="%menu.perspectives.items.preset.default"
-				onAction="#handleLoadDefault" />
-			<MenuItem text="%menu.perspectives.items.preset.separated"
-				onAction="#handleLoadSeparated" />
-			<MenuItem text="%menu.perspectives.items.preset.separated2"
-				onAction="#handleLoadSeparated2" />
-		</Menu>
-		<MenuItem text="%menu.perspectives.items.detach" onAction="#handleLoadDetached" />
-		<MenuItem text="%menu.perspectives.items.load" onAction="#handleLoadPerspective" />
-	</Menu>
-	<Menu fx:id="viewMenu" text="%menu.view">
-		<MenuItem fx:id="viewMenu_default" text="%menu.view.default" onAction="#handleDefaultFontSize"
-			accelerator="Shortcut+D" />
-		<MenuItem fx:id="viewMenu_bigger" text="%menu.view.bigger" accelerator="Alt+Shortcut+PLUS"
-			onAction="#handleIncreaseFontSize" />
-		<MenuItem fx:id="viewMenu_smaller" text="%menu.view.smaller" accelerator="Alt+Shortcut+MINUS"
-			onAction="#handleDecreaseFontSize" />
-	</Menu>
+	<FileMenu fx:id="fileMenu" />
+	<EditMenu fx:id="editMenu" />
+	<FormulaMenu fx:id="formulaMenu" />
+	<ConsolesMenu fx:id="consolesMenu" />
+	<PerspectivesMenu fx:id="perspectivesMenu" />
+	<ViewMenu fx:id="viewMenu" />
 	<Menu fx:id="windowMenu" text="%menu.window" />
-	<Menu text="%menu.help">
-		<MenuItem text="%menu.help.openHelp" onAction="#handleOpenHelp" />
-		<MenuItem fx:id="aboutItem" onAction="#handleAboutDialog" text="%menu.help.items.about" />
-		<MenuItem text="%menu.help.items.reportBug" onAction="#handleReportBug" />
-	</Menu>
+	<HelpMenu fx:id="helpMenu" />
 </fx:root>
