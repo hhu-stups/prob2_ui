@@ -49,6 +49,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ListProperty<Preference> preferences;
 	private final ReadOnlyListProperty<Runconfiguration> runconfigurations;
 	private final ObjectProperty<Runconfiguration> currentRunconfiguration;
+	private final ObjectProperty<Machine> currentMachine;
 
 	private final ObjectProperty<File> location;
 	private final BooleanProperty saved;
@@ -80,6 +81,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations",
 				FXCollections.observableArrayList());
 		this.currentRunconfiguration = new SimpleObjectProperty<>(this, "currentRunconfiguration", null);
+		this.currentMachine =  new SimpleObjectProperty<>(this, "currentMachine", null);
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
 
@@ -95,6 +97,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.location.set(to.getLocation());
 				if (!to.equals(from)) {
 					this.saved.set(false);
+					this.currentRunconfiguration.set(null);
+					this.currentMachine.set(null);
 				}
 			}
 		});
@@ -106,8 +110,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.machines.clear();
 		this.preferences.clear();
 		this.location.set(null);
-		this.injector.getInstance(ModelcheckingController.class).resetView();
 		this.saved.set(true);
+		this.currentRunconfiguration.set(null);
+		this.currentMachine.set(null);
+
+		modelCheckController.resetView();
 	}
 
 	public void startAnimation(Runconfiguration runconfiguration) {
@@ -120,6 +127,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 			machineLoader.loadAsync(m, pref);
 			this.currentRunconfiguration.set(runconfiguration);
+			this.currentMachine.set(runconfiguration.getMachine());
 		} else {
 			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not load machine \"" + runconfiguration.getMachine()
 					+ "\" with preferences: \"" + runconfiguration.getPreference() + "\"").showAndWait();
@@ -187,6 +195,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public Runconfiguration getCurrentRunconfiguration() {
 		return this.currentRunconfigurationProperty().get();
 	}
+	
+	public ReadOnlyObjectProperty<Machine> currentMachineProperty() {
+		return this.currentMachine;
+	}
+	
+	public Machine getCurrentMachine() {
+		return this.currentMachineProperty().get();
+	}
 
 	public void initializeMachines() {
 		for (Machine machine : machines) {
@@ -211,7 +227,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (!saved.get() && !confirmReplacingProject()) {
 			return;
 		}
-		currentRunconfiguration.set(null);
 		if (currentTrace.exists()) {
 			animations.removeTrace(currentTrace.get());
 			modelCheckController.resetView();

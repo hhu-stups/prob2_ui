@@ -1,37 +1,23 @@
 package de.prob2.ui.project.machines;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
-import de.prob.animator.command.GetPreferenceCommand;
-import de.prob.scripting.Api;
-import de.prob.statespace.StateSpace;
-
 import de.prob2.ui.ProB2;
-import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.menu.EditMenu;
 import de.prob2.ui.menu.FileAsker;
-import de.prob2.ui.preferences.GlobalPreferences;
-import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-
 import javafx.beans.property.SimpleStringProperty;
-import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -46,9 +32,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachinesTab extends Tab {
@@ -74,19 +57,12 @@ public class MachinesTab extends Tab {
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final Injector injector;
-	private final Api api;
-	private final GlobalPreferences globalPreferences;
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(MachinesTab.class);
 
 	@Inject
-	private MachinesTab(final StageManager stageManager, final CurrentProject currentProject, final Injector injector,
-			final Api api, final GlobalPreferences globalPreferences) {
+	private MachinesTab(final StageManager stageManager, final CurrentProject currentProject, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.api = api;
-		this.globalPreferences = globalPreferences;
 		stageManager.loadFXML(this, "machines_tab.fxml");
 	}
 
@@ -115,10 +91,11 @@ public class MachinesTab extends Tab {
 				removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(machine));
 
 				final MenuItem editFileMenuItem = new MenuItem("Edit Machine File");
-				editFileMenuItem.setOnAction(event -> this.showEditorStage(machine));
+				editFileMenuItem.setOnAction(event -> injector.getInstance(EditMenu.class).showEditorStage(machine));
 
 				final MenuItem editExternalMenuItem = new MenuItem("Edit Machine File in External Editor");
-				editExternalMenuItem.setOnAction(event -> this.showExternalEditor(machine));
+				editExternalMenuItem
+						.setOnAction(event -> injector.getInstance(EditMenu.class).showExternalEditor(machine));
 
 				final Menu startAnimationMenu = new Menu("Start Animation...");
 
@@ -182,48 +159,5 @@ public class MachinesTab extends Tab {
 	@FXML
 	private void closeDescriptionView() {
 		splitPane.getItems().remove(descriptionView);
-	}
-
-	private void showEditorStage(Machine machine) {
-		final BEditorStage editorStage = injector.getInstance(BEditorStage.class);
-		final Path path = currentProject.getLocation().toPath().resolve(machine.getPath());
-		final String text;
-		try {
-			text = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
-		} catch (IOException | UncheckedIOException e) {
-			LOGGER.error("Could not read file " + path, e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not read file:\n" + path + "\n" + e).showAndWait();
-			return;
-		}
-		editorStage.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-			if (newState == Worker.State.SUCCEEDED) {
-				editorStage.setTextEditor(text, path);
-			}
-		});
-		editorStage.setTitle(machine.getFileName());
-		editorStage.show();
-	}
-
-	private void showExternalEditor(Machine machine) {
-		final StateSpace stateSpace = ProBPreferences.getEmptyStateSpace(api, globalPreferences);
-		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
-		stateSpace.execute(cmd);
-		final File editor = new File(cmd.getValue());
-		final Path machinePath = currentProject.getLocation().toPath().resolve(machine.getPath());
-		final String[] cmdline;
-		if (ProB2Module.IS_MAC && editor.isDirectory()) {
-			// On Mac, use the open tool to start app bundles
-			cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(), machinePath.toString() };
-		} else {
-			// Run normal executables directly
-			cmdline = new String[] { editor.getAbsolutePath(), machinePath.toString() };
-		}
-		final ProcessBuilder processBuilder = new ProcessBuilder(cmdline);
-		try {
-			processBuilder.start();
-		} catch (IOException e) {
-			LOGGER.error("Failed to start external editor", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to start external editor:\n" + e).showAndWait();
-		}
 	}
 }

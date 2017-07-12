@@ -43,7 +43,7 @@ public final class MenuController extends MenuBar {
 
 			// Remove About menu item from Help
 			MenuItem aboutItem = helpMenu.getAboutItem();
-			aboutItem.getParentMenu().getItems().remove(aboutItem);
+			helpMenu.getItems().remove(aboutItem);
 			aboutItem.setText("About ProB 2");
 
 			// Remove Preferences menu item from Edit
