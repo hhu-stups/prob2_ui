@@ -39,14 +39,16 @@ public class CBCInvariants extends Stage {
 	}
 	
 	private void update(Trace trace) {
-		ArrayList<String> events = new ArrayList<>();
-		AbstractElement mainComponent = currentTrace.getStateSpace().getMainComponent();
-		if (mainComponent instanceof Machine) {
-			for (BEvent e : mainComponent.getChildrenOfType(BEvent.class)) {
-				events.add(e.getName());
+		if(currentTrace.get() != null) {
+			ArrayList<String> events = new ArrayList<>();
+			AbstractElement mainComponent = currentTrace.getStateSpace().getMainComponent();
+			if (mainComponent instanceof Machine) {
+				for (BEvent e : mainComponent.getChildrenOfType(BEvent.class)) {
+					events.add(e.getName());
+				}
 			}
+			cbOperations.getItems().setAll(events);
 		}
-		cbOperations.getItems().setAll(events);
 	}
 	
 	

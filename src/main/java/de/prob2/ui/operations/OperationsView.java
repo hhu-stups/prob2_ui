@@ -528,7 +528,6 @@ public final class OperationsView extends AnchorPane {
 				opToParams.put(e.getName(), getParams(e));
 			}
 		}
-
 	}
 
 	private List<String> getParams(BEvent e) {
