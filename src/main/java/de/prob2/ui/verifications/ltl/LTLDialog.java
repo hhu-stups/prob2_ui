@@ -27,14 +27,10 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 	private WebView taCode;
 	
 	protected WebEngine engine;
-	
-	private volatile boolean loaded;
-	
-	private volatile String text;
+
 			
 	public LTLDialog(Class<? extends AbstractCheckableItem> clazz) {
 		super();
-		loaded = false;
 		this.setResultConverter(type -> {
 			if(type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
@@ -55,23 +51,11 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 		engine = taCode.getEngine();
 		engine.load(getClass().getResource("../LTLEditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
-		engine.getLoadWorker().stateProperty().addListener((observable, from, to) -> {
-			if(to == Worker.State.SUCCEEDED) {
-				loaded = true;
-				if(text != null) {
-					final JSObject editor = (JSObject) engine.executeScript("editor");
-					editor.call("setValue", text);
-				}
-			}
-		});
 	}
 	
 	private void setTextEditor(String text) {
-		this.text = text;
-		if(loaded) {
-			final JSObject editor = (JSObject) engine.executeScript("editor");
-			editor.call("setValue", text);
-		}
+		final JSObject editor = (JSObject) engine.executeScript("editor");
+		editor.call("setValue", text);
 	}
 		
 	public void setData(String name, String description, String code) {
@@ -83,6 +67,10 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 	public void clear() {
 		this.tfName.clear();
 		this.taDescription.clear();
+	}
+
+	public WebEngine getEngine() {
+		return engine;
 	}
 		
 }

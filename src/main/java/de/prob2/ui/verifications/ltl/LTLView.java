@@ -14,6 +14,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.MachineTableView.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
@@ -23,6 +24,7 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.project.Project;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -35,6 +37,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import netscape.javascript.JSObject;
 
 @Singleton
 public class LTLView extends AnchorPane{
@@ -198,7 +201,9 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void addFormula() {
 		Machine machine = tvMachines.getFocusModel().getFocusedItem();
-		injector.getInstance(LTLFormulaDialog.class)
+		LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
+		loadLTLDialog(formulaDialog, null);
+		formulaDialog
 				.showAndWait()
 				.ifPresent(item -> addFormula(machine, (LTLFormulaItem) item));
 	}
@@ -227,7 +232,9 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void addPattern() {
 		Machine machine = tvMachines.getFocusModel().getFocusedItem();
-		injector.getInstance(LTLPatternDialog.class)
+		LTLPatternDialog patternDialog = injector.getInstance(LTLPatternDialog.class);
+		loadLTLDialog(patternDialog, null);
+		patternDialog
 				.showAndWait()
 				.ifPresent(item -> addPattern(machine, (LTLPatternItem) item));
 	}
@@ -269,7 +276,7 @@ public class LTLView extends AnchorPane{
 			
 	private void showCurrentItemDialog(LTLFormulaItem item) {
 		LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
-		formulaDialog.setData(item.getName(), item.getDescription(), item.getCode());
+		loadLTLDialog(formulaDialog, item);
 		formulaDialog.showAndWait()
 					.ifPresent(result-> changeFormula(item, (LTLFormulaItem) result));
 		formulaDialog.clear();
@@ -286,10 +293,20 @@ public class LTLView extends AnchorPane{
 	
 	private void showCurrentItemDialog(LTLPatternItem item) {
 		LTLPatternDialog patternDialog = injector.getInstance(LTLPatternDialog.class);
-		patternDialog.setData(item.getName(), item.getDescription(), item.getCode());
+		loadLTLDialog(patternDialog, item);
 		patternDialog.showAndWait()
 					.ifPresent(result-> changePattern(item, (LTLPatternItem) result));
 		patternDialog.clear();
+	}
+
+	private void loadLTLDialog(LTLDialog dialog, AbstractCheckableItem item) {
+		dialog.getEngine().getLoadWorker().stateProperty().addListener((observable, from, to) -> {
+			if(to == Worker.State.SUCCEEDED) {
+				if(item != null) {
+					dialog.setData(item.getName(), item.getDescription(), item.getCode());
+				}
+			}
+		});
 	}
 	
 	private void changePattern(LTLPatternItem item, LTLPatternItem result) {
