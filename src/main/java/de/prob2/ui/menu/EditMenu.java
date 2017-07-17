@@ -11,6 +11,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob.animator.command.GetPreferenceCommand;
+import de.prob.exception.CliError;
+import de.prob.exception.ProBError;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 
@@ -87,9 +89,9 @@ public class EditMenu extends Menu {
 	private void handleReloadMachine() {
 		try {
 			this.currentTrace.reload(this.currentTrace.get());
-		} catch (IOException | ModelTranslationError e) {
+		} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 			LOGGER.error("Model reload failed", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to reload model:\n" + e).showAndWait();
+			stageManager.makeExceptionAlert(Alert.AlertType.ERROR, "Failed to reload model", e).showAndWait();
 		}
 	}
 

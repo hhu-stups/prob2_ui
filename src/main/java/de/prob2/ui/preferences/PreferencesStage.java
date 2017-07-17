@@ -175,7 +175,7 @@ public final class PreferencesStage extends Stage {
 			this.globalProBPrefs.apply();
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to apply preference changes:\n" + e).show();
+			stageManager.makeExceptionAlert(Alert.AlertType.ERROR, "Failed to apply preference changes", e).show();
 		}
 		
 		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();
@@ -192,7 +192,7 @@ public final class PreferencesStage extends Stage {
 				this.currentTrace.reload(this.currentTrace.get(), this.globalPreferences);
 			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 				LOGGER.error("Failed to reload machine", e);
-				this.stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to reload machine").show();
+				this.stageManager.makeExceptionAlert(Alert.AlertType.ERROR, "Failed to reload machine", e).show();
 			}
 		}
 	}
