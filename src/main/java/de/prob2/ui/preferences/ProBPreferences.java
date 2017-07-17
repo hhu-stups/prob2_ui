@@ -1,6 +1,5 @@
 package de.prob2.ui.preferences;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,15 +9,11 @@ import java.util.Objects;
 
 import com.google.inject.Inject;
 
-import de.be4.classicalb.core.parser.node.*;
-
 import de.prob.animator.command.ComposedCommand;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
 import de.prob.animator.command.SetPreferenceCommand;
 import de.prob.animator.domainobjects.ProBPreference;
-import de.prob.scripting.Api;
-import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 
 import javafx.beans.binding.Bindings;
@@ -31,17 +26,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
 public final class ProBPreferences {
-	private static final Start EMPTY_MACHINE_AST = new Start(
-		new AAbstractMachineParseUnit( // pParseUnit
-			new AMachineMachineVariant(), // variant
-			new AMachineHeader( // header
-				Collections.singletonList(new TIdentifierLiteral("empty", 1, 9)), // name
-				Collections.emptyList() // parameters
-			),
-			Collections.emptyList() // machineClauses
-		),
-		new EOF(1, 18) // eof
-	);
 	
 	private final ObjectProperty<StateSpace> stateSpace;
 	private final ObservableMap<String, ProBPreference> cachedPreferences;
@@ -69,14 +53,6 @@ public final class ProBPreferences {
 				this.apply();
 			}
 		});
-	}
-	
-	public static StateSpace getEmptyStateSpace(final Api api, final Map<String, String> prefs) {
-		try {
-			return api.b_load(EMPTY_MACHINE_AST, prefs);
-		} catch (IOException | ModelTranslationError e) {
-			throw new IllegalStateException("Failed to load empty machine, this should never happen!", e);
-		}
 	}
 	
 	/**

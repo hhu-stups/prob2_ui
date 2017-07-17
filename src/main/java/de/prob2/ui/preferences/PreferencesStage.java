@@ -12,13 +12,13 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
-import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.MachineLoader;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
@@ -68,7 +68,7 @@ public final class PreferencesStage extends Stage {
 		final CurrentTrace currentTrace,
 		final GlobalPreferences globalPreferences,
 		final ProBPreferences globalProBPrefs,
-		final Api api,
+		final MachineLoader machineLoader,
 		final RecentProjects recentProjects,
 		final StageManager stageManager,
 		final CurrentProject currentProject
@@ -76,7 +76,7 @@ public final class PreferencesStage extends Stage {
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.globalProBPrefs = globalProBPrefs;
-		this.globalProBPrefs.setStateSpace(ProBPreferences.getEmptyStateSpace(api, this.globalPreferences));
+		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace(this.globalPreferences));
 		this.recentProjects = recentProjects;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;

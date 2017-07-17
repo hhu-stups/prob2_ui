@@ -2,11 +2,14 @@ package de.prob2.ui.project;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import de.be4.classicalb.core.parser.node.*;
 
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
@@ -32,6 +35,18 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class MachineLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MachineLoader.class);
+	private static final Start EMPTY_MACHINE_AST = new Start(
+		new AAbstractMachineParseUnit( // pParseUnit
+			new AMachineMachineVariant(), // variant
+			new AMachineHeader( // header
+				Collections.singletonList(new TIdentifierLiteral("empty", 1, 9)), // name
+				Collections.emptyList() // parameters
+			),
+			Collections.emptyList() // machineClauses
+		),
+		new EOF(1, 18) // eof
+	);
+	
 	private final Object openLock;
 	private final Api api;
 	private final CurrentProject currentProject;
@@ -54,6 +69,14 @@ public class MachineLoader {
 		this.statusBar = statusBar;
 	}
 
+	public StateSpace getEmptyStateSpace(final Map<String, String> prefs) {
+		try {
+			return api.b_load(EMPTY_MACHINE_AST, prefs);
+		} catch (CliError | IOException | ModelTranslationError | ProBError e) {
+			throw new IllegalStateException("Failed to load empty machine, this should never happen!", e);
+		}
+	}
+	
 	public void loadAsync(Machine machine, Map<String, String> pref) {
 		new Thread(() -> {
 			try {

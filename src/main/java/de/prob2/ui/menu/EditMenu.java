@@ -7,31 +7,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob.animator.command.GetPreferenceCommand;
-import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesStage;
-import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EditMenu extends Menu {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EditMenu.class);
@@ -48,18 +49,18 @@ public class EditMenu extends Menu {
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final Injector injector;
-	private final Api api;
+	private final MachineLoader machineLoader;
 	private final GlobalPreferences globalPreferences;
 	private final StageManager stageManager;
 
 	@Inject
 	private EditMenu(final StageManager stageManager, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final Injector injector, final Api api,
+			final CurrentProject currentProject, final Injector injector, final MachineLoader machineLoader,
 			final GlobalPreferences globalPreferences) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.api = api;
+		this.machineLoader = machineLoader;
 		this.globalPreferences = globalPreferences;
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "editMenu.fxml");
@@ -124,7 +125,7 @@ public class EditMenu extends Menu {
 	}
 
 	public void showExternalEditor(Machine machine) {
-		final StateSpace stateSpace = ProBPreferences.getEmptyStateSpace(api, globalPreferences);
+		final StateSpace stateSpace = machineLoader.getEmptyStateSpace(globalPreferences);
 		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
 		stateSpace.execute(cmd);
 		final File editor = new File(cmd.getValue());
