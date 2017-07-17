@@ -2,12 +2,13 @@ package de.prob2.ui.prob2fx;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.IAnimator;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
@@ -19,23 +20,17 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
 
 import de.prob2.ui.project.machines.Machine;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyListProperty;
+import javafx.beans.property.ReadOnlyBooleanPropertyBase;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 /**
  * A singleton writable property that represents the current {@link Trace}. It
@@ -44,34 +39,86 @@ import javafx.collections.ObservableList;
  */
 @Singleton
 public final class CurrentTrace extends SimpleObjectProperty<Trace> {
+	private final class ROBoolProp extends ReadOnlyBooleanPropertyBase {
+		private final String name;
+		private final BooleanSupplier getter;
+		
+		private ROBoolProp(final String name, final BooleanSupplier getter) {
+			super();
+			
+			this.name = name;
+			this.getter = getter;
+			
+			CurrentTrace.this.addListener(o -> this.fireValueChangedEvent());
+		}
+		
+		@Override
+		public boolean get() {
+			return this.getter.getAsBoolean();
+		}
+		
+		@Override
+		public Object getBean() {
+			return CurrentTrace.this;
+		}
+		
+		@Override
+		public String getName() {
+			return this.name;
+		}
+	}
+	
+	private final class ROObjProp<T> extends ReadOnlyObjectPropertyBase<T> {
+		private final String name;
+		private final Supplier<T> getter;
+		
+		private ROObjProp(final String name, final Supplier<T> getter) {
+			super();
+			
+			this.name = name;
+			this.getter = getter;
+			
+			CurrentTrace.this.addListener(o -> this.fireValueChangedEvent());
+		}
+		
+		@Override
+		public T get() {
+			return this.getter.get();
+		}
+		
+		@Override
+		public Object getBean() {
+			return CurrentTrace.this;
+		}
+		
+		@Override
+		public String getName() {
+			return this.name;
+		}
+	}
+	
 	private final Injector injector;
 	private final AnimationSelector animationSelector;
 	private final Api api;
 	
-	private final BooleanProperty exists;
+	private final ReadOnlyBooleanProperty exists;
 	private final BooleanProperty animatorBusy;
 
 	private final CurrentState currentState;
-	private final CurrentStateSpace stateSpace;
-	private final CurrentModel model;
+	private final ROObjProp<StateSpace> stateSpace;
+	private final ROObjProp<AbstractModel> model;
 
-	private final ListProperty<Transition> transitionListWritable;
-	private final ListProperty<Transition> transitionList;
+	private final ReadOnlyBooleanProperty canGoBack;
+	private final ReadOnlyBooleanProperty canGoForward;
 
-	private final BooleanProperty canGoBack;
-	private final BooleanProperty canGoForward;
-
-	private final ObjectProperty<Trace> back;
-	private final ObjectProperty<Trace> forward;
+	private final ReadOnlyObjectProperty<Trace> back;
+	private final ReadOnlyObjectProperty<Trace> forward;
 
 	@Inject
 	private CurrentTrace(
 		final Injector injector,
 		final AnimationSelector animationSelector,
-		final Api api,
-		final CurrentState currentState,
-		final CurrentStateSpace currentStateSpace,
-		final CurrentModel currentModel
+		final Api api
 	) {
 		super(null);
 		this.injector = injector;
@@ -89,66 +136,25 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		});
 		this.api = api;
 		
-		this.exists = new SimpleBooleanProperty(this, "exists", false);
-		this.exists.bind(Bindings.isNotNull(this));
+		this.addListener((observable, from, to) -> {
+			if (to != null) {
+				this.animationSelector.traceChange(to);
+			}
+		});
+		
+		this.exists = new ROBoolProp("exists", () -> this.get() != null);
 
 		this.animatorBusy = new SimpleBooleanProperty(this, "animatorBusy", false);
-		this.animatorBusy.addListener((observable, from, to) -> {
-			if (to) {
-				this.get().getStateSpace().startTransaction();
-			} else {
-				this.get().getStateSpace().endTransaction();
-			}
-		});
 
-		this.currentState = currentState;
-		this.stateSpace = currentStateSpace;
-		this.model = currentModel;
+		this.currentState = new CurrentState(this);
+		this.stateSpace = new ROObjProp<>("stateSpace", () -> this.exists() ? this.get().getStateSpace() : null);
+		this.model = new ROObjProp<>("model", () -> this.exists() ? this.get().getModel() : null);
 
-		this.transitionListWritable = new SimpleListProperty<>(this, "transitionListWritable",
-				FXCollections.observableArrayList());
-		this.transitionList = new SimpleListProperty<>(this, "transitionList",
-				FXCollections.unmodifiableObservableList(this.transitionListWritable));
+		this.canGoBack = new ROBoolProp("canGoBack", () -> this.exists() && this.get().canGoBack());
+		this.canGoForward = new ROBoolProp("canGoForward", () -> this.exists() && this.get().canGoForward());
 
-		this.canGoBack = new SimpleBooleanProperty(this, "canGoBack", false);
-		this.canGoForward = new SimpleBooleanProperty(this, "canGoForward", false);
-
-		this.back = new SimpleObjectProperty<>(this, "back", null);
-		this.forward = new SimpleObjectProperty<>(this, "forward", null);
-
-		this.addListener((observable, from, to) -> {
-			if (to == null) {
-				clearProperties();
-			} else {
-				this.animationSelector.traceChange(to);
-
-				this.currentState.set(to.getCurrentState());
-				this.stateSpace.set(to.getStateSpace());
-				this.model.set(to.getModel());
-
-				this.transitionListWritable.setAll(to.getTransitionList());
-
-				this.canGoBack.set(to.canGoBack());
-				this.canGoForward.set(to.canGoForward());
-
-				this.back.set(to.back());
-				this.forward.set(to.forward());
-			}
-		});
-	}
-
-	private void clearProperties() {
-		this.currentState.set(null);
-		this.stateSpace.set(null);
-		this.model.set(null);
-
-		this.transitionListWritable.clear();
-
-		this.canGoBack.set(false);
-		this.canGoForward.set(false);
-
-		this.back.set(null);
-		this.forward.set(null);
+		this.back = new ROObjProp<>("back", () -> this.exists() ? this.get().back() : null);
+		this.forward = new ROObjProp<>("forward", () -> this.exists() ? this.get().forward() : null);
 	}
 
 	/**
@@ -173,14 +179,11 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	/**
 	 * A writable property indicating whether the animator is currently busy. It
 	 * holds the last value reported by
-	 * {@link IAnimationChangeListener#animatorStatus(boolean)}. When written
-	 * to, {@link IAnimator#startTransaction()} or
-	 * {@link IAnimator#endTransaction()} is called on the current
-	 * {@link StateSpace}.
+	 * {@link IAnimationChangeListener#animatorStatus(boolean)}.
 	 * 
 	 * @return a property indicating whether the animator is currently busy
 	 */
-	public BooleanProperty animatorBusyProperty() {
+	public ReadOnlyBooleanProperty animatorBusyProperty() {
 		return this.animatorBusy;
 	}
 
@@ -191,16 +194,6 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	 */
 	public boolean isAnimatorBusy() {
 		return this.animatorBusyProperty().get();
-	}
-
-	/**
-	 * Set the animator's busy status.
-	 * 
-	 * @param busy
-	 *            the new busy status
-	 */
-	public void setAnimatorBusy(final boolean busy) {
-		this.animatorBusyProperty().set(busy);
 	}
 
 	/**
@@ -223,13 +216,12 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	}
 
 	/**
-	 * A {@link CurrentStateSpace} holding the current {@link Trace}'s
+	 * A read-only property holding the current {@link Trace}'s
 	 * {@link StateSpace}.
 	 * 
-	 * @return a {@link CurrentStateSpace} holding the current {@link Trace}'s
-	 *         {@link StateSpace}
+	 * @return a read-only property holding the current {@link Trace}'s {@link StateSpace}
 	 */
-	public CurrentStateSpace stateSpaceProperty() {
+	public ReadOnlyObjectProperty<StateSpace> stateSpaceProperty() {
 		return this.stateSpace;
 	}
 
@@ -243,13 +235,12 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	}
 	
 	/**
-	 * A {@link CurrentModel} holding the current {@link Trace}'s
+	 * A read-only property holding the current {@link Trace}'s
 	 * {@link AbstractModel}.
 	 *
-	 * @return a {@link CurrentModel} holding the current {@link Trace}'s
-	 *         {@link AbstractModel}
+	 * @return a read-only property holding the current {@link Trace}'s {@link AbstractModel}
 	 */
-	public CurrentModel modelProperty() {
+	public ReadOnlyObjectProperty<AbstractModel> modelProperty() {
 		return this.model;
 	}
 
@@ -260,28 +251,6 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	 */
 	public AbstractModel getModel() {
 		return this.modelProperty().get();
-	}
-
-	/**
-	 * A read-only list property holding a read-only {@link ObservableList}
-	 * version of the current {@link Trace}'s transition list.
-	 * 
-	 * @return a read-only list property holding a read-only observable list
-	 *         version of the current {@link Trace}'s transition list
-	 */
-	public ReadOnlyListProperty<Transition> transitionListProperty() {
-		return this.transitionList;
-	}
-
-	/**
-	 * Get the current {@link Trace}'s transition list as a read-only
-	 * {@link ObservableList}.
-	 * 
-	 * @return the current {@link Trace}'s transition list as a read-only
-	 *         {@link ObservableList}
-	 */
-	public ObservableList<Transition> getTransitionList() {
-		return this.transitionListProperty().get();
 	}
 
 	/**

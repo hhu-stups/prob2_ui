@@ -1,40 +1,55 @@
 package de.prob2.ui.prob2fx;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.function.BooleanSupplier;
 
 import de.prob.statespace.State;
-import javafx.beans.InvalidationListener;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
+
 import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
+import javafx.beans.property.ReadOnlyBooleanPropertyBase;
+import javafx.beans.property.ReadOnlyObjectPropertyBase;
 
 /**
  * A singleton read-only property representing the current {@link State}. It also provides convenience properties and methods for easy interaction with JavaFX components using property binding.
  */
-@Singleton
-public final class CurrentState extends ReadOnlyObjectProperty<State> {
-	private final ObjectProperty<State> state;
-	private final BooleanProperty initialized;
+public final class CurrentState extends ReadOnlyObjectPropertyBase<State> {
+	private final class ROBoolProp extends ReadOnlyBooleanPropertyBase {
+		private final String name;
+		private final BooleanSupplier getter;
+		
+		private ROBoolProp(final String name, final BooleanSupplier getter) {
+			super();
+			
+			this.name = name;
+			this.getter = getter;
+			
+			CurrentState.this.addListener(o -> this.fireValueChangedEvent());
+		}
+		
+		@Override
+		public boolean get() {
+			return this.getter.getAsBoolean();
+		}
+		
+		@Override
+		public Object getBean() {
+			return CurrentState.this;
+		}
+		
+		@Override
+		public String getName() {
+			return this.name;
+		}
+	}
 	
-	@Inject
-	private CurrentState() {
+	private final CurrentTrace currentTrace;
+	private final ReadOnlyBooleanProperty initialized;
+	
+	CurrentState(final CurrentTrace currentTrace) {
 		super();
 		
-		this.state = new SimpleObjectProperty<>(this, "state", null);
-		this.initialized = new SimpleBooleanProperty(this, "initialized", false);
-		
-		this.addListener((observable, from, to) -> {
-			if (to == null) {
-				this.initialized.set(false);
-			} else {
-				this.initialized.set(to.isInitialised());
-			}
-		});
+		this.currentTrace = currentTrace;
+		currentTrace.addListener(o -> this.fireValueChangedEvent());
+		this.initialized = new ROBoolProp("initialized", () -> this.get() != null && this.get().isInitialised());
 	}
 	
 	@Override
@@ -42,7 +57,6 @@ public final class CurrentState extends ReadOnlyObjectProperty<State> {
 		return null;
 	}
 	
-	@SuppressWarnings("MethodReturnAlwaysConstant")
 	@Override
 	public String getName() {
 		return "";
@@ -50,31 +64,7 @@ public final class CurrentState extends ReadOnlyObjectProperty<State> {
 	
 	@Override
 	public State get() {
-		return this.state.get();
-	}
-	
-	@Override
-	public void addListener(final ChangeListener<? super State> listener) {
-		this.state.addListener(listener);
-	}
-	
-	@Override
-	public void removeListener(final ChangeListener<? super State> listener) {
-		this.state.removeListener(listener);
-	}
-	
-	@Override
-	public void addListener(final InvalidationListener listener) {
-		this.state.addListener(listener);
-	}
-	
-	@Override
-	public void removeListener(final InvalidationListener listener) {
-		this.state.removeListener(listener);
-	}
-	
-	/* package */ void set(final State stateSpace) {
-		this.state.set(stateSpace);
+		return this.currentTrace.exists() ? this.currentTrace.get().getCurrentState() : null;
 	}
 	
 	/**
