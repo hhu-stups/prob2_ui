@@ -14,13 +14,16 @@ public class Runconfiguration {
 	public Runconfiguration(Machine machine, Preference preference) {
 		this.machine = machine;
 		this.preference = preference;
-		this.name = machine.getName() + "." + preference.getName();
+		this.name = this.machine.getName() + "." + this.preference.getName();
 	}
-	
+
 	public String getName() {
-		return name;
+		if (machine != null && preference != null) {
+			this.name = this.machine.getName() + "." + this.preference.getName();
+		}
+		return this.name;
 	}
-	
+
 	public Machine getMachine() {
 		return machine;
 	}
@@ -28,21 +31,21 @@ public class Runconfiguration {
 	public Preference getPreference() {
 		return preference;
 	}
-	
+
 	public String getMachineName() {
-		return name.split("\\.")[0];
+		return this.getName().split("\\.")[0];
 	}
-	
+
 	public String getPreferenceName() {
-		return name.split("\\.")[1];
+		return this.getName().split("\\.")[1];
 	}
 
 	@Override
 	public String toString() {
-		if(this.preference instanceof DefaultPreference) {
+		if (this.preference instanceof DefaultPreference) {
 			return this.machine.getName();
 		}
-		return this.name;
+		return this.getName();
 	}
 
 	@Override
@@ -54,7 +57,7 @@ public class Runconfiguration {
 			return false;
 		}
 		final Runconfiguration runconfig = (Runconfiguration) object;
-		if (this.name == null || runconfig.name == null || !this.name.equals(runconfig.name)) {
+		if (!this.getName().equals(runconfig.getName())) {
 			return false;
 		}
 		if (this.machine == null || runconfig.machine == null || !this.machine.equals(runconfig.machine)) {
@@ -66,6 +69,6 @@ public class Runconfiguration {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.name);
+		return Objects.hash(this.getName());
 	}
 }

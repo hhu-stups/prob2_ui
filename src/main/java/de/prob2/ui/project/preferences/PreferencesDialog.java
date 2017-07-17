@@ -35,6 +35,8 @@ public class PreferencesDialog extends Dialog<Preference> {
 
 	private final ProBPreferences prefs;
 	private final CurrentProject currentProject;
+	private Preference preference;
+	private Set<String> preferencesNamesSet;
 
 	@Inject
 	private PreferencesDialog(final StageManager stageManager, final Api api, final ProBPreferences prefs,
@@ -50,7 +52,9 @@ public class PreferencesDialog extends Dialog<Preference> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				return new Preference(this.nameField.getText(), new HashMap<>(this.prefs.getChangedPreferences()));
+				preference.setName(this.nameField.getText());
+				preference.setPreferences(new HashMap<>(this.prefs.getChangedPreferences()));
+				return preference; 
 			}
 		});
 
@@ -60,9 +64,10 @@ public class PreferencesDialog extends Dialog<Preference> {
 	@FXML
 	private void initialize() {
 		this.prefsView.setPreferences(this.prefs);
+		this.preference = new DefaultPreference();
 
 		List<Preference> preferencesList = currentProject.getPreferences();
-		Set<String> preferencesNamesSet = new HashSet<>();
+		preferencesNamesSet = new HashSet<>();
 		preferencesNamesSet.addAll(preferencesList.stream().map(Preference::getName).collect(Collectors.toList()));
 
 		Button okButton = (Button) this.getDialogPane().lookupButton(okButtonType);
@@ -85,9 +90,11 @@ public class PreferencesDialog extends Dialog<Preference> {
 	}
 
 	void setPreference(Preference preference) {
-		nameField.setText(preference.getName() + "(copy)");
+		this.preference = preference;
+		preferencesNamesSet.remove(preference.getName());
+		this.nameField.setText(preference.getName());
 		for (Entry<String, String> pref : preference.getPreferences().entrySet()) {
-			prefs.setPreferenceValue(pref.getKey(), pref.getValue());
+			this.prefs.setPreferenceValue(pref.getKey(), pref.getValue());
 		}
 	}
 }

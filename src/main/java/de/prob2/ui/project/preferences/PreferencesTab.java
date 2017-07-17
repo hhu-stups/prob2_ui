@@ -52,7 +52,7 @@ public class PreferencesTab extends Tab {
 		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
 		preferencesListView.setCellFactory(listView -> initListCell());
-		
+
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addPreferenceButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 	}
@@ -82,22 +82,23 @@ public class PreferencesTab extends Tab {
 		});
 		removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
 
-		final MenuItem editCopyMenuItem = new MenuItem("Edit copy");
-		editCopyMenuItem.setOnAction(event -> {
+		final MenuItem editMenuItem = new MenuItem("Edit");
+		editMenuItem.setOnAction(event -> {
 			PreferencesDialog prefDialog = injector.getInstance(PreferencesDialog.class);
-			prefDialog.setPreference(cell.getItem());
-			prefDialog.showAndWait().ifPresent(currentProject::addPreference);
+			Preference pref = cell.getItem();
+			prefDialog.setPreference(pref);
+			prefDialog.showAndWait().ifPresent(result -> {
+				preferencesListView.refresh();
+				showPreferenceView(pref);
+			});
 		});
-		editCopyMenuItem.disableProperty().bind(cell.emptyProperty());
+		editMenuItem.disableProperty().bind(cell.emptyProperty());
 
-		cell.setContextMenu(new ContextMenu(editCopyMenuItem, removePreferenceMenuItem));
+		cell.setContextMenu(new ContextMenu(editMenuItem, removePreferenceMenuItem));
 
 		cell.setOnMouseClicked(event -> {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-				if (splitPane.getItems().size() >= 2) {
-					splitPane.getItems().remove(0);
-				}
-				splitPane.getItems().add(0, new PreferenceView(cell.getItem(), stageManager, injector));
+				showPreferenceView(cell.getItem());
 			}
 		});
 
@@ -107,6 +108,13 @@ public class PreferencesTab extends Tab {
 	@FXML
 	void addPreference() {
 		injector.getInstance(PreferencesDialog.class).showAndWait().ifPresent(currentProject::addPreference);
+	}
+
+	public void showPreferenceView(Preference pref) {
+		if (splitPane.getItems().size() >= 2) {
+			splitPane.getItems().remove(0);
+		}
+		splitPane.getItems().add(0, new PreferenceView(pref, stageManager, injector));
 	}
 
 	public void closePreferenceView() {

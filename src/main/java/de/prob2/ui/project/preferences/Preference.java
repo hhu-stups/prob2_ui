@@ -20,6 +20,13 @@ public class Preference {
 		return preferences;
 	}
 	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public void setPreferences(Map<String, String> preferences) {
+		this.preferences = preferences;
+	}
 	
 	@Override
 	public String toString() {
