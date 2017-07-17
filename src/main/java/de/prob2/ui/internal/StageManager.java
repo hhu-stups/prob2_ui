@@ -20,6 +20,8 @@ import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
 
+import de.prob.exception.ProBError;
+
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
 
@@ -35,12 +37,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -264,13 +269,23 @@ public final class StageManager {
 	}
 	
 	public Alert makeExceptionAlert(final Alert.AlertType alertType, final String contentText, final Throwable exc) {
-		final Alert alert = this.makeAlert(alertType, contentText);
+		final String message = exc instanceof ProBError ? ((ProBError)exc).getOriginalMessage() : exc.getMessage();
+		final Alert alert = this.makeAlert(alertType, contentText + '\n' + message);
+		
+		if (exc instanceof ProBError && ((ProBError)exc).getErrors() != null) {
+			final ListView<String> errorsListView = new ListView<>();
+			errorsListView.getItems().setAll(((ProBError)exc).getErrors());
+			errorsListView.setPrefSize(480, 160);
+			alert.getDialogPane().setContent(new VBox(new Label(alert.getContentText()), errorsListView));
+		}
+		
 		final TextArea textArea = new TextArea();
 		try (final CharArrayWriter caw = new CharArrayWriter(); final PrintWriter pw = new PrintWriter(caw)) {
 			exc.printStackTrace(pw);
 			textArea.setText(caw.toString());
 		}
 		alert.getDialogPane().setExpandableContent(textArea);
+		
 		return alert;
 	}
 	
