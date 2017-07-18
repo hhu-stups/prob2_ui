@@ -18,6 +18,7 @@ import de.prob2.ui.menu.FileAsker;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -61,6 +62,11 @@ public class MachinesTab extends Tab {
 		noMachinesStack.visibleProperty().bind(currentProject.machinesProperty().emptyProperty());
 
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
+			Node node = splitPane.getItems().get(0);
+			if (node instanceof MachineView && !to.contains(((MachineView) node).getMachine())) {
+				closeMachineView();
+			}
+			
 			machinesVBox.getChildren().clear();
 			for (Machine machine : to) {
 				MachinesItem machinesItem = new MachinesItem(machine, stageManager);
