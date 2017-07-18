@@ -17,21 +17,17 @@ import de.prob2.ui.menu.EditMenu;
 import de.prob2.ui.menu.FileAsker;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 
 @Singleton
 public class MachinesTab extends Tab {
@@ -40,17 +36,9 @@ public class MachinesTab extends Tab {
 	@FXML
 	private StackPane noMachinesStack;
 	@FXML
-	private AnchorPane descriptionView;
-	@FXML
-	private Label descriptionViewTitelLabel;
-	@FXML
-	private Text descriptionText;
-	@FXML
 	private SplitPane splitPane;
 	@FXML
 	private Button addMachineButton;
-	@FXML
-	private Button closeDescriptionButton;
 	@FXML
 	private HelpButton helpButton;
 
@@ -72,8 +60,6 @@ public class MachinesTab extends Tab {
 		noMachinesStack.managedProperty().bind(currentProject.machinesProperty().emptyProperty());
 		noMachinesStack.visibleProperty().bind(currentProject.machinesProperty().emptyProperty());
 
-		splitPane.getItems().remove(descriptionView);
-
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			machinesVBox.getChildren().clear();
 			for (Machine machine : to) {
@@ -84,7 +70,7 @@ public class MachinesTab extends Tab {
 				editMachineMenuItem.setOnAction(event -> injector.getInstance(EditMachinesDialog.class)
 						.editAndShow(machine).ifPresent(result -> {
 					machinesItem.refresh();
-					showDescriptionView(machine);
+					showMachineView(machine);
 				}));
 
 				final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
@@ -107,7 +93,7 @@ public class MachinesTab extends Tab {
 						updateAnimationMenu(startAnimationMenu, machine);
 						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-						showDescriptionView(machine);
+						showMachineView(machine);
 					}
 				});
 			}
@@ -115,15 +101,6 @@ public class MachinesTab extends Tab {
 
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addMachineButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
-		((FontAwesomeIconView) (closeDescriptionButton.getGraphic())).glyphSizeProperty().bind(fontsize);
-	}
-
-	private void showDescriptionView(Machine machine) {
-		if (splitPane.getItems().size() < 2) {
-			splitPane.getItems().add(0, descriptionView);
-		}
-		descriptionViewTitelLabel.textProperty().bind(new SimpleStringProperty(machine.getName()));
-		descriptionText.textProperty().bind(new SimpleStringProperty(machine.getDescription()));
 	}
 
 	private void updateAnimationMenu(final Menu startAnimationMenu, Machine machine) {
@@ -156,8 +133,16 @@ public class MachinesTab extends Tab {
 		injector.getInstance(AddMachinesDialog.class).showAndWait(relative).ifPresent(currentProject::addMachine);
 	}
 
-	@FXML
-	private void closeDescriptionView() {
-		splitPane.getItems().remove(descriptionView);
+	private void showMachineView(Machine machine) {
+		if (splitPane.getItems().size() >= 2) {
+			splitPane.getItems().remove(0);
+		}
+		splitPane.getItems().add(0, new MachineView(machine, stageManager, injector));
+	}
+
+	void closeMachineView() {
+		if (splitPane.getItems().get(0) instanceof MachineView) {
+			splitPane.getItems().remove(0);
+		}
 	}
 }

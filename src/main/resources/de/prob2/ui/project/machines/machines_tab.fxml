@@ -35,34 +35,6 @@
 			</AnchorPane>
 		</HBox>
 		<SplitPane fx:id="splitPane" VBox.vgrow="always">
-			<AnchorPane fx:id="descriptionView">
-				<VBox spacing="5" AnchorPane.topAnchor="6"
-					AnchorPane.bottomAnchor="-4" AnchorPane.leftAnchor="0"
-					AnchorPane.rightAnchor="0">
-					<Label fx:id="descriptionViewTitelLabel" id="details-title">
-						<VBox.margin>
-							<Insets left="10" right="10" />
-						</VBox.margin>
-					</Label>
-					<AnchorPane styleClass="border" VBox.vgrow="always">
-						<ScrollPane AnchorPane.leftAnchor="0"
-							AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"
-							AnchorPane.bottomAnchor="0">
-							<AnchorPane>
-								<Text fx:id="descriptionText" AnchorPane.topAnchor="10"
-									AnchorPane.bottomAnchor="4" AnchorPane.leftAnchor="5"
-									AnchorPane.rightAnchor="5" />
-							</AnchorPane>
-						</ScrollPane>
-					</AnchorPane>
-				</VBox>
-				<Button fx:id="closeDescriptionButton" AnchorPane.topAnchor="2.0"
-					AnchorPane.rightAnchor="2.0" onAction="#closeDescriptionView">
-					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="CLOSE" />
-					</graphic>
-				</Button>
-			</AnchorPane>
 			<AnchorPane>
 				<ScrollPane AnchorPane.leftAnchor="0"
 					AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"

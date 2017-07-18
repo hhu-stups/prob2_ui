@@ -120,6 +120,8 @@ public class PreferencesTab extends Tab {
 	}
 
 	public void closePreferenceView() {
-		splitPane.getItems().remove(0);
+		if (splitPane.getItems().get(0) instanceof PreferenceView) {
+			splitPane.getItems().remove(0);
+		}
 	}
 }
