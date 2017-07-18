@@ -178,7 +178,11 @@ public class LTLView extends AnchorPane{
 			MenuItem removeItem = new MenuItem("Remove Pattern");
 			removeItem.setOnAction(e -> removePattern());
 			removeItem.disableProperty().bind(row.emptyProperty());
-			row.setContextMenu(new ContextMenu(removeItem));
+
+			MenuItem openEditor = new MenuItem("Open in Editor");
+			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
+
+			row.setContextMenu(new ContextMenu(openEditor, removeItem));
 			return row;
 		});
 	}
