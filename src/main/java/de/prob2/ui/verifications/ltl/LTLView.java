@@ -155,7 +155,10 @@ public class LTLView extends AnchorPane{
 			MenuItem showCounterExampleItem = new MenuItem("Show Counter Example");
 			showCounterExampleItem.setOnAction(e-> showCounterExample());
 			showCounterExampleItem.setDisable(true);
-			
+
+			MenuItem openEditor = new MenuItem("Open in Editor");
+			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
+
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
 					LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
@@ -166,7 +169,7 @@ public class LTLView extends AnchorPane{
 					}
 				}
 			});
-			row.setContextMenu(new ContextMenu(removeItem, showCounterExampleItem));
+			row.setContextMenu(new ContextMenu(openEditor, removeItem, showCounterExampleItem));
 			return row;
 		});
 		
