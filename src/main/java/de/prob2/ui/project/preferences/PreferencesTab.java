@@ -1,16 +1,19 @@
 package de.prob2.ui.project.preferences;
 
+import java.net.URISyntaxException;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
@@ -19,8 +22,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.input.MouseButton;
-
-import java.net.URISyntaxException;
 
 @Singleton
 public class PreferencesTab extends Tab {
@@ -55,6 +56,13 @@ public class PreferencesTab extends Tab {
 
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addPreferenceButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
+		
+		currentProject.preferencesProperty().addListener((observable, from, to) -> {
+			Node node = splitPane.getItems().get(0);
+			if(node instanceof PreferenceView && !to.contains(((PreferenceView) node).getPreference())) {
+				closePreferenceView();
+			}
+		});
 	}
 
 	private ListCell<Preference> initListCell() {
@@ -73,13 +81,7 @@ public class PreferencesTab extends Tab {
 		};
 
 		final MenuItem removePreferenceMenuItem = new MenuItem("Remove Preference");
-		removePreferenceMenuItem.setOnAction(event -> {
-			if (splitPane.getItems().size() >= 2
-					&& ((PreferenceView) splitPane.getItems().get(0)).getPreference() == cell.getItem()) {
-				closePreferenceView();
-			}
-			currentProject.removePreference(cell.getItem());
-		});
+		removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
 		removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
 
 		final MenuItem editMenuItem = new MenuItem("Edit");
