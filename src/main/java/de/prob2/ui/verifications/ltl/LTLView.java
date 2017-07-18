@@ -144,7 +144,10 @@ public class LTLView extends AnchorPane{
 			}
 		});
 	}
-	
+
+	/**
+	 * Sets the context menus for the items LTLFormula and LTLPatterns
+	 */
 	private void setContextMenus() {
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
@@ -159,6 +162,9 @@ public class LTLView extends AnchorPane{
 			MenuItem openEditor = new MenuItem("Open in Editor");
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
 
+			MenuItem check = new MenuItem("Check separately");
+			check.setOnAction(e->checkFormula(row.getItem(), tvMachines.getFocusModel().getFocusedItem()));
+
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
 					LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
@@ -169,7 +175,7 @@ public class LTLView extends AnchorPane{
 					}
 				}
 			});
-			row.setContextMenu(new ContextMenu(openEditor, removeItem, showCounterExampleItem));
+			row.setContextMenu(new ContextMenu(openEditor, removeItem, showCounterExampleItem, check));
 			return row;
 		});
 		
