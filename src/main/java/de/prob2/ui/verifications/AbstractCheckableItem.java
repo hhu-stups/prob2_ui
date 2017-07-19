@@ -2,10 +2,13 @@ package de.prob2.ui.verifications;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
 import javafx.scene.paint.Color;
 
 public abstract class AbstractCheckableItem {
+	
 	protected transient FontAwesomeIconView status;
+	protected Checked checked;
 	protected String name;
 	protected String description;
 	protected String code;
@@ -27,6 +30,7 @@ public abstract class AbstractCheckableItem {
 	public void initializeStatus() {
 		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.status.setFill(Color.BLUE);
+		this.checked = Checked.NOT_CHECKED;
 	}
 	
 	public FontAwesomeIconView getStatus() {
@@ -67,6 +71,14 @@ public abstract class AbstractCheckableItem {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
 		icon.setFill(Color.RED);
 		this.status = icon;
+	}
+	
+	public void setChecked(Checked checked) {
+		this.checked = checked;
+	}
+	
+	public Checked getChecked() {
+		return checked;
 	}
 		
 	

@@ -30,7 +30,7 @@ public class LTLResultHandler {
 	private static final Logger logger = LoggerFactory.getLogger(LTLResultHandler.class);
 	
 	public enum Checked {
-		SUCCESS, FAIL, EXCEPTION;
+		NOT_CHECKED, SUCCESS, FAIL, EXCEPTION;
 	}
 	
 	public static class LTLResultItem {

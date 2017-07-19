@@ -2,6 +2,8 @@ package de.prob2.ui.verifications.ltl;
 
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -17,6 +19,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.MachineTableView.CheckingType;
+import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaDialog;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -37,7 +40,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-import netscape.javascript.JSObject;
 
 @Singleton
 public class LTLView extends AnchorPane{
@@ -163,7 +165,13 @@ public class LTLView extends AnchorPane{
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
 
 			MenuItem check = new MenuItem("Check separately");
-			check.setOnAction(e->checkFormula(row.getItem(), tvMachines.getFocusModel().getFocusedItem()));
+			check.setOnAction(e-> {
+				Machine machine = tvMachines.getFocusModel().getFocusedItem();
+				LTLFormulaItem item = row.getItem();
+				Checked result = checkFormula(item, machine);
+				item.setChecked(result);
+				checkMachineStatus(machine);
+			});
 
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
@@ -283,8 +291,8 @@ public class LTLView extends AnchorPane{
 		alert.showAndWait();
 	}
 			
-	public void checkFormula(LTLFormulaItem item, Machine machine) {
-		checker.checkFormula(item, machine);
+	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
+		return checker.checkFormula(item, machine);
 	}
 			
 	private void showCurrentItemDialog(LTLFormulaItem item) {
@@ -343,7 +351,9 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void checkSelectedMachine() {
-		checker.checkMachine(tvMachines.getFocusModel().getFocusedItem());
+		Machine machine = tvMachines.getFocusModel().getFocusedItem();
+		checker.checkMachine(machine);
+		checkMachineStatus(machine);
 	}
 	
 	public void parseMachine(Machine machine) {
@@ -356,6 +366,22 @@ public class LTLView extends AnchorPane{
 	
 	public void refreshPattern() {
 		tvPattern.refresh();
+	}
+	
+	private void checkMachineStatus(Machine machine) {
+		ArrayList<Boolean> success = new ArrayList<>();
+		success.add(true);
+		machine.getFormulas().forEach(item-> {
+			Checked checked = item.getChecked();
+			if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
+				machine.setLTLCheckedFailed();
+				success.set(0, false);
+			}
+		});
+		if(success.get(0)) {
+			machine.setLTLCheckedSuccessful();
+		}
+		tvMachines.refresh();
 	}
 
 }
