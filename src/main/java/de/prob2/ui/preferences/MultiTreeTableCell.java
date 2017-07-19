@@ -220,7 +220,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 		try {
 			color = Color.web(pti.getValue());
 		} catch (final IllegalArgumentException exc) {
-			logger.error("Invalid color",exc);
+			logger.error("Invalid color: {}", pti.getValue(), exc);
 			color = Color.color(1.0, 0.0, 1.0);
 		}
 		if (this.getGraphic() instanceof ColorPicker) {
