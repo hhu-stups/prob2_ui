@@ -14,11 +14,12 @@ import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 
+import org.junit.Test;
+
+import org.loadui.testfx.GuiTest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.junit.Test;
-import org.loadui.testfx.GuiTest;
 
 public class MachineTest extends GuiTest{
     private static final Logger LOGGER = LoggerFactory.getLogger(MachineTest.class);
@@ -26,9 +27,7 @@ public class MachineTest extends GuiTest{
 
     @Override
     public Parent getRootNode(){
-        RuntimeOptions runtimeOptions = new RuntimeOptions();
-        runtimeOptions.setProject("src/test/resources/Lift/Lift0.json");
-        runtimeOptions.setRunconfig("lift0.default");
+        final RuntimeOptions runtimeOptions = new RuntimeOptions("src/test/resources/Lift/Lift0.json", "lift0.default", false, false);
         Injector injector = Guice.createInjector(Stage.PRODUCTION, new ProB2Module(runtimeOptions));
         CurrentProject currentProject = injector.getInstance(CurrentProject.class);
         if (runtimeOptions.getProject() != null) {
