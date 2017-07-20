@@ -1,11 +1,6 @@
 package de.prob2.ui.preferences;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import de.prob2.ui.internal.StageManager;
 
@@ -30,68 +25,7 @@ import org.slf4j.LoggerFactory;
 public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S, String> {
 	private static final Logger logger = LoggerFactory.getLogger(MultiTreeTableCell.class);
 	
-	// Valid values for named list-like types.
-	private static final Map<String, String[]> VALID_TYPE_VALUES;
-	
-	static {
-		final Map<String, String[]> validTypeValues = new HashMap<>();
-		validTypeValues.put("dot_line_style", new String[] {
-			"solid",
-			"dashed",
-			"dotted",
-			"bold",
-			"invis",
-		});
-		validTypeValues.put("dot_shape", new String[] {
-			"triangle",
-			"ellipse",
-			"box",
-			"diamond",
-			"hexagon",
-			"octagon",
-			"house",
-			"invtriangle",
-			"invhouse",
-			"invtrapez",
-			"doubleoctagon",
-			"egg",
-		});
-		validTypeValues.put("por", new String[] {
-			"off",
-			"ample_sets",
-			"sleep_sets",
-		});
-		validTypeValues.put("text_encoding", new String[] {
-			"auto",
-			"ISO-8859-1",
-			"ISO-8859-2",
-			"ISO-8859-15",
-			"UTF-8",
-			"UTF-16",
-			"UTF-16LE",
-			"UTF-16BE",
-			"UTF-32",
-			"UTF-32LE",
-			"UTF-32BE",
-			"ANSI_X3.4-1968",
-			"windows 1252",
-		});
-		VALID_TYPE_VALUES = Collections.unmodifiableMap(validTypeValues);
-	}
-	
-	// Value types that are always editable, such as bool (CheckBox) or [] (ComboBox).
-	private static final Set<String> ALWAYS_EDITABLE;
-	
 	private final StageManager stageManager;
-	
-	static {
-		final Set<String> alwaysEditable = new HashSet<>();
-		alwaysEditable.add("bool");
-		alwaysEditable.add("rgb_color");
-		alwaysEditable.add("[]");
-		alwaysEditable.addAll(VALID_TYPE_VALUES.keySet());
-		ALWAYS_EDITABLE = Collections.unmodifiableSet(alwaysEditable);
-	}
 	
 	public MultiTreeTableCell(final StageManager stageManager) {
 		super();
@@ -220,8 +154,11 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 		try {
 			color = Color.web(pti.getValue());
 		} catch (final IllegalArgumentException exc) {
-			logger.error("Invalid color: {}", pti.getValue(), exc);
-			color = Color.color(1.0, 0.0, 1.0);
+			color = PrefConstants.TK_COLORS.get(pti.getValue().toLowerCase());
+			if (color == null) {
+				logger.error("Invalid color: {}", pti.getValue(), exc);
+				color = Color.color(1.0, 0.0, 1.0);
+			}
 		}
 		if (this.getGraphic() instanceof ColorPicker) {
 			final ColorPicker colorPicker = (ColorPicker)this.getGraphic();
@@ -254,7 +191,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 			final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(
 				"[]".equals(type)
 					? pti.getValueType().getValues()
-					: VALID_TYPE_VALUES.get(type)
+					: PrefConstants.VALID_TYPE_VALUES.get(type)
 			));
 			comboBox.getSelectionModel().select(pti.getValue());
 			comboBox.setOnAction(event -> this.instantEdit(comboBox.getValue()));
@@ -276,7 +213,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 		
 		// If the super method decided that we actually shouldn't be editing, don't.
 		// For "always editable" cells nothing else should be done, so return for those too.
-		if (!this.isEditing() || ALWAYS_EDITABLE.contains(valueType.getType())) {
+		if (!this.isEditing() || PrefConstants.ALWAYS_EDITABLE.contains(valueType.getType())) {
 			return;
 		}
 		
@@ -318,7 +255,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 	public void cancelEdit() {
 		super.cancelEdit();
 		// Revert to normal text, unless this is an "always editable" cell.
-		if (!ALWAYS_EDITABLE.contains(this.getTreeTableRow().getItem().getValueType().getType())) {
+		if (!PrefConstants.ALWAYS_EDITABLE.contains(this.getTreeTableRow().getItem().getValueType().getType())) {
 			changeToText();
 		}
 	}
@@ -355,7 +292,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 				} else if ("rgb_color".equals(type)) {
 					// Colors get a ColorPicker.
 					changeToColorPicker(pti);
-				} else if ("[]".equals(type) || VALID_TYPE_VALUES.containsKey(type)) {
+				} else if ("[]".equals(type) || PrefConstants.VALID_TYPE_VALUES.containsKey(type)) {
 					// Lists get a ComboBox.
 					changeToComboBox(pti, type);
 				} else {
