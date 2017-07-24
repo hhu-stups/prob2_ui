@@ -3,12 +3,14 @@ package de.prob2.ui.chart;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EvalResult;
@@ -18,12 +20,10 @@ import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.TraceElement;
-
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -38,13 +38,11 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class HistoryChartStage extends Stage {
@@ -105,6 +103,8 @@ public final class HistoryChartStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HistoryChartStage.class);
 	private static final TraceElement DUMMY_TRACE_ELEMENT = new TraceElement(new State("Dummy state", null));
 
+	@FXML
+	private ScrollPane chartsScrollPane;
 	@FXML
 	private FlowPane chartsPane;
 	@FXML
@@ -170,8 +170,8 @@ public final class HistoryChartStage extends Stage {
 		this.startChoiceBox.setConverter(new HistoryChartStage.TraceElementStringConverter());
 		this.startChoiceBox.valueProperty().addListener((observable, from, to) -> this.updateCharts());
 
-		this.singleChart.prefWidthProperty().bind(this.chartsPane.widthProperty());
-		this.singleChart.prefHeightProperty().bind(this.chartsPane.heightProperty());
+		this.singleChart.prefWidthProperty().bind(this.chartsScrollPane.widthProperty().subtract(5));
+		this.singleChart.prefHeightProperty().bind(this.chartsScrollPane.heightProperty().subtract(5));
 
 		this.showingProperty().addListener((observable, from, to) -> {
 			if (to) {
