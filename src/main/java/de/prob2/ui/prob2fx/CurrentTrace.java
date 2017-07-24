@@ -126,6 +126,9 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
 			@Override
 			public void traceChange(final Trace currentTrace, final boolean currentAnimationChanged) {
+				if (!currentTrace.getCurrentState().isExplored()) {
+					currentTrace.getCurrentState().explore();
+				}
 				Platform.runLater(() -> CurrentTrace.this.set(currentTrace));
 			}
 
