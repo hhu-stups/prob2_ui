@@ -87,8 +87,7 @@ public final class Config {
 	private final UIState uiState;
 	private final CurrentProject currentProject;
 	private final GlobalPreferences globalPreferences;
-	
-	private boolean ignoreConfig;
+	private final RuntimeOptions runtimeOptions;
 
 	@Inject
 	private Config(
@@ -109,8 +108,7 @@ public final class Config {
 		this.injector = injector;
 		this.currentProject = currentProject;
 		this.globalPreferences = globalPreferences;
-		
-		this.ignoreConfig = runtimeOptions.isResetPreferences();
+		this.runtimeOptions = runtimeOptions;
 
 		try (final InputStream is = Config.class.getResourceAsStream("default.json");
 				final Reader defaultReader = new InputStreamReader(is, CONFIG_CHARSET)) {
@@ -193,13 +191,11 @@ public final class Config {
 
 	public void load() {
 		ConfigData configData;
-		if (this.ignoreConfig) {
-			logger.info("Preferences reset requested via runtime options, loading default settings");
-			this.ignoreConfig = false;
-			configData = this.defaultData;
-		} else {
-			try (final InputStream is = new FileInputStream(LOCATION);
-					final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)) {
+		if (this.runtimeOptions.isLoadConfig()) {
+			try (
+				final InputStream is = new FileInputStream(LOCATION);
+				final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
+			) {
 				configData = gson.fromJson(reader, ConfigData.class);
 			} catch (FileNotFoundException exc) {
 				logger.info("Config file not found, loading default settings", exc);
@@ -208,6 +204,9 @@ public final class Config {
 				logger.warn("Failed to open config file", exc);
 				return;
 			}
+		} else {
+			logger.info("Config loading disabled via runtime options, loading default config");
+			configData = this.defaultData;
 		}
 
 		this.replaceMissingWithDefaults(configData);
@@ -250,6 +249,11 @@ public final class Config {
 	}
 
 	public void save() {
+		if (!this.runtimeOptions.isSaveConfig()) {
+			logger.info("Config saving disabled via runtime options, ignoring config save request");
+			return;
+		}
+		
 		uiState.updateSavedStageBoxes();
 		final ConfigData configData = new ConfigData();
 		configData.guiState = this.uiState.getGuiState();

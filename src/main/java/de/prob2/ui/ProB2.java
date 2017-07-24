@@ -1,6 +1,7 @@
 package de.prob2.ui;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.Optional;
 
 import com.google.inject.Guice;
@@ -86,6 +87,11 @@ public class ProB2 extends Application {
 	}
 
 	@Override
+	public void init() {
+		Locale.setDefault(Locale.ENGLISH);
+	}
+	
+	@Override
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
 		this.loadingStage = new Stage();
@@ -113,7 +119,8 @@ public class ProB2 extends Application {
 		
 		options.addOption(null, "project", true, "Open the specified project on startup.");
 		options.addOption(null, "runconfig", true, "Run the specified run configuration on startup. Requires a project to be loaded first (using --open-project).");
-		options.addOption(null, "reset-preferences", false, "Reset all preferences to their defaults.");
+		options.addOption(null, "no-load-config", false, "Do not load the user config file, use the default config instead.");
+		options.addOption(null, "no-save-config", false, "Do not save the user config file.");
 		
 		final CommandLineParser clParser = new PosixParser();
 		final CommandLine cl;
@@ -133,10 +140,12 @@ public class ProB2 extends Application {
 			throw die("Invalid combination of options: --runconfig requires --project", 2);
 		}
 		
-		final RuntimeOptions runtimeOpts = new RuntimeOptions();
-		runtimeOpts.setProject(cl.getOptionValue("project"));
-		runtimeOpts.setRunconfig(cl.getOptionValue("runconfig"));
-		runtimeOpts.setResetPreferences(cl.hasOption("reset-preferences"));
+		final RuntimeOptions runtimeOpts = new RuntimeOptions(
+			cl.getOptionValue("project"),
+			cl.getOptionValue("runconfig"),
+			!cl.hasOption("no-load-config"),
+			!cl.hasOption("no-save-config")
+		);
 		LOGGER.info("Created runtime options: {}", runtimeOpts);
 		
 		return runtimeOpts;

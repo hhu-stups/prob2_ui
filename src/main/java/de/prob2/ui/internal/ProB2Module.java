@@ -58,7 +58,7 @@ public class ProB2Module extends AbstractModule {
 		install(new MainModule());
 		
 		// General stuff
-		final Locale locale = Locale.ENGLISH;
+		final Locale locale = Locale.getDefault();
 		bind(Locale.class).toInstance(locale);
 		final ResourceBundle bundle = ResourceBundle.getBundle("bundles.prob2", locale);
 		bind(ResourceBundle.class).toInstance(bundle);

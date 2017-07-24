@@ -16,7 +16,7 @@ public class PreferencesTest extends GuiTest{
 
     @Override
     public Parent getRootNode(){
-        RuntimeOptions runtimeOptions = new RuntimeOptions();
+        RuntimeOptions runtimeOptions = new RuntimeOptions(null, null, false, false);
         Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module(runtimeOptions));
         if(mainStage) {
             return injector.getInstance(MainController.class);
