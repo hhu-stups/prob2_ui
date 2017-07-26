@@ -1,11 +1,13 @@
 package de.prob2.ui.project.runconfigurations;
 
+import java.net.URISyntaxException;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -18,8 +20,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.input.MouseButton;
-
-import java.net.URISyntaxException;
 
 public class RunconfigurationsTab extends Tab {
 
@@ -58,7 +58,7 @@ public class RunconfigurationsTab extends Tab {
 		});
 		runconfigurationsListView.itemsProperty().bind(currentProject.runconfigurationsProperty());
 		this.selectedProperty().addListener((observable, from, to) -> {
-			if(to) {
+			if (to) {
 				runconfigurationsListView.refresh();
 			}
 		});
@@ -76,24 +76,28 @@ public class RunconfigurationsTab extends Tab {
 					}
 				}
 			};
-			
+
 			final MenuItem removeRunconfigMenuItem = new MenuItem("Remove Runconfiguration");
 			removeRunconfigMenuItem.setOnAction(event -> currentProject.removeRunconfiguration(cell.getItem()));
 			removeRunconfigMenuItem.disableProperty().bind(cell.emptyProperty());
+
+			cell.setOnMouseClicked(event -> {
+				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					currentProject.startAnimation(cell.getItem());
+				}
+				runconfigurationsListView.getSelectionModel().select(currentProject.getCurrentRunconfiguration());
+			});
+			// makes sure that the selected item is always the current
+			// runconfiguration. Otherwise the current runconfig would be
+			// unselected as long as a mouse button is pressed
+			cell.setOnMousePressed(event -> runconfigurationsListView.getSelectionModel()
+					.select(currentProject.getCurrentRunconfiguration()));
 
 			cell.setContextMenu(new ContextMenu(removeRunconfigMenuItem));
 
 			return cell;
 		});
-		runconfigurationsListView.setOnMouseClicked(event -> {
-			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-				Runconfiguration selectedItem = runconfigurationsListView.getSelectionModel().getSelectedItem();
-				if (selectedItem != null) {
-					currentProject.startAnimation(selectedItem);
-				}
-			}
-		});
-		
+
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addRunconfigButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 	}
