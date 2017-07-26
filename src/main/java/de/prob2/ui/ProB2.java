@@ -13,11 +13,13 @@ import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+import de.prob2.ui.states.StatesView;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -234,6 +236,8 @@ public class ProB2 extends Application {
 			config.save();
 		}
 		if (injector != null) {
+			injector.getInstance(OperationsView.class).shutdown();
+			injector.getInstance(StatesView.class).shutdown();
 			injector.getInstance(ProBInstanceProvider.class).shutdownAll();
 		}
 	}

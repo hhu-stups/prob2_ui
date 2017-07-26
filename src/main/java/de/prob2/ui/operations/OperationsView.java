@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -229,6 +231,7 @@ public final class OperationsView extends AnchorPane {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final Comparator<CharSequence> alphanumericComparator;
+	private final ExecutorService updater;
 
 	private static final String ICON_DARK = "icon-dark";
 
@@ -238,6 +241,7 @@ public final class OperationsView extends AnchorPane {
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
+		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
 
 		stageManager.loadFXML(this, "ops_view.fxml");
 	}
@@ -276,6 +280,10 @@ public final class OperationsView extends AnchorPane {
 		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 	}
 
+	public void shutdown() {
+		this.updater.shutdownNow();
+	}
+
 	private List<String> extractParamsFromNextState(final Trace trace, final Transition transition,
 			final Class<? extends AbstractFormulaElement> type) {
 		// It seems that there is no way to easily find out the
@@ -306,16 +314,18 @@ public final class OperationsView extends AnchorPane {
 	}
 
 	private void update(final Trace trace) {
+		this.opsListView.setDisable(true);
 		if (trace == null) {
-			this.opsListView.setDisable(true);
 			currentModel = null;
 			opNames = new ArrayList<>();
-			Platform.runLater(opsListView.getItems()::clear);
-			return;
+			opsListView.getItems().clear();
+		} else {
+			opsListView.getItems().setAll(new OperationItem(trace, "-", "Loading...", Collections.emptyList(), Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
+			this.updater.execute(() -> this.updateBG(trace));
 		}
+	}
 
-		this.opsListView.setDisable(false);
-
+	private void updateBG(final Trace trace) {
 		if (!trace.getModel().equals(currentModel)) {
 			updateModel(trace);
 		}
@@ -357,7 +367,12 @@ public final class OperationsView extends AnchorPane {
 					Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
 		}
 
-		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
+		final List<OperationItem> filtered = applyFilter(filter);
+		
+		Platform.runLater(() -> {
+			opsListView.getItems().setAll(filtered);
+			this.opsListView.setDisable(false);
+		});
 	}
 
 	private void showDisabledAndWithTimeout(final Trace trace, final Set<String> notEnabled, final Set<String> withTimeout) {
