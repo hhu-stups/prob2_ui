@@ -25,12 +25,12 @@ import de.prob2.ui.project.machines.Machine;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanPropertyBase;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 /**
  * A singleton writable property that represents the current {@link Trace}. It
@@ -38,7 +38,7 @@ import javafx.beans.property.SimpleObjectProperty;
  * JavaFX components using property binding.
  */
 @Singleton
-public final class CurrentTrace extends SimpleObjectProperty<Trace> {
+public final class CurrentTrace extends ObjectPropertyBase<Trace> {
 	private final class ROBoolProp extends ReadOnlyBooleanPropertyBase {
 		private final String name;
 		private final BooleanSupplier getter;
@@ -120,7 +120,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		final AnimationSelector animationSelector,
 		final Api api
 	) {
-		super(null);
+		super(animationSelector.getCurrentTrace());
 		this.injector = injector;
 		this.animationSelector = animationSelector;
 		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
@@ -139,12 +139,6 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		});
 		this.api = api;
 		
-		this.addListener((observable, from, to) -> {
-			if (to != null) {
-				this.animationSelector.traceChange(to);
-			}
-		});
-		
 		this.exists = new ROBoolProp("exists", () -> this.get() != null);
 
 		this.animatorBusy = new SimpleBooleanProperty(this, "animatorBusy", false);
@@ -160,6 +154,22 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		this.forward = new ROObjProp<>("forward", () -> this.exists() ? this.get().forward() : null);
 	}
 
+	@Override
+	public Object getBean() {
+		return null;
+	}
+	
+	@Override
+	public String getName() {
+		return "";
+	}
+	
+	@Override
+	protected void invalidated() {
+		super.invalidated();
+		this.animationSelector.changeCurrentAnimation(this.get());
+	}
+	
 	/**
 	 * A read-only boolean property indicating whether a current trace exists
 	 * (i. e. is not null).
