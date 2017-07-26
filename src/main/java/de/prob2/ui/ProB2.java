@@ -14,6 +14,7 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIPersistence;
+import de.prob2.ui.plugin.PluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
@@ -47,6 +48,8 @@ public class ProB2 extends Application {
 
 	private Stage primaryStage;
 	private Stage loadingStage;
+
+	private PluginManager pluginManager;
 
 	public static void main(String... args) {
 		launch(args);
@@ -183,6 +186,9 @@ public class ProB2 extends Application {
 		stageManager.registerMainStage(primaryStage, this.getClass().getName());
 
 		primaryStage.setOnCloseRequest(event -> {
+			if (pluginManager != null) {
+				pluginManager.stopPlugins();
+			}
 			if (!currentProject.isSaved()) {
 				ButtonType save = new ButtonType("Save", ButtonBar.ButtonData.YES);
 				ButtonType doNotSave = new ButtonType("Do not save", ButtonBar.ButtonData.NO);
@@ -203,6 +209,10 @@ public class ProB2 extends Application {
 		});
 
 		primaryStage.show();
+
+		pluginManager = injector.getInstance(PluginManager.class);
+		pluginManager.loadPlugins();
+
 		uiPersistence.open();
 		
 		if (runtimeOptions.getProject() != null) {

@@ -24,6 +24,7 @@ import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.PerspectivesMenu;
 import de.prob2.ui.menu.ViewMenu;
 import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.plugin.PluginManager;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.project.ProjectTab;
 import de.prob2.ui.project.ProjectView;
@@ -97,6 +98,8 @@ public class ProB2Module extends AbstractModule {
 		bind(VerificationsView.class);
 		bind(VisualisationView.class);
 		bind(StateVisualisationView.class);
+
+		bind(PluginManager.class);
 	}
 
 	@Provides
