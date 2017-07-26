@@ -190,11 +190,11 @@ public final class CurrentTrace extends ObjectPropertyBase<Trace> {
 	}
 
 	/**
-	 * A writable property indicating whether the animator is currently busy. It
+	 * A read-only property indicating whether the animator is currently busy. It
 	 * holds the last value reported by
 	 * {@link IAnimationChangeListener#animatorStatus(boolean)}.
 	 * 
-	 * @return a property indicating whether the animator is currently busy
+	 * @return a read-only property indicating whether the animator is currently busy
 	 */
 	public ReadOnlyBooleanProperty animatorBusyProperty() {
 		return this.animatorBusy;
