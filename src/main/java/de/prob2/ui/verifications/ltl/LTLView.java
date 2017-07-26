@@ -214,6 +214,9 @@ public class LTLView extends AnchorPane{
 		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+			if(tvMachines.getSelectionModel().getSelectedIndex() < 0) {
+				tvMachines.getSelectionModel().select(0);
+			}
 			if(newValue && machine != null) {
 				checkSelectedMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
 			}
@@ -370,6 +373,7 @@ public class LTLView extends AnchorPane{
 		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
 		checker.checkMachine(machine);
 		checkMachineStatus(machine);
+		tvFormula.refresh();
 	}
 	
 	public void parseMachine(Machine machine) {
