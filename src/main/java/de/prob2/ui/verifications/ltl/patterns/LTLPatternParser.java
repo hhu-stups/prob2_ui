@@ -33,7 +33,6 @@ public class LTLPatternParser {
 		Pattern pattern = itemToPattern(item);
 		machine.getPatternManager().getPatterns().add(pattern);
 		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item, byInit);
-		injector.getInstance(LTLView.class).refreshPattern();
 	}
 	
 	private LTLParseListener checkDefinition(Pattern pattern, Machine machine) {

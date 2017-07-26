@@ -54,7 +54,6 @@ public class LTLFormulaChecker {
 		LtlParser parser = new LtlParser(item.getCode());
 		parser.setPatternManager(machine.getPatternManager());
 		Checked checked = resultHandler.handleFormulaResult(item, getResult(parser, item), stateid);
-		injector.getInstance(LTLView.class).refreshFormula();
 		return checked;
 	}
 	
