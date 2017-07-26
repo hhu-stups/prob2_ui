@@ -31,6 +31,7 @@ import de.prob.statespace.Trace;
 
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
@@ -82,7 +83,8 @@ public final class StatesView extends AnchorPane {
 		final Injector injector,
 		final CurrentTrace currentTrace,
 		final FormulaGenerator formulaGenerator,
-		final StageManager stageManager
+		final StageManager stageManager,
+		final StopActions stopActions
 	) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
@@ -92,6 +94,7 @@ public final class StatesView extends AnchorPane {
 		this.currentValues = new HashMap<>();
 		this.previousValues = new HashMap<>();
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "StatesView Updater"));
+		stopActions.add(this.updater::shutdownNow);
 
 		stageManager.loadFXML(this, "states_view.fxml");
 	}
@@ -199,10 +202,6 @@ public final class StatesView extends AnchorPane {
 		};
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
-	}
-	
-	public void shutdown() {
-		this.updater.shutdownNow();
 	}
 	
 	private static boolean isSameNode(final PrologASTNode x, final PrologASTNode y) {

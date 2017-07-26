@@ -41,6 +41,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -237,11 +238,12 @@ public final class OperationsView extends AnchorPane {
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
-			final Injector injector) {
+			final Injector injector, final StopActions stopActions) {
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
+		stopActions.add(this.updater::shutdownNow);
 
 		stageManager.loadFXML(this, "ops_view.fxml");
 	}
@@ -278,10 +280,6 @@ public final class OperationsView extends AnchorPane {
 				.addListener((observable, from, to) -> ((FontAwesomeIconView) (disabledOpsToggle.getGraphic()))
 						.glyphSizeProperty().bind(fontsize.add(2)));
 		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
-	}
-
-	public void shutdown() {
-		this.updater.shutdownNow();
 	}
 
 	private List<String> extractParamsFromNextState(final Trace trace, final Transition transition,
