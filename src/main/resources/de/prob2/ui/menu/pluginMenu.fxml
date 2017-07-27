@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+
+<fx:root type="Menu" text="%menu.plugin" xmlns:fx="http://javafx.com/fxml/1">
+    <MenuItem text="%menu.plugin.items.add"
+              onAction="#addPlugin" />
+    <Menu fx:id="pluginsStopMenu" text="%menu.plugin.items.stop" disable="true"/>
+</fx:root>
+

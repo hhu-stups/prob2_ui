@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -32,6 +33,8 @@ public class PluginManager {
         PERSPECTIVES_MENU("perspectivesMenu"),
         PRESET_PERSPECTIVES_MENU("presetPerspectivesMenu"),
         VIEW_MENU("viewMenu"),
+        PLUGIN_MENU("pluginMenu"),
+        PLUGINS_STOP_MENU("pluginsStopMenu"),
         WINDOW_MENU("windowMenu"),
         HELP_MENU("helpMenu");
 
@@ -74,7 +77,12 @@ public class PluginManager {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginManager.class);
-    private static final String PLUGIN_DIRECTORY = "plugins";
+    private static final String PLUGIN_DIRECTORY = System.getProperty("user.home")
+            + File.separator + ".prob"
+            + File.separator + "prob2"
+            + File.separator + "prob2ui"
+            + File.separator + "plugins";
+
     private final Injector injector;
     private final CurrentTrace currentTrace;
 
@@ -93,12 +101,7 @@ public class PluginManager {
     }
 
     public void loadPlugins() {
-        String pluginDirectoryPath = System.getProperty("user.home")
-                + File.separator + ".prob"
-                + File.separator + "prob2"
-                + File.separator + "prob2ui"
-                + File.separator + PLUGIN_DIRECTORY;
-        File pluginDirectory = new File(pluginDirectoryPath);
+        File pluginDirectory = new File(PLUGIN_DIRECTORY);
         if (!pluginDirectory.exists()) {
             if (!pluginDirectory.mkdirs()) {
                 LOGGER.warn("Couldn't create the directory for plugins!\n{}", pluginDirectory.getAbsolutePath());
@@ -115,6 +118,25 @@ public class PluginManager {
                 }
             }
         }
+    }
+
+    public void addPlugin(File selectedPlugin) {
+        File pluginDirectory = new File(PLUGIN_DIRECTORY);
+        if (!pluginDirectory.exists()) {
+            if (!pluginDirectory.mkdirs()) {
+                LOGGER.warn("Couldn't create the directory for plugins!\n{}", pluginDirectory.getAbsolutePath());
+            }
+            return;
+        }
+        String pluginName = selectedPlugin.getName();
+        File plugin = new File(PLUGIN_DIRECTORY + File.separator + pluginName);
+        try {
+            Files.copy(selectedPlugin.toPath(),plugin.toPath());
+            loadPlugin(new JarFile(plugin));
+        } catch (IOException e) {
+            LOGGER.warn("Tried to copy the plugin {} \nThis exception was thrown: ", pluginName, e);
+        }
+
     }
 
     public void stopPlugins() {
