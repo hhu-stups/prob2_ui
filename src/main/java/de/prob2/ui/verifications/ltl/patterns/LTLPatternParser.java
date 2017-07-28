@@ -5,27 +5,21 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Injector;
-
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
-import de.prob2.ui.verifications.ltl.LTLView;
 
 public class LTLPatternParser {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LTLPatternParser.class);
 	
 	private final LTLResultHandler resultHandler;
-	
-	private final Injector injector;
-	
+		
 	@Inject
-	private LTLPatternParser(final LTLResultHandler resultHandler, final Injector injector) {
+	private LTLPatternParser(final LTLResultHandler resultHandler) {
 		this.resultHandler = resultHandler;
-		this.injector = injector;
 	}
 		
 	public void parsePattern(LTLPatternItem item, Machine machine, boolean byInit) {
@@ -33,7 +27,6 @@ public class LTLPatternParser {
 		Pattern pattern = itemToPattern(item);
 		machine.getPatternManager().getPatterns().add(pattern);
 		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item, byInit);
-		injector.getInstance(LTLView.class).refreshPattern();
 	}
 	
 	private LTLParseListener checkDefinition(Pattern pattern, Machine machine) {

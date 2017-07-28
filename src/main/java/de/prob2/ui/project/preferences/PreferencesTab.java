@@ -56,10 +56,10 @@ public class PreferencesTab extends Tab {
 
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addPreferenceButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
-		
+
 		currentProject.preferencesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
-			if(node instanceof PreferenceView && !to.contains(((PreferenceView) node).getPreference())) {
+			if (node instanceof PreferenceView && !to.contains(((PreferenceView) node).getPreference())) {
 				closePreferenceView();
 			}
 		});
@@ -102,6 +102,23 @@ public class PreferencesTab extends Tab {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 				showPreferenceView(cell.getItem());
 			}
+			if (splitPane.getItems().get(0) instanceof PreferenceView) {
+				PreferenceView prefView = (PreferenceView) splitPane.getItems().get(0);
+				preferencesListView.getSelectionModel().select(prefView.getPreference());
+			} else {
+				preferencesListView.getSelectionModel().clearSelection();
+			}
+		});
+		// makes sure that the selected item is always the preference currently
+		// displayed in Preference View. Otherwise this preference would be
+		// unselected as long as a mouse button is pressed
+		cell.setOnMousePressed(event -> {
+			if (splitPane.getItems().get(0) instanceof PreferenceView) {
+				PreferenceView prefView = (PreferenceView) splitPane.getItems().get(0);
+				preferencesListView.getSelectionModel().select(prefView.getPreference());
+			} else {
+				preferencesListView.getSelectionModel().clearSelection();
+			}
 		});
 
 		return cell;
@@ -123,5 +140,6 @@ public class PreferencesTab extends Tab {
 		if (splitPane.getItems().get(0) instanceof PreferenceView) {
 			splitPane.getItems().remove(0);
 		}
+		preferencesListView.getSelectionModel().clearSelection();
 	}
 }

@@ -2,12 +2,14 @@ package de.prob2.ui.beditor;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.google.inject.Inject;
 
+import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -42,11 +44,11 @@ public class BEditorStage extends Stage {
 	}
 	
 	@FXML
-	private void initialize() {
+	private void initialize() throws URISyntaxException {
 		this.stageManager.setMacMenuBar(this, this.menuBar);
 		beditor.setContextMenuEnabled(false);
 		engine = beditor.getEngine();
-		engine.load(getClass().getResource("beditor.html").toExternalForm());
+		engine.load(ProB2.class.getClassLoader().getResource("codemirror/beditor.html").toURI().toString());
 		engine.setJavaScriptEnabled(true);
 		new BTokenProvider(engine);
 

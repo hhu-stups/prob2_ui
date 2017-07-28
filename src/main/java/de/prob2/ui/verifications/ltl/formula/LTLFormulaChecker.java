@@ -6,8 +6,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Injector;
-
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.LTL;
@@ -19,7 +17,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
-import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
 
 public class LTLFormulaChecker {
@@ -28,14 +25,11 @@ public class LTLFormulaChecker {
 				
 	private final CurrentTrace currentTrace;
 	
-	private final Injector injector;
-	
 	private final LTLResultHandler resultHandler;
 	
 	@Inject
-	private LTLFormulaChecker(final CurrentTrace currentTrace, final Injector injector, final LTLResultHandler resultHandler) {
+	private LTLFormulaChecker(final CurrentTrace currentTrace, final LTLResultHandler resultHandler) {
 		this.currentTrace = currentTrace;
-		this.injector = injector;
 		this.resultHandler = resultHandler;
 	}
 	
@@ -54,7 +48,6 @@ public class LTLFormulaChecker {
 		LtlParser parser = new LtlParser(item.getCode());
 		parser.setPatternManager(machine.getPatternManager());
 		Checked checked = resultHandler.handleFormulaResult(item, getResult(parser, item), stateid);
-		injector.getInstance(LTLView.class).refreshFormula();
 		return checked;
 	}
 	
