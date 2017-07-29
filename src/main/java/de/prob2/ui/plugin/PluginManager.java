@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob2.ui.MainController;
 import de.prob2.ui.menu.MenuController;
+import de.prob2.ui.menu.PluginMenu;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import javafx.scene.control.*;
@@ -149,10 +150,20 @@ public class PluginManager {
         }
     }
 
+    private void registerPlugin(@Nonnull final Plugin plugin) {
+        if (registeredPlugins == null) {
+            registeredPlugins = new ArrayList<>();
+        }
+        registeredPlugins.add(plugin);
+        injector.getInstance(PluginMenu.class).addPluginMenuItem(plugin);
+
+    }
+
     public void unregisterPlugin(@Nonnull final Plugin plugin) {
         if (registeredPlugins != null) {
             registeredPlugins.remove(plugin);
         }
+        injector.getInstance(PluginMenu.class).removePluginMenuItem(plugin);
     }
 
     public void addTab(@Nonnull final Tab tab) {
@@ -233,13 +244,6 @@ public class PluginManager {
             }
         }
         return null;
-    }
-
-    private void registerPlugin(@Nonnull final Plugin pl) {
-        if (registeredPlugins == null) {
-            registeredPlugins = new ArrayList<>();
-        }
-        registeredPlugins.add(pl);
     }
 
     private void loadPlugin(@Nonnull final JarFile plugin) {

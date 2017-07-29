@@ -6,4 +6,6 @@ public abstract class Plugin {
 
     public abstract void stop();
 
+    public abstract String getName();
+
 }
