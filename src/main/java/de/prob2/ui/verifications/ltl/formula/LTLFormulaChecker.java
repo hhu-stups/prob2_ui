@@ -1,10 +1,14 @@
 package de.prob2.ui.verifications.ltl.formula;
 
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.inject.Injector;
 
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.prob.animator.command.EvaluationCommand;
@@ -14,6 +18,8 @@ import de.prob.ltl.parser.LtlParser;
 import de.prob.statespace.State;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.statusbar.StatusBar;
+import de.prob2.ui.statusbar.StatusBar.LTLStatus;
 import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
@@ -27,20 +33,33 @@ public class LTLFormulaChecker {
 	
 	private final LTLResultHandler resultHandler;
 	
+	private final Injector injector;
+	
 	@Inject
-	private LTLFormulaChecker(final CurrentTrace currentTrace, final LTLResultHandler resultHandler) {
+	private LTLFormulaChecker(final CurrentTrace currentTrace, final LTLResultHandler resultHandler,
+								final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.resultHandler = resultHandler;
+		this.injector = injector;
 	}
 	
 	public void checkMachine(Machine machine) {
+		ArrayList<Boolean> failed = new ArrayList<>();
+		failed.add(false);
 		machine.getFormulas().forEach(item-> {
 			Checked result = this.checkFormula(item, machine);
 			if(result == Checked.FAIL || result == Checked.EXCEPTION) {
+				failed.set(0, true);
 				machine.setLTLCheckedFailed();
 			}
 			item.setChecked(result);
 		});
+		StatusBar statusBar = injector.getInstance(StatusBar.class);
+		if(failed.get(0)) {
+			statusBar.updateLTLCheckingStatus(LTLStatus.ERROR);
+		} else {
+			statusBar.updateLTLCheckingStatus(LTLStatus.SUCCESSFUL);
+		}
 	}
 	
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
