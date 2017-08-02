@@ -1,36 +1,68 @@
 package de.prob2.ui.operations;
 
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.classicalb.Operation;
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
-import de.prob.model.representation.*;
+import de.prob.model.representation.AbstractElement;
+import de.prob.model.representation.AbstractFormulaElement;
+import de.prob.model.representation.AbstractModel;
+import de.prob.model.representation.BEvent;
+import de.prob.model.representation.Constant;
+import de.prob.model.representation.Machine;
+import de.prob.model.representation.Variable;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
+import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-import se.sawano.java.text.AlphanumericComparator;
 
-import java.util.*;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import se.sawano.java.text.AlphanumericComparator;
 
 @Singleton
 public final class OperationsView extends AnchorPane {
@@ -200,15 +232,18 @@ public final class OperationsView extends AnchorPane {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final Comparator<CharSequence> alphanumericComparator;
+	private final ExecutorService updater;
 
 	private static final String ICON_DARK = "icon-dark";
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
-			final Injector injector) {
+			final Injector injector, final StopActions stopActions) {
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
+		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
+		stopActions.add(this.updater::shutdownNow);
 
 		stageManager.loadFXML(this, "ops_view.fxml");
 	}
@@ -278,15 +313,20 @@ public final class OperationsView extends AnchorPane {
 
 	private void update(final Trace trace) {
 		if (trace == null) {
-			this.opsListView.setDisable(true);
 			currentModel = null;
 			opNames = new ArrayList<>();
-			Platform.runLater(opsListView.getItems()::clear);
-			return;
+			opsListView.getItems().clear();
+		} else {
+			this.updater.execute(() -> this.updateBG(trace));
 		}
+	}
 
-		this.opsListView.setDisable(false);
-
+	private void updateBG(final Trace trace) {
+		Platform.runLater(() -> {
+			this.opsListView.setDisable(true);
+			opsListView.getItems().setAll(new OperationItem(trace, "-", "Loading...", Collections.emptyList(), Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
+		});
+		
 		if (!trace.getModel().equals(currentModel)) {
 			updateModel(trace);
 		}
@@ -328,7 +368,12 @@ public final class OperationsView extends AnchorPane {
 					Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
 		}
 
-		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
+		final List<OperationItem> filtered = applyFilter(filter);
+		
+		Platform.runLater(() -> {
+			opsListView.getItems().setAll(filtered);
+			this.opsListView.setDisable(false);
+		});
 	}
 
 	private void showDisabledAndWithTimeout(final Trace trace, final Set<String> notEnabled, final Set<String> withTimeout) {
