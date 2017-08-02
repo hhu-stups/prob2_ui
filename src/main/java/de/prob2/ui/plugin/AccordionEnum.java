@@ -1,9 +1,10 @@
 package de.prob2.ui.plugin;
 
 import com.google.inject.Injector;
+import de.prob2.ui.MainController;
 import javafx.scene.control.Accordion;
 
-import javax.annotation.Nonnull;
+import java.util.List;
 
 public enum AccordionEnum {
     RIGHT_ACCORDION("rightAccordion"),
@@ -29,5 +30,15 @@ public enum AccordionEnum {
 
     public String id() {
         return this.id;
+    }
+
+    public Accordion getAccordion(Injector injector) {
+        List<Accordion> accordions = injector.getInstance(MainController.class).getAccordionList();
+        for (Accordion acc : accordions) {
+            if (acc != null && this.id.equals(acc.getId())) {
+                return acc;
+            }
+        }
+        return null;
     }
 }

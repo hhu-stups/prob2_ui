@@ -211,7 +211,7 @@ public class MainController extends BorderPane {
 		return parentMap;
 	}
 
-	private List<Accordion> getAccordionList() {
+	public List<Accordion> getAccordionList() {
 		List<Accordion> accordionList = new ArrayList<>();
 		accordionList.add(leftAccordion);
 		accordionList.add(leftAccordion1);

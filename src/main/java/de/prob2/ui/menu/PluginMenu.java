@@ -40,25 +40,14 @@ public class PluginMenu extends Menu {
 
     @FXML
     private void addPlugin() {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Add Plugin");
-        fileChooser.getExtensionFilters()
-                .addAll(new FileChooser.ExtensionFilter("ProB2 Plugins", "*.jar"));
-
-        final File selectedPlugin = fileChooser.showOpenDialog(stageManager.getMainStage());
-        if (selectedPlugin == null) {
-            LOGGER.info("No plugin selected!");
-            return;
-        }
-
-        pluginManager.addPlugin(selectedPlugin);
+        pluginManager.addPlugin();
     }
 
     public void addPluginMenuItem(Plugin plugin) {
         MenuItem stopEntry = new MenuItem(plugin.getName());
         stopEntry.setOnAction((event) -> {
             plugin.stop();
-            pluginManager.unregisterPlugin(plugin);
+            //pluginManager.unregisterPlugin(plugin);
         });
         stopEntry.setUserData(plugin);
         pluginsStopMenu.getItems().add(stopEntry);

@@ -3,14 +3,15 @@ package de.prob2.ui.plugin;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob2.ui.MainController;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MenuController;
-import de.prob2.ui.menu.PluginMenu;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import edu.umd.cs.findbugs.annotations.NonNull;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,8 @@ public class PluginManager {
     private final CurrentTrace currentTrace;
     private final StageManager stageManager;
 
-    private List<Plugin> registeredPlugins;
+    private ObservableMap<Plugin, Boolean> activePlugins;
+    //private List<Plugin> registeredPlugins;
 
 
     //TODO: test what happens when two plugins use the same library in different versions and what happens when two plugins have the same package structure
@@ -53,7 +55,12 @@ public class PluginManager {
         });
     }
 
+    public ObservableMap<Plugin, Boolean> getActivePlugins(){
+        return activePlugins;
+    }
+
     public void loadPlugins() {
+        stopPlugins(); //stop and remove all plugins
         File pluginDirectory = new File(PLUGIN_DIRECTORY);
         if (!pluginDirectory.exists()) {
             if (!pluginDirectory.mkdirs()) {
@@ -65,7 +72,8 @@ public class PluginManager {
         if (plugins != null && plugins.length != 0) {
             for (File plugin : plugins) {
                 try {
-                    loadPlugin(new JarFile(plugin));
+                    //TODO: check if the plugin should be active or not
+                    loadPlugin(new JarFile(plugin), true);
                 } catch (IOException e) {
                     LOGGER.warn("\n\"{}\" is not a valid ProB-Plugin! \nThe following exception was thrown:", plugin.getName(), e);
                 }
@@ -73,49 +81,46 @@ public class PluginManager {
         }
     }
 
-    public void addPlugin(File selectedPlugin) {
-        File pluginDirectory = new File(PLUGIN_DIRECTORY);
-        if (!pluginDirectory.exists()) {
-            if (!pluginDirectory.mkdirs()) {
-                LOGGER.warn("Couldn't create the directory for plugins!\n{}", pluginDirectory.getAbsolutePath());
-            }
-            return;
-        }
-        String pluginName = selectedPlugin.getName();
-        File plugin = new File(PLUGIN_DIRECTORY + File.separator + pluginName);
-        try {
-            Files.copy(selectedPlugin.toPath(),plugin.toPath());
-            loadPlugin(new JarFile(plugin));
-        } catch (IOException e) {
-            LOGGER.warn("Tried to copy the plugin {} \nThis exception was thrown: ", pluginName, e);
-        }
+    public void addPlugin() {
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Add Plugin");
+        fileChooser.getExtensionFilters()
+                .addAll(new FileChooser.ExtensionFilter("ProB2 Plugins", "*.jar"));
 
+        final File selectedPlugin = fileChooser.showOpenDialog(stageManager.getMainStage());
+        if (selectedPlugin != null) {
+            File pluginDirectory = new File(PLUGIN_DIRECTORY);
+            if (!pluginDirectory.exists()) {
+                if (!pluginDirectory.mkdirs()) {
+                    LOGGER.warn("Couldn't create the directory for plugins!\n{}", pluginDirectory.getAbsolutePath());
+                }
+                return;
+            }
+            File plugin = new File(PLUGIN_DIRECTORY + File.separator + selectedPlugin.getName());
+            try {
+                Files.copy(selectedPlugin.toPath(), plugin.toPath());
+                loadPlugin(new JarFile(plugin), true);
+            } catch (IOException e) {
+                LOGGER.warn("Tried to copy the plugin {} \nThis exception was thrown: ", selectedPlugin.getName(), e);
+            }
+        }
     }
 
     public void stopPlugins() {
-        if (registeredPlugins != null && !registeredPlugins.isEmpty()) {
-            for (Iterator<Plugin> it = registeredPlugins.iterator(); it.hasNext(); ) {
-                Plugin plugin = it.next();
+        if (activePlugins != null && !activePlugins.isEmpty()) {
+            activePlugins.forEach((plugin, active) -> {
+                if (active)
                 plugin.stop();
-                it.remove();
-            }
+            });
+            activePlugins.clear();
         }
     }
 
-    private void registerPlugin(@Nonnull final Plugin plugin) {
-        if (registeredPlugins == null) {
-            registeredPlugins = new ArrayList<>();
+    private void registerPlugin(@Nonnull final Plugin plugin, boolean active) {
+        if (activePlugins == null) {
+            activePlugins = FXCollections.emptyObservableMap();
         }
-        registeredPlugins.add(plugin);
-        injector.getInstance(PluginMenu.class).addPluginMenuItem(plugin);
-
-    }
-
-    public void unregisterPlugin(@Nonnull final Plugin plugin) {
-        if (registeredPlugins != null) {
-            registeredPlugins.remove(plugin);
-        }
-        injector.getInstance(PluginMenu.class).removePluginMenuItem(plugin);
+        activePlugins.put(plugin, active);
     }
 
     public void addTab(@Nonnull final Tab tab) {
@@ -123,12 +128,12 @@ public class PluginManager {
         tabPane.getTabs().add(tab);
     }
 
-    public void addMenu(@NonNull final Menu menu) {
+    public void addMenu(@Nonnull final Menu menu) {
         MenuController menuController = injector.getInstance(MenuController.class);
         menuController.getMenus().add(menu);
     }
 
-    public void addMenuItem(@NonNull final MenuEnum menu, @NonNull final MenuItem... items) {
+    public void addMenuItem(@Nonnull final MenuEnum menu, @Nonnull final MenuItem... items) {
         Menu menuToAddItems = menu.searchMenu(injector);
         if (menuToAddItems != null) {
             menuToAddItems.getItems().addAll(items);
@@ -147,9 +152,11 @@ public class PluginManager {
             LOGGER.warn("Couldn't find a Menu with the given id {}!", menu.id());
         }
     }
+
     //TODO: not working
     public void addPane(AccordionEnum accordion, TitledPane pane) {
-        Accordion acc = getAccodion(accordion);
+        Accordion acc = accordion.getAccordion(injector);
+        //TODO: react when the Accordion doesn't exist
         if (acc != null) {
             acc.getPanes().add(pane);
         }
@@ -157,16 +164,12 @@ public class PluginManager {
 
     //TODO: not working
     public void addPane(AccordionEnum accordion, int position, TitledPane pane) {
-        Accordion acc = getAccodion(accordion);
+        Accordion acc = accordion.getAccordion(injector);
+        //TODO: react when the Accordion doesn't exist
         if (acc != null) acc.getPanes().add(position,pane);
     }
 
-    private Accordion getAccodion(AccordionEnum accordion) {
-        MainController mainController = injector.getInstance(MainController.class);
-        return (Accordion) mainController.getScene().lookup("#" + accordion.id());
-    }
-
-    private void loadPlugin(@Nonnull final JarFile plugin) {
+    private void loadPlugin(@Nonnull final JarFile plugin, boolean active) {
         try {
             URL[]  urls = new URL[]{ new URL("jar:file:" + plugin.getName() +"!/") };
             URLClassLoader classLoader = URLClassLoader.newInstance(urls);
@@ -192,8 +195,9 @@ public class PluginManager {
             if (loadPlugin) {
                 LOGGER.info("Loading Plugin \"{}\"!", plugin.getName());
                 Plugin pl = (Plugin) pluginClass.newInstance();
+                //TODO: check if the Plugin is already started, maybe in an other version and that the version of the plugin is sufficient for the used version of ProB
                 pl.start(this);
-                registerPlugin(pl);
+                registerPlugin(pl, active);
             } else {
                 LOGGER.warn("\"{}\" is not a valid ProB-Plugin!", plugin.getName());
             }
