@@ -25,7 +25,6 @@ import de.prob2.ui.project.machines.Machine;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanPropertyBase;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -33,12 +32,12 @@ import javafx.beans.property.ReadOnlyObjectPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
 
 /**
- * A singleton writable property that represents the current {@link Trace}. It
+ * A singleton read-only property that represents the current {@link Trace}. It
  * also provides convenience properties and methods for easy interaction with
  * JavaFX components using property binding.
  */
 @Singleton
-public final class CurrentTrace extends ObjectPropertyBase<Trace> {
+public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	private final class ROBoolProp extends ReadOnlyBooleanPropertyBase {
 		private final String name;
 		private final BooleanSupplier getter;
@@ -120,7 +119,7 @@ public final class CurrentTrace extends ObjectPropertyBase<Trace> {
 		final AnimationSelector animationSelector,
 		final Api api
 	) {
-		super(animationSelector.getCurrentTrace());
+		super();
 		this.injector = injector;
 		this.animationSelector = animationSelector;
 		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
@@ -129,7 +128,9 @@ public final class CurrentTrace extends ObjectPropertyBase<Trace> {
 				if (!currentTrace.getCurrentState().isExplored()) {
 					currentTrace.getCurrentState().explore();
 				}
-				Platform.runLater(() -> CurrentTrace.this.set(currentTrace));
+				// Has to be a lambda. For some reason, using a method reference here causes an IllegalAccessError at runtime.
+				// noinspection Convert2MethodRef
+				Platform.runLater(() -> CurrentTrace.this.fireValueChangedEvent());
 			}
 
 			@Override
@@ -165,9 +166,17 @@ public final class CurrentTrace extends ObjectPropertyBase<Trace> {
 	}
 	
 	@Override
-	protected void invalidated() {
-		super.invalidated();
-		this.animationSelector.changeCurrentAnimation(this.get());
+	public Trace get() {
+		return this.animationSelector.getCurrentTrace();
+	}
+	
+	/**
+	 * Set the given {@link Trace} as the new current trace.
+	 * 
+	 * @param trace the new current trace
+	 */
+	public void set(final Trace trace) {
+		this.animationSelector.changeCurrentAnimation(trace);
 	}
 	
 	/**
