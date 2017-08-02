@@ -1,25 +1,48 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob.check.*;
+
+import de.prob.check.ConsistencyChecker;
+import de.prob.check.IModelCheckJob;
+import de.prob.check.IModelCheckListener;
+import de.prob.check.IModelCheckingResult;
+import de.prob.check.ModelCheckingOptions;
+import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
+
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -28,15 +51,9 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Singleton
 public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
@@ -396,6 +413,8 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			Platform.runLater(() -> {
 				historyNodeList.add(historyNode);
 				this.stageController.hide();
+				injector.getInstance(OperationsView.class).update(currentTrace.get());
+				injector.getInstance(StatsView.class).update(currentTrace.get());
 			});
 		} catch (RuntimeException e) {
 			LOGGER.error("Exception in isFinished", e);

@@ -1,35 +1,67 @@
 package de.prob2.ui.states;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.animator.command.GetMachineStructureCommand;
-import de.prob.animator.domainobjects.*;
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.EvaluationErrorResult;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.animator.domainobjects.StateError;
 import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 @Singleton
 public final class StatesView extends AnchorPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StatesView.class);
+	private static final TreeItem<StateItem<?>> LOADING_ITEM;
+	
+	static {
+		LOADING_ITEM = new TreeItem<>(new StateItem<>("Loading...", false));
+		LOADING_ITEM.getChildren().add(new TreeItem<>(new StateItem<>("Loading", false)));
+	}
 
 	@FXML private TreeTableView<StateItem<?>> tv;
 	@FXML private TreeTableColumn<StateItem<?>, StateItem<?>> tvName;
@@ -44,13 +76,15 @@ public final class StatesView extends AnchorPane {
 
 	private final Map<IEvalElement, AbstractEvalResult> currentValues;
 	private final Map<IEvalElement, AbstractEvalResult> previousValues;
+	private final ExecutorService updater;
 
 	@Inject
 	private StatesView(
 		final Injector injector,
 		final CurrentTrace currentTrace,
 		final FormulaGenerator formulaGenerator,
-		final StageManager stageManager
+		final StageManager stageManager,
+		final StopActions stopActions
 	) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
@@ -59,6 +93,8 @@ public final class StatesView extends AnchorPane {
 
 		this.currentValues = new HashMap<>();
 		this.previousValues = new HashMap<>();
+		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "StatesView Updater"));
+		stopActions.add(this.updater::shutdownNow);
 
 		stageManager.loadFXML(this, "states_view.fxml");
 	}
@@ -150,13 +186,13 @@ public final class StatesView extends AnchorPane {
 		this.tvValue.setCellValueFactory(cellValueFactory);
 		this.tvPreviousValue.setCellValueFactory(cellValueFactory);
 
-		this.tvRootItem.setValue(new StateItem<>("Machine (this root item should be invisible)", false));
+		this.tv.getRoot().setValue(new StateItem<>("Machine (this root item should be invisible)", false));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			if (to == null) {
-				this.tvRootItem.getChildren().clear();
+				this.tv.getRoot().getChildren().clear();
 			} else {
-				this.updateRoot(to);
+				this.updater.execute(() -> this.updateRoot(to));
 			}
 		};
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
@@ -216,9 +252,13 @@ public final class StatesView extends AnchorPane {
 	}
 
 	private void updateRoot(final Trace trace) {
-		Objects.requireNonNull(trace);
+		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 		
-		final int row = tv.getSelectionModel().getSelectedIndex();
+		Platform.runLater(() -> {
+			this.tv.setDisable(true);
+			this.tv.setRoot(LOADING_ITEM);
+			this.tv.refresh();
+		});
 		
 		final TreeItem<StateItem<?>> errorsItem;
 		if (this.tvRootItem.getChildren().isEmpty()) {
@@ -226,7 +266,7 @@ public final class StatesView extends AnchorPane {
 			errorsItem.setExpanded(true);
 		} else {
 			errorsItem = this.tvRootItem.getChildren().remove(this.tvRootItem.getChildren().size()-1);
-			assert "State Errors".equals(errorsItem.getValue().getContents());
+			assert "State Errors".equals(errorsItem.getValue().getContents()) : errorsItem.getValue().getContents();
 		}
 		
 		final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
@@ -252,8 +292,12 @@ public final class StatesView extends AnchorPane {
 		errorsItem.setValue(new StateItem<>("State Errors", !errorsItem.getChildren().isEmpty()));
 		this.tvRootItem.getChildren().add(errorsItem);
 
-		this.tv.refresh();
-		this.tv.getSelectionModel().select(row);
+		Platform.runLater(() -> {
+			this.tv.setRoot(this.tvRootItem);
+			this.tv.refresh();
+			this.tv.getSelectionModel().select(selectedRow);
+			this.tv.setDisable(false);
+		});
 	}
 	
 	private void showError(StateItem<?> stateItem) {
