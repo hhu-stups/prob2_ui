@@ -24,7 +24,7 @@
 			<AnchorPane>
 				<ScrollPane AnchorPane.leftAnchor="0"
 					AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"
-					AnchorPane.bottomAnchor="0">
+					AnchorPane.bottomAnchor="0" fitToHeight="true" fitToWidth="true">
 					<AnchorPane>
 						<VBox fx:id="machinesVBox" spacing="5" AnchorPane.leftAnchor="6"
 							AnchorPane.topAnchor="4" AnchorPane.rightAnchor="6">

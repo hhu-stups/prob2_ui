@@ -3,9 +3,6 @@ package de.prob2.ui.menu;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.animator.command.GetPreferenceCommand;
-import de.prob.exception.CliError;
-import de.prob.exception.ProBError;
-import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
@@ -13,7 +10,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
 import javafx.concurrent.Worker;
@@ -40,11 +36,8 @@ public class EditMenu extends Menu {
 	@FXML
 	private MenuItem editCurrentMachineInExternalEditorItem;
 	@FXML
-	private MenuItem reloadMachineItem;
-	@FXML
 	private MenuItem preferencesItem;
 
-	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final Injector injector;
 	private final MachineLoader machineLoader;
@@ -52,10 +45,8 @@ public class EditMenu extends Menu {
 	private final StageManager stageManager;
 
 	@Inject
-	private EditMenu(final StageManager stageManager, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final Injector injector, final MachineLoader machineLoader,
-			final GlobalPreferences globalPreferences) {
-		this.currentTrace = currentTrace;
+	private EditMenu(final StageManager stageManager, final CurrentProject currentProject, final Injector injector,
+			final MachineLoader machineLoader, final GlobalPreferences globalPreferences) {
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.machineLoader = machineLoader;
@@ -66,9 +57,9 @@ public class EditMenu extends Menu {
 
 	@FXML
 	public void initialize() {
-		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not());
 		this.editCurrentMachineItem.disableProperty().bind(currentProject.currentMachineProperty().isNull());
-		this.editCurrentMachineInExternalEditorItem.disableProperty().bind(currentProject.currentMachineProperty().isNull());
+		this.editCurrentMachineInExternalEditorItem.disableProperty()
+				.bind(currentProject.currentMachineProperty().isNull());
 	}
 
 	@FXML
@@ -79,16 +70,6 @@ public class EditMenu extends Menu {
 	@FXML
 	private void handleEditCurrentMachineInExternalEditor() {
 		showExternalEditor(currentProject.getCurrentMachine());
-	}
-
-	@FXML
-	private void handleReloadMachine() {
-		try {
-			this.currentTrace.reload(this.currentTrace.get());
-		} catch (CliError | IOException | ModelTranslationError | ProBError e) {
-			LOGGER.error("Model reload failed", e);
-			stageManager.makeExceptionAlert(Alert.AlertType.ERROR, "Failed to reload model", e).showAndWait();
-		}
 	}
 
 	@FXML

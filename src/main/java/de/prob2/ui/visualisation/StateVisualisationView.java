@@ -4,12 +4,14 @@ import com.google.inject.Inject;
 import de.prob.Main;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 import de.prob2.ui.commands.ExecuteRightClickCommand;
 import de.prob2.ui.commands.GetImagesForMachineCommand;
 import de.prob2.ui.commands.GetImagesForStateCommand;
 import de.prob2.ui.commands.GetRightClickOptionsForStateVisualizationCommand;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -32,11 +34,13 @@ public class StateVisualisationView extends AnchorPane {
 	private GridPane visualisationGridPane;
 
 	private final CurrentProject currentProject;
+	private final CurrentTrace currentTrace;
 	private BooleanProperty visualisationPossible = new SimpleBooleanProperty(false);
 
 	@Inject
-	public StateVisualisationView(final StageManager stageManager, final CurrentProject currentProject) {
+	public StateVisualisationView(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace) {
 		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
 		stageManager.loadFXML(this, "state_visualisation_view.fxml");
 	}
 
@@ -89,9 +93,15 @@ public class StateVisualisationView extends AnchorPane {
 		List<String> options = getOptionsCommand.getOptions();
 		for (String opt : options) {
 			final MenuItem item = new MenuItem(opt);
+			Trace trace = getTraceToState(currentTrace.get(), state);
+			if (trace == null) {
+				item.setDisable(true);
+			}
 			item.setOnAction(e -> {
 				ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(state.getId(), row, column, opt);
 				stateSpace.execute(executeCommand);
+				String transitionId = executeCommand.getTransitionID();
+				currentTrace.set(trace.add(transitionId));
 			});
 			contextMenu.getItems().add(item);
 		}
@@ -101,6 +111,16 @@ public class StateVisualisationView extends AnchorPane {
 			contextMenu.getItems().add(item);
 		}
 		return contextMenu;
+	}
+
+	private Trace getTraceToState(Trace trace, State state) {
+		if(trace.getCurrentState().equals(state)) {
+			return trace;
+		} else if (trace.canGoBack()) {
+			return getTraceToState(trace.back(), state);
+		} else {
+			return null;
+		}
 	}
 
 	private Image getImage(String imageURL) throws FileNotFoundException {

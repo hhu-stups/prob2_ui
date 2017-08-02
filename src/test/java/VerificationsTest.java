@@ -1,5 +1,6 @@
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
@@ -9,7 +10,6 @@ import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import org.apache.commons.cli.*;
 import org.junit.Test;
 import org.loadui.testfx.GuiTest;
 import org.slf4j.Logger;
@@ -17,24 +17,20 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
+<<<<<<<HEAD
+        =======
+
+        >>>>>>>develop
+
 public class VerificationsTest extends GuiTest{
-    private static final Logger LOGGER = LoggerFactory.getLogger(MachineTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(VerificationsTest.class);
 
     private boolean mainStage = true;
 
     @Override
     public Parent getRootNode(){
-        RuntimeOptions runtimeOptions = new RuntimeOptions();
-        //Set this to a lift0.json file..
-        //Set this to default
-        String args[] = new String[]{"--project", "src/test/res/Lift/Lift0.json", "--runconfig", "lift0.default", "--reset-preferences"};
-        try{
-            runtimeOptions = parseRuntimeOptions(args);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-
-        Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module(runtimeOptions));
+        RuntimeOptions runtimeOptions = new RuntimeOptions("src/test/resources/Lift/Lift0.json", "lift0.default", false, false);
+        Injector injector = Guice.createInjector(Stage.PRODUCTION, new ProB2Module(runtimeOptions));
         CurrentProject currentProject = injector.getInstance(CurrentProject.class);
         if (runtimeOptions.getProject() != null) {
             injector.getInstance(ProjectManager.class).openProject(new File(runtimeOptions.getProject()));
@@ -77,45 +73,5 @@ public class VerificationsTest extends GuiTest{
         sleep(500);
         click("#tabLTLFormula");
         //Add test when fully implemented
-    }
-
-    /**
-     * Copied from ProB2
-     * @throws Exception if runconfig is not valid
-     */
-    private static RuntimeOptions parseRuntimeOptions(final String[] args) throws Exception{
-        LOGGER.info("Parsing arguments: {}", (Object)args);
-
-        final Options options = new Options();
-
-        options.addOption(null, "project", true, "Open the specified project on startup.");
-        options.addOption(null, "runconfig", true, "Run the specified run configuration on startup. Requires a project to be loaded first (using --open-project).");
-        options.addOption(null, "reset-preferences", false, "Reset all preferences to their defaults.");
-
-        final CommandLineParser clParser = new PosixParser();
-        final CommandLine cl;
-        try {
-            cl = clParser.parse(options, args);
-        } catch (ParseException e) {
-            LOGGER.error("Failed to parse command line", e);
-            throw new Exception(e.getLocalizedMessage());
-        }
-        LOGGER.info("Parsed command line: args {}, options {}", cl.getArgs(), cl.getOptions());
-
-        if (!cl.getArgList().isEmpty()) {
-            throw new Exception("Positional arguments are not allowed: " + cl.getArgList());
-        }
-
-        if (cl.hasOption("runconfig") && !cl.hasOption("project")) {
-            throw new Exception("Invalid combination of options: --runconfig requires --project");
-        }
-
-        final RuntimeOptions runtimeOpts = new RuntimeOptions();
-        runtimeOpts.setProject(cl.getOptionValue("project"));
-        runtimeOpts.setRunconfig(cl.getOptionValue("runconfig"));
-        runtimeOpts.setResetPreferences(cl.hasOption("reset-preferences"));
-        LOGGER.info("Created runtime options: {}", runtimeOpts);
-
-        return runtimeOpts;
     }
 }

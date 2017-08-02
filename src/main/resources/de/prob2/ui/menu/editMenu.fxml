@@ -7,8 +7,6 @@
 	<MenuItem fx:id="editCurrentMachineInExternalEditorItem"
 		text="%menu.edit.items.editCurrentMachineInExternalEditor" onAction="#handleEditCurrentMachineInExternalEditor" />
 	<SeparatorMenuItem />
-	<MenuItem fx:id="reloadMachineItem" text="%menu.edit.items.reloadMachine"
-		accelerator="Shortcut+R" onAction="#handleReloadMachine" />
 	<MenuItem fx:id="preferencesItem" text="%menu.edit.items.preferences"
 		onAction="#handlePreferences" />
 </fx:root>

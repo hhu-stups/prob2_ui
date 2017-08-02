@@ -1,3 +1,5 @@
+import org.gradle.plugins.ide.eclipse.model.AccessRule
+
 import java.text.DateFormat
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -75,6 +77,15 @@ dependencies {
 	testRuntime 'org.testfx:openjfx-monocle:1.8.0_20'
 }
 
+eclipse.classpath.file.whenMerged {
+	classpath ->
+		classpath.entries.findResult { entry ->
+			if (entry.kind == 'con' && entry.path.contains('org.eclipse.jdt.launching.JRE_CONTAINER')) {
+					entry.accessRules.add(new AccessRule('accessible', 'javafx/**'))
+					entry.accessRules.add(new AccessRule('accessible', 'netscape/**'))
+			}
+		}
+}
 
 processResources {
 	doFirst {

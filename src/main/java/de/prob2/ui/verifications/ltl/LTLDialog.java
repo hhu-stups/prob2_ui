@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.ltl;
 
 
+import de.prob2.ui.ProB2;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
@@ -13,6 +14,8 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import netscape.javascript.JSObject;
+
+import java.net.URISyntaxException;
 
 public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 
@@ -46,9 +49,9 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 	}
 	
 	@FXML
-	public void initialize() {
+	public void initialize() throws URISyntaxException {
 		engine = taCode.getEngine();
-		engine.load(getClass().getResource("../LTLEditor.html").toExternalForm());
+		engine.load(ProB2.class.getClassLoader().getResource("codemirror/LTLEditor.html").toURI().toString());
 		engine.setJavaScriptEnabled(true);
 	}
 	

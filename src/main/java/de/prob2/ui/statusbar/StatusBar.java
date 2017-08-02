@@ -34,6 +34,10 @@ public class StatusBar extends HBox {
 		}
 	}
 	
+	public enum LTLStatus {
+		ERROR, SUCCESSFUL;
+	}
+	
 	@FXML private Label errorsLabel;
 	
 	private final ResourceBundle resourceBundle;
@@ -91,6 +95,17 @@ public class StatusBar extends HBox {
 			}
 		} else {
 			errorsLabel.setText(this.resourceBundle.getString(this.getLoadingStatus().getMessageKey()));
+		}
+	}
+	
+	public void updateLTLCheckingStatus(LTLStatus ltlStatus) {
+		errorsLabel.getStyleClass().removeAll("noErrors", "someErrors");
+		if(ltlStatus == LTLStatus.ERROR) {
+			errorsLabel.getStyleClass().add("someErrors");
+			errorsLabel.setText(resourceBundle.getString("statusbar.errors.LTLNotOK"));
+		} else {
+			errorsLabel.getStyleClass().add("noErrors");
+			errorsLabel.setText(resourceBundle.getString("statusbar.errors.LTLOK"));
 		}
 	}
 }

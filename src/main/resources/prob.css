@@ -215,14 +215,20 @@
 .list-cell:odd {
 	-fx-background: white;
 }
-.list-cell:focused:odd {
-	-fx-background: -prob-aqua;
+.list-cell:selected {
+	-fx-background-color: -prob-aqua;
+	-fx-text-fill: white;
 }
-.list-cell:empty:hover {
-	-fx-background-color: white;
+.list-cell:selected:hover {
+	-fx-background-color: -prob-grey;
+	-fx-text-fill: white;
 }
 .list-cell:hover {
 	-fx-background-color: -prob-grey-20;
+	-fx-text-fill: black;
+}
+.list-cell:empty:hover {
+	-fx-background-color: white;
 }
 .popup .list-view {
 	-fx-border-color: -prob-grey;

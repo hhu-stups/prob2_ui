@@ -27,7 +27,7 @@ public class LTLResultHandler {
 	private static final Logger logger = LoggerFactory.getLogger(LTLResultHandler.class);
 	
 	public enum Checked {
-		SUCCESS, FAIL, EXCEPTION;
+		NOT_CHECKED, SUCCESS, FAIL, EXCEPTION;
 	}
 	
 	public static class LTLResultItem {
@@ -61,6 +61,12 @@ public class LTLResultHandler {
 		if(resultItem == null) {
 			return;
 		}
+		if(resultItem.type != AlertType.ERROR) {
+			item.setCheckedSuccessful();
+			return;
+		} else {
+			item.setCheckedFailed();
+		}
 		Alert alert = new Alert(resultItem.type, resultItem.message);
 		alert.setTitle(item.getName());
 		alert.setHeaderText(resultItem.header);
@@ -75,11 +81,6 @@ public class LTLResultHandler {
 			alert.getDialogPane().setExpanded(true);
 		}
 		alert.showAndWait();
-		if(resultItem.type != AlertType.ERROR) {
-			item.setCheckedSuccessful();
-		} else {
-			item.setCheckedFailed();
-		}
 		if(item instanceof LTLFormulaItem) {
 			((LTLFormulaItem) item).setCounterExample(trace);
 		}

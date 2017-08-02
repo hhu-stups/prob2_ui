@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,14 +31,12 @@ public class HelpSystem extends StackPane {
     @FXML private TreeView<String> treeView;
     @FXML private WebView webView;
     WebEngine webEngine;
-    //private Path in;
     static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
 
     @Inject
     public HelpSystem(final StageManager stageManager) throws URISyntaxException, IOException {
         stageManager.loadFXML(this, "helpsystem.fxml");
         URI uri = ProB2.class.getClassLoader().getResource("help/").toURI();
-        Platform.runLater(() -> System.out.println(uri));
         File dest;
         if (uri.toString().startsWith("jar:")) {
             Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");

@@ -90,6 +90,8 @@ public final class HistoryChartStage extends Stage {
 	private static final TraceElement DUMMY_TRACE_ELEMENT = new TraceElement(new State("Dummy state", null));
 
 	@FXML
+	private ScrollPane chartsScrollPane;
+	@FXML
 	private FlowPane chartsPane;
 	@FXML
 	private LineChart<Number, Number> singleChart;
@@ -154,8 +156,8 @@ public final class HistoryChartStage extends Stage {
 		this.startChoiceBox.setConverter(new HistoryChartStage.TraceElementStringConverter());
 		this.startChoiceBox.valueProperty().addListener((observable, from, to) -> this.updateCharts());
 
-		this.singleChart.prefWidthProperty().bind(this.chartsPane.widthProperty());
-		this.singleChart.prefHeightProperty().bind(this.chartsPane.heightProperty());
+		this.singleChart.prefWidthProperty().bind(this.chartsScrollPane.widthProperty().subtract(5));
+		this.singleChart.prefHeightProperty().bind(this.chartsScrollPane.heightProperty().subtract(5));
 
 		this.showingProperty().addListener((observable, from, to) -> {
 			if (to) {

@@ -2,8 +2,12 @@ package de.prob2.ui.menu;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import de.prob.exception.CliError;
+import de.prob.exception.ProBError;
+import de.prob.scripting.ModelTranslationError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.ProjectManager;
@@ -16,18 +20,23 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileMenu extends Menu {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileMenu.class);
 
 	@FXML
 	private Menu recentProjectsMenu;
@@ -37,17 +46,21 @@ public class FileMenu extends Menu {
 	private MenuItem clearRecentProjects;
 	@FXML
 	private MenuItem saveProjectItem;
+	@FXML
+	private MenuItem reloadMachineItem;
 
 	private final RecentProjects recentProjects;
 	private final CurrentProject currentProject;
+	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
 
 	@Inject
 	private FileMenu(final StageManager stageManager, final RecentProjects recentProjects,
-			final CurrentProject currentProject, final Injector injector) {
+			final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
 		this.recentProjects = recentProjects;
 		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "fileMenu.fxml");
@@ -69,6 +82,8 @@ public class FileMenu extends Menu {
 		recentProjectsListener.onChanged(null);
 
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
+
+		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 
 	@FXML
@@ -138,6 +153,16 @@ public class FileMenu extends Menu {
 	@FXML
 	private void saveProject() {
 		injector.getInstance(ProjectManager.class).saveCurrentProject();
+	}
+	
+	@FXML
+	private void handleReloadMachine() {
+		try {
+			this.currentTrace.reload(this.currentTrace.get());
+		} catch (CliError | IOException | ModelTranslationError | ProBError e) {
+			LOGGER.error("Model reload failed", e);
+			stageManager.makeExceptionAlert(Alert.AlertType.ERROR, "Failed to reload model", e).showAndWait();
+		}
 	}
 
 	@FXML

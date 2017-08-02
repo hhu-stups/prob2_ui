@@ -20,6 +20,8 @@ import javafx.scene.layout.VBox;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class MachinesTab extends Tab {
@@ -127,7 +129,16 @@ public class MachinesTab extends Tab {
 					"The machine \"" + relative + "\" already exists in the current project.").showAndWait();
 			return;
 		}
-		injector.getInstance(AddMachinesDialog.class).showAndWait(relative).ifPresent(currentProject::addMachine);
+
+		final Set<String> machineNamesSet = currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toSet());
+		String[] n = relative.toFile().getName().split("\\.");
+		String name = n[0];
+		int i = 1;
+		while (machineNamesSet.contains(name)) {
+			name = n[0] + "(" + i + ")";
+			i++;
+		}
+		currentProject.addMachine(new Machine(name, "", relative));
 	}
 
 	private void showMachineView(Machine machine) {

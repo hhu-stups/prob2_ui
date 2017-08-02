@@ -8,7 +8,14 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+<<<<<<< HEAD
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%chart.historychart.title" minWidth="320" minHeight="240">
+=======
+<?import javafx.scene.control.ScrollPane?>
+
+<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%chart.historychart.title"
+	minWidth="320" minHeight="240">
+>>>>>>> develop
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane>
@@ -52,16 +59,23 @@
 							</VBox>
 						</bottom>
 					</BorderPane>
-					<FlowPane fx:id="chartsPane" minWidth="160" minHeight="160" maxWidth="Infinity" maxHeight="Infinity" prefWrapLength="640">
-						<LineChart fx:id="singleChart" styleClass="history-chart">
-							<xAxis>
-								<NumberAxis styleClass="time-axis" autoRanging="false" tickUnit="1.0" upperBound="1.0" />
-							</xAxis>
-							<yAxis>
-								<NumberAxis />
-							</yAxis>
-						</LineChart>
-					</FlowPane>
+					<AnchorPane>
+						<ScrollPane fx:id="chartsScrollPane" AnchorPane.bottomAnchor="0.0"
+							AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+							AnchorPane.topAnchor="0.0" fitToWidth="TRUE" fitToHeight="TRUE">
+							<FlowPane fx:id="chartsPane">
+								<LineChart fx:id="singleChart" styleClass="history-chart">
+									<xAxis>
+										<NumberAxis styleClass="time-axis" autoRanging="false"
+											tickUnit="1.0" upperBound="1.0" />
+									</xAxis>
+									<yAxis>
+										<NumberAxis />
+									</yAxis>
+								</LineChart>
+							</FlowPane>
+						</ScrollPane>
+					</AnchorPane>
 				</SplitPane>
 			</AnchorPane>
 		</Scene>
