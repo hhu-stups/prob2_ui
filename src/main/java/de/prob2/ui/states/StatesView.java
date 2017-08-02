@@ -189,15 +189,10 @@ public final class StatesView extends AnchorPane {
 		this.tv.getRoot().setValue(new StateItem<>("Machine (this root item should be invisible)", false));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
-			this.tv.setDisable(true);
 			if (to == null) {
 				this.tv.getRoot().getChildren().clear();
 			} else {
-				final int selectedRow = tv.getSelectionModel().getSelectedIndex();
-				
-				this.tv.setRoot(LOADING_ITEM);
-				this.tv.refresh();
-				this.updater.execute(() -> this.updateRoot(to, selectedRow));
+				this.updater.execute(() -> this.updateRoot(to));
 			}
 		};
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
@@ -256,7 +251,15 @@ public final class StatesView extends AnchorPane {
 		treeItem.getChildren().removeAll(toRemove);
 	}
 
-	private void updateRoot(final Trace trace, final int selectedRow) {
+	private void updateRoot(final Trace trace) {
+		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
+		
+		Platform.runLater(() -> {
+			this.tv.setDisable(true);
+			this.tv.setRoot(LOADING_ITEM);
+			this.tv.refresh();
+		});
+		
 		final TreeItem<StateItem<?>> errorsItem;
 		if (this.tvRootItem.getChildren().isEmpty()) {
 			errorsItem = new TreeItem<>();

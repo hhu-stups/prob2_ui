@@ -312,18 +312,21 @@ public final class OperationsView extends AnchorPane {
 	}
 
 	private void update(final Trace trace) {
-		this.opsListView.setDisable(true);
 		if (trace == null) {
 			currentModel = null;
 			opNames = new ArrayList<>();
 			opsListView.getItems().clear();
 		} else {
-			opsListView.getItems().setAll(new OperationItem(trace, "-", "Loading...", Collections.emptyList(), Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
 			this.updater.execute(() -> this.updateBG(trace));
 		}
 	}
 
 	private void updateBG(final Trace trace) {
+		Platform.runLater(() -> {
+			this.opsListView.setDisable(true);
+			opsListView.getItems().setAll(new OperationItem(trace, "-", "Loading...", Collections.emptyList(), Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
+		});
+		
 		if (!trace.getModel().equals(currentModel)) {
 			updateModel(trace);
 		}
