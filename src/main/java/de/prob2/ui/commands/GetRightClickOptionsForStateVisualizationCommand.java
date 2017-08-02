@@ -1,15 +1,15 @@
 package de.prob2.ui.commands;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import de.prob.animator.command.AbstractCommand;
 import de.prob.parser.BindingGenerator;
 import de.prob.parser.ISimplifiedROMap;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class GetRightClickOptionsForStateVisualizationCommand extends AbstractCommand {
 

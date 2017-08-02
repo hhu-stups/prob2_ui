@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob.check.CBCInvariantChecker;
+
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.BEvent;
 import de.prob.model.representation.Machine;

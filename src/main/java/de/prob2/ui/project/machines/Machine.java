@@ -1,34 +1,27 @@
 package de.prob2.ui.project.machines;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob.ltl.parser.pattern.PatternManager;
+import de.prob.scripting.Api;
+import de.prob.scripting.ModelTranslationError;
+import de.prob.statespace.StateSpace;
+import de.prob2.ui.menu.FileAsker;
+import de.prob2.ui.verifications.cbc.CBCFormulaItem;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.scene.paint.Color;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
-
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
-import de.prob.ltl.parser.pattern.PatternManager;
-import de.prob.scripting.Api;
-import de.prob.scripting.ModelTranslationError;
-import de.prob.statespace.StateSpace;
-
-import de.prob2.ui.menu.FileAsker;
-import de.prob2.ui.verifications.cbc.CBCFormulaItem;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
-
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
-import javafx.scene.paint.Color;
 
 public class Machine {
 	@FunctionalInterface

@@ -4,18 +4,15 @@ import de.prob.ltl.parser.WarningListener;
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.ltl.parser.pattern.PatternUpdateListener;
-
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
-
-
-import org.slf4j.LoggerFactory;
 
 public class LTLParseListener extends BaseErrorListener implements WarningListener, PatternUpdateListener {
 

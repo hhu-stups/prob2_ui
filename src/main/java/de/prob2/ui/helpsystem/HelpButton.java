@@ -3,14 +3,17 @@ package de.prob2.ui.helpsystem;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob.Main;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
+import java.io.File;
+
 public class HelpButton extends Button{
     private Injector injector;
-    private String pathToHelp;
+    private File helpContent;
 
     @Inject
     private HelpButton(StageManager stageManager, Injector injector) {
@@ -27,14 +30,14 @@ public class HelpButton extends Button{
     @FXML
     public void openHelp() {
         final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
-        if (!pathToHelp.isEmpty()) {
-            helpSystemStage.setContent(pathToHelp);
+        if (helpContent!=null) {
+            helpSystemStage.setContent(helpContent);
         }
         helpSystemStage.show();
         helpSystemStage.toFront();
     }
 
-    public void setPathToHelp(String pathToHelp) {
-        this.pathToHelp = pathToHelp;
+    public void setHelpContent(String fileName) {
+        helpContent = new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + fileName);
     }
 }

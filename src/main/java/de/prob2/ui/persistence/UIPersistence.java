@@ -1,15 +1,8 @@
 package de.prob2.ui.persistence;
 
-import java.util.HashSet;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
@@ -22,6 +15,11 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.states.StatesView;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.List;
 
 @Singleton
 public final class UIPersistence {

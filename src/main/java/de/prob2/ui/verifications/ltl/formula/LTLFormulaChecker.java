@@ -1,15 +1,6 @@
 package de.prob2.ui.verifications.ltl.formula;
 
-
-import java.util.ArrayList;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Injector;
-
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.LTL;
@@ -24,6 +15,11 @@ import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
 
 public class LTLFormulaChecker {
 	

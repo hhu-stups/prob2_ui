@@ -1,22 +1,20 @@
 package de.prob2.ui.beditor;
 
+import de.be4.classicalb.core.parser.BLexer;
+import de.be4.classicalb.core.parser.lexer.LexerException;
+import de.be4.classicalb.core.parser.node.*;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.web.WebEngine;
+import netscape.javascript.JSObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-
-import de.be4.classicalb.core.parser.BLexer;
-import de.be4.classicalb.core.parser.lexer.LexerException;
-import de.be4.classicalb.core.parser.node.*;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.web.WebEngine;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import netscape.javascript.JSObject;
 
 
 public class BTokenProvider {

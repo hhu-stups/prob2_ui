@@ -1,7 +1,5 @@
 package de.prob2.ui.verifications.ltl;
 
-
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import com.google.inject.Inject;
@@ -9,12 +7,14 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.statespace.AnimationSelector;
-import de.prob2.ui.ProB2;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.MachineTableView;
@@ -26,7 +26,7 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
-import de.prob2.ui.project.Project;
+
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -113,20 +113,18 @@ public class LTLView extends AnchorPane{
 	}
 	
 	@FXML
-	public void initialize() throws URISyntaxException {
-		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+	public void initialize() {
+		helpButton.setHelpContent("HelpMain.html");
 		tvMachines.setCheckingType(CheckingType.LTL);
 		setOnItemClicked();
 		setContextMenus();
 		setBindings();
-		tvMachines.getSelectionModel().selectedIndexProperty().addListener((observable, from, to) -> {
-			if(to.intValue() >= 0) {
-				Machine newMachine = tvMachines.getItems().get(to.intValue());
-				if(from.intValue() >= 0) {
-					Machine oldMachine = tvMachines.getItems().get(from.intValue());
-					oldMachine.clearPatternManager();
+		tvMachines.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(to != null) {
+				if(from != null) {
+					from.clearPatternManager();
 				}
-				bindMachine(newMachine);
+				bindMachine(to);
 			}
 		});
 	}
@@ -224,7 +222,9 @@ public class LTLView extends AnchorPane{
 	}
 	
 	private void bindMachine(Machine machine) {
+		tvFormula.itemsProperty().unbind();
 		tvFormula.itemsProperty().bind(machine.ltlFormulasProperty());
+		tvPattern.itemsProperty().unbind();
 		tvPattern.itemsProperty().bind(machine.ltlPatternsProperty());
 		if(currentTrace.existsProperty().get()) {
 			checkSelectedMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
@@ -249,7 +249,7 @@ public class LTLView extends AnchorPane{
 		if(!machine.getLTLFormulas().contains(item)) {
 			machine.addLTLFormula(item);
 			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+					tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 					currentProject.getLocation()));
 			currentProject.setSaved(false);
 		} else {
@@ -284,7 +284,7 @@ public class LTLView extends AnchorPane{
 		if(!machine.getLTLPatterns().contains(item)) {
 			machine.addLTLPattern(item);
 			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+					tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 					currentProject.getLocation()));
 			patternParser.parsePattern(item, machine, false);
 			currentProject.setSaved(false);

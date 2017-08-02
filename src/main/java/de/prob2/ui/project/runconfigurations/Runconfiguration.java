@@ -1,10 +1,10 @@
 package de.prob2.ui.project.runconfigurations;
 
-import java.util.Objects;
-
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
+
+import java.util.Objects;
 
 public class Runconfiguration {
 	private String name;

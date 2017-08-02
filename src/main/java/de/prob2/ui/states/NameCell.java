@@ -1,12 +1,11 @@
 package de.prob2.ui.states;
 
-import java.util.Objects;
-
 import de.prob.animator.domainobjects.StateError;
 import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
-
 import javafx.scene.control.TreeTableCell;
+
+import java.util.Objects;
 
 class NameCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 	public static String getName(final StateItem<?> item) {

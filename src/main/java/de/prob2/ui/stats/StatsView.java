@@ -1,19 +1,14 @@
 package de.prob2.ui.stats;
 
-import java.net.URISyntaxException;
-import java.util.List;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
-import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -29,6 +24,8 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+
+import java.util.List;
 
 @Singleton
 public class StatsView extends ScrollPane {
@@ -75,8 +72,8 @@ public class StatsView extends ScrollPane {
 	}
 
 	@FXML
-	public void initialize() throws URISyntaxException {
-		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+	public void initialize() {
+		helpButton.setHelpContent("HelpMain.html");
 		extendedStatsBox.visibleProperty().bind(extendedStatsToggle.selectedProperty());
 		noStatsLabel.visibleProperty().bind(currentTrace.existsProperty().not());
 		statsBox.visibleProperty().bind(noStatsLabel.visibleProperty().not());

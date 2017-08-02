@@ -2,7 +2,6 @@ package de.prob2.ui.preferences;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import javafx.beans.property.MapPropertyBase;
 import javafx.collections.FXCollections;
 

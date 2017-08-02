@@ -1,27 +1,23 @@
 package de.prob2.ui.menu;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import de.prob.Main;
+import de.prob.cli.CliVersionNumber;
+import de.prob.scripting.Api;
+import de.prob2.ui.internal.StageManager;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Properties;
 import java.util.ResourceBundle;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-import de.prob.Main;
-import de.prob.cli.CliVersionNumber;
-import de.prob.scripting.Api;
-
-import de.prob2.ui.internal.StageManager;
-
-import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.stage.Stage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class AboutBox extends Stage {

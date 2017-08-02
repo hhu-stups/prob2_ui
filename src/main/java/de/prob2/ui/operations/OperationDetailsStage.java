@@ -1,11 +1,7 @@
 package de.prob2.ui.operations;
 
-import java.util.List;
-
 import com.google.inject.Inject;
-
 import de.prob2.ui.internal.StageManager;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -13,6 +9,8 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
+
+import java.util.List;
 
 class OperationDetailsStage extends Stage {
 	private enum ValueType {

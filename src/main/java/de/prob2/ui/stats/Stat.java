@@ -1,11 +1,11 @@
 package de.prob2.ui.stats;
 
-import java.util.Objects;
-
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
+
+import java.util.Objects;
 
 public class Stat {
 	private final String name;

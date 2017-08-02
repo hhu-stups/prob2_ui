@@ -1,13 +1,7 @@
 package de.prob2.ui.verifications.cbc;
 
-import java.net.URISyntaxException;
-
-import javax.inject.Inject;
-
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
-import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -18,6 +12,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
+
+import javax.inject.Inject;
 
 @Singleton
 public class CBCView extends AnchorPane {
@@ -46,8 +42,8 @@ public class CBCView extends AnchorPane {
 	}
 	
 	@FXML
-	public void initialize() throws URISyntaxException {
-		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+	public void initialize() {
+		helpButton.setHelpContent("HelpMain.html");
 		tvMachines.setCheckingType(CheckingType.CBC);
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}

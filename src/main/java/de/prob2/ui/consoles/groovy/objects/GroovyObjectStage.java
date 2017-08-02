@@ -1,15 +1,7 @@
 package de.prob2.ui.consoles.groovy.objects;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.script.Bindings;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
 import javafx.collections.FXCollections;
@@ -19,6 +11,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+
+import javax.script.Bindings;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import java.util.List;
+import java.util.Map;
 
 @Singleton
 public final class GroovyObjectStage extends Stage {

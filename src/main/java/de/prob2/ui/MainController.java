@@ -1,15 +1,11 @@
 package de.prob2.ui;
 
-import java.util.*;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
@@ -17,6 +13,8 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
+
+import java.util.*;
 
 @Singleton
 public class MainController extends BorderPane {
