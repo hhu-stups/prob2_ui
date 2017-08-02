@@ -2,10 +2,14 @@
 
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
 
-<fx:root type="VBox" xmlns:fx="http://javafx.com/fxml/1" stylesheets="@/prob.css">
+<fx:root id="machines-item" type="VBox" xmlns:fx="http://javafx.com/fxml/1"
+	stylesheets="@/prob.css">
 	<Label fx:id="nameLabel" id="machines-item-name" />
 	<Label fx:id="locationLabel" id="machines-item-location" />
+	<padding>
+		<Insets left="6.0" right="6.0" top="2.0" bottom="2.0" />
+	</padding>
 </fx:root>
 

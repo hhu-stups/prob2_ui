@@ -798,6 +798,18 @@
 #details-title {
 	-fx-font-size: 1.2em; 
 }
+#machines-item:hover {
+	-fx-background-color: -prob-grey-20;
+}
+#machines-item-selected {
+	-fx-background-color: -prob-aqua;
+}
+#machines-item-selected > .label {
+	-fx-text-fill: white;
+}
+#machines-item-selected:hover {
+	-fx-background-color: -prob-grey;
+}
 #machines-item-name {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: bold;

@@ -26,6 +26,10 @@ public class MachinesItem extends VBox {
 		nameLabel.setText(machine.getName());
 		locationLabel.setText(machine.getPath().toString());
 	}
+	
+	Machine getMachine() {
+		return machine;
+	}
 
 	public void refresh() {
 		nameLabel.setText(machine.getName());
