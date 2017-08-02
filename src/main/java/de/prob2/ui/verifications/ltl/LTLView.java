@@ -246,11 +246,12 @@ public class LTLView extends AnchorPane{
 	}
 	
 	private void addFormula(Machine machine, LTLFormulaItem item) {
-		if(!machine.getFormulas().contains(item)) {
+		if(!machine.getLTLFormulas().contains(item)) {
 			machine.addLTLFormula(item);
 			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
 					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 					currentProject.getLocation()));
+			currentProject.setSaved(false);
 		} else {
 			showAlreadyExists(LTLItemType.Formula);
 		}
@@ -280,12 +281,13 @@ public class LTLView extends AnchorPane{
 	}
 	
 	private void addPattern(Machine machine, LTLPatternItem item) {
-		if(!machine.getPatterns().contains(item)) {
+		if(!machine.getLTLPatterns().contains(item)) {
 			machine.addLTLPattern(item);
 			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
 					currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 					currentProject.getLocation()));
 			patternParser.parsePattern(item, machine, false);
+			currentProject.setSaved(false);
 		} else {
 			showAlreadyExists(LTLItemType.Pattern);
 		}
@@ -383,7 +385,7 @@ public class LTLView extends AnchorPane{
 	private void checkMachineStatus(Machine machine) {
 		ArrayList<Boolean> success = new ArrayList<>();
 		success.add(true);
-		machine.getFormulas().forEach(item-> {
+		machine.getLTLFormulas().forEach(item-> {
 			Checked checked = item.getChecked();
 			if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
 				machine.setLTLCheckedFailed();

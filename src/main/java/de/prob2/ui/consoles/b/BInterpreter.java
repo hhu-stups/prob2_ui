@@ -51,7 +51,7 @@ public class BInterpreter implements Executable {
 			}
 		} catch (CliError | EvaluationException | ProBError e) {
 			logger.info("B evaluation failed", e);
-			return new ConsoleExecResult("", "Invalid syntax: " + e.getMessage(), ConsoleExecResultType.ERROR) ;
+			return new ConsoleExecResult("", "Invalid syntax: " + e.getMessage(), ConsoleExecResultType.ERROR);
 		}
 		// noinspection ObjectToString
 		return new ConsoleExecResult("", res.toString(), ConsoleExecResultType.PASSED);
