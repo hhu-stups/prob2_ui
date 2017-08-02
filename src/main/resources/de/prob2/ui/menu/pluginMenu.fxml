@@ -7,8 +7,7 @@
     <MenuItem text="%menu.plugin.items.add"
               onAction="#addPlugin" />
     <Menu fx:id="pluginsStopMenu" text="%menu.plugin.items.stop">
-        <MenuItem fx:id="noPluginsMenuItem" text="%menu.plugin.items.no.plugins"
-            onAction="#test"/>
+        <MenuItem fx:id="noPluginsMenuItem" text="%menu.plugin.items.no.plugins"/>
     </Menu>
 </fx:root>
 
