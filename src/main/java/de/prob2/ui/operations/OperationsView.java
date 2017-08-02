@@ -1,6 +1,5 @@
 package de.prob2.ui.operations;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,6 +9,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -36,9 +37,9 @@ import de.prob.model.representation.Variable;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
-import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -229,22 +230,25 @@ public final class OperationsView extends AnchorPane {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final Comparator<CharSequence> alphanumericComparator;
+	private final ExecutorService updater;
 
 	private static final String ICON_DARK = "icon-dark";
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
-			final Injector injector) {
+			final Injector injector, final StopActions stopActions) {
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
+		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
+		stopActions.add(this.updater::shutdownNow);
 
 		stageManager.loadFXML(this, "ops_view.fxml");
 	}
 
 	@FXML
-	public void initialize() throws URISyntaxException {
-		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+	public void initialize() {
+		helpButton.setHelpContent("HelpMain.html");
 		opsListView.setCellFactory(lv -> new OperationsCell());
 
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
@@ -305,17 +309,22 @@ public final class OperationsView extends AnchorPane {
 		return params;
 	}
 
-	private void update(final Trace trace) {
+	public void update(final Trace trace) {
 		if (trace == null) {
-			this.opsListView.setDisable(true);
 			currentModel = null;
 			opNames = new ArrayList<>();
-			Platform.runLater(opsListView.getItems()::clear);
-			return;
+			opsListView.getItems().clear();
+		} else {
+			this.updater.execute(() -> this.updateBG(trace));
 		}
+	}
 
-		this.opsListView.setDisable(false);
-
+	private void updateBG(final Trace trace) {
+		Platform.runLater(() -> {
+			this.opsListView.setDisable(true);
+			opsListView.getItems().setAll(new OperationItem(trace, "-", "Loading...", Collections.emptyList(), Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
+		});
+		
 		if (!trace.getModel().equals(currentModel)) {
 			updateModel(trace);
 		}
@@ -357,7 +366,12 @@ public final class OperationsView extends AnchorPane {
 					Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
 		}
 
-		Platform.runLater(() -> opsListView.getItems().setAll(applyFilter(filter)));
+		final List<OperationItem> filtered = applyFilter(filter);
+		
+		Platform.runLater(() -> {
+			opsListView.getItems().setAll(filtered);
+			this.opsListView.setDisable(false);
+		});
 	}
 
 	private void showDisabledAndWithTimeout(final Trace trace, final Set<String> notEnabled, final Set<String> withTimeout) {

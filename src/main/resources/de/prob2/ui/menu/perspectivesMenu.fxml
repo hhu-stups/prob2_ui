@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuItem?>
-
+<?import javafx.scene.control.*?>
 <fx:root type="Menu" text="%menu.perspectives" xmlns:fx="http://javafx.com/fxml/1">
 	<Menu text="%menu.perspectives.items.preset" fx:id="presetPerspectivesMenu">
 		<MenuItem text="%menu.perspectives.items.preset.default"

@@ -1,21 +1,16 @@
 package de.prob2.ui.project.runconfigurations;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import javafx.fxml.FXML;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
+import javafx.scene.control.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class RunconfigurationsDialog extends Dialog<Runconfiguration> {
 

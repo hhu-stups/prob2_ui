@@ -9,10 +9,11 @@ import com.google.inject.Injector;
 
 import de.prob.cli.ProBInstanceProvider;
 
-import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.config.Config;
+import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.plugin.PluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -44,7 +45,6 @@ public class ProB2 extends Application {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProB2.class);
 
 	private Injector injector;
-	private Config config;
 
 	private Stage primaryStage;
 	private Stage loadingStage;
@@ -158,6 +158,8 @@ public class ProB2 extends Application {
 		final RuntimeOptions runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
 		ProB2Module module = new ProB2Module(runtimeOptions);
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
+		
+		injector.getInstance(StopActions.class).add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
 
 		StageManager stageManager = injector.getInstance(StageManager.class);
 		Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
@@ -170,7 +172,7 @@ public class ProB2 extends Application {
 			});
 		});
 
-		config = injector.getInstance(Config.class);
+		injector.getInstance(Config.class); // Load config file
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
 		Parent root = injector.getInstance(MainController.class);
 		Scene mainScene = new Scene(root, 1024, 768);
@@ -240,11 +242,8 @@ public class ProB2 extends Application {
 
 	@Override
 	public void stop() {
-		if (config != null) {
-			config.save();
-		}
 		if (injector != null) {
-			injector.getInstance(ProBInstanceProvider.class).shutdownAll();
+			injector.getInstance(StopActions.class).run();
 		}
 	}
 }

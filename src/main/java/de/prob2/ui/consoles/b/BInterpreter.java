@@ -4,13 +4,12 @@ import java.util.Collections;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
-import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
@@ -25,35 +24,28 @@ import org.slf4j.LoggerFactory;
 public class BInterpreter implements Executable {
 
 	private static final Logger logger = LoggerFactory.getLogger(BInterpreter.class);
-	private final StateSpace defaultSS;
-	private CurrentTrace currentTrace;
+	private final CurrentTrace currentTrace;
+	private final Trace defaultTrace;
 
 	@Inject
 	public BInterpreter(final MachineLoader machineLoader, final CurrentTrace currentTrace) {
-		defaultSS = machineLoader.getEmptyStateSpace(Collections.emptyMap());
 		this.currentTrace = currentTrace;
+		this.defaultTrace = new Trace(machineLoader.getEmptyStateSpace(Collections.emptyMap()));
 	}
 
 	@Override
 	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
-		String line = instruction.getInstruction();
-		AbstractEvalResult res;
+		if ("clear".equals(instruction.getInstruction())) {
+			return new ConsoleExecResult("clear","", ConsoleExecResultType.PASSED);
+		}
 		try {
-			if ("clear".equals(instruction.getInstruction())) {
-				return new ConsoleExecResult("clear","", ConsoleExecResultType.PASSED);
-			}
-			if (currentTrace.exists()) {
-				res = currentTrace.get().evalCurrent(currentTrace.getModel().parseFormula(line));
-			} else {
-				EvaluationCommand cmd = new ClassicalB(line).getCommand(defaultSS.getRoot());
-				defaultSS.execute(cmd);
-				res = cmd.getValue();
-			}
+			final Trace trace = currentTrace.exists() ? currentTrace.get() : defaultTrace;
+			AbstractEvalResult res = trace.evalCurrent(trace.getModel().parseFormula(instruction.getInstruction(), FormulaExpand.expand));
+			// noinspection ObjectToString
+			return new ConsoleExecResult("", res.toString(), ConsoleExecResultType.PASSED);
 		} catch (CliError | EvaluationException | ProBError e) {
 			logger.info("B evaluation failed", e);
-			return new ConsoleExecResult("", "Invalid syntax: " + e.getMessage(), ConsoleExecResultType.ERROR) ;
+			return new ConsoleExecResult("", "Evaluation failed: " + e, ConsoleExecResultType.ERROR);
 		}
-		// noinspection ObjectToString
-		return new ConsoleExecResult("", res.toString(), ConsoleExecResultType.PASSED);
 	}
 }

@@ -6,13 +6,12 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import java.util.HashSet;
-import java.util.List;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class EditMachinesDialog extends Dialog<Machine> {
+public class AddMachinesDialog extends Dialog<Machine> {
 	@FXML
 	private TextField nameField;
 	@FXML
@@ -23,34 +22,36 @@ public class EditMachinesDialog extends Dialog<Machine> {
 	private ButtonType okButtonType;
 
 	private final CurrentProject currentProject;
-	private Machine machine;
-
+	private Path machinePath;
+	
 	@Inject
-	public EditMachinesDialog(final StageManager stageManager, final CurrentProject currentProject) {
+	public AddMachinesDialog(final StageManager stageManager, final CurrentProject currentProject) {
 		super();
 		this.currentProject = currentProject;
-
+				
 		this.setResultConverter(type -> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				machine.setName(nameField.getText());
-				machine.setDescription(descriptionTextArea.getText());
-				return machine;
+				return new Machine(nameField.getText(), descriptionTextArea.getText(), machinePath);
 			}
 		});
 		stageManager.loadFXML(this, "machines_dialog.fxml");
 	}
-
-	public Optional<Machine> editAndShow(Machine machine) {
-		this.setTitle("Edit " + machine.getName());
-		this.machine = machine;
-
-		List<Machine> machinesList = currentProject.getMachines();
-		Set<String> machineNamesSet = new HashSet<>();
-		machineNamesSet.addAll(machinesList.stream().map(Machine::getName).collect(Collectors.toList()));
-		machineNamesSet.remove(machine.getName());
-
+	
+	public Optional<Machine> showAndWait(Path machinePath) {
+		this.machinePath = machinePath;
+		final Set<String> machineNamesSet = currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toSet());
+		
+		String[] n = machinePath.toFile().getName().split("\\.");
+		String name = n[0];
+		int i = 1;
+		while (machineNamesSet.contains(name)) {
+			name = n[0] + "(" + i + ")";
+			i++;
+		}
+		nameField.setText(name);
+		
 		nameField.textProperty().addListener((observable, from, to) -> {
 			Button okButton = (Button) this.getDialogPane().lookupButton(okButtonType);
 			if (machineNamesSet.contains(to)) {
@@ -64,10 +65,6 @@ public class EditMachinesDialog extends Dialog<Machine> {
 				errorExplanationLabel.setText("");
 			}
 		});
-
-		nameField.setText(machine.getName());
-		descriptionTextArea.setText(machine.getDescription());
-
-		return super.showAndWait();
+		return showAndWait();
 	}
 }

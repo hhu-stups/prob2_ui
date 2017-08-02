@@ -1,14 +1,7 @@
 package de.prob2.ui.menu;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
@@ -23,6 +16,11 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.stage.FileChooser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
 
 public class PerspectivesMenu extends Menu {
 	private static final Logger logger = LoggerFactory.getLogger(PerspectivesMenu.class);

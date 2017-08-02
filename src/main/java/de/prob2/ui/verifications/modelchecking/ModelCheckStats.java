@@ -1,24 +1,13 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.util.Objects;
-
-import javax.inject.Inject;
-
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.ComputeCoverageCommand;
-import de.prob.check.IModelCheckJob;
-import de.prob.check.IModelCheckingResult;
-import de.prob.check.LTLOk;
-import de.prob.check.ModelCheckOk;
-import de.prob.check.StateSpaceStats;
+import de.prob.check.*;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.stats.StatsView;
-
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -26,6 +15,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+
+import javax.inject.Inject;
+import java.util.Objects;
 
 
 @Singleton

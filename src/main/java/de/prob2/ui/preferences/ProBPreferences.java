@@ -1,29 +1,18 @@
 package de.prob2.ui.preferences;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import com.google.inject.Inject;
-
 import de.prob.animator.command.ComposedCommand;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
 import de.prob.animator.command.SetPreferenceCommand;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.statespace.StateSpace;
-
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
+
+import java.util.*;
 
 public final class ProBPreferences {
 	

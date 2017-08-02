@@ -1,17 +1,7 @@
 package de.prob2.ui.menu;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.ModelTranslationError;
@@ -36,6 +26,14 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileMenu extends Menu {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileMenu.class);
@@ -110,13 +108,13 @@ public class FileMenu extends Menu {
 	}
 	
 	private void createProjectFromFile(File file) {
-		final Path projectLocation = currentProject.getDefaultLocation();
+		final Path projectLocation = file.getParentFile().toPath();
 		final Path absolute = file.toPath();
 		final Path relative = projectLocation.relativize(absolute);
 		final String shortName = file.getName().substring(0, file.getName().lastIndexOf('.'));
 		final String description = "(this project was created automatically from file " + absolute + ')';
 		final Machine machine = new Machine(shortName, "", relative);
-		currentProject.set(new Project(shortName, description, machine, currentProject.getDefaultLocation().toFile()));
+		currentProject.set(new Project(shortName, description, machine, projectLocation.toFile()));
 		
 		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
 		currentProject.addRunconfiguration(defaultRunconfig);

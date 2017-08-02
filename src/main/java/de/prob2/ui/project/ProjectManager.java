@@ -24,11 +24,15 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+import javafx.application.Platform;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 
 public class ProjectManager {
 	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
@@ -36,11 +40,13 @@ public class ProjectManager {
 
 	private final Gson gson;
 	private final CurrentProject currentProject;
+	private final StageManager stageManager;
 
 	@Inject
-	public ProjectManager(CurrentProject currentProject) {
+	public ProjectManager(CurrentProject currentProject, StageManager stageManager) {
 		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 		this.currentProject = currentProject;
+		this.stageManager = stageManager;
 	}
 
 	public void saveCurrentProject() {
@@ -68,6 +74,7 @@ public class ProjectManager {
 			setupRunconfigurations(project);
 			initializeLTL(project);
 		} catch (FileNotFoundException exc) {
+			stageManager.makeAlert(AlertType.ERROR, "The project file " + file + " could not be found.\nThe file was probably moved, renamed or deleted.", ButtonType.OK).showAndWait();
 			LOGGER.warn("Project file not found", exc);
 			return;
 		} catch (IOException exc) {

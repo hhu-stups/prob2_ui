@@ -1,9 +1,9 @@
 package de.prob2.ui.verifications.ltl.formula;
 
-import java.util.Objects;
-
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+
+import java.util.Objects;
 
 public class LTLFormulaItem extends AbstractCheckableItem {
 

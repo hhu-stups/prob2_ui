@@ -1,13 +1,12 @@
 package de.prob2.ui.menu;
 
+import de.prob2.ui.project.machines.Machine;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import de.prob2.ui.project.machines.Machine;
-
-import javafx.stage.FileChooser;
-import javafx.stage.Window;
 
 public final class FileAsker {
 	private static File askForFile(final Window window, final boolean projects, final boolean machines) {

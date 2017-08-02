@@ -2,7 +2,6 @@ package de.prob2.ui.menu;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.formula.FormulaInputDialog;
 import de.prob2.ui.internal.StageManager;

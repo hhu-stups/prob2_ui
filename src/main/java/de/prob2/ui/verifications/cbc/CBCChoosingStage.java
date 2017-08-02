@@ -1,14 +1,13 @@
 package de.prob2.ui.verifications.cbc;
 
-import javax.inject.Inject;
-
 import com.google.inject.Injector;
-
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.RadioButton;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import javax.inject.Inject;
 
 public class CBCChoosingStage extends Stage {
 	

@@ -1,22 +1,14 @@
 package de.prob2.ui.persistence;
 
-import java.lang.ref.Reference;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
+
+import java.lang.ref.Reference;
+import java.util.*;
 
 @Singleton
 public class UIState {

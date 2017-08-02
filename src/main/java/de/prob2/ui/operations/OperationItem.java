@@ -1,12 +1,11 @@
 package de.prob2.ui.operations;
 
+import com.google.common.base.MoreObjects;
+import de.prob.statespace.Trace;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import com.google.common.base.MoreObjects;
-
-import de.prob.statespace.Trace;
 
 public class OperationItem {
 	public enum Status {

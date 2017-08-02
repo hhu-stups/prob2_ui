@@ -30,15 +30,14 @@ import javafx.beans.property.ReadOnlyBooleanPropertyBase;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 /**
- * A singleton writable property that represents the current {@link Trace}. It
+ * A singleton read-only property that represents the current {@link Trace}. It
  * also provides convenience properties and methods for easy interaction with
  * JavaFX components using property binding.
  */
 @Singleton
-public final class CurrentTrace extends SimpleObjectProperty<Trace> {
+public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	private final class ROBoolProp extends ReadOnlyBooleanPropertyBase {
 		private final String name;
 		private final BooleanSupplier getter;
@@ -120,7 +119,7 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		final AnimationSelector animationSelector,
 		final Api api
 	) {
-		super(null);
+		super();
 		this.injector = injector;
 		this.animationSelector = animationSelector;
 		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
@@ -129,7 +128,9 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 				if (!currentTrace.getCurrentState().isExplored()) {
 					currentTrace.getCurrentState().explore();
 				}
-				Platform.runLater(() -> CurrentTrace.this.set(currentTrace));
+				// Has to be a lambda. For some reason, using a method reference here causes an IllegalAccessError at runtime.
+				// noinspection Convert2MethodRef
+				Platform.runLater(() -> CurrentTrace.this.fireValueChangedEvent());
 			}
 
 			@Override
@@ -138,12 +139,6 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 			}
 		});
 		this.api = api;
-		
-		this.addListener((observable, from, to) -> {
-			if (to != null) {
-				this.animationSelector.traceChange(to);
-			}
-		});
 		
 		this.exists = new ROBoolProp("exists", () -> this.get() != null);
 
@@ -160,6 +155,30 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 		this.forward = new ROObjProp<>("forward", () -> this.exists() ? this.get().forward() : null);
 	}
 
+	@Override
+	public Object getBean() {
+		return null;
+	}
+	
+	@Override
+	public String getName() {
+		return "";
+	}
+	
+	@Override
+	public Trace get() {
+		return this.animationSelector.getCurrentTrace();
+	}
+	
+	/**
+	 * Set the given {@link Trace} as the new current trace.
+	 * 
+	 * @param trace the new current trace
+	 */
+	public void set(final Trace trace) {
+		this.animationSelector.changeCurrentAnimation(trace);
+	}
+	
 	/**
 	 * A read-only boolean property indicating whether a current trace exists
 	 * (i. e. is not null).
@@ -180,11 +199,11 @@ public final class CurrentTrace extends SimpleObjectProperty<Trace> {
 	}
 
 	/**
-	 * A writable property indicating whether the animator is currently busy. It
+	 * A read-only property indicating whether the animator is currently busy. It
 	 * holds the last value reported by
 	 * {@link IAnimationChangeListener#animatorStatus(boolean)}.
 	 * 
-	 * @return a property indicating whether the animator is currently busy
+	 * @return a read-only property indicating whether the animator is currently busy
 	 */
 	public ReadOnlyBooleanProperty animatorBusyProperty() {
 		return this.animatorBusy;

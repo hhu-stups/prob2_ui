@@ -1,10 +1,7 @@
 package de.prob2.ui.menu;
 
-import javax.annotation.Nullable;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
@@ -15,6 +12,8 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
+import javax.annotation.Nullable;
 
 @Singleton
 public final class MenuController extends MenuBar {

@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,10 +24,10 @@ import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 
-import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 
@@ -252,8 +251,8 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	}
 
 	@FXML
-	public void initialize() throws URISyntaxException {
-		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+	public void initialize() {
+		helpButton.setHelpContent("HelpMain.html");
 		showStats(new ModelCheckStats(stageManager, this, statsView));
 		historyNodeList = historyBox.getChildren();
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not());
@@ -414,6 +413,8 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			Platform.runLater(() -> {
 				historyNodeList.add(historyNode);
 				this.stageController.hide();
+				injector.getInstance(OperationsView.class).update(currentTrace.get());
+				injector.getInstance(StatsView.class).update(currentTrace.get());
 			});
 		} catch (RuntimeException e) {
 			LOGGER.error("Exception in isFinished", e);

@@ -2,7 +2,6 @@ package de.prob2.ui.formula;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.ExpandFormulaCommand;
 import de.prob.animator.command.InsertFormulaForVisualizationCommand;
 import de.prob.animator.domainobjects.EvaluationException;

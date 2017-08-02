@@ -1,36 +1,16 @@
 package de.prob2.ui.config;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.Main;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.TablePersistenceHandler;
@@ -39,11 +19,17 @@ import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.states.StatesView;
-
 import javafx.geometry.BoundingBox;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Singleton
 @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
@@ -98,7 +84,8 @@ public final class Config {
 		final Injector injector,
 		final CurrentProject currentProject,
 		final GlobalPreferences globalPreferences,
-		final RuntimeOptions runtimeOptions
+		final RuntimeOptions runtimeOptions,
+		final StopActions stopActions
 	) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.recentProjects = recentProjects;
@@ -124,6 +111,8 @@ public final class Config {
 		}
 
 		this.load();
+		
+		stopActions.add(this::save);
 	}
 
 	private void replaceMissingWithDefaults(final ConfigData configData) {

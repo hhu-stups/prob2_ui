@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.ChoiceBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.stage.Stage?>
-<?import javafx.scene.Scene?>
-<?import javafx.scene.control.Button?>
+
 <?import javafx.geometry.Insets?>
-
-
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
 <fx:root type="Stage" title="CBC Invariants" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene height="200.0" width="600.0">
@@ -26,9 +23,9 @@
 				      	</HBox>
 				      	<HBox alignment="CENTER" prefHeight="47.0" prefWidth="200.0" spacing="60">
 				         <children>
-				            <Button fx:id="btAdd" text="%verifications.cbc.add" styleClass="button-blue" />
-				            <Button fx:id="btCheck" text="%verifications.cbc.check" styleClass="button-blue" />
-				            <Button fx:id="btCancel" text="%verifications.cbc.cancel" styleClass="button-blue" />
+				            <Button fx:id="btAdd" onAction="#addFormula" text="%verifications.cbc.add" styleClass="button-blue" />
+				            <Button fx:id="btCheck" onAction="#checkFormula" text="%verifications.cbc.check" styleClass="button-blue" />
+				            <Button fx:id="btCancel" onAction="#cancelFormula" text="%verifications.cbc.cancel" styleClass="button-blue" />
 				         </children>
 				      	</HBox>
 			   		</VBox>

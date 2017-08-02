@@ -1,13 +1,9 @@
 package de.prob2.ui.internal;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.util.Providers;
-
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.MainController;
@@ -35,6 +31,9 @@ import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 import javafx.fxml.FXMLLoader;
+
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");

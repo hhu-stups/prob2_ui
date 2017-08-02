@@ -1,7 +1,6 @@
 package de.prob2.ui.project.machines;
 
 import com.google.inject.Inject;
-
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -25,6 +24,10 @@ public class MachinesItem extends VBox {
 	public void initialize() {
 		nameLabel.setText(machine.getName());
 		locationLabel.setText(machine.getPath().toString());
+	}
+	
+	Machine getMachine() {
+		return machine;
 	}
 
 	public void refresh() {

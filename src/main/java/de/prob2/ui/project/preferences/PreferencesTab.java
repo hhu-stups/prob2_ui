@@ -1,26 +1,16 @@
 package de.prob2.ui.project.preferences;
 
-import java.net.URISyntaxException;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 
 @Singleton
@@ -49,8 +39,8 @@ public class PreferencesTab extends Tab {
 	}
 
 	@FXML
-	public void initialize() throws URISyntaxException {
-		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+	public void initialize() {
+		helpButton.setHelpContent("HelpMain.html");
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
 		preferencesListView.setCellFactory(listView -> initListCell());
 

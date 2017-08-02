@@ -1,8 +1,8 @@
 package de.prob2.ui.verifications.ltl.patterns;
 
-import java.util.Objects;
-
 import de.prob2.ui.verifications.AbstractCheckableItem;
+
+import java.util.Objects;
 
 public class LTLPatternItem extends AbstractCheckableItem {
 	
