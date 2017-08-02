@@ -1,15 +1,14 @@
 package de.prob2.ui.verifications.ltl.patterns;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 
 public class LTLPatternParser {
 	
@@ -61,7 +60,7 @@ public class LTLPatternParser {
 	}
 	
 	public void parseMachine(Machine machine) {
-		machine.getPatterns().forEach(item-> this.parsePattern(item, machine, true));
+		machine.getLTLPatterns().forEach(item-> this.parsePattern(item, machine, true));
 	}
 	
 }

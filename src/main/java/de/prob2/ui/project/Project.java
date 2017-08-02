@@ -1,15 +1,11 @@
 package de.prob2.ui.project;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+
+import java.io.File;
+import java.util.*;
 
 public class Project {
 	private String name;

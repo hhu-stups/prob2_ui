@@ -1,3 +1,5 @@
+import org.gradle.plugins.ide.eclipse.model.AccessRule
+
 import java.text.DateFormat
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -13,8 +15,6 @@ apply plugin: 'antlr'
 
 sourceCompatibility="1.8"
 targetCompatibility="1.8"
-
-import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 repositories {
 	mavenLocal()
@@ -102,4 +102,13 @@ processResources {
 		def hash = proc.in.readLines()[0]
 		f.append("commit=${hash}\n")
 	}
+}
+
+task fatJar(type: Jar) {
+	manifest {
+        attributes 'Main-Class': 'de.prob2.ui.ProB2'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }

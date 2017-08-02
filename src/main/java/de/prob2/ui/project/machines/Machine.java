@@ -1,33 +1,27 @@
 package de.prob2.ui.project.machines;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob.ltl.parser.pattern.PatternManager;
+import de.prob.scripting.Api;
+import de.prob.scripting.ModelTranslationError;
+import de.prob.statespace.StateSpace;
+import de.prob2.ui.menu.FileAsker;
+import de.prob2.ui.verifications.cbc.CBCFormulaItem;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.scene.paint.Color;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
-
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
-import de.prob.ltl.parser.pattern.PatternManager;
-import de.prob.scripting.Api;
-import de.prob.scripting.ModelTranslationError;
-import de.prob.statespace.StateSpace;
-
-import de.prob2.ui.menu.FileAsker;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
-
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
-import javafx.scene.paint.Color;
 
 public class Machine {
 	@FunctionalInterface
@@ -112,6 +106,7 @@ public class Machine {
 	private Machine.Type type;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
+	private ListProperty<CBCFormulaItem> cbcFormulas;
 	private transient PatternManager patternManager;
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
@@ -123,6 +118,7 @@ public class Machine {
 		this.type = type;
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
+		this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
 	}
 	
 	public Machine(String name, String description, Path location) {
@@ -213,7 +209,7 @@ public class Machine {
 		return ltlFormulas;
 	}
 	
-	public List<LTLFormulaItem> getFormulas() {
+	public List<LTLFormulaItem> getLTLFormulas() {
 		return ltlFormulasProperty().get();
 	}
 	
@@ -229,7 +225,7 @@ public class Machine {
 		return ltlPatterns;
 	}
 	
-	public List<LTLPatternItem> getPatterns() {
+	public List<LTLPatternItem> getLTLPatterns() {
 		return ltlPatternsProperty().get();
 	}
 	
@@ -239,6 +235,19 @@ public class Machine {
 	
 	public void removeLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.remove(pattern);
+	}
+	
+	public ListProperty<CBCFormulaItem> cbcFormulasProperty() {
+		return cbcFormulas;
+	}
+	
+	
+	public void addCBCFormula(CBCFormulaItem formula) {
+		cbcFormulas.add(formula);
+	}
+	
+	public void removeCBCFormula(CBCFormulaItem formula) {
+		cbcFormulas.remove(formula);
 	}
 	
 		
@@ -251,6 +260,9 @@ public class Machine {
 		}
 		if(ltlPatterns == null) {
 			this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
+		}
+		if(cbcFormulas == null) {
+			this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
 		}
 	}
 	
@@ -287,4 +299,5 @@ public class Machine {
 	public void clearPatternManager() {
 		patternManager.getPatterns().clear();
 	}
+	
 }

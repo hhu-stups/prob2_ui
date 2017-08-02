@@ -1,20 +1,12 @@
 package de.prob2.ui.project;
 
-import java.net.URISyntaxException;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.text.Text;
@@ -46,8 +38,8 @@ public class ProjectTab extends Tab {
 	}
 
 	@FXML
-	public void initialize() throws URISyntaxException {
-		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+	public void initialize() {
+		helpButton.setHelpContent("HelpMain.html");
 		applyButton.managedProperty().bind(projectDescriptionTextArea.managedProperty());
 		applyButton.visibleProperty().bind(projectDescriptionTextArea.visibleProperty());
 		projectDescriptionText.visibleProperty().bind(projectDescriptionTextArea.visibleProperty().not());

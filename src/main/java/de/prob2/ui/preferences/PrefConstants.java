@@ -1,12 +1,8 @@
 package de.prob2.ui.preferences;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import javafx.scene.paint.Color;
+
+import java.util.*;
 
 final class PrefConstants {
 	// Valid values for named list-like types.

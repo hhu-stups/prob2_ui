@@ -1,28 +1,16 @@
 package de.prob2.ui.internal;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.util.Providers;
-
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryView;
-import de.prob2.ui.menu.ConsolesMenu;
-import de.prob2.ui.menu.EditMenu;
-import de.prob2.ui.menu.FileMenu;
-import de.prob2.ui.menu.FormulaMenu;
-import de.prob2.ui.menu.HelpMenu;
-import de.prob2.ui.menu.MainView;
-import de.prob2.ui.menu.MenuController;
-import de.prob2.ui.menu.PerspectivesMenu;
-import de.prob2.ui.menu.ViewMenu;
+import de.prob2.ui.menu.*;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.project.ProjectTab;
@@ -42,6 +30,9 @@ import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 import javafx.fxml.FXMLLoader;
+
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");

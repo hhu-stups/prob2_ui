@@ -1,8 +1,6 @@
 package de.prob2.ui.verifications.ltl;
 
 
-import java.net.URISyntaxException;
-
 import de.prob2.ui.ProB2;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -16,6 +14,8 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import netscape.javascript.JSObject;
+
+import java.net.URISyntaxException;
 
 public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 

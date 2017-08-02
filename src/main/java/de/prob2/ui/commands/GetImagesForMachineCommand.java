@@ -1,14 +1,14 @@
 package de.prob2.ui.commands;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import de.prob.animator.command.AbstractCommand;
 import de.prob.parser.BindingGenerator;
 import de.prob.parser.ISimplifiedROMap;
 import de.prob.prolog.output.IPrologTermOutput;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Fetches a map of id to filename from ProB for the visualization.

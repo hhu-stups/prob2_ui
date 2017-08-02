@@ -2,7 +2,6 @@ package de.prob2.ui.consoles.b;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.consoles.Console;
 
 @Singleton

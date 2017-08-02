@@ -2,7 +2,6 @@ package de.prob2.ui.menu;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;

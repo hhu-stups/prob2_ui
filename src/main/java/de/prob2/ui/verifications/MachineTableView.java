@@ -1,7 +1,5 @@
 package de.prob2.ui.verifications;
 
-import javax.inject.Inject;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -11,6 +9,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+
+import javax.inject.Inject;
 
 public class MachineTableView extends TableView<Machine> {
 	

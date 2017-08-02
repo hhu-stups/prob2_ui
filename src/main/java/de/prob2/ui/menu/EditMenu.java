@@ -1,18 +1,7 @@
 package de.prob2.ui.menu;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.beditor.BEditorStage;
@@ -29,6 +18,15 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Collectors;
 
 public class EditMenu extends Menu {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EditMenu.class);

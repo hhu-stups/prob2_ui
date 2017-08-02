@@ -1,10 +1,6 @@
 package de.prob2.ui;
 
-import java.io.IOException;
-import java.util.List;
-
 import com.google.inject.Inject;
-
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,6 +8,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.util.List;
 
 public class GenericListController {
 

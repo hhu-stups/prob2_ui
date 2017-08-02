@@ -1,14 +1,14 @@
 package de.prob2.ui.formula;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.prob.animator.domainobjects.ExpandedFormula;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class FormulaNode extends Region {

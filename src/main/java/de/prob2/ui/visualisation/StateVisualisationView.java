@@ -1,14 +1,6 @@
 package de.prob2.ui.visualisation;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-
 import com.google.inject.Inject;
-
 import de.prob.Main;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
@@ -29,6 +21,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 
 public class StateVisualisationView extends AnchorPane {
 	@FXML

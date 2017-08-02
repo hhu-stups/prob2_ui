@@ -1,20 +1,18 @@
 package de.prob2.ui.statusbar;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 
 @Singleton
 public class StatusBar extends HBox {
@@ -34,6 +32,10 @@ public class StatusBar extends HBox {
 		public String getMessageKey() {
 			return this.messageKey;
 		}
+	}
+	
+	public enum LTLStatus {
+		ERROR, SUCCESSFUL;
 	}
 	
 	@FXML private Label errorsLabel;
@@ -93,6 +95,17 @@ public class StatusBar extends HBox {
 			}
 		} else {
 			errorsLabel.setText(this.resourceBundle.getString(this.getLoadingStatus().getMessageKey()));
+		}
+	}
+	
+	public void updateLTLCheckingStatus(LTLStatus ltlStatus) {
+		errorsLabel.getStyleClass().removeAll("noErrors", "someErrors");
+		if(ltlStatus == LTLStatus.ERROR) {
+			errorsLabel.getStyleClass().add("someErrors");
+			errorsLabel.setText(resourceBundle.getString("statusbar.errors.LTLNotOK"));
+		} else {
+			errorsLabel.getStyleClass().add("noErrors");
+			errorsLabel.setText(resourceBundle.getString("statusbar.errors.LTLOK"));
 		}
 	}
 }

@@ -1,25 +1,20 @@
-import java.io.File;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-
 import javafx.scene.Node;
 import javafx.scene.Parent;
-
 import org.junit.Test;
-
 import org.loadui.testfx.GuiTest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 public class MachineTest extends GuiTest{
     private static final Logger LOGGER = LoggerFactory.getLogger(MachineTest.class);
