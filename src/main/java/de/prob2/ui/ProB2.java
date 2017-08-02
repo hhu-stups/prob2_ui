@@ -210,9 +210,6 @@ public class ProB2 extends Application {
 
 		primaryStage.show();
 
-		//pluginManager = injector.getInstance(PluginManager.class);
-		//pluginManager.loadPlugins();
-
 		uiPersistence.open();
 		
 		if (runtimeOptions.getProject() != null) {

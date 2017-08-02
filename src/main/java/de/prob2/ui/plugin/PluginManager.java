@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob2.ui.MainController;
 import de.prob2.ui.menu.MainView;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.PluginMenu;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -26,58 +27,6 @@ import java.util.jar.JarFile;
 @Singleton
 public class PluginManager {
 
-    public enum MenuEnum {
-        FILE_MENU("fileMenu"),
-        RECENT_PROJECTS_MENU("recentProjectsMenu"),
-        EDIT_MENU("editMenu"),
-        FORMULA_MENU("formulaMenu"),
-        CONSOLES_MENU("consolesMenu"),
-        PERSPECTIVES_MENU("perspectivesMenu"),
-        PRESET_PERSPECTIVES_MENU("presetPerspectivesMenu"),
-        VIEW_MENU("viewMenu"),
-        PLUGIN_MENU("pluginMenu"),
-        PLUGINS_STOP_MENU("pluginsStopMenu"),
-        WINDOW_MENU("windowMenu"),
-        HELP_MENU("helpMenu");
-
-        private final String id;
-
-        MenuEnum(String id) {
-            this.id = id;
-        }
-
-        public String id() {
-            return this.id;
-        }
-    }
-
-    public enum AccordionEnum {
-        RIGHT_ACCORDION("rightAccordion"),
-        RIGHT_ACCORDION_1("rightAccordion1"),
-        RIGHT_ACCORDION_2("rightAccordion2"),
-        LEFT_ACCORDION("leftAccordion"),
-        LEFT_ACCORDION_1("leftAccordion1"),
-        LEFT_ACCORDION_2("leftAccordion2"),
-        TOP_ACCORDION("topAccordion"),
-        TOP_ACCORDION_1("topAccordion1"),
-        TOP_ACCORDION_2("topAccordion2"),
-        TOP_ACCORDION_3("topAccordion3"),
-        BOTTOM_ACCORDION("bottomAccordion"),
-        BOTTOM_ACCORDION_1("bottomAccordion1"),
-        BOTTOM_ACCORDION_2("bottomAccordion2"),
-        BOTTOM_ACCORDION_3("bottomAccordion3");
-
-        private final String id;
-
-        AccordionEnum(String id) {
-            this.id = id;
-        }
-
-        public String id() {
-            return this.id;
-        }
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginManager.class);
     private static final String PLUGIN_DIRECTORY = System.getProperty("user.home")
             + File.separator + ".prob"
@@ -87,6 +36,7 @@ public class PluginManager {
 
     private final Injector injector;
     private final CurrentTrace currentTrace;
+    private final StageManager stageManager;
 
     private List<Plugin> registeredPlugins;
 
@@ -94,9 +44,10 @@ public class PluginManager {
     //TODO: test what happens when two plugins use the same library in different versions and what happens when two plugins have the same package structure
 
     @Inject
-    public PluginManager(Injector injector, CurrentTrace currentTrace){
+    public PluginManager(Injector injector, CurrentTrace currentTrace, StageManager stageManager){
         this.injector = injector;
         this.currentTrace = currentTrace;
+        this.stageManager = stageManager;
         this.currentTrace.addListener((observable, oldValue, newValue) -> {
             //TODO: implement
         });
@@ -178,7 +129,7 @@ public class PluginManager {
     }
 
     public void addMenuItem(@NonNull final MenuEnum menu, @NonNull final MenuItem... items) {
-        Menu menuToAddItems = searchMenu(menu);
+        Menu menuToAddItems = menu.searchMenu(injector);
         if (menuToAddItems != null) {
             menuToAddItems.getItems().addAll(items);
         } else {
@@ -189,7 +140,7 @@ public class PluginManager {
     public void addMenuItem(@Nonnull final MenuEnum menu,
                             final int position,
                             @Nonnull final MenuItem... items) {
-        Menu menuToAddItems = searchMenu(menu);
+        Menu menuToAddItems = menu.searchMenu(injector);
         if (menuToAddItems != null) {
             menuToAddItems.getItems().addAll(position, Arrays.asList(items));
         } else {
@@ -213,37 +164,6 @@ public class PluginManager {
     private Accordion getAccodion(AccordionEnum accordion) {
         MainController mainController = injector.getInstance(MainController.class);
         return (Accordion) mainController.getScene().lookup("#" + accordion.id());
-    }
-
-    private Menu searchMenu(@Nonnull final MenuEnum searchedMenu) {
-        MenuController menuController = injector.getInstance(MenuController.class);
-        for (Menu menu : menuController.getMenus()) {
-            if (searchedMenu.id().equals(menu.getId())) {
-                return menu;
-            }
-            Menu subMenu = searchMenuInSubMenus(menu, searchedMenu);
-            if (subMenu != null) {
-                return subMenu;
-            }
-        }
-        return null;
-    }
-
-    private Menu searchMenuInSubMenus(@Nonnull final Menu menuToSearchIn,
-                                      @Nonnull final MenuEnum searchedMenu){
-        for (MenuItem item : menuToSearchIn.getItems()) {
-            if (item instanceof Menu) {
-                Menu subMenu = (Menu) item;
-                if (searchedMenu.id().equals(subMenu.getId())) {
-                    return subMenu;
-                }
-                Menu ret = searchMenuInSubMenus(subMenu, searchedMenu);
-                if (ret != null) {
-                    return ret;
-                }
-            }
-        }
-        return null;
     }
 
     private void loadPlugin(@Nonnull final JarFile plugin) {
