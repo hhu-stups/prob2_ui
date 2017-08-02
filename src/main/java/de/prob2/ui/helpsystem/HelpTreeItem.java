@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,19 +17,21 @@ public class HelpTreeItem extends TreeItem<String>{
     private boolean isLeaf;
     private boolean isFirstTimeChildren = true;
     private boolean isFirstTimeLeaf = true;
-    private File f;
+    private File file;
 
-    public HelpTreeItem(final File f) throws IOException {
-        super(f.getName());
-        this.f = f;
-        if (!f.isDirectory()) {
-            String text = new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
+    public HelpTreeItem(final File file) throws IOException {
+        super(file.getName());
+        this.file = file;
+        if (file.isFile()) {
+            String text = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
             text = text.replaceAll("\\s+", " ");
             Pattern p = Pattern.compile("<title>(.*?)</title>");
             Matcher m = p.matcher(text);
             while (m.find()) {
                 this.setValue(m.group(1));
             }
+        } else {
+            this.setValue(this.getValue().replace(File.separator,""));
         }
         this.setExpanded(true);
         Platform.runLater(() -> this.setExpanded(false));
@@ -51,36 +52,32 @@ public class HelpTreeItem extends TreeItem<String>{
     @Override public boolean isLeaf() {
         if (isFirstTimeLeaf) {
             isFirstTimeLeaf = false;
-            isLeaf = this.f.isFile();
+            isLeaf = this.file.isFile();
         }
         return isLeaf;
     }
 
     private ObservableList<TreeItem<String>> buildChildren(HelpTreeItem helpTreeItem) throws IOException {
-        File file = helpTreeItem.f;
+        File file = helpTreeItem.file;
         if (file != null && file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (files != null) {
-                ObservableList<TreeItem<String>> children = FXCollections.observableArrayList();
-                for (File childFile : files) {
-                    children.add(createNode(childFile));
-                }
-                return children;
+            ObservableList<TreeItem<String>> children = FXCollections.observableArrayList();
+            for (File child : file.listFiles()) {
+                children.add(createNode(child));
             }
+            return children;
         }
-
         return FXCollections.emptyObservableList();
     }
 
-    private TreeItem<String> createNode(final File f) throws IOException {
-        HelpTreeItem hti = new HelpTreeItem(f);
+    private TreeItem<String> createNode(final File file) throws IOException {
+        HelpTreeItem hti = new HelpTreeItem(file);
         if (hti.isLeaf()) {
-            HelpSystem.fileMap.put(f, hti);
+            HelpSystem.fileMap.put(file, hti);
         }
         return hti;
     }
 
     public File getFile() {
-        return f;
+        return file;
     }
 }

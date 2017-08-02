@@ -1,22 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.Label?>
-<?import de.prob2.ui.verifications.MachineTableView?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Tooltip?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.verifications.cbc.CBCView?>
-
+<?import de.prob2.ui.verifications.MachineTableView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <fx:root stylesheets="@/prob.css" type="CBCView"
-	xmlns:fx="http://javafx.com/fxml/1">
+		 xmlns:fx="http://javafx.com/fxml/1">
 	<ScrollPane fitToHeight="true" fitToWidth="true"
 		AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

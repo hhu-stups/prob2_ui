@@ -1,10 +1,10 @@
 package de.prob2.ui.consoles;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConsoleSearchHandler {
 	

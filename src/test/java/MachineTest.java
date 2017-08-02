@@ -8,7 +8,6 @@ import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.input.KeyCode;
 import org.apache.commons.cli.*;
 import org.junit.Test;
 import org.loadui.testfx.GuiTest;

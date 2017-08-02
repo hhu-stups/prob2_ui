@@ -1,14 +1,14 @@
 package de.prob2.ui.verifications.cbc;
 
 
-import javax.inject.Inject;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import javax.inject.Inject;
 
 public class CBCDeadlock extends Stage {
 	

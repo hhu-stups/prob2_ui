@@ -2,7 +2,6 @@ package de.prob2.ui.menu;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.internal.StageManager;
 import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;

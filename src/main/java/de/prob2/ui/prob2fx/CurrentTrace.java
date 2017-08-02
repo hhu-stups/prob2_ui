@@ -1,36 +1,23 @@
 package de.prob2.ui.prob2fx;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
-import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.IAnimationChangeListener;
-import de.prob.statespace.State;
-import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
-
+import de.prob.statespace.*;
 import de.prob2.ui.project.machines.Machine;
-
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanPropertyBase;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectPropertyBase;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 /**
  * A singleton writable property that represents the current {@link Trace}. It

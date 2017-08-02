@@ -1,18 +1,16 @@
 package de.prob2.ui.verifications.ltl.patterns;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Injector;
-
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.LTLView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 
 public class LTLPatternParser {
 	

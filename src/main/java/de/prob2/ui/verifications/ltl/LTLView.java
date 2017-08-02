@@ -1,18 +1,16 @@
 package de.prob2.ui.verifications.ltl;
 
 
-import java.net.URISyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.statespace.AnimationSelector;
-import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.MachineTableView;
@@ -23,21 +21,13 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
-import de.prob2.ui.project.Project;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-import netscape.javascript.JSObject;
 
 @Singleton
 public class LTLView extends AnchorPane{
@@ -111,8 +101,8 @@ public class LTLView extends AnchorPane{
 	}
 	
 	@FXML
-	public void initialize() throws URISyntaxException {
-		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+	public void initialize() {
+		helpButton.setHelpContent("HelpMain.html");
 		tvMachines.setCheckingType(CheckingType.LTL);
 		setOnItemClicked();
 		setContextMenus();

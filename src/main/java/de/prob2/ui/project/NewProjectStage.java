@@ -1,9 +1,6 @@
 package de.prob2.ui.project;
 
-import java.io.File;
-
 import com.google.inject.Inject;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.event.ActionEvent;
@@ -15,6 +12,8 @@ import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import java.io.File;
 
 public class NewProjectStage extends Stage {
 	@FXML

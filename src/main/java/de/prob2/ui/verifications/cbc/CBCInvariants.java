@@ -1,9 +1,5 @@
 package de.prob2.ui.verifications.cbc;
 
-import java.util.ArrayList;
-
-import javax.inject.Inject;
-
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.BEvent;
 import de.prob.model.representation.Machine;
@@ -14,6 +10,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
 
 public class CBCInvariants extends Stage {
 	

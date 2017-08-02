@@ -75,6 +75,7 @@ dependencies {
 	testRuntime 'org.testfx:openjfx-monocle:1.8.0_20'
 }
 
+
 processResources {
 	doFirst {
 		def f = file("src/main/resources/de/prob2/ui/build.properties")
@@ -90,4 +91,13 @@ processResources {
 		def hash = proc.in.readLines()[0]
 		f.append("commit=${hash}\n")
 	}
+}
+
+task fatJar(type: Jar) {
+	manifest {
+        attributes 'Main-Class': 'de.prob2.ui.ProB2'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }

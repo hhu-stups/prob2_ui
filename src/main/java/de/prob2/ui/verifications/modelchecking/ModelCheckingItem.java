@@ -1,8 +1,8 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.util.Objects;
-
 import de.prob.check.ModelCheckingOptions;
+
+import java.util.Objects;
 
 public class ModelCheckingItem {
 

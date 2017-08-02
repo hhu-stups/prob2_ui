@@ -9,7 +9,6 @@ import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.input.KeyCode;
 import org.apache.commons.cli.*;
 import org.junit.Test;
 import org.loadui.testfx.GuiTest;

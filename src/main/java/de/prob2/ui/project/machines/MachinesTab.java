@@ -1,15 +1,9 @@
 package de.prob2.ui.project.machines;
 
-import java.io.File;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -19,16 +13,13 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+
+import java.io.File;
+import java.nio.file.Path;
 
 @Singleton
 public class MachinesTab extends Tab {
@@ -56,8 +47,8 @@ public class MachinesTab extends Tab {
 	}
 
 	@FXML
-	public void initialize() throws URISyntaxException {
-		helpButton.setPathToHelp(ProB2.class.getClassLoader().getResource("help/HelpMain.html").toURI().toString());
+	public void initialize() {
+		helpButton.setHelpContent("HelpMain.html");
 		noMachinesStack.managedProperty().bind(currentProject.machinesProperty().emptyProperty());
 		noMachinesStack.visibleProperty().bind(currentProject.machinesProperty().emptyProperty());
 

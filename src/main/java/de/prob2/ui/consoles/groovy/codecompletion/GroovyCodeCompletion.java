@@ -1,9 +1,5 @@
 package de.prob2.ui.consoles.groovy.codecompletion;
 
-import java.util.Optional;
-
-import javax.script.ScriptEngine;
-
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
 import de.prob2.ui.internal.StageManager;
@@ -17,6 +13,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
+
+import javax.script.ScriptEngine;
+import java.util.Optional;
 
 public class GroovyCodeCompletion extends Popup {
 	@FXML private ListView<GroovyAbstractItem> lvSuggestions;

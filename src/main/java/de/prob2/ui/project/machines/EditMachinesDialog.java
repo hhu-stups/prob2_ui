@@ -1,23 +1,16 @@
 package de.prob2.ui.project.machines;
 
+import com.google.inject.Inject;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.google.inject.Inject;
-
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 
 public class EditMachinesDialog extends Dialog<Machine> {
 	@FXML

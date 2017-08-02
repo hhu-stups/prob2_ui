@@ -1,31 +1,17 @@
 package de.prob2.ui.preferences;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import de.prob2.ui.internal.StageManager;
-
 import javafx.collections.FXCollections;
-import javafx.scene.control.Alert;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTablePosition;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
 
 public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S, String> {
 	private static final Logger logger = LoggerFactory.getLogger(MultiTreeTableCell.class);

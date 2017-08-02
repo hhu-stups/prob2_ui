@@ -1,7 +1,6 @@
 package de.prob2.ui.project.preferences;
 
 import com.google.inject.Injector;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
