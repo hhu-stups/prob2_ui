@@ -1,6 +1,5 @@
 package de.prob2.ui.operations;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,7 +37,6 @@ import de.prob.model.representation.Variable;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
-import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -311,7 +309,7 @@ public final class OperationsView extends AnchorPane {
 		return params;
 	}
 
-	private void update(final Trace trace) {
+	public void update(final Trace trace) {
 		if (trace == null) {
 			currentModel = null;
 			opNames = new ArrayList<>();

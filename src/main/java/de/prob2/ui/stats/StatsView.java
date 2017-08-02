@@ -1,20 +1,25 @@
 package de.prob2.ui.stats;
 
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -24,8 +29,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-
-import java.util.List;
 
 @Singleton
 public class StatsView extends ScrollPane {
@@ -61,7 +64,6 @@ public class StatsView extends ScrollPane {
 	private HelpButton helpButton;
 
 	private final CurrentTrace currentTrace;
-	private final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> computeStats(to);
 	private final Injector injector;
 
 	@Inject
@@ -81,8 +83,8 @@ public class StatsView extends ScrollPane {
 		statsBox.managedProperty().bind(statsBox.visibleProperty());
 		noStatsLabel.managedProperty().bind(noStatsLabel.visibleProperty());
 
-		this.currentTrace.addListener(traceChangeListener);
-		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
+		this.currentTrace.addListener((observable, from, to) -> this.update(to));
+		this.update(currentTrace.get());
 
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) extendedStatsToggle.getGraphic()).glyphSizeProperty().bind(fontsize.multiply(1.2));
@@ -105,7 +107,7 @@ public class StatsView extends ScrollPane {
 		Tooltip tooltip;
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		if (extendedStatsToggle.isSelected()) {
-			traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
+			this.update(currentTrace.get());
 
 			icon = new FontAwesomeIconView(FontAwesomeIcon.CLOSE);
 			tooltip = new Tooltip("Close Extended Stats");
@@ -121,7 +123,7 @@ public class StatsView extends ScrollPane {
 		extendedStatsToggle.setTooltip(tooltip);
 	}
 
-	private void computeStats(Trace trace) {
+	public void update(Trace trace) {
 		if (trace != null) {
 			final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
 			trace.getStateSpace().execute(stateSpaceStatsCmd);
