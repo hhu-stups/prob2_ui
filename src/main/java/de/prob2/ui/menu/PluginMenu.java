@@ -1,7 +1,6 @@
 package de.prob2.ui.menu;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.plugin.Plugin;
@@ -48,17 +47,11 @@ public class PluginMenu extends Menu {
 
         final File selectedPlugin = fileChooser.showOpenDialog(stageManager.getMainStage());
         if (selectedPlugin == null) {
+            LOGGER.info("No plugin selected!");
             return;
         }
 
         pluginManager.addPlugin(selectedPlugin);
-    }
-
-    @FXML
-    private void test(){
-        for (MenuItem item : pluginsStopMenu.getItems()) {
-            System.out.println(item.getText());
-        }
     }
 
     public void addPluginMenuItem(Plugin plugin) {
@@ -70,7 +63,6 @@ public class PluginMenu extends Menu {
         stopEntry.setUserData(plugin);
         pluginsStopMenu.getItems().add(stopEntry);
         noPluginsMenuItem.setVisible(false);
-        //pluginsStopMenu.setDisable(false);
     }
 
     public void removePluginMenuItem(Plugin plugin) {
@@ -84,8 +76,7 @@ public class PluginMenu extends Menu {
         if (stopItem != null) {
             pluginsStopMenu.getItems().remove(stopItem);
         }
-        if (pluginsStopMenu.getItems().size() == 1                                ) {
-            //pluginsStopMenu.setDisable(true);
+        if (pluginsStopMenu.getItems().size() == 1) {
             noPluginsMenuItem.setVisible(true);
         }
     }

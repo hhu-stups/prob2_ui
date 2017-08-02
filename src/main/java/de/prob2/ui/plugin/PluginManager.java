@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob2.ui.MainController;
+import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.PluginMenu;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -167,8 +168,7 @@ public class PluginManager {
     }
 
     public void addTab(@Nonnull final Tab tab) {
-        MainController mainController = injector.getInstance(MainController.class);
-        TabPane tabPane = (TabPane) mainController.getScene().lookup("#mainTabPane");
+        TabPane tabPane = injector.getInstance(MainView.class).getMainTabPane();
         tabPane.getTabs().add(tab);
     }
 

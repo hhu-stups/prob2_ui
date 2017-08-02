@@ -210,8 +210,8 @@ public class ProB2 extends Application {
 
 		primaryStage.show();
 
-		pluginManager = injector.getInstance(PluginManager.class);
-		pluginManager.loadPlugins();
+		//pluginManager = injector.getInstance(PluginManager.class);
+		//pluginManager.loadPlugins();
 
 		uiPersistence.open();
 		
@@ -234,7 +234,10 @@ public class ProB2 extends Application {
 				currentProject.startAnimation(found);
 			}
 		}
-		
+
+		pluginManager = injector.getInstance(PluginManager.class);
+		pluginManager.loadPlugins();
+
 		this.loadingStage.hide();
 	}
 
