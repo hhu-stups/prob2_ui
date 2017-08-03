@@ -318,7 +318,7 @@ public final class StatesView extends AnchorPane {
 	}
 
 	private static String getResultValue(final ASTFormula element, final State state) {
-		final AbstractEvalResult result = state.eval(element.getFormula(FormulaExpand.expand));
+		final AbstractEvalResult result = state.eval(element.getFormula(FormulaExpand.EXPAND));
 		return result instanceof EvalResult ? ((EvalResult)result).getValue() : null;
 	}
 

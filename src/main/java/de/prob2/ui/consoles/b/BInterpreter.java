@@ -40,7 +40,7 @@ public class BInterpreter implements Executable {
 		}
 		try {
 			final Trace trace = currentTrace.exists() ? currentTrace.get() : defaultTrace;
-			AbstractEvalResult res = trace.evalCurrent(trace.getModel().parseFormula(instruction.getInstruction(), FormulaExpand.expand));
+			AbstractEvalResult res = trace.evalCurrent(trace.getModel().parseFormula(instruction.getInstruction(), FormulaExpand.EXPAND));
 			// noinspection ObjectToString
 			return new ConsoleExecResult("", res.toString(), ConsoleExecResultType.PASSED);
 		} catch (CliError | EvaluationException | ProBError e) {
