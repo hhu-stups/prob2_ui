@@ -1,10 +1,31 @@
 package de.prob2.ui.helpsystem;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.Main;
+
 import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
+
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -13,18 +34,8 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.HashMap;
-import java.util.Map;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class HelpSystem extends StackPane {
@@ -42,23 +53,24 @@ public class HelpSystem extends StackPane {
             Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
             Map<String, String> env = new HashMap<>();
             env.put("create", "true");
-            FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env);
-            Path source = jarFileSystem.getPath("/help/");
-            if (!Files.exists(target)) {
-                Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
-                    @Override
-                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                        Path newdir = target.resolve(source.relativize(dir).toString());
-                        Files.copy(dir, newdir);
-                        return FileVisitResult.CONTINUE;
-                    }
-
-                    @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                        Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
-                        return FileVisitResult.CONTINUE;
-                    }
-                });
+            try (FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env)) {
+                Path source = jarFileSystem.getPath("/help/");
+                if (!Files.exists(target)) {
+                    Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+                        @Override
+                        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                            Path newdir = target.resolve(source.relativize(dir).toString());
+                            Files.copy(dir, newdir);
+                            return FileVisitResult.CONTINUE;
+                        }
+            
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                            Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
+                            return FileVisitResult.CONTINUE;
+                        }
+                    });
+                }
             }
             dest = new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
         } else {
