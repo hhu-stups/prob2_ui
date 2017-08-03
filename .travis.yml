@@ -7,7 +7,7 @@ branches:
 script:
 - ./gradlew assemble --refresh-dependencies
 ##- ./gradlew -Pheadless=true check
-- sonar-scanner -Dsonar.login=$SONAR_TOKEN
+- ./gradlew sonarqube -Dsonar.host.url=http://sonarcloud.io -Dsonar.projectKey=prob2standalone -Dsonar.login=$SONAR_TOKEN --info --stacktrace
 sudo: false
 matrix:
   include:
@@ -22,10 +22,6 @@ matrix:
       env: _JAVA_OPTIONS="-Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw -Dprism.text=t2k -Dtestfx.setup.timeout=2500"
 
 addons:
-  sonarqube:
-    branches:
-      - master
-      - develop
   apt:
     packages:
     - oracle-java8-installer
