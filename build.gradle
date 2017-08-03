@@ -110,7 +110,7 @@ processResources {
 
 sonarqube {
 	properties {
-		property("sonar.java.binaries", "build/classes,build/classes/groovy,build/classes/groovy/main")
+		property("sonar.java.binaries", sourceSets.main.java.outputDir + "," + sourceSets.main.groovy.outputDir)
 		
 		property("sonar.projectKey", "prob2standalone")
 		property("sonar.projectName", "prob2standalone")
