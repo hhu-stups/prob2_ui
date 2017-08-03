@@ -111,6 +111,7 @@ processResources {
 sonarqube {
 	properties {
 		property("sonar.java.binaries", "build/classes,build/classes/groovy,build/classes/groovy/main")
+		property("sonar.login", System.getenv("SONAR_TOKEN"))
 	}
 }
 

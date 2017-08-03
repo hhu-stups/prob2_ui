@@ -7,7 +7,7 @@ branches:
 script:
 - ./gradlew assemble --refresh-dependencies
 ##- ./gradlew -Pheadless=true check
-- ./gradlew sonarqube -Dsonar.login=$SONAR_TOKEN --info --stacktrace
+- ./gradlew sonarqube --info --stacktrace
 sudo: false
 matrix:
   include:
