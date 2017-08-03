@@ -108,6 +108,12 @@ processResources {
 	}
 }
 
+sonarqube {
+	properties {
+		property("sonar.java.binaries", "build/classes,build/classes/groovy,build/classes/groovy/main")
+	}
+}
+
 task fatJar(type: Jar) {
 	manifest {
         attributes 'Main-Class': 'de.prob2.ui.ProB2'
