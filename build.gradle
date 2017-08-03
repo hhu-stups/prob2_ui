@@ -111,6 +111,12 @@ processResources {
 sonarqube {
 	properties {
 		property("sonar.java.binaries", "build/classes,build/classes/groovy,build/classes/groovy/main")
+		
+		property("sonar.projectKey", "prob2standalone")
+		property("sonar.projectName", "prob2standalone")
+		
+		property("sonar.exclusions", "gradle/wrapper/*,build/**,scrapbook/*,src/main/resources/codemirror/clike.js,src/main/resources/codemirror/closebrackets.js,src/main/resources/codemirror/codemirror.css,src/main/resources/codemirror/codemirror.js,src/main/resources/codemirror/jquery.js,src/main/resources/codemirror/matchbrackets.js")
+		
 		property("sonar.login", System.getenv("SONAR_TOKEN"))
 	}
 }
