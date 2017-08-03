@@ -48,6 +48,9 @@ if (hasProperty("macAppJRE")) {
 sourceSets.main.java.srcDirs = []
 sourceSets.main.groovy.srcDirs += ["src/main/java"]
 
+sourceSets.test.java.srcDirs = []
+sourceSets.test.groovy.srcDirs = []
+
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
 }
