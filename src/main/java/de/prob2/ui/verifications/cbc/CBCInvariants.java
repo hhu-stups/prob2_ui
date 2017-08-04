@@ -10,13 +10,15 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Injector;
 
 import de.prob.check.CBCInvariantChecker;
-
+import de.prob.check.IModelCheckingResult;
+import de.prob.check.ModelCheckOk;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.BEvent;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
@@ -65,28 +67,47 @@ public class CBCInvariants extends Stage {
 	
 	@FXML
 	public void addFormula() {
-		ArrayList<String> event = new ArrayList<>();
-		event.add(cbOperations.getSelectionModel().getSelectedItem().toString());
-		String name = cbOperations.getSelectionModel().getSelectedItem().toString();
-		CBCFormulaItem formula = new CBCFormulaItem(name, "INVARIANT", "");
+		String item = cbOperations.getSelectionModel().getSelectedItem();
+		if(item == null) {
+			return;
+		}
+		CBCFormulaItem formula = new CBCFormulaItem(item, "INVARIANT", "");
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
 		if(currentMachine != null) {
 			currentMachine.addCBCFormula(formula);
 		}
+		injector.getInstance(CBCView.class).updateProject();
 		this.close();
 	}
 	
 	@FXML
 	public void checkFormula() {
 		addFormula();
-		ArrayList<String> event = new ArrayList<>();
-		event.add(cbOperations.getSelectionModel().getSelectedItem().toString());
-		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
-		try {
-			System.out.println(checker.call());
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
+		String name = cbOperations.getSelectionModel().getSelectedItem();
+		if(name == null) {
+			return;
 		}
+		ArrayList<String> event = new ArrayList<>();
+		event.add(name);
+		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
+		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		try {
+			IModelCheckingResult result = checker.call();
+			int size = currentMachine.getCBCFormulas().size();
+			CBCFormulaItem item = currentMachine.getCBCFormulas().get(size-1);
+			if(result instanceof ModelCheckOk) {
+				item.setCheckedSuccessful();
+				item.setChecked(Checked.SUCCESS);
+			} else {
+				item.setCheckedFailed();
+				item.setChecked(Checked.FAIL);
+			}
+		} catch (Exception e) {
+			
+		}
+		CBCView cbcView = injector.getInstance(CBCView.class);
+		cbcView.updateMachineStatus(currentMachine);
+		cbcView.refreshMachines();
 	}
 	
 	@FXML

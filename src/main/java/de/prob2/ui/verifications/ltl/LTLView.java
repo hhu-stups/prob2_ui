@@ -17,9 +17,9 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.MachineTableView.CheckingType;
-import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaDialog;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -211,10 +211,10 @@ public class LTLView extends AnchorPane{
 		addPatternButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
-			Machine machine = tvMachines.getSelectionModel().getSelectedItem();
 			if(tvMachines.getSelectionModel().getSelectedIndex() < 0) {
 				tvMachines.getSelectionModel().select(0);
 			}
+			Machine machine = tvMachines.getSelectionModel().getSelectedItem();
 			if(newValue && machine != null) {
 				checkSelectedMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
 			}

@@ -11,10 +11,10 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LTLStatus;
+import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
-import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

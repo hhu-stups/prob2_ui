@@ -2,7 +2,6 @@ package de.prob2.ui.verifications;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
 import javafx.scene.paint.Color;
 
 public abstract class AbstractCheckableItem {

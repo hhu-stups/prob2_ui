@@ -157,11 +157,11 @@ public class Machine {
 		this.cbcstatus.setFill(Color.BLUE);
 	}
 	
-	public FontAwesomeIconView getLtlStatus() {
+	public FontAwesomeIconView getLTLStatus() {
 		return ltlstatus;
 	}
 	
-	public FontAwesomeIconView getCbcStatus() {
+	public FontAwesomeIconView getCBCStatus() {
 		return cbcstatus;
 	}
 	
@@ -248,6 +248,10 @@ public class Machine {
 	
 	public void removeCBCFormula(CBCFormulaItem formula) {
 		cbcFormulas.remove(formula);
+	}
+	
+	public ListProperty<CBCFormulaItem> getCBCFormulas() {
+		return cbcFormulas;
 	}
 	
 		

@@ -46,9 +46,9 @@ public class MachineTableView extends TableView<Machine> {
 	public void initialize() {
 		typeProperty.addListener((observable, from, to) -> {
 			if(to == CheckingType.LTL) {
-				machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("ltlStatus"));
+				machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("LTLStatus"));
 			} else {
-				machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("cbcStatus"));
+				machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("CBCStatus"));
 			}
 		});
 		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
