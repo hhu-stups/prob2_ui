@@ -6,8 +6,11 @@ import com.google.inject.Singleton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.MachineTableView.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -45,12 +48,16 @@ public class CBCView extends AnchorPane {
 	private Button addFormulaButton;
 	
 	private final CurrentTrace currentTrace;
+	
+	private final CurrentProject currentProject;
 
 	private final Injector injector;
 	
 	@Inject
-	public CBCView(final StageManager stageManager, final CurrentTrace currentTrace, final Injector injector) {
+	public CBCView(final StageManager stageManager, final CurrentTrace currentTrace, 
+					final CurrentProject currentProject, final Injector injector) {
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "cbc_view.fxml");
 
@@ -66,6 +73,7 @@ public class CBCView extends AnchorPane {
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		tvMachines.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to != null) {
+				tvFormula.itemsProperty().unbind();
 				tvFormula.itemsProperty().bind(to.cbcFormulasProperty());
 			}
 		});
@@ -74,6 +82,7 @@ public class CBCView extends AnchorPane {
 				tvMachines.getSelectionModel().select(0);
 			}
 		});
+		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 	
 	@FXML
@@ -83,6 +92,26 @@ public class CBCView extends AnchorPane {
 	
 	public Machine getCurrentMachine() {
 		return tvMachines.getSelectionModel().getSelectedItem();
+	}
+	
+	public void updateMachineStatus(Machine machine) {
+		for(CBCFormulaItem formula : machine.getCBCFormulas()) {
+			if(formula.getChecked() == Checked.FAIL) {
+				machine.setCBCCheckedFailed();
+				return;
+			}
+		}
+		machine.setCBCCheckedSuccessful();
+	}
+	
+	public void updateProject() {
+		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+				tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+				currentProject.getLocation()));
+	}
+	
+	public void refreshMachines() {
+		tvMachines.refresh();
 	}
 		
 }

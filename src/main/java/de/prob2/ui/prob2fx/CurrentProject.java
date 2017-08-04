@@ -1,9 +1,21 @@
 package de.prob2.ui.prob2fx;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.statespace.AnimationSelector;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
@@ -13,17 +25,22 @@ import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyListProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -148,7 +165,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		preferencesList.remove(preference);
 		List<Runconfiguration> runconfigsList = new ArrayList<>();
 		runconfigsList.addAll(this.getRunconfigurations());
-		this.getRunconfigurations().stream().filter(r -> r.getPreference().equals(preference.getName()))
+		this.getRunconfigurations().stream().filter(r -> r.getPreference().getName().equals(preference.getName()))
 				.forEach(runconfigsList::remove);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
 				runconfigsList, this.getLocation()));

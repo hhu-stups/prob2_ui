@@ -6,6 +6,7 @@ import java.time.ZoneOffset
 
 plugins {
 	id "edu.sc.seis.macAppBundle" version "2.1.6"
+	id "org.sonarqube" version "2.5"
 }
 
 apply plugin: 'application'
@@ -46,6 +47,9 @@ if (hasProperty("macAppJRE")) {
 
 sourceSets.main.java.srcDirs = []
 sourceSets.main.groovy.srcDirs += ["src/main/java"]
+
+sourceSets.test.java.srcDirs = []
+sourceSets.test.groovy.srcDirs = []
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
@@ -101,6 +105,20 @@ processResources {
 		}
 		def hash = proc.in.readLines()[0]
 		f.append("commit=${hash}\n")
+	}
+}
+
+sonarqube {
+	properties {
+		property("sonar.java.binaries", sourceSets.main.groovy.outputDir.path)
+		
+		property("sonar.organization", "prob2")
+		property("sonar.projectKey", "prob2-ui")
+		property("sonar.projectName", "prob2-ui")
+		
+		property("sonar.exclusions", "gradle/wrapper/*,build/**,scrapbook/*,src/main/resources/codemirror/clike.js,src/main/resources/codemirror/closebrackets.js,src/main/resources/codemirror/codemirror.css,src/main/resources/codemirror/codemirror.js,src/main/resources/codemirror/jquery.js,src/main/resources/codemirror/matchbrackets.js")
+		
+		property("sonar.login", System.getenv("SONAR_TOKEN"))
 	}
 }
 

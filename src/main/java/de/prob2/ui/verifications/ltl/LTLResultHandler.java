@@ -8,6 +8,7 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLParseError;
 import javafx.scene.control.Alert;
@@ -25,11 +26,7 @@ import java.io.StringWriter;
 public class LTLResultHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LTLResultHandler.class);
-	
-	public enum Checked {
-		NOT_CHECKED, SUCCESS, FAIL, EXCEPTION;
-	}
-	
+		
 	public static class LTLResultItem {
 	
 		private AlertType type;
