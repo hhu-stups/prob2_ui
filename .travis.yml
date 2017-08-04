@@ -7,7 +7,6 @@ branches:
 script:
 - ./gradlew assemble --refresh-dependencies
 ##- ./gradlew -Pheadless=true check
-- ./gradlew sonarqube
 sudo: false
 matrix:
   include:
@@ -44,6 +43,7 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 after_success:
+- ./gradlew sonarqube --info --stacktrace
 - travis-custom-deploy sftp build/distributions/*.zip
 env:
   global:

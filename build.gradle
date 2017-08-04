@@ -112,8 +112,9 @@ sonarqube {
 	properties {
 		property("sonar.java.binaries", sourceSets.main.groovy.outputDir.path)
 		
-		property("sonar.projectKey", "prob2standalone")
-		property("sonar.projectName", "prob2standalone")
+		property("sonar.organization", "prob2")
+		property("sonar.projectKey", "prob2-ui")
+		property("sonar.projectName", "prob2-ui")
 		
 		property("sonar.exclusions", "gradle/wrapper/*,build/**,scrapbook/*,src/main/resources/codemirror/clike.js,src/main/resources/codemirror/closebrackets.js,src/main/resources/codemirror/codemirror.css,src/main/resources/codemirror/codemirror.js,src/main/resources/codemirror/jquery.js,src/main/resources/codemirror/matchbrackets.js")
 		
