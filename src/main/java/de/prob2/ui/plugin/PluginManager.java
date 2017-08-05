@@ -11,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,12 +97,16 @@ public class PluginManager {
     }
 
     public void addPlugin() {
+        addPlugin(stageManager.getMainStage());
+    }
+
+    public void addPlugin(@Nonnull Stage stage) {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Add Plugin");
         fileChooser.getExtensionFilters()
                 .addAll(new FileChooser.ExtensionFilter("ProB2 Plugins", "*.jar"));
 
-        final File selectedPlugin = fileChooser.showOpenDialog(stageManager.getMainStage());
+        final File selectedPlugin = fileChooser.showOpenDialog(stage);
         if (selectedPlugin != null) {
             File pluginDirectory = new File(PLUGIN_DIRECTORY);
             if (!pluginDirectory.exists()) {

@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +39,7 @@ public class PluginMenu extends Menu {
     }
 
     @FXML
-    private void addPlugin() {
-        pluginManager.addPlugin();
-    }
+    private void addPlugin() {pluginManager.addPlugin();}
 
     @FXML
     private void reloadPlugins() {
@@ -50,9 +49,10 @@ public class PluginMenu extends Menu {
 
     @FXML
     private void showPluginMenu() {
-        injector.getInstance(PluginMenuStage.class).showAndWait();
-        //TODO: load and show a window where the user can de/activate and delete plugins
-
+        PluginMenuStage pluginMenuStage = injector.getInstance(PluginMenuStage.class);
+        pluginMenuStage.initModality(Modality.APPLICATION_MODAL);
+        pluginMenuStage.initOwner(stageManager.getMainStage());
+        pluginMenuStage.show();
     }
 
 }

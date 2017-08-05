@@ -90,7 +90,13 @@ public class PluginMenuStage extends Stage {
         activeCol.setCellValueFactory(param -> {
             final Plugin plugin = param.getValue();
             SimpleBooleanProperty booleanProp = new SimpleBooleanProperty(activePlugins.get(plugin));
-            booleanProp.addListener((observable, oldValue, newValue) -> activePlugins.put(plugin, newValue));
+            booleanProp.addListener((observable, oldValue, newValue) -> {
+                activePlugins.put(plugin, newValue);
+                if (newValue) {
+                    plugin.start(pluginManager);
+                } else {
+                    plugin.stop();
+                }});
             return booleanProp;
         });
 
@@ -105,7 +111,7 @@ public class PluginMenuStage extends Stage {
 
     @FXML
     private void addPlugin() {
-       pluginManager.addPlugin();
+       pluginManager.addPlugin(this);
     }
 
 }
