@@ -3,7 +3,6 @@ package de.prob2.ui.plugin;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MenuController;
@@ -40,6 +39,7 @@ public class PluginManager {
     private final StageManager stageManager;
 
     private ObservableMap<Plugin, Boolean> activePlugins;
+    private Map<Plugin, String> pluginFiles;
     //private List<Plugin> registeredPlugins;
 
 
@@ -56,11 +56,14 @@ public class PluginManager {
     }
 
     public ObservableMap<Plugin, Boolean> getActivePlugins(){
+        if (activePlugins == null) {
+            activePlugins = FXCollections.observableHashMap();
+        }
         return activePlugins;
     }
 
     public void loadPlugins() {
-        stopPlugins(); //stop and remove all plugins
+        stopPlugins(); //stop all plugins and remove them from the maps
         File pluginDirectory = new File(PLUGIN_DIRECTORY);
         if (!pluginDirectory.exists()) {
             if (!pluginDirectory.mkdirs()) {
@@ -78,6 +81,17 @@ public class PluginManager {
                     LOGGER.warn("\n\"{}\" is not a valid ProB-Plugin! \nThe following exception was thrown:", plugin.getName(), e);
                 }
             }
+        }
+    }
+
+    public void stopPlugins() {
+        if (activePlugins != null && !activePlugins.isEmpty()) {
+            activePlugins.forEach((plugin, active) -> {
+                if (active)
+                    plugin.stop();
+            });
+            activePlugins.clear();
+            pluginFiles.clear();
         }
     }
 
@@ -106,22 +120,69 @@ public class PluginManager {
         }
     }
 
-    public void stopPlugins() {
-        if (activePlugins != null && !activePlugins.isEmpty()) {
-            activePlugins.forEach((plugin, active) -> {
-                if (active)
-                plugin.stop();
-            });
-            activePlugins.clear();
+    public void removePlugin(Plugin plugin) {
+        if (activePlugins.get(plugin)) {
+            plugin.stop();
+        }
+        File pluginFile = new File(PLUGIN_DIRECTORY + File.separator + pluginFiles.get(plugin));
+        try {
+            Files.delete(pluginFile.toPath());
+        } catch (IOException e) {
+            stageManager.makeAlert(Alert.AlertType.WARNING,
+                    String.format("Could not delete the Jar-File of the plugin %s!" +
+                            "\nPlease try to delete it manually!", plugin.getName()),
+                    ButtonType.OK).show();
         }
     }
 
-    private void registerPlugin(@Nonnull final Plugin plugin, boolean active) {
+    private void registerPlugin(@Nonnull final Plugin plugin, boolean active, String fileName) {
         if (activePlugins == null) {
-            activePlugins = FXCollections.emptyObservableMap();
+            activePlugins = FXCollections.observableHashMap();
         }
         activePlugins.put(plugin, active);
+        if (pluginFiles == null) {
+            pluginFiles = new HashMap<>();
+        }
+        pluginFiles.put(plugin, fileName);
     }
+
+    private void loadPlugin(@Nonnull final JarFile pluginJar, boolean active) {
+        try {
+            URL[]  urls = new URL[]{ new URL("jar:file:" + pluginJar.getName() +"!/") };
+            URLClassLoader classLoader = URLClassLoader.newInstance(urls);
+
+            Enumeration<JarEntry> pluginEntries = pluginJar.entries();
+            boolean loadPlugin = false;
+            Class pluginClass = null;
+            while (pluginEntries.hasMoreElements()) {
+                JarEntry jarEntry = pluginEntries.nextElement();
+                if(jarEntry.isDirectory() || !jarEntry.getName().endsWith(".class")){
+                    continue;
+                }
+                String className = jarEntry.getName().substring(0,jarEntry.getName().length()-6);
+                className = className.replace('/', '.');
+                pluginClass = classLoader.loadClass(className);
+                if (pluginClass != null &&
+                        pluginClass.getSuperclass() != null &&
+                        pluginClass.getSuperclass().equals(Plugin.class)) {
+                    loadPlugin = true;
+                    break;
+                }
+            }
+            if (loadPlugin) {
+                LOGGER.info("Loading Plugin \"{}\"!", pluginJar.getName());
+                Plugin plugin = (Plugin) pluginClass.newInstance();
+                //TODO: check if the Plugin is already started, maybe in an other version and that the version of the plugin is sufficient for the used version of ProB
+                plugin.start(this);
+                registerPlugin(plugin, active, pluginJar.getName());
+            } else {
+                LOGGER.warn("\"{}\" is not a valid ProB-Plugin!", pluginJar.getName());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Exception while loading the Plugin \"{}\"", pluginJar.getName(), e);
+        }
+    }
+
 
     public void addTab(@Nonnull final Tab tab) {
         TabPane tabPane = injector.getInstance(MainView.class).getMainTabPane();
@@ -167,43 +228,6 @@ public class PluginManager {
         Accordion acc = accordion.getAccordion(injector);
         //TODO: react when the Accordion doesn't exist
         if (acc != null) acc.getPanes().add(position,pane);
-    }
-
-    private void loadPlugin(@Nonnull final JarFile plugin, boolean active) {
-        try {
-            URL[]  urls = new URL[]{ new URL("jar:file:" + plugin.getName() +"!/") };
-            URLClassLoader classLoader = URLClassLoader.newInstance(urls);
-
-            Enumeration<JarEntry> pluginEntries = plugin.entries();
-            boolean loadPlugin = false;
-            Class pluginClass = null;
-            while (pluginEntries.hasMoreElements()) {
-                JarEntry jarEntry = pluginEntries.nextElement();
-                if(jarEntry.isDirectory() || !jarEntry.getName().endsWith(".class")){
-                    continue;
-                }
-                String className = jarEntry.getName().substring(0,jarEntry.getName().length()-6);
-                className = className.replace('/', '.');
-                pluginClass = classLoader.loadClass(className);
-                if (pluginClass != null &&
-                        pluginClass.getSuperclass() != null &&
-                        pluginClass.getSuperclass().equals(Plugin.class)) {
-                    loadPlugin = true;
-                    break;
-                }
-            }
-            if (loadPlugin) {
-                LOGGER.info("Loading Plugin \"{}\"!", plugin.getName());
-                Plugin pl = (Plugin) pluginClass.newInstance();
-                //TODO: check if the Plugin is already started, maybe in an other version and that the version of the plugin is sufficient for the used version of ProB
-                pl.start(this);
-                registerPlugin(pl, active);
-            } else {
-                LOGGER.warn("\"{}\" is not a valid ProB-Plugin!", plugin.getName());
-            }
-        } catch (Exception e) {
-            LOGGER.error("Exception while loading the Plugin \"{}\"", plugin.getName(), e);
-        }
     }
 
 }

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.plugin.PluginMenuStage?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+<fx:root type="PluginMenuStage" title="Plugin Menu" minWidth="600" minHeight="500" width="600" height="500" xmlns:fx="http://javafx.com/fxml/1">
+    <scene>
+        <Scene stylesheets="@/prob.css">
+            <BorderPane maxHeight="Infinity" maxWidth="Infinity" minHeight="500" minWidth="600" >
+                <padding>
+                    <Insets left="10.0" right="10.0"/>
+                </padding>
+                <top>
+                    <HBox spacing="10.0" alignment="CENTER">
+                        <Text HBox.hgrow="NEVER" text="%pluginsmenu.search"/>
+                        <TextField fx:id="pluginSearch"
+                                onAction="#handlePluginSearch"
+                                promptText="%pluginsmenu.search.prompt" HBox.hgrow="ALWAYS"/>
+                        <padding>
+                            <Insets top="10.0" bottom="10.0"/>
+                        </padding>
+                   </HBox>
+                </top>
+                <center>
+                    <TableView fx:id="pluginTableView"
+                               style="-fx-border-width: 2px; -fx-border-color: #037875; -fx-focus-color: transparent; ">
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                        </columnResizePolicy>
+                        <columns>
+                            <TableColumn fx:id="nameCol" text="%pluginsmenu.columns.name" />
+                            <TableColumn fx:id="versionCol" text="%pluginsmenu.columns.version" maxWidth="100" minWidth="100"/>
+                            <TableColumn fx:id="activeCol" text="%pluginsmenu.columns.active"  maxWidth="100" minWidth="100"/>
+                        </columns>
+                        <placeholder>
+                            <Label text="%pluginsmenu.table.noPluginsLoaded"/>
+                        </placeholder>
+                    </TableView>
+                </center>
+                <bottom>
+                    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                        <Button text="%menu.plugin.items.add" onAction="#addPlugin"
+                                styleClass="button-blue"/>
+                        <padding>
+                            <Insets top="10.0" bottom="10.0"/>
+                        </padding>
+                    </HBox>
+                </bottom>
+           </BorderPane>
+       </Scene>
+    </scene>
+</fx:root>

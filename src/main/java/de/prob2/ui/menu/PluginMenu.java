@@ -1,10 +1,12 @@
 package de.prob2.ui.menu;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.plugin.Plugin;
 import de.prob2.ui.plugin.PluginManager;
+import de.prob2.ui.plugin.PluginMenuStage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -23,18 +25,15 @@ public class PluginMenu extends Menu {
     private static final Logger LOGGER = LoggerFactory.getLogger(PerspectivesMenu.class);
 
     private final PluginManager pluginManager;
+    private final Injector injector;
     private final StageManager stageManager;
 
-    @FXML
-    private Menu pluginsStopMenu;
-
-    @FXML
-    private MenuItem noPluginsMenuItem;
 
     @Inject
-    public PluginMenu(final StageManager stageManager, final PluginManager pluginManager) {
+    public PluginMenu(final StageManager stageManager, final PluginManager pluginManager, final Injector injector) {
         this.pluginManager = pluginManager;
         this.stageManager = stageManager;
+        this.injector = injector;
         stageManager.loadFXML(this, "pluginMenu.fxml");
     }
 
@@ -43,31 +42,17 @@ public class PluginMenu extends Menu {
         pluginManager.addPlugin();
     }
 
-    public void addPluginMenuItem(Plugin plugin) {
-        MenuItem stopEntry = new MenuItem(plugin.getName());
-        stopEntry.setOnAction((event) -> {
-            plugin.stop();
-            //pluginManager.unregisterPlugin(plugin);
-        });
-        stopEntry.setUserData(plugin);
-        pluginsStopMenu.getItems().add(stopEntry);
-        noPluginsMenuItem.setVisible(false);
+    @FXML
+    private void reloadPlugins() {
+        //TODO: show the user, that we are doing smth
+        pluginManager.loadPlugins();
     }
 
-    public void removePluginMenuItem(Plugin plugin) {
-        MenuItem stopItem = null;
-        for (MenuItem item : pluginsStopMenu.getItems()) {
-            if(item.getUserData() != null && item.getUserData().equals(plugin)) {
-                stopItem = item;
-                break;
-            }
-        }
-        if (stopItem != null) {
-            pluginsStopMenu.getItems().remove(stopItem);
-        }
-        if (pluginsStopMenu.getItems().size() == 1) {
-            noPluginsMenuItem.setVisible(true);
-        }
+    @FXML
+    private void showPluginMenu() {
+        injector.getInstance(PluginMenuStage.class).showAndWait();
+        //TODO: load and show a window where the user can de/activate and delete plugins
+
     }
 
 }
