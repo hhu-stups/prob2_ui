@@ -10,11 +10,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
@@ -22,7 +25,9 @@ import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Comparator;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
 
 /**
  * Created by Christoph Heinzen on 03.08.17.
@@ -36,6 +41,8 @@ public class PluginMenuStage extends Stage {
 
     @FXML
     private TableView pluginTableView;
+    @FXML
+    private TextField pluginSearchTextField;
     @FXML
     private TableColumn<Plugin, String> nameCol;
     @FXML
@@ -100,12 +107,18 @@ public class PluginMenuStage extends Stage {
             return booleanProp;
         });
 
-        pluginTableView.setItems(pluginList);
+        FilteredList<Plugin> pluginFilteredList = new FilteredList<>(pluginList,p -> true);
+        pluginSearchTextField.textProperty().addListener((observable, oldValue, newValue) ->
+                pluginFilteredList.setPredicate(plugin -> {
+                    if (newValue == null || newValue.isEmpty()) {
+                        return true;
+                    }
+                    return plugin.getName().toLowerCase().contains(newValue.toLowerCase());
+        }));
 
-    }
-
-    @FXML
-    private void handlePluginSearch() {
+        SortedList<Plugin> pluginSortedFilteredList = new SortedList<>(pluginFilteredList, Comparator.comparing(Plugin::getName));
+        pluginSortedFilteredList.comparatorProperty().bind(pluginTableView.comparatorProperty());
+        pluginTableView.setItems(pluginSortedFilteredList);
 
     }
 
@@ -113,5 +126,4 @@ public class PluginMenuStage extends Stage {
     private void addPlugin() {
        pluginManager.addPlugin(this);
     }
-
 }

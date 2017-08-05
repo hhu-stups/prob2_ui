@@ -18,8 +18,7 @@
                 <top>
                     <HBox spacing="10.0" alignment="CENTER">
                         <Text HBox.hgrow="NEVER" text="%pluginsmenu.search"/>
-                        <TextField fx:id="pluginSearch"
-                                onAction="#handlePluginSearch"
+                        <TextField fx:id="pluginSearchTextField"
                                 promptText="%pluginsmenu.search.prompt" HBox.hgrow="ALWAYS"/>
                         <padding>
                             <Insets top="10.0" bottom="10.0"/>
@@ -33,9 +32,10 @@
                             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                         </columnResizePolicy>
                         <columns>
-                            <TableColumn fx:id="nameCol" text="%pluginsmenu.columns.name" />
-                            <TableColumn fx:id="versionCol" text="%pluginsmenu.columns.version" maxWidth="100" minWidth="100" sortable="false"/>
-                            <TableColumn fx:id="activeCol" text="%pluginsmenu.columns.active"  maxWidth="100" minWidth="100" editable="true"/>
+                            <TableColumn fx:id="nameCol" text="%pluginsmenu.columns.name" editable="false"/>
+                            <TableColumn fx:id="versionCol" text="%pluginsmenu.columns.version"
+                                         maxWidth="100" minWidth="100" sortable="false" editable="false"/>
+                            <TableColumn fx:id="activeCol" text="%pluginsmenu.columns.active"  maxWidth="100" minWidth="100"/>
                         </columns>
                         <placeholder>
                             <Label text="%pluginsmenu.table.noPluginsLoaded"/>
