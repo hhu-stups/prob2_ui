@@ -128,11 +128,16 @@ public class PluginManager {
     public void removePlugin(Plugin plugin) {
         if (activePlugins.get(plugin)) {
             plugin.stop();
+            activePlugins.put(plugin, false);
+            //TODO: set the plugin to deactivated in the map
         }
-        File pluginFile = new File(PLUGIN_DIRECTORY + File.separator + pluginFiles.get(plugin));
+        File pluginFile = new File(pluginFiles.get(plugin));
         try {
             Files.delete(pluginFile.toPath());
+            activePlugins.remove(plugin);
+            pluginFiles.remove(plugin);
         } catch (IOException e) {
+            //TODO: get String from bundle
             stageManager.makeAlert(Alert.AlertType.WARNING,
                     String.format("Could not delete the Jar-File of the plugin %s!" +
                             "\nPlease try to delete it manually!", plugin.getName()),

@@ -12,14 +12,16 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.slf4j.Logger;
@@ -38,9 +40,10 @@ public class PluginMenuStage extends Stage {
 
     private final PluginManager pluginManager;
     private final ResourceBundle bundle;
+    private final StageManager stageManager;
 
     @FXML
-    private TableView pluginTableView;
+    private TableView<Plugin> pluginTableView;
     @FXML
     private TextField pluginSearchTextField;
     @FXML
@@ -51,16 +54,21 @@ public class PluginMenuStage extends Stage {
     private TableColumn<Plugin, Boolean> activeCol;
 
     @Inject
-    public PluginMenuStage(final StageManager stageManager, final PluginManager pluginManager, final ResourceBundle bundle) {
+    public PluginMenuStage(final StageManager stageManager,
+                           final PluginManager pluginManager,
+                           final ResourceBundle bundle) {
         this.pluginManager = pluginManager;
         this.bundle = bundle;
+        this.stageManager = stageManager;
         stageManager.loadFXML(this, "plugin_menu_stage.fxml");
     }
 
     @FXML
     private void initialize() {
+        //TODO: check if we really need a sortedList!
         ObservableMap<Plugin, Boolean> activePlugins = pluginManager.getActivePlugins();
         final ObservableList<Plugin> pluginList = FXCollections.observableArrayList(activePlugins.keySet());
+        pluginList.sort(Comparator.comparing(Plugin::getName));
 
         MapChangeListener<Plugin, Boolean> activePluginsListener = change -> {
                     boolean removed = change.wasRemoved();
@@ -79,8 +87,33 @@ public class PluginMenuStage extends Stage {
         activePlugins.addListener(activePluginsListener);
         this.setOnCloseRequest(closeEvent -> activePlugins.removeListener(activePluginsListener));
 
+        configureColumns(activePlugins);
+        configureContextMenu();
+
+        FilteredList<Plugin> pluginFilteredList = new FilteredList<>(pluginList,p -> true);
+        pluginSearchTextField.textProperty().addListener((observable, oldValue, newValue) ->
+                pluginFilteredList.setPredicate(plugin -> {
+                    if (newValue == null || newValue.isEmpty()) {
+                        return true;
+                    }
+                    return plugin.getName().toLowerCase().contains(newValue.toLowerCase());
+        }));
+
+        SortedList<Plugin> pluginSortedFilteredList = new SortedList<>(pluginFilteredList, Comparator.comparing(Plugin::getName));
+        pluginSortedFilteredList.comparatorProperty().bind(pluginTableView.comparatorProperty());
+        pluginTableView.setItems(pluginSortedFilteredList);
+        //pluginTableView.setItems(pluginFilteredList);
+    }
+
+    @FXML
+    private void addPlugin() {
+       pluginManager.addPlugin(this);
+    }
+
+    private void configureColumns(ObservableMap<Plugin, Boolean> activePlugins) {
         nameCol.setCellFactory(TextFieldTableCell.forTableColumn());
         nameCol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getName()));
+        nameCol.setSortType(TableColumn.SortType.ASCENDING);
 
         versionCol.setCellFactory(param -> {
             TextFieldTableCell<Plugin, String> cell = new TextFieldTableCell<>();
@@ -106,24 +139,29 @@ public class PluginMenuStage extends Stage {
                 }});
             return booleanProp;
         });
-
-        FilteredList<Plugin> pluginFilteredList = new FilteredList<>(pluginList,p -> true);
-        pluginSearchTextField.textProperty().addListener((observable, oldValue, newValue) ->
-                pluginFilteredList.setPredicate(plugin -> {
-                    if (newValue == null || newValue.isEmpty()) {
-                        return true;
-                    }
-                    return plugin.getName().toLowerCase().contains(newValue.toLowerCase());
-        }));
-
-        SortedList<Plugin> pluginSortedFilteredList = new SortedList<>(pluginFilteredList, Comparator.comparing(Plugin::getName));
-        pluginSortedFilteredList.comparatorProperty().bind(pluginTableView.comparatorProperty());
-        pluginTableView.setItems(pluginSortedFilteredList);
-
     }
 
-    @FXML
-    private void addPlugin() {
-       pluginManager.addPlugin(this);
+    private void configureContextMenu() {
+        pluginTableView.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEvent -> {
+            if (mouseEvent.getButton() == MouseButton.SECONDARY) {
+                Plugin plugin = pluginTableView.getSelectionModel().getSelectedItem();
+                if (plugin != null) {
+                    MenuItem removeMenuItem = new MenuItem(
+                            String.format(bundle.getString("pluginsmenu.table.contextmenu.remove"), plugin.getName()));
+                    removeMenuItem.setOnAction(event -> {
+                        Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+                                String.format(bundle.getString("pluginsmenu.table.dialog.remove.question"), plugin.getName()),
+                                ButtonType.YES, ButtonType.NO);
+                        dialog.setTitle(bundle.getString("pluginsmenu.table.dialog.title"));
+                        dialog.showAndWait().ifPresent(response -> {
+                            if (response == ButtonType.YES) {
+                                pluginManager.removePlugin(plugin);
+                            }
+                        });
+                    });
+                    new ContextMenu(removeMenuItem).show(pluginTableView, mouseEvent.getScreenX(), mouseEvent.getScreenY());
+                }
+            }
+        });
     }
 }
