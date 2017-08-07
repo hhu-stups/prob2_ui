@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.hildan.fxgson.FxGson;
@@ -25,12 +26,14 @@ import com.google.gson.Gson;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
@@ -41,12 +44,14 @@ public class ProjectManager {
 	private final Gson gson;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
+	private final RecentProjects recentProjects;
 
 	@Inject
-	public ProjectManager(CurrentProject currentProject, StageManager stageManager) {
+	public ProjectManager(CurrentProject currentProject, StageManager stageManager, RecentProjects recentProjects) {
 		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.recentProjects = recentProjects;
 	}
 
 	public void saveCurrentProject() {
@@ -74,8 +79,17 @@ public class ProjectManager {
 			setupRunconfigurations(project);
 			initializeLTL(project);
 		} catch (FileNotFoundException exc) {
-			stageManager.makeAlert(AlertType.ERROR, "The project file " + file + " could not be found.\nThe file was probably moved, renamed or deleted.", ButtonType.OK).showAndWait();
 			LOGGER.warn("Project file not found", exc);
+			Alert alert = stageManager.makeAlert(AlertType.ERROR,
+					"The project file " + file + " could not be found.\n"
+							+ "The file was probably moved, renamed or deleted.\n\n"
+							+ "Would you like to remove this project from the list of recent projects?",
+					ButtonType.YES, ButtonType.NO);
+			alert.setHeaderText("Project File not found.");
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
+				Platform.runLater(() -> recentProjects.remove(file.getAbsolutePath()));
+			}
 			return;
 		} catch (IOException exc) {
 			LOGGER.warn("Failed to open project file", exc);
@@ -83,6 +97,10 @@ public class ProjectManager {
 		}
 		currentProject.set(project);
 		currentProject.setSaved(true);
+		Platform.runLater(() -> {
+			this.recentProjects.remove(file.getAbsolutePath());
+			this.recentProjects.add(0, file.getAbsolutePath());
+		});
 	}
 
 	private void replaceMissingWithDefaults(Project project) {
@@ -100,7 +118,7 @@ public class ProjectManager {
 		project.setRunconfigurations(
 				(project.getRunconfigurations() == null) ? new HashSet<>() : project.getRunconfigurations());
 	}
-	
+
 	private void setupRunconfigurations(Project project) {
 		Set<Runconfiguration> newRunconfigs = new HashSet<>();
 		Map<String, Machine> machinesMap = getMachinesAsMap(project);
@@ -108,16 +126,16 @@ public class ProjectManager {
 		for (Runconfiguration runconfig : project.getRunconfigurations()) {
 			Machine m = machinesMap.get(runconfig.getMachineName());
 			Preference p = prefsMap.get(runconfig.getPreferenceName());
-			if(p == null) {
+			if (p == null) {
 				p = new DefaultPreference();
 			}
 			newRunconfigs.add(new Runconfiguration(m, p));
 		}
 		project.setRunconfigurations(newRunconfigs);
 	}
-	
+
 	private void initializeLTL(Project project) {
-		for(Machine machine: project.getMachines()) {
+		for (Machine machine : project.getMachines()) {
 			machine.initializeLTLStatus();
 			machine.initializeCBCStatus();
 		}
@@ -125,7 +143,7 @@ public class ProjectManager {
 
 	private Map<String, Preference> getPreferencesAsMap(Project project) {
 		Map<String, Preference> prefsMap = new HashMap<>();
-		for(Preference p: project.getPreferences()) {
+		for (Preference p : project.getPreferences()) {
 			prefsMap.put(p.getName(), p);
 		}
 		return prefsMap;

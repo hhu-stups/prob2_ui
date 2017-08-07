@@ -140,8 +140,6 @@ public class FileMenu extends Menu {
 
 		Platform.runLater(() -> {
 			injector.getInstance(ModelcheckingController.class).resetView();
-			this.recentProjects.remove(file.getAbsolutePath());
-			this.recentProjects.add(0, file.getAbsolutePath());
 		});
 	}
 
