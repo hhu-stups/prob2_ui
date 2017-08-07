@@ -125,7 +125,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
 			@Override
 			public void traceChange(final Trace currentTrace, final boolean currentAnimationChanged) {
-				if (!currentTrace.getCurrentState().isExplored()) {
+				if (currentTrace != null && !currentTrace.getCurrentState().isExplored()) {
 					currentTrace.getCurrentState().explore();
 				}
 				// Has to be a lambda. For some reason, using a method reference here causes an IllegalAccessError at runtime.
