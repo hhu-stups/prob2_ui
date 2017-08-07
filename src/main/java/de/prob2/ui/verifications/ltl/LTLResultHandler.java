@@ -114,7 +114,7 @@ public class LTLResultHandler {
 	
 	public void handlePatternResult(LTLParseListener parseListener, AbstractCheckableItem item, boolean byInit) {
 		LTLResultItem resultItem = null;
-		if(parseListener.getErrorMarkers().size() == 0) {
+		if(parseListener.getErrorMarkers().isEmpty()) {
 			resultItem = new LTLResultItem(AlertType.INFORMATION, Checked.SUCCESS, "Parsing LTL Pattern succeeded", "Success");
 			item.setCheckedSuccessful();
 		} else {
