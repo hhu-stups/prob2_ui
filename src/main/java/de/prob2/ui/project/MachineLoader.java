@@ -86,7 +86,7 @@ public class MachineLoader {
 			} catch (FileNotFoundException e) {
 				LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
 				Platform.runLater(() -> {
-					Alert alert = stageManager.makeAlert(AlertType.ERROR, "The machine file" + getPathToMachine(machine)
+					Alert alert = stageManager.makeAlert(AlertType.ERROR, "The machine file " + getPathToMachine(machine)
 							+ " could not be found.\n" + "The file was probably moved, renamed or deleted.\n");
 					alert.setHeaderText("Project File not found.");
 					alert.showAndWait();
