@@ -60,7 +60,6 @@ public class CBCView extends AnchorPane {
 		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "cbc_view.fxml");
-
 	}
 	
 	@FXML
@@ -110,8 +109,9 @@ public class CBCView extends AnchorPane {
 				currentProject.getLocation()));
 	}
 	
-	public void refreshMachines() {
+	public void refresh() {
 		tvMachines.refresh();
+		tvFormula.refresh();
 	}
 		
 }

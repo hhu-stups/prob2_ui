@@ -250,8 +250,8 @@ public class Machine {
 		cbcFormulas.remove(formula);
 	}
 	
-	public ListProperty<CBCFormulaItem> getCBCFormulas() {
-		return cbcFormulas;
+	public List<CBCFormulaItem> getCBCFormulas() {
+		return cbcFormulas.get();
 	}
 	
 		

@@ -74,7 +74,9 @@ public class CBCInvariants extends Stage {
 		CBCFormulaItem formula = new CBCFormulaItem(item, "INVARIANT", "");
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
 		if(currentMachine != null) {
-			currentMachine.addCBCFormula(formula);
+			if(!currentMachine.getCBCFormulas().contains(formula)) {
+				currentMachine.addCBCFormula(formula);
+			}
 		}
 		injector.getInstance(CBCView.class).updateProject();
 		this.close();
@@ -93,8 +95,10 @@ public class CBCInvariants extends Stage {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
 		try {
 			IModelCheckingResult result = checker.call();
-			int size = currentMachine.getCBCFormulas().size();
-			CBCFormulaItem item = currentMachine.getCBCFormulas().get(size-1);
+			CBCFormulaItem item = currentMachine.getCBCFormulas()
+									.stream()
+									.filter(current -> name.equals(current.getName()))
+									.findFirst().get();
 			if(result instanceof ModelCheckOk) {
 				item.setCheckedSuccessful();
 				item.setChecked(Checked.SUCCESS);
@@ -103,11 +107,11 @@ public class CBCInvariants extends Stage {
 				item.setChecked(Checked.FAIL);
 			}
 		} catch (Exception e) {
-			
+			LOGGER.error("Could not parse CBC Formula: ", e.getMessage());
 		}
 		CBCView cbcView = injector.getInstance(CBCView.class);
 		cbcView.updateMachineStatus(currentMachine);
-		cbcView.refreshMachines();
+		cbcView.refresh();
 	}
 	
 	@FXML
