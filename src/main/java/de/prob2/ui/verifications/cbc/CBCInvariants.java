@@ -65,7 +65,7 @@ public class CBCInvariants extends Stage {
 		if(item == null) {
 			return;
 		}
-		CBCFormulaItem formula = new CBCFormulaItem(item, "INVARIANT", "");
+		CBCFormulaItem formula = new CBCFormulaItem(item, "", CBCFormulaItem.CBCType.INVARIANT);
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
 		if(currentMachine != null) {
 			if(!currentMachine.getCBCFormulas().contains(formula)) {

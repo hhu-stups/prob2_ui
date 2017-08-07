@@ -96,7 +96,11 @@ public class CBCView extends AnchorPane {
 			MenuItem check = new MenuItem("Check separately");
 			check.setOnAction(e-> {
 				CBCFormulaItem item = row.getItem();
-				cbcChecker.checkInvariant(item.getName());
+				if(item.getType() == CBCFormulaItem.CBCType.INVARIANT) {
+					cbcChecker.checkInvariant(item.getName());
+				} else if(item.getType() == CBCFormulaItem.CBCType.DEADLOCK) {
+					cbcChecker.checkDeadlock(item.getCode());
+				}
 			});
 			
 			MenuItem removeItem = new MenuItem("Remove Formula");

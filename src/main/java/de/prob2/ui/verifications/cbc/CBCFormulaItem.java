@@ -5,9 +5,16 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 import java.util.Objects;
 
 public class CBCFormulaItem extends AbstractCheckableItem {
+	
+	public enum CBCType {
+		INVARIANT,SEQUENCE,DEADLOCK
+	}
+	
+	private CBCType type;
 
-	public CBCFormulaItem(String name, String description, String code) {
-		super(name, description, code);
+	public CBCFormulaItem(String name, String code, CBCType type) {
+		super(name, type.name(), code);
+		this.type = type;
 	}
 	
 	@Override
@@ -26,5 +33,10 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 	public int hashCode() {
 		return Objects.hash(name, description, code);
 	}
+	
+	public CBCType getType() {
+		return type;
+	}
+	
 
 }
