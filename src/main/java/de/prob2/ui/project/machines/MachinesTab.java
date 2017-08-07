@@ -110,7 +110,7 @@ public class MachinesTab extends Tab {
 			item.setOnAction(e -> currentProject.startAnimation(runconfiguration));
 			startAnimationMenu.getItems().add(item);
 		}
-		if (startAnimationMenu.getItems().size() == 0) {
+		if (startAnimationMenu.getItems().isEmpty()) {
 			startAnimationMenu.setDisable(true);
 		}
 	}
