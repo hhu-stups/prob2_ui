@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
+import de.prob.animator.domainobjects.EventB;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
@@ -35,12 +38,12 @@ public class CBCChecker {
 		event.add(name);
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		CBCFormulaItem item = currentMachine.getCBCFormulas()
+				.stream()
+				.filter(current -> name.equals(current.getName()))
+				.findFirst().get();
 		try {
 			IModelCheckingResult result = checker.call();
-			CBCFormulaItem item = currentMachine.getCBCFormulas()
-									.stream()
-									.filter(current -> name.equals(current.getName()))
-									.findFirst().get();
 			if(result instanceof ModelCheckOk) {
 				item.setCheckedSuccessful();
 				item.setChecked(Checked.SUCCESS);
@@ -50,6 +53,35 @@ public class CBCChecker {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Could not check CBC Invariant: ", e.getMessage());
+			item.setCheckedFailed();
+			item.setChecked(Checked.FAIL);
+		}
+		CBCView cbcView = injector.getInstance(CBCView.class);
+		cbcView.updateMachineStatus(currentMachine);
+		cbcView.refresh();
+	}
+	
+	public void checkDeadlock(String code) {
+		IEvalElement constraint = new EventB(code); 
+		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
+		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		CBCFormulaItem item = currentMachine.getCBCFormulas()
+				.stream()
+				.filter(current -> code.equals(current.getCode()))
+				.findFirst().get();
+		try {
+			IModelCheckingResult result = checker.call();
+			if(result instanceof ModelCheckOk) {
+				item.setCheckedSuccessful();
+				item.setChecked(Checked.SUCCESS);
+			} else {
+				item.setCheckedFailed();
+				item.setChecked(Checked.FAIL);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Could not check CBC Deadlock: ", e.getMessage());
+			item.setCheckedFailed();
+			item.setChecked(Checked.FAIL);
 		}
 		CBCView cbcView = injector.getInstance(CBCView.class);
 		cbcView.updateMachineStatus(currentMachine);
