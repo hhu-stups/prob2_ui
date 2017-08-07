@@ -155,6 +155,11 @@ public class Machine {
 	public void initializeCBCStatus() {
 		this.cbcstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.cbcstatus.setFill(Color.BLUE);
+		if (cbcFormulas != null) {
+			for (CBCFormulaItem item : cbcFormulas) {
+				item.initializeStatus();
+			}
+		}
 	}
 	
 	public FontAwesomeIconView getLTLStatus() {
@@ -250,8 +255,8 @@ public class Machine {
 		cbcFormulas.remove(formula);
 	}
 	
-	public ListProperty<CBCFormulaItem> getCBCFormulas() {
-		return cbcFormulas;
+	public List<CBCFormulaItem> getCBCFormulas() {
+		return cbcFormulas.get();
 	}
 	
 		
