@@ -41,7 +41,6 @@ public class PluginManager {
 
     private ObservableMap<Plugin, Boolean> activePlugins;
     private Map<Plugin, String> pluginFiles;
-    //private List<Plugin> registeredPlugins;
 
 
     //TODO: test what happens when two plugins use the same library in different versions and what happens when two plugins have the same package structure
@@ -61,6 +60,13 @@ public class PluginManager {
             activePlugins = FXCollections.observableHashMap();
         }
         return activePlugins;
+    }
+
+    public Map<Plugin, String> getPluginFiles() {
+        if (pluginFiles == null) {
+            pluginFiles = new HashMap<>();
+        }
+        return pluginFiles;
     }
 
     public void loadPlugins() {
@@ -86,13 +92,13 @@ public class PluginManager {
     }
 
     public void stopPlugins() {
-        if (activePlugins != null && !activePlugins.isEmpty()) {
-            activePlugins.forEach((plugin, active) -> {
+        if (!getActivePlugins().isEmpty()) {
+            getActivePlugins().forEach((plugin, active) -> {
                 if (active)
                     plugin.stop();
             });
-            activePlugins.clear();
-            pluginFiles.clear();
+            getActivePlugins().clear();
+            getActivePlugins().clear();
         }
     }
 
@@ -126,34 +132,22 @@ public class PluginManager {
     }
 
     public void removePlugin(Plugin plugin) {
-        if (activePlugins.get(plugin)) {
+        if (getActivePlugins().get(plugin)) {
             plugin.stop();
-            activePlugins.put(plugin, false);
-            //TODO: set the plugin to deactivated in the map
+            getActivePlugins().put(plugin, false);
         }
-        File pluginFile = new File(pluginFiles.get(plugin));
+        File pluginFile = new File(getPluginFiles().get(plugin));
         try {
             Files.delete(pluginFile.toPath());
-            activePlugins.remove(plugin);
-            pluginFiles.remove(plugin);
+            getActivePlugins().remove(plugin);
+            getPluginFiles().remove(plugin);
         } catch (IOException e) {
-            //TODO: get String from bundle
+            LOGGER.warn("Couldn't delete the Jar-File of the plugin {}!\nThe following exception was thrown:", plugin.getName(), e);
             stageManager.makeAlert(Alert.AlertType.WARNING,
                     String.format("Could not delete the Jar-File of the plugin %s!" +
                             "\nPlease try to delete it manually!", plugin.getName()),
                     ButtonType.OK).show();
         }
-    }
-
-    private void registerPlugin(@Nonnull final Plugin plugin, boolean active, String fileName) {
-        if (activePlugins == null) {
-            activePlugins = FXCollections.observableHashMap();
-        }
-        activePlugins.put(plugin, active);
-        if (pluginFiles == null) {
-            pluginFiles = new HashMap<>();
-        }
-        pluginFiles.put(plugin, fileName);
     }
 
     private void loadPlugin(@Nonnull final JarFile pluginJar, boolean active) {
@@ -182,9 +176,12 @@ public class PluginManager {
             if (loadPlugin) {
                 LOGGER.info("Loading Plugin \"{}\"!", pluginJar.getName());
                 Plugin plugin = (Plugin) pluginClass.newInstance();
-                //TODO: check if the Plugin is already started, maybe in an other version and that the version of the plugin is sufficient for the used version of ProB
+                //TODO: check if the Plugin is already loaded, maybe in an other version and that the version of the plugin is sufficient for the used version of ProB
+                getActivePlugins().put(plugin, false);
+                getPluginFiles().put(plugin, pluginJar.getName());
+                //TODO: check here if the plugin should be started or not
                 plugin.start(this);
-                registerPlugin(plugin, active, pluginJar.getName());
+                getActivePlugins().put(plugin, active);
             } else {
                 LOGGER.warn("\"{}\" is not a valid ProB-Plugin!", pluginJar.getName());
             }

@@ -9,6 +9,8 @@ public abstract class Plugin {
     private final String name;
     private final UUID uuid;
 
+    boolean started = false;
+
     protected Plugin (String name, String version, int internalVersion, UUID uuid) {
         this.name = name;
         this.version = version;
@@ -16,23 +18,37 @@ public abstract class Plugin {
         this.uuid = uuid;
     }
 
-    public abstract void start(PluginManager manager);
+    public void start(PluginManager manager){
+        if (!this.started) {
+            this.safeStart(manager);
+            this.started = true;
+        }
+    }
 
-    public abstract void stop();
+    public void stop(){
+        if (this.started) {
+            this.safeStop();
+            this.started = false;
+        }
+    }
+
+    protected abstract void safeStart(PluginManager manager);
+
+    protected abstract void safeStop();
 
     public int getInternalVersion() {
-        return internalVersion;
+        return this.internalVersion;
     }
 
     public String getVersion() {
-        return version;
+        return this.version;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public UUID getUuid() {
-        return uuid;
+        return this.uuid;
     }
 }
