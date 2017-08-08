@@ -1,7 +1,6 @@
 package de.prob2.ui;
 
 import java.io.File;
-import java.util.Locale;
 import java.util.Optional;
 
 import com.google.inject.Guice;
@@ -86,11 +85,6 @@ public class ProB2 extends Application {
 		this.primaryStage.setTitle(title.toString());
 	}
 
-	@Override
-	public void init() {
-		Locale.setDefault(Locale.ENGLISH);
-	}
-	
 	@Override
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
