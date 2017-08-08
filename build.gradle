@@ -124,9 +124,9 @@ sonarqube {
 
 task fatJar(type: Jar) {
 	manifest {
-        attributes 'Main-Class': 'de.prob2.ui.ProB2'
-    }
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+		attributes 'Main-Class': 'de.prob2.ui.ProB2'
+	}
+	baseName = project.name + '-all'
+	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	with jar
 }
