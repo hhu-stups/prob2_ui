@@ -46,6 +46,8 @@
                     <HBox spacing="10.0" alignment="CENTER_RIGHT">
                         <Button text="%menu.plugin.items.add" onAction="#addPlugin"
                                 styleClass="button-blue"/>
+                        <Button text="%menu.plugin.items.reload" onAction="#reloadPlugins"
+                                styleClass="button-blue"/>
                         <padding>
                             <Insets top="10.0" bottom="10.0"/>
                         </padding>

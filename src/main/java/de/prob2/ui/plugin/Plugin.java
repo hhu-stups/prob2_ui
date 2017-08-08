@@ -9,7 +9,7 @@ public abstract class Plugin {
     private final String name;
     private final UUID uuid;
 
-    boolean started = false;
+    private boolean started = false;
 
     protected Plugin (String name, String version, int internalVersion, UUID uuid) {
         this.name = name;
@@ -20,14 +20,14 @@ public abstract class Plugin {
 
     public void start(PluginManager manager){
         if (!this.started) {
-            this.safeStart(manager);
+            safeStart(manager);
             this.started = true;
         }
     }
 
     public void stop(){
         if (this.started) {
-            this.safeStop();
+            safeStop();
             this.started = false;
         }
     }

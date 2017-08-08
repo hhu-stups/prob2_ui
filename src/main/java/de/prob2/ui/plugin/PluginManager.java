@@ -38,6 +38,7 @@ public class PluginManager {
     private final Injector injector;
     private final CurrentTrace currentTrace;
     private final StageManager stageManager;
+    private final ResourceBundle bundle;
 
     private ObservableMap<Plugin, Boolean> activePlugins;
     private Map<Plugin, String> pluginFiles;
@@ -46,10 +47,11 @@ public class PluginManager {
     //TODO: test what happens when two plugins use the same library in different versions and what happens when two plugins have the same package structure
 
     @Inject
-    public PluginManager(Injector injector, CurrentTrace currentTrace, StageManager stageManager){
+    public PluginManager(Injector injector, CurrentTrace currentTrace, StageManager stageManager, ResourceBundle bundle){
         this.injector = injector;
         this.currentTrace = currentTrace;
         this.stageManager = stageManager;
+        this.bundle = bundle;
         this.currentTrace.addListener((observable, oldValue, newValue) -> {
             //TODO: implement
         });
@@ -108,7 +110,7 @@ public class PluginManager {
 
     public void addPlugin(@Nonnull Stage stage) {
         final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Add Plugin");
+        fileChooser.setTitle(bundle.getString("menu.plugin.items.add"));
         fileChooser.getExtensionFilters()
                 .addAll(new FileChooser.ExtensionFilter("ProB2 Plugins", "*.jar"));
 

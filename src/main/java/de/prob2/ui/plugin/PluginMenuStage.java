@@ -18,15 +18,21 @@ import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.ResourceBundle;
 import java.util.function.Predicate;
@@ -65,7 +71,6 @@ public class PluginMenuStage extends Stage {
 
     @FXML
     private void initialize() {
-        //TODO: check if we really need a sortedList!
         ObservableMap<Plugin, Boolean> activePlugins = pluginManager.getActivePlugins();
         final ObservableList<Plugin> pluginList = FXCollections.observableArrayList(activePlugins.keySet());
         pluginList.sort(Comparator.comparing(Plugin::getName));
@@ -102,12 +107,16 @@ public class PluginMenuStage extends Stage {
         SortedList<Plugin> pluginSortedFilteredList = new SortedList<>(pluginFilteredList, Comparator.comparing(Plugin::getName));
         pluginSortedFilteredList.comparatorProperty().bind(pluginTableView.comparatorProperty());
         pluginTableView.setItems(pluginSortedFilteredList);
-        //pluginTableView.setItems(pluginFilteredList);
     }
 
     @FXML
     private void addPlugin() {
        pluginManager.addPlugin(this);
+    }
+
+    @FXML
+    private void reloadPlugins() {
+        pluginManager.loadPlugins();
     }
 
     private void configureColumns(ObservableMap<Plugin, Boolean> activePlugins) {
@@ -131,11 +140,22 @@ public class PluginMenuStage extends Stage {
             final Plugin plugin = param.getValue();
             SimpleBooleanProperty booleanProp = new SimpleBooleanProperty(activePlugins.get(plugin));
             booleanProp.addListener((observable, oldValue, newValue) -> {
-                activePlugins.put(plugin, newValue);
                 if (newValue) {
-                    plugin.start(pluginManager);
+                    try {
+                        plugin.start(pluginManager);
+                        activePlugins.put(plugin, true);
+                    } catch (Exception e) {
+                        LOGGER.warn("Could not start the plugin {}. The following exception was thrown:", plugin.getName(), e);
+                        activePlugins.put(plugin, false);
+                    }
                 } else {
-                    plugin.stop();
+                    try {
+                        plugin.stop();
+                        activePlugins.put(plugin, false);
+                    } catch (Exception e) {
+                        LOGGER.warn("Could not stop the plugin {}. The following exception was thrown:", plugin.getName(), e);
+                        activePlugins.put(plugin, true);
+                    }
                 }});
             return booleanProp;
         });
@@ -146,6 +166,14 @@ public class PluginMenuStage extends Stage {
             if (mouseEvent.getButton() == MouseButton.SECONDARY) {
                 Plugin plugin = pluginTableView.getSelectionModel().getSelectedItem();
                 if (plugin != null) {
+                    MenuItem restartItem = new MenuItem(
+                            String.format(bundle.getString("pluginsmenu.table.contextmenu.restart"), plugin.getName()));
+                    restartItem.setOnAction(event -> {
+                        plugin.stop();
+                        pluginManager.getActivePlugins().put(plugin, false);
+                        plugin.start(pluginManager);
+                        pluginManager.getActivePlugins().put(plugin, true);
+                    });
                     MenuItem removeMenuItem = new MenuItem(
                             String.format(bundle.getString("pluginsmenu.table.contextmenu.remove"), plugin.getName()));
                     removeMenuItem.setOnAction(event -> {
@@ -159,7 +187,8 @@ public class PluginMenuStage extends Stage {
                             }
                         });
                     });
-                    new ContextMenu(removeMenuItem).show(pluginTableView, mouseEvent.getScreenX(), mouseEvent.getScreenY());
+                    new ContextMenu(restartItem, removeMenuItem)
+                            .show(pluginTableView, mouseEvent.getScreenX(), mouseEvent.getScreenY());
                 }
             }
         });
