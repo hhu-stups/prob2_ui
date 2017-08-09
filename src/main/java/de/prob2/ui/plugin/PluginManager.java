@@ -97,10 +97,41 @@ public class PluginManager {
         if (!getActivePlugins().isEmpty()) {
             getActivePlugins().forEach((plugin, active) -> {
                 if (active)
-                    plugin.stop();
+                    stopPlugin(plugin);
             });
+            //TODO: check if all plugins were stopped
             getActivePlugins().clear();
-            getActivePlugins().clear();
+            getPluginFiles().clear();
+        }
+    }
+
+    public boolean startPlugin(Plugin plugin){
+        try {
+            plugin.start(this);
+            getActivePlugins().put(plugin, true);
+            return true;
+        } catch (Exception e) {
+            LOGGER.warn("Could not start the plugin {}. The following exception was thrown:", plugin.getName(), e);
+            getActivePlugins().put(plugin, false);
+            stageManager.makeAlert(Alert.AlertType.WARNING,
+                    String.format(bundle.getString("plugins.error.start"), plugin.getName()),
+                    ButtonType.OK).show();
+            return false;
+        }
+    }
+
+    public boolean stopPlugin(Plugin plugin){
+        try {
+            plugin.stop();
+            getActivePlugins().put(plugin, false);
+            return true;
+        } catch (Exception e) {
+            LOGGER.warn("Could not stop the plugin {}. The following exception was thrown:", plugin.getName(), e);
+            getActivePlugins().put(plugin, true);
+            stageManager.makeAlert(Alert.AlertType.WARNING,
+                    String.format(bundle.getString("plugins.error.stop"), plugin.getName()),
+                    ButtonType.OK).show();
+            return false;
         }
     }
 
@@ -135,8 +166,8 @@ public class PluginManager {
 
     public void removePlugin(Plugin plugin) {
         if (getActivePlugins().get(plugin)) {
-            plugin.stop();
-            getActivePlugins().put(plugin, false);
+            //TODO: react when the plugin couldn't get stopped
+            stopPlugin(plugin);
         }
         File pluginFile = new File(getPluginFiles().get(plugin));
         try {
@@ -182,8 +213,7 @@ public class PluginManager {
                 getActivePlugins().put(plugin, false);
                 getPluginFiles().put(plugin, pluginJar.getName());
                 //TODO: check here if the plugin should be started or not
-                plugin.start(this);
-                getActivePlugins().put(plugin, active);
+                startPlugin(plugin);
             } else {
                 LOGGER.warn("\"{}\" is not a valid ProB-Plugin!", pluginJar.getName());
             }

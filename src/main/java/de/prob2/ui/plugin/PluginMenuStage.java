@@ -1,6 +1,9 @@
 package de.prob2.ui.plugin;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
+import de.prob2.ui.internal.GuiceBuilderFactory;
 import de.prob2.ui.internal.StageManager;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -104,7 +107,7 @@ public class PluginMenuStage extends Stage {
                     return plugin.getName().toLowerCase().contains(newValue.toLowerCase());
         }));
 
-        SortedList<Plugin> pluginSortedFilteredList = new SortedList<>(pluginFilteredList, Comparator.comparing(Plugin::getName));
+        SortedList<Plugin> pluginSortedFilteredList = new SortedList<>(pluginFilteredList);
         pluginSortedFilteredList.comparatorProperty().bind(pluginTableView.comparatorProperty());
         pluginTableView.setItems(pluginSortedFilteredList);
     }
@@ -141,21 +144,9 @@ public class PluginMenuStage extends Stage {
             SimpleBooleanProperty booleanProp = new SimpleBooleanProperty(activePlugins.get(plugin));
             booleanProp.addListener((observable, oldValue, newValue) -> {
                 if (newValue) {
-                    try {
-                        plugin.start(pluginManager);
-                        activePlugins.put(plugin, true);
-                    } catch (Exception e) {
-                        LOGGER.warn("Could not start the plugin {}. The following exception was thrown:", plugin.getName(), e);
-                        activePlugins.put(plugin, false);
-                    }
+                    pluginManager.startPlugin(plugin);
                 } else {
-                    try {
-                        plugin.stop();
-                        activePlugins.put(plugin, false);
-                    } catch (Exception e) {
-                        LOGGER.warn("Could not stop the plugin {}. The following exception was thrown:", plugin.getName(), e);
-                        activePlugins.put(plugin, true);
-                    }
+                    pluginManager.stopPlugin(plugin);
                 }});
             return booleanProp;
         });
@@ -169,10 +160,9 @@ public class PluginMenuStage extends Stage {
                     MenuItem restartItem = new MenuItem(
                             String.format(bundle.getString("pluginsmenu.table.contextmenu.restart"), plugin.getName()));
                     restartItem.setOnAction(event -> {
-                        plugin.stop();
-                        pluginManager.getActivePlugins().put(plugin, false);
-                        plugin.start(pluginManager);
-                        pluginManager.getActivePlugins().put(plugin, true);
+                        if(pluginManager.stopPlugin(plugin)) {
+                            pluginManager.startPlugin(plugin);
+                        }
                     });
                     MenuItem removeMenuItem = new MenuItem(
                             String.format(bundle.getString("pluginsmenu.table.contextmenu.remove"), plugin.getName()));

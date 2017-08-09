@@ -18,14 +18,14 @@ public abstract class Plugin {
         this.uuid = uuid;
     }
 
-    public void start(PluginManager manager){
+    public void start(PluginManager manager) {
         if (!this.started) {
             safeStart(manager);
-            this.started = true;
+            this.started= true;
         }
     }
 
-    public void stop(){
+    public void stop() {
         if (this.started) {
             safeStop();
             this.started = false;
