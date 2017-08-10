@@ -85,8 +85,7 @@ public class CBCFormulaHandler {
 			}
 		}
 	}
-	
-	
+		
 	private void updateMachine(Machine machine) {
 		CBCView cbcView = injector.getInstance(CBCView.class);
 		cbcView.updateMachineStatus(machine);

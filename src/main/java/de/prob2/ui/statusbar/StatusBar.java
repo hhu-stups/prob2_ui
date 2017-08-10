@@ -40,6 +40,10 @@ public class StatusBar extends HBox {
 		ERROR, SUCCESSFUL;
 	}
 	
+	public enum CBCStatus {
+		ERROR, SUCCESSFUL;
+	}
+	
 	@FXML private Label errorsLabel;
 	
 	private final ResourceBundle resourceBundle;
@@ -47,6 +51,7 @@ public class StatusBar extends HBox {
 	
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
 	private final ObjectProperty<StatusBar.LTLStatus> ltlStatus;
+	private final ObjectProperty<StatusBar.CBCStatus> cbcStatus;
 	
 	@Inject
 	private StatusBar(final ResourceBundle resourceBundle, final CurrentTrace currentTrace, final StageManager stageManager) {
@@ -57,6 +62,7 @@ public class StatusBar extends HBox {
 		
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
 		this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", StatusBar.LTLStatus.SUCCESSFUL);
+		this.cbcStatus = new SimpleObjectProperty<>(this, "cbcStatus", StatusBar.CBCStatus.SUCCESSFUL);
 		
 		stageManager.loadFXML(this, "status_bar.fxml");
 	}
@@ -66,6 +72,7 @@ public class StatusBar extends HBox {
 		this.currentTrace.addListener((observable, from, to) -> this.update());
 		this.loadingStatusProperty().addListener((observable, from, to) -> this.update());
 		this.ltlStatusProperty().addListener((observable, from, to) -> this.update());
+		this.cbcStatusProperty().addListener((observable, from, to) -> this.update());
 	}
 	
 	public ObjectProperty<StatusBar.LoadingStatus> loadingStatusProperty() {
@@ -87,9 +94,21 @@ public class StatusBar extends HBox {
 	public StatusBar.LTLStatus getLtlStatus() {
 		return this.ltlStatusProperty().get();
 	}
-	
+		
 	public void setLtlStatus(final StatusBar.LTLStatus ltlStatus) {
 		this.ltlStatusProperty().set(ltlStatus);
+	}
+	
+	public ObjectProperty<StatusBar.CBCStatus> cbcStatusProperty() {
+		return this.cbcStatus;
+	}
+	
+	public StatusBar.CBCStatus getCbcStatus() {
+		return this.cbcStatusProperty().get();
+	}
+	
+	public void setCbcStatus(final StatusBar.CBCStatus cbcStatus) {
+		this.cbcStatusProperty().set(cbcStatus);
 	}
 	
 	private void update() {
@@ -104,6 +123,10 @@ public class StatusBar extends HBox {
 			}
 			if (this.getLtlStatus() == StatusBar.LTLStatus.ERROR) {
 				errorMessages.add(resourceBundle.getString("statusbar.errors.ltlError"));
+			}
+			
+			if (this.getCbcStatus() == StatusBar.CBCStatus.ERROR) {
+				errorMessages.add(resourceBundle.getString("statusbar.errors.cbcError"));
 			}
 			
 			if (errorMessages.isEmpty()) {

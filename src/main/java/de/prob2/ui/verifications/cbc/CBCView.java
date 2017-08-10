@@ -10,6 +10,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.MachineTableView.CheckingType;
@@ -146,10 +147,12 @@ public class CBCView extends AnchorPane {
 		for(CBCFormulaItem formula : machine.getCBCFormulas()) {
 			if(formula.getChecked() == Checked.FAIL) {
 				machine.setCBCCheckedFailed();
+				injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.ERROR);
 				return;
 			}
 		}
 		machine.setCBCCheckedSuccessful();
+		injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.SUCCESSFUL);
 	}
 	
 	public void updateProject() {
