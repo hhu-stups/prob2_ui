@@ -54,6 +54,17 @@ public class LTLFormulaChecker {
 		injector.getInstance(StatusBar.class).setLtlStatus(failed ? StatusBar.LTLStatus.ERROR : StatusBar.LTLStatus.SUCCESSFUL);
 	}
 	
+	public void checkMachineStatus(Machine machine) {
+		machine.getLTLFormulas().forEach(item-> {
+			Checked checked = item.getChecked();
+			if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
+				machine.setLTLCheckedFailed();
+				return;
+			}
+		});
+		machine.setLTLCheckedSuccessful();
+	}
+	
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
 		State stateid = currentTrace.getCurrentState();
 		LtlParser parser = new LtlParser(item.getCode());

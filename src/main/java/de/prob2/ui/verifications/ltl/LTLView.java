@@ -1,7 +1,5 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.util.ArrayList;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -168,7 +166,8 @@ public class LTLView extends AnchorPane{
 				LTLFormulaItem item = row.getItem();
 				Checked result = checkFormula(item, machine);
 				item.setChecked(result);
-				checkMachineStatus(machine);
+				checker.checkMachineStatus(machine);
+				tvFormula.refresh();
 			});
 
 			row.setOnMouseClicked(e-> {
@@ -372,7 +371,8 @@ public class LTLView extends AnchorPane{
 	public void checkSelectedMachine() {
 		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
 		checker.checkMachine(machine);
-		checkMachineStatus(machine);
+		checker.checkMachineStatus(machine);
+		tvMachines.refresh();
 		tvFormula.refresh();
 	}
 	
@@ -380,20 +380,6 @@ public class LTLView extends AnchorPane{
 		patternParser.parseMachine(machine);
 	}
 		
-	private void checkMachineStatus(Machine machine) {
-		ArrayList<Boolean> success = new ArrayList<>();
-		success.add(true);
-		machine.getLTLFormulas().forEach(item-> {
-			Checked checked = item.getChecked();
-			if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
-				machine.setLTLCheckedFailed();
-				success.set(0, false);
-			}
-		});
-		if(success.get(0)) {
-			machine.setLTLCheckedSuccessful();
-		}
-		tvMachines.refresh();
-	}
+
 
 }

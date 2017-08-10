@@ -50,6 +50,9 @@ public class CBCView extends AnchorPane {
 	@FXML
 	private Button addFormulaButton;
 	
+	@FXML
+	private Button checkSelectedMachineButton;
+	
 	private final CurrentTrace currentTrace;
 	
 	private final CurrentProject currentProject;
@@ -74,6 +77,7 @@ public class CBCView extends AnchorPane {
 		helpButton.setHelpContent("HelpMain.html");
 		tvMachines.setCheckingType(CheckingType.CBC);
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -100,6 +104,8 @@ public class CBCView extends AnchorPane {
 					cbcHandler.checkInvariant(item.getName());
 				} else if(item.getType() == CBCFormulaItem.CBCType.DEADLOCK) {
 					cbcHandler.checkDeadlock(item.getCode());
+				} else {
+					cbcHandler.checkSequence(item.getCode());
 				}
 			});
 			
@@ -114,6 +120,15 @@ public class CBCView extends AnchorPane {
 	@FXML
 	public void addFormula() {
 		injector.getInstance(CBCChoosingStage.class).showAndWait();
+	}
+	
+	@FXML
+	public void checkSelectedMachine() {
+		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+		cbcHandler.checkMachine(machine);
+		updateMachineStatus(machine);
+		tvMachines.refresh();
+		tvFormula.refresh();
 	}
 	
 	private void removeFormula() {

@@ -74,6 +74,19 @@ public class CBCFormulaHandler {
 		updateMachine(currentMachine);
 	}
 	
+	public void checkMachine(Machine machine) {
+		for (CBCFormulaItem item : machine.getCBCFormulas()) {
+			if(item.getType() == CBCType.INVARIANT) {
+				checkInvariant(item.getName());
+			} else if(item.getType() == CBCType.DEADLOCK) {
+				checkDeadlock(item.getCode());
+			} else {
+				checkSequence(item.getCode());
+			}
+		}
+	}
+	
+	
 	private void updateMachine(Machine machine) {
 		CBCView cbcView = injector.getInstance(CBCView.class);
 		cbcView.updateMachineStatus(machine);
