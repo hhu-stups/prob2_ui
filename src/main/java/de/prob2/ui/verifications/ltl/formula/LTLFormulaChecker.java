@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.ltl.formula;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import com.google.inject.Injector;
@@ -55,13 +57,17 @@ public class LTLFormulaChecker {
 	}
 	
 	public void checkMachineStatus(Machine machine) {
+		ArrayList<Boolean> failed = new ArrayList<>();
 		machine.getLTLFormulas().forEach(item-> {
 			Checked checked = item.getChecked();
 			if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
-				machine.setLTLCheckedFailed();
-				return;
+				failed.add(true);
 			}
 		});
+		if(failed.size() > 0) {
+			machine.setLTLCheckedFailed();
+			return;
+		}
 		machine.setLTLCheckedSuccessful();
 	}
 	

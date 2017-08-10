@@ -108,6 +108,7 @@ public class CBCView extends AnchorPane {
 				} else {
 					cbcHandler.checkSequence(item.getCode());
 				}
+				injector.getInstance(StatusBar.class).setCbcStatus(item.getChecked() == Checked.SUCCESS ? StatusBar.CBCStatus.SUCCESSFUL : StatusBar.CBCStatus.ERROR);
 			});
 			
 			MenuItem removeItem = new MenuItem("Remove Formula");
