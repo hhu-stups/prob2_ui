@@ -4,14 +4,11 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import com.google.inject.Injector;
-
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.BEvent;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
@@ -24,16 +21,13 @@ public class CBCInvariants extends Stage {
 
 	private final CurrentTrace currentTrace;
 
-	private final Injector injector;
-
-	private final CBCChecker cbcChecker;
+	private final CBCFormulaHandler cbcHandler;
 
 	@Inject
-	private CBCInvariants(final StageManager stageManager, final CurrentTrace currentTrace, final CBCChecker cbcChecker,
-			final Injector injector) {
+	private CBCInvariants(final StageManager stageManager, final CurrentTrace currentTrace, 
+			final CBCFormulaHandler cbcHandler) {
 		this.currentTrace = currentTrace;
-		this.cbcChecker = cbcChecker;
-		this.injector = injector;
+		this.cbcHandler = cbcHandler;
 		stageManager.loadFXML(this, "cbc_invariants.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
@@ -63,14 +57,7 @@ public class CBCInvariants extends Stage {
 		if (item == null) {
 			return;
 		}
-		CBCFormulaItem formula = new CBCFormulaItem(item, "", CBCFormulaItem.CBCType.INVARIANT);
-		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
-		if (currentMachine != null) {
-			if (!currentMachine.getCBCFormulas().contains(formula)) {
-				currentMachine.addCBCFormula(formula);
-			}
-		}
-		injector.getInstance(CBCView.class).updateProject();
+		cbcHandler.addFormula(item, "", CBCFormulaItem.CBCType.INVARIANT);
 		this.close();
 	}
 
@@ -81,7 +68,7 @@ public class CBCInvariants extends Stage {
 		if (name == null) {
 			return;
 		}
-		cbcChecker.checkInvariant(name);
+		cbcHandler.checkInvariant(name);
 	}
 
 	@FXML

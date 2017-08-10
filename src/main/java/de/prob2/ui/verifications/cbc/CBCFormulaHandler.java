@@ -18,17 +18,18 @@ import de.prob.check.ModelCheckOk;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 
-public class CBCChecker {
+public class CBCFormulaHandler {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(CBCChecker.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBCFormulaHandler.class);
 	
 	private final CurrentTrace currentTrace;
 	
 	private final Injector injector;
 	
 	@Inject
-	public CBCChecker(final CurrentTrace currentTrace, final Injector injector) {
+	public CBCFormulaHandler(final CurrentTrace currentTrace, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 	}
@@ -56,9 +57,7 @@ public class CBCChecker {
 			item.setCheckedFailed();
 			item.setChecked(Checked.FAIL);
 		}
-		CBCView cbcView = injector.getInstance(CBCView.class);
-		cbcView.updateMachineStatus(currentMachine);
-		cbcView.refresh();
+		updateMachine(currentMachine);
 	}
 	
 	public void checkDeadlock(String code) {
@@ -83,9 +82,25 @@ public class CBCChecker {
 			item.setCheckedFailed();
 			item.setChecked(Checked.FAIL);
 		}
+		updateMachine(currentMachine);
+	}
+	
+	private void updateMachine(Machine machine) {
 		CBCView cbcView = injector.getInstance(CBCView.class);
-		cbcView.updateMachineStatus(currentMachine);
+		cbcView.updateMachineStatus(machine);
 		cbcView.refresh();
 	}
+	
+	public void addFormula(String name, String code, CBCType type) {
+		CBCFormulaItem formula = new CBCFormulaItem(name, code, type);
+		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		if (currentMachine != null) {
+			if (!currentMachine.getCBCFormulas().contains(formula)) {
+				currentMachine.addCBCFormula(formula);
+				injector.getInstance(CBCView.class).updateProject();
+			}
+		}
+	}
+	
 
 }
