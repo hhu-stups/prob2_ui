@@ -1,6 +1,8 @@
 package de.prob2.ui.verifications.cbc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -60,6 +62,18 @@ public class CBCFormulaHandler {
 		updateMachine(currentMachine);
 	}
 	
+	public void checkSequence(String sequence) {
+		List<String> events = Arrays.asList(sequence.split(";"));
+		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
+		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		currentMachine.getCBCFormulas()
+				.stream()
+				.filter(current -> sequence.equals(current.getName()))
+				.findFirst()
+				.ifPresent(item -> checkItem(checker, item));
+		updateMachine(currentMachine);
+	}
+	
 	private void updateMachine(Machine machine) {
 		CBCView cbcView = injector.getInstance(CBCView.class);
 		cbcView.updateMachineStatus(machine);
@@ -69,11 +83,9 @@ public class CBCFormulaHandler {
 	public void addFormula(String name, String code, CBCType type) {
 		CBCFormulaItem formula = new CBCFormulaItem(name, code, type);
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
-		if (currentMachine != null) {
-			if (!currentMachine.getCBCFormulas().contains(formula)) {
-				currentMachine.addCBCFormula(formula);
-				injector.getInstance(CBCView.class).updateProject();
-			}
+		if (currentMachine != null && !currentMachine.getCBCFormulas().contains(formula)) {
+			currentMachine.addCBCFormula(formula);
+			injector.getInstance(CBCView.class).updateProject();
 		}
 	}
 	

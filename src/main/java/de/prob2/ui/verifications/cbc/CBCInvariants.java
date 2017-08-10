@@ -71,7 +71,7 @@ public class CBCInvariants extends Stage {
 	}
 
 	@FXML
-	public void cancelFormula() {
+	public void cancel() {
 		this.close();
 	}
 
