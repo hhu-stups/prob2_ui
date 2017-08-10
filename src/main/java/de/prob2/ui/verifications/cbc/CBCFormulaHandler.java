@@ -13,6 +13,7 @@ import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
+import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -39,24 +40,11 @@ public class CBCFormulaHandler {
 		event.add(name);
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
-		CBCFormulaItem item = currentMachine.getCBCFormulas()
+		currentMachine.getCBCFormulas()
 				.stream()
 				.filter(current -> name.equals(current.getName()))
-				.findFirst().get();
-		try {
-			IModelCheckingResult result = checker.call();
-			if(result instanceof ModelCheckOk) {
-				item.setCheckedSuccessful();
-				item.setChecked(Checked.SUCCESS);
-			} else {
-				item.setCheckedFailed();
-				item.setChecked(Checked.FAIL);
-			}
-		} catch (Exception e) {
-			LOGGER.error("Could not check CBC Invariant: ", e.getMessage());
-			item.setCheckedFailed();
-			item.setChecked(Checked.FAIL);
-		}
+				.findFirst()
+				.ifPresent(item -> checkItem(checker, item));
 		updateMachine(currentMachine);
 	}
 	
@@ -64,24 +52,11 @@ public class CBCFormulaHandler {
 		IEvalElement constraint = new EventB(code); 
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
-		CBCFormulaItem item = currentMachine.getCBCFormulas()
+		currentMachine.getCBCFormulas()
 				.stream()
 				.filter(current -> code.equals(current.getCode()))
-				.findFirst().get();
-		try {
-			IModelCheckingResult result = checker.call();
-			if(result instanceof ModelCheckOk) {
-				item.setCheckedSuccessful();
-				item.setChecked(Checked.SUCCESS);
-			} else {
-				item.setCheckedFailed();
-				item.setChecked(Checked.FAIL);
-			}
-		} catch (Exception e) {
-			LOGGER.error("Could not check CBC Deadlock: ", e.getMessage());
-			item.setCheckedFailed();
-			item.setChecked(Checked.FAIL);
-		}
+				.findFirst()
+				.ifPresent(item -> checkItem(checker, item));
 		updateMachine(currentMachine);
 	}
 	
@@ -99,6 +74,23 @@ public class CBCFormulaHandler {
 				currentMachine.addCBCFormula(formula);
 				injector.getInstance(CBCView.class).updateProject();
 			}
+		}
+	}
+	
+	private void checkItem(IModelCheckJob checker, CBCFormulaItem item) {
+		try {
+			IModelCheckingResult result = checker.call();
+			if(result instanceof ModelCheckOk) {
+				item.setCheckedSuccessful();
+				item.setChecked(Checked.SUCCESS);
+			} else {
+				item.setCheckedFailed();
+				item.setChecked(Checked.FAIL);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Could not check CBC Deadlock: ", e.getMessage());
+			item.setCheckedFailed();
+			item.setChecked(Checked.FAIL);
 		}
 	}
 	
