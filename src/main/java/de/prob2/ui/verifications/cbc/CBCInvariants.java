@@ -6,7 +6,6 @@ import javax.inject.Inject;
 
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.BEvent;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
@@ -34,11 +33,11 @@ public class CBCInvariants extends Stage {
 
 	@FXML
 	public void initialize() {
-		this.update(currentTrace.get());
-		currentTrace.addListener((observable, from, to) -> update(to));
+		this.update();
+		currentTrace.addListener((observable, from, to) -> update());
 	}
 
-	private void update(Trace trace) {
+	private void update() {
 		if (currentTrace.get() != null) {
 			ArrayList<String> events = new ArrayList<>();
 			AbstractElement mainComponent = currentTrace.getStateSpace().getMainComponent();

@@ -58,14 +58,13 @@ public class LTLFormulaChecker {
 		State stateid = currentTrace.getCurrentState();
 		LtlParser parser = new LtlParser(item.getCode());
 		parser.setPatternManager(machine.getPatternManager());
-		Checked checked = resultHandler.handleFormulaResult(item, getResult(parser, item), stateid);
-		return checked;
+		return resultHandler.handleFormulaResult(item, getResult(parser, item), stateid);
 	}
 	
 	private Object getResult(LtlParser parser, LTLFormulaItem item) {
 		State stateid = currentTrace.getCurrentState();
 		LTLParseListener parseListener = parseFormula(parser);
-		if(parseListener.getErrorMarkers().size() > 0) {
+		if(!parseListener.getErrorMarkers().isEmpty()) {
 			return getFailedResult(parseListener);
 		}
 		EvaluationCommand lcc = null;

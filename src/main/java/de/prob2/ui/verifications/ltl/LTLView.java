@@ -343,10 +343,8 @@ public class LTLView extends AnchorPane{
 
 	private void loadLTLDialog(LTLDialog dialog, AbstractCheckableItem item) {
 		dialog.getEngine().getLoadWorker().stateProperty().addListener((observable, from, to) -> {
-			if(to == Worker.State.SUCCEEDED) {
-				if(item != null) {
-					dialog.setData(item.getName(), item.getDescription(), item.getCode());
-				}
+			if(to == Worker.State.SUCCEEDED && item != null) {
+				dialog.setData(item.getName(), item.getDescription(), item.getCode());
 			}
 		});
 	}

@@ -55,7 +55,7 @@ public class HelpSystem extends StackPane {
             env.put("create", "true");
             try (FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env)) {
                 Path source = jarFileSystem.getPath("/help/");
-                if (!Files.exists(target)) {
+                if (!target.toFile().exists()) {
                     Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
                         @Override
                         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {

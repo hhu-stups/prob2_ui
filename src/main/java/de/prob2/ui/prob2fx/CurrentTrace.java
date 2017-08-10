@@ -130,7 +130,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 				}
 				// Has to be a lambda. For some reason, using a method reference here causes an IllegalAccessError at runtime.
 				// noinspection Convert2MethodRef
-				Platform.runLater(() -> CurrentTrace.this.fireValueChangedEvent());
+				Platform.runLater(CurrentTrace.this::fireValueChangedEvent);
 			}
 
 			@Override
