@@ -16,8 +16,8 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
 import de.prob.check.IModelCheckJob;
-import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
+import de.prob.statespace.State;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
@@ -31,9 +31,13 @@ public class CBCFormulaHandler {
 	
 	private final Injector injector;
 	
+	private final CBCResultHandler resultHandler;
+	
 	@Inject
-	public CBCFormulaHandler(final CurrentTrace currentTrace, final Injector injector) {
+	public CBCFormulaHandler(final CurrentTrace currentTrace, final CBCResultHandler resultHandler,
+								final Injector injector) {
 		this.currentTrace = currentTrace;
+		this.resultHandler = resultHandler;
 		this.injector = injector;
 	}
 	
@@ -102,8 +106,10 @@ public class CBCFormulaHandler {
 	}
 	
 	private void checkItem(IModelCheckJob checker, CBCFormulaItem item) {
+		State stateid = currentTrace.getCurrentState();
+		Object result = null;
 		try {
-			IModelCheckingResult result = checker.call();
+			result = checker.call();
 			if(result instanceof ModelCheckOk) {
 				item.setCheckedSuccessful();
 				item.setChecked(Checked.SUCCESS);
@@ -112,10 +118,13 @@ public class CBCFormulaHandler {
 				item.setChecked(Checked.FAIL);
 			}
 		} catch (Exception e) {
-			LOGGER.error("Could not check CBC Deadlock: ", e.getMessage());
+			String message = "Could not check CBC Deadlock: ".concat(e.getMessage());
+			LOGGER.error(message);
 			item.setCheckedFailed();
 			item.setChecked(Checked.FAIL);
+			result = new CBCParseError(message);
 		}
+		resultHandler.handleFormulaResult(item, result, stateid);
 	}
 	
 
