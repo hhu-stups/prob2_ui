@@ -75,6 +75,16 @@ public class CBCView extends AnchorPane {
 	public void initialize() {
 		helpButton.setHelpContent("HelpMain.html");
 		tvMachines.setCheckingType(CheckingType.CBC);
+		setBindings();
+		setContextMenu();
+		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
+			if(tvMachines.getSelectionModel().getSelectedIndex() < 0) {
+				tvMachines.getSelectionModel().select(0);
+			}
+		});
+	}
+	
+	private void setBindings() {
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -86,12 +96,10 @@ public class CBCView extends AnchorPane {
 				tvFormula.itemsProperty().bind(to.cbcFormulasProperty());
 			}
 		});
-		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
-			if(tvMachines.getSelectionModel().getSelectedIndex() < 0) {
-				tvMachines.getSelectionModel().select(0);
-			}
-		});
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
+	}
+	
+	private void setContextMenu() {
 		tvFormula.setRowFactory(table -> {
 			
 			final TableRow<CBCFormulaItem> row = new TableRow<>();
@@ -127,8 +135,7 @@ public class CBCView extends AnchorPane {
 		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
 		cbcHandler.checkMachine(machine);
 		cbcHandler.updateMachineStatus(machine);
-		tvMachines.refresh();
-		tvFormula.refresh();
+		refresh();
 	}
 	
 	private void removeFormula() {

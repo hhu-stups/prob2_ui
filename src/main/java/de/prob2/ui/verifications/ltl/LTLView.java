@@ -250,10 +250,7 @@ public class LTLView extends AnchorPane{
 	private void addFormula(Machine machine, LTLFormulaItem item) {
 		if(!machine.getLTLFormulas().contains(item)) {
 			machine.addLTLFormula(item);
-			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-					tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
-					currentProject.getLocation()));
-			currentProject.setSaved(false);
+			updateProject();
 		} else {
 			showAlreadyExists(LTLItemType.Formula);
 		}
@@ -263,10 +260,7 @@ public class LTLView extends AnchorPane{
 		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
 		LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 		machine.removeLTLFormula(item);
-		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-				tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
-				currentProject.getLocation()));
-		currentProject.setSaved(false);
+		updateProject();
 	}
 	
 	@FXML
@@ -285,11 +279,8 @@ public class LTLView extends AnchorPane{
 	private void addPattern(Machine machine, LTLPatternItem item) {
 		if(!machine.getLTLPatterns().contains(item)) {
 			machine.addLTLPattern(item);
-			currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-					tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
-					currentProject.getLocation()));
+			updateProject();
 			patternParser.parsePattern(item, machine, false);
-			currentProject.setSaved(false);
 		} else {
 			showAlreadyExists(LTLItemType.Pattern);
 		}
@@ -300,12 +291,10 @@ public class LTLView extends AnchorPane{
 		LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
 		machine.removeLTLPattern(item);
 		patternParser.removePattern(item, machine);
-		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-				tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
-				currentProject.getLocation()));
-		currentProject.setSaved(false);
+		updateProject();
 	}
 	
+	//TODO: also add for CBCForulaItem
 	private void showAlreadyExists(LTLItemType type) {
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle(type.name() + " already exists");
@@ -368,6 +357,13 @@ public class LTLView extends AnchorPane{
 			this.animations.removeTrace(currentTrace.get());
 		}
 		animations.addNewAnimation(tvFormula.getSelectionModel().getSelectedItem().getCounterExample());
+	}
+	
+	private void updateProject() {
+		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+				tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+				currentProject.getLocation()));
+		currentProject.setSaved(false);
 	}
 	
 	@FXML
