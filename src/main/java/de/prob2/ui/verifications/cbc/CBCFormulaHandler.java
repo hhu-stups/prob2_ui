@@ -20,6 +20,7 @@ import de.prob.check.ModelCheckOk;
 import de.prob.statespace.State;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 
@@ -45,34 +46,26 @@ public class CBCFormulaHandler {
 		ArrayList<String> event = new ArrayList<>();
 		event.add(name);
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
-		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
-		currentMachine.getCBCFormulas()
-				.stream()
-				.filter(current -> name.equals(current.getName()))
-				.findFirst()
-				.ifPresent(item -> checkItem(checker, item));
-		updateMachine(currentMachine);
+		executeCheckingItem(checker, name);
 	}
 	
 	public void checkDeadlock(String code) {
 		IEvalElement constraint = new EventB(code); 
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
-		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
-		currentMachine.getCBCFormulas()
-				.stream()
-				.filter(current -> code.equals(current.getCode()))
-				.findFirst()
-				.ifPresent(item -> checkItem(checker, item));
-		updateMachine(currentMachine);
+		executeCheckingItem(checker, code);
 	}
 	
 	public void checkSequence(String sequence) {
 		List<String> events = Arrays.asList(sequence.split(";"));
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
+		executeCheckingItem(checker, sequence);
+	}
+	
+	public void executeCheckingItem(IModelCheckJob checker, String code) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
 		currentMachine.getCBCFormulas()
 				.stream()
-				.filter(current -> sequence.equals(current.getName()))
+				.filter(current -> code.equals(current.getName()))
 				.findFirst()
 				.ifPresent(item -> checkItem(checker, item));
 		updateMachine(currentMachine);
@@ -89,10 +82,22 @@ public class CBCFormulaHandler {
 			}
 		}
 	}
+	
+	public void updateMachineStatus(Machine machine) {
+		for(CBCFormulaItem formula : machine.getCBCFormulas()) {
+			if(formula.getChecked() == Checked.FAIL) {
+				machine.setCBCCheckedFailed();
+				injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.ERROR);
+				return;
+			}
+		}
+		machine.setCBCCheckedSuccessful();
+		injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.SUCCESSFUL);
+	}
 		
 	private void updateMachine(Machine machine) {
 		CBCView cbcView = injector.getInstance(CBCView.class);
-		cbcView.updateMachineStatus(machine);
+		updateMachineStatus(machine);
 		cbcView.refresh();
 	}
 	

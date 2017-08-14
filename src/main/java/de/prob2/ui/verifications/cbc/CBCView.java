@@ -10,8 +10,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.MachineTableView.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -108,7 +106,7 @@ public class CBCView extends AnchorPane {
 				} else {
 					cbcHandler.checkSequence(item.getCode());
 				}
-				updateMachineStatus(getCurrentMachine());
+				cbcHandler.updateMachineStatus(getCurrentMachine());
 			});
 			
 			MenuItem removeItem = new MenuItem("Remove Formula");
@@ -128,7 +126,7 @@ public class CBCView extends AnchorPane {
 	public void checkSelectedMachine() {
 		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
 		cbcHandler.checkMachine(machine);
-		updateMachineStatus(machine);
+		cbcHandler.updateMachineStatus(machine);
 		tvMachines.refresh();
 		tvFormula.refresh();
 	}
@@ -142,18 +140,6 @@ public class CBCView extends AnchorPane {
 	
 	public Machine getCurrentMachine() {
 		return tvMachines.getSelectionModel().getSelectedItem();
-	}
-	
-	public void updateMachineStatus(Machine machine) {
-		for(CBCFormulaItem formula : machine.getCBCFormulas()) {
-			if(formula.getChecked() == Checked.FAIL) {
-				machine.setCBCCheckedFailed();
-				injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.ERROR);
-				return;
-			}
-		}
-		machine.setCBCCheckedSuccessful();
-		injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.SUCCESSFUL);
 	}
 	
 	public void updateProject() {
