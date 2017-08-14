@@ -11,7 +11,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.MachineTableView;
-import de.prob2.ui.verifications.MachineTableView.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -74,7 +73,7 @@ public class CBCView extends AnchorPane {
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent("HelpMain.html");
-		tvMachines.setCheckingType(CheckingType.CBC);
+		tvMachines.setCheckingType(de.prob2.ui.verifications.CheckingType.CBC);
 		setBindings();
 		setContextMenu();
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
