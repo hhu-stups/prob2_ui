@@ -64,11 +64,13 @@ public class LTLFormulaChecker {
 				failed.add(true);
 			}
 		});
-		if(failed.size() > 0) {
+		if(!failed.isEmpty()) {
 			machine.setLTLCheckedFailed();
+			injector.getInstance(StatusBar.class).setLtlStatus(StatusBar.LTLStatus.ERROR);
 			return;
 		}
 		machine.setLTLCheckedSuccessful();
+		injector.getInstance(StatusBar.class).setLtlStatus(StatusBar.LTLStatus.SUCCESSFUL);
 	}
 	
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {

@@ -14,7 +14,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.MachineTableView;
@@ -168,8 +167,8 @@ public class LTLView extends AnchorPane{
 				Checked result = checkFormula(item, machine);
 				item.setChecked(result);
 				checker.checkMachineStatus(machine);
-				injector.getInstance(StatusBar.class).setLtlStatus(result == Checked.SUCCESS ? StatusBar.LTLStatus.SUCCESSFUL : StatusBar.LTLStatus.ERROR);
 				tvFormula.refresh();
+				tvMachines.refresh();
 			});
 
 			row.setOnMouseClicked(e-> {
@@ -218,6 +217,8 @@ public class LTLView extends AnchorPane{
 			Machine machine = tvMachines.getSelectionModel().getSelectedItem();
 			if(newValue && machine != null) {
 				checkSelectedMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
+			} else {
+				checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 			}
 		});
 	}
