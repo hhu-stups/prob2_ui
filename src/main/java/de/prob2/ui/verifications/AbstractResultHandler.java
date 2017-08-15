@@ -3,6 +3,7 @@ package de.prob2.ui.verifications;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +12,8 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
 
 public abstract class AbstractResultHandler {
@@ -58,7 +59,7 @@ public abstract class AbstractResultHandler {
 		alert.showAndWait();
 	}
 	
-	public CheckingResultItem handleFormulaResult(Object result, State stateid, ArrayList<Trace> traces) {
+	public CheckingResultItem handleFormulaResult(Object result, State stateid, List<Trace> traces) {
 		CheckingResultItem resultItem = null;
 		if(success.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(AlertType.INFORMATION, Checked.SUCCESS, type.name().concat(" Formula Check succeeded"), "Success");

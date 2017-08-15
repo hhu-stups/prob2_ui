@@ -1,5 +1,9 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.google.inject.Singleton;
 
 import de.prob.check.LTLCounterExample;
@@ -17,9 +21,6 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLParseError;
 import javafx.scene.control.Alert.AlertType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 @Singleton
 public class LTLResultHandler extends AbstractResultHandler {
 		
@@ -31,7 +32,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 		this.exception.addAll(Arrays.asList(LTLParseError.class, ProBError.class));
 	}
 			
-	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, ArrayList<Trace> traces) {
+	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, List<Trace> traces) {
 		super.showResult(resultItem, item);
 		if(!traces.isEmpty()) {
 			((LTLFormulaItem) item).setCounterExample(traces.get(0));

@@ -2,11 +2,12 @@ package de.prob2.ui.verifications.cbc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
-import de.prob.check.ModelCheckOk;
 import de.prob.check.CheckError;
+import de.prob.check.ModelCheckOk;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
@@ -24,7 +25,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 		this.exception.addAll(Arrays.asList(CBCParseError.class));
 	}
 	
-	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, ArrayList<Trace> traces) {
+	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, List<Trace> traces) {
 		super.showResult(resultItem, item);
 		//TODO: counter examples
 	}
