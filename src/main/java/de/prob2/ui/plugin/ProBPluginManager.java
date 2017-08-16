@@ -116,7 +116,7 @@ public class ProBPluginManager extends JarPluginManager {
             try {
                 Files.copy(selectedPlugin.toPath(), plugin.toPath());
                 String pluginId = loadPlugin(plugin.toPath());
-                if (checkLoadedPlugin(pluginId, pluginFileName) && !inactivePluginIds.contains(pluginId)) {
+                if (checkLoadedPlugin(pluginId, pluginFileName) && !getInactivePluginIds().contains(pluginId)) {
                     startPlugin(pluginId);
                 }
             } catch (Exception e) {
@@ -213,6 +213,12 @@ public class ProBPluginManager extends JarPluginManager {
         try {
             if (INACTIVE_PLUGINS_FILE.exists()) {
                 inactivePluginIds = FileUtils.readLines(INACTIVE_PLUGINS_FILE, true);
+            } else {
+                if (!PLUGIN_DIRECTORY.exists()) {
+                    PLUGIN_DIRECTORY.mkdirs();
+                }
+                INACTIVE_PLUGINS_FILE.createNewFile();
+                inactivePluginIds = new ArrayList<>();
             }
         } catch (IOException e) {
             LOGGER.warn("An error occurred while reading the inactive plugins:", e);
