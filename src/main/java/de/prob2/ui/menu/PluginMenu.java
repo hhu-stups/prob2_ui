@@ -4,18 +4,13 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.plugin.Plugin;
-import de.prob2.ui.plugin.PluginManager;
+import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.plugin.PluginMenuStage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
 
 /**
  * Created by Christoph Heinzen on 27.07.17.
@@ -25,13 +20,13 @@ public class PluginMenu extends Menu {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PerspectivesMenu.class);
 
-    private final PluginManager pluginManager;
+    private final ProBPluginManager pluginManager;
     private final Injector injector;
     private final StageManager stageManager;
 
 
     @Inject
-    public PluginMenu(final StageManager stageManager, final PluginManager pluginManager, final Injector injector) {
+    public PluginMenu(final StageManager stageManager, final ProBPluginManager pluginManager, final Injector injector) {
         this.pluginManager = pluginManager;
         this.stageManager = stageManager;
         this.injector = injector;
@@ -39,7 +34,8 @@ public class PluginMenu extends Menu {
     }
 
     @FXML
-    private void addPlugin() {pluginManager.addPlugin();}
+    private void addPlugin() {
+        pluginManager.addPlugin();}
 
     @FXML
     private void reloadPlugins() {

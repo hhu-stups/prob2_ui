@@ -15,7 +15,7 @@ import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.persistence.UIPersistence;
-import de.prob2.ui.plugin.PluginManager;
+import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
@@ -49,7 +49,7 @@ public class ProB2 extends Application {
 	private Stage primaryStage;
 	private Stage loadingStage;
 
-	private PluginManager pluginManager;
+	private ProBPluginManager pluginManager;
 
 	public static void main(String... args) {
 		launch(args);
@@ -234,8 +234,8 @@ public class ProB2 extends Application {
 			}
 		}
 
-		pluginManager = injector.getInstance(PluginManager.class);
-		pluginManager.loadPlugins();
+		pluginManager = injector.getInstance(ProBPluginManager.class);
+		pluginManager.start();
 
 		this.loadingStage.hide();
 	}

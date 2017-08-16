@@ -12,7 +12,8 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.*;
 import de.prob2.ui.operations.OperationsView;
-import de.prob2.ui.plugin.PluginManager;
+import de.prob2.ui.plugin.ProBConnection;
+import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.project.ProjectTab;
 import de.prob2.ui.project.ProjectView;
@@ -91,7 +92,8 @@ public class ProB2Module extends AbstractModule {
 		bind(VisualisationView.class);
 		bind(StateVisualisationView.class);
 
-		bind(PluginManager.class);
+		bind(ProBPluginManager.class);
+		bind(ProBConnection.class);
 	}
 
 	@Provides

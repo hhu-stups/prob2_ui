@@ -3,8 +3,8 @@ package de.prob2.ui.plugin;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob2.ui.menu.MainView;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.collections.FXCollections;
@@ -25,11 +25,14 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/**
+ * Created by Christoph Heinzen on 10.08.17.
+ */
 @Singleton
 public class PluginManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginManager.class);
-    private static final String PLUGIN_DIRECTORY = System.getProperty("user.home")
+    public static final String PLUGIN_DIRECTORY = System.getProperty("user.home")
             + File.separator + ".prob"
             + File.separator + "prob2"
             + File.separator + "prob2ui"
@@ -43,18 +46,12 @@ public class PluginManager {
     private ObservableMap<Plugin, Boolean> activePlugins;
     private Map<Plugin, String> pluginFiles;
 
-
-    //TODO: test what happens when two plugins use the same library in different versions and what happens when two plugins have the same package structure
-
     @Inject
-    public PluginManager(Injector injector, CurrentTrace currentTrace, StageManager stageManager, ResourceBundle bundle){
+    public PluginManager(Injector injector, CurrentTrace currentTrace, StageManager stageManager, ResourceBundle bundle) {
         this.injector = injector;
         this.currentTrace = currentTrace;
         this.stageManager = stageManager;
         this.bundle = bundle;
-        this.currentTrace.addListener((observable, oldValue, newValue) -> {
-            //TODO: implement
-        });
     }
 
     public ObservableMap<Plugin, Boolean> getActivePlugins(){
@@ -83,12 +80,7 @@ public class PluginManager {
         File[] plugins = pluginDirectory.listFiles();
         if (plugins != null && plugins.length != 0) {
             for (File plugin : plugins) {
-                try {
-                    //TODO: check if the plugin should be active or not
-                    loadPlugin(new JarFile(plugin), true);
-                } catch (IOException e) {
-                    LOGGER.warn("\n\"{}\" is not a valid ProB-Plugin! \nThe following exception was thrown:", plugin.getName(), e);
-                }
+                loadPlugin(plugin);
             }
         }
     }
@@ -120,6 +112,7 @@ public class PluginManager {
         }
     }
 
+
     public boolean stopPlugin(Plugin plugin){
         try {
             plugin.stop();
@@ -132,35 +125,6 @@ public class PluginManager {
                     String.format(bundle.getString("plugins.error.stop"), plugin.getName()),
                     ButtonType.OK).show();
             return false;
-        }
-    }
-
-    public void addPlugin() {
-        addPlugin(stageManager.getMainStage());
-    }
-
-    public void addPlugin(@Nonnull Stage stage) {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(bundle.getString("menu.plugin.items.add"));
-        fileChooser.getExtensionFilters()
-                .addAll(new FileChooser.ExtensionFilter("ProB2 Plugins", "*.jar"));
-
-        final File selectedPlugin = fileChooser.showOpenDialog(stage);
-        if (selectedPlugin != null) {
-            File pluginDirectory = new File(PLUGIN_DIRECTORY);
-            if (!pluginDirectory.exists()) {
-                if (!pluginDirectory.mkdirs()) {
-                    LOGGER.warn("Couldn't create the directory for plugins!\n{}", pluginDirectory.getAbsolutePath());
-                }
-                return;
-            }
-            File plugin = new File(PLUGIN_DIRECTORY + File.separator + selectedPlugin.getName());
-            try {
-                Files.copy(selectedPlugin.toPath(), plugin.toPath());
-                loadPlugin(new JarFile(plugin), true);
-            } catch (IOException e) {
-                LOGGER.warn("Tried to copy the plugin {} \nThis exception was thrown: ", selectedPlugin.getName(), e);
-            }
         }
     }
 
@@ -177,14 +141,14 @@ public class PluginManager {
         } catch (IOException e) {
             LOGGER.warn("Couldn't delete the Jar-File of the plugin {}!\nThe following exception was thrown:", plugin.getName(), e);
             stageManager.makeAlert(Alert.AlertType.WARNING,
-                    String.format("Could not delete the Jar-File of the plugin %s!" +
-                            "\nPlease try to delete it manually!", plugin.getName()),
+                    String.format(bundle.getString("plugins.error.remove"), plugin.getName()),
                     ButtonType.OK).show();
         }
     }
 
-    private void loadPlugin(@Nonnull final JarFile pluginJar, boolean active) {
+    public void loadPlugin(@Nonnull final File pluginFile) {
         try {
+            JarFile pluginJar = new JarFile(pluginFile);
             URL[]  urls = new URL[]{ new URL("jar:file:" + pluginJar.getName() +"!/") };
             URLClassLoader classLoader = URLClassLoader.newInstance(urls);
 
@@ -209,19 +173,65 @@ public class PluginManager {
             if (loadPlugin) {
                 LOGGER.info("Loading Plugin \"{}\"!", pluginJar.getName());
                 Plugin plugin = (Plugin) pluginClass.newInstance();
-                //TODO: check if the Plugin is already loaded, maybe in an other version and that the version of the plugin is sufficient for the used version of ProB
-                getActivePlugins().put(plugin, false);
-                getPluginFiles().put(plugin, pluginJar.getName());
-                //TODO: check here if the plugin should be started or not
-                startPlugin(plugin);
+                if (checkPlugin(plugin)) {
+                    //TODO: check if the Plugin is already loaded, maybe in an other version and that the version of the plugin is sufficient for the used version of ProB
+                    getActivePlugins().put(plugin, false);
+                    getPluginFiles().put(plugin, pluginJar.getName());
+                    //TODO: check here if the plugin should be started or not
+                    startPlugin(plugin);
+                }
             } else {
                 LOGGER.warn("\"{}\" is not a valid ProB-Plugin!", pluginJar.getName());
+                stageManager.makeAlert(Alert.AlertType.WARNING,
+                        String.format(bundle.getString("plugins.error.load"), pluginJar.getName()),
+                        ButtonType.OK).show();
             }
         } catch (Exception e) {
-            LOGGER.error("Exception while loading the Plugin \"{}\"", pluginJar.getName(), e);
+            LOGGER.error("Exception while loading the Plugin \"{}\"", pluginFile.getName(), e);
         }
     }
 
+    private boolean checkPlugin(Plugin plugin) {
+        //TODO: check if the Plugin is compatible to the used version of ProB
+        for (Plugin loadedPlugin : getActivePlugins().keySet()){
+            if (loadedPlugin.getUuid().equals(plugin.getUuid())) {
+                //TODO: show alert
+                return false;
+            }
+        }
+        return true;
+    }
+    public void addPlugin() {
+        addPlugin(stageManager.getMainStage());
+    }
+
+    public void addPlugin(@Nonnull Stage stage) {
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(bundle.getString("menu.plugin.items.add"));
+        fileChooser.getExtensionFilters()
+                .addAll(new FileChooser.ExtensionFilter("ProB2 Plugins", "*.jar"));
+
+        final File selectedPlugin = fileChooser.showOpenDialog(stage);
+        if (selectedPlugin != null) {
+            File pluginDirectory = new File(PLUGIN_DIRECTORY);
+            if (!pluginDirectory.exists()) {
+                if (!pluginDirectory.mkdirs()) {
+                    LOGGER.warn("Couldn't create the directory for plugins!\n{}", pluginDirectory.getAbsolutePath());
+                }
+                return;
+            }
+            File plugin = new File(PLUGIN_DIRECTORY + File.separator + selectedPlugin.getName());
+            try {
+                Files.copy(selectedPlugin.toPath(), plugin.toPath());
+                loadPlugin(plugin);
+            } catch (IOException e) {
+                LOGGER.warn("Tried to copy the plugin {} \nThis exception was thrown: ", selectedPlugin.getName(), e);
+                stageManager.makeAlert(Alert.AlertType.WARNING,
+                        String.format(bundle.getString("plugins.error.copy"), selectedPlugin.getName()),
+                        ButtonType.OK).show();
+            }
+        }
+    }
 
     public void addTab(@Nonnull final Tab tab) {
         TabPane tabPane = injector.getInstance(MainView.class).getMainTabPane();
@@ -268,5 +278,4 @@ public class PluginManager {
         //TODO: react when the Accordion doesn't exist
         if (acc != null) acc.getPanes().add(position,pane);
     }
-
 }

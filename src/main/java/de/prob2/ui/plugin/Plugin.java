@@ -51,4 +51,5 @@ public abstract class Plugin {
     public UUID getUuid() {
         return this.uuid;
     }
+
 }
