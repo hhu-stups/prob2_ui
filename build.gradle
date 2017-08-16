@@ -74,6 +74,7 @@ dependencies {
 	compile 'org.fxmisc.wellbehaved:wellbehavedfx:0.3'
 	compile 'org.hildan.fxgson:fx-gson:3.1.0'
 	compile 'se.sawano.java:alphanumeric-comparator:1.4.1'
+	compile 'ro.fortsoft.pf4j:pf4j:1.3.0'
 
 	testCompile 'org.loadui:testFx:3.1.2'
 	testCompile 'org.testfx:testfx-core:4.0.+'
