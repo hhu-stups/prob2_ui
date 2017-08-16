@@ -53,24 +53,10 @@ public class HelpSystem extends StackPane {
             Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
             Map<String, String> env = new HashMap<>();
             env.put("create", "true");
-            try (FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env)) {
-                Path source = jarFileSystem.getPath("/help/");
-                if (!target.toFile().exists()) {
-                    Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
-                        @Override
-                        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                            Path newdir = target.resolve(source.relativize(dir).toString());
-                            Files.copy(dir, newdir);
-                            return FileVisitResult.CONTINUE;
-                        }
-            
-                        @Override
-                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                            Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
-                            return FileVisitResult.CONTINUE;
-                        }
-                    });
-                }
+            FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env);
+            Path source = jarFileSystem.getPath("/help/");
+            if (!target.toFile().exists()) {
+                copyHelp(source,target);
             }
             dest = new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
         } else {
@@ -85,16 +71,15 @@ public class HelpSystem extends StackPane {
             }
         });
         webEngine = webView.getEngine();
-        webEngine.load(((HelpTreeItem) treeView.getRoot().getChildren().get(0)).getFile().toURI().toString());
         webEngine.getLoadWorker().stateProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == Worker.State.SUCCEEDED) {
                 HelpTreeItem hti = null;
-                for (File f : fileMap.keySet()) {
-                    hti = fileMap.get(f);
+                for (Map.Entry<File,HelpTreeItem> entry : fileMap.entrySet()) {
+                    hti = entry.getValue();
                     expandTree(hti);
                     HelpTreeItem finalHti = hti;
                     try {
-                        if (f.toURI().toURL().sameFile(new URL(webEngine.getLocation()))) {
+                        if (entry.getKey().toURI().toURL().sameFile(new URL(webEngine.getLocation()))) {
                             Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(finalHti)));
                         }
                     } catch (MalformedURLException e) {
@@ -103,6 +88,7 @@ public class HelpSystem extends StackPane {
                 }
             }
         });
+        webEngine.load(((HelpTreeItem) treeView.getRoot().getChildren().get(0)).getFile().toURI().toString());
     }
 
     private TreeItem<String> createNode(final File file) throws IOException {
@@ -121,5 +107,22 @@ public class HelpSystem extends StackPane {
                 Platform.runLater(() -> ti.setExpanded(true));
             }
         }
+    }
+
+    private void copyHelp(Path source, Path target) throws IOException {
+        Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Path newdir = target.resolve(source.relativize(dir).toString());
+                Files.copy(dir, newdir);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }
