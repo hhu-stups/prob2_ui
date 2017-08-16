@@ -58,6 +58,7 @@ public class HelpSystem extends StackPane {
             if (!target.toFile().exists()) {
                 copyHelp(source,target);
             }
+            jarFileSystem.close();
             dest = new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
         } else {
             dest = new File(uri);
