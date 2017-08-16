@@ -19,7 +19,7 @@ import javafx.scene.layout.StackPane;
 
 public abstract class AbstractResultHandler {
 	
-	public static enum ItemType {
+	public enum ItemType {
 		Formula,Pattern;
 	}
 	
@@ -83,7 +83,7 @@ public abstract class AbstractResultHandler {
 			}
 			resultItem = new CheckingResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse formula", 
 											sw.toString());
-			logger.error("Could not parse" + type.name() + " formula", result);			
+			logger.error("Could not parse {} formula", type.name(), result);			
 		}
 		return resultItem;
 	}

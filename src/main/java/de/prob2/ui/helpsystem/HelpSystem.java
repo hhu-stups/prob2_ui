@@ -58,6 +58,7 @@ public class HelpSystem extends StackPane {
             if (!target.toFile().exists()) {
                 copyHelp(source,target);
             }
+            jarFileSystem.close();
             dest = new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
         } else {
             dest = new File(uri);
@@ -76,10 +77,10 @@ public class HelpSystem extends StackPane {
                 HelpTreeItem hti = null;
                 for (Map.Entry<File,HelpTreeItem> entry : fileMap.entrySet()) {
                     hti = entry.getValue();
-                    expandTree(hti);
                     HelpTreeItem finalHti = hti;
                     try {
                         if (entry.getKey().toURI().toURL().sameFile(new URL(webEngine.getLocation()))) {
+                            expandTree(hti);
                             Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(finalHti)));
                         }
                     } catch (MalformedURLException e) {
