@@ -14,9 +14,14 @@ import de.prob.statespace.Trace;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
 public abstract class AbstractResultHandler {
+	
+	public static enum ItemType {
+		Formula,Pattern;
+	}
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResultHandler.class);
 	
@@ -46,6 +51,7 @@ public abstract class AbstractResultHandler {
 		Alert alert = new Alert(resultItem.getType(), resultItem.getMessage());
 		alert.setTitle(item.getName());
 		alert.setHeaderText(resultItem.getHeader());
+		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		if(resultItem.getChecked() == Checked.EXCEPTION) {
 			alert.getDialogPane().getStylesheets().add(getClass().getResource("/prob.css").toExternalForm());
 			TextArea exceptionText = new TextArea(resultItem.getExceptionText());
@@ -65,7 +71,6 @@ public abstract class AbstractResultHandler {
 			resultItem = new CheckingResultItem(AlertType.INFORMATION, Checked.SUCCESS, type.name().concat(" Formula Check succeeded"), "Success");
 		} else if(counterExample.contains(result.getClass())) {
 			traces.add(handleCounterExample(result, stateid));
-			System.out.println(traces.get(0));
 			resultItem = new CheckingResultItem(AlertType.ERROR, Checked.FAIL, type.name().concat(" Counter Example has been found"), 
 											"Counter Example Found");
 		} else if(error.contains(result.getClass())) {
@@ -78,11 +83,20 @@ public abstract class AbstractResultHandler {
 			}
 			resultItem = new CheckingResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse formula", 
 											sw.toString());
-			logger.error("Could not parse ".concat(type.name().concat(" formula")), result);			
+			logger.error("Could not parse" + type.name() + " formula", result);			
 		}
 		return resultItem;
 	}
 	
 	protected abstract Trace handleCounterExample(Object result, State stateid);
+	
+	
+	public void showAlreadyExists(ItemType type) {
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle(type.name() + " already exists");
+		alert.setHeaderText(type.name() + " already exists");
+		alert.setContentText("Declared " + type.name() + " already exists");
+		alert.showAndWait();
+	}
 
 }

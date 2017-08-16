@@ -101,12 +101,16 @@ public class CBCFormulaHandler {
 		cbcView.refresh();
 	}
 	
-	public void addFormula(String name, String code, CBCType type) {
+	public void addFormula(String name, String code, CBCType type, boolean checking) {
 		CBCFormulaItem formula = new CBCFormulaItem(name, code, type);
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
-		if (currentMachine != null && !currentMachine.getCBCFormulas().contains(formula)) {
-			currentMachine.addCBCFormula(formula);
-			injector.getInstance(CBCView.class).updateProject();
+		if (currentMachine != null) {
+			if(!currentMachine.getCBCFormulas().contains(formula)) {
+				currentMachine.addCBCFormula(formula);
+				injector.getInstance(CBCView.class).updateProject();
+			} else if(!checking) {
+				resultHandler.showAlreadyExists(CBCResultHandler.ItemType.Formula);
+			}
 		}
 	}
 	

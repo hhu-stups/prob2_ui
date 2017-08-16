@@ -27,8 +27,6 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -41,11 +39,7 @@ import javafx.scene.layout.AnchorPane;
 
 @Singleton
 public class LTLView extends AnchorPane{
-	
-	private enum LTLItemType {
-		Formula,Pattern;
-	}
-			
+				
 	@FXML
 	private Button addFormulaButton;
 	
@@ -96,17 +90,20 @@ public class LTLView extends AnchorPane{
 	private final LTLFormulaChecker checker;
 	
 	private final LTLPatternParser patternParser;
+	
+	private final LTLResultHandler resultHandler;
 				
 	@Inject
 	private LTLView(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
 					final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLFormulaChecker checker,
-					final LTLPatternParser patternParser) {
+					final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.animations = animations;
 		this.checker = checker;
 		this.patternParser = patternParser;
+		this.resultHandler = resultHandler;
 		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
@@ -252,7 +249,7 @@ public class LTLView extends AnchorPane{
 			machine.addLTLFormula(item);
 			updateProject();
 		} else {
-			showAlreadyExists(LTLItemType.Formula);
+			resultHandler.showAlreadyExists(LTLResultHandler.ItemType.Formula);
 		}
 	}
 	
@@ -282,7 +279,7 @@ public class LTLView extends AnchorPane{
 			updateProject();
 			patternParser.parsePattern(item, machine, false);
 		} else {
-			showAlreadyExists(LTLItemType.Pattern);
+			resultHandler.showAlreadyExists(LTLResultHandler.ItemType.Pattern);
 		}
 	}
 	
@@ -294,15 +291,7 @@ public class LTLView extends AnchorPane{
 		updateProject();
 	}
 	
-	//TODO: also add for CBCForulaItem
-	private void showAlreadyExists(LTLItemType type) {
-		Alert alert = new Alert(AlertType.INFORMATION);
-		alert.setTitle(type.name() + " already exists");
-		alert.setHeaderText(type.name() + " already exists");
-		alert.setContentText("Declared " + type.name() + " already exists");
-		alert.showAndWait();
-	}
-			
+				
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
 		return checker.checkFormula(item, machine);
 	}
