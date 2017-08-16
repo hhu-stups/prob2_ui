@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.inject.Singleton;
+
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
@@ -15,6 +17,7 @@ import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 
+@Singleton
 public class CBCResultHandler extends AbstractResultHandler {
 	
 	public CBCResultHandler() {

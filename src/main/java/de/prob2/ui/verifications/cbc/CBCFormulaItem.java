@@ -31,7 +31,7 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, description, code);
+		return Objects.hash(name);
 	}
 	
 	public CBCType getType() {

@@ -24,13 +24,17 @@ public class CBCDeadlock extends Stage {
 	
 	@FXML
 	public void addFormula() {
-		cbcHandler.addFormula(tfFormula.getText(), tfFormula.getText(), CBCFormulaItem.CBCType.DEADLOCK);
-		this.close();
+		addFormula(false);
+	}
+	
+	private void addFormula(boolean checking) {
+		cbcHandler.addFormula(tfFormula.getText(), tfFormula.getText(), CBCFormulaItem.CBCType.DEADLOCK,
+								checking);
 	}
 	
 	@FXML
 	public void checkFormula() {
-		addFormula();
+		addFormula(true);
 		cbcHandler.checkDeadlock(tfFormula.getText());
 	}
 	

@@ -52,17 +52,20 @@ public class CBCInvariants extends Stage {
 
 	@FXML
 	public void addFormula() {
+		addFormula(false);
+	}
+	
+	private void addFormula(boolean checking) {
 		String item = cbOperations.getSelectionModel().getSelectedItem();
 		if (item == null) {
 			return;
 		}
-		cbcHandler.addFormula(item, "", CBCFormulaItem.CBCType.INVARIANT);
-		this.close();
+		cbcHandler.addFormula(item, "", CBCFormulaItem.CBCType.INVARIANT, checking);
 	}
 
 	@FXML
 	public void checkFormula() {
-		addFormula();
+		addFormula(true);
 		String name = cbOperations.getSelectionModel().getSelectedItem();
 		if (name == null) {
 			return;

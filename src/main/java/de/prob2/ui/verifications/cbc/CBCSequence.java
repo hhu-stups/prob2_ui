@@ -24,13 +24,17 @@ public class CBCSequence extends Stage {
 	
 	@FXML
 	public void addFormula() {
-		cbcHandler.addFormula(tfSequence.getText(), tfSequence.getText(), CBCFormulaItem.CBCType.SEQUENCE);
-		this.close();
+		addFormula(false);
+	}
+	
+	private void addFormula(boolean checking) {
+		cbcHandler.addFormula(tfSequence.getText(), tfSequence.getText(), CBCFormulaItem.CBCType.SEQUENCE,
+								checking);
 	}
 
 	@FXML
 	public void checkFormula() {
-		addFormula();
+		addFormula(true);
 		cbcHandler.checkSequence(tfSequence.getText());
 	}
 
