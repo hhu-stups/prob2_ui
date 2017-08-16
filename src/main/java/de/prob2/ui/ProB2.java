@@ -30,6 +30,7 @@ import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.application.Preloader;
+import javafx.event.Event;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -93,25 +94,7 @@ public class ProB2 extends Application {
 		stageManager.registerMainStage(primaryStage, this.getClass().getName());
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		this.primaryStage.setOnCloseRequest(event -> {
-			if (!currentProject.isSaved()) {
-				ButtonType save = new ButtonType("Save", ButtonBar.ButtonData.YES);
-				ButtonType doNotSave = new ButtonType("Do not save", ButtonBar.ButtonData.NO);
-				Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-						"The current project \"" + currentProject.getName()
-								+ "\" contains unsaved changes.\nDo you want to save the project?",
-						save, ButtonType.CANCEL, doNotSave);
-				Optional<ButtonType> result = alert.showAndWait();
-				if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
-					event.consume();
-				} else if (result.isPresent() && result.get().equals(save)) {
-					injector.getInstance(ProjectManager.class).saveCurrentProject();
-					Platform.exit();
-				}
-			} else {
-				Platform.exit();
-			}
-		});
+		primaryStage.setOnCloseRequest(event -> handleCloseRequest(event, currentProject, stageManager));
 
 		LauncherImpl.notifyPreloader(this, new Preloader.ProgressNotification(100));
 		this.primaryStage.show();
@@ -230,6 +213,26 @@ public class ProB2 extends Application {
 	public void stop() {
 		if (injector != null) {
 			injector.getInstance(StopActions.class).run();
+		}
+	}
+
+	private void handleCloseRequest(Event event, CurrentProject currentProject, StageManager stageManager) {
+		if (!currentProject.isSaved()) {
+			ButtonType save = new ButtonType("Save", ButtonBar.ButtonData.YES);
+			ButtonType doNotSave = new ButtonType("Do not save", ButtonBar.ButtonData.NO);
+			Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+					"The current project \"" + currentProject.getName()
+							+ "\" contains unsaved changes.\nDo you want to save the project?",
+					save, ButtonType.CANCEL, doNotSave);
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
+				event.consume();
+			} else if (result.isPresent() && result.get().equals(save)) {
+				injector.getInstance(ProjectManager.class).saveCurrentProject();
+				Platform.exit();
+			}
+		} else {
+			Platform.exit();
 		}
 	}
 }

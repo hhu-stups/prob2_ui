@@ -67,7 +67,9 @@ public class LTLResultHandler extends AbstractResultHandler {
 	}
 
 	@Override
-	protected Trace handleCounterExample(Object result, State stateid) {
-		return ((LTLCounterExample) result).getTrace(stateid.getStateSpace());
+	protected List<Trace> handleCounterExample(Object result, State stateid) {
+		ArrayList<Trace> counterExamples = new ArrayList<>();
+		counterExamples.add(((LTLCounterExample) result).getTrace(stateid.getStateSpace()));
+		return counterExamples;
 	}
 }

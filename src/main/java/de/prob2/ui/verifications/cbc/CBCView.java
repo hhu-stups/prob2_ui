@@ -4,6 +4,8 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob.statespace.AnimationSelector;
+import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -15,12 +17,16 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -59,14 +65,17 @@ public class CBCView extends AnchorPane {
 	
 	private final CBCFormulaHandler cbcHandler;
 	
+	private final AnimationSelector animations;
+	
 	@Inject
 	public CBCView(final StageManager stageManager, final CurrentTrace currentTrace, 
 					final CurrentProject currentProject, final CBCFormulaHandler cbcHandler,
-					final Injector injector) {
+					final Injector injector, final AnimationSelector animations) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.cbcHandler = cbcHandler;
 		this.injector = injector;
+		this.animations = animations;
 		stageManager.loadFXML(this, "cbc_view.fxml");
 	}
 	
@@ -116,10 +125,26 @@ public class CBCView extends AnchorPane {
 				cbcHandler.updateMachineStatus(getCurrentMachine());
 			});
 			
+			Menu showCounterExampleItem = new Menu("Show Counter Example");
+			showCounterExampleItem.setDisable(true);
+			
 			MenuItem removeItem = new MenuItem("Remove Formula");
 			removeItem.setOnAction(e -> removeFormula());
 			removeItem.disableProperty().bind(row.emptyProperty());
-			row.setContextMenu(new ContextMenu(check, removeItem));
+			
+			
+			row.setOnMouseClicked(e-> {
+				if(e.getButton() == MouseButton.SECONDARY) {
+					CBCFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+					if(row.emptyProperty().get() || item.getCounterExamples().isEmpty()) {
+						showCounterExampleItem.setDisable(true);
+					} else {
+						showCounterExampleItem.setDisable(false);
+						showCounterExamples(showCounterExampleItem);
+					}
+				}
+			});
+			row.setContextMenu(new ContextMenu(check, showCounterExampleItem, removeItem));
 			return row;
 		});
 	}
@@ -158,6 +183,26 @@ public class CBCView extends AnchorPane {
 	public void refresh() {
 		tvMachines.refresh();
 		tvFormula.refresh();
+	}
+	
+	private void showCounterExamples(Menu counterExampleItem) {
+		counterExampleItem.getItems().clear();
+		CBCFormulaItem currentItem = tvFormula.getSelectionModel().getSelectedItem();
+		List<Trace> counterExamples = currentItem.getCounterExamples(); 
+		for(int i = 0; i < counterExamples.size(); i++) {
+			MenuItem traceItem = new MenuItem("Counter Example " + Integer.toString(i + 1));
+			final int index = i;
+			traceItem.setOnAction(e-> showCounterExample(counterExamples.get(index)));
+			counterExampleItem.getItems().add(traceItem);
+		}
+
+	}
+	
+	private void showCounterExample(Trace trace) {
+		if (currentTrace.exists()) {
+			this.animations.removeTrace(currentTrace.get());
+		}
+		animations.addNewAnimation(trace);
 	}
 		
 }

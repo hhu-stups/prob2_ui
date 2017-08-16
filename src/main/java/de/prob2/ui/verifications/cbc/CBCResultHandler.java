@@ -30,7 +30,9 @@ public class CBCResultHandler extends AbstractResultHandler {
 	
 	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, List<Trace> traces) {
 		super.showResult(resultItem, item);
-		//TODO: counter examples
+		for(Trace trace: traces) {
+			((CBCFormulaItem) item).getCounterExamples().add(trace);
+		}
 	}
 	
 	public void handleFormulaResult(CBCFormulaItem item, Object result, State stateid) {
@@ -40,9 +42,27 @@ public class CBCResultHandler extends AbstractResultHandler {
 	}
 
 	@Override
-	protected Trace handleCounterExample(Object result, State stateid) {
-		// TODO Auto-generated method stub
-		return null;
+	protected List<Trace> handleCounterExample(Object result, State stateid) {
+		if(result instanceof CBCInvariantViolationFound) {
+			return handleInvariantCounterExamples(result, stateid);
+		}
+		return handleDeadlockCounterExample(result, stateid);
+	}
+	
+	private List<Trace> handleInvariantCounterExamples(Object result, State stateid) {
+		ArrayList<Trace> counterExamples = new ArrayList<>();
+		CBCInvariantViolationFound violation = (CBCInvariantViolationFound) result;
+		int size = violation.getCounterexamples().size();
+		for(int i = 0; i < size; i++) {
+			counterExamples.add(violation.getTrace(i, stateid.getStateSpace()));
+		}
+		return counterExamples;
+	}
+	
+	private List<Trace> handleDeadlockCounterExample(Object result, State stateid) {
+		ArrayList<Trace> counterExamples = new ArrayList<>();
+		counterExamples.add(((CBCDeadlockFound) result).getTrace(stateid.getStateSpace()));
+		return counterExamples;
 	}
 
 }
