@@ -46,26 +46,26 @@ public class CBCFormulaHandler {
 		ArrayList<String> event = new ArrayList<>();
 		event.add(name);
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
-		executeCheckingItem(checker, name);
+		executeCheckingItem(checker, name, CBCType.INVARIANT);
 	}
 	
 	public void checkDeadlock(String code) {
 		IEvalElement constraint = new EventB(code); 
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
-		executeCheckingItem(checker, code);
+		executeCheckingItem(checker, code, CBCType.DEADLOCK);
 	}
 	
 	public void checkSequence(String sequence) {
 		List<String> events = Arrays.asList(sequence.split(";"));
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
-		executeCheckingItem(checker, sequence);
+		executeCheckingItem(checker, sequence, CBCType.SEQUENCE);
 	}
 	
-	public void executeCheckingItem(IModelCheckJob checker, String code) {
+	public void executeCheckingItem(IModelCheckJob checker, String code, CBCType type) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
 		currentMachine.getCBCFormulas()
 				.stream()
-				.filter(current -> code.equals(current.getName()))
+				.filter(current -> code.equals(current.getName()) && current.getType().equals(type))
 				.findFirst()
 				.ifPresent(item -> checkItem(checker, item));
 		updateMachine(currentMachine);
