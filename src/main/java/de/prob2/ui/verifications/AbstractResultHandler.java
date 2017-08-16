@@ -70,7 +70,7 @@ public abstract class AbstractResultHandler {
 		if(success.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(AlertType.INFORMATION, Checked.SUCCESS, type.name().concat(" Formula Check succeeded"), "Success");
 		} else if(counterExample.contains(result.getClass())) {
-			traces.add(handleCounterExample(result, stateid));
+			traces.addAll(handleCounterExample(result, stateid));
 			resultItem = new CheckingResultItem(AlertType.ERROR, Checked.FAIL, type.name().concat(" Counter Example has been found"), 
 											"Counter Example Found");
 		} else if(error.contains(result.getClass())) {
@@ -88,7 +88,7 @@ public abstract class AbstractResultHandler {
 		return resultItem;
 	}
 	
-	protected abstract Trace handleCounterExample(Object result, State stateid);
+	protected abstract List<Trace> handleCounterExample(Object result, State stateid);
 	
 	
 	public void showAlreadyExists(ItemType type) {

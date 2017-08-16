@@ -125,6 +125,14 @@ public class Machine {
 		this(name, description, location,
 			Machine.Type.fromExtension(FileAsker.getExtension(location.getFileName().toString())));
 	}
+	
+	public void initialize() {
+		initializeLTLStatus();
+		initializeCBCStatus();
+		for(CBCFormulaItem item : cbcFormulas) {
+			item.initializeCounterExamples();
+		}
+	}
 
 	public String getFileName() {
 		String pattern = Pattern.quote(System.getProperty("file.separator"));
