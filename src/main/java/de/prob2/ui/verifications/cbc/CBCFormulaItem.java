@@ -26,12 +26,13 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 			return false;
 		}
 		CBCFormulaItem otherItem = (CBCFormulaItem) obj;
-		return otherItem.getName().equals(this.getName());
+		return otherItem.getName().equals(this.getName()) &&
+				otherItem.getType().equals(this.getType());
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(name);
+		return Objects.hash(name, type);
 	}
 	
 	public CBCType getType() {
