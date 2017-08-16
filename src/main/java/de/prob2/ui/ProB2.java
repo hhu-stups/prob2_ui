@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Locale;
 import java.util.Optional;
 
+import de.prob2.ui.plugin.ProBPluginManager;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
@@ -124,6 +125,9 @@ public class ProB2 extends Application {
 				currentProject.startAnimation(found);
 			}
 		}
+
+		ProBPluginManager pluginManager = injector.getInstance(ProBPluginManager.class);
+		pluginManager.start();
 	}
 
 	private void updateTitle() {
@@ -217,6 +221,8 @@ public class ProB2 extends Application {
 	}
 
 	private void handleCloseRequest(Event event, CurrentProject currentProject, StageManager stageManager) {
+		ProBPluginManager proBPluginManager = injector.getInstance(ProBPluginManager.class);
+		proBPluginManager.stopPlugins();
 		if (!currentProject.isSaved()) {
 			ButtonType save = new ButtonType("Save", ButtonBar.ButtonData.YES);
 			ButtonType doNotSave = new ButtonType("Do not save", ButtonBar.ButtonData.NO);
