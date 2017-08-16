@@ -61,17 +61,6 @@ public final class DetachViewStageController extends Stage {
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
 	
-	private static <T> T findOfType(final Iterable<? super T> objects, final Class<T> clazz) {
-		for (final Object o : objects) {
-			try {
-				return clazz.cast(o);
-			} catch (ClassCastException ignored) { // NOSONAR
-				// Object doesn't have the type that we want, try the next one
-			}
-		}
-		throw new NoSuchElementException(String.format("No %s object found in %s", clazz, objects));
-	}
-	
 	@FXML
 	public void initialize() {
 		checkBoxMap.put(OperationsView.class, detachOperations);
@@ -109,9 +98,9 @@ public final class DetachViewStageController extends Stage {
 		}
 		final Parent root = injector.getInstance(PerspectivesMenu.class).loadPreset(guiState);
 		final Map<TitledPane,Accordion> accordionMap = ((MainController) root).getAccordionMap();
-		for (TitledPane titledPane : accordionMap.keySet()) {
-			if (checkBoxMap.get(titledPane.getContent().getClass()).isSelected()) {
-				removeTP(accordionMap.get(titledPane));
+		for (Map.Entry<TitledPane,Accordion> entry: accordionMap.entrySet()) {
+			if (checkBoxMap.get(entry.getKey().getContent().getClass()).isSelected()) {
+				removeTP(entry.getValue());
 			}
 		}
 		updateWrapperStages();

@@ -10,6 +10,7 @@ import de.prob.prolog.term.PrologTerm;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GetRightClickOptionsForStateVisualizationCommand extends AbstractCommand {
 
@@ -40,9 +41,7 @@ public class GetRightClickOptionsForStateVisualizationCommand extends AbstractCo
 	@Override
 	public void processResult(ISimplifiedROMap<String, PrologTerm> bindings) {
 		ListPrologTerm optionTerms = BindingGenerator.getList(bindings.get(OPTIONS));
-		for (PrologTerm term : optionTerms) {
-			options.add(term.getFunctor());
-		}
+		options.addAll(optionTerms.stream().map(PrologTerm::getFunctor).collect(Collectors.toList()));
 	}
 
 	public List<String> getOptions() {

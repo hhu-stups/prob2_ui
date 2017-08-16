@@ -58,11 +58,13 @@ public class HelpTreeItem extends TreeItem<String>{
     }
 
     private ObservableList<TreeItem<String>> buildChildren(HelpTreeItem helpTreeItem) throws IOException {
-        File file = helpTreeItem.file;
-        if (file != null && file.isDirectory()) {
+        File f = helpTreeItem.file;
+        if (f != null && f.isDirectory()) {
             ObservableList<TreeItem<String>> children = FXCollections.observableArrayList();
-            for (File child : file.listFiles()) {
-                children.add(createNode(child));
+            for (File child : f.listFiles()) {
+                if (child.isDirectory()||child.getName().contains(".htm")) {
+                    children.add(createNode(child));
+                }
             }
             return children;
         }

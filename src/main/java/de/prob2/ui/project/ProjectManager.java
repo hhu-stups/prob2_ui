@@ -56,8 +56,8 @@ public class ProjectManager {
 
 	public void saveCurrentProject() {
 		Project project = currentProject.get();
-		File loc = new File(project.getLocation() + File.separator + project.getName() + ".json");
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(loc), PROJECT_CHARSET)) {
+		File file = new File(project.getLocation() + File.separator + project.getName() + ".json");
+		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), PROJECT_CHARSET)) {
 
 			currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(),
 					project.getPreferences(), project.getRunconfigurations(), project.getLocation()));
@@ -67,6 +67,7 @@ public class ProjectManager {
 		} catch (IOException exc) {
 			LOGGER.warn("Failed to save project", exc);
 		}
+		addToRecentProjects(file);
 		currentProject.setSaved(true);
 	}
 
@@ -96,10 +97,16 @@ public class ProjectManager {
 			return;
 		}
 		currentProject.set(project);
+		addToRecentProjects(file);
 		currentProject.setSaved(true);
+	}
+	
+	private void addToRecentProjects(File file) {
 		Platform.runLater(() -> {
-			this.recentProjects.remove(file.getAbsolutePath());
-			this.recentProjects.add(0, file.getAbsolutePath());
+			if (recentProjects.isEmpty() || !recentProjects.get(0).equals(file.getAbsolutePath())) {
+				this.recentProjects.remove(file.getAbsolutePath());
+				this.recentProjects.add(0, file.getAbsolutePath());
+			}
 		});
 	}
 

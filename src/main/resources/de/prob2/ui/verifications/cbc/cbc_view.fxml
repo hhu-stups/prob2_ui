@@ -24,6 +24,11 @@
 						</VBox.margin>
 					</HelpButton>
 					<HBox spacing="5.0" alignment="CENTER_LEFT">
+						<HBox alignment="BOTTOM_LEFT" HBox.hgrow="ALWAYS">
+							<Button fx:id="checkSelectedMachineButton" disable="true"
+								text="%verifications.checkSelectedMachine" onAction="#checkSelectedMachine"
+								styleClass="button-blue" />
+						</HBox>
 						<VBox spacing="5.0" alignment="TOP_RIGHT">
 							<Button fx:id="addFormulaButton" disable="true" onAction="#addFormula"
 								styleClass="button-blue" text="Add CBC Formula">

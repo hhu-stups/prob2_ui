@@ -1,7 +1,10 @@
 package de.prob2.ui.verifications.cbc;
 
+import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class CBCFormulaItem extends AbstractCheckableItem {
@@ -11,10 +14,21 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 	}
 	
 	private CBCType type;
+	
+	private transient List<Trace> counterExamples;
 
 	public CBCFormulaItem(String name, String code, CBCType type) {
 		super(name, type.name(), code);
 		this.type = type;
+		this.initializeCounterExamples();
+	}
+	
+	public void initializeCounterExamples() {
+		this.counterExamples = new ArrayList<>();
+	}
+	
+	public List<Trace> getCounterExamples() {
+		return counterExamples;
 	}
 	
 	@Override
@@ -26,12 +40,13 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 			return false;
 		}
 		CBCFormulaItem otherItem = (CBCFormulaItem) obj;
-		return otherItem.getName().equals(this.getName());
+		return otherItem.getName().equals(this.getName()) &&
+				otherItem.getType().equals(this.getType());
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, description, code);
+		return Objects.hash(name, type);
 	}
 	
 	public CBCType getType() {

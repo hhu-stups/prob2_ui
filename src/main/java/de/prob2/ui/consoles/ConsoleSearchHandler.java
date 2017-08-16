@@ -63,7 +63,7 @@ public class ConsoleSearchHandler {
 	}
 	
 	public String getCurrentSearchResult() {
-		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf("\n") + 5;
+		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf('\n') + 5;
 		return parent.getText().substring(posOfColon, parent.getText().length());
 	}
 	
@@ -86,7 +86,7 @@ public class ConsoleSearchHandler {
 			if (e.getCode() == KeyCode.DELETE) {
 				parent.deactivateSearch();
 				return true;
-			} else if (parent.getCaretPosition() != parent.getLength() - parent.getCurrentLine().length() + parent.getCurrentLine().indexOf("'") + 1) {
+			} else if (parent.getCaretPosition() != parent.getLength() - parent.getCurrentLine().length() + parent.getCurrentLine().indexOf('\'') + 1) {
 				handleKey(e);
 			}
 		}
@@ -98,11 +98,11 @@ public class ConsoleSearchHandler {
 		if (!searchResults.get(0).getFound()) {
 			searchPrefix = NOTFOUND;
 		}
-		int posOfEnter = parent.getText().lastIndexOf("\n");
+		int posOfEnter = parent.getText().lastIndexOf('\n');
 		String addition = searchPrefix.substring(0,searchPrefix.length() - 2) + getSearchCurrent() + "':" + searchResults.get(currentSearchIndex).getResult();
 		parent.deleteText(posOfEnter + 1, parent.getText().length());
 		parent.appendText(addition);
-		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf("\n") + 4;
+		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf('\n') + 4;
 		parent.moveTo(posOfColon -1);
 		parent.setEstimatedScrollY(Double.MAX_VALUE);
 	}
