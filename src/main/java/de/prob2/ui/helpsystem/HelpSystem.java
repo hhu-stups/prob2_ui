@@ -76,10 +76,10 @@ public class HelpSystem extends StackPane {
                 HelpTreeItem hti = null;
                 for (Map.Entry<File,HelpTreeItem> entry : fileMap.entrySet()) {
                     hti = entry.getValue();
-                    expandTree(hti);
                     HelpTreeItem finalHti = hti;
                     try {
                         if (entry.getKey().toURI().toURL().sameFile(new URL(webEngine.getLocation()))) {
+                            expandTree(hti);
                             Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(finalHti)));
                         }
                     } catch (MalformedURLException e) {
