@@ -53,12 +53,13 @@ public class HelpSystem extends StackPane {
             Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
             Map<String, String> env = new HashMap<>();
             env.put("create", "true");
-            FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env);
-            Path source = jarFileSystem.getPath("/help/");
-            if (!target.toFile().exists()) {
-                copyHelp(source,target);
+            try (FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env)) {
+                Path source = jarFileSystem.getPath("/help/");
+                if (!target.toFile().exists()) {
+                    copyHelp(source, target);
+                }
+                jarFileSystem.close();
             }
-            jarFileSystem.close();
             dest = new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
         } else {
             dest = new File(uri);
