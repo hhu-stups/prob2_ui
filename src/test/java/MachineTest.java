@@ -16,11 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-<<<<<<<HEAD
-        =======
-
-        >>>>>>>develop
-
 public class MachineTest extends GuiTest{
     private static final Logger LOGGER = LoggerFactory.getLogger(MachineTest.class);
 

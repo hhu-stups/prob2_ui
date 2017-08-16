@@ -1,15 +1,19 @@
 package de.prob2.ui.helpsystem;
 
+import java.io.File;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.Main;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-
-import java.io.File;
 
 public class HelpButton extends Button{
     private Injector injector;
@@ -22,7 +26,7 @@ public class HelpButton extends Button{
     }
 
     @FXML
-    public void initialize() {
+    private void initialize() {
         FontSize fontsize = injector.getInstance(FontSize.class);
         ((FontAwesomeIconView) (this.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
     }

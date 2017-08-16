@@ -7,6 +7,7 @@ import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.menu.FileAsker;
+import de.prob2.ui.verifications.cbc.CBCFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import javafx.beans.property.ListProperty;
@@ -105,6 +106,7 @@ public class Machine {
 	private Machine.Type type;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
+	private ListProperty<CBCFormulaItem> cbcFormulas;
 	private transient PatternManager patternManager;
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
@@ -116,6 +118,7 @@ public class Machine {
 		this.type = type;
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
+		this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
 	}
 	
 	public Machine(String name, String description, Path location) {
@@ -152,13 +155,18 @@ public class Machine {
 	public void initializeCBCStatus() {
 		this.cbcstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.cbcstatus.setFill(Color.BLUE);
+		if (cbcFormulas != null) {
+			for (CBCFormulaItem item : cbcFormulas) {
+				item.initializeStatus();
+			}
+		}
 	}
 	
-	public FontAwesomeIconView getLtlStatus() {
+	public FontAwesomeIconView getLTLStatus() {
 		return ltlstatus;
 	}
 	
-	public FontAwesomeIconView getCbcStatus() {
+	public FontAwesomeIconView getCBCStatus() {
 		return cbcstatus;
 	}
 	
@@ -206,7 +214,7 @@ public class Machine {
 		return ltlFormulas;
 	}
 	
-	public List<LTLFormulaItem> getFormulas() {
+	public List<LTLFormulaItem> getLTLFormulas() {
 		return ltlFormulasProperty().get();
 	}
 	
@@ -222,7 +230,7 @@ public class Machine {
 		return ltlPatterns;
 	}
 	
-	public List<LTLPatternItem> getPatterns() {
+	public List<LTLPatternItem> getLTLPatterns() {
 		return ltlPatternsProperty().get();
 	}
 	
@@ -232,6 +240,23 @@ public class Machine {
 	
 	public void removeLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.remove(pattern);
+	}
+	
+	public ListProperty<CBCFormulaItem> cbcFormulasProperty() {
+		return cbcFormulas;
+	}
+	
+	
+	public void addCBCFormula(CBCFormulaItem formula) {
+		cbcFormulas.add(formula);
+	}
+	
+	public void removeCBCFormula(CBCFormulaItem formula) {
+		cbcFormulas.remove(formula);
+	}
+	
+	public List<CBCFormulaItem> getCBCFormulas() {
+		return cbcFormulas.get();
 	}
 	
 		
@@ -244,6 +269,9 @@ public class Machine {
 		}
 		if(ltlPatterns == null) {
 			this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
+		}
+		if(cbcFormulas == null) {
+			this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
 		}
 	}
 	
@@ -280,4 +308,5 @@ public class Machine {
 	public void clearPatternManager() {
 		patternManager.getPatterns().clear();
 	}
+	
 }

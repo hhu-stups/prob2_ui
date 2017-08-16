@@ -1,9 +1,19 @@
 package de.prob2.ui.menu;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
@@ -12,21 +22,16 @@ import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.stream.Collectors;
 
 public class EditMenu extends Menu {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EditMenu.class);
@@ -87,8 +92,8 @@ public class EditMenu extends Menu {
 		final BEditorStage editorStage = injector.getInstance(BEditorStage.class);
 		final Path path = currentProject.getLocation().toPath().resolve(machine.getPath());
 		final String text;
-		try {
-			text = Files.lines(path).collect(Collectors.joining(System.lineSeparator()));
+		try (final Stream<String> lines = Files.lines(path)) {
+			text = lines.collect(Collectors.joining(System.lineSeparator()));
 		} catch (IOException | UncheckedIOException e) {
 			LOGGER.error("Could not read file " + path, e);
 			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not read file:\n" + path + "\n" + e).showAndWait();

@@ -1,25 +1,27 @@
 package de.prob2.ui.verifications.ltl.formula;
 
+import javax.inject.Inject;
+
 import com.google.inject.Injector;
+
 import de.be4.classicalb.core.parser.ClassicalBParser;
+
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
 import de.prob.statespace.State;
+
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.statusbar.StatusBar.LTLStatus;
+import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
-import de.prob2.ui.verifications.ltl.LTLResultHandler.Checked;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
 
 public class LTLFormulaChecker {
 	
@@ -40,36 +42,42 @@ public class LTLFormulaChecker {
 	}
 	
 	public void checkMachine(Machine machine) {
-		ArrayList<Boolean> failed = new ArrayList<>();
-		failed.add(false);
-		machine.getFormulas().forEach(item-> {
+		boolean failed = false;
+		for (LTLFormulaItem item : machine.getLTLFormulas()) {
 			Checked result = this.checkFormula(item, machine);
 			if(result == Checked.FAIL || result == Checked.EXCEPTION) {
-				failed.set(0, true);
+				failed = true;
 				machine.setLTLCheckedFailed();
 			}
 			item.setChecked(result);
-		});
-		StatusBar statusBar = injector.getInstance(StatusBar.class);
-		if(failed.get(0)) {
-			statusBar.updateLTLCheckingStatus(LTLStatus.ERROR);
-		} else {
-			statusBar.updateLTLCheckingStatus(LTLStatus.SUCCESSFUL);
 		}
+		injector.getInstance(StatusBar.class).setLtlStatus(failed ? StatusBar.LTLStatus.ERROR : StatusBar.LTLStatus.SUCCESSFUL);
+	}
+	
+	public void checkMachineStatus(Machine machine) {
+		for(LTLFormulaItem item : machine.getLTLFormulas()) {
+			Checked checked = item.getChecked();
+			if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
+				machine.setLTLCheckedFailed();
+				injector.getInstance(StatusBar.class).setLtlStatus(StatusBar.LTLStatus.ERROR);
+				return;
+			}
+		}
+		machine.setLTLCheckedSuccessful();
+		injector.getInstance(StatusBar.class).setLtlStatus(StatusBar.LTLStatus.SUCCESSFUL);
 	}
 	
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
 		State stateid = currentTrace.getCurrentState();
 		LtlParser parser = new LtlParser(item.getCode());
 		parser.setPatternManager(machine.getPatternManager());
-		Checked checked = resultHandler.handleFormulaResult(item, getResult(parser, item), stateid);
-		return checked;
+		return resultHandler.handleFormulaResult(item, getResult(parser, item), stateid);
 	}
 	
 	private Object getResult(LtlParser parser, LTLFormulaItem item) {
 		State stateid = currentTrace.getCurrentState();
 		LTLParseListener parseListener = parseFormula(parser);
-		if(parseListener.getErrorMarkers().size() > 0) {
+		if(!parseListener.getErrorMarkers().isEmpty()) {
 			return getFailedResult(parseListener);
 		}
 		EvaluationCommand lcc = null;

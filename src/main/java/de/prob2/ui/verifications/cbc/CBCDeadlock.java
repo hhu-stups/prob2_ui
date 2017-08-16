@@ -1,10 +1,8 @@
 package de.prob2.ui.verifications.cbc;
 
-
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -12,17 +10,33 @@ import javax.inject.Inject;
 
 public class CBCDeadlock extends Stage {
 	
-	@FXML
-	private ChoiceBox<String> cbOperations;
+	private final CBCFormulaHandler cbcHandler;
 	
-	private final CurrentTrace currentTrace;
+	@FXML
+	private TextField tfFormula;
 
 	@Inject
-	private CBCDeadlock(final StageManager stageManager, final CurrentTrace currentTrace) {
-		this.currentTrace = currentTrace;
+	private CBCDeadlock(final StageManager stageManager, final CBCFormulaHandler cbcHandler) {
+		this.cbcHandler = cbcHandler;
 		stageManager.loadFXML(this, "cbc_deadlock.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
-		
+	}
+	
+	@FXML
+	public void addFormula() {
+		cbcHandler.addFormula(tfFormula.getText(), tfFormula.getText(), CBCFormulaItem.CBCType.DEADLOCK);
+		this.close();
+	}
+	
+	@FXML
+	public void checkFormula() {
+		addFormula();
+		cbcHandler.checkDeadlock(tfFormula.getText());
+	}
+	
+	@FXML
+	public void cancel() {
+		this.close();
 	}
 		
 }

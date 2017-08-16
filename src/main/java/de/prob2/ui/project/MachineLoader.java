@@ -1,8 +1,24 @@
 package de.prob2.ui.project;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.be4.classicalb.core.parser.node.*;
+
+import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
+import de.be4.classicalb.core.parser.node.AMachineHeader;
+import de.be4.classicalb.core.parser.node.AMachineMachineVariant;
+import de.be4.classicalb.core.parser.node.EOF;
+import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.Api;
@@ -18,30 +34,20 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import javafx.scene.control.Alert.AlertType;
 
 @Singleton
 public class MachineLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MachineLoader.class);
-	private static final Start EMPTY_MACHINE_AST = new Start(
-		new AAbstractMachineParseUnit( // pParseUnit
+	private static final Start EMPTY_MACHINE_AST = new Start(new AAbstractMachineParseUnit( // pParseUnit
 			new AMachineMachineVariant(), // variant
 			new AMachineHeader( // header
-				Collections.singletonList(new TIdentifierLiteral("empty", 1, 9)), // name
-				Collections.emptyList() // parameters
-			),
-			Collections.emptyList() // machineClauses
-		),
-		new EOF(1, 18) // eof
+					Collections.singletonList(new TIdentifierLiteral("empty", 1, 9)), // name
+					Collections.emptyList() // parameters
+	), Collections.emptyList() // machineClauses
+	), new EOF(1, 18) // eof
 	);
-	
+
 	private final Object openLock;
 	private final Api api;
 	private final CurrentProject currentProject;
@@ -53,7 +59,8 @@ public class MachineLoader {
 
 	@Inject
 	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager,
-			final AnimationSelector animations, final CurrentTrace currentTrace, final GlobalPreferences globalPreferences, final StatusBar statusBar) {
+			final AnimationSelector animations, final CurrentTrace currentTrace,
+			final GlobalPreferences globalPreferences, final StatusBar statusBar) {
 		this.api = api;
 		this.openLock = new Object();
 		this.currentProject = currentProject;
@@ -71,20 +78,27 @@ public class MachineLoader {
 			throw new IllegalStateException("Failed to load empty machine, this should never happen!", e);
 		}
 	}
-	
+
 	public void loadAsync(Machine machine, Map<String, String> pref) {
 		new Thread(() -> {
 			try {
 				this.load(machine, pref);
+			} catch (FileNotFoundException e) {
+				LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
+				Platform.runLater(() -> {
+					Alert alert = stageManager.makeAlert(AlertType.ERROR, "The machine file " + getPathToMachine(machine)
+							+ " could not be found.\n" + "The file was probably moved, renamed or deleted.\n");
+					alert.setHeaderText("Project File not found.");
+					alert.showAndWait();
+				});
 			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 				LOGGER.error("Loading machine \"{}\" failed", machine.getName(), e);
-				Platform.runLater(() -> stageManager
-						.makeExceptionAlert(Alert.AlertType.ERROR, "Could not open machine \"" + machine.getName() + '"', e)
-						.showAndWait());
+				Platform.runLater(() -> stageManager.makeExceptionAlert(Alert.AlertType.ERROR,
+						"Could not open machine \"" + machine.getName() + '"', e).showAndWait());
 			}
-		}, "Machine Loader").start();
+		} , "Machine Loader").start();
 	}
-	
+
 	private void setLoadingStatus(final StatusBar.LoadingStatus loadingStatus) {
 		Platform.runLater(() -> this.statusBar.setLoadingStatus(loadingStatus));
 	}
@@ -102,23 +116,29 @@ public class MachineLoader {
 				if (currentTrace.exists()) {
 					this.animations.removeTrace(currentTrace.get());
 				}
-				
+
 				setLoadingStatus(StatusBar.LoadingStatus.LOADING_FILE);
-				final Path path;
-				if (currentProject.getMachines().contains(machine)) {
-					path = currentProject.get().getLocation().toPath().resolve(machine.getPath());
-				} else {
-					path = machine.getPath();
-				}
+				final Path path = getPathToMachine(machine);
+
 				final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
 				allPrefs.putAll(prefs);
 				final StateSpace stateSpace = machine.getType().getLoader().load(api, path.toString(), allPrefs);
-				
+
 				setLoadingStatus(StatusBar.LoadingStatus.ADDING_ANIMATION);
 				this.animations.addNewAnimation(new Trace(stateSpace));
 			} finally {
 				setLoadingStatus(StatusBar.LoadingStatus.NOT_LOADING);
 			}
 		}
+	}
+
+	private Path getPathToMachine(Machine machine) {
+		final Path path;
+		if (currentProject.getMachines().contains(machine)) {
+			path = currentProject.get().getLocation().toPath().resolve(machine.getPath());
+		} else {
+			path = machine.getPath();
+		}
+		return path;
 	}
 }

@@ -69,7 +69,7 @@ public class MachinesTab extends Tab {
 				editMachineMenuItem.setOnAction(event -> injector.getInstance(EditMachinesDialog.class)
 						.editAndShow(machine).ifPresent(result -> {
 					machinesItem.refresh();
-					showMachineView(machine);
+					showMachineView(machinesItem);
 				}));
 
 				final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
@@ -92,7 +92,8 @@ public class MachinesTab extends Tab {
 						updateAnimationMenu(startAnimationMenu, machine);
 						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-						showMachineView(machine);
+						showMachineView(machinesItem);
+						machinesItem.setId("machines-item-selected");
 					}
 				});
 			}
@@ -109,7 +110,7 @@ public class MachinesTab extends Tab {
 			item.setOnAction(e -> currentProject.startAnimation(runconfiguration));
 			startAnimationMenu.getItems().add(item);
 		}
-		if (startAnimationMenu.getItems().size() == 0) {
+		if (startAnimationMenu.getItems().isEmpty()) {
 			startAnimationMenu.setDisable(true);
 		}
 	}
@@ -141,16 +142,16 @@ public class MachinesTab extends Tab {
 		currentProject.addMachine(new Machine(name, "", relative));
 	}
 
-	private void showMachineView(Machine machine) {
-		if (splitPane.getItems().size() >= 2) {
-			splitPane.getItems().remove(0);
-		}
-		splitPane.getItems().add(0, new MachineView(machine, stageManager, injector));
+	private void showMachineView(MachinesItem machinesItem) {
+		closeMachineView();
+		splitPane.getItems().add(0, new MachineView(machinesItem, stageManager, injector));
 	}
 
 	void closeMachineView() {
 		if (splitPane.getItems().get(0) instanceof MachineView) {
+			MachineView machineView = (MachineView) splitPane.getItems().get(0);		
 			splitPane.getItems().remove(0);
+			machineView.getMachinesItem().setId("machines-item");
 		}
 	}
 }

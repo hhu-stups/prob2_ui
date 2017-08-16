@@ -10,6 +10,7 @@ import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.TablePersistenceHandler;
@@ -83,7 +84,8 @@ public final class Config {
 		final Injector injector,
 		final CurrentProject currentProject,
 		final GlobalPreferences globalPreferences,
-		final RuntimeOptions runtimeOptions
+		final RuntimeOptions runtimeOptions,
+		final StopActions stopActions
 	) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.recentProjects = recentProjects;
@@ -109,6 +111,8 @@ public final class Config {
 		}
 
 		this.load();
+		
+		stopActions.add(this::save);
 	}
 
 	private void replaceMissingWithDefaults(final ConfigData configData) {

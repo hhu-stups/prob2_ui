@@ -133,7 +133,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 			// CheckBox doesn't exist yet, so create it.
 			final CheckBox checkBox = new CheckBox();
 			checkBox.setSelected("true".equals(pti.getValue()));
-			checkBox.setOnAction(event -> this.instantEdit("" + checkBox.isSelected()));
+			checkBox.setOnAction(event -> this.instantEdit(Boolean.toString(checkBox.isSelected())));
 			this.setText(null);
 			this.setGraphic(checkBox);
 		}

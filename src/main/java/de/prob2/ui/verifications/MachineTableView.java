@@ -13,11 +13,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javax.inject.Inject;
 
 public class MachineTableView extends TableView<Machine> {
-	
-	public enum CheckingType {
-		LTL, CBC;
-	}
-	
+		
 	@FXML
 	private TableColumn<Machine, FontAwesomeIconView> machineStatusColumn;
 	
@@ -46,9 +42,9 @@ public class MachineTableView extends TableView<Machine> {
 	public void initialize() {
 		typeProperty.addListener((observable, from, to) -> {
 			if(to == CheckingType.LTL) {
-				machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("ltlStatus"));
+				machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("LTLStatus"));
 			} else {
-				machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("cbcStatus"));
+				machineStatusColumn.setCellValueFactory(new PropertyValueFactory<>("CBCStatus"));
 			}
 		});
 		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));

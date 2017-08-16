@@ -7,7 +7,6 @@ branches:
 script:
 - ./gradlew assemble --refresh-dependencies
 ##- ./gradlew -Pheadless=true check
-- sonar-scanner -Dsonar.login=$SONAR_TOKEN
 sudo: false
 matrix:
   include:
@@ -22,7 +21,7 @@ matrix:
       env: _JAVA_OPTIONS="-Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw -Dprism.text=t2k -Dtestfx.setup.timeout=2500"
 
 addons:
-  sonarqube:
+  sonarcloud:
     branches:
       - master
       - develop
@@ -44,6 +43,7 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 after_success:
+- ./gradlew sonarqube --info --stacktrace
 - travis-custom-deploy sftp build/distributions/*.zip
 env:
   global:

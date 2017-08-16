@@ -1,18 +1,20 @@
 package de.prob2.ui.statusbar;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
 
 @Singleton
 public class StatusBar extends HBox {
@@ -38,12 +40,18 @@ public class StatusBar extends HBox {
 		ERROR, SUCCESSFUL;
 	}
 	
+	public enum CBCStatus {
+		ERROR, SUCCESSFUL;
+	}
+	
 	@FXML private Label errorsLabel;
 	
 	private final ResourceBundle resourceBundle;
 	private final CurrentTrace currentTrace;
 	
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
+	private final ObjectProperty<StatusBar.LTLStatus> ltlStatus;
+	private final ObjectProperty<StatusBar.CBCStatus> cbcStatus;
 	
 	@Inject
 	private StatusBar(final ResourceBundle resourceBundle, final CurrentTrace currentTrace, final StageManager stageManager) {
@@ -53,6 +61,8 @@ public class StatusBar extends HBox {
 		this.currentTrace = currentTrace;
 		
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
+		this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", StatusBar.LTLStatus.SUCCESSFUL);
+		this.cbcStatus = new SimpleObjectProperty<>(this, "cbcStatus", StatusBar.CBCStatus.SUCCESSFUL);
 		
 		stageManager.loadFXML(this, "status_bar.fxml");
 	}
@@ -61,6 +71,8 @@ public class StatusBar extends HBox {
 	private void initialize() {
 		this.currentTrace.addListener((observable, from, to) -> this.update());
 		this.loadingStatusProperty().addListener((observable, from, to) -> this.update());
+		this.ltlStatusProperty().addListener((observable, from, to) -> this.update());
+		this.cbcStatusProperty().addListener((observable, from, to) -> this.update());
 	}
 	
 	public ObjectProperty<StatusBar.LoadingStatus> loadingStatusProperty() {
@@ -75,6 +87,30 @@ public class StatusBar extends HBox {
 		this.loadingStatusProperty().set(loadingStatus);
 	}
 	
+	public ObjectProperty<StatusBar.LTLStatus> ltlStatusProperty() {
+		return this.ltlStatus;
+	}
+	
+	public StatusBar.LTLStatus getLtlStatus() {
+		return this.ltlStatusProperty().get();
+	}
+		
+	public void setLtlStatus(final StatusBar.LTLStatus ltlStatus) {
+		this.ltlStatusProperty().set(ltlStatus);
+	}
+	
+	public ObjectProperty<StatusBar.CBCStatus> cbcStatusProperty() {
+		return this.cbcStatus;
+	}
+	
+	public StatusBar.CBCStatus getCbcStatus() {
+		return this.cbcStatusProperty().get();
+	}
+	
+	public void setCbcStatus(final StatusBar.CBCStatus cbcStatus) {
+		this.cbcStatusProperty().set(cbcStatus);
+	}
+	
 	private void update() {
 		errorsLabel.getStyleClass().removeAll("noErrors", "someErrors");
 		if (this.currentTrace.exists()) {
@@ -84,6 +120,13 @@ public class StatusBar extends HBox {
 			}
 			if (!this.currentTrace.getCurrentState().getStateErrors().isEmpty()) {
 				errorMessages.add(resourceBundle.getString("statusbar.errors.stateErrors"));
+			}
+			if (this.getLtlStatus() == StatusBar.LTLStatus.ERROR) {
+				errorMessages.add(resourceBundle.getString("statusbar.errors.ltlError"));
+			}
+			
+			if (this.getCbcStatus() == StatusBar.CBCStatus.ERROR) {
+				errorMessages.add(resourceBundle.getString("statusbar.errors.cbcError"));
 			}
 			
 			if (errorMessages.isEmpty()) {
@@ -95,17 +138,6 @@ public class StatusBar extends HBox {
 			}
 		} else {
 			errorsLabel.setText(this.resourceBundle.getString(this.getLoadingStatus().getMessageKey()));
-		}
-	}
-	
-	public void updateLTLCheckingStatus(LTLStatus ltlStatus) {
-		errorsLabel.getStyleClass().removeAll("noErrors", "someErrors");
-		if(ltlStatus == LTLStatus.ERROR) {
-			errorsLabel.getStyleClass().add("someErrors");
-			errorsLabel.setText(resourceBundle.getString("statusbar.errors.LTLNotOK"));
-		} else {
-			errorsLabel.getStyleClass().add("noErrors");
-			errorsLabel.setText(resourceBundle.getString("statusbar.errors.LTLOK"));
 		}
 	}
 }

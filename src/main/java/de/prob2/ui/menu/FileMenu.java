@@ -92,7 +92,7 @@ public class FileMenu extends Menu {
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();
 	}
-	
+
 	@FXML
 	private void handleOpen() {
 		final File selected = FileAsker.askForProjectOrMachine(stageManager.getMainStage());
@@ -106,16 +106,16 @@ public class FileMenu extends Menu {
 			this.createProjectFromFile(selected);
 		}
 	}
-	
+
 	private void createProjectFromFile(File file) {
-		final Path projectLocation = currentProject.getDefaultLocation();
+		final Path projectLocation = file.getParentFile().toPath();
 		final Path absolute = file.toPath();
 		final Path relative = projectLocation.relativize(absolute);
 		final String shortName = file.getName().substring(0, file.getName().lastIndexOf('.'));
 		final String description = "(this project was created automatically from file " + absolute + ')';
 		final Machine machine = new Machine(shortName, "", relative);
-		currentProject.set(new Project(shortName, description, machine, currentProject.getDefaultLocation().toFile()));
-		
+		currentProject.set(new Project(shortName, description, machine, projectLocation.toFile()));
+
 		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
 		currentProject.addRunconfiguration(defaultRunconfig);
 		currentProject.startAnimation(defaultRunconfig);
@@ -138,11 +138,7 @@ public class FileMenu extends Menu {
 	private void openProject(File file) {
 		injector.getInstance(ProjectManager.class).openProject(file);
 
-		Platform.runLater(() -> {
-			injector.getInstance(ModelcheckingController.class).resetView();
-			this.recentProjects.remove(file.getAbsolutePath());
-			this.recentProjects.add(0, file.getAbsolutePath());
-		});
+		Platform.runLater(() -> injector.getInstance(ModelcheckingController.class).resetView());
 	}
 
 	@FXML
@@ -154,7 +150,7 @@ public class FileMenu extends Menu {
 	private void saveProject() {
 		injector.getInstance(ProjectManager.class).saveCurrentProject();
 	}
-	
+
 	@FXML
 	private void handleReloadMachine() {
 		try {
