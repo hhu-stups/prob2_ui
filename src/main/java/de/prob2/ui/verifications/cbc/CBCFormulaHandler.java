@@ -23,6 +23,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
+import javafx.application.Platform;
 
 public class CBCFormulaHandler {
 	
@@ -56,19 +57,29 @@ public class CBCFormulaHandler {
 	}
 	
 	public void checkSequence(String sequence) {
-		List<String> events = Arrays.asList(sequence.split(";"));
+		List<String> events = Arrays.asList(sequence.replaceAll(" ", "").split(";"));
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
 		executeCheckingItem(checker, sequence, CBCType.SEQUENCE);
 	}
 	
 	public void executeCheckingItem(IModelCheckJob checker, String code, CBCType type) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
-		currentMachine.getCBCFormulas()
-				.stream()
-				.filter(current -> code.equals(current.getName()) && current.getType().equals(type))
-				.findFirst()
-				.ifPresent(item -> checkItem(checker, item));
-		updateMachine(currentMachine);
+		Thread executionThread = new Thread(() -> {
+			Platform.runLater(() -> {
+				currentMachine.getCBCFormulas()
+					.stream()
+					.filter(current -> code.equals(current.getName()) && current.getType().equals(type))
+					.findFirst()
+					.ifPresent(item -> checkItem(checker, item));
+			});
+		});
+		Thread updatingThread = new Thread(() -> {
+			Platform.runLater(() -> {
+				updateMachine(currentMachine);
+			});
+		});
+		executionThread.start();
+		updatingThread.start();
 	}
 	
 	public void checkMachine(Machine machine) {
