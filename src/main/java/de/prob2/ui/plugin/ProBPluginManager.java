@@ -3,6 +3,7 @@ package de.prob2.ui.plugin;
 import com.github.zafarkhaja.semver.Version;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import de.prob.Main;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.scene.control.*;
@@ -24,20 +25,30 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Created by Christoph Heinzen on 10.08.17.
+ * {@inheritDoc}
+ *
+ * Overwrites the {@code createPluginFactory} method to use {@link ProBPlugin} as plugin class,
+ * the {@code createPluginsRoot} method to set the plugins directory and the {@code getRuntimeMode}
+ * to avoid the development mode of PF4J.
+ *
+ * {@link ProBPluginManager} also adds methods to start the plugin manager, to reload the plugins and
+ * to add plugins using a {@link FileChooser}.
+ *
+ * @author  Christoph Heinzen
+ * @version 0.1.0
+ * @since   10.08.2017
  */
 @Singleton
 public class ProBPluginManager extends JarPluginManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginManager.class);
 
+    private static final String VERSION = "0.1.0";
     private static final File PLUGIN_DIRECTORY;
     private static final File INACTIVE_PLUGINS_FILE;
 
     static {
-        String pluginDirectorPath = System.getProperty("user.home")
-                + File.separator + ".prob"
-                + File.separator + "prob2"
+        String pluginDirectorPath = Main.getProBDirectory()
                 + File.separator + "prob2ui"
                 + File.separator + "plugins";
 
@@ -50,16 +61,27 @@ public class ProBPluginManager extends JarPluginManager {
     private final ResourceBundle bundle;
     private List<String> inactivePluginIds;
 
+    /**
+     * Should only be used by the Guice-Injector.
+     * Do not call this constructor.
+     *
+     * @param proBConnection singleton instance of {@link ProBConnection} used in the prob2-ui application
+     * @param stageManager singleton instance of {@link StageManager} used in the prob2-ui application
+     * @param bundle {@link ResourceBundle} used in the prob2-ui application
+     */
     @Inject
     public ProBPluginManager(ProBConnection proBConnection, StageManager stageManager, ResourceBundle bundle) {
         this.proBConnection = proBConnection;
         this.stageManager = stageManager;
         this.bundle = bundle;
-        setSystemVersion(Version.valueOf("0.1.0"));
+        setSystemVersion(Version.valueOf(VERSION));
         setExactVersionAllowed(true);
         createPluginDirectory();
     }
 
+    /*
+     * override methods to configure the pluginmanager
+     */
     @Override
     protected Path createPluginsRoot() {
         return PLUGIN_DIRECTORY.toPath();
@@ -88,7 +110,7 @@ public class ProBPluginManager extends JarPluginManager {
                 return null;
             }
 
-            // create the plugin instance
+            // create the ProBPlugin instance
             try {
                 Constructor<?> constructor = pluginClass.getConstructor(PluginWrapper.class);
                 return (ProBPlugin) constructor.newInstance(pluginWrapper);
@@ -104,10 +126,22 @@ public class ProBPluginManager extends JarPluginManager {
         return RuntimeMode.DEPLOYMENT;
     }
 
+    /**
+     * Calls the {@code addPlugin(Stage stage)} method with the main-stage provided by the
+     * {@link StageManager}.
+     */
     public void addPlugin() {
         addPlugin(stageManager.getMainStage());
     }
 
+    /**
+     * Shows a {@link FileChooser} to select a plugin.
+     * If the user selects a plugin, the selected file will be copied into to the plugins-directory.
+     * After that the plugins gets loaded and started if necessary.
+     * If an error occurs, an {@link Alert} with an error message will be shown.
+     *
+     * @param stage parent-stage of the used {@link FileChooser}
+     */
     public void addPlugin(@Nonnull final Stage stage) {
         final File selectedPlugin = showFileChooser(stage);
         if (selectedPlugin != null && createPluginDirectory()) {
@@ -136,6 +170,74 @@ public class ProBPluginManager extends JarPluginManager {
         }
     }
 
+    /**
+     * This method loads all plugins in the plugins directory and
+     * starts the plugin if it is not marked as inactive in the {@code inactive.txt}.
+     */
+    public void start() {
+        loadPlugins();
+        List<String> inactivePluginIds = getInactivePluginIds();
+        if (inactivePluginIds != null) {
+            for (PluginWrapper plugin : getPlugins()) {
+                String pluginId = plugin.getPluginId();
+                if (!inactivePluginIds.contains(pluginId)) {
+                    startPlugin(pluginId);
+                }
+            }
+        } else {
+            showWarningAlert("plugins.error.inactive");
+        }
+    }
+
+    /**
+     * This method unloads all loaded plugins and after that calls the
+     * {@code start} method of the {@link ProBPluginManager}.
+     *
+     * @return a list of {@link PluginWrapper}, containing every loaded plugin
+     */
+    public List<PluginWrapper> reloadPlugins() {
+        List<PluginWrapper> loadedPlugins = getPlugins();
+        for (PluginWrapper plugin : loadedPlugins) {
+            unloadPlugin(plugin.getPluginId());
+        }
+        start();
+        return getPlugins();
+    }
+
+    /**
+     * Getter for the singleton instance of the {@link ProBConnection} of
+     * the prob2-ui application.
+     *
+     * @return singleton instance of the {@link ProBConnection}
+     */
+    public ProBConnection getProBConnection() {
+        return proBConnection;
+    }
+
+    /**
+     * Saves the ids of every inactive plugin in the {@code inactive.txt} file.
+     * A plugin is inactive if its state is not {@code PluginState.STARTED}.
+     */
+    public void writeInactivePlugins() {
+        try {
+            if (createPluginDirectory()) {
+                if (!INACTIVE_PLUGINS_FILE.exists()) {
+                    if (!INACTIVE_PLUGINS_FILE.createNewFile()) {
+                        LOGGER.warn("Could not create file for inactive plugins!");
+                        return;
+                    }
+                }
+                inactivePluginIds = getPlugins().stream()
+                        .filter(pluginWrapper -> pluginWrapper.getPluginState() != PluginState.STARTED)
+                        .map(PluginWrapper::getPluginId)
+                        .collect(Collectors.toList());
+                FileUtils.writeLines(inactivePluginIds, INACTIVE_PLUGINS_FILE);
+            }
+        } catch (IOException e) {
+            LOGGER.warn("An error occurred while writing the inactive plugins:", e);
+        }
+    }
+
     private boolean checkLoadedPlugin(String loadedPluginId, String pluginFileName) throws PluginException {
         if (loadedPluginId == null) {
             throw new PluginException("Could not load the plugin '" + pluginFileName + "'.");
@@ -161,63 +263,14 @@ public class ProBPluginManager extends JarPluginManager {
         return fileChooser.showOpenDialog(stage);
     }
 
-    public void start() {
-        loadPlugins();
-        List<String> inactivePluginIds = getInactivePluginIds();
-        if (inactivePluginIds != null) {
-            for (PluginWrapper plugin : getPlugins()) {
-                String pluginId = plugin.getPluginId();
-                if (!inactivePluginIds.contains(pluginId)) {
-                    startPlugin(pluginId);
-                }
-            }
-        } else {
-            showWarningAlert("plugins.error.inactive");
-        }
-    }
-
-    public List<PluginWrapper> reloadPlugins() {
-        List<PluginWrapper> loadedPlugins = getPlugins();
-        for (PluginWrapper plugin : loadedPlugins) {
-            unloadPlugin(plugin.getPluginId());
-        }
-        start();
-        return getPlugins();
-    }
-
-    public ProBConnection getProBConnection() {
-        return proBConnection;
-    }
-
-    public void writeInactivePlugins() {
-        try {
-            if (createPluginDirectory()) {
-                if (!INACTIVE_PLUGINS_FILE.exists()) {
-                    if (!INACTIVE_PLUGINS_FILE.createNewFile()) {
-                        LOGGER.warn("Could not create file for inactive plugins!");
-                        return;
-                    }
-                }
-                inactivePluginIds = getPlugins().stream()
-                        .filter(pluginWrapper -> pluginWrapper.getPluginState() != PluginState.STARTED)
-                        .map(PluginWrapper::getPluginId)
-                        .collect(Collectors.toList());
-                FileUtils.writeLines(inactivePluginIds, INACTIVE_PLUGINS_FILE);
-            }
-        } catch (IOException e) {
-            LOGGER.warn("An error occurred while writing the inactive plugins:", e);
-        }
-    }
-
     private void readInactivePlugins() {
         try {
             if (INACTIVE_PLUGINS_FILE.exists()) {
                 inactivePluginIds = FileUtils.readLines(INACTIVE_PLUGINS_FILE, true);
             } else {
-                if (!PLUGIN_DIRECTORY.exists()) {
-                    PLUGIN_DIRECTORY.mkdirs();
+                if (!createPluginDirectory() || !INACTIVE_PLUGINS_FILE.createNewFile() ) {
+                    LOGGER.warn("Could not create file for inactive plugins!");
                 }
-                INACTIVE_PLUGINS_FILE.createNewFile();
                 inactivePluginIds = new ArrayList<>();
             }
         } catch (IOException e) {
