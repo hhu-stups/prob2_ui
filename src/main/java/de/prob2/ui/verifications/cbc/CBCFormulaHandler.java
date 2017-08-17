@@ -64,20 +64,20 @@ public class CBCFormulaHandler {
 	
 	public void executeCheckingItem(IModelCheckJob checker, String code, CBCType type) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
-		Thread executionThread = new Thread(() -> {
-			Platform.runLater(() -> {
+		Thread executionThread = new Thread(() -> 
+			Platform.runLater(() -> 
 				currentMachine.getCBCFormulas()
 					.stream()
 					.filter(current -> code.equals(current.getName()) && current.getType().equals(type))
 					.findFirst()
-					.ifPresent(item -> checkItem(checker, item));
-			});
-		});
-		Thread updatingThread = new Thread(() -> {
-			Platform.runLater(() -> {
-				updateMachine(currentMachine);
-			});
-		});
+					.ifPresent(item -> checkItem(checker, item))
+			)
+		);
+		Thread updatingThread = new Thread(() -> 
+			Platform.runLater(() -> 
+				updateMachine(currentMachine)
+			)
+		);
 		executionThread.start();
 		updatingThread.start();
 	}
