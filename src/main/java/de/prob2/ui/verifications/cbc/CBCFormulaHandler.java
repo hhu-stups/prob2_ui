@@ -83,9 +83,7 @@ public class CBCFormulaHandler {
 	}
 	
 	public void checkMachine(Machine machine) {
-		machine.getCBCFormulas().forEach(item -> {
-			checkItem(item);
-		});
+		machine.getCBCFormulas().forEach(this::checkItem);
 	}
 	
 	public void checkItem(CBCFormulaItem item) {
