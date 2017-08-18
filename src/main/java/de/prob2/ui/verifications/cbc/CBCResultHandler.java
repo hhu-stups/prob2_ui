@@ -30,6 +30,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 	
 	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, List<Trace> traces) {
 		super.showResult(resultItem, item);
+		((CBCFormulaItem) item).getCounterExamples().clear();
 		for(Trace trace: traces) {
 			((CBCFormulaItem) item).getCounterExamples().add(trace);
 		}

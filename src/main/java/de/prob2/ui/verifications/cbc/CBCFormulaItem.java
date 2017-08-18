@@ -31,6 +31,11 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 		return counterExamples;
 	}
 	
+	public void reset() {
+		this.initializeStatus();
+		this.counterExamples.clear();
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
@@ -41,12 +46,13 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 		}
 		CBCFormulaItem otherItem = (CBCFormulaItem) obj;
 		return otherItem.getName().equals(this.getName()) &&
+				otherItem.getCode().equals(this.getCode()) &&
 				otherItem.getType().equals(this.getType());
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, type);
+		return Objects.hash(name, code, type);
 	}
 	
 	public CBCType getType() {

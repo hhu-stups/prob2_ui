@@ -13,6 +13,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.MachineTableView;
+import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -116,7 +117,7 @@ public class CBCView extends AnchorPane {
 			check.setOnAction(e-> {
 				CBCFormulaItem item = row.getItem();
 				if(item.getType() == CBCFormulaItem.CBCType.INVARIANT) {
-					cbcHandler.checkInvariant(item.getName());
+					cbcHandler.checkInvariant(item.getCode());
 				} else if(item.getType() == CBCFormulaItem.CBCType.DEADLOCK) {
 					cbcHandler.checkDeadlock(item.getCode());
 				} else {
@@ -132,6 +133,9 @@ public class CBCView extends AnchorPane {
 			removeItem.setOnAction(e -> removeFormula());
 			removeItem.disableProperty().bind(row.emptyProperty());
 			
+			MenuItem changeItem = new MenuItem("Change Formula");
+			changeItem.setOnAction(e->openItem(row.getItem()));
+			changeItem.disableProperty().bind(row.emptyProperty());
 			
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
@@ -144,7 +148,7 @@ public class CBCView extends AnchorPane {
 					}
 				}
 			});
-			row.setContextMenu(new ContextMenu(check, showCounterExampleItem, removeItem));
+			row.setContextMenu(new ContextMenu(check, changeItem, showCounterExampleItem, removeItem));
 			return row;
 		});
 	}
@@ -188,7 +192,7 @@ public class CBCView extends AnchorPane {
 	private void showCounterExamples(Menu counterExampleItem) {
 		counterExampleItem.getItems().clear();
 		CBCFormulaItem currentItem = tvFormula.getSelectionModel().getSelectedItem();
-		List<Trace> counterExamples = currentItem.getCounterExamples(); 
+		List<Trace> counterExamples = currentItem.getCounterExamples();
 		for(int i = 0; i < counterExamples.size(); i++) {
 			MenuItem traceItem = new MenuItem("Counter Example " + Integer.toString(i + 1));
 			final int index = i;
@@ -203,6 +207,19 @@ public class CBCView extends AnchorPane {
 			this.animations.removeTrace(currentTrace.get());
 		}
 		animations.addNewAnimation(trace);
+	}
+	
+	private void openItem(CBCFormulaItem item) {
+		if(item.getType() == CBCType.INVARIANT) {
+			CBCInvariants cbcInvariants = injector.getInstance(CBCInvariants.class);
+			cbcInvariants.changeFormula(item);
+		} else if(item.getType() == CBCType.SEQUENCE) {
+			CBCSequence cbcSequence = injector.getInstance(CBCSequence.class);
+			cbcSequence.changeFormula(item);
+		} else {
+			CBCDeadlock cbcDeadlock = injector.getInstance(CBCDeadlock.class);
+			cbcDeadlock.changeFormula(item);
+		}
 	}
 		
 }

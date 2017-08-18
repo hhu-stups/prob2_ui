@@ -43,11 +43,11 @@ public class CBCFormulaHandler {
 		this.injector = injector;
 	}
 	
-	public void checkInvariant(String name) {
+	public void checkInvariant(String code) {
 		ArrayList<String> event = new ArrayList<>();
-		event.add(name);
+		event.add(code);
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
-		executeCheckingItem(checker, name, CBCType.INVARIANT);
+		executeCheckingItem(checker, code, CBCType.INVARIANT);
 	}
 	
 	public void checkDeadlock(String code) {
@@ -68,7 +68,7 @@ public class CBCFormulaHandler {
 			Platform.runLater(() -> 
 				currentMachine.getCBCFormulas()
 					.stream()
-					.filter(current -> code.equals(current.getName()) && current.getType().equals(type))
+					.filter(current -> current.getCode().equals(code) && current.getType().equals(type))
 					.findFirst()
 					.ifPresent(item -> checkItem(checker, item))
 			)
@@ -85,7 +85,7 @@ public class CBCFormulaHandler {
 	public void checkMachine(Machine machine) {
 		for (CBCFormulaItem item : machine.getCBCFormulas()) {
 			if(item.getType() == CBCType.INVARIANT) {
-				checkInvariant(item.getName());
+				checkInvariant(item.getCode());
 			} else if(item.getType() == CBCType.DEADLOCK) {
 				checkDeadlock(item.getCode());
 			} else {
