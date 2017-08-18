@@ -83,14 +83,18 @@ public class CBCFormulaHandler {
 	}
 	
 	public void checkMachine(Machine machine) {
-		for (CBCFormulaItem item : machine.getCBCFormulas()) {
-			if(item.getType() == CBCType.INVARIANT) {
-				checkInvariant(item.getCode());
-			} else if(item.getType() == CBCType.DEADLOCK) {
-				checkDeadlock(item.getCode());
-			} else {
-				checkSequence(item.getCode());
-			}
+		machine.getCBCFormulas().forEach(item -> {
+			checkItem(item);
+		});
+	}
+	
+	public void checkItem(CBCFormulaItem item) {
+		if(item.getType() == CBCType.INVARIANT) {
+			checkInvariant(item.getCode());
+		} else if(item.getType() == CBCType.DEADLOCK) {
+			checkDeadlock(item.getCode());
+		} else {
+			checkSequence(item.getCode());
 		}
 	}
 	
