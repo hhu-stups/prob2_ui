@@ -22,6 +22,8 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -31,7 +33,7 @@ import java.util.stream.Collectors;
  * the {@code createPluginsRoot} method to set the plugins directory and the {@code getRuntimeMode}
  * to avoid the development mode of PF4J.
  *
- * {@link ProBPluginManager} also adds methods to start the plugin manager, to reload the plugins and
+ * {@link ProBPluginManager} also has methods to start the plugin manager, to reload the plugins and
  * to add plugins using a {@link FileChooser}.
  *
  * @author  Christoph Heinzen
@@ -143,24 +145,22 @@ public class ProBPluginManager extends JarPluginManager {
      * @param stage parent-stage of the used {@link FileChooser}
      */
     public void addPlugin(@Nonnull final Stage stage) {
+        //let the user select a plugin-file
         final File selectedPlugin = showFileChooser(stage);
         if (selectedPlugin != null && createPluginDirectory()) {
             String pluginFileName = selectedPlugin.getName();
             File plugin = new File(PLUGIN_DIRECTORY + File.separator + pluginFileName);
             try {
-                Files.copy(selectedPlugin.toPath(), plugin.toPath());
-                String pluginId = loadPlugin(plugin.toPath());
-                if (checkLoadedPlugin(pluginId, pluginFileName) && !getInactivePluginIds().contains(pluginId)) {
-                    startPlugin(pluginId);
+                if (copyPluginFile(selectedPlugin, plugin, stage)) {
+                    String pluginId = loadPlugin(plugin.toPath());
+                    if (checkLoadedPlugin(stage, pluginId, pluginFileName) && !getInactivePluginIds().contains(pluginId)) {
+                        startPlugin(pluginId);
+                    }
                 }
-            } catch (Exception e) {
+            } catch (PluginException e) {
                 LOGGER.warn("Tried to copy and load/start the plugin {}.\nThis exception was thrown: ", pluginFileName, e);
-                if (e instanceof PluginException) {
-                    showWarningAlert("plugins.error.load", pluginFileName);
-                } else {
-                    showWarningAlert("plugins.error.copy", pluginFileName);
-                }
-                //if an error occurred, delete the plugin
+                showWarningAlert(stage, "plugins.error.load", pluginFileName);
+                //if an error occurred, delete the plugin file
                 try {
                     Files.deleteIfExists(plugin.toPath());
                 } catch (IOException ex) {
@@ -185,7 +185,7 @@ public class ProBPluginManager extends JarPluginManager {
                 }
             }
         } else {
-            showWarningAlert("plugins.error.inactive");
+            showWarningAlert(stageManager.getMainStage(), "plugins.error.inactive");
         }
     }
 
@@ -238,13 +238,67 @@ public class ProBPluginManager extends JarPluginManager {
         }
     }
 
-    private boolean checkLoadedPlugin(String loadedPluginId, String pluginFileName) throws PluginException {
+    private boolean copyPluginFile(File source, File destination, Stage parentStage) {
+        if (destination.exists()) {
+            //if there is already a file with the name, try to find the corresponding plugin
+            PluginWrapper wrapper = getPlugin(destination.toPath());
+            if (wrapper != null) {
+                //if there is a corresponding plugin, ask the user if he wants to overwrite it
+                Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+                        String.format(bundle.getString("plugins.confirmation.copy"),
+                                destination.getName(),
+                                ((ProBPlugin) wrapper.getPlugin()).getName(),
+                                wrapper.getDescriptor().getVersion()),
+                        ButtonType.YES, ButtonType.NO);
+                dialog.initOwner(stageManager.getMainStage());
+                Optional<ButtonType> result = dialog.showAndWait();
+                if (!result.isPresent() || result.get() != ButtonType.YES) {
+                    //if he don't want to overwrite it, do nothing
+                    return false;
+                } else {
+                    deletePlugin(wrapper.getPluginId());
+                }
+            } else {
+                //if there is no corresponding plugin, delete the file
+                try {
+                    Files.deleteIfExists(destination.toPath());
+                } catch (IOException ex) {
+                    LOGGER.warn("Could not delete file " + destination.getName() + ".");
+                    showWarningAlert(parentStage, "plugins.error.delete", destination.getName());
+                    return false;
+                }
+            }
+        }
+        try {
+            //copy the selected file into the plugins directory
+            Files.copy(source.toPath(), destination.toPath());
+            return true;
+        } catch (IOException e) {
+            showWarningAlert(parentStage,"plugins.error.copy", destination.getName());
+        }
+        return false;
+    }
+
+    public PluginWrapper getPlugin(Path pluginPath) {
+        for (PluginWrapper pluginWrapper : getPlugins()) {
+            if (pluginWrapper.getPluginPath().equals(pluginPath)) {
+                return pluginWrapper;
+            }
+        }
+        return null;
+    }
+
+    private boolean checkLoadedPlugin(Stage parentStage, String loadedPluginId, String pluginFileName) throws PluginException {
         if (loadedPluginId == null) {
+            // error while loading the plugin
             throw new PluginException("Could not load the plugin '" + pluginFileName + "'.");
         } else {
             PluginWrapper pluginWrapper = getPlugin(loadedPluginId);
+            //because we don't use the enabled/disabled.txt of PF4J, the only reason for a
+            //plugin to be disabled is, when it has the wrong version
             if (pluginWrapper.getPluginState() == PluginState.DISABLED) {
-                showWarningAlert("plugins.error.version",
+                showWarningAlert(parentStage,
+                        "plugins.error.version",
                         pluginWrapper.getPluginPath().getFileName(),
                         pluginWrapper.getDescriptor().getRequires(),
                         getSystemVersion());
@@ -295,11 +349,11 @@ public class ProBPluginManager extends JarPluginManager {
         return true;
     }
 
-    private void showWarningAlert(String bundleKey, Object... stringParams) {
+    private void showWarningAlert(Stage parentStage, String bundleKey, Object... stringParams) {
         Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
                 String.format(bundle.getString(bundleKey), stringParams),
                 ButtonType.OK);
-        alert.initOwner(stageManager.getMainStage());
+        alert.initOwner(parentStage);
         alert.show();
     }
 }
