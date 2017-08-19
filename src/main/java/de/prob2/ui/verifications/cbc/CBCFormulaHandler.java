@@ -43,11 +43,11 @@ public class CBCFormulaHandler {
 		this.injector = injector;
 	}
 	
-	public void checkInvariant(String name) {
+	public void checkInvariant(String code) {
 		ArrayList<String> event = new ArrayList<>();
-		event.add(name);
+		event.add(code);
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
-		executeCheckingItem(checker, name, CBCType.INVARIANT);
+		executeCheckingItem(checker, code, CBCType.INVARIANT);
 	}
 	
 	public void checkDeadlock(String code) {
@@ -64,33 +64,35 @@ public class CBCFormulaHandler {
 	
 	public void executeCheckingItem(IModelCheckJob checker, String code, CBCType type) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
-		Thread executionThread = new Thread(() -> {
-			Platform.runLater(() -> {
+		Thread executionThread = new Thread(() -> 
+			Platform.runLater(() -> 
 				currentMachine.getCBCFormulas()
 					.stream()
-					.filter(current -> code.equals(current.getName()) && current.getType().equals(type))
+					.filter(current -> current.getCode().equals(code) && current.getType().equals(type))
 					.findFirst()
-					.ifPresent(item -> checkItem(checker, item));
-			});
-		});
-		Thread updatingThread = new Thread(() -> {
-			Platform.runLater(() -> {
-				updateMachine(currentMachine);
-			});
-		});
+					.ifPresent(item -> checkItem(checker, item))
+			)
+		);
+		Thread updatingThread = new Thread(() -> 
+			Platform.runLater(() -> 
+				updateMachine(currentMachine)
+			)
+		);
 		executionThread.start();
 		updatingThread.start();
 	}
 	
 	public void checkMachine(Machine machine) {
-		for (CBCFormulaItem item : machine.getCBCFormulas()) {
-			if(item.getType() == CBCType.INVARIANT) {
-				checkInvariant(item.getName());
-			} else if(item.getType() == CBCType.DEADLOCK) {
-				checkDeadlock(item.getCode());
-			} else {
-				checkSequence(item.getCode());
-			}
+		machine.getCBCFormulas().forEach(this::checkItem);
+	}
+	
+	public void checkItem(CBCFormulaItem item) {
+		if(item.getType() == CBCType.INVARIANT) {
+			checkInvariant(item.getCode());
+		} else if(item.getType() == CBCType.DEADLOCK) {
+			checkDeadlock(item.getCode());
+		} else {
+			checkSequence(item.getCode());
 		}
 	}
 	

@@ -39,6 +39,7 @@ public class CBCChoosingStage extends Stage {
 		} else {
 			injector.getInstance(CBCDeadlock.class).showAndWait();
 		}
+		this.close();
 	}
 
 }

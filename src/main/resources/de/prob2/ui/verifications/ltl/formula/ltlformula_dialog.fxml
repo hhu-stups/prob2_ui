@@ -24,7 +24,7 @@
 							<TextField fx:id="tfName" HBox.hgrow="always" />
 						</HBox>
 						<VBox spacing="10" alignment="center_left">
-							<Label text="%verifications.ltl.dialog.formula" />
+							<Label text="%verifications.formula" />
 							<WebView fx:id="taCode"/>
 						</VBox>
 						<VBox spacing="10" alignment="center_left">

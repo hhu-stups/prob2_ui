@@ -49,7 +49,7 @@
 									maxWidth="80.0" prefWidth="80.0" text="%verifications.columns.status" />
 								<TableColumn fx:id="formulaNameColumn" minWidth="120.0"
 									maxWidth="240.0" prefWidth="120.0"
-									text="%verifications.formula.columns.name" />
+									text="%verifications.formula" />
 								<TableColumn fx:id="formulaDescriptionColumn"
 									minWidth="120.0" prefWidth="120.0"
 									text="%verifications.columns.description" />
