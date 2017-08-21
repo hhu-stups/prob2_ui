@@ -139,7 +139,7 @@ public class ProBPluginManager extends JarPluginManager {
     /**
      * Shows a {@link FileChooser} to select a plugin.
      * If the user selects a plugin, the selected file will be copied into to the plugins-directory.
-     * After that the plugins gets loaded and started if necessary.
+     * After that the plugin gets loaded and started if necessary.
      * If an error occurs, an {@link Alert} with an error message will be shown.
      *
      * @param stage parent-stage of the used {@link FileChooser}
@@ -252,11 +252,12 @@ public class ProBPluginManager extends JarPluginManager {
                         ButtonType.YES, ButtonType.NO);
                 dialog.initOwner(stageManager.getMainStage());
                 Optional<ButtonType> result = dialog.showAndWait();
-                if (!result.isPresent() || result.get() != ButtonType.YES) {
+                if (result.isPresent() && result.get() == ButtonType.YES) {
+                    //if he wants to overwrite, delete the plugin
+                    deletePlugin(wrapper.getPluginId());
+                } else {
                     //if he don't want to overwrite it, do nothing
                     return false;
-                } else {
-                    deletePlugin(wrapper.getPluginId());
                 }
             } else {
                 //if there is no corresponding plugin, delete the file
