@@ -15,6 +15,7 @@ import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.TablePersistenceHandler;
 import de.prob2.ui.persistence.UIState;
+import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -53,6 +54,7 @@ public final class Config {
 		private OperationsView.SortMode operationsSortMode;
 		private boolean operationsShowNotEnabled;
 		private Map<String, String> globalPreferences;
+		private String pluginDirectory;
 
 		private ConfigData() {
 		}
@@ -74,19 +76,21 @@ public final class Config {
 	private final CurrentProject currentProject;
 	private final GlobalPreferences globalPreferences;
 	private final RuntimeOptions runtimeOptions;
+	private final ProBPluginManager proBPluginManager;
 
 	@Inject
 	private Config(
-		final RecentProjects recentProjects,
-		final UIState uiState,
-		final GroovyConsole groovyConsole,
-		final BConsole bConsole,
-		final Injector injector,
-		final CurrentProject currentProject,
-		final GlobalPreferences globalPreferences,
-		final RuntimeOptions runtimeOptions,
-		final StopActions stopActions
-	) {
+			final RecentProjects recentProjects,
+			final UIState uiState,
+			final GroovyConsole groovyConsole,
+			final BConsole bConsole,
+			final Injector injector,
+			final CurrentProject currentProject,
+			final GlobalPreferences globalPreferences,
+			final RuntimeOptions runtimeOptions,
+			final StopActions stopActions,
+			final ProBPluginManager proBPluginManager
+			) {
 		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.recentProjects = recentProjects;
 		this.uiState = uiState;
@@ -96,6 +100,7 @@ public final class Config {
 		this.currentProject = currentProject;
 		this.globalPreferences = globalPreferences;
 		this.runtimeOptions = runtimeOptions;
+		this.proBPluginManager = proBPluginManager;
 
 		try (final InputStream is = Config.class.getResourceAsStream("default.json");
 				final Reader defaultReader = new InputStreamReader(is, CONFIG_CHARSET)) {
@@ -235,6 +240,8 @@ public final class Config {
 		this.uiState.setOperationsShowNotEnabled(configData.operationsShowNotEnabled);
 		
 		this.globalPreferences.putAll(configData.globalPreferences);
+
+		this.proBPluginManager.setPluginDirectory(configData.pluginDirectory);
 	}
 
 	public void save() {
@@ -277,6 +284,8 @@ public final class Config {
 		configData.operationsShowNotEnabled = operationsView.getShowDisabledOps();
 		
 		configData.globalPreferences = new HashMap<>(this.globalPreferences);
+
+		configData.pluginDirectory = proBPluginManager.getPluginDirectory().getAbsolutePath();
 
 		try (final OutputStream os = new FileOutputStream(LOCATION);
 				final Writer writer = new OutputStreamWriter(os, CONFIG_CHARSET)) {

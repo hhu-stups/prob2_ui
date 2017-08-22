@@ -51,6 +51,10 @@ public class PluginMenuStage extends Stage {
     private TableColumn<PluginWrapper, String> versionCol;
     @FXML
     private TableColumn<PluginWrapper, Boolean> activeCol;
+    @FXML
+    private TextField pathTextField;
+
+    private PluginStateListener stateListener;
 
     @Inject
     public PluginMenuStage(final StageManager stageManager,
@@ -64,10 +68,12 @@ public class PluginMenuStage extends Stage {
 
     @FXML
     private void initialize() {
+        pathTextField.setText(proBPluginManager.getPluginDirectory().getAbsolutePath());
+
         pluginList = FXCollections.observableArrayList(proBPluginManager.getPlugins());
         pluginList.sort(Comparator.comparing(pluginWrapper -> ((ProBPlugin) pluginWrapper.getPlugin()).getName()));
 
-        PluginStateListener stateListener = event -> {
+        stateListener = event -> {
             PluginWrapper plugin = event.getPlugin();
             if (pluginList.contains(plugin) && !proBPluginManager.getPlugins().contains(plugin)) {
                 //a plugin was removed
@@ -106,6 +112,17 @@ public class PluginMenuStage extends Stage {
     @FXML
     private void reloadPlugins() {
         proBPluginManager.reloadPlugins();
+    }
+
+    @FXML
+    private void changePath() {
+        List<PluginWrapper> plugins = proBPluginManager.changePluginDirectory(this);
+        if (plugins != null) {
+            pluginList.clear();
+            pluginList.addAll(plugins);
+            proBPluginManager.addPluginStateListener(stateListener);
+        }
+        pathTextField.setText(proBPluginManager.getPluginDirectory().getAbsolutePath());
     }
 
     private void configureColumns() {

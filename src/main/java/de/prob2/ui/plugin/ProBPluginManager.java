@@ -7,6 +7,7 @@ import de.prob.Main;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.scene.control.*;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -41,27 +43,22 @@ import java.util.stream.Collectors;
  * @since   10.08.2017
  */
 @Singleton
-public class ProBPluginManager extends JarPluginManager {
+public class ProBPluginManager {
 
+    //TODO refactor
     private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginManager.class);
 
     private static final String VERSION = "0.1.0";
-    private static final File PLUGIN_DIRECTORY;
-    private static final File INACTIVE_PLUGINS_FILE;
-
-    static {
-        String pluginDirectorPath = Main.getProBDirectory()
-                + File.separator + "prob2ui"
-                + File.separator + "plugins";
-
-        PLUGIN_DIRECTORY = new File(pluginDirectorPath);
-        INACTIVE_PLUGINS_FILE = new File(pluginDirectorPath + File.separator + "inactive.txt");
-    }
+    private static final File PLUGIN_DIRECTORY = new File(Main.getProBDirectory()
+            + File.separator + "prob2ui"
+            + File.separator + "plugins");
 
     private final ProBConnection proBConnection;
     private final StageManager stageManager;
     private final ResourceBundle bundle;
     private List<String> inactivePluginIds;
+    private File pluginDirectory;
+    private ProBJarPluginManager pluginManager;
 
     /**
      * Should only be used by the Guice-Injector.
@@ -76,57 +73,45 @@ public class ProBPluginManager extends JarPluginManager {
         this.proBConnection = proBConnection;
         this.stageManager = stageManager;
         this.bundle = bundle;
-        setSystemVersion(Version.valueOf(VERSION));
-        setExactVersionAllowed(true);
+        this.pluginManager = new ProBJarPluginManager();
         createPluginDirectory();
     }
 
     /*
-     * override methods to configure the pluginmanager
+     * Delegate calls to the PF4J pluginmanager
      */
-    @Override
-    protected Path createPluginsRoot() {
-        return PLUGIN_DIRECTORY.toPath();
+
+    public PluginState startPlugin(String pluginId) {
+        return pluginManager.startPlugin(pluginId);
     }
 
-    @Override
-    protected PluginFactory createPluginFactory() {
-        return pluginWrapper -> {
-            String pluginClassName = pluginWrapper.getDescriptor().getPluginClass();
-            LOGGER.debug("Create instance for plugin '{}'", pluginClassName);
-
-            Class<?> pluginClass;
-            try {
-                pluginClass = pluginWrapper.getPluginClassLoader().loadClass(pluginClassName);
-            } catch (ClassNotFoundException e) {
-                LOGGER.error(e.getMessage(), e);
-                return null;
-            }
-
-            // once we have the class, we can do some checks on it to ensure
-            // that it is a valid implementation of a plugin.
-            int modifiers = pluginClass.getModifiers();
-            if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)
-                    || (!ProBPlugin.class.isAssignableFrom(pluginClass))) {
-                LOGGER.error("The plugin class '{}' is not a valid ProBPlugin", pluginClassName);
-                return null;
-            }
-
-            // create the ProBPlugin instance
-            try {
-                Constructor<?> constructor = pluginClass.getConstructor(PluginWrapper.class);
-                return (ProBPlugin) constructor.newInstance(pluginWrapper);
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-            return null;
-        };
+    public PluginState stopPlugin(String pluginId) {
+        return pluginManager.stopPlugin(pluginId);
     }
 
-    @Override
-    public RuntimeMode getRuntimeMode() {
-        return RuntimeMode.DEPLOYMENT;
+    public boolean deletePlugin(String pluginId) {
+        return pluginManager.deletePlugin(pluginId);
     }
+
+    public void stopPlugins() {
+        pluginManager.stopPlugins();
+    }
+
+    public List<PluginWrapper> getPlugins() {
+        return pluginManager.getPlugins();
+    }
+
+    public void addPluginStateListener(PluginStateListener listener) {
+        pluginManager.addPluginStateListener(listener);
+    }
+
+    public void removePluginStateListener(PluginStateListener listener) {
+        pluginManager.removePluginStateListener(listener);
+    }
+
+    /*
+     * methods to add functionality
+     */
 
     /**
      * Calls the {@code addPlugin(Stage stage)} method with the main-stage provided by the
@@ -149,12 +134,14 @@ public class ProBPluginManager extends JarPluginManager {
         final File selectedPlugin = showFileChooser(stage);
         if (selectedPlugin != null && createPluginDirectory()) {
             String pluginFileName = selectedPlugin.getName();
-            File plugin = new File(PLUGIN_DIRECTORY + File.separator + pluginFileName);
+            File plugin = new File(getPluginDirectory() + File.separator + pluginFileName);
             try {
                 if (copyPluginFile(selectedPlugin, plugin, stage)) {
-                    String pluginId = loadPlugin(plugin.toPath());
-                    if (checkLoadedPlugin(stage, pluginId, pluginFileName) && !getInactivePluginIds().contains(pluginId)) {
-                        startPlugin(pluginId);
+                    String pluginId = pluginManager.loadPlugin(plugin.toPath());
+                    if (checkLoadedPlugin(stage, pluginId, pluginFileName)
+                            && getInactivePluginIds() != null
+                            && !getInactivePluginIds().contains(pluginId)) {
+                        pluginManager.startPlugin(pluginId);
                     }
                 }
             } catch (PluginException e) {
@@ -175,13 +162,13 @@ public class ProBPluginManager extends JarPluginManager {
      * starts the plugin if it is not marked as inactive in the {@code inactive.txt}.
      */
     public void start() {
-        loadPlugins();
+        pluginManager.loadPlugins();
         List<String> inactivePluginIds = getInactivePluginIds();
         if (inactivePluginIds != null) {
-            for (PluginWrapper plugin : getPlugins()) {
+            for (PluginWrapper plugin : pluginManager.getPlugins()) {
                 String pluginId = plugin.getPluginId();
                 if (!inactivePluginIds.contains(pluginId)) {
-                    startPlugin(pluginId);
+                    pluginManager.startPlugin(pluginId);
                 }
             }
         } else {
@@ -195,13 +182,34 @@ public class ProBPluginManager extends JarPluginManager {
      *
      * @return a list of {@link PluginWrapper}, containing every loaded plugin
      */
-    public List<PluginWrapper> reloadPlugins() {
-        List<PluginWrapper> loadedPlugins = getPlugins();
+    public void reloadPlugins() {
+        List<PluginWrapper> loadedPlugins = pluginManager.getPlugins();
         for (PluginWrapper plugin : loadedPlugins) {
-            unloadPlugin(plugin.getPluginId());
+            pluginManager.unloadPlugin(plugin.getPluginId());
         }
         start();
-        return getPlugins();
+    }
+
+    public List<PluginWrapper> changePluginDirectory(Stage stage) {
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle(bundle.getString("pluginsmenu.changepath"));
+        chooser.setInitialDirectory(getPluginDirectory());
+        File newPath = chooser.showDialog(stage);
+        if (newPath != null) {
+            //unload all plugins
+            List<PluginWrapper> loadedPlugins = pluginManager.getPlugins();
+            for (PluginWrapper plugin : loadedPlugins) {
+                pluginManager.unloadPlugin(plugin.getPluginId());
+            }
+            //set new path
+            pluginDirectory = newPath;
+            //initialize the PluginManager using the new path
+            pluginManager = new ProBJarPluginManager();
+            //load an start the plugins
+            start();
+            return pluginManager.getPlugins();
+        }
+        return null;
     }
 
     /**
@@ -221,22 +229,27 @@ public class ProBPluginManager extends JarPluginManager {
     public void writeInactivePlugins() {
         try {
             if (createPluginDirectory()) {
-                if (!INACTIVE_PLUGINS_FILE.exists()) {
-                    if (!INACTIVE_PLUGINS_FILE.createNewFile()) {
+                File inactivePlugins = getInactivePluginsFile();
+                if (!inactivePlugins.exists()) {
+                    if (!inactivePlugins.createNewFile()) {
                         LOGGER.warn("Could not create file for inactive plugins!");
                         return;
                     }
                 }
-                inactivePluginIds = getPlugins().stream()
+                inactivePluginIds = pluginManager.getPlugins().stream()
                         .filter(pluginWrapper -> pluginWrapper.getPluginState() != PluginState.STARTED)
                         .map(PluginWrapper::getPluginId)
                         .collect(Collectors.toList());
-                FileUtils.writeLines(inactivePluginIds, INACTIVE_PLUGINS_FILE);
+                FileUtils.writeLines(inactivePluginIds, inactivePlugins);
             }
         } catch (IOException e) {
             LOGGER.warn("An error occurred while writing the inactive plugins:", e);
         }
     }
+
+    /*
+     * private methods used to add a new plugin
+     */
 
     private boolean copyPluginFile(File source, File destination, Stage parentStage) {
         if (destination.exists()) {
@@ -254,7 +267,7 @@ public class ProBPluginManager extends JarPluginManager {
                 Optional<ButtonType> result = dialog.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.YES) {
                     //if he wants to overwrite, delete the plugin
-                    deletePlugin(wrapper.getPluginId());
+                    pluginManager.deletePlugin(wrapper.getPluginId());
                 } else {
                     //if he don't want to overwrite it, do nothing
                     return false;
@@ -280,8 +293,8 @@ public class ProBPluginManager extends JarPluginManager {
         return false;
     }
 
-    public PluginWrapper getPlugin(Path pluginPath) {
-        for (PluginWrapper pluginWrapper : getPlugins()) {
+    private PluginWrapper getPlugin(Path pluginPath) {
+        for (PluginWrapper pluginWrapper : pluginManager.getPlugins()) {
             if (pluginWrapper.getPluginPath().equals(pluginPath)) {
                 return pluginWrapper;
             }
@@ -294,7 +307,7 @@ public class ProBPluginManager extends JarPluginManager {
             // error while loading the plugin
             throw new PluginException("Could not load the plugin '" + pluginFileName + "'.");
         } else {
-            PluginWrapper pluginWrapper = getPlugin(loadedPluginId);
+            PluginWrapper pluginWrapper = pluginManager.getPlugin(loadedPluginId);
             //because we don't use the enabled/disabled.txt of PF4J, the only reason for a
             //plugin to be disabled is, when it has the wrong version
             if (pluginWrapper.getPluginState() == PluginState.DISABLED) {
@@ -302,8 +315,8 @@ public class ProBPluginManager extends JarPluginManager {
                         "plugins.error.version",
                         pluginWrapper.getPluginPath().getFileName(),
                         pluginWrapper.getDescriptor().getRequires(),
-                        getSystemVersion());
-                deletePlugin(loadedPluginId);
+                        pluginManager.getSystemVersion());
+                pluginManager.deletePlugin(loadedPluginId);
                 return false;
             }
         }
@@ -318,15 +331,20 @@ public class ProBPluginManager extends JarPluginManager {
         return fileChooser.showOpenDialog(stage);
     }
 
+    /*
+     * methods to handle the inactive plugins
+     */
+
     private void readInactivePlugins() {
         try {
-            if (INACTIVE_PLUGINS_FILE.exists()) {
-                inactivePluginIds = FileUtils.readLines(INACTIVE_PLUGINS_FILE, true);
+            File inactivePlugins = getInactivePluginsFile();
+            if (inactivePlugins.exists()) {
+                inactivePluginIds = FileUtils.readLines(inactivePlugins, true);
             } else {
-                if (!createPluginDirectory() || !INACTIVE_PLUGINS_FILE.createNewFile() ) {
+                if (!createPluginDirectory() || !inactivePlugins.createNewFile() ) {
                     LOGGER.warn("Could not create file for inactive plugins!");
                 }
-                inactivePluginIds = new ArrayList<>();
+                inactivePluginIds = null;
             }
         } catch (IOException e) {
             LOGGER.warn("An error occurred while reading the inactive plugins:", e);
@@ -340,15 +358,46 @@ public class ProBPluginManager extends JarPluginManager {
         return inactivePluginIds;
     }
 
+    private File getInactivePluginsFile() {
+        return new File(getPluginDirectory() + File.separator + "inactive.txt");
+    }
+
+    /*
+     * methods to handle the plugin directory
+     */
+
     private boolean createPluginDirectory() {
-        if (!PLUGIN_DIRECTORY.exists()) {
-            if (!PLUGIN_DIRECTORY.mkdirs()) {
-                LOGGER.warn("Couldn't create the directory for plugins!\n{}", PLUGIN_DIRECTORY.getAbsolutePath());
+        File directory = getPluginDirectory();
+        if (!directory.exists()) {
+            if (!directory.mkdirs()) {
+                LOGGER.warn("Couldn't create the directory for plugins!\n{}", directory.getAbsolutePath());
                 return false;
             }
         }
         return true;
     }
+
+    public File getPluginDirectory() {
+        if (pluginDirectory != null) {
+            return pluginDirectory;
+        }
+        return PLUGIN_DIRECTORY;
+    }
+
+    /**
+     * Do not call this method.
+     */
+    public void setPluginDirectory(String path) {
+        if (path != null) {
+            this.pluginDirectory = new File(path);
+            //initialize with the new PluginDirectory
+            pluginManager = new ProBJarPluginManager();
+        }
+    }
+
+    /*
+     * GUI helper methods
+     */
 
     private void showWarningAlert(Stage parentStage, String bundleKey, Object... stringParams) {
         Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
@@ -356,5 +405,71 @@ public class ProBPluginManager extends JarPluginManager {
                 ButtonType.OK);
         alert.initOwner(parentStage);
         alert.show();
+    }
+
+    /**
+     * Slightly changed version of the PF4J-PluginManager
+     */
+    public class ProBJarPluginManager extends JarPluginManager {
+
+        ProBJarPluginManager(){
+            setSystemVersion(Version.valueOf(VERSION));
+            setExactVersionAllowed(true);
+        }
+
+        @Override
+        protected Path createPluginsRoot() {
+            if (pluginDirectory != null) {
+                if (createPluginDirectory()) {
+                    return pluginDirectory.toPath();
+                }
+                LOGGER.warn("Couldn't create plugin directory {}. Using the default directory {}.",
+                        pluginDirectory, PLUGIN_DIRECTORY);
+            }
+            return PLUGIN_DIRECTORY.toPath();
+        }
+
+        @Override
+        protected PluginFactory createPluginFactory() {
+            return pluginWrapper -> {
+                String pluginClassName = pluginWrapper.getDescriptor().getPluginClass();
+                LOGGER.debug("Create instance for plugin '{}'", pluginClassName);
+
+                Class<?> pluginClass;
+                try {
+                    pluginClass = pluginWrapper.getPluginClassLoader().loadClass(pluginClassName);
+                } catch (ClassNotFoundException e) {
+                    LOGGER.error(e.getMessage(), e);
+                    return null;
+                }
+
+                // once we have the class, we can do some checks on it to ensure
+                // that it is a valid implementation of a plugin.
+                int modifiers = pluginClass.getModifiers();
+                if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)
+                        || (!ProBPlugin.class.isAssignableFrom(pluginClass))) {
+                    LOGGER.error("The plugin class '{}' is not a valid ProBPlugin", pluginClassName);
+                    return null;
+                }
+
+                // create the ProBPlugin instance
+                try {
+                    Constructor<?> constructor = pluginClass.getConstructor(PluginWrapper.class);
+                    return (ProBPlugin) constructor.newInstance(pluginWrapper);
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+                return null;
+            };
+        }
+
+        @Override
+        public RuntimeMode getRuntimeMode() {
+            return RuntimeMode.DEPLOYMENT;
+        }
+
+        public ProBPluginManager getPluginManager() {
+            return ProBPluginManager.this;
+        }
     }
 }

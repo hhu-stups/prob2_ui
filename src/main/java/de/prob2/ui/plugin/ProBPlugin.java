@@ -101,11 +101,24 @@ public abstract class ProBPlugin extends Plugin{
      * @return singleton instance of the {@link ProBPluginManager}
      */
     public ProBPluginManager getProBPluginManager() {
-        PluginManager pluginManager = getWrapper().getPluginManager();
-        if (pluginManager instanceof ProBPluginManager) {
-            return (ProBPluginManager) pluginManager;
+        ProBPluginManager.ProBJarPluginManager pluginManager = getPluginManager();
+        if (pluginManager != null) {
+            return pluginManager.getPluginManager();
         }
-        LOGGER.warn("The PluginManager of plugin {} is not an instance of ProBPluginManager.", getName());
+        return null;
+    }
+
+    /**
+     * Getter for the {@link ProBPluginManager.ProBJarPluginManager} used to load this plugin.
+     *
+     * @return Returns the {@link ProBPluginManager} used to load this plugin.
+     */
+    public ProBPluginManager.ProBJarPluginManager getPluginManager() {
+        PluginManager pluginManager = getWrapper().getPluginManager();
+        if (pluginManager instanceof ProBPluginManager.ProBJarPluginManager) {
+            return (ProBPluginManager.ProBJarPluginManager) pluginManager;
+        }
+        LOGGER.warn("The PluginManager of plugin {} is not an instance of ProBJarPluginManager.", getName());
         return null;
     }
 
