@@ -105,9 +105,7 @@ public class PluginMenuStage extends Stage {
 
     @FXML
     private void reloadPlugins() {
-        List<PluginWrapper> plugins = proBPluginManager.reloadPlugins();
-        plugins.sort(Comparator.comparing(pluginWrapper -> ((ProBPlugin) pluginWrapper.getPlugin()).getName()));
-        pluginList.addAll(plugins);
+        proBPluginManager.reloadPlugins();
     }
 
     private void configureColumns() {

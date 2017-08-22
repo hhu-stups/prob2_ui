@@ -20,14 +20,14 @@ public class PluginMenu extends Menu {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PerspectivesMenu.class);
 
-    private final ProBPluginManager pluginManager;
+    private final ProBPluginManager proBPluginManager;
     private final Injector injector;
     private final StageManager stageManager;
 
 
     @Inject
-    public PluginMenu(final StageManager stageManager, final ProBPluginManager pluginManager, final Injector injector) {
-        this.pluginManager = pluginManager;
+    public PluginMenu(final StageManager stageManager, final ProBPluginManager proBPluginManager, final Injector injector) {
+        this.proBPluginManager = proBPluginManager;
         this.stageManager = stageManager;
         this.injector = injector;
         stageManager.loadFXML(this, "pluginMenu.fxml");
@@ -35,12 +35,11 @@ public class PluginMenu extends Menu {
 
     @FXML
     private void addPlugin() {
-        pluginManager.addPlugin();}
+        proBPluginManager.addPlugin();}
 
     @FXML
     private void reloadPlugins() {
-        //TODO: show the user, that we are doing smth
-        pluginManager.loadPlugins();
+        proBPluginManager.reloadPlugins();
     }
 
     @FXML
