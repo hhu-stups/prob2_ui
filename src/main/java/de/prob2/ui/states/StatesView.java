@@ -101,81 +101,7 @@ public final class StatesView extends AnchorPane {
 	
 	@FXML
 	private void initialize() {
-		tv.setRowFactory(view -> {
-			final TreeTableRow<StateItem<?>> row = new TreeTableRow<>();
-
-			row.itemProperty().addListener((observable, from, to) -> {
-				row.getStyleClass().remove("changed");
-				if (to != null && to.getContents() instanceof ASTFormula) {
-					final IEvalElement formula = ((ASTFormula)to.getContents()).getFormula();
-					final AbstractEvalResult current = this.currentValues.get(formula);
-					final AbstractEvalResult previous = this.previousValues.get(formula);
-
-					if (current != null && previous != null && (
-						!current.getClass().equals(previous.getClass())
-						|| current instanceof EvalResult && !((EvalResult)current).getValue().equals(((EvalResult)previous).getValue())
-					)) {
-						row.getStyleClass().add("changed");
-					}
-				}
-			});
-
-			final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
-			// Expression can only be shown if the row item contains an ASTFormula and the current state is initialized.
-			visualizeExpressionItem.disableProperty().bind(
-				Bindings.createBooleanBinding(() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
-				.or(currentTrace.currentStateProperty().initializedProperty().not())
-			);
-			visualizeExpressionItem.setOnAction(event -> {
-				try {
-					formulaGenerator.showFormula(((ASTFormula)row.getItem().getContents()).getFormula());
-				} catch (EvaluationException | ProBError e) {
-					LOGGER.error("Could not visualize formula", e);
-					stageManager.makeAlert(Alert.AlertType.ERROR, "Could not visualize formula:\n" + e).showAndWait();
-				}
-			});
-			
-			final MenuItem showFullValueItem = new MenuItem("Show Full Value");
-			// Full value can only be shown if the row item contains any of the following:
-			// * An ASTFormula, and the corresponding value is an EvalResult.
-			// * A StateError
-			showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> row.getItem() == null || !(
-					row.getItem().getContents() instanceof ASTFormula
-					&& this.currentValues.get(((ASTFormula)row.getItem().getContents()).getFormula()) instanceof EvalResult
-					|| row.getItem().getContents() instanceof StateError
-				),
-				row.itemProperty()
-			));
-			showFullValueItem.setOnAction(event -> this.showFullValue(row.getItem()));
-
-			final MenuItem showErrorsItem = new MenuItem("Show Errors");
-			// Errors can only be shown if the row contains an ASTFormula whose value is an EvaluationErrorResult.
-			showErrorsItem.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> row.getItem() == null || !(
-					row.getItem().getContents() instanceof ASTFormula
-					&& this.currentValues.get(((ASTFormula)row.getItem().getContents()).getFormula()) instanceof EvaluationErrorResult
-				),
-				row.itemProperty()
-			));
-			showErrorsItem.setOnAction(event -> this.showError(row.getItem()));
-
-			row.contextMenuProperty().bind(
-				Bindings.when(row.emptyProperty())
-				.then((ContextMenu) null)
-				.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem, showErrorsItem))
-			);
-
-			// Double-click on an item triggers "show full value" if allowed.
-			row.setOnMouseClicked(event -> {
-				if (!showFullValueItem.isDisable() && event.getButton() == MouseButton.PRIMARY
-						&& event.getClickCount() == 2) {
-					showFullValueItem.getOnAction().handle(null);
-				}
-			});
-
-			return row;
-		});
+		tv.setRowFactory(view -> initTableRow());
 
 		this.tvName.setCellFactory(col -> new NameCell());
 		this.tvValue.setCellFactory(col -> new ValueCell(this.currentValues, true));
@@ -199,6 +125,81 @@ public final class StatesView extends AnchorPane {
 		this.currentTrace.addListener(traceChangeListener);
 	}
 	
+	private TreeTableRow<StateItem<?>> initTableRow() {
+		final TreeTableRow<StateItem<?>> row = new TreeTableRow<>();
+
+		row.itemProperty().addListener((observable, from, to) -> {
+			row.getStyleClass().remove("changed");
+			if (to != null && to.getContents() instanceof ASTFormula) {
+				final IEvalElement formula = ((ASTFormula)to.getContents()).getFormula();
+				final AbstractEvalResult current = this.currentValues.get(formula);
+				final AbstractEvalResult previous = this.previousValues.get(formula);
+
+				if (current != null && previous != null && (
+					!current.getClass().equals(previous.getClass())
+					|| current instanceof EvalResult && !((EvalResult)current).getValue().equals(((EvalResult)previous).getValue())
+				)) {
+					row.getStyleClass().add("changed");
+				}
+			}
+		});
+
+		final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
+		// Expression can only be shown if the row item contains an ASTFormula and the current state is initialized.
+		visualizeExpressionItem.disableProperty().bind(
+			Bindings.createBooleanBinding(() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
+			.or(currentTrace.currentStateProperty().initializedProperty().not())
+		);
+		visualizeExpressionItem.setOnAction(event -> {
+			try {
+				formulaGenerator.showFormula(((ASTFormula)row.getItem().getContents()).getFormula());
+			} catch (EvaluationException | ProBError e) {
+				LOGGER.error("Could not visualize formula", e);
+				stageManager.makeAlert(Alert.AlertType.ERROR, "Could not visualize formula:\n" + e).showAndWait();
+			}
+		});
+		
+		final MenuItem showFullValueItem = new MenuItem("Show Full Value");
+		// Full value can only be shown if the row item contains any of the following:
+		// * An ASTFormula, and the corresponding value is an EvalResult.
+		// * A StateError
+		showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
+			() -> row.getItem() == null || !(
+				row.getItem().getContents() instanceof ASTFormula
+				&& this.currentValues.get(((ASTFormula)row.getItem().getContents()).getFormula()) instanceof EvalResult
+				|| row.getItem().getContents() instanceof StateError
+			),
+			row.itemProperty()
+		));
+		showFullValueItem.setOnAction(event -> this.showFullValue(row.getItem()));
+
+		final MenuItem showErrorsItem = new MenuItem("Show Errors");
+		// Errors can only be shown if the row contains an ASTFormula whose value is an EvaluationErrorResult.
+		showErrorsItem.disableProperty().bind(Bindings.createBooleanBinding(
+			() -> row.getItem() == null || !(
+				row.getItem().getContents() instanceof ASTFormula
+				&& this.currentValues.get(((ASTFormula)row.getItem().getContents()).getFormula()) instanceof EvaluationErrorResult
+			),
+			row.itemProperty()
+		));
+		showErrorsItem.setOnAction(event -> this.showError(row.getItem()));
+
+		row.contextMenuProperty().bind(
+			Bindings.when(row.emptyProperty())
+			.then((ContextMenu) null)
+			.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem, showErrorsItem))
+		);
+
+		// Double-click on an item triggers "show full value" if allowed.
+		row.setOnMouseClicked(event -> {
+			if (!showFullValueItem.isDisable() && event.getButton() == MouseButton.PRIMARY
+					&& event.getClickCount() == 2) {
+				showFullValueItem.getOnAction().handle(null);
+			}
+		});
+		return row;
+	}
+
 	private static boolean isSameNode(final PrologASTNode x, final PrologASTNode y) {
 		final boolean isSameCategory = x instanceof ASTCategory && y instanceof ASTCategory && ((ASTCategory)x).getName().equals(((ASTCategory)y).getName());
 		final boolean isSameFormula = x instanceof ASTFormula && y instanceof ASTFormula && ((ASTFormula)x).getFormula().equals(((ASTFormula)y).getFormula());
