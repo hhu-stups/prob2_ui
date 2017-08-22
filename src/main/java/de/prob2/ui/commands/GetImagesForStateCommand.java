@@ -18,7 +18,7 @@ public class GetImagesForStateCommand extends AbstractCommand {
 
 	private final String stateId;
 
-	private int[][] matrix;
+	private Integer[][] matrix;
 	private int rows;
 	private int columns;
 
@@ -47,7 +47,7 @@ public class GetImagesForStateCommand extends AbstractCommand {
 		int minColumn = BindingGenerator.getInteger(bindings.get(MINCOL_VAR)).getValue().intValue();
 		rows = maxRow - minRow + 1;
 		columns = maxColumn - minColumn + 1;
-		matrix = new int[rows][columns];
+		matrix = new Integer[rows][columns];
 
 		for (PrologTerm t : matrixterm) {
 			int row = BindingGenerator.getInteger(t.getArgument(1)).getValue().intValue();
@@ -66,7 +66,7 @@ public class GetImagesForStateCommand extends AbstractCommand {
 		return columns;
 	}
 
-	public int[][] getMatrix() {
+	public Integer[][] getMatrix() {
 		return matrix;
 	}
 
