@@ -27,7 +27,7 @@ please use the Guice-injector. You can get an instance of the injector with the
 
 To build your plugin, add the following code to your `buid.gradle` file. 
 You have to replace the values in brackets with your own values. A example is shown in the 
-[EventB-Pacman]() plugin repository. 
+[EventB-Pacman](https://github.com/heinzware/EventBPacman-Plugin) plugin repository. 
 The `PROB_VERSION` value has to match the ProB2-UI version you are targeting.
 
 ```
@@ -47,7 +47,11 @@ jar {
 }
 ```
 ## Using a plugin
-//TODO
+![Plugin Menu](plugin_menu.png "Plugin Menu")
 
-  
+To add a plugin, go to _Plugins -> Add Plugin_ or _Plugins -> Plugin Menu -> Add Plugin_.
+This opens a file chooser where you can select the plugin you want to add.
+
+Added plugins are shown in the plugin menu. Here you can activate/deactivate them.
+These plugins are stored in a plugins folder and are automatically loaded/started when you start the ProB2-UI application.
 
