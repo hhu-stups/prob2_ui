@@ -48,23 +48,9 @@ public class HelpSystem extends StackPane {
     public HelpSystem(final StageManager stageManager) throws URISyntaxException, IOException {
         stageManager.loadFXML(this, "helpsystem.fxml");
         URI uri = ProB2.class.getClassLoader().getResource("help/").toURI();
-        File dest;
-        if (uri.toString().startsWith("jar:")) {
-            Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
-            Map<String, String> env = new HashMap<>();
-            env.put("create", "true");
-            try (FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env)) {
-                Path source = jarFileSystem.getPath("/help/");
-                if (!target.toFile().exists()) {
-                    copyHelp(source, target);
-                }
-                jarFileSystem.close();
-            }
-            dest = new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
-        } else {
-            dest = new File(uri);
-        }
-        treeView.setRoot(createNode(dest));
+        File helpMainDirectory = getHelpMainDirectory(uri);
+
+        treeView.setRoot(createNode(helpMainDirectory));
         treeView.setShowRoot(false);
         treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal!=null && newVal.isLeaf()){
@@ -72,7 +58,9 @@ public class HelpSystem extends StackPane {
                 webEngine.load(f.toURI().toString());
             }
         });
+
         webEngine = webView.getEngine();
+        webEngine.setJavaScriptEnabled(true);
         webEngine.getLoadWorker().stateProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == Worker.State.SUCCEEDED) {
                 HelpTreeItem hti = null;
@@ -95,9 +83,11 @@ public class HelpSystem extends StackPane {
 
     private TreeItem<String> createNode(final File file) throws IOException {
         HelpTreeItem hti = new HelpTreeItem(file);
-        Platform.runLater(() -> hti.setExpanded(true));
-        if (hti.isLeaf()) {
-            fileMap.put(file, hti);
+        if (!file.getName().contains(":")) {
+            Platform.runLater(() -> hti.setExpanded(true));
+            if (hti.isLeaf()) {
+                fileMap.put(file, hti);
+            }
         }
         return hti;
     }
@@ -126,5 +116,23 @@ public class HelpSystem extends StackPane {
                 return FileVisitResult.CONTINUE;
             }
         });
+    }
+
+    private File getHelpMainDirectory(URI uri) throws IOException {
+        if (uri.toString().startsWith("jar:")) {
+            Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
+            Map<String, String> env = new HashMap<>();
+            env.put("create", "true");
+            try (FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env)) {
+                Path source = jarFileSystem.getPath("/help/");
+                if (!target.toFile().exists()) {
+                    copyHelp(source, target);
+                }
+                jarFileSystem.close();
+            }
+            return new File(Main.getProBDirectory() + "prob2ui" ); //+ File.separator +"www3.hhu.de"
+        } else {
+            return new File(uri);
+        }
     }
 }
