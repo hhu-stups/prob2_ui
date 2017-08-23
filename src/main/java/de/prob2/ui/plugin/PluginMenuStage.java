@@ -70,22 +70,22 @@ public class PluginMenuStage extends Stage {
     private void initialize() {
         pathTextField.setText(proBPluginManager.getPluginDirectory().getAbsolutePath());
 
-        pluginList = FXCollections.observableArrayList(proBPluginManager.getPlugins());
+        pluginList = FXCollections.observableArrayList(getProBJarPluginManager().getPlugins());
         pluginList.sort(Comparator.comparing(pluginWrapper -> ((ProBPlugin) pluginWrapper.getPlugin()).getName()));
 
         stateListener = event -> {
             PluginWrapper plugin = event.getPlugin();
-            if (pluginList.contains(plugin) && !proBPluginManager.getPlugins().contains(plugin)) {
+            if (pluginList.contains(plugin) && !getProBJarPluginManager().getPlugins().contains(plugin)) {
                 //a plugin was removed
                 pluginList.remove(plugin);
-            } else if (!pluginList.contains(plugin) && proBPluginManager.getPlugins().contains(plugin)) {
+            } else if (!pluginList.contains(plugin) && getProBJarPluginManager().getPlugins().contains(plugin)) {
                 //a new plugin was added
                 pluginList.add(plugin);
             }
         };
 
-        proBPluginManager.addPluginStateListener(stateListener);
-        this.setOnCloseRequest(closeEvent -> proBPluginManager.removePluginStateListener(stateListener));
+        getProBJarPluginManager().addPluginStateListener(stateListener);
+        this.setOnCloseRequest(closeEvent -> getProBJarPluginManager().removePluginStateListener(stateListener));
 
         configureColumns();
         configureContextMenu();
@@ -120,7 +120,7 @@ public class PluginMenuStage extends Stage {
         if (plugins != null) {
             pluginList.clear();
             pluginList.addAll(plugins);
-            proBPluginManager.addPluginStateListener(stateListener);
+            getProBJarPluginManager().addPluginStateListener(stateListener);
         }
         pathTextField.setText(proBPluginManager.getPluginDirectory().getAbsolutePath());
     }
@@ -147,9 +147,9 @@ public class PluginMenuStage extends Stage {
             SimpleBooleanProperty booleanProp = new SimpleBooleanProperty(plugin.getPluginState() == PluginState.STARTED);
             booleanProp.addListener((observable, oldValue, newValue) -> {
                 if (newValue) {
-                    proBPluginManager.startPlugin(plugin.getPluginId());
+                    getProBJarPluginManager().startPlugin(plugin.getPluginId());
                 } else {
-                    proBPluginManager.stopPlugin(plugin.getPluginId());
+                    getProBJarPluginManager().stopPlugin(plugin.getPluginId());
                 }
                 proBPluginManager.writeInactivePlugins();
             });
@@ -168,8 +168,8 @@ public class PluginMenuStage extends Stage {
                     MenuItem restartItem = new MenuItem(
                             String.format(bundle.getString("pluginsmenu.table.contextmenu.restart"), pluginName));
                     restartItem.setOnAction(event -> {
-                        if(PluginState.STOPPED == proBPluginManager.stopPlugin(pluginId)) {
-                            proBPluginManager.startPlugin(pluginId);
+                        if(PluginState.STOPPED == getProBJarPluginManager().stopPlugin(pluginId)) {
+                            getProBJarPluginManager().startPlugin(pluginId);
                         }
                     });
                     MenuItem removeMenuItem = new MenuItem(
@@ -181,7 +181,7 @@ public class PluginMenuStage extends Stage {
                         dialog.setTitle(bundle.getString("pluginsmenu.table.dialog.title"));
                         dialog.showAndWait().ifPresent(response -> {
                             if (response == ButtonType.YES) {
-                                proBPluginManager.deletePlugin(pluginId);
+                                getProBJarPluginManager().deletePlugin(pluginId);
                             }
                         });
                     });
@@ -190,5 +190,9 @@ public class PluginMenuStage extends Stage {
                 }
             }
         });
+    }
+
+    private ProBPluginManager.ProBJarPluginManager getProBJarPluginManager() {
+        return proBPluginManager.getPluginManager();
     }
 }

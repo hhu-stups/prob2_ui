@@ -5,8 +5,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.Main;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -22,10 +22,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
@@ -77,36 +76,13 @@ public class ProBPluginManager {
         createPluginDirectory();
     }
 
-    /*
-     * Delegate calls to the PF4J pluginmanager
+    /**
+     * Getter for the current {@link ProBJarPluginManager}, that the application is using.
+     *
+     * @return Return the current {@link ProBJarPluginManager}
      */
-
-    public PluginState startPlugin(String pluginId) {
-        return pluginManager.startPlugin(pluginId);
-    }
-
-    public PluginState stopPlugin(String pluginId) {
-        return pluginManager.stopPlugin(pluginId);
-    }
-
-    public boolean deletePlugin(String pluginId) {
-        return pluginManager.deletePlugin(pluginId);
-    }
-
-    public void stopPlugins() {
-        pluginManager.stopPlugins();
-    }
-
-    public List<PluginWrapper> getPlugins() {
-        return pluginManager.getPlugins();
-    }
-
-    public void addPluginStateListener(PluginStateListener listener) {
-        pluginManager.addPluginStateListener(listener);
-    }
-
-    public void removePluginStateListener(PluginStateListener listener) {
-        pluginManager.removePluginStateListener(listener);
+    public ProBJarPluginManager getPluginManager() {
+        return pluginManager;
     }
 
     /*
@@ -129,7 +105,7 @@ public class ProBPluginManager {
      *
      * @param stage parent-stage of the used {@link FileChooser}
      */
-    public void addPlugin(@Nonnull final Stage stage) {
+    void addPlugin(@Nonnull final Stage stage) {
         //let the user select a plugin-file
         final File selectedPlugin = showFileChooser(stage);
         if (selectedPlugin != null && createPluginDirectory()) {
@@ -159,7 +135,7 @@ public class ProBPluginManager {
 
     /**
      * This method loads all plugins in the plugins directory and
-     * starts the plugin if it is not marked as inactive in the {@code inactive.txt}.
+     * starts the plugin if it is not marked as inactive in the {@code inactive.txt} file.
      */
     public void start() {
         pluginManager.loadPlugins();
@@ -179,8 +155,6 @@ public class ProBPluginManager {
     /**
      * This method unloads all loaded plugins and after that calls the
      * {@code start} method of the {@link ProBPluginManager}.
-     *
-     * @return a list of {@link PluginWrapper}, containing every loaded plugin
      */
     public void reloadPlugins() {
         List<PluginWrapper> loadedPlugins = pluginManager.getPlugins();
@@ -190,7 +164,15 @@ public class ProBPluginManager {
         start();
     }
 
-    public List<PluginWrapper> changePluginDirectory(Stage stage) {
+    /**
+     * Changes the directory where PF4J searches for plugins.
+     * Because PF4J does not allow it to change thee directory, we have
+     * to create a new instance of the {@link ProBJarPluginManager}.
+     *
+     * @param stage The owner window of the used {@link DirectoryChooser}.
+     * @return Returns the plugins in the new directory.
+     */
+    List<PluginWrapper> changePluginDirectory(Stage stage) {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle(bundle.getString("pluginsmenu.changepath"));
         chooser.setInitialDirectory(getPluginDirectory());
@@ -226,7 +208,7 @@ public class ProBPluginManager {
      * Saves the ids of every inactive plugin in the {@code inactive.txt} file.
      * A plugin is inactive if its state is not {@code PluginState.STARTED}.
      */
-    public void writeInactivePlugins() {
+    void writeInactivePlugins() {
         try {
             if (createPluginDirectory()) {
                 File inactivePlugins = getInactivePluginsFile();
@@ -254,7 +236,7 @@ public class ProBPluginManager {
     private boolean copyPluginFile(File source, File destination, Stage parentStage) {
         if (destination.exists()) {
             //if there is already a file with the name, try to find the corresponding plugin
-            PluginWrapper wrapper = getPlugin(destination.toPath());
+            PluginWrapper wrapper = pluginManager.getPlugin(destination.toPath());
             if (wrapper != null) {
                 //if there is a corresponding plugin, ask the user if he wants to overwrite it
                 Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
@@ -269,7 +251,7 @@ public class ProBPluginManager {
                     //if he wants to overwrite, delete the plugin
                     pluginManager.deletePlugin(wrapper.getPluginId());
                 } else {
-                    //if he don't want to overwrite it, do nothing
+                    //if he doesn't want to overwrite it, do nothing
                     return false;
                 }
             } else {
@@ -291,15 +273,6 @@ public class ProBPluginManager {
             showWarningAlert(parentStage,"plugins.error.copy", destination.getName());
         }
         return false;
-    }
-
-    private PluginWrapper getPlugin(Path pluginPath) {
-        for (PluginWrapper pluginWrapper : pluginManager.getPlugins()) {
-            if (pluginWrapper.getPluginPath().equals(pluginPath)) {
-                return pluginWrapper;
-            }
-        }
-        return null;
     }
 
     private boolean checkLoadedPlugin(Stage parentStage, String loadedPluginId, String pluginFileName) throws PluginException {
@@ -339,8 +312,10 @@ public class ProBPluginManager {
         try {
             File inactivePlugins = getInactivePluginsFile();
             if (inactivePlugins.exists()) {
+                //if we already have a incative plugins file, read it
                 inactivePluginIds = FileUtils.readLines(inactivePlugins, true);
             } else {
+                //if not, try to create an empty file
                 if (!createPluginDirectory() || !inactivePlugins.createNewFile() ) {
                     LOGGER.warn("Could not create file for inactive plugins!");
                 }
@@ -408,11 +383,11 @@ public class ProBPluginManager {
     }
 
     /**
-     * Slightly changed version of the PF4J-PluginManager
+     * Slightly changed version of the PF4J-{@link JarPluginManager}
      */
     public class ProBJarPluginManager extends JarPluginManager {
 
-        ProBJarPluginManager(){
+        private ProBJarPluginManager(){
             setSystemVersion(Version.valueOf(VERSION));
             setExactVersionAllowed(true);
         }
@@ -430,6 +405,7 @@ public class ProBPluginManager {
         }
 
         @Override
+        //changed to use the ProBPlugin
         protected PluginFactory createPluginFactory() {
             return pluginWrapper -> {
                 String pluginClassName = pluginWrapper.getDescriptor().getPluginClass();
@@ -470,6 +446,15 @@ public class ProBPluginManager {
 
         public ProBPluginManager getPluginManager() {
             return ProBPluginManager.this;
+        }
+
+        private PluginWrapper getPlugin(Path pluginPath) {
+            for (PluginWrapper pluginWrapper : pluginManager.getPlugins()) {
+                if (pluginWrapper.getPluginPath().equals(pluginPath)) {
+                    return pluginWrapper;
+                }
+            }
+            return null;
         }
     }
 }

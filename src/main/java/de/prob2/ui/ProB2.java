@@ -222,7 +222,7 @@ public class ProB2 extends Application {
 
 	private void handleCloseRequest(Event event, CurrentProject currentProject, StageManager stageManager) {
 		ProBPluginManager proBPluginManager = injector.getInstance(ProBPluginManager.class);
-		proBPluginManager.stopPlugins();
+		proBPluginManager.getPluginManager().stopPlugins();
 		if (!currentProject.isSaved()) {
 			ButtonType save = new ButtonType("Save", ButtonBar.ButtonData.YES);
 			ButtonType doNotSave = new ButtonType("Do not save", ButtonBar.ButtonData.NO);
