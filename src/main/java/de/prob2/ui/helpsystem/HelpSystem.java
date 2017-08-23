@@ -130,7 +130,7 @@ public class HelpSystem extends StackPane {
                 }
                 jarFileSystem.close();
             }
-            return new File(Main.getProBDirectory() + "prob2ui" ); //+ File.separator +"www3.hhu.de"
+            return new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
         } else {
             return new File(uri);
         }
