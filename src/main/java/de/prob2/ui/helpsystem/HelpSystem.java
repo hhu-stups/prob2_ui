@@ -63,19 +63,7 @@ public class HelpSystem extends StackPane {
         webEngine.setJavaScriptEnabled(true);
         webEngine.getLoadWorker().stateProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == Worker.State.SUCCEEDED) {
-                HelpTreeItem hti = null;
-                for (Map.Entry<File,HelpTreeItem> entry : fileMap.entrySet()) {
-                    hti = entry.getValue();
-                    HelpTreeItem finalHti = hti;
-                    try {
-                        if (entry.getKey().toURI().toURL().sameFile(new URL(webEngine.getLocation()))) {
-                            expandTree(hti);
-                            Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(finalHti)));
-                        }
-                    } catch (MalformedURLException e) {
-                        LoggerFactory.getLogger(HelpSystem.class).error("Malformed URL",e);
-                    }
-                }
+                findMatchingTreeViewEntryToSelect();
             }
         });
         webEngine.load(((HelpTreeItem) treeView.getRoot().getChildren().get(0)).getFile().toURI().toString());
@@ -133,6 +121,20 @@ public class HelpSystem extends StackPane {
             return new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
         } else {
             return new File(uri);
+        }
+    }
+
+    private void findMatchingTreeViewEntryToSelect() {
+        for (Map.Entry<File,HelpTreeItem> entry : fileMap.entrySet()) {
+            final HelpTreeItem hti = entry.getValue();
+            try {
+                if (entry.getKey().toURI().toURL().sameFile(new URL(webEngine.getLocation()))) {
+                    expandTree(hti);
+                    Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
+                }
+            } catch (MalformedURLException e) {
+                LoggerFactory.getLogger(HelpSystem.class).error("Malformed URL", e);
+            }
         }
     }
 }
