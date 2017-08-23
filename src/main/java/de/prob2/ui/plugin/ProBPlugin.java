@@ -50,7 +50,7 @@ public abstract class ProBPlugin extends Plugin{
 
     /**
      * Stops the plugin and ensures that the {@code stop} method of the plugin is only called
-     * when the plugin has not yet been started.
+     * when the plugin has not yet been stopped.
      */
     public abstract void stopPlugin();
 

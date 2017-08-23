@@ -28,13 +28,10 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
- * {@inheritDoc}
+ * The {@link ProBPluginManager} is a wrapper for the {@link ProBJarPluginManager} which is an
+ * implementation of the PF4J {@link JarPluginManager}.
  *
- * Overwrites the {@code createPluginFactory} method to use {@link ProBPlugin} as plugin class,
- * the {@code createPluginsRoot} method to set the plugins directory and the {@code getRuntimeMode}
- * to avoid the development mode of PF4J.
- *
- * {@link ProBPluginManager} also has methods to start the plugin manager, to reload the plugins and
+ * {@link ProBPluginManager} has methods to start the plugin manager, to reload the plugins and
  * to add plugins using a {@link FileChooser}.
  *
  * @author  Christoph Heinzen
@@ -44,7 +41,6 @@ import java.util.stream.Collectors;
 @Singleton
 public class ProBPluginManager {
 
-    //TODO refactor
     private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginManager.class);
 
     private static final String VERSION = "0.1.0";
@@ -55,6 +51,7 @@ public class ProBPluginManager {
     private final ProBConnection proBConnection;
     private final StageManager stageManager;
     private final ResourceBundle bundle;
+
     private List<String> inactivePluginIds;
     private File pluginDirectory;
     private ProBJarPluginManager pluginManager;
@@ -384,6 +381,16 @@ public class ProBPluginManager {
 
     /**
      * Slightly changed version of the PF4J-{@link JarPluginManager}
+     *
+     * {@inheritDoc}
+     *
+     * Overwrites the {@code createPluginFactory} method to use {@link ProBPlugin} as plugin class,
+     * the {@code createPluginsRoot} method to set the plugins directory and the {@code getRuntimeMode}
+     * to avoid the development mode of PF4J.
+     *
+     * @author  Christoph Heinzen
+     * @version 0.1.0
+     * @since   23.08.2017
      */
     public class ProBJarPluginManager extends JarPluginManager {
 
@@ -405,7 +412,7 @@ public class ProBPluginManager {
         }
 
         @Override
-        //changed to use the ProBPlugin
+        //changed to use the ProBPlugin class
         protected PluginFactory createPluginFactory() {
             return pluginWrapper -> {
                 String pluginClassName = pluginWrapper.getDescriptor().getPluginClass();
