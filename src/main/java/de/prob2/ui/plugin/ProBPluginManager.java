@@ -145,7 +145,7 @@ public class ProBPluginManager {
                 }
             }
         } else {
-            showWarningAlert(stageManager.getMainStage(), "plugins.error.inactive");
+            showWarningAlert(stageManager.getMainStage(), "plugins.error.inactive", getPluginDirectory());
         }
     }
 
