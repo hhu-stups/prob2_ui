@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+
 <fx:root type="Stage" fx:id="mcheckStage"
 		 title="%verifications.modelchecking.stage.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
