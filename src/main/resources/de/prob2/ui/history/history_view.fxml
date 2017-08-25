@@ -41,6 +41,15 @@
 							<Tooltip text="%history.buttons.reverse.tooltip" />
 						</tooltip>
 					</ToggleButton>
+					<Button fx:id="saveTrace" mnemonicParsing="false">
+						<graphic>
+							<FontAwesomeIconView styleClass="icon-dark"
+								glyphName="DOWNLOAD" size="15" />
+						</graphic>
+						<tooltip>
+							<Tooltip text="%history.buttons.saveTrace.tooltip" />
+						</tooltip>
+					</Button>
 					<HelpButton fx:id="helpButton"/>
 				</HBox>
 			</HBox>
