@@ -27,6 +27,7 @@ import de.prob2.ui.verifications.cbc.CBCView;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+import de.prob2.ui.verifications.tracereplay.TraceReplayView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 import javafx.fxml.FXMLLoader;
@@ -85,6 +86,7 @@ public class ProB2Module extends AbstractModule {
 		bind(StatesView.class);
 		bind(StatsView.class);
 		bind(StatusBar.class);
+		bind(TraceReplayView.class);
 		bind(VerificationsView.class);
 		bind(VisualisationView.class);
 		bind(StateVisualisationView.class);

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.ScrollPane?>
+
+<fx:root type="ScrollPane" fitToHeight="true" fitToWidth="true"
+		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
+	<!-- TODO Add Nodes -->
+</fx:root>
+

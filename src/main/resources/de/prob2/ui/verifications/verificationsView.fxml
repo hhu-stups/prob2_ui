@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.verifications.cbc.CBCView?>
-<?import de.prob2.ui.verifications.ltl.LTLView?>
 <?import de.prob2.ui.verifications.modelchecking.ModelcheckingController?>
+<?import de.prob2.ui.verifications.ltl.LTLView?>
+<?import de.prob2.ui.verifications.cbc.CBCView?>
+<?import de.prob2.ui.verifications.tracereplay.TraceReplayView?>
 <?import de.prob2.ui.verifications.VerificationsView?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.AnchorPane?>
+
 <fx:root type="VerificationsView" xmlns:fx="http://javafx.com/fxml/1">
 	<TabPane tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -24,6 +26,11 @@
 			<Tab fx:id="tabCBC" text="%verification.tabs.cbc.title">
 				<content>
 					<CBCView />
+				</content>
+			</Tab>
+			<Tab fx:id="tabTraceReplay" text="%verification.tabs.tracereplay.title">
+				<content>
+					<TraceReplayView />
 				</content>
 			</Tab>
 		</tabs>
