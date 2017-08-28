@@ -20,12 +20,15 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 	private ChoiceBox<String> cbOperations;
 
 	private final CurrentTrace currentTrace;
+	
+	private ArrayList<String> events;
 
 	@Inject
 	private CBCInvariants(final StageManager stageManager, final CurrentTrace currentTrace, 
 							final CBCFormulaHandler cbcHandler, final Injector injector) {
 		super(cbcHandler, injector);
 		this.currentTrace = currentTrace;
+		this.events = new ArrayList<>();
 		stageManager.loadFXML(this, "cbc_invariants.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
@@ -37,8 +40,8 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 	}
 
 	private void update() {
+		events.clear();
 		if (currentTrace.get() != null) {
-			ArrayList<String> events = new ArrayList<>();
 			AbstractElement mainComponent = currentTrace.getStateSpace().getMainComponent();
 			if (mainComponent instanceof de.prob.model.representation.Machine) {
 				for (BEvent e : mainComponent.getChildrenOfType(BEvent.class)) {
@@ -47,6 +50,10 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 			}
 			cbOperations.getItems().setAll(events);
 		}
+	}
+	
+	public ArrayList<String> getEvents() {
+		return events;
 	}
 
 	@FXML

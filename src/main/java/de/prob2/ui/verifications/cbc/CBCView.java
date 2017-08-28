@@ -27,6 +27,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -57,6 +58,9 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	private Button checkSelectedMachineButton;
+	
+	@FXML
+	private Button checkAllOperationsButton;
 	
 	private final CurrentTrace currentTrace;
 	
@@ -96,6 +100,7 @@ public class CBCView extends AnchorPane {
 	private void setBindings() {
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkAllOperationsButton.disableProperty().bind(currentTrace.existsProperty().not());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -164,6 +169,15 @@ public class CBCView extends AnchorPane {
 		cbcHandler.checkMachine(machine);
 		cbcHandler.updateMachineStatus(machine);
 		refresh();
+	}
+	
+	@FXML
+	public void checkAllOperations() {
+		ArrayList<String> events = injector.getInstance(CBCInvariants.class).getEvents();
+		for(String event : events) {
+			cbcHandler.addFormula(event, event, CBCFormulaItem.CBCType.INVARIANT, true);
+			cbcHandler.checkInvariant(event);
+		}
 	}
 	
 	private void removeFormula() {
