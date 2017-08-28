@@ -27,7 +27,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -177,7 +176,7 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	public void checkAllOperations() {
-		ArrayList<String> events = injector.getInstance(CBCInvariants.class).getEvents();
+		List<String> events = injector.getInstance(CBCInvariants.class).getEvents();
 		for(String event : events) {
 			cbcHandler.addFormula(event, event, CBCFormulaItem.CBCType.INVARIANT, true);
 			cbcHandler.checkInvariant(event);

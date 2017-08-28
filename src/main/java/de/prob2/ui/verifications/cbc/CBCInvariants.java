@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.cbc;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -52,7 +53,7 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 		}
 	}
 	
-	public ArrayList<String> getEvents() {
+	public List<String> getEvents() {
 		return events;
 	}
 
