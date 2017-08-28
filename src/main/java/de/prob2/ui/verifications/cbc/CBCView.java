@@ -126,6 +126,7 @@ public class CBCView extends AnchorPane {
 				cbcHandler.checkItem(row.getItem());
 				cbcHandler.updateMachineStatus(getCurrentMachine());
 			});
+			check.disableProperty().bind(row.emptyProperty());
 			
 			Menu showCounterExampleItem = new Menu("Show Counter Example");
 			showCounterExampleItem.setDisable(true);

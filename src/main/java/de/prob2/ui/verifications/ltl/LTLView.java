@@ -156,6 +156,7 @@ public class LTLView extends AnchorPane{
 
 			MenuItem openEditor = new MenuItem("Open in Editor");
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
+			openEditor.disableProperty().bind(row.emptyProperty());
 
 			MenuItem check = new MenuItem("Check separately");
 			check.setOnAction(e-> {
@@ -167,6 +168,7 @@ public class LTLView extends AnchorPane{
 				tvFormula.refresh();
 				tvMachines.refresh();
 			});
+			check.disableProperty().bind(row.emptyProperty());
 
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
@@ -190,6 +192,7 @@ public class LTLView extends AnchorPane{
 
 			MenuItem openEditor = new MenuItem("Open in Editor");
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
+			openEditor.disableProperty().bind(row.emptyProperty());
 
 			row.setContextMenu(new ContextMenu(openEditor, removeItem));
 			return row;
