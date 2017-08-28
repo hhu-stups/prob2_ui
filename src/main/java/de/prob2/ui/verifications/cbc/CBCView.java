@@ -62,6 +62,9 @@ public class CBCView extends AnchorPane {
 	@FXML
 	private Button checkAllOperationsButton;
 	
+	@FXML
+	private Button findDeadlockButton;
+	
 	private final CurrentTrace currentTrace;
 	
 	private final CurrentProject currentProject;
@@ -101,6 +104,7 @@ public class CBCView extends AnchorPane {
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkAllOperationsButton.disableProperty().bind(currentTrace.existsProperty().not());
+		findDeadlockButton.disableProperty().bind(currentTrace.existsProperty().not());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -179,6 +183,13 @@ public class CBCView extends AnchorPane {
 			cbcHandler.checkInvariant(event);
 		}
 	}
+	
+	@FXML
+	public void findDeadlock() {
+		cbcHandler.addFormula("FIND DEADLOCK", "FIND DEADLOCK", CBCFormulaItem.CBCType.DEADLOCK, true);
+		cbcHandler.findDeadlock();
+	}
+	
 	
 	private void removeFormula() {
 		Machine machine = tvMachines.getSelectionModel().getSelectedItem();

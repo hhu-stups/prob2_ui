@@ -56,6 +56,11 @@ public class CBCFormulaHandler {
 		executeCheckingItem(checker, code, CBCType.DEADLOCK);
 	}
 	
+	public void findDeadlock() {
+		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace());
+		executeCheckingItem(checker, "FIND DEADLOCK", CBCType.DEADLOCK);
+	}
+	
 	public void checkSequence(String sequence) {
 		List<String> events = Arrays.asList(sequence.replaceAll(" ", "").split(";"));
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
