@@ -292,7 +292,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			}
 		});
 		updateSelectedItem(background);
-
+		currentStats.setBackgroundOnClick(background.getOnMouseClicked());
 		HBox box = new HBox();
 		box.setSpacing(5);
 		background.getChildren().add(box);

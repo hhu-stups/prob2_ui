@@ -83,7 +83,7 @@ public abstract class AbstractResultHandler {
 			}
 			resultItem = new CheckingResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse formula", 
 											sw.toString());
-			logger.error("Could not parse {} formula ", type.name(), result);			
+			logger.error("Could not parse {} formula ", type, result);			
 		}
 		return resultItem;
 	}

@@ -34,7 +34,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 			
 	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, List<Trace> traces) {
 		super.showResult(resultItem, item);
-		if(!traces.isEmpty()) {
+		if(traces != null && !traces.isEmpty()) {
 			((LTLFormulaItem) item).setCounterExample(traces.get(0));
 		}
 	}
