@@ -92,6 +92,9 @@ public class CBCFormulaHandler {
 	}
 	
 	public void checkItem(CBCFormulaItem item) {
+		if("FIND DEADLOCK".equals(item.getCode())) {
+			return;
+		}
 		if(item.getType() == CBCType.INVARIANT) {
 			checkInvariant(item.getCode());
 		} else if(item.getType() == CBCType.DEADLOCK) {

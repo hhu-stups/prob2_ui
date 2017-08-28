@@ -123,14 +123,7 @@ public class CBCView extends AnchorPane {
 			
 			MenuItem check = new MenuItem("Check separately");
 			check.setOnAction(e-> {
-				CBCFormulaItem item = row.getItem();
-				if(item.getType() == CBCFormulaItem.CBCType.INVARIANT) {
-					cbcHandler.checkInvariant(item.getCode());
-				} else if(item.getType() == CBCFormulaItem.CBCType.DEADLOCK) {
-					cbcHandler.checkDeadlock(item.getCode());
-				} else {
-					cbcHandler.checkSequence(item.getCode());
-				}
+				cbcHandler.checkItem(row.getItem());
 				cbcHandler.updateMachineStatus(getCurrentMachine());
 			});
 			
