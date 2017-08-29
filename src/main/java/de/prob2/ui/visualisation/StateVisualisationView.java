@@ -38,7 +38,8 @@ public class StateVisualisationView extends AnchorPane {
 	private BooleanProperty visualisationPossible = new SimpleBooleanProperty(false);
 
 	@Inject
-	public StateVisualisationView(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace) {
+	public StateVisualisationView(final StageManager stageManager, final CurrentProject currentProject,
+			final CurrentTrace currentTrace) {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		stageManager.loadFXML(this, "state_visualisation_view.fxml");
@@ -47,7 +48,7 @@ public class StateVisualisationView extends AnchorPane {
 	public void visualiseState(State state) throws FileNotFoundException {
 		visualisationGridPane.getChildren().clear();
 		visualisationPossible.set(false);
-		if(state == null || !state.isInitialised() || currentProject.getCurrentRunconfiguration() == null) {
+		if (state == null || !state.isInitialised() || currentProject.getCurrentRunconfiguration() == null) {
 			return;
 		}
 		StateSpace stateSpace = state.getStateSpace();
@@ -60,7 +61,7 @@ public class StateVisualisationView extends AnchorPane {
 		}
 
 	}
-	
+
 	public BooleanProperty visualisationPossibleProperty() {
 		return visualisationPossible;
 	}
@@ -68,18 +69,22 @@ public class StateVisualisationView extends AnchorPane {
 	private void showImages(State state, Map<Integer, String> images) throws FileNotFoundException {
 		GetImagesForStateCommand getImagesForStateCommand = new GetImagesForStateCommand(state.getId());
 		state.getStateSpace().execute(getImagesForStateCommand);
-		int[][] imageMatrix = getImagesForStateCommand.getMatrix();
+		Integer[][] imageMatrix = getImagesForStateCommand.getMatrix();
 		int rowNr = getImagesForStateCommand.getRows();
 		int columnNr = getImagesForStateCommand.getColumns();
 
 		for (int r = 0; r < rowNr; r++) {
 			for (int c = 0; c < columnNr; c++) {
-				String imageURL = images.get(imageMatrix[r][c]);
-				Image image = getImage(imageURL);
-				ImageView imageView = new ImageView(image);
-				ContextMenu contextMenu = getContextMenu(state, r, c);
-				imageView.setOnContextMenuRequested(e -> contextMenu.show(imageView, e.getScreenX(), e.getScreenY()));
-				visualisationGridPane.add(imageView, c, r);
+				Integer imageId = imageMatrix[r][c];
+				if (imageId != null) {
+					String imageURL = images.get(imageId);
+					Image image = getImage(imageURL);
+					ImageView imageView = new ImageView(image);
+					ContextMenu contextMenu = getContextMenu(state, r, c);
+					imageView.setOnContextMenuRequested(
+							e -> contextMenu.show(imageView, e.getScreenX(), e.getScreenY()));
+					visualisationGridPane.add(imageView, c, r);
+				}
 			}
 		}
 	}
@@ -114,7 +119,7 @@ public class StateVisualisationView extends AnchorPane {
 	}
 
 	private Trace getTraceToState(Trace trace, State state) {
-		if(trace.getCurrentState().equals(state)) {
+		if (trace.getCurrentState().equals(state)) {
 			return trace;
 		} else if (trace.canGoBack()) {
 			return getTraceToState(trace.back(), state);

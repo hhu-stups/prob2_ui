@@ -13,11 +13,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javax.inject.Inject;
 
 public class MachineTableView extends TableView<Machine> {
-	
-	public enum CheckingType {
-		LTL, CBC;
-	}
-	
+		
 	@FXML
 	private TableColumn<Machine, FontAwesomeIconView> machineStatusColumn;
 	

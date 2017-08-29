@@ -48,35 +48,9 @@ public class HelpSystem extends StackPane {
     public HelpSystem(final StageManager stageManager) throws URISyntaxException, IOException {
         stageManager.loadFXML(this, "helpsystem.fxml");
         URI uri = ProB2.class.getClassLoader().getResource("help/").toURI();
-        File dest;
-        if (uri.toString().startsWith("jar:")) {
-            Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
-            Map<String, String> env = new HashMap<>();
-            env.put("create", "true");
-            try (FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env)) {
-                Path source = jarFileSystem.getPath("/help/");
-                if (!Files.exists(target)) {
-                    Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
-                        @Override
-                        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                            Path newdir = target.resolve(source.relativize(dir).toString());
-                            Files.copy(dir, newdir);
-                            return FileVisitResult.CONTINUE;
-                        }
-            
-                        @Override
-                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                            Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
-                            return FileVisitResult.CONTINUE;
-                        }
-                    });
-                }
-            }
-            dest = new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
-        } else {
-            dest = new File(uri);
-        }
-        treeView.setRoot(createNode(dest));
+        File helpMainDirectory = getHelpMainDirectory(uri);
+
+        treeView.setRoot(createNode(helpMainDirectory));
         treeView.setShowRoot(false);
         treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal!=null && newVal.isLeaf()){
@@ -84,32 +58,24 @@ public class HelpSystem extends StackPane {
                 webEngine.load(f.toURI().toString());
             }
         });
+
         webEngine = webView.getEngine();
-        webEngine.load(((HelpTreeItem) treeView.getRoot().getChildren().get(0)).getFile().toURI().toString());
+        webEngine.setJavaScriptEnabled(true);
         webEngine.getLoadWorker().stateProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == Worker.State.SUCCEEDED) {
-                HelpTreeItem hti = null;
-                for (File f : fileMap.keySet()) {
-                    hti = fileMap.get(f);
-                    expandTree(hti);
-                    HelpTreeItem finalHti = hti;
-                    try {
-                        if (f.toURI().toURL().sameFile(new URL(webEngine.getLocation()))) {
-                            Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(finalHti)));
-                        }
-                    } catch (MalformedURLException e) {
-                        LoggerFactory.getLogger(HelpSystem.class).error("Malformed URL",e);
-                    }
-                }
+                findMatchingTreeViewEntryToSelect();
             }
         });
+        webEngine.load(((HelpTreeItem) treeView.getRoot().getChildren().get(0)).getFile().toURI().toString());
     }
 
     private TreeItem<String> createNode(final File file) throws IOException {
         HelpTreeItem hti = new HelpTreeItem(file);
-        Platform.runLater(() -> hti.setExpanded(true));
-        if (hti.isLeaf()) {
-            fileMap.put(file, hti);
+        if (!file.getName().contains(":")) {
+            Platform.runLater(() -> hti.setExpanded(true));
+            if (hti.isLeaf()) {
+                fileMap.put(file, hti);
+            }
         }
         return hti;
     }
@@ -119,6 +85,55 @@ public class HelpSystem extends StackPane {
             expandTree(ti.getParent());
             if (!ti.isLeaf()) {
                 Platform.runLater(() -> ti.setExpanded(true));
+            }
+        }
+    }
+
+    private void copyHelp(Path source, Path target) throws IOException {
+        Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Path newdir = target.resolve(source.relativize(dir).toString());
+                Files.copy(dir, newdir);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    private File getHelpMainDirectory(URI uri) throws IOException {
+        if (uri.toString().startsWith("jar:")) {
+            Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
+            Map<String, String> env = new HashMap<>();
+            env.put("create", "true");
+            try (FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env)) {
+                Path source = jarFileSystem.getPath("/help/");
+                if (!target.toFile().exists()) {
+                    copyHelp(source, target);
+                }
+                jarFileSystem.close();
+            }
+            return new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
+        } else {
+            return new File(uri);
+        }
+    }
+
+    private void findMatchingTreeViewEntryToSelect() {
+        for (Map.Entry<File,HelpTreeItem> entry : fileMap.entrySet()) {
+            final HelpTreeItem hti = entry.getValue();
+            try {
+                if (entry.getKey().toURI().toURL().sameFile(new URL(webEngine.getLocation()))) {
+                    expandTree(hti);
+                    Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
+                }
+            } catch (MalformedURLException e) {
+                LoggerFactory.getLogger(HelpSystem.class).error("Malformed URL", e);
             }
         }
     }

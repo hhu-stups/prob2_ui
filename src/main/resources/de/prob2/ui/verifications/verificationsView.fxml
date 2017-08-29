@@ -11,17 +11,17 @@
 	<TabPane tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 		<tabs>
-			<Tab fx:id="tabModelchecking" text="Modelchecking">
+			<Tab fx:id="tabModelchecking" text="%verification.tabs.modelchecking.title">
 				<content>
 					<ModelcheckingController />
 				</content>
 			</Tab>
-			<Tab fx:id="tabLTLFormula" text="LTL Verifications">
+			<Tab fx:id="tabLTLFormula" text="%verification.tabs.ltl.title">
 				<content>
 					<LTLView />
 				</content>
 			</Tab>
-			<Tab fx:id="tabCBC" text="Constraint Based Checking">
+			<Tab fx:id="tabCBC" text="%verification.tabs.cbc.title">
 				<content>
 					<CBCView />
 				</content>

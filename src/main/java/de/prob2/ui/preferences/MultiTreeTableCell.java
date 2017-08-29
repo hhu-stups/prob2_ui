@@ -1,16 +1,26 @@
 package de.prob2.ui.preferences;
 
+import java.io.File;
+
 import de.prob2.ui.internal.StageManager;
+
 import javafx.collections.FXCollections;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTablePosition;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
 
 public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S, String> {
 	private static final Logger logger = LoggerFactory.getLogger(MultiTreeTableCell.class);
@@ -133,7 +143,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 			// CheckBox doesn't exist yet, so create it.
 			final CheckBox checkBox = new CheckBox();
 			checkBox.setSelected("true".equals(pti.getValue()));
-			checkBox.setOnAction(event -> this.instantEdit("" + checkBox.isSelected()));
+			checkBox.setOnAction(event -> this.instantEdit(Boolean.toString(checkBox.isSelected())));
 			this.setText(null);
 			this.setGraphic(checkBox);
 		}
@@ -160,9 +170,9 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 				// noinspection NumericCastThatLosesPrecision
 				this.instantEdit(String.format(
 					"#%02x%02x%02x",
-					(int)(selected.getRed()*256),
-					(int)(selected.getGreen()*256),
-					(int)(selected.getBlue()*256)
+					(int)(selected.getRed()*255),
+					(int)(selected.getGreen()*255),
+					(int)(selected.getBlue()*255)
 				));
 			});
 			this.setText(null);

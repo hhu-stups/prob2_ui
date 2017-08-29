@@ -6,9 +6,9 @@
 	</appender>
 
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>./ProB2UI.log</file>
+		<file>${user.home}/.prob/ProB2UI.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>ProB2UI.log.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>${user.home}/.prob/ProB2UI.log.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>7</maxHistory>
 		</rollingPolicy>
 		

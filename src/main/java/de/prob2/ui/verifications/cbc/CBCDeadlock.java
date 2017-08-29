@@ -1,55 +1,72 @@
 package de.prob2.ui.verifications.cbc;
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.project.machines.Machine;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Modality;
-import javafx.stage.Stage;
 
 import javax.inject.Inject;
 
 import com.google.inject.Injector;
 
-public class CBCDeadlock extends Stage {
+public class CBCDeadlock extends AbstractCBCFormulaInputStage {
 		
-	private final Injector injector;
-	
-	private final CBCChecker cbcChecker;
-	
 	@FXML
 	private TextField tfFormula;
+	
 
 	@Inject
-	private CBCDeadlock(final StageManager stageManager, final CBCChecker cbcChecker, final Injector injector) {
-		this.cbcChecker = cbcChecker;
-		this.injector = injector;
+	private CBCDeadlock(final StageManager stageManager, final CBCFormulaHandler cbcHandler,
+						final Injector injector) {
+		super(cbcHandler, injector);
 		stageManager.loadFXML(this, "cbc_deadlock.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
 	
 	@FXML
 	public void addFormula() {
-		CBCFormulaItem formula = new CBCFormulaItem(tfFormula.getText(), tfFormula.getText(), CBCFormulaItem.CBCType.DEADLOCK);
-		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
-		if(currentMachine != null) {
-			if(!currentMachine.getCBCFormulas().contains(formula)) {
-				currentMachine.addCBCFormula(formula);
-			}
+		addFormula(false);
+	}
+	
+	private void addFormula(boolean checking) {
+		if("FIND DEADLOCK".equals(tfFormula.getText())) {
+			showInvalidFormula();
+			return;
 		}
-		injector.getInstance(CBCView.class).updateProject();
+		cbcHandler.addFormula(tfFormula.getText(), tfFormula.getText(), CBCFormulaItem.CBCType.DEADLOCK,
+								checking);
 		this.close();
 	}
 	
 	@FXML
 	public void checkFormula() {
-		addFormula();
-		cbcChecker.checkDeadlock(tfFormula.getText());
+		if("FIND DEADLOCK".equals(tfFormula.getText())) {
+			showInvalidFormula();
+			return;
+		}
+		addFormula(true);
+		cbcHandler.checkDeadlock(tfFormula.getText());
+		this.close();
 	}
 	
+	public void changeFormula(CBCFormulaItem item) {
+		super.changeFormula(tfFormula, item);
+	}
+	
+	
 	@FXML
-	public void cancelFormula() {
+	public void cancel() {
 		this.close();
+	}
+	
+	public void showInvalidFormula() {
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("Invalid Formula");
+		alert.setHeaderText("Invalid Formula");
+		alert.setContentText("Formula is valid!");
+		alert.showAndWait();
 	}
 		
 }

@@ -8,14 +8,10 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<<<<<<< HEAD
-<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%chart.historychart.title" minWidth="320" minHeight="240">
-=======
 <?import javafx.scene.control.ScrollPane?>
 
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%chart.historychart.title"
 	minWidth="320" minHeight="240">
->>>>>>> develop
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane>

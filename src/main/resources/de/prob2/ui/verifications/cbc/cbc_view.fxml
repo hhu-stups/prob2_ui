@@ -24,6 +24,18 @@
 						</VBox.margin>
 					</HelpButton>
 					<HBox spacing="5.0" alignment="CENTER_LEFT">
+						<VBox spacing="5.0" alignment="BOTTOM_LEFT" HBox.hgrow="ALWAYS">
+							<Button fx:id="checkSelectedMachineButton" disable="true"
+								text="%verifications.checkSelectedMachine" onAction="#checkSelectedMachine"
+								styleClass="button-blue" prefWidth="180.0"/>
+								
+							<Button fx:id="checkAllOperationsButton" disable="true"
+								text="%verifications.checkAllOperations" onAction="#checkAllOperations"
+								styleClass="button-blue" prefWidth="180.0"/>
+							<Button fx:id="findDeadlockButton" disable="true"
+								text="%verifications.findDeadlock" onAction="#findDeadlock"
+								styleClass="button-blue" prefWidth="180.0"/>
+						</VBox>
 						<VBox spacing="5.0" alignment="TOP_RIGHT">
 							<Button fx:id="addFormulaButton" disable="true" onAction="#addFormula"
 								styleClass="button-blue" text="Add CBC Formula">
@@ -44,7 +56,7 @@
 									maxWidth="80.0" prefWidth="80.0" text="%verifications.columns.status" />
 								<TableColumn fx:id="formulaNameColumn" minWidth="120.0"
 									maxWidth="240.0" prefWidth="120.0"
-									text="%verifications.formula.columns.name" />
+									text="%verifications.formula" />
 								<TableColumn fx:id="formulaDescriptionColumn"
 									minWidth="120.0" prefWidth="120.0"
 									text="%verifications.columns.description" />

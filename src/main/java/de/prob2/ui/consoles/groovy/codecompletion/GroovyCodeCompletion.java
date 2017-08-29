@@ -191,7 +191,7 @@ public class GroovyCodeCompletion extends Popup {
 			return true;
 		}
 		if (getParent().getCaretPosition() != getParent().getText().length()) {
-			currentSuggestion += getParent().getText().charAt(getParent().getCaretPosition());
+			currentSuggestion += Character.toString(getParent().getText().charAt(getParent().getCaretPosition()));
 			charCounterInSuggestion += 1;
 			currentPosInSuggestion = Math.min(currentSuggestion.length(), currentPosInSuggestion + 1);
 		}
