@@ -40,7 +40,6 @@ import org.apache.commons.cli.PosixParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("restriction")
 public class ProB2 extends Application {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProB2.class);
 
