@@ -80,7 +80,7 @@ public class HelpSystem extends StackPane {
         return hti;
     }
 
-    private void expandTree(TreeItem ti) {
+    private void expandTree(TreeItem<?> ti) {
         if (ti!=null) {
             expandTree(ti.getParent());
             if (!ti.isLeaf()) {
@@ -116,7 +116,6 @@ public class HelpSystem extends StackPane {
                 if (!target.toFile().exists()) {
                     copyHelp(source, target);
                 }
-                jarFileSystem.close();
             }
             return new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
         } else {
