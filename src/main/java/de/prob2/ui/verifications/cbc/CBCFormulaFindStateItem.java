@@ -18,5 +18,19 @@ public class CBCFormulaFindStateItem extends CBCFormulaItem {
 	public Trace getExample() {
 		return example;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof CBCFormulaFindStateItem)) {
+			return false;
+		}
+		CBCFormulaFindStateItem otherItem = (CBCFormulaFindStateItem) obj;
+		return otherItem.getName().equals(this.getName()) &&
+				otherItem.getCode().equals(this.getCode()) &&
+				otherItem.getType().equals(this.getType());
+	}
 
 }

@@ -66,7 +66,7 @@ public class CBCFormulaHandler {
 	
 	public void findDeadlock() {
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace());
-		executeCheckingItem(checker, "FIND DEADLOCK", CBCType.DEADLOCK);
+		executeCheckingItem(checker, "FIND DEADLOCK", CBCType.FIND_DEADLOCK);
 	}
 	
 	public void checkSequence(String sequence) {
@@ -151,17 +151,16 @@ public class CBCFormulaHandler {
 	}
 	
 	public void checkItem(CBCFormulaItem item) {
-		if("FIND DEADLOCK".equals(item.getCode())) {
-			return;
-		}
 		if(item.getType() == CBCType.INVARIANT) {
 			checkInvariant(item.getCode());
 		} else if(item.getType() == CBCType.DEADLOCK) {
 			checkDeadlock(item.getCode());
 		} else if(item.getType() == CBCType.SEQUENCE) {
 			checkSequence(item.getCode());
-		} else {
+		} else if(item.getType() == CBCType.FIND_VALID_STATE) {
 			findValidState((CBCFormulaFindStateItem) item);
+		} else {
+			findDeadlock();
 		}
 	}
 	

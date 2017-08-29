@@ -148,7 +148,7 @@ public class CBCView extends AnchorPane {
 			
 			MenuItem changeItem = new MenuItem("Change Formula");
 			changeItem.setOnAction(e->openItem(row.getItem()));
-			changeItem.disableProperty().bind(row.emptyProperty());
+			changeItem.setDisable(true);
 			
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
@@ -160,12 +160,16 @@ public class CBCView extends AnchorPane {
 						showCounterExamples(showCounterExampleItem);
 					}
 					
+					if(row.emptyProperty().get() || item.getType() == CBCType.FIND_DEADLOCK) {
+						changeItem.setDisable(true);
+					} else {
+						changeItem.setDisable(false);
+					}
+					
 					if(item instanceof CBCFormulaFindStateItem) {
 						if(((CBCFormulaFindStateItem) item).getExample() != null) {
 							showStateItem.setDisable(false);
-							showStateItem.setOnAction(event-> {
-								showTrace(((CBCFormulaFindStateItem) item).getExample());
-							});
+							showStateItem.setOnAction(event-> showTrace(((CBCFormulaFindStateItem) item).getExample()));
 						} else {
 							showStateItem.setDisable(true);
 						}
@@ -202,7 +206,7 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	public void findDeadlock() {
-		cbcHandler.addFormula("FIND DEADLOCK", "FIND DEADLOCK", CBCFormulaItem.CBCType.DEADLOCK, true);
+		cbcHandler.addFormula("FIND DEADLOCK", "FIND DEADLOCK", CBCFormulaItem.CBCType.FIND_DEADLOCK, true);
 		cbcHandler.findDeadlock();
 	}
 	
