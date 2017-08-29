@@ -208,8 +208,8 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	public void findRedundants() {
-		//cbcHandler.addFormula("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", CBCFormulaItem.CBCType.INVARIANT, true);
-		//cbcHandler.findRedundantInvariants();
+		cbcHandler.addFormula("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", CBCFormulaItem.CBCType.INVARIANT, true);
+		cbcHandler.findRedundantInvariants();
 	}
 	
 	@FXML

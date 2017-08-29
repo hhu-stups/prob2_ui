@@ -13,8 +13,8 @@ import com.google.inject.Injector;
 
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.FindStateCommand.ResultType;
+import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.domainobjects.EvaluationException;
-//import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
@@ -76,9 +76,10 @@ public class CBCFormulaHandler {
 	}
 	
 	public void findRedundantInvariants() {
-		//GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
-		
-		//System.out.println(cmd.getRedundantInvariants());
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
+		stateSpace.execute(cmd);
+		//TODO: continue
 	}
 	
 	public void findValidState(CBCFormulaFindStateItem item) {
