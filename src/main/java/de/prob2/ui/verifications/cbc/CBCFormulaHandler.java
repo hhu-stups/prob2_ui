@@ -11,19 +11,27 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
+import de.prob.animator.command.FindStateCommand;
+import de.prob.animator.command.FindStateCommand.ResultType;
+import de.prob.animator.domainobjects.EvaluationException;
+//import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.ModelCheckOk;
+import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 public class CBCFormulaHandler {
 	
@@ -67,6 +75,56 @@ public class CBCFormulaHandler {
 		executeCheckingItem(checker, sequence, CBCType.SEQUENCE);
 	}
 	
+	public void findRedundantInvariants() {
+		//GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
+		
+		//System.out.println(cmd.getRedundantInvariants());
+	}
+	
+	public void findValidState(CBCFormulaFindStateItem item) {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
+		item.setExample(null);
+		try {
+			stateSpace.execute(cmd);
+			if(cmd.getResult() == ResultType.STATE_FOUND) {
+				showResultForSearchingValidState("State found", true);
+				item.setCheckedSuccessful();
+				item.setChecked(Checked.SUCCESS);
+				item.setExample(cmd.getTrace(stateSpace));
+			} else {
+				if(cmd.getResult() == ResultType.NO_STATE_FOUND) {
+					showResultForSearchingValidState("State not found", false);
+				} else if(cmd.getResult() == ResultType.INTERRUPTED) {
+					showResultForSearchingValidState("Searching valid state for predicate is interrupted", false);
+				} else {
+					showResultForSearchingValidState("Error when searching valid state for predicate", false);
+				}
+				item.setCheckedFailed();
+				item.setChecked(Checked.FAIL);
+			}
+		} catch (ProBError | EvaluationException e){
+			showResultForSearchingValidState("Error when searching valid state for predicate", false);
+			item.setCheckedFailed();
+			item.setChecked(Checked.FAIL);
+			LOGGER.error(e.getMessage());
+		}
+		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
+	}
+	
+	public void showResultForSearchingValidState(String msg, boolean found) {
+		Alert alert;
+		if(found) {
+			alert = new Alert(AlertType.INFORMATION);
+		} else {
+			alert = new Alert(AlertType.ERROR);
+		}
+		alert.setTitle("Find Valid State Satisfying command");
+		alert.setHeaderText(msg);
+		alert.setContentText(msg);
+		alert.showAndWait();
+	}
+	
 	public void executeCheckingItem(IModelCheckJob checker, String code, CBCType type) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
 		Thread executionThread = new Thread(() -> 
@@ -86,7 +144,7 @@ public class CBCFormulaHandler {
 		executionThread.start();
 		updatingThread.start();
 	}
-	
+		
 	public void checkMachine(Machine machine) {
 		machine.getCBCFormulas().forEach(this::checkItem);
 	}
@@ -99,8 +157,10 @@ public class CBCFormulaHandler {
 			checkInvariant(item.getCode());
 		} else if(item.getType() == CBCType.DEADLOCK) {
 			checkDeadlock(item.getCode());
-		} else {
+		} else if(item.getType() == CBCType.SEQUENCE) {
 			checkSequence(item.getCode());
+		} else {
+			findValidState((CBCFormulaFindStateItem) item);
 		}
 	}
 	
@@ -124,6 +184,10 @@ public class CBCFormulaHandler {
 	
 	public void addFormula(String name, String code, CBCType type, boolean checking) {
 		CBCFormulaItem formula = new CBCFormulaItem(name, code, type);
+		addFormula(formula,checking);
+	}
+	
+	public void addFormula(CBCFormulaItem formula, boolean checking) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
 		if (currentMachine != null) {
 			if(!currentMachine.getCBCFormulas().contains(formula)) {
