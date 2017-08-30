@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+
 <fx:root type="Stage" title="CBC Invariants" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene height="200.0" width="600.0">
 			<StackPane>
 			   <children>
-			   		<VBox spacing="40">
+			   		<VBox spacing="10">
 				  		<HBox alignment="CENTER" prefHeight="47.0" prefWidth="200.0">
 				  		 <VBox.margin>
 							<Insets top="30"/>
@@ -28,6 +28,13 @@
 				            <Button fx:id="btCancel" onAction="#cancel" text="%verifications.cbc.cancel" styleClass="button-blue" />
 				         </children>
 				      	</HBox>
+				      	<HBox alignment="CENTER" prefHeight="47.0" prefWidth="200.0" spacing="60">
+				         <children>
+				      		<Button fx:id="checkAllOperationsButton" text="%verifications.checkAllOperations" onAction="#checkAllOperations" styleClass="button-blue"/>
+				         	<Button fx:id="findRedundantsButton" text="%verifications.findRedundants" onAction="#findRedundants" styleClass="button-blue" />
+				         </children>
+				      	</HBox>
+
 			   		</VBox>
 			   </children>
 			</StackPane>

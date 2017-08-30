@@ -11,13 +11,19 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
+import de.prob.animator.command.FindStateCommand;
+import de.prob.animator.command.FindStateCommand.ResultType;
+import de.prob.animator.command.GetRedundantInvariantsCommand;
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.ModelCheckOk;
+import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
@@ -56,11 +62,48 @@ public class CBCFormulaHandler {
 		executeCheckingItem(checker, code, CBCType.DEADLOCK);
 	}
 	
+	public void findDeadlock() {
+		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace());
+		executeCheckingItem(checker, "FIND DEADLOCK", CBCType.FIND_DEADLOCK);
+	}
+	
 	public void checkSequence(String sequence) {
 		List<String> events = Arrays.asList(sequence.replaceAll(" ", "").split(";"));
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
 		executeCheckingItem(checker, sequence, CBCType.SEQUENCE);
 	}
+	
+	public void findRedundantInvariants() {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
+		stateSpace.execute(cmd);
+		//TODO: continue
+	}
+	
+	public void findValidState(CBCFormulaItem item) {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
+		ResultType result = null;
+		try {
+			stateSpace.execute(cmd);
+			result = cmd.getResult();
+			if(result == ResultType.STATE_FOUND) {
+				item.setCheckedSuccessful();
+				item.setChecked(Checked.SUCCESS);
+			} else {
+				item.setCheckedFailed();
+				item.setChecked(Checked.FAIL);
+			}
+		} catch (ProBError | EvaluationException e){
+			item.setCheckedFailed();
+			item.setChecked(Checked.FAIL);
+			LOGGER.error(e.getMessage());
+		}
+		resultHandler.handleFindValidState(item, cmd, stateSpace);
+		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
+	}
+	
+
 	
 	public void executeCheckingItem(IModelCheckJob checker, String code, CBCType type) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
@@ -81,7 +124,7 @@ public class CBCFormulaHandler {
 		executionThread.start();
 		updatingThread.start();
 	}
-	
+		
 	public void checkMachine(Machine machine) {
 		machine.getCBCFormulas().forEach(this::checkItem);
 	}
@@ -91,8 +134,12 @@ public class CBCFormulaHandler {
 			checkInvariant(item.getCode());
 		} else if(item.getType() == CBCType.DEADLOCK) {
 			checkDeadlock(item.getCode());
-		} else {
+		} else if(item.getType() == CBCType.SEQUENCE) {
 			checkSequence(item.getCode());
+		} else if(item.getType() == CBCType.FIND_VALID_STATE) {
+			findValidState(item);
+		} else {
+			findDeadlock();
 		}
 	}
 	
@@ -116,6 +163,10 @@ public class CBCFormulaHandler {
 	
 	public void addFormula(String name, String code, CBCType type, boolean checking) {
 		CBCFormulaItem formula = new CBCFormulaItem(name, code, type);
+		addFormula(formula,checking);
+	}
+	
+	public void addFormula(CBCFormulaItem formula, boolean checking) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
 		if (currentMachine != null) {
 			if(!currentMachine.getCBCFormulas().contains(formula)) {

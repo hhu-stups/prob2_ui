@@ -1,12 +1,17 @@
 package de.prob2.ui.persistence;
 
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
-
-import java.util.List;
+import javafx.scene.control.Control;
+import javafx.scene.control.TableColumnBase;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 
 @Singleton
 public final class TablePersistenceHandler {
@@ -50,12 +55,18 @@ public final class TablePersistenceHandler {
 
 	@SuppressWarnings("unchecked")
 	public void setColumnsOrder(ObservableList<? extends TableColumnBase<?, ?>> columns) {
-		ObservableList<? extends TableColumnBase<?, ?>> newColumns = FXCollections.observableArrayList();
+		ObservableList<TableColumnBase<?, ?>> newColumns = FXCollections.observableArrayList();
 		for (final String text : uiState.getStatesViewColumnsOrder()) {
 			for (TableColumnBase<?, ?> column : columns) {
-				if (column.getText().equals(text)) {
-					((ObservableList<TableColumnBase<?, ?>>) newColumns).add(column);
+				if (column.getId().equals(text)) {
+					newColumns.add(column);
 				}
+			}
+		}
+
+		for (final TableColumnBase<?, ?> column : columns) {
+			if (!newColumns.contains(column)) {
+				newColumns.add(column);
 			}
 		}
 
@@ -66,7 +77,7 @@ public final class TablePersistenceHandler {
 	public String[] getColumnsOrder(List<? extends TableColumnBase<?, ?>> columns) {
 		String[] order = new String[columns.size()];
 		for (int i = 0; i < columns.size(); i++) {
-			order[i] = columns.get(i).getText();
+			order[i] = columns.get(i).getId();
 		}
 		return order;
 	}

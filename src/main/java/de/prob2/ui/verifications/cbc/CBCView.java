@@ -57,7 +57,7 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	private Button checkSelectedMachineButton;
-	
+					
 	private final CurrentTrace currentTrace;
 	
 	private final CurrentProject currentProject;
@@ -90,6 +90,12 @@ public class CBCView extends AnchorPane {
 			if(tvMachines.getSelectionModel().getSelectedIndex() < 0) {
 				tvMachines.getSelectionModel().select(0);
 			}
+			Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+			if(newValue && machine != null) {
+				checkSelectedMachineButton.disableProperty().bind(machine.cbcFormulasProperty().emptyProperty());
+			} else {
+				checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+			}
 		});
 	}
 	
@@ -103,10 +109,15 @@ public class CBCView extends AnchorPane {
 			if(to != null) {
 				tvFormula.itemsProperty().unbind();
 				tvFormula.itemsProperty().bind(to.cbcFormulasProperty());
+				Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+				if(currentTrace.existsProperty().get()) {
+					checkSelectedMachineButton.disableProperty().bind(machine.cbcFormulasProperty().emptyProperty());
+				}
 			}
 		});
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
+	
 	
 	private void setContextMenu() {
 		tvFormula.setRowFactory(table -> {
@@ -115,19 +126,16 @@ public class CBCView extends AnchorPane {
 			
 			MenuItem check = new MenuItem("Check separately");
 			check.setOnAction(e-> {
-				CBCFormulaItem item = row.getItem();
-				if(item.getType() == CBCFormulaItem.CBCType.INVARIANT) {
-					cbcHandler.checkInvariant(item.getCode());
-				} else if(item.getType() == CBCFormulaItem.CBCType.DEADLOCK) {
-					cbcHandler.checkDeadlock(item.getCode());
-				} else {
-					cbcHandler.checkSequence(item.getCode());
-				}
+				cbcHandler.checkItem(row.getItem());
 				cbcHandler.updateMachineStatus(getCurrentMachine());
 			});
+			check.disableProperty().bind(row.emptyProperty());
 			
 			Menu showCounterExampleItem = new Menu("Show Counter Example");
 			showCounterExampleItem.setDisable(true);
+			
+			MenuItem showStateItem = new MenuItem("Show found State");
+			showStateItem.setDisable(true);
 			
 			MenuItem removeItem = new MenuItem("Remove Formula");
 			removeItem.setOnAction(e -> removeFormula());
@@ -135,7 +143,7 @@ public class CBCView extends AnchorPane {
 			
 			MenuItem changeItem = new MenuItem("Change Formula");
 			changeItem.setOnAction(e->openItem(row.getItem()));
-			changeItem.disableProperty().bind(row.emptyProperty());
+			changeItem.setDisable(true);
 			
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
@@ -146,9 +154,25 @@ public class CBCView extends AnchorPane {
 						showCounterExampleItem.setDisable(false);
 						showCounterExamples(showCounterExampleItem);
 					}
+					
+					if(row.emptyProperty().get() || item.getType() == CBCType.FIND_DEADLOCK) {
+						changeItem.setDisable(true);
+					} else {
+						changeItem.setDisable(false);
+					}
+					
+					if(item.getType() == CBCType.FIND_VALID_STATE) {
+						if(row.emptyProperty().get() || item.getExample() == null) {
+							showStateItem.setDisable(true);
+						} else {
+							showStateItem.setDisable(false);
+							showStateItem.setOnAction(event-> showTrace(item.getExample()));
+						}
+					}
 				}
 			});
-			row.setContextMenu(new ContextMenu(check, changeItem, showCounterExampleItem, removeItem));
+			
+			row.setContextMenu(new ContextMenu(check, changeItem, showCounterExampleItem, showStateItem, removeItem));
 			return row;
 		});
 	}
@@ -196,13 +220,13 @@ public class CBCView extends AnchorPane {
 		for(int i = 0; i < counterExamples.size(); i++) {
 			MenuItem traceItem = new MenuItem("Counter Example " + Integer.toString(i + 1));
 			final int index = i;
-			traceItem.setOnAction(e-> showCounterExample(counterExamples.get(index)));
+			traceItem.setOnAction(e-> showTrace(counterExamples.get(index)));
 			counterExampleItem.getItems().add(traceItem);
 		}
 
 	}
 	
-	private void showCounterExample(Trace trace) {
+	private void showTrace(Trace trace) {
 		if (currentTrace.exists()) {
 			this.animations.removeTrace(currentTrace.get());
 		}

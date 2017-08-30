@@ -6,16 +6,21 @@ import java.util.List;
 
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.FindStateCommand;
+import de.prob.animator.command.FindStateCommand.ResultType;
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
 import de.prob.check.ModelCheckOk;
 import de.prob.statespace.State;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 @Singleton
 public class CBCResultHandler extends AbstractResultHandler {
@@ -23,7 +28,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 	public CBCResultHandler() {
 		this.type = CheckingType.CBC;
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
-		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class));
+		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class));
 		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
 		this.exception.addAll(Arrays.asList(CBCParseError.class));
 	}
@@ -65,5 +70,36 @@ public class CBCResultHandler extends AbstractResultHandler {
 		counterExamples.add(((CBCDeadlockFound) result).getTrace(stateid.getStateSpace()));
 		return counterExamples;
 	}
+	
+	public void handleFindValidState(CBCFormulaItem item, FindStateCommand cmd, StateSpace stateSpace) {
+		ResultType result = cmd.getResult();
+		item.setExample(null);
+		if(result == null) {
+			showResultForSearchingValidState("Error when searching valid state for predicate", false);
+		} else if(result == ResultType.STATE_FOUND) {
+			showResultForSearchingValidState("State found", true);
+			item.setExample(cmd.getTrace(stateSpace));
+		} else if(result == ResultType.NO_STATE_FOUND) {
+			showResultForSearchingValidState("State not found", false);
+		} else if(result == ResultType.INTERRUPTED) {
+			showResultForSearchingValidState("Searching valid state for predicate is interrupted", false);
+		} else {
+			showResultForSearchingValidState("Error when searching valid state for predicate", false);
+		}
+	}
+	
+	public void showResultForSearchingValidState(String msg, boolean found) {
+		Alert alert;
+		if(found) {
+			alert = new Alert(AlertType.INFORMATION);
+		} else {
+			alert = new Alert(AlertType.ERROR);
+		}
+		alert.setTitle("Find Valid State Satisfying Predicate");
+		alert.setHeaderText(msg);
+		alert.setContentText(msg);
+		alert.showAndWait();
+	}
+
 
 }
