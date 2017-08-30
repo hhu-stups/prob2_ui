@@ -93,7 +93,6 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 	
 	@FXML
 	public void checkAllOperations() {
-		List<String> events = injector.getInstance(CBCInvariants.class).getEvents();
 		for(String event : events) {
 			cbcHandler.addFormula(event, event, CBCFormulaItem.CBCType.INVARIANT, true);
 			cbcHandler.checkInvariant(event);
