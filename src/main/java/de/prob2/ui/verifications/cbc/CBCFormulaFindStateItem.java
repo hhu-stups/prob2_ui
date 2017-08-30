@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.cbc;
 
+import java.util.Objects;
+
 import de.prob.statespace.Trace;
 
 public class CBCFormulaFindStateItem extends CBCFormulaItem {
@@ -31,6 +33,11 @@ public class CBCFormulaFindStateItem extends CBCFormulaItem {
 		return otherItem.getName().equals(this.getName()) &&
 				otherItem.getCode().equals(this.getCode()) &&
 				otherItem.getType().equals(this.getType());
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, code, type);
 	}
 
 }

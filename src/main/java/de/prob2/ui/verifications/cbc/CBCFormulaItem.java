@@ -13,7 +13,7 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 		INVARIANT,SEQUENCE,DEADLOCK, FIND_DEADLOCK, FIND_VALID_STATE
 	}
 	
-	private CBCType type;
+	protected CBCType type;
 	
 	private transient List<Trace> counterExamples;
 
