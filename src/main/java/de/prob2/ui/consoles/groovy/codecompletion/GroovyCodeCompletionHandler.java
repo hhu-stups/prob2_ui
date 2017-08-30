@@ -1,23 +1,26 @@
 package de.prob2.ui.consoles.groovy.codecompletion;
 
-import de.prob2.ui.consoles.groovy.GroovyMethodOption;
-import de.prob2.ui.consoles.groovy.MetaPropertiesHandler;
-import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
-import de.prob2.ui.consoles.groovy.objects.GroovyClassPropertyItem;
-import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
-import javafx.collections.ObservableList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.script.Bindings;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.script.Bindings;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+
+import de.prob2.ui.consoles.groovy.GroovyMethodOption;
+import de.prob2.ui.consoles.groovy.MetaPropertiesHandler;
+import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
+import de.prob2.ui.consoles.groovy.objects.GroovyClassPropertyItem;
+import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
+
+import javafx.collections.ObservableList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GroovyCodeCompletionHandler {
 	
@@ -61,20 +64,26 @@ public class GroovyCodeCompletionHandler {
 	}
 	
 	public void handleStaticClasses(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action) {
-		String[] methods = getMethodsFromCurrentLine(currentLine);
-		Package[] packages = Package.getPackages();
+		final String[] methods = getMethodsFromCurrentLine(currentLine);
 		if (methods.length == 0) {
 			return;
 		}
-		for (Package pack : packages) {
-			String fullClassName = pack.getName() + "." + methods[methods.length - 1];
+		final StringBuilder classNameBuilder = new StringBuilder(methods[0]);
+		for (int i = 1; i <= methods.length; i++) {
+			// For each possible prefix of the "methods" array, try to find a class with that name.
+			// For example, when the user types "java.lang.Boolean.FALSE.", this tries to find classes called java, java.lang, java.lang.Boolean, and java.lang.Boolean.FALSE (and stops at the first valid class name, java.lang.Boolean).
 			try {
-				Class<?> clazz = Class.forName(fullClassName);
+				final Class<?> clazz = Class.forName(classNameBuilder.toString());
 				fillAllMethodsAndProperties(clazz, GroovyMethodOption.STATIC);
 				showSuggestions(clazz, GroovyMethodOption.STATIC);
-			} catch (ClassNotFoundException ignored) {
-				// Just try with the next package if the current fullClassName does not fit any classes
-				logger.error(ignored.getMessage());
+				break;
+			} catch (ClassNotFoundException e) {
+				logger.trace("{} is not a class name (this is not an error)", e.getMessage());
+			}
+			// Special case for the last iteration
+			if (i < methods.length) {
+				classNameBuilder.append('.');
+				classNameBuilder.append(methods[i]);
 			}
 		}
 		if (action == CodeCompletionTriggerAction.TRIGGER) {

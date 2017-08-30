@@ -23,7 +23,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 	public CBCResultHandler() {
 		this.type = CheckingType.CBC;
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
-		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class));
+		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class));
 		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
 		this.exception.addAll(Arrays.asList(CBCParseError.class));
 	}

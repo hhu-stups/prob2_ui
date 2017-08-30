@@ -4,19 +4,11 @@ import java.io.File;
 import java.util.Locale;
 import java.util.Optional;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.sun.javafx.application.LauncherImpl;
 
 import de.prob.cli.ProBInstanceProvider;
+
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
@@ -27,6 +19,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.application.Preloader;
@@ -38,7 +31,15 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
-@SuppressWarnings("restriction")
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ProB2 extends Application {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProB2.class);
 
@@ -48,7 +49,7 @@ public class ProB2 extends Application {
 	private Stage primaryStage;
 
 	public static void main(String... args) {
-		LauncherImpl.launchApplication(ProB2.class, ProB2Preloader.class, args);
+		Application.launch(args);
 	}
 
 	@Override
@@ -96,7 +97,7 @@ public class ProB2 extends Application {
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		primaryStage.setOnCloseRequest(event -> handleCloseRequest(event, currentProject, stageManager));
 
-		LauncherImpl.notifyPreloader(this, new Preloader.ProgressNotification(100));
+		this.notifyPreloader(new Preloader.ProgressNotification(100));
 		this.primaryStage.show();
 
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);

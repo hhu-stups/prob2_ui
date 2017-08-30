@@ -1,6 +1,13 @@
 package de.prob2.ui.preferences;
 
-import javafx.beans.property.*;
+import com.google.common.base.MoreObjects;
+
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public class PrefTreeItem {
 	private final StringProperty name;
@@ -73,5 +80,17 @@ public class PrefTreeItem {
 	
 	public String getDescription() {
 		return this.description.get();
+	}
+	
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("name", this.getName())
+			.add("changed", this.getChanged())
+			.add("value", this.getValue())
+			.add("valueType", this.getValueType())
+			.add("defaultValue", this.getDefaultValue())
+			.add("description", this.getDescription())
+			.toString();
 	}
 }

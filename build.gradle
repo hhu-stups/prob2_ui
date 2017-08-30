@@ -31,6 +31,8 @@ repositories {
 }
 
 mainClassName = "de.prob2.ui.ProB2"
+final preloaderClassName = "de.prob2.ui.ProB2Preloader"
+applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}"]
 
 macAppBundle {
 	dmgName = "ProB-2.0-for-MacOS"
@@ -65,7 +67,7 @@ dependencies {
 	compile 'com.google.code.gson:gson:2.7'
 	compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
 	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.4'
-	compile 'de.hhu.stups:de.prob2.kernel:3.2.2-SNAPSHOT'
+	compile 'de.hhu.stups:de.prob2.kernel:3.2.3-SNAPSHOT'
 	compile 'de.hhu.stups:ltl-dsl:0.1.0'
 	compile 'de.jensd:fontawesomefx-commons:8.15'
 	compile 'de.jensd:fontawesomefx-fontawesome:4.7.0-5'
@@ -124,7 +126,11 @@ sonarqube {
 
 task fatJar(type: Jar) {
 	manifest {
-		attributes 'Main-Class': 'de.prob2.ui.ProB2'
+		attributes(
+			'Main-Class': mainClassName,
+			'JavaFX-Application-Class': mainClassName,
+			'JavaFX-Preloader-Class': preloaderClassName,
+		)
 	}
 	baseName = project.name + '-all'
 	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
