@@ -6,7 +6,7 @@ import de.prob.statespace.Trace;
 
 public class CBCFormulaFindStateItem extends CBCFormulaItem {
 	
-	private Trace example;
+	private transient Trace example;
 	
 	public CBCFormulaFindStateItem(String name, String code, CBCType type) {
 		super(name, code, type);
