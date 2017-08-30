@@ -16,19 +16,31 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 	protected CBCType type;
 	
 	private transient List<Trace> counterExamples;
+	
+	private transient Trace example;
 
 	public CBCFormulaItem(String name, String code, CBCType type) {
 		super(name, type.name(), code);
 		this.type = type;
+		this.example = null;
 		this.initializeCounterExamples();
+		
 	}
-	
+		
 	public void initializeCounterExamples() {
 		this.counterExamples = new ArrayList<>();
 	}
 	
 	public List<Trace> getCounterExamples() {
 		return counterExamples;
+	}
+	
+	public void setExample(Trace example) {
+		this.example = example;
+	}
+	
+	public Trace getExample() {
+		return example;
 	}
 	
 	public void reset() {

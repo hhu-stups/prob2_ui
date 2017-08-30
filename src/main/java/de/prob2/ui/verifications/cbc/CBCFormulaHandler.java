@@ -80,7 +80,7 @@ public class CBCFormulaHandler {
 		//TODO: continue
 	}
 	
-	public void findValidState(CBCFormulaFindStateItem item) {
+	public void findValidState(CBCFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
 		ResultType result = null;
@@ -137,7 +137,7 @@ public class CBCFormulaHandler {
 		} else if(item.getType() == CBCType.SEQUENCE) {
 			checkSequence(item.getCode());
 		} else if(item.getType() == CBCType.FIND_VALID_STATE) {
-			findValidState((CBCFormulaFindStateItem) item);
+			findValidState(item);
 		} else {
 			findDeadlock();
 		}

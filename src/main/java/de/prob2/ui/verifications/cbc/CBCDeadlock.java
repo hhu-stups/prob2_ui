@@ -64,7 +64,7 @@ public class CBCDeadlock extends AbstractCBCFormulaInputStage {
 	
 	@FXML
 	public void findValidState() {
-		CBCFormulaFindStateItem item = new CBCFormulaFindStateItem(tfFormula.getText(), tfFormula.getText(), 
+		CBCFormulaItem item = new CBCFormulaItem(tfFormula.getText(), tfFormula.getText(), 
 				CBCType.FIND_VALID_STATE);
 		cbcHandler.addFormula(item, true);
 		cbcHandler.findValidState(item);

@@ -71,7 +71,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 		return counterExamples;
 	}
 	
-	public void handleFindValidState(CBCFormulaFindStateItem item, FindStateCommand cmd, StateSpace stateSpace) {
+	public void handleFindValidState(CBCFormulaItem item, FindStateCommand cmd, StateSpace stateSpace) {
 		ResultType result = cmd.getResult();
 		item.setExample(null);
 		if(result == null) {

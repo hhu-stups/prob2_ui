@@ -150,12 +150,12 @@ public class CBCView extends AnchorPane {
 						changeItem.setDisable(false);
 					}
 					
-					if(item instanceof CBCFormulaFindStateItem) {
-						if(row.emptyProperty().get() || ((CBCFormulaFindStateItem) item).getExample() == null) {
+					if(item.getType() == CBCType.FIND_VALID_STATE) {
+						if(row.emptyProperty().get() || item.getExample() == null) {
 							showStateItem.setDisable(true);
 						} else {
 							showStateItem.setDisable(false);
-							showStateItem.setOnAction(event-> showTrace(((CBCFormulaFindStateItem) item).getExample()));
+							showStateItem.setOnAction(event-> showTrace(item.getExample()));
 						}
 					}
 				}
