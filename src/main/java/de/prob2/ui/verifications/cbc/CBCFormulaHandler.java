@@ -30,8 +30,6 @@ import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 
 public class CBCFormulaHandler {
 	
@@ -85,46 +83,27 @@ public class CBCFormulaHandler {
 	public void findValidState(CBCFormulaFindStateItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
-		item.setExample(null);
+		ResultType result = null;
 		try {
 			stateSpace.execute(cmd);
-			if(cmd.getResult() == ResultType.STATE_FOUND) {
-				showResultForSearchingValidState("State found", true);
+			result = cmd.getResult();
+			if(result == ResultType.STATE_FOUND) {
 				item.setCheckedSuccessful();
 				item.setChecked(Checked.SUCCESS);
-				item.setExample(cmd.getTrace(stateSpace));
 			} else {
-				if(cmd.getResult() == ResultType.NO_STATE_FOUND) {
-					showResultForSearchingValidState("State not found", false);
-				} else if(cmd.getResult() == ResultType.INTERRUPTED) {
-					showResultForSearchingValidState("Searching valid state for predicate is interrupted", false);
-				} else {
-					showResultForSearchingValidState("Error when searching valid state for predicate", false);
-				}
 				item.setCheckedFailed();
 				item.setChecked(Checked.FAIL);
 			}
 		} catch (ProBError | EvaluationException e){
-			showResultForSearchingValidState("Error when searching valid state for predicate", false);
 			item.setCheckedFailed();
 			item.setChecked(Checked.FAIL);
 			LOGGER.error(e.getMessage());
 		}
+		resultHandler.handleFindValidState(item, cmd, stateSpace);
 		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
 	}
 	
-	public void showResultForSearchingValidState(String msg, boolean found) {
-		Alert alert;
-		if(found) {
-			alert = new Alert(AlertType.INFORMATION);
-		} else {
-			alert = new Alert(AlertType.ERROR);
-		}
-		alert.setTitle("Find Valid State Satisfying command");
-		alert.setHeaderText(msg);
-		alert.setContentText(msg);
-		alert.showAndWait();
-	}
+
 	
 	public void executeCheckingItem(IModelCheckJob checker, String code, CBCType type) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();

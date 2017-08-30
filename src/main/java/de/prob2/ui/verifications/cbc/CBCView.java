@@ -167,11 +167,11 @@ public class CBCView extends AnchorPane {
 					}
 					
 					if(item instanceof CBCFormulaFindStateItem) {
-						if(((CBCFormulaFindStateItem) item).getExample() != null) {
+						if(row.emptyProperty().get() || ((CBCFormulaFindStateItem) item).getExample() == null) {
+							showStateItem.setDisable(true);
+						} else {
 							showStateItem.setDisable(false);
 							showStateItem.setOnAction(event-> showTrace(((CBCFormulaFindStateItem) item).getExample()));
-						} else {
-							showStateItem.setDisable(true);
 						}
 					}
 				}
