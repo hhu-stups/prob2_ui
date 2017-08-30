@@ -1,8 +1,13 @@
 package de.prob2.ui.history;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -21,10 +26,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
-
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
 
 @Singleton
 public final class HistoryView extends AnchorPane {
@@ -170,4 +171,9 @@ public final class HistoryView extends AnchorPane {
 		lvHistory.getItems().add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST));
 	}
 	
+	@FXML
+	private void saveTrace() {
+		//TODO
+	}
+
 }
