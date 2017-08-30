@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.cbc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -12,6 +13,7 @@ import de.prob.model.representation.BEvent;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
 
@@ -20,10 +22,16 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 	@FXML
 	private ChoiceBox<String> cbOperations;
 	
+	@FXML
+	private Button checkAllOperationsButton;
+	
+	@FXML
+	private Button findRedundantsButton;
+	
 	private final CurrentTrace currentTrace;
 	
 	private ArrayList<String> events;
-
+	
 	@Inject
 	private CBCInvariants(final StageManager stageManager, final CurrentTrace currentTrace, 
 							final CBCFormulaHandler cbcHandler, final Injector injector) {
@@ -37,6 +45,7 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 	@FXML
 	public void initialize() {
 		this.update();
+		this.invisibles.addAll(Arrays.asList(checkAllOperationsButton, findRedundantsButton));
 		currentTrace.addListener((observable, from, to) -> update());
 	}
 
@@ -99,7 +108,7 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 	}
 	
 	public void changeFormula(CBCFormulaItem item) {
-		super.changeFormula(cbOperations, item);
+		super.changeFormula(cbOperations, item, invisibles);
 	}
 	
 	@FXML

@@ -44,7 +44,7 @@ public class CBCFindValidState extends AbstractCBCFormulaInputStage {
 	}
 	
 	public void changeFormula(CBCFormulaItem item) {
-		super.changeFormula(tfPredicate, item);
+		super.changeFormula(tfPredicate, item, invisibles);
 	}
 	
 	@FXML

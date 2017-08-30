@@ -41,7 +41,7 @@ public class CBCSequence extends AbstractCBCFormulaInputStage {
 	}
 	
 	public void changeFormula(CBCFormulaItem item) {
-		super.changeFormula(tfSequence, item);
+		super.changeFormula(tfSequence, item, invisibles);
 	}
 
 	@FXML
