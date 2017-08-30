@@ -110,7 +110,7 @@ public class ProB2Module extends AbstractModule {
 		// General stuff
 		final Locale locale = Locale.getDefault();
 		bind(Locale.class).toInstance(locale);
-		final ResourceBundle bundle = ResourceBundle.getBundle("bundles.prob2", locale, new ProB2Module.UTF8PropertiesControl());
+		final ResourceBundle bundle = ResourceBundle.getBundle("de.prob2.ui.prob2", locale, new ProB2Module.UTF8PropertiesControl());
 		bind(ResourceBundle.class).toInstance(bundle);
 		final MenuToolkit toolkit = IS_MAC ? MenuToolkit.toolkit(locale) : null;
 		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
