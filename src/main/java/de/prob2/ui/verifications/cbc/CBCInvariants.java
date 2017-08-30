@@ -19,7 +19,7 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 
 	@FXML
 	private ChoiceBox<String> cbOperations;
-
+	
 	private final CurrentTrace currentTrace;
 	
 	private ArrayList<String> events;
@@ -80,6 +80,22 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 		}
 		cbcHandler.checkInvariant(code);
 		this.close();
+	}
+	
+	@FXML
+	public void checkAllOperations() {
+		List<String> events = injector.getInstance(CBCInvariants.class).getEvents();
+		for(String event : events) {
+			cbcHandler.addFormula(event, event, CBCFormulaItem.CBCType.INVARIANT, true);
+			cbcHandler.checkInvariant(event);
+		}
+		this.close();
+	}
+	
+	@FXML
+	public void findRedundants() {
+		cbcHandler.addFormula("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", CBCFormulaItem.CBCType.INVARIANT, true);
+		cbcHandler.findRedundantInvariants();
 	}
 	
 	public void changeFormula(CBCFormulaItem item) {

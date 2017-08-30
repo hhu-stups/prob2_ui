@@ -32,15 +32,14 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 	
 	@SuppressWarnings("unchecked")
 	protected void changeFormula(Control input, CBCFormulaItem item) {
-		if(!(item instanceof CBCFormulaFindStateItem)) {
-			btAdd.setText("Change");
-			btAdd.setOnAction(e-> {
-				if(!updateFormula(input, item)) {
-					injector.getInstance(CBCResultHandler.class).showAlreadyExists(ItemType.Formula);
-				}
-				this.close();
-			});
-		}
+		btAdd.setText("Change");
+		btAdd.setOnAction(e-> {
+			if(!updateFormula(input, item)) {
+				injector.getInstance(CBCResultHandler.class).showAlreadyExists(ItemType.Formula);
+			}
+			this.close();
+		});
+
 		btCheck.setText("Change and Check");
 		btCheck.setOnAction(e-> {
 			if(updateFormula(input, item)) {

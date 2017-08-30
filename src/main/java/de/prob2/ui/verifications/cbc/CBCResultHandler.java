@@ -95,7 +95,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 		} else {
 			alert = new Alert(AlertType.ERROR);
 		}
-		alert.setTitle("Find Valid State Satisfying command");
+		alert.setTitle("Find Valid State Satisfying Predicate");
 		alert.setHeaderText(msg);
 		alert.setContentText(msg);
 		alert.showAndWait();

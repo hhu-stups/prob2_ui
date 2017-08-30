@@ -57,19 +57,7 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	private Button checkSelectedMachineButton;
-	
-	@FXML
-	private Button checkAllOperationsButton;
-	
-	@FXML
-	private Button findDeadlockButton;
-	
-	@FXML
-	private Button findRedundantsButton;
-	
-	@FXML
-	private Button findValidStateButton;
-	
+					
 	private final CurrentTrace currentTrace;
 	
 	private final CurrentProject currentProject;
@@ -108,10 +96,6 @@ public class CBCView extends AnchorPane {
 	private void setBindings() {
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
-		checkAllOperationsButton.disableProperty().bind(currentTrace.existsProperty().not());
-		findDeadlockButton.disableProperty().bind(currentTrace.existsProperty().not());
-		findRedundantsButton.disableProperty().bind(currentTrace.existsProperty().not());
-		findValidStateButton.disableProperty().bind(currentTrace.existsProperty().not());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -195,33 +179,6 @@ public class CBCView extends AnchorPane {
 		refresh();
 	}
 	
-	@FXML
-	public void checkAllOperations() {
-		List<String> events = injector.getInstance(CBCInvariants.class).getEvents();
-		for(String event : events) {
-			cbcHandler.addFormula(event, event, CBCFormulaItem.CBCType.INVARIANT, true);
-			cbcHandler.checkInvariant(event);
-		}
-	}
-	
-	@FXML
-	public void findDeadlock() {
-		cbcHandler.addFormula("FIND DEADLOCK", "FIND DEADLOCK", CBCFormulaItem.CBCType.FIND_DEADLOCK, true);
-		cbcHandler.findDeadlock();
-	}
-	
-	@FXML
-	public void findRedundants() {
-		cbcHandler.addFormula("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", CBCFormulaItem.CBCType.INVARIANT, true);
-		cbcHandler.findRedundantInvariants();
-	}
-	
-	@FXML
-	public void findValidState() {
-		injector.getInstance(CBCFindValidState.class).showAndWait();
-	}
-	
-	
 	private void removeFormula() {
 		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
 		CBCFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
@@ -272,12 +229,9 @@ public class CBCView extends AnchorPane {
 		} else if(item.getType() == CBCType.SEQUENCE) {
 			CBCSequence cbcSequence = injector.getInstance(CBCSequence.class);
 			cbcSequence.changeFormula(item);
-		} else if(item.getType() == CBCType.DEADLOCK){
+		} else {
 			CBCDeadlock cbcDeadlock = injector.getInstance(CBCDeadlock.class);
 			cbcDeadlock.changeFormula(item);
-		} else {
-			CBCFindValidState cbcFindValidState = injector.getInstance(CBCFindValidState.class);
-			cbcFindValidState.changeFormula(item);
 		}
 	}
 		

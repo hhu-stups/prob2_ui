@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.cbc;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
@@ -12,8 +13,7 @@ import com.google.inject.Injector;
 public class CBCDeadlock extends AbstractCBCFormulaInputStage {
 		
 	@FXML
-	private TextField tfFormula;
-	
+	private TextField tfFormula;	
 
 	@Inject
 	private CBCDeadlock(final StageManager stageManager, final CBCFormulaHandler cbcHandler,
@@ -22,7 +22,7 @@ public class CBCDeadlock extends AbstractCBCFormulaInputStage {
 		stageManager.loadFXML(this, "cbc_deadlock.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
-	
+			
 	@FXML
 	public void addFormula() {
 		addFormula(false);
@@ -38,6 +38,22 @@ public class CBCDeadlock extends AbstractCBCFormulaInputStage {
 	public void checkFormula() {
 		addFormula(true);
 		cbcHandler.checkDeadlock(tfFormula.getText());
+		this.close();
+	}
+	
+	@FXML
+	public void findDeadlock() {
+		cbcHandler.addFormula("FIND DEADLOCK", "FIND DEADLOCK", CBCFormulaItem.CBCType.FIND_DEADLOCK, true);
+		cbcHandler.findDeadlock();
+		this.close();
+	}
+	
+	@FXML
+	public void findValidState() {
+		CBCFormulaFindStateItem item = new CBCFormulaFindStateItem(tfFormula.getText(), tfFormula.getText(), 
+				CBCType.FIND_VALID_STATE);
+		cbcHandler.addFormula(item, true);
+		cbcHandler.findValidState(item);
 		this.close();
 	}
 	

@@ -5,32 +5,42 @@ import javax.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 
+@Deprecated
 public class CBCFindValidState extends AbstractCBCFormulaInputStage {
 	
 	@FXML
 	private TextField tfPredicate;
+	
+	@FXML
+	private Button findValidStateButton;
+	
+	private CurrentTrace currentTrace;
 		
 	@Inject
 	private CBCFindValidState(final StageManager stageManager, final CBCFormulaHandler cbcHandler,
-						final Injector injector) {
+						final Injector injector, final CurrentTrace currentTrace) {
 		super(cbcHandler, injector);
+		this.currentTrace = currentTrace;
 		stageManager.loadFXML(this, "cbc_findValidState.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
+	}
+	
+	@FXML
+	public void initialize() {
+		findValidStateButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 	
 	
 	@FXML
 	public void checkFormula() {
-		CBCFormulaFindStateItem item = new CBCFormulaFindStateItem(tfPredicate.getText(), tfPredicate.getText(), 
-												CBCType.FIND_VALID_STATE);
-		cbcHandler.addFormula(item, true);
-		cbcHandler.findValidState(item);
-		this.close();
+
 	}
 	
 	public void changeFormula(CBCFormulaItem item) {
