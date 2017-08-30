@@ -90,6 +90,12 @@ public class CBCView extends AnchorPane {
 			if(tvMachines.getSelectionModel().getSelectedIndex() < 0) {
 				tvMachines.getSelectionModel().select(0);
 			}
+			Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+			if(newValue && machine != null) {
+				checkSelectedMachineButton.disableProperty().bind(machine.cbcFormulasProperty().emptyProperty());
+			} else {
+				checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+			}
 		});
 	}
 	
@@ -103,10 +109,15 @@ public class CBCView extends AnchorPane {
 			if(to != null) {
 				tvFormula.itemsProperty().unbind();
 				tvFormula.itemsProperty().bind(to.cbcFormulasProperty());
+				Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+				if(currentTrace.existsProperty().get()) {
+					checkSelectedMachineButton.disableProperty().bind(machine.cbcFormulasProperty().emptyProperty());
+				}
 			}
 		});
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
+	
 	
 	private void setContextMenu() {
 		tvFormula.setRowFactory(table -> {
