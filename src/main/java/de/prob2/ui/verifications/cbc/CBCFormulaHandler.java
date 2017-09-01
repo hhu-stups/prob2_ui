@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
+import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
+import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.FindStateCommand.ResultType;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
@@ -30,8 +32,6 @@ import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 
 public class CBCFormulaHandler {
 	
@@ -82,49 +82,80 @@ public class CBCFormulaHandler {
 		//TODO: continue
 	}
 	
-	public void findValidState(CBCFormulaFindStateItem item) {
+	public void checkRefinement(CBCFormulaItem item) {
+		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		int index = currentMachine.getCBCFormulas().indexOf(item);
+		if(index > -1) {
+			item = currentMachine.getCBCFormulas().get(index);
+		}
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
-		item.setExample(null);
+		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand();
+		ConstraintBasedRefinementCheckCommand.ResultType result = null;
 		try {
-			stateSpace.execute(cmd);
-			if(cmd.getResult() == ResultType.STATE_FOUND) {
-				showResultForSearchingValidState("State found", true);
+			stateSpace.execute(command);
+			result = command.getResult();
+			if(result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
 				item.setCheckedSuccessful();
 				item.setChecked(Checked.SUCCESS);
-				item.setExample(cmd.getTrace(stateSpace));
+			} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
+				item.setCheckedFailed();
+				item.setChecked(Checked.FAIL);
+			}
+		} catch (Exception e) {
+			item.setCheckedFailed();
+			item.setChecked(Checked.FAIL);
+			LOGGER.error("Not a refinement machine");
+		}
+		resultHandler.handleRefinementChecking(command);
+		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
+	}
+	
+	public void checkAssertions(CBCFormulaItem item) {
+		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		int index = currentMachine.getCBCFormulas().indexOf(item);
+		if(index > -1) {
+			item = currentMachine.getCBCFormulas().get(index);
+		}
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
+		stateSpace.execute(command);
+		ConstraintBasedAssertionCheckCommand.ResultType result = command.getResult();
+		if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS ||
+			result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
+			item.setCheckedSuccessful();
+			item.setChecked(Checked.SUCCESS);
+		} else {
+			item.setCheckedFailed();
+			item.setChecked(Checked.FAIL);
+		}
+		resultHandler.handleAssertionChecking(command);
+		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
+	}
+	
+	public void findValidState(CBCFormulaItem item) {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
+		ResultType result = null;
+		try {
+			stateSpace.execute(cmd);
+			result = cmd.getResult();
+			if(result == ResultType.STATE_FOUND) {
+				item.setCheckedSuccessful();
+				item.setChecked(Checked.SUCCESS);
 			} else {
-				if(cmd.getResult() == ResultType.NO_STATE_FOUND) {
-					showResultForSearchingValidState("State not found", false);
-				} else if(cmd.getResult() == ResultType.INTERRUPTED) {
-					showResultForSearchingValidState("Searching valid state for predicate is interrupted", false);
-				} else {
-					showResultForSearchingValidState("Error when searching valid state for predicate", false);
-				}
 				item.setCheckedFailed();
 				item.setChecked(Checked.FAIL);
 			}
 		} catch (ProBError | EvaluationException e){
-			showResultForSearchingValidState("Error when searching valid state for predicate", false);
 			item.setCheckedFailed();
 			item.setChecked(Checked.FAIL);
 			LOGGER.error(e.getMessage());
 		}
+		resultHandler.handleFindValidState(item, cmd, stateSpace);
 		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
 	}
 	
-	public void showResultForSearchingValidState(String msg, boolean found) {
-		Alert alert;
-		if(found) {
-			alert = new Alert(AlertType.INFORMATION);
-		} else {
-			alert = new Alert(AlertType.ERROR);
-		}
-		alert.setTitle("Find Valid State Satisfying command");
-		alert.setHeaderText(msg);
-		alert.setContentText(msg);
-		alert.showAndWait();
-	}
+
 	
 	public void executeCheckingItem(IModelCheckJob checker, String code, CBCType type) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
@@ -158,9 +189,13 @@ public class CBCFormulaHandler {
 		} else if(item.getType() == CBCType.SEQUENCE) {
 			checkSequence(item.getCode());
 		} else if(item.getType() == CBCType.FIND_VALID_STATE) {
-			findValidState((CBCFormulaFindStateItem) item);
-		} else {
+			findValidState(item);
+		} else if(item.getType() == CBCType.FIND_DEADLOCK) {
 			findDeadlock();
+		} else if(item.getType() == CBCType.REFINEMENT) {
+			checkRefinement(item);
+		} else {
+			checkAssertions(item);
 		}
 	}
 	

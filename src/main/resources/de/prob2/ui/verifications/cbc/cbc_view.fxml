@@ -25,22 +25,15 @@
 					</HelpButton>
 					<HBox spacing="5.0" alignment="CENTER_LEFT">
 						<VBox spacing="5.0" alignment="BOTTOM_LEFT" HBox.hgrow="ALWAYS">
-							<Button fx:id="checkSelectedMachineButton" disable="true"
+							<Button fx:id="checkSelectedMachineButton" 
 								text="%verifications.checkSelectedMachine" onAction="#checkSelectedMachine"
-								styleClass="button-blue" prefWidth="220.0"/>
-								
-							<Button fx:id="checkAllOperationsButton" disable="true"
-								text="%verifications.checkAllOperations" onAction="#checkAllOperations"
-								styleClass="button-blue" prefWidth="220.0"/>
-							<Button fx:id="findDeadlockButton" disable="true"
-								text="%verifications.findDeadlock" onAction="#findDeadlock"
-								styleClass="button-blue" prefWidth="220.0"/>
-							<Button fx:id="findRedundantsButton" disable="true"
-								text="%verifications.findRedundants" onAction="#findRedundants"
-								styleClass="button-blue" prefWidth="220.0"/>
-							<Button fx:id="findValidStateButton" disable="true"
-								text="%verifications.findValidState" onAction="#findValidState"
-								styleClass="button-blue" prefWidth="220.0"/>
+								styleClass="button-blue" prefWidth="200.0"/>
+							<Button fx:id="checkRefinementButton" 
+								text="%verifications.checkRefinement" onAction="#checkRefinement"
+								styleClass="button-blue" prefWidth="200.0"/>
+							<Button fx:id="checkAssertionsButton" 
+								text="%verifications.checkAssertion" onAction="#checkAssertions"
+								styleClass="button-blue" prefWidth="200.0"/>
 						</VBox>
 						<VBox spacing="5.0" alignment="TOP_RIGHT">
 							<Button fx:id="addFormulaButton" disable="true" onAction="#addFormula"

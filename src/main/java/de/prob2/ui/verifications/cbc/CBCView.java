@@ -27,6 +27,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -59,17 +60,11 @@ public class CBCView extends AnchorPane {
 	private Button checkSelectedMachineButton;
 	
 	@FXML
-	private Button checkAllOperationsButton;
+	private Button checkRefinementButton;
 	
 	@FXML
-	private Button findDeadlockButton;
-	
-	@FXML
-	private Button findRedundantsButton;
-	
-	@FXML
-	private Button findValidStateButton;
-	
+	private Button checkAssertionsButton;
+					
 	private final CurrentTrace currentTrace;
 	
 	private final CurrentProject currentProject;
@@ -102,16 +97,20 @@ public class CBCView extends AnchorPane {
 			if(tvMachines.getSelectionModel().getSelectedIndex() < 0) {
 				tvMachines.getSelectionModel().select(0);
 			}
+			Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+			if(newValue && machine != null) {
+				checkSelectedMachineButton.disableProperty().bind(machine.cbcFormulasProperty().emptyProperty());
+			} else {
+				checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+			}
 		});
 	}
 	
 	private void setBindings() {
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
-		checkAllOperationsButton.disableProperty().bind(currentTrace.existsProperty().not());
-		findDeadlockButton.disableProperty().bind(currentTrace.existsProperty().not());
-		findRedundantsButton.disableProperty().bind(currentTrace.existsProperty().not());
-		findValidStateButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkRefinementButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkAssertionsButton.disableProperty().bind(currentTrace.existsProperty().not());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -119,10 +118,15 @@ public class CBCView extends AnchorPane {
 			if(to != null) {
 				tvFormula.itemsProperty().unbind();
 				tvFormula.itemsProperty().bind(to.cbcFormulasProperty());
+				Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+				if(currentTrace.existsProperty().get()) {
+					checkSelectedMachineButton.disableProperty().bind(machine.cbcFormulasProperty().emptyProperty());
+				}
 			}
 		});
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
+	
 	
 	private void setContextMenu() {
 		tvFormula.setRowFactory(table -> {
@@ -151,6 +155,7 @@ public class CBCView extends AnchorPane {
 			changeItem.setDisable(true);
 			
 			row.setOnMouseClicked(e-> {
+				List<CBCType> changeDisabled = Arrays.asList(CBCType.FIND_DEADLOCK, CBCType.REFINEMENT, CBCType.ASSERTIONS);
 				if(e.getButton() == MouseButton.SECONDARY) {
 					CBCFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 					if(row.emptyProperty().get() || item.getCounterExamples().isEmpty()) {
@@ -160,18 +165,18 @@ public class CBCView extends AnchorPane {
 						showCounterExamples(showCounterExampleItem);
 					}
 					
-					if(row.emptyProperty().get() || item.getType() == CBCType.FIND_DEADLOCK) {
+					if(row.emptyProperty().get() || changeDisabled.contains(item.getType())) {
 						changeItem.setDisable(true);
 					} else {
 						changeItem.setDisable(false);
 					}
 					
-					if(item instanceof CBCFormulaFindStateItem) {
-						if(((CBCFormulaFindStateItem) item).getExample() != null) {
-							showStateItem.setDisable(false);
-							showStateItem.setOnAction(event-> showTrace(((CBCFormulaFindStateItem) item).getExample()));
-						} else {
+					if(item.getType() == CBCType.FIND_VALID_STATE) {
+						if(row.emptyProperty().get() || item.getExample() == null) {
 							showStateItem.setDisable(true);
+						} else {
+							showStateItem.setDisable(false);
+							showStateItem.setOnAction(event-> showTrace(item.getExample()));
 						}
 					}
 				}
@@ -196,31 +201,18 @@ public class CBCView extends AnchorPane {
 	}
 	
 	@FXML
-	public void checkAllOperations() {
-		List<String> events = injector.getInstance(CBCInvariants.class).getEvents();
-		for(String event : events) {
-			cbcHandler.addFormula(event, event, CBCFormulaItem.CBCType.INVARIANT, true);
-			cbcHandler.checkInvariant(event);
-		}
+	public void checkRefinement() {
+		CBCFormulaItem item = new CBCFormulaItem("Refinement Checking", "Refinement Checking", CBCFormulaItem.CBCType.REFINEMENT);
+		cbcHandler.addFormula(item, true);
+		cbcHandler.checkRefinement(item);
 	}
 	
 	@FXML
-	public void findDeadlock() {
-		cbcHandler.addFormula("FIND DEADLOCK", "FIND DEADLOCK", CBCFormulaItem.CBCType.FIND_DEADLOCK, true);
-		cbcHandler.findDeadlock();
+	public void checkAssertions() {
+		CBCFormulaItem item = new CBCFormulaItem("Assertion Checking", "Assertion Checking", CBCFormulaItem.CBCType.ASSERTIONS);
+		cbcHandler.addFormula(item, true);
+		cbcHandler.checkAssertions(item);
 	}
-	
-	@FXML
-	public void findRedundants() {
-		cbcHandler.addFormula("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", CBCFormulaItem.CBCType.INVARIANT, true);
-		cbcHandler.findRedundantInvariants();
-	}
-	
-	@FXML
-	public void findValidState() {
-		injector.getInstance(CBCFindValidState.class).showAndWait();
-	}
-	
 	
 	private void removeFormula() {
 		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
@@ -272,12 +264,9 @@ public class CBCView extends AnchorPane {
 		} else if(item.getType() == CBCType.SEQUENCE) {
 			CBCSequence cbcSequence = injector.getInstance(CBCSequence.class);
 			cbcSequence.changeFormula(item);
-		} else if(item.getType() == CBCType.DEADLOCK){
+		} else {
 			CBCDeadlock cbcDeadlock = injector.getInstance(CBCDeadlock.class);
 			cbcDeadlock.changeFormula(item);
-		} else {
-			CBCFindValidState cbcFindValidState = injector.getInstance(CBCFindValidState.class);
-			cbcFindValidState.changeFormula(item);
 		}
 	}
 		

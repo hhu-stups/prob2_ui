@@ -10,25 +10,37 @@ import java.util.Objects;
 public class CBCFormulaItem extends AbstractCheckableItem {
 	
 	public enum CBCType {
-		INVARIANT,SEQUENCE,DEADLOCK, FIND_DEADLOCK, FIND_VALID_STATE
+		INVARIANT,SEQUENCE,DEADLOCK, FIND_DEADLOCK, FIND_VALID_STATE, REFINEMENT, ASSERTIONS
 	}
 	
-	private CBCType type;
+	protected CBCType type;
 	
 	private transient List<Trace> counterExamples;
+	
+	private transient Trace example;
 
 	public CBCFormulaItem(String name, String code, CBCType type) {
 		super(name, type.name(), code);
 		this.type = type;
+		this.example = null;
 		this.initializeCounterExamples();
+		
 	}
-	
+		
 	public void initializeCounterExamples() {
 		this.counterExamples = new ArrayList<>();
 	}
 	
 	public List<Trace> getCounterExamples() {
 		return counterExamples;
+	}
+	
+	public void setExample(Trace example) {
+		this.example = example;
+	}
+	
+	public Trace getExample() {
+		return example;
 	}
 	
 	public void reset() {

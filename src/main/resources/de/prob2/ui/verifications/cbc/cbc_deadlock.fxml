@@ -11,7 +11,7 @@
 		<Scene height="200.0" width="600.0">
 			<StackPane>
 			   <children>
-			   		<VBox spacing="40">
+			   		<VBox spacing="10">
 				  		<HBox alignment="CENTER" prefHeight="47.0" prefWidth="400.0">
 				  		 <VBox.margin>
 							<Insets top="30"/>
@@ -28,6 +28,12 @@
 				            <Button fx:id="btAdd" onAction="#addFormula" text="%verifications.cbc.add" styleClass="button-blue" />
 				            <Button fx:id="btCheck" onAction="#checkFormula" text="%verifications.cbc.check" styleClass="button-blue" />
 				            <Button fx:id="btCancel" onAction="#cancel" text="%verifications.cbc.cancel" styleClass="button-blue" />
+				         </children>
+				      	</HBox>
+				      	<HBox alignment="CENTER" prefHeight="47.0" prefWidth="200.0" spacing="60">
+				         <children>
+				      		<Button fx:id="findDeadlockButton" text="%verifications.findDeadlock" onAction="#findDeadlock" styleClass="button-blue"/>
+				         	<Button fx:id="findValidStateButton" text="%verifications.findValidState" onAction="#findValidState" styleClass="button-blue"/>
 				         </children>
 				      	</HBox>
 			   		</VBox>

@@ -1,6 +1,9 @@
 package de.prob2.ui.verifications.cbc;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.inject.Injector;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler.ItemType;
@@ -24,23 +27,25 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 	
 	protected final Injector injector;
 	
+	protected final List<Button> invisibles;
+	
 	public AbstractCBCFormulaInputStage(final CBCFormulaHandler cbcHandler, final Injector injector) {
 		this.cbcHandler = cbcHandler;
 		this.injector = injector;
-		
+		this.invisibles = new ArrayList<>();
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected void changeFormula(Control input, CBCFormulaItem item) {
-		if(!(item instanceof CBCFormulaFindStateItem)) {
-			btAdd.setText("Change");
-			btAdd.setOnAction(e-> {
-				if(!updateFormula(input, item)) {
-					injector.getInstance(CBCResultHandler.class).showAlreadyExists(ItemType.Formula);
-				}
-				this.close();
-			});
-		}
+	protected void changeFormula(Control input, CBCFormulaItem item, List<Button> invisibles) {
+		hideInvisibleButtons(invisibles);
+		btAdd.setText("Change");
+		btAdd.setOnAction(e-> {
+			if(!updateFormula(input, item)) {
+				injector.getInstance(CBCResultHandler.class).showAlreadyExists(ItemType.Formula);
+			}
+			this.close();
+		});
+
 		btCheck.setText("Change and Check");
 		btCheck.setOnAction(e-> {
 			if(updateFormula(input, item)) {
@@ -61,6 +66,12 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 			});
 		}
 		this.showAndWait();
+	}
+	
+	private void hideInvisibleButtons(List<Button> invisibles) {
+		for(Button button : invisibles) {
+			button.setVisible(false);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
