@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.FindStateCommand.ResultType;
@@ -90,7 +91,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 		}
 	}
 	
-	public void handleRefinementChecking(CBCFormulaItem item, ConstraintBasedRefinementCheckCommand cmd) {
+	public void handleRefinementChecking(ConstraintBasedRefinementCheckCommand cmd) {
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
 		String msg = cmd.getResultsString();
 		if(result == null) {
@@ -104,8 +105,25 @@ public class CBCResultHandler extends AbstractResultHandler {
 		}
 	}
 	
+	public void handleAssertionChecking(ConstraintBasedAssertionCheckCommand cmd) {
+		ConstraintBasedAssertionCheckCommand.ResultType result = cmd.getResult();
+		if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS) {
+			showAssertionCheckingResult("No counter-example exists", true);
+		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
+			showAssertionCheckingResult("No counter-example found", true);
+		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.COUNTER_EXAMPLE) {
+			showAssertionCheckingResult("Counter-example found", false);
+		} else {
+			showAssertionCheckingResult("Assertion checking is interrupted", false);
+		}
+	}
+	
 	public void showRefinementCheckingResult(String header, String msg, boolean successful) {
 		showAlert("Constraint Based Refinement Checking", header, msg, successful);
+	}
+	
+	public void showAssertionCheckingResult(String msg, boolean successful) {
+		showAlert("Checking assertions", msg, msg, successful);
 	}
 		
 	public void showResultForSearchingValidState(String msg, boolean found) {

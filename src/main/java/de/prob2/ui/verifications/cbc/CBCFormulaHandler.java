@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
+import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.FindStateCommand.ResultType;
@@ -105,7 +106,29 @@ public class CBCFormulaHandler {
 			item.setChecked(Checked.FAIL);
 			LOGGER.error("Not a refinement machine");
 		}
-		resultHandler.handleRefinementChecking(item, command);
+		resultHandler.handleRefinementChecking(command);
+		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
+	}
+	
+	public void checkAssertions(CBCFormulaItem item) {
+		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		int index = currentMachine.getCBCFormulas().indexOf(item);
+		if(index > -1) {
+			item = currentMachine.getCBCFormulas().get(index);
+		}
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
+		stateSpace.execute(command);
+		ConstraintBasedAssertionCheckCommand.ResultType result = command.getResult();
+		if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS ||
+			result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
+			item.setCheckedSuccessful();
+			item.setChecked(Checked.SUCCESS);
+		} else {
+			item.setCheckedFailed();
+			item.setChecked(Checked.FAIL);
+		}
+		resultHandler.handleAssertionChecking(command);
 		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
 	}
 	
@@ -169,8 +192,10 @@ public class CBCFormulaHandler {
 			findValidState(item);
 		} else if(item.getType() == CBCType.FIND_DEADLOCK) {
 			findDeadlock();
-		} else {
+		} else if(item.getType() == CBCType.REFINEMENT) {
 			checkRefinement(item);
+		} else {
+			checkAssertions(item);
 		}
 	}
 	
