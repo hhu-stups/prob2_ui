@@ -1,5 +1,18 @@
 package de.prob2.ui.project.machines;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Pattern;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.ltl.parser.pattern.PatternManager;
@@ -14,14 +27,6 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.regex.Pattern;
 
 public class Machine {
 	@FunctionalInterface
@@ -107,6 +112,7 @@ public class Machine {
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<CBCFormulaItem> cbcFormulas;
+	private List<File> traces = new ArrayList<>();
 	private transient PatternManager patternManager;
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
@@ -267,6 +273,13 @@ public class Machine {
 		return cbcFormulas.get();
 	}
 	
+	public void addTrace(File traceFile) {
+		this.traces.add(traceFile);
+	}
+	
+	public List<File> getTraces() {
+		return this.traces;
+	}
 		
 	public void replaceMissingWithDefaults() {
 		if (type == null) {
@@ -280,6 +293,9 @@ public class Machine {
 		}
 		if(cbcFormulas == null) {
 			this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
+		}
+		if(traces == null) {
+			this.traces = new ArrayList<>();
 		}
 	}
 	

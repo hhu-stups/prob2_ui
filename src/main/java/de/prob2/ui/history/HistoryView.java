@@ -14,7 +14,10 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.verifications.tracereplay.ReplayTrace;
+import de.prob2.ui.verifications.tracereplay.TraceSaver;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableIntegerValue;
@@ -55,12 +58,17 @@ public final class HistoryView extends AnchorPane {
 			}
 		}
 	}
-	
-	@FXML private ListView<HistoryItem> lvHistory;
-	@FXML private ToggleButton tbReverse;
-	@FXML private Button btBack;
-	@FXML private Button btForward;
-	@FXML private HelpButton helpButton;
+
+	@FXML
+	private ListView<HistoryItem> lvHistory;
+	@FXML
+	private ToggleButton tbReverse;
+	@FXML
+	private Button btBack;
+	@FXML
+	private Button btForward;
+	@FXML
+	private HelpButton helpButton;
 
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
@@ -80,14 +88,14 @@ public final class HistoryView extends AnchorPane {
 			lvHistory.getItems().clear();
 			if (to != null) {
 				int currentPos = to.getCurrent().getIndex();
-				addItems(lvHistory,currentPos);
+				addItems(lvHistory, currentPos);
 				List<Transition> transitionList = to.getTransitionList();
 				for (int i = 0; i < transitionList.size(); i++) {
-					HistoryStatus status = getStatus(i,currentPos);
+					HistoryStatus status = getStatus(i, currentPos);
 					lvHistory.getItems().add(new HistoryItem(transitionList.get(i), status));
 				}
 			}
-			
+
 			if (tbReverse.isSelected()) {
 				Collections.reverse(lvHistory.getItems());
 			}
@@ -121,17 +129,17 @@ public final class HistoryView extends AnchorPane {
 				currentTrace.set(currentTrace.forward());
 			}
 		});
-		
+
 		bindIconSizeToFontSize();
 	}
-	
+
 	private void bindIconSizeToFontSize() {
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (btBack.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 		((FontAwesomeIconView) (btForward.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 		((FontAwesomeIconView) (tbReverse.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 	}
-	
+
 	public static String transitionToString(final Transition transition) {
 		if (transition == null) {
 			// Root item has no transition
@@ -170,10 +178,12 @@ public final class HistoryView extends AnchorPane {
 	private void addItems(ListView<HistoryItem> lvHistory, int currentPos) {
 		lvHistory.getItems().add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST));
 	}
-	
+
 	@FXML
 	private void saveTrace() {
-		//TODO
+		TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
+		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
+		traceSaver.saveTrace(new ReplayTrace(currentTrace.get()), currentProject.getCurrentMachine());
 	}
 
 }
