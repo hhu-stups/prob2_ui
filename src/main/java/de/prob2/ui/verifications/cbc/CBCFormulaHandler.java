@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
+import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.FindStateCommand.ResultType;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
@@ -80,6 +81,34 @@ public class CBCFormulaHandler {
 		//TODO: continue
 	}
 	
+	public void checkRefinement(CBCFormulaItem item) {
+		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		int index = currentMachine.getCBCFormulas().indexOf(item);
+		if(index > -1) {
+			item = currentMachine.getCBCFormulas().get(index);
+		}
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand();
+		ConstraintBasedRefinementCheckCommand.ResultType result = null;
+		try {
+			stateSpace.execute(command);
+			result = command.getResult();
+			if(result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
+				item.setCheckedSuccessful();
+				item.setChecked(Checked.SUCCESS);
+			} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
+				item.setCheckedFailed();
+				item.setChecked(Checked.FAIL);
+			}
+		} catch (Exception e) {
+			item.setCheckedFailed();
+			item.setChecked(Checked.FAIL);
+			LOGGER.error("Not a refinement machine");
+		}
+		resultHandler.handleRefinementChecking(item, command);
+		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
+	}
+	
 	public void findValidState(CBCFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
@@ -138,8 +167,10 @@ public class CBCFormulaHandler {
 			checkSequence(item.getCode());
 		} else if(item.getType() == CBCType.FIND_VALID_STATE) {
 			findValidState(item);
-		} else {
+		} else if(item.getType() == CBCType.FIND_DEADLOCK) {
 			findDeadlock();
+		} else {
+			checkRefinement(item);
 		}
 	}
 	

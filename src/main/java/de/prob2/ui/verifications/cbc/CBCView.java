@@ -57,6 +57,9 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	private Button checkSelectedMachineButton;
+	
+	@FXML
+	private Button checkRefinementButton;
 					
 	private final CurrentTrace currentTrace;
 	
@@ -102,6 +105,7 @@ public class CBCView extends AnchorPane {
 	private void setBindings() {
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkRefinementButton.disableProperty().bind(currentTrace.existsProperty().not());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -155,7 +159,8 @@ public class CBCView extends AnchorPane {
 						showCounterExamples(showCounterExampleItem);
 					}
 					
-					if(row.emptyProperty().get() || item.getType() == CBCType.FIND_DEADLOCK) {
+					if(row.emptyProperty().get() || item.getType() == CBCType.FIND_DEADLOCK ||
+						item.getType() == CBCType.REFINEMENT) {
 						changeItem.setDisable(true);
 					} else {
 						changeItem.setDisable(false);
@@ -188,6 +193,13 @@ public class CBCView extends AnchorPane {
 		cbcHandler.checkMachine(machine);
 		cbcHandler.updateMachineStatus(machine);
 		refresh();
+	}
+	
+	@FXML
+	public void checkRefinement() {
+		CBCFormulaItem item = new CBCFormulaItem("Refinement Checking", "Refinement Checking", CBCFormulaItem.CBCType.REFINEMENT);
+		cbcHandler.addFormula(item, true);
+		cbcHandler.checkRefinement(item);
 	}
 	
 	private void removeFormula() {
