@@ -255,20 +255,7 @@ public final class StatesView extends AnchorPane {
 	private void updateRoot(final Trace trace) {
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 		
-		Platform.runLater(() -> {
-			this.tv.setDisable(true);
-			this.tv.setRoot(LOADING_ITEM);
-			this.tv.refresh();
-		});
-		
-		final TreeItem<StateItem<?>> errorsItem;
-		if (this.tvRootItem.getChildren().isEmpty()) {
-			errorsItem = new TreeItem<>();
-			errorsItem.setExpanded(true);
-		} else {
-			errorsItem = this.tvRootItem.getChildren().remove(this.tvRootItem.getChildren().size()-1);
-			assert "State Errors".equals(errorsItem.getValue().getContents()) : errorsItem.getValue().getContents();
-		}
+		Platform.runLater(() -> this.tv.setDisable(true));
 		
 		final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
 		trace.getStateSpace().execute(cmd);
@@ -283,18 +270,8 @@ public final class StatesView extends AnchorPane {
 			this.previousValues.putAll(trace.getPreviousState().getValues());
 		}
 		
-		updateNodes(this.tvRootItem, rootNodes);
-
-		errorsItem.getChildren().clear();
-		for (final StateError error : trace.getCurrentState().getStateErrors()) {
-			errorsItem.getChildren().add(new TreeItem<>(new StateItem<>(error, true)));
-		}
-
-		errorsItem.setValue(new StateItem<>("State Errors", !errorsItem.getChildren().isEmpty()));
-		this.tvRootItem.getChildren().add(errorsItem);
-
 		Platform.runLater(() -> {
-			this.tv.setRoot(this.tvRootItem);
+			updateNodes(this.tvRootItem, rootNodes);
 			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);
