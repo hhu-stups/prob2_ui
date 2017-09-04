@@ -21,7 +21,6 @@ import de.prob.animator.domainobjects.EvaluationErrorResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.animator.domainobjects.StateError;
 import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
@@ -160,14 +159,11 @@ public final class StatesView extends AnchorPane {
 		});
 		
 		final MenuItem showFullValueItem = new MenuItem("Show Full Value");
-		// Full value can only be shown if the row item contains any of the following:
-		// * An ASTFormula, and the corresponding value is an EvalResult.
-		// * A StateError
+		// Full value can only be shown if the row item contains an ASTFormula, and the corresponding value is an EvalResult.
 		showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
 			() -> row.getItem() == null || !(
 				row.getItem().getContents() instanceof ASTFormula
 				&& this.currentValues.get(((ASTFormula)row.getItem().getContents()).getFormula()) instanceof EvalResult
-				|| row.getItem().getContents() instanceof StateError
 			),
 			row.itemProperty()
 		));
@@ -308,12 +304,6 @@ public final class StatesView extends AnchorPane {
 			stage.setCurrentValue(getResultValue(element, this.currentTrace.getCurrentState()));
 			stage.setPreviousValue(getResultValue(element, this.currentTrace.get().getPreviousState()));
 			stage.setFormattingEnabled(true);
-		} else if (stateItem.getContents() instanceof StateError) {
-			final StateError error = (StateError) stateItem.getContents();
-			stage.setTitle(error.getEvent());
-			stage.setCurrentValue(error.getLongDescription());
-			stage.setPreviousValue(null);
-			stage.setFormattingEnabled(false);
 		} else {
 			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());
 		}
