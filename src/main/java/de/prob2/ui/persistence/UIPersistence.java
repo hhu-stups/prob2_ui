@@ -1,8 +1,12 @@
 package de.prob2.ui.persistence;
 
+import java.util.HashSet;
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
@@ -13,13 +17,12 @@ import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.PerspectivesMenu;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.states.StatesView;
+
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashSet;
-import java.util.List;
 
 @Singleton
 public final class UIPersistence {
@@ -113,11 +116,9 @@ public final class UIPersistence {
 			}
 		}
 		
-		for (String titledPane : new String[] {"Operations", "History", "Project", "Verifications", "Statistics"}) {
-			if (uiState.getExpandedTitledPanes().contains(titledPane)) {
-				main.expandTitledPane(titledPane);
-			}
-		}
+		main.getAccordions().forEach(acc ->
+			acc.getPanes().stream().filter(tp -> uiState.getExpandedTitledPanes().contains(tp.getId())).forEach(acc::setExpandedPane)
+		);
 		
 		final StatesView statesView = injector.getInstance(StatesView.class);
 		final TablePersistenceHandler tablePersistenceHandler = injector.getInstance(TablePersistenceHandler.class);

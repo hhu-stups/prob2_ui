@@ -8,19 +8,22 @@
 <?import de.prob2.ui.project.ProjectView?>
 <?import de.prob2.ui.stats.StatsView?>
 <?import de.prob2.ui.verifications.VerificationsView?>
-<?import javafx.scene.control.*?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TitledPane?>
 <fx:root type="MainController" maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
 		<SplitPane fx:id="horizontalSP" dividerPositions="0.26,0.8">
 			<Accordion fx:id="leftAccordion">
 				<panes>
-					<TitledPane text="%tptitles.operations" fx:id="operationsTP" onMouseClicked="#operationsTPClicked">
+					<TitledPane text="%tptitles.operations" fx:id="operationsTP">
 						<OperationsView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.verifications" fx:id="verificationsTP" onMouseClicked="#verificationsTPClicked">
+					<TitledPane text="%tptitles.verifications" fx:id="verificationsTP">
 						<VerificationsView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.project" fx:id = "projectTP" onMouseClicked="#projectTPClicked">
+					<TitledPane text="%tptitles.project" fx:id="projectTP">
 						<ProjectView/>
 					</TitledPane>
 				</panes>
@@ -28,10 +31,10 @@
 			<MainView/>
 			<Accordion fx:id="rightAccordion">
 				<panes>
-					<TitledPane text="%tptitles.history" fx:id="historyTP" onMouseClicked="#historyTPClicked">
+					<TitledPane text="%tptitles.history" fx:id="historyTP">
 						<HistoryView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.stats" fx:id="statsTP" onMouseClicked="#statsTPClicked">
+					<TitledPane text="%tptitles.stats" fx:id="statsTP">
 						<StatsView/>
 					</TitledPane>
 				</panes>
@@ -41,4 +44,10 @@
 	<top>
 		<MenuController/>
 	</top>
+	<fx:define>
+		<FXCollections fx:id="accordions" fx:factory="observableArrayList">
+			<fx:reference source="leftAccordion"/>
+			<fx:reference source="rightAccordion"/>
+		</FXCollections>
+	</fx:define>
 </fx:root>

@@ -1,20 +1,21 @@
 package de.prob2.ui.consoles;
 
-import javafx.scene.control.IndexRange;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import org.fxmisc.richtext.StyleClassedTextArea;
-import org.fxmisc.wellbehaved.event.EventPattern;
-import org.fxmisc.wellbehaved.event.InputMap;
-import org.fxmisc.wellbehaved.event.Nodes;
-
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javafx.scene.control.IndexRange;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
 
 
 public abstract class Console extends StyleClassedTextArea {
@@ -43,15 +44,17 @@ public abstract class Console extends StyleClassedTextArea {
 	protected List<IndexRange> errors;
 	protected Executable interpreter;
 	protected String header;
+	protected String prompt;
 	
-
-	protected Console(String header) {
+	protected Console(String header, String prompt) {
 		this.header = header;
+		this.prompt = prompt;
 		this.instructions = new ArrayList<>();
 		this.errors = new ArrayList<>();
 		this.searchHandler = new ConsoleSearchHandler(this);
 		this.requestFollowCaret();
 		setEvents();
+		this.reset();
 	}
 	
 	public void setEvents() {
@@ -175,7 +178,7 @@ public abstract class Console extends StyleClassedTextArea {
 			int posOfEnter = this.getText().lastIndexOf('\n');
 			String searchResult = searchHandler.getCurrentSearchResult();
 			this.deleteText(posOfEnter + 1, this.getText().length());
-			this.appendText(" > " + searchResult);
+			this.appendText(prompt + searchResult);
 			this.moveTo(this.getText().length());
 			charCounterInLine = searchResult.length();
 			currentPosInLine = charCounterInLine;
@@ -190,9 +193,8 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	protected void reset() {
-		this.replaceText(header);
 		this.errors.clear();
-		this.appendText("\n > ");
+		this.replaceText(header + '\n' + prompt);
 	}
 		
 	protected void handleEnter() {
@@ -222,11 +224,9 @@ public abstract class Console extends StyleClassedTextArea {
 				this.setStyleClass(begin, end, "error");
 				errors.add(new IndexRange(begin, end));
 			}
-		} else {
-			this.appendText("\nnull");
 		}
 		searchHandler.handleEnter();
-		this.appendText("\n > ");
+		this.appendText('\n' + prompt);
 		this.setStyleClass(this.getText().length() - 3, this.getText().length(), "current");
 		this.setEstimatedScrollY(Double.MAX_VALUE);
 		goToLastPos();

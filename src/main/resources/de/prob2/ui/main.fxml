@@ -9,15 +9,18 @@
 <?import de.prob2.ui.stats.StatsView?>
 <?import de.prob2.ui.statusbar.StatusBar?>
 <?import de.prob2.ui.verifications.VerificationsView?>
-<?import javafx.scene.control.*?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TitledPane?>
 <fx:root type="MainController" maxHeight="Infinity"
 		 maxWidth="Infinity" minHeight="700.0" minWidth="1000.0"
 		 prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
 		<SplitPane fx:id="horizontalSP" dividerPositions="0.26,0.8">
-			<Accordion fx:id = "leftAccordion" expandedPane="$operationsTP">
+			<Accordion fx:id="leftAccordion" expandedPane="$operationsTP">
 				<panes>
-					<TitledPane text="%tptitles.operations" fx:id="operationsTP" collapsible="false" onMouseClicked="#operationsTPClicked">
+					<TitledPane text="%tptitles.operations" id="operationsTP" fx:id="operationsTP" collapsible="false">
 						<OperationsView/>
 					</TitledPane>
 				</panes>
@@ -26,23 +29,23 @@
 				<MainView/>
 			</SplitPane>
 			<SplitPane fx:id="verticalSP2" dividerPositions="0.5" orientation="VERTICAL">
-				<Accordion fx:id = "rightAccordion1"  expandedPane="$statsTP">
+				<Accordion fx:id="rightAccordion1" expandedPane="$statsTP">
 					<panes>
-						<TitledPane text="%tptitles.stats" fx:id="statsTP" onMouseClicked="#statsTPClicked">
+						<TitledPane text="%tptitles.stats" id="statsTP" fx:id="statsTP">
 							<StatsView/>
 						</TitledPane>
-						<TitledPane text="%tptitles.verifications" fx:id="verificationsTP" onMouseClicked="#verificationsTPClicked">
+						<TitledPane text="%tptitles.verifications" id="verificationsTP" fx:id="verificationsTP">
 							<VerificationsView/>
 						</TitledPane>
-						<TitledPane text="%tptitles.project" fx:id = "projectTP" onMouseClicked="#projectTPClicked">
+						<TitledPane text="%tptitles.project" id="projectTP" fx:id="projectTP">
 							<ProjectView/>
 						</TitledPane>
 					</panes>
 				</Accordion>
-				<Accordion fx:id = "rightAccordion2" expandedPane="$historyTP">
+				<Accordion fx:id="rightAccordion2" expandedPane="$historyTP">
 					<panes>
 						<!-- Note: The title text of historyTP is changed in MainController.initialize to include the history size. -->
-						<TitledPane text="%tptitles.history" fx:id="historyTP" collapsible="false" onMouseClicked="#historyTPClicked">
+						<TitledPane text="%tptitles.history" id="historyTP" fx:id="historyTP" collapsible="false">
 							<HistoryView/>
 						</TitledPane>
 					</panes>
@@ -56,4 +59,11 @@
 	<bottom>
 		<StatusBar/>
 	</bottom>
+	<fx:define>
+		<FXCollections fx:id="accordions" fx:factory="observableArrayList">
+			<fx:reference source="leftAccordion"/>
+			<fx:reference source="rightAccordion1"/>
+			<fx:reference source="rightAccordion2"/>
+		</FXCollections>
+	</fx:define>
 </fx:root>
