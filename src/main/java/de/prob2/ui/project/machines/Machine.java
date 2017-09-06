@@ -289,6 +289,7 @@ public class Machine {
 	
 	public void addTrace(File traceFile) {
 		this.traces.add(traceFile);
+		this.changed.set(true);
 	}
 	
 	public List<File> getTraces() {
