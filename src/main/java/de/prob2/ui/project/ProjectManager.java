@@ -78,6 +78,9 @@ public class ProjectManager {
 		if(savedFile != null) {
 			addToRecentProjects(savedFile);
 			currentProject.setSaved(true);
+			for (Machine machine : currentProject.get().getMachines()) {
+				machine.changedProperty().set(false);
+			}
 		}
 	}
 	
@@ -117,7 +120,7 @@ public class ProjectManager {
 			currentProject.setSaved(true);
 		} 
 	}
-	
+
 	private void addToRecentProjects(File file) {
 		Platform.runLater(() -> {
 			if (recentProjects.isEmpty() || !recentProjects.get(0).equals(file.getAbsolutePath())) {

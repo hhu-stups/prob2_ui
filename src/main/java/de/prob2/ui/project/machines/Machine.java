@@ -23,7 +23,9 @@ import de.prob2.ui.menu.FileAsker;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
@@ -114,6 +116,7 @@ public class Machine {
 	private ListProperty<CBCFormulaItem> cbcFormulas;
 	private List<File> traces = new ArrayList<>();
 	private transient PatternManager patternManager;
+	private transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
 		initializeLTLStatus();
@@ -138,6 +141,10 @@ public class Machine {
 		for(CBCFormulaItem item : cbcFormulas) {
 			item.initializeCounterExamples();
 		}
+	}
+	
+	public BooleanProperty changedProperty() {
+		return changed;
 	}
 
 	public String getFileName() {
@@ -187,17 +194,19 @@ public class Machine {
 	public String getName() {
 		return name;
 	}
+	
+	public void setName(String name) {
+		this.name = name;
+		this.changed.set(true);
+	}
 
 	public String getDescription() {
 		return description;
 	}
 	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
 	public void setDescription(String description) {
 		this.description = description;
+		this.changed.set(true);
 	}
 	
 	public void setLTLCheckedSuccessful() {
@@ -234,10 +243,12 @@ public class Machine {
 	
 	public void addLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.add(formula);
+		this.changed.set(true);
 	}
 	
 	public void removeLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.remove(formula);
+		this.changed.set(true);
 	}
 	
 	public ListProperty<LTLPatternItem> ltlPatternsProperty() {
@@ -250,27 +261,30 @@ public class Machine {
 	
 	public void addLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.add(pattern);
+		this.changed.set(true);
 	}
 	
 	public void removeLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.remove(pattern);
+		this.changed.set(true);
 	}
 	
 	public ListProperty<CBCFormulaItem> cbcFormulasProperty() {
 		return cbcFormulas;
 	}
 	
+	public List<CBCFormulaItem> getCBCFormulas() {
+		return cbcFormulas.get();
+	}
 	
 	public void addCBCFormula(CBCFormulaItem formula) {
 		cbcFormulas.add(formula);
+		this.changed.set(true);
 	}
 	
 	public void removeCBCFormula(CBCFormulaItem formula) {
 		cbcFormulas.remove(formula);
-	}
-	
-	public List<CBCFormulaItem> getCBCFormulas() {
-		return cbcFormulas.get();
+		this.changed.set(true);
 	}
 	
 	public void addTrace(File traceFile) {
@@ -297,6 +311,7 @@ public class Machine {
 		if(traces == null) {
 			this.traces = new ArrayList<>();
 		}
+		this.changed = new SimpleBooleanProperty(false); 
 	}
 	
 	public Path getPath() {
@@ -332,5 +347,4 @@ public class Machine {
 	public void clearPatternManager() {
 		patternManager.getPatterns().clear();
 	}
-	
 }
