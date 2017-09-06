@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentProjects;
@@ -37,6 +38,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
+@Singleton
 public class ProjectManager {
 	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
@@ -53,32 +55,37 @@ public class ProjectManager {
 		this.stageManager = stageManager;
 		this.recentProjects = recentProjects;
 	}
-
-	public void saveCurrentProject() {
-		Project project = currentProject.get();
+	
+	private File saveProject(Project project) {
 		File file = new File(project.getLocation() + File.separator + project.getName() + ".json");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), PROJECT_CHARSET)) {
-
-			currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(),
-					project.getPreferences(), project.getRunconfigurations(), project.getLocation()));
 			gson.toJson(project, writer);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
+			return null;
 		} catch (IOException exc) {
 			LOGGER.warn("Failed to save project", exc);
+			return null;
 		}
-		addToRecentProjects(file);
-		currentProject.setSaved(true);
+		return file;
 	}
 
-	public void openProject(File file) {
+	public void saveCurrentProject() {
+		Project project = currentProject.get();
+		currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(),
+					project.getPreferences(), project.getRunconfigurations(), project.getLocation()));
+		File savedFile = saveProject(project);
+		if(savedFile != null) {
+			addToRecentProjects(savedFile);
+			currentProject.setSaved(true);
+		}
+	}
+	
+	private Project loadProject(File file) {
 		Project project;
 		try (final Reader reader = new InputStreamReader(new FileInputStream(file), PROJECT_CHARSET)) {
 			project = gson.fromJson(reader, Project.class);
 			project.setLocation(file.getParentFile());
-			replaceMissingWithDefaults(project);
-			setupRunconfigurations(project);
-			initializeLTL(project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
 			Alert alert = stageManager.makeAlert(AlertType.ERROR,
@@ -91,14 +98,24 @@ public class ProjectManager {
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 				Platform.runLater(() -> recentProjects.remove(file.getAbsolutePath()));
 			}
-			return;
+			return null;
 		} catch (IOException exc) {
 			LOGGER.warn("Failed to open project file", exc);
-			return;
+			return null;
 		}
-		currentProject.set(project);
-		addToRecentProjects(file);
-		currentProject.setSaved(true);
+		return project;
+	}
+
+	public void openProject(File file) {
+		Project project = loadProject(file);
+		if(project != null) {
+			replaceMissingWithDefaults(project);
+			setupRunconfigurations(project);
+			initializeLTL(project);
+			currentProject.set(project);
+			addToRecentProjects(file);
+			currentProject.setSaved(true);
+		} 
 	}
 	
 	private void addToRecentProjects(File file) {
