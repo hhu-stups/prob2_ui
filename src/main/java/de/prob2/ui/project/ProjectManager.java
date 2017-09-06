@@ -81,6 +81,9 @@ public class ProjectManager {
 			for (Machine machine : currentProject.get().getMachines()) {
 				machine.changedProperty().set(false);
 			}
+			for (Preference pref : currentProject.get().getPreferences()) {
+				pref.changedProperty().set(false);
+			}
 		}
 	}
 	
@@ -141,7 +144,14 @@ public class ProjectManager {
 			}
 		}
 		project.setMachines(machineList);
-		project.setPreferences((project.getPreferences() == null) ? new ArrayList<>() : project.getPreferences());
+		List<Preference> prefList = new ArrayList<>();
+		if (project.getPreferences() != null) {
+			prefList = project.getPreferences();
+			for (Preference pref : prefList) {
+				pref.replaceMissingWithDefaults();
+			}
+		}
+		project.setPreferences(prefList);
 		project.setRunconfigurations(
 				(project.getRunconfigurations() == null) ? new HashSet<>() : project.getRunconfigurations());
 	}

@@ -245,6 +245,13 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				}
 			});
 		}
+		for(Preference pref : project.getPreferences()) {
+			pref.changedProperty().addListener((observable, from, to) -> {
+				if (to == true) {
+					this.setSaved(false);
+				}
+			});
+		}
 	}
 
 	public void remove() {
