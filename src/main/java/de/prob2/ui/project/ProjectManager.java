@@ -58,7 +58,6 @@ public class ProjectManager {
 		Project project = currentProject.get();
 		File file = new File(project.getLocation() + File.separator + project.getName() + ".json");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), PROJECT_CHARSET)) {
-
 			currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(),
 					project.getPreferences(), project.getRunconfigurations(), project.getLocation()));
 			gson.toJson(project, writer);
@@ -69,6 +68,9 @@ public class ProjectManager {
 		}
 		addToRecentProjects(file);
 		currentProject.setSaved(true);
+		for (Machine machine : currentProject.get().getMachines()) {
+			machine.changedProperty().set(false);
+		}
 	}
 
 	public void openProject(File file) {
@@ -100,7 +102,7 @@ public class ProjectManager {
 		addToRecentProjects(file);
 		currentProject.setSaved(true);
 	}
-	
+
 	private void addToRecentProjects(File file) {
 		Platform.runLater(() -> {
 			if (recentProjects.isEmpty() || !recentProjects.get(0).equals(file.getAbsolutePath())) {

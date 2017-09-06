@@ -83,7 +83,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations",
 				FXCollections.observableArrayList());
 		this.currentRunconfiguration = new SimpleObjectProperty<>(this, "currentRunconfiguration", null);
-		this.currentMachine =  new SimpleObjectProperty<>(this, "currentMachine", null);
+		this.currentMachine = new SimpleObjectProperty<>(this, "currentMachine", null);
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
 
@@ -189,19 +189,19 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return getRunconfigurations().stream().filter(runconfig -> machine.equals(runconfig.getMachine()))
 				.collect(Collectors.toList());
 	}
-	
+
 	public ReadOnlyObjectProperty<Runconfiguration> currentRunconfigurationProperty() {
 		return this.currentRunconfiguration;
 	}
-	
+
 	public Runconfiguration getCurrentRunconfiguration() {
 		return this.currentRunconfigurationProperty().get();
 	}
-	
+
 	public ReadOnlyObjectProperty<Machine> currentMachineProperty() {
 		return this.currentMachine;
 	}
-	
+
 	public Machine getCurrentMachine() {
 		return this.currentMachineProperty().get();
 	}
@@ -232,12 +232,19 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			animations.removeTrace(currentTrace.get());
 			modelCheckController.resetView();
 		}
-		super.set(project);
+		update(project);
 		initializeMachines();
 	}
 
 	public void update(Project project) {
 		super.set(project);
+		for(Machine machine : project.getMachines()) {
+			machine.changedProperty().addListener((observable, from, to) -> {
+				if (to == true) {
+					this.setSaved(false);
+				}
+			});
+		}
 	}
 
 	public void remove() {
@@ -342,7 +349,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 		return null;
 	}
-	
+
 	private boolean confirmReplacingProject() {
 		if (exists()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
