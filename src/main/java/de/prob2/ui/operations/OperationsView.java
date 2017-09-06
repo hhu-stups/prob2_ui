@@ -322,7 +322,6 @@ public final class OperationsView extends AnchorPane {
 	private void updateBG(final Trace trace) {
 		Platform.runLater(() -> {
 			this.opsListView.setDisable(true);
-			opsListView.getItems().setAll(new OperationItem(trace, "-", "Loading...", Collections.emptyList(), Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
 		});
 		
 		if (!trace.getModel().equals(currentModel)) {
