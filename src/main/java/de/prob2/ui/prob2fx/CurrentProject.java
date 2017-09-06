@@ -240,14 +240,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		super.set(project);
 		for(Machine machine : project.getMachines()) {
 			machine.changedProperty().addListener((observable, from, to) -> {
-				if (to == true) {
+				if (to) {
 					this.setSaved(false);
 				}
 			});
 		}
 		for(Preference pref : project.getPreferences()) {
 			pref.changedProperty().addListener((observable, from, to) -> {
-				if (to == true) {
+				if (to) {
 					this.setSaved(false);
 				}
 			});
