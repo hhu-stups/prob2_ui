@@ -46,7 +46,7 @@ public class StatusBar extends HBox {
 		ERROR, SUCCESSFUL;
 	}
 	
-	@FXML private Label errorsLabel;
+	@FXML private Label statusLabel;
 	
 	private final ResourceBundle resourceBundle;
 	private final CurrentTrace currentTrace;
@@ -144,9 +144,9 @@ public class StatusBar extends HBox {
 	}
 	
 	private void update() {
-		errorsLabel.getStyleClass().removeAll("noErrors", "someErrors");
+		statusLabel.getStyleClass().removeAll("noErrors", "someErrors");
 		if (this.isOperationsViewUpdating() || this.isStatesViewUpdating()) {
-			errorsLabel.setText(resourceBundle.getString("statusbar.updatingViews"));
+			statusLabel.setText(resourceBundle.getString("statusbar.updatingViews"));
 		} else if (this.currentTrace.exists()) {
 			final List<String> errorMessages = new ArrayList<>();
 			if (!this.currentTrace.getCurrentState().isInvariantOk()) {
@@ -164,14 +164,14 @@ public class StatusBar extends HBox {
 			}
 			
 			if (errorMessages.isEmpty()) {
-				errorsLabel.getStyleClass().add("noErrors");
-				errorsLabel.setText(resourceBundle.getString("statusbar.noErrors"));
+				statusLabel.getStyleClass().add("noErrors");
+				statusLabel.setText(resourceBundle.getString("statusbar.noErrors"));
 			} else {
-				errorsLabel.getStyleClass().add("someErrors");
-				errorsLabel.setText(String.format(resourceBundle.getString("statusbar.someErrors"), String.join(", ", errorMessages)));
+				statusLabel.getStyleClass().add("someErrors");
+				statusLabel.setText(String.format(resourceBundle.getString("statusbar.someErrors"), String.join(", ", errorMessages)));
 			}
 		} else {
-			errorsLabel.setText(this.resourceBundle.getString(this.getLoadingStatus().getMessageKey()));
+			statusLabel.setText(this.resourceBundle.getString(this.getLoadingStatus().getMessageKey()));
 		}
 	}
 }
