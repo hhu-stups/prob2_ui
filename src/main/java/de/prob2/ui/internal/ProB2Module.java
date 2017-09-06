@@ -32,6 +32,7 @@ import de.prob2.ui.menu.HelpMenu;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.PerspectivesMenu;
+import de.prob2.ui.menu.PluginMenu;
 import de.prob2.ui.menu.ViewMenu;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.plugin.ProBConnection;
