@@ -10,7 +10,9 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -52,6 +54,8 @@ public class StatusBar extends HBox {
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
 	private final ObjectProperty<StatusBar.LTLStatus> ltlStatus;
 	private final ObjectProperty<StatusBar.CBCStatus> cbcStatus;
+	private final BooleanProperty operationsViewUpdating;
+	private final BooleanProperty statesViewUpdating;
 	
 	@Inject
 	private StatusBar(final ResourceBundle resourceBundle, final CurrentTrace currentTrace, final StageManager stageManager) {
@@ -63,6 +67,8 @@ public class StatusBar extends HBox {
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
 		this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", StatusBar.LTLStatus.SUCCESSFUL);
 		this.cbcStatus = new SimpleObjectProperty<>(this, "cbcStatus", StatusBar.CBCStatus.SUCCESSFUL);
+		this.operationsViewUpdating = new SimpleBooleanProperty(this, "operationsViewUpdating", false);
+		this.statesViewUpdating = new SimpleBooleanProperty(this, "statesViewUpdating", false);
 		
 		stageManager.loadFXML(this, "status_bar.fxml");
 	}
@@ -73,6 +79,8 @@ public class StatusBar extends HBox {
 		this.loadingStatusProperty().addListener((observable, from, to) -> this.update());
 		this.ltlStatusProperty().addListener((observable, from, to) -> this.update());
 		this.cbcStatusProperty().addListener((observable, from, to) -> this.update());
+		this.operationsViewUpdatingProperty().addListener((o, from, to) -> this.update());
+		this.statesViewUpdatingProperty().addListener((o, from, to) -> this.update());
 	}
 	
 	public ObjectProperty<StatusBar.LoadingStatus> loadingStatusProperty() {
@@ -111,9 +119,35 @@ public class StatusBar extends HBox {
 		this.cbcStatusProperty().set(cbcStatus);
 	}
 	
+	public BooleanProperty operationsViewUpdatingProperty() {
+		return this.operationsViewUpdating;
+	}
+	
+	public boolean isOperationsViewUpdating() {
+		return this.operationsViewUpdatingProperty().get();
+	}
+	
+	public void setOperationsViewUpdating(final boolean operationsViewUpdating) {
+		this.operationsViewUpdatingProperty().set(operationsViewUpdating);
+	}
+	
+	public BooleanProperty statesViewUpdatingProperty() {
+		return this.statesViewUpdating;
+	}
+	
+	public boolean isStatesViewUpdating() {
+		return this.statesViewUpdatingProperty().get();
+	}
+	
+	public void setStatesViewUpdating(final boolean statesViewUpdating) {
+		this.statesViewUpdatingProperty().set(statesViewUpdating);
+	}
+	
 	private void update() {
 		errorsLabel.getStyleClass().removeAll("noErrors", "someErrors");
-		if (this.currentTrace.exists()) {
+		if (this.isOperationsViewUpdating() || this.isStatesViewUpdating()) {
+			errorsLabel.setText(resourceBundle.getString("statusbar.updatingViews"));
+		} else if (this.currentTrace.exists()) {
 			final List<String> errorMessages = new ArrayList<>();
 			if (!this.currentTrace.getCurrentState().isInvariantOk()) {
 				errorMessages.add(resourceBundle.getString("statusbar.errors.invariantNotOK"));
