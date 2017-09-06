@@ -2,6 +2,7 @@ package de.prob2.ui;
 
 import java.io.File;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -42,8 +43,9 @@ import org.slf4j.LoggerFactory;
 public class ProB2 extends Application {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProB2.class);
 
+	private RuntimeOptions runtimeOptions;
 	private Injector injector;
-	private RuntimeOptions runtimeOptions = new RuntimeOptions();
+	private ResourceBundle bundle;
 
 	private Stage primaryStage;
 
@@ -57,6 +59,7 @@ public class ProB2 extends Application {
 		ProB2Module module = new ProB2Module(runtimeOptions);
 		Platform.runLater(() -> {
 			injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
+			bundle = injector.getInstance(ResourceBundle.class);
 			injector.getInstance(StopActions.class)
 					.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
 			StageManager stageManager = injector.getInstance(StageManager.class);
@@ -217,12 +220,12 @@ public class ProB2 extends Application {
 
 	private void handleCloseRequest(Event event, CurrentProject currentProject, StageManager stageManager) {
 		if (!currentProject.isSaved()) {
-			ButtonType save = new ButtonType("Save", ButtonBar.ButtonData.YES);
-			ButtonType doNotSave = new ButtonType("Do not save", ButtonBar.ButtonData.NO);
-			Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-					"The current project \"" + currentProject.getName()
-							+ "\" contains unsaved changes.\nDo you want to save the project?",
-					save, ButtonType.CANCEL, doNotSave);
+			ButtonType save = new ButtonType(bundle.getString("common.save"), ButtonBar.ButtonData.YES);
+			ButtonType doNotSave = new ButtonType(bundle.getString("common.doNotSave"), ButtonBar.ButtonData.NO);
+			Alert alert = stageManager.makeAlert(
+				Alert.AlertType.CONFIRMATION,
+				String.format(bundle.getString("common.unsavedProjectChanges.message"), currentProject.getName()),
+				save, ButtonType.CANCEL, doNotSave);
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
 				event.consume();
