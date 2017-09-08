@@ -17,7 +17,7 @@ include ':prob2-ui'
 project(":prob2-ui").projectDir = file("[PATH]")
 ```
 
-In the `build.gradle` file you need to add the following line in the dependencies block.
+In the `build.gradle` file you have to add the following line in the dependencies block.
 
 ```
 compileOnly project(':prob2-ui') 
