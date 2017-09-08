@@ -27,6 +27,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -57,6 +58,12 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	private Button checkSelectedMachineButton;
+	
+	@FXML
+	private Button checkRefinementButton;
+	
+	@FXML
+	private Button checkAssertionsButton;
 					
 	private final CurrentTrace currentTrace;
 	
@@ -102,6 +109,8 @@ public class CBCView extends AnchorPane {
 	private void setBindings() {
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkRefinementButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkAssertionsButton.disableProperty().bind(currentTrace.existsProperty().not());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -146,6 +155,7 @@ public class CBCView extends AnchorPane {
 			changeItem.setDisable(true);
 			
 			row.setOnMouseClicked(e-> {
+				List<CBCType> changeDisabled = Arrays.asList(CBCType.FIND_DEADLOCK, CBCType.REFINEMENT, CBCType.ASSERTIONS);
 				if(e.getButton() == MouseButton.SECONDARY) {
 					CBCFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 					if(row.emptyProperty().get() || item.getCounterExamples().isEmpty()) {
@@ -155,7 +165,7 @@ public class CBCView extends AnchorPane {
 						showCounterExamples(showCounterExampleItem);
 					}
 					
-					if(row.emptyProperty().get() || item.getType() == CBCType.FIND_DEADLOCK) {
+					if(row.emptyProperty().get() || changeDisabled.contains(item.getType())) {
 						changeItem.setDisable(true);
 					} else {
 						changeItem.setDisable(false);
@@ -190,6 +200,20 @@ public class CBCView extends AnchorPane {
 		refresh();
 	}
 	
+	@FXML
+	public void checkRefinement() {
+		CBCFormulaItem item = new CBCFormulaItem("Refinement Checking", "Refinement Checking", CBCFormulaItem.CBCType.REFINEMENT);
+		cbcHandler.addFormula(item, true);
+		cbcHandler.checkRefinement(item);
+	}
+	
+	@FXML
+	public void checkAssertions() {
+		CBCFormulaItem item = new CBCFormulaItem("Assertion Checking", "Assertion Checking", CBCFormulaItem.CBCType.ASSERTIONS);
+		cbcHandler.addFormula(item, true);
+		cbcHandler.checkAssertions(item);
+	}
+	
 	private void removeFormula() {
 		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
 		CBCFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
@@ -205,7 +229,6 @@ public class CBCView extends AnchorPane {
 		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
 				tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 				currentProject.getLocation()));
-		currentProject.setSaved(false);
 	}
 	
 	public void refresh() {

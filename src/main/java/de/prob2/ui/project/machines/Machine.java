@@ -1,5 +1,17 @@
 package de.prob2.ui.project.machines;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Pattern;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.ltl.parser.pattern.PatternManager;
@@ -10,18 +22,12 @@ import de.prob2.ui.menu.FileAsker;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.regex.Pattern;
 
 public class Machine {
 	@FunctionalInterface
@@ -108,6 +114,7 @@ public class Machine {
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<CBCFormulaItem> cbcFormulas;
 	private transient PatternManager patternManager;
+	private transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
 		initializeLTLStatus();
@@ -132,6 +139,10 @@ public class Machine {
 		for(CBCFormulaItem item : cbcFormulas) {
 			item.initializeCounterExamples();
 		}
+	}
+	
+	public BooleanProperty changedProperty() {
+		return changed;
 	}
 
 	public String getFileName() {
@@ -181,17 +192,19 @@ public class Machine {
 	public String getName() {
 		return name;
 	}
+	
+	public void setName(String name) {
+		this.name = name;
+		this.changed.set(true);
+	}
 
 	public String getDescription() {
 		return description;
 	}
 	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
 	public void setDescription(String description) {
 		this.description = description;
+		this.changed.set(true);
 	}
 	
 	public void setLTLCheckedSuccessful() {
@@ -228,10 +241,12 @@ public class Machine {
 	
 	public void addLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.add(formula);
+		this.changed.set(true);
 	}
 	
 	public void removeLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.remove(formula);
+		this.changed.set(true);
 	}
 	
 	public ListProperty<LTLPatternItem> ltlPatternsProperty() {
@@ -244,27 +259,30 @@ public class Machine {
 	
 	public void addLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.add(pattern);
+		this.changed.set(true);
 	}
 	
 	public void removeLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.remove(pattern);
+		this.changed.set(true);
 	}
 	
 	public ListProperty<CBCFormulaItem> cbcFormulasProperty() {
 		return cbcFormulas;
 	}
 	
+	public List<CBCFormulaItem> getCBCFormulas() {
+		return cbcFormulas.get();
+	}
 	
 	public void addCBCFormula(CBCFormulaItem formula) {
 		cbcFormulas.add(formula);
+		this.changed.set(true);
 	}
 	
 	public void removeCBCFormula(CBCFormulaItem formula) {
 		cbcFormulas.remove(formula);
-	}
-	
-	public List<CBCFormulaItem> getCBCFormulas() {
-		return cbcFormulas.get();
+		this.changed.set(true);
 	}
 	
 		
@@ -281,6 +299,7 @@ public class Machine {
 		if(cbcFormulas == null) {
 			this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
 		}
+		this.changed = new SimpleBooleanProperty(false); 
 	}
 	
 	public Path getPath() {
@@ -316,5 +335,4 @@ public class Machine {
 	public void clearPatternManager() {
 		patternManager.getPatterns().clear();
 	}
-	
 }

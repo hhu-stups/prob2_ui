@@ -77,11 +77,12 @@ public class PreferencesTab extends Tab {
 		final MenuItem editMenuItem = new MenuItem("Edit");
 		editMenuItem.setOnAction(event -> {
 			PreferencesDialog prefDialog = injector.getInstance(PreferencesDialog.class);
-			Preference pref = cell.getItem();
-			prefDialog.setPreference(pref);
-			prefDialog.showAndWait().ifPresent(result -> {
+			Preference oldPref = cell.getItem();
+			prefDialog.setPreference(oldPref);
+			prefDialog.showAndWait().ifPresent(newPref -> {
+				currentProject.getPreferences().replaceAll(p -> p.equals(oldPref) ? newPref : p);
 				preferencesListView.refresh();
-				showPreferenceView(pref);
+				showPreferenceView(newPref);
 			});
 		});
 		editMenuItem.disableProperty().bind(cell.emptyProperty());

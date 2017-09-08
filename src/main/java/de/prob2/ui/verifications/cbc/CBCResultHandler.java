@@ -6,6 +6,8 @@ import java.util.List;
 
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
+import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.FindStateCommand.ResultType;
 import de.prob.check.CBCDeadlockFound;
@@ -21,6 +23,7 @@ import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.layout.Region;
 
 @Singleton
 public class CBCResultHandler extends AbstractResultHandler {
@@ -88,16 +91,56 @@ public class CBCResultHandler extends AbstractResultHandler {
 		}
 	}
 	
+	public void handleRefinementChecking(ConstraintBasedRefinementCheckCommand cmd) {
+		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
+		String msg = cmd.getResultsString();
+		if(result == null) {
+			showRefinementCheckingResult("Refinement checking failed", "Not a refinement machine", false);
+		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
+			showRefinementCheckingResult("Violation not found", msg, true);
+		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
+			showRefinementCheckingResult("Violation found", msg, false);
+		} else {
+			showRefinementCheckingResult("Refinement checking is interrupted", msg, false);
+		}
+	}
+	
+	public void handleAssertionChecking(ConstraintBasedAssertionCheckCommand cmd) {
+		ConstraintBasedAssertionCheckCommand.ResultType result = cmd.getResult();
+		if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS) {
+			showAssertionCheckingResult("No counter-example exists", true);
+		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
+			showAssertionCheckingResult("No counter-example found", true);
+		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.COUNTER_EXAMPLE) {
+			showAssertionCheckingResult("Counter-example found", false);
+		} else {
+			showAssertionCheckingResult("Assertion checking is interrupted", false);
+		}
+	}
+	
+	public void showRefinementCheckingResult(String header, String msg, boolean successful) {
+		showAlert("Constraint Based Refinement Checking", header, msg, successful);
+	}
+	
+	public void showAssertionCheckingResult(String msg, boolean successful) {
+		showAlert("Checking assertions", msg, msg, successful);
+	}
+		
 	public void showResultForSearchingValidState(String msg, boolean found) {
+		showAlert("Find Valid State Satisfying Predicate", msg, msg, found);
+	}
+	
+	private void showAlert(String title, String header, String msg, boolean successful) {
 		Alert alert;
-		if(found) {
+		if(successful) {
 			alert = new Alert(AlertType.INFORMATION);
 		} else {
 			alert = new Alert(AlertType.ERROR);
 		}
-		alert.setTitle("Find Valid State Satisfying Predicate");
-		alert.setHeaderText(msg);
-		alert.setContentText(msg);
+		alert.setTitle(title);
+		alert.setHeaderText(header);
+		alert.setContentText(msg.length() > 0 ? msg : header);
+		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.showAndWait();
 	}
 

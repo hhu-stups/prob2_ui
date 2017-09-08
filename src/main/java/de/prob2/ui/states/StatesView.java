@@ -21,7 +21,6 @@ import de.prob.animator.domainobjects.EvaluationErrorResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.animator.domainobjects.StateError;
 import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
@@ -33,6 +32,7 @@ import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.statusbar.StatusBar;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -72,6 +72,7 @@ public final class StatesView extends AnchorPane {
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
 	private final FormulaGenerator formulaGenerator;
+	private final StatusBar statusBar;
 	private final StageManager stageManager;
 
 	private final Map<IEvalElement, AbstractEvalResult> currentValues;
@@ -83,12 +84,14 @@ public final class StatesView extends AnchorPane {
 		final Injector injector,
 		final CurrentTrace currentTrace,
 		final FormulaGenerator formulaGenerator,
+		final StatusBar statusBar,
 		final StageManager stageManager,
 		final StopActions stopActions
 	) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.formulaGenerator = formulaGenerator;
+		this.statusBar = statusBar;
 		this.stageManager = stageManager;
 
 		this.currentValues = new HashMap<>();
@@ -160,14 +163,11 @@ public final class StatesView extends AnchorPane {
 		});
 		
 		final MenuItem showFullValueItem = new MenuItem("Show Full Value");
-		// Full value can only be shown if the row item contains any of the following:
-		// * An ASTFormula, and the corresponding value is an EvalResult.
-		// * A StateError
+		// Full value can only be shown if the row item contains an ASTFormula, and the corresponding value is an EvalResult.
 		showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
 			() -> row.getItem() == null || !(
 				row.getItem().getContents() instanceof ASTFormula
 				&& this.currentValues.get(((ASTFormula)row.getItem().getContents()).getFormula()) instanceof EvalResult
-				|| row.getItem().getContents() instanceof StateError
 			),
 			row.itemProperty()
 		));
@@ -256,19 +256,9 @@ public final class StatesView extends AnchorPane {
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 		
 		Platform.runLater(() -> {
+			this.statusBar.setStatesViewUpdating(true);
 			this.tv.setDisable(true);
-			this.tv.setRoot(LOADING_ITEM);
-			this.tv.refresh();
 		});
-		
-		final TreeItem<StateItem<?>> errorsItem;
-		if (this.tvRootItem.getChildren().isEmpty()) {
-			errorsItem = new TreeItem<>();
-			errorsItem.setExpanded(true);
-		} else {
-			errorsItem = this.tvRootItem.getChildren().remove(this.tvRootItem.getChildren().size()-1);
-			assert "State Errors".equals(errorsItem.getValue().getContents()) : errorsItem.getValue().getContents();
-		}
 		
 		final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
 		trace.getStateSpace().execute(cmd);
@@ -283,21 +273,12 @@ public final class StatesView extends AnchorPane {
 			this.previousValues.putAll(trace.getPreviousState().getValues());
 		}
 		
-		updateNodes(this.tvRootItem, rootNodes);
-
-		errorsItem.getChildren().clear();
-		for (final StateError error : trace.getCurrentState().getStateErrors()) {
-			errorsItem.getChildren().add(new TreeItem<>(new StateItem<>(error, true)));
-		}
-
-		errorsItem.setValue(new StateItem<>("State Errors", !errorsItem.getChildren().isEmpty()));
-		this.tvRootItem.getChildren().add(errorsItem);
-
 		Platform.runLater(() -> {
-			this.tv.setRoot(this.tvRootItem);
+			updateNodes(this.tvRootItem, rootNodes);
 			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);
+			this.statusBar.setStatesViewUpdating(false);
 		});
 	}
 	
@@ -331,12 +312,6 @@ public final class StatesView extends AnchorPane {
 			stage.setCurrentValue(getResultValue(element, this.currentTrace.getCurrentState()));
 			stage.setPreviousValue(getResultValue(element, this.currentTrace.get().getPreviousState()));
 			stage.setFormattingEnabled(true);
-		} else if (stateItem.getContents() instanceof StateError) {
-			final StateError error = (StateError) stateItem.getContents();
-			stage.setTitle(error.getEvent());
-			stage.setCurrentValue(error.getLongDescription());
-			stage.setPreviousValue(null);
-			stage.setFormattingEnabled(false);
 		} else {
 			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());
 		}

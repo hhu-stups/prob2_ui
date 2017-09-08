@@ -862,12 +862,12 @@
 	-fx-background-color: lightgray;
 }
 
-.statusbar .errorsLabel.noErrors {
+.statusbar .statusLabel.noErrors {
 	-fx-background-color: lightgreen;
 	-fx-text-fill: black;
 }
 
-.statusbar .errorsLabel.someErrors {
+.statusbar .statusLabel.someErrors {
 	-fx-background-color: red;
 	-fx-text-fill: white;
 }

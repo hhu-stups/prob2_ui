@@ -1,8 +1,16 @@
 package de.prob2.ui.menu;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
@@ -11,6 +19,7 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -25,10 +34,9 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 @Singleton
 public final class DetachViewStageController extends Stage {
@@ -46,7 +54,7 @@ public final class DetachViewStageController extends Stage {
 	private final UIState uiState;
 	private static final String DETACHED = "detached";
 	
-	private final Map<Class<? extends Parent>, CheckBox> checkBoxMap;
+	private final Map<Class<?>, CheckBox> checkBoxMap;
 	private final Set<Stage> wrapperStages;
 	
 	@Inject
@@ -71,14 +79,11 @@ public final class DetachViewStageController extends Stage {
 	}
 	
 	public void selectForDetach(final String name) {
-		final Class<? extends Parent> clazz;
+		final Class<?> clazz;
 		try {
-			clazz = Class.forName(name).asSubclass(Parent.class);
+			clazz = Class.forName(name);
 		} catch (ClassNotFoundException e) {
 			LOGGER.warn("Not a valid class name, cannot select for detaching", e);
-			return;
-		} catch (ClassCastException e) {
-			LOGGER.warn("Not a subclass of Parent, cannot select for detaching", e);
 			return;
 		}
 		
@@ -97,12 +102,7 @@ public final class DetachViewStageController extends Stage {
 			guiState = guiState.replace(DETACHED,"");
 		}
 		final Parent root = injector.getInstance(PerspectivesMenu.class).loadPreset(guiState);
-		final Map<TitledPane,Accordion> accordionMap = ((MainController) root).getAccordionMap();
-		for (Map.Entry<TitledPane,Accordion> entry: accordionMap.entrySet()) {
-			if (checkBoxMap.get(entry.getKey().getContent().getClass()).isSelected()) {
-				removeTP(entry.getValue());
-			}
-		}
+		((MainController)root).getAccordions().forEach(this::removeTitledPanes);
 		updateWrapperStages();
 		if (!uiState.getGuiState().contains(DETACHED)) {
 			uiState.setGuiState(uiState.getGuiState() + DETACHED);
@@ -136,7 +136,7 @@ public final class DetachViewStageController extends Stage {
 		}
 	}
 	
-	private void removeTP(Accordion accordion) {
+	private void removeTitledPanes(Accordion accordion) {
 		uiState.updateSavedStageBoxes();
 		wrapperStages.forEach(Window::hide);
 		for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {

@@ -42,6 +42,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.statusbar.StatusBar;
 
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
@@ -229,6 +230,7 @@ public final class OperationsView extends AnchorPane {
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
+	private final StatusBar statusBar;
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final ExecutorService updater;
 
@@ -236,10 +238,11 @@ public final class OperationsView extends AnchorPane {
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
-			final Injector injector, final StopActions stopActions) {
+			final Injector injector, final StatusBar statusBar, final StopActions stopActions) {
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
+		this.statusBar = statusBar;
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
 		stopActions.add(this.updater::shutdownNow);
 
@@ -321,8 +324,8 @@ public final class OperationsView extends AnchorPane {
 
 	private void updateBG(final Trace trace) {
 		Platform.runLater(() -> {
+			this.statusBar.setOperationsViewUpdating(true);
 			this.opsListView.setDisable(true);
-			opsListView.getItems().setAll(new OperationItem(trace, "-", "Loading...", Collections.emptyList(), Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
 		});
 		
 		if (!trace.getModel().equals(currentModel)) {
@@ -371,6 +374,7 @@ public final class OperationsView extends AnchorPane {
 		Platform.runLater(() -> {
 			opsListView.getItems().setAll(filtered);
 			this.opsListView.setDisable(false);
+			this.statusBar.setOperationsViewUpdating(false);
 		});
 	}
 
