@@ -33,7 +33,7 @@ public enum AccordionEnum {
     }
 
     public Accordion getAccordion(Injector injector) {
-        List<Accordion> accordions = injector.getInstance(MainController.class).getAccordionList();
+        List<Accordion> accordions = injector.getInstance(MainController.class).getAccordions();
         for (Accordion acc : accordions) {
             if (acc != null && this.id.equals(acc.getId())) {
                 return acc;
