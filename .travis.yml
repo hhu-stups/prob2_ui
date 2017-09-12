@@ -32,10 +32,25 @@ addons:
 before_install:
 - rvm install 2.0.0
 - gem install travis-custom-deploy
-- .ci/before_install.sh
+- |
+  if [[ "${TRAVIS_OS_NAME}" == osx ]]
+  then
+    # If logging JVM crashes
+    # brew update
+    # brew upgrade
+
+    brew cask install java
+    brew install gradle # Note: this will call `brew update`
+    brew unlink python # fixes 'run_one_line' is not defined error in backtrace
+  fi
 install: true
 before_script:
-- if [[ "${TRAVIS_OS_NAME}" == linux ]]; then export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start; fi
+- |
+  if [[ "${TRAVIS_OS_NAME}" == linux ]]
+  then
+    export DISPLAY=:99.0
+    sh -e /etc/init.d/xvfb start
+  fi
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
