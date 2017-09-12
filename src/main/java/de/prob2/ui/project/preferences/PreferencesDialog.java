@@ -36,6 +36,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 
 	private final ProBPreferences prefs;
 	private final CurrentProject currentProject;
+	private Preference preference;
 	private Set<String> preferencesNamesSet;
 
 	@Inject
@@ -52,7 +53,9 @@ public class PreferencesDialog extends Dialog<Preference> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				return new Preference(this.nameField.getText(), new HashMap<>(this.prefs.getChangedPreferences())); 
+				preference.setName(this.nameField.getText());
+				preference.setPreferences(new HashMap<>(this.prefs.getChangedPreferences()));
+				return preference; 
 			}
 		});
 
@@ -62,6 +65,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 	@FXML
 	private void initialize() {
 		this.prefsView.setPreferences(this.prefs);
+		this.preference = new Preference("", new HashMap<>());
 
 		List<Preference> preferencesList = currentProject.getPreferences();
 		preferencesNamesSet = preferencesList.stream().map(Preference::getName).collect(Collectors.toCollection(HashSet::new));
@@ -86,6 +90,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 	}
 
 	void setPreference(Preference preference) {
+		this.preference = preference;
 		preferencesNamesSet.remove(preference.getName());
 		this.nameField.setText(preference.getName());
 		for (Map.Entry<String, String> pref : preference.getPreferences().entrySet()) {
