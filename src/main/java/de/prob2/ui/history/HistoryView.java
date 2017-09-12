@@ -68,15 +68,20 @@ public final class HistoryView extends AnchorPane {
 	@FXML
 	private Button btForward;
 	@FXML
+	private Button saveTraceButton;
+	@FXML
 	private HelpButton helpButton;
 
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
+	private final CurrentProject currentProject;
 
 	@Inject
-	private HistoryView(StageManager stageManager, CurrentTrace currentTrace, Injector injector) {
+	private HistoryView(StageManager stageManager, CurrentTrace currentTrace, Injector injector,
+			CurrentProject currentProject) {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
+		this.currentProject = currentProject;
 		stageManager.loadFXML(this, "history_view.fxml");
 	}
 
@@ -131,6 +136,8 @@ public final class HistoryView extends AnchorPane {
 		});
 
 		bindIconSizeToFontSize();
+		saveTraceButton.disableProperty()
+				.bind(currentProject.existsProperty().and(currentTrace.existsProperty()).not());
 	}
 
 	private void bindIconSizeToFontSize() {
@@ -182,7 +189,6 @@ public final class HistoryView extends AnchorPane {
 	@FXML
 	private void saveTrace() {
 		TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
-		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		traceSaver.saveTrace(new ReplayTrace(currentTrace.get()), currentProject.getCurrentMachine());
 	}
 

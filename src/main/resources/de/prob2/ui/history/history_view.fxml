@@ -42,7 +42,7 @@
 							<Tooltip text="%history.buttons.reverse.tooltip" />
 						</tooltip>
 					</ToggleButton>
-					<Button fx:id="saveTrace" mnemonicParsing="false" onAction="#saveTrace">
+					<Button fx:id="saveTraceButton" mnemonicParsing="false" onAction="#saveTrace">
 						<graphic>
 							<FontAwesomeIconView styleClass="icon-dark"
 								glyphName="DOWNLOAD" size="15" />
