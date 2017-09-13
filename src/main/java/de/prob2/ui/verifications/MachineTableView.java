@@ -12,6 +12,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 import javax.inject.Inject;
 
+//do not remove this class. it might be needed later
+@Deprecated
 public class MachineTableView extends TableView<Machine> {
 		
 	@FXML

@@ -24,6 +24,7 @@ import de.prob.check.IModelCheckJob;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
@@ -37,15 +38,18 @@ public class CBCFormulaHandler {
 	
 	private final CurrentTrace currentTrace;
 	
+	private final CurrentProject currentProject;
+	
 	private final Injector injector;
 	
 	private final CBCResultHandler resultHandler;
 
 	
 	@Inject
-	public CBCFormulaHandler(final CurrentTrace currentTrace, final CBCResultHandler resultHandler,
-								final Injector injector) {
+	public CBCFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
+							final CBCResultHandler resultHandler, final Injector injector) {
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
 		this.injector = injector;
 	}
@@ -82,7 +86,7 @@ public class CBCFormulaHandler {
 	}
 	
 	public void checkRefinement(CBCFormulaItem item) {
-		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		Machine currentMachine = currentProject.getCurrentMachine();
 		int index = currentMachine.getCBCFormulas().indexOf(item);
 		if(index > -1) {
 			item = currentMachine.getCBCFormulas().get(index);
@@ -95,13 +99,13 @@ public class CBCFormulaHandler {
 			LOGGER.error(e.getMessage());
 		}
 		resultHandler.handleRefinementChecking(item, command);
-		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
+		updateMachine(currentProject.getCurrentMachine());
 	}
 	
 
 		
 	public void checkAssertions(CBCFormulaItem item) {
-		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		Machine currentMachine = currentProject.getCurrentMachine();
 		int index = currentMachine.getCBCFormulas().indexOf(item);
 		if(index > -1) {
 			item = currentMachine.getCBCFormulas().get(index);
@@ -110,7 +114,7 @@ public class CBCFormulaHandler {
 		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
 		stateSpace.execute(command);
 		resultHandler.handleAssertionChecking(item, command);
-		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
+		updateMachine(currentProject.getCurrentMachine());
 	}
 	
 
@@ -123,13 +127,13 @@ public class CBCFormulaHandler {
 			LOGGER.error(e.getMessage());
 		}
 		resultHandler.handleFindValidState(item, cmd, stateSpace);
-		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
+		updateMachine(currentProject.getCurrentMachine());
 	}
 	
 
 	
 	public void executeCheckingItem(IModelCheckJob checker, String code, CBCType type) {
-		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		Machine currentMachine = currentProject.getCurrentMachine();
 		Thread executionThread = new Thread(() -> 
 			Platform.runLater(() -> 
 				currentMachine.getCBCFormulas()
@@ -194,7 +198,7 @@ public class CBCFormulaHandler {
 	}
 	
 	public void addFormula(CBCFormulaItem formula, boolean checking) {
-		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
 			if(!currentMachine.getCBCFormulas().contains(formula)) {
 				currentMachine.addCBCFormula(formula);

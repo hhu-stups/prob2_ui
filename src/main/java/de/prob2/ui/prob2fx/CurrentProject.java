@@ -209,7 +209,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void initializeMachines() {
 		for (Machine machine : machines) {
 			machine.initialize();
-			injector.getInstance(LTLView.class).parseMachine(machine);
 		}
 	}
 
