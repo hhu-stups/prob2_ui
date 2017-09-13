@@ -14,7 +14,6 @@ import com.google.inject.Injector;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
-import de.prob.animator.command.FindStateCommand.ResultType;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.EventB;
@@ -42,6 +41,7 @@ public class CBCFormulaHandler {
 	private final Injector injector;
 	
 	private final CBCResultHandler resultHandler;
+
 	
 	@Inject
 	public CBCFormulaHandler(final CurrentTrace currentTrace, final CBCResultHandler resultHandler,
@@ -90,26 +90,17 @@ public class CBCFormulaHandler {
 		}
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand();
-		ConstraintBasedRefinementCheckCommand.ResultType result = null;
 		try {
 			stateSpace.execute(command);
-			result = command.getResult();
-			if(result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
-				item.setCheckedSuccessful();
-				item.setChecked(Checked.SUCCESS);
-			} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
-				item.setCheckedFailed();
-				item.setChecked(Checked.FAIL);
-			}
-		} catch (Exception e) {
-			item.setCheckedFailed();
-			item.setChecked(Checked.FAIL);
-			LOGGER.error("Not a refinement machine");
+		} catch (Exception e){
+			LOGGER.error(e.getMessage());
 		}
-		resultHandler.handleRefinementChecking(command);
+		resultHandler.handleRefinementChecking(item, command);
 		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
 	}
 	
+
+		
 	public void checkAssertions(CBCFormulaItem item) {
 		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
 		int index = currentMachine.getCBCFormulas().indexOf(item);
@@ -119,36 +110,17 @@ public class CBCFormulaHandler {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
 		stateSpace.execute(command);
-		ConstraintBasedAssertionCheckCommand.ResultType result = command.getResult();
-		if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS ||
-			result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
-			item.setCheckedSuccessful();
-			item.setChecked(Checked.SUCCESS);
-		} else {
-			item.setCheckedFailed();
-			item.setChecked(Checked.FAIL);
-		}
-		resultHandler.handleAssertionChecking(command);
+		resultHandler.handleAssertionChecking(item, command);
 		updateMachine(injector.getInstance(CBCView.class).getCurrentMachine());
 	}
 	
+
 	public void findValidState(CBCFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
-		ResultType result = null;
 		try {
 			stateSpace.execute(cmd);
-			result = cmd.getResult();
-			if(result == ResultType.STATE_FOUND) {
-				item.setCheckedSuccessful();
-				item.setChecked(Checked.SUCCESS);
-			} else {
-				item.setCheckedFailed();
-				item.setChecked(Checked.FAIL);
-			}
 		} catch (ProBError | EvaluationException e){
-			item.setCheckedFailed();
-			item.setChecked(Checked.FAIL);
 			LOGGER.error(e.getMessage());
 		}
 		resultHandler.handleFindValidState(item, cmd, stateSpace);
@@ -255,6 +227,6 @@ public class CBCFormulaHandler {
 		}
 		resultHandler.handleFormulaResult(item, result, stateid);
 	}
-	
+		
 
 }
