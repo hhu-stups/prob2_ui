@@ -22,9 +22,7 @@ import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.layout.Region;
 
 @Singleton
 public class CBCResultHandler extends AbstractResultHandler {
@@ -46,6 +44,11 @@ public class CBCResultHandler extends AbstractResultHandler {
 	}
 	
 	public void handleFormulaResult(CBCFormulaItem item, Object result, State stateid) {
+		if(result instanceof ModelCheckOk) {
+			handleItem(item, true);
+		} else {
+			handleItem(item, false);
+		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
 		this.showResult(resultItem, item, traces);
@@ -79,16 +82,16 @@ public class CBCResultHandler extends AbstractResultHandler {
 		ResultType result = cmd.getResult();
 		item.setExample(null);
 		if(result == null) {
-			showResultForSearchingValidState(item, "Error when searching valid state for predicate", false);
+			showCheckingResult(item, "Error when searching valid state for predicate", false);
 		} else if(result == ResultType.STATE_FOUND) {
-			showResultForSearchingValidState(item, "State found", true);
+			showCheckingResult(item, "State found", true);
 			item.setExample(cmd.getTrace(stateSpace));
 		} else if(result == ResultType.NO_STATE_FOUND) {
-			showResultForSearchingValidState(item, "State not found", false);
+			showCheckingResult(item, "State not found", false);
 		} else if(result == ResultType.INTERRUPTED) {
-			showResultForSearchingValidState(item, "Searching valid state for predicate is interrupted", false);
+			showCheckingResult(item, "Searching valid state for predicate is interrupted", false);
 		} else {
-			showResultForSearchingValidState(item, "Error when searching valid state for predicate", false);
+			showCheckingResult(item, "Error when searching valid state for predicate", false);
 		}
 	}
 	
@@ -96,42 +99,39 @@ public class CBCResultHandler extends AbstractResultHandler {
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
 		String msg = cmd.getResultsString();
 		if(result == null) {
-			showRefinementCheckingResult(item, "Refinement checking failed", "Not a refinement machine", false);
+			showCheckingResult(item, "Not a refinement machine", "Refinement checking failed", false);
 		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
-			showRefinementCheckingResult(item, "Violation not found", msg, true);
+			showCheckingResult(item, msg, "Violation not found", true);
 		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
-			showRefinementCheckingResult(item, "Violation found", msg, false);
+			showCheckingResult(item, msg, "Violation found", false);
 		} else {
-			showRefinementCheckingResult(item, "Refinement checking is interrupted", msg, false);
+			showCheckingResult(item, msg, "Refinement checking is interrupted", false);
 		}
 	}
 	
 	public void handleAssertionChecking(CBCFormulaItem item, ConstraintBasedAssertionCheckCommand cmd) {
 		ConstraintBasedAssertionCheckCommand.ResultType result = cmd.getResult();
 		if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS) {
-			showAssertionCheckingResult(item, "No counter-example exists", true);
+			showCheckingResult(item, "No counter-example exists", true);
 		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
-			showAssertionCheckingResult(item, "No counter-example found", true);
+			showCheckingResult(item, "No counter-example found", true);
 		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.COUNTER_EXAMPLE) {
-			showAssertionCheckingResult(item, "Counter-example found", false);
+			showCheckingResult(item, "Counter-example found", false);
 		} else {
-			showAssertionCheckingResult(item, "Assertion checking is interrupted", false);
+			showCheckingResult(item, "Assertion checking is interrupted", false);
 		}
 	}
-	
-	public void showRefinementCheckingResult(CBCFormulaItem item, String header, String msg, boolean successful) {
-		showAlert("Constraint Based Refinement Checking", header, msg, successful);
-		handleItem(item, successful);
-	}
-	
-	public void showAssertionCheckingResult(CBCFormulaItem item, String msg, boolean successful) {
-		showAlert("Checking assertions", msg, msg, successful);
-		handleItem(item, successful);
-	}
 		
-	public void showResultForSearchingValidState(CBCFormulaItem item, String msg, boolean found) {
-		showAlert("Find Valid State Satisfying Predicate", msg, msg, found);
-		handleItem(item, found);
+	private void showCheckingResult(CBCFormulaItem item, String msg, String header, boolean successful) {
+		AlertType alertType = successful ? AlertType.INFORMATION: AlertType.ERROR;
+		Checked checked = successful ? Checked.SUCCESS: Checked.FAIL;
+		CheckingResultItem resultItem = new CheckingResultItem(alertType , checked, msg, header);
+		super.showResult(resultItem, item);
+		handleItem(item, successful);
+	}
+	
+	private void showCheckingResult(CBCFormulaItem item, String msg, boolean successful) {
+		showCheckingResult(item, msg, msg, successful);
 	}
 	
 	private void handleItem(CBCFormulaItem item, boolean successful) {
@@ -142,20 +142,6 @@ public class CBCResultHandler extends AbstractResultHandler {
 			item.setCheckedFailed();
 			item.setChecked(Checked.FAIL);
 		}
-	}
-	
-	private void showAlert(String title, String header, String msg, boolean successful) {
-		Alert alert;
-		if(successful) {
-			alert = new Alert(AlertType.INFORMATION);
-		} else {
-			alert = new Alert(AlertType.ERROR);
-		}
-		alert.setTitle(title);
-		alert.setHeaderText(header);
-		alert.setContentText(msg.length() > 0 ? msg : header);
-		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-		alert.showAndWait();
 	}
 
 

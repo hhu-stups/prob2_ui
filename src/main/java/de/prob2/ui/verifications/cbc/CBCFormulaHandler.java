@@ -21,7 +21,6 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
 import de.prob.check.IModelCheckJob;
-import de.prob.check.ModelCheckOk;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
@@ -211,18 +210,9 @@ public class CBCFormulaHandler {
 		Object result = null;
 		try {
 			result = checker.call();
-			if(result instanceof ModelCheckOk) {
-				item.setCheckedSuccessful();
-				item.setChecked(Checked.SUCCESS);
-			} else {
-				item.setCheckedFailed();
-				item.setChecked(Checked.FAIL);
-			}
 		} catch (Exception e) {
 			String message = "Could not check CBC Deadlock: ".concat(e.getMessage());
 			LOGGER.error(message);
-			item.setCheckedFailed();
-			item.setChecked(Checked.FAIL);
 			result = new CBCParseError(message);
 		}
 		resultHandler.handleFormulaResult(item, result, stateid);
