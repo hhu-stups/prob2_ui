@@ -1,12 +1,34 @@
 package de.prob2.ui.internal;
 
+import java.io.CharArrayWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+import javax.annotation.Nullable;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob.exception.ProBError;
+
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
+import de.prob2.ui.project.machines.Machine;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -16,23 +38,24 @@ import javafx.geometry.BoundingBox;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.io.CharArrayWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
 
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W
@@ -295,6 +318,81 @@ public final class StageManager {
 		alert.getDialogPane().setExpandableContent(textArea);
 
 		return alert;
+	}
+	
+	/**
+	 * Show a {@link FileChooser} to ask the user to select a ProB file.
+	 * 
+	 * @param window the {@link Window} on which to show the {@link FileChooser}
+	 * @param projects whether projects should be selectable
+	 * @param machines whether machines should be selectable
+	 * @return the selected {@link File}, or {@code null} if none was selected
+	 */
+	private File showOpenFileChooser(final Window window, final boolean projects, final boolean machines) {
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open...");
+		
+		final List<String> allExts = new ArrayList<>();
+		if (projects) {
+			allExts.add("*.json");
+			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ProB 2 Projects", "*.json"));
+		}
+		
+		if (machines) {
+			allExts.addAll(Machine.Type.getExtensionToTypeMap().keySet());
+			fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("Classical B Files", Machine.Type.B.getExtensions()),
+				new FileChooser.ExtensionFilter("EventB Files", Machine.Type.EVENTB.getExtensions()),
+				new FileChooser.ExtensionFilter("CSP Files", Machine.Type.CSP.getExtensions()),
+				new FileChooser.ExtensionFilter("TLA Files", Machine.Type.TLA.getExtensions())
+			);
+		}
+		
+		allExts.sort(String::compareTo);
+		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter("All ProB Files", allExts));
+		
+		return fileChooser.showOpenDialog(window);
+	}
+	
+	/**
+	 * Show a {@link FileChooser} to ask the user to select a ProB 2 project.
+	 * 
+	 * @param window the {@link Window} on which to show the {@link FileChooser}
+	 * @return the selected {@link File}, or {@code null} if none was selected
+	 */
+	public File showOpenProjectChooser(final Window window) {
+		return showOpenFileChooser(window, true, false);
+	}
+	
+	/**
+	 * Show a {@link FileChooser} to ask the user to select a machine file.
+	 *
+	 * @param window the {@link Window} on which to show the {@link FileChooser}
+	 * @return the selected {@link File}, or {@code null} if none was selected
+	 */
+	public File showOpenMachineChooser(final Window window) {
+		return showOpenFileChooser(window, false, true);
+	}
+	
+	/**
+	 * Show a {@link FileChooser} to ask the user to select a ProB 2 project or a machine file.
+	 *
+	 * @param window the {@link Window} on which to show the {@link FileChooser}
+	 * @return the selected {@link File}, or {@code null} if none was selected
+	 */
+	public File showOpenProjectOrMachineChooser(final Window window) {
+		return showOpenFileChooser(window, true, true);
+	}
+	
+	/**
+	 * Get the extension of the given file name.
+	 * 
+	 * @param filename the file name for which to get the extension
+	 * @return the file extension
+	 */
+	public static String getExtension(final String filename) {
+		final String[] parts = filename.split("\\.");
+		return parts[parts.length-1];
 	}
 
 	/**

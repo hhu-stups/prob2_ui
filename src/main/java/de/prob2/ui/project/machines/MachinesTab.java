@@ -1,27 +1,35 @@
 package de.prob2.ui.project.machines;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.menu.EditMenu;
-import de.prob2.ui.menu.FileAsker;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.runconfigurations.Runconfiguration;
-import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.input.MouseButton;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
+import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.menu.EditMenu;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.runconfigurations.Runconfiguration;
+
+import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 @Singleton
 public class MachinesTab extends Tab {
@@ -117,7 +125,7 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	void addMachine() {
-		final File selected = FileAsker.askForMachine(this.getContent().getScene().getWindow());
+		final File selected = stageManager.showOpenMachineChooser(this.getContent().getScene().getWindow());
 		if (selected == null) {
 			return;
 		}

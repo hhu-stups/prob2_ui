@@ -19,7 +19,7 @@ import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 
-import de.prob2.ui.menu.FileAsker;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
@@ -109,7 +109,7 @@ public class Machine {
 	
 	public Machine(String name, String description, Path location) {
 		this(name, description, location,
-			Machine.Type.fromExtension(FileAsker.getExtension(location.getFileName().toString())));
+			Machine.Type.fromExtension(StageManager.getExtension(location.getFileName().toString())));
 	}
 	
 	public void initialize() {
