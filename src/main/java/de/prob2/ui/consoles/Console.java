@@ -3,6 +3,7 @@ package de.prob2.ui.consoles;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,7 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
 	
+	private final ResourceBundle bundle;
 	protected List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
@@ -46,12 +48,13 @@ public abstract class Console extends StyleClassedTextArea {
 	protected String header;
 	protected String prompt;
 	
-	protected Console(String header, String prompt) {
+	protected Console(ResourceBundle bundle, String header) {
+		this.bundle = bundle;
 		this.header = header;
-		this.prompt = prompt;
+		this.prompt = bundle.getString("consoles.prompt.default");
 		this.instructions = new ArrayList<>();
 		this.errors = new ArrayList<>();
-		this.searchHandler = new ConsoleSearchHandler(this);
+		this.searchHandler = new ConsoleSearchHandler(this, bundle);
 		this.requestFollowCaret();
 		setEvents();
 		this.reset();
@@ -166,7 +169,7 @@ public abstract class Console extends StyleClassedTextArea {
 	protected void activateSearch() {
 		int posOfEnter = this.getText().lastIndexOf('\n');
 		this.deleteText(posOfEnter + 1, this.getText().length());
-		this.appendText(ConsoleSearchHandler.FOUND + getCurrentLine());
+		this.appendText(String.format(bundle.getString("consoles.prompt.backwardSearch"), "", getCurrentLine()));
 		this.moveTo(this.getText().lastIndexOf('\''));
 		currentPosInLine = 0;
 		charCounterInLine = 0;
