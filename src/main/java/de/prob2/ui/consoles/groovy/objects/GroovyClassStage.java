@@ -1,9 +1,19 @@
 package de.prob2.ui.consoles.groovy.objects;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
-import de.prob2.ui.consoles.groovy.MetaPropertiesHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
+
+import groovy.lang.MetaMethod;
+import groovy.lang.PropertyValue;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,12 +24,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 
 public class GroovyClassStage extends Stage {
 	@FXML private TableView<GroovyClassPropertyItem> tvMethods;
@@ -119,8 +124,8 @@ public class GroovyClassStage extends Stage {
 			fields.add(new GroovyClassPropertyItem(f));
 		}
 		
-		MetaPropertiesHandler.handleProperties(object, fields);
-		MetaPropertiesHandler.handleMethods(clazz, methods, GroovyMethodOption.ALL);
+		handleProperties(object);
+		handleMethods(clazz, methods, GroovyMethodOption.ALL);
 		
 		if (clazz.isArray()) {
 			handleArrays(object);
@@ -134,6 +139,20 @@ public class GroovyClassStage extends Stage {
 		tvMethods.refresh();
 		tvFields.refresh();
 		tvCollectionData.refresh();
+	}
+	
+	private void handleProperties(Object object) {
+		for (PropertyValue p : DefaultGroovyMethods.getMetaPropertyValues(object)) {
+			fields.add(new GroovyClassPropertyItem(p));
+		}
+	}
+	
+	public static void handleMethods(Class<?> clazz, Collection<? super GroovyClassPropertyItem> methods, GroovyMethodOption option) {
+		for (MetaMethod m : DefaultGroovyMethods.getMetaClass(clazz).getMetaMethods()) {
+			if ((option == GroovyMethodOption.ALL) || (option == GroovyMethodOption.NONSTATIC && !m.isStatic()) || (option == GroovyMethodOption.STATIC && !m.isStatic())) {
+				methods.add(new GroovyClassPropertyItem(m));
+			}
+		}
 	}
 	
 	private void handleArrays(Object object) {
