@@ -49,6 +49,9 @@ public class GroovyCodeCompletion extends Popup {
 		String newCurrentLine = currentLine;
 		if (action == CodeCompletionTriggerAction.POINT) {
 			newCurrentLine += ".";
+			if(currentLine.endsWith(".")) {
+				return;
+			}
 		}
 		String currentPrefix = handleActivation(newCurrentLine);
 		completionHandler.handleMethodsFromObjects(currentPrefix, currentSuggestion, action, engine);
@@ -61,21 +64,11 @@ public class GroovyCodeCompletion extends Popup {
 		String currentPrefix;
 		String newCurrentLine = currentLine.replaceAll("\\s","");
 		int indexOfPoint = newCurrentLine.lastIndexOf('.');
-		int indexOfSemicolon = newCurrentLine.lastIndexOf(';');
-		
-		if ((indexOfPoint < indexOfSemicolon && indexOfSemicolon > getParent().getCurrentPosInLine()) || (indexOfPoint != -1 && indexOfSemicolon == -1)) {
-			int index = Math.max(-1, indexOfPoint);
-			currentSuggestion = newCurrentLine.substring(index + 1, newCurrentLine.length());
-			currentPosInSuggestion = currentSuggestion.length();
-			charCounterInSuggestion = currentPosInSuggestion;
-			currentPrefix = newCurrentLine.substring(0, index + 1);
-		} else {
-			int index = Math.max(-1, indexOfSemicolon);
-			currentSuggestion = newCurrentLine.substring(index + 1, newCurrentLine.length());
-			charCounterInSuggestion = currentSuggestion.length();
-			currentPosInSuggestion = charCounterInSuggestion;
-			currentPrefix = currentSuggestion;
-		}
+		int index = Math.max(-1, indexOfPoint);
+		currentSuggestion = newCurrentLine.substring(index + 1, newCurrentLine.length());
+		currentPosInSuggestion = currentSuggestion.length();
+		charCounterInSuggestion = currentPosInSuggestion;
+		currentPrefix = newCurrentLine.substring(0, index + 1);
 		return currentPrefix;
 	}
 	
@@ -152,6 +145,11 @@ public class GroovyCodeCompletion extends Popup {
 			//handle Insert Char
 			filterSuggestions(e.getText(), CodeCompletionAction.INSERTION);
 		}
+		
+		if(".".equals(e.getText())) {
+			deactivate();
+		}
+		
 	}
 
 	private void handleArrowKey(KeyEvent e) {
