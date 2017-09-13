@@ -87,9 +87,9 @@ public class CBCView extends AnchorPane {
 		helpButton.setHelpContent("HelpMain.html");
 		setBindings();
 		setContextMenu();
-		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
-			tvFormula.itemsProperty().bind(currentProject.getCurrentMachine().cbcFormulasProperty());
-		});
+		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> 
+			tvFormula.itemsProperty().bind(currentProject.getCurrentMachine().cbcFormulasProperty())
+		);
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
 				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().cbcFormulasProperty().emptyProperty());

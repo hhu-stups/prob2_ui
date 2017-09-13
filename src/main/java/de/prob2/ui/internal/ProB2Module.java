@@ -44,7 +44,6 @@ import de.prob2.ui.states.StateErrorsView;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.cbc.CBCView;
 import de.prob2.ui.verifications.ltl.LTLView;
@@ -123,7 +122,6 @@ public class ProB2Module extends AbstractModule {
 		bind(MainController.class);
 		bind(LTLFormulaChecker.class);
 		bind(HelpButton.class);
-		bind(MachineTableView.class);
 		bind(LTLView.class);
 		bind(MachinesTab.class);
 		bind(MainView.class);
