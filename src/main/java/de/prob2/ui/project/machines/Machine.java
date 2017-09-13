@@ -1,6 +1,5 @@
 package de.prob2.ui.project.machines;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
@@ -14,14 +13,17 @@ import java.util.regex.Pattern;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.menu.FileAsker;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -78,29 +80,6 @@ public class Machine {
 		
 		public String[] getExtensions() {
 			return this.extensions.clone();
-		}
-	}
-	
-	public static final class FileAndType {
-		private final File file;
-		private final Machine.Type type;
-		
-		public FileAndType(final File file, final Machine.Type type) {
-			super();
-			
-			Objects.requireNonNull(file);
-			Objects.requireNonNull(type);
-			
-			this.file = file;
-			this.type = type;
-		}
-		
-		public File getFile() {
-			return this.file;
-		}
-		
-		public Machine.Type getType() {
-			return this.type;
 		}
 	}
 	
