@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -75,6 +76,7 @@ public final class StageManager {
 	private final Injector injector;
 	private final MenuToolkit menuToolkit;
 	private final UIState uiState;
+	private final ResourceBundle bundle;
 
 	private final ObjectProperty<Stage> current;
 	private final Map<Stage, Void> registered;
@@ -82,10 +84,11 @@ public final class StageManager {
 	private Stage mainStage;
 
 	@Inject
-	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState) {
+	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState, final ResourceBundle bundle) {
 		this.injector = injector;
 		this.menuToolkit = menuToolkit;
 		this.uiState = uiState;
+		this.bundle = bundle;
 
 		this.current = new SimpleObjectProperty<>(this, "current");
 		this.registered = new WeakHashMap<>();
@@ -330,26 +333,26 @@ public final class StageManager {
 	 */
 	private File showOpenFileChooser(final Window window, final boolean projects, final boolean machines) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open...");
+		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
 		
 		final List<String> allExts = new ArrayList<>();
 		if (projects) {
 			allExts.add("*.json");
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ProB 2 Projects", "*.json"));
+			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*.json"));
 		}
 		
 		if (machines) {
 			allExts.addAll(Machine.Type.getExtensionToTypeMap().keySet());
 			fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter("Classical B Files", Machine.Type.B.getExtensions()),
-				new FileChooser.ExtensionFilter("EventB Files", Machine.Type.EVENTB.getExtensions()),
-				new FileChooser.ExtensionFilter("CSP Files", Machine.Type.CSP.getExtensions()),
-				new FileChooser.ExtensionFilter("TLA Files", Machine.Type.TLA.getExtensions())
+				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.classicalB"), Machine.Type.B.getExtensions()),
+				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.eventB"), Machine.Type.EVENTB.getExtensions()),
+				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.csp"), Machine.Type.CSP.getExtensions()),
+				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.tla"), Machine.Type.TLA.getExtensions())
 			);
 		}
 		
 		allExts.sort(String::compareTo);
-		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter("All ProB Files", allExts));
+		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
 		
 		return fileChooser.showOpenDialog(window);
 	}
