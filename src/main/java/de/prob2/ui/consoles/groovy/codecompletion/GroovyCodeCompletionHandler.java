@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -14,15 +13,13 @@ import javax.script.ScriptEngine;
 
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
+import de.prob2.ui.consoles.groovy.objects.GroovyClassHandler;
 import de.prob2.ui.consoles.groovy.objects.GroovyClassPropertyItem;
-import de.prob2.ui.consoles.groovy.objects.GroovyClassStage;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 
-import groovy.lang.MetaProperty;
 
 import javafx.collections.ObservableList;
 
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,12 +35,6 @@ public class GroovyCodeCompletionHandler {
 	public GroovyCodeCompletionHandler(ObservableList<GroovyAbstractItem> suggestions) {
 		this.suggestions = suggestions;
 		this.currentSuggestions = new ArrayList<>();
-	}
-	
-	private static void handleProperties(Class<?> clazz, Collection<? super GroovyClassPropertyItem> properties) {
-		for (MetaProperty m : DefaultGroovyMethods.getMetaClass(clazz).getProperties()) {
-			properties.add(new GroovyClassPropertyItem(m));
-		}
 	}
 	
 	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action, ScriptEngine engine) {
@@ -114,8 +105,8 @@ public class GroovyCodeCompletionHandler {
 	private void fillAllMethodsAndProperties(Class <?> clazz, GroovyMethodOption option) {
 		currentSuggestions.clear();
 		fillMethodsAndProperties(clazz, option);
-		GroovyClassStage.handleMethods(clazz, currentSuggestions, option);
-		handleProperties(clazz, currentSuggestions);
+		GroovyClassHandler.handleMethods(clazz, currentSuggestions, option);
+		GroovyClassHandler.handleProperties(clazz, currentSuggestions);
 	}
 	
 	public void fillObjects(Bindings bindings) {
@@ -152,8 +143,8 @@ public class GroovyCodeCompletionHandler {
 		currentSuggestions.clear();
 		suggestions.clear();
 		fillMethodsAndProperties(clazz, option);
-		GroovyClassStage.handleMethods(clazz, currentSuggestions, option);
-		handleProperties(clazz, currentSuggestions);
+		GroovyClassHandler.handleMethods(clazz, currentSuggestions, option);
+		GroovyClassHandler.handleProperties(clazz, currentSuggestions);
 		suggestions.addAll(currentSuggestions);
 	}
 	

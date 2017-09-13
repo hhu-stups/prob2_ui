@@ -1,18 +1,11 @@
 package de.prob2.ui.consoles.groovy.objects;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
 
-import groovy.lang.MetaMethod;
-import groovy.lang.PropertyValue;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,7 +17,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 
 public class GroovyClassStage extends Stage {
 	@FXML private TableView<GroovyClassPropertyItem> tvMethods;
@@ -69,6 +61,7 @@ public class GroovyClassStage extends Stage {
 	private UIState uiState;
 	private int index;
 
+	
 	public GroovyClassStage(StageManager stageManager, UIState uiState, String name) {
 		this.index = 0;
 		this.uiState = uiState;
@@ -116,97 +109,21 @@ public class GroovyClassStage extends Stage {
 		fields.clear();
 		collectionData.clear();
 		
-		for (Method m : clazz.getMethods()) {
-			methods.add(new GroovyClassPropertyItem(m));
-		}
-		
-		for (Field f : clazz.getFields()) {
-			fields.add(new GroovyClassPropertyItem(f));
-		}
-		
-		handleProperties(object);
-		handleMethods(clazz, methods, GroovyMethodOption.ALL);
+		GroovyClassHandler.handleProperties(clazz, fields, object);
+		GroovyClassHandler.handleMethods(clazz, methods, GroovyMethodOption.ALL);
 		
 		if (clazz.isArray()) {
-			handleArrays(object);
+			GroovyClassHandler.handleArrays(object, collectionData);
 		} else if (object instanceof Collection<?>) {
-			handleCollections((Collection<?>)object);
+			GroovyClassHandler.handleCollections((Collection<?>)object, collectionData);
 		} else {
 			tabCollectionData.setDisable(true);
 		}
 		
-		showClassAttributes();
+		GroovyClassHandler.handleClassAttributes(clazz, attributes);
 		tvMethods.refresh();
 		tvFields.refresh();
 		tvCollectionData.refresh();
-	}
-	
-	private void handleProperties(Object object) {
-		for (PropertyValue p : DefaultGroovyMethods.getMetaPropertyValues(object)) {
-			fields.add(new GroovyClassPropertyItem(p));
-		}
-	}
-	
-	public static void handleMethods(Class<?> clazz, Collection<? super GroovyClassPropertyItem> methods, GroovyMethodOption option) {
-		for (MetaMethod m : DefaultGroovyMethods.getMetaClass(clazz).getMetaMethods()) {
-			if ((option == GroovyMethodOption.ALL) || (option == GroovyMethodOption.NONSTATIC && !m.isStatic()) || (option == GroovyMethodOption.STATIC && !m.isStatic())) {
-				methods.add(new GroovyClassPropertyItem(m));
-			}
-		}
-	}
-	
-	private void handleArrays(Object object) {
-		if (object instanceof Object[]) {
-			// Check Array of Objects
-			Object[] objects = (Object[]) object;
-			for (int i = 0; i < objects.length; i++) {
-				String value = "";
-				if (objects[i] != null) {
-					value = objects[i].toString();
-				}
-				collectionData.add(new CollectionDataItem(i,value));
-			}
-		} else {
-			// Check Array of Primitives
-			int length = Array.getLength(object);
-			for (int i = 0; i < length; i++) {
-				collectionData.add(new CollectionDataItem(i,Array.get(object, i)));
-			}
-		}
-	}
-	
-	private void handleCollections(Collection<?> object) {
-		int i = 0;
-		for (Object o : object) {
-			collectionData.add(new CollectionDataItem(i,o));
-			i++;
-		}
-	}
-	
-	private void showClassAttributes() {
-		attributes.clear();
-		String packagename = "default";
-		if (clazz.getPackage() != null) {
-			packagename = clazz.getPackage().getName();
-		}
-		attributes.add(new GroovyClassItem("Package", packagename));
-		attributes.add(new GroovyClassItem("Class Name", clazz.getName()));
-		
-		final List<String> interfaceNames = new ArrayList<>();
-		for (Class<?> c : clazz.getInterfaces()) {
-			interfaceNames.add(c.getSimpleName());
-		}
-		attributes.add(new GroovyClassItem("Interfaces", String.join(", ", interfaceNames)));
-		
-		final List<String> superclassNames = new ArrayList<>();
-		Class<?> tmp = clazz;
-		while (!Object.class.equals(tmp)) {
-			superclassNames.add(tmp.getSuperclass().getSimpleName());
-			tmp = tmp.getSuperclass();
-		}
-		attributes.add(new GroovyClassItem("Superclasses", String.join(", ", superclassNames)));
-		attributes.add(new GroovyClassItem("isPrimitive", Boolean.toString(clazz.isPrimitive())));
-		attributes.add(new GroovyClassItem("isArray", Boolean.toString(clazz.isArray())));
 		tvClass.refresh();
 	}
 	
