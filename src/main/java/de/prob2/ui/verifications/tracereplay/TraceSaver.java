@@ -32,7 +32,7 @@ public class TraceSaver {
 	}
 	
 	public void saveTrace(ReplayTrace trace, Machine machine) {
-		File file = new File(currentProject.getLocation() + File.separator + machine.getName() + "_trace.json");
+		File file = new File(currentProject.getLocation() + File.separator + machine.getName() + ".trace");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), TRACE_CHARSET)) {
 			gson.toJson(trace, writer);
 		} catch (FileNotFoundException exc) {
