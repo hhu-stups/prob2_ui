@@ -114,6 +114,11 @@ public class LTLView extends AnchorPane{
 					from.clearPatternManager();
 				}
 				bindMachine(to);
+			} else {
+				tvFormula.getItems().clear();
+				tvFormula.itemsProperty().unbind();
+				tvPattern.getItems().clear();
+				tvPattern.itemsProperty().unbind();
 			}
 		});
 	}
