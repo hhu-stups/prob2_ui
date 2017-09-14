@@ -12,9 +12,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -37,27 +35,24 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	private HelpButton helpButton;
-	
-	@FXML
-	private MachineTableView tvMachines;
-	
+		
 	@FXML
 	private TableView<CBCFormulaItem> tvFormula;
 	
 	@FXML
-	private TableColumn<LTLFormulaItem, FontAwesomeIconView> formulaStatusColumn;
+	private TableColumn<CBCFormulaItem, FontAwesomeIconView> formulaStatusColumn;
 	
 	@FXML
-	private TableColumn<LTLFormulaItem, String> formulaNameColumn;
+	private TableColumn<CBCFormulaItem, String> formulaNameColumn;
 	
 	@FXML
-	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
+	private TableColumn<CBCFormulaItem, String> formulaDescriptionColumn;
 	
 	@FXML
 	private Button addFormulaButton;
 	
 	@FXML
-	private Button checkSelectedMachineButton;
+	private Button checkMachineButton;
 	
 	@FXML
 	private Button checkRefinementButton;
@@ -90,40 +85,35 @@ public class CBCView extends AnchorPane {
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent("HelpMain.html");
-		tvMachines.setCheckingType(de.prob2.ui.verifications.CheckingType.CBC);
 		setBindings();
 		setContextMenu();
-		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
-			if(tvMachines.getSelectionModel().getSelectedIndex() < 0) {
-				tvMachines.getSelectionModel().select(0);
-			}
-			Machine machine = tvMachines.getSelectionModel().getSelectedItem();
-			if(newValue && machine != null) {
-				checkSelectedMachineButton.disableProperty().bind(machine.cbcFormulasProperty().emptyProperty());
+		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
+			if(newValue != null) {
+				tvFormula.itemsProperty().bind(newValue.cbcFormulasProperty());
 			} else {
-				checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+				tvFormula.getItems().clear();
+				tvFormula.itemsProperty().unbind();
+			}
+		});
+		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
+			if(newValue != null) {
+				if(currentProject.getCurrentMachine() != null) {
+					checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().cbcFormulasProperty().emptyProperty());
+				}
+			} else {
+				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 			}
 		});
 	}
 	
 	private void setBindings() {
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
-		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkRefinementButton.disableProperty().bind(currentTrace.existsProperty().not());
 		checkAssertionsButton.disableProperty().bind(currentTrace.existsProperty().not());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		tvMachines.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(to != null) {
-				tvFormula.itemsProperty().unbind();
-				tvFormula.itemsProperty().bind(to.cbcFormulasProperty());
-				Machine machine = tvMachines.getSelectionModel().getSelectedItem();
-				if(currentTrace.existsProperty().get()) {
-					checkSelectedMachineButton.disableProperty().bind(machine.cbcFormulasProperty().emptyProperty());
-				}
-			}
-		});
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 	
@@ -136,7 +126,7 @@ public class CBCView extends AnchorPane {
 			MenuItem check = new MenuItem("Check separately");
 			check.setOnAction(e-> {
 				cbcHandler.checkItem(row.getItem());
-				cbcHandler.updateMachineStatus(getCurrentMachine());
+				cbcHandler.updateMachineStatus(currentProject.getCurrentMachine());
 			});
 			check.disableProperty().bind(row.emptyProperty());
 			
@@ -193,8 +183,8 @@ public class CBCView extends AnchorPane {
 	}
 	
 	@FXML
-	public void checkSelectedMachine() {
-		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+	public void checkMachine() {
+		Machine machine = currentProject.getCurrentMachine();
 		cbcHandler.checkMachine(machine);
 		cbcHandler.updateMachineStatus(machine);
 		refresh();
@@ -215,24 +205,20 @@ public class CBCView extends AnchorPane {
 	}
 	
 	private void removeFormula() {
-		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+		Machine machine = currentProject.getCurrentMachine();
 		CBCFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 		machine.removeCBCFormula(item);
 		updateProject();
 	}
 	
-	public Machine getCurrentMachine() {
-		return tvMachines.getSelectionModel().getSelectedItem();
-	}
 	
 	public void updateProject() {
 		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-				tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+				currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 				currentProject.getLocation()));
 	}
 	
 	public void refresh() {
-		tvMachines.refresh();
 		tvFormula.refresh();
 	}
 	

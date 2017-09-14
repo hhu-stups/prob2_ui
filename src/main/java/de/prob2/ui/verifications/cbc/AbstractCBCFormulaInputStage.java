@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.inject.Injector;
+
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler.ItemType;
 import javafx.fxml.FXML;
@@ -19,6 +21,8 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 
 	protected final CBCFormulaHandler cbcHandler;
 	
+	protected final CurrentProject currentProject;
+	
 	@FXML
 	protected Button btAdd;
 	
@@ -29,8 +33,10 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 	
 	protected final List<Button> invisibles;
 	
-	public AbstractCBCFormulaInputStage(final CBCFormulaHandler cbcHandler, final Injector injector) {
+	public AbstractCBCFormulaInputStage(final CBCFormulaHandler cbcHandler, final CurrentProject currentProject,
+										final Injector injector) {
 		this.cbcHandler = cbcHandler;
+		this.currentProject = currentProject;
 		this.injector = injector;
 		this.invisibles = new ArrayList<>();
 	}
@@ -76,7 +82,7 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 
 	@SuppressWarnings("unchecked")
 	private boolean updateFormula(Control input, CBCFormulaItem item) {
-		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula;
 		if(input instanceof TextField) {
 			formula = ((TextField) input).getText();

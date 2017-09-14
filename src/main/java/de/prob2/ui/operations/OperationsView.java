@@ -183,6 +183,7 @@ public final class OperationsView extends AnchorPane {
 				icon.glyphSizeProperty().bind(fontsize);
 				setGraphic(icon);
 			} else {
+				setDisable(true);
 				setGraphic(null);
 				setText(null);
 			}

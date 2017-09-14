@@ -1,6 +1,7 @@
 package de.prob2.ui.consoles.b;
 
 import java.util.Collections;
+import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
@@ -25,11 +26,13 @@ public class BInterpreter implements Executable {
 
 	private static final Logger logger = LoggerFactory.getLogger(BInterpreter.class);
 	private final CurrentTrace currentTrace;
+	private final ResourceBundle bundle;
 	private final Trace defaultTrace;
 
 	@Inject
-	public BInterpreter(final MachineLoader machineLoader, final CurrentTrace currentTrace) {
+	public BInterpreter(final MachineLoader machineLoader, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
+		this.bundle = bundle;
 		this.defaultTrace = new Trace(machineLoader.getEmptyStateSpace(Collections.emptyMap()));
 	}
 
@@ -45,7 +48,7 @@ public class BInterpreter implements Executable {
 			return new ConsoleExecResult("", res.toString(), ConsoleExecResultType.PASSED);
 		} catch (CliError | EvaluationException | ProBError e) {
 			logger.info("B evaluation failed", e);
-			return new ConsoleExecResult("", "Evaluation failed: " + e, ConsoleExecResultType.ERROR);
+			return new ConsoleExecResult("", String.format(bundle.getString("consoles.b.evalFailed"), e), ConsoleExecResultType.ERROR);
 		}
 	}
 }

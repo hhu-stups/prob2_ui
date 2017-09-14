@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.cbc;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -26,8 +27,8 @@ public class CBCDeadlock extends AbstractCBCFormulaInputStage {
 	
 	@Inject
 	private CBCDeadlock(final StageManager stageManager, final CBCFormulaHandler cbcHandler,
-						final Injector injector) {
-		super(cbcHandler, injector);
+						final CurrentProject currentProject, final Injector injector) {
+		super(cbcHandler, currentProject, injector);
 		stageManager.loadFXML(this, "cbc_deadlock.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
 	}

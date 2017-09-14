@@ -1,8 +1,19 @@
 package de.prob2.ui.beditor;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
+
 import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.project.machines.Machine;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.MenuBar;
@@ -10,16 +21,11 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 import netscape.javascript.JSObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class BEditorStage extends Stage {
 	
@@ -30,13 +36,15 @@ public class BEditorStage extends Stage {
 	@FXML private WebView beditor;
 	
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	
 	private Path path;
 	private WebEngine engine;
 	
 	@Inject
-	public BEditorStage(final StageManager stageManager) {
+	public BEditorStage(final StageManager stageManager, final ResourceBundle bundle) {
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		stageManager.loadFXML(this, "beditor.fxml");
 	}
 	
@@ -59,8 +67,8 @@ public class BEditorStage extends Stage {
 	@FXML
 	public void handleSaveAs() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Select Location");
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
+		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.classicalB"), Machine.Type.B.getExtensions()));
 		File openFile = fileChooser.showSaveDialog(this.getOwner());
 		if (openFile != null) {
 			File newFile = new File(openFile.getAbsolutePath() + (openFile.getName().contains(".") ? "" : ".mch"));
@@ -77,7 +85,7 @@ public class BEditorStage extends Stage {
 			Files.write(path, beditorText.getBytes(EDITOR_CHARSET));
 		} catch (IOException e) {
 			LOGGER.error("Could not save file", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not save file:\n" + e).showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("beditor.couldNotSaveFile"), e)).showAndWait();
 		}
 	}
 	

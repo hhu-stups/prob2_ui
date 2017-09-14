@@ -1,10 +1,18 @@
 package de.prob2.ui.menu;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.ModelTranslationError;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -15,6 +23,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -23,17 +32,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 public class FileMenu extends Menu {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileMenu.class);
@@ -95,11 +98,11 @@ public class FileMenu extends Menu {
 
 	@FXML
 	private void handleOpen() {
-		final File selected = FileAsker.askForProjectOrMachine(stageManager.getMainStage());
+		final File selected = stageManager.showOpenProjectOrMachineChooser(stageManager.getMainStage());
 		if (selected == null) {
 			return;
 		}
-		final String ext = FileAsker.getExtension(selected.getName());
+		final String ext = StageManager.getExtension(selected.getName());
 		if ("json".equals(ext)) {
 			this.openProject(selected);
 		} else {
@@ -119,20 +122,6 @@ public class FileMenu extends Menu {
 		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
 		currentProject.addRunconfiguration(defaultRunconfig);
 		currentProject.startAnimation(defaultRunconfig);
-	}
-
-	@FXML
-	private void handleOpenProject() {
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open Project");
-		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("ProB2 Projects", "*.json"));
-
-		final File selectedProject = fileChooser.showOpenDialog(stageManager.getMainStage());
-		if (selectedProject == null) {
-			return;
-		}
-
-		this.openProject(selectedProject);
 	}
 
 	private void openProject(File file) {
