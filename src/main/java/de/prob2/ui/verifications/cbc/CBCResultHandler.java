@@ -10,6 +10,7 @@ import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.FindStateCommand.ResultType;
+import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
@@ -92,6 +93,22 @@ public class CBCResultHandler extends AbstractResultHandler {
 			showCheckingResult(item, "Searching valid state for predicate is interrupted", false);
 		} else {
 			showCheckingResult(item, "Error when searching valid state for predicate", false);
+		}
+	}
+	
+	public void handleFindRedundantInvariants(CBCFormulaItem item, GetRedundantInvariantsCommand cmd) {
+		List<String> result = cmd.getRedundantInvariants();
+		int size = result.size();
+		if(size == 0) {
+			showCheckingResult(item, "No redundant invariants found", true);
+		} else {
+			String header;
+			if(Boolean.valueOf(cmd.getRedundantInvariantsTimeout())) {
+				header = "Timeout occured";
+			} else {
+				header = "Redundant invariants found";	
+			}
+			showCheckingResult(item, String.join("\n", result), header, false);
 		}
 	}
 	

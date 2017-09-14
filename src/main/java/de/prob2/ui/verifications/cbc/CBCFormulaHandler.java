@@ -78,11 +78,12 @@ public class CBCFormulaHandler {
 		executeCheckingItem(checker, sequence, CBCType.SEQUENCE);
 	}
 	
-	public void findRedundantInvariants() {
+	public void findRedundantInvariants(CBCFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
 		stateSpace.execute(cmd);
-		//TODO: continue
+		resultHandler.handleFindRedundantInvariants(item, cmd);
+		updateMachine(currentProject.getCurrentMachine());
 	}
 	
 	public void checkRefinement(CBCFormulaItem item) {
@@ -169,8 +170,10 @@ public class CBCFormulaHandler {
 			findDeadlock();
 		} else if(item.getType() == CBCType.REFINEMENT) {
 			checkRefinement(item);
-		} else {
+		} else if(item.getType() == CBCType.ASSERTIONS) {
 			checkAssertions(item);
+		} else {
+			findRedundantInvariants(item);
 		}
 	}
 	
