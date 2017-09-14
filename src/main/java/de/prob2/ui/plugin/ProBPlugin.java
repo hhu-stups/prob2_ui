@@ -9,16 +9,16 @@ import ro.fortsoft.pf4j.PluginManager;
 import ro.fortsoft.pf4j.PluginWrapper;
 
 /**
- * This class will be extended by all plugins and
- * serves as the common class between a plugin and the prob2-ui application.
+ * This class will be extended by all plug-ins and
+ * serves as the common class between a plug-in and the prob2-ui application.
  *
  * It extends the class {@link Plugin} of the PF4J framework and
  * adds abstract methods to start ({@code startPlugin}) and
- * stop ({@code stopPlugin}) the plugin and
+ * stop ({@code stopPlugin}) the plug-in and
  * to give it a human readable name ({@code getName}).
  *
  * It also ensures that the {@code start} and {@code stop} method of the
- * {@link Plugin} class can only be called when the plugin hast not yet been started
+ * {@link Plugin} class can only be called when the plug-in hast not yet been started
  * or stopped.
  *
  * @author  Christoph Heinzen
@@ -36,21 +36,21 @@ public abstract class ProBPlugin extends Plugin{
     }
 
     /**
-     * Gives the plugin a human readable name.
+     * Gives the plug-in a human readable name.
      *
      * @return name of the plugin
      */
     public abstract String getName();
 
     /**
-     * Starts the plugin and ensures that the {@code start} method of the plugin is only called
-     * when the plugin has not yet been started.
+     * Starts the plug-in and ensures that the {@code start} method of the plug-in is only called
+     * when the plug-in has not yet been started.
      */
     public abstract void startPlugin();
 
     /**
-     * Stops the plugin and ensures that the {@code stop} method of the plugin is only called
-     * when the plugin has not yet been stopped.
+     * Stops the plug-in and ensures that the {@code stop} method of the plug-in is only called
+     * when the plug-in has not yet been stopped.
      */
     public abstract void stopPlugin();
 
@@ -109,9 +109,9 @@ public abstract class ProBPlugin extends Plugin{
     }
 
     /**
-     * Getter for the {@link ProBPluginManager.ProBJarPluginManager} used to load this plugin.
+     * Getter for the {@link ProBPluginManager.ProBJarPluginManager} used to load this plug-in.
      *
-     * @return Returns the {@link ProBPluginManager} used to load this plugin.
+     * @return Returns the {@link ProBPluginManager} used to load this plug-in.
      */
     public ProBPluginManager.ProBJarPluginManager getPluginManager() {
         PluginManager pluginManager = getWrapper().getPluginManager();

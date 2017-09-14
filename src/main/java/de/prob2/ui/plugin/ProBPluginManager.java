@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.Main;
 import de.prob2.ui.internal.StageManager;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
@@ -169,7 +170,7 @@ public class ProBPluginManager {
      * @param stage The owner window of the used {@link DirectoryChooser}.
      * @return Returns the plugins in the new directory.
      */
-    List<PluginWrapper> changePluginDirectory(Stage stage) {
+    List<PluginWrapper> changePluginDirectory(@NonNull final Stage stage) {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle(bundle.getString("pluginsmenu.changepath"));
         chooser.setInitialDirectory(getPluginDirectory());
