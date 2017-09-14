@@ -90,13 +90,13 @@ public class CBCFormulaHandler {
 	public void checkRefinement(CBCFormulaItem item) {
 		item = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand();
+		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand(stateSpace);
 		try {
 			stateSpace.execute(command);
 		} catch (Exception e){
 			LOGGER.error(e.getMessage());
 		}
-		resultHandler.handleRefinementChecking(item, command);
+		resultHandler.handleRefinementChecking(item, command, stateSpace);
 		updateMachine(currentProject.getCurrentMachine());
 	}
 	

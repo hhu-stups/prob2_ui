@@ -15,6 +15,7 @@ import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
 import de.prob.check.ModelCheckOk;
+import de.prob.check.RefinementCheckCounterExample;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -31,7 +32,8 @@ public class CBCResultHandler extends AbstractResultHandler {
 	public CBCResultHandler() {
 		this.type = CheckingType.CBC;
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
-		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class));
+		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
+												RefinementCheckCounterExample.class));
 		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
 		this.exception.addAll(Arrays.asList(CBCParseError.class));
 	}
@@ -59,8 +61,10 @@ public class CBCResultHandler extends AbstractResultHandler {
 	protected List<Trace> handleCounterExample(Object result, State stateid) {
 		if(result instanceof CBCInvariantViolationFound) {
 			return handleInvariantCounterExamples(result, stateid);
+		} else if(result instanceof CBCDeadlockFound) {
+			return handleDeadlockCounterExample(result, stateid);
 		}
-		return handleDeadlockCounterExample(result, stateid);
+		return handleRefinementCounterExample(result, stateid);
 	}
 	
 	private List<Trace> handleInvariantCounterExamples(Object result, State stateid) {
@@ -76,6 +80,12 @@ public class CBCResultHandler extends AbstractResultHandler {
 	private List<Trace> handleDeadlockCounterExample(Object result, State stateid) {
 		ArrayList<Trace> counterExamples = new ArrayList<>();
 		counterExamples.add(((CBCDeadlockFound) result).getTrace(stateid.getStateSpace()));
+		return counterExamples;
+	}
+	
+	private List<Trace> handleRefinementCounterExample(Object result, State stateid) {
+		ArrayList<Trace> counterExamples = new ArrayList<>();
+		counterExamples.add(((RefinementCheckCounterExample) result).getTrace(stateid.getStateSpace()));
 		return counterExamples;
 	}
 	
@@ -103,7 +113,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 			showCheckingResult(item, "No redundant invariants found", true);
 		} else {
 			String header;
-			if(Boolean.valueOf(cmd.getRedundantInvariantsTimeout())) {
+			if(cmd.isTimeout()) {
 				header = "Timeout occured";
 			} else {
 				header = "Redundant invariants found";	
@@ -112,7 +122,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 		}
 	}
 	
-	public void handleRefinementChecking(CBCFormulaItem item, ConstraintBasedRefinementCheckCommand cmd) {
+	public void handleRefinementChecking(CBCFormulaItem item, ConstraintBasedRefinementCheckCommand cmd, StateSpace s) {
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
 		String msg = cmd.getResultsString();
 		if(result == null) {
@@ -120,6 +130,9 @@ public class CBCResultHandler extends AbstractResultHandler {
 		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
 			showCheckingResult(item, msg, "Violation not found", true);
 		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
+			for(RefinementCheckCounterExample counterExample : cmd.getCounterExamples()) {
+				item.getCounterExamples().add(counterExample.getTrace(s));
+			}
 			showCheckingResult(item, msg, "Violation found", false);
 		} else {
 			showCheckingResult(item, msg, "Refinement checking is interrupted", false);
