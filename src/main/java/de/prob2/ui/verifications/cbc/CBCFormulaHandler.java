@@ -79,19 +79,16 @@ public class CBCFormulaHandler {
 	}
 	
 	public void findRedundantInvariants(CBCFormulaItem item) {
+		item = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
 		stateSpace.execute(cmd);
 		resultHandler.handleFindRedundantInvariants(item, cmd);
 		updateMachine(currentProject.getCurrentMachine());
 	}
-	
+		
 	public void checkRefinement(CBCFormulaItem item) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		int index = currentMachine.getCBCFormulas().indexOf(item);
-		if(index > -1) {
-			item = currentMachine.getCBCFormulas().get(index);
-		}
+		item = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand();
 		try {
@@ -106,11 +103,7 @@ public class CBCFormulaHandler {
 
 		
 	public void checkAssertions(CBCFormulaItem item) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		int index = currentMachine.getCBCFormulas().indexOf(item);
-		if(index > -1) {
-			item = currentMachine.getCBCFormulas().get(index);
-		}
+		item = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
 		stateSpace.execute(command);
@@ -118,8 +111,18 @@ public class CBCFormulaHandler {
 		updateMachine(currentProject.getCurrentMachine());
 	}
 	
+	private CBCFormulaItem getItemIfAlreadyExists(CBCFormulaItem item) {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		int index = currentMachine.getCBCFormulas().indexOf(item);
+		if(index > -1) {
+			item = currentMachine.getCBCFormulas().get(index);
+		}
+		return item;
+	}
+	
 
 	public void findValidState(CBCFormulaItem item) {
+		item = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
 		try {
