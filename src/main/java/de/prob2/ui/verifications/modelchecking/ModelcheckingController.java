@@ -212,8 +212,8 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@FXML
 	private AnchorPane statsPane;
-	@FXML
-	private VBox historyBox;
+	//@FXML
+	//private VBox historyBox;
 	@FXML
 	private Button addModelCheckButton;
 	@FXML
@@ -229,7 +229,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private final Map<String, IModelCheckJob> jobs;
 	private IModelCheckJob currentJob;
 	private Thread currentJobThread;
-	private ObservableList<Node> historyNodeList;
+	//private ObservableList<Node> historyNodeList;
 	private ModelCheckStats currentStats;
 	private ModelCheckingOptions currentOptions;
 
@@ -254,7 +254,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	public void initialize() {
 		helpButton.setHelpContent("HelpMain.html");
 		showStats(new ModelCheckStats(stageManager, this, statsView));
-		historyNodeList = historyBox.getChildren();
+		//historyNodeList = historyBox.getChildren();
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not());
 		
 		FontSize fontsize = injector.getInstance(FontSize.class);
@@ -329,13 +329,13 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		currentJob = new ConsistencyChecker(stateSpace, options, null, this);
 	}
 	
-	private void updateSelectedItem(Node selected) {
+	/*private void updateSelectedItem(Node selected) {
 		for (Node node : historyNodeList) {
 			node.getStyleClass().remove("historyItemBackgroundSelected");
 			node.getStyleClass().add("historyItemBackground");
 		}
 		selected.getStyleClass().add("historyItemBackgroundSelected");
-	}
+	}*/
 
 	private FontAwesomeIconView selectIcon(ModelCheckStats.Result res) {
 		FontAwesomeIcon icon;
@@ -380,7 +380,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	public void resetView() {
 		showStats(new ModelCheckStats(stageManager, this, statsView));
-		historyNodeList.clear();
+		//historyNodeList.clear();
 	}
 
 	@Override
@@ -411,7 +411,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats);
 			Node historyNode = toHistoryNode(modelcheckingItem);
 			Platform.runLater(() -> {
-				historyNodeList.add(historyNode);
+				//historyNodeList.add(historyNode);
 				this.stageController.hide();
 				injector.getInstance(OperationsView.class).update(currentTrace.get());
 				injector.getInstance(StatsView.class).update(currentTrace.get());
