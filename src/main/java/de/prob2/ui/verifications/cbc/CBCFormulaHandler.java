@@ -107,7 +107,7 @@ public class CBCFormulaHandler {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
 		stateSpace.execute(command);
-		resultHandler.handleAssertionChecking(item, command);
+		resultHandler.handleAssertionChecking(item, command, stateSpace);
 		updateMachine(currentProject.getCurrentMachine());
 	}
 	

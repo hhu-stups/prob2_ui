@@ -139,13 +139,14 @@ public class CBCResultHandler extends AbstractResultHandler {
 		}
 	}
 	
-	public void handleAssertionChecking(CBCFormulaItem item, ConstraintBasedAssertionCheckCommand cmd) {
+	public void handleAssertionChecking(CBCFormulaItem item, ConstraintBasedAssertionCheckCommand cmd, StateSpace stateSpace) {
 		ConstraintBasedAssertionCheckCommand.ResultType result = cmd.getResult();
 		if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS) {
 			showCheckingResult(item, "No counter-example exists", true);
 		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
 			showCheckingResult(item, "No counter-example found", true);
 		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.COUNTER_EXAMPLE) {
+			item.getCounterExamples().add(cmd.getTrace(stateSpace));
 			showCheckingResult(item, "Counter-example found", false);
 		} else {
 			showCheckingResult(item, "Assertion checking is interrupted", false);
