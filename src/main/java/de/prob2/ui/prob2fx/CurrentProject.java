@@ -23,7 +23,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -60,16 +59,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final Injector injector;
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
-	private final ModelcheckingController modelCheckController;
 
 	@Inject
 	private CurrentProject(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
-			final CurrentTrace currentTrace, final ModelcheckingController modelCheckController) {
+			final CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
 		this.injector = injector;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
-		this.modelCheckController = modelCheckController;
 
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
 				Paths.get(System.getProperty("user.home")));
@@ -114,8 +111,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.saved.set(true);
 		this.currentRunconfiguration.set(null);
 		this.currentMachine.set(null);
-
-		modelCheckController.resetView();
 	}
 
 	public void startAnimation(Runconfiguration runconfiguration) {
@@ -228,7 +223,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 		if (currentTrace.exists()) {
 			animations.removeTrace(currentTrace.get());
-			modelCheckController.resetView();
 		}
 		update(project);
 		initializeMachines();

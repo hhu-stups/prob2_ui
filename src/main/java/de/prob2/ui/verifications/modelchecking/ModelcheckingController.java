@@ -28,9 +28,10 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
-
+import de.prob2.ui.verifications.cbc.CBCFormulaItem;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -43,6 +44,9 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -125,7 +129,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		@FXML
 		private void startModelCheck() {
 			if (currentTrace.exists()) {
-				updateCurrentValues(getOptions(), animations.getCurrentTrace().getStateSpace());
+				updateCurrentValues(getOptions(), animations.getCurrentTrace().getStateSpace(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
 				startModelchecking();
 			} else {
 				stageManager.makeAlert(Alert.AlertType.ERROR, "No specification file loaded. Cannot run model checker.")
@@ -187,7 +191,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			options = options.checkGoal(findGoal.isSelected());
 			options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
 			options = options.recheckExisting(!searchForNewErrors.isSelected());
-
 			return options;
 		}
 
@@ -218,9 +221,22 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private Button addModelCheckButton;
 	@FXML
 	private HelpButton helpButton;
+	
+	@FXML
+	private TableView<ModelCheckingItem> tvItems;
+	
+	@FXML
+	private TableColumn<ModelCheckingItem, FontAwesomeIconView> statusColumn;
+	
+	@FXML
+	private TableColumn<ModelCheckingItem, String> strategyColumn;
+	
+	@FXML
+	private TableColumn<ModelCheckingItem, String> descriptionColumn;
 
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 	private final StatsView statsView;
 	private final ModelcheckingStageController stageController;
 	private final StageManager stageManager;
@@ -235,9 +251,11 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@Inject
 	private ModelcheckingController(final AnimationSelector animations, final CurrentTrace currentTrace,
-			final StageManager stageManager, final StatsView statsView, final Injector injector, final ResourceBundle bundle) {
+			final CurrentProject currentProject, final StageManager stageManager, final StatsView statsView, 
+			final Injector injector, final ResourceBundle bundle) {
 		this.animations = animations;
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.statsView = statsView;
 		this.stageManager = stageManager;
 		this.injector = injector;
@@ -256,9 +274,27 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		showStats(new ModelCheckStats(stageManager, this, statsView));
 		//historyNodeList = historyBox.getChildren();
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not());
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
+		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		
+		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
+			if(newValue != null) {
+				tvItems.itemsProperty().bind(newValue.modelcheckingItemsProperty());
+			} else {
+				tvItems.getItems().clear();
+				tvItems.itemsProperty().unbind();
+			}
+		});
 		
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addModelCheckButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
+	
+		currentProject.addListener((observable, from, to) -> {
+			if(to != from) {
+				this.resetView();
+			}
+		});
 	}
 
 	@FXML
@@ -268,7 +304,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		}
 	}
 
-	private Node toHistoryNode(ModelCheckingItem item) {
+	/*private Node toHistoryNode(ModelCheckingItem item) {
 		ContextMenu cm = createContextMenu(item);
 
 		AnchorPane background = new AnchorPane();
@@ -276,7 +312,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		background.setOnMouseClicked(event -> {
 			if (event.getButton() == MouseButton.PRIMARY) {
 				showStats(item.getStats());
-				updateSelectedItem(background);
+				//updateSelectedItem(background);
 				if (event.getClickCount() >= 2 && item.getResult() == ModelCheckStats.Result.DANGER) {
 					if (currentTrace.exists()) {
 						this.animations.removeTrace(currentTrace.get());
@@ -291,7 +327,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				}
 			}
 		});
-		updateSelectedItem(background);
+		//updateSelectedItem(background);
 		currentStats.setBackgroundOnClick(background.getOnMouseClicked());
 		HBox box = new HBox();
 		box.setSpacing(5);
@@ -308,9 +344,9 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		box.getChildren().add(text);
 
 		return background;
-	}
+	}*/
 
-	private ContextMenu createContextMenu(ModelCheckingItem item) {
+	/*private ContextMenu createContextMenu(ModelCheckingItem item) {
 		ContextMenu cm = new ContextMenu();
 		MenuItem mItem = new MenuItem("Show Trace To Error State");
 		mItem.setOnAction(event -> {
@@ -321,22 +357,16 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		});
 		cm.getItems().add(mItem);
 		return cm;
-	}
+	}*/
 	
-	public void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
+	public void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
 		currentOptions = options;
 		currentStats = new ModelCheckStats(stageManager, this, statsView);
 		currentJob = new ConsistencyChecker(stateSpace, options, null, this);
+		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy), toPrettyString(currentOptions));
+		currentProject.getCurrentMachine().modelcheckingItemsProperty().add(modelcheckingItem);
 	}
 	
-	/*private void updateSelectedItem(Node selected) {
-		for (Node node : historyNodeList) {
-			node.getStyleClass().remove("historyItemBackgroundSelected");
-			node.getStyleClass().add("historyItemBackground");
-		}
-		selected.getStyleClass().add("historyItemBackgroundSelected");
-	}*/
-
 	private FontAwesomeIconView selectIcon(ModelCheckStats.Result res) {
 		FontAwesomeIcon icon;
 		switch (res) {
@@ -407,9 +437,10 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				// isFinished was already called for this job
 				return;
 			}
+			
 			currentStats.isFinished(job, timeElapsed, result);
-			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats);
-			Node historyNode = toHistoryNode(modelcheckingItem);
+			
+			//Node historyNode = toHistoryNode(modelcheckingItem);
 			Platform.runLater(() -> {
 				//historyNodeList.add(historyNode);
 				this.stageController.hide();
