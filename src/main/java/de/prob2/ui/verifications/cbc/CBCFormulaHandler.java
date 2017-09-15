@@ -78,47 +78,51 @@ public class CBCFormulaHandler {
 		executeCheckingItem(checker, sequence, CBCType.SEQUENCE);
 	}
 	
-	public void findRedundantInvariants() {
+	public void findRedundantInvariants(CBCFormulaItem item) {
+		item = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
 		stateSpace.execute(cmd);
-		//TODO: continue
+		resultHandler.handleFindRedundantInvariants(item, cmd);
+		updateMachine(currentProject.getCurrentMachine());
 	}
-	
+		
 	public void checkRefinement(CBCFormulaItem item) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		int index = currentMachine.getCBCFormulas().indexOf(item);
-		if(index > -1) {
-			item = currentMachine.getCBCFormulas().get(index);
-		}
+		item = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand();
+		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand(stateSpace);
 		try {
 			stateSpace.execute(command);
 		} catch (Exception e){
 			LOGGER.error(e.getMessage());
 		}
-		resultHandler.handleRefinementChecking(item, command);
+		resultHandler.handleRefinementChecking(item, command, stateSpace);
 		updateMachine(currentProject.getCurrentMachine());
 	}
 	
 
 		
 	public void checkAssertions(CBCFormulaItem item) {
+		item = getItemIfAlreadyExists(item);
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
+		stateSpace.execute(command);
+		resultHandler.handleAssertionChecking(item, command, stateSpace);
+		updateMachine(currentProject.getCurrentMachine());
+	}
+	
+	private CBCFormulaItem getItemIfAlreadyExists(CBCFormulaItem item) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		int index = currentMachine.getCBCFormulas().indexOf(item);
 		if(index > -1) {
 			item = currentMachine.getCBCFormulas().get(index);
 		}
-		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
-		stateSpace.execute(command);
-		resultHandler.handleAssertionChecking(item, command);
-		updateMachine(currentProject.getCurrentMachine());
+		return item;
 	}
 	
 
 	public void findValidState(CBCFormulaItem item) {
+		item = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
 		try {
@@ -169,8 +173,10 @@ public class CBCFormulaHandler {
 			findDeadlock();
 		} else if(item.getType() == CBCType.REFINEMENT) {
 			checkRefinement(item);
-		} else {
+		} else if(item.getType() == CBCType.ASSERTIONS) {
 			checkAssertions(item);
+		} else {
+			findRedundantInvariants(item);
 		}
 	}
 	
