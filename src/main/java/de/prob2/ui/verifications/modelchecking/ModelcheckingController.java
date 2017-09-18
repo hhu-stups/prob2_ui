@@ -123,13 +123,22 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		@FXML
 		private void startModelCheck() {
 			if (currentTrace.exists()) {
-				updateCurrentValues(getOptions(), animations.getCurrentTrace().getStateSpace(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
-				startModelchecking();
+				checkItem();
 			} else {
 				stageManager.makeAlert(Alert.AlertType.ERROR, "No specification file loaded. Cannot run model checker.")
 						.showAndWait();
 				this.hide();
 			}
+		}
+		
+		private void checkItem() {
+			currentJobThread = new Thread(() -> {
+				synchronized(lock) {
+					updateCurrentValues(getOptions(), animations.getCurrentTrace().getStateSpace(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
+					startModelchecking();
+				}
+			}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
+			currentJobThread.start();
 		}
 		
 		private ModelCheckingOptions getOptions() {
@@ -185,6 +194,8 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	@FXML
 	private Button addModelCheckButton;
 	@FXML
+	private Button checkMachineButton;
+	@FXML
 	private HelpButton helpButton;
 	
 	@FXML
@@ -212,6 +223,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private Thread currentJobThread;
 	private ModelCheckStats currentStats;
 	private ModelCheckingOptions currentOptions;
+	private Object lock = new Object();
 
 	@Inject
 	private ModelcheckingController(final AnimationSelector animations, final CurrentTrace currentTrace,
@@ -243,6 +255,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	
 	private void setBindings() {
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -274,8 +287,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			if(item != null) {
 				if(item.getStats() == null) {
 					if(e.getButton() == MouseButton.PRIMARY) {
-						updateCurrentValues(item.getOptions(), animations.getCurrentTrace().getStateSpace(), item);
-						startModelchecking();
+						checkItem(item);
 					}
 				} else {
 					showStats(item.getStats());
@@ -285,6 +297,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 							this.animations.removeTrace(currentTrace.get());
 						}
 						animations.addNewAnimation(item.getStats().getTrace());
+						injector.getInstance(StatsView.class).update(item.getStats().getTrace());
 					}
 				}
 			}
@@ -308,8 +321,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			MenuItem checkItem = new MenuItem("Check seperately");
 			checkItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				updateCurrentValues(item.getOptions(), animations.getCurrentTrace().getStateSpace(), item);
-				startModelchecking();
+				checkItem(item);
 			});
 			
 			row.setOnMouseClicked(e-> {
@@ -333,6 +345,22 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		if (!stageController.isShowing()) {
 			this.stageController.showAndWait();
 		}
+	}
+	
+	@FXML
+	public void checkMachine() {
+		currentProject.currentMachineProperty().get().getModelcheckingItems()
+			.forEach(item->checkItem(item));
+	}
+	
+	private void checkItem(ModelCheckingItem item) {
+		currentJobThread = new Thread(() -> {
+			synchronized(lock) {
+				updateCurrentValues(item.getOptions(), animations.getCurrentTrace().getStateSpace(), item);
+				startModelchecking();
+			}
+		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
+		currentJobThread.start();
 	}
 
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
@@ -396,28 +424,28 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		stageController.setDisableStart(true);
 		jobs.put(currentJob.getJobId(), currentJob);
 		currentStats.startJob();
-		showStats(currentStats);
-		currentJobThread = new Thread(() -> {
-			final IModelCheckingResult result;
-			try {
-				result = currentJob.call();
-			} catch (Exception e) {
-				LOGGER.error("Exception while running model check job", e);
-				Platform.runLater(() -> stageManager
-						.makeAlert(Alert.AlertType.ERROR, "Exception while running model check job:\n" + e).show());
-				return;
-			} finally {
-				currentJobThread = null;
-				stageController.setDisableStart(false);
-			}
-			// The consistency checker sometimes doesn't call isFinished, so
-			// we call it manually here with some dummy information.
-			// If the checker already called isFinished, this call won't do
-			// anything - on the first call, the checker was removed from
-			// the jobs map, so the second call returns right away.
-			isFinished(currentJob.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
-		} , "Model Check Result Waiter " + threadCounter.getAndIncrement());
-		currentJobThread.start();
+		Platform.runLater(() -> {
+			showStats(currentStats);
+		});
+
+		final IModelCheckingResult result;
+		try {
+			result = currentJob.call();
+		} catch (Exception e) {
+			LOGGER.error("Exception while running model check job", e);
+			Platform.runLater(() -> stageManager
+					.makeAlert(Alert.AlertType.ERROR, "Exception while running model check job:\n" + e).show());
+			return;
+		} finally {
+			currentJobThread = null;
+			stageController.setDisableStart(false);
+		}
+		// The consistency checker sometimes doesn't call isFinished, so
+		// we call it manually here with some dummy information.
+		// If the checker already called isFinished, this call won't do
+		// anything - on the first call, the checker was removed from
+		// the jobs map, so the second call returns right away.
+		isFinished(currentJob.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
 	}
 
 	@Override
@@ -429,7 +457,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				return;
 			}
 			currentStats.isFinished(job, timeElapsed, result);
-			
 			Platform.runLater(() -> {
 				this.stageController.hide();
 				injector.getInstance(OperationsView.class).update(currentTrace.get());
