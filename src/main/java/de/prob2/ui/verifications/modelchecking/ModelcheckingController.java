@@ -349,8 +349,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	
 	@FXML
 	public void checkMachine() {
-		currentProject.currentMachineProperty().get().getModelcheckingItems()
-			.forEach(item->checkItem(item));
+		currentProject.currentMachineProperty().get().getModelcheckingItems().forEach(this::checkItem);
 	}
 	
 	private void checkItem(ModelCheckingItem item) {
@@ -358,6 +357,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			synchronized(lock) {
 				updateCurrentValues(item.getOptions(), animations.getCurrentTrace().getStateSpace(), item);
 				startModelchecking();
+				tvItems.getSelectionModel().select(item);
 			}
 		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
 		currentJobThread.start();
@@ -424,9 +424,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		stageController.setDisableStart(true);
 		jobs.put(currentJob.getJobId(), currentJob);
 		currentStats.startJob();
-		Platform.runLater(() -> {
-			showStats(currentStats);
-		});
+		Platform.runLater(() -> showStats(currentStats));
 
 		final IModelCheckingResult result;
 		try {
