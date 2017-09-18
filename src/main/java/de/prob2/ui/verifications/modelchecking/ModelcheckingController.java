@@ -324,9 +324,24 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				checkItem(item);
 			});
 			
+			MenuItem showFullValueItem = new MenuItem("Show full value");
+			showFullValueItem.setOnAction(e-> {
+				ModelcheckingItemFullValueStage fullValueStage = injector.getInstance(ModelcheckingItemFullValueStage.class);
+				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+				fullValueStage.setValues(item.getStrategy(), item.getDescription());
+				fullValueStage.show();
+			});
+			
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
 					ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+					if(row.emptyProperty().get()) {
+						checkItem.setDisable(true);
+						showFullValueItem.setDisable(true);
+					} else {
+						checkItem.setDisable(false);
+						showFullValueItem.setDisable(false);
+					}
 					if(row.emptyProperty().get() || item.getStats() == null || item.getStats().getTrace() == null) {
 						showTraceToErrorItem.setDisable(true);
 					} else {
@@ -335,7 +350,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 					
 				}
 			});
-			row.setContextMenu(new ContextMenu(showTraceToErrorItem, checkItem));
+			row.setContextMenu(new ContextMenu(showTraceToErrorItem, checkItem, showFullValueItem));
 			return row;
 		});
 	}
