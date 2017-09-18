@@ -149,6 +149,11 @@ public class Machine {
 				item.initializeStatus();
 			}
 		}
+		if(modelcheckingItems != null) {
+			for (ModelCheckingItem item : modelcheckingItems) {
+				item.initializeStatus();
+			}
+		}
 		patternManager = new PatternManager();
 	}
 	

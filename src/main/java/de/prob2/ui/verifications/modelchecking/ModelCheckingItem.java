@@ -11,7 +11,7 @@ import java.util.Objects;
 public class ModelCheckingItem {
 
 	private final ModelCheckingOptions options;
-	private transient final ModelCheckStats stats;
+	private transient ModelCheckStats stats;
 	
 	private transient FontAwesomeIconView status;
 	private Checked checked;
@@ -34,6 +34,10 @@ public class ModelCheckingItem {
 
 	public ModelCheckingOptions getOptions() {
 		return this.options;
+	}
+	
+	public void setStats(ModelCheckStats stats) {
+		this.stats = stats;
 	}
 
 	public ModelCheckStats getStats() {
@@ -66,9 +70,6 @@ public class ModelCheckingItem {
 		return status;
 	}
 	
-	public ModelCheckStats.Result getResult() {
-		return stats.getResult();
-	}
 	
 	public void setCheckedSuccessful() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);

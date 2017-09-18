@@ -30,6 +30,7 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -130,35 +131,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				this.hide();
 			}
 		}
-
-		private void startModelchecking() {
-			stageController.setDisableStart(true);
-			jobs.put(currentJob.getJobId(), currentJob);
-			currentStats.startJob();
-			showStats(currentStats);
-			currentJobThread = new Thread(() -> {
-				final IModelCheckingResult result;
-				try {
-					result = currentJob.call();
-				} catch (Exception e) {
-					LOGGER.error("Exception while running model check job", e);
-					Platform.runLater(() -> stageManager
-							.makeAlert(Alert.AlertType.ERROR, "Exception while running model check job:\n" + e).show());
-					return;
-				} finally {
-					currentJobThread = null;
-					stageController.setDisableStart(false);
-				}
-				// The consistency checker sometimes doesn't call isFinished, so
-				// we call it manually here with some dummy information.
-				// If the checker already called isFinished, this call won't do
-				// anything - on the first call, the checker was removed from
-				// the jobs map, so the second call returns right away.
-				isFinished(currentJob.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
-			} , "Model Check Result Waiter " + threadCounter.getAndIncrement());
-			currentJobThread.start();
-		}
-
+		
 		private ModelCheckingOptions getOptions() {
 			ModelCheckingOptions options = new ModelCheckingOptions();
 			
@@ -267,17 +240,12 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		
+		tvItems.disableProperty().bind(currentTrace.existsProperty().not());
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
 				tvItems.itemsProperty().unbind();
 				tvItems.itemsProperty().bind(newValue.modelcheckingItemsProperty());
-				int size = tvItems.getItems().size();
-				if(size > 0) {
-					tvItems.getFocusModel().focus(0);
-				} else {
-					resetView();
-				}
+				resetView();
 			} else {
 				tvItems.getItems().clear();
 				tvItems.itemsProperty().unbind();
@@ -294,11 +262,17 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		});
 		
 		tvItems.setOnMouseClicked(e-> {
-			if(e.getButton() == MouseButton.PRIMARY) {
-				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				if(item != null) {
+			ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+			if(item != null) {
+				if(item.getStats() == null) {
+					if(e.getButton() == MouseButton.PRIMARY) {
+						updateCurrentValues(item.getOptions(), animations.getCurrentTrace().getStateSpace(), item);
+						startModelchecking();
+					}
+				} else {
 					showStats(item.getStats());
-					if (e.getClickCount() >= 2 && item.getResult() == ModelCheckStats.Result.DANGER) {
+					if (e.getClickCount() >= 2 && e.getButton() == MouseButton.PRIMARY &&
+							item.getChecked() == Checked.FAIL && item.getStats().getTrace() != null) {
 						if (currentTrace.exists()) {
 							this.animations.removeTrace(currentTrace.get());
 						}
@@ -309,7 +283,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		});
 		
 		tvItems.setRowFactory(table -> {
-			
 			final TableRow<ModelCheckingItem> row = new TableRow<>();
 			
 			MenuItem showTraceToErrorItem = new MenuItem("Show Trace To Error State");
@@ -319,13 +292,13 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 					this.animations.removeTrace(currentTrace.get());
 				}
 				animations.addNewAnimation(item.getStats().getTrace());
+				injector.getInstance(StatsView.class).update(item.getStats().getTrace());
 			});
-			
 			
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
 					ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-					if(row.emptyProperty().get() || item.getStats().getTrace() == null) {
+					if(row.emptyProperty().get() || item.getStats() == null || item.getStats().getTrace() == null) {
 						showTraceToErrorItem.setDisable(true);
 					} else {
 						showTraceToErrorItem.setDisable(false);
@@ -333,7 +306,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 					
 				}
 			});
-			
 			row.setContextMenu(new ContextMenu(showTraceToErrorItem));
 			return row;
 		});
@@ -346,13 +318,23 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		}
 	}
 
-	public void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
-		currentOptions = options;
-		currentStats = new ModelCheckStats(stageManager, this, statsView);
-		currentJob = new ConsistencyChecker(stateSpace, options, null, this);
+	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
+		updateCurrentValues(options, stateSpace);
 		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy), toPrettyString(currentOptions));
 		currentStats.setItem(modelcheckingItem);
 		currentProject.getCurrentMachine().modelcheckingItemsProperty().add(modelcheckingItem);
+		tvItems.getSelectionModel().selectLast();
+	}
+	
+	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
+		currentOptions = options;
+		currentStats = new ModelCheckStats(stageManager, this, statsView);
+		currentJob = new ConsistencyChecker(stateSpace, options, null, this);
+	}
+	
+	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, ModelCheckingItem item) {
+		updateCurrentValues(options, stateSpace);
+		currentStats.setItem(item);
 	}
 
 	private String toPrettyString(ModelCheckingOptions options) {
@@ -391,6 +373,34 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			Platform.runLater(
 					() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Exception in updateStats:\n" + e).show());
 		}
+	}
+	
+	private void startModelchecking() {
+		stageController.setDisableStart(true);
+		jobs.put(currentJob.getJobId(), currentJob);
+		currentStats.startJob();
+		showStats(currentStats);
+		currentJobThread = new Thread(() -> {
+			final IModelCheckingResult result;
+			try {
+				result = currentJob.call();
+			} catch (Exception e) {
+				LOGGER.error("Exception while running model check job", e);
+				Platform.runLater(() -> stageManager
+						.makeAlert(Alert.AlertType.ERROR, "Exception while running model check job:\n" + e).show());
+				return;
+			} finally {
+				currentJobThread = null;
+				stageController.setDisableStart(false);
+			}
+			// The consistency checker sometimes doesn't call isFinished, so
+			// we call it manually here with some dummy information.
+			// If the checker already called isFinished, this call won't do
+			// anything - on the first call, the checker was removed from
+			// the jobs map, so the second call returns right away.
+			isFinished(currentJob.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
+		} , "Model Check Result Waiter " + threadCounter.getAndIncrement());
+		currentJobThread.start();
 	}
 
 	@Override
