@@ -109,9 +109,7 @@ public final class ModelCheckStats extends AnchorPane {
 			item.setTimeout();
 			item.setChecked(Checked.TIMEOUT);
 		}
-		if(item.getStats() == null) {
-			item.setStats(this);
-		}
+		item.setStats(this);
 		String message = result.getMessage();
 
 		final StateSpace stateSpace = modelChecker.getStateSpace();

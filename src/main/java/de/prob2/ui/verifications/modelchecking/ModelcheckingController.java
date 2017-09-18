@@ -236,11 +236,22 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	public void initialize() {
 		helpButton.setHelpContent("HelpMain.html");
 		showStats(new ModelCheckStats(stageManager, this, statsView));
+		setBindings();
+		setListeners();
+		setContextMenus();
+	}
+	
+	private void setBindings() {
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not());
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) (addModelCheckButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
+	}
+	
+	private void setListeners() {
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
 				tvItems.itemsProperty().unbind();
@@ -252,9 +263,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			}
 		});
 		
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (addModelCheckButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
-	
 		currentProject.addListener((observable, from, to) -> {
 			if(to != from) {
 				this.resetView();
@@ -281,7 +289,9 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				}
 			}
 		});
-		
+	}
+	
+	private void setContextMenus() {
 		tvItems.setRowFactory(table -> {
 			final TableRow<ModelCheckingItem> row = new TableRow<>();
 			
@@ -295,6 +305,13 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				injector.getInstance(StatsView.class).update(item.getStats().getTrace());
 			});
 			
+			MenuItem checkItem = new MenuItem("Check seperately");
+			checkItem.setOnAction(e-> {
+				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+				updateCurrentValues(item.getOptions(), animations.getCurrentTrace().getStateSpace(), item);
+				startModelchecking();
+			});
+			
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
 					ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
@@ -306,7 +323,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 					
 				}
 			});
-			row.setContextMenu(new ContextMenu(showTraceToErrorItem));
+			row.setContextMenu(new ContextMenu(showTraceToErrorItem, checkItem));
 			return row;
 		});
 	}
