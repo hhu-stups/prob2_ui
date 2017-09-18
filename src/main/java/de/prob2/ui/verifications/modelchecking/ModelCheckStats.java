@@ -42,6 +42,8 @@ public final class ModelCheckStats extends AnchorPane {
 	
 	private final StatsView statsView;
 	
+	private ModelCheckingItem item;
+	
 	@Inject
 	public ModelCheckStats(final StageManager stageManager, final ModelcheckingController modelcheckingController, final StatsView statsView) {
 		this.modelcheckingController = modelcheckingController;
@@ -104,10 +106,13 @@ public final class ModelCheckStats extends AnchorPane {
 		
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
 			this.result = Result.SUCCESS;
+			item.setCheckedSuccessful();
 		} else if (result instanceof ITraceDescription) {
 			this.result = Result.DANGER;
+			item.setCheckedFailed();
 		} else {
 			this.result = Result.WARNING;
+			item.setTimeout();
 		}
 		String message = result.getMessage();
 
@@ -169,5 +174,9 @@ public final class ModelCheckStats extends AnchorPane {
 	
 	public void setBackgroundOnClick(EventHandler<? super MouseEvent> eventHandler) {
 		resultBackground.setOnMouseClicked(eventHandler);
+	}
+	
+	public void setItem(ModelCheckingItem item) {
+		this.item = item;
 	}
 }

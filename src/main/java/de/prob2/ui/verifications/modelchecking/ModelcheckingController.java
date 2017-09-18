@@ -11,7 +11,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob.check.ConsistencyChecker;
@@ -31,12 +30,8 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.verifications.cbc.CBCFormulaItem;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -45,13 +40,11 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -215,8 +208,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@FXML
 	private AnchorPane statsPane;
-	//@FXML
-	//private VBox historyBox;
+
 	@FXML
 	private Button addModelCheckButton;
 	@FXML
@@ -245,7 +237,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private final Map<String, IModelCheckJob> jobs;
 	private IModelCheckJob currentJob;
 	private Thread currentJobThread;
-	//private ObservableList<Node> historyNodeList;
 	private ModelCheckStats currentStats;
 	private ModelCheckingOptions currentOptions;
 
@@ -272,7 +263,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	public void initialize() {
 		helpButton.setHelpContent("HelpMain.html");
 		showStats(new ModelCheckStats(stageManager, this, statsView));
-		//historyNodeList = historyBox.getChildren();
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
@@ -280,7 +270,14 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
+				tvItems.itemsProperty().unbind();
 				tvItems.itemsProperty().bind(newValue.modelcheckingItemsProperty());
+				int size = tvItems.getItems().size();
+				if(size > 0) {
+					tvItems.getFocusModel().focus(0);
+				} else {
+					resetView();
+				}
 			} else {
 				tvItems.getItems().clear();
 				tvItems.itemsProperty().unbind();
@@ -295,6 +292,51 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				this.resetView();
 			}
 		});
+		
+		tvItems.setOnMouseClicked(e-> {
+			if(e.getButton() == MouseButton.PRIMARY) {
+				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+				if(item != null) {
+					showStats(item.getStats());
+					if (e.getClickCount() >= 2 && item.getResult() == ModelCheckStats.Result.DANGER) {
+						if (currentTrace.exists()) {
+							this.animations.removeTrace(currentTrace.get());
+						}
+						animations.addNewAnimation(item.getStats().getTrace());
+					}
+				}
+			}
+		});
+		
+		tvItems.setRowFactory(table -> {
+			
+			final TableRow<ModelCheckingItem> row = new TableRow<>();
+			
+			MenuItem showTraceToErrorItem = new MenuItem("Show Trace To Error State");
+			showTraceToErrorItem.setOnAction(e-> {
+				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+				if (currentTrace.exists()) {
+					this.animations.removeTrace(currentTrace.get());
+				}
+				animations.addNewAnimation(item.getStats().getTrace());
+			});
+			
+			
+			row.setOnMouseClicked(e-> {
+				if(e.getButton() == MouseButton.SECONDARY) {
+					ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+					if(row.emptyProperty().get() || item.getStats().getTrace() == null) {
+						showTraceToErrorItem.setDisable(true);
+					} else {
+						showTraceToErrorItem.setDisable(false);
+					}
+					
+				}
+			});
+			
+			row.setContextMenu(new ContextMenu(showTraceToErrorItem));
+			return row;
+		});
 	}
 
 	@FXML
@@ -304,90 +346,13 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		}
 	}
 
-	/*private Node toHistoryNode(ModelCheckingItem item) {
-		ContextMenu cm = createContextMenu(item);
-
-		AnchorPane background = new AnchorPane();
-		VBox.setMargin(background, new Insets(2.5, 5, 2.5, 5));
-		background.setOnMouseClicked(event -> {
-			if (event.getButton() == MouseButton.PRIMARY) {
-				showStats(item.getStats());
-				//updateSelectedItem(background);
-				if (event.getClickCount() >= 2 && item.getResult() == ModelCheckStats.Result.DANGER) {
-					if (currentTrace.exists()) {
-						this.animations.removeTrace(currentTrace.get());
-					}
-					animations.addNewAnimation(item.getStats().getTrace());
-				}
-			}
-			if (event.getButton() == MouseButton.SECONDARY) {
-				cm.show(background, event.getScreenX(), event.getScreenY());
-				if (item.getResult() != ModelCheckStats.Result.DANGER) {
-					cm.getItems().get(0).setDisable(true);
-				}
-			}
-		});
-		//updateSelectedItem(background);
-		currentStats.setBackgroundOnClick(background.getOnMouseClicked());
-		HBox box = new HBox();
-		box.setSpacing(5);
-		background.getChildren().add(box);
-		AnchorPane.setTopAnchor(box, 2.0);
-		AnchorPane.setRightAnchor(box, 4.0);
-		AnchorPane.setBottomAnchor(box, 2.0);
-		AnchorPane.setLeftAnchor(box, 4.0);
-
-		FontAwesomeIconView iconView = selectIcon(item.getResult());
-		Text text = new Text(toPrettyString(item.getOptions()));
-		Platform.runLater(() -> text.wrappingWidthProperty().bind(this.widthProperty().subtract(70.0)));
-		box.getChildren().add(iconView);
-		box.getChildren().add(text);
-
-		return background;
-	}*/
-
-	/*private ContextMenu createContextMenu(ModelCheckingItem item) {
-		ContextMenu cm = new ContextMenu();
-		MenuItem mItem = new MenuItem("Show Trace To Error State");
-		mItem.setOnAction(event -> {
-			if (currentTrace.exists()) {
-				this.animations.removeTrace(currentTrace.get());
-			}
-			animations.addNewAnimation(item.getStats().getTrace());
-		});
-		cm.getItems().add(mItem);
-		return cm;
-	}*/
-	
 	public void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
 		currentOptions = options;
 		currentStats = new ModelCheckStats(stageManager, this, statsView);
 		currentJob = new ConsistencyChecker(stateSpace, options, null, this);
 		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy), toPrettyString(currentOptions));
+		currentStats.setItem(modelcheckingItem);
 		currentProject.getCurrentMachine().modelcheckingItemsProperty().add(modelcheckingItem);
-	}
-	
-	private FontAwesomeIconView selectIcon(ModelCheckStats.Result res) {
-		FontAwesomeIcon icon;
-		switch (res) {
-		case SUCCESS:
-			icon = FontAwesomeIcon.CHECK_CIRCLE_ALT;
-			break;
-
-		case DANGER:
-			icon = FontAwesomeIcon.TIMES_CIRCLE_ALT;
-			break;
-
-		case WARNING:
-			icon = FontAwesomeIcon.EXCLAMATION_TRIANGLE;
-			break;
-
-		default:
-			throw new IllegalArgumentException("Invalid result: " + res);
-		}
-		FontAwesomeIconView iconView = new FontAwesomeIconView(icon);
-		iconView.setSize("15");
-		return iconView;
 	}
 
 	private String toPrettyString(ModelCheckingOptions options) {
@@ -410,7 +375,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	public void resetView() {
 		showStats(new ModelCheckStats(stageManager, this, statsView));
-		//historyNodeList.clear();
 	}
 
 	@Override
@@ -437,15 +401,13 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				// isFinished was already called for this job
 				return;
 			}
-			
 			currentStats.isFinished(job, timeElapsed, result);
 			
-			//Node historyNode = toHistoryNode(modelcheckingItem);
 			Platform.runLater(() -> {
-				//historyNodeList.add(historyNode);
 				this.stageController.hide();
 				injector.getInstance(OperationsView.class).update(currentTrace.get());
 				injector.getInstance(StatsView.class).update(currentTrace.get());
+				tvItems.refresh();
 			});
 		} catch (RuntimeException e) {
 			LOGGER.error("Exception in isFinished", e);

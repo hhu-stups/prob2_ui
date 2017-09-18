@@ -82,6 +82,13 @@ public class ModelCheckingItem {
 		this.status = icon;
 	}
 	
+	public void setTimeout() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
+		icon.setFill(Color.BLUE);
+		this.status = icon;
+	}
+
+	
 	public void setChecked(Checked checked) {
 		this.checked = checked;
 	}
@@ -89,5 +96,6 @@ public class ModelCheckingItem {
 	public Checked getChecked() {
 		return checked;
 	}
+	
 
 }
