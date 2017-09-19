@@ -130,7 +130,7 @@ public class EditMenu extends Menu {
 			processBuilder.start();
 		} catch (IOException e) {
 			LOGGER.error("Failed to start external editor", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("menu.edit.errors.coultNotStartEditor"), e)).showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("menu.edit.errors.couldNotStartEditor"), e)).showAndWait();
 		}
 	}
 }
