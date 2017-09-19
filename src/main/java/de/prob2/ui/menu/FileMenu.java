@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -57,15 +58,17 @@ public class FileMenu extends Menu {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 
 	@Inject
 	private FileMenu(final StageManager stageManager, final RecentProjects recentProjects,
-			final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
+			final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector, final ResourceBundle bundle) {
 		this.recentProjects = recentProjects;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		stageManager.loadFXML(this, "fileMenu.fxml");
 	}
 
@@ -115,7 +118,7 @@ public class FileMenu extends Menu {
 		final Path absolute = file.toPath();
 		final Path relative = projectLocation.relativize(absolute);
 		final String shortName = file.getName().substring(0, file.getName().lastIndexOf('.'));
-		final String description = "(this project was created automatically from file " + absolute + ')';
+		final String description = String.format(bundle.getString("project.automaticDescription"), absolute);
 		final Machine machine = new Machine(shortName, "", relative);
 		currentProject.set(new Project(shortName, description, machine, projectLocation.toFile()));
 
@@ -146,7 +149,7 @@ public class FileMenu extends Menu {
 			this.currentTrace.reload(this.currentTrace.get());
 		} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 			LOGGER.error("Model reload failed", e);
-			stageManager.makeExceptionAlert(Alert.AlertType.ERROR, "Failed to reload model", e).showAndWait();
+			stageManager.makeExceptionAlert(Alert.AlertType.ERROR, bundle.getString("menu.edit.errors.couldNotReload"), e).showAndWait();
 		}
 	}
 
