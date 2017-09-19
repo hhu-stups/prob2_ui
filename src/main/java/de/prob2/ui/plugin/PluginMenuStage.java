@@ -1,6 +1,7 @@
 package de.prob2.ui.plugin;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,6 +18,7 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,7 @@ import java.util.ResourceBundle;
 /**
  * Created by Christoph Heinzen on 03.08.17.
  */
+@Singleton
 public class PluginMenuStage extends Stage {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginMenuStage.class);
@@ -63,11 +66,14 @@ public class PluginMenuStage extends Stage {
         this.proBPluginManager = proBPluginManager;
         this.bundle = bundle;
         this.stageManager = stageManager;
-        stageManager.loadFXML(this, "plugin_menu_stage.fxml");
+        stageManager.loadFXML(this, "plugin_menu_stage.fxml", this.getClass().getName());
+        initModality(Modality.APPLICATION_MODAL);
+        initOwner(stageManager.getMainStage());
     }
 
     @FXML
     private void initialize() {
+        //TODO: check how to sort a tableview proper
         pathTextField.setText(proBPluginManager.getPluginDirectory().getAbsolutePath());
 
         pluginList = FXCollections.observableArrayList(getProBJarPluginManager().getPlugins());
@@ -85,7 +91,9 @@ public class PluginMenuStage extends Stage {
         };
 
         getProBJarPluginManager().addPluginStateListener(stateListener);
-        this.setOnCloseRequest(closeEvent -> getProBJarPluginManager().removePluginStateListener(stateListener));
+        //TODO: check listener and list handling when stage not shown
+        //this.setOnCloseRequest(closeEvent -> getProBJarPluginManager().removePluginStateListener(stateListener));
+        //this.setOnShown(event -> {System.out.println();});
 
         configureColumns();
         configureContextMenu();

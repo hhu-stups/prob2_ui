@@ -8,6 +8,8 @@ import ro.fortsoft.pf4j.PluginException;
 import ro.fortsoft.pf4j.PluginManager;
 import ro.fortsoft.pf4j.PluginWrapper;
 
+import java.net.URL;
+
 /**
  * This class will be extended by all plug-ins and
  * serves as the common class between a plug-in and the prob2-ui application.
@@ -130,6 +132,10 @@ public abstract class ProBPlugin extends Plugin{
      */
     public Injector getInjector() {
         return getProBConnection().getInjector();
+    }
+
+    protected URL getResource(String name) {
+        return getWrapper().getPluginClassLoader().getResource(name);
     }
 
 }

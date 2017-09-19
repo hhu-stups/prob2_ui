@@ -45,8 +45,6 @@ public class PluginMenu extends Menu {
     @FXML
     private void showPluginMenu() {
         PluginMenuStage pluginMenuStage = injector.getInstance(PluginMenuStage.class);
-        pluginMenuStage.initModality(Modality.APPLICATION_MODAL);
-        pluginMenuStage.initOwner(stageManager.getMainStage());
         pluginMenuStage.show();
     }
 
