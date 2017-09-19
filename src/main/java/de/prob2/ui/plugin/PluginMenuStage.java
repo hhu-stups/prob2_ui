@@ -114,7 +114,7 @@ public class PluginMenuStage extends Stage {
 
     @FXML
     private void addPlugin() {
-       proBPluginManager.addPlugin(this);
+       proBPluginManager.addPlugin();
     }
 
     @FXML
@@ -124,7 +124,7 @@ public class PluginMenuStage extends Stage {
 
     @FXML
     private void changePath() {
-        List<PluginWrapper> plugins = proBPluginManager.changePluginDirectory(this);
+        List<PluginWrapper> plugins = proBPluginManager.changePluginDirectory();
         if (plugins != null) {
             pluginList.clear();
             pluginList.addAll(plugins);

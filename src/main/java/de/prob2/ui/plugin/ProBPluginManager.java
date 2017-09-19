@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.Main;
 import de.prob2.ui.internal.StageManager;
-import edu.umd.cs.findbugs.annotations.NonNull;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
@@ -88,31 +87,23 @@ public class ProBPluginManager {
      */
 
     /**
-     * Calls the {@code addPlugin(Stage stage)} method with the main-stage provided by the
-     * {@link StageManager}.
-     */
-    public void addPlugin() {
-        addPlugin(stageManager.getMainStage());
-    }
-
-    /**
      * Shows a {@link FileChooser} to select a plugin.
      * If the user selects a plugin, the selected file will be copied into to the plugins-directory.
      * After that the plugin gets loaded and started if necessary.
      * If an error occurs, an {@link Alert} with an error message will be shown.
      *
-     * @param stage parent-stage of the used {@link FileChooser}
      */
-    void addPlugin(@Nonnull final Stage stage) {
+    void addPlugin() {
         //let the user select a plugin-file
+        Stage stage = stageManager.getCurrent();
         final File selectedPlugin = showFileChooser(stage);
         if (selectedPlugin != null && createPluginDirectory()) {
             String pluginFileName = selectedPlugin.getName();
             File plugin = new File(getPluginDirectory() + File.separator + pluginFileName);
             try {
-                if (copyPluginFile(selectedPlugin, plugin, stage)) {
+                if (copyPluginFile(selectedPlugin, plugin)) {
                     String pluginId = pluginManager.loadPlugin(plugin.toPath());
-                    if (checkLoadedPlugin(stage, pluginId, pluginFileName)
+                    if (checkLoadedPlugin(pluginId, pluginFileName)
                             && getInactivePluginIds() != null
                             && !getInactivePluginIds().contains(pluginId)) {
                         pluginManager.startPlugin(pluginId);
@@ -120,7 +111,7 @@ public class ProBPluginManager {
                 }
             } catch (PluginException e) {
                 LOGGER.warn("Tried to copy and load/start the plugin {}.\nThis exception was thrown: ", pluginFileName, e);
-                showWarningAlert(stage, "plugins.error.load", pluginFileName);
+                showWarningAlert("plugins.error.load", pluginFileName);
                 //if an error occurred, delete the plugin file
                 try {
                     Files.deleteIfExists(plugin.toPath());
@@ -146,7 +137,7 @@ public class ProBPluginManager {
                 }
             }
         } else {
-            showWarningAlert(stageManager.getMainStage(), "plugins.error.inactive", getPluginDirectory());
+            showWarningAlert("plugins.error.inactive", getPluginDirectory());
         }
     }
 
@@ -167,14 +158,13 @@ public class ProBPluginManager {
      * Because PF4J does not allow it to change thee directory, we have
      * to create a new instance of the {@link ProBJarPluginManager}.
      *
-     * @param stage The owner window of the used {@link DirectoryChooser}.
      * @return Returns the plugins in the new directory.
      */
-    List<PluginWrapper> changePluginDirectory(@NonNull final Stage stage) {
+    List<PluginWrapper> changePluginDirectory() {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle(bundle.getString("pluginsmenu.changepath"));
         chooser.setInitialDirectory(getPluginDirectory());
-        File newPath = chooser.showDialog(stage);
+        File newPath = chooser.showDialog(stageManager.getCurrent());
         if (newPath != null) {
             //unload all plugins
             List<PluginWrapper> loadedPlugins = pluginManager.getPlugins();
@@ -231,7 +221,7 @@ public class ProBPluginManager {
      * private methods used to add a new plugin
      */
 
-    private boolean copyPluginFile(File source, File destination, Stage parentStage) {
+    private boolean copyPluginFile(File source, File destination) {
         if (destination.exists()) {
             //if there is already a file with the name, try to find the corresponding plugin
             PluginWrapper wrapper = pluginManager.getPlugin(destination.toPath());
@@ -243,7 +233,7 @@ public class ProBPluginManager {
                                 ((ProBPlugin) wrapper.getPlugin()).getName(),
                                 wrapper.getDescriptor().getVersion()),
                         ButtonType.YES, ButtonType.NO);
-                dialog.initOwner(stageManager.getMainStage());
+                dialog.initOwner(stageManager.getCurrent());
                 Optional<ButtonType> result = dialog.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.YES) {
                     //if he wants to overwrite, delete the plugin
@@ -258,7 +248,7 @@ public class ProBPluginManager {
                     Files.deleteIfExists(destination.toPath());
                 } catch (IOException ex) {
                     LOGGER.warn("Could not delete file " + destination.getName() + ".");
-                    showWarningAlert(parentStage, "plugins.error.delete", destination.getName());
+                    showWarningAlert("plugins.error.delete", destination.getName());
                     return false;
                 }
             }
@@ -268,12 +258,12 @@ public class ProBPluginManager {
             Files.copy(source.toPath(), destination.toPath());
             return true;
         } catch (IOException e) {
-            showWarningAlert(parentStage,"plugins.error.copy", destination.getName());
+            showWarningAlert("plugins.error.copy", destination.getName());
         }
         return false;
     }
 
-    private boolean checkLoadedPlugin(Stage parentStage, String loadedPluginId, String pluginFileName) throws PluginException {
+    private boolean checkLoadedPlugin(String loadedPluginId, String pluginFileName) throws PluginException {
         if (loadedPluginId == null) {
             // error while loading the plugin
             throw new PluginException("Could not load the plugin '" + pluginFileName + "'.");
@@ -282,8 +272,7 @@ public class ProBPluginManager {
             //because we don't use the enabled/disabled.txt of PF4J, the only reason for a
             //plugin to be disabled is, when it has the wrong version
             if (pluginWrapper.getPluginState() == PluginState.DISABLED) {
-                showWarningAlert(parentStage,
-                        "plugins.error.version",
+                showWarningAlert("plugins.error.version",
                         pluginWrapper.getPluginPath().getFileName(),
                         pluginWrapper.getDescriptor().getRequires(),
                         pluginManager.getSystemVersion());
@@ -372,11 +361,11 @@ public class ProBPluginManager {
      * GUI helper methods
      */
 
-    private void showWarningAlert(Stage parentStage, String bundleKey, Object... stringParams) {
+    private void showWarningAlert(String bundleKey, Object... stringParams) {
         Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
                 String.format(bundle.getString(bundleKey), stringParams),
                 ButtonType.OK);
-        alert.initOwner(parentStage);
+        alert.initOwner(stageManager.getCurrent());
         alert.show();
     }
 
