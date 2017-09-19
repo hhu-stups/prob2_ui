@@ -23,7 +23,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
-
+import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -92,6 +92,7 @@ public class Machine {
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<CBCFormulaItem> cbcFormulas;
+	private ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
 	private transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
@@ -105,6 +106,7 @@ public class Machine {
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
+		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingITems", FXCollections.observableArrayList());
 	}
 	
 	public Machine(String name, String description, Path location) {
@@ -144,6 +146,11 @@ public class Machine {
 		}
 		if (ltlPatterns != null) {
 			for (LTLPatternItem item : ltlPatterns) {
+				item.initializeStatus();
+			}
+		}
+		if(modelcheckingItems != null) {
+			for (ModelCheckingItem item : modelcheckingItems) {
 				item.initializeStatus();
 			}
 		}
@@ -264,6 +271,24 @@ public class Machine {
 		this.changed.set(true);
 	}
 	
+	public ListProperty<ModelCheckingItem> modelcheckingItemsProperty() {
+		return modelcheckingItems;
+	}
+	
+	public List<ModelCheckingItem> getModelcheckingItems() {
+		return modelcheckingItems.get();
+	}
+	
+	public void addModelcheckingItem(ModelCheckingItem item) {
+		modelcheckingItems.add(item);
+		this.changed.set(true);
+	}
+	
+	public void removeModelcheckingItem(ModelCheckingItem item) {
+		modelcheckingItems.remove(item);
+		this.changed.set(true);
+	}
+	
 		
 	public void replaceMissingWithDefaults() {
 		if (type == null) {
@@ -277,6 +302,10 @@ public class Machine {
 		}
 		if(cbcFormulas == null) {
 			this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
+		}
+		if(modelcheckingItems == null) {
+			this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
+
 		}
 		this.changed = new SimpleBooleanProperty(false); 
 	}

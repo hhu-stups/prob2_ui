@@ -10,10 +10,12 @@ import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.FindStateCommand.ResultType;
+import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
 import de.prob.check.ModelCheckOk;
+import de.prob.check.RefinementCheckCounterExample;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -30,7 +32,8 @@ public class CBCResultHandler extends AbstractResultHandler {
 	public CBCResultHandler() {
 		this.type = CheckingType.CBC;
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
-		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class));
+		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
+												RefinementCheckCounterExample.class));
 		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
 		this.exception.addAll(Arrays.asList(CBCParseError.class));
 	}
@@ -58,8 +61,10 @@ public class CBCResultHandler extends AbstractResultHandler {
 	protected List<Trace> handleCounterExample(Object result, State stateid) {
 		if(result instanceof CBCInvariantViolationFound) {
 			return handleInvariantCounterExamples(result, stateid);
+		} else if(result instanceof CBCDeadlockFound) {
+			return handleDeadlockCounterExample(result, stateid);
 		}
-		return handleDeadlockCounterExample(result, stateid);
+		return handleRefinementCounterExample(result, stateid);
 	}
 	
 	private List<Trace> handleInvariantCounterExamples(Object result, State stateid) {
@@ -75,6 +80,12 @@ public class CBCResultHandler extends AbstractResultHandler {
 	private List<Trace> handleDeadlockCounterExample(Object result, State stateid) {
 		ArrayList<Trace> counterExamples = new ArrayList<>();
 		counterExamples.add(((CBCDeadlockFound) result).getTrace(stateid.getStateSpace()));
+		return counterExamples;
+	}
+	
+	private List<Trace> handleRefinementCounterExample(Object result, State stateid) {
+		ArrayList<Trace> counterExamples = new ArrayList<>();
+		counterExamples.add(((RefinementCheckCounterExample) result).getTrace(stateid.getStateSpace()));
 		return counterExamples;
 	}
 	
@@ -95,7 +106,23 @@ public class CBCResultHandler extends AbstractResultHandler {
 		}
 	}
 	
-	public void handleRefinementChecking(CBCFormulaItem item, ConstraintBasedRefinementCheckCommand cmd) {
+	public void handleFindRedundantInvariants(CBCFormulaItem item, GetRedundantInvariantsCommand cmd) {
+		List<String> result = cmd.getRedundantInvariants();
+		int size = result.size();
+		if(size == 0) {
+			showCheckingResult(item, "No redundant invariants found", true);
+		} else {
+			String header;
+			if(cmd.isTimeout()) {
+				header = "Timeout occured";
+			} else {
+				header = "Redundant invariants found";	
+			}
+			showCheckingResult(item, String.join("\n", result), header, false);
+		}
+	}
+	
+	public void handleRefinementChecking(CBCFormulaItem item, ConstraintBasedRefinementCheckCommand cmd, StateSpace s) {
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
 		String msg = cmd.getResultsString();
 		if(result == null) {
@@ -103,19 +130,23 @@ public class CBCResultHandler extends AbstractResultHandler {
 		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
 			showCheckingResult(item, msg, "Violation not found", true);
 		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
+			for(RefinementCheckCounterExample counterExample : cmd.getCounterExamples()) {
+				item.getCounterExamples().add(counterExample.getTrace(s));
+			}
 			showCheckingResult(item, msg, "Violation found", false);
 		} else {
 			showCheckingResult(item, msg, "Refinement checking is interrupted", false);
 		}
 	}
 	
-	public void handleAssertionChecking(CBCFormulaItem item, ConstraintBasedAssertionCheckCommand cmd) {
+	public void handleAssertionChecking(CBCFormulaItem item, ConstraintBasedAssertionCheckCommand cmd, StateSpace stateSpace) {
 		ConstraintBasedAssertionCheckCommand.ResultType result = cmd.getResult();
 		if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS) {
 			showCheckingResult(item, "No counter-example exists", true);
 		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
 			showCheckingResult(item, "No counter-example found", true);
 		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.COUNTER_EXAMPLE) {
+			item.getCounterExamples().add(cmd.getTrace(stateSpace));
 			showCheckingResult(item, "Counter-example found", false);
 		} else {
 			showCheckingResult(item, "Assertion checking is interrupted", false);

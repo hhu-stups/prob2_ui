@@ -104,8 +104,10 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 	
 	@FXML
 	public void findRedundants() {
-		cbcHandler.addFormula("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", CBCFormulaItem.CBCType.INVARIANT, true);
-		cbcHandler.findRedundantInvariants();
+		CBCFormulaItem item = new CBCFormulaItem("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", CBCFormulaItem.CBCType.FIND_REDUNDANT_INVARIANTS);
+		cbcHandler.addFormula(item, true);
+		cbcHandler.findRedundantInvariants(item);
+		this.close();
 	}
 	
 	public void changeFormula(CBCFormulaItem item) {

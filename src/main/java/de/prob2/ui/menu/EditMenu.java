@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,15 +49,17 @@ public class EditMenu extends Menu {
 	private final MachineLoader machineLoader;
 	private final GlobalPreferences globalPreferences;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 
 	@Inject
 	private EditMenu(final StageManager stageManager, final CurrentProject currentProject, final Injector injector,
-			final MachineLoader machineLoader, final GlobalPreferences globalPreferences) {
+			final MachineLoader machineLoader, final GlobalPreferences globalPreferences, final ResourceBundle bundle) {
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.machineLoader = machineLoader;
 		this.globalPreferences = globalPreferences;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		stageManager.loadFXML(this, "editMenu.fxml");
 	}
 
@@ -96,7 +99,7 @@ public class EditMenu extends Menu {
 			text = lines.collect(Collectors.joining(System.lineSeparator()));
 		} catch (IOException | UncheckedIOException e) {
 			LOGGER.error("Could not read file " + path, e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not read file:\n" + path + "\n" + e).showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("menu.edit.errors.couldNotReadFile"), path, e)).showAndWait();
 			return;
 		}
 		editorStage.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
@@ -127,7 +130,7 @@ public class EditMenu extends Menu {
 			processBuilder.start();
 		} catch (IOException e) {
 			LOGGER.error("Failed to start external editor", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to start external editor:\n" + e).showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("menu.edit.errors.couldNotStartEditor"), e)).showAndWait();
 		}
 	}
 }

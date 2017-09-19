@@ -3,7 +3,7 @@
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<fx:root type="Dialog" title="%formula.stage.title" xmlns="http://javafx.com/javafx/8.0.91"
+<fx:root type="Dialog" title="%formula.input.title" xmlns="http://javafx.com/javafx/8.0.91"
 		 xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane fx:id="parent" stylesheets="@/prob.css">
@@ -12,9 +12,9 @@
 					<HBox AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="20.0"
 						AnchorPane.rightAnchor="10.0" spacing="30.0" alignment="CENTER_LEFT">
 						<VBox spacing="15" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
-							<Label fx:id="lbHeader" text="%formula.stage.title" id="formula-dialog-header" />
+							<Label fx:id="lbHeader" text="%formula.input.title" id="formula-dialog-header" />
 							<HBox spacing="10" alignment="CENTER_LEFT">
-								<Label alignment="CENTER_RIGHT" text="%formula.stage.enterFormula" />
+								<Label alignment="CENTER_RIGHT" text="%formula.input.enterFormula" />
 								<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
 							</HBox>
 						</VBox>

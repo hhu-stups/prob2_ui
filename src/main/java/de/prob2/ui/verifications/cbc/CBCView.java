@@ -145,7 +145,7 @@ public class CBCView extends AnchorPane {
 			changeItem.setDisable(true);
 			
 			row.setOnMouseClicked(e-> {
-				List<CBCType> changeDisabled = Arrays.asList(CBCType.FIND_DEADLOCK, CBCType.REFINEMENT, CBCType.ASSERTIONS);
+				List<CBCType> changeDisabled = Arrays.asList(CBCType.FIND_DEADLOCK, CBCType.REFINEMENT, CBCType.ASSERTIONS, CBCType.FIND_REDUNDANT_INVARIANTS);
 				if(e.getButton() == MouseButton.SECONDARY) {
 					CBCFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 					if(row.emptyProperty().get() || item.getCounterExamples().isEmpty()) {
