@@ -93,7 +93,7 @@ public class ProBPluginManager {
      * If an error occurs, an {@link Alert} with an error message will be shown.
      *
      */
-    void addPlugin() {
+    public void addPlugin() {
         //let the user select a plugin-file
         Stage stage = stageManager.getCurrent();
         final File selectedPlugin = showFileChooser(stage);
