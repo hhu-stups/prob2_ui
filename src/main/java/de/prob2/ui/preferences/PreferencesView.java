@@ -1,25 +1,33 @@
 package de.prob2.ui.preferences;
 
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 import com.google.inject.Inject;
+
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.internal.StageManager;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 public final class PreferencesView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesView.class);
@@ -63,6 +71,8 @@ public final class PreferencesView extends BorderPane {
 	@FXML
 	private void initialize() {
 		this.prefSearchField.textProperty().addListener(observable -> this.updatePreferences());
+		
+		this.tv.getSelectionModel().clearSelection();
 		
 		tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 		

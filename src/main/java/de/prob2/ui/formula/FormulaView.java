@@ -1,5 +1,7 @@
 package de.prob2.ui.formula;
 
+import java.util.ResourceBundle;
+
 import de.prob2.ui.internal.StageManager;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
@@ -19,7 +21,7 @@ public class FormulaView extends Stage {
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.84;
 	
-	public FormulaView(StageManager stageManager, FormulaGraph data) {
+	public FormulaView(StageManager stageManager, FormulaGraph data, ResourceBundle bundle) {
 		super();
 		graph = data;
 		setEventListeners();
@@ -29,7 +31,7 @@ public class FormulaView extends Stage {
 		// Wrap root in a StackPane so the Mac menu bar can be set
 		// (the root has to be a Pane subclass, and ScrollPane extends Control and not Pane)
 		this.setScene(new Scene(new StackPane(root), 1024, 768));
-		this.setTitle("Mathematical Expression");
+		this.setTitle(bundle.getString("formula.view.title"));
 		stageManager.register(this, null);
 	}
 	

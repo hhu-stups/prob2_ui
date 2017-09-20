@@ -1,21 +1,28 @@
 package de.prob2.ui.project.preferences;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 
 public class PreferencesDialog extends Dialog<Preference> {
 	@FXML
@@ -58,11 +65,10 @@ public class PreferencesDialog extends Dialog<Preference> {
 	@FXML
 	private void initialize() {
 		this.prefsView.setPreferences(this.prefs);
-		this.preference = new DefaultPreference();
+		this.preference = new Preference("", new HashMap<>());
 
 		List<Preference> preferencesList = currentProject.getPreferences();
-		preferencesNamesSet = new HashSet<>();
-		preferencesNamesSet.addAll(preferencesList.stream().map(Preference::getName).collect(Collectors.toList()));
+		preferencesNamesSet = preferencesList.stream().map(Preference::getName).collect(Collectors.toCollection(HashSet::new));
 
 		Button okButton = (Button) this.getDialogPane().lookupButton(okButtonType);
 		okButton.setDisable(true);
@@ -87,7 +93,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 		this.preference = preference;
 		preferencesNamesSet.remove(preference.getName());
 		this.nameField.setText(preference.getName());
-		for (Entry<String, String> pref : preference.getPreferences().entrySet()) {
+		for (Map.Entry<String, String> pref : preference.getPreferences().entrySet()) {
 			this.prefs.setPreferenceValue(pref.getKey(), pref.getValue());
 		}
 	}

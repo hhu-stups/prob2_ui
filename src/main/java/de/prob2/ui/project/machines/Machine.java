@@ -1,27 +1,35 @@
 package de.prob2.ui.project.machines;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob.ltl.parser.pattern.PatternManager;
-import de.prob.scripting.Api;
-import de.prob.scripting.ModelTranslationError;
-import de.prob.statespace.StateSpace;
-import de.prob2.ui.menu.FileAsker;
-import de.prob2.ui.verifications.cbc.CBCFormulaItem;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
-import javafx.scene.paint.Color;
-
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
+
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
+import de.prob.ltl.parser.pattern.PatternManager;
+import de.prob.scripting.Api;
+import de.prob.scripting.ModelTranslationError;
+import de.prob.statespace.StateSpace;
+
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.verifications.cbc.CBCFormulaItem;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.scene.paint.Color;
 
 public class Machine {
 	@FunctionalInterface
@@ -75,29 +83,6 @@ public class Machine {
 		}
 	}
 	
-	public static final class FileAndType {
-		private final File file;
-		private final Machine.Type type;
-		
-		public FileAndType(final File file, final Machine.Type type) {
-			super();
-			
-			Objects.requireNonNull(file);
-			Objects.requireNonNull(type);
-			
-			this.file = file;
-			this.type = type;
-		}
-		
-		public File getFile() {
-			return this.file;
-		}
-		
-		public Machine.Type getType() {
-			return this.type;
-		}
-	}
-	
 	protected transient FontAwesomeIconView ltlstatus;
 	protected transient FontAwesomeIconView cbcstatus;
 	private String name;
@@ -107,7 +92,9 @@ public class Machine {
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<CBCFormulaItem> cbcFormulas;
+	private ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
+	private transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
 		initializeLTLStatus();
@@ -119,11 +106,12 @@ public class Machine {
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
+		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingITems", FXCollections.observableArrayList());
 	}
 	
 	public Machine(String name, String description, Path location) {
 		this(name, description, location,
-			Machine.Type.fromExtension(FileAsker.getExtension(location.getFileName().toString())));
+			Machine.Type.fromExtension(StageManager.getExtension(location.getFileName().toString())));
 	}
 	
 	public void initialize() {
@@ -132,6 +120,10 @@ public class Machine {
 		for(CBCFormulaItem item : cbcFormulas) {
 			item.initializeCounterExamples();
 		}
+	}
+	
+	public BooleanProperty changedProperty() {
+		return changed;
 	}
 
 	public String getFileName() {
@@ -154,6 +146,11 @@ public class Machine {
 		}
 		if (ltlPatterns != null) {
 			for (LTLPatternItem item : ltlPatterns) {
+				item.initializeStatus();
+			}
+		}
+		if(modelcheckingItems != null) {
+			for (ModelCheckingItem item : modelcheckingItems) {
 				item.initializeStatus();
 			}
 		}
@@ -181,17 +178,19 @@ public class Machine {
 	public String getName() {
 		return name;
 	}
+	
+	public void setName(String name) {
+		this.name = name;
+		this.changed.set(true);
+	}
 
 	public String getDescription() {
 		return description;
 	}
 	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
 	public void setDescription(String description) {
 		this.description = description;
+		this.changed.set(true);
 	}
 	
 	public void setLTLCheckedSuccessful() {
@@ -228,10 +227,12 @@ public class Machine {
 	
 	public void addLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.add(formula);
+		this.changed.set(true);
 	}
 	
 	public void removeLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.remove(formula);
+		this.changed.set(true);
 	}
 	
 	public ListProperty<LTLPatternItem> ltlPatternsProperty() {
@@ -244,27 +245,48 @@ public class Machine {
 	
 	public void addLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.add(pattern);
+		this.changed.set(true);
 	}
 	
 	public void removeLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.remove(pattern);
+		this.changed.set(true);
 	}
 	
 	public ListProperty<CBCFormulaItem> cbcFormulasProperty() {
 		return cbcFormulas;
 	}
 	
+	public List<CBCFormulaItem> getCBCFormulas() {
+		return cbcFormulas.get();
+	}
 	
 	public void addCBCFormula(CBCFormulaItem formula) {
 		cbcFormulas.add(formula);
+		this.changed.set(true);
 	}
 	
 	public void removeCBCFormula(CBCFormulaItem formula) {
 		cbcFormulas.remove(formula);
+		this.changed.set(true);
 	}
 	
-	public List<CBCFormulaItem> getCBCFormulas() {
-		return cbcFormulas.get();
+	public ListProperty<ModelCheckingItem> modelcheckingItemsProperty() {
+		return modelcheckingItems;
+	}
+	
+	public List<ModelCheckingItem> getModelcheckingItems() {
+		return modelcheckingItems.get();
+	}
+	
+	public void addModelcheckingItem(ModelCheckingItem item) {
+		modelcheckingItems.add(item);
+		this.changed.set(true);
+	}
+	
+	public void removeModelcheckingItem(ModelCheckingItem item) {
+		modelcheckingItems.remove(item);
+		this.changed.set(true);
 	}
 	
 		
@@ -281,6 +303,11 @@ public class Machine {
 		if(cbcFormulas == null) {
 			this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
 		}
+		if(modelcheckingItems == null) {
+			this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
+
+		}
+		this.changed = new SimpleBooleanProperty(false); 
 	}
 	
 	public Path getPath() {
@@ -316,5 +343,4 @@ public class Machine {
 	public void clearPatternManager() {
 		patternManager.getPatterns().clear();
 	}
-	
 }

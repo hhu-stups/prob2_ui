@@ -11,6 +11,7 @@ import com.google.inject.Injector;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.BEvent;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -34,8 +35,9 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 	
 	@Inject
 	private CBCInvariants(final StageManager stageManager, final CurrentTrace currentTrace, 
-							final CBCFormulaHandler cbcHandler, final Injector injector) {
-		super(cbcHandler, injector);
+							final CurrentProject currentProject, final CBCFormulaHandler cbcHandler, 
+							final Injector injector) {
+		super(cbcHandler, currentProject, injector);
 		this.currentTrace = currentTrace;
 		this.events = new ArrayList<>();
 		stageManager.loadFXML(this, "cbc_invariants.fxml");
@@ -102,8 +104,10 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 	
 	@FXML
 	public void findRedundants() {
-		cbcHandler.addFormula("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", CBCFormulaItem.CBCType.INVARIANT, true);
-		cbcHandler.findRedundantInvariants();
+		CBCFormulaItem item = new CBCFormulaItem("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", CBCFormulaItem.CBCType.FIND_REDUNDANT_INVARIANTS);
+		cbcHandler.addFormula(item, true);
+		cbcHandler.findRedundantInvariants(item);
+		this.close();
 	}
 	
 	public void changeFormula(CBCFormulaItem item) {

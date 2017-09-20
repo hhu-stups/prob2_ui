@@ -32,6 +32,7 @@ import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.statusbar.StatusBar;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -71,6 +72,7 @@ public final class StatesView extends AnchorPane {
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
 	private final FormulaGenerator formulaGenerator;
+	private final StatusBar statusBar;
 	private final StageManager stageManager;
 
 	private final Map<IEvalElement, AbstractEvalResult> currentValues;
@@ -82,12 +84,14 @@ public final class StatesView extends AnchorPane {
 		final Injector injector,
 		final CurrentTrace currentTrace,
 		final FormulaGenerator formulaGenerator,
+		final StatusBar statusBar,
 		final StageManager stageManager,
 		final StopActions stopActions
 	) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.formulaGenerator = formulaGenerator;
+		this.statusBar = statusBar;
 		this.stageManager = stageManager;
 
 		this.currentValues = new HashMap<>();
@@ -251,7 +255,10 @@ public final class StatesView extends AnchorPane {
 	private void updateRoot(final Trace trace) {
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 		
-		Platform.runLater(() -> this.tv.setDisable(true));
+		Platform.runLater(() -> {
+			this.statusBar.setStatesViewUpdating(true);
+			this.tv.setDisable(true);
+		});
 		
 		final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
 		trace.getStateSpace().execute(cmd);
@@ -271,6 +278,7 @@ public final class StatesView extends AnchorPane {
 			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);
+			this.statusBar.setStatesViewUpdating(false);
 		});
 	}
 	

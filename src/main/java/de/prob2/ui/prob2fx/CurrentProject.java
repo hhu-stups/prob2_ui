@@ -23,8 +23,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-import de.prob2.ui.verifications.ltl.LTLView;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -61,16 +59,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final Injector injector;
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
-	private final ModelcheckingController modelCheckController;
 
 	@Inject
 	private CurrentProject(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
-			final CurrentTrace currentTrace, final ModelcheckingController modelCheckController) {
+			final CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
 		this.injector = injector;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
-		this.modelCheckController = modelCheckController;
 
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
 				Paths.get(System.getProperty("user.home")));
@@ -83,7 +79,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations",
 				FXCollections.observableArrayList());
 		this.currentRunconfiguration = new SimpleObjectProperty<>(this, "currentRunconfiguration", null);
-		this.currentMachine =  new SimpleObjectProperty<>(this, "currentMachine", null);
+		this.currentMachine = new SimpleObjectProperty<>(this, "currentMachine", null);
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
 
@@ -115,8 +111,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.saved.set(true);
 		this.currentRunconfiguration.set(null);
 		this.currentMachine.set(null);
-
-		modelCheckController.resetView();
 	}
 
 	public void startAnimation(Runconfiguration runconfiguration) {
@@ -189,19 +183,19 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return getRunconfigurations().stream().filter(runconfig -> machine.equals(runconfig.getMachine()))
 				.collect(Collectors.toList());
 	}
-	
+
 	public ReadOnlyObjectProperty<Runconfiguration> currentRunconfigurationProperty() {
 		return this.currentRunconfiguration;
 	}
-	
+
 	public Runconfiguration getCurrentRunconfiguration() {
 		return this.currentRunconfigurationProperty().get();
 	}
-	
+
 	public ReadOnlyObjectProperty<Machine> currentMachineProperty() {
 		return this.currentMachine;
 	}
-	
+
 	public Machine getCurrentMachine() {
 		return this.currentMachineProperty().get();
 	}
@@ -209,7 +203,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void initializeMachines() {
 		for (Machine machine : machines) {
 			machine.initialize();
-			injector.getInstance(LTLView.class).parseMachine(machine);
 		}
 	}
 
@@ -230,14 +223,27 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 		if (currentTrace.exists()) {
 			animations.removeTrace(currentTrace.get());
-			modelCheckController.resetView();
 		}
-		super.set(project);
+		update(project);
 		initializeMachines();
 	}
 
 	public void update(Project project) {
 		super.set(project);
+		for(Machine machine : project.getMachines()) {
+			machine.changedProperty().addListener((observable, from, to) -> {
+				if (to) {
+					this.setSaved(false);
+				}
+			});
+		}
+		for(Preference pref : project.getPreferences()) {
+			pref.changedProperty().addListener((observable, from, to) -> {
+				if (to) {
+					this.setSaved(false);
+				}
+			});
+		}
 	}
 
 	public void remove() {
@@ -342,7 +348,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 		return null;
 	}
-	
+
 	private boolean confirmReplacingProject() {
 		if (exists()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
