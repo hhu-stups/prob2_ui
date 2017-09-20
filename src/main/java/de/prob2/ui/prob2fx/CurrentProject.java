@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -56,14 +57,16 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	private final ObjectProperty<Path> defaultLocation;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	private final Injector injector;
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 
 	@Inject
-	private CurrentProject(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
+	private CurrentProject(final StageManager stageManager, final ResourceBundle bundle, final Injector injector, final AnimationSelector animations,
 			final CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		this.injector = injector;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
@@ -125,8 +128,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			this.currentRunconfiguration.set(runconfiguration);
 			this.currentMachine.set(runconfiguration.getMachine());
 		} else {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not load machine \"" + runconfiguration.getMachine()
-					+ "\" with preferences: \"" + runconfiguration.getPreference() + "\"").showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.couldNotLoadMachine"), runconfiguration.getMachine(), runconfiguration.getPreference())).showAndWait();
 		}
 	}
 
@@ -352,8 +354,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private boolean confirmReplacingProject() {
 		if (exists()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
-			alert.setHeaderText("You've already opened a project.");
-			alert.setContentText("Do you want to close the current project?\n(Unsaved changes will be lost)");
+			alert.setHeaderText(bundle.getString("project.confirmReplacingProject.header"));
+			alert.setContentText(bundle.getString("project.confirmReplacingProject.content"));
 			Optional<ButtonType> result = alert.showAndWait();
 			return result.isPresent() && ButtonType.OK.equals(result.get());
 		} else {
