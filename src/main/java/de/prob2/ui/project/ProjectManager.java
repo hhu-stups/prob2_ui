@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import com.google.gson.Gson;
@@ -32,7 +33,6 @@ import de.prob2.ui.project.runconfigurations.Runconfiguration;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
 import org.hildan.fxgson.FxGson;
@@ -47,13 +47,15 @@ public class ProjectManager {
 	private final Gson gson;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	private final RecentProjects recentProjects;
 
 	@Inject
-	public ProjectManager(CurrentProject currentProject, StageManager stageManager, RecentProjects recentProjects) {
+	public ProjectManager(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, RecentProjects recentProjects) {
 		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		this.recentProjects = recentProjects;
 	}
 
@@ -89,12 +91,8 @@ public class ProjectManager {
 			initializeLTL(project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
-			Alert alert = stageManager.makeAlert(AlertType.ERROR,
-					"The project file " + file + " could not be found.\n"
-							+ "The file was probably moved, renamed or deleted.\n\n"
-							+ "Would you like to remove this project from the list of recent projects?",
-					ButtonType.YES, ButtonType.NO);
-			alert.setHeaderText("Project File not found.");
+			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.fileNotFound.content"), file), ButtonType.YES, ButtonType.NO);
+			alert.setHeaderText(bundle.getString("project.fileNotFound.header"));
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 				Platform.runLater(() -> recentProjects.remove(file.getAbsolutePath()));
