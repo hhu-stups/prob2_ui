@@ -11,6 +11,7 @@ import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.TablePersistenceHandler;
@@ -19,6 +20,7 @@ import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.states.StatesView;
+import de.prob2.ui.verifications.VerificationsView;
 import javafx.geometry.BoundingBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,8 @@ public final class Config {
 		private Map<String, double[]> stageBoxes;
 		private List<String> groovyObjectTabs;
 		private String currentPreference;
+		private String currentMainTab;
+		private String currentVerificationTab;
 		private List<String> expandedTitledPanes;
 		private String defaultProjectLocation;
 		private double[] horizontalDividerPositions;
@@ -138,6 +142,12 @@ public final class Config {
 		if (configData.currentPreference == null) {
 			configData.currentPreference = this.defaultData.currentPreference;
 		}
+		if (configData.currentMainTab == null) {
+			configData.currentMainTab = this.defaultData.currentMainTab;
+		}
+		if (configData.currentVerificationTab == null) {
+			configData.currentVerificationTab = this.defaultData.currentVerificationTab;
+		}
 		if (configData.groovyConsoleSettings == null) {
 			configData.groovyConsoleSettings = this.defaultData.groovyConsoleSettings;
 		}
@@ -219,9 +229,12 @@ public final class Config {
 		for (String pane : configData.expandedTitledPanes) {
 			this.uiState.getExpandedTitledPanes().add(pane);
 		}
+		
 
 		this.injector.getInstance(PreferencesStage.class).setCurrentTab(configData.currentPreference);
-
+		this.injector.getInstance(MainView.class).setCurrentTab(configData.currentMainTab);
+		this.injector.getInstance(VerificationsView.class).setCurrentTab(configData.currentVerificationTab);
+		
 		groovyConsole.applySettings(configData.groovyConsoleSettings);
 		bConsole.applySettings(configData.bConsoleSettings);
 
@@ -257,6 +270,8 @@ public final class Config {
 		configData.recentProjects = new ArrayList<>(this.recentProjects);
 		configData.defaultProjectLocation = this.currentProject.getDefaultLocation().toString();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
+		configData.currentMainTab = injector.getInstance(MainView.class).getCurrentTab();
+		configData.currentVerificationTab = injector.getInstance(VerificationsView.class).getCurrentTab();
 		configData.groovyConsoleSettings = groovyConsole.getSettings();
 		configData.bConsoleSettings = bConsole.getSettings();
 		configData.expandedTitledPanes = new ArrayList<>(this.uiState.getExpandedTitledPanes());

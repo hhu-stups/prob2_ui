@@ -50,6 +50,7 @@ public class MainController extends BorderPane {
 		stageManager.loadFXML(this, guiState);
 	}
 	
+	
 	@FXML
 	private void initialize() {
 		accordions.forEach(acc ->
@@ -59,6 +60,9 @@ public class MainController extends BorderPane {
 				tp.getContent().setVisible(true);
 				tp.setOnMouseClicked(event -> {
 					if (tp.isExpanded()) {
+						for(TitledPane pane : acc.getPanes()) {
+							uiState.getExpandedTitledPanes().remove(pane.getId());
+						}
 						uiState.getExpandedTitledPanes().add(tp.getId());
 					} else {
 						uiState.getExpandedTitledPanes().remove(tp.getId());
