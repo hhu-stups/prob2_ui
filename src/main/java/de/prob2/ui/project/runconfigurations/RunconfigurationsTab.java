@@ -97,4 +97,8 @@ public class RunconfigurationsTab extends Tab {
 		injector.getInstance(RunconfigurationsDialog.class).showAndWait()
 				.ifPresent(currentProject::addRunconfiguration);
 	}
+	
+	public void disableTable(boolean disable) {
+		runconfigurationsListView.setDisable(disable);
+	}
 }

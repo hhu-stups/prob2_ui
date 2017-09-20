@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
@@ -56,11 +57,12 @@ public class MachineLoader {
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final StatusBar statusBar;
+	private final Injector injector;
 
 	@Inject
 	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager,
 			final AnimationSelector animations, final CurrentTrace currentTrace,
-			final GlobalPreferences globalPreferences, final StatusBar statusBar) {
+			final GlobalPreferences globalPreferences, final StatusBar statusBar, final Injector injector) {
 		this.api = api;
 		this.openLock = new Object();
 		this.currentProject = currentProject;
@@ -69,6 +71,7 @@ public class MachineLoader {
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.statusBar = statusBar;
+		this.injector = injector;
 	}
 
 	public StateSpace getEmptyStateSpace(final Map<String, String> prefs) {
@@ -116,6 +119,7 @@ public class MachineLoader {
 				if (currentTrace.exists()) {
 					this.animations.removeTrace(currentTrace.get());
 				}
+				injector.getInstance(ProjectView.class).disableRunconfigurationsTable(true);
 
 				setLoadingStatus(StatusBar.LoadingStatus.LOADING_FILE);
 				final Path path = getPathToMachine(machine);
@@ -126,6 +130,7 @@ public class MachineLoader {
 
 				setLoadingStatus(StatusBar.LoadingStatus.ADDING_ANIMATION);
 				this.animations.addNewAnimation(new Trace(stateSpace));
+				injector.getInstance(ProjectView.class).disableRunconfigurationsTable(false);
 			} finally {
 				setLoadingStatus(StatusBar.LoadingStatus.NOT_LOADING);
 			}

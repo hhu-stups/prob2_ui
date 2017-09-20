@@ -26,10 +26,7 @@ public class TabPersistenceHandler {
 		for(Tab tab : pane.getTabs()) {
 			tabMap.put(tab.getId(), tab);
 		}
-		
-		this.currentTabProperty().addListener((observable, from, to) -> {
-			this.pane.getSelectionModel().select(tabMap.get(to));
-		});
+		this.currentTabProperty().addListener((observable, from, to) -> this.pane.getSelectionModel().select(tabMap.get(to)));
 	}
 	
 	public StringProperty currentTabProperty() {
