@@ -18,7 +18,7 @@ public class ModelcheckingItemFullValueStage extends Stage {
 	
 	@Inject
 	private ModelcheckingItemFullValueStage(StageManager stageManager) {
-		stageManager.loadFXML(this, "modelchecking_item_fullvalue.fxml", this.getClass().getName());
+		stageManager.loadFXML(this, "modelchecking_item_fullvalue.fxml");
 	}
 	
 	public void setValues(String strategy, String description) {
