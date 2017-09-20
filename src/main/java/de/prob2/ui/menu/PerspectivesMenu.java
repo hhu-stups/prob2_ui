@@ -1,7 +1,12 @@
 package de.prob2.ui.menu;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
@@ -10,28 +15,29 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
 
 public class PerspectivesMenu extends Menu {
 	private static final Logger logger = LoggerFactory.getLogger(PerspectivesMenu.class);
 
 	private final Injector injector;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 
 	@Inject
-	private PerspectivesMenu(final StageManager stageManager, final Injector injector) {
+	private PerspectivesMenu(final StageManager stageManager, final Injector injector, final ResourceBundle bundle) {
 		this.injector = injector;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		stageManager.loadFXML(this, "perspectivesMenu.fxml");
 	}
 
@@ -61,8 +67,8 @@ public class PerspectivesMenu extends Menu {
 	@FXML
 	private void handleLoadPerspective() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open File");
-		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("FXML Files", "*.fxml"));
+		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
+		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.fxml"), "*.fxml"));
 		File selectedFile = fileChooser.showOpenDialog(stageManager.getMainStage());
 		if (selectedFile != null) {
 			try {
@@ -78,7 +84,7 @@ public class PerspectivesMenu extends Menu {
 				stageManager.getMainStage().getScene().setRoot(root);
 			} catch (IOException e) {
 				logger.error("Loading fxml failed", e);
-				stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file:\n" + e).showAndWait();
+				stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("menu.perspectives.errors.couldNotOpen"), e)).showAndWait();
 			}
 		}
 	}

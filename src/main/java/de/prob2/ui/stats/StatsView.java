@@ -141,7 +141,7 @@ public class StatsView extends ScrollPane {
 		int nrTotalNodes = result.getNrTotalNodes();
 		int nrTotalTransitions = result.getNrTotalTransitions();
 		int nrProcessedNodes = result.getNrProcessedNodes();
-
+		
 		Platform.runLater(() -> {
 			totalStates.setText(Integer.toString(nrTotalNodes));
 			totalTransitions.setText(Integer.toString(nrTotalTransitions));

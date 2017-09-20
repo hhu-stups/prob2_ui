@@ -1,9 +1,16 @@
 package de.prob2.ui.menu;
 
+import java.util.ResourceBundle;
+
+import javax.annotation.Nullable;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob2.ui.internal.StageManager;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -13,12 +20,8 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import javax.annotation.Nullable;
-
 @Singleton
 public final class MenuController extends MenuBar {
-	private static final String PROB2 = "ProB 2";
-
 	private final MenuToolkit menuToolkit;
 	private final StageManager stageManager;
 
@@ -30,8 +33,7 @@ public final class MenuController extends MenuBar {
 	private HelpMenu helpMenu;
 
 	@Inject
-	private MenuController(final StageManager stageManager,
-			@Nullable final MenuToolkit menuToolkit) {
+	private MenuController(final StageManager stageManager, @Nullable final MenuToolkit menuToolkit, final ResourceBundle bundle) {
 		this.menuToolkit = menuToolkit;
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "menu.fxml");
@@ -43,7 +45,6 @@ public final class MenuController extends MenuBar {
 			// Remove About menu item from Help
 			MenuItem aboutItem = helpMenu.getAboutItem();
 			helpMenu.getItems().remove(aboutItem);
-			aboutItem.setText("About ProB 2");
 
 			// Remove Preferences menu item from Edit
 			MenuItem preferencesItem = editMenu.getPreferencesItem();
@@ -51,18 +52,18 @@ public final class MenuController extends MenuBar {
 			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
 
 			// Create Mac-style application menu
-			final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu(PROB2);
+			final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu(bundle.getString("common.prob2"));
 			this.getMenus().add(0, applicationMenu);
 
 			menuToolkit.setApplicationMenu(applicationMenu);
-			MenuItem quit = menuToolkit.createQuitMenuItem(PROB2);
+			MenuItem quit = menuToolkit.createQuitMenuItem(bundle.getString("common.prob2"));
 			quit.setOnAction(event -> {
 				for (Stage stage : stageManager.getRegistered()) {
 					stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
 				}
 			});
 			applicationMenu.getItems().setAll(aboutItem, new SeparatorMenuItem(), preferencesItem,
-					new SeparatorMenuItem(), menuToolkit.createHideMenuItem(PROB2),
+					new SeparatorMenuItem(), menuToolkit.createHideMenuItem(bundle.getString("common.prob2")),
 					menuToolkit.createHideOthersMenuItem(), menuToolkit.createUnhideAllMenuItem(),
 					new SeparatorMenuItem(), quit);
 

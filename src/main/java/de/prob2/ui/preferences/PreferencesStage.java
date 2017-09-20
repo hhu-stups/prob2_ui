@@ -1,33 +1,43 @@
 package de.prob2.ui.preferences;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import de.prob.animator.domainobjects.ProBPreference;
-import de.prob.exception.CliError;
-import de.prob.exception.ProBError;
-import de.prob.scripting.ModelTranslationError;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.RecentProjects;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.MachineLoader;
-import javafx.beans.InvalidationListener;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.MapChangeListener;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ResourceBundle;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import de.prob.animator.domainobjects.ProBPreference;
+import de.prob.exception.CliError;
+import de.prob.exception.ProBError;
+import de.prob.scripting.ModelTranslationError;
+
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.menu.RecentProjects;
+import de.prob2.ui.persistence.TabPersistenceHandler;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.MachineLoader;
+
+import javafx.beans.InvalidationListener;
+import javafx.collections.MapChangeListener;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class PreferencesStage extends Stage {
@@ -41,16 +51,15 @@ public final class PreferencesStage extends Stage {
 	@FXML private Button applyButton;
 	@FXML private Label applyWarning;
 	@FXML private TabPane tabPane;
-	@FXML private Tab tabGeneral;
-	@FXML private Tab tabPreferences;
 
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final ProBPreferences globalProBPrefs;
 	private final RecentProjects recentProjects;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
-	private final StringProperty currentTab;
+	private final TabPersistenceHandler tabPersistenceHandler;
 
 	@Inject
 	private PreferencesStage(
@@ -60,6 +69,7 @@ public final class PreferencesStage extends Stage {
 		final MachineLoader machineLoader,
 		final RecentProjects recentProjects,
 		final StageManager stageManager,
+		final ResourceBundle bundle,
 		final CurrentProject currentProject
 	) {
 		this.currentTrace = currentTrace;
@@ -68,10 +78,11 @@ public final class PreferencesStage extends Stage {
 		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace(this.globalPreferences));
 		this.recentProjects = recentProjects;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		this.currentProject = currentProject;
-		this.currentTab = new SimpleStringProperty(this, "currentTab", null);
 
 		stageManager.loadFXML(this, "preferences_stage.fxml", this.getClass().getName());
+		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 	}
 
 	@FXML
@@ -116,28 +127,12 @@ public final class PreferencesStage extends Stage {
 		this.applyWarning.visibleProperty().bind(this.globalProBPrefs.changesAppliedProperty().not());
 		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
 		
-		this.currentTabProperty().addListener((observable, from, to) -> {
-			switch (to) {
-				case "general":
-					this.tabPane.getSelectionModel().select(this.tabGeneral);
-					break;
-				
-				case "preferences":
-					this.tabPane.getSelectionModel().select(this.tabPreferences);
-					break;
-				
-				default:
-					LOGGER.warn("Attempted to select unknown preferences tab: {}", to);
-			}
-		});
-		this.tabPane.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> this.setCurrentTab(to.getId()));
-		this.setCurrentTab(this.tabPane.getSelectionModel().getSelectedItem().getId());
 	}
 	
 	@FXML
 	private void selectDefaultLocation(ActionEvent event) {
 		DirectoryChooser dirChooser = new DirectoryChooser();
-		dirChooser.setTitle("Select default location to store new projects");
+		dirChooser.setTitle(bundle.getString("preferences.stage.tabs.general.selectLocation.title"));
 		File file = dirChooser.showDialog(this.getOwner());
 		if (file != null) {
 			defaultLocationField.setText(file.getAbsolutePath());
@@ -192,15 +187,8 @@ public final class PreferencesStage extends Stage {
 		this.hide();
 	}
 	
-	public StringProperty currentTabProperty() {
-		return this.currentTab;
+	public TabPersistenceHandler getTabPersistenceHandler() {
+		return tabPersistenceHandler;
 	}
 	
-	public String getCurrentTab() {
-		return this.currentTabProperty().get();
-	}
-	
-	public void setCurrentTab(String tab) {
-		this.currentTabProperty().set(tab);
-	}
 }
