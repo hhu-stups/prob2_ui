@@ -2,6 +2,7 @@ package de.prob2.ui.preferences;
 
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -42,14 +43,16 @@ public final class PreferencesView extends BorderPane {
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	
 	private final ObjectProperty<ProBPreferences> preferences;
 	
 	@Inject
-	private PreferencesView(final StageManager stageManager) {
+	private PreferencesView(final StageManager stageManager, final ResourceBundle bundle) {
 		super();
 		
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		
 		this.preferences = new SimpleObjectProperty<>(this, "preferences", null);
 		
@@ -79,7 +82,7 @@ public final class PreferencesView extends BorderPane {
 		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
 		
 		tvValue.setCellFactory(col -> {
-			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell<>(this.stageManager);
+			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell<>(this.stageManager, bundle);
 			cell.tableRowProperty().addListener((observable, from, to) ->
 				to.treeItemProperty().addListener((observable1, from1, to1) ->
 					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem)
@@ -94,7 +97,7 @@ public final class PreferencesView extends BorderPane {
 		
 		tvDescription.setCellValueFactory(new TreeItemPropertyValueFactory<>("description"));
 		
-		tv.getRoot().setValue(new CategoryPrefTreeItem("Preferences"));
+		tv.getRoot().setValue(new CategoryPrefTreeItem("Preferences (this should be invisible)"));
 		
 		final ChangeListener<StateSpace> updatePreferencesCL = (observable, from, to) -> this.updatePreferences();
 		final MapChangeListener<String, String> updatePreferencesMCL = change -> this.updatePreferences();
