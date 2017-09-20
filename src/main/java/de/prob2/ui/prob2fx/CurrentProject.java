@@ -334,24 +334,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return this.savedProperty().get();
 	}
 
-	public Machine getMachine(String machine) {
-		for (Machine m : getMachines()) {
-			if (m.getName().equals(machine)) {
-				return m;
-			}
-		}
-		return null;
-	}
-
-	public Map<String, String> getPreferenceAsMap(String preference) {
-		for (Preference p : getPreferences()) {
-			if (p.getName().equals(preference)) {
-				return p.getPreferences();
-			}
-		}
-		return null;
-	}
-
 	private boolean confirmReplacingProject() {
 		if (exists()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
