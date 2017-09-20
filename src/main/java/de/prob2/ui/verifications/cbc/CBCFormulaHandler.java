@@ -27,6 +27,7 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
@@ -83,6 +84,7 @@ public class CBCFormulaHandler {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
 		stateSpace.execute(cmd);
+		injector.getInstance(StatsView.class).update(currentTrace.get());
 		resultHandler.handleFindRedundantInvariants(item, cmd);
 		updateMachine(currentProject.getCurrentMachine());
 	}
@@ -93,6 +95,7 @@ public class CBCFormulaHandler {
 		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand(stateSpace);
 		try {
 			stateSpace.execute(command);
+			injector.getInstance(StatsView.class).update(currentTrace.get());
 		} catch (Exception e){
 			LOGGER.error(e.getMessage());
 		}
@@ -107,6 +110,7 @@ public class CBCFormulaHandler {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
 		stateSpace.execute(command);
+		injector.getInstance(StatsView.class).update(currentTrace.get());
 		resultHandler.handleAssertionChecking(item, command, stateSpace);
 		updateMachine(currentProject.getCurrentMachine());
 	}
@@ -127,6 +131,7 @@ public class CBCFormulaHandler {
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
 		try {
 			stateSpace.execute(cmd);
+			injector.getInstance(StatsView.class).update(currentTrace.get());
 		} catch (ProBError | EvaluationException e){
 			LOGGER.error(e.getMessage());
 		}
@@ -148,12 +153,14 @@ public class CBCFormulaHandler {
 			)
 		);
 		Thread updatingThread = new Thread(() -> 
-			Platform.runLater(() -> 
-				updateMachine(currentMachine)
-			)
+			Platform.runLater(() -> {
+				updateMachine(currentMachine);
+				injector.getInstance(StatsView.class).update(currentTrace.get());
+			})
 		);
 		executionThread.start();
 		updatingThread.start();
+		
 	}
 		
 	public void checkMachine(Machine machine) {

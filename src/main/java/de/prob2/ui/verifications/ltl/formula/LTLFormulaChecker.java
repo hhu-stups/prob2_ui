@@ -14,6 +14,7 @@ import de.prob.statespace.State;
 
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.LTLMarker;
@@ -85,6 +86,7 @@ public class LTLFormulaChecker {
 			LTL formula = new LTL(item.getCode(), new ClassicalBParser(), parser);
 			lcc = formula.getCommand(stateid);
 			currentTrace.getStateSpace().execute(lcc);
+			injector.getInstance(StatsView.class).update(currentTrace.get());
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula", error.getMessage());
 			return error;
