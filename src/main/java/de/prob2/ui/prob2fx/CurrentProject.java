@@ -142,9 +142,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void removeMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.remove(machine);
-		List<Runconfiguration> runconfigsList = new ArrayList<>();
-		runconfigsList.addAll(this.getRunconfigurations());
-		this.getRunconfigurations(machine).stream().forEach(runconfigsList::remove);
+		List<Runconfiguration> runconfigsList = new ArrayList<>(this.getRunconfigurations());
+		runconfigsList.removeAll(this.getRunconfigurations(machine));
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 				runconfigsList, this.getLocation()));
 	}
@@ -159,8 +158,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void removePreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.remove(preference);
-		List<Runconfiguration> runconfigsList = new ArrayList<>();
-		runconfigsList.addAll(this.getRunconfigurations());
+		List<Runconfiguration> runconfigsList = new ArrayList<>(this.getRunconfigurations());
 		this.getRunconfigurations().stream().filter(r -> r.getPreference().getName().equals(preference.getName()))
 				.forEach(runconfigsList::remove);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
