@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -53,6 +54,7 @@ public class MachineLoader {
 	private final Api api;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
@@ -60,12 +62,13 @@ public class MachineLoader {
 
 	@Inject
 	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager,
-			final AnimationSelector animations, final CurrentTrace currentTrace,
+			final ResourceBundle bundle, final AnimationSelector animations, final CurrentTrace currentTrace,
 			final GlobalPreferences globalPreferences, final StatusBar statusBar) {
 		this.api = api;
 		this.openLock = new Object();
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
@@ -87,15 +90,14 @@ public class MachineLoader {
 			} catch (FileNotFoundException e) {
 				LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
 				Platform.runLater(() -> {
-					Alert alert = stageManager.makeAlert(AlertType.ERROR, "The machine file " + getPathToMachine(machine)
-							+ " could not be found.\n" + "The file was probably moved, renamed or deleted.\n");
-					alert.setHeaderText("Project File not found.");
+					Alert alert = stageManager.makeAlert(AlertType.ERROR, String.format(bundle.getString("machineLoader.fileNotFound.content"), getPathToMachine(machine)));
+					alert.setHeaderText(bundle.getString("machineLoader.fileNotFound.header"));
 					alert.showAndWait();
 				});
 			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 				LOGGER.error("Loading machine \"{}\" failed", machine.getName(), e);
 				Platform.runLater(() -> stageManager.makeExceptionAlert(Alert.AlertType.ERROR,
-						"Could not open machine \"" + machine.getName() + '"', e).showAndWait());
+					String.format(bundle.getString("machineLoader.couldNotOpen"), machine.getName()), e).showAndWait());
 			}
 		} , "Machine Loader").start();
 	}
