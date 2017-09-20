@@ -228,6 +228,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 		update(project);
 		initializeMachines();
+		setSaved(true);
 	}
 
 	public void update(Project project) {
