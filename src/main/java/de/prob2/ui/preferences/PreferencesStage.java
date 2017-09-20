@@ -17,13 +17,12 @@ import de.prob.scripting.ModelTranslationError;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentProjects;
+import de.prob2.ui.persistence.TabPersistenceHandler;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.MapChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -32,7 +31,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
@@ -53,8 +51,6 @@ public final class PreferencesStage extends Stage {
 	@FXML private Button applyButton;
 	@FXML private Label applyWarning;
 	@FXML private TabPane tabPane;
-	@FXML private Tab tabGeneral;
-	@FXML private Tab tabPreferences;
 
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
@@ -63,7 +59,7 @@ public final class PreferencesStage extends Stage {
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
-	private final StringProperty currentTab;
+	private final TabPersistenceHandler tabPersistenceHandler;
 
 	@Inject
 	private PreferencesStage(
@@ -84,9 +80,9 @@ public final class PreferencesStage extends Stage {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
-		this.currentTab = new SimpleStringProperty(this, "currentTab", null);
 
 		stageManager.loadFXML(this, "preferences_stage.fxml", this.getClass().getName());
+		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 	}
 
 	@FXML
@@ -131,22 +127,6 @@ public final class PreferencesStage extends Stage {
 		this.applyWarning.visibleProperty().bind(this.globalProBPrefs.changesAppliedProperty().not());
 		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
 		
-		this.currentTabProperty().addListener((observable, from, to) -> {
-			switch (to) {
-				case "general":
-					this.tabPane.getSelectionModel().select(this.tabGeneral);
-					break;
-				
-				case "preferences":
-					this.tabPane.getSelectionModel().select(this.tabPreferences);
-					break;
-				
-				default:
-					LOGGER.warn("Attempted to select unknown preferences tab: {}", to);
-			}
-		});
-		this.tabPane.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> this.setCurrentTab(to.getId()));
-		this.setCurrentTab(this.tabPane.getSelectionModel().getSelectedItem().getId());
 	}
 	
 	@FXML
@@ -207,15 +187,8 @@ public final class PreferencesStage extends Stage {
 		this.hide();
 	}
 	
-	public StringProperty currentTabProperty() {
-		return this.currentTab;
+	public TabPersistenceHandler getTabPersistenceHandler() {
+		return tabPersistenceHandler;
 	}
 	
-	public String getCurrentTab() {
-		return this.currentTabProperty().get();
-	}
-	
-	public void setCurrentTab(String tab) {
-		this.currentTabProperty().set(tab);
-	}
 }

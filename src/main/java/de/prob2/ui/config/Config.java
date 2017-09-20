@@ -231,9 +231,9 @@ public final class Config {
 		}
 		
 
-		this.injector.getInstance(PreferencesStage.class).setCurrentTab(configData.currentPreference);
-		this.injector.getInstance(MainView.class).setCurrentTab(configData.currentMainTab);
-		this.injector.getInstance(VerificationsView.class).setCurrentTab(configData.currentVerificationTab);
+		this.injector.getInstance(PreferencesStage.class).getTabPersistenceHandler().setCurrentTab(configData.currentPreference);
+		this.injector.getInstance(MainView.class).getTabPersistenceHandler().setCurrentTab(configData.currentMainTab);
+		this.injector.getInstance(VerificationsView.class).getTabPersistenceHandler().setCurrentTab(configData.currentVerificationTab);
 		
 		groovyConsole.applySettings(configData.groovyConsoleSettings);
 		bConsole.applySettings(configData.bConsoleSettings);
@@ -269,9 +269,9 @@ public final class Config {
 		configData.maxRecentProjects = this.recentProjects.getMaximum();
 		configData.recentProjects = new ArrayList<>(this.recentProjects);
 		configData.defaultProjectLocation = this.currentProject.getDefaultLocation().toString();
-		configData.currentPreference = injector.getInstance(PreferencesStage.class).getCurrentTab();
-		configData.currentMainTab = injector.getInstance(MainView.class).getCurrentTab();
-		configData.currentVerificationTab = injector.getInstance(VerificationsView.class).getCurrentTab();
+		configData.currentPreference = injector.getInstance(PreferencesStage.class).getTabPersistenceHandler().getCurrentTab();
+		configData.currentMainTab = injector.getInstance(MainView.class).getTabPersistenceHandler().getCurrentTab();
+		configData.currentVerificationTab = injector.getInstance(VerificationsView.class).getTabPersistenceHandler().getCurrentTab();
 		configData.groovyConsoleSettings = groovyConsole.getSettings();
 		configData.bConsoleSettings = bConsole.getSettings();
 		configData.expandedTitledPanes = new ArrayList<>(this.uiState.getExpandedTitledPanes());
