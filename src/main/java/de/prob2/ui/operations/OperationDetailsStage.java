@@ -1,7 +1,12 @@
 package de.prob2.ui.operations;
 
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
+
 import de.prob2.ui.internal.StageManager;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -10,11 +15,21 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
-import java.util.List;
-
 class OperationDetailsStage extends Stage {
 	private enum ValueType {
-		PARAM, RETURN_VALUE
+		PARAM("operationDetails.type.parameter"),
+		RETURN_VALUE("operationDetails.type.returnValue"),
+		;
+		
+		private final String key;
+		
+		private ValueType(final String key) {
+			this.key = key;
+		}
+		
+		public String getKey() {
+			return this.key;
+		}
 	}
 	
 	private static final class ValueItem {
@@ -43,7 +58,7 @@ class OperationDetailsStage extends Stage {
 		}
 	}
 	
-	private static final class ValueCell extends ListCell<ValueItem> {
+	private final class ValueCell extends ListCell<ValueItem> {
 		private ValueCell() {
 			super();
 		}
@@ -55,20 +70,12 @@ class OperationDetailsStage extends Stage {
 			if (item == null || empty) {
 				this.setText(null);
 			} else {
-				final String type;
-				switch (item.getType()) {
-					case PARAM:
-						type = "Parameter";
-						break;
-					
-					case RETURN_VALUE:
-						type = "Return value";
-						break;
-					
-					default:
-						throw new IllegalArgumentException("Unhandled item type: " + item.getType());
-				}
-				this.setText(String.format("%s #%d: %s", type, item.getIndex(), item.getValue()));
+				this.setText(String.format(
+					bundle.getString("operationDetails.format"),
+					bundle.getString(item.getType().getKey()),
+					item.getIndex(),
+					item.getValue()
+				));
 			}
 		}
 	}
@@ -76,11 +83,15 @@ class OperationDetailsStage extends Stage {
 	@FXML private ListView<ValueItem> valuesListView;
 	@FXML private TextArea textArea;
 	
+	private final ResourceBundle bundle;
+	
 	private final ObjectProperty<OperationItem> item;
 	
 	@Inject
-	OperationDetailsStage(final StageManager stageManager) {
+	OperationDetailsStage(final StageManager stageManager, final ResourceBundle bundle) {
 		super();
+		
+		this.bundle = bundle;
 		
 		this.item = new SimpleObjectProperty<>(this, "item", null);
 		
@@ -95,9 +106,9 @@ class OperationDetailsStage extends Stage {
 		this.item.addListener((observable, from, to) -> {
 			this.valuesListView.getItems().clear();
 			if (to == null) {
-				this.setTitle("Operation Details");
+				this.setTitle(bundle.getString("operationDetails.title"));
 			} else {
-				this.setTitle("Operation Details: " + to.getName());
+				this.setTitle(String.format(bundle.getString("operationDetails.titleWithName"), to.getName()));
 				final List<String> params = to.getParams();
 				for (int i = 0; i < params.size(); i++) {
 					final String param = params.get(i);
