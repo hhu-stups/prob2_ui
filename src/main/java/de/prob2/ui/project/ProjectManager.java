@@ -18,11 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.hildan.fxgson.FxGson;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
+
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
@@ -32,10 +29,16 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+
+import org.hildan.fxgson.FxGson;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProjectManager {
 	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
@@ -103,7 +106,6 @@ public class ProjectManager {
 		}
 		currentProject.set(project);
 		addToRecentProjects(file);
-		currentProject.setSaved(true);
 	}
 
 	private void addToRecentProjects(File file) {
