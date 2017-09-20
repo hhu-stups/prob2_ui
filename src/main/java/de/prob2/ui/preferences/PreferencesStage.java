@@ -1,33 +1,45 @@
 package de.prob2.ui.preferences;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.ModelTranslationError;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.MapChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 
 @Singleton
 public final class PreferencesStage extends Stage {
@@ -49,6 +61,7 @@ public final class PreferencesStage extends Stage {
 	private final ProBPreferences globalProBPrefs;
 	private final RecentProjects recentProjects;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 	private final StringProperty currentTab;
 
@@ -60,6 +73,7 @@ public final class PreferencesStage extends Stage {
 		final MachineLoader machineLoader,
 		final RecentProjects recentProjects,
 		final StageManager stageManager,
+		final ResourceBundle bundle,
 		final CurrentProject currentProject
 	) {
 		this.currentTrace = currentTrace;
@@ -68,6 +82,7 @@ public final class PreferencesStage extends Stage {
 		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace(this.globalPreferences));
 		this.recentProjects = recentProjects;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.currentTab = new SimpleStringProperty(this, "currentTab", null);
 
@@ -137,7 +152,7 @@ public final class PreferencesStage extends Stage {
 	@FXML
 	private void selectDefaultLocation(ActionEvent event) {
 		DirectoryChooser dirChooser = new DirectoryChooser();
-		dirChooser.setTitle("Select default location to store new projects");
+		dirChooser.setTitle(bundle.getString("preferences.stage.tabs.general.selectLocation.title"));
 		File file = dirChooser.showDialog(this.getOwner());
 		if (file != null) {
 			defaultLocationField.setText(file.getAbsolutePath());
