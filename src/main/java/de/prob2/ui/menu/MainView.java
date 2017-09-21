@@ -27,4 +27,7 @@ public class MainView extends AnchorPane {
 		return tabPersistenceHandler;
 	}
 
+	public TabPane getTabPane() {
+		return tabPane;
+	}
 }

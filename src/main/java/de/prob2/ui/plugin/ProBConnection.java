@@ -47,12 +47,12 @@ public class ProBConnection {
     }
 
     public void addTab(@Nonnull final Tab tab) {
-        TabPane tabPane = injector.getInstance(MainView.class).getMainTabPane();
+        TabPane tabPane = injector.getInstance(MainView.class).getTabPane();
         tabPane.getTabs().add(tab);
     }
 
     public void removeTab(@Nonnull final Tab tab) {
-        TabPane tabPane = injector.getInstance(MainView.class).getMainTabPane();
+        TabPane tabPane = injector.getInstance(MainView.class).getTabPane();
         tabPane.getTabs().remove(tab);
     }
 
