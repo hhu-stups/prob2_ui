@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class PluginMenu extends Menu {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PerspectivesMenu.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginMenu.class);
 
     private final ProBPluginManager proBPluginManager;
     private final Injector injector;

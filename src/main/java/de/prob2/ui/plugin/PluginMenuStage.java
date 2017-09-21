@@ -3,6 +3,7 @@ package de.prob2.ui.plugin;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -20,6 +21,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ro.fortsoft.pf4j.PluginState;
@@ -166,38 +168,46 @@ public class PluginMenuStage extends Stage {
     }
 
     private void configureContextMenu() {
-        pluginTableView.addEventHandler(MouseEvent.MOUSE_CLICKED, click -> {
-            if (click.getButton() == MouseButton.SECONDARY) {
-                PluginWrapper pluginWrapper = pluginTableView.getSelectionModel().getSelectedItem();
-                if (pluginWrapper != null) {
-                    ProBPlugin plugin = (ProBPlugin) pluginWrapper.getPlugin();
-                    String pluginId = pluginWrapper.getPluginId();
-                    String pluginName = plugin.getName();
-                    MenuItem restartItem = new MenuItem(
-                            String.format(bundle.getString("pluginsmenu.table.contextmenu.restart"), pluginName));
-                    restartItem.setOnAction(event -> {
-                        if(PluginState.STOPPED == getProBJarPluginManager().stopPlugin(pluginId)) {
-                            getProBJarPluginManager().startPlugin(pluginId);
-                        }
-                    });
-                    MenuItem removeMenuItem = new MenuItem(
-                            String.format(bundle.getString("pluginsmenu.table.contextmenu.remove"), pluginName));
-                    removeMenuItem.setOnAction(event -> {
-                        Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-                                String.format(bundle.getString("pluginsmenu.table.dialog.remove.question"), pluginName),
-                                ButtonType.YES, ButtonType.NO);
-                        dialog.setTitle(bundle.getString("pluginsmenu.table.dialog.title"));
-                        dialog.showAndWait().ifPresent(response -> {
-                            if (response == ButtonType.YES) {
-                                getProBJarPluginManager().deletePlugin(pluginId);
-                            }
-                        });
-                    });
-                    new ContextMenu(restartItem, removeMenuItem)
-                            .show(pluginTableView, click.getScreenX(), click.getScreenY());
+        pluginTableView.setRowFactory(tableView -> {
+            final TableRow<PluginWrapper> row = new TableRow<>();
+            row.setOnMouseClicked(clickEvent -> {
+                if(clickEvent.getButton() == MouseButton.SECONDARY && row.getItem() != null) {
+                    ContextMenu ctMenu = createContextMenu(row.getItem());
+                    ctMenu.show(row, clickEvent.getScreenX(), clickEvent.getScreenY());
                 }
+            });
+            return row;
+        });
+    }
+
+    private ContextMenu createContextMenu(PluginWrapper pluginWrapper) {
+        ProBPlugin plugin = (ProBPlugin) pluginWrapper.getPlugin();
+        String pluginId = pluginWrapper.getPluginId();
+        String pluginName = plugin.getName();
+
+        MenuItem restartItem = new MenuItem(
+                String.format(bundle.getString("pluginsmenu.table.contextmenu.restart"), pluginName));
+        restartItem.setOnAction(event -> {
+            if (PluginState.STOPPED == getProBJarPluginManager().stopPlugin(pluginId)) {
+                getProBJarPluginManager().startPlugin(pluginId);
             }
         });
+
+        MenuItem removeMenuItem = new MenuItem(
+                String.format(bundle.getString("pluginsmenu.table.contextmenu.remove"), pluginName));
+        removeMenuItem.setOnAction(event -> {
+            Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+                    String.format(bundle.getString("pluginsmenu.table.dialog.remove.question"), pluginName),
+                    ButtonType.NO, ButtonType.YES);
+            dialog.initOwner(this);
+            dialog.setTitle(bundle.getString("pluginsmenu.table.dialog.title"));
+            dialog.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.YES) {
+                    getProBJarPluginManager().deletePlugin(pluginId);
+                }
+            });
+        });
+        return new ContextMenu(restartItem, removeMenuItem);
     }
 
     private ProBPluginManager.ProBJarPluginManager getProBJarPluginManager() {
