@@ -244,7 +244,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent("HelpMain.html");
-		showStats(new ModelCheckStats(stageManager, this, statsView));
+		showStats(new ModelCheckStats(stageManager, this, statsView, injector));
 		setBindings();
 		setListeners();
 		setContextMenus();
@@ -380,20 +380,20 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
 		updateCurrentValues(options, stateSpace);
 		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy), toPrettyString(currentOptions));
-		currentStats.setItem(modelcheckingItem);
+		currentStats.updateItem(modelcheckingItem, currentProject.getCurrentMachine());
 		currentProject.getCurrentMachine().modelcheckingItemsProperty().add(modelcheckingItem);
 		tvItems.getSelectionModel().selectLast();
 	}
 	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
 		currentOptions = options;
-		currentStats = new ModelCheckStats(stageManager, this, statsView);
+		currentStats = new ModelCheckStats(stageManager, this, statsView, injector);
 		currentJob = new ConsistencyChecker(stateSpace, options, null, this);
 	}
 	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, ModelCheckingItem item) {
 		updateCurrentValues(options, stateSpace);
-		currentStats.setItem(item);
+		currentStats.updateItem(item,  currentProject.getCurrentMachine());
 	}
 
 	private String toPrettyString(ModelCheckingOptions options) {
@@ -415,7 +415,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	}
 
 	public void resetView() {
-		showStats(new ModelCheckStats(stageManager, this, statsView));
+		showStats(new ModelCheckStats(stageManager, this, statsView, injector));
 	}
 
 	@Override

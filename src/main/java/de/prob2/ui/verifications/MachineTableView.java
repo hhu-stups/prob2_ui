@@ -23,6 +23,9 @@ public class MachineTableView extends TableView<Machine> {
 	private TableColumn<Machine, FontAwesomeIconView> machineCBCColumn;
 	
 	@FXML
+	private TableColumn<Machine, FontAwesomeIconView> machineModelcheckColumn;
+	
+	@FXML
 	private TableColumn<Machine, String> machineNameColumn;
 	
 	private CurrentProject currentProject;
@@ -37,6 +40,7 @@ public class MachineTableView extends TableView<Machine> {
 	public void initialize() {
 		machineLTLColumn.setCellValueFactory(new PropertyValueFactory<>("LTLStatus"));
 		machineCBCColumn.setCellValueFactory(new PropertyValueFactory<>("CBCStatus"));
+		machineModelcheckColumn.setCellValueFactory(new PropertyValueFactory<>("ModelcheckStatus"));
 		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		this.itemsProperty().bind(currentProject.machinesProperty());
 	}

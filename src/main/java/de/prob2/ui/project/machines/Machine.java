@@ -85,6 +85,7 @@ public class Machine {
 	
 	protected transient FontAwesomeIconView ltlstatus;
 	protected transient FontAwesomeIconView cbcstatus;
+	protected transient FontAwesomeIconView modelcheckingstatus;
 	private String name;
 	private String description;
 	private String location;
@@ -106,7 +107,7 @@ public class Machine {
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
-		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingITems", FXCollections.observableArrayList());
+		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
 	}
 	
 	public Machine(String name, String description, Path location) {
@@ -117,6 +118,7 @@ public class Machine {
 	public void initialize() {
 		initializeLTLStatus();
 		initializeCBCStatus();
+		initializeModelcheckingStatus();
 		for(CBCFormulaItem item : cbcFormulas) {
 			item.initializeCounterExamples();
 		}
@@ -149,11 +151,6 @@ public class Machine {
 				item.initializeStatus();
 			}
 		}
-		if(modelcheckingItems != null) {
-			for (ModelCheckingItem item : modelcheckingItems) {
-				item.initializeStatus();
-			}
-		}
 		patternManager = new PatternManager();
 	}
 	
@@ -167,6 +164,16 @@ public class Machine {
 		}
 	}
 	
+	public void initializeModelcheckingStatus() {
+		this.modelcheckingstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		this.modelcheckingstatus.setFill(Color.BLUE);
+		if (modelcheckingItems != null) {
+			for (ModelCheckingItem item : modelcheckingItems) {
+				item.initializeStatus();
+			}
+		}
+	}
+	
 	public FontAwesomeIconView getLTLStatus() {
 		return ltlstatus;
 	}
@@ -174,6 +181,11 @@ public class Machine {
 	public FontAwesomeIconView getCBCStatus() {
 		return cbcstatus;
 	}
+	
+	public FontAwesomeIconView getModelcheckStatus() {
+		return modelcheckingstatus;
+	}
+	
 	
 	public String getName() {
 		return name;
@@ -215,6 +227,18 @@ public class Machine {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
 		icon.setFill(Color.RED);
 		this.cbcstatus = icon;
+	}
+	
+	public void setModelcheckingCheckedSuccessful() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
+		icon.setFill(Color.GREEN);
+		this.modelcheckingstatus = icon;
+	}
+
+	public void setModelcheckingCheckedFailed() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
+		icon.setFill(Color.RED);
+		this.modelcheckingstatus = icon;
 	}
 		
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {
