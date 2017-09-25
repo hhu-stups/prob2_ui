@@ -217,6 +217,8 @@ public class LTLView extends AnchorPane{
 		tvFormula.itemsProperty().bind(machine.ltlFormulasProperty());
 		tvPattern.itemsProperty().unbind();
 		tvPattern.itemsProperty().bind(machine.ltlPatternsProperty());
+		tvFormula.refresh();
+		tvPattern.refresh();
 		if(currentTrace.existsProperty().get()) {
 			checkMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
 		}

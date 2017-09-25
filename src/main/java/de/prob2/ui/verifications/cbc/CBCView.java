@@ -87,6 +87,7 @@ public class CBCView extends AnchorPane {
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
 				tvFormula.itemsProperty().bind(newValue.cbcFormulasProperty());
+				tvFormula.refresh();
 			} else {
 				tvFormula.getItems().clear();
 				tvFormula.itemsProperty().unbind();

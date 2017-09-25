@@ -157,7 +157,7 @@ public final class ModelCheckStats extends AnchorPane {
 				return;
 			}
 		}
-		currentMachine.setModelcheckingCheckedSuccessful();;
+		currentMachine.setModelcheckingCheckedSuccessful();
 		injector.getInstance(MachineTableView.class).refresh();
 		injector.getInstance(StatusBar.class).setModelcheckingStatus(StatusBar.ModelcheckingStatus.SUCCESSFUL);
 	}
