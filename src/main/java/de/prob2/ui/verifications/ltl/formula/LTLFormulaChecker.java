@@ -17,6 +17,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
@@ -60,11 +61,13 @@ public class LTLFormulaChecker {
 			Checked checked = item.getChecked();
 			if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
 				machine.setLTLCheckedFailed();
+				injector.getInstance(MachineTableView.class).refresh();
 				injector.getInstance(StatusBar.class).setLtlStatus(StatusBar.LTLStatus.ERROR);
 				return;
 			}
 		}
 		machine.setLTLCheckedSuccessful();
+		injector.getInstance(MachineTableView.class).refresh();
 		injector.getInstance(StatusBar.class).setLtlStatus(StatusBar.LTLStatus.SUCCESSFUL);
 	}
 	

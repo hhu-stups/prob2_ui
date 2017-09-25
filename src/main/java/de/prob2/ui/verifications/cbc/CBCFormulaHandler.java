@@ -30,6 +30,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 import javafx.application.Platform;
 
@@ -202,11 +203,13 @@ public class CBCFormulaHandler {
 		for(CBCFormulaItem formula : machine.getCBCFormulas()) {
 			if(formula.getChecked() == Checked.FAIL) {
 				machine.setCBCCheckedFailed();
+				injector.getInstance(MachineTableView.class).refresh();
 				injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.ERROR);
 				return;
 			}
 		}
 		machine.setCBCCheckedSuccessful();
+		injector.getInstance(MachineTableView.class).refresh();
 		injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.SUCCESSFUL);
 	}
 		
