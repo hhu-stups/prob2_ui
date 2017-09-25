@@ -168,22 +168,33 @@ public class CBCFormulaHandler {
 	}
 	
 	public void checkItem(CBCFormulaItem item) {
-		if(item.getType() == CBCType.INVARIANT) {
-			checkInvariant(item.getCode());
-		} else if(item.getType() == CBCType.DEADLOCK) {
-			checkDeadlock(item.getCode());
-		} else if(item.getType() == CBCType.SEQUENCE) {
-			checkSequence(item.getCode());
-		} else if(item.getType() == CBCType.FIND_VALID_STATE) {
-			findValidState(item);
-		} else if(item.getType() == CBCType.FIND_DEADLOCK) {
-			findDeadlock();
-		} else if(item.getType() == CBCType.REFINEMENT) {
-			checkRefinement(item);
-		} else if(item.getType() == CBCType.ASSERTIONS) {
-			checkAssertions(item);
-		} else {
-			findRedundantInvariants(item);
+		switch(item.getType()) {
+			case INVARIANT:
+				checkInvariant(item.getCode());
+				break;
+			case DEADLOCK:
+				checkDeadlock(item.getCode());
+				break;
+			case SEQUENCE:
+				checkSequence(item.getCode());
+				break;
+			case FIND_VALID_STATE:
+				findValidState(item);
+				break;
+			case FIND_DEADLOCK:
+				findDeadlock();
+				break;
+			case REFINEMENT:
+				checkRefinement(item);
+				break;
+			case ASSERTIONS:
+				checkAssertions(item);
+				break;
+			case FIND_REDUNDANT_INVARIANTS:
+				findRedundantInvariants(item);
+				break;
+			default:
+				break;
 		}
 	}
 	

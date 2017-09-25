@@ -273,6 +273,14 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			}
 		});
 		
+		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
+			if(newValue) {
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty());
+			} else {
+				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+			}
+		});
+		
 		currentProject.addListener((observable, from, to) -> {
 			if(to != from) {
 				this.resetView();

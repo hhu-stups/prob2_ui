@@ -93,10 +93,8 @@ public class CBCView extends AnchorPane {
 			}
 		});
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
-			if(newValue != null) {
-				if(currentProject.getCurrentMachine() != null) {
-					checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().cbcFormulasProperty().emptyProperty());
-				}
+			if(newValue) {
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().cbcFormulasProperty().emptyProperty());
 			} else {
 				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 			}

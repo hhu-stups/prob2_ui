@@ -58,6 +58,7 @@ public abstract class Console extends StyleClassedTextArea {
 		this.requestFollowCaret();
 		setEvents();
 		this.reset();
+		this.setWrapText(true);
 	}
 	
 	public void setEvents() {
