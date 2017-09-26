@@ -1,5 +1,7 @@
 package de.prob2.ui.project.runconfigurations;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -22,12 +24,13 @@ public class RunconfigurationsTab extends Tab {
 	@FXML
 	private ListView<Runconfiguration> runconfigurationsListView;
 
+	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 	private final Injector injector;
 
 	@Inject
-	private RunconfigurationsTab(final StageManager stageManager, final CurrentProject currentProject,
-			final Injector injector) {
+	private RunconfigurationsTab(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final Injector injector) {
+		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "runconfigurations_tab.fxml");
@@ -36,13 +39,12 @@ public class RunconfigurationsTab extends Tab {
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent("HelpMain.html");
-		runconfigsPlaceholder.setText("Add machines first");
 		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
 			if (to) {
-				runconfigsPlaceholder.setText("Add machines first");
+				runconfigsPlaceholder.setText(bundle.getString("project.runconfigurations.tab.addMachinesFirst"));
 				addRunconfigButton.setDisable(true);
 			} else {
-				runconfigsPlaceholder.setText("No Runconfigurations");
+				runconfigsPlaceholder.setText(bundle.getString("project.runconfigurations.tab.noRunconfigurations"));
 				addRunconfigButton.setDisable(false);
 			}
 		});
@@ -67,7 +69,7 @@ public class RunconfigurationsTab extends Tab {
 				}
 			};
 
-			final MenuItem removeRunconfigMenuItem = new MenuItem("Remove Runconfiguration");
+			final MenuItem removeRunconfigMenuItem = new MenuItem(bundle.getString("project.runconfigurations.tab.remove"));
 			removeRunconfigMenuItem.setOnAction(event -> currentProject.removeRunconfiguration(cell.getItem()));
 			removeRunconfigMenuItem.disableProperty().bind(cell.emptyProperty());
 
