@@ -310,7 +310,7 @@ public final class StatesView extends AnchorPane {
 			final ASTFormula element = (ASTFormula)stateItem.getContents();
 			stage.setTitle(element.getFormula().toString());
 			stage.setCurrentValue(getResultValue(element, this.currentTrace.getCurrentState()));
-			stage.setPreviousValue(getResultValue(element, this.currentTrace.get().getPreviousState()));
+			stage.setPreviousValue(this.currentTrace.canGoBack() ? getResultValue(element, this.currentTrace.get().getPreviousState()) : null);
 			stage.setFormattingEnabled(true);
 		} else {
 			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());
