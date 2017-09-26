@@ -1,5 +1,7 @@
 package de.prob2.ui.project.preferences;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -25,14 +27,15 @@ public class PreferencesTab extends Tab {
 	@FXML
 	private HelpButton helpButton;
 
+	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 	private final Injector injector;
 	private final StageManager stageManager;
 
 	@Inject
-	private PreferencesTab(final StageManager stageManager, final CurrentProject currentProject,
-			final Injector injector) {
+	private PreferencesTab(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final Injector injector) {
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "preferences_tab.fxml");
@@ -70,11 +73,11 @@ public class PreferencesTab extends Tab {
 			}
 		};
 
-		final MenuItem removePreferenceMenuItem = new MenuItem("Remove Preference");
+		final MenuItem removePreferenceMenuItem = new MenuItem(bundle.getString("project.preferences.tab.menu.remove"));
 		removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
 		removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
 
-		final MenuItem editMenuItem = new MenuItem("Edit");
+		final MenuItem editMenuItem = new MenuItem(bundle.getString("project.preferences.tab.menu.edit"));
 		editMenuItem.setOnAction(event -> {
 			PreferencesDialog prefDialog = injector.getInstance(PreferencesDialog.class);
 			Preference pref = cell.getItem();
