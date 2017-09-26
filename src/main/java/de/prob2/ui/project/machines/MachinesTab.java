@@ -2,6 +2,7 @@ package de.prob2.ui.project.machines;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,11 +47,13 @@ public class MachinesTab extends Tab {
 
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	private final Injector injector;
 
 	@Inject
-	private MachinesTab(final StageManager stageManager, final CurrentProject currentProject, final Injector injector) {
+	private MachinesTab(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final Injector injector) {
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "machines_tab.fxml");
@@ -73,24 +76,24 @@ public class MachinesTab extends Tab {
 				MachinesItem machinesItem = new MachinesItem(machine, stageManager);
 				machinesVBox.getChildren().add(machinesItem);
 
-				final MenuItem editMachineMenuItem = new MenuItem("Edit Machine Configuration");
+				final MenuItem editMachineMenuItem = new MenuItem(bundle.getString("project.machines.tab.menu.editMachineConfiguration"));
 				editMachineMenuItem.setOnAction(event -> injector.getInstance(EditMachinesDialog.class)
 						.editAndShow(machine).ifPresent(result -> {
 					machinesItem.refresh();
 					showMachineView(machinesItem);
 				}));
 
-				final MenuItem removeMachineMenuItem = new MenuItem("Remove Machine");
+				final MenuItem removeMachineMenuItem = new MenuItem(bundle.getString("project.machines.tab.menu.removeMachine"));
 				removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(machine));
 
-				final MenuItem editFileMenuItem = new MenuItem("Edit Machine File");
+				final MenuItem editFileMenuItem = new MenuItem(bundle.getString("project.machines.tab.menu.editMachineFile"));
 				editFileMenuItem.setOnAction(event -> injector.getInstance(EditMenu.class).showEditorStage(machine));
 
-				final MenuItem editExternalMenuItem = new MenuItem("Edit Machine File in External Editor");
+				final MenuItem editExternalMenuItem = new MenuItem(bundle.getString("project.machines.tab.menu.editMachineFileInExternalEditor"));
 				editExternalMenuItem
 						.setOnAction(event -> injector.getInstance(EditMenu.class).showExternalEditor(machine));
 
-				final Menu startAnimationMenu = new Menu("Start Animation...");
+				final Menu startAnimationMenu = new Menu(bundle.getString("project.machines.tab.menu.startAnimation"));
 
 				ContextMenu contextMenu = new ContextMenu(editMachineMenuItem, removeMachineMenuItem, editFileMenuItem,
 						editExternalMenuItem, startAnimationMenu);
@@ -134,8 +137,7 @@ public class MachinesTab extends Tab {
 		final Path absolute = selected.toPath();
 		final Path relative = projectLocation.relativize(absolute);
 		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
-			stageManager.makeAlert(Alert.AlertType.ERROR,
-					"The machine \"" + relative + "\" already exists in the current project.").showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.error.machineAlreadyExists"), relative)).showAndWait();
 			return;
 		}
 
@@ -144,7 +146,7 @@ public class MachinesTab extends Tab {
 		String name = n[0];
 		int i = 1;
 		while (machineNamesSet.contains(name)) {
-			name = n[0] + "(" + i + ")";
+			name = String.format(bundle.getString("project.machines.nameSuffix"), n[0], i);
 			i++;
 		}
 		currentProject.addMachine(new Machine(name, "", relative));
