@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.cbc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 
@@ -34,10 +35,8 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 	private ArrayList<String> events;
 	
 	@Inject
-	private CBCInvariants(final StageManager stageManager, final CurrentTrace currentTrace, 
-							final CurrentProject currentProject, final CBCFormulaHandler cbcHandler, 
-							final Injector injector) {
-		super(cbcHandler, currentProject, injector);
+	private CBCInvariants(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final CBCFormulaHandler cbcHandler, final Injector injector, final ResourceBundle bundle) {
+		super(cbcHandler, currentProject, injector, bundle);
 		this.currentTrace = currentTrace;
 		this.events = new ArrayList<>();
 		stageManager.loadFXML(this, "cbc_invariants.fxml");
