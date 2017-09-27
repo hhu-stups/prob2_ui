@@ -98,7 +98,7 @@ public class CBCFormulaHandler {
 	public void checkRefinement(CBCFormulaItem item) {
 		final CBCFormulaItem currentItem = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand(stateSpace);
+		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand();
 		Thread checkingThread = new Thread(() -> {
 			try {
 				stateSpace.execute(command);

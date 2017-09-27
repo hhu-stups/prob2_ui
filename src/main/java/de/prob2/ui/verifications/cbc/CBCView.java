@@ -58,6 +58,9 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	private Button checkAssertionsButton;
+	
+	@FXML
+	private Button cancelButton;
 					
 	private final CurrentTrace currentTrace;
 	
@@ -198,6 +201,11 @@ public class CBCView extends AnchorPane {
 		CBCFormulaItem item = new CBCFormulaItem("Assertion Checking", "Assertion Checking", CBCFormulaItem.CBCType.ASSERTIONS);
 		cbcHandler.addFormula(item, true);
 		cbcHandler.checkAssertions(item);
+	}
+	
+	@FXML
+	public void cancel() {
+		currentTrace.getStateSpace().sendInterrupt();
 	}
 	
 	private void removeFormula() {

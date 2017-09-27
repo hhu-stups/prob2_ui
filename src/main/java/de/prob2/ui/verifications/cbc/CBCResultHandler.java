@@ -15,6 +15,7 @@ import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
 import de.prob.check.ModelCheckOk;
+import de.prob.check.NotYetFinished;
 import de.prob.check.RefinementCheckCounterExample;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
@@ -36,6 +37,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 												RefinementCheckCounterExample.class));
 		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
 		this.exception.addAll(Arrays.asList(CBCParseError.class));
+		this.interrupted.addAll(Arrays.asList(NotYetFinished.class));
 	}
 	
 	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, List<Trace> traces) {
@@ -130,9 +132,6 @@ public class CBCResultHandler extends AbstractResultHandler {
 		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
 			showCheckingResult(item, msg, "Violation not found", true);
 		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
-			for(RefinementCheckCounterExample counterExample : cmd.getCounterExamples()) {
-				item.getCounterExamples().add(counterExample.getTrace(s));
-			}
 			showCheckingResult(item, msg, "Violation found", false);
 		} else {
 			showCheckingResult(item, msg, "Refinement checking is interrupted", false);

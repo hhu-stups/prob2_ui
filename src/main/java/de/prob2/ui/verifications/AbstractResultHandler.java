@@ -30,6 +30,7 @@ public abstract class AbstractResultHandler {
 	protected ArrayList<Class<?>> counterExample;
 	protected ArrayList<Class<?>> error;
 	protected ArrayList<Class<?>> exception;
+	protected ArrayList<Class<?>> interrupted;
 	
 	public AbstractResultHandler() {
 		success = new ArrayList<>();
@@ -67,6 +68,7 @@ public abstract class AbstractResultHandler {
 	
 	public CheckingResultItem handleFormulaResult(Object result, State stateid, List<Trace> traces) {
 		CheckingResultItem resultItem = null;
+		System.out.println(result != null ? result.getClass() : "null");
 		if(success.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(AlertType.INFORMATION, Checked.SUCCESS, type.name().concat(" Formula Check succeeded"), "Success");
 		} else if(counterExample.contains(result.getClass())) {
@@ -84,6 +86,8 @@ public abstract class AbstractResultHandler {
 			resultItem = new CheckingResultItem(AlertType.ERROR, Checked.EXCEPTION, "Message: ", "Could not parse formula", 
 											sw.toString());
 			logger.error("Could not parse {} formula ", type, result);			
+		} else if(interrupted.contains(result.getClass())) {
+			//resultItem = new CheckingResultItem(AlertType.INFORMATION, Checked.TIMEOUT, type.name().concat(" Formula Check succeeded"), "Success")
 		}
 		return resultItem;
 	}

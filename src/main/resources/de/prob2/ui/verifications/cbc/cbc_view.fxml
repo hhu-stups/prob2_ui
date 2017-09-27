@@ -33,6 +33,9 @@
 							<Button fx:id="checkAssertionsButton" 
 								text="%verifications.checkAssertion" onAction="#checkAssertions"
 								styleClass="button-blue" prefWidth="170.0"/>
+							<Button fx:id="cancelButton" 
+								text="%verifications.cancel" onAction="#cancel"
+								styleClass="button-blue" prefWidth="170.0"/>
 						</VBox>
 						<VBox spacing="5.0" alignment="TOP_RIGHT">
 							<Button fx:id="addFormulaButton" disable="true" onAction="#addFormula"
