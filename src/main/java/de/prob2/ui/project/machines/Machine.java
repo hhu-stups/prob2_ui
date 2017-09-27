@@ -287,13 +287,18 @@ public class Machine {
 		this.changed.set(true);
 	}
 	
+	public List<File> getTraces() {
+		return this.traces;
+	}
+	
 	public void addTrace(File traceFile) {
 		this.traces.add(traceFile);
 		this.changed.set(true);
 	}
 	
-	public List<File> getTraces() {
-		return this.traces;
+	public void removeTrace(File traceFile) {
+		this.traces.remove(traceFile);
+		this.changed.set(true);
 	}
 		
 	public void replaceMissingWithDefaults() {

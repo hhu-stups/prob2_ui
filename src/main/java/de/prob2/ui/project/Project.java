@@ -14,7 +14,6 @@ public class Project {
 	private List<Preference> preferences = new ArrayList<>();
 	private Set<Runconfiguration> runconfigurations = new HashSet<>();
 	private transient File location;
-
 	
 	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
 			List<Runconfiguration> runconfigurations, File location) {
@@ -25,7 +24,6 @@ public class Project {
 		this.runconfigurations.addAll(runconfigurations);
 		this.location = location;
 	}
-
 	
 	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
 			Set<Runconfiguration> runconfigurations, File location) {
