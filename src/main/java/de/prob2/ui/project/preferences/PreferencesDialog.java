@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,16 +35,17 @@ public class PreferencesDialog extends Dialog<Preference> {
 	@FXML
 	private Label errorExplanationLabel;
 
+	private final ResourceBundle bundle;
 	private final ProBPreferences prefs;
 	private final CurrentProject currentProject;
 	private Preference preference;
 	private Set<String> preferencesNamesSet;
 
 	@Inject
-	private PreferencesDialog(final StageManager stageManager, final MachineLoader machineLoader, final ProBPreferences prefs,
-			final GlobalPreferences globalPreferences, CurrentProject currentProject) {
+	private PreferencesDialog(final StageManager stageManager, final ResourceBundle bundle, final MachineLoader machineLoader, final ProBPreferences prefs, final GlobalPreferences globalPreferences, CurrentProject currentProject) {
 		super();
 
+		this.bundle = bundle;
 		this.currentProject = currentProject;
 
 		this.prefs = prefs;
@@ -75,13 +77,13 @@ public class PreferencesDialog extends Dialog<Preference> {
 		nameField.textProperty().addListener((observable, from, to) -> {
 			if (preferencesNamesSet.contains(to)) {
 				okButton.setDisable(true);
-				errorExplanationLabel.setText("There is already a preference named '" + to + "'");
+				errorExplanationLabel.setText(String.format(bundle.getString("project.preferences.dialog.error.preferenceAlreadyExists"), to));
 			} else if ("default".equals(to)) {
 				okButton.setDisable(true);
-				errorExplanationLabel.setText("Name cannot be 'default'");
+				errorExplanationLabel.setText(bundle.getString("project.preferences.dialog.error.nameCannotBeDefault"));
 			} else if (to.isEmpty()) {
 				okButton.setDisable(true);
-				errorExplanationLabel.setText("Name cannot be empty");
+				errorExplanationLabel.setText(bundle.getString("project.preferences.dialog.error.nameCannotBeEmpty"));
 			} else {
 				okButton.setDisable(false);
 				errorExplanationLabel.setText("");

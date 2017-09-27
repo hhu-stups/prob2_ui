@@ -6,8 +6,11 @@ import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.MachineTableView;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -19,6 +22,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import javax.inject.Inject;
+
+import com.google.inject.Injector;
+
 import java.util.Objects;
 
 
@@ -39,10 +45,16 @@ public final class ModelCheckStats extends AnchorPane {
 	
 	private ModelCheckingItem item;
 	
+	private final Injector injector;
+	
+	private Machine currentMachine;
+	
 	@Inject
-	public ModelCheckStats(final StageManager stageManager, final ModelcheckingController modelcheckingController, final StatsView statsView) {
+	public ModelCheckStats(final StageManager stageManager, final ModelcheckingController modelcheckingController, final StatsView statsView,
+							final Injector injector) {
 		this.modelcheckingController = modelcheckingController;
 		this.statsView = statsView;
+		this.injector = injector;
 		stageManager.loadFXML(this, "modelchecking_stats.fxml");
 	}
 
@@ -110,6 +122,7 @@ public final class ModelCheckStats extends AnchorPane {
 			item.setChecked(Checked.TIMEOUT);
 		}
 		item.setStats(this);
+		updateCurrentMachineStatus();
 		String message = result.getMessage();
 
 		final StateSpace stateSpace = modelChecker.getStateSpace();
@@ -133,6 +146,20 @@ public final class ModelCheckStats extends AnchorPane {
 			trace = ((ITraceDescription) result).getTrace(s);
 		}
 		showResult(message);
+	}
+	
+	private void updateCurrentMachineStatus() {
+		for(ModelCheckingItem item : currentMachine.getModelcheckingItems()) {
+			if(item.getChecked() == Checked.FAIL) {
+				currentMachine.setModelcheckingCheckedFailed();
+				injector.getInstance(MachineTableView.class).refresh();
+				injector.getInstance(StatusBar.class).setModelcheckingStatus(StatusBar.ModelcheckingStatus.ERROR);
+				return;
+			}
+		}
+		currentMachine.setModelcheckingCheckedSuccessful();
+		injector.getInstance(MachineTableView.class).refresh();
+		injector.getInstance(StatusBar.class).setModelcheckingStatus(StatusBar.ModelcheckingStatus.SUCCESSFUL);
 	}
 
 	private void showResult(String message) {
@@ -168,7 +195,9 @@ public final class ModelCheckStats extends AnchorPane {
 		resultBackground.setOnMouseClicked(eventHandler);
 	}
 	
-	public void setItem(ModelCheckingItem item) {
+	public void updateItem(ModelCheckingItem item, Machine currentMachine) {
 		this.item = item;
+		this.currentMachine = currentMachine;
 	}
+	
 }

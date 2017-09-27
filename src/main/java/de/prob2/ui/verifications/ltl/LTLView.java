@@ -6,8 +6,6 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
-import de.prob.statespace.AnimationSelector;
-
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -79,9 +77,7 @@ public class LTLView extends AnchorPane{
 	private final CurrentTrace currentTrace;
 	
 	private final CurrentProject currentProject;
-	
-	private final AnimationSelector animations;
-	
+		
 	private final LTLFormulaChecker checker;
 	
 	private final LTLPatternParser patternParser;
@@ -89,13 +85,12 @@ public class LTLView extends AnchorPane{
 	private final LTLResultHandler resultHandler;
 				
 	@Inject
-	private LTLView(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
-					final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLFormulaChecker checker,
+	private LTLView(final StageManager stageManager, final Injector injector,final CurrentTrace currentTrace, 
+					final CurrentProject currentProject, final LTLFormulaChecker checker,
 					final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.animations = animations;
 		this.checker = checker;
 		this.patternParser = patternParser;
 		this.resultHandler = resultHandler;
@@ -150,7 +145,7 @@ public class LTLView extends AnchorPane{
 			removeItem.disableProperty().bind(row.emptyProperty());
 						
 			MenuItem showCounterExampleItem = new MenuItem("Show Counter Example");
-			showCounterExampleItem.setOnAction(e-> showCounterExample());
+			showCounterExampleItem.setOnAction(e-> currentTrace.set(tvFormula.getSelectionModel().getSelectedItem().getCounterExample()));
 			showCounterExampleItem.setDisable(true);
 
 			MenuItem openEditor = new MenuItem("Open in Editor");
@@ -222,6 +217,8 @@ public class LTLView extends AnchorPane{
 		tvFormula.itemsProperty().bind(machine.ltlFormulasProperty());
 		tvPattern.itemsProperty().unbind();
 		tvPattern.itemsProperty().bind(machine.ltlPatternsProperty());
+		tvFormula.refresh();
+		tvPattern.refresh();
 		if(currentTrace.existsProperty().get()) {
 			checkMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
 		}
@@ -330,13 +327,6 @@ public class LTLView extends AnchorPane{
 			currentProject.setSaved(false);
 			tvPattern.refresh();
 		}
-	}
-	
-	private void showCounterExample() {
-		if (currentTrace.exists()) {
-			this.animations.removeTrace(currentTrace.get());
-		}
-		animations.addNewAnimation(tvFormula.getSelectionModel().getSelectedItem().getCounterExample());
 	}
 	
 	private void updateProject() {

@@ -27,8 +27,10 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 import javafx.application.Platform;
 
@@ -83,6 +85,7 @@ public class CBCFormulaHandler {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
 		stateSpace.execute(cmd);
+		injector.getInstance(StatsView.class).update(currentTrace.get());
 		resultHandler.handleFindRedundantInvariants(item, cmd);
 		updateMachine(currentProject.getCurrentMachine());
 	}
@@ -93,6 +96,7 @@ public class CBCFormulaHandler {
 		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand(stateSpace);
 		try {
 			stateSpace.execute(command);
+			injector.getInstance(StatsView.class).update(currentTrace.get());
 		} catch (Exception e){
 			LOGGER.error(e.getMessage());
 		}
@@ -107,6 +111,7 @@ public class CBCFormulaHandler {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
 		stateSpace.execute(command);
+		injector.getInstance(StatsView.class).update(currentTrace.get());
 		resultHandler.handleAssertionChecking(item, command, stateSpace);
 		updateMachine(currentProject.getCurrentMachine());
 	}
@@ -127,6 +132,7 @@ public class CBCFormulaHandler {
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
 		try {
 			stateSpace.execute(cmd);
+			injector.getInstance(StatsView.class).update(currentTrace.get());
 		} catch (ProBError | EvaluationException e){
 			LOGGER.error(e.getMessage());
 		}
@@ -148,12 +154,14 @@ public class CBCFormulaHandler {
 			)
 		);
 		Thread updatingThread = new Thread(() -> 
-			Platform.runLater(() -> 
-				updateMachine(currentMachine)
-			)
+			Platform.runLater(() -> {
+				updateMachine(currentMachine);
+				injector.getInstance(StatsView.class).update(currentTrace.get());
+			})
 		);
 		executionThread.start();
 		updatingThread.start();
+		
 	}
 		
 	public void checkMachine(Machine machine) {
@@ -161,22 +169,33 @@ public class CBCFormulaHandler {
 	}
 	
 	public void checkItem(CBCFormulaItem item) {
-		if(item.getType() == CBCType.INVARIANT) {
-			checkInvariant(item.getCode());
-		} else if(item.getType() == CBCType.DEADLOCK) {
-			checkDeadlock(item.getCode());
-		} else if(item.getType() == CBCType.SEQUENCE) {
-			checkSequence(item.getCode());
-		} else if(item.getType() == CBCType.FIND_VALID_STATE) {
-			findValidState(item);
-		} else if(item.getType() == CBCType.FIND_DEADLOCK) {
-			findDeadlock();
-		} else if(item.getType() == CBCType.REFINEMENT) {
-			checkRefinement(item);
-		} else if(item.getType() == CBCType.ASSERTIONS) {
-			checkAssertions(item);
-		} else {
-			findRedundantInvariants(item);
+		switch(item.getType()) {
+			case INVARIANT:
+				checkInvariant(item.getCode());
+				break;
+			case DEADLOCK:
+				checkDeadlock(item.getCode());
+				break;
+			case SEQUENCE:
+				checkSequence(item.getCode());
+				break;
+			case FIND_VALID_STATE:
+				findValidState(item);
+				break;
+			case FIND_DEADLOCK:
+				findDeadlock();
+				break;
+			case REFINEMENT:
+				checkRefinement(item);
+				break;
+			case ASSERTIONS:
+				checkAssertions(item);
+				break;
+			case FIND_REDUNDANT_INVARIANTS:
+				findRedundantInvariants(item);
+				break;
+			default:
+				break;
 		}
 	}
 	
@@ -184,11 +203,13 @@ public class CBCFormulaHandler {
 		for(CBCFormulaItem formula : machine.getCBCFormulas()) {
 			if(formula.getChecked() == Checked.FAIL) {
 				machine.setCBCCheckedFailed();
+				injector.getInstance(MachineTableView.class).refresh();
 				injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.ERROR);
 				return;
 			}
 		}
 		machine.setCBCCheckedSuccessful();
+		injector.getInstance(MachineTableView.class).refresh();
 		injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.SUCCESSFUL);
 	}
 		

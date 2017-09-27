@@ -20,7 +20,6 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
-import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 
 import de.prob2.ui.helpsystem.HelpButton;
@@ -134,7 +133,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		private void checkItem() {
 			currentJobThread = new Thread(() -> {
 				synchronized(lock) {
-					updateCurrentValues(getOptions(), animations.getCurrentTrace().getStateSpace(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
+					updateCurrentValues(getOptions(), currentTrace.getStateSpace(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
 					startModelchecking();
 				}
 			}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
@@ -210,7 +209,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	@FXML
 	private TableColumn<ModelCheckingItem, String> descriptionColumn;
 
-	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final StatsView statsView;
@@ -226,10 +224,9 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private Object lock = new Object();
 
 	@Inject
-	private ModelcheckingController(final AnimationSelector animations, final CurrentTrace currentTrace,
+	private ModelcheckingController(final CurrentTrace currentTrace,
 			final CurrentProject currentProject, final StageManager stageManager, final StatsView statsView, 
 			final Injector injector, final ResourceBundle bundle) {
-		this.animations = animations;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.statsView = statsView;
@@ -247,7 +244,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent("HelpMain.html");
-		showStats(new ModelCheckStats(stageManager, this, statsView));
+		showStats(new ModelCheckStats(stageManager, this, statsView, injector));
 		setBindings();
 		setListeners();
 		setContextMenus();
@@ -276,6 +273,14 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			}
 		});
 		
+		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
+			if(newValue) {
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty());
+			} else {
+				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+			}
+		});
+		
 		currentProject.addListener((observable, from, to) -> {
 			if(to != from) {
 				this.resetView();
@@ -293,10 +298,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 					showStats(item.getStats());
 					if (e.getClickCount() >= 2 && e.getButton() == MouseButton.PRIMARY &&
 							item.getChecked() == Checked.FAIL && item.getStats().getTrace() != null) {
-						if (currentTrace.exists()) {
-							this.animations.removeTrace(currentTrace.get());
-						}
-						animations.addNewAnimation(item.getStats().getTrace());
+						currentTrace.set(item.getStats().getTrace());
 						injector.getInstance(StatsView.class).update(item.getStats().getTrace());
 					}
 				}
@@ -311,10 +313,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			MenuItem showTraceToErrorItem = new MenuItem("Show Trace To Error State");
 			showTraceToErrorItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				if (currentTrace.exists()) {
-					this.animations.removeTrace(currentTrace.get());
-				}
-				animations.addNewAnimation(item.getStats().getTrace());
+				currentTrace.set(item.getStats().getTrace());
 				injector.getInstance(StatsView.class).update(item.getStats().getTrace());
 			});
 			
@@ -370,7 +369,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private void checkItem(ModelCheckingItem item) {
 		currentJobThread = new Thread(() -> {
 			synchronized(lock) {
-				updateCurrentValues(item.getOptions(), animations.getCurrentTrace().getStateSpace(), item);
+				updateCurrentValues(item.getOptions(), currentTrace.getStateSpace(), item);
 				startModelchecking();
 				tvItems.getSelectionModel().select(item);
 			}
@@ -381,20 +380,20 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
 		updateCurrentValues(options, stateSpace);
 		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy), toPrettyString(currentOptions));
-		currentStats.setItem(modelcheckingItem);
+		currentStats.updateItem(modelcheckingItem, currentProject.getCurrentMachine());
 		currentProject.getCurrentMachine().modelcheckingItemsProperty().add(modelcheckingItem);
 		tvItems.getSelectionModel().selectLast();
 	}
 	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
 		currentOptions = options;
-		currentStats = new ModelCheckStats(stageManager, this, statsView);
+		currentStats = new ModelCheckStats(stageManager, this, statsView, injector);
 		currentJob = new ConsistencyChecker(stateSpace, options, null, this);
 	}
 	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, ModelCheckingItem item) {
 		updateCurrentValues(options, stateSpace);
-		currentStats.setItem(item);
+		currentStats.updateItem(item,  currentProject.getCurrentMachine());
 	}
 
 	private String toPrettyString(ModelCheckingOptions options) {
@@ -416,7 +415,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	}
 
 	public void resetView() {
-		showStats(new ModelCheckStats(stageManager, this, statsView));
+		showStats(new ModelCheckStats(stageManager, this, statsView, injector));
 	}
 
 	@Override

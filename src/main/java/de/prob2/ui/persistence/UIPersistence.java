@@ -49,7 +49,7 @@ public final class UIPersistence {
 			return;
 		}
 		
-		if (id.startsWith(DetachViewStageController.class.getName() + " detached ")) {
+		if (id.startsWith(DetachViewStageController.class.getName() + " detached ".toUpperCase())) {
 			// Remove the prefix before the name of the detached class
 			final String toDetach = id.substring((DetachViewStageController.class.getName() + " detached ").length());
 			injector.getInstance(DetachViewStageController.class).selectForDetach(toDetach);

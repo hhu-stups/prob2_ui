@@ -176,7 +176,13 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	 * @param trace the new current trace
 	 */
 	public void set(final Trace trace) {
-		this.animationSelector.changeCurrentAnimation(trace);
+		final Trace oldTrace = this.get();
+		if (trace != null) {
+			this.animationSelector.addNewAnimation(trace);
+		}
+		if (oldTrace != null) {
+			this.animationSelector.removeTrace(oldTrace);
+		}
 	}
 	
 	/**

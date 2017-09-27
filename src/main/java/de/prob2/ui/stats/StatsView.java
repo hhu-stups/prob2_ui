@@ -1,6 +1,7 @@
 package de.prob2.ui.stats;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -63,11 +64,13 @@ public class StatsView extends ScrollPane {
 	@FXML
 	private HelpButton helpButton;
 
+	private final ResourceBundle bundle;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 
 	@Inject
-	public StatsView(final StageManager stageManager, final CurrentTrace currentTrace, final Injector injector) {
+	public StatsView(final ResourceBundle bundle, final StageManager stageManager, final CurrentTrace currentTrace, final Injector injector) {
+		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		stageManager.loadFXML(this, "stats_view.fxml");
@@ -110,12 +113,12 @@ public class StatsView extends ScrollPane {
 			this.update(currentTrace.get());
 
 			icon = new FontAwesomeIconView(FontAwesomeIcon.CLOSE);
-			tooltip = new Tooltip("Close Extended Stats");
-			extendedStatsToggle.setText("");
+			tooltip = new Tooltip(bundle.getString("stats.hideExtendedStats"));
+			extendedStatsToggle.setText(bundle.getString("stats.hideExtendedStats"));
 		} else {
 			icon = new FontAwesomeIconView(FontAwesomeIcon.PLUS_CIRCLE);
-			tooltip = new Tooltip("Show Extended Stats");
-			extendedStatsToggle.setText("Show Extended Stats");
+			tooltip = new Tooltip(bundle.getString("stats.showExtendedStats"));
+			extendedStatsToggle.setText(bundle.getString("stats.showExtendedStats"));
 		}
 		icon.glyphSizeProperty().bind(fontsize.multiply(1.2));
 		icon.setStyle("-fx-fill: -prob-grey;");
@@ -141,7 +144,7 @@ public class StatsView extends ScrollPane {
 		int nrTotalNodes = result.getNrTotalNodes();
 		int nrTotalTransitions = result.getNrTotalTransitions();
 		int nrProcessedNodes = result.getNrProcessedNodes();
-
+		
 		Platform.runLater(() -> {
 			totalStates.setText(Integer.toString(nrTotalNodes));
 			totalTransitions.setText(Integer.toString(nrTotalTransitions));

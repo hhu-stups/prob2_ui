@@ -8,14 +8,14 @@
 <?import javafx.scene.layout.AnchorPane?>
 <fx:root type="AnchorPane" minWidth="240" minHeight="70" xmlns:fx="http://javafx.com/fxml/1">
 	<!-- TabPane *obviously* does not extend Pane, so we have to wrap it in a AnchorPane so we can add the menu bar to it on Mac. -->
-	<TabPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.91">
-		<Tab text="%states.tab.title">
+	<TabPane fx:id="tabPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.91">
+		<Tab fx:id="statesTab" id="states" text="%states.tab.title">
 			<StatesView/>
 		</Tab>
-		<Tab text="%stateErrors.tab.title">
+		<Tab fx:id="statesErrorTab" id="statesError" text="%stateErrors.tab.title">
 			<StateErrorsView/>
 		</Tab>
-		<Tab text="%visualisation.tab.title">
+		<Tab fx:id="visualisationTab" id="visualisation" text="%visualisation.tab.title">
 			<VisualisationView/>
 		</Tab>
 	</TabPane>
