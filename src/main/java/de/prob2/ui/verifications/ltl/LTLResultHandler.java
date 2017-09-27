@@ -19,6 +19,7 @@ import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLParseError;
+import javafx.application.Platform;
 import javafx.scene.control.Alert.AlertType;
 
 @Singleton
@@ -42,7 +43,9 @@ public class LTLResultHandler extends AbstractResultHandler {
 	public Checked handleFormulaResult(LTLFormulaItem item, Object result, State stateid) {
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
-		this.showResult(resultItem, item, traces);
+		Platform.runLater(() -> {
+			this.showResult(resultItem, item, traces);
+		});
 		if(resultItem != null) {
 			return resultItem.getChecked();
 		}

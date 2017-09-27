@@ -20,7 +20,7 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
-
+import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -154,12 +154,17 @@ public class LTLView extends AnchorPane{
 
 			MenuItem check = new MenuItem("Check separately");
 			check.setOnAction(e-> {
-				Machine machine = currentProject.getCurrentMachine();
-				LTLFormulaItem item = row.getItem();
-				Checked result = checkFormula(item, machine);
-				item.setChecked(result);
-				checker.checkMachineStatus(machine);
-				tvFormula.refresh();
+				Thread checkingThread = new Thread(() -> {
+					Machine machine = currentProject.getCurrentMachine();
+					LTLFormulaItem item = row.getItem();
+					Checked result = checkFormula(item, machine);
+					item.setChecked(result);
+					Platform.runLater(() -> {
+						checker.checkMachineStatus(machine);
+						tvFormula.refresh();
+					});
+				});
+				checkingThread.start();
 			});
 			check.disableProperty().bind(row.emptyProperty());
 
@@ -338,9 +343,14 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
-		checker.checkMachine(machine);
-		checker.checkMachineStatus(machine);
-		tvFormula.refresh();
+		Thread checkingThread = new Thread(() -> {
+			checker.checkMachine(machine);
+			Platform.runLater(() -> {
+				checker.checkMachineStatus(machine);
+				tvFormula.refresh();
+			});
+		});
+		checkingThread.start();
 	}
 	
 	private void parseMachine(Machine machine) {
