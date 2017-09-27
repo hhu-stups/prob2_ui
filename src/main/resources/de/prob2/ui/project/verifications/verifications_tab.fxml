@@ -8,7 +8,7 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.Label?>
-<?import de.prob2.ui.verifications.MachineTableView?>
+<?import de.prob2.ui.project.verifications.MachineTableView?>
 
 <fx:root type="Tab" text="%project.verifications.tab.title"
 		 closable="false" xmlns:fx="http://javafx.com/fxml/1">

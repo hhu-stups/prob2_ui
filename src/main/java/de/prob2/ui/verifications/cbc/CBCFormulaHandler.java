@@ -27,10 +27,10 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
 import javafx.application.Platform;
 
