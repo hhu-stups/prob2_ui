@@ -1,14 +1,17 @@
 package de.prob2.ui.verifications.cbc;
 
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import javafx.fxml.FXML;
-import javafx.scene.control.TextField;
-import javafx.stage.Modality;
+import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 
 import com.google.inject.Injector;
+
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.TextField;
+import javafx.stage.Modality;
 
 public class CBCSequence extends AbstractCBCFormulaInputStage {
 
@@ -16,9 +19,8 @@ public class CBCSequence extends AbstractCBCFormulaInputStage {
 	private TextField tfSequence;
 		
 	@Inject
-	private CBCSequence(final StageManager stageManager, final CBCFormulaHandler cbcHandler,
-						final CurrentProject currentProject, final Injector injector) {
-		super(cbcHandler, currentProject, injector);
+	private CBCSequence(final StageManager stageManager, final CBCFormulaHandler cbcHandler, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
+		super(cbcHandler, currentProject, injector, bundle);
 		stageManager.loadFXML(this, "cbc_sequence.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
