@@ -1,19 +1,23 @@
 package de.prob2.ui.visualisation;
 
+import java.io.FileNotFoundException;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.FileNotFoundException;
 
 @Singleton
 public class VisualisationView extends AnchorPane {
@@ -32,11 +36,13 @@ public class VisualisationView extends AnchorPane {
 
 	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 
 	@Inject
-	public VisualisationView(final CurrentTrace currentTrace, final StageManager stageManager) {
+	public VisualisationView(final CurrentTrace currentTrace, final StageManager stageManager, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		stageManager.loadFXML(this, "visualisation_view.fxml");
 	}
 
@@ -56,7 +62,7 @@ public class VisualisationView extends AnchorPane {
 			} catch (FileNotFoundException e) {
 				LOGGER.warn("Failed to open images for visualisation", e);
 				Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, e.getMessage());
-				alert.setHeaderText("Visualisation not possible");
+				alert.setHeaderText(bundle.getString("visualisation.error.visualisationNotPossible"));
 				alert.showAndWait();
 			}
 
