@@ -25,7 +25,6 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 		this.type = type;
 		this.example = null;
 		this.initializeCounterExamples();
-		
 	}
 		
 	public void initializeCounterExamples() {

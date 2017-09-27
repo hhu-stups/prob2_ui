@@ -11,7 +11,6 @@ import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.internal.StageManager;
-
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Region;
@@ -53,7 +52,6 @@ public abstract class AbstractResultHandler {
 	protected AbstractResultHandler(final StageManager stageManager, final ResourceBundle bundle) {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		
 		success = new ArrayList<>();
 		counterExample = new ArrayList<>();
 		error = new ArrayList<>();
@@ -62,14 +60,8 @@ public abstract class AbstractResultHandler {
 	}
 	
 	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item) {
-		if(resultItem == null) {
+		if(resultItem == null || item.getChecked() == Checked.SUCCESS) {
 			return;
-		}
-		if(resultItem.getType() != Alert.AlertType.ERROR) {
-			item.setCheckedSuccessful();
-			return;
-		} else {
-			item.setCheckedFailed();
 		}
 		Alert alert = new Alert(resultItem.getType(), resultItem.getMessage());
 		alert.setTitle(item.getName());
@@ -90,7 +82,6 @@ public abstract class AbstractResultHandler {
 	
 	public CheckingResultItem handleFormulaResult(Object result, State stateid, List<Trace> traces) {
 		CheckingResultItem resultItem = null;
-		System.out.println(result != null ? result.getClass() : "null");
 		if(success.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Alert.AlertType.INFORMATION, Checked.SUCCESS, String.format(bundle.getString("verifications.result.succeeded"), bundle.getString(type.getKey())), "Success");
 		} else if(counterExample.contains(result.getClass())) {
@@ -107,7 +98,7 @@ public abstract class AbstractResultHandler {
 			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.EXCEPTION, bundle.getString("verifications.result.couldNotParseFormula.message"), bundle.getString("verifications.result.couldNotParseFormula.header"), sw.toString());
 			logger.error("Could not parse {} formula", type, exc);	
 		} else if(interrupted.contains(result.getClass())) {
-			//resultItem = new CheckingResultItem(AlertType.INFORMATION, Checked.TIMEOUT, type.name().concat(" Formula Check succeeded"), "Success")
+			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.INTERRUPTED, "Checking interrupted", "Checking interrupted");
 		}
 		return resultItem;
 	}
@@ -121,6 +112,17 @@ public abstract class AbstractResultHandler {
 		alert.setHeaderText(String.format("%s already exists", bundle.getString(itemType.getKey())));
 		alert.setContentText(String.format("Declared %s already exists", bundle.getString(itemType.getKey())));
 		alert.showAndWait();
+	}
+	
+	protected void handleItem(AbstractCheckableItem item, Checked checked) {
+		item.setChecked(checked);
+		if(checked == Checked.SUCCESS) {
+			item.setCheckedSuccessful();
+		} else if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
+			item.setCheckedFailed();
+		}  else if(checked == Checked.INTERRUPTED) {
+			item.setCheckInterrupted();
+		}
 	}
 
 }

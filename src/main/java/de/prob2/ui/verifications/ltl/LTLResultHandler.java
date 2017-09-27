@@ -48,6 +48,14 @@ public class LTLResultHandler extends AbstractResultHandler {
 	}
 	
 	public Checked handleFormulaResult(LTLFormulaItem item, Object result, State stateid) {
+		Class<?> clazz = result.getClass();
+		if(success.contains(clazz)) {
+			handleItem(item, Checked.SUCCESS);
+		} else if(error.contains(clazz) || counterExample.contains(clazz) || exception.contains(clazz)) {
+			handleItem(item, Checked.FAIL);
+		} else {
+			handleItem(item, Checked.INTERRUPTED);
+		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
 		Platform.runLater(() -> {

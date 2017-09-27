@@ -33,6 +33,7 @@ import javafx.scene.control.Alert;
 
 @Singleton
 public class CBCResultHandler extends AbstractResultHandler {
+	
 	@Inject
 	public CBCResultHandler(final StageManager stageManager, final ResourceBundle bundle) {
 		super(stageManager, bundle);
@@ -55,10 +56,13 @@ public class CBCResultHandler extends AbstractResultHandler {
 	}
 	
 	public void handleFormulaResult(CBCFormulaItem item, Object result, State stateid) {
-		if(result instanceof ModelCheckOk) {
-			handleItem(item, true);
+		Class<?> clazz = result.getClass();
+		if(success.contains(clazz)) {
+			handleItem(item, Checked.SUCCESS);
+		} else if(error.contains(clazz) || counterExample.contains(clazz) || exception.contains(clazz)) {
+			handleItem(item, Checked.FAIL);
 		} else {
-			handleItem(item, false);
+			handleItem(item, Checked.INTERRUPTED);
 		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
@@ -102,24 +106,24 @@ public class CBCResultHandler extends AbstractResultHandler {
 		item.setExample(null);
 		// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
 		if (result == FindStateCommand.ResultType.STATE_FOUND) {
-			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.found"), true);
+			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.found"), Checked.SUCCESS);
 			item.setExample(cmd.getTrace(stateSpace));
 		} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
-			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.notFound"), false);
+			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.notFound"), Checked.FAIL);
 		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
-			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.interrupted"), false);
+			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.interrupted"), Checked.INTERRUPTED);
 		} else {
-			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.error"), false);
+			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.error"), Checked.FAIL);
 		}
 	}
 	
 	public void handleFindRedundantInvariants(CBCFormulaItem item, GetRedundantInvariantsCommand cmd) {
 		List<String> result = cmd.getRedundantInvariants();
 		if (result.isEmpty()) {
-			showCheckingResult(item, bundle.getString("verifications.cbc.findRedundantInvariants.result.notFound"), true);
+			showCheckingResult(item, bundle.getString("verifications.cbc.findRedundantInvariants.result.notFound"), Checked.SUCCESS);
 		} else {
 			final String header = bundle.getString(cmd.isTimeout() ? "verifications.cbc.findRedundantInvariants.result.timeout" : "verifications.cbc.findRedundantInvariants.result.found");
-			showCheckingResult(item, String.join("\n", result), header, false);
+			showCheckingResult(item, String.join("\n", result), header, Checked.FAIL);
 		}
 	}
 	
@@ -127,49 +131,40 @@ public class CBCResultHandler extends AbstractResultHandler {
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
 		String msg = cmd.getResultsString();
 		if (result == null) {
-			showCheckingResult(item, bundle.getString("verifications.cbc.refinementChecking.result.notARefinementMachine.message"), bundle.getString("verifications.cbc.refinementChecking.result.notARefinementMachine.header"), false);
+			showCheckingResult(item, bundle.getString("verifications.cbc.refinementChecking.result.notARefinementMachine.message"), bundle.getString("verifications.cbc.refinementChecking.result.notARefinementMachine.header"), Checked.FAIL);
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
-			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.noViolationFound"), true);
+			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.noViolationFound"), Checked.SUCCESS);
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
-			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.violationFound"), false);
+			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.violationFound"), Checked.FAIL);
 		} else {
-			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.interrupted"), false);
+			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.interrupted"), Checked.INTERRUPTED);
 		}
 	}
 	
 	public void handleAssertionChecking(CBCFormulaItem item, ConstraintBasedAssertionCheckCommand cmd, StateSpace stateSpace) {
 		ConstraintBasedAssertionCheckCommand.ResultType result = cmd.getResult();
 		if (result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS) {
-			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.noCounterExampleExists"), true);
+			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.noCounterExampleExists"), Checked.SUCCESS);
 		} else if (result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
-			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.noCounterExampleFound"), true);
+			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.noCounterExampleFound"), Checked.SUCCESS);
 		} else if (result == ConstraintBasedAssertionCheckCommand.ResultType.COUNTER_EXAMPLE) {
 			item.getCounterExamples().add(cmd.getTrace(stateSpace));
-			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.counterExampleFound"), false);
+			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.counterExampleFound"), Checked.FAIL);
 		} else {
-			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.interrupted"), false);
+			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.interrupted"), Checked.INTERRUPTED);
 		}
 	}
 		
-	private void showCheckingResult(CBCFormulaItem item, String msg, String header, boolean successful) {
-		Alert.AlertType alertType = successful ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR;
-		Checked checked = successful ? Checked.SUCCESS : Checked.FAIL;
+	private void showCheckingResult(CBCFormulaItem item, String msg, String header, Checked checked) {
+		Alert.AlertType alertType = checked == Checked.SUCCESS ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR;
 		CheckingResultItem resultItem = new CheckingResultItem(alertType , checked, msg, header);
 		super.showResult(resultItem, item);
-		handleItem(item, successful);
+		handleItem(item, checked);
 	}
 	
-	private void showCheckingResult(CBCFormulaItem item, String msg, boolean successful) {
-		showCheckingResult(item, msg, msg, successful);
+	private void showCheckingResult(CBCFormulaItem item, String msg, Checked checked) {
+		showCheckingResult(item, msg, msg, checked);
 	}
 	
-	private void handleItem(CBCFormulaItem item, boolean successful) {
-		if(successful) {
-			item.setCheckedSuccessful();
-			item.setChecked(Checked.SUCCESS);
-		} else {
-			item.setCheckedFailed();
-			item.setChecked(Checked.FAIL);
-		}
-	}
+
 }
