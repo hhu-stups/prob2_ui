@@ -19,6 +19,7 @@ import com.google.inject.Inject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.tracereplay.ReplayTrace.Status;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -65,6 +66,7 @@ public class TraceLoader {
 			LOGGER.warn("Failed to open project file", exc);
 			return null;
 		}
+		trace.setStatus(Status.NOT_CHECKED);
 		return trace;
 	}
 }
