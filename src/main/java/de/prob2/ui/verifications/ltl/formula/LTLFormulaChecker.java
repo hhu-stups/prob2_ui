@@ -57,9 +57,7 @@ public class LTLFormulaChecker {
 			}
 			item.setChecked(result);
 		}
-		Platform.runLater(() -> {
-			injector.getInstance(StatusBar.class).setLtlStatus(failed.get(0) ? StatusBar.LTLStatus.ERROR : StatusBar.LTLStatus.SUCCESSFUL);
-		});
+		Platform.runLater(() -> injector.getInstance(StatusBar.class).setLtlStatus(failed.get(0) ? StatusBar.LTLStatus.ERROR : StatusBar.LTLStatus.SUCCESSFUL));
 	
 	}
 	

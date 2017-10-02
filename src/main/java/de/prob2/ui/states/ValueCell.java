@@ -17,11 +17,7 @@ import de.prob.animator.prologast.ASTFormula;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeTableCell;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ValueCell.class);
 	
 	private final ResourceBundle bundle;
 	private final Map<IEvalElement, AbstractEvalResult> values;

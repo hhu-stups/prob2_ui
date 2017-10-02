@@ -47,6 +47,9 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	private Button checkMachineButton;
+	
+	@FXML
+	private Button cancelButton;
 
 	@FXML
 	private HelpButton helpButton;
@@ -355,6 +358,11 @@ public class LTLView extends AnchorPane{
 			});
 		});
 		checkingThread.start();
+	}
+	
+	@FXML
+	public void cancel() {
+		currentTrace.getStateSpace().sendInterrupt();
 	}
 	
 	private void parseMachine(Machine machine) {

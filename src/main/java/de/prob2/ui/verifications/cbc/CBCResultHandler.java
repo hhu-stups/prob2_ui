@@ -127,7 +127,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 		}
 	}
 	
-	public void handleRefinementChecking(CBCFormulaItem item, ConstraintBasedRefinementCheckCommand cmd, StateSpace s) {
+	public void handleRefinementChecking(CBCFormulaItem item, ConstraintBasedRefinementCheckCommand cmd) {
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
 		String msg = cmd.getResultsString();
 		if (result == null) {

@@ -60,9 +60,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
-		Platform.runLater(() -> {
-			this.showResult(resultItem, item, traces);
-		});
+		Platform.runLater(() -> this.showResult(resultItem, item, traces));
 		if(resultItem != null) {
 			return resultItem.getChecked();
 		}

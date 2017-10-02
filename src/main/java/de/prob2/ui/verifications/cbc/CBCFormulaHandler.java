@@ -112,7 +112,7 @@ public class CBCFormulaHandler {
 				LOGGER.error(e.getMessage());
 			}
 			Platform.runLater(() -> {
-				resultHandler.handleRefinementChecking(currentItem, command, stateSpace);
+				resultHandler.handleRefinementChecking(currentItem, command);
 				updateMachine(currentProject.getCurrentMachine());
 			});
 		});
