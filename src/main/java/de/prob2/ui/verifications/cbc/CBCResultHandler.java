@@ -136,7 +136,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.noViolationFound"), Checked.SUCCESS);
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
 			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.violationFound"), Checked.FAIL);
-		} else {
+		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.INTERRUPTED) {
 			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.interrupted"), Checked.INTERRUPTED);
 		}
 	}
@@ -150,7 +150,7 @@ public class CBCResultHandler extends AbstractResultHandler {
 		} else if (result == ConstraintBasedAssertionCheckCommand.ResultType.COUNTER_EXAMPLE) {
 			item.getCounterExamples().add(cmd.getTrace(stateSpace));
 			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.counterExampleFound"), Checked.FAIL);
-		} else {
+		} else if (result == ConstraintBasedAssertionCheckCommand.ResultType.INTERRUPTED) {
 			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.interrupted"), Checked.INTERRUPTED);
 		}
 	}

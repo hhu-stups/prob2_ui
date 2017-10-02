@@ -11,6 +11,7 @@ import com.google.inject.Singleton;
 
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
+import de.prob.check.LTLNotYetFinished;
 import de.prob.check.LTLOk;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
@@ -38,6 +39,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 		this.counterExample.addAll(Arrays.asList(LTLCounterExample.class));
 		this.error.addAll(Arrays.asList(LTLError.class));
 		this.exception.addAll(Arrays.asList(LTLParseError.class, ProBError.class));
+		this.interrupted.addAll(Arrays.asList(LTLNotYetFinished.class));
 	}
 			
 	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, List<Trace> traces) {
