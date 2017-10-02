@@ -119,7 +119,9 @@ public class CBCResultHandler extends AbstractResultHandler {
 	
 	public void handleFindRedundantInvariants(CBCFormulaItem item, GetRedundantInvariantsCommand cmd) {
 		List<String> result = cmd.getRedundantInvariants();
-		if (result.isEmpty()) {
+		if(cmd.isInterrupted()) {
+			showCheckingResult(item, bundle.getString("verifications.interrupted"), Checked.INTERRUPTED);
+		} else if (result.isEmpty()) {
 			showCheckingResult(item, bundle.getString("verifications.cbc.findRedundantInvariants.result.notFound"), Checked.SUCCESS);
 		} else {
 			final String header = bundle.getString(cmd.isTimeout() ? "verifications.cbc.findRedundantInvariants.result.timeout" : "verifications.cbc.findRedundantInvariants.result.found");

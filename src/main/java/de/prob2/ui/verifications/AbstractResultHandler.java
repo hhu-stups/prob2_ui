@@ -98,7 +98,7 @@ public abstract class AbstractResultHandler {
 			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.EXCEPTION, bundle.getString("verifications.result.couldNotParseFormula.message"), bundle.getString("verifications.result.couldNotParseFormula.header"), sw.toString());
 			logger.error("Could not parse {} formula", type, exc);	
 		} else if(interrupted.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.INTERRUPTED, "Checking interrupted", "Checking interrupted");
+			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.INTERRUPTED, bundle.getString("verifications.interrupted"), bundle.getString("verifications.interrupted"));
 		}
 		return resultItem;
 	}
