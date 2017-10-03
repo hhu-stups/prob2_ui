@@ -12,12 +12,14 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
-import de.prob2.ui.consoles.groovy.MetaPropertiesHandler;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
+import de.prob2.ui.consoles.groovy.objects.GroovyClassHandler;
 import de.prob2.ui.consoles.groovy.objects.GroovyClassPropertyItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 
+
 import javafx.collections.ObservableList;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,8 +105,8 @@ public class GroovyCodeCompletionHandler {
 	private void fillAllMethodsAndProperties(Class <?> clazz, GroovyMethodOption option) {
 		currentSuggestions.clear();
 		fillMethodsAndProperties(clazz, option);
-		MetaPropertiesHandler.handleMethods(clazz, currentSuggestions, option);
-		MetaPropertiesHandler.handleProperties(clazz, currentSuggestions);
+		GroovyClassHandler.handleMethods(clazz, currentSuggestions, option);
+		GroovyClassHandler.handleProperties(clazz, currentSuggestions);
 	}
 	
 	public void fillObjects(Bindings bindings) {
@@ -141,8 +143,8 @@ public class GroovyCodeCompletionHandler {
 		currentSuggestions.clear();
 		suggestions.clear();
 		fillMethodsAndProperties(clazz, option);
-		MetaPropertiesHandler.handleMethods(clazz, currentSuggestions, option);
-		MetaPropertiesHandler.handleProperties(clazz, currentSuggestions);
+		GroovyClassHandler.handleMethods(clazz, currentSuggestions, option);
+		GroovyClassHandler.handleProperties(clazz, currentSuggestions);
 		suggestions.addAll(currentSuggestions);
 	}
 	

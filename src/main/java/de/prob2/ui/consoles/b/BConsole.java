@@ -10,7 +10,7 @@ import de.prob2.ui.consoles.Console;
 public final class BConsole extends Console {
 	@Inject
 	private BConsole(BInterpreter interpreter, ResourceBundle bundle) {
-		super(bundle.getString("consoles.b.header"), bundle.getString("consoles.b.prompt"));
+		super(bundle, bundle.getString("consoles.b.header"));
 		this.interpreter = interpreter;
 	}
 }

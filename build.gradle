@@ -11,8 +11,6 @@ plugins {
 
 apply plugin: 'application'
 apply plugin: 'eclipse'
-apply plugin: 'groovy'
-apply plugin: 'antlr'
 
 sourceCompatibility="1.8"
 targetCompatibility="1.8"
@@ -48,28 +46,18 @@ if (hasProperty("macAppJRE")) {
 	macAppBundle.jreHome = macAppJRE
 }
 
-sourceSets.main.java.srcDirs = []
-sourceSets.main.groovy.srcDirs += ["src/main/java"]
-
 sourceSets.test.java.srcDirs = []
-sourceSets.test.groovy.srcDirs = []
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
 }
 
-tasks.withType(GroovyCompile) {
-	options.encoding = "UTF-8"
-}
-
 dependencies {
-	antlr 'org.antlr:antlr4:4.5'
-
 	compile 'com.google.code.gson:gson:2.7'
 	compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
 	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.4'
-	compile 'de.hhu.stups:de.prob2.kernel:3.2.3-SNAPSHOT'
-	compile 'de.hhu.stups:ltl-dsl:0.1.0'
+	compile 'de.hhu.stups:de.prob2.kernel:3.2.4-SNAPSHOT'
+	compile 'de.hhu.stups:ltl-dsl:0.1.1-SNAPSHOT'
 	compile 'de.jensd:fontawesomefx-commons:8.15'
 	compile 'de.jensd:fontawesomefx-fontawesome:4.7.0-5'
 	compile 'org.codehaus.groovy:groovy-all:2.4.7'
@@ -113,7 +101,7 @@ processResources {
 
 sonarqube {
 	properties {
-		property("sonar.java.binaries", sourceSets.main.groovy.outputDir.path)
+		property("sonar.java.binaries", sourceSets.main.java.outputDir.path)
 		
 		property("sonar.organization", "prob2")
 		property("sonar.projectKey", "prob2-ui")
@@ -123,6 +111,11 @@ sonarqube {
 		
 		property("sonar.login", System.getenv("SONAR_TOKEN"))
 	}
+}
+
+task wrapper(type: Wrapper) {
+	distributionType = "ALL"
+	gradleVersion = "4.2"
 }
 
 task fatJar(type: Jar) {

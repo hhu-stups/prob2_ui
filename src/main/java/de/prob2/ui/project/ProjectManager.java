@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.hildan.fxgson.FxGson;
@@ -35,7 +36,6 @@ import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
 @Singleton
@@ -46,16 +46,19 @@ public class ProjectManager {
 	private final Gson gson;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	private final RecentProjects recentProjects;
 
 	@Inject
-	public ProjectManager(CurrentProject currentProject, StageManager stageManager, RecentProjects recentProjects) {
+	public ProjectManager(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle,
+			RecentProjects recentProjects) {
 		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		this.recentProjects = recentProjects;
 	}
-	
+
 	private File saveProject(Project project) {
 		File file = new File(project.getLocation() + File.separator + project.getName() + ".json");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), PROJECT_CHARSET)) {
@@ -73,9 +76,9 @@ public class ProjectManager {
 	public void saveCurrentProject() {
 		Project project = currentProject.get();
 		currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(),
-					project.getPreferences(), project.getRunconfigurations(), project.getLocation()));
+				project.getPreferences(), project.getRunconfigurations(), project.getLocation()));
 		File savedFile = saveProject(project);
-		if(savedFile != null) {
+		if (savedFile != null) {
 			addToRecentProjects(savedFile);
 			currentProject.setSaved(true);
 			for (Machine machine : currentProject.get().getMachines()) {
@@ -86,7 +89,7 @@ public class ProjectManager {
 			}
 		}
 	}
-	
+
 	private Project loadProject(File file) {
 		Project project;
 		try (final Reader reader = new InputStreamReader(new FileInputStream(file), PROJECT_CHARSET)) {
@@ -94,12 +97,8 @@ public class ProjectManager {
 			project.setLocation(file.getParentFile());
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
-			Alert alert = stageManager.makeAlert(AlertType.ERROR,
-					"The project file " + file + " could not be found.\n"
-							+ "The file was probably moved, renamed or deleted.\n\n"
-							+ "Would you like to remove this project from the list of recent projects?",
-					ButtonType.YES, ButtonType.NO);
-			alert.setHeaderText("Project File not found.");
+			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.fileNotFound.content"), file), ButtonType.YES, ButtonType.NO);
+			alert.setHeaderText(bundle.getString("project.fileNotFound.header"));
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 				Platform.runLater(() -> recentProjects.remove(file.getAbsolutePath()));
@@ -120,7 +119,6 @@ public class ProjectManager {
 			initializeLTL(project);
 			currentProject.set(project);
 			addToRecentProjects(file);
-			currentProject.setSaved(true);
 		} 
 	}
 

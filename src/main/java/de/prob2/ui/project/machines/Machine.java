@@ -19,10 +19,11 @@ import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.menu.FileAsker;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.verifications.cbc.CBCFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -82,31 +83,9 @@ public class Machine {
 		}
 	}
 	
-	public static final class FileAndType {
-		private final File file;
-		private final Machine.Type type;
-		
-		public FileAndType(final File file, final Machine.Type type) {
-			super();
-			
-			Objects.requireNonNull(file);
-			Objects.requireNonNull(type);
-			
-			this.file = file;
-			this.type = type;
-		}
-		
-		public File getFile() {
-			return this.file;
-		}
-		
-		public Machine.Type getType() {
-			return this.type;
-		}
-	}
-	
 	protected transient FontAwesomeIconView ltlstatus;
 	protected transient FontAwesomeIconView cbcstatus;
+	protected transient FontAwesomeIconView modelcheckingstatus;
 	private String name;
 	private String description;
 	private String location;
@@ -115,6 +94,7 @@ public class Machine {
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<CBCFormulaItem> cbcFormulas;
 	private List<File> traces = new ArrayList<>();
+	private ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
 	private transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
@@ -128,16 +108,18 @@ public class Machine {
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
+		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
 	}
 	
 	public Machine(String name, String description, Path location) {
 		this(name, description, location,
-			Machine.Type.fromExtension(FileAsker.getExtension(location.getFileName().toString())));
+			Machine.Type.fromExtension(StageManager.getExtension(location.getFileName().toString())));
 	}
 	
 	public void initialize() {
 		initializeLTLStatus();
 		initializeCBCStatus();
+		initializeModelcheckingStatus();
 		for(CBCFormulaItem item : cbcFormulas) {
 			item.initializeCounterExamples();
 		}
@@ -183,6 +165,16 @@ public class Machine {
 		}
 	}
 	
+	public void initializeModelcheckingStatus() {
+		this.modelcheckingstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		this.modelcheckingstatus.setFill(Color.BLUE);
+		if (modelcheckingItems != null) {
+			for (ModelCheckingItem item : modelcheckingItems) {
+				item.initializeStatus();
+			}
+		}
+	}
+	
 	public FontAwesomeIconView getLTLStatus() {
 		return ltlstatus;
 	}
@@ -190,6 +182,11 @@ public class Machine {
 	public FontAwesomeIconView getCBCStatus() {
 		return cbcstatus;
 	}
+	
+	public FontAwesomeIconView getModelcheckStatus() {
+		return modelcheckingstatus;
+	}
+	
 	
 	public String getName() {
 		return name;
@@ -231,6 +228,18 @@ public class Machine {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
 		icon.setFill(Color.RED);
 		this.cbcstatus = icon;
+	}
+	
+	public void setModelcheckingCheckedSuccessful() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
+		icon.setFill(Color.GREEN);
+		this.modelcheckingstatus = icon;
+	}
+
+	public void setModelcheckingCheckedFailed() {
+		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
+		icon.setFill(Color.RED);
+		this.modelcheckingstatus = icon;
 	}
 		
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {
@@ -300,6 +309,25 @@ public class Machine {
 		this.traces.remove(traceFile);
 		this.changed.set(true);
 	}
+
+	public ListProperty<ModelCheckingItem> modelcheckingItemsProperty() {
+		return modelcheckingItems;
+	}
+	
+	public List<ModelCheckingItem> getModelcheckingItems() {
+		return modelcheckingItems.get();
+	}
+	
+	public void addModelcheckingItem(ModelCheckingItem item) {
+		modelcheckingItems.add(item);
+		this.changed.set(true);
+	}
+	
+	public void removeModelcheckingItem(ModelCheckingItem item) {
+		modelcheckingItems.remove(item);
+		this.changed.set(true);
+	}
+	
 		
 	public void replaceMissingWithDefaults() {
 		if (type == null) {
@@ -317,7 +345,10 @@ public class Machine {
 		if(traces == null) {
 			this.traces = new ArrayList<>();
 		}
-		this.changed = new SimpleBooleanProperty(false); 
+		if(modelcheckingItems == null) {
+			this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
+		}
+		this.changed = new SimpleBooleanProperty(false);
 	}
 	
 	public Path getPath() {

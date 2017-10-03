@@ -61,15 +61,18 @@ public abstract class AbstractCheckableItem {
 	}
 	
 	public void setCheckedSuccessful() {
-		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
-		icon.setFill(Color.GREEN);
-		this.status = icon;
+		status.setIcon(FontAwesomeIcon.CHECK);
+		status.setFill(Color.GREEN);
 	}
 
 	public void setCheckedFailed() {
-		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
-		icon.setFill(Color.RED);
-		this.status = icon;
+		status.setIcon(FontAwesomeIcon.REMOVE);
+		status.setFill(Color.RED);
+	}
+	
+	public void setCheckInterrupted() {
+		status.setIcon(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
+		status.setFill(Color.YELLOW);
 	}
 	
 	public void setChecked(Checked checked) {

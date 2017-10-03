@@ -1,25 +1,34 @@
 package de.prob2.ui.preferences;
 
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.ResourceBundle;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 import com.google.inject.Inject;
+
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.internal.StageManager;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 public final class PreferencesView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesView.class);
@@ -34,14 +43,16 @@ public final class PreferencesView extends BorderPane {
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	
 	private final ObjectProperty<ProBPreferences> preferences;
 	
 	@Inject
-	private PreferencesView(final StageManager stageManager) {
+	private PreferencesView(final StageManager stageManager, final ResourceBundle bundle) {
 		super();
 		
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		
 		this.preferences = new SimpleObjectProperty<>(this, "preferences", null);
 		
@@ -64,12 +75,14 @@ public final class PreferencesView extends BorderPane {
 	private void initialize() {
 		this.prefSearchField.textProperty().addListener(observable -> this.updatePreferences());
 		
+		this.tv.getSelectionModel().clearSelection();
+		
 		tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 		
 		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
 		
 		tvValue.setCellFactory(col -> {
-			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell<>(this.stageManager);
+			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell<>(this.stageManager, bundle);
 			cell.tableRowProperty().addListener((observable, from, to) ->
 				to.treeItemProperty().addListener((observable1, from1, to1) ->
 					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem)
@@ -84,7 +97,7 @@ public final class PreferencesView extends BorderPane {
 		
 		tvDescription.setCellValueFactory(new TreeItemPropertyValueFactory<>("description"));
 		
-		tv.getRoot().setValue(new CategoryPrefTreeItem("Preferences"));
+		tv.getRoot().setValue(new CategoryPrefTreeItem("Preferences (this should be invisible)"));
 		
 		final ChangeListener<StateSpace> updatePreferencesCL = (observable, from, to) -> this.updatePreferences();
 		final MapChangeListener<String, String> updatePreferencesMCL = change -> this.updatePreferences();

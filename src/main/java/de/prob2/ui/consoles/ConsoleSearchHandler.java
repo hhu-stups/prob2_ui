@@ -1,23 +1,24 @@
 package de.prob2.ui.consoles;
 
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
+
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 public class ConsoleSearchHandler {
 	
 	protected boolean searchActive = false;
 	protected List<SearchResult> searchResults;
 	protected int currentSearchIndex = 0;
-	public static final String FOUND = "(backward search) '':";
-	public static final String NOTFOUND = "(failed backward search) '':";
 	private final Console parent;
+	private final ResourceBundle bundle;
 	
-	public ConsoleSearchHandler(Console parent) {
+	public ConsoleSearchHandler(Console parent, ResourceBundle bundle) {
 		this.searchResults = new ArrayList<>();
 		this.parent = parent;
+		this.bundle = bundle;
 	}
 	
 	public boolean isActive() {
@@ -94,12 +95,9 @@ public class ConsoleSearchHandler {
 	}
 	
 	protected void refreshSearch() {
-		String searchPrefix = FOUND;
-		if (!searchResults.get(0).getFound()) {
-			searchPrefix = NOTFOUND;
-		}
+		final String format = bundle.getString(searchResults.get(0).getFound() ? "consoles.prompt.backwardSearch" : "consoles.prompt.backwardSearchFailed");
+		final String addition = String.format(format, getSearchCurrent(), searchResults.get(currentSearchIndex).getResult());
 		int posOfEnter = parent.getText().lastIndexOf('\n');
-		String addition = searchPrefix.substring(0,searchPrefix.length() - 2) + getSearchCurrent() + "':" + searchResults.get(currentSearchIndex).getResult();
 		parent.deleteText(posOfEnter + 1, parent.getText().length());
 		parent.appendText(addition);
 		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf('\n') + 4;

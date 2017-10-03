@@ -1,6 +1,7 @@
 package de.prob2.ui.preferences;
 
 import java.io.File;
+import java.util.ResourceBundle;
 
 import de.prob2.ui.internal.StageManager;
 
@@ -26,11 +27,13 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 	private static final Logger logger = LoggerFactory.getLogger(MultiTreeTableCell.class);
 	
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	
-	public MultiTreeTableCell(final StageManager stageManager) {
+	public MultiTreeTableCell(final StageManager stageManager, final ResourceBundle bundle) {
 		super();
 		
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 	}
 	
 	// Edit this cell and commit an edit with newValue right away.
@@ -54,7 +57,7 @@ public class MultiTreeTableCell<S extends PrefTreeItem> extends TreeTableCell<S,
 			value = spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText());
 		} catch (final NumberFormatException e) {
 			logger.debug("User entered invalid number", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Not a valid number: " + spinner.getEditor().getText()).show();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("preferences.view.invalidNumber"), spinner.getEditor().getText())).show();
 			return false;
 		}
 		spinner.getValueFactory().setValue(value);

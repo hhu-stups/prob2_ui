@@ -40,11 +40,12 @@ import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.project.machines.MachinesTab;
 import de.prob2.ui.project.preferences.PreferencesTab;
 import de.prob2.ui.project.runconfigurations.RunconfigurationsTab;
+import de.prob2.ui.project.verifications.MachineTableView;
+import de.prob2.ui.project.verifications.VerificationsTab;
 import de.prob2.ui.states.StateErrorsView;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.cbc.CBCView;
 import de.prob2.ui.verifications.ltl.LTLView;
@@ -124,7 +125,6 @@ public class ProB2Module extends AbstractModule {
 		bind(MainController.class);
 		bind(LTLFormulaChecker.class);
 		bind(HelpButton.class);
-		bind(MachineTableView.class);
 		bind(LTLView.class);
 		bind(MachinesTab.class);
 		bind(MainView.class);
@@ -136,6 +136,7 @@ public class ProB2Module extends AbstractModule {
 		bind(PerspectivesMenu.class);
 		bind(ViewMenu.class);
 		bind(HelpMenu.class);
+		bind(MachineTableView.class);
 		bind(ModelcheckingController.class);
 		bind(OperationsView.class);
 		bind(PreferencesTab.class);
@@ -149,6 +150,7 @@ public class ProB2Module extends AbstractModule {
 		bind(StatusBar.class);
 		bind(TraceReplayView.class);
 		bind(VerificationsView.class);
+		bind(VerificationsTab.class);
 		bind(VisualisationView.class);
 		bind(StateVisualisationView.class);
 	}

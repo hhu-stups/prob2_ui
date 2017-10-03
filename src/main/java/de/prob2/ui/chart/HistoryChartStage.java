@@ -1,17 +1,30 @@
 package de.prob2.ui.chart;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob.animator.domainobjects.*;
+
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.ClassicalB;
+import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.TraceElement;
+
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -20,15 +33,20 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Singleton
 public final class HistoryChartStage extends Stage {
@@ -73,11 +91,10 @@ public final class HistoryChartStage extends Stage {
 		}
 	}
 
-	private static class TraceElementStringConverter extends StringConverter<TraceElement> {
+	private class TraceElementStringConverter extends StringConverter<TraceElement> {
 		@Override
 		public String toString(final TraceElement object) {
-			return object == DUMMY_TRACE_ELEMENT ? "(no model loaded)"
-					: HistoryView.transitionToString(object.getTransition());
+			return object == DUMMY_TRACE_ELEMENT ? bundle.getString("common.noModelLoaded") : HistoryView.transitionToString(object.getTransition());
 		}
 
 		@Override
@@ -108,19 +125,21 @@ public final class HistoryChartStage extends Stage {
 
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
+	private final ResourceBundle bundle;
 	private final Injector injector;
 
 	private final ObservableList<LineChart<Number, Number>> separateCharts;
 
 	@Inject
-	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace,
-			final Injector injector) {
+	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle, final Injector injector) {
 		super();
 
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
-		this.separateCharts = FXCollections.observableArrayList();
+		this.bundle = bundle;
 		this.injector = injector;
+
+		this.separateCharts = FXCollections.observableArrayList();
 
 		stageManager.loadFXML(this, "history_chart_stage.fxml", this.getClass().getName());
 	}
@@ -361,14 +380,14 @@ public final class HistoryChartStage extends Stage {
 					return Integer.parseInt(value);
 				} catch (NumberFormatException e) {
 					if (showErrors) {
-						stageManager.makeAlert(Alert.AlertType.ERROR, "Could not evaluate formula for history chart: Not a valid integer: " + e.getMessage()).show();
+						stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("historyChart.formulaEvalError.invalidInteger"), e.getMessage())).show();
 					}
 					throw new IllegalArgumentException("Could not evaluate formula for history chart: Not a valid integer", e);
 				}
 			}
 		} else {
 			if (showErrors) {
-				stageManager.makeAlert(Alert.AlertType.ERROR, "Could not evaluate formula for history chart: Invalid result: " + aer).show();
+				stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("historyChart.formulaEvalError.notAnEvalResult"), aer)).show();
 			}
 			throw new IllegalArgumentException("Could not evaluate formula for history chart: Expected an EvalResult, not " + aer.getClass().getName());
 		}

@@ -7,6 +7,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
+
 <fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1"
 		 stylesheets="@/prob.css">
 	<VBox spacing="5" AnchorPane.topAnchor="6"

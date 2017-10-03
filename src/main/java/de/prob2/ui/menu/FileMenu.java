@@ -1,10 +1,19 @@
 package de.prob2.ui.menu;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.ModelTranslationError;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -15,6 +24,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -23,17 +33,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 public class FileMenu extends Menu {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileMenu.class);
@@ -54,15 +58,17 @@ public class FileMenu extends Menu {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 
 	@Inject
 	private FileMenu(final StageManager stageManager, final RecentProjects recentProjects,
-			final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
+			final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector, final ResourceBundle bundle) {
 		this.recentProjects = recentProjects;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		stageManager.loadFXML(this, "fileMenu.fxml");
 	}
 
@@ -95,11 +101,11 @@ public class FileMenu extends Menu {
 
 	@FXML
 	private void handleOpen() {
-		final File selected = FileAsker.askForProjectOrMachine(stageManager.getMainStage());
+		final File selected = stageManager.showOpenProjectOrMachineChooser(stageManager.getMainStage());
 		if (selected == null) {
 			return;
 		}
-		final String ext = FileAsker.getExtension(selected.getName());
+		final String ext = StageManager.getExtension(selected.getName());
 		if ("json".equals(ext)) {
 			this.openProject(selected);
 		} else {
@@ -112,27 +118,13 @@ public class FileMenu extends Menu {
 		final Path absolute = file.toPath();
 		final Path relative = projectLocation.relativize(absolute);
 		final String shortName = file.getName().substring(0, file.getName().lastIndexOf('.'));
-		final String description = "(this project was created automatically from file " + absolute + ')';
+		final String description = String.format(bundle.getString("project.automaticDescription"), absolute);
 		final Machine machine = new Machine(shortName, "", relative);
 		currentProject.set(new Project(shortName, description, machine, projectLocation.toFile()));
 
 		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
 		currentProject.addRunconfiguration(defaultRunconfig);
 		currentProject.startAnimation(defaultRunconfig);
-	}
-
-	@FXML
-	private void handleOpenProject() {
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open Project");
-		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("ProB2 Projects", "*.json"));
-
-		final File selectedProject = fileChooser.showOpenDialog(stageManager.getMainStage());
-		if (selectedProject == null) {
-			return;
-		}
-
-		this.openProject(selectedProject);
 	}
 
 	private void openProject(File file) {
@@ -157,7 +149,7 @@ public class FileMenu extends Menu {
 			this.currentTrace.reload(this.currentTrace.get());
 		} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 			LOGGER.error("Model reload failed", e);
-			stageManager.makeExceptionAlert(Alert.AlertType.ERROR, "Failed to reload model", e).showAndWait();
+			stageManager.makeExceptionAlert(Alert.AlertType.ERROR, bundle.getString("menu.edit.errors.couldNotReload"), e).showAndWait();
 		}
 	}
 

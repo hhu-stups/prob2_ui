@@ -1,12 +1,12 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
-import de.prob.statespace.AnimationSelector;
 
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
@@ -15,16 +15,15 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingType;
-import de.prob2.ui.verifications.MachineTableView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaDialog;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
-
+import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -47,7 +46,10 @@ public class LTLView extends AnchorPane{
 	private Button addPatternButton;
 	
 	@FXML
-	private Button checkSelectedMachineButton;
+	private Button checkMachineButton;
+	
+	@FXML
+	private Button cancelButton;
 
 	@FXML
 	private HelpButton helpButton;
@@ -76,17 +78,14 @@ public class LTLView extends AnchorPane{
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	
-	@FXML
-	private MachineTableView tvMachines;
-		
+	private final ResourceBundle bundle;
+	
 	private final Injector injector;
 	
 	private final CurrentTrace currentTrace;
 	
 	private final CurrentProject currentProject;
-	
-	private final AnimationSelector animations;
-	
+		
 	private final LTLFormulaChecker checker;
 	
 	private final LTLPatternParser patternParser;
@@ -94,13 +93,11 @@ public class LTLView extends AnchorPane{
 	private final LTLResultHandler resultHandler;
 				
 	@Inject
-	private LTLView(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
-					final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLFormulaChecker checker,
-					final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
+	private LTLView(final StageManager stageManager, final ResourceBundle bundle, final Injector injector,final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLFormulaChecker checker, final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
+		this.bundle = bundle;
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.animations = animations;
 		this.checker = checker;
 		this.patternParser = patternParser;
 		this.resultHandler = resultHandler;
@@ -110,16 +107,20 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent("HelpMain.html");
-		tvMachines.setCheckingType(CheckingType.LTL);
 		setOnItemClicked();
 		setContextMenus();
 		setBindings();
-		tvMachines.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if(to != null) {
 				if(from != null) {
 					from.clearPatternManager();
 				}
 				bindMachine(to);
+			} else {
+				tvFormula.getItems().clear();
+				tvFormula.itemsProperty().unbind();
+				tvPattern.getItems().clear();
+				tvPattern.itemsProperty().unbind();
 			}
 		});
 	}
@@ -146,27 +147,31 @@ public class LTLView extends AnchorPane{
 	private void setContextMenus() {
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem("Remove formula");
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.formula.menu.remove"));
 			removeItem.setOnAction(e -> removeFormula());
 			removeItem.disableProperty().bind(row.emptyProperty());
 						
-			MenuItem showCounterExampleItem = new MenuItem("Show Counter Example");
-			showCounterExampleItem.setOnAction(e-> showCounterExample());
+			MenuItem showCounterExampleItem = new MenuItem(bundle.getString("verifications.ltl.formula.menu.showCounterExample"));
+			showCounterExampleItem.setOnAction(e-> currentTrace.set(tvFormula.getSelectionModel().getSelectedItem().getCounterExample()));
 			showCounterExampleItem.setDisable(true);
 
-			MenuItem openEditor = new MenuItem("Open in Editor");
+			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.formula.menu.openInEditor"));
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
 			openEditor.disableProperty().bind(row.emptyProperty());
 
-			MenuItem check = new MenuItem("Check separately");
+			MenuItem check = new MenuItem(bundle.getString("verifications.ltl.formula.menu.checkSeparately"));
 			check.setOnAction(e-> {
-				Machine machine = tvMachines.getSelectionModel().getSelectedItem();
-				LTLFormulaItem item = row.getItem();
-				Checked result = checkFormula(item, machine);
-				item.setChecked(result);
-				checker.checkMachineStatus(machine);
-				tvFormula.refresh();
-				tvMachines.refresh();
+				Thread checkingThread = new Thread(() -> {
+					Machine machine = currentProject.getCurrentMachine();
+					LTLFormulaItem item = row.getItem();
+					Checked result = checkFormula(item, machine);
+					item.setChecked(result);
+					Platform.runLater(() -> {
+						checker.checkMachineStatus(machine);
+						tvFormula.refresh();
+					});
+				});
+				checkingThread.start();
 			});
 			check.disableProperty().bind(row.emptyProperty());
 
@@ -186,11 +191,11 @@ public class LTLView extends AnchorPane{
 		
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem("Remove Pattern");
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.pattern.menu.remove"));
 			removeItem.setOnAction(e -> removePattern());
 			removeItem.disableProperty().bind(row.emptyProperty());
 
-			MenuItem openEditor = new MenuItem("Open in Editor");
+			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.pattern.menu.openInEditor"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			openEditor.disableProperty().bind(row.emptyProperty());
 
@@ -209,16 +214,12 @@ public class LTLView extends AnchorPane{
 
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		addPatternButton.disableProperty().bind(currentTrace.existsProperty().not());
-		checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
-			if(tvMachines.getSelectionModel().getSelectedIndex() < 0) {
-				tvMachines.getSelectionModel().select(0);
-			}
-			Machine machine = tvMachines.getSelectionModel().getSelectedItem();
-			if(newValue && machine != null) {
-				checkSelectedMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
+			if(newValue) {
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
 			} else {
-				checkSelectedMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
 			}
 		});
 	}
@@ -228,18 +229,17 @@ public class LTLView extends AnchorPane{
 		tvFormula.itemsProperty().bind(machine.ltlFormulasProperty());
 		tvPattern.itemsProperty().unbind();
 		tvPattern.itemsProperty().bind(machine.ltlPatternsProperty());
+		tvFormula.refresh();
+		tvPattern.refresh();
 		if(currentTrace.existsProperty().get()) {
-			checkSelectedMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
+			checkMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
 		}
 		parseMachine(machine);
 	}
 		
 	@FXML
 	public void addFormula() {
-		if(tvMachines.getSelectionModel().getSelectedIndex() < 0) {
-			tvMachines.getSelectionModel().select(0);
-		}
-		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+		Machine machine = currentProject.getCurrentMachine();
 		LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
 		loadLTLDialog(formulaDialog, null);
 		formulaDialog
@@ -252,12 +252,12 @@ public class LTLView extends AnchorPane{
 			machine.addLTLFormula(item);
 			updateProject();
 		} else {
-			resultHandler.showAlreadyExists(LTLResultHandler.ItemType.Formula);
+			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
 	}
 	
 	private void removeFormula() {
-		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+		Machine machine = currentProject.getCurrentMachine();
 		LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 		machine.removeLTLFormula(item);
 		updateProject();
@@ -265,10 +265,7 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void addPattern() {
-		if(tvMachines.getSelectionModel().getSelectedIndex() < 0) {
-			tvMachines.getSelectionModel().select(0);
-		}
-		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+		Machine machine = currentProject.getCurrentMachine();
 		LTLPatternDialog patternDialog = injector.getInstance(LTLPatternDialog.class);
 		loadLTLDialog(patternDialog, null);
 		patternDialog
@@ -282,12 +279,12 @@ public class LTLView extends AnchorPane{
 			updateProject();
 			patternParser.parsePattern(item, machine, false);
 		} else {
-			resultHandler.showAlreadyExists(LTLResultHandler.ItemType.Pattern);
+			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
 		}
 	}
 	
 	private void removePattern() {
-		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+		Machine machine = currentProject.getCurrentMachine();
 		LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
 		machine.removeLTLPattern(item);
 		patternParser.removePattern(item, machine);
@@ -335,7 +332,7 @@ public class LTLView extends AnchorPane{
 	private void changePattern(LTLPatternItem item, LTLPatternItem result) {
 		if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) ||
 				!item.getCode().equals(result.getCode())) {
-			Machine machine = tvMachines.getSelectionModel().getSelectedItem();
+			Machine machine = currentProject.getCurrentMachine();
 			machine.getPatternManager().removePattern(machine.getPatternManager().getUserPattern(item.getName()));
 			item.setData(result.getName(), result.getDescription(), result.getCode());
 			patternParser.parsePattern(item, machine, false);
@@ -344,29 +341,31 @@ public class LTLView extends AnchorPane{
 		}
 	}
 	
-	private void showCounterExample() {
-		if (currentTrace.exists()) {
-			this.animations.removeTrace(currentTrace.get());
-		}
-		animations.addNewAnimation(tvFormula.getSelectionModel().getSelectedItem().getCounterExample());
-	}
-	
 	private void updateProject() {
 		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-				tvMachines.getItems(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
+				currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
 				currentProject.getLocation()));
 	}
 	
 	@FXML
-	public void checkSelectedMachine() {
-		Machine machine = tvMachines.getSelectionModel().getSelectedItem();
-		checker.checkMachine(machine);
-		checker.checkMachineStatus(machine);
-		tvMachines.refresh();
-		tvFormula.refresh();
+	public void checkMachine() {
+		Machine machine = currentProject.getCurrentMachine();
+		Thread checkingThread = new Thread(() -> {
+			checker.checkMachine(machine);
+			Platform.runLater(() -> {
+				checker.checkMachineStatus(machine);
+				tvFormula.refresh();
+			});
+		});
+		checkingThread.start();
 	}
 	
-	public void parseMachine(Machine machine) {
+	@FXML
+	public void cancel() {
+		currentTrace.getStateSpace().sendInterrupt();
+	}
+	
+	private void parseMachine(Machine machine) {
 		patternParser.parseMachine(machine);
 	}
 		

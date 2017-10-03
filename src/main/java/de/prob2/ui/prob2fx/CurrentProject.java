@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -23,8 +24,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-import de.prob2.ui.verifications.ltl.LTLView;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -58,19 +57,19 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	private final ObjectProperty<Path> defaultLocation;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	private final Injector injector;
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
-	private final ModelcheckingController modelCheckController;
 
 	@Inject
-	private CurrentProject(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
-			final CurrentTrace currentTrace, final ModelcheckingController modelCheckController) {
+	private CurrentProject(final StageManager stageManager, final ResourceBundle bundle, final Injector injector, final AnimationSelector animations,
+			final CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		this.injector = injector;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
-		this.modelCheckController = modelCheckController;
 
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
 				Paths.get(System.getProperty("user.home")));
@@ -115,8 +114,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.saved.set(true);
 		this.currentRunconfiguration.set(null);
 		this.currentMachine.set(null);
-
-		modelCheckController.resetView();
 	}
 
 	public void startAnimation(Runconfiguration runconfiguration) {
@@ -131,8 +128,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			this.currentRunconfiguration.set(runconfiguration);
 			this.currentMachine.set(runconfiguration.getMachine());
 		} else {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not load machine \"" + runconfiguration.getMachine()
-					+ "\" with preferences: \"" + runconfiguration.getPreference() + "\"").showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.couldNotLoadMachine"), runconfiguration.getMachine(), runconfiguration.getPreference())).showAndWait();
 		}
 	}
 
@@ -146,9 +142,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void removeMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.remove(machine);
-		List<Runconfiguration> runconfigsList = new ArrayList<>();
-		runconfigsList.addAll(this.getRunconfigurations());
-		this.getRunconfigurations(machine).stream().forEach(runconfigsList::remove);
+		List<Runconfiguration> runconfigsList = new ArrayList<>(this.getRunconfigurations());
+		runconfigsList.removeAll(this.getRunconfigurations(machine));
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
 				runconfigsList, this.getLocation()));
 	}
@@ -163,8 +158,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void removePreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.remove(preference);
-		List<Runconfiguration> runconfigsList = new ArrayList<>();
-		runconfigsList.addAll(this.getRunconfigurations());
+		List<Runconfiguration> runconfigsList = new ArrayList<>(this.getRunconfigurations());
 		this.getRunconfigurations().stream().filter(r -> r.getPreference().getName().equals(preference.getName()))
 				.forEach(runconfigsList::remove);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
@@ -209,7 +203,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void initializeMachines() {
 		for (Machine machine : machines) {
 			machine.initialize();
-			injector.getInstance(LTLView.class).parseMachine(machine);
 		}
 	}
 
@@ -230,10 +223,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 		if (currentTrace.exists()) {
 			animations.removeTrace(currentTrace.get());
-			modelCheckController.resetView();
 		}
 		update(project);
 		initializeMachines();
+		setSaved(true);
 	}
 
 	public void update(Project project) {
@@ -339,29 +332,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return this.savedProperty().get();
 	}
 
-	public Machine getMachine(String machine) {
-		for (Machine m : getMachines()) {
-			if (m.getName().equals(machine)) {
-				return m;
-			}
-		}
-		return null;
-	}
-
-	public Map<String, String> getPreferenceAsMap(String preference) {
-		for (Preference p : getPreferences()) {
-			if (p.getName().equals(preference)) {
-				return p.getPreferences();
-			}
-		}
-		return null;
-	}
-
 	private boolean confirmReplacingProject() {
 		if (exists()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
-			alert.setHeaderText("You've already opened a project.");
-			alert.setContentText("Do you want to close the current project?\n(Unsaved changes will be lost)");
+			alert.setHeaderText(bundle.getString("project.confirmReplacingProject.header"));
+			alert.setContentText(bundle.getString("project.confirmReplacingProject.content"));
 			Optional<ButtonType> result = alert.showAndWait();
 			return result.isPresent() && ButtonType.OK.equals(result.get());
 		} else {

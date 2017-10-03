@@ -25,7 +25,7 @@ import org.fxmisc.wellbehaved.event.Nodes;
 public class GroovyConsole extends Console {
 	@Inject
 	private GroovyConsole(GroovyInterpreter interpreter, ResourceBundle bundle) {
-		super(bundle.getString("consoles.groovy.header"), bundle.getString("consoles.groovy.prompt"));
+		super(bundle, bundle.getString("consoles.groovy.header"));
 		this.interpreter = interpreter;
 		interpreter.setCodeCompletion(this);
 		setListeners();

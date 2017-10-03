@@ -1,13 +1,16 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import com.google.inject.Singleton;
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.check.*;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.statusbar.StatusBar;
+import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -19,14 +22,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import javax.inject.Inject;
+
+import com.google.inject.Injector;
+
 import java.util.Objects;
 
 
-@Singleton
 public final class ModelCheckStats extends AnchorPane {
-	public enum Result {
-		SUCCESS, DANGER, WARNING
-	}
 	
 	@FXML private AnchorPane resultBackground;
 	@FXML private Text resultText;
@@ -37,15 +39,22 @@ public final class ModelCheckStats extends AnchorPane {
 	@FXML private Label totalTransitions;
 
 	private ModelcheckingController modelcheckingController;
-	private Result result;
 	private Trace trace;
 	
 	private final StatsView statsView;
 	
+	private ModelCheckingItem item;
+	
+	private final Injector injector;
+	
+	private Machine currentMachine;
+	
 	@Inject
-	public ModelCheckStats(final StageManager stageManager, final ModelcheckingController modelcheckingController, final StatsView statsView) {
+	public ModelCheckStats(final StageManager stageManager, final ModelcheckingController modelcheckingController, final StatsView statsView,
+							final Injector injector) {
 		this.modelcheckingController = modelcheckingController;
 		this.statsView = statsView;
+		this.injector = injector;
 		stageManager.loadFXML(this, "modelchecking_stats.fxml");
 	}
 
@@ -103,12 +112,17 @@ public final class ModelCheckStats extends AnchorPane {
 		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
 		
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
-			this.result = Result.SUCCESS;
+			item.setCheckedSuccessful();
+			item.setChecked(Checked.SUCCESS);
 		} else if (result instanceof ITraceDescription) {
-			this.result = Result.DANGER;
+			item.setCheckedFailed();
+			item.setChecked(Checked.FAIL);
 		} else {
-			this.result = Result.WARNING;
+			item.setTimeout();
+			item.setChecked(Checked.TIMEOUT);
 		}
+		item.setStats(this);
+		updateCurrentMachineStatus();
 		String message = result.getMessage();
 
 		final StateSpace stateSpace = modelChecker.getStateSpace();
@@ -133,36 +147,46 @@ public final class ModelCheckStats extends AnchorPane {
 		}
 		showResult(message);
 	}
+	
+	private void updateCurrentMachineStatus() {
+		for(ModelCheckingItem item : currentMachine.getModelcheckingItems()) {
+			if(item.getChecked() == Checked.FAIL) {
+				currentMachine.setModelcheckingCheckedFailed();
+				injector.getInstance(MachineTableView.class).refresh();
+				injector.getInstance(StatusBar.class).setModelcheckingStatus(StatusBar.ModelcheckingStatus.ERROR);
+				return;
+			}
+		}
+		currentMachine.setModelcheckingCheckedSuccessful();
+		injector.getInstance(MachineTableView.class).refresh();
+		injector.getInstance(StatusBar.class).setModelcheckingStatus(StatusBar.ModelcheckingStatus.SUCCESSFUL);
+	}
 
 	private void showResult(String message) {
 		resultBackground.setVisible(true);
 		resultText.setText(message);
 		resultText.setWrappingWidth(this.modelcheckingController.widthProperty().doubleValue() - 60);
-		switch (this.result) {
+		switch (item.getChecked()) {
 			case SUCCESS:
 				resultBackground.getStyleClass().setAll("mcheckSuccess");
 				resultText.setFill(Color.web("#5e945e"));
 				break;
 
-			case DANGER:
+			case FAIL:
 				resultBackground.getStyleClass().setAll("mcheckDanger");
 				resultText.setFill(Color.web("#b95050ff"));
 				break;
 
-			case WARNING:
+			case TIMEOUT:
 				resultBackground.getStyleClass().setAll("mcheckWarning");
 				resultText.setFill(Color.web("#96904e"));
 				break;
 
 			default:
-				throw new IllegalArgumentException("Unknown result: " + this.result);
+				throw new IllegalArgumentException("Unknown result: " + item.getChecked());
 		}
 	}
 	
-	public Result getResult() {
-		return result;
-	}
-
 	public Trace getTrace() {
 		return trace;
 	}
@@ -170,4 +194,10 @@ public final class ModelCheckStats extends AnchorPane {
 	public void setBackgroundOnClick(EventHandler<? super MouseEvent> eventHandler) {
 		resultBackground.setOnMouseClicked(eventHandler);
 	}
+	
+	public void updateItem(ModelCheckingItem item, Machine currentMachine) {
+		this.item = item;
+		this.currentMachine = currentMachine;
+	}
+	
 }

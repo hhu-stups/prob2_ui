@@ -10,7 +10,8 @@ import java.util.Objects;
 public class CBCFormulaItem extends AbstractCheckableItem {
 	
 	public enum CBCType {
-		INVARIANT,SEQUENCE,DEADLOCK, FIND_DEADLOCK, FIND_VALID_STATE, REFINEMENT, ASSERTIONS
+		INVARIANT,SEQUENCE,DEADLOCK, FIND_DEADLOCK, FIND_VALID_STATE, FIND_REDUNDANT_INVARIANTS, 
+		REFINEMENT, ASSERTIONS
 	}
 	
 	protected CBCType type;
@@ -24,7 +25,6 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 		this.type = type;
 		this.example = null;
 		this.initializeCounterExamples();
-		
 	}
 		
 	public void initializeCounterExamples() {

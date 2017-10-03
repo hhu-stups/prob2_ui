@@ -1,24 +1,32 @@
 package de.prob2.ui.states;
 
-import de.prob.animator.domainobjects.*;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EnumerationWarning;
+import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.EvaluationErrorResult;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.animator.domainobjects.IdentifierNotInitialised;
+import de.prob.animator.domainobjects.StateError;
+import de.prob.animator.domainobjects.WDError;
 import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
+
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeTableCell;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ValueCell.class);
 	
+	private final ResourceBundle bundle;
 	private final Map<IEvalElement, AbstractEvalResult> values;
 	private final boolean isCurrent;
 	
-	ValueCell(final Map<IEvalElement, AbstractEvalResult> values, final boolean isCurrent) {
+	ValueCell(final ResourceBundle bundle, final Map<IEvalElement, AbstractEvalResult> values, final boolean isCurrent) {
 		super();
 		
+		this.bundle = bundle;
 		this.values = values;
 		this.isCurrent = isCurrent;
 		
@@ -64,21 +72,19 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 				this.getStyleClass().add("true");
 			}
 		} else if (result instanceof IdentifierNotInitialised) {
-			this.setText("(not initialized)");
+			this.setText(bundle.getString("states.value.notInitialized"));
 			this.getStyleClass().add("errorresult");
 		} else if (result instanceof WDError) {
-			this.setText("(not well-defined)");
+			this.setText(bundle.getString("states.value.notWellDefined"));
 			this.getStyleClass().add("errorresult");
 		} else if (result instanceof EvaluationErrorResult) {
-			this.setText("Error: " + ((EvaluationErrorResult) result).getResult());
+			this.setText(String.format(bundle.getString("states.value.error"), ((EvaluationErrorResult)result).getResult()));
 			this.getStyleClass().add("errorresult");
 		} else if (result instanceof EnumerationWarning) {
-			this.setText("(enumeration warning)");
+			this.setText(bundle.getString("states.value.enumerationWarning"));
 			this.getStyleClass().add("errorresult");
 		} else {
-			LOGGER.warn("Unknown result type, falling back to toString: {}", result.getClass());
-			// noinspection ObjectToString
-			this.setText(result.getClass() + " toString: " + result);
+			throw new IllegalArgumentException("Don't know how to show the value of a " + result.getClass() + " instance");
 		}
 	}
 }

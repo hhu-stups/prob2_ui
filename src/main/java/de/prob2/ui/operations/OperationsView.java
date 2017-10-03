@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -86,7 +87,7 @@ public final class OperationsView extends AnchorPane {
 				}
 			});
 			
-			final MenuItem showDetailsItem = new MenuItem("Show Details");
+			final MenuItem showDetailsItem = new MenuItem(bundle.getString("operations.showDetails"));
 			showDetailsItem.setOnAction(event -> {
 				final OperationDetailsStage stage = injector.getInstance(OperationDetailsStage.class);
 				stage.setItem(this.getItem());
@@ -142,7 +143,7 @@ public final class OperationsView extends AnchorPane {
 				case TIMEOUT:
 					icon = new FontAwesomeIconView(FontAwesomeIcon.CLOCK_ALT);
 					getStyleClass().add("timeout");
-					setTooltip(new Tooltip("Operation with timeout"));
+					setTooltip(new Tooltip(bundle.getString("operations.tooltip.timeout")));
 					break;
 
 				case ENABLED:
@@ -151,13 +152,13 @@ public final class OperationsView extends AnchorPane {
 					getStyleClass().add("enabled");
 					if (!item.isExplored()) {
 						getStyleClass().add("unexplored");
-						setTooltip(new Tooltip("Reaches unexplored State"));
+						setTooltip(new Tooltip(bundle.getString("operations.tooltip.reachesUnexplored")));
 					} else if (item.isErrored()) {
 						getStyleClass().add("errored");
-						setTooltip(new Tooltip("Reaches errored State"));
+						setTooltip(new Tooltip(bundle.getString("operations.tooltip.reachesErrored")));
 					} else if (item.isSkip()) {
 						getStyleClass().add("skip");
-						setTooltip(new Tooltip("Does not change State"));
+						setTooltip(new Tooltip(bundle.getString("operations.tooltip.reachesSame")));
 					} else {
 						getStyleClass().add("normal");
 						setTooltip(null);
@@ -183,6 +184,7 @@ public final class OperationsView extends AnchorPane {
 				icon.glyphSizeProperty().bind(fontsize);
 				setGraphic(icon);
 			} else {
+				setDisable(true);
 				setGraphic(null);
 				setText(null);
 			}
@@ -230,6 +232,7 @@ public final class OperationsView extends AnchorPane {
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
+	private final ResourceBundle bundle;
 	private final StatusBar statusBar;
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final ExecutorService updater;
@@ -238,10 +241,11 @@ public final class OperationsView extends AnchorPane {
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
-			final Injector injector, final StatusBar statusBar, final StopActions stopActions) {
+			final Injector injector, final ResourceBundle bundle, final StatusBar statusBar, final StopActions stopActions) {
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
+		this.bundle = bundle;
 		this.statusBar = statusBar;
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
 		stopActions.add(this.updater::shutdownNow);
@@ -365,7 +369,7 @@ public final class OperationsView extends AnchorPane {
 		doSort();
 
 		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
-			events.add(new OperationItem(trace, "-", "(possibly more - maximum operations reached)", Collections.emptyList(),
+			events.add(new OperationItem(trace, "-", bundle.getString("operations.maxReached"), Collections.emptyList(),
 					Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
 		}
 

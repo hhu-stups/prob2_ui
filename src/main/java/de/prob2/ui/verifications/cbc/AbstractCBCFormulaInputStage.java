@@ -3,10 +3,14 @@ package de.prob2.ui.verifications.cbc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import com.google.inject.Injector;
+
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.AbstractResultHandler.ItemType;
+import de.prob2.ui.verifications.AbstractResultHandler;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -19,6 +23,8 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 
 	protected final CBCFormulaHandler cbcHandler;
 	
+	protected final CurrentProject currentProject;
+	
 	@FXML
 	protected Button btAdd;
 	
@@ -27,31 +33,35 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 	
 	protected final Injector injector;
 	
+	protected final ResourceBundle bundle;
+	
 	protected final List<Button> invisibles;
 	
-	public AbstractCBCFormulaInputStage(final CBCFormulaHandler cbcHandler, final Injector injector) {
+	public AbstractCBCFormulaInputStage(final CBCFormulaHandler cbcHandler, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
 		this.cbcHandler = cbcHandler;
+		this.currentProject = currentProject;
 		this.injector = injector;
+		this.bundle = bundle;
 		this.invisibles = new ArrayList<>();
 	}
 	
 	@SuppressWarnings("unchecked")
 	protected void changeFormula(Control input, CBCFormulaItem item, List<Button> invisibles) {
 		hideInvisibleButtons(invisibles);
-		btAdd.setText("Change");
+		btAdd.setText(bundle.getString("verifications.cbc.input.change"));
 		btAdd.setOnAction(e-> {
 			if(!updateFormula(input, item)) {
-				injector.getInstance(CBCResultHandler.class).showAlreadyExists(ItemType.Formula);
+				injector.getInstance(CBCResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 			}
 			this.close();
 		});
 
-		btCheck.setText("Change and Check");
+		btCheck.setText(bundle.getString("verifications.cbc.input.changeAndCheck"));
 		btCheck.setOnAction(e-> {
 			if(updateFormula(input, item)) {
 				cbcHandler.checkItem(item);
 			} else {
-				injector.getInstance(CBCResultHandler.class).showAlreadyExists(ItemType.Formula);
+				injector.getInstance(CBCResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 			}
 			this.close();
 		});
@@ -76,7 +86,7 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 
 	@SuppressWarnings("unchecked")
 	private boolean updateFormula(Control input, CBCFormulaItem item) {
-		Machine currentMachine = injector.getInstance(CBCView.class).getCurrentMachine();
+		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula;
 		if(input instanceof TextField) {
 			formula = ((TextField) input).getText();

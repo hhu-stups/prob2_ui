@@ -2,7 +2,6 @@
 
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.verifications.cbc.CBCView?>
-<?import de.prob2.ui.verifications.MachineTableView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -25,15 +24,20 @@
 					</HelpButton>
 					<HBox spacing="5.0" alignment="CENTER_LEFT">
 						<VBox spacing="5.0" alignment="BOTTOM_LEFT" HBox.hgrow="ALWAYS">
-							<Button fx:id="checkSelectedMachineButton" 
-								text="%verifications.checkSelectedMachine" onAction="#checkSelectedMachine"
-								styleClass="button-blue" prefWidth="200.0"/>
+							<Button fx:id="checkMachineButton" 
+								text="%verifications.checkMachine" onAction="#checkMachine"
+								styleClass="button-blue" prefWidth="170.0"/>
 							<Button fx:id="checkRefinementButton" 
 								text="%verifications.checkRefinement" onAction="#checkRefinement"
-								styleClass="button-blue" prefWidth="200.0"/>
+								styleClass="button-blue" prefWidth="170.0"/>
 							<Button fx:id="checkAssertionsButton" 
 								text="%verifications.checkAssertion" onAction="#checkAssertions"
-								styleClass="button-blue" prefWidth="200.0"/>
+								styleClass="button-blue" prefWidth="170.0"/>
+						</VBox>
+						<VBox alignment="TOP_CENTER" HBox.hgrow="ALWAYS">
+							<Button fx:id="cancelButton" 
+								text="%verifications.cancel" onAction="#cancel"
+								styleClass="button-blue" prefWidth="100.0"/>
 						</VBox>
 						<VBox spacing="5.0" alignment="TOP_RIGHT">
 							<Button fx:id="addFormulaButton" disable="true" onAction="#addFormula"
@@ -44,27 +48,24 @@
 							<Insets left="5" right="5" />
 						</VBox.margin>
 					</HBox>
-					<VBox styleClass="border" spacing="0.0">
-						<MachineTableView fx:id="tvMachines" />
-						<TableView fx:id="tvFormula" minHeight="150">
-							<columnResizePolicy>
-								<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-							</columnResizePolicy>
-							<columns>
-								<TableColumn fx:id="formulaStatusColumn" minWidth="80.0"
-									maxWidth="80.0" prefWidth="80.0" text="%verifications.columns.status" />
-								<TableColumn fx:id="formulaNameColumn" minWidth="120.0"
-									maxWidth="240.0" prefWidth="120.0"
-									text="%verifications.formula" />
-								<TableColumn fx:id="formulaDescriptionColumn"
-									minWidth="120.0" prefWidth="120.0"
-									text="%verifications.columns.description" />
-							</columns>
-							<placeholder>
-								<Label text="%verifications.cbc.formula.noFormulas" />
-							</placeholder>
-						</TableView>
-					</VBox>
+					<TableView fx:id="tvFormula" minHeight="150">
+						<columnResizePolicy>
+							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+						</columnResizePolicy>
+						<columns>
+							<TableColumn fx:id="formulaStatusColumn" minWidth="80.0"
+								maxWidth="80.0" prefWidth="80.0" text="%verifications.columns.status" />
+							<TableColumn fx:id="formulaNameColumn" minWidth="120.0"
+								maxWidth="240.0" prefWidth="120.0"
+								text="%verifications.formula" />
+							<TableColumn fx:id="formulaDescriptionColumn"
+								minWidth="120.0" prefWidth="120.0"
+								text="%verifications.columns.description" />
+						</columns>
+						<placeholder>
+							<Label text="%verifications.cbc.formula.noFormulas" />
+						</placeholder>
+					</TableView>
 				</VBox>
 			</VBox>
 		</AnchorPane>

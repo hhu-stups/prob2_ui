@@ -1,8 +1,13 @@
 package de.prob2.ui.project;
 
+import java.io.File;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -12,8 +17,6 @@ import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import java.io.File;
 
 public class NewProjectStage extends Stage {
 	@FXML
@@ -27,11 +30,13 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private Label errorExplanationLabel;
 
-	private CurrentProject currentProject;
+	private final CurrentProject currentProject;
+	private final ResourceBundle bundle;
 
 	@Inject
-	private NewProjectStage(CurrentProject currentProject, StageManager stageManager) {
+	private NewProjectStage(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
 		this.currentProject = currentProject;
+		this.bundle = bundle;
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "new_project_stage.fxml");
 	}
@@ -45,7 +50,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	void selectLocation(ActionEvent event) {
 		DirectoryChooser dirChooser = new DirectoryChooser();
-		dirChooser.setTitle("Select Location");
+		dirChooser.setTitle(bundle.getString("project.newProject.stage.selectLocation.title"));
 		File file = dirChooser.showDialog(this.getOwner());
 		if (file != null) {
 			locationField.setText(file.getAbsolutePath());
@@ -61,7 +66,7 @@ public class NewProjectStage extends Stage {
 	void finish(ActionEvent event) {
 		File dir = new File(locationField.getText());
 		if (!dir.isDirectory()) {
-			errorExplanationLabel.setText("The location does not exist or is invalid");
+			errorExplanationLabel.setText(bundle.getString("project.newProject.stage.invalidLocationError"));
 			return;
 		}
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), dir);
