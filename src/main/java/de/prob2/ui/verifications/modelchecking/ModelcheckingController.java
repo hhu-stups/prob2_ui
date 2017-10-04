@@ -94,8 +94,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		private CheckBox findGoal;
 		@FXML
 		private CheckBox stopAtFullCoverage;
-		@FXML
-		private CheckBox searchForNewErrors;
 
 		private ModelcheckingStageController(final StageManager stageManager) {
 			stageManager.loadFXML(this, "modelchecking_stage.fxml");
@@ -165,7 +163,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			options = options.checkAssertions(findBAViolations.isSelected());
 			options = options.checkGoal(findGoal.isSelected());
 			options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
-			options = options.recheckExisting(!searchForNewErrors.isSelected());
+			options = options.recheckExisting(true);
 			return options;
 		}
 
@@ -320,6 +318,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.checkSeparately"));
 			checkItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+				item.setOptions(item.getOptions().recheckExisting(true));
 				checkItem(item);
 			});
 			
@@ -329,6 +328,13 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 				fullValueStage.setValues(item.getStrategy(), item.getDescription());
 				fullValueStage.show();
+			});
+			
+			MenuItem searchForNewErrorsItem = new MenuItem(bundle.getString("verifications.modelchecking.stage.options.searchForNewErrors"));
+			searchForNewErrorsItem.setOnAction(e-> {
+				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+				item.setOptions(item.getOptions().recheckExisting(false));
+				checkItem(item);
 			});
 			
 			row.setOnMouseClicked(e-> {
@@ -343,13 +349,15 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 					}
 					if(row.emptyProperty().get() || item.getStats() == null || item.getStats().getTrace() == null) {
 						showTraceToErrorItem.setDisable(true);
+						searchForNewErrorsItem.setDisable(true);
 					} else {
 						showTraceToErrorItem.setDisable(false);
+						searchForNewErrorsItem.setDisable(false);
 					}
 					
 				}
 			});
-			row.setContextMenu(new ContextMenu(showTraceToErrorItem, checkItem, showFullValueItem));
+			row.setContextMenu(new ContextMenu(showTraceToErrorItem, checkItem, showFullValueItem, searchForNewErrorsItem));
 			return row;
 		});
 	}
@@ -363,7 +371,10 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	
 	@FXML
 	public void checkMachine() {
-		currentProject.currentMachineProperty().get().getModelcheckingItems().forEach(this::checkItem);
+		currentProject.currentMachineProperty().get().getModelcheckingItems().forEach(item -> {
+			item.setOptions(item.getOptions().recheckExisting(true));
+			checkItem(item);
+		});
 	}
 	
 	@FXML

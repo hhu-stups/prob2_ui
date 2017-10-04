@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class ModelCheckingItem {
 
-	private final ModelCheckingOptions options;
+	private ModelCheckingOptions options;
 	private transient ModelCheckStats stats;
 	
 	private transient FontAwesomeIconView status;
@@ -30,6 +30,10 @@ public class ModelCheckingItem {
 		this.stats = stats;
 		this.strategy = strategy;
 		this.description = description;
+	}
+	
+	public void setOptions(ModelCheckingOptions options) {
+		this.options = options;
 	}
 
 	public ModelCheckingOptions getOptions() {

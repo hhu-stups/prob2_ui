@@ -117,7 +117,6 @@ public class CBCView extends AnchorPane {
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 	
 	
