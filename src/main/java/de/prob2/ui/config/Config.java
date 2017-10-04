@@ -2,6 +2,8 @@ package de.prob2.ui.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -207,7 +209,11 @@ public final class Config {
 			logger.info("Config loading disabled via runtime options, loading default config");
 			configData = this.defaultData;
 		}
-
+		
+		if(configData == null) {
+			configData = this.defaultData;
+		}
+		
 		this.replaceMissingWithDefaults(configData);
 
 		this.recentProjects.setMaximum(configData.maxRecentProjects);
