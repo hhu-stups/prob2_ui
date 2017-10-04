@@ -19,8 +19,7 @@
 					<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 				</columnResizePolicy>
 				<columns>
-					<TableColumn fx:id="statusColumn" minWidth="80.0"
-						maxWidth="80.0" prefWidth="80.0" text="%verifications.columns.status" />
+					<TableColumn fx:id="statusColumn" prefWidth="80.0" text="%verifications.columns.status" />
 					<TableColumn fx:id="nameColumn" text="%verifications.columns.name" />
 				</columns>
 				<placeholder>

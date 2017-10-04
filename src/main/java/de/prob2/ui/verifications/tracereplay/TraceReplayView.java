@@ -39,6 +39,7 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private void initialize() {
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("statusIcon"));
+		statusColumn.setStyle( "-fx-alignment: CENTER;");
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateTraceTableView(to));
 	}
