@@ -3,11 +3,9 @@ package de.prob2.ui.verifications.cbc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
@@ -24,15 +22,20 @@ import de.prob.check.IModelCheckJob;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
+import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.MachineTableView;
-import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
+
 import javafx.application.Platform;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CBCFormulaHandler {
 	
@@ -45,75 +48,92 @@ public class CBCFormulaHandler {
 	private final Injector injector;
 	
 	private final CBCResultHandler resultHandler;
+	
+	private final ResourceBundle bundle;
 
 	
 	@Inject
-	public CBCFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
-							final CBCResultHandler resultHandler, final Injector injector) {
+	public CBCFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject, final CBCResultHandler resultHandler, final Injector injector, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
 		this.injector = injector;
+		this.bundle = bundle;
 	}
 	
 	public void checkInvariant(String code) {
 		ArrayList<String> event = new ArrayList<>();
 		event.add(code);
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
-		executeCheckingItem(checker, code, CBCType.INVARIANT);
+		executeCheckingItem(checker, code, CBCFormulaItem.CBCType.INVARIANT);
 	}
 	
 	public void checkDeadlock(String code) {
 		IEvalElement constraint = new EventB(code); 
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
-		executeCheckingItem(checker, code, CBCType.DEADLOCK);
+		executeCheckingItem(checker, code, CBCFormulaItem.CBCType.DEADLOCK);
 	}
 	
 	public void findDeadlock() {
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace());
-		executeCheckingItem(checker, "FIND DEADLOCK", CBCType.FIND_DEADLOCK);
+		executeCheckingItem(checker, "FIND DEADLOCK", CBCFormulaItem.CBCType.FIND_DEADLOCK);
 	}
 	
 	public void checkSequence(String sequence) {
 		List<String> events = Arrays.asList(sequence.replaceAll(" ", "").split(";"));
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
-		executeCheckingItem(checker, sequence, CBCType.SEQUENCE);
+		executeCheckingItem(checker, sequence, CBCFormulaItem.CBCType.SEQUENCE);
 	}
 	
 	public void findRedundantInvariants(CBCFormulaItem item) {
-		item = getItemIfAlreadyExists(item);
+		final CBCFormulaItem currentItem = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
-		stateSpace.execute(cmd);
-		injector.getInstance(StatsView.class).update(currentTrace.get());
-		resultHandler.handleFindRedundantInvariants(item, cmd);
-		updateMachine(currentProject.getCurrentMachine());
+		Thread checkingThread = new Thread(() -> {
+			stateSpace.execute(cmd);
+			injector.getInstance(StatsView.class).update(currentTrace.get());
+			Platform.runLater(() -> {
+				resultHandler.handleFindRedundantInvariants(currentItem, cmd);
+				updateMachine(currentProject.getCurrentMachine());
+			});
+		});
+		checkingThread.start();
 	}
 		
 	public void checkRefinement(CBCFormulaItem item) {
-		item = getItemIfAlreadyExists(item);
+		final CBCFormulaItem currentItem = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand(stateSpace);
-		try {
-			stateSpace.execute(command);
-			injector.getInstance(StatsView.class).update(currentTrace.get());
-		} catch (Exception e){
-			LOGGER.error(e.getMessage());
-		}
-		resultHandler.handleRefinementChecking(item, command, stateSpace);
-		updateMachine(currentProject.getCurrentMachine());
+		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand();
+		Thread checkingThread = new Thread(() -> {
+			try {
+				stateSpace.execute(command);
+				injector.getInstance(StatsView.class).update(currentTrace.get());
+			} catch (Exception e){
+				LOGGER.error(e.getMessage());
+			}
+			Platform.runLater(() -> {
+				resultHandler.handleRefinementChecking(currentItem, command);
+				updateMachine(currentProject.getCurrentMachine());
+			});
+		});
+		checkingThread.start();
 	}
 	
 
 		
 	public void checkAssertions(CBCFormulaItem item) {
-		item = getItemIfAlreadyExists(item);
+		final CBCFormulaItem currentItem = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
-		stateSpace.execute(command);
-		injector.getInstance(StatsView.class).update(currentTrace.get());
-		resultHandler.handleAssertionChecking(item, command, stateSpace);
-		updateMachine(currentProject.getCurrentMachine());
+		Thread checkingThread = new Thread(() -> {
+			stateSpace.execute(command);
+			Platform.runLater(() -> {
+				injector.getInstance(StatsView.class).update(currentTrace.get());
+				resultHandler.handleAssertionChecking(currentItem, command, stateSpace);
+				updateMachine(currentProject.getCurrentMachine());
+			});
+		});
+		checkingThread.start();
 	}
 	
 	private CBCFormulaItem getItemIfAlreadyExists(CBCFormulaItem item) {
@@ -127,41 +147,33 @@ public class CBCFormulaHandler {
 	
 
 	public void findValidState(CBCFormulaItem item) {
-		item = getItemIfAlreadyExists(item);
+		final CBCFormulaItem currentItem = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
-		try {
-			stateSpace.execute(cmd);
-			injector.getInstance(StatsView.class).update(currentTrace.get());
-		} catch (ProBError | EvaluationException e){
-			LOGGER.error(e.getMessage());
-		}
-		resultHandler.handleFindValidState(item, cmd, stateSpace);
-		updateMachine(currentProject.getCurrentMachine());
+		Thread checkingThread = new Thread(() -> {
+			try {
+				stateSpace.execute(cmd);
+			} catch (ProBError | EvaluationException e){
+				LOGGER.error(e.getMessage());
+			}
+			Platform.runLater(() -> {
+				injector.getInstance(StatsView.class).update(currentTrace.get());
+				resultHandler.handleFindValidState(currentItem, cmd, stateSpace);
+				updateMachine(currentProject.getCurrentMachine());
+			});
+		});
+		checkingThread.start();
 	}
 	
 
 	
-	public void executeCheckingItem(IModelCheckJob checker, String code, CBCType type) {
+	public void executeCheckingItem(IModelCheckJob checker, String code, CBCFormulaItem.CBCType type) {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		Thread executionThread = new Thread(() -> 
-			Platform.runLater(() -> 
-				currentMachine.getCBCFormulas()
-					.stream()
-					.filter(current -> current.getCode().equals(code) && current.getType().equals(type))
-					.findFirst()
-					.ifPresent(item -> checkItem(checker, item))
-			)
-		);
-		Thread updatingThread = new Thread(() -> 
-			Platform.runLater(() -> {
-				updateMachine(currentMachine);
-				injector.getInstance(StatsView.class).update(currentTrace.get());
-			})
-		);
-		executionThread.start();
-		updatingThread.start();
-		
+		currentMachine.getCBCFormulas()
+			.stream()
+			.filter(current -> current.getCode().equals(code) && current.getType().equals(type))
+			.findFirst()
+			.ifPresent(item -> checkItem(checker, item));
 	}
 		
 	public void checkMachine(Machine machine) {
@@ -214,12 +226,12 @@ public class CBCFormulaHandler {
 	}
 		
 	private void updateMachine(Machine machine) {
-		CBCView cbcView = injector.getInstance(CBCView.class);
+		final CBCView cbcView = injector.getInstance(CBCView.class);
 		updateMachineStatus(machine);
 		cbcView.refresh();
 	}
 	
-	public void addFormula(String name, String code, CBCType type, boolean checking) {
+	public void addFormula(String name, String code, CBCFormulaItem.CBCType type, boolean checking) {
 		CBCFormulaItem formula = new CBCFormulaItem(name, code, type);
 		addFormula(formula,checking);
 	}
@@ -231,22 +243,30 @@ public class CBCFormulaHandler {
 				currentMachine.addCBCFormula(formula);
 				injector.getInstance(CBCView.class).updateProject();
 			} else if(!checking) {
-				resultHandler.showAlreadyExists(CBCResultHandler.ItemType.Formula);
+				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 			}
 		}
 	}
 	
 	private void checkItem(IModelCheckJob checker, CBCFormulaItem item) {
-		State stateid = currentTrace.getCurrentState();
-		Object result = null;
-		try {
-			result = checker.call();
-		} catch (Exception e) {
-			String message = "Could not check CBC Deadlock: ".concat(e.getMessage());
-			LOGGER.error(message);
-			result = new CBCParseError(message);
-		}
-		resultHandler.handleFormulaResult(item, result, stateid);
+		Thread checkingThread = new Thread(() -> {
+			State stateid = currentTrace.getCurrentState();
+			ArrayList<Object> result = new ArrayList<>();
+			result.add(null);
+			try {
+				result.set(0, checker.call());
+			} catch (Exception e) {
+				LOGGER.error("Could not check CBC Deadlock", e);
+				result.set(0, new CBCParseError(String.format(bundle.getString("verifications.cbc.couldNotCheckCBCDeadlock"), e.getMessage())));
+			}
+			Platform.runLater(() -> {
+				Machine currentMachine = currentProject.getCurrentMachine();
+				resultHandler.handleFormulaResult(item, result.get(0), stateid);
+				updateMachine(currentMachine);
+				injector.getInstance(StatsView.class).update(currentTrace.get());
+			});
+		});
+		checkingThread.start();
 	}
 		
 

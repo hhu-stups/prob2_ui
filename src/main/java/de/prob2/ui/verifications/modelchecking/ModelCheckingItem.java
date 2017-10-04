@@ -85,7 +85,7 @@ public class ModelCheckingItem {
 	
 	public void setTimeout() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
-		icon.setFill(Color.BLUE);
+		icon.setFill(Color.YELLOW);
 		this.status = icon;
 	}
 

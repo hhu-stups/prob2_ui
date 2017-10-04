@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.verifications.MachineTableView?>
+<?import de.prob2.ui.project.verifications.MachineTableView?>
 <?import javafx.scene.control.*?>
 <fx:root stylesheets="@/prob.css" minHeight="150" type="MachineTableView"
 		 xmlns:fx="http://javafx.com/fxml/1">

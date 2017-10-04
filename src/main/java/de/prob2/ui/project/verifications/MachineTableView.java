@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications;
+package de.prob2.ui.project.verifications;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
