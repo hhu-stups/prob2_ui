@@ -46,6 +46,10 @@ public class StatusBar extends HBox {
 		ERROR, SUCCESSFUL;
 	}
 	
+	public enum ModelcheckingStatus {
+		ERROR, SUCCESSFUL;
+	}
+	
 	@FXML private Label statusLabel;
 	
 	private final ResourceBundle resourceBundle;
@@ -54,6 +58,7 @@ public class StatusBar extends HBox {
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
 	private final ObjectProperty<StatusBar.LTLStatus> ltlStatus;
 	private final ObjectProperty<StatusBar.CBCStatus> cbcStatus;
+	private final ObjectProperty<StatusBar.ModelcheckingStatus> modelcheckingStatus;
 	private final BooleanProperty operationsViewUpdating;
 	private final BooleanProperty statesViewUpdating;
 	
@@ -67,6 +72,7 @@ public class StatusBar extends HBox {
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
 		this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", StatusBar.LTLStatus.SUCCESSFUL);
 		this.cbcStatus = new SimpleObjectProperty<>(this, "cbcStatus", StatusBar.CBCStatus.SUCCESSFUL);
+		this.modelcheckingStatus = new SimpleObjectProperty<>(this, "cbcStatus", StatusBar.ModelcheckingStatus.SUCCESSFUL);
 		this.operationsViewUpdating = new SimpleBooleanProperty(this, "operationsViewUpdating", false);
 		this.statesViewUpdating = new SimpleBooleanProperty(this, "statesViewUpdating", false);
 		
@@ -119,6 +125,18 @@ public class StatusBar extends HBox {
 		this.cbcStatusProperty().set(cbcStatus);
 	}
 	
+	public ObjectProperty<StatusBar.ModelcheckingStatus> modelcheckingStatusProperty() {
+		return this.modelcheckingStatus;
+	}
+	
+	public StatusBar.ModelcheckingStatus getModelcheckingStatus() {
+		return this.modelcheckingStatusProperty().get();
+	}
+	
+	public void setModelcheckingStatus(final StatusBar.ModelcheckingStatus modelcheckingStatus) {
+		this.modelcheckingStatus.set(modelcheckingStatus);
+	}
+	
 	public BooleanProperty operationsViewUpdatingProperty() {
 		return this.operationsViewUpdating;
 	}
@@ -162,6 +180,11 @@ public class StatusBar extends HBox {
 			if (this.getCbcStatus() == StatusBar.CBCStatus.ERROR) {
 				errorMessages.add(resourceBundle.getString("statusbar.errors.cbcError"));
 			}
+			
+			if (this.getModelcheckingStatus() == StatusBar.ModelcheckingStatus.ERROR) {
+				errorMessages.add(resourceBundle.getString("statusbar.errors.modelcheckError"));
+			}
+			
 			
 			if (errorMessages.isEmpty()) {
 				statusLabel.getStyleClass().add("noErrors");

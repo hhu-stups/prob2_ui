@@ -1,27 +1,44 @@
 package de.prob2.ui.states;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.google.inject.Inject;
+
 import de.prob2.ui.internal.StageManager;
+
 import difflib.DiffUtils;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 import org.fxmisc.richtext.StyleClassedTextArea;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class FullValueStage extends Stage {
 	private static final Pattern PRETTIFY_DELIMITERS = Pattern.compile("[\\{\\}\\,]");
@@ -38,14 +55,16 @@ public class FullValueStage extends Stage {
 	@FXML private Button saveAsButton;
 	
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	
 	private final StringProperty currentValue;
 	private final StringProperty previousValue;
 	private final BooleanProperty formattingEnabled;
 	
 	@Inject
-	public FullValueStage(final StageManager stageManager) {
+	public FullValueStage(final StageManager stageManager, final ResourceBundle bundle) {
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		this.currentValue = new SimpleStringProperty(this, "currentValue", null);
 		this.previousValue = new SimpleStringProperty(this, "previousValue", null);
 		this.formattingEnabled = new SimpleBooleanProperty(this, "formattingEnabled", true);
@@ -204,11 +223,11 @@ public class FullValueStage extends Stage {
 	private void saveAs() {
 		final FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().setAll(
-			new FileChooser.ExtensionFilter("Text Files", "*.txt"),
-			new FileChooser.ExtensionFilter("All Files", "*.*")
+			new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.text"), "*.txt"),
+			new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.all"), "*.*")
 		);
 		if (diffTab.isSelected()) {
-			chooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter("Diff Files", "*.diff"));
+			chooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.diff"), "*.diff"));
 			chooser.setInitialFileName(this.getTitle() + ".diff");
 		} else {
 			chooser.setInitialFileName(this.getTitle() + ".txt");
@@ -236,10 +255,10 @@ public class FullValueStage extends Stage {
 			out.write(value);
 		} catch (FileNotFoundException e) {
 			LOGGER.error("Could not open file for writing", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Could not open file for writing:\n" + e.getMessage()).showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("states.fullValue.error.couldNotWriteFile"), e.getMessage())).showAndWait();
 		} catch (IOException e) {
 			LOGGER.error("Failed to save value to file", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, "Failed to save file:\n" + e.getMessage()).showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("states.fullValue.error.couldNotSave"), e.getMessage())).showAndWait();
 		}
 	}
 }

@@ -1,10 +1,20 @@
 package de.prob2.ui.visualisation;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
+
 import de.prob.Main;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.commands.ExecuteRightClickCommand;
 import de.prob2.ui.commands.GetImagesForMachineCommand;
 import de.prob2.ui.commands.GetImagesForStateCommand;
@@ -12,6 +22,7 @@ import de.prob2.ui.commands.GetRightClickOptionsForStateVisualizationCommand;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -22,24 +33,18 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-
 public class StateVisualisationView extends AnchorPane {
 	@FXML
 	private GridPane visualisationGridPane;
 
+	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private BooleanProperty visualisationPossible = new SimpleBooleanProperty(false);
 
 	@Inject
-	public StateVisualisationView(final StageManager stageManager, final CurrentProject currentProject,
-			final CurrentTrace currentTrace) {
+	public StateVisualisationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace) {
+		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		stageManager.loadFXML(this, "state_visualisation_view.fxml");
@@ -111,7 +116,7 @@ public class StateVisualisationView extends AnchorPane {
 			contextMenu.getItems().add(item);
 		}
 		if (options.isEmpty()) {
-			final MenuItem item = new MenuItem("no right click options defined");
+			final MenuItem item = new MenuItem(bundle.getString("visualisation.noRightClickOptions"));
 			item.setDisable(true);
 			contextMenu.getItems().add(item);
 		}
@@ -144,10 +149,7 @@ public class StateVisualisationView extends AnchorPane {
 				imagePath = Paths.get(Main.getProBDirectory()).resolve(imageURL).toFile();
 				final File imageInProbFolder = imagePath;
 				if (!imageInProbFolder.exists()) {
-					throw new FileNotFoundException("Image " + imagePath.getName() + " not found in machine folder ("
-							+ imageInMachineFolder.getParent() + ") and project folder ("
-							+ imageInProjectFolder.getParent() + ") and ProB folder (" + imageInProbFolder.getParent()
-							+ ")");
+					throw new FileNotFoundException(String.format(bundle.getString("visualisation.error.imageNotFound"), imagePath.getName(), imageInMachineFolder.getParent(), imageInProjectFolder.getParent(), imageInProbFolder.getParent()));
 				}
 			}
 		}

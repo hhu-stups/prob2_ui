@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class ModelCheckingItem {
 
-	private final ModelCheckingOptions options;
+	private ModelCheckingOptions options;
 	private transient ModelCheckStats stats;
 	
 	private transient FontAwesomeIconView status;
@@ -30,6 +30,10 @@ public class ModelCheckingItem {
 		this.stats = stats;
 		this.strategy = strategy;
 		this.description = description;
+	}
+	
+	public void setOptions(ModelCheckingOptions options) {
+		this.options = options;
 	}
 
 	public ModelCheckingOptions getOptions() {
@@ -85,7 +89,7 @@ public class ModelCheckingItem {
 	
 	public void setTimeout() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
-		icon.setFill(Color.BLUE);
+		icon.setFill(Color.YELLOW);
 		this.status = icon;
 	}
 

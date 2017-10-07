@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -74,6 +75,7 @@ public final class StatesView extends AnchorPane {
 	private final FormulaGenerator formulaGenerator;
 	private final StatusBar statusBar;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 
 	private final Map<IEvalElement, AbstractEvalResult> currentValues;
 	private final Map<IEvalElement, AbstractEvalResult> previousValues;
@@ -86,6 +88,7 @@ public final class StatesView extends AnchorPane {
 		final FormulaGenerator formulaGenerator,
 		final StatusBar statusBar,
 		final StageManager stageManager,
+		final ResourceBundle bundle,
 		final StopActions stopActions
 	) {
 		this.injector = injector;
@@ -93,6 +96,7 @@ public final class StatesView extends AnchorPane {
 		this.formulaGenerator = formulaGenerator;
 		this.statusBar = statusBar;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 
 		this.currentValues = new HashMap<>();
 		this.previousValues = new HashMap<>();
@@ -107,8 +111,8 @@ public final class StatesView extends AnchorPane {
 		tv.setRowFactory(view -> initTableRow());
 
 		this.tvName.setCellFactory(col -> new NameCell());
-		this.tvValue.setCellFactory(col -> new ValueCell(this.currentValues, true));
-		this.tvPreviousValue.setCellFactory(col -> new ValueCell(this.previousValues, false));
+		this.tvValue.setCellFactory(col -> new ValueCell(bundle, this.currentValues, true));
+		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle, this.previousValues, false));
 
 		final Callback<TreeTableColumn.CellDataFeatures<StateItem<?>, StateItem<?>>, ObservableValue<StateItem<?>>> cellValueFactory = data -> Bindings.createObjectBinding(data.getValue()::getValue, this.currentTrace);
 		this.tvName.setCellValueFactory(cellValueFactory);
@@ -147,7 +151,7 @@ public final class StatesView extends AnchorPane {
 			}
 		});
 
-		final MenuItem visualizeExpressionItem = new MenuItem("Visualize Expression");
+		final MenuItem visualizeExpressionItem = new MenuItem(bundle.getString("states.menu.visualizeExpression"));
 		// Expression can only be shown if the row item contains an ASTFormula and the current state is initialized.
 		visualizeExpressionItem.disableProperty().bind(
 			Bindings.createBooleanBinding(() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
@@ -158,11 +162,11 @@ public final class StatesView extends AnchorPane {
 				formulaGenerator.showFormula(((ASTFormula)row.getItem().getContents()).getFormula());
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
-				stageManager.makeAlert(Alert.AlertType.ERROR, "Could not visualize formula:\n" + e).showAndWait();
+				stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("states.error.couldNotVisualize"), e)).showAndWait();
 			}
 		});
 		
-		final MenuItem showFullValueItem = new MenuItem("Show Full Value");
+		final MenuItem showFullValueItem = new MenuItem(bundle.getString("states.menu.showFullValue"));
 		// Full value can only be shown if the row item contains an ASTFormula, and the corresponding value is an EvalResult.
 		showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
 			() -> row.getItem() == null || !(
@@ -173,7 +177,7 @@ public final class StatesView extends AnchorPane {
 		));
 		showFullValueItem.setOnAction(event -> this.showFullValue(row.getItem()));
 
-		final MenuItem showErrorsItem = new MenuItem("Show Errors");
+		final MenuItem showErrorsItem = new MenuItem(bundle.getString("states.menu.showErrors"));
 		// Errors can only be shown if the row contains an ASTFormula whose value is an EvaluationErrorResult.
 		showErrorsItem.disableProperty().bind(Bindings.createBooleanBinding(
 			() -> row.getItem() == null || !(
@@ -310,7 +314,7 @@ public final class StatesView extends AnchorPane {
 			final ASTFormula element = (ASTFormula)stateItem.getContents();
 			stage.setTitle(element.getFormula().toString());
 			stage.setCurrentValue(getResultValue(element, this.currentTrace.getCurrentState()));
-			stage.setPreviousValue(getResultValue(element, this.currentTrace.get().getPreviousState()));
+			stage.setPreviousValue(this.currentTrace.canGoBack() ? getResultValue(element, this.currentTrace.get().getPreviousState()) : null);
 			stage.setFormattingEnabled(true);
 		} else {
 			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());

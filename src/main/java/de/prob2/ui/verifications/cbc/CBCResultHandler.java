@@ -3,39 +3,48 @@ package de.prob2.ui.verifications.cbc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
-import de.prob.animator.command.FindStateCommand.ResultType;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
 import de.prob.check.ModelCheckOk;
+import de.prob.check.NotYetFinished;
 import de.prob.check.RefinementCheckCounterExample;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
-import javafx.scene.control.Alert.AlertType;
+
+import javafx.scene.control.Alert;
 
 @Singleton
 public class CBCResultHandler extends AbstractResultHandler {
 	
-	public CBCResultHandler() {
+	@Inject
+	public CBCResultHandler(final StageManager stageManager, final ResourceBundle bundle) {
+		super(stageManager, bundle);
+		
 		this.type = CheckingType.CBC;
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
 												RefinementCheckCounterExample.class));
 		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
 		this.exception.addAll(Arrays.asList(CBCParseError.class));
+		this.interrupted.addAll(Arrays.asList(NotYetFinished.class));
 	}
 	
 	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, List<Trace> traces) {
@@ -47,10 +56,13 @@ public class CBCResultHandler extends AbstractResultHandler {
 	}
 	
 	public void handleFormulaResult(CBCFormulaItem item, Object result, State stateid) {
-		if(result instanceof ModelCheckOk) {
-			handleItem(item, true);
+		Class<?> clazz = result.getClass();
+		if(success.contains(clazz)) {
+			handleItem(item, Checked.SUCCESS);
+		} else if(error.contains(clazz) || counterExample.contains(clazz) || exception.contains(clazz)) {
+			handleItem(item, Checked.FAIL);
 		} else {
-			handleItem(item, false);
+			handleItem(item, Checked.INTERRUPTED);
 		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
@@ -90,90 +102,71 @@ public class CBCResultHandler extends AbstractResultHandler {
 	}
 	
 	public void handleFindValidState(CBCFormulaItem item, FindStateCommand cmd, StateSpace stateSpace) {
-		ResultType result = cmd.getResult();
+		FindStateCommand.ResultType result = cmd.getResult();
 		item.setExample(null);
-		if(result == null) {
-			showCheckingResult(item, "Error when searching valid state for predicate", false);
-		} else if(result == ResultType.STATE_FOUND) {
-			showCheckingResult(item, "State found", true);
+		// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
+		if (result == FindStateCommand.ResultType.STATE_FOUND) {
+			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.found"), Checked.SUCCESS);
 			item.setExample(cmd.getTrace(stateSpace));
-		} else if(result == ResultType.NO_STATE_FOUND) {
-			showCheckingResult(item, "State not found", false);
-		} else if(result == ResultType.INTERRUPTED) {
-			showCheckingResult(item, "Searching valid state for predicate is interrupted", false);
+		} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
+			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.notFound"), Checked.FAIL);
+		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
+			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.interrupted"), Checked.INTERRUPTED);
 		} else {
-			showCheckingResult(item, "Error when searching valid state for predicate", false);
+			showCheckingResult(item, bundle.getString("verifications.cbc.findValidState.result.error"), Checked.FAIL);
 		}
 	}
 	
 	public void handleFindRedundantInvariants(CBCFormulaItem item, GetRedundantInvariantsCommand cmd) {
 		List<String> result = cmd.getRedundantInvariants();
-		int size = result.size();
-		if(size == 0) {
-			showCheckingResult(item, "No redundant invariants found", true);
+		if(cmd.isInterrupted()) {
+			showCheckingResult(item, bundle.getString("verifications.interrupted"), Checked.INTERRUPTED);
+		} else if (result.isEmpty()) {
+			showCheckingResult(item, bundle.getString("verifications.cbc.findRedundantInvariants.result.notFound"), Checked.SUCCESS);
 		} else {
-			String header;
-			if(cmd.isTimeout()) {
-				header = "Timeout occured";
-			} else {
-				header = "Redundant invariants found";	
-			}
-			showCheckingResult(item, String.join("\n", result), header, false);
+			final String header = bundle.getString(cmd.isTimeout() ? "verifications.cbc.findRedundantInvariants.result.timeout" : "verifications.cbc.findRedundantInvariants.result.found");
+			showCheckingResult(item, String.join("\n", result), header, Checked.FAIL);
 		}
 	}
 	
-	public void handleRefinementChecking(CBCFormulaItem item, ConstraintBasedRefinementCheckCommand cmd, StateSpace s) {
+	public void handleRefinementChecking(CBCFormulaItem item, ConstraintBasedRefinementCheckCommand cmd) {
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
 		String msg = cmd.getResultsString();
-		if(result == null) {
-			showCheckingResult(item, "Not a refinement machine", "Refinement checking failed", false);
-		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
-			showCheckingResult(item, msg, "Violation not found", true);
-		} else if(result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
-			for(RefinementCheckCounterExample counterExample : cmd.getCounterExamples()) {
-				item.getCounterExamples().add(counterExample.getTrace(s));
-			}
-			showCheckingResult(item, msg, "Violation found", false);
-		} else {
-			showCheckingResult(item, msg, "Refinement checking is interrupted", false);
+		if (result == null) {
+			showCheckingResult(item, bundle.getString("verifications.cbc.refinementChecking.result.notARefinementMachine.message"), bundle.getString("verifications.cbc.refinementChecking.result.notARefinementMachine.header"), Checked.FAIL);
+		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
+			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.noViolationFound"), Checked.SUCCESS);
+		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
+			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.violationFound"), Checked.FAIL);
+		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.INTERRUPTED) {
+			showCheckingResult(item, msg, bundle.getString("verifications.cbc.refinementChecking.result.interrupted"), Checked.INTERRUPTED);
 		}
 	}
 	
 	public void handleAssertionChecking(CBCFormulaItem item, ConstraintBasedAssertionCheckCommand cmd, StateSpace stateSpace) {
 		ConstraintBasedAssertionCheckCommand.ResultType result = cmd.getResult();
-		if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS) {
-			showCheckingResult(item, "No counter-example exists", true);
-		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
-			showCheckingResult(item, "No counter-example found", true);
-		} else if(result == ConstraintBasedAssertionCheckCommand.ResultType.COUNTER_EXAMPLE) {
+		if (result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS) {
+			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.noCounterExampleExists"), Checked.SUCCESS);
+		} else if (result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
+			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.noCounterExampleFound"), Checked.SUCCESS);
+		} else if (result == ConstraintBasedAssertionCheckCommand.ResultType.COUNTER_EXAMPLE) {
 			item.getCounterExamples().add(cmd.getTrace(stateSpace));
-			showCheckingResult(item, "Counter-example found", false);
-		} else {
-			showCheckingResult(item, "Assertion checking is interrupted", false);
+			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.counterExampleFound"), Checked.FAIL);
+		} else if (result == ConstraintBasedAssertionCheckCommand.ResultType.INTERRUPTED) {
+			showCheckingResult(item, bundle.getString("verifications.cbc.assertionChecking.result.interrupted"), Checked.INTERRUPTED);
 		}
 	}
 		
-	private void showCheckingResult(CBCFormulaItem item, String msg, String header, boolean successful) {
-		AlertType alertType = successful ? AlertType.INFORMATION: AlertType.ERROR;
-		Checked checked = successful ? Checked.SUCCESS: Checked.FAIL;
+	private void showCheckingResult(CBCFormulaItem item, String msg, String header, Checked checked) {
+		Alert.AlertType alertType = checked == Checked.SUCCESS ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR;
 		CheckingResultItem resultItem = new CheckingResultItem(alertType , checked, msg, header);
 		super.showResult(resultItem, item);
-		handleItem(item, successful);
+		handleItem(item, checked);
 	}
 	
-	private void showCheckingResult(CBCFormulaItem item, String msg, boolean successful) {
-		showCheckingResult(item, msg, msg, successful);
+	private void showCheckingResult(CBCFormulaItem item, String msg, Checked checked) {
+		showCheckingResult(item, msg, msg, checked);
 	}
 	
-	private void handleItem(CBCFormulaItem item, boolean successful) {
-		if(successful) {
-			item.setCheckedSuccessful();
-			item.setChecked(Checked.SUCCESS);
-		} else {
-			item.setCheckedFailed();
-			item.setChecked(Checked.FAIL);
-		}
-	}
-
 
 }

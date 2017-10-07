@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.ltl.formula;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import com.google.inject.Injector;
@@ -14,12 +16,14 @@ import de.prob.statespace.State;
 
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
+import javafx.application.Platform;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,16 +47,18 @@ public class LTLFormulaChecker {
 	}
 	
 	public void checkMachine(Machine machine) {
-		boolean failed = false;
+		final ArrayList<Boolean> failed = new ArrayList<>();
+		failed.add(false);
 		for (LTLFormulaItem item : machine.getLTLFormulas()) {
 			Checked result = this.checkFormula(item, machine);
 			if(result == Checked.FAIL || result == Checked.EXCEPTION) {
-				failed = true;
+				failed.set(0, true);
 				machine.setLTLCheckedFailed();
 			}
 			item.setChecked(result);
 		}
-		injector.getInstance(StatusBar.class).setLtlStatus(failed ? StatusBar.LTLStatus.ERROR : StatusBar.LTLStatus.SUCCESSFUL);
+		Platform.runLater(() -> injector.getInstance(StatusBar.class).setLtlStatus(failed.get(0) ? StatusBar.LTLStatus.ERROR : StatusBar.LTLStatus.SUCCESSFUL));
+	
 	}
 	
 	public void checkMachineStatus(Machine machine) {
@@ -60,11 +66,13 @@ public class LTLFormulaChecker {
 			Checked checked = item.getChecked();
 			if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
 				machine.setLTLCheckedFailed();
+				injector.getInstance(MachineTableView.class).refresh();
 				injector.getInstance(StatusBar.class).setLtlStatus(StatusBar.LTLStatus.ERROR);
 				return;
 			}
 		}
 		machine.setLTLCheckedSuccessful();
+		injector.getInstance(MachineTableView.class).refresh();
 		injector.getInstance(StatusBar.class).setLtlStatus(StatusBar.LTLStatus.SUCCESSFUL);
 	}
 	

@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -13,6 +15,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaDialog;
@@ -20,7 +23,7 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
-
+import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -44,6 +47,9 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	private Button checkMachineButton;
+	
+	@FXML
+	private Button cancelButton;
 
 	@FXML
 	private HelpButton helpButton;
@@ -71,7 +77,9 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
-			
+	
+	private final ResourceBundle bundle;
+	
 	private final Injector injector;
 	
 	private final CurrentTrace currentTrace;
@@ -85,9 +93,8 @@ public class LTLView extends AnchorPane{
 	private final LTLResultHandler resultHandler;
 				
 	@Inject
-	private LTLView(final StageManager stageManager, final Injector injector,final CurrentTrace currentTrace, 
-					final CurrentProject currentProject, final LTLFormulaChecker checker,
-					final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
+	private LTLView(final StageManager stageManager, final ResourceBundle bundle, final Injector injector,final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLFormulaChecker checker, final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
+		this.bundle = bundle;
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
@@ -140,26 +147,31 @@ public class LTLView extends AnchorPane{
 	private void setContextMenus() {
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem("Remove formula");
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.formula.menu.remove"));
 			removeItem.setOnAction(e -> removeFormula());
 			removeItem.disableProperty().bind(row.emptyProperty());
 						
-			MenuItem showCounterExampleItem = new MenuItem("Show Counter Example");
+			MenuItem showCounterExampleItem = new MenuItem(bundle.getString("verifications.ltl.formula.menu.showCounterExample"));
 			showCounterExampleItem.setOnAction(e-> currentTrace.set(tvFormula.getSelectionModel().getSelectedItem().getCounterExample()));
 			showCounterExampleItem.setDisable(true);
 
-			MenuItem openEditor = new MenuItem("Open in Editor");
+			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.formula.menu.openInEditor"));
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
 			openEditor.disableProperty().bind(row.emptyProperty());
 
-			MenuItem check = new MenuItem("Check separately");
+			MenuItem check = new MenuItem(bundle.getString("verifications.ltl.formula.menu.checkSeparately"));
 			check.setOnAction(e-> {
-				Machine machine = currentProject.getCurrentMachine();
-				LTLFormulaItem item = row.getItem();
-				Checked result = checkFormula(item, machine);
-				item.setChecked(result);
-				checker.checkMachineStatus(machine);
-				tvFormula.refresh();
+				Thread checkingThread = new Thread(() -> {
+					Machine machine = currentProject.getCurrentMachine();
+					LTLFormulaItem item = row.getItem();
+					Checked result = checkFormula(item, machine);
+					item.setChecked(result);
+					Platform.runLater(() -> {
+						checker.checkMachineStatus(machine);
+						tvFormula.refresh();
+					});
+				});
+				checkingThread.start();
 			});
 			check.disableProperty().bind(row.emptyProperty());
 
@@ -179,11 +191,11 @@ public class LTLView extends AnchorPane{
 		
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem("Remove Pattern");
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.pattern.menu.remove"));
 			removeItem.setOnAction(e -> removePattern());
 			removeItem.disableProperty().bind(row.emptyProperty());
 
-			MenuItem openEditor = new MenuItem("Open in Editor");
+			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.pattern.menu.openInEditor"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			openEditor.disableProperty().bind(row.emptyProperty());
 
@@ -217,6 +229,8 @@ public class LTLView extends AnchorPane{
 		tvFormula.itemsProperty().bind(machine.ltlFormulasProperty());
 		tvPattern.itemsProperty().unbind();
 		tvPattern.itemsProperty().bind(machine.ltlPatternsProperty());
+		tvFormula.refresh();
+		tvPattern.refresh();
 		if(currentTrace.existsProperty().get()) {
 			checkMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
 		}
@@ -238,7 +252,7 @@ public class LTLView extends AnchorPane{
 			machine.addLTLFormula(item);
 			updateProject();
 		} else {
-			resultHandler.showAlreadyExists(LTLResultHandler.ItemType.Formula);
+			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
 	}
 	
@@ -265,7 +279,7 @@ public class LTLView extends AnchorPane{
 			updateProject();
 			patternParser.parsePattern(item, machine, false);
 		} else {
-			resultHandler.showAlreadyExists(LTLResultHandler.ItemType.Pattern);
+			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
 		}
 	}
 	
@@ -336,9 +350,19 @@ public class LTLView extends AnchorPane{
 	@FXML
 	public void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
-		checker.checkMachine(machine);
-		checker.checkMachineStatus(machine);
-		tvFormula.refresh();
+		Thread checkingThread = new Thread(() -> {
+			checker.checkMachine(machine);
+			Platform.runLater(() -> {
+				checker.checkMachineStatus(machine);
+				tvFormula.refresh();
+			});
+		});
+		checkingThread.start();
+	}
+	
+	@FXML
+	public void cancel() {
+		currentTrace.getStateSpace().sendInterrupt();
 	}
 	
 	private void parseMachine(Machine machine) {

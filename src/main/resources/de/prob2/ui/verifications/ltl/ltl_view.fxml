@@ -20,10 +20,13 @@
 					</VBox.margin>
 				</HelpButton>
 				<HBox spacing="5.0" alignment="CENTER_LEFT">
-					<HBox alignment="BOTTOM_LEFT" HBox.hgrow="ALWAYS">
+					<HBox spacing="5.0" alignment="BOTTOM_LEFT" HBox.hgrow="ALWAYS">
 						<Button fx:id="checkMachineButton" disable="true"
 							text="%verifications.checkMachine" onAction="#checkMachine"
 							styleClass="button-blue" />
+						<Button fx:id="cancelButton" 
+							text="%verifications.cancel" onAction="#cancel"
+							styleClass="button-blue"/>
 					</HBox>
 					<VBox spacing="5.0" alignment="TOP_RIGHT">
 						<Button fx:id="addFormulaButton" disable="true" onAction="#addFormula" prefWidth="140.0"
