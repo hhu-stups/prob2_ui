@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ro.fortsoft.pf4j.*;
 import ro.fortsoft.pf4j.util.FileUtils;
+import ro.fortsoft.pf4j.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -109,7 +110,7 @@ public class ProBPluginManager {
                         pluginManager.startPlugin(pluginId);
                     }
                 }
-            } catch (PluginException e) {
+            } catch (Exception e) {
                 LOGGER.warn("Tried to copy and load/start the plugin {}.\nThis exception was thrown: ", pluginFileName, e);
                 showWarningAlert("plugins.error.load", pluginFileName);
                 //if an error occurred, delete the plugin file
@@ -374,7 +375,7 @@ public class ProBPluginManager {
      *
      * {@inheritDoc}
      *
-     * Overwrites the {@code createPluginFactory} method to use {@link ProBPlugin} as plugin class,
+     * Overwrites the {@code createPluginFactory} method to use {@link ProBPlugin} as plugin clazz,
      * the {@code createPluginsRoot} method to set the plugins directory and the {@code getRuntimeMode}
      * to avoid the development mode of PF4J.
      *
@@ -402,7 +403,7 @@ public class ProBPluginManager {
         }
 
         @Override
-        //changed to use the ProBPlugin class
+        //changed to use the ProBPlugin clazz
         protected PluginFactory createPluginFactory() {
             return pluginWrapper -> {
                 String pluginClassName = pluginWrapper.getDescriptor().getPluginClass();
@@ -416,12 +417,12 @@ public class ProBPluginManager {
                     return null;
                 }
 
-                // once we have the class, we can do some checks on it to ensure
+                // once we have the clazz, we can do some checks on it to ensure
                 // that it is a valid implementation of a plugin.
                 int modifiers = pluginClass.getModifiers();
                 if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)
                         || (!ProBPlugin.class.isAssignableFrom(pluginClass))) {
-                    LOGGER.error("The plugin class '{}' is not a valid ProBPlugin", pluginClassName);
+                    LOGGER.error("The plugin clazz '{}' is not a valid ProBPlugin", pluginClassName);
                     return null;
                 }
 
@@ -439,6 +440,23 @@ public class ProBPluginManager {
         @Override
         public RuntimeMode getRuntimeMode() {
             return RuntimeMode.DEPLOYMENT;
+        }
+
+        @Override
+        //also checked required version
+        protected void validatePluginDescriptor(PluginDescriptor descriptor) throws PluginException {
+            super.validatePluginDescriptor(descriptor);
+            if (StringUtils.isEmpty(descriptor.getRequires()) || descriptor.getRequires().equals("*")) {
+                throw new PluginException("Plugin-Requires has to be specified");
+            }
+            if (!descriptor.getDependencies().isEmpty()) {
+                StringBuilder builder = new StringBuilder("Plugin-Dependencies are not supported but the plugin has the following dependencies:");
+                for (PluginDependency dependency : descriptor.getDependencies()) {
+                    builder.append(System.getProperty("line.separator"));
+                    builder.append(dependency.getPluginId());
+                }
+                throw new PluginException(builder.toString());
+            }
         }
 
         public ProBPluginManager getPluginManager() {

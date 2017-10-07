@@ -122,6 +122,10 @@ public class PluginMenuStage extends Stage {
     @FXML
     private void reloadPlugins() {
         proBPluginManager.reloadPlugins();
+        List<PluginWrapper> plugins = getProBJarPluginManager().getPlugins();
+        plugins.sort(Comparator.comparing(pluginWrapper -> ((ProBPlugin) pluginWrapper.getPlugin()).getName()));
+        pluginList.clear();
+        pluginList.addAll(plugins);
     }
 
     @FXML
@@ -186,7 +190,7 @@ public class PluginMenuStage extends Stage {
         String pluginName = plugin.getName();
 
         MenuItem restartItem = new MenuItem(
-                String.format(bundle.getString("pluginsmenu.table.contextmenu.restart"), pluginName));
+                getFormattedString("pluginsmenu.table.contextmenu.restart", pluginName));
         restartItem.setOnAction(event -> {
             if (PluginState.STOPPED == getProBJarPluginManager().stopPlugin(pluginId)) {
                 getProBJarPluginManager().startPlugin(pluginId);
@@ -194,10 +198,10 @@ public class PluginMenuStage extends Stage {
         });
 
         MenuItem removeMenuItem = new MenuItem(
-                String.format(bundle.getString("pluginsmenu.table.contextmenu.remove"), pluginName));
+                getFormattedString("pluginsmenu.table.contextmenu.remove", pluginName));
         removeMenuItem.setOnAction(event -> {
             Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-                    String.format(bundle.getString("pluginsmenu.table.dialog.remove.question"), pluginName),
+                    getFormattedString("pluginsmenu.table.dialog.remove.question", pluginName),
                     ButtonType.NO, ButtonType.YES);
             dialog.initOwner(this);
             dialog.setTitle(bundle.getString("pluginsmenu.table.dialog.title"));
@@ -212,5 +216,14 @@ public class PluginMenuStage extends Stage {
 
     private ProBPluginManager.ProBJarPluginManager getProBJarPluginManager() {
         return proBPluginManager.getPluginManager();
+    }
+
+    private String getFormattedString(String key, Object... args) {
+        String bundleString = bundle.getString(key);
+        if (args.length == 0) {
+            return bundleString;
+        } else {
+            return String.format(bundleString, args);
+        }
     }
 }
