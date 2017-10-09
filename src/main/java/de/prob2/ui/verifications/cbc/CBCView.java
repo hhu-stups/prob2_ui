@@ -10,7 +10,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.helpsystem.HelpButton;
@@ -19,7 +18,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -73,11 +71,11 @@ public class CBCView extends AnchorPane {
 
 	private final Injector injector;
 	
-	private final CBCFormulaHandler cbcHandler;
-	
-	
+	private final CBCFormulaHandler cbcHandler;	
+
 	@Inject
-	public CBCView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, final CurrentProject currentProject, final CBCFormulaHandler cbcHandler, final Injector injector) {
+	public CBCView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
+					final CurrentProject currentProject, final CBCFormulaHandler cbcHandler, final Injector injector) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
@@ -102,18 +100,20 @@ public class CBCView extends AnchorPane {
 		});
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().cbcFormulasProperty().emptyProperty());
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().cbcFormulasProperty().emptyProperty().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
 			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
 			}
 		});
 	}
 	
 	private void setBindings() {
-		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
-		checkRefinementButton.disableProperty().bind(currentTrace.existsProperty().not());
-		checkAssertionsButton.disableProperty().bind(currentTrace.existsProperty().not());
+		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
+		checkRefinementButton.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
+		checkAssertionsButton.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
+		cancelButton.disableProperty().bind(cbcHandler.currentJobThreadsProperty().emptyProperty());
+		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -208,7 +208,7 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	public void cancel() {
-		currentTrace.getStateSpace().sendInterrupt();
+		cbcHandler.interrupt();
 	}
 	
 	private void removeFormula() {
