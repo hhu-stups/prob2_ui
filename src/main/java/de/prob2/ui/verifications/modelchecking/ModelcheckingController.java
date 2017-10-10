@@ -380,7 +380,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	@FXML
 	public synchronized void cancelModelcheck() {
 		currentJobs.forEach(job -> job.getStateSpace().sendInterrupt());
-		currentJobThreads.forEach(job -> job.interrupt());
+		currentJobThreads.forEach(thread -> thread.interrupt());
 	}
 	
 	private void checkItem(ModelCheckingItem item) {

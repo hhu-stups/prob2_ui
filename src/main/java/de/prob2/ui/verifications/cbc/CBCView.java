@@ -207,7 +207,7 @@ public class CBCView extends AnchorPane {
 	}
 	
 	@FXML
-	public void cancel() {
+	public synchronized void cancel() {
 		cbcHandler.interrupt();
 	}
 	

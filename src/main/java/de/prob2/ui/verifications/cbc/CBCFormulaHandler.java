@@ -70,9 +70,6 @@ public class CBCFormulaHandler {
 		this.injector = injector;
 		this.bundle = bundle;
 		this.currentJobs = new SimpleListProperty<>(this, "currentJobs", FXCollections.observableArrayList());
-		this.currentJobs.emptyProperty().addListener((a,b,c) -> {
-			
-		});
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 	}
 	
@@ -106,11 +103,12 @@ public class CBCFormulaHandler {
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
 		Thread checkingThread = new Thread(() -> {
 			stateSpace.execute(cmd);
+			Thread currentThread = Thread.currentThread();
 			injector.getInstance(StatsView.class).update(currentTrace.get());
 			Platform.runLater(() -> {
 				resultHandler.handleFindRedundantInvariants(currentItem, cmd);
 				updateMachine(currentProject.getCurrentMachine());
-				currentJobThreads.remove(currentJobThreads.size() - 1);
+				currentJobThreads.remove(currentThread);
 			});
 		});
 		currentJobThreads.add(checkingThread);
@@ -128,10 +126,11 @@ public class CBCFormulaHandler {
 			} catch (Exception e){
 				LOGGER.error(e.getMessage());
 			}
+			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
 				resultHandler.handleRefinementChecking(currentItem, command);
 				updateMachine(currentProject.getCurrentMachine());
-				currentJobThreads.remove(currentJobThreads.size() - 1);
+				currentJobThreads.remove(currentThread);
 			});
 		});
 		currentJobThreads.add(checkingThread);
@@ -146,11 +145,12 @@ public class CBCFormulaHandler {
 		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
 		Thread checkingThread = new Thread(() -> {
 			stateSpace.execute(command);
+			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
 				injector.getInstance(StatsView.class).update(currentTrace.get());
 				resultHandler.handleAssertionChecking(currentItem, command, stateSpace);
 				updateMachine(currentProject.getCurrentMachine());
-				currentJobThreads.remove(currentJobThreads.size() - 1);
+				currentJobThreads.remove(currentThread);
 			});
 		});
 		currentJobThreads.add(checkingThread);
@@ -177,11 +177,12 @@ public class CBCFormulaHandler {
 			} catch (ProBError | EvaluationException e){
 				LOGGER.error(e.getMessage());
 			}
+			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
 				injector.getInstance(StatsView.class).update(currentTrace.get());
 				resultHandler.handleFindValidState(currentItem, cmd, stateSpace);
 				updateMachine(currentProject.getCurrentMachine());
-				currentJobThreads.remove(currentJobThreads.size() - 1);
+				currentJobThreads.remove(currentThread);
 			});
 		});
 		currentJobThreads.add(checkingThread);
