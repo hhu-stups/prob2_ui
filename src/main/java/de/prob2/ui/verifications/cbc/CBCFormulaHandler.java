@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import javax.inject.Inject;
 
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
@@ -33,10 +34,14 @@ import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 
 import javafx.application.Platform;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class CBCFormulaHandler {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBCFormulaHandler.class);
@@ -50,15 +55,25 @@ public class CBCFormulaHandler {
 	private final CBCResultHandler resultHandler;
 	
 	private final ResourceBundle bundle;
+	
+	private final ListProperty<IModelCheckJob> currentJobs;
+	
+	private final ListProperty<Thread> currentJobThreads;
 
 	
 	@Inject
-	public CBCFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject, final CBCResultHandler resultHandler, final Injector injector, final ResourceBundle bundle) {
+	public CBCFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject, 
+							final CBCResultHandler resultHandler, final Injector injector, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
 		this.injector = injector;
 		this.bundle = bundle;
+		this.currentJobs = new SimpleListProperty<>(this, "currentJobs", FXCollections.observableArrayList());
+		this.currentJobs.emptyProperty().addListener((a,b,c) -> {
+			
+		});
+		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 	}
 	
 	public void checkInvariant(String code) {
@@ -95,8 +110,10 @@ public class CBCFormulaHandler {
 			Platform.runLater(() -> {
 				resultHandler.handleFindRedundantInvariants(currentItem, cmd);
 				updateMachine(currentProject.getCurrentMachine());
+				currentJobThreads.remove(currentJobThreads.size() - 1);
 			});
 		});
+		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}
 		
@@ -114,8 +131,10 @@ public class CBCFormulaHandler {
 			Platform.runLater(() -> {
 				resultHandler.handleRefinementChecking(currentItem, command);
 				updateMachine(currentProject.getCurrentMachine());
+				currentJobThreads.remove(currentJobThreads.size() - 1);
 			});
 		});
+		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}
 	
@@ -131,8 +150,10 @@ public class CBCFormulaHandler {
 				injector.getInstance(StatsView.class).update(currentTrace.get());
 				resultHandler.handleAssertionChecking(currentItem, command, stateSpace);
 				updateMachine(currentProject.getCurrentMachine());
+				currentJobThreads.remove(currentJobThreads.size() - 1);
 			});
 		});
+		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}
 	
@@ -160,8 +181,10 @@ public class CBCFormulaHandler {
 				injector.getInstance(StatsView.class).update(currentTrace.get());
 				resultHandler.handleFindValidState(currentItem, cmd, stateSpace);
 				updateMachine(currentProject.getCurrentMachine());
+				currentJobThreads.remove(currentJobThreads.size() - 1);
 			});
 		});
+		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}
 	
@@ -253,20 +276,34 @@ public class CBCFormulaHandler {
 			State stateid = currentTrace.getCurrentState();
 			ArrayList<Object> result = new ArrayList<>();
 			result.add(null);
+			currentJobs.add(checker);
 			try {
 				result.set(0, checker.call());
 			} catch (Exception e) {
 				LOGGER.error("Could not check CBC Deadlock", e);
 				result.set(0, new CBCParseError(String.format(bundle.getString("verifications.cbc.couldNotCheckCBCDeadlock"), e.getMessage())));
 			}
+			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
 				Machine currentMachine = currentProject.getCurrentMachine();
 				resultHandler.handleFormulaResult(item, result.get(0), stateid);
 				updateMachine(currentMachine);
 				injector.getInstance(StatsView.class).update(currentTrace.get());
+				currentJobs.remove(checker);
+				currentJobThreads.remove(currentThread);
 			});
 		});
+		currentJobThreads.add(checkingThread);
 		checkingThread.start();
+	}
+	
+	public void interrupt() {
+		currentJobThreads.forEach(thread -> thread.interrupt());
+		currentJobs.forEach(job -> job.getStateSpace().sendInterrupt());
+	}
+	
+	public ListProperty<Thread> currentJobThreadsProperty() {
+		return currentJobThreads;
 	}
 		
 

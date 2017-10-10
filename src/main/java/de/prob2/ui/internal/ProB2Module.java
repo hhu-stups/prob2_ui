@@ -1,14 +1,6 @@
 package de.prob2.ui.internal;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 import com.google.inject.AbstractModule;
@@ -58,45 +50,6 @@ import de.prob2.ui.visualisation.VisualisationView;
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
-	/**
-	 * Custom {@link ResourceBundle.Control} subclass that loads property bundles as UTF-8 instead of the default ISO-8859-1.
-	 */
-	private static final class UTF8PropertiesControl extends ResourceBundle.Control {
-		private UTF8PropertiesControl() {
-			super();
-		}
-		
-		@Override
-		public ResourceBundle newBundle(
-			final String baseName,
-			final Locale locale,
-			final String format,
-			final ClassLoader loader,
-			final boolean reload
-		) throws IllegalAccessException, InstantiationException, IOException {
-			if ("java.properties".equals(format)) {
-				// This is mostly copied from the default ResourceBundle.Control.newBundle implementation.
-				final String resourceName = toResourceName(toBundleName(baseName, locale), "properties");
-				final URL url = loader.getResource(resourceName);
-				if (url != null) {
-					final URLConnection connection = url.openConnection();
-					if (connection != null) {
-						connection.setUseCaches(!reload);
-						try (
-							final InputStream stream = connection.getInputStream();
-							final Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
-						) {
-							return new PropertyResourceBundle(reader);
-						}
-					}
-				}
-				return null;
-			} else {
-				return super.newBundle(baseName, locale, format, loader, reload);
-			}
-		}
-	}
-	
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 	
 	private final RuntimeOptions runtimeOptions;
@@ -113,7 +66,7 @@ public class ProB2Module extends AbstractModule {
 		// General stuff
 		final Locale locale = Locale.getDefault();
 		bind(Locale.class).toInstance(locale);
-		final ResourceBundle bundle = ResourceBundle.getBundle("de.prob2.ui.prob2", locale, new ProB2Module.UTF8PropertiesControl());
+		final ResourceBundle bundle = ResourceBundle.getBundle("de.prob2.ui.prob2", locale);
 		bind(ResourceBundle.class).toInstance(bundle);
 		final MenuToolkit toolkit = IS_MAC ? MenuToolkit.toolkit(locale) : null;
 		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));

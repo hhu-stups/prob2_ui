@@ -54,11 +54,6 @@
 								text="%verifications.modelchecking.stage.options.stopAtFullCoverage"
 								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
 						</AnchorPane>
-						<AnchorPane VBox.vgrow="ALWAYS">
-							<CheckBox fx:id="searchForNewErrors" selected="true"
-								text="%verifications.modelchecking.stage.options.searchForNewErrors"
-								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
-						</AnchorPane>
 					</VBox>
 					<AnchorPane>
 						<HBox AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0"
