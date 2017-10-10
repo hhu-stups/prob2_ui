@@ -375,7 +375,7 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public synchronized void cancel() {
-		currentJobThreads.forEach(thread -> thread.interrupt());
+		currentJobThreads.forEach(Thread::interrupt);
 	}
 	
 	private void parseMachine(Machine machine) {

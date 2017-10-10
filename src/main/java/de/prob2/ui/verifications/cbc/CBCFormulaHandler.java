@@ -299,7 +299,7 @@ public class CBCFormulaHandler {
 	}
 	
 	public void interrupt() {
-		currentJobThreads.forEach(thread -> thread.interrupt());
+		currentJobThreads.forEach(Thread::interrupt);
 		currentJobs.forEach(job -> job.getStateSpace().sendInterrupt());
 	}
 	
