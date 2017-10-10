@@ -100,7 +100,6 @@ public class ModelCheckingItem {
 	
 	public Checked getChecked() {
 		return checked;
-	}
+	}	
 	
-
 }
