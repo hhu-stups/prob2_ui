@@ -24,6 +24,7 @@ import de.prob2.ui.verifications.cbc.CBCFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -305,12 +306,16 @@ public class Machine {
 	
 	public void addModelcheckingItem(ModelCheckingItem item) {
 		modelcheckingItems.add(item);
-		this.changed.set(true);
+		Platform.runLater(() -> {
+			this.changed.set(true);
+		});
 	}
 	
 	public void removeModelcheckingItem(ModelCheckingItem item) {
 		modelcheckingItems.remove(item);
-		this.changed.set(true);
+		Platform.runLater(() -> {
+			this.changed.set(true);
+		});
 	}
 	
 		

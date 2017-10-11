@@ -197,4 +197,14 @@ public class StatusBar extends HBox {
 			statusLabel.setText(this.resourceBundle.getString(this.getLoadingStatus().getMessageKey()));
 		}
 	}
+	
+	public void reset() {
+		setModelcheckingStatus(ModelcheckingStatus.SUCCESSFUL);
+		setLtlStatus(LTLStatus.SUCCESSFUL);
+		setCbcStatus(CBCStatus.SUCCESSFUL);
+		setLoadingStatus(LoadingStatus.NOT_LOADING);
+		setOperationsViewUpdating(false);
+		setStatesViewUpdating(false);
+	}
+	
 }
