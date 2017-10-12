@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.cbc;
+package de.prob2.ui.verifications.symbolicchecking;
 
 
 import java.util.ArrayList;
@@ -18,10 +18,10 @@ import javafx.scene.control.Control;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public abstract class AbstractCBCFormulaInputStage extends Stage {
+public abstract class AbstractSymbolicCheckingFormulaInputStage extends Stage {
 	
 
-	protected final CBCFormulaHandler cbcHandler;
+	protected final SymbolicCheckingFormulaHandler symbolicCheckingHandler;
 	
 	protected final CurrentProject currentProject;
 	
@@ -37,8 +37,8 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 	
 	protected final List<Button> invisibles;
 	
-	public AbstractCBCFormulaInputStage(final CBCFormulaHandler cbcHandler, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
-		this.cbcHandler = cbcHandler;
+	public AbstractSymbolicCheckingFormulaInputStage(final SymbolicCheckingFormulaHandler cbcHandler, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
+		this.symbolicCheckingHandler = cbcHandler;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.bundle = bundle;
@@ -46,22 +46,22 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected void changeFormula(Control input, CBCFormulaItem item, List<Button> invisibles) {
+	protected void changeFormula(Control input, SymbolicCheckingFormulaItem item, List<Button> invisibles) {
 		hideInvisibleButtons(invisibles);
-		btAdd.setText(bundle.getString("verifications.cbc.input.change"));
+		btAdd.setText(bundle.getString("verifications.symbolic.input.change"));
 		btAdd.setOnAction(e-> {
 			if(!updateFormula(input, item)) {
-				injector.getInstance(CBCResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+				injector.getInstance(SymbolicCheckingResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 			}
 			this.close();
 		});
 
-		btCheck.setText(bundle.getString("verifications.cbc.input.changeAndCheck"));
+		btCheck.setText(bundle.getString("verifications.symbolic.input.changeAndCheck"));
 		btCheck.setOnAction(e-> {
 			if(updateFormula(input, item)) {
-				cbcHandler.checkItem(item);
+				symbolicCheckingHandler.checkItem(item);
 			} else {
-				injector.getInstance(CBCResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+				injector.getInstance(SymbolicCheckingResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 			}
 			this.close();
 		});
@@ -85,7 +85,7 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean updateFormula(Control input, CBCFormulaItem item) {
+	private boolean updateFormula(Control input, SymbolicCheckingFormulaItem item) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula;
 		if(input instanceof TextField) {
@@ -93,12 +93,12 @@ public abstract class AbstractCBCFormulaInputStage extends Stage {
 		} else {
 			formula = ((ChoiceBox<String>) input).getSelectionModel().getSelectedItem();
 		}
-		CBCFormulaItem newItem = new CBCFormulaItem(formula, formula, item.getType());
-		if(!currentMachine.getCBCFormulas().contains(newItem)) {
+		SymbolicCheckingFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, item.getType());
+		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
 			item.setName(formula);
 			item.setCode(formula);
 			item.reset();
-			injector.getInstance(CBCView.class).refresh();
+			injector.getInstance(SymbolicCheckingView.class).refresh();
 			return true;
 		}	
 		return false;

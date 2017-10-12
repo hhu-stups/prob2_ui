@@ -46,9 +46,9 @@ public class BInterpreter implements Executable {
 			AbstractEvalResult res = trace.evalCurrent(trace.getModel().parseFormula(instruction.getInstruction(), FormulaExpand.EXPAND));
 			// noinspection ObjectToString
 			return new ConsoleExecResult("", res.toString(), ConsoleExecResultType.PASSED);
-		} catch (CliError | EvaluationException | ProBError e) {
+		} catch (CliError | EvaluationException | ProBError  e) {
 			logger.info("B evaluation failed", e);
-			return new ConsoleExecResult("", String.format(bundle.getString("consoles.b.evalFailed"), e), ConsoleExecResultType.ERROR);
+			return new ConsoleExecResult("", String.format(bundle.getString("consoles.b.evalFailed"), e.getMessage()), ConsoleExecResultType.ERROR);
 		}
 	}
 }

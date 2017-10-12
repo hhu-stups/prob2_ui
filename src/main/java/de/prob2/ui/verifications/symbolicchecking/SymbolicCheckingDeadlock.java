@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.cbc;
+package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.Arrays;
 import java.util.ResourceBundle;
@@ -9,14 +9,13 @@ import com.google.inject.Injector;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.verifications.cbc.CBCFormulaItem.CBCType;
-
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem.SymbolicCheckingType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 
-public class CBCDeadlock extends AbstractCBCFormulaInputStage {
+public class SymbolicCheckingDeadlock extends AbstractSymbolicCheckingFormulaInputStage {
 	
 	
 	@FXML
@@ -29,10 +28,10 @@ public class CBCDeadlock extends AbstractCBCFormulaInputStage {
 	private Button findValidStateButton;
 	
 	@Inject
-	private CBCDeadlock(final StageManager stageManager, final CBCFormulaHandler cbcHandler,
+	private SymbolicCheckingDeadlock(final StageManager stageManager, final SymbolicCheckingFormulaHandler cbcHandler,
 						final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
 		super(cbcHandler, currentProject, injector, bundle);
-		stageManager.loadFXML(this, "cbc_deadlock.fxml");
+		stageManager.loadFXML(this, "symbolic_checking_deadlock.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
 	
@@ -47,7 +46,7 @@ public class CBCDeadlock extends AbstractCBCFormulaInputStage {
 	}
 	
 	private void addFormula(boolean checking) {
-		cbcHandler.addFormula(tfFormula.getText(), tfFormula.getText(), CBCFormulaItem.CBCType.DEADLOCK,
+		symbolicCheckingHandler.addFormula(tfFormula.getText(), tfFormula.getText(), SymbolicCheckingFormulaItem.SymbolicCheckingType.DEADLOCK,
 								checking);
 		this.close();
 	}
@@ -55,27 +54,27 @@ public class CBCDeadlock extends AbstractCBCFormulaInputStage {
 	@FXML
 	public void checkFormula() {
 		addFormula(true);
-		cbcHandler.checkDeadlock(tfFormula.getText());
+		symbolicCheckingHandler.checkDeadlock(tfFormula.getText());
 		this.close();
 	}
 	
 	@FXML
 	public void findDeadlock() {
-		cbcHandler.addFormula("FIND DEADLOCK", "FIND DEADLOCK", CBCFormulaItem.CBCType.FIND_DEADLOCK, true);
-		cbcHandler.findDeadlock();
+		symbolicCheckingHandler.addFormula("FIND DEADLOCK", "FIND DEADLOCK", SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_DEADLOCK, true);
+		symbolicCheckingHandler.findDeadlock();
 		this.close();
 	}
 	
 	@FXML
 	public void findValidState() {
-		CBCFormulaItem item = new CBCFormulaItem(tfFormula.getText(), tfFormula.getText(), 
-				CBCType.FIND_VALID_STATE);
-		cbcHandler.addFormula(item, true);
-		cbcHandler.findValidState(item);
+		SymbolicCheckingFormulaItem item = new SymbolicCheckingFormulaItem(tfFormula.getText(), tfFormula.getText(), 
+				SymbolicCheckingType.FIND_VALID_STATE);
+		symbolicCheckingHandler.addFormula(item, true);
+		symbolicCheckingHandler.findValidState(item);
 		this.close();
 	}
 	
-	public void changeFormula(CBCFormulaItem item) {
+	public void changeFormula(SymbolicCheckingFormulaItem item) {
 		super.changeFormula(tfFormula, item, invisibles);
 	}
 	
