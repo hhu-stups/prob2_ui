@@ -24,7 +24,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-
+import de.prob2.ui.statusbar.StatusBar;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -64,7 +64,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	@Inject
 	private CurrentProject(final StageManager stageManager, final ResourceBundle bundle, final Injector injector, final AnimationSelector animations,
-			final CurrentTrace currentTrace) {
+							final CurrentTrace currentTrace, final StatusBar statusBar) {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.injector = injector;
@@ -102,6 +102,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 					this.currentMachine.set(null);
 				}
 			}
+			statusBar.reset();
 		});
 	}
 

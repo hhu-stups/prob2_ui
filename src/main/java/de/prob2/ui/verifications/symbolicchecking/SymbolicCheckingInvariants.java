@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.cbc;
+package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +19,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
 
-public class CBCInvariants extends AbstractCBCFormulaInputStage {
+public class SymbolicCheckingInvariants extends AbstractSymbolicCheckingFormulaInputStage {
 
 	@FXML
 	private ChoiceBox<String> cbOperations;
@@ -35,12 +35,12 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 	private ArrayList<String> events;
 	
 	@Inject
-	private CBCInvariants(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, 
-							final CBCFormulaHandler cbcHandler, final Injector injector, final ResourceBundle bundle) {
+	private SymbolicCheckingInvariants(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, 
+							final SymbolicCheckingFormulaHandler cbcHandler, final Injector injector, final ResourceBundle bundle) {
 		super(cbcHandler, currentProject, injector, bundle);
 		this.currentTrace = currentTrace;
 		this.events = new ArrayList<>();
-		stageManager.loadFXML(this, "cbc_invariants.fxml");
+		stageManager.loadFXML(this, "symbolic_checking_invariants.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
 
@@ -78,7 +78,7 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 		if (item == null) {
 			return;
 		}
-		cbcHandler.addFormula(item, item, CBCFormulaItem.CBCType.INVARIANT, checking);
+		symbolicCheckingHandler.addFormula(item, item, SymbolicCheckingFormulaItem.SymbolicCheckingType.INVARIANT, checking);
 		this.close();
 	}
 
@@ -89,28 +89,28 @@ public class CBCInvariants extends AbstractCBCFormulaInputStage {
 		if (code == null) {
 			return;
 		}
-		cbcHandler.checkInvariant(code);
+		symbolicCheckingHandler.checkInvariant(code);
 		this.close();
 	}
 	
 	@FXML
 	public void checkAllOperations() {
 		for(String event : events) {
-			cbcHandler.addFormula(event, event, CBCFormulaItem.CBCType.INVARIANT, true);
-			cbcHandler.checkInvariant(event);
+			symbolicCheckingHandler.addFormula(event, event, SymbolicCheckingFormulaItem.SymbolicCheckingType.INVARIANT, true);
+			symbolicCheckingHandler.checkInvariant(event);
 		}
 		this.close();
 	}
 	
 	@FXML
 	public void findRedundants() {
-		CBCFormulaItem item = new CBCFormulaItem("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", CBCFormulaItem.CBCType.FIND_REDUNDANT_INVARIANTS);
-		cbcHandler.addFormula(item, true);
-		cbcHandler.findRedundantInvariants(item);
+		SymbolicCheckingFormulaItem item = new SymbolicCheckingFormulaItem("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS);
+		symbolicCheckingHandler.addFormula(item, true);
+		symbolicCheckingHandler.findRedundantInvariants(item);
 		this.close();
 	}
 	
-	public void changeFormula(CBCFormulaItem item) {
+	public void changeFormula(SymbolicCheckingFormulaItem item) {
 		super.changeFormula(cbOperations, item, invisibles);
 	}
 	

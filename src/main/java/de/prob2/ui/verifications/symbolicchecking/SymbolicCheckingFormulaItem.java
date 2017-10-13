@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.cbc;
+package de.prob2.ui.verifications.symbolicchecking;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
@@ -7,20 +7,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CBCFormulaItem extends AbstractCheckableItem {
+public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
 	
-	public enum CBCType {
+	public enum SymbolicCheckingType {
 		INVARIANT,SEQUENCE,DEADLOCK, FIND_DEADLOCK, FIND_VALID_STATE, FIND_REDUNDANT_INVARIANTS, 
 		REFINEMENT, ASSERTIONS
 	}
 	
-	protected CBCType type;
+	protected SymbolicCheckingType type;
 	
 	private transient List<Trace> counterExamples;
 	
 	private transient Trace example;
 
-	public CBCFormulaItem(String name, String code, CBCType type) {
+	public SymbolicCheckingFormulaItem(String name, String code, SymbolicCheckingType type) {
 		super(name, type.name(), code);
 		this.type = type;
 		this.example = null;
@@ -53,10 +53,10 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 		if (obj == this) {
 			return true;
 		}
-		if (!(obj instanceof CBCFormulaItem)) {
+		if (!(obj instanceof SymbolicCheckingFormulaItem)) {
 			return false;
 		}
-		CBCFormulaItem otherItem = (CBCFormulaItem) obj;
+		SymbolicCheckingFormulaItem otherItem = (SymbolicCheckingFormulaItem) obj;
 		return otherItem.getName().equals(this.getName()) &&
 				otherItem.getCode().equals(this.getCode()) &&
 				otherItem.getType().equals(this.getType());
@@ -67,7 +67,7 @@ public class CBCFormulaItem extends AbstractCheckableItem {
 		return Objects.hash(name, code, type);
 	}
 	
-	public CBCType getType() {
+	public SymbolicCheckingType getType() {
 		return type;
 	}
 	

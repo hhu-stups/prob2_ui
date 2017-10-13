@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" fx:id="cbcChoice" title="%verifications.cbc.choice.title"
+<fx:root type="Stage" fx:id="cbcChoice" title="%verifications.symbolic.choice.title"
 		 resizable="false" xmlns:fx="http://javafx.com/fxml/1" width="600">
 	<fx:define>
 		<ToggleGroup fx:id ="tgChoice"></ToggleGroup>
@@ -16,24 +16,24 @@
 				<VBox spacing="10" AnchorPane.topAnchor="10.0"
 					AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0"
 					AnchorPane.rightAnchor="0.0">
-					<Label text="%verifications.cbc.choice.text">
+					<Label text="%verifications.symbolic.choice.text">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>
 					</Label>
 					<VBox spacing="15.0" styleClass="dark">
 						<RadioButton fx:id="rbInvariant"
-							text="%verifications.cbc.choice.invariant"
+							text="%verifications.symbolic.choice.invariant"
 							toggleGroup ="$tgChoice" selected="true"/>
 						<RadioButton fx:id="rbSequence"
-							text="%verifications.cbc.choice.sequence" 
+							text="%verifications.symbolic.choice.sequence" 
 							toggleGroup ="$tgChoice"/>
 						<RadioButton fx:id="rbDeadlock"
-							text="%verifications.cbc.choice.deadlock" 
+							text="%verifications.symbolic.choice.deadlock" 
 							toggleGroup ="$tgChoice"/>
 					</VBox>
 					<Button fx:id="btchoose" onAction="#choose"
-						text="%verifications.cbc.choice.choose">
+						text="%verifications.symbolic.choice.choose">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>

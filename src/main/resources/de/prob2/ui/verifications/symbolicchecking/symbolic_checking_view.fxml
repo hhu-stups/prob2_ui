@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.helpsystem.HelpButton?>
-<?import de.prob2.ui.verifications.cbc.CBCView?>
+<?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<fx:root stylesheets="@/prob.css" type="CBCView"
+<fx:root stylesheets="@/prob.css" type="SymbolicCheckingView"
 		 xmlns:fx="http://javafx.com/fxml/1">
 	<ScrollPane fitToHeight="true" fitToWidth="true"
 		AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -41,7 +41,7 @@
 						</VBox>
 						<VBox spacing="5.0" alignment="TOP_RIGHT">
 							<Button fx:id="addFormulaButton" disable="true" onAction="#addFormula"
-								styleClass="button-blue" text="Add CBC Formula">
+								styleClass="button-blue" text="Add Symbolic Checking Formula">
 							</Button>
 						</VBox>
 						<VBox.margin>
@@ -63,7 +63,7 @@
 								text="%verifications.columns.description" />
 						</columns>
 						<placeholder>
-							<Label text="%verifications.cbc.formula.noFormulas" />
+							<Label text="%verifications.symbolic.formula.noFormulas" />
 						</placeholder>
 					</TableView>
 				</VBox>

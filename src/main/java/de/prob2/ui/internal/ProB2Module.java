@@ -9,9 +9,7 @@ import com.google.inject.Provides;
 import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob.MainModule;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -39,14 +37,14 @@ import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.VerificationsView;
-import de.prob2.ui.verifications.cbc.CBCView;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+import de.prob2.ui.verifications.symbolic.SymbolicModelcheckingView;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.verifications.tracereplay.TraceReplayView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
-
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
@@ -73,7 +71,6 @@ public class ProB2Module extends AbstractModule {
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
 		
 		// Controllers
-		bind(CBCView.class);
 		bind(HistoryView.class);
 		bind(MainController.class);
 		bind(LTLFormulaChecker.class);
@@ -102,10 +99,12 @@ public class ProB2Module extends AbstractModule {
 		bind(StatsView.class);
 		bind(StatusBar.class);
 		bind(TraceReplayView.class);
+		bind(SymbolicModelcheckingView.class);
 		bind(VerificationsView.class);
 		bind(VerificationsTab.class);
 		bind(VisualisationView.class);
 		bind(StateVisualisationView.class);
+		bind(SymbolicCheckingView.class);
 	}
 
 	@Provides

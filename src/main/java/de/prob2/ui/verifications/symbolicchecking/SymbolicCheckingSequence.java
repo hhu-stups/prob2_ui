@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.cbc;
+package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.ResourceBundle;
 
@@ -13,15 +13,15 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 
-public class CBCSequence extends AbstractCBCFormulaInputStage {
+public class SymbolicCheckingSequence extends AbstractSymbolicCheckingFormulaInputStage {
 
 	@FXML
 	private TextField tfSequence;
 		
 	@Inject
-	private CBCSequence(final StageManager stageManager, final CBCFormulaHandler cbcHandler, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
+	private SymbolicCheckingSequence(final StageManager stageManager, final SymbolicCheckingFormulaHandler cbcHandler, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
 		super(cbcHandler, currentProject, injector, bundle);
-		stageManager.loadFXML(this, "cbc_sequence.fxml");
+		stageManager.loadFXML(this, "symbolic_checking_sequence.fxml");
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
 	
@@ -31,7 +31,7 @@ public class CBCSequence extends AbstractCBCFormulaInputStage {
 	}
 	
 	private void addFormula(boolean checking) {
-		cbcHandler.addFormula(tfSequence.getText(), tfSequence.getText(), CBCFormulaItem.CBCType.SEQUENCE,
+		symbolicCheckingHandler.addFormula(tfSequence.getText(), tfSequence.getText(), SymbolicCheckingFormulaItem.SymbolicCheckingType.SEQUENCE,
 								checking);
 		this.close();
 	}
@@ -39,11 +39,11 @@ public class CBCSequence extends AbstractCBCFormulaInputStage {
 	@FXML
 	public void checkFormula() {
 		addFormula(true);
-		cbcHandler.checkSequence(tfSequence.getText());
+		symbolicCheckingHandler.checkSequence(tfSequence.getText());
 		this.close();
 	}
 	
-	public void changeFormula(CBCFormulaItem item) {
+	public void changeFormula(SymbolicCheckingFormulaItem item) {
 		super.changeFormula(tfSequence, item, invisibles);
 	}
 
