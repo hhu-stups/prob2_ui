@@ -14,7 +14,7 @@
 			<HBox alignment="CENTER_LEFT">
 				<Button fx:id="checkButton" onAction="#checkMachine" mnemonicParsing="false" disable="true">
 					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="CHECK_CIRCLE_ALT"
+						<FontAwesomeIconView styleClass="icon-dark" glyphName="CHECK_CIRCLE_ALT"
 							size="15" />
 					</graphic>
 					<tooltip>
@@ -23,7 +23,7 @@
 				</Button>
 				<Button fx:id="cancelButton" mnemonicParsing="false" disable="true">
 					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="TIMES_CIRCLE_ALT"
+						<FontAwesomeIconView styleClass="icon-dark" glyphName="TIMES_CIRCLE_ALT"
 							size="15" />
 					</graphic>
 					<tooltip>

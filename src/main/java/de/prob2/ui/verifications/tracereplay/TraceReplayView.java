@@ -89,6 +89,8 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	private void replayTrace(ReplayTrace trace) {
+		trace.setStatus(Status.NOT_CHECKED);
+		
 		StateSpace stateSpace = injector.getInstance(CurrentTrace.class).getStateSpace();
 		Trace t = new Trace(stateSpace);
 
