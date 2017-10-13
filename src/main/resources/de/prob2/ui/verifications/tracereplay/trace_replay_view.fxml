@@ -12,7 +12,7 @@
 		<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 			AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0" spacing="2">
 			<HBox alignment="CENTER_LEFT">
-				<Button fx:id="checkButton" mnemonicParsing="false">
+				<Button fx:id="checkButton" onAction="#checkMachine" mnemonicParsing="false" disable="true">
 					<graphic>
 						<FontAwesomeIconView fill="#555560" glyphName="CHECK_CIRCLE_ALT"
 							size="15" />
@@ -21,7 +21,7 @@
 						<Tooltip text="%verifications.checkMachine" />
 					</tooltip>
 				</Button>
-				<Button fx:id="cancelButton" mnemonicParsing="false">
+				<Button fx:id="cancelButton" mnemonicParsing="false" disable="true">
 					<graphic>
 						<FontAwesomeIconView fill="#555560" glyphName="TIMES_CIRCLE_ALT"
 							size="15" />
@@ -34,7 +34,7 @@
 					<HelpButton fx:id="helpButton" />
 				</HBox>
 				<VBox.margin>
-					<Insets bottom="0.0" left="10.0" right="0.0" top="0.0" />
+					<Insets bottom="0.0" left="10.0" right="0.0" top="10.0" />
 				</VBox.margin>
 			</HBox>
 			<TableView fx:id="traceTableView" VBox.vgrow="ALWAYS">
