@@ -134,3 +134,12 @@ task fatJar(type: Jar) {
 	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 	with jar
 }
+
+task runHome(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+
+  main = mainClassName
+
+  // arguments to pass to the application
+  jvmArgs '-Dprob.home='+System.getenv("PROB_HOME")
+}
