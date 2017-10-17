@@ -27,12 +27,6 @@
 							<Button fx:id="checkMachineButton" 
 								text="%verifications.checkMachine" onAction="#checkMachine"
 								styleClass="button-blue" prefWidth="170.0"/>
-							<Button fx:id="checkRefinementButton" 
-								text="%verifications.checkRefinement" onAction="#checkRefinement"
-								styleClass="button-blue" prefWidth="170.0"/>
-							<Button fx:id="checkAssertionsButton" 
-								text="%verifications.checkAssertion" onAction="#checkAssertions"
-								styleClass="button-blue" prefWidth="170.0"/>
 						</VBox>
 						<VBox alignment="TOP_CENTER" HBox.hgrow="ALWAYS">
 							<Button fx:id="cancelButton" 

@@ -55,12 +55,6 @@ public class SymbolicCheckingView extends AnchorPane {
 	private Button checkMachineButton;
 	
 	@FXML
-	private Button checkRefinementButton;
-	
-	@FXML
-	private Button checkAssertionsButton;
-	
-	@FXML
 	private Button cancelButton;
 					
 	private final ResourceBundle bundle;
@@ -110,8 +104,6 @@ public class SymbolicCheckingView extends AnchorPane {
 	private void setBindings() {
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
 		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
-		checkRefinementButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
-		checkAssertionsButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
 		cancelButton.disableProperty().bind(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty());
 		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -193,20 +185,6 @@ public class SymbolicCheckingView extends AnchorPane {
 	}
 	
 	@FXML
-	public void checkRefinement() {
-		SymbolicCheckingFormulaItem item = new SymbolicCheckingFormulaItem("Refinement Checking", "Refinement Checking", SymbolicCheckingFormulaItem.SymbolicCheckingType.REFINEMENT);
-		symbolicCheckHandler.addFormula(item, true);
-		symbolicCheckHandler.checkRefinement(item);
-	}
-	
-	@FXML
-	public void checkAssertions() {
-		SymbolicCheckingFormulaItem item = new SymbolicCheckingFormulaItem("Assertion Checking", "Assertion Checking", SymbolicCheckingFormulaItem.SymbolicCheckingType.ASSERTIONS);
-		symbolicCheckHandler.addFormula(item, true);
-		symbolicCheckHandler.checkAssertions(item);
-	}
-	
-	@FXML
 	public synchronized void cancel() {
 		symbolicCheckHandler.interrupt();
 	}
@@ -244,16 +222,8 @@ public class SymbolicCheckingView extends AnchorPane {
 	
 	
 	private void openItem(SymbolicCheckingFormulaItem item) {
-		if(item.getType() == SymbolicCheckingFormulaItem.SymbolicCheckingType.INVARIANT) {
-			SymbolicCheckingInvariants cbcInvariants = injector.getInstance(SymbolicCheckingInvariants.class);
-			cbcInvariants.changeFormula(item);
-		} else if(item.getType() == SymbolicCheckingFormulaItem.SymbolicCheckingType.SEQUENCE) {
-			SymbolicCheckingSequence cbcSequence = injector.getInstance(SymbolicCheckingSequence.class);
-			cbcSequence.changeFormula(item);
-		} else {
-			SymbolicCheckingDeadlock cbcDeadlock = injector.getInstance(SymbolicCheckingDeadlock.class);
-			cbcDeadlock.changeFormula(item);
-		}
+		SymbolicCheckingFormulaInput formulaInput = injector.getInstance(SymbolicCheckingFormulaInput.class);
+		formulaInput.changeFormula(item);
 	}
 		
 }
