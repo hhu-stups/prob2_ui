@@ -33,6 +33,15 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	
 	private final CurrentProject currentProject;
 	
+	private static final String FIND_REDUNDANT_INVARIANTS = "FIND REDUNDANT INVARIANTS";
+	
+	private static final String FIND_DEADLOCK = "FIND DEADLOCK";
+	
+	private static final String ASSERTION_CHECKING = "Assertion Checking";
+	
+	private static final String REFINEMENT_CHECKING = "Refinement Checking";
+	
+			
 	@FXML
 	private Button btAdd;
 	
@@ -147,20 +156,11 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	}
 	
 	private void addFormula(boolean checking) {
-		String item = null;
-		GUIType guiType = injector.getInstance(SymbolicCheckingChoosingStage.class).getGUIType();
-		if(guiType == GUIType.CHOICE_BOX) {
-			item = cbOperations.getSelectionModel().getSelectedItem();
-		} else if(guiType == GUIType.TEXT_FIELD) {
-			item = tfFormula.getText();
-		}
-		if (item == null && guiType != GUIType.NONE) {
-			return;
-		}
 		CheckingType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
 		SymbolicCheckingFormulaItem formulaItem;
 		switch(checkingType) {
 			case INVARIANTS:
+				String item = cbOperations.getSelectionModel().getSelectedItem();
 				symbolicCheckingHandler.addFormula(item, item, SymbolicCheckingFormulaItem.SymbolicCheckingType.INVARIANT, checking);
 				break;
 			case DEADLOCK:
@@ -177,11 +177,11 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 				}
 				break;
 			case FIND_REDUNDANT_INVARIANTS:
-				formulaItem = new SymbolicCheckingFormulaItem("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS);
+				formulaItem = new SymbolicCheckingFormulaItem(FIND_REDUNDANT_INVARIANTS, FIND_REDUNDANT_INVARIANTS, SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS);
 				symbolicCheckingHandler.addFormula(formulaItem, true);
 				break;
 			case FIND_DEADLOCK:
-				symbolicCheckingHandler.addFormula("FIND DEADLOCK", "FIND DEADLOCK", SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_DEADLOCK, true);
+				symbolicCheckingHandler.addFormula(FIND_DEADLOCK, FIND_DEADLOCK, SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_DEADLOCK, true);
 				break;
 			case FIND_VALID_STATE:
 				formulaItem = new SymbolicCheckingFormulaItem(tfFormula.getText(), tfFormula.getText(), 
@@ -189,11 +189,11 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 				symbolicCheckingHandler.addFormula(formulaItem, true);
 				break;
 			case CHECK_ASSERTIONS:
-				formulaItem = new SymbolicCheckingFormulaItem("Assertion Checking", "Assertion Checking", SymbolicCheckingFormulaItem.SymbolicCheckingType.ASSERTIONS);
+				formulaItem = new SymbolicCheckingFormulaItem(ASSERTION_CHECKING, ASSERTION_CHECKING, SymbolicCheckingFormulaItem.SymbolicCheckingType.ASSERTIONS);
 				symbolicCheckingHandler.addFormula(formulaItem, true);
 				break;
 			case CHECK_REFINEMENT:
-				formulaItem = new SymbolicCheckingFormulaItem("Refinement Checking", "Refinement Checking", SymbolicCheckingFormulaItem.SymbolicCheckingType.REFINEMENT);
+				formulaItem = new SymbolicCheckingFormulaItem(REFINEMENT_CHECKING, REFINEMENT_CHECKING, SymbolicCheckingFormulaItem.SymbolicCheckingType.REFINEMENT);
 				symbolicCheckingHandler.addFormula(formulaItem, true);
 				break;
 			default:
@@ -204,22 +204,12 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	
 	@FXML
 	public void checkFormula() {
-		String item = null;
-		GUIType guiType = injector.getInstance(SymbolicCheckingChoosingStage.class).getGUIType();
-		if(guiType == GUIType.CHOICE_BOX) {
-			item = cbOperations.getSelectionModel().getSelectedItem();
-		} else if(guiType == GUIType.TEXT_FIELD) {
-			item = tfFormula.getText();
-		}
-		if (item == null && guiType != GUIType.NONE) {
-			return;
-		}
 		CheckingType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
 		SymbolicCheckingFormulaItem formulaItem;
 		switch(checkingType) {
 			case INVARIANTS:
 				addFormula(true);
-				symbolicCheckingHandler.checkInvariant(item);
+				symbolicCheckingHandler.checkInvariant(cbOperations.getSelectionModel().getSelectedItem());
 				break;
 			case DEADLOCK:
 				addFormula(true);
@@ -235,7 +225,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 				}
 				break;
 			case FIND_REDUNDANT_INVARIANTS:
-				formulaItem = new SymbolicCheckingFormulaItem("FIND REDUNDANT INVARIANTS", "FIND REDUNDANT INVARIANTS", SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS);
+				formulaItem = new SymbolicCheckingFormulaItem(FIND_REDUNDANT_INVARIANTS, FIND_REDUNDANT_INVARIANTS, SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS);
 				symbolicCheckingHandler.findRedundantInvariants(formulaItem);
 				break;
 			case FIND_DEADLOCK:
@@ -247,11 +237,11 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 				symbolicCheckingHandler.findValidState(formulaItem);
 				break;
 			case CHECK_ASSERTIONS:
-				formulaItem = new SymbolicCheckingFormulaItem("Assertion Checking", "Assertion Checking", SymbolicCheckingFormulaItem.SymbolicCheckingType.ASSERTIONS);
+				formulaItem = new SymbolicCheckingFormulaItem(ASSERTION_CHECKING, ASSERTION_CHECKING, SymbolicCheckingFormulaItem.SymbolicCheckingType.ASSERTIONS);
 				symbolicCheckingHandler.checkAssertions(formulaItem);
 				break;
 			case CHECK_REFINEMENT:
-				formulaItem = new SymbolicCheckingFormulaItem("Refinement Checking", "Refinement Checking", SymbolicCheckingFormulaItem.SymbolicCheckingType.REFINEMENT);
+				formulaItem = new SymbolicCheckingFormulaItem(REFINEMENT_CHECKING, REFINEMENT_CHECKING, SymbolicCheckingFormulaItem.SymbolicCheckingType.REFINEMENT);
 				symbolicCheckingHandler.checkRefinement(formulaItem);
 				break;
 			default:
