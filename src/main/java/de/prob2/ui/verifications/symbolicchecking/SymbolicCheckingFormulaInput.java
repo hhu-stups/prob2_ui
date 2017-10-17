@@ -28,7 +28,6 @@ import javafx.scene.layout.StackPane;
 @Singleton
 public class SymbolicCheckingFormulaInput extends StackPane {
 	
-
 	private final SymbolicCheckingFormulaHandler symbolicCheckingHandler;
 	
 	private final CurrentProject currentProject;
@@ -41,7 +40,6 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	
 	private static final String REFINEMENT_CHECKING = "Refinement Checking";
 	
-			
 	@FXML
 	private Button btAdd;
 	

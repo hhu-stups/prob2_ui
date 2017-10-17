@@ -40,6 +40,10 @@
 									    <SymbolicCheckingItem checkingType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
 									    <SymbolicCheckingItem checkingType="CHECK_REFINEMENT" guiType="NONE"/>
 									    <SymbolicCheckingItem checkingType="CHECK_ASSERTIONS" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="IC3" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="TINDUCTION" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="KINDUCTION" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="BMC" guiType="NONE"/>
 									 </FXCollections>
 								</items>
 				           </ChoiceBox>
