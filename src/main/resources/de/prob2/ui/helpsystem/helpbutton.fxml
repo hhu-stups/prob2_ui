@@ -5,7 +5,7 @@
 <?import javafx.scene.control.Tooltip?>
 <fx:root type="Button" onAction="#openHelp" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
     <graphic>
-        <FontAwesomeIconView fill="#555560" glyphName="QUESTION_CIRCLE"/>
+        <FontAwesomeIconView styleClass="icon-dark" glyphName="QUESTION_CIRCLE"/>
     </graphic>
     <tooltip>
         <Tooltip text="%menu.help" />

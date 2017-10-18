@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.cbc;
+package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,34 +31,28 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
 @Singleton
-public class CBCView extends AnchorPane {
+public class SymbolicCheckingView extends AnchorPane {
 	
 	@FXML
 	private HelpButton helpButton;
 		
 	@FXML
-	private TableView<CBCFormulaItem> tvFormula;
+	private TableView<SymbolicCheckingFormulaItem> tvFormula;
 	
 	@FXML
-	private TableColumn<CBCFormulaItem, FontAwesomeIconView> formulaStatusColumn;
+	private TableColumn<SymbolicCheckingFormulaItem, FontAwesomeIconView> formulaStatusColumn;
 	
 	@FXML
-	private TableColumn<CBCFormulaItem, String> formulaNameColumn;
+	private TableColumn<SymbolicCheckingFormulaItem, String> formulaNameColumn;
 	
 	@FXML
-	private TableColumn<CBCFormulaItem, String> formulaDescriptionColumn;
+	private TableColumn<SymbolicCheckingFormulaItem, String> formulaDescriptionColumn;
 	
 	@FXML
 	private Button addFormulaButton;
 	
 	@FXML
 	private Button checkMachineButton;
-	
-	@FXML
-	private Button checkRefinementButton;
-	
-	@FXML
-	private Button checkAssertionsButton;
 	
 	@FXML
 	private Button cancelButton;
@@ -71,17 +65,17 @@ public class CBCView extends AnchorPane {
 
 	private final Injector injector;
 	
-	private final CBCFormulaHandler cbcHandler;	
+	private final SymbolicCheckingFormulaHandler symbolicCheckHandler;	
 
 	@Inject
-	public CBCView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
-					final CurrentProject currentProject, final CBCFormulaHandler cbcHandler, final Injector injector) {
+	public SymbolicCheckingView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
+					final CurrentProject currentProject, final SymbolicCheckingFormulaHandler cbcHandler, final Injector injector) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.cbcHandler = cbcHandler;
+		this.symbolicCheckHandler = cbcHandler;
 		this.injector = injector;
-		stageManager.loadFXML(this, "cbc_view.fxml");
+		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
 	
 	@FXML
@@ -91,7 +85,7 @@ public class CBCView extends AnchorPane {
 		setContextMenu();
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
-				tvFormula.itemsProperty().bind(newValue.cbcFormulasProperty());
+				tvFormula.itemsProperty().bind(newValue.symbolicCheckingFormulasProperty());
 				tvFormula.refresh();
 			} else {
 				tvFormula.getItems().clear();
@@ -100,20 +94,18 @@ public class CBCView extends AnchorPane {
 		});
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().cbcFormulasProperty().emptyProperty().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().symbolicCheckingFormulasProperty().emptyProperty().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
 			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
 			}
 		});
 	}
 	
 	private void setBindings() {
-		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
-		checkRefinementButton.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
-		checkAssertionsButton.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
-		cancelButton.disableProperty().bind(cbcHandler.currentJobThreadsProperty().emptyProperty());
-		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(cbcHandler.currentJobThreadsProperty().emptyProperty().not()));
+		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
+		cancelButton.disableProperty().bind(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty());
+		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -123,33 +115,33 @@ public class CBCView extends AnchorPane {
 	private void setContextMenu() {
 		tvFormula.setRowFactory(table -> {
 			
-			final TableRow<CBCFormulaItem> row = new TableRow<>();
+			final TableRow<SymbolicCheckingFormulaItem> row = new TableRow<>();
 			
-			MenuItem check = new MenuItem(bundle.getString("verifications.cbc.menu.checkSeparately"));
+			MenuItem check = new MenuItem(bundle.getString("verifications.symbolic.menu.checkSeparately"));
 			check.setOnAction(e-> {
-				cbcHandler.checkItem(row.getItem());
-				cbcHandler.updateMachineStatus(currentProject.getCurrentMachine());
+				symbolicCheckHandler.checkItem(row.getItem());
+				symbolicCheckHandler.updateMachineStatus(currentProject.getCurrentMachine());
 			});
 			check.disableProperty().bind(row.emptyProperty());
 			
-			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.cbc.menu.showCounterExample"));
+			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolic.menu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);
 			
-			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.cbc.menu.showFoundState"));
+			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.symbolic.menu.showFoundState"));
 			showStateItem.setDisable(true);
 			
-			MenuItem removeItem = new MenuItem(bundle.getString("verifications.cbc.menu.remove"));
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.symbolic.menu.remove"));
 			removeItem.setOnAction(e -> removeFormula());
 			removeItem.disableProperty().bind(row.emptyProperty());
 			
-			MenuItem changeItem = new MenuItem(bundle.getString("verifications.cbc.menu.change"));
+			MenuItem changeItem = new MenuItem(bundle.getString("verifications.symbolic.menu.change"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
 			changeItem.setDisable(true);
 			
 			row.setOnMouseClicked(e-> {
-				List<CBCFormulaItem.CBCType> changeDisabled = Arrays.asList(CBCFormulaItem.CBCType.FIND_DEADLOCK, CBCFormulaItem.CBCType.REFINEMENT, CBCFormulaItem.CBCType.ASSERTIONS, CBCFormulaItem.CBCType.FIND_REDUNDANT_INVARIANTS);
+				List<SymbolicCheckingFormulaItem.SymbolicCheckingType> changeDisabled = Arrays.asList(SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_DEADLOCK, SymbolicCheckingFormulaItem.SymbolicCheckingType.REFINEMENT, SymbolicCheckingFormulaItem.SymbolicCheckingType.ASSERTIONS, SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS);
 				if(e.getButton() == MouseButton.SECONDARY) {
-					CBCFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+					SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 					if(row.emptyProperty().get() || item.getCounterExamples().isEmpty()) {
 						showCounterExampleItem.setDisable(true);
 					} else {
@@ -163,7 +155,7 @@ public class CBCView extends AnchorPane {
 						changeItem.setDisable(false);
 					}
 					
-					if(item.getType() == CBCFormulaItem.CBCType.FIND_VALID_STATE) {
+					if(item.getType() == SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_VALID_STATE) {
 						if(row.emptyProperty().get() || item.getExample() == null) {
 							showStateItem.setDisable(true);
 						} else {
@@ -181,40 +173,26 @@ public class CBCView extends AnchorPane {
 	
 	@FXML
 	public void addFormula() {
-		injector.getInstance(CBCChoosingStage.class).showAndWait();
+		injector.getInstance(SymbolicCheckingChoosingStage.class).showAndWait();
 	}
 	
 	@FXML
 	public void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
-		cbcHandler.checkMachine(machine);
-		cbcHandler.updateMachineStatus(machine);
+		symbolicCheckHandler.checkMachine(machine);
+		symbolicCheckHandler.updateMachineStatus(machine);
 		refresh();
 	}
 	
 	@FXML
-	public void checkRefinement() {
-		CBCFormulaItem item = new CBCFormulaItem("Refinement Checking", "Refinement Checking", CBCFormulaItem.CBCType.REFINEMENT);
-		cbcHandler.addFormula(item, true);
-		cbcHandler.checkRefinement(item);
-	}
-	
-	@FXML
-	public void checkAssertions() {
-		CBCFormulaItem item = new CBCFormulaItem("Assertion Checking", "Assertion Checking", CBCFormulaItem.CBCType.ASSERTIONS);
-		cbcHandler.addFormula(item, true);
-		cbcHandler.checkAssertions(item);
-	}
-	
-	@FXML
 	public synchronized void cancel() {
-		cbcHandler.interrupt();
+		symbolicCheckHandler.interrupt();
 	}
 	
 	private void removeFormula() {
 		Machine machine = currentProject.getCurrentMachine();
-		CBCFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-		machine.removeCBCFormula(item);
+		SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+		machine.removeSymbolicCheckingFormula(item);
 		updateProject();
 	}
 	
@@ -231,10 +209,10 @@ public class CBCView extends AnchorPane {
 	
 	private void showCounterExamples(Menu counterExampleItem) {
 		counterExampleItem.getItems().clear();
-		CBCFormulaItem currentItem = tvFormula.getSelectionModel().getSelectedItem();
+		SymbolicCheckingFormulaItem currentItem = tvFormula.getSelectionModel().getSelectedItem();
 		List<Trace> counterExamples = currentItem.getCounterExamples();
 		for(int i = 0; i < counterExamples.size(); i++) {
-			MenuItem traceItem = new MenuItem(String.format(bundle.getString("verifications.cbc.menu.showCounterExample.counterExample"), i + 1));
+			MenuItem traceItem = new MenuItem(String.format(bundle.getString("verifications.symbolic.menu.showCounterExample.counterExample"), i + 1));
 			final int index = i;
 			traceItem.setOnAction(e-> currentTrace.set((counterExamples.get(index))));
 			counterExampleItem.getItems().add(traceItem);
@@ -243,17 +221,9 @@ public class CBCView extends AnchorPane {
 	}
 	
 	
-	private void openItem(CBCFormulaItem item) {
-		if(item.getType() == CBCFormulaItem.CBCType.INVARIANT) {
-			CBCInvariants cbcInvariants = injector.getInstance(CBCInvariants.class);
-			cbcInvariants.changeFormula(item);
-		} else if(item.getType() == CBCFormulaItem.CBCType.SEQUENCE) {
-			CBCSequence cbcSequence = injector.getInstance(CBCSequence.class);
-			cbcSequence.changeFormula(item);
-		} else {
-			CBCDeadlock cbcDeadlock = injector.getInstance(CBCDeadlock.class);
-			cbcDeadlock.changeFormula(item);
-		}
+	private void openItem(SymbolicCheckingFormulaItem item) {
+		SymbolicCheckingFormulaInput formulaInput = injector.getInstance(SymbolicCheckingFormulaInput.class);
+		formulaInput.changeFormula(item);
 	}
 		
 }

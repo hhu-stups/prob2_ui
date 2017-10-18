@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import javafx.collections.*?>
+<?import java.lang.String?>
+<?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaInput?>
+<?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingItem?>
+
+<fx:root type="Stage" fx:id="cbcChoice" title="%verifications.symbolic.choice.title"
+		 resizable="false" xmlns:fx="http://javafx.com/fxml/1" width="600">
+	<scene>
+		<Scene fill="TRANSPARENT">
+			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
+				<VBox spacing="10" AnchorPane.topAnchor="10.0"
+					AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0"
+					AnchorPane.rightAnchor="0.0">
+					<Label text="%verifications.symbolic.choice.text">
+						<VBox.margin>
+							<Insets left="10" right="10" />
+						</VBox.margin>
+					</Label>
+					<HBox alignment="CENTER" prefHeight="47.0" prefWidth="200.0">
+				  		<VBox.margin>
+							<Insets top="30"/>
+						</VBox.margin>
+				        <children>
+				           <ChoiceBox fx:id="cbChoice" prefWidth="250.0">
+				           		<items>
+									<FXCollections fx:factory="observableArrayList">
+										<SymbolicCheckingItem checkingType="SEQUENCE" guiType="TEXT_FIELD"/>
+									    <SymbolicCheckingItem checkingType="INVARIANTS" guiType="CHOICE_BOX"/>
+									    <SymbolicCheckingItem checkingType="DEADLOCK" guiType="TEXT_FIELD"/>
+									    <SymbolicCheckingItem checkingType="FIND_DEADLOCK" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="FIND_VALID_STATE" guiType="TEXT_FIELD"/>
+									    <SymbolicCheckingItem checkingType="CHECK_ALL_OPERATIONS" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="CHECK_REFINEMENT" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="CHECK_ASSERTIONS" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="IC3" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="TINDUCTION" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="KINDUCTION" guiType="NONE"/>
+									    <SymbolicCheckingItem checkingType="BMC" guiType="NONE"/>
+									 </FXCollections>
+								</items>
+				           </ChoiceBox>
+				        </children>
+				    </HBox>
+				    <SymbolicCheckingFormulaInput fx:id="formulaInput"/>
+				</VBox>
+			</AnchorPane>
+		</Scene>
+	</scene>
+</fx:root>

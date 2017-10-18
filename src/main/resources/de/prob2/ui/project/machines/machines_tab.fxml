@@ -20,7 +20,7 @@
 				<Button fx:id="addMachineButton" contentDisplay="GRAPHIC_ONLY"
 					AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" onAction="#addMachine">
 					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE" />
+						<FontAwesomeIconView styleClass="icon-dark" glyphName="PLUS_CIRCLE" />
 					</graphic>
 				</Button>
 			</AnchorPane>

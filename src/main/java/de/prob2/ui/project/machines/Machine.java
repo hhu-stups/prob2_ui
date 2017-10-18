@@ -20,10 +20,10 @@ import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.verifications.cbc.CBCFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -43,6 +43,7 @@ public class Machine {
 		EVENTB(Api::eventb_load, new String[] {"*.eventb", "*.bum", "*.buc"}),
 		CSP(Api::csp_load, new String[] {"*.csp", "*.cspm"}),
 		TLA(Api::tla_load, new String[] {"*.tla"}),
+		BRULES(Api::brules_load, new String[] {"*.rmch"} ),
 		;
 		
 		private static final Map<String, Machine.Type> extensionToTypeMap;
@@ -85,7 +86,7 @@ public class Machine {
 	}
 	
 	protected transient FontAwesomeIconView ltlstatus;
-	protected transient FontAwesomeIconView cbcstatus;
+	protected transient FontAwesomeIconView symboliccheckingstatus;
 	protected transient FontAwesomeIconView modelcheckingstatus;
 	private String name;
 	private String description;
@@ -93,21 +94,21 @@ public class Machine {
 	private Machine.Type type;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
-	private ListProperty<CBCFormulaItem> cbcFormulas;
+	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
 	private ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
 	private transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
 		initializeLTLStatus();
-		initializeCBCStatus();
+		initializeSymbolicCheckingStatus();
 		this.name = name;
 		this.description = description;
 		this.location = location.toString();
 		this.type = type;
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
-		this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
+		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
 	}
 	
@@ -118,9 +119,9 @@ public class Machine {
 	
 	public void initialize() {
 		initializeLTLStatus();
-		initializeCBCStatus();
+		initializeSymbolicCheckingStatus();
 		initializeModelcheckingStatus();
-		for(CBCFormulaItem item : cbcFormulas) {
+		for(SymbolicCheckingFormulaItem item : symbolicCheckingFormulas) {
 			item.initializeCounterExamples();
 		}
 	}
@@ -155,11 +156,11 @@ public class Machine {
 		patternManager = new PatternManager();
 	}
 	
-	public void initializeCBCStatus() {
-		this.cbcstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
-		this.cbcstatus.setFill(Color.BLUE);
-		if (cbcFormulas != null) {
-			for (CBCFormulaItem item : cbcFormulas) {
+	public void initializeSymbolicCheckingStatus() {
+		this.symboliccheckingstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		this.symboliccheckingstatus.setFill(Color.BLUE);
+		if (symbolicCheckingFormulas != null) {
+			for (SymbolicCheckingFormulaItem item : symbolicCheckingFormulas) {
 				item.initializeStatus();
 			}
 		}
@@ -179,8 +180,8 @@ public class Machine {
 		return ltlstatus;
 	}
 	
-	public FontAwesomeIconView getCBCStatus() {
-		return cbcstatus;
+	public FontAwesomeIconView getSymbolicCheckingStatus() {
+		return symboliccheckingstatus;
 	}
 	
 	public FontAwesomeIconView getModelcheckStatus() {
@@ -218,16 +219,16 @@ public class Machine {
 		this.ltlstatus = icon;
 	}
 	
-	public void setCBCCheckedSuccessful() {
+	public void setSymbolicCheckedSuccessful() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
 		icon.setFill(Color.GREEN);
-		this.cbcstatus = icon;
+		this.symboliccheckingstatus = icon;
 	}
 
-	public void setCBCCheckedFailed() {
+	public void setSymbolicCheckedFailed() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
 		icon.setFill(Color.RED);
-		this.cbcstatus = icon;
+		this.symboliccheckingstatus = icon;
 	}
 	
 	public void setModelcheckingCheckedSuccessful() {
@@ -278,21 +279,21 @@ public class Machine {
 		this.changed.set(true);
 	}
 	
-	public ListProperty<CBCFormulaItem> cbcFormulasProperty() {
-		return cbcFormulas;
+	public ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulasProperty() {
+		return symbolicCheckingFormulas;
 	}
 	
-	public List<CBCFormulaItem> getCBCFormulas() {
-		return cbcFormulas.get();
+	public List<SymbolicCheckingFormulaItem> getSymbolicCheckingFormulas() {
+		return symbolicCheckingFormulas.get();
 	}
 	
-	public void addCBCFormula(CBCFormulaItem formula) {
-		cbcFormulas.add(formula);
+	public void addSymbolicCheckingFormula(SymbolicCheckingFormulaItem formula) {
+		symbolicCheckingFormulas.add(formula);
 		this.changed.set(true);
 	}
 	
-	public void removeCBCFormula(CBCFormulaItem formula) {
-		cbcFormulas.remove(formula);
+	public void removeSymbolicCheckingFormula(SymbolicCheckingFormulaItem formula) {
+		symbolicCheckingFormulas.remove(formula);
 		this.changed.set(true);
 	}
 	
@@ -306,16 +307,12 @@ public class Machine {
 	
 	public void addModelcheckingItem(ModelCheckingItem item) {
 		modelcheckingItems.add(item);
-		Platform.runLater(() -> {
-			this.changed.set(true);
-		});
+		Platform.runLater(() -> this.changed.set(true));
 	}
 	
 	public void removeModelcheckingItem(ModelCheckingItem item) {
 		modelcheckingItems.remove(item);
-		Platform.runLater(() -> {
-			this.changed.set(true);
-		});
+		Platform.runLater(() -> this.changed.set(true));
 	}
 	
 		
@@ -329,8 +326,8 @@ public class Machine {
 		if(ltlPatterns == null) {
 			this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		}
-		if(cbcFormulas == null) {
-			this.cbcFormulas = new SimpleListProperty<>(this, "cbcFormulas", FXCollections.observableArrayList());
+		if(symbolicCheckingFormulas == null) {
+			this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
 		}
 		if(modelcheckingItems == null) {
 			this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());

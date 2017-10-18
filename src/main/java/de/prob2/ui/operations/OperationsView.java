@@ -295,9 +295,12 @@ public final class OperationsView extends AnchorPane {
 		// So we look at the values of all constants/variables in the
 		// transition's destination state.
 		final List<IEvalElement> formulas = new ArrayList<>();
-		for (final AbstractFormulaElement c : trace.getStateSpace().getMainComponent().getChildrenOfType(type)) {
-			formulas.add(c.getFormula());
+		if(trace.getStateSpace().getMainComponent() != null){
+			for (final AbstractFormulaElement c : trace.getStateSpace().getMainComponent().getChildrenOfType(type)) {
+				formulas.add(c.getFormula());
+			}
 		}
+
 
 		final List<String> params = new ArrayList<>();
 		final List<AbstractEvalResult> results = transition.getDestination().eval(formulas);

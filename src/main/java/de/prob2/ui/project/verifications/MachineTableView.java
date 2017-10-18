@@ -20,7 +20,7 @@ public class MachineTableView extends TableView<Machine> {
 	private TableColumn<Machine, FontAwesomeIconView> machineLTLColumn;
 	
 	@FXML
-	private TableColumn<Machine, FontAwesomeIconView> machineCBCColumn;
+	private TableColumn<Machine, FontAwesomeIconView> machineSymbolicColumn;
 	
 	@FXML
 	private TableColumn<Machine, FontAwesomeIconView> machineModelcheckColumn;
@@ -39,7 +39,7 @@ public class MachineTableView extends TableView<Machine> {
 	@FXML
 	public void initialize() {
 		machineLTLColumn.setCellValueFactory(new PropertyValueFactory<>("LTLStatus"));
-		machineCBCColumn.setCellValueFactory(new PropertyValueFactory<>("CBCStatus"));
+		machineSymbolicColumn.setCellValueFactory(new PropertyValueFactory<>("SymbolicCheckingStatus"));
 		machineModelcheckColumn.setCellValueFactory(new PropertyValueFactory<>("ModelcheckStatus"));
 		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		this.itemsProperty().bind(currentProject.machinesProperty());

@@ -2,7 +2,7 @@ package de.prob2.ui.verifications;
 
 public enum CheckingType {
 	LTL("verifications.checkingType.ltl"),
-	CBC("verifications.checkingType.cbc"),
+	SYMBOLIC("verifications.checkingType.symbolic"),
 	;
 	
 	private final String key;

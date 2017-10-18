@@ -12,8 +12,8 @@
 			prefWidth="120.0" text="%project.machines.dialog.title" />
 		<TableColumn fx:id="machineLTLColumn" minWidth="60.0"
 			maxWidth="60.0" prefWidth="60.0" text="%verifications.columns.ltlstatus" />
-		<TableColumn fx:id="machineCBCColumn" minWidth="60.0"
-			maxWidth="60.0" prefWidth="60.0" text="%verifications.columns.cbcstatus" />
+		<TableColumn fx:id="machineSymbolicColumn" minWidth="150.0"
+			maxWidth="150.0" prefWidth="150.0" text="%verifications.columns.symbolicstatus" />
 		<TableColumn fx:id="machineModelcheckColumn" minWidth="120.0"
 			maxWidth="120.0" prefWidth="120.0" text="%verifications.columns.modelcheckstatus" />
 	</columns>
