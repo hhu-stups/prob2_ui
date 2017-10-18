@@ -23,13 +23,14 @@ public class HelpTreeItem extends TreeItem<String>{
         super(file.getName());
         this.file = file;
         if (file.isFile()) {
-            String text = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+            /*String text = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
             text = text.replaceAll("\\s+", " ");
             Pattern p = Pattern.compile("<title>(.*?)</title>");
             Matcher m = p.matcher(text);
             while (m.find()) {
                 this.setValue(m.group(1));
-            }
+            }*/
+            this.setValue(file.getName().replace(".md.html",""));
         } else {
             this.setValue(this.getValue().replace(File.separator,""));
         }
@@ -62,7 +63,7 @@ public class HelpTreeItem extends TreeItem<String>{
         if (f != null && f.isDirectory()) {
             ObservableList<TreeItem<String>> children = FXCollections.observableArrayList();
             for (File child : f.listFiles()) {
-                if ((child.isDirectory() && !child.getName().contains("screenshots"))||child.getName().contains(".htm")) {
+                if ((child.isDirectory() && !child.getName().contains("screenshots"))||child.getName().contains(".md.html")) {
                     children.add(createNode(child));
                 }
             }

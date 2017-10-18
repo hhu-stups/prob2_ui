@@ -112,7 +112,7 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("HelpMain.html");
+		helpButton.setHelpContent("Verification.md.html");
 		setOnItemClicked();
 		setContextMenus();
 		setBindings();

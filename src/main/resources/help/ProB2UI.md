@@ -9,7 +9,7 @@ By default the main window is split into three vertical panes (see below).
 	* [The Verification view](Verification.md)
 	* [The Statistics view](Statistics.md)
 
-![ProB2 JavaFX UI Overview](../screenshots/Overview.png)
+![ProB2 JavaFX UI Overview](screenshots/Overview.png)
 
 ## The ProB2 JavaFX Main Menu Bar
 The menu bar contains the various commands to access the features of ProB. It includes the menus

@@ -255,7 +255,7 @@ public final class OperationsView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("HelpMain.html");
+		helpButton.setHelpContent("ProB2UI.md.html");
 		opsListView.setCellFactory(lv -> new OperationsCell());
 
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());

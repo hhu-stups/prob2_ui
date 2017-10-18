@@ -241,7 +241,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("HelpMain.html");
+		helpButton.setHelpContent("Verification.md.html");
 		showStats(new ModelCheckStats(stageManager, this, statsView, injector));
 		setBindings();
 		setListeners();
