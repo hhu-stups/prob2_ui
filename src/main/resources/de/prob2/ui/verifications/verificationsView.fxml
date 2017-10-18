@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView?>
-<?import de.prob2.ui.verifications.symbolic.SymbolicModelcheckingView?>
 <?import de.prob2.ui.verifications.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.verifications.ltl.LTLView?>
 <?import de.prob2.ui.verifications.tracereplay.TraceReplayView?>
@@ -27,11 +26,6 @@
 			<Tab fx:id="tabSymbolic" id="symbolic" text="%verification.tabs.symbolic.title">
 				<content>
 					<SymbolicCheckingView />
-				</content>
-			</Tab>
-			<Tab fx:id="tabSymbolic1" id="symbolic1" text="Symbolic Modelchecking">
-				<content>
-					<SymbolicModelcheckingView />
 				</content>
 			</Tab>
 			<Tab fx:id="tabTraceReplay" text="%verification.tabs.tracereplay.title">

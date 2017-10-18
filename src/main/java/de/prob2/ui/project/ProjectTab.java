@@ -39,7 +39,7 @@ public class ProjectTab extends Tab {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("HelpMain.html");
+		helpButton.setHelpContent("Project.md.html");
 		applyButton.managedProperty().bind(projectDescriptionTextArea.managedProperty());
 		applyButton.visibleProperty().bind(projectDescriptionTextArea.visibleProperty());
 		projectDescriptionText.visibleProperty().bind(projectDescriptionTextArea.visibleProperty().not());

@@ -1,19 +1,32 @@
 package de.prob2.ui.persistence;
 
+import java.lang.ref.Reference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
+
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
-
-import java.lang.ref.Reference;
-import java.util.*;
 
 @Singleton
 public class UIState {
 	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList("History", "Operations", "Model Check", "Statistics", "Animations"));
 	
+	private final ObjectProperty<Locale> localeOverride;
 	private String guiState;
 	private final Set<String> savedVisibleStages;
 	private final Map<String, BoundingBox> savedStageBoxes;
@@ -29,6 +42,7 @@ public class UIState {
 		
 	@Inject
 	public UIState() {
+		this.localeOverride = new SimpleObjectProperty<>(this, "localeOverride", null);
 		this.guiState = "main.fxml";
 		this.savedVisibleStages = new LinkedHashSet<>();
 		this.savedStageBoxes = new LinkedHashMap<>();
@@ -37,6 +51,18 @@ public class UIState {
 		this.expandedTitledPanes = new ArrayList<>();
 		this.statesViewColumnsWidth = new double[3];
 		this.statesViewColumnsOrder = new String[3];
+	}
+	
+	public ObjectProperty<Locale> localeOverrideProperty() {
+		return this.localeOverride;
+	}
+	
+	public Locale getLocaleOverride() {
+		return this.localeOverrideProperty().get();
+	}
+	
+	public void setLocaleOverride(final Locale localeOverride) {
+		this.localeOverrideProperty().set(localeOverride);
 	}
 	
 	public void setGuiState(String guiState) {

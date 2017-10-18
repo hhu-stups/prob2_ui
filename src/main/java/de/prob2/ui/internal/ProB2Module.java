@@ -40,7 +40,7 @@ import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
-import de.prob2.ui.verifications.symbolic.SymbolicModelcheckingView;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaInput;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.verifications.tracereplay.TraceReplayView;
 import de.prob2.ui.visualisation.StateVisualisationView;
@@ -99,12 +99,12 @@ public class ProB2Module extends AbstractModule {
 		bind(StatsView.class);
 		bind(StatusBar.class);
 		bind(TraceReplayView.class);
-		bind(SymbolicModelcheckingView.class);
 		bind(VerificationsView.class);
 		bind(VerificationsTab.class);
 		bind(VisualisationView.class);
 		bind(StateVisualisationView.class);
 		bind(SymbolicCheckingView.class);
+		bind(SymbolicCheckingFormulaInput.class);
 	}
 
 	@Provides

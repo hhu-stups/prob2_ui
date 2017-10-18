@@ -38,7 +38,7 @@ public class RunconfigurationsTab extends Tab {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("HelpMain.html");
+		helpButton.setHelpContent("Project.md.html");
 		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
 			if (to) {
 				runconfigsPlaceholder.setText(bundle.getString("project.runconfigurations.tab.addMachinesFirst"));

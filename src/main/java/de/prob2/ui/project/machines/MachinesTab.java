@@ -61,7 +61,7 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("HelpMain.html");
+		helpButton.setHelpContent("Project.md.html");
 		noMachinesStack.managedProperty().bind(currentProject.machinesProperty().emptyProperty());
 		noMachinesStack.visibleProperty().bind(currentProject.machinesProperty().emptyProperty());
 

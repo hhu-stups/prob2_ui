@@ -1,5 +1,24 @@
 package de.prob2.ui.config;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
@@ -7,6 +26,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.Main;
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.Console;
@@ -23,54 +43,58 @@ import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.verifications.VerificationsView;
+
 import javafx.geometry.BoundingBox;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @Singleton
-@SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
 public final class Config {
-	private static final class ConfigData {
-		private int maxRecentProjects;
-		private List<String> recentProjects;
-		private Console.ConfigData groovyConsoleSettings;
-		private Console.ConfigData bConsoleSettings;
-		private String guiState;
-		private List<String> visibleStages;
-		private Map<String, double[]> stageBoxes;
-		private List<String> groovyObjectTabs;
-		private String currentPreference;
-		private String currentMainTab;
-		private String currentVerificationTab;
-		private List<String> expandedTitledPanes;
-		private String defaultProjectLocation;
-		private double[] horizontalDividerPositions;
-		private double[] verticalDividerPositions;
-		private double[] statesViewColumnsWidth;
-		private String[] statesViewColumnsOrder;
-		private OperationsView.SortMode operationsSortMode;
-		private boolean operationsShowNotEnabled;
-		private Map<String, String> globalPreferences;
+	/**
+	 * A subset of the full {@link ConfigData}, which is used to load parts of the config before the injector is set up. This is needed to apply the locale override for example.
+	 */
+	private static class BasicConfigData {
+		Locale localeOverride;
+		
+		private BasicConfigData() {}
+	}
+	
+	/*
+	 * The full set of config settings, used when the injector is available.
+	 */
+	private static final class ConfigData extends BasicConfigData {
+		int maxRecentProjects;
+		List<String> recentProjects;
+		Console.ConfigData groovyConsoleSettings;
+		Console.ConfigData bConsoleSettings;
+		String guiState;
+		List<String> visibleStages;
+		Map<String, double[]> stageBoxes;
+		List<String> groovyObjectTabs;
+		String currentPreference;
+		String currentMainTab;
+		String currentVerificationTab;
+		List<String> expandedTitledPanes;
+		String defaultProjectLocation;
+		double[] horizontalDividerPositions;
+		double[] verticalDividerPositions;
+		double[] statesViewColumnsWidth;
+		String[] statesViewColumnsOrder;
+		OperationsView.SortMode operationsSortMode;
+		boolean operationsShowNotEnabled;
+		Map<String, String> globalPreferences;
 
-		private ConfigData() {
-		}
+		private ConfigData() {}
 	}
 
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private static final File LOCATION = new File(
 			Main.getProBDirectory() + File.separator + "prob2ui" + File.separator + "config.json");
 
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
-	private final Gson gson;
 	private final RecentProjects recentProjects;
 	private final ConfigData defaultData;
 	private final GroovyConsole groovyConsole;
@@ -93,7 +117,6 @@ public final class Config {
 		final RuntimeOptions runtimeOptions,
 		final StopActions stopActions
 	) {
-		this.gson = new GsonBuilder().setPrettyPrinting().create();
 		this.recentProjects = recentProjects;
 		this.uiState = uiState;
 		this.groovyConsole = groovyConsole;
@@ -103,9 +126,11 @@ public final class Config {
 		this.globalPreferences = globalPreferences;
 		this.runtimeOptions = runtimeOptions;
 
-		try (final InputStream is = Config.class.getResourceAsStream("default.json");
-				final Reader defaultReader = new InputStreamReader(is, CONFIG_CHARSET)) {
-			this.defaultData = gson.fromJson(defaultReader, ConfigData.class);
+		try (
+			final InputStream is = Config.class.getResourceAsStream("default.json");
+			final Reader defaultReader = new InputStreamReader(is, CONFIG_CHARSET)
+		) {
+			this.defaultData = GSON.fromJson(defaultReader, ConfigData.class);
 		} catch (FileNotFoundException exc) {
 			throw new IllegalStateException("Default config file not found", exc);
 		} catch (IOException exc) {
@@ -119,6 +144,35 @@ public final class Config {
 		this.load();
 		
 		stopActions.add(this::save);
+	}
+	
+	/**
+	 * Load basic settings from the config file. This method is static so it can be called before all of {@link Config}'s dependencies are available.
+	 *
+	 * @return basic settings from the config file
+	 */
+	private static BasicConfigData loadBasicConfig() {
+		try (
+			final InputStream is = new FileInputStream(LOCATION);
+			final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
+		) {
+			return GSON.fromJson(reader, BasicConfigData.class);
+		} catch (FileNotFoundException exc) {
+			logger.info("Config file not found, while loading basic config, loading default settings", exc);
+			return new BasicConfigData();
+		} catch (IOException exc) {
+			logger.warn("Failed to open config file while loading basic config", exc);
+			return new BasicConfigData();
+		}
+	}
+	
+	/**
+	 * Get the locale override from the config file. This method is static so it can be called before all of {@link Config}'s dependencies are available.
+	 *
+	 * @return the locale override
+	 */
+	public static Locale getLocaleOverride() {
+		return loadBasicConfig().localeOverride;
 	}
 
 	private void replaceMissingWithDefaults(final ConfigData configData) {
@@ -197,7 +251,7 @@ public final class Config {
 				final InputStream is = new FileInputStream(LOCATION);
 				final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
 			) {
-				configData = gson.fromJson(reader, ConfigData.class);
+				configData = GSON.fromJson(reader, ConfigData.class);
 			} catch (FileNotFoundException exc) {
 				logger.info("Config file not found, loading default settings", exc);
 				configData = this.defaultData;
@@ -215,6 +269,8 @@ public final class Config {
 		}
 		
 		this.replaceMissingWithDefaults(configData);
+
+		this.uiState.setLocaleOverride(configData.localeOverride);
 
 		this.recentProjects.setMaximum(configData.maxRecentProjects);
 		this.recentProjects.setAll(configData.recentProjects);
@@ -264,6 +320,7 @@ public final class Config {
 		
 		uiState.updateSavedStageBoxes();
 		final ConfigData configData = new ConfigData();
+		configData.localeOverride = this.uiState.getLocaleOverride();
 		configData.guiState = this.uiState.getGuiState();
 		configData.visibleStages = new ArrayList<>(this.uiState.getSavedVisibleStages());
 		configData.stageBoxes = new HashMap<>();
@@ -299,9 +356,11 @@ public final class Config {
 		
 		configData.globalPreferences = new HashMap<>(this.globalPreferences);
 
-		try (final OutputStream os = new FileOutputStream(LOCATION);
-				final Writer writer = new OutputStreamWriter(os, CONFIG_CHARSET)) {
-			gson.toJson(configData, writer);
+		try (
+			final OutputStream os = new FileOutputStream(LOCATION);
+			final Writer writer = new OutputStreamWriter(os, CONFIG_CHARSET)
+		) {
+			GSON.toJson(configData, writer);
 		} catch (FileNotFoundException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {

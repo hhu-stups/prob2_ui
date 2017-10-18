@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -18,6 +19,7 @@ import de.prob.scripting.ModelTranslationError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.persistence.TabPersistenceHandler;
+import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
@@ -28,6 +30,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -35,6 +38,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +46,17 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public final class PreferencesStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesStage.class);
+	// The locales to show in the language selection menu. This needs to be updated when new translations are added.
+	private static final Locale[] SUPPORTED_LOCALES = {
+		null, // system default
+		Locale.ENGLISH,
+		Locale.FRENCH,
+		Locale.GERMAN,
+	};
 
 	@FXML private Spinner<Integer> recentProjectsCountSpinner;
 	@FXML private TextField defaultLocationField;
+	@FXML private ChoiceBox<Locale> localeOverrideBox;
 	@FXML private PreferencesView globalPrefsView;
 	@FXML private Button undoButton;
 	@FXML private Button resetButton;
@@ -59,6 +71,7 @@ public final class PreferencesStage extends Stage {
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
+	private final UIState uiState;
 	private final TabPersistenceHandler tabPersistenceHandler;
 
 	@Inject
@@ -70,7 +83,8 @@ public final class PreferencesStage extends Stage {
 		final RecentProjects recentProjects,
 		final StageManager stageManager,
 		final ResourceBundle bundle,
-		final CurrentProject currentProject
+		final CurrentProject currentProject,
+		final UIState uiState
 	) {
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
@@ -80,6 +94,7 @@ public final class PreferencesStage extends Stage {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
+		this.uiState = uiState;
 
 		stageManager.loadFXML(this, "preferences_stage.fxml", this.getClass().getName());
 		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
@@ -100,6 +115,20 @@ public final class PreferencesStage extends Stage {
 		
 		defaultLocationField.setText(this.currentProject.getDefaultLocation().toString());
 		defaultLocationField.textProperty().addListener((observable, from, to) -> this.currentProject.setDefaultLocation(Paths.get(to)));
+
+		localeOverrideBox.valueProperty().bindBidirectional(uiState.localeOverrideProperty());
+		localeOverrideBox.setConverter(new StringConverter<Locale>() {
+			@Override
+			public String toString(Locale object) {
+				return object == null ? "System Default" : object.getDisplayName(object);
+			}
+			
+			@Override
+			public Locale fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String to Locale not supported");
+			}
+		});
+		localeOverrideBox.getItems().setAll(SUPPORTED_LOCALES);
 
 		// Global Preferences
 		
