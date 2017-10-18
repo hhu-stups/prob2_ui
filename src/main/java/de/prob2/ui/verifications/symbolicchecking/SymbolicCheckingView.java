@@ -139,7 +139,15 @@ public class SymbolicCheckingView extends AnchorPane {
 			changeItem.setDisable(true);
 			
 			row.setOnMouseClicked(e-> {
-				List<SymbolicCheckingFormulaItem.SymbolicCheckingType> changeDisabled = Arrays.asList(SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_DEADLOCK, SymbolicCheckingFormulaItem.SymbolicCheckingType.REFINEMENT, SymbolicCheckingFormulaItem.SymbolicCheckingType.ASSERTIONS, SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS);
+				List<SymbolicCheckingType> changeDisabled = Arrays.asList(
+							SymbolicCheckingType.FIND_DEADLOCK, 
+							SymbolicCheckingType.REFINEMENT, 
+							SymbolicCheckingType.ASSERTIONS, 
+							SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS,
+							SymbolicCheckingType.BMC,
+							SymbolicCheckingType.IC3,
+							SymbolicCheckingType.KINDUCTION,
+							SymbolicCheckingType.TINDUCTION);
 				if(e.getButton() == MouseButton.SECONDARY) {
 					SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 					if(row.emptyProperty().get() || item.getCounterExamples().isEmpty()) {
@@ -155,7 +163,7 @@ public class SymbolicCheckingView extends AnchorPane {
 						changeItem.setDisable(false);
 					}
 					
-					if(item.getType() == SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_VALID_STATE) {
+					if(item != null && item.getType() == SymbolicCheckingType.FIND_VALID_STATE) {
 						if(row.emptyProperty().get() || item.getExample() == null) {
 							showStateItem.setDisable(true);
 						} else {

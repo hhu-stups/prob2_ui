@@ -12,6 +12,7 @@ import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
+import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
@@ -154,6 +155,19 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 			showCheckingResult(item, bundle.getString("verifications.symbolic.assertionChecking.result.counterExampleFound"), Checked.FAIL);
 		} else if (result == ConstraintBasedAssertionCheckCommand.ResultType.INTERRUPTED) {
 			showCheckingResult(item, bundle.getString("verifications.symbolic.assertionChecking.result.interrupted"), Checked.INTERRUPTED);
+		}
+	}
+	
+	public void handleSymbolicChecking(SymbolicCheckingFormulaItem item, SymbolicModelcheckCommand cmd) {
+		SymbolicModelcheckCommand.ResultType result = cmd.getResult();
+		if(result == SymbolicModelcheckCommand.ResultType.SUCCESSFUL) {
+			showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.success"), Checked.SUCCESS);
+		} else if(result == SymbolicModelcheckCommand.ResultType.COUNTER_EXAMPLE) {
+			showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.counterExample"), Checked.FAIL);
+		} else if(result == SymbolicModelcheckCommand.ResultType.TIMEOUT) {
+			showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.timeout"), Checked.TIMEOUT);
+		} else if(result == SymbolicModelcheckCommand.ResultType.INTERRUPTED) {
+			showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.interrupted"), Checked.INTERRUPTED);
 		}
 	}
 		

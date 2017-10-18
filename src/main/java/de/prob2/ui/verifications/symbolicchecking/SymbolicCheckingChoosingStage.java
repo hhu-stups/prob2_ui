@@ -4,7 +4,6 @@ import com.google.inject.Singleton;
 
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingItem.CheckingType;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingItem.GUIType;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
@@ -52,7 +51,7 @@ public class SymbolicCheckingChoosingStage extends Stage {
 		return cbChoice.getSelectionModel().getSelectedItem().getGUIType();
 	}
 	
-	public CheckingType getCheckingType() {
+	public SymbolicCheckingType getCheckingType() {
 		return cbChoice.getSelectionModel().getSelectedItem().getCheckingType();
 	}
 	

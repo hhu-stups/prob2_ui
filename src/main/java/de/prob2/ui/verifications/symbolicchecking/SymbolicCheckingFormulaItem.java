@@ -8,12 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
-	
-	public enum SymbolicCheckingType {
-		INVARIANT,SEQUENCE,DEADLOCK, FIND_DEADLOCK, FIND_VALID_STATE, FIND_REDUNDANT_INVARIANTS, 
-		REFINEMENT, ASSERTIONS
-	}
-	
+		
 	protected SymbolicCheckingType type;
 	
 	private transient List<Trace> counterExamples;

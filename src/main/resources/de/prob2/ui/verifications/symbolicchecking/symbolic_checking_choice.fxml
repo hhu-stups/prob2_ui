@@ -32,7 +32,7 @@
 				           		<items>
 									<FXCollections fx:factory="observableArrayList">
 										<SymbolicCheckingItem checkingType="SEQUENCE" guiType="TEXT_FIELD"/>
-									    <SymbolicCheckingItem checkingType="INVARIANTS" guiType="CHOICE_BOX"/>
+									    <SymbolicCheckingItem checkingType="INVARIANT" guiType="CHOICE_BOX"/>
 									    <SymbolicCheckingItem checkingType="DEADLOCK" guiType="TEXT_FIELD"/>
 									    <SymbolicCheckingItem checkingType="FIND_DEADLOCK" guiType="NONE"/>
 									    <SymbolicCheckingItem checkingType="FIND_VALID_STATE" guiType="TEXT_FIELD"/>
