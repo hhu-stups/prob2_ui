@@ -14,6 +14,7 @@ import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
+import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.IEvalElement;
@@ -157,6 +158,25 @@ public class SymbolicCheckingFormulaHandler {
 		checkingThread.start();
 	}
 	
+	public void checkSymbolic(SymbolicCheckingFormulaItem item, SymbolicModelcheckCommand.Algorithm algorithm) {
+		final SymbolicCheckingFormulaItem currentItem = getItemIfAlreadyExists(item);
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		SymbolicModelcheckCommand command = new SymbolicModelcheckCommand(algorithm);
+		Thread checkingThread = new Thread(() -> {
+			stateSpace.execute(command);
+			Thread currentThread = Thread.currentThread();
+			Platform.runLater(() -> {
+				injector.getInstance(StatsView.class).update(currentTrace.get());
+				resultHandler.handleSymbolicChecking(currentItem, command);
+				updateMachine(currentProject.getCurrentMachine());
+				currentJobThreads.remove(currentThread);
+			});
+		});
+		currentJobThreads.add(checkingThread);
+		checkingThread.start();
+		
+	}
+	 
 	private SymbolicCheckingFormulaItem getItemIfAlreadyExists(SymbolicCheckingFormulaItem item) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		int index = currentMachine.getSymbolicCheckingFormulas().indexOf(item);

@@ -11,7 +11,7 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
 	
 	public enum SymbolicCheckingType {
 		INVARIANT,SEQUENCE,DEADLOCK, FIND_DEADLOCK, FIND_VALID_STATE, FIND_REDUNDANT_INVARIANTS, 
-		REFINEMENT, ASSERTIONS
+		REFINEMENT, ASSERTIONS, IC3, KINDUCTION, TINDUCTION, BMC
 	}
 	
 	protected SymbolicCheckingType type;

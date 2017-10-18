@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.BEvent;
 import de.prob2.ui.internal.StageManager;
@@ -39,6 +40,14 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	private static final String ASSERTION_CHECKING = "Assertion Checking";
 	
 	private static final String REFINEMENT_CHECKING = "Refinement Checking";
+	
+	private static final String IC3 = "IC3";
+	
+	private static final String TINDUCTION = "TINDUCTION";
+	
+	private static final String KINDUCTION = "KINDUCTION";
+	
+	private static final String BMC = "BMC";
 	
 	@FXML
 	private Button btAdd;
@@ -194,6 +203,22 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 				formulaItem = new SymbolicCheckingFormulaItem(REFINEMENT_CHECKING, REFINEMENT_CHECKING, SymbolicCheckingFormulaItem.SymbolicCheckingType.REFINEMENT);
 				symbolicCheckingHandler.addFormula(formulaItem, true);
 				break;
+			case IC3:
+				formulaItem = new SymbolicCheckingFormulaItem(IC3, IC3, SymbolicCheckingFormulaItem.SymbolicCheckingType.IC3);
+				symbolicCheckingHandler.addFormula(formulaItem, true);
+				break;
+			case TINDUCTION:
+				formulaItem = new SymbolicCheckingFormulaItem(TINDUCTION, TINDUCTION, SymbolicCheckingFormulaItem.SymbolicCheckingType.TINDUCTION);
+				symbolicCheckingHandler.addFormula(formulaItem, true);
+				break;
+			case KINDUCTION:
+				formulaItem = new SymbolicCheckingFormulaItem(KINDUCTION, KINDUCTION, SymbolicCheckingFormulaItem.SymbolicCheckingType.KINDUCTION);
+				symbolicCheckingHandler.addFormula(formulaItem, true);
+				break;
+			case BMC:
+				formulaItem = new SymbolicCheckingFormulaItem(BMC, BMC, SymbolicCheckingFormulaItem.SymbolicCheckingType.BMC);
+				symbolicCheckingHandler.addFormula(formulaItem, true);
+				break;
 			default:
 				break;
 		}
@@ -204,17 +229,15 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	public void checkFormula() {
 		CheckingType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
 		SymbolicCheckingFormulaItem formulaItem;
+		addFormula(true);
 		switch(checkingType) {
 			case INVARIANTS:
-				addFormula(true);
 				symbolicCheckingHandler.checkInvariant(cbOperations.getSelectionModel().getSelectedItem());
 				break;
 			case DEADLOCK:
-				addFormula(true);
 				symbolicCheckingHandler.checkDeadlock(tfFormula.getText());
 				break;
 			case SEQUENCE:
-				addFormula(true);
 				symbolicCheckingHandler.checkSequence(tfFormula.getText());
 				break;
 			case CHECK_ALL_OPERATIONS:
@@ -241,6 +264,22 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 			case CHECK_REFINEMENT:
 				formulaItem = new SymbolicCheckingFormulaItem(REFINEMENT_CHECKING, REFINEMENT_CHECKING, SymbolicCheckingFormulaItem.SymbolicCheckingType.REFINEMENT);
 				symbolicCheckingHandler.checkRefinement(formulaItem);
+				break;
+			case IC3:
+				formulaItem = new SymbolicCheckingFormulaItem(IC3, IC3, SymbolicCheckingFormulaItem.SymbolicCheckingType.IC3);
+				symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.IC3);
+				break;
+			case TINDUCTION:
+				formulaItem = new SymbolicCheckingFormulaItem(TINDUCTION, TINDUCTION, SymbolicCheckingFormulaItem.SymbolicCheckingType.TINDUCTION);
+				symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.TINDUCTION);
+				break;
+			case KINDUCTION:
+				formulaItem = new SymbolicCheckingFormulaItem(KINDUCTION, KINDUCTION, SymbolicCheckingFormulaItem.SymbolicCheckingType.KINDUCTION);
+				symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.KINDUCTION);
+				break;
+			case BMC:
+				formulaItem = new SymbolicCheckingFormulaItem(BMC, BMC, SymbolicCheckingFormulaItem.SymbolicCheckingType.BMC);
+				symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.BMC);
 				break;
 			default:
 				break;

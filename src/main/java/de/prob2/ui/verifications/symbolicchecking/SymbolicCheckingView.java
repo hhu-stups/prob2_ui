@@ -155,7 +155,7 @@ public class SymbolicCheckingView extends AnchorPane {
 						changeItem.setDisable(false);
 					}
 					
-					if(item.getType() == SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_VALID_STATE) {
+					if(item != null && item.getType() == SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_VALID_STATE) {
 						if(row.emptyProperty().get() || item.getExample() == null) {
 							showStateItem.setDisable(true);
 						} else {
