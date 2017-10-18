@@ -2,9 +2,6 @@ package de.prob2.ui.verifications.tracereplay;
 
 import java.io.File;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -27,8 +24,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 @Singleton
 public class TraceReplayView extends ScrollPane {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(TraceReplayView.class);
 
 	@FXML
 	private TableView<ReplayTraceItem> traceTableView;
