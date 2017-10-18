@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+
 <fx:root type="Dialog" title="%project.machines.dialog.dialogTitle"
 		 xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
