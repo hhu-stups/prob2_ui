@@ -9,16 +9,11 @@ public class SymbolicCheckingItem {
 		NONE, TEXT_FIELD, CHOICE_BOX
 	}
 	
-	public enum CheckingType {
-	    SEQUENCE,INVARIANTS,DEADLOCK,FIND_DEADLOCK,FIND_VALID_STATE, CHECK_ALL_OPERATIONS, 
-	    FIND_REDUNDANT_INVARIANTS, CHECK_REFINEMENT, CHECK_ASSERTIONS, IC3, TINDUCTION, KINDUCTION, BMC
-	}
-	
-	private CheckingType checkingType;
+	private SymbolicCheckingType checkingType;
 	
 	private GUIType guiType;
 	
-	public SymbolicCheckingItem(@NamedArg("checkingType") CheckingType name, @NamedArg("guiType") GUIType guiType) {
+	public SymbolicCheckingItem(@NamedArg("checkingType") SymbolicCheckingType name, @NamedArg("guiType") GUIType guiType) {
 		this.checkingType = name;
 		this.guiType = guiType;
 	}
@@ -27,7 +22,7 @@ public class SymbolicCheckingItem {
 		return checkingType.name();
 	}
 	
-	public CheckingType getCheckingType() {
+	public SymbolicCheckingType getCheckingType() {
 		return checkingType;
 	}
 	
@@ -35,7 +30,7 @@ public class SymbolicCheckingItem {
 		return guiType;
 	}
 	
-	public void setCheckingType(CheckingType checkingType) {
+	public void setCheckingType(SymbolicCheckingType checkingType) {
 		this.checkingType = checkingType;
 	}
 	

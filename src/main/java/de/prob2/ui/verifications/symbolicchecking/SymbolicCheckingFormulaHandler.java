@@ -78,24 +78,24 @@ public class SymbolicCheckingFormulaHandler {
 		ArrayList<String> event = new ArrayList<>();
 		event.add(code);
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
-		executeCheckingItem(checker, code, SymbolicCheckingFormulaItem.SymbolicCheckingType.INVARIANT);
+		executeCheckingItem(checker, code, SymbolicCheckingType.INVARIANT);
 	}
 	
 	public void checkDeadlock(String code) {
 		IEvalElement constraint = new EventB(code); 
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
-		executeCheckingItem(checker, code, SymbolicCheckingFormulaItem.SymbolicCheckingType.DEADLOCK);
+		executeCheckingItem(checker, code, SymbolicCheckingType.DEADLOCK);
 	}
 	
 	public void findDeadlock() {
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace());
-		executeCheckingItem(checker, "FIND DEADLOCK", SymbolicCheckingFormulaItem.SymbolicCheckingType.FIND_DEADLOCK);
+		executeCheckingItem(checker, "FIND DEADLOCK", SymbolicCheckingType.FIND_DEADLOCK);
 	}
 	
 	public void checkSequence(String sequence) {
 		List<String> events = Arrays.asList(sequence.replaceAll(" ", "").split(";"));
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
-		executeCheckingItem(checker, sequence, SymbolicCheckingFormulaItem.SymbolicCheckingType.SEQUENCE);
+		executeCheckingItem(checker, sequence, SymbolicCheckingType.SEQUENCE);
 	}
 	
 	public void findRedundantInvariants(SymbolicCheckingFormulaItem item) {
@@ -211,7 +211,7 @@ public class SymbolicCheckingFormulaHandler {
 	
 
 	
-	public void executeCheckingItem(IModelCheckJob checker, String code, SymbolicCheckingFormulaItem.SymbolicCheckingType type) {
+	public void executeCheckingItem(IModelCheckJob checker, String code, SymbolicCheckingType type) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		currentMachine.getSymbolicCheckingFormulas()
 			.stream()
@@ -250,6 +250,18 @@ public class SymbolicCheckingFormulaHandler {
 			case FIND_REDUNDANT_INVARIANTS:
 				findRedundantInvariants(item);
 				break;
+			case IC3:
+				checkSymbolic(item, SymbolicModelcheckCommand.Algorithm.IC3);
+				break;
+			case TINDUCTION:
+				checkSymbolic(item, SymbolicModelcheckCommand.Algorithm.TINDUCTION);
+				break;
+			case KINDUCTION:
+				checkSymbolic(item, SymbolicModelcheckCommand.Algorithm.KINDUCTION);
+				break;
+			case BMC:
+				checkSymbolic(item, SymbolicModelcheckCommand.Algorithm.BMC);
+				break;
 			default:
 				break;
 		}
@@ -275,7 +287,7 @@ public class SymbolicCheckingFormulaHandler {
 		cbcView.refresh();
 	}
 	
-	public void addFormula(String name, String code, SymbolicCheckingFormulaItem.SymbolicCheckingType type, boolean checking) {
+	public void addFormula(String name, String code, SymbolicCheckingType type, boolean checking) {
 		SymbolicCheckingFormulaItem formula = new SymbolicCheckingFormulaItem(name, code, type);
 		addFormula(formula,checking);
 	}
