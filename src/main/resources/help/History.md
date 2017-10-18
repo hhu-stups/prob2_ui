@@ -1,4 +1,4 @@
-![History View](../screenshots/History.png)
+![History View](screenshots/History.png)
 
 The History View shows a list of already executed operations. The items contained in this list are linked to the State View: When selecting one of these items, State View shows the current and the previous state of the chosen machine.  The chrevron buttons on the left allow to go back and forth in history by one step. The two buttons on the right provide sorting and help.
 

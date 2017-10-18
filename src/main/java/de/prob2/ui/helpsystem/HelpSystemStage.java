@@ -20,7 +20,7 @@ public class HelpSystemStage extends Stage {
         this.setTitle(bundle.getString("helpsystem.stage.title"));
         this.setScene(new Scene(new HelpSystem(stageManager)));
         stageManager.register(this, this.getClass().getName());
-        setContent(new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + "HelpMain.html"));
+        setContent(new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + "ProB2UI.md.html"));
     }
 
     public void setContent(File file) {
