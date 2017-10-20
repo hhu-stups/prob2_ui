@@ -28,6 +28,7 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
@@ -240,7 +241,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("HelpMain.html");
+		helpButton.setHelpContent("Verification.md.html");
 		showStats(new ModelCheckStats(stageManager, this, statsView, injector));
 		setBindings();
 		setListeners();
@@ -337,6 +338,10 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				checkItem(item);
 			});
 			
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.remove"));
+			removeItem.setOnAction(e -> removeItem());
+			removeItem.disableProperty().bind(row.emptyProperty());
+			
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
 					ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
@@ -357,7 +362,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 					
 				}
 			});
-			row.setContextMenu(new ContextMenu(showTraceToErrorItem, checkItem, showFullValueItem, searchForNewErrorsItem));
+			row.setContextMenu(new ContextMenu(showTraceToErrorItem, checkItem, showFullValueItem, searchForNewErrorsItem, removeItem));
 			return row;
 		});
 	}
@@ -367,6 +372,12 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		if (!stageController.isShowing()) {
 			this.stageController.showAndWait();
 		}
+	}
+	
+	private void removeItem() {
+		Machine machine = currentProject.getCurrentMachine();
+		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+		machine.removeModelcheckingItem(item);
 	}
 	
 	@FXML
@@ -380,7 +391,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	@FXML
 	public synchronized void cancelModelcheck() {
 		currentJobs.forEach(job -> job.getStateSpace().sendInterrupt());
-		currentJobThreads.forEach(job -> job.interrupt());
+		currentJobThreads.forEach(Thread::interrupt);
 	}
 	
 	private void checkItem(ModelCheckingItem item) {
@@ -399,7 +410,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		updateCurrentValues(options, stateSpace);
 		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy), toPrettyString(currentOptions));
 		currentStats.updateItem(modelcheckingItem, currentProject.getCurrentMachine());
-		currentProject.getCurrentMachine().modelcheckingItemsProperty().add(modelcheckingItem);
+		currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
 		tvItems.getSelectionModel().selectLast();
 	}
 	

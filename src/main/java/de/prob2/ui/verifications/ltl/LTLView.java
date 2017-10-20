@@ -24,6 +24,9 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import javafx.application.Platform;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -91,6 +94,8 @@ public class LTLView extends AnchorPane{
 	private final LTLPatternParser patternParser;
 	
 	private final LTLResultHandler resultHandler;
+	
+	private final ListProperty<Thread> currentJobThreads;
 				
 	@Inject
 	private LTLView(final StageManager stageManager, final ResourceBundle bundle, final Injector injector,final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLFormulaChecker checker, final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
@@ -101,12 +106,13 @@ public class LTLView extends AnchorPane{
 		this.checker = checker;
 		this.patternParser = patternParser;
 		this.resultHandler = resultHandler;
+		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("HelpMain.html");
+		helpButton.setHelpContent("Verification.md.html");
 		setOnItemClicked();
 		setContextMenus();
 		setBindings();
@@ -166,14 +172,17 @@ public class LTLView extends AnchorPane{
 					LTLFormulaItem item = row.getItem();
 					Checked result = checkFormula(item, machine);
 					item.setChecked(result);
+					Thread currentThread = Thread.currentThread();
 					Platform.runLater(() -> {
 						checker.checkMachineStatus(machine);
 						tvFormula.refresh();
+						currentJobThreads.remove(currentThread);
 					});
 				});
+				currentJobThreads.add(checkingThread);
 				checkingThread.start();
 			});
-			check.disableProperty().bind(row.emptyProperty());
+			check.disableProperty().bind(row.emptyProperty().or(currentJobThreads.emptyProperty().not()));
 
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
@@ -214,12 +223,13 @@ public class LTLView extends AnchorPane{
 
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		addPatternButton.disableProperty().bind(currentTrace.existsProperty().not());
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+		cancelButton.disableProperty().bind(currentJobThreads.emptyProperty());
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(currentJobThreads.emptyProperty().not()));
 			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not());
+				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
 			}
 		});
 	}
@@ -352,23 +362,25 @@ public class LTLView extends AnchorPane{
 		Machine machine = currentProject.getCurrentMachine();
 		Thread checkingThread = new Thread(() -> {
 			checker.checkMachine(machine);
+			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
 				checker.checkMachineStatus(machine);
 				tvFormula.refresh();
+				currentJobThreads.remove(currentThread);
 			});
 		});
+		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}
 	
 	@FXML
-	public void cancel() {
-		currentTrace.getStateSpace().sendInterrupt();
+	public synchronized void cancel() {
+		currentJobThreads.forEach(Thread::interrupt);
 	}
 	
 	private void parseMachine(Machine machine) {
 		patternParser.parseMachine(machine);
-	}
-		
+	}		
 
 
 }

@@ -1,6 +1,7 @@
 package de.prob2.ui;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -57,6 +58,12 @@ public class ProB2 extends Application {
 	@Override
 	public void init() {
 		runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
+		if (runtimeOptions.isLoadConfig()) {
+			final Locale localeOverride = Config.getLocaleOverride();
+			if (localeOverride != null) {
+				Locale.setDefault(localeOverride);
+			}
+		}
 		ProB2Module module = new ProB2Module(runtimeOptions);
 		Platform.runLater(() -> {
 			injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);

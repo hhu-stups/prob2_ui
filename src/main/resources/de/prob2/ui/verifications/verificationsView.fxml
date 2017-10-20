@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.verifications.cbc.CBCView?>
+<?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView?>
 <?import de.prob2.ui.verifications.ltl.LTLView?>
 <?import de.prob2.ui.verifications.modelchecking.ModelcheckingController?>
 <?import de.prob2.ui.verifications.VerificationsView?>
@@ -23,9 +23,9 @@
 					<LTLView />
 				</content>
 			</Tab>
-			<Tab fx:id="tabCBC" id="cbc" text="%verification.tabs.cbc.title">
+			<Tab fx:id="tabSymbolic" id="symbolic" text="%verification.tabs.symbolic.title">
 				<content>
-					<CBCView />
+					<SymbolicCheckingView />
 				</content>
 			</Tab>
 		</tabs>

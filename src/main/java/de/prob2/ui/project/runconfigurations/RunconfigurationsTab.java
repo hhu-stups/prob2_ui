@@ -38,7 +38,7 @@ public class RunconfigurationsTab extends Tab {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("HelpMain.html");
+		helpButton.setHelpContent("Project.md.html");
 		currentProject.machinesProperty().emptyProperty().addListener((observable, from, to) -> {
 			if (to) {
 				runconfigsPlaceholder.setText(bundle.getString("project.runconfigurations.tab.addMachinesFirst"));
@@ -75,7 +75,9 @@ public class RunconfigurationsTab extends Tab {
 
 			cell.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					currentProject.startAnimation(cell.getItem());
+					if(cell.getItem() != null) {
+						currentProject.startAnimation(cell.getItem());
+					}
 				}
 				runconfigurationsListView.getSelectionModel().select(currentProject.getCurrentRunconfiguration());
 			});

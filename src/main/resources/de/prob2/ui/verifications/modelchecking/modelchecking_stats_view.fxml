@@ -27,7 +27,7 @@
 							prefHeight="26.0" prefWidth="26.0" contentDisplay="GRAPHIC_ONLY"
 							onAction="#addModelCheck">
 							<graphic>
-								<FontAwesomeIconView fill="#555560"
+								<FontAwesomeIconView styleClass="icon-dark"
 									glyphName="PLUS_CIRCLE" size="26" />
 							</graphic>
 							<tooltip>

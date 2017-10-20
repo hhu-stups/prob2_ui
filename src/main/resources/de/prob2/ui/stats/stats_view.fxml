@@ -5,8 +5,9 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.HBox?>
 <fx:root type="ScrollPane" fitToHeight="true" fitToWidth="true"
-		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.65">
+	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.65">
 	<AnchorPane>
 		<Label text="%common.noModelLoaded" AnchorPane.bottomAnchor="0.0"
 			AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"
@@ -27,93 +28,99 @@
 					</VBox.margin>
 				</HBox>
 				<HBox spacing="7.0">
-					<Label text="%stats.totalTransitions" HBox.hgrow="ALWAYS"
-						id="bold" />
+					<Label text="%stats.totalTransitions" HBox.hgrow="ALWAYS" id="bold" />
 					<Label fx:id="totalTransitions" />
 					<VBox.margin>
 						<Insets bottom="15.0" left="10.0" right="10.0" top="0.0" />
 					</VBox.margin>
 				</HBox>
 			</VBox>
-			<AnchorPane>
-				<HelpButton fx:id="helpButton" AnchorPane.leftAnchor="2" />
-				<ToggleButton AnchorPane.leftAnchor="20.0"
-					onAction="#handleExtendedStatsToggle" fx:id="extendedStatsToggle"
-					text="%stats.showExtendedStats">
-					<graphic>
-						<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE" />
-					</graphic>
-					<tooltip>
-						<Tooltip text="%stats.showExtendedStats" />
-					</tooltip>
-				</ToggleButton>
-				<VBox fx:id="extendedStatsBox" AnchorPane.topAnchor="20.0"
-					AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
-					AnchorPane.bottomAnchor="5.0" visible="false" spacing="10.0">
-					<AnchorPane>
-						<Label alignment="CENTER" text="%stats.stateStats"
-							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0"
-							id="stats-titel" />
-					</AnchorPane>
-					<VBox>
-						<GridPane fx:id="stateStatsHeader">
-							<columnConstraints>
-								<ColumnConstraints hgrow="ALWAYS" />
-								<ColumnConstraints hgrow="NEVER" />
-							</columnConstraints>
-							<AnchorPane
-								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
-								<Label text="%stats.stateStats.status"
-									AnchorPane.leftAnchor="10.0" id="stats-header" />
-							</AnchorPane>
-							<AnchorPane fx:id="numberOfStatesAnchorPane"
-								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
-								GridPane.columnIndex="1">
-								<Label text="%stats.stateStats.numberOfStates"
-									AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0" id="stats-header"/>
-							</AnchorPane>
-						</GridPane>
-						<GridPane fx:id="stateStats">
-							<columnConstraints>
-								<ColumnConstraints hgrow="ALWAYS" />
-								<ColumnConstraints halignment="RIGHT" hgrow="NEVER" />
-							</columnConstraints>
-						</GridPane>
+			<VBox>
+				<HBox alignment="CENTER_LEFT">
+					<ToggleButton onAction="#handleExtendedStatsToggle"
+						fx:id="extendedStatsToggle" text="%stats.showExtendedStats">
+						<graphic>
+							<FontAwesomeIconView fill="#555560"
+								glyphName="PLUS_CIRCLE" />
+						</graphic>
+						<tooltip>
+							<Tooltip text="%stats.showExtendedStats" />
+						</tooltip>
+					</ToggleButton>
+					<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+						<HelpButton fx:id="helpButton" />
+					</HBox>
+				</HBox>
+				<AnchorPane>
+					<VBox fx:id="extendedStatsBox" AnchorPane.topAnchor="5.0"
+						AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
+						AnchorPane.bottomAnchor="5.0" visible="false" spacing="10.0">
+						<AnchorPane>
+							<Label alignment="CENTER" text="%stats.stateStats"
+								AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+								AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0" id="stats-titel" />
+						</AnchorPane>
+						<VBox>
+							<GridPane fx:id="stateStatsHeader">
+								<columnConstraints>
+									<ColumnConstraints hgrow="ALWAYS" />
+									<ColumnConstraints hgrow="NEVER" />
+								</columnConstraints>
+								<AnchorPane
+									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
+									<Label text="%stats.stateStats.status"
+										AnchorPane.leftAnchor="10.0" id="stats-header" />
+								</AnchorPane>
+								<AnchorPane fx:id="numberOfStatesAnchorPane"
+									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
+									GridPane.columnIndex="1">
+									<Label text="%stats.stateStats.numberOfStates"
+										AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0"
+										id="stats-header" />
+								</AnchorPane>
+							</GridPane>
+							<GridPane fx:id="stateStats">
+								<columnConstraints>
+									<ColumnConstraints hgrow="ALWAYS" />
+									<ColumnConstraints halignment="RIGHT" hgrow="NEVER" />
+								</columnConstraints>
+							</GridPane>
+						</VBox>
+						<AnchorPane>
+							<Label alignment="CENTER" prefHeight="16.0"
+								text="%stats.transitionStats" AnchorPane.bottomAnchor="0.0"
+								AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+								AnchorPane.topAnchor="20.0" id="stats-titel" />
+						</AnchorPane>
+						<VBox>
+							<GridPane fx:id="transStatsHeader">
+								<columnConstraints>
+									<ColumnConstraints hgrow="ALWAYS" />
+									<ColumnConstraints hgrow="NEVER" />
+								</columnConstraints>
+								<AnchorPane
+									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
+									<Label text="%stats.transitionStats.name"
+										AnchorPane.leftAnchor="10.0" id="stats-header" />
+								</AnchorPane>
+								<AnchorPane fx:id="numberOfTransitionsAnchorPane"
+									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
+									GridPane.columnIndex="1">
+									<Label text="%stats.transitionStats.numberOfTransitions"
+										AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0"
+										id="stats-header" />
+								</AnchorPane>
+							</GridPane>
+							<GridPane fx:id="transStats">
+								<columnConstraints>
+									<ColumnConstraints hgrow="ALWAYS" />
+									<ColumnConstraints hgrow="ALWAYS" />
+								</columnConstraints>
+							</GridPane>
+						</VBox>
 					</VBox>
-					<AnchorPane>
-						<Label alignment="CENTER" prefHeight="16.0"
-							text="%stats.transitionStats" AnchorPane.bottomAnchor="0.0"
-							AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-							AnchorPane.topAnchor="20.0" id="stats-titel" />
-					</AnchorPane>
-					<VBox>
-						<GridPane fx:id="transStatsHeader">
-							<columnConstraints>
-								<ColumnConstraints hgrow="ALWAYS" />
-								<ColumnConstraints hgrow="NEVER" />
-							</columnConstraints>
-							<AnchorPane
-								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
-								<Label text="%stats.transitionStats.name"
-									AnchorPane.leftAnchor="10.0" id="stats-header" />
-							</AnchorPane>
-							<AnchorPane  fx:id="numberOfTransitionsAnchorPane"
-								style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
-								GridPane.columnIndex="1">
-								<Label text="%stats.transitionStats.numberOfTransitions"
-									AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0" id="stats-header" />
-							</AnchorPane>
-						</GridPane>
-						<GridPane fx:id="transStats">
-							<columnConstraints>
-								<ColumnConstraints hgrow="ALWAYS" />
-								<ColumnConstraints hgrow="ALWAYS" />
-							</columnConstraints>
-						</GridPane>
-					</VBox>
-				</VBox>
-			</AnchorPane>
+				</AnchorPane>
+			</VBox>
 		</VBox>
 	</AnchorPane>
 </fx:root>

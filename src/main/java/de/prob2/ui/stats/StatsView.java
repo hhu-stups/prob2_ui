@@ -9,17 +9,14 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -69,7 +66,8 @@ public class StatsView extends ScrollPane {
 	private final Injector injector;
 
 	@Inject
-	public StatsView(final ResourceBundle bundle, final StageManager stageManager, final CurrentTrace currentTrace, final Injector injector) {
+	public StatsView(final ResourceBundle bundle, final StageManager stageManager, final CurrentTrace currentTrace,
+			final Injector injector) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
@@ -78,7 +76,7 @@ public class StatsView extends ScrollPane {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("HelpMain.html");
+		helpButton.setHelpContent("Statistics.md.html");
 		extendedStatsBox.visibleProperty().bind(extendedStatsToggle.selectedProperty());
 		noStatsLabel.visibleProperty().bind(currentTrace.existsProperty().not());
 		statsBox.visibleProperty().bind(noStatsLabel.visibleProperty().not());
@@ -120,8 +118,8 @@ public class StatsView extends ScrollPane {
 			tooltip = new Tooltip(bundle.getString("stats.showExtendedStats"));
 			extendedStatsToggle.setText(bundle.getString("stats.showExtendedStats"));
 		}
+		icon.setStyleClass("icon-dark");
 		icon.glyphSizeProperty().bind(fontsize.multiply(1.2));
-		icon.setStyle("-fx-fill: -prob-grey;");
 		extendedStatsToggle.setGraphic(icon);
 		extendedStatsToggle.setTooltip(tooltip);
 	}
@@ -144,7 +142,7 @@ public class StatsView extends ScrollPane {
 		int nrTotalNodes = result.getNrTotalNodes();
 		int nrTotalTransitions = result.getNrTotalTransitions();
 		int nrProcessedNodes = result.getNrProcessedNodes();
-		
+
 		Platform.runLater(() -> {
 			totalStates.setText(Integer.toString(nrTotalNodes));
 			totalTransitions.setText(Integer.toString(nrTotalTransitions));

@@ -255,7 +255,7 @@ public final class OperationsView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("HelpMain.html");
+		helpButton.setHelpContent("ProB2UI.md.html");
 		opsListView.setCellFactory(lv -> new OperationsCell());
 
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
@@ -295,9 +295,12 @@ public final class OperationsView extends AnchorPane {
 		// So we look at the values of all constants/variables in the
 		// transition's destination state.
 		final List<IEvalElement> formulas = new ArrayList<>();
-		for (final AbstractFormulaElement c : trace.getStateSpace().getMainComponent().getChildrenOfType(type)) {
-			formulas.add(c.getFormula());
+		if(trace.getStateSpace().getMainComponent() != null){
+			for (final AbstractFormulaElement c : trace.getStateSpace().getMainComponent().getChildrenOfType(type)) {
+				formulas.add(c.getFormula());
+			}
 		}
+
 
 		final List<String> params = new ArrayList<>();
 		final List<AbstractEvalResult> results = transition.getDestination().eval(formulas);
@@ -466,7 +469,7 @@ public final class OperationsView extends AnchorPane {
 	}
 
 	private List<OperationItem> applyFilter(final String filter) {
-		return events.stream().filter(op -> op.getName().startsWith(filter)).collect(Collectors.toList());
+		return events.stream().filter(op -> op.getName().toLowerCase().contains(filter.toLowerCase())).collect(Collectors.toList());
 	}
 
 	private void doSort() {

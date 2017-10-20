@@ -71,7 +71,7 @@
 
 .icon-dark {
 	-fx-fill: -prob-grey;
-	-fx-opacity: 0.8;
+	-fx-opacity: 0.85;
 }
 
 .icon-dark:hover, .menu-button:hover > .arrow-button > .arrow,
