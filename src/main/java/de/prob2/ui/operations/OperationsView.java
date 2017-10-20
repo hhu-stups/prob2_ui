@@ -469,7 +469,7 @@ public final class OperationsView extends AnchorPane {
 	}
 
 	private List<OperationItem> applyFilter(final String filter) {
-		return events.stream().filter(op -> op.getName().startsWith(filter)).collect(Collectors.toList());
+		return events.stream().filter(op -> op.getName().toLowerCase().contains(filter.toLowerCase())).collect(Collectors.toList());
 	}
 
 	private void doSort() {
