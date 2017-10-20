@@ -156,7 +156,7 @@ public class ProBPluginManager {
 
     /**
      * Changes the directory where PF4J searches for plugins.
-     * Because PF4J does not allow it to change thee directory, we have
+     * Because PF4J does not allow it to change the directory, we have
      * to create a new instance of the {@link ProBJarPluginManager}.
      *
      * @return Returns the plugins in the new directory.
@@ -445,6 +445,7 @@ public class ProBPluginManager {
         @Override
         //also checked required version
         protected void validatePluginDescriptor(PluginDescriptor descriptor) throws PluginException {
+            //TODO: show what is wrong in an alert
             super.validatePluginDescriptor(descriptor);
             if (StringUtils.isEmpty(descriptor.getRequires()) || descriptor.getRequires().equals("*")) {
                 throw new PluginException("Plugin-Requires has to be specified");
