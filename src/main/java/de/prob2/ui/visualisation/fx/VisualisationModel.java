@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
@@ -25,15 +26,17 @@ public class VisualisationModel {
 
     private final CurrentTrace currentTrace;
     private final StageManager stageManager;
+    private final ResourceBundle bundle;
 
     private Trace oldTrace;
     private Trace newTrace;
     private Map<String, EvalResult> oldStringToResult;
     private Map<String, EvalResult> newStringToResult;
 
-    public VisualisationModel(CurrentTrace currentTrace, StageManager stageManager) {
+    public VisualisationModel(CurrentTrace currentTrace, StageManager stageManager, ResourceBundle bundle) {
         this.currentTrace = currentTrace;
         this.stageManager = stageManager;
+        this.bundle = bundle;
     }
 
     /**
@@ -173,9 +176,8 @@ public class VisualisationModel {
             return null;
         } catch (EvaluationException evalException) {
             Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
-                    "EvaluationException while evaluating the formula \"" + formula +
-                            "\".\nThe message of the thrown exception is:\n\n\"" + evalException.getMessage() + "\"\n\n" +
-                            "More details are in the log.", ButtonType.OK);
+                    String.format(bundle.getString("visualisation.model.eval"), formula, evalException.getMessage()),
+                    ButtonType.OK);
             alert.initOwner(stageManager.getCurrent());
             alert.show();
             LOGGER.warn("EvaluationException while evaluating the formula \"" + formula +"\".", evalException);

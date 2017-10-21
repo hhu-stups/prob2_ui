@@ -12,10 +12,6 @@ public class InMemoryCompiler {
 
     public Class<?> compile(String className, File javaClassFile, /*String classpath,*/ InMemoryClassloader classloader)
             throws InMemoryCompilerException, IOException, ClassNotFoundException{
-        // create complete classpath
-        /*classpath = (System.getProperty("java.class.path") + File.pathSeparator + classpath)
-                .replaceAll("%20", " ");*/
-
         String classpath = System.getProperty("java.class.path");
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
+import java.util.ResourceBundle;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -34,11 +35,13 @@ public class VisualisationLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationLoader.class);
 
     private final StageManager stageManager;
+    private final ResourceBundle bundle;
 
     private ClassLoader visualisationClassloader;
 
-    public VisualisationLoader(StageManager stageManager) {
+    public VisualisationLoader(StageManager stageManager, ResourceBundle bundle) {
         this.stageManager = stageManager;
+        this.bundle = bundle;
     }
 
     public Visualisation loadVisualization(File selectedVisualisation) {
@@ -74,20 +77,20 @@ public class VisualisationLoader {
             } else {
                 LOGGER.warn("Class {} does not extend the abstract class Visualisation.", className);
                 showAlert(false, Alert.AlertType.WARNING,
-                        "The class \"%s\" does not extend the abstract class Visualisation. It is no valid visualization.",
+                        "visualisation.loader.no.extend",
                         className);
                 return null;
             }
 
         } catch (InMemoryCompilerException e) {
             LOGGER.warn("Exception while compiling the class \"{}\".", fileName, e);
-            showAlert(true, Alert.AlertType.WARNING, "Could not compile the class \"" +
-            fileName + "\".\n" + e.getCompilerMessage(), ButtonType.OK);
+            showAlert(true, Alert.AlertType.WARNING, "visualisation.loader.compiler",
+            fileName, e.getCompilerMessage(), ButtonType.OK);
             return null;
         } catch (Exception e) {
             LOGGER.warn("Exception while loading the visualization:\n{}", fileName, e);
             showAlert(false, Alert.AlertType.ERROR,
-                    "Exception while loading the visualization.\n\nThe thrown exception is shown in the Log-file.");
+                    "visualisation.loader.exception");
             return null;
         }
     }
@@ -136,14 +139,14 @@ public class VisualisationLoader {
             } else {
                 LOGGER.warn("No visualization-class found in jar: {}", fileName);
                 showAlert(false, Alert.AlertType.WARNING,
-                        "No visualization-class found!\n\nThe jar \"%s\" is not a valid visualization.",
+                        "visualisation.loader.no.class",
                         fileName);
                 return null;
             }
         } catch (Exception e) {
             LOGGER.warn("Exception while loading the visualization:\n{}", fileName, e);
             showAlert(false, Alert.AlertType.ERROR,
-                    "Exception while loading the visualization.\n\nThe thrown exception is shown in the Log-file.");
+                    "visualisation.loader.exception");
             return null;
         }
     }
@@ -154,12 +157,12 @@ public class VisualisationLoader {
                 visualizationClass.getSuperclass().equals(Visualisation.class);
     }
 
-    private void showAlert(boolean resizable, Alert.AlertType type, String text, Object... textParams) {
+    private void showAlert(boolean resizable, Alert.AlertType type, String key, Object... textParams) {
         Alert alert = stageManager.makeAlert(type,
-                String.format(text, textParams),
+                String.format(bundle.getString(key), textParams),
                 ButtonType.OK);
         alert.initOwner(stageManager.getCurrent());
-        alert.setTitle(NAME);
+        alert.setTitle(bundle.getString("menu.visualisation"));
         alert.setResizable(resizable);
         alert.show();
     }

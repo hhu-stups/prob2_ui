@@ -48,6 +48,7 @@ public class VisualisationController {
     private final ChangeListener<Trace> currentTraceChangeListener;
     private final StageManager stageManager;
     private final CurrentTrace currentTrace;
+    private final ResourceBundle bundle;
     private final TabPane tabPane;
     private final ReadOnlyObjectProperty<Machine> currentMachine;
 
@@ -59,13 +60,14 @@ public class VisualisationController {
 
     @Inject
     public VisualisationController(StageManager stageManager, CurrentTrace currentTrace, CurrentProject currentProject,
-                                   MainView mainView) {
+                                   MainView mainView, ResourceBundle bundle) {
 
         this.stageManager = stageManager;
         this.currentTrace = currentTrace;
         this.currentMachine = currentProject.currentMachineProperty();
         this.tabPane = mainView.getTabPane();
-        visualisationModel = new VisualisationModel(currentTrace, stageManager);
+        this.bundle = bundle;
+        visualisationModel = new VisualisationModel(currentTrace, stageManager, bundle);
 
         currentTraceChangeListener = (observable, oldTrace, newTrace) -> {
             if (newTrace != null) {
@@ -85,9 +87,7 @@ public class VisualisationController {
             if (visualisation != null) {
                 if (newMachine == null) {
                     showAlert(Alert.AlertType.INFORMATION,
-                            "The animation of the machine \"" + oldMachine.getName() +
-                                    "\" was stopped, so the visualisation \"" + visualisation.getName() +
-                                    "\" will be stopped.",
+                            getFormattedString("visualisation.machine.null", oldMachine.getName(), visualisation.getName()),
                             ButtonType.OK);
                     stopVisualisation();
                 } else if (!newMachine.equals(oldMachine)) {
@@ -96,9 +96,7 @@ public class VisualisationController {
                         setVisualisationContent(visualisation.initialize());
                     } else {
                         showAlert(Alert.AlertType.INFORMATION,
-                                "The machine \"" + newMachine.getName() + "\" was loaded and " +
-                                        "does not work with the loaded visualisation \"" +
-                                        visualisation.getName() + "\". So the visualisation will be stopped.",
+                                getFormattedString("visualisation.machine.loaded", newMachine.getName(), visualisation.getName()),
                                 ButtonType.OK);
                         stopVisualisation();
                     }
@@ -120,10 +118,9 @@ public class VisualisationController {
     public void openVisualisation() {
         if (visualisation.isNotNull().get()) {
             Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-                    "The visualisation \"" + visualisation.get().getName() +
-                            "\" is already loaded.\n\nDo you want to replace the loaded visualisation with another one?",
+                    getFormattedString("visualisation.controller.replace", visualisation.get().getName()),
                     ButtonType.YES, ButtonType.NO);
-            alert.setTitle("VisualizationFX");
+            alert.setTitle(bundle.getString("menu.visualisation"));
             alert.initOwner(stageManager.getCurrent());
             Optional<ButtonType> alertResult = alert.showAndWait();
             if (alertResult.isPresent() && alertResult.get() == ButtonType.YES) {
@@ -134,7 +131,7 @@ public class VisualisationController {
         }
         LOGGER.debug("Show filechooser to select a visualisation.");
         final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select a visualisation");
+        fileChooser.setTitle(bundle.getString("visualisation.controller.select"));
         fileChooser.getExtensionFilters()
                 .addAll(new FileChooser.ExtensionFilter("Visualisation-JAR", "*.jar"),
                         new FileChooser.ExtensionFilter("Visualisation-Class", "*.java"));
@@ -143,7 +140,7 @@ public class VisualisationController {
         if (selectedVisualisation != null) {
             LOGGER.debug("Try to load visualisation from file {}.", selectedVisualisation.getName());
             if (visualisationLoader == null) {
-                visualisationLoader = new VisualisationLoader(stageManager/*,(PluginClassLoader) getWrapper().getPluginClassLoader()*/);
+                visualisationLoader = new VisualisationLoader(stageManager, bundle);
             }
             Visualisation loadedVisualisation = visualisationLoader.loadVisualization(selectedVisualisation);
             if (loadedVisualisation != null) {
@@ -191,10 +188,8 @@ public class VisualisationController {
         LOGGER.debug("Starting the visualisation \"{}\"", loadedVisualisation.getName());
         boolean start = checkMachine(loadedVisualisation.getMachines());
         if (!start) {
-            //TODO: show allowed machine files and current machine file
-            showAlert(Alert.AlertType.INFORMATION, "The visualisation \"" + loadedVisualisation.getName() +
-                    "\" does not work with the the animated machine \"" + currentMachine.get().getName() + "\".\n\n" +
-                    "The visualisation won't be loaded.",
+            showAlert(Alert.AlertType.INFORMATION,
+                    getFormattedString("visualisation.controller.unsuitable", loadedVisualisation.getName(), currentMachine.get().getName()),
                     ButtonType.OK);
             visualisationLoader.closeClassloader();
             return;
@@ -292,7 +287,7 @@ public class VisualisationController {
 
     private void createVisualisationTab() {
         visualisationTab = new Tab(visualisation.get().getName(), createPlaceHolderContent(
-                String.format("The animated machine \"%s\" is not yet initialized.", currentMachine.get().getName())));
+                getFormattedString("visualisation.controller.initialized", currentMachine.get().getName())));
         visualisationTab.setClosable(false);
         tabPane.getTabs().add(visualisationTab);
         tabPane.getSelectionModel().select(visualisationTab);
@@ -325,7 +320,7 @@ public class VisualisationController {
             visualizationStage = null;
         });
         visualizationStage.show();
-        visualisationTab.setContent(createPlaceHolderContent("Visualisation detached."));
+        visualisationTab.setContent(createPlaceHolderContent(bundle.getString("visualisation.controller.detached")));
         detached.set(true);
     }
 
@@ -356,8 +351,12 @@ public class VisualisationController {
 
     private void showAlert(Alert.AlertType type, String content, ButtonType... buttons) {
         Alert alert = stageManager.makeAlert(type, content, buttons);
-        alert.setTitle(NAME);
+        alert.setTitle(bundle.getString("menu.visualisation"));
         alert.initOwner(stageManager.getCurrent());
         alert.show();
+    }
+
+    private String getFormattedString(String key, Object... args) {
+        return String.format(bundle.getString(key), args);
     }
 }
