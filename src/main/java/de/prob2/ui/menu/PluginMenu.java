@@ -22,13 +22,11 @@ public class PluginMenu extends Menu {
 
     private final ProBPluginManager proBPluginManager;
     private final Injector injector;
-    private final StageManager stageManager;
 
 
     @Inject
     public PluginMenu(final StageManager stageManager, final ProBPluginManager proBPluginManager, final Injector injector) {
         this.proBPluginManager = proBPluginManager;
-        this.stageManager = stageManager;
         this.injector = injector;
         stageManager.loadFXML(this, "pluginMenu.fxml");
     }

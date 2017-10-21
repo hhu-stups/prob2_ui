@@ -13,6 +13,7 @@
 	<PerspectivesMenu fx:id="perspectivesMenu" />
 	<ViewMenu fx:id="viewMenu" />
 	<PluginMenu fx:id="pluginMenu"/>
+	<VisualisationMenu fx:id="visualisationMenu"/>
 	<Menu fx:id="windowMenu" text="%menu.window" />
 	<HelpMenu fx:id="helpMenu" />
 </fx:root>

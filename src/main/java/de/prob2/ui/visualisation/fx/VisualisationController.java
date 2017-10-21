@@ -1,0 +1,363 @@
+package de.prob2.ui.visualisation.fx;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import de.prob.statespace.Trace;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.menu.MainView;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.visualisation.fx.listener.FormulaListener;
+import de.prob2.ui.visualisation.fx.listener.EventListener;
+import de.prob2.ui.visualisation.fx.loader.VisualisationLoader;
+import de.prob2.ui.menu.VisualisationMenu;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+
+/**
+ * @author Christoph Heinzen
+ * @since 14.09.17
+ */
+@Singleton
+public class VisualisationController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationMenu.class);
+
+    public static final String NAME = "VisualisationFX";
+
+    private Tab visualisationTab;
+    private VisualisationModel visualisationModel;
+    private VisualisationLoader visualisationLoader;
+
+    private final ChangeListener<Trace> currentTraceChangeListener;
+    private final StageManager stageManager;
+    private final CurrentTrace currentTrace;
+    private final TabPane tabPane;
+    private final ReadOnlyObjectProperty<Machine> currentMachine;
+
+    private HashMap<String, List<FormulaListener>> formulaListenerMap;
+    private HashMap<String, EventListener> eventListenerMap;
+    private SimpleObjectProperty<Visualisation> visualisation = new SimpleObjectProperty<>(null);
+    private SimpleBooleanProperty detached = new SimpleBooleanProperty(false);
+    private Stage visualizationStage;
+
+    @Inject
+    public VisualisationController(StageManager stageManager, CurrentTrace currentTrace, CurrentProject currentProject,
+                                   MainView mainView) {
+
+        this.stageManager = stageManager;
+        this.currentTrace = currentTrace;
+        this.currentMachine = currentProject.currentMachineProperty();
+        this.tabPane = mainView.getTabPane();
+        visualisationModel = new VisualisationModel(currentTrace, stageManager);
+
+        currentTraceChangeListener = (observable, oldTrace, newTrace) -> {
+            if (newTrace != null) {
+                if (newTrace.getCurrentState() != null && newTrace.getCurrentState().isInitialised()) {
+                    visualisationModel.setTraces(oldTrace, newTrace);
+                    if (newTrace.getPreviousState() == null || !newTrace.getPreviousState().isInitialised()) {
+                        //the model was initialized in the last event, so constants could have changed
+                        setVisualisationContent(visualisation.get().initialize());
+                    }
+                    updateVisualization();
+                }
+            }
+        };
+
+        currentMachine.addListener((observable, oldMachine, newMachine) -> {
+            Visualisation visualisation = this.visualisation.get();
+            if (visualisation != null) {
+                if (newMachine == null) {
+                    showAlert(Alert.AlertType.INFORMATION,
+                            "The animation of the machine \"" + oldMachine.getName() +
+                                    "\" was stopped, so the visualisation \"" + visualisation.getName() +
+                                    "\" will be stopped.",
+                            ButtonType.OK);
+                    stopVisualisation();
+                } else if (!newMachine.equals(oldMachine)) {
+                    boolean start = checkMachine(visualisation.getMachines());
+                    if (start) {
+                        setVisualisationContent(visualisation.initialize());
+                    } else {
+                        showAlert(Alert.AlertType.INFORMATION,
+                                "The machine \"" + newMachine.getName() + "\" was loaded and " +
+                                        "does not work with the loaded visualisation \"" +
+                                        visualisation.getName() + "\". So the visualisation will be stopped.",
+                                ButtonType.OK);
+                        stopVisualisation();
+                    }
+                }
+            }
+        });
+    }
+
+    public ReadOnlyObjectProperty<Machine> currentMachineProperty() {
+        return currentMachine;
+    }
+
+    public SimpleObjectProperty<Visualisation> visualisationProperty() {
+        return visualisation;
+    }
+
+    public SimpleBooleanProperty detachProperty() {return detached;}
+
+    public void openVisualisation() {
+        if (visualisation.isNotNull().get()) {
+            Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+                    "The visualisation \"" + visualisation.get().getName() +
+                            "\" is already loaded.\n\nDo you want to replace the loaded visualisation with another one?",
+                    ButtonType.YES, ButtonType.NO);
+            alert.setTitle("VisualizationFX");
+            alert.initOwner(stageManager.getCurrent());
+            Optional<ButtonType> alertResult = alert.showAndWait();
+            if (alertResult.isPresent() && alertResult.get() == ButtonType.YES) {
+                stopVisualisation();
+            } else {
+                return;
+            }
+        }
+        LOGGER.debug("Show filechooser to select a visualisation.");
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select a visualisation");
+        fileChooser.getExtensionFilters()
+                .addAll(new FileChooser.ExtensionFilter("Visualisation-JAR", "*.jar"),
+                        new FileChooser.ExtensionFilter("Visualisation-Class", "*.java"));
+        File selectedVisualisation = fileChooser.showOpenDialog(stageManager.getCurrent());
+
+        if (selectedVisualisation != null) {
+            LOGGER.debug("Try to load visualisation from file {}.", selectedVisualisation.getName());
+            if (visualisationLoader == null) {
+                visualisationLoader = new VisualisationLoader(stageManager/*,(PluginClassLoader) getWrapper().getPluginClassLoader()*/);
+            }
+            Visualisation loadedVisualisation = visualisationLoader.loadVisualization(selectedVisualisation);
+            if (loadedVisualisation != null) {
+                startVisualization(loadedVisualisation);
+            } else {
+                visualisationLoader.closeClassloader();
+            }
+        }
+    }
+
+    public void registerFormulaListener(FormulaListener listener) {
+        String[] formulas = listener.getFormulas();
+        if (formulaListenerMap == null) {
+            formulaListenerMap = new HashMap<>();
+        }
+        for(String formula : formulas) {
+            if (formulaListenerMap.containsKey(formula)) {
+                formulaListenerMap.get(formula).add(listener);
+            } else {
+                formulaListenerMap.put(formula, new ArrayList<>(Collections.singletonList(listener)));
+            }
+        }
+    }
+
+    public void registerEventListener(EventListener listener) {
+        if (eventListenerMap == null) {
+            eventListenerMap = new HashMap<>();
+        }
+        eventListenerMap.put(listener.getEvent(), listener);
+    }
+
+    private Node createPlaceHolderContent(String placeHolder) {
+        AnchorPane anchorPane = new AnchorPane();
+        Label noVisualizationLabel = new Label(placeHolder);
+        AnchorPane.setTopAnchor     (noVisualizationLabel, 10.0);
+        AnchorPane.setBottomAnchor  (noVisualizationLabel, 10.0);
+        AnchorPane.setLeftAnchor    (noVisualizationLabel, 10.0);
+        AnchorPane.setRightAnchor   (noVisualizationLabel, 10.0);
+        noVisualizationLabel.setAlignment(Pos.CENTER);
+        anchorPane.getChildren().add(noVisualizationLabel);
+        return anchorPane;
+    }
+
+    private void startVisualization(Visualisation loadedVisualisation) {
+        LOGGER.debug("Starting the visualisation \"{}\"", loadedVisualisation.getName());
+        boolean start = checkMachine(loadedVisualisation.getMachines());
+        if (!start) {
+            //TODO: show allowed machine files and current machine file
+            showAlert(Alert.AlertType.INFORMATION, "The visualisation \"" + loadedVisualisation.getName() +
+                    "\" does not work with the the animated machine \"" + currentMachine.get().getName() + "\".\n\n" +
+                    "The visualisation won't be loaded.",
+                    ButtonType.OK);
+            visualisationLoader.closeClassloader();
+            return;
+        }
+        visualisation.set(loadedVisualisation);
+        loadedVisualisation.setController(this);
+        loadedVisualisation.setModel(visualisationModel);
+        loadedVisualisation.registerFormulaListener();
+        loadedVisualisation.registerEventListener();
+        createVisualisationTab();
+        if (currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
+            LOGGER.debug("Start: The current state is initialised, call initialize() of visualisation.");
+            visualisationModel.setTraces(null, currentTrace.get());
+            setVisualisationContent(loadedVisualisation.initialize());
+            updateVisualization();
+        }
+        currentTrace.addListener(currentTraceChangeListener);
+    }
+
+    public void stopVisualisation() {
+        if (visualisation.isNotNull().get()) {
+            LOGGER.debug("Stopping visualisation \"{}\"!", visualisation.get().getName());
+            currentTrace.removeListener(currentTraceChangeListener);
+            if (formulaListenerMap != null && !formulaListenerMap.isEmpty()) {
+                formulaListenerMap.clear();
+            }
+            if (eventListenerMap != null && !eventListenerMap.isEmpty()) {
+                eventListenerMap.clear();
+            }
+            visualisation.get().stop();
+            visualisationLoader.closeClassloader();
+            visualisation.set(null);
+            if (detached.get()) {
+                visualizationStage.close();
+                detached.set(false);
+            }
+            closeVisualisationTab();
+        }
+    }
+
+    private void updateVisualization() {
+        //first check which formulas have changed
+        LOGGER.debug("Update visualisation!");
+        if (formulaListenerMap != null) {
+            List<String> changedFormulas = new ArrayList<>();
+            for (String formula : formulaListenerMap.keySet()) {
+                if (visualisationModel.hasChanged(formula)) {
+                    changedFormulas.add(formula);
+                }
+            }
+
+            LOGGER.debug("The following formulas have changed their values: {}", String.join(" ", changedFormulas));
+
+            Set<FormulaListener> listenersToTrigger = new HashSet<>();
+            for (String formula : changedFormulas) {
+                listenersToTrigger.addAll(formulaListenerMap.get(formula));
+            }
+
+            Map<String, Object> formulaValueMap = new HashMap<>(changedFormulas.size());
+            for (FormulaListener listener : listenersToTrigger) {
+                String[] formulas = listener.getFormulas();
+                Object[] formulaValues = new Object[formulas.length];
+                for (int i = 0; i < formulas.length; i++) {
+                    if (formulaValueMap.containsKey(formulas[i])) {
+                        formulaValues[i] = formulaValueMap.get(formulas[i]);
+                    } else {
+                        Object formulaValue = visualisationModel.getValue(formulas[i]);
+                        formulaValues[i] = formulaValue;
+                        formulaValueMap.put(formulas[i], formulaValue);
+                    }
+                }
+                LOGGER.debug("Fire listener for formulas: {}", String.join(" ", formulas));
+                try {
+                    listener.variablesChanged(formulaValues);
+                } catch (Exception e) {
+                    Alert alert = stageManager.makeExceptionAlert(Alert.AlertType.WARNING,
+                            "Exception while calling the formula listener for the formulas:\n\"" +
+                                    String.join(" ", formulas) + "\"\n", e);
+                    alert.initOwner(stageManager.getCurrent());
+                    alert.show();
+                    LOGGER.warn("Exception while calling the formula listener for the formulas:\n\"" +
+                            String.join(" ", formulas), e);
+                }
+            }
+        }
+
+        if (eventListenerMap != null) {
+            String lastEvent = currentTrace.get().getCurrentTransition().getName();
+            if (eventListenerMap.containsKey(lastEvent)) {
+                LOGGER.info("Last executed event is \"{}\". Call corresponding listener.");
+                eventListenerMap.get(lastEvent).eventExcecuted();
+            }
+        }
+    }
+
+    private void createVisualisationTab() {
+        visualisationTab = new Tab(visualisation.get().getName(), createPlaceHolderContent(
+                String.format("The animated machine \"%s\" is not yet initialized.", currentMachine.get().getName())));
+        visualisationTab.setClosable(false);
+        tabPane.getTabs().add(visualisationTab);
+        tabPane.getSelectionModel().select(visualisationTab);
+    }
+
+    private void closeVisualisationTab() {
+        tabPane.getTabs().remove(visualisationTab);
+        visualisationTab = null;
+    }
+
+    public void detachVisualisation() {
+        visualizationStage = new Stage();
+        Node root = visualisationTab.getContent();
+        AnchorPane.setTopAnchor(root, 0.0);
+        AnchorPane.setBottomAnchor(root, 0.0);
+        AnchorPane.setLeftAnchor(root, 0.0);
+        AnchorPane.setRightAnchor(root, 0.0);
+        AnchorPane pane = new AnchorPane(root);
+        Scene visualizationScene = new Scene(pane);
+        visualizationStage.setScene(visualizationScene);
+        visualizationStage.setResizable(true);
+        visualizationStage.setTitle(visualisation.get().getName());
+        visualizationStage.setOnCloseRequest(event -> {
+            if (visualisation.isNotNull().get()) {
+                Node visualizationContent = ((AnchorPane) visualizationStage.getScene().getRoot()).getChildren().get(0);
+                visualisationTab.setContent(visualizationContent);
+                visualisationTab.getTabPane().getSelectionModel().select(visualisationTab);
+            }
+            detached.set(false);
+            visualizationStage = null;
+        });
+        visualizationStage.show();
+        visualisationTab.setContent(createPlaceHolderContent("Visualisation detached."));
+        detached.set(true);
+    }
+
+    private void setVisualisationContent(Node visualizationContent) {
+        if (detached.get()) {
+            Parent parent  = visualizationStage.getScene().getRoot();
+            AnchorPane pane = (parent != null) ? (AnchorPane) parent : new AnchorPane();
+            pane.getChildren().clear();
+            AnchorPane.setTopAnchor(visualizationContent, 0.0);
+            AnchorPane.setBottomAnchor(visualizationContent, 0.0);
+            AnchorPane.setLeftAnchor(visualizationContent, 0.0);
+            AnchorPane.setRightAnchor(visualizationContent, 0.0);
+            pane.getChildren().add(visualizationContent);
+        } else {
+            visualisationTab.setContent(visualizationContent);
+        }
+    }
+
+    private boolean checkMachine(String[] machines) {
+        String machineName = currentMachine.get().getFileName();
+        LOGGER.debug("Checking the machine. Current machine is \"{}\" and possible machines are \"{}\"", machineName, machines);
+        boolean start = true;
+        if (machines != null && machines.length != 0) {
+            start = Arrays.asList(machines).contains(machineName);
+        }
+        return start;
+    }
+
+    private void showAlert(Alert.AlertType type, String content, ButtonType... buttons) {
+        Alert alert = stageManager.makeAlert(type, content, buttons);
+        alert.setTitle(NAME);
+        alert.initOwner(stageManager.getCurrent());
+        alert.show();
+    }
+}

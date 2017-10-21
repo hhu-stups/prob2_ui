@@ -41,6 +41,7 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 
+import de.prob2.ui.visualisation.fx.VisualisationController;
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
@@ -104,6 +105,9 @@ public class ProB2Module extends AbstractModule {
 
 		bind(ProBPluginManager.class);
 		bind(ProBConnection.class);
+
+		bind(VisualisationController.class);
+		bind(VisualisationMenu.class);
 
 	}
 
