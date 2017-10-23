@@ -39,12 +39,6 @@ public class VisualisationController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationMenu.class);
 
-    public static final String NAME = "VisualisationFX";
-
-    private Tab visualisationTab;
-    private VisualisationModel visualisationModel;
-    private VisualisationLoader visualisationLoader;
-
     private final ChangeListener<Trace> currentTraceChangeListener;
     private final StageManager stageManager;
     private final CurrentTrace currentTrace;
@@ -57,11 +51,15 @@ public class VisualisationController {
     private SimpleObjectProperty<Visualisation> visualisation = new SimpleObjectProperty<>(null);
     private SimpleBooleanProperty detached = new SimpleBooleanProperty(false);
     private Stage visualizationStage;
+    private Tab visualisationTab;
+    private AnchorPane placeHolderContent;
+    private Label placeHolderLabel;
+    private VisualisationModel visualisationModel;
+    private VisualisationLoader visualisationLoader;
 
     @Inject
     public VisualisationController(StageManager stageManager, CurrentTrace currentTrace, CurrentProject currentProject,
                                    MainView mainView, ResourceBundle bundle) {
-
         this.stageManager = stageManager;
         this.currentTrace = currentTrace;
         this.currentMachine = currentProject.currentMachineProperty();
@@ -78,6 +76,9 @@ public class VisualisationController {
                         setVisualisationContent(visualisation.get().initialize());
                     }
                     updateVisualization();
+                } else {
+                    setVisualisationContent(getPlaceHolderContent(
+                            getFormattedString("visualisation.controller.initialized", currentMachine.get().getName())));
                 }
             }
         };
@@ -172,16 +173,17 @@ public class VisualisationController {
         eventListenerMap.put(listener.getEvent(), listener);
     }
 
-    private Node createPlaceHolderContent(String placeHolder) {
-        AnchorPane anchorPane = new AnchorPane();
-        Label noVisualizationLabel = new Label(placeHolder);
-        AnchorPane.setTopAnchor     (noVisualizationLabel, 10.0);
-        AnchorPane.setBottomAnchor  (noVisualizationLabel, 10.0);
-        AnchorPane.setLeftAnchor    (noVisualizationLabel, 10.0);
-        AnchorPane.setRightAnchor   (noVisualizationLabel, 10.0);
-        noVisualizationLabel.setAlignment(Pos.CENTER);
-        anchorPane.getChildren().add(noVisualizationLabel);
-        return anchorPane;
+    private Node getPlaceHolderContent(String placeHolder) {
+        if (placeHolderContent == null) {
+            placeHolderContent = new AnchorPane();
+            placeHolderLabel = new Label(placeHolder);
+            setZeroAnchor(placeHolderLabel);
+            placeHolderLabel.setAlignment(Pos.CENTER);
+            placeHolderContent.getChildren().add(placeHolderLabel);
+        } else {
+            placeHolderLabel.setText(placeHolder);
+        }
+        return placeHolderContent;
     }
 
     private void startVisualization(Visualisation loadedVisualisation) {
@@ -286,7 +288,7 @@ public class VisualisationController {
     }
 
     private void createVisualisationTab() {
-        visualisationTab = new Tab(visualisation.get().getName(), createPlaceHolderContent(
+        visualisationTab = new Tab(visualisation.get().getName(), getPlaceHolderContent(
                 getFormattedString("visualisation.controller.initialized", currentMachine.get().getName())));
         visualisationTab.setClosable(false);
         tabPane.getTabs().add(visualisationTab);
@@ -299,43 +301,34 @@ public class VisualisationController {
     }
 
     public void detachVisualisation() {
-        visualizationStage = new Stage();
-        Node root = visualisationTab.getContent();
-        AnchorPane.setTopAnchor(root, 0.0);
-        AnchorPane.setBottomAnchor(root, 0.0);
-        AnchorPane.setLeftAnchor(root, 0.0);
-        AnchorPane.setRightAnchor(root, 0.0);
-        AnchorPane pane = new AnchorPane(root);
-        Scene visualizationScene = new Scene(pane);
-        visualizationStage.setScene(visualizationScene);
+        final Node visualisationContent = visualisationTab.getContent();
+        setZeroAnchor(visualisationContent);
+        Scene visualisationScene = new Scene(new AnchorPane(visualisationContent));
+        visualizationStage = stageManager.makeStage(visualisationScene, null);
         visualizationStage.setResizable(true);
         visualizationStage.setTitle(visualisation.get().getName());
         visualizationStage.setOnCloseRequest(event -> {
             if (visualisation.isNotNull().get()) {
-                Node visualizationContent = ((AnchorPane) visualizationStage.getScene().getRoot()).getChildren().get(0);
-                visualisationTab.setContent(visualizationContent);
+                visualisationTab.setContent(visualisationContent);
                 visualisationTab.getTabPane().getSelectionModel().select(visualisationTab);
             }
             detached.set(false);
             visualizationStage = null;
         });
         visualizationStage.show();
-        visualisationTab.setContent(createPlaceHolderContent(bundle.getString("visualisation.controller.detached")));
+        visualisationTab.setContent(getPlaceHolderContent(bundle.getString("visualisation.controller.detached")));
         detached.set(true);
     }
 
-    private void setVisualisationContent(Node visualizationContent) {
+    private void setVisualisationContent(Node visualisationContent) {
         if (detached.get()) {
             Parent parent  = visualizationStage.getScene().getRoot();
             AnchorPane pane = (parent != null) ? (AnchorPane) parent : new AnchorPane();
             pane.getChildren().clear();
-            AnchorPane.setTopAnchor(visualizationContent, 0.0);
-            AnchorPane.setBottomAnchor(visualizationContent, 0.0);
-            AnchorPane.setLeftAnchor(visualizationContent, 0.0);
-            AnchorPane.setRightAnchor(visualizationContent, 0.0);
-            pane.getChildren().add(visualizationContent);
+            setZeroAnchor(visualisationContent);
+            pane.getChildren().add(visualisationContent);
         } else {
-            visualisationTab.setContent(visualizationContent);
+            visualisationTab.setContent(visualisationContent);
         }
     }
 
@@ -358,5 +351,12 @@ public class VisualisationController {
 
     private String getFormattedString(String key, Object... args) {
         return String.format(bundle.getString(key), args);
+    }
+
+    private void setZeroAnchor(Node node) {
+        AnchorPane.setTopAnchor(node, 0.0);
+        AnchorPane.setBottomAnchor(node, 0.0);
+        AnchorPane.setLeftAnchor(node, 0.0);
+        AnchorPane.setRightAnchor(node, 0.0);
     }
 }

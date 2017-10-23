@@ -21,13 +21,8 @@ import java.util.ResourceBundle;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static de.prob2.ui.visualisation.fx.VisualisationController.NAME;
-
 /**
- * Description of class
- *
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 23.09.17
  */
 public class VisualisationLoader {
@@ -62,13 +57,10 @@ public class VisualisationLoader {
             LOGGER.debug("Try to compile file {}.", fileName);
             String className = fileName.replace(".java", "");
 
-
             InMemoryClassloader classLoader = new InMemoryClassloader(this.getClass().getClassLoader());
             visualisationClassloader = classLoader;
 
-            Class visualizationClass = new InMemoryCompiler()
-                    .compile(className, selectedVisualization,/* pluginClassPath,*/ classLoader);
-
+            Class visualizationClass = new InMemoryCompiler().compile(className, selectedVisualization, classLoader);
             LOGGER.debug("Successfully compiled class {}.", className);
 
             if (checkVisualizationClass(visualizationClass)) {
@@ -76,12 +68,9 @@ public class VisualisationLoader {
                 return (Visualisation) visualizationClass.newInstance();
             } else {
                 LOGGER.warn("Class {} does not extend the abstract class Visualisation.", className);
-                showAlert(false, Alert.AlertType.WARNING,
-                        "visualisation.loader.no.extend",
-                        className);
+                showAlert(false, Alert.AlertType.WARNING, "visualisation.loader.no.extend", className);
                 return null;
             }
-
         } catch (InMemoryCompilerException e) {
             LOGGER.warn("Exception while compiling the class \"{}\".", fileName, e);
             showAlert(true, Alert.AlertType.WARNING, "visualisation.loader.compiler",
@@ -113,9 +102,7 @@ public class VisualisationLoader {
             JarFile selectedVisualizationJar = new JarFile(selectedVisualization);
             URL[]  urls = new URL[]{ new URL("jar:file:" + selectedVisualizationJar.getName() +"!/") };
             URLClassLoader classloader = URLClassLoader.newInstance(urls, this.getClass().getClassLoader());
-
             visualisationClassloader = classloader;
-
             Class visualizationClass = null;
             String className = null;
             Enumeration<JarEntry> jarEntries = selectedVisualizationJar.entries();
