@@ -33,6 +33,7 @@ import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IShouldExecuteItem;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+import de.prob2.ui.verifications.ShouldExecuteValueFactory.Type;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -260,7 +261,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory());
+		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(Type.MODELCHECKING, injector));
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addModelCheckButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
@@ -415,7 +416,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
 		updateCurrentValues(options, stateSpace);
 		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy), toPrettyString(currentOptions));
-		currentStats.updateItem(modelcheckingItem, currentProject.getCurrentMachine());
+		currentStats.updateItem(modelcheckingItem);
 		currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
 		tvItems.getSelectionModel().selectLast();
 	}
@@ -429,7 +430,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, ModelCheckingItem item) {
 		updateCurrentValues(options, stateSpace);
-		currentStats.updateItem(item,  currentProject.getCurrentMachine());
+		currentStats.updateItem(item);
 	}
 
 	private String toPrettyString(ModelCheckingOptions options) {

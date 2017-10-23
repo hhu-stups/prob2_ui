@@ -6,6 +6,7 @@ import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.stats.StatsView;
@@ -46,8 +47,6 @@ public final class ModelCheckStats extends AnchorPane {
 	private ModelCheckingItem item;
 	
 	private final Injector injector;
-	
-	private Machine currentMachine;
 	
 	@Inject
 	public ModelCheckStats(final StageManager stageManager, final ModelcheckingController modelcheckingController, final StatsView statsView,
@@ -148,16 +147,20 @@ public final class ModelCheckStats extends AnchorPane {
 		showResult(message);
 	}
 	
-	private void updateCurrentMachineStatus() {
-		for(ModelCheckingItem item : currentMachine.getModelcheckingItems()) {
+	public void updateCurrentMachineStatus() {
+		Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+		for(ModelCheckingItem item : machine.getModelcheckingItems()) {
+			if(!item.shouldExecute()) {
+				continue;
+			}
 			if(item.getChecked() == Checked.FAIL) {
-				currentMachine.setModelcheckingCheckedFailed();
+				machine.setModelcheckingCheckedFailed();
 				injector.getInstance(MachineTableView.class).refresh();
 				injector.getInstance(StatusBar.class).setModelcheckingStatus(StatusBar.ModelcheckingStatus.ERROR);
 				return;
 			}
 		}
-		currentMachine.setModelcheckingCheckedSuccessful();
+		machine.setModelcheckingCheckedSuccessful();
 		injector.getInstance(MachineTableView.class).refresh();
 		injector.getInstance(StatusBar.class).setModelcheckingStatus(StatusBar.ModelcheckingStatus.SUCCESSFUL);
 	}
@@ -195,9 +198,8 @@ public final class ModelCheckStats extends AnchorPane {
 		resultBackground.setOnMouseClicked(eventHandler);
 	}
 	
-	public void updateItem(ModelCheckingItem item, Machine currentMachine) {
+	public void updateItem(ModelCheckingItem item) {
 		this.item = item;
-		this.currentMachine = currentMachine;
 	}
 	
 }

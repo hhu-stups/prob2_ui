@@ -21,6 +21,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IShouldExecuteItem;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+import de.prob2.ui.verifications.ShouldExecuteValueFactory.Type;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -117,7 +118,7 @@ public class SymbolicCheckingView extends AnchorPane {
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory());
+		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(Type.SYMBOLIC, injector));
 	}
 	
 	

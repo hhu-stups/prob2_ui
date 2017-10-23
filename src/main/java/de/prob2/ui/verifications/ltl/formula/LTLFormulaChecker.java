@@ -63,6 +63,9 @@ public class LTLFormulaChecker {
 	
 	public void checkMachineStatus(Machine machine) {
 		for(LTLFormulaItem item : machine.getLTLFormulas()) {
+			if(!item.shouldExecute()) {
+				continue;
+			}
 			Checked checked = item.getChecked();
 			if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
 				machine.setLTLCheckedFailed();
