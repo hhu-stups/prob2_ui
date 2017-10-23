@@ -25,6 +25,7 @@ import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.formula.FormulaGenerator;
@@ -207,29 +208,41 @@ public final class StatesView extends AnchorPane {
 		return row;
 	}
 
-	private static boolean isSameNode(final PrologASTNode x, final PrologASTNode y) {
-		final boolean isSameCategory = x instanceof ASTCategory && y instanceof ASTCategory && ((ASTCategory)x).getName().equals(((ASTCategory)y).getName());
-		final boolean isSameFormula = x instanceof ASTFormula && y instanceof ASTFormula && ((ASTFormula)x).getFormula().equals(((ASTFormula)y).getFormula());
-		return isSameCategory || isSameFormula;
-	}
-
-	private static void getFormulasToSubscribe(final List<PrologASTNode> nodes, final List<IEvalElement> formulas) {
+	private static void getInitialExpandedFormulas(final List<PrologASTNode> nodes, final List<IEvalElement> formulas) {
 		for (final PrologASTNode node : nodes) {
 			if (node instanceof ASTFormula) {
 				formulas.add(((ASTFormula)node).getFormula());
 			}
-			
-			getFormulasToSubscribe(node.getSubnodes(), formulas);
+			if (node instanceof ASTCategory && ((ASTCategory)node).isExpanded()) {
+				getInitialExpandedFormulas(node.getSubnodes(), formulas);
+			}
 		}
 	}
 	
-	private static List<IEvalElement> getFormulasToSubscribe(final List<PrologASTNode> nodes) {
+	private static List<IEvalElement> getInitialExpandedFormulas(final List<PrologASTNode> nodes) {
 		final List<IEvalElement> formulas = new ArrayList<>();
-		getFormulasToSubscribe(nodes, formulas);
+		getInitialExpandedFormulas(nodes, formulas);
 		return formulas;
 	}
 
-	private static void buildNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
+	private static void getExpandedFormulas(final List<TreeItem<StateItem<?>>> treeItems, final List<IEvalElement> formulas) {
+		for (final TreeItem<StateItem<?>> ti : treeItems) {
+			if (ti.getValue().getContents() instanceof ASTFormula) {
+				formulas.add(((ASTFormula)ti.getValue().getContents()).getFormula());
+			}
+			if (ti.isExpanded()) {
+				getExpandedFormulas(ti.getChildren(), formulas);
+			}
+		}
+	}
+
+	private static List<IEvalElement> getExpandedFormulas(final List<TreeItem<StateItem<?>>> treeItems) {
+		final List<IEvalElement> formulas = new ArrayList<>();
+		getExpandedFormulas(treeItems, formulas);
+		return formulas;
+	}
+
+	private void buildNodes(final StateSpace stateSpace, final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(nodes);
 		
@@ -242,7 +255,15 @@ public final class StatesView extends AnchorPane {
 			}
 			treeItem.getChildren().add(subTreeItem);
 			subTreeItem.setValue(new StateItem<>(node, false));
-			buildNodes(subTreeItem, node.getSubnodes());
+			subTreeItem.expandedProperty().addListener((o, from, to) -> {
+				final List<IEvalElement> formulas = getExpandedFormulas(subTreeItem.getChildren());
+				if (to) {
+					stateSpace.subscribe(this, formulas);
+				} else {
+					stateSpace.unsubscribe(this, formulas);
+				}
+			});
+			buildNodes(stateSpace, subTreeItem, node.getSubnodes());
 		}
 	}
 
@@ -274,9 +295,8 @@ public final class StatesView extends AnchorPane {
 			final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
 			to.getStateSpace().execute(cmd);
 			this.rootNodes = cmd.getPrologASTList();
+			to.getStateSpace().subscribe(this, getInitialExpandedFormulas(this.rootNodes));
 		}
-		
-		to.getStateSpace().subscribe(this, getFormulasToSubscribe(this.rootNodes));
 		
 		this.currentValues.clear();
 		this.currentValues.putAll(to.getCurrentState().getValues());
@@ -288,7 +308,7 @@ public final class StatesView extends AnchorPane {
 		Platform.runLater(() -> {
 			if (rebuildTree) {
 				this.tvRootItem.getChildren().clear();
-				buildNodes(this.tvRootItem, this.rootNodes);
+				buildNodes(to.getStateSpace(), this.tvRootItem, this.rootNodes);
 			} else {
 				updateNodes(this.tvRootItem, this.rootNodes);
 			}
