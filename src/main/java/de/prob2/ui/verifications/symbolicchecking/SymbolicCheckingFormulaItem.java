@@ -62,6 +62,10 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
 		return Objects.hash(name, code, type);
 	}
 	
+	public void setType(SymbolicCheckingType type) {
+		this.type = type;
+	}
+	
 	public SymbolicCheckingType getType() {
 		return type;
 	}

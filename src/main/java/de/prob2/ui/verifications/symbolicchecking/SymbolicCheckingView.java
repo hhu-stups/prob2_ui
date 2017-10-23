@@ -18,6 +18,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -127,6 +128,9 @@ public class SymbolicCheckingView extends AnchorPane {
 			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolic.menu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);
 			
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
+			showMessage.setOnAction(e -> injector.getInstance(SymbolicCheckingResultHandler.class).showResult(row.getItem()));
+			
 			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.symbolic.menu.showFoundState"));
 			showStateItem.setDisable(true);
 			
@@ -171,10 +175,16 @@ public class SymbolicCheckingView extends AnchorPane {
 							showStateItem.setOnAction(event-> currentTrace.set((item.getExample())));
 						}
 					}
+					
+					if(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked()) {
+						showMessage.setDisable(true);
+					} else {
+						showMessage.setDisable(false);
+					}
 				}
 			});
 			
-			row.setContextMenu(new ContextMenu(check, changeItem, showCounterExampleItem, showStateItem, removeItem));
+			row.setContextMenu(new ContextMenu(check, changeItem, showCounterExampleItem, showMessage, showStateItem, removeItem));
 			return row;
 		});
 	}

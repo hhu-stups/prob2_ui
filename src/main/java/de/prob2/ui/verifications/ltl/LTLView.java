@@ -164,6 +164,9 @@ public class LTLView extends AnchorPane{
 			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.formula.menu.openInEditor"));
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
 			openEditor.disableProperty().bind(row.emptyProperty());
+			
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
+			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 
 			MenuItem check = new MenuItem(bundle.getString("verifications.ltl.formula.menu.checkSeparately"));
 			check.setOnAction(e-> {
@@ -192,9 +195,15 @@ public class LTLView extends AnchorPane{
 					} else {
 						showCounterExampleItem.setDisable(false);
 					}
+					
+					if(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked()) {
+						showMessage.setDisable(true);
+					} else {
+						showMessage.setDisable(false);
+					}
 				}
 			});
-			row.setContextMenu(new ContextMenu(openEditor, removeItem, showCounterExampleItem, check));
+			row.setContextMenu(new ContextMenu(openEditor, removeItem, showCounterExampleItem, showMessage, check));
 			return row;
 		});
 		

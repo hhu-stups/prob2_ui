@@ -11,12 +11,14 @@ public abstract class AbstractCheckableItem {
 	protected String name;
 	protected String description;
 	protected String code;
+	protected CheckingResultItem resultItem;
 	
 	public AbstractCheckableItem(String name, String description, String code) {
 		initializeStatus();
 		this.name = name;
 		this.description = description;
 		this.code = code;
+		this.resultItem = null;
 	}	
 	
 	public void setData(String name, String description, String code) {
@@ -58,6 +60,14 @@ public abstract class AbstractCheckableItem {
 	
 	public String getCode() {
 		return code;
+	}
+	
+	public void setResultItem(CheckingResultItem resultItem) {
+		this.resultItem = resultItem;
+	}
+	
+	public CheckingResultItem getResultItem() {
+		return resultItem;
 	}
 	
 	public void setCheckedSuccessful() {
