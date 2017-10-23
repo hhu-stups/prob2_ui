@@ -31,6 +31,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IShouldExecuteItem;
+import de.prob2.ui.verifications.ShouldExecuteValueFactory;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -205,6 +207,9 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	
 	@FXML
 	private TableColumn<ModelCheckingItem, String> descriptionColumn;
+	
+	@FXML
+	private TableColumn<IShouldExecuteItem, CheckBox> shouldExecuteColumn;
 
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
@@ -255,6 +260,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory());
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addModelCheckButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));

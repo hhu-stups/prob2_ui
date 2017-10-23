@@ -49,6 +49,9 @@
 							maxWidth="240.0" prefWidth="120.0" text="%verifications.columns.strategy" />
 						<TableColumn fx:id="descriptionColumn" minWidth="120.0"
 							prefWidth="120.0" text="%verifications.columns.description" />
+						<TableColumn fx:id="shouldExecuteColumn"
+							minWidth="50.0" prefWidth="50.0"
+							text="" />
 					</columns>
 					<placeholder>
 						<Label text="%verifications.modelchecking.stats.placeholder" />

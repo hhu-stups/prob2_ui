@@ -19,8 +19,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
+import de.prob2.ui.verifications.IShouldExecuteItem;
+import de.prob2.ui.verifications.ShouldExecuteValueFactory;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -33,23 +33,10 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-import javafx.util.Callback;
 
 @Singleton
 public class SymbolicCheckingView extends AnchorPane {
 	
-	public class ShouldExecuteValueFactory implements Callback<TableColumn.CellDataFeatures<SymbolicCheckingFormulaItem, CheckBox>, ObservableValue<CheckBox>> {
-	    @Override
-	    public ObservableValue<CheckBox> call(TableColumn.CellDataFeatures<SymbolicCheckingFormulaItem, CheckBox> param) {
-	    	SymbolicCheckingFormulaItem item = param.getValue();
-	        CheckBox checkBox = new CheckBox();
-	        checkBox.selectedProperty().setValue(item.shouldExecute());
-	        checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-	            item.setShouldExecute(newValue);
-	        });
-	        return new SimpleObjectProperty<>(checkBox);
-	    }
-	}
 	
 	@FXML
 	private HelpButton helpButton;
@@ -67,7 +54,7 @@ public class SymbolicCheckingView extends AnchorPane {
 	private TableColumn<SymbolicCheckingFormulaItem, String> formulaDescriptionColumn;
 	
 	@FXML
-	private TableColumn<SymbolicCheckingFormulaItem, CheckBox> shouldExecuteColumn;
+	private TableColumn<IShouldExecuteItem, CheckBox> shouldExecuteColumn;
 	
 	@FXML
 	private Button addFormulaButton;

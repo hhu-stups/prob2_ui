@@ -4,7 +4,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.scene.paint.Color;
 
-public abstract class AbstractCheckableItem {
+public abstract class AbstractCheckableItem implements IShouldExecuteItem {
 	
 	protected transient FontAwesomeIconView status;
 	protected Checked checked;
@@ -44,10 +44,12 @@ public abstract class AbstractCheckableItem {
 		return name;
 	}
 	
+	@Override
 	public void setShouldExecute(boolean shouldExecute) {
 		this.shouldExecute = shouldExecute;
 	}
 	
+	@Override
 	public boolean shouldExecute() {
 		return shouldExecute;
 	}
