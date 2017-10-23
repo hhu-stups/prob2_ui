@@ -11,6 +11,7 @@ public abstract class AbstractCheckableItem {
 	protected String name;
 	protected String description;
 	protected String code;
+	protected boolean shouldExecute;
 	protected CheckingResultItem resultItem;
 	
 	public AbstractCheckableItem(String name, String description, String code) {
@@ -18,6 +19,7 @@ public abstract class AbstractCheckableItem {
 		this.name = name;
 		this.description = description;
 		this.code = code;
+		this.shouldExecute = true;
 		this.resultItem = null;
 	}	
 	
@@ -40,6 +42,14 @@ public abstract class AbstractCheckableItem {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public void setShouldExecute(boolean shouldExecute) {
+		this.shouldExecute = shouldExecute;
+	}
+	
+	public boolean shouldExecute() {
+		return shouldExecute;
 	}
 
 	public String getDescription() {
