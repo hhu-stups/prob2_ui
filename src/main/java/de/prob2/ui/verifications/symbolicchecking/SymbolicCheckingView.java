@@ -119,6 +119,14 @@ public class SymbolicCheckingView extends AnchorPane {
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(Type.SYMBOLIC, injector));
+		
+		tvFormula.setOnMouseClicked(e-> {
+			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+			if(e.getClickCount() == 2 &&  item != null && currentTrace.exists()) {
+				symbolicCheckHandler.checkItem(item);
+				symbolicCheckHandler.updateMachineStatus(currentProject.getCurrentMachine());
+			}
+		});
 	}
 	
 	
@@ -161,6 +169,7 @@ public class SymbolicCheckingView extends AnchorPane {
 							SymbolicCheckingType.IC3,
 							SymbolicCheckingType.KINDUCTION,
 							SymbolicCheckingType.TINDUCTION);
+				
 				if(e.getButton() == MouseButton.SECONDARY) {
 					SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 					if(row.emptyProperty().get() || item.getCounterExamples().isEmpty()) {
