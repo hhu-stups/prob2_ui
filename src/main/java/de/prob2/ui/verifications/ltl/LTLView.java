@@ -17,7 +17,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.IShouldExecuteItem;
+import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory.Type;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
@@ -86,7 +86,7 @@ public class LTLView extends AnchorPane{
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	
 	@FXML
-	private TableColumn<IShouldExecuteItem, CheckBox> shouldExecuteColumn;
+	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
 	
 	private final ResourceBundle bundle;
 	

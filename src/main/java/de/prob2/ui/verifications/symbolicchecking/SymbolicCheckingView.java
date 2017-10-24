@@ -19,7 +19,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.IShouldExecuteItem;
+import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory.Type;
 import javafx.fxml.FXML;
@@ -55,7 +55,7 @@ public class SymbolicCheckingView extends AnchorPane {
 	private TableColumn<SymbolicCheckingFormulaItem, String> formulaDescriptionColumn;
 	
 	@FXML
-	private TableColumn<IShouldExecuteItem, CheckBox> shouldExecuteColumn;
+	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
 	
 	@FXML
 	private Button addFormulaButton;

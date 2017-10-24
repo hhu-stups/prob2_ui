@@ -4,12 +4,12 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.check.ModelCheckingOptions;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.IShouldExecuteItem;
+import de.prob2.ui.verifications.IExecutableItem;
 import javafx.scene.paint.Color;
 
 import java.util.Objects;
 
-public class ModelCheckingItem implements IShouldExecuteItem {
+public class ModelCheckingItem implements IExecutableItem {
 
 	private ModelCheckingOptions options;
 	private transient ModelCheckStats stats;

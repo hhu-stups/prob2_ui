@@ -1,6 +1,6 @@
 package de.prob2.ui.verifications;
 
-public interface IShouldExecuteItem {
+public interface IExecutableItem {
 	boolean shouldExecute();
 	void setShouldExecute(boolean shouldExecute);
 }

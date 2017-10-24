@@ -4,7 +4,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.scene.paint.Color;
 
-public abstract class AbstractCheckableItem implements IShouldExecuteItem {
+public abstract class AbstractCheckableItem implements IExecutableItem {
 	
 	protected transient FontAwesomeIconView status;
 	protected Checked checked;
