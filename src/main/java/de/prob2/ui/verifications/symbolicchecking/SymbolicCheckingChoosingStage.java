@@ -31,6 +31,9 @@ public class SymbolicCheckingChoosingStage extends Stage {
 	public void initialize() {
 		formulaInput.visibleProperty().bind(cbChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			if(newValue == null) {
+				return;
+			}
 			switch(newValue.getGUIType()) {
 				case TEXT_FIELD:
 					formulaInput.showTextField();
@@ -45,6 +48,7 @@ public class SymbolicCheckingChoosingStage extends Stage {
 					break;
 			}
 		});
+		
 	}
 	
 	public GUIType getGUIType() {
@@ -53,6 +57,19 @@ public class SymbolicCheckingChoosingStage extends Stage {
 	
 	public SymbolicCheckingType getCheckingType() {
 		return cbChoice.getSelectionModel().getSelectedItem().getCheckingType();
+	}
+	
+	public void select(SymbolicCheckingFormulaItem item) {
+		cbChoice.getItems().forEach(choice -> {
+			if(item.getDescription().toLowerCase().equals(choice.getCheckingType().name().toLowerCase())) {
+				cbChoice.getSelectionModel().select(choice);
+			}
+		});
+	}
+	
+	public void reset() {
+		formulaInput.reset();
+		cbChoice.getSelectionModel().clearSelection();
 	}
 	
 }

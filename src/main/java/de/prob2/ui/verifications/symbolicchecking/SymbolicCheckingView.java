@@ -209,6 +209,7 @@ public class SymbolicCheckingView extends AnchorPane {
 	
 	@FXML
 	public void addFormula() {
+		injector.getInstance(SymbolicCheckingChoosingStage.class).reset();
 		injector.getInstance(SymbolicCheckingChoosingStage.class).showAndWait();
 	}
 	
