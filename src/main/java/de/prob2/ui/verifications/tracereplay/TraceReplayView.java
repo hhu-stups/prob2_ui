@@ -108,9 +108,7 @@ public class TraceReplayView extends ScrollPane {
 
 	@FXML
 	private void checkMachine() {
-		for (ReplayTraceItem traceItem : traceTableView.getItems()) {
-			replayTrace(traceItem.getTrace());
-		}
+		traceTableView.getItems().forEach(traceItem -> replayTrace(traceItem.getTrace()));
 	}
 
 	private void replayTrace(ReplayTrace trace) {
