@@ -9,14 +9,10 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.tracereplay.ReplayTrace.Status;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -41,13 +37,15 @@ public class TraceReplayView extends ScrollPane {
 
 	private final CurrentProject currentProject;
 	private final TraceLoader traceLoader;
+	private final TraceChecker traceChecker;
 	private final Injector injector;
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
-			final TraceLoader traceLoader, final Injector injector) {
+			final TraceLoader traceLoader, final TraceChecker traceChecker, final Injector injector) {
 		this.currentProject = currentProject;
 		this.traceLoader = traceLoader;
+		this.traceChecker = traceChecker;
 		this.injector = injector;
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
@@ -108,23 +106,6 @@ public class TraceReplayView extends ScrollPane {
 
 	@FXML
 	private void checkMachine() {
-		traceTableView.getItems().forEach(traceItem -> replayTrace(traceItem.getTrace()));
-	}
-
-	private void replayTrace(ReplayTrace trace) {
-		trace.setStatus(Status.NOT_CHECKED);
-
-		StateSpace stateSpace = injector.getInstance(CurrentTrace.class).getStateSpace();
-		Trace t = new Trace(stateSpace);
-
-		try {
-			for (ReplayTransition transition : trace.getTransitionList()) {
-				t = t.addTransitionWith(transition.getName(), transition.getParameters());
-			}
-		} catch (IllegalArgumentException e) {
-			trace.setStatus(Status.FAILED);
-			return;
-		}
-		trace.setStatus(Status.SUCCESSFUL);
+		traceChecker.checkMachine(traceTableView.getItems());
 	}
 }
