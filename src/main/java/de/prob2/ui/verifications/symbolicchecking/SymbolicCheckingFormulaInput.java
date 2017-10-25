@@ -94,16 +94,16 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "symbolic_checking_formula_input.fxml");
 		
-		changeHandler = (item) -> {
+		changeHandler = item -> 
 			btAdd.setOnAction(e -> {
 				if(!updateFormula(item)) {
 					injector.getInstance(SymbolicCheckingResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 				}
 				injector.getInstance(SymbolicCheckingChoosingStage.class).close();
 			});
-		};
+		;
 		
-		checkAndChangeHandler = (item) -> {
+		checkAndChangeHandler = item -> 
 			btCheck.setOnAction(e-> {
 				if(updateFormula(item)) {
 					symbolicCheckingHandler.checkItem(item);
@@ -112,13 +112,11 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 				}
 				injector.getInstance(SymbolicCheckingChoosingStage.class).close();
 			});
-		};
+		;
 		
-		addHandler = (e) -> {
-			addFormula(false);
-		};
+		addHandler = e -> addFormula(false);
 		
-		checkHandler = (e) -> {
+		checkHandler = e -> {
 			SymbolicCheckingType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
 			SymbolicCheckingFormulaItem formulaItem;
 			addFormula(true);

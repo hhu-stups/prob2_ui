@@ -59,9 +59,9 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
 		item.setResultItem(resultItem);
-		((SymbolicCheckingFormulaItem) item).getCounterExamples().clear();
+		item.getCounterExamples().clear();
 		for(Trace trace: traces) {
-			((SymbolicCheckingFormulaItem) item).getCounterExamples().add(trace);
+			item.getCounterExamples().add(trace);
 		}
 	}
 
@@ -171,9 +171,9 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = new CheckingResultItem(alertType , checked, msg, header);
 		item.setResultItem(resultItem);
-		((SymbolicCheckingFormulaItem) item).getCounterExamples().clear();
+		item.getCounterExamples().clear();
 		for(Trace trace: traces) {
-			((SymbolicCheckingFormulaItem) item).getCounterExamples().add(trace);
+			item.getCounterExamples().add(trace);
 		}
 		handleItem(item, checked);
 	}
