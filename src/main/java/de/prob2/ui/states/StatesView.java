@@ -25,7 +25,6 @@ import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.formula.FormulaGenerator;
@@ -242,7 +241,16 @@ public final class StatesView extends AnchorPane {
 		return formulas;
 	}
 
-	private void buildNodes(final StateSpace stateSpace, final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
+	private void updateValueMaps(final Trace trace) {
+		this.currentValues.clear();
+		this.currentValues.putAll(trace.getCurrentState().getValues());
+		this.previousValues.clear();
+		if (trace.canGoBack()) {
+			this.previousValues.putAll(trace.getPreviousState().getValues());
+		}
+	}
+
+	private void buildNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(nodes);
 		
@@ -258,12 +266,13 @@ public final class StatesView extends AnchorPane {
 			subTreeItem.expandedProperty().addListener((o, from, to) -> {
 				final List<IEvalElement> formulas = getExpandedFormulas(subTreeItem.getChildren());
 				if (to) {
-					stateSpace.subscribe(this, formulas);
+					this.currentTrace.getStateSpace().subscribe(this, formulas);
 				} else {
-					stateSpace.unsubscribe(this, formulas);
+					this.currentTrace.getStateSpace().unsubscribe(this, formulas);
 				}
+				this.updateValueMaps(this.currentTrace.get());
 			});
-			buildNodes(stateSpace, subTreeItem, node.getSubnodes());
+			buildNodes(subTreeItem, node.getSubnodes());
 		}
 	}
 
@@ -298,17 +307,12 @@ public final class StatesView extends AnchorPane {
 			to.getStateSpace().subscribe(this, getInitialExpandedFormulas(this.rootNodes));
 		}
 		
-		this.currentValues.clear();
-		this.currentValues.putAll(to.getCurrentState().getValues());
-		this.previousValues.clear();
-		if (to.canGoBack()) {
-			this.previousValues.putAll(to.getPreviousState().getValues());
-		}
+		this.updateValueMaps(to);
 		
 		Platform.runLater(() -> {
 			if (rebuildTree) {
 				this.tvRootItem.getChildren().clear();
-				buildNodes(to.getStateSpace(), this.tvRootItem, this.rootNodes);
+				buildNodes(this.tvRootItem, this.rootNodes);
 			} else {
 				updateNodes(this.tvRootItem, this.rootNodes);
 			}

@@ -18,6 +18,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingItem.GUIType;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -26,6 +28,11 @@ import javafx.scene.layout.StackPane;
 
 @Singleton
 public class SymbolicCheckingFormulaInput extends StackPane {
+	
+	@FunctionalInterface
+	private interface EventHandlerOnItem {
+		void apply(SymbolicCheckingFormulaItem item);
+	}
 	
 	private final SymbolicCheckingFormulaHandler symbolicCheckingHandler;
 	
@@ -67,6 +74,14 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	
 	private ArrayList<String> events;
 	
+	private final EventHandlerOnItem changeHandler;
+	
+	private final EventHandlerOnItem checkAndChangeHandler;
+	
+	private final EventHandler<ActionEvent> addHandler;
+	
+	private final EventHandler<ActionEvent> checkHandler;
+	
 	@Inject
 	public SymbolicCheckingFormulaInput(final StageManager stageManager, final SymbolicCheckingFormulaHandler cbcHandler, 
 										final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
@@ -78,33 +93,107 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		this.injector = injector;
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "symbolic_checking_formula_input.fxml");
+		
+		changeHandler = item -> 
+			btAdd.setOnAction(e -> {
+				if(!updateFormula(item)) {
+					injector.getInstance(SymbolicCheckingResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+				}
+				injector.getInstance(SymbolicCheckingChoosingStage.class).close();
+			});
+		;
+		
+		checkAndChangeHandler = item -> 
+			btCheck.setOnAction(e-> {
+				if(updateFormula(item)) {
+					symbolicCheckingHandler.checkItem(item);
+				} else {
+					injector.getInstance(SymbolicCheckingResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+				}
+				injector.getInstance(SymbolicCheckingChoosingStage.class).close();
+			});
+		;
+		
+		addHandler = e -> addFormula(false);
+		
+		checkHandler = e -> {
+			SymbolicCheckingType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
+			SymbolicCheckingFormulaItem formulaItem;
+			addFormula(true);
+			switch(checkingType) {
+				case INVARIANT:
+					symbolicCheckingHandler.checkInvariant(cbOperations.getSelectionModel().getSelectedItem());
+					break;
+				case DEADLOCK:
+					symbolicCheckingHandler.checkDeadlock(tfFormula.getText());
+					break;
+				case SEQUENCE:
+					symbolicCheckingHandler.checkSequence(tfFormula.getText());
+					break;
+				case CHECK_ALL_OPERATIONS:
+					for(String event : events) {
+						symbolicCheckingHandler.checkInvariant(event);
+					}
+					break;
+				case FIND_REDUNDANT_INVARIANTS:
+					formulaItem = new SymbolicCheckingFormulaItem(FIND_REDUNDANT_INVARIANTS, FIND_REDUNDANT_INVARIANTS, SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS);
+					symbolicCheckingHandler.findRedundantInvariants(formulaItem);
+					break;
+				case FIND_DEADLOCK:
+					symbolicCheckingHandler.findDeadlock();
+					break;
+				case FIND_VALID_STATE:
+					formulaItem = new SymbolicCheckingFormulaItem(tfFormula.getText(), tfFormula.getText(), 
+							SymbolicCheckingType.FIND_VALID_STATE);
+					symbolicCheckingHandler.findValidState(formulaItem);
+					break;
+				case CHECK_ASSERTIONS:
+					formulaItem = new SymbolicCheckingFormulaItem(ASSERTION_CHECKING, ASSERTION_CHECKING, SymbolicCheckingType.ASSERTIONS);
+					symbolicCheckingHandler.checkAssertions(formulaItem);
+					break;
+				case CHECK_REFINEMENT:
+					formulaItem = new SymbolicCheckingFormulaItem(REFINEMENT_CHECKING, REFINEMENT_CHECKING, SymbolicCheckingType.REFINEMENT);
+					symbolicCheckingHandler.checkRefinement(formulaItem);
+					break;
+				case IC3:
+					formulaItem = new SymbolicCheckingFormulaItem(IC3, IC3, SymbolicCheckingType.IC3);
+					symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.IC3);
+					break;
+				case TINDUCTION:
+					formulaItem = new SymbolicCheckingFormulaItem(TINDUCTION, TINDUCTION, SymbolicCheckingType.TINDUCTION);
+					symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.TINDUCTION);
+					break;
+				case KINDUCTION:
+					formulaItem = new SymbolicCheckingFormulaItem(KINDUCTION, KINDUCTION, SymbolicCheckingType.KINDUCTION);
+					symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.KINDUCTION);
+					break;
+				case BMC:
+					formulaItem = new SymbolicCheckingFormulaItem(BMC, BMC, SymbolicCheckingType.BMC);
+					symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.BMC);
+					break;
+				default:
+					break;
+			}
+			injector.getInstance(SymbolicCheckingChoosingStage.class).close();
+		};
 	}
 	
 	@FXML
 	public void initialize() {
 		this.update();
 		currentTrace.addListener((observable, from, to) -> update());
+		btAdd.setOnAction(addHandler);
+		btCheck.setOnAction(checkHandler);
 	}
 	
 	public void changeFormula(SymbolicCheckingFormulaItem item) {
 		btAdd.setText(bundle.getString("verifications.symbolic.input.change"));
-		btAdd.setOnAction(e-> {
-			if(!updateFormula(item)) {
-				injector.getInstance(SymbolicCheckingResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
-			}
-			injector.getInstance(SymbolicCheckingChoosingStage.class).close();
-		});
-
+		changeHandler.apply(item);
 		btCheck.setText(bundle.getString("verifications.symbolic.input.changeAndCheck"));
-		btCheck.setOnAction(e-> {
-			if(updateFormula(item)) {
-				symbolicCheckingHandler.checkItem(item);
-			} else {
-				injector.getInstance(SymbolicCheckingResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
-			}
-			injector.getInstance(SymbolicCheckingChoosingStage.class).close();
-		});
+		checkAndChangeHandler.apply(item);
+		
 		SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
+		choosingStage.select(item);
 		if(choosingStage.getGUIType() == GUIType.TEXT_FIELD) {
 			tfFormula.setText(item.getCode());
 		} else if(choosingStage.getGUIType() == GUIType.CHOICE_BOX) {
@@ -158,11 +247,6 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	
 	public List<String> getEvents() {
 		return events;
-	}
-	
-	@FXML
-	public void addFormula() {
-		addFormula(false);
 	}
 	
 	private void addFormula(boolean checking) {
@@ -227,68 +311,6 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		}
 		injector.getInstance(SymbolicCheckingChoosingStage.class).close();
 	}
-	
-	@FXML
-	public void checkFormula() {
-		SymbolicCheckingType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
-		SymbolicCheckingFormulaItem formulaItem;
-		addFormula(true);
-		switch(checkingType) {
-			case INVARIANT:
-				symbolicCheckingHandler.checkInvariant(cbOperations.getSelectionModel().getSelectedItem());
-				break;
-			case DEADLOCK:
-				symbolicCheckingHandler.checkDeadlock(tfFormula.getText());
-				break;
-			case SEQUENCE:
-				symbolicCheckingHandler.checkSequence(tfFormula.getText());
-				break;
-			case CHECK_ALL_OPERATIONS:
-				for(String event : events) {
-					symbolicCheckingHandler.checkInvariant(event);
-				}
-				break;
-			case FIND_REDUNDANT_INVARIANTS:
-				formulaItem = new SymbolicCheckingFormulaItem(FIND_REDUNDANT_INVARIANTS, FIND_REDUNDANT_INVARIANTS, SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS);
-				symbolicCheckingHandler.findRedundantInvariants(formulaItem);
-				break;
-			case FIND_DEADLOCK:
-				symbolicCheckingHandler.findDeadlock();
-				break;
-			case FIND_VALID_STATE:
-				formulaItem = new SymbolicCheckingFormulaItem(tfFormula.getText(), tfFormula.getText(), 
-						SymbolicCheckingType.FIND_VALID_STATE);
-				symbolicCheckingHandler.findValidState(formulaItem);
-				break;
-			case CHECK_ASSERTIONS:
-				formulaItem = new SymbolicCheckingFormulaItem(ASSERTION_CHECKING, ASSERTION_CHECKING, SymbolicCheckingType.ASSERTIONS);
-				symbolicCheckingHandler.checkAssertions(formulaItem);
-				break;
-			case CHECK_REFINEMENT:
-				formulaItem = new SymbolicCheckingFormulaItem(REFINEMENT_CHECKING, REFINEMENT_CHECKING, SymbolicCheckingType.REFINEMENT);
-				symbolicCheckingHandler.checkRefinement(formulaItem);
-				break;
-			case IC3:
-				formulaItem = new SymbolicCheckingFormulaItem(IC3, IC3, SymbolicCheckingType.IC3);
-				symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.IC3);
-				break;
-			case TINDUCTION:
-				formulaItem = new SymbolicCheckingFormulaItem(TINDUCTION, TINDUCTION, SymbolicCheckingType.TINDUCTION);
-				symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.TINDUCTION);
-				break;
-			case KINDUCTION:
-				formulaItem = new SymbolicCheckingFormulaItem(KINDUCTION, KINDUCTION, SymbolicCheckingType.KINDUCTION);
-				symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.KINDUCTION);
-				break;
-			case BMC:
-				formulaItem = new SymbolicCheckingFormulaItem(BMC, BMC, SymbolicCheckingType.BMC);
-				symbolicCheckingHandler.checkSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.BMC);
-				break;
-			default:
-				break;
-		}
-		injector.getInstance(SymbolicCheckingChoosingStage.class).close();
-	}
 		
 	@FXML
 	public void cancel() {
@@ -310,6 +332,15 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	public void showNone() {
 		tfFormula.setVisible(false);
 		cbOperations.setVisible(false);
+	}
+	
+	public void reset() {
+		btAdd.setOnAction(addHandler);
+		btCheck.setOnAction(checkHandler);
+		btAdd.setText(bundle.getString("verifications.symbolic.add"));
+		btCheck.setText(bundle.getString("verifications.symbolic.check"));
+		tfFormula.clear();
+		cbOperations.getSelectionModel().clearSelection();
 	}
 
 }

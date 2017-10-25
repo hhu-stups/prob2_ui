@@ -56,7 +56,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 		Platform.runLater(() -> {
 			item.setResultItem(resultItem);	
 			if(traces != null && !traces.isEmpty()) {
-				((LTLFormulaItem) item).setCounterExample(traces.get(0));
+				item.setCounterExample(traces.get(0));
 			}
 		});
 		if(resultItem != null) {

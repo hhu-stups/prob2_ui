@@ -9,6 +9,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import de.prob.cli.ProBInstanceProvider;
+import de.prob.scripting.Api;
 
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.RuntimeOptions;
@@ -81,7 +82,10 @@ public class ProB2 extends Application {
 					alert.show();
 				});
 			});
-			injector.getInstance(Config.class); // Load config file
+			// Disable subscribing to variables by default, StatesView handles all subscribing itself
+			injector.getInstance(Api.class).setLoadVariablesByDefault(false);
+			// Load config file
+			injector.getInstance(Config.class);
 
 			CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 			currentProject.addListener((observable, from, to) -> this.updateTitle());
