@@ -24,7 +24,6 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -48,14 +47,6 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		this.interrupted.addAll(Arrays.asList(NotYetFinished.class));
 	}
 	
-	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, List<Trace> traces) {
-		super.showResult(resultItem, item);
-		((SymbolicCheckingFormulaItem) item).getCounterExamples().clear();
-		for(Trace trace: traces) {
-			((SymbolicCheckingFormulaItem) item).getCounterExamples().add(trace);
-		}
-	}
-	
 	public void handleFormulaResult(SymbolicCheckingFormulaItem item, Object result, State stateid) {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
@@ -67,7 +58,11 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
-		this.showResult(resultItem, item, traces);
+		item.setResultItem(resultItem);
+		((SymbolicCheckingFormulaItem) item).getCounterExamples().clear();
+		for(Trace trace: traces) {
+			((SymbolicCheckingFormulaItem) item).getCounterExamples().add(trace);
+		}
 	}
 
 	@Override
@@ -173,8 +168,13 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		
 	private void showCheckingResult(SymbolicCheckingFormulaItem item, String msg, String header, Checked checked) {
 		Alert.AlertType alertType = checked == Checked.SUCCESS ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR;
+		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = new CheckingResultItem(alertType , checked, msg, header);
-		super.showResult(resultItem, item);
+		item.setResultItem(resultItem);
+		((SymbolicCheckingFormulaItem) item).getCounterExamples().clear();
+		for(Trace trace: traces) {
+			((SymbolicCheckingFormulaItem) item).getCounterExamples().add(trace);
+		}
 		handleItem(item, checked);
 	}
 	

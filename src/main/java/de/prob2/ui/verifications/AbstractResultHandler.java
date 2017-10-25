@@ -59,7 +59,8 @@ public abstract class AbstractResultHandler {
 		interrupted = new ArrayList<>();
 	}
 	
-	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item) {
+	public void showResult(AbstractCheckableItem item) {
+		CheckingResultItem resultItem = item.getResultItem();
 		if(resultItem == null || item.getChecked() == Checked.SUCCESS) {
 			return;
 		}

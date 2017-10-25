@@ -269,6 +269,9 @@ public class SymbolicCheckingFormulaHandler {
 	
 	public void updateMachineStatus(Machine machine) {
 		for(SymbolicCheckingFormulaItem formula : machine.getSymbolicCheckingFormulas()) {
+			if(!formula.shouldExecute()) {
+				continue;
+			}
 			if(formula.getChecked() == Checked.FAIL) {
 				machine.setSymbolicCheckedFailed();
 				injector.getInstance(MachineTableView.class).refresh();

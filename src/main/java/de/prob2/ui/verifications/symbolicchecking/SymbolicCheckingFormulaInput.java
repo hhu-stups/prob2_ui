@@ -126,9 +126,14 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 			formula = tfFormula.getText();
 		} else if(choosingStage.getGUIType() == GUIType.CHOICE_BOX) {
 			formula = cbOperations.getSelectionModel().getSelectedItem();
+		} else {
+			formula = choosingStage.getCheckingType().name();
 		}
 		SymbolicCheckingFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, item.getType());
 		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
+			SymbolicCheckingType type = choosingStage.getCheckingType();
+			item.setType(type);
+			item.setDescription(type.name());
 			item.setName(formula);
 			item.setCode(formula);
 			item.reset();

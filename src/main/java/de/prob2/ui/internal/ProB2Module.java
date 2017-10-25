@@ -66,7 +66,7 @@ public class ProB2Module extends AbstractModule {
 		bind(Locale.class).toInstance(locale);
 		final ResourceBundle bundle = ResourceBundle.getBundle("de.prob2.ui.prob2", locale);
 		bind(ResourceBundle.class).toInstance(bundle);
-		final MenuToolkit toolkit = IS_MAC ? MenuToolkit.toolkit(locale) : null;
+		final MenuToolkit toolkit = IS_MAC && "true".equals(System.getProperty("de.prob2.ui.useMacMenuBar", "true")) ? MenuToolkit.toolkit(locale) : null;
 		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
 		

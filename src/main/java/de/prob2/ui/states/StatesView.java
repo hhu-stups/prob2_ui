@@ -2,12 +2,10 @@ package de.prob2.ui.states;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,6 +25,7 @@ import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.formula.FormulaGenerator;
@@ -77,6 +76,7 @@ public final class StatesView extends AnchorPane {
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
+	private List<PrologASTNode> rootNodes;
 	private final Map<IEvalElement, AbstractEvalResult> currentValues;
 	private final Map<IEvalElement, AbstractEvalResult> previousValues;
 	private final ExecutorService updater;
@@ -98,6 +98,7 @@ public final class StatesView extends AnchorPane {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 
+		this.rootNodes = null;
 		this.currentValues = new HashMap<>();
 		this.previousValues = new HashMap<>();
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "StatesView Updater"));
@@ -123,9 +124,12 @@ public final class StatesView extends AnchorPane {
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			if (to == null) {
+				this.rootNodes = null;
+				this.currentValues.clear();
+				this.previousValues.clear();
 				this.tv.getRoot().getChildren().clear();
 			} else {
-				this.updater.execute(() -> this.updateRoot(to));
+				this.updater.execute(() -> this.updateRoot(from, to));
 			}
 		};
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
@@ -204,59 +208,80 @@ public final class StatesView extends AnchorPane {
 		return row;
 	}
 
-	private static boolean isSameNode(final PrologASTNode x, final PrologASTNode y) {
-		final boolean isSameCategory = x instanceof ASTCategory && y instanceof ASTCategory && ((ASTCategory)x).getName().equals(((ASTCategory)y).getName());
-		final boolean isSameFormula = x instanceof ASTFormula && y instanceof ASTFormula && ((ASTFormula)x).getFormula().equals(((ASTFormula)y).getFormula());
-		return isSameCategory || isSameFormula;
-	}
-
-	private static void getFormulasToSubscribe(final List<PrologASTNode> nodes, final List<IEvalElement> formulas) {
+	private static void getInitialExpandedFormulas(final List<PrologASTNode> nodes, final List<IEvalElement> formulas) {
 		for (final PrologASTNode node : nodes) {
 			if (node instanceof ASTFormula) {
 				formulas.add(((ASTFormula)node).getFormula());
 			}
-			
-			getFormulasToSubscribe(node.getSubnodes(), formulas);
+			if (node instanceof ASTCategory && ((ASTCategory)node).isExpanded()) {
+				getInitialExpandedFormulas(node.getSubnodes(), formulas);
+			}
 		}
 	}
 	
-	private static List<IEvalElement> getFormulasToSubscribe(final List<PrologASTNode> nodes) {
+	private static List<IEvalElement> getInitialExpandedFormulas(final List<PrologASTNode> nodes) {
 		final List<IEvalElement> formulas = new ArrayList<>();
-		getFormulasToSubscribe(nodes, formulas);
+		getInitialExpandedFormulas(nodes, formulas);
 		return formulas;
+	}
+
+	private static void getExpandedFormulas(final List<TreeItem<StateItem<?>>> treeItems, final List<IEvalElement> formulas) {
+		for (final TreeItem<StateItem<?>> ti : treeItems) {
+			if (ti.getValue().getContents() instanceof ASTFormula) {
+				formulas.add(((ASTFormula)ti.getValue().getContents()).getFormula());
+			}
+			if (ti.isExpanded()) {
+				getExpandedFormulas(ti.getChildren(), formulas);
+			}
+		}
+	}
+
+	private static List<IEvalElement> getExpandedFormulas(final List<TreeItem<StateItem<?>>> treeItems) {
+		final List<IEvalElement> formulas = new ArrayList<>();
+		getExpandedFormulas(treeItems, formulas);
+		return formulas;
+	}
+
+	private void buildNodes(final StateSpace stateSpace, final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
+		Objects.requireNonNull(treeItem);
+		Objects.requireNonNull(nodes);
+		
+		assert treeItem.getChildren().isEmpty();
+		
+		for (final PrologASTNode node : nodes) {
+			final TreeItem<StateItem<?>> subTreeItem = new TreeItem<>();
+			if (node instanceof ASTCategory && ((ASTCategory)node).isExpanded()) {
+				subTreeItem.setExpanded(true);
+			}
+			treeItem.getChildren().add(subTreeItem);
+			subTreeItem.setValue(new StateItem<>(node, false));
+			subTreeItem.expandedProperty().addListener((o, from, to) -> {
+				final List<IEvalElement> formulas = getExpandedFormulas(subTreeItem.getChildren());
+				if (to) {
+					stateSpace.subscribe(this, formulas);
+				} else {
+					stateSpace.unsubscribe(this, formulas);
+				}
+			});
+			buildNodes(stateSpace, subTreeItem, node.getSubnodes());
+		}
 	}
 
 	private static void updateNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(nodes);
 		
-		final Set<TreeItem<StateItem<?>>> toRemove = new HashSet<>(treeItem.getChildren());
-		for (final PrologASTNode node : nodes) {
-			TreeItem<StateItem<?>> subTreeItem = null;
-			for (final TreeItem<StateItem<?>> it : treeItem.getChildren()) {
-				final Object contents = it.getValue().getContents();
-				if (contents instanceof PrologASTNode && isSameNode((PrologASTNode)contents, node)) {
-					subTreeItem = it;
-					toRemove.remove(subTreeItem);
-					break;
-				}
-			}
-			if (subTreeItem == null) {
-				subTreeItem = new TreeItem<>();
-				if (node instanceof ASTCategory && ((ASTCategory)node).isExpanded()) {
-					subTreeItem.setExpanded(true);
-				}
-				treeItem.getChildren().add(subTreeItem);
-			}
-			
+		assert treeItem.getChildren().size() == nodes.size();
+		
+		for (int i = 0; i < nodes.size(); i++) {
+			final TreeItem<StateItem<?>> subTreeItem = treeItem.getChildren().get(i);
+			final PrologASTNode node = nodes.get(i);
 			subTreeItem.setValue(new StateItem<>(node, false));
 			updateNodes(subTreeItem, node.getSubnodes());
 		}
-		// Remove all TreeItems for which no node was found anymore in the nodes list.
-		treeItem.getChildren().removeAll(toRemove);
 	}
 
-	private void updateRoot(final Trace trace) {
+	private void updateRoot(final Trace from, final Trace to) {
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 		
 		Platform.runLater(() -> {
@@ -264,21 +289,29 @@ public final class StatesView extends AnchorPane {
 			this.tv.setDisable(true);
 		});
 		
-		final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
-		trace.getStateSpace().execute(cmd);
-		final List<PrologASTNode> rootNodes = cmd.getPrologASTList();
-		
-		trace.getStateSpace().subscribe(this, getFormulasToSubscribe(rootNodes));
+		// If the model has changed or the machine structure hasn't been loaded yet, update it and rebuild the tree view.
+		final boolean rebuildTree = this.rootNodes == null || from == null || !from.getModel().equals(to.getModel());
+		if (rebuildTree) {
+			final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
+			to.getStateSpace().execute(cmd);
+			this.rootNodes = cmd.getPrologASTList();
+			to.getStateSpace().subscribe(this, getInitialExpandedFormulas(this.rootNodes));
+		}
 		
 		this.currentValues.clear();
-		this.currentValues.putAll(trace.getCurrentState().getValues());
+		this.currentValues.putAll(to.getCurrentState().getValues());
 		this.previousValues.clear();
-		if (trace.canGoBack()) {
-			this.previousValues.putAll(trace.getPreviousState().getValues());
+		if (to.canGoBack()) {
+			this.previousValues.putAll(to.getPreviousState().getValues());
 		}
 		
 		Platform.runLater(() -> {
-			updateNodes(this.tvRootItem, rootNodes);
+			if (rebuildTree) {
+				this.tvRootItem.getChildren().clear();
+				buildNodes(to.getStateSpace(), this.tvRootItem, this.rootNodes);
+			} else {
+				updateNodes(this.tvRootItem, this.rootNodes);
+			}
 			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);

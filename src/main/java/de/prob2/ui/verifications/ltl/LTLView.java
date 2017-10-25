@@ -17,6 +17,9 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+import de.prob2.ui.verifications.ShouldExecuteValueFactory.Type;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaDialog;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -30,6 +33,7 @@ import javafx.collections.FXCollections;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
@@ -80,6 +84,9 @@ public class LTLView extends AnchorPane{
 	
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
+	
+	@FXML
+	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
 	
 	private final ResourceBundle bundle;
 	
@@ -164,6 +171,9 @@ public class LTLView extends AnchorPane{
 			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.formula.menu.openInEditor"));
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
 			openEditor.disableProperty().bind(row.emptyProperty());
+			
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
+			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 
 			MenuItem check = new MenuItem(bundle.getString("verifications.ltl.formula.menu.checkSeparately"));
 			check.setOnAction(e-> {
@@ -192,9 +202,15 @@ public class LTLView extends AnchorPane{
 					} else {
 						showCounterExampleItem.setDisable(false);
 					}
+					
+					if(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked()) {
+						showMessage.setDisable(true);
+					} else {
+						showMessage.setDisable(false);
+					}
 				}
 			});
-			row.setContextMenu(new ContextMenu(openEditor, removeItem, showCounterExampleItem, check));
+			row.setContextMenu(new ContextMenu(openEditor, removeItem, showCounterExampleItem, showMessage, check));
 			return row;
 		});
 		
@@ -220,7 +236,8 @@ public class LTLView extends AnchorPane{
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-
+		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(Type.LTL, injector));
+		
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		addPatternButton.disableProperty().bind(currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(currentJobThreads.emptyProperty());
