@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.tracereplay;
 
+import java.io.File;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.verifications.tracereplay.ReplayTrace.Status;
@@ -12,10 +14,12 @@ public class ReplayTraceItem {
 	private ObjectProperty<FontAwesomeIconView> statusIcon;
 	private final String name;
 	private final ReplayTrace trace;
+	private final File location;
 
-	public ReplayTraceItem(ReplayTrace trace, String name) {
-		this.name = name;
+	public ReplayTraceItem(ReplayTrace trace, File traceFile) {
+		this.name = traceFile.getName();
 		this.trace = trace;
+		this.location = traceFile;
 		this.statusIcon = new SimpleObjectProperty<>();
 		this.setStatus(trace.getStatus().get());
 		trace.getStatus().addListener((observable, from, to) -> setStatus(to));
@@ -54,5 +58,9 @@ public class ReplayTraceItem {
 
 	public ReplayTrace getTrace() {
 		return trace;
+	}
+	
+	public File getLocation() {
+		return location;
 	}
 }

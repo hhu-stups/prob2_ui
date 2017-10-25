@@ -1,6 +1,8 @@
 package de.prob2.ui.verifications.tracereplay;
 
 import java.io.File;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -15,6 +17,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.tracereplay.ReplayTrace.Status;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -55,7 +58,18 @@ public class TraceReplayView extends ScrollPane {
 		statusColumn.setStyle("-fx-alignment: CENTER;");
 		nameColumn.setCellValueFactory(new PropertyValueFactory<ReplayTraceItem, String>("name"));
 
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateTraceTableView(to));
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			updateTraceTableView(to);
+			to.getTraces().addListener(new ListChangeListener<File>() {
+				@Override
+				public void onChanged(ListChangeListener.Change c) {
+					while (c.next()) {
+						addToTraceTableView(c.getAddedSubList());
+						removeFromTraceTableView(c.getRemoved());
+					}
+				}
+			});
+		});
 
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (checkButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
@@ -68,11 +82,27 @@ public class TraceReplayView extends ScrollPane {
 		traceTableView.getItems().clear();
 		checkButton.setDisable(true);
 		if (machine != null) {
-			for (File traceFile : machine.getTraces()) {
-				ReplayTrace trace = traceLoader.loadTrace(traceFile);
-				traceTableView.getItems().add(new ReplayTraceItem(trace, traceFile.getName()));
-			}
+			addToTraceTableView(machine.getTraces());
 			checkButton.setDisable(false);
+		}
+	}
+
+	private void addToTraceTableView(List<File> traceFiles) {
+		for (File traceFile : traceFiles) {
+			ReplayTrace trace = traceLoader.loadTrace(traceFile);
+			traceTableView.getItems().add(new ReplayTraceItem(trace, traceFile));
+		}
+	}
+
+	private void removeFromTraceTableView(List<File> traceFiles) {
+		traceTableView.getItems().stream().filter(traceItem -> !traceFiles.contains(traceItem.getLocation()))
+				.collect(Collectors.toList());
+		for (ReplayTraceItem traceItem : traceTableView.getItems()) {
+			for (File traceFile : traceFiles) {
+				if (traceItem.getLocation().equals(traceFile)) {
+
+				}
+			}
 		}
 	}
 
@@ -85,7 +115,7 @@ public class TraceReplayView extends ScrollPane {
 
 	private void replayTrace(ReplayTrace trace) {
 		trace.setStatus(Status.NOT_CHECKED);
-		
+
 		StateSpace stateSpace = injector.getInstance(CurrentTrace.class).getStateSpace();
 		Trace t = new Trace(stateSpace);
 

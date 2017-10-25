@@ -49,11 +49,13 @@ public class TraceSaver {
 
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), TRACE_CHARSET)) {
 			gson.toJson(trace, writer);
-			machine.addTrace(file);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create trace data file", exc);
+			return;
 		} catch (IOException exc) {
 			LOGGER.warn("Failed to save trace", exc);
+			return;
 		}
+		machine.addTrace(file);
 	}
 }

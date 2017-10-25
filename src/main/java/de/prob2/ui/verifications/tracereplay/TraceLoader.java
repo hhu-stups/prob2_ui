@@ -44,6 +44,7 @@ public class TraceLoader {
 		ReplayTrace trace;
 		try (final Reader reader = new InputStreamReader(new FileInputStream(file), PROJECT_CHARSET)) {
 			trace = gson.fromJson(reader, ReplayTrace.class);
+			trace.setStatus(Status.NOT_CHECKED);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Trace file not found", exc);
 			Alert alert = stageManager.makeAlert(AlertType.ERROR,
@@ -66,7 +67,6 @@ public class TraceLoader {
 			LOGGER.warn("Failed to open project file", exc);
 			return null;
 		}
-		trace.setStatus(Status.NOT_CHECKED);
 		return trace;
 	}
 }
