@@ -96,7 +96,6 @@ public class ProBConnection {
         }
     }
 
-    //TODO: not working
     public void addPane(@Nonnull final AccordionEnum accordion, @Nonnull final TitledPane pane) {
         Accordion acc = accordion.getAccordion(injector);
         //TODO: react when the Accordion doesn't exist
@@ -105,7 +104,6 @@ public class ProBConnection {
         }
     }
 
-    //TODO: not working
     public void addPane(@Nonnull final AccordionEnum accordion, final int position, @Nonnull final TitledPane pane) {
         Accordion acc = accordion.getAccordion(injector);
         //TODO: react when the Accordion doesn't exist
