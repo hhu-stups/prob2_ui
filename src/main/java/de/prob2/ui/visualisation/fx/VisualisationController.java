@@ -78,7 +78,7 @@ public class VisualisationController {
                     updateVisualization();
                 } else {
                     setVisualisationContent(getPlaceHolderContent(
-                            getFormattedString("visualisation.controller.initialized", currentMachine.get().getName())));
+                            format("visualisation.controller.initialized", currentMachine.get().getName())));
                 }
             }
         };
@@ -88,7 +88,7 @@ public class VisualisationController {
             if (visualisation != null) {
                 if (newMachine == null) {
                     showAlert(Alert.AlertType.INFORMATION,
-                            getFormattedString("visualisation.machine.null", oldMachine.getName(), visualisation.getName()),
+                            format("visualisation.machine.null", oldMachine.getName(), visualisation.getName()),
                             ButtonType.OK);
                     stopVisualisation();
                 } else if (!newMachine.equals(oldMachine)) {
@@ -97,7 +97,7 @@ public class VisualisationController {
                         setVisualisationContent(visualisation.initialize());
                     } else {
                         showAlert(Alert.AlertType.INFORMATION,
-                                getFormattedString("visualisation.machine.loaded", newMachine.getName(), visualisation.getName()),
+                                format("visualisation.machine.loaded", newMachine.getName(), visualisation.getName()),
                                 ButtonType.OK);
                         stopVisualisation();
                     }
@@ -119,7 +119,7 @@ public class VisualisationController {
     public void openVisualisation() {
         if (visualisation.isNotNull().get()) {
             Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-                    getFormattedString("visualisation.controller.replace", visualisation.get().getName()),
+                    format("visualisation.controller.replace", visualisation.get().getName()),
                     ButtonType.YES, ButtonType.NO);
             alert.setTitle(bundle.getString("menu.visualisation"));
             alert.initOwner(stageManager.getCurrent());
@@ -191,7 +191,7 @@ public class VisualisationController {
         boolean start = checkMachine(loadedVisualisation.getMachines());
         if (!start) {
             showAlert(Alert.AlertType.INFORMATION,
-                    getFormattedString("visualisation.controller.unsuitable", loadedVisualisation.getName(), currentMachine.get().getName()),
+                    format("visualisation.controller.unsuitable", loadedVisualisation.getName(), currentMachine.get().getName()),
                     ButtonType.OK);
             visualisationLoader.closeClassloader();
             return;
@@ -263,13 +263,12 @@ public class VisualisationController {
                         formulaValueMap.put(formulas[i], formulaValue);
                     }
                 }
-                LOGGER.debug("Fire listener for formulas: {}", String.join(" ", formulas));
+                LOGGER.debug("Call listener for formulas: {}", String.join(" ", formulas));
                 try {
                     listener.variablesChanged(formulaValues);
                 } catch (Exception e) {
                     Alert alert = stageManager.makeExceptionAlert(Alert.AlertType.WARNING,
-                            "Exception while calling the formula listener for the formulas:\n\"" +
-                                    String.join(" ", formulas) + "\"\n", e);
+                            format("visualisation.controller.listener.exception", String.join(" ", formulas)), e);
                     alert.initOwner(stageManager.getCurrent());
                     alert.show();
                     LOGGER.warn("Exception while calling the formula listener for the formulas:\n\"" +
@@ -289,7 +288,7 @@ public class VisualisationController {
 
     private void createVisualisationTab() {
         visualisationTab = new Tab(visualisation.get().getName(), getPlaceHolderContent(
-                getFormattedString("visualisation.controller.initialized", currentMachine.get().getName())));
+                format("visualisation.controller.initialized", currentMachine.get().getName())));
         visualisationTab.setClosable(false);
         tabPane.getTabs().add(visualisationTab);
         tabPane.getSelectionModel().select(visualisationTab);
@@ -349,7 +348,7 @@ public class VisualisationController {
         alert.show();
     }
 
-    private String getFormattedString(String key, Object... args) {
+    private String format(String key, Object... args) {
         return String.format(bundle.getString(key), args);
     }
 

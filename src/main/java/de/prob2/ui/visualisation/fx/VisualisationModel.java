@@ -127,12 +127,30 @@ public class VisualisationModel {
                 TranslatedEvalResult translatedValue = value.translate();
                 return translatedValue.getValue();
             } catch (Exception  e) {
-                LOGGER.debug("Exception while trying to get the value for formula \"{}\" out of the map. Try to eval the trace.", formula);
+                LOGGER.debug("Exception while trying to get the value for formula \"{}\" out of the map. Try to eval it.", formula);
                 return evalCurrent(formula);
             }
         }
         LOGGER.debug("Eval trace to get value of formula \"{}\".", formula);
         return evalCurrent(formula);
+    }
+
+    /**
+     * Evaluates the given formula, but not on the current state.
+     * It tries to evaluate it on the previous state of the current trace.
+     *
+     * @param formula Formula to evaluate.
+     * @return The value of the formula or {@code null}.
+     */
+    public Object getPreviousValue(String formula) {
+        LOGGER.debug("Try to get previous value of formula \"{}\".", formula);
+        if (newTrace.getPreviousState() != null) {
+            EvalResult value = evalState(newTrace.getPreviousState(), formula);
+            LOGGER.debug("Evaluated previous value of formula \"{}\" and got the result: {}", formula, value);
+            return value != null ? value.translate().getValue() : null;
+        }
+        LOGGER.debug("The previous state is null. Returning null");
+        return null;
     }
 
     /**
@@ -157,12 +175,7 @@ public class VisualisationModel {
 
     private Object evalCurrent(String formula) {
         EvalResult value = evalState(newTrace.getCurrentState(), formula);
-        try {
-            return value != null ? value.translate().getValue() : null;
-        } catch (BCompoundException e) {
-            LOGGER.error("Error while translating the value of formula " + formula, e);
-            return null;
-        }
+        return value != null ? value.translate().getValue() : null;
     }
 
     private EvalResult evalState(State state, String formula) {
@@ -183,28 +196,5 @@ public class VisualisationModel {
             LOGGER.warn("EvaluationException while evaluating the formula \"" + formula +"\".", evalException);
             return null;
         }
-    }
-
-    /**
-     * Evaluates the given formula, but not on the current state.
-     * It tries to evaluate it on the previous state of the current trace.
-     *
-     * @param formula Formula to evaluate.
-     * @return The value of the formula or {@code null}.
-     */
-    public Object getPreviousValue(String formula) {
-        LOGGER.debug("Try to get previous value of formula \"{}\".", formula);
-        if (newTrace.getPreviousState() != null) {
-            EvalResult value = evalState(newTrace.getPreviousState(), formula);
-            LOGGER.debug("Evaluated previous value of formula \"{}\" and got the result: {}", formula, value);
-            try {
-                return value != null ? value.translate().getValue() : null;
-            } catch (BCompoundException e) {
-                LOGGER.error("Error while translating the value of formula " + formula, e);
-                return null;
-            }
-        }
-        LOGGER.debug("The previous state is null. Returning null");
-        return null;
     }
 }
