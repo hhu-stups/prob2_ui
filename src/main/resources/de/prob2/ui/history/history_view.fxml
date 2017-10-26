@@ -4,6 +4,7 @@
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+
 <fx:root stylesheets="@/prob.css" type="AnchorPane"
 		 xmlns:fx="http://javafx.com/fxml/1">
 	<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -41,6 +42,15 @@
 							<Tooltip text="%history.buttons.reverse.tooltip" />
 						</tooltip>
 					</ToggleButton>
+					<Button fx:id="saveTraceButton" mnemonicParsing="false" onAction="#saveTrace">
+						<graphic>
+							<FontAwesomeIconView styleClass="icon-dark"
+								glyphName="DOWNLOAD" size="15" />
+						</graphic>
+						<tooltip>
+							<Tooltip text="%history.buttons.saveTrace.tooltip" />
+						</tooltip>
+					</Button>
 					<HelpButton fx:id="helpButton"/>
 				</HBox>
 			</HBox>

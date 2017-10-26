@@ -4,11 +4,12 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.check.ModelCheckingOptions;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IExecutableItem;
 import javafx.scene.paint.Color;
 
 import java.util.Objects;
 
-public class ModelCheckingItem {
+public class ModelCheckingItem implements IExecutableItem {
 
 	private ModelCheckingOptions options;
 	private transient ModelCheckStats stats;
@@ -19,6 +20,8 @@ public class ModelCheckingItem {
 	private String strategy;
 	
 	private String description;
+	
+	private boolean shouldExecute;
 
 	public ModelCheckingItem(ModelCheckingOptions options, ModelCheckStats stats, String strategy,
 							 String description) {
@@ -30,6 +33,7 @@ public class ModelCheckingItem {
 		this.stats = stats;
 		this.strategy = strategy;
 		this.description = description;
+		this.shouldExecute = true;
 	}
 	
 	public void setOptions(ModelCheckingOptions options) {
@@ -62,6 +66,16 @@ public class ModelCheckingItem {
 	
 	public String getDescription() {
 		return description;
+	}
+	
+	@Override
+	public void setShouldExecute(boolean shouldExecute) {
+		this.shouldExecute = shouldExecute;
+	}
+	
+	@Override
+	public boolean shouldExecute() {
+		return shouldExecute;
 	}
 	
 	public void initializeStatus() {

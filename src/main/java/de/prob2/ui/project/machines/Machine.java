@@ -1,5 +1,6 @@
 package de.prob2.ui.project.machines;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
@@ -13,12 +14,10 @@ import java.util.regex.Pattern;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
@@ -30,6 +29,7 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 
 public class Machine {
@@ -95,6 +95,7 @@ public class Machine {
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
+	private ObservableList<File> traces;
 	private ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
 	private transient BooleanProperty changed = new SimpleBooleanProperty(false);
@@ -109,6 +110,7 @@ public class Machine {
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
+		this.traces = new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
 	}
 	
@@ -297,6 +299,20 @@ public class Machine {
 		this.changed.set(true);
 	}
 	
+	public ObservableList<File> getTraces() {
+		return this.traces;
+	}
+	
+	public void addTrace(File traceFile) {
+		this.traces.add(traceFile);
+		this.changed.set(true);
+	}
+	
+	public void removeTrace(File traceFile) {
+		this.traces.remove(traceFile);
+		this.changed.set(true);
+	}
+
 	public ListProperty<ModelCheckingItem> modelcheckingItemsProperty() {
 		return modelcheckingItems;
 	}
@@ -329,11 +345,13 @@ public class Machine {
 		if(symbolicCheckingFormulas == null) {
 			this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
 		}
+		if(traces == null) {
+			this.traces = new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList());
+		}
 		if(modelcheckingItems == null) {
 			this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
-
 		}
-		this.changed = new SimpleBooleanProperty(false); 
+		this.changed = new SimpleBooleanProperty(false);
 	}
 	
 	public Path getPath() {

@@ -9,9 +9,7 @@ import com.google.inject.Provides;
 import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob.MainModule;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -38,6 +36,7 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaInput;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
+import de.prob2.ui.verifications.tracereplay.TraceReplayView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 
@@ -63,7 +62,7 @@ public class ProB2Module extends AbstractModule {
 		bind(Locale.class).toInstance(locale);
 		final ResourceBundle bundle = ResourceBundle.getBundle("de.prob2.ui.prob2", locale);
 		bind(ResourceBundle.class).toInstance(bundle);
-		final MenuToolkit toolkit = IS_MAC ? MenuToolkit.toolkit(locale) : null;
+		final MenuToolkit toolkit = IS_MAC && "true".equals(System.getProperty("de.prob2.ui.useMacMenuBar", "true")) ? MenuToolkit.toolkit(locale) : null;
 		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
 		
@@ -96,6 +95,7 @@ public class ProB2Module extends AbstractModule {
 		bind(StatesView.class);
 		bind(StatsView.class);
 		bind(StatusBar.class);
+		bind(TraceReplayView.class);
 		bind(VerificationsView.class);
 		bind(VerificationsTab.class);
 		bind(VisualisationView.class);

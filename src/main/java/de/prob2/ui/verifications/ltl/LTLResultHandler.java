@@ -41,13 +41,6 @@ public class LTLResultHandler extends AbstractResultHandler {
 		this.exception.addAll(Arrays.asList(LTLParseError.class, ProBError.class));
 		this.interrupted.addAll(Arrays.asList(LTLNotYetFinished.class));
 	}
-			
-	public void showResult(CheckingResultItem resultItem, AbstractCheckableItem item, List<Trace> traces) {
-		super.showResult(resultItem, item);
-		if(traces != null && !traces.isEmpty()) {
-			((LTLFormulaItem) item).setCounterExample(traces.get(0));
-		}
-	}
 	
 	public Checked handleFormulaResult(LTLFormulaItem item, Object result, State stateid) {
 		Class<?> clazz = result.getClass();
@@ -60,7 +53,12 @@ public class LTLResultHandler extends AbstractResultHandler {
 		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
-		Platform.runLater(() -> this.showResult(resultItem, item, traces));
+		Platform.runLater(() -> {
+			item.setResultItem(resultItem);	
+			if(traces != null && !traces.isEmpty()) {
+				item.setCounterExample(traces.get(0));
+			}
+		});
 		if(resultItem != null) {
 			return resultItem.getChecked();
 		}
@@ -77,7 +75,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 			item.setCheckedFailed();
 		}
 		if(!byInit) {
-			this.showResult(resultItem, item, null);
+			item.setResultItem(resultItem);
 		}
 	}
 

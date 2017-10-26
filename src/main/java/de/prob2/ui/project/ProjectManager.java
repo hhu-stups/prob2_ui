@@ -19,9 +19,13 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import com.google.gson.Gson;
+import org.hildan.fxgson.FxGson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentProjects;
@@ -30,16 +34,11 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
-import org.hildan.fxgson.FxGson;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+@Singleton
 public class ProjectManager {
 	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
@@ -51,7 +50,8 @@ public class ProjectManager {
 	private final RecentProjects recentProjects;
 
 	@Inject
-	public ProjectManager(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, RecentProjects recentProjects) {
+	public ProjectManager(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle,
+			RecentProjects recentProjects) {
 		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
@@ -59,36 +59,42 @@ public class ProjectManager {
 		this.recentProjects = recentProjects;
 	}
 
-	public void saveCurrentProject() {
-		Project project = currentProject.get();
+	private File saveProject(Project project) {
 		File file = new File(project.getLocation() + File.separator + project.getName() + ".json");
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), PROJECT_CHARSET)) {
-			currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(),
-					project.getPreferences(), project.getRunconfigurations(), project.getLocation()));
 			gson.toJson(project, writer);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
+			return null;
 		} catch (IOException exc) {
 			LOGGER.warn("Failed to save project", exc);
+			return null;
 		}
-		addToRecentProjects(file);
-		currentProject.setSaved(true);
-		for (Machine machine : currentProject.get().getMachines()) {
-			machine.changedProperty().set(false);
-		}
-		for (Preference pref : currentProject.get().getPreferences()) {
-			pref.changedProperty().set(false);
+		return file;
+	}
+
+	public void saveCurrentProject() {
+		Project project = currentProject.get();
+		currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(),
+				project.getPreferences(), project.getRunconfigurations(), project.getLocation()));
+		File savedFile = saveProject(project);
+		if (savedFile != null) {
+			addToRecentProjects(savedFile);
+			currentProject.setSaved(true);
+			for (Machine machine : currentProject.get().getMachines()) {
+				machine.changedProperty().set(false);
+			}
+			for (Preference pref : currentProject.get().getPreferences()) {
+				pref.changedProperty().set(false);
+			}
 		}
 	}
 
-	public void openProject(File file) {
+	private Project loadProject(File file) {
 		Project project;
 		try (final Reader reader = new InputStreamReader(new FileInputStream(file), PROJECT_CHARSET)) {
 			project = gson.fromJson(reader, Project.class);
 			project.setLocation(file.getParentFile());
-			replaceMissingWithDefaults(project);
-			setupRunconfigurations(project);
-			initializeLTL(project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
 			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.fileNotFound.content"), file), ButtonType.YES, ButtonType.NO);
@@ -97,13 +103,23 @@ public class ProjectManager {
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 				Platform.runLater(() -> recentProjects.remove(file.getAbsolutePath()));
 			}
-			return;
+			return null;
 		} catch (IOException exc) {
 			LOGGER.warn("Failed to open project file", exc);
-			return;
+			return null;
 		}
-		currentProject.set(project);
-		addToRecentProjects(file);
+		return project;
+	}
+
+	public void openProject(File file) {
+		Project project = loadProject(file);
+		if(project != null) {
+			replaceMissingWithDefaults(project);
+			setupRunconfigurations(project);
+			initializeLTL(project);
+			currentProject.set(project);
+			addToRecentProjects(file);
+		} 
 	}
 
 	private void addToRecentProjects(File file) {

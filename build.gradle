@@ -141,11 +141,11 @@ task createHelp(type: Exec) {
 	commandLine './help.sh'
 }
 
-task runHome(type: JavaExec) {
-  classpath = sourceSets.main.runtimeClasspath
-
-  main = mainClassName
-
-  // arguments to pass to the application
-  jvmArgs '-Dprob.home='+System.getenv("PROB_HOME")
+allprojects {
+	final probHome = System.getenv("PROB_HOME")
+	if (probHome != null) {
+		tasks.withType(JavaExec) {
+			systemProperties["prob.home"] = probHome
+		}
+	}
 }

@@ -85,6 +85,7 @@ public class StatusBar extends HBox {
 		this.loadingStatusProperty().addListener((observable, from, to) -> this.update());
 		this.ltlStatusProperty().addListener((observable, from, to) -> this.update());
 		this.cbcStatusProperty().addListener((observable, from, to) -> this.update());
+		this.modelcheckingStatusProperty().addListener((observable, from, to) -> this.update());
 		this.operationsViewUpdatingProperty().addListener((o, from, to) -> this.update());
 		this.statesViewUpdatingProperty().addListener((o, from, to) -> this.update());
 	}

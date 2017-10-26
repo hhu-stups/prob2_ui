@@ -4,19 +4,23 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.scene.paint.Color;
 
-public abstract class AbstractCheckableItem {
+public abstract class AbstractCheckableItem implements IExecutableItem {
 	
 	protected transient FontAwesomeIconView status;
 	protected Checked checked;
 	protected String name;
 	protected String description;
 	protected String code;
+	protected boolean shouldExecute;
+	protected CheckingResultItem resultItem;
 	
 	public AbstractCheckableItem(String name, String description, String code) {
 		initializeStatus();
 		this.name = name;
 		this.description = description;
 		this.code = code;
+		this.shouldExecute = true;
+		this.resultItem = null;
 	}	
 	
 	public void setData(String name, String description, String code) {
@@ -39,6 +43,16 @@ public abstract class AbstractCheckableItem {
 	public String getName() {
 		return name;
 	}
+	
+	@Override
+	public void setShouldExecute(boolean shouldExecute) {
+		this.shouldExecute = shouldExecute;
+	}
+	
+	@Override
+	public boolean shouldExecute() {
+		return shouldExecute;
+	}
 
 	public String getDescription() {
 		return description;
@@ -58,6 +72,14 @@ public abstract class AbstractCheckableItem {
 	
 	public String getCode() {
 		return code;
+	}
+	
+	public void setResultItem(CheckingResultItem resultItem) {
+		this.resultItem = resultItem;
+	}
+	
+	public CheckingResultItem getResultItem() {
+		return resultItem;
 	}
 	
 	public void setCheckedSuccessful() {

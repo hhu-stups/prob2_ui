@@ -52,6 +52,9 @@
 							<TableColumn fx:id="formulaDescriptionColumn"
 								minWidth="120.0" prefWidth="120.0"
 								text="%verifications.columns.description" />
+							<TableColumn fx:id="shouldExecuteColumn"
+								minWidth="50.0" prefWidth="50.0"
+								text="" />
 						</columns>
 						<placeholder>
 							<Label text="%verifications.symbolic.formula.noFormulas" />
