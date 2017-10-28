@@ -8,8 +8,6 @@ import ro.fortsoft.pf4j.PluginException;
 import ro.fortsoft.pf4j.PluginManager;
 import ro.fortsoft.pf4j.PluginWrapper;
 
-import java.net.URL;
-
 /**
  * This class will be extended by all plug-ins and
  * serves as the common class between a plug-in and the prob2-ui application.
@@ -26,15 +24,20 @@ import java.net.URL;
  * @author  Christoph Heinzen
  * @version 0.1.0
  * @since   10.08.2017
+ * @see ro.fortsoft.pf4j.Plugin
  */
 public abstract class ProBPlugin extends Plugin{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProBPlugin.class);
 
     private boolean started = false;
+    private final ProBPluginManager proBPluginManager;
+    private final ProBPluginUIConnection proBPluginUIConnection;
 
-    public ProBPlugin (PluginWrapper pluginWrapper) {
+    public ProBPlugin (PluginWrapper pluginWrapper, ProBPluginManager proBPluginManager, ProBPluginUIConnection proBPluginUIConnection) {
         super(pluginWrapper);
+        this.proBPluginManager = proBPluginManager;
+        this.proBPluginUIConnection = proBPluginUIConnection;
     }
 
     /**
@@ -81,19 +84,14 @@ public abstract class ProBPlugin extends Plugin{
     }
 
     /**
-     * Getter for the singleton instance of the {@link ProBConnection} of
-     * the prob2-ui application. Uses the {@code getProBConnection()} method of the
+     * Getter for the singleton instance of the {@link ProBPluginUIConnection} of
+     * the prob2-ui application. Uses the {@code getProBPluginUIConnection()} method of the
      * {@link ProBPluginManager}.
      *
-     * @return singleton instance of the {@link ProBConnection}
+     * @return singleton instance of the {@link ProBPluginUIConnection}
      */
-    public ProBConnection getProBConnection() {
-        ProBPluginManager pluginManager = getProBPluginManager();
-        if (pluginManager != null) {
-            return pluginManager.getProBConnection();
-        }
-        LOGGER.warn("Couldn't get ProBConnection!");
-        return null;
+    public ProBPluginUIConnection getProBPluginUIConnection() {
+        return proBPluginUIConnection;
     }
 
     /**
@@ -103,11 +101,7 @@ public abstract class ProBPlugin extends Plugin{
      * @return singleton instance of the {@link ProBPluginManager}
      */
     public ProBPluginManager getProBPluginManager() {
-        ProBPluginManager.ProBJarPluginManager pluginManager = getPluginManager();
-        if (pluginManager != null) {
-            return pluginManager.getPluginManager();
-        }
-        return null;
+        return proBPluginManager;
     }
 
     /**
@@ -131,11 +125,6 @@ public abstract class ProBPlugin extends Plugin{
      * @return singleton instance of the {@link Injector}
      */
     public Injector getInjector() {
-        return getProBConnection().getInjector();
+        return getProBPluginUIConnection().getInjector();
     }
-
-    protected URL getResource(String name) {
-        return getWrapper().getPluginClassLoader().getResource(name);
-    }
-
 }

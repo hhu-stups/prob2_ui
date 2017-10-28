@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
  * to add plugins using a {@link FileChooser}.
  *
  * @author  Christoph Heinzen
- * @version 0.1.0
  * @since   10.08.2017
  */
 @Singleton
@@ -49,7 +48,7 @@ public class ProBPluginManager {
             + File.separator + "prob2ui"
             + File.separator + "plugins");
 
-    private final ProBConnection proBConnection;
+    private final ProBPluginUIConnection proBPluginUIConnection;
     private final StageManager stageManager;
     private final ResourceBundle bundle;
 
@@ -61,13 +60,13 @@ public class ProBPluginManager {
      * Should only be used by the Guice-Injector.
      * Do not call this constructor.
      *
-     * @param proBConnection singleton instance of {@link ProBConnection} used in the prob2-ui application
+     * @param proBPluginUIConnection singleton instance of {@link ProBPluginUIConnection} used in the prob2-ui application
      * @param stageManager singleton instance of {@link StageManager} used in the prob2-ui application
      * @param bundle {@link ResourceBundle} used in the prob2-ui application
      */
     @Inject
-    public ProBPluginManager(ProBConnection proBConnection, StageManager stageManager, ResourceBundle bundle) {
-        this.proBConnection = proBConnection;
+    public ProBPluginManager(ProBPluginUIConnection proBPluginUIConnection, StageManager stageManager, ResourceBundle bundle) {
+        this.proBPluginUIConnection = proBPluginUIConnection;
         this.stageManager = stageManager;
         this.bundle = bundle;
         this.pluginManager = new ProBJarPluginManager();
@@ -184,13 +183,13 @@ public class ProBPluginManager {
     }
 
     /**
-     * Getter for the singleton instance of the {@link ProBConnection} of
+     * Getter for the singleton instance of the {@link ProBPluginUIConnection} of
      * the prob2-ui application.
      *
-     * @return singleton instance of the {@link ProBConnection}
+     * @return singleton instance of the {@link ProBPluginUIConnection}
      */
-    public ProBConnection getProBConnection() {
-        return proBConnection;
+    public ProBPluginUIConnection getProBPluginUIConnection() {
+        return proBPluginUIConnection;
     }
 
     /**
@@ -380,8 +379,10 @@ public class ProBPluginManager {
      * to avoid the development mode of PF4J.
      *
      * @author  Christoph Heinzen
-     * @version 0.1.0
      * @since   23.08.2017
+     * @see ro.fortsoft.pf4j.JarPluginManager
+     * @see ro.fortsoft.pf4j.DefaultPluginManager
+     * @see ro.fortsoft.pf4j.AbstractPluginManager
      */
     public class ProBJarPluginManager extends JarPluginManager {
 
@@ -428,8 +429,9 @@ public class ProBPluginManager {
 
                 // create the ProBPlugin instance
                 try {
-                    Constructor<?> constructor = pluginClass.getConstructor(PluginWrapper.class);
-                    return (ProBPlugin) constructor.newInstance(pluginWrapper);
+                    Constructor<?> constructor =
+                            pluginClass.getConstructor(PluginWrapper.class, ProBPluginManager.class, ProBPluginUIConnection.class);
+                    return (ProBPlugin) constructor.newInstance(pluginWrapper, ProBPluginManager.this, proBPluginUIConnection);
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                 }

@@ -16,7 +16,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.menu.*;
 import de.prob2.ui.operations.OperationsView;
-import de.prob2.ui.plugin.ProBConnection;
+import de.prob2.ui.plugin.ProBPluginUIConnection;
 import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.project.ProjectTab;
@@ -104,7 +104,7 @@ public class ProB2Module extends AbstractModule {
         bind(SymbolicCheckingFormulaInput.class);
 
 		bind(ProBPluginManager.class);
-		bind(ProBConnection.class);
+		bind(ProBPluginUIConnection.class);
 
 		bind(VisualisationController.class);
 		bind(VisualisationMenu.class);
