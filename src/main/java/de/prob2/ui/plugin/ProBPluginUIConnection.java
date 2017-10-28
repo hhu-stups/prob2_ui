@@ -15,19 +15,20 @@ import javax.annotation.Nonnull;
 import java.util.Arrays;
 
 /**
- * Created by Christoph Heinzen on 11.08.17.
+ * @author Christoph Heinzen
+ * @since 11.08.17.
  */
 @Singleton
-public class ProBConnection {
+public class ProBPluginUIConnection {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProBConnection.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginUIConnection.class);
 
     private final Injector injector;
     private final CurrentTrace currentTrace;
     private final StageManager stageManager;
 
     @Inject
-    public ProBConnection(Injector injector, CurrentTrace currentTrace, StageManager stageManager) {
+    public ProBPluginUIConnection(Injector injector, CurrentTrace currentTrace, StageManager stageManager) {
         this.injector = injector;
         this.currentTrace = currentTrace;
         this.stageManager = stageManager;
