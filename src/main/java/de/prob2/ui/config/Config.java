@@ -21,13 +21,13 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
@@ -131,6 +131,9 @@ public final class Config {
 			final Reader defaultReader = new InputStreamReader(is, CONFIG_CHARSET)
 		) {
 			this.defaultData = GSON.fromJson(defaultReader, ConfigData.class);
+			if (this.defaultData == null) {
+				throw new IllegalStateException("Default config file is empty");
+			}
 		} catch (FileNotFoundException exc) {
 			throw new IllegalStateException("Default config file not found", exc);
 		} catch (IOException exc) {
@@ -156,7 +159,12 @@ public final class Config {
 			final InputStream is = new FileInputStream(LOCATION);
 			final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
 		) {
-			return GSON.fromJson(reader, BasicConfigData.class);
+			final BasicConfigData data = GSON.fromJson(reader, BasicConfigData.class);
+			if (data == null) {
+				// Config file is empty, use defaults instead.
+				return new BasicConfigData();
+			}
+			return data;
 		} catch (FileNotFoundException exc) {
 			logger.info("Config file not found, while loading basic config, loading default settings", exc);
 			return new BasicConfigData();
@@ -252,6 +260,10 @@ public final class Config {
 				final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
 			) {
 				configData = GSON.fromJson(reader, ConfigData.class);
+				if (configData == null) {
+					// Config file is empty, use default config.
+					configData = this.defaultData;
+				}
 			} catch (FileNotFoundException exc) {
 				logger.info("Config file not found, loading default settings", exc);
 				configData = this.defaultData;
@@ -261,10 +273,6 @@ public final class Config {
 			}
 		} else {
 			logger.info("Config loading disabled via runtime options, loading default config");
-			configData = this.defaultData;
-		}
-		
-		if(configData == null) {
 			configData = this.defaultData;
 		}
 		
