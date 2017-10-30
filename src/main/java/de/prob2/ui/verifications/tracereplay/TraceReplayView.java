@@ -59,6 +59,9 @@ public class TraceReplayView extends ScrollPane {
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			if(to == null) {
+				return;
+			}
 			updateTraceTableView(to);
 			to.getTraces().addListener((ListChangeListener<File>)c -> {
 				while (c.next()) {

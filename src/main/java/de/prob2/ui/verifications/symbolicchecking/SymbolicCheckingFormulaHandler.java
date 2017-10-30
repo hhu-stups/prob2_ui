@@ -225,6 +225,9 @@ public class SymbolicCheckingFormulaHandler {
 	}
 	
 	public void checkItem(SymbolicCheckingFormulaItem item) {
+		if(!item.shouldExecute()) {
+			return;
+		}
 		switch(item.getType()) {
 			case INVARIANT:
 				checkInvariant(item.getCode());

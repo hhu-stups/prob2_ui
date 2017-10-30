@@ -24,7 +24,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-import de.prob2.ui.statusbar.StatusBar;
+import de.prob2.ui.project.verifications.MachineTableView;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -64,7 +64,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	@Inject
 	private CurrentProject(final StageManager stageManager, final ResourceBundle bundle, final Injector injector, final AnimationSelector animations,
-							final CurrentTrace currentTrace, final StatusBar statusBar) {
+							final CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.injector = injector;
@@ -102,7 +102,12 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 					this.currentMachine.set(null);
 				}
 			}
-			statusBar.reset();
+		});
+		this.currentMachineProperty().addListener((observable, from, to) -> {
+			if(from != null) {
+				from.resetStatus();
+			}
+			injector.getInstance(MachineTableView.class).refresh();
 		});
 	}
 
@@ -203,7 +208,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void initializeMachines() {
 		for (Machine machine : machines) {
-			machine.initialize();
+			machine.resetStatus();
 		}
 	}
 

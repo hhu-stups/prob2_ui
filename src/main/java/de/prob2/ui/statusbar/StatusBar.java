@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.property.BooleanProperty;
@@ -54,6 +55,7 @@ public class StatusBar extends HBox {
 	
 	private final ResourceBundle resourceBundle;
 	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 	
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
 	private final ObjectProperty<StatusBar.LTLStatus> ltlStatus;
@@ -63,12 +65,13 @@ public class StatusBar extends HBox {
 	private final BooleanProperty statesViewUpdating;
 	
 	@Inject
-	private StatusBar(final ResourceBundle resourceBundle, final CurrentTrace currentTrace, final StageManager stageManager) {
+	private StatusBar(final ResourceBundle resourceBundle, final CurrentTrace currentTrace, final CurrentProject currentProject,
+					final StageManager stageManager) {
 		super();
 		
 		this.resourceBundle = resourceBundle;
 		this.currentTrace = currentTrace;
-		
+		this.currentProject = currentProject;
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
 		this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", StatusBar.LTLStatus.SUCCESSFUL);
 		this.cbcStatus = new SimpleObjectProperty<>(this, "cbcStatus", StatusBar.CBCStatus.SUCCESSFUL);
@@ -82,6 +85,11 @@ public class StatusBar extends HBox {
 	@FXML
 	private void initialize() {
 		this.currentTrace.addListener((observable, from, to) -> this.update());
+		this.currentProject.addListener((observable, from, to) -> {
+			reset();
+			this.update();
+		});
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> reset());
 		this.loadingStatusProperty().addListener((observable, from, to) -> this.update());
 		this.ltlStatusProperty().addListener((observable, from, to) -> this.update());
 		this.cbcStatusProperty().addListener((observable, from, to) -> this.update());
@@ -185,7 +193,6 @@ public class StatusBar extends HBox {
 			if (this.getModelcheckingStatus() == StatusBar.ModelcheckingStatus.ERROR) {
 				errorMessages.add(resourceBundle.getString("statusbar.errors.modelcheckError"));
 			}
-			
 			
 			if (errorMessages.isEmpty()) {
 				statusLabel.getStyleClass().add("noErrors");
