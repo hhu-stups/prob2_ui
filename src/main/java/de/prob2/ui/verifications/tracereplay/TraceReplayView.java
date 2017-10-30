@@ -54,19 +54,16 @@ public class TraceReplayView extends ScrollPane {
 
 	@FXML
 	private void initialize() {
-		statusColumn.setCellValueFactory(new PropertyValueFactory<ReplayTraceItem, FontAwesomeIconView>("statusIcon"));
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("statusIcon"));
 		statusColumn.setStyle("-fx-alignment: CENTER;");
-		nameColumn.setCellValueFactory(new PropertyValueFactory<ReplayTraceItem, String>("name"));
+		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			updateTraceTableView(to);
-			to.getTraces().addListener(new ListChangeListener<File>() {
-				@Override
-				public void onChanged(ListChangeListener.Change c) {
-					while (c.next()) {
-						addToTraceTableView(c.getAddedSubList());
-						removeFromTraceTableView(c.getRemoved());
-					}
+			to.getTraces().addListener((ListChangeListener<File>)c -> {
+				while (c.next()) {
+					addToTraceTableView(c.getAddedSubList());
+					removeFromTraceTableView(c.getRemoved());
 				}
 			});
 		});
@@ -87,14 +84,14 @@ public class TraceReplayView extends ScrollPane {
 		}
 	}
 
-	private void addToTraceTableView(List<File> traceFiles) {
+	private void addToTraceTableView(List<? extends File> traceFiles) {
 		for (File traceFile : traceFiles) {
 			ReplayTrace trace = traceLoader.loadTrace(traceFile);
 			traceTableView.getItems().add(new ReplayTraceItem(trace, traceFile));
 		}
 	}
 
-	private void removeFromTraceTableView(List<File> traceFiles) {
+	private void removeFromTraceTableView(List<? extends File> traceFiles) {
 		traceTableView.getItems().stream().filter(traceItem -> !traceFiles.contains(traceItem.getLocation()))
 				.collect(Collectors.toList());
 		for (ReplayTraceItem traceItem : traceTableView.getItems()) {
