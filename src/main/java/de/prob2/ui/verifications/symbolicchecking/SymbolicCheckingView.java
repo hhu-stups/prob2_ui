@@ -162,8 +162,8 @@ public class SymbolicCheckingView extends AnchorPane {
 			row.setOnMouseClicked(e-> {
 				List<SymbolicCheckingType> changeDisabled = Arrays.asList(
 							SymbolicCheckingType.FIND_DEADLOCK, 
-							SymbolicCheckingType.REFINEMENT, 
-							SymbolicCheckingType.ASSERTIONS, 
+							SymbolicCheckingType.CHECK_REFINEMENT, 
+							SymbolicCheckingType.CHECK_ASSERTIONS, 
 							SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS,
 							SymbolicCheckingType.BMC,
 							SymbolicCheckingType.IC3,

@@ -241,10 +241,10 @@ public class SymbolicCheckingFormulaHandler {
 			case FIND_DEADLOCK:
 				findDeadlock();
 				break;
-			case REFINEMENT:
+			case CHECK_REFINEMENT:
 				checkRefinement(item);
 				break;
-			case ASSERTIONS:
+			case CHECK_ASSERTIONS:
 				checkAssertions(item);
 				break;
 			case FIND_REDUNDANT_INVARIANTS:
