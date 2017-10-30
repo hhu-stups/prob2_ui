@@ -2,7 +2,7 @@ package de.prob2.ui.verifications.symbolicchecking;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -83,7 +83,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	
 	private final EventHandler<ActionEvent> checkHandler;
 	
-	private final HashMap<SymbolicCheckingType, String> noneCheckings;
+	private final EnumMap<SymbolicCheckingType, String> noneCheckings;
 	
 	@Inject
 	public SymbolicCheckingFormulaInput(final StageManager stageManager, final SymbolicCheckingFormulaHandler cbcHandler, 
@@ -96,7 +96,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		this.injector = injector;
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "symbolic_checking_formula_input.fxml");
-		noneCheckings = new HashMap<>();
+		noneCheckings = new EnumMap<SymbolicCheckingType, String>(SymbolicCheckingType.class);
 		noneCheckings.put(SymbolicCheckingType.FIND_DEADLOCK, FIND_DEADLOCK);
 		noneCheckings.put(SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS, FIND_REDUNDANT_INVARIANTS);
 		noneCheckings.put(SymbolicCheckingType.CHECK_ASSERTIONS, ASSERTION_CHECKING);

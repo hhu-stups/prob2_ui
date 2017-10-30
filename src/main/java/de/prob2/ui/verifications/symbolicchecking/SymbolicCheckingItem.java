@@ -28,13 +28,5 @@ public class SymbolicCheckingItem {
 	public GUIType getGUIType() {
 		return guiType;
 	}
-	
-	public void setCheckingType(SymbolicCheckingType checkingType) {
-		this.checkingType = checkingType;
-	}
-	
-	public void setGUIType(GUIType guiType) {
-		this.guiType = guiType;
-	}
 
 }
