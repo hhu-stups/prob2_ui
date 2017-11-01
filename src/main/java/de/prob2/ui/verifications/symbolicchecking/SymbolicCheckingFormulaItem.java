@@ -70,5 +70,10 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
 		return type;
 	}
 	
+	@Override
+	public String toString() {
+		return String.join(" ", name, code, type.name());
+	}
+	
 
 }

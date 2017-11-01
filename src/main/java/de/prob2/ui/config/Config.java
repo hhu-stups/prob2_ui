@@ -21,13 +21,13 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
@@ -98,7 +98,6 @@ public final class Config {
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
 	private final RecentProjects recentProjects;
-	private final ConfigData defaultData;
 	private final GroovyConsole groovyConsole;
 	private final BConsole bConsole;
 	private final Injector injector;
@@ -131,17 +130,6 @@ public final class Config {
 		this.runtimeOptions = runtimeOptions;
 		this.proBPluginManager = proBPluginManager;
 
-		try (
-			final InputStream is = Config.class.getResourceAsStream("default.json");
-			final Reader defaultReader = new InputStreamReader(is, CONFIG_CHARSET)
-		) {
-			this.defaultData = GSON.fromJson(defaultReader, ConfigData.class);
-		} catch (FileNotFoundException exc) {
-			throw new IllegalStateException("Default config file not found", exc);
-		} catch (IOException exc) {
-			throw new IllegalStateException("Failed to open default config file", exc);
-		}
-
 		if (!LOCATION.getParentFile().exists() && !LOCATION.getParentFile().mkdirs()) {
 			logger.warn("Failed to create the parent directory for the config file {}", LOCATION.getAbsolutePath());
 		}
@@ -161,7 +149,12 @@ public final class Config {
 			final InputStream is = new FileInputStream(LOCATION);
 			final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
 		) {
-			return GSON.fromJson(reader, BasicConfigData.class);
+			final BasicConfigData data = GSON.fromJson(reader, BasicConfigData.class);
+			if (data == null) {
+				// Config file is empty, use defaults instead.
+				return new BasicConfigData();
+			}
+			return data;
 		} catch (FileNotFoundException exc) {
 			logger.info("Config file not found, while loading basic config, loading default settings", exc);
 			return new BasicConfigData();
@@ -184,64 +177,58 @@ public final class Config {
 		// If some keys are null (for example when loading a config from a
 		// previous version that did not have those keys), replace them with
 		// their values from the default config.
+		if (configData.maxRecentProjects <= 0) {
+			configData.maxRecentProjects = 10;
+		}
 		if (configData.recentProjects == null) {
-			configData.maxRecentProjects = this.defaultData.maxRecentProjects;
-			configData.recentProjects = new ArrayList<>(this.defaultData.recentProjects);
+			configData.recentProjects = new ArrayList<>();
 		}
 		if (configData.guiState == null || configData.guiState.isEmpty()) {
-			configData.guiState = this.defaultData.guiState;
+			configData.guiState = "main.fxml";
 		}
 		if (configData.visibleStages == null) {
-			configData.visibleStages = new ArrayList<>(this.defaultData.visibleStages);
+			configData.visibleStages = new ArrayList<>();
 		}
 		if (configData.stageBoxes == null) {
-			configData.stageBoxes = new HashMap<>(this.defaultData.stageBoxes);
+			configData.stageBoxes = new HashMap<>();
 		}
 		if (configData.groovyObjectTabs == null) {
-			configData.groovyObjectTabs = new ArrayList<>(this.defaultData.groovyObjectTabs);
+			configData.groovyObjectTabs = new ArrayList<>();
 		}
 		if (configData.currentPreference == null) {
-			configData.currentPreference = this.defaultData.currentPreference;
+			configData.currentPreference = "general";
 		}
 		if (configData.currentMainTab == null) {
-			configData.currentMainTab = this.defaultData.currentMainTab;
+			configData.currentMainTab = "states";
 		}
 		if (configData.currentVerificationTab == null) {
-			configData.currentVerificationTab = this.defaultData.currentVerificationTab;
-		}
-		if (configData.groovyConsoleSettings == null) {
-			configData.groovyConsoleSettings = this.defaultData.groovyConsoleSettings;
-		}
-		if (configData.bConsoleSettings == null) {
-			configData.bConsoleSettings = this.defaultData.bConsoleSettings;
+			configData.currentVerificationTab = "modelchecking";
 		}
 		if (configData.expandedTitledPanes == null) {
-			configData.expandedTitledPanes = this.defaultData.expandedTitledPanes;
+			configData.expandedTitledPanes = new ArrayList<>();
 		}
 		if (configData.defaultProjectLocation == null) {
 			configData.defaultProjectLocation = System.getProperty("user.home");
 		}
 
 		MainController main = injector.getInstance(MainController.class);
-
 		if (configData.horizontalDividerPositions == null) {
 			configData.horizontalDividerPositions = main.getHorizontalDividerPositions();
 		}
-
 		if (configData.verticalDividerPositions == null) {
 			configData.verticalDividerPositions = main.getVerticalDividerPositions();
 		}
 
 		if (configData.statesViewColumnsWidth == null) {
-			configData.statesViewColumnsWidth = this.defaultData.statesViewColumnsWidth.clone();
+			configData.statesViewColumnsWidth = new double[]{0.3333333333333333, 0.3333333333333333, 0.3333333333333333};
 		}
 
 		if (configData.statesViewColumnsOrder == null) {
-			configData.statesViewColumnsOrder = this.defaultData.statesViewColumnsOrder.clone();
+			configData.statesViewColumnsOrder = new String[]{"name", "value", "previousValue"};
 		}
 
 		if (configData.operationsSortMode == null) {
-			configData.operationsSortMode = this.defaultData.operationsSortMode;
+			configData.operationsSortMode = OperationsView.SortMode.MODEL_ORDER;
 		}
 
 		if (configData.globalPreferences == null) {
@@ -257,20 +244,20 @@ public final class Config {
 				final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
 			) {
 				configData = GSON.fromJson(reader, ConfigData.class);
+				if (configData == null) {
+					// Config file is empty, use default config.
+					configData = new ConfigData();
+				}
 			} catch (FileNotFoundException exc) {
 				logger.info("Config file not found, loading default settings", exc);
-				configData = this.defaultData;
+				configData = new ConfigData();
 			} catch (IOException exc) {
 				logger.warn("Failed to open config file", exc);
 				return;
 			}
 		} else {
 			logger.info("Config loading disabled via runtime options, loading default config");
-			configData = this.defaultData;
-		}
-		
-		if(configData == null) {
-			configData = this.defaultData;
+			configData = new ConfigData();
 		}
 		
 		this.replaceMissingWithDefaults(configData);

@@ -3,10 +3,11 @@ package de.prob2.ui.project;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob.scripting.Api;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.runconfigurations.RunconfigurationsTab;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
@@ -28,7 +29,7 @@ public final class ProjectView extends AnchorPane {
 	private final Injector injector;
 
 	@Inject
-	private ProjectView(final StageManager stageManager, final CurrentProject currentProject, final Injector injector, final Api api) {
+	private ProjectView(final StageManager stageManager, final CurrentProject currentProject, final Injector injector) {
 		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "project_view.fxml");

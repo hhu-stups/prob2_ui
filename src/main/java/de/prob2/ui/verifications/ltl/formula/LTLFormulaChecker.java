@@ -80,6 +80,9 @@ public class LTLFormulaChecker {
 	}
 	
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
+		if(!item.shouldExecute()) {
+			return Checked.NOT_CHECKED;
+		}
 		State stateid = currentTrace.getCurrentState();
 		LtlParser parser = new LtlParser(item.getCode());
 		parser.setPatternManager(machine.getPatternManager());

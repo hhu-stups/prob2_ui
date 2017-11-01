@@ -8,7 +8,6 @@ import java.util.ResourceBundle;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import de.prob.Main;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob.scripting.Api;
 
@@ -54,8 +53,6 @@ public class ProB2 extends Application {
 	private Stage primaryStage;
 
 	public static void main(String... args) {
-		Api api = Main.getInjector().getInstance(Api.class);
-		LOGGER.info("probcli version: {}",api.getVersion().toString());
 		Application.launch(args);
 	}
 
@@ -86,8 +83,7 @@ public class ProB2 extends Application {
 					alert.show();
 				});
 			});
-			// Disable subscribing to variables by default, StatesView handles all subscribing itself
-			injector.getInstance(Api.class).setLoadVariablesByDefault(false);
+			LOGGER.info("probcli version: {}", injector.getInstance(Api.class).getVersion());
 			// Load config file
 			injector.getInstance(Config.class);
 

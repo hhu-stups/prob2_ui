@@ -404,6 +404,9 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	}
 	
 	private void checkItem(ModelCheckingItem item) {
+		if(!item.shouldExecute()) {
+			return;
+		}
 		Thread currentJobThread = new Thread(() -> {
 			synchronized(lock) {
 				updateCurrentValues(item.getOptions(), currentTrace.getStateSpace(), item);

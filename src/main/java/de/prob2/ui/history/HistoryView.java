@@ -1,6 +1,5 @@
 package de.prob2.ui.history;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
