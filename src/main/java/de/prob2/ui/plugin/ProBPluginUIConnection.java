@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 /**
  * @author Christoph Heinzen
- * @since 11.08.17.
+ * @since 11.08.17
  */
 @Singleton
 public class ProBPluginUIConnection {

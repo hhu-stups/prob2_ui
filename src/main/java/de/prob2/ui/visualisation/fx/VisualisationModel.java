@@ -11,6 +11,7 @@ import javafx.scene.control.ButtonType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.util.Collections;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -46,6 +47,7 @@ public class VisualisationModel {
      * @param newTrace Current trace.
      */
     public void setTraces(Trace oldTrace, Trace newTrace) {
+        //TODO: make possible for other specifications than Event-B
         this.oldTrace = oldTrace;
         this.newTrace = newTrace;
         if (oldTrace != null) {
