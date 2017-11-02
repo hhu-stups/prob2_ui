@@ -110,6 +110,7 @@ public class VisualisationModel {
         }
 
         LOGGER.debug("The value of formula \"{}\" could be evaluated for the new and the old trace.", formula);
+        //TODO if both values are equal, check if their expanded versions are really equal
         return !oldValue.getValue().equals(newValue.getValue());
     }
 
