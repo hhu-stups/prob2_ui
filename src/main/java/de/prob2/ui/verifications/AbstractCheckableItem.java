@@ -12,7 +12,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	protected String description;
 	protected String code;
 	protected boolean shouldExecute;
-	protected CheckingResultItem resultItem;
+	protected transient CheckingResultItem resultItem;
 	
 	public AbstractCheckableItem(String name, String description, String code) {
 		initializeStatus();

@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
@@ -24,6 +25,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -34,10 +36,13 @@ import javafx.scene.control.Alert;
 @Singleton
 public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 	
+	private final CurrentTrace currentTrace;
+	
 	@Inject
-	public SymbolicCheckingResultHandler(final StageManager stageManager, final ResourceBundle bundle) {
+	public SymbolicCheckingResultHandler(final StageManager stageManager, final ResourceBundle bundle, 
+										final CurrentTrace currentTrace) {
 		super(stageManager, bundle);
-		
+		this.currentTrace = currentTrace;
 		this.type = CheckingType.SYMBOLIC;
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
@@ -62,6 +67,22 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		item.getCounterExamples().clear();
 		for(Trace trace: traces) {
 			item.getCounterExamples().add(trace);
+		}
+	}
+	
+	public void handleFormulaResult(SymbolicCheckingFormulaItem item, AbstractCommand cmd) {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		if(item.getType() == SymbolicCheckingType.FIND_VALID_STATE) {
+			handleFindValidState(item, (FindStateCommand) cmd, stateSpace);
+		} else if(item.getType() == SymbolicCheckingType.TINDUCTION || item.getType() == SymbolicCheckingType.KINDUCTION ||
+					item.getType() == SymbolicCheckingType.BMC || item.getType() == SymbolicCheckingType.IC3) {
+			handleSymbolicChecking(item, (SymbolicModelcheckCommand) cmd);
+		} else if(item.getType() == SymbolicCheckingType.CHECK_ASSERTIONS) {
+			handleAssertionChecking(item, (ConstraintBasedAssertionCheckCommand) cmd, stateSpace);
+		} else if(item.getType() == SymbolicCheckingType.CHECK_REFINEMENT) {
+			handleRefinementChecking(item, (ConstraintBasedRefinementCheckCommand) cmd);
+		} else if(item.getType() == SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS) {
+			handleFindRedundantInvariants(item, (GetRedundantInvariantsCommand) cmd);
 		}
 	}
 
