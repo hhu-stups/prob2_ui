@@ -74,15 +74,19 @@ public class SymbolicCheckingView extends AnchorPane {
 
 	private final Injector injector;
 	
-	private final SymbolicCheckingFormulaHandler symbolicCheckHandler;	
+	private final SymbolicCheckingFormulaHandler symbolicCheckHandler;
+	
+	private final SymbolicFormulaChecker symbolicChecker;
 
 	@Inject
 	public SymbolicCheckingView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
-					final CurrentProject currentProject, final SymbolicCheckingFormulaHandler cbcHandler, final Injector injector) {
+					final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler, 
+					final SymbolicFormulaChecker symbolicChecker, final Injector injector) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.symbolicCheckHandler = cbcHandler;
+		this.symbolicCheckHandler = symbolicCheckHandler;
+		this.symbolicChecker = symbolicChecker;
 		this.injector = injector;
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
@@ -103,18 +107,18 @@ public class SymbolicCheckingView extends AnchorPane {
 		});
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().symbolicCheckingFormulasProperty().emptyProperty().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().symbolicCheckingFormulasProperty().emptyProperty().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
 			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
 			}
 		});
 	}
 	
 	private void setBindings() {
-		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
-		cancelButton.disableProperty().bind(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty());
-		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicCheckHandler.currentJobThreadsProperty().emptyProperty().not()));
+		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
+		cancelButton.disableProperty().bind(symbolicChecker.currentJobThreadsProperty().emptyProperty());
+		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -123,8 +127,8 @@ public class SymbolicCheckingView extends AnchorPane {
 		tvFormula.setOnMouseClicked(e-> {
 			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 &&  item != null && currentTrace.exists()) {
-				symbolicCheckHandler.checkItem(item);
-				symbolicCheckHandler.updateMachineStatus(currentProject.getCurrentMachine());
+				symbolicCheckHandler.handleItem(item);
+				symbolicChecker.updateMachineStatus(currentProject.getCurrentMachine());
 			}
 		});
 	}
@@ -137,8 +141,8 @@ public class SymbolicCheckingView extends AnchorPane {
 			
 			MenuItem check = new MenuItem(bundle.getString("verifications.symbolic.menu.checkSeparately"));
 			check.setOnAction(e-> {
-				symbolicCheckHandler.checkItem(row.getItem());
-				symbolicCheckHandler.updateMachineStatus(currentProject.getCurrentMachine());
+				symbolicCheckHandler.handleItem(row.getItem());
+				symbolicChecker.updateMachineStatus(currentProject.getCurrentMachine());
 			});
 			check.disableProperty().bind(row.emptyProperty());
 			
@@ -216,14 +220,14 @@ public class SymbolicCheckingView extends AnchorPane {
 	@FXML
 	public void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
-		symbolicCheckHandler.checkMachine(machine);
-		symbolicCheckHandler.updateMachineStatus(machine);
+		symbolicCheckHandler.handleMachine(machine);
+		symbolicChecker.updateMachineStatus(machine);
 		refresh();
 	}
 	
 	@FXML
 	public synchronized void cancel() {
-		symbolicCheckHandler.interrupt();
+		symbolicChecker.interrupt();
 	}
 	
 	private void removeFormula() {
