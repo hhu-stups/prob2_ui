@@ -10,18 +10,17 @@ import javax.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.command.SymbolicModelcheckCommand;
-import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
 import de.prob.check.IModelCheckJob;
-import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 
@@ -99,82 +98,50 @@ public class SymbolicCheckingFormulaHandler {
 	}
 	
 	public void findRedundantInvariants(SymbolicCheckingFormulaItem item) {
-		final SymbolicCheckingFormulaItem currentItem = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
-		Thread checkingThread = new Thread(() -> {
-			stateSpace.execute(cmd);
-			Thread currentThread = Thread.currentThread();
-			injector.getInstance(StatsView.class).update(currentTrace.get());
-			Platform.runLater(() -> {
-				resultHandler.handleFindRedundantInvariants(currentItem, cmd);
-				updateMachine(currentProject.getCurrentMachine());
-				currentJobThreads.remove(currentThread);
-			});
-		});
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
+		checkItem(item, cmd, stateSpace);
 	}
 		
 	public void checkRefinement(SymbolicCheckingFormulaItem item) {
-		final SymbolicCheckingFormulaItem currentItem = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedRefinementCheckCommand command = new ConstraintBasedRefinementCheckCommand();
-		Thread checkingThread = new Thread(() -> {
-			try {
-				stateSpace.execute(command);
-				injector.getInstance(StatsView.class).update(currentTrace.get());
-			} catch (Exception e){
-				LOGGER.error(e.getMessage());
-			}
-			Thread currentThread = Thread.currentThread();
-			Platform.runLater(() -> {
-				resultHandler.handleRefinementChecking(currentItem, command);
-				updateMachine(currentProject.getCurrentMachine());
-				currentJobThreads.remove(currentThread);
-			});
-		});
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
+		ConstraintBasedRefinementCheckCommand cmd = new ConstraintBasedRefinementCheckCommand();
+		checkItem(item, cmd, stateSpace);
 	}
 	
-
-		
 	public void checkAssertions(SymbolicCheckingFormulaItem item) {
-		final SymbolicCheckingFormulaItem currentItem = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedAssertionCheckCommand command = new ConstraintBasedAssertionCheckCommand(stateSpace);
-		Thread checkingThread = new Thread(() -> {
-			stateSpace.execute(command);
-			Thread currentThread = Thread.currentThread();
-			Platform.runLater(() -> {
-				injector.getInstance(StatsView.class).update(currentTrace.get());
-				resultHandler.handleAssertionChecking(currentItem, command, stateSpace);
-				updateMachine(currentProject.getCurrentMachine());
-				currentJobThreads.remove(currentThread);
-			});
-		});
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
+		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(stateSpace);
+		checkItem(item, cmd, stateSpace);
 	}
 	
 	public void checkSymbolic(SymbolicCheckingFormulaItem item, SymbolicModelcheckCommand.Algorithm algorithm) {
-		final SymbolicCheckingFormulaItem currentItem = getItemIfAlreadyExists(item);
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		SymbolicModelcheckCommand command = new SymbolicModelcheckCommand(algorithm);
-		Thread checkingThread = new Thread(() -> {
-			stateSpace.execute(command);
-			Thread currentThread = Thread.currentThread();
-			Platform.runLater(() -> {
-				injector.getInstance(StatsView.class).update(currentTrace.get());
-				resultHandler.handleSymbolicChecking(currentItem, command);
-				updateMachine(currentProject.getCurrentMachine());
-				currentJobThreads.remove(currentThread);
-			});
-		});
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
+		SymbolicModelcheckCommand cmd = new SymbolicModelcheckCommand(algorithm);
+		checkItem(item, cmd, stateSpace);
 		
+	}
+	
+	public void findValidState(SymbolicCheckingFormulaItem item) {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
+		checkItem(item, cmd, stateSpace);
+	}
+	
+	private void handleResult(SymbolicCheckingFormulaItem item, AbstractCommand cmd) {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		if(item.getType() == SymbolicCheckingType.FIND_VALID_STATE) {
+			resultHandler.handleFindValidState(item, (FindStateCommand) cmd, stateSpace);
+		} else if(item.getType() == SymbolicCheckingType.TINDUCTION || item.getType() == SymbolicCheckingType.KINDUCTION ||
+					item.getType() == SymbolicCheckingType.BMC || item.getType() == SymbolicCheckingType.IC3) {
+			resultHandler.handleSymbolicChecking(item, (SymbolicModelcheckCommand) cmd);
+		} else if(item.getType() == SymbolicCheckingType.CHECK_ASSERTIONS) {
+			resultHandler.handleAssertionChecking(item, (ConstraintBasedAssertionCheckCommand) cmd, stateSpace);
+		} else if(item.getType() == SymbolicCheckingType.CHECK_REFINEMENT) {
+			resultHandler.handleRefinementChecking(item, (ConstraintBasedRefinementCheckCommand) cmd);
+		} else if(item.getType() == SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS) {
+			resultHandler.handleFindRedundantInvariants(item, (GetRedundantInvariantsCommand) cmd);
+		}
 	}
 	 
 	private SymbolicCheckingFormulaItem getItemIfAlreadyExists(SymbolicCheckingFormulaItem item) {
@@ -185,31 +152,6 @@ public class SymbolicCheckingFormulaHandler {
 		}
 		return item;
 	}
-	
-
-	public void findValidState(SymbolicCheckingFormulaItem item) {
-		final SymbolicCheckingFormulaItem currentItem = getItemIfAlreadyExists(item);
-		StateSpace stateSpace = currentTrace.getStateSpace();
-		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
-		Thread checkingThread = new Thread(() -> {
-			try {
-				stateSpace.execute(cmd);
-			} catch (ProBError | EvaluationException e){
-				LOGGER.error(e.getMessage());
-			}
-			Thread currentThread = Thread.currentThread();
-			Platform.runLater(() -> {
-				injector.getInstance(StatsView.class).update(currentTrace.get());
-				resultHandler.handleFindValidState(currentItem, cmd, stateSpace);
-				updateMachine(currentProject.getCurrentMachine());
-				currentJobThreads.remove(currentThread);
-			});
-		});
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
-	}
-	
-
 	
 	public void executeCheckingItem(IModelCheckJob checker, String code, SymbolicCheckingType type) {
 		Machine currentMachine = currentProject.getCurrentMachine();
@@ -310,6 +252,26 @@ public class SymbolicCheckingFormulaHandler {
 		}
 	}
 	
+	private void checkItem(SymbolicCheckingFormulaItem item, AbstractCommand cmd, final StateSpace stateSpace) {
+		final SymbolicCheckingFormulaItem currentItem = getItemIfAlreadyExists(item);
+		Thread checkingThread = new Thread(() -> {
+			try {
+				stateSpace.execute(cmd);
+			} catch (Exception e){
+				LOGGER.error(e.getMessage());
+			}
+			Thread currentThread = Thread.currentThread();
+			Platform.runLater(() -> {
+				injector.getInstance(StatsView.class).update(currentTrace.get());
+				handleResult(currentItem, cmd);
+				updateMachine(currentProject.getCurrentMachine());
+				currentJobThreads.remove(currentThread);
+			});
+		});
+		currentJobThreads.add(checkingThread);
+		checkingThread.start();
+	}
+	
 	private void checkItem(IModelCheckJob checker, SymbolicCheckingFormulaItem item) {
 		Thread checkingThread = new Thread(() -> {
 			State stateid = currentTrace.getCurrentState();
@@ -344,6 +306,5 @@ public class SymbolicCheckingFormulaHandler {
 	public ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
 	}
-		
-
+	
 }
