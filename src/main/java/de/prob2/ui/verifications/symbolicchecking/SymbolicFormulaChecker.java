@@ -21,7 +21,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
@@ -67,25 +66,6 @@ public class SymbolicFormulaChecker {
 			.findFirst()
 			.ifPresent(item -> checkItem(checker, item));
 	}
-			
-
-	
-	public void addFormula(String name, String code, SymbolicCheckingType type, boolean checking) {
-		SymbolicCheckingFormulaItem formula = new SymbolicCheckingFormulaItem(name, code, type);
-		addFormula(formula,checking);
-	}
-	
-	public void addFormula(SymbolicCheckingFormulaItem formula, boolean checking) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		if (currentMachine != null) {
-			if(!currentMachine.getSymbolicCheckingFormulas().contains(formula)) {
-				currentMachine.addSymbolicCheckingFormula(formula);
-				injector.getInstance(SymbolicCheckingView.class).updateProject();
-			} else if(!checking) {
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
-			}
-		}
-	}
 	
 	public void checkItem(SymbolicCheckingFormulaItem item, AbstractCommand cmd, final StateSpace stateSpace) {
 		final SymbolicCheckingFormulaItem currentItem = getItemIfAlreadyExists(item);
@@ -121,9 +101,8 @@ public class SymbolicFormulaChecker {
 			}
 			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
-				Machine currentMachine = currentProject.getCurrentMachine();
 				resultHandler.handleFormulaResult(item, result.get(0), stateid);
-				updateMachine(currentMachine);
+				updateMachine(currentProject.getCurrentMachine());
 				injector.getInstance(StatsView.class).update(currentTrace.get());
 				currentJobs.remove(checker);
 				currentJobThreads.remove(currentThread);
@@ -141,13 +120,13 @@ public class SymbolicFormulaChecker {
 			if(formula.getChecked() == Checked.FAIL) {
 				machine.setSymbolicCheckedFailed();
 				injector.getInstance(MachineTableView.class).refresh();
-				injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.ERROR);
+				injector.getInstance(StatusBar.class).setSymbolicStatus(StatusBar.SymbolicStatus.ERROR);
 				return;
 			}
 		}
 		machine.setSymbolicCheckedSuccessful();
 		injector.getInstance(MachineTableView.class).refresh();
-		injector.getInstance(StatusBar.class).setCbcStatus(StatusBar.CBCStatus.SUCCESSFUL);
+		injector.getInstance(StatusBar.class).setSymbolicStatus(StatusBar.SymbolicStatus.SUCCESSFUL);
 	}
 		
 	public void updateMachine(Machine machine) {
@@ -173,6 +152,5 @@ public class SymbolicFormulaChecker {
 	public ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
 	}
-
 
 }

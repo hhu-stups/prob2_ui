@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
@@ -18,9 +19,10 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
 import de.prob.statespace.StateSpace;
-
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.AbstractResultHandler;
 
 @Singleton
 public class SymbolicCheckingFormulaHandler {
@@ -29,11 +31,39 @@ public class SymbolicCheckingFormulaHandler {
 	
 	private final SymbolicFormulaChecker symbolicChecker;
 	
+	private final SymbolicCheckingResultHandler resultHandler;
+	
+	private final Injector injector;
+	
+	private final CurrentProject currentProject;
+	
 	
 	@Inject
-	public SymbolicCheckingFormulaHandler(final CurrentTrace currentTrace, final SymbolicFormulaChecker symbolicChecker) {
+	public SymbolicCheckingFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
+											final Injector injector, final SymbolicFormulaChecker symbolicChecker,
+											final SymbolicCheckingResultHandler resultHandler) {
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
+		this.injector = injector;
 		this.symbolicChecker = symbolicChecker;
+		this.resultHandler = resultHandler;
+	}
+	
+	public void addFormula(String name, String code, SymbolicCheckingType type, boolean checking) {
+		SymbolicCheckingFormulaItem formula = new SymbolicCheckingFormulaItem(name, code, type);
+		addFormula(formula,checking);
+	}
+	
+	public void addFormula(SymbolicCheckingFormulaItem formula, boolean checking) {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		if (currentMachine != null) {
+			if(!currentMachine.getSymbolicCheckingFormulas().contains(formula)) {
+				currentMachine.addSymbolicCheckingFormula(formula);
+				injector.getInstance(SymbolicCheckingView.class).updateProject();
+			} else if(!checking) {
+				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+			}
+		}
 	}
 	
 	public void handleInvariant(String code) {
