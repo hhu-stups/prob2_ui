@@ -1,23 +1,29 @@
 package de.prob2.ui.verifications.tracereplay;
 
-import java.io.File;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import java.io.File;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javafx.collections.ListChangeListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
@@ -69,6 +75,20 @@ public class TraceReplayView extends ScrollPane {
 			});
 		});
 
+		this.traceTableView.setRowFactory(param -> {
+
+			final ContextMenu menu = new ContextMenu();
+			final TableRow<ReplayTraceItem> row = new TableRow<>();
+			row.setContextMenu(menu);
+			//
+			final MenuItem item = new MenuItem("Replay Trace"); // TODO: i18n
+			menu.getItems().add(item);
+			//
+			item.setOnAction(event -> this.traceChecker.replayTrace(row.getItem().getTrace(), true));
+			//
+			return row;
+		});
+
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (checkButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 		((FontAwesomeIconView) (cancelButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
@@ -84,7 +104,7 @@ public class TraceReplayView extends ScrollPane {
 		});
 	}
 
-	private void updateTraceTableView(Machine machine) {
+    private void updateTraceTableView(Machine machine) {
 		traceTableView.getItems().clear();
 		checkButton.setDisable(true);
 		if (machine != null) {

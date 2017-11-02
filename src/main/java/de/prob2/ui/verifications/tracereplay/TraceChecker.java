@@ -22,10 +22,10 @@ public class TraceChecker {
 	}
 
 	void checkMachine(ObservableList<ReplayTraceItem> traceItems) {
-		traceItems.forEach(traceItem -> replayTrace(traceItem.getTrace()));
+		traceItems.forEach(traceItem -> replayTrace(traceItem.getTrace(), false));
 	}
 
-	private void replayTrace(ReplayTrace trace) {
+	public void replayTrace(ReplayTrace trace, final boolean setCurrentAnimation) {
 		Thread replayThread = new Thread(() -> {
 			trace.setStatus(Status.NOT_CHECKED);
 
@@ -46,6 +46,9 @@ public class TraceChecker {
 				return;
 			}
 			trace.setStatus(Status.SUCCESSFUL);
+			if (setCurrentAnimation) {
+			    currentTrace.set(t);
+            }
 			currentJobThreads.remove(Thread.currentThread());
 		});
 		currentJobThreads.add(replayThread);
@@ -56,7 +59,7 @@ public class TraceChecker {
 		currentJobThreads.forEach(Thread::interrupt);
 		currentJobThreads.clear();
 	}
-	
+
 	ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
 	}
