@@ -63,12 +63,12 @@ public class VisualisationLoader {
 			InMemoryClassloader classLoader = new InMemoryClassloader(this.getClass().getClassLoader());
 			visualisationClassloader = classLoader;
 
-			Class visualizationClass = new InMemoryCompiler().compile(className, selectedVisualization, classLoader);
+			Class<?> visualizationClass = new InMemoryCompiler().compile(className, selectedVisualization, classLoader);
 			LOGGER.debug("Successfully compiled class {}.", className);
 
 			if (checkVisualizationClass(visualizationClass)) {
 				LOGGER.debug("Class {} extends the abstract class Visualisation. Create an instance of it.", className);
-				return (Visualisation) visualizationClass.newInstance();
+				return (Visualisation)visualizationClass.getConstructor().newInstance();
 			} else {
 				LOGGER.warn("Class {} does not extend the abstract class Visualisation.", className);
 				showAlert(false, Alert.AlertType.WARNING, "visualisation.loader.no.extend", className);
@@ -101,12 +101,11 @@ public class VisualisationLoader {
 
 	private Visualisation loadVisualisationJar(File selectedVisualization) {
 		String fileName = selectedVisualization.getName();
-		try {
-			JarFile selectedVisualizationJar = new JarFile(selectedVisualization);
-			URL[]  urls = new URL[]{ new URL("jar:file:" + selectedVisualizationJar.getName() +"!/") };
+		try (JarFile selectedVisualizationJar = new JarFile(selectedVisualization)) {
+			URL[] urls = {new URL("jar:file:" + selectedVisualizationJar.getName() +"!/")};
 			URLClassLoader classloader = URLClassLoader.newInstance(urls, this.getClass().getClassLoader());
 			visualisationClassloader = classloader;
-			Class visualizationClass = null;
+			Class<?> visualizationClass = null;
 			String className = null;
 			Enumeration<JarEntry> jarEntries = selectedVisualizationJar.entries();
 			while (jarEntries.hasMoreElements()) {
@@ -124,7 +123,7 @@ public class VisualisationLoader {
 			}
 			if (visualizationClass != null) {
 				LOGGER.debug("Found visualization-class {} in jar: {}", className, fileName);
-				return (Visualisation) visualizationClass.newInstance();
+				return (Visualisation)visualizationClass.getConstructor().newInstance();
 
 			} else {
 				LOGGER.warn("No visualization-class found in jar: {}", fileName);
@@ -141,7 +140,7 @@ public class VisualisationLoader {
 		}
 	}
 
-	private boolean checkVisualizationClass(Class visualizationClass) {
+	private boolean checkVisualizationClass(Class<?> visualizationClass) {
 		return visualizationClass != null &&
 				visualizationClass.getSuperclass() != null &&
 				visualizationClass.getSuperclass().equals(Visualisation.class);

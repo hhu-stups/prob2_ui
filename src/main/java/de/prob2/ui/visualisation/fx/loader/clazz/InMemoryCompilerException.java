@@ -12,6 +12,7 @@ import javax.tools.JavaFileObject;
  * @since 09.10.17
  */
 public class InMemoryCompilerException extends Exception {
+	private static final long serialVersionUID = 1L;
 
 	private final String compilerMessage;
 
