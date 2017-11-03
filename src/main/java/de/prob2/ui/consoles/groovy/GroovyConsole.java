@@ -90,7 +90,7 @@ public class GroovyConsole extends Console {
 	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
 		if (e.getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent)e.getEvent()).getText())) {
 			handleChooseSuggestion(e);
-			this.setEstimatedScrollY(Double.MAX_VALUE);
+			this.scrollYToPixel(Double.MAX_VALUE);
 		} else if (e.getCode() == KeyCode.SPACE) {
 			//handle Space in Code Completion
 			keyPressed((KeyEvent)e.getEvent());

@@ -102,7 +102,7 @@ public class ConsoleSearchHandler {
 		parent.appendText(addition);
 		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf('\n') + 4;
 		parent.moveTo(posOfColon -1);
-		parent.setEstimatedScrollY(Double.MAX_VALUE);
+		parent.scrollYToPixel(Double.MAX_VALUE);
 	}
 	
 	protected void searchNext() {
