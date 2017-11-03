@@ -38,6 +38,7 @@ import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.TablePersistenceHandler;
 import de.prob2.ui.persistence.UIState;
+import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -56,10 +57,10 @@ public final class Config {
 	 */
 	private static class BasicConfigData {
 		Locale localeOverride;
-		
+
 		private BasicConfigData() {}
 	}
-	
+
 	/*
 	 * The full set of config settings, used when the injector is available.
 	 */
@@ -84,6 +85,7 @@ public final class Config {
 		OperationsView.SortMode operationsSortMode;
 		boolean operationsShowNotEnabled;
 		Map<String, String> globalPreferences;
+        private String pluginDirectory;
 
 		private ConfigData() {}
 	}
@@ -103,6 +105,7 @@ public final class Config {
 	private final CurrentProject currentProject;
 	private final GlobalPreferences globalPreferences;
 	private final RuntimeOptions runtimeOptions;
+	private final ProBPluginManager proBPluginManager;
 
 	@Inject
 	private Config(
@@ -114,7 +117,8 @@ public final class Config {
 		final CurrentProject currentProject,
 		final GlobalPreferences globalPreferences,
 		final RuntimeOptions runtimeOptions,
-		final StopActions stopActions
+		final StopActions stopActions,
+        final ProBPluginManager proBPluginManager
 	) {
 		this.recentProjects = recentProjects;
 		this.uiState = uiState;
@@ -124,6 +128,7 @@ public final class Config {
 		this.currentProject = currentProject;
 		this.globalPreferences = globalPreferences;
 		this.runtimeOptions = runtimeOptions;
+		this.proBPluginManager = proBPluginManager;
 
 		if (!LOCATION.getParentFile().exists() && !LOCATION.getParentFile().mkdirs()) {
 			logger.warn("Failed to create the parent directory for the config file {}", LOCATION.getAbsolutePath());
@@ -133,7 +138,7 @@ public final class Config {
 		
 		stopActions.add(this::save);
 	}
-	
+
 	/**
 	 * Load basic settings from the config file. This method is static so it can be called before all of {@link Config}'s dependencies are available.
 	 *
@@ -158,7 +163,7 @@ public final class Config {
 			return new BasicConfigData();
 		}
 	}
-	
+
 	/**
 	 * Get the locale override from the config file. This method is static so it can be called before all of {@link Config}'s dependencies are available.
 	 *
@@ -297,6 +302,8 @@ public final class Config {
 		this.uiState.setOperationsShowNotEnabled(configData.operationsShowNotEnabled);
 		
 		this.globalPreferences.putAll(configData.globalPreferences);
+
+		this.proBPluginManager.setPluginDirectory(configData.pluginDirectory);
 	}
 
 	public void save() {
@@ -342,6 +349,8 @@ public final class Config {
 		configData.operationsShowNotEnabled = operationsView.getShowDisabledOps();
 		
 		configData.globalPreferences = new HashMap<>(this.globalPreferences);
+
+		configData.pluginDirectory = proBPluginManager.getPluginDirectory().getAbsolutePath();
 
 		try (
 			final OutputStream os = new FileOutputStream(LOCATION);

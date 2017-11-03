@@ -2,7 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <fx:root type="Menu" text="%menu.perspectives" xmlns:fx="http://javafx.com/fxml/1">
-	<Menu text="%menu.perspectives.items.preset">
+	<Menu text="%menu.perspectives.items.preset" fx:id="presetPerspectivesMenu">
 		<MenuItem text="%menu.perspectives.items.preset.default"
 			onAction="#handleLoadDefault" />
 		<MenuItem text="%menu.perspectives.items.preset.separated"
