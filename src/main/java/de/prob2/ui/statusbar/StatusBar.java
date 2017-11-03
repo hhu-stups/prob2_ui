@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.property.BooleanProperty;
@@ -42,7 +43,7 @@ public class StatusBar extends HBox {
 		ERROR, SUCCESSFUL;
 	}
 	
-	public enum CBCStatus {
+	public enum SymbolicStatus {
 		ERROR, SUCCESSFUL;
 	}
 	
@@ -54,25 +55,27 @@ public class StatusBar extends HBox {
 	
 	private final ResourceBundle resourceBundle;
 	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 	
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
 	private final ObjectProperty<StatusBar.LTLStatus> ltlStatus;
-	private final ObjectProperty<StatusBar.CBCStatus> cbcStatus;
+	private final ObjectProperty<StatusBar.SymbolicStatus> symbolicStatus;
 	private final ObjectProperty<StatusBar.ModelcheckingStatus> modelcheckingStatus;
 	private final BooleanProperty operationsViewUpdating;
 	private final BooleanProperty statesViewUpdating;
 	
 	@Inject
-	private StatusBar(final ResourceBundle resourceBundle, final CurrentTrace currentTrace, final StageManager stageManager) {
+	private StatusBar(final ResourceBundle resourceBundle, final CurrentTrace currentTrace, final CurrentProject currentProject,
+					final StageManager stageManager) {
 		super();
 		
 		this.resourceBundle = resourceBundle;
 		this.currentTrace = currentTrace;
-		
+		this.currentProject = currentProject;
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
 		this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", StatusBar.LTLStatus.SUCCESSFUL);
-		this.cbcStatus = new SimpleObjectProperty<>(this, "cbcStatus", StatusBar.CBCStatus.SUCCESSFUL);
-		this.modelcheckingStatus = new SimpleObjectProperty<>(this, "cbcStatus", StatusBar.ModelcheckingStatus.SUCCESSFUL);
+		this.symbolicStatus = new SimpleObjectProperty<>(this, "symbolicStatus", StatusBar.SymbolicStatus.SUCCESSFUL);
+		this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", StatusBar.ModelcheckingStatus.SUCCESSFUL);
 		this.operationsViewUpdating = new SimpleBooleanProperty(this, "operationsViewUpdating", false);
 		this.statesViewUpdating = new SimpleBooleanProperty(this, "statesViewUpdating", false);
 		
@@ -82,9 +85,14 @@ public class StatusBar extends HBox {
 	@FXML
 	private void initialize() {
 		this.currentTrace.addListener((observable, from, to) -> this.update());
+		this.currentProject.addListener((observable, from, to) -> {
+			reset();
+			this.update();
+		});
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> reset());
 		this.loadingStatusProperty().addListener((observable, from, to) -> this.update());
 		this.ltlStatusProperty().addListener((observable, from, to) -> this.update());
-		this.cbcStatusProperty().addListener((observable, from, to) -> this.update());
+		this.symbolicStatusProperty().addListener((observable, from, to) -> this.update());
 		this.modelcheckingStatusProperty().addListener((observable, from, to) -> this.update());
 		this.operationsViewUpdatingProperty().addListener((o, from, to) -> this.update());
 		this.statesViewUpdatingProperty().addListener((o, from, to) -> this.update());
@@ -114,16 +122,16 @@ public class StatusBar extends HBox {
 		this.ltlStatusProperty().set(ltlStatus);
 	}
 	
-	public ObjectProperty<StatusBar.CBCStatus> cbcStatusProperty() {
-		return this.cbcStatus;
+	public ObjectProperty<StatusBar.SymbolicStatus> symbolicStatusProperty() {
+		return this.symbolicStatus;
 	}
 	
-	public StatusBar.CBCStatus getCbcStatus() {
-		return this.cbcStatusProperty().get();
+	public StatusBar.SymbolicStatus getSymbolicStatus() {
+		return this.symbolicStatusProperty().get();
 	}
 	
-	public void setCbcStatus(final StatusBar.CBCStatus cbcStatus) {
-		this.cbcStatusProperty().set(cbcStatus);
+	public void setSymbolicStatus(final StatusBar.SymbolicStatus symbolicStatus) {
+		this.symbolicStatusProperty().set(symbolicStatus);
 	}
 	
 	public ObjectProperty<StatusBar.ModelcheckingStatus> modelcheckingStatusProperty() {
@@ -178,14 +186,13 @@ public class StatusBar extends HBox {
 				errorMessages.add(resourceBundle.getString("statusbar.errors.ltlError"));
 			}
 			
-			if (this.getCbcStatus() == StatusBar.CBCStatus.ERROR) {
-				errorMessages.add(resourceBundle.getString("statusbar.errors.cbcError"));
+			if (this.getSymbolicStatus() == StatusBar.SymbolicStatus.ERROR) {
+				errorMessages.add(resourceBundle.getString("statusbar.errors.symbolicError"));
 			}
 			
 			if (this.getModelcheckingStatus() == StatusBar.ModelcheckingStatus.ERROR) {
 				errorMessages.add(resourceBundle.getString("statusbar.errors.modelcheckError"));
 			}
-			
 			
 			if (errorMessages.isEmpty()) {
 				statusLabel.getStyleClass().add("noErrors");
@@ -202,7 +209,7 @@ public class StatusBar extends HBox {
 	public void reset() {
 		setModelcheckingStatus(ModelcheckingStatus.SUCCESSFUL);
 		setLtlStatus(LTLStatus.SUCCESSFUL);
-		setCbcStatus(CBCStatus.SUCCESSFUL);
+		setSymbolicStatus(SymbolicStatus.SUCCESSFUL);
 		setLoadingStatus(LoadingStatus.NOT_LOADING);
 		setOperationsViewUpdating(false);
 		setStatesViewUpdating(false);

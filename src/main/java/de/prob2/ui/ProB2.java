@@ -82,8 +82,7 @@ public class ProB2 extends Application {
 					alert.show();
 				});
 			});
-			// Disable subscribing to variables by default, StatesView handles all subscribing itself
-			injector.getInstance(Api.class).setLoadVariablesByDefault(false);
+			LOGGER.info("probcli version: {}", injector.getInstance(Api.class).getVersion());
 			// Load config file
 			injector.getInstance(Config.class);
 

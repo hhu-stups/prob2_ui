@@ -119,7 +119,7 @@ sonarqube {
 
 task wrapper(type: Wrapper) {
 	distributionType = "ALL"
-	gradleVersion = "4.2"
+	gradleVersion = "4.2.1"
 }
 
 task fatJar(type: Jar) {

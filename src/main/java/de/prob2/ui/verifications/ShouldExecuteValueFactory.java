@@ -6,7 +6,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.CheckBox;
@@ -44,7 +44,7 @@ public class ShouldExecuteValueFactory implements Callback<TableColumn.CellDataF
             		injector.getInstance(LTLFormulaChecker.class).checkMachineStatus(machine);
             		break;
             	case SYMBOLIC:
-            		injector.getInstance(SymbolicCheckingFormulaHandler.class).updateMachineStatus(machine);
+            		injector.getInstance(SymbolicFormulaChecker.class).updateMachineStatus(machine);
             		break;
             	default:
             		break;

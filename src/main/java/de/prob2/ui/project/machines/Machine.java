@@ -119,7 +119,7 @@ public class Machine {
 			Machine.Type.fromExtension(StageManager.getExtension(location.getFileName().toString())));
 	}
 	
-	public void initialize() {
+	public void resetStatus() {
 		initializeLTLStatus();
 		initializeSymbolicCheckingStatus();
 		initializeModelcheckingStatus();

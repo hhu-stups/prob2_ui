@@ -232,7 +232,7 @@ public abstract class Console extends StyleClassedTextArea {
 		searchHandler.handleEnter();
 		this.appendText('\n' + prompt);
 		this.setStyleClass(this.getText().length() - 3, this.getText().length(), "current");
-		this.setEstimatedScrollY(Double.MAX_VALUE);
+		this.scrollYToPixel(Double.MAX_VALUE);
 		goToLastPos();
 	}
 		
@@ -292,7 +292,7 @@ public abstract class Console extends StyleClassedTextArea {
 		this.appendText(currentLine);
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
-		this.setEstimatedScrollY(Double.MAX_VALUE);
+		this.scrollYToPixel(Double.MAX_VALUE);
 	}
 	
 	private void handleDeletion(KeyEvent e) {

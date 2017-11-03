@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
 		
-	protected SymbolicCheckingType type;
+	private SymbolicCheckingType type;
 	
 	private transient List<Trace> counterExamples;
 	
@@ -68,6 +68,11 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
 	
 	public SymbolicCheckingType getType() {
 		return type;
+	}
+	
+	@Override
+	public String toString() {
+		return String.join(" ", name, code, type.name());
 	}
 	
 

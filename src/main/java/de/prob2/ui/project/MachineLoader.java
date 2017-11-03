@@ -68,6 +68,7 @@ public class MachineLoader {
 				final GlobalPreferences globalPreferences, final StatusBar statusBar, final Injector injector) {
 
 		this.api = api;
+		this.api.setLoadVariablesByDefault(false);
 		this.openLock = new Object();
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
