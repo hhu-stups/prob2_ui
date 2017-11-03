@@ -21,6 +21,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
+import de.prob2.ui.plugin.ProBPluginManager;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -136,6 +137,9 @@ public class ProB2 extends Application {
 				currentProject.startAnimation(found);
 			}
 		}
+
+		ProBPluginManager pluginManager = injector.getInstance(ProBPluginManager.class);
+		pluginManager.start();
 	}
 
 	private void updateTitle() {
@@ -224,6 +228,8 @@ public class ProB2 extends Application {
 	}
 
 	private void handleCloseRequest(Event event, CurrentProject currentProject, StageManager stageManager) {
+		ProBPluginManager proBPluginManager = injector.getInstance(ProBPluginManager.class);
+		proBPluginManager.getPluginManager().stopPlugins();
 		if (!currentProject.isSaved()) {
 			ButtonType save = new ButtonType(bundle.getString("common.save"), ButtonBar.ButtonData.YES);
 			ButtonType doNotSave = new ButtonType(bundle.getString("common.doNotSave"), ButtonBar.ButtonData.NO);

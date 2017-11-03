@@ -23,9 +23,9 @@ import javafx.scene.layout.BorderPane;
 
 @Singleton
 public class MainController extends BorderPane {
-	@FXML private TitledPane historyTP; 
-	@FXML private SplitPane horizontalSP; 
-	@FXML private SplitPane verticalSP; 
+	@FXML private TitledPane historyTP;
+	@FXML private SplitPane horizontalSP;
+	@FXML private SplitPane verticalSP;
 	@FXML private ObservableList<Accordion> accordions;
 	
 	private final Injector injector;
@@ -41,7 +41,7 @@ public class MainController extends BorderPane {
 		this.resourceBundle = resourceBundle;
 		refresh();
 	}
-	
+
 	public void refresh() {
 		String guiState = "main.fxml";
 		if (!uiState.getGuiState().contains("detached")) {
@@ -73,7 +73,7 @@ public class MainController extends BorderPane {
 		final ObservableIntegerValue size = this.injector.getInstance(HistoryView.class).getObservableHistorySize();
 		this.historyTP.textProperty().bind(Bindings.format(this.resourceBundle.getString("tptitles.historyWithSize"), size));
 	}
-	
+
 	public double[] getHorizontalDividerPositions() {
 		if (horizontalSP != null) {
 			return horizontalSP.getDividerPositions();
@@ -99,7 +99,7 @@ public class MainController extends BorderPane {
 			verticalSP.setDividerPositions(pos);
 		}
 	}
-	
+
 	public List<Accordion> getAccordions() {
 		return Collections.unmodifiableList(accordions);
 	}

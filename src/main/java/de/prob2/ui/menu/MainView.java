@@ -11,20 +11,23 @@ import javafx.scene.layout.AnchorPane;
 
 @Singleton
 public class MainView extends AnchorPane {
-		
+
 	@FXML
 	private TabPane tabPane;
-		
+
 	private final TabPersistenceHandler tabPersistenceHandler;
-	
+
 	@Inject
 	private MainView(StageManager stageManager) {
 		stageManager.loadFXML(this, "mainView.fxml");
 		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 	}
-	
+
 	public TabPersistenceHandler getTabPersistenceHandler() {
 		return tabPersistenceHandler;
 	}
-	
+
+	public TabPane getTabPane() {
+		return tabPane;
+	}
 }

@@ -16,32 +16,32 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
 public class HelpButton extends Button{
-    private Injector injector;
-    private File helpContent;
+	private Injector injector;
+	private File helpContent;
 
-    @Inject
-    private HelpButton(StageManager stageManager, Injector injector) {
-        this.injector = injector;
-        stageManager.loadFXML(this, "helpbutton.fxml");
-    }
+	@Inject
+	private HelpButton(StageManager stageManager, Injector injector) {
+		this.injector = injector;
+		stageManager.loadFXML(this, "helpbutton.fxml");
+	}
 
-    @FXML
-    private void initialize() {
-        FontSize fontsize = injector.getInstance(FontSize.class);
-        ((FontAwesomeIconView) (this.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
-    }
+	@FXML
+	private void initialize() {
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) (this.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
+	}
 
-    @FXML
-    public void openHelp() {
-        final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
-        if (helpContent!=null) {
-            helpSystemStage.setContent(helpContent);
-        }
-        helpSystemStage.show();
-        helpSystemStage.toFront();
-    }
+	@FXML
+	public void openHelp() {
+		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
+		if (helpContent!=null) {
+			helpSystemStage.setContent(helpContent);
+		}
+		helpSystemStage.show();
+		helpSystemStage.toFront();
+	}
 
-    public void setHelpContent(String fileName) {
-        helpContent = new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + fileName);
-    }
+	public void setHelpContent(String fileName) {
+		helpContent = new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + fileName);
+	}
 }

@@ -14,16 +14,10 @@ import de.prob2.ui.MainController;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryView;
-import de.prob2.ui.menu.ConsolesMenu;
-import de.prob2.ui.menu.EditMenu;
-import de.prob2.ui.menu.FileMenu;
-import de.prob2.ui.menu.FormulaMenu;
-import de.prob2.ui.menu.HelpMenu;
-import de.prob2.ui.menu.MainView;
-import de.prob2.ui.menu.MenuController;
-import de.prob2.ui.menu.PerspectivesMenu;
-import de.prob2.ui.menu.ViewMenu;
+import de.prob2.ui.menu.*;
 import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.plugin.ProBPluginUIConnection;
+import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.project.ProjectTab;
 import de.prob2.ui.project.ProjectView;
@@ -45,6 +39,8 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.verifications.tracereplay.TraceReplayView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
+
+import de.prob2.ui.visualisation.fx.VisualisationController;
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
@@ -85,6 +81,7 @@ public class ProB2Module extends AbstractModule {
 		bind(ConsolesMenu.class);
 		bind(PerspectivesMenu.class);
 		bind(ViewMenu.class);
+		bind(PluginMenu.class);
 		bind(HelpMenu.class);
 		bind(MachineTableView.class);
 		bind(ModelcheckingController.class);
@@ -105,6 +102,13 @@ public class ProB2Module extends AbstractModule {
 		bind(StateVisualisationView.class);
 		bind(SymbolicCheckingView.class);
 		bind(SymbolicCheckingFormulaInput.class);
+
+		bind(ProBPluginManager.class);
+		bind(ProBPluginUIConnection.class);
+
+		bind(VisualisationController.class);
+		bind(VisualisationMenu.class);
+
 	}
 
 	@Provides

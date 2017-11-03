@@ -18,55 +18,55 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 public class VerificationsTest extends GuiTest{
-    private static final Logger LOGGER = LoggerFactory.getLogger(VerificationsTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(VerificationsTest.class);
 
-    private boolean mainStage = true;
+	private boolean mainStage = true;
 
-    @Override
-    public Parent getRootNode(){
-        RuntimeOptions runtimeOptions = new RuntimeOptions("src/test/resources/Lift/Lift0.json", "lift0.default", false, false);
-        Injector injector = Guice.createInjector(Stage.PRODUCTION, new ProB2Module(runtimeOptions));
-        CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-        if (runtimeOptions.getProject() != null) {
-            injector.getInstance(ProjectManager.class).openProject(new File(runtimeOptions.getProject()));
-        }
+	@Override
+	public Parent getRootNode(){
+		RuntimeOptions runtimeOptions = new RuntimeOptions("src/test/resources/Lift/Lift0.json", "lift0.default", false, false);
+		Injector injector = Guice.createInjector(Stage.PRODUCTION, new ProB2Module(runtimeOptions));
+		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
+		if (runtimeOptions.getProject() != null) {
+			injector.getInstance(ProjectManager.class).openProject(new File(runtimeOptions.getProject()));
+		}
 
-        if (runtimeOptions.getRunconfig() != null) {
-            Runconfiguration found = null;
-            for (final Runconfiguration r : currentProject.getRunconfigurations()) {
-                if (r.getName().equals(runtimeOptions.getRunconfig())) {
-                    found = r;
-                    break;
-                }
-            }
+		if (runtimeOptions.getRunconfig() != null) {
+			Runconfiguration found = null;
+			for (final Runconfiguration r : currentProject.getRunconfigurations()) {
+				if (r.getName().equals(runtimeOptions.getRunconfig())) {
+					found = r;
+					break;
+				}
+			}
 
-            if (found == null) {
-                return injector.getInstance(MainController.class);
-            } else {
-                currentProject.startAnimation(found);
-            }
-        }
-        if(!mainStage){
-            return injector.getInstance(ModelcheckingController.class);
-        }
-        return injector.getInstance(MainController.class);
-    }
+			if (found == null) {
+				return injector.getInstance(MainController.class);
+			} else {
+				currentProject.startAnimation(found);
+			}
+		}
+		if(!mainStage){
+			return injector.getInstance(ModelcheckingController.class);
+		}
+		return injector.getInstance(MainController.class);
+	}
 
-    @Test
-    public void verificationsTest() throws Exception{
-        sleep(6000);
-        click("#verificationsTP");
-        click((Node) find("SETUP_CONSTANTS"));
-        sleep(500);
-        click((Node) find("INITIALISATION(level=L0)"));
-        click("#tabModelchecking");
-        click("#addModelCheckButton");
-        mainStage = false;
-        click("#findDeadlocks");
-        click("#startButton");
-        mainStage = true;
-        sleep(500);
-        click("#tabLTLFormula");
-        //Add test when fully implemented
-    }
+	@Test
+	public void verificationsTest() throws Exception{
+		sleep(6000);
+		click("#verificationsTP");
+		click((Node) find("SETUP_CONSTANTS"));
+		sleep(500);
+		click((Node) find("INITIALISATION(level=L0)"));
+		click("#tabModelchecking");
+		click("#addModelCheckButton");
+		mainStage = false;
+		click("#findDeadlocks");
+		click("#startButton");
+		mainStage = true;
+		sleep(500);
+		click("#tabLTLFormula");
+		//Add test when fully implemented
+	}
 }
