@@ -21,7 +21,7 @@
 						<Tooltip text="%verifications.checkMachine" />
 					</tooltip>
 				</Button>
-				<Button fx:id="cancelButton" mnemonicParsing="false" disable="true">
+				<Button fx:id="cancelButton" onAction="#cancel" mnemonicParsing="false" disable="true">
 					<graphic>
 						<FontAwesomeIconView styleClass="icon-dark" glyphName="TIMES_CIRCLE_ALT"
 							size="15" />

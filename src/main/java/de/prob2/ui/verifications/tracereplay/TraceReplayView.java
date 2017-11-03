@@ -57,11 +57,11 @@ public class TraceReplayView extends ScrollPane {
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			if(to == null) {
+			if (to == null) {
 				return;
 			}
 			updateTraceTableView(to);
-			to.getTraces().addListener((ListChangeListener<File>)c -> {
+			to.getTraces().addListener((ListChangeListener<File>) c -> {
 				while (c.next()) {
 					addToTraceTableView(c.getAddedSubList());
 					removeFromTraceTableView(c.getRemoved());
@@ -74,6 +74,14 @@ public class TraceReplayView extends ScrollPane {
 		((FontAwesomeIconView) (cancelButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 		statusColumn.minWidthProperty().bind(fontsize.multiply(6.0));
 		statusColumn.maxWidthProperty().bind(fontsize.multiply(6.0));
+
+		traceChecker.currentJobThreadsProperty().addListener((observable, from, to) -> {
+			if (to.isEmpty()) {
+				cancelButton.setDisable(true);
+			} else {
+				cancelButton.setDisable(false);
+			}
+		});
 	}
 
 	private void updateTraceTableView(Machine machine) {
@@ -107,5 +115,10 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private void checkMachine() {
 		traceChecker.checkMachine(traceTableView.getItems());
+	}
+
+	@FXML
+	public synchronized void cancel() {
+		traceChecker.cancelReplay();
 	}
 }
