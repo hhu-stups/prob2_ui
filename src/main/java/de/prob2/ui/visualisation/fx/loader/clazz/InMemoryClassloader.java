@@ -8,26 +8,26 @@ import java.util.Map;
  */
 public class InMemoryClassloader extends ClassLoader {
 
-    private final Map<String, InMemoryJavaFileObject> classFiles = new HashMap<>();
+	private final Map<String, InMemoryJavaFileObject> classFiles = new HashMap<>();
 
-    public InMemoryClassloader(ClassLoader parentClassLoader) {
-        super(parentClassLoader);
-    }
+	public InMemoryClassloader(ClassLoader parentClassLoader) {
+		super(parentClassLoader);
+	}
 
-    void addClassFile(InMemoryJavaFileObject javaFileObject) {
-        classFiles.put(javaFileObject.getClassName(), javaFileObject);
-    }
+	void addClassFile(InMemoryJavaFileObject javaFileObject) {
+		classFiles.put(javaFileObject.getClassName(), javaFileObject);
+	}
 
-    @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
-        InMemoryJavaFileObject fileObject = classFiles.get(name);
+	@Override
+	protected Class<?> findClass(String name) throws ClassNotFoundException {
+		InMemoryJavaFileObject fileObject = classFiles.get(name);
 
-        if (fileObject != null) {
-            byte[] bytes = fileObject.getClassBytes();
-            return defineClass(name, bytes, 0, bytes.length);
-        }
+		if (fileObject != null) {
+			byte[] bytes = fileObject.getClassBytes();
+			return defineClass(name, bytes, 0, bytes.length);
+		}
 
-        return super.findClass(name);
-    }
+		return super.findClass(name);
+	}
 
 }

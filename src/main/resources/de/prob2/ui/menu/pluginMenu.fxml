@@ -4,8 +4,8 @@
 <?import javafx.scene.control.MenuItem?>
 
 <fx:root type="Menu" text="%menu.plugin" xmlns:fx="http://javafx.com/fxml/1">
-    <MenuItem text="%menu.plugin.items.reload" onAction="#reloadPlugins"/>
-    <MenuItem text="%menu.plugin.items.add" onAction="#addPlugin" />
-    <MenuItem text="%menu.plugin.items.menu" onAction="#showPluginMenu"/>
+	<MenuItem text="%menu.plugin.items.reload" onAction="#reloadPlugins"/>
+	<MenuItem text="%menu.plugin.items.add" onAction="#addPlugin" />
+	<MenuItem text="%menu.plugin.items.menu" onAction="#showPluginMenu"/>
 </fx:root>
 

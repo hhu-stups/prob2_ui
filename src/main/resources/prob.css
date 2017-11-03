@@ -150,8 +150,8 @@
 	-fx-text-fill: white;
 }
 .custom-color-dialog .toggle-button:selected {
-    -fx-background-insets: 0 0 -1 0;
-    -fx-background-color: -prob-grey-75;
+	-fx-background-insets: 0 0 -1 0;
+	-fx-background-color: -prob-grey-75;
 }
 .custom-color-dialog .slider .thumb {
 	-fx-background-color: -prob-grey;

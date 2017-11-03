@@ -85,7 +85,7 @@ public final class Config {
 		OperationsView.SortMode operationsSortMode;
 		boolean operationsShowNotEnabled;
 		Map<String, String> globalPreferences;
-        private String pluginDirectory;
+		private String pluginDirectory;
 
 		private ConfigData() {}
 	}
@@ -118,7 +118,7 @@ public final class Config {
 		final GlobalPreferences globalPreferences,
 		final RuntimeOptions runtimeOptions,
 		final StopActions stopActions,
-        final ProBPluginManager proBPluginManager
+		final ProBPluginManager proBPluginManager
 	) {
 		this.recentProjects = recentProjects;
 		this.uiState = uiState;

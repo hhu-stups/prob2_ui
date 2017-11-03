@@ -17,49 +17,49 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class VisualisationMenu extends Menu{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationMenu.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationMenu.class);
 
-    @FXML
-    private MenuItem openVisualisationItem;
+	@FXML
+	private MenuItem openVisualisationItem;
 
-    @FXML
-    private MenuItem stopVisualisationItem;
+	@FXML
+	private MenuItem stopVisualisationItem;
 
-    @FXML
-    private MenuItem detachVisualisationItem;
+	@FXML
+	private MenuItem detachVisualisationItem;
 
-    private final VisualisationController visualisationController;
+	private final VisualisationController visualisationController;
 
-    @Inject
-    public VisualisationMenu(final StageManager stageManager, final VisualisationController visualisationController) {
-        this.visualisationController = visualisationController;
-        stageManager.loadFXML(this, "visualisationMenu.fxml");
-    }
+	@Inject
+	public VisualisationMenu(final StageManager stageManager, final VisualisationController visualisationController) {
+		this.visualisationController = visualisationController;
+		stageManager.loadFXML(this, "visualisationMenu.fxml");
+	}
 
-    @FXML
-    public void initialize() {
-        LOGGER.debug("Initializing the visualization-menu!");
-        openVisualisationItem.disableProperty().bind(visualisationController.currentMachineProperty().isNull());
-        stopVisualisationItem.disableProperty().bind(visualisationController.visualisationProperty().isNull());
-        detachVisualisationItem.disableProperty()
-                .bind(visualisationController.visualisationProperty().isNull().or(visualisationController.detachProperty()));
-    }
+	@FXML
+	public void initialize() {
+		LOGGER.debug("Initializing the visualization-menu!");
+		openVisualisationItem.disableProperty().bind(visualisationController.currentMachineProperty().isNull());
+		stopVisualisationItem.disableProperty().bind(visualisationController.visualisationProperty().isNull());
+		detachVisualisationItem.disableProperty()
+				.bind(visualisationController.visualisationProperty().isNull().or(visualisationController.detachProperty()));
+	}
 
-    @FXML
-    private void stopVisualisation() {
-        LOGGER.debug("Stop menu-item called.");
-        visualisationController.stopVisualisation();
-    }
+	@FXML
+	private void stopVisualisation() {
+		LOGGER.debug("Stop menu-item called.");
+		visualisationController.stopVisualisation();
+	}
 
-    @FXML
-    private void openVisualisation() {
-        LOGGER.debug("Open menu-item called.");
-        visualisationController.openVisualisation();
-    }
+	@FXML
+	private void openVisualisation() {
+		LOGGER.debug("Open menu-item called.");
+		visualisationController.openVisualisation();
+	}
 
-    @FXML void detachVisualisation() {
-        LOGGER.debug("Detach menu-item called.");
-        visualisationController.detachVisualisation();
-    }
+	@FXML void detachVisualisation() {
+		LOGGER.debug("Detach menu-item called.");
+		visualisationController.detachVisualisation();
+	}
 
 }

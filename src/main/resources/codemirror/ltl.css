@@ -10,25 +10,25 @@ span.container {
 }
 
 span.cm-s-default span.cm-comment {
-    color: #3F7F5F;
+	color: #3F7F5F;
 }
 
 span.cm-s-default span.cm-keyword {
 	color: #7F0055;
-    font-weight: bold;
-    line-height: 1em;
+	font-weight: bold;
+	line-height: 1em;
 }
 
 span.cm-s-default span.cm-atom , span.cm-s-default span.cm-number {
-    color: #33AA33;
+	color: #33AA33;
 }
 
 span.cm-s-default span.cm-ltl, span.cm-s-default span.cm-boolean {
-    color: #00AAAA;
+	color: #00AAAA;
 }
 
 span.cm-s-default span.cm-scope {
 	color: #221199;
-    font-weight: bold;
-    line-height: 1em;
+	font-weight: bold;
+	line-height: 1em;
 }

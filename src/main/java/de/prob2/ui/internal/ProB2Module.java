@@ -100,8 +100,8 @@ public class ProB2Module extends AbstractModule {
 		bind(VerificationsTab.class);
 		bind(VisualisationView.class);
 		bind(StateVisualisationView.class);
-        bind(SymbolicCheckingView.class);
-        bind(SymbolicCheckingFormulaInput.class);
+		bind(SymbolicCheckingView.class);
+		bind(SymbolicCheckingFormulaInput.class);
 
 		bind(ProBPluginManager.class);
 		bind(ProBPluginUIConnection.class);

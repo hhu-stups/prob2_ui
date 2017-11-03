@@ -7,17 +7,17 @@ import javax.tools.*;
  */
 public class InMemoryJavaFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {
 
-    private final InMemoryClassloader classLoader;
+	private final InMemoryClassloader classLoader;
 
-    InMemoryJavaFileManager(JavaCompiler compiler, InMemoryClassloader classLoader, DiagnosticCollector<JavaFileObject> diagnostics) {
-        super(compiler.getStandardFileManager(diagnostics, null, null));
-        this.classLoader = classLoader;
-    }
+	InMemoryJavaFileManager(JavaCompiler compiler, InMemoryClassloader classLoader, DiagnosticCollector<JavaFileObject> diagnostics) {
+		super(compiler.getStandardFileManager(diagnostics, null, null));
+		this.classLoader = classLoader;
+	}
 
-    @Override
-    public JavaFileObject getJavaFileForOutput(Location location, String className, JavaFileObject.Kind kind, FileObject sibling ) {
-        InMemoryJavaFileObject fileObject = new InMemoryJavaFileObject(className);
-        classLoader.addClassFile(fileObject);
-        return fileObject;
-    }
+	@Override
+	public JavaFileObject getJavaFileForOutput(Location location, String className, JavaFileObject.Kind kind, FileObject sibling ) {
+		InMemoryJavaFileObject fileObject = new InMemoryJavaFileObject(className);
+		classLoader.addClassFile(fileObject);
+		return fileObject;
+	}
 }
