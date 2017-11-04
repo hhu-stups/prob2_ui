@@ -40,8 +40,9 @@ public class TraceChecker {
 						return;
 					}
 				}
-			} catch (IllegalArgumentException e) {
+			} catch (IllegalArgumentException | de.prob.exception.ProBError e ) {
 				traceReplaySuccess = false;
+				//TODO display warning 
 			}
 			if(traceReplaySuccess){
 				trace.setStatus(Status.SUCCESSFUL);
