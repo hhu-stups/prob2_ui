@@ -31,7 +31,7 @@ public class TraceChecker {
 
 			StateSpace stateSpace = currentTrace.getStateSpace();
 			Trace t = new Trace(stateSpace);
-
+			boolean traceReplaySuccess = true;
 			try {
 				for (ReplayTransition transition : trace.getTransitionList()) {
 					t = t.addTransitionWith(transition.getName(), transition.getParameters());
@@ -41,12 +41,15 @@ public class TraceChecker {
 					}
 				}
 			} catch (IllegalArgumentException e) {
-				trace.setStatus(Status.FAILED);
-				currentJobThreads.remove(Thread.currentThread());
-				return;
+				traceReplaySuccess = false;
 			}
-			trace.setStatus(Status.SUCCESSFUL);
+			if(traceReplaySuccess){
+				trace.setStatus(Status.SUCCESSFUL);
+			}else{
+				trace.setStatus(Status.FAILED);
+			}
 			if (setCurrentAnimation) {
+				// set the current trace in both cases
 			    currentTrace.set(t);
             }
 			currentJobThreads.remove(Thread.currentThread());
