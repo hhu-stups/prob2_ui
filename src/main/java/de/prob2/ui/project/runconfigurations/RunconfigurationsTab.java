@@ -74,10 +74,8 @@ public class RunconfigurationsTab extends Tab {
 			removeRunconfigMenuItem.disableProperty().bind(cell.emptyProperty());
 
 			cell.setOnMouseClicked(event -> {
-				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					if(cell.getItem() != null) {
-						currentProject.startAnimation(cell.getItem());
-					}
+				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2 && cell.getItem() != null) {
+					currentProject.startAnimation(cell.getItem());
 				}
 				runconfigurationsListView.getSelectionModel().select(currentProject.getCurrentRunconfiguration());
 			});

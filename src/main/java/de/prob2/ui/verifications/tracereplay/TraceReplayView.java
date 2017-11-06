@@ -5,18 +5,14 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javafx.collections.ListChangeListener;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -126,7 +122,7 @@ public class TraceReplayView extends ScrollPane {
 		for (ReplayTraceItem traceItem : traceTableView.getItems()) {
 			for (File traceFile : traceFiles) {
 				if (traceItem.getLocation().equals(traceFile)) {
-
+					//TODO
 				}
 			}
 		}

@@ -213,11 +213,9 @@ public class ProBPluginManager {
 		try {
 			if (createPluginDirectory()) {
 				File inactivePlugins = getInactivePluginsFile();
-				if (!inactivePlugins.exists()) {
-					if (!inactivePlugins.createNewFile()) {
-						LOGGER.warn("Could not create file for inactive plugins!");
-						return;
-					}
+				if (!inactivePlugins.exists() && !inactivePlugins.createNewFile()) {
+					LOGGER.warn("Could not create file for inactive plugins!");
+					return;
 				}
 				inactivePluginIds = pluginManager.getPlugins().stream()
 						.filter(pluginWrapper -> pluginWrapper.getPluginState() != PluginState.STARTED)
@@ -343,11 +341,9 @@ public class ProBPluginManager {
 
 	private boolean createPluginDirectory() {
 		File directory = getPluginDirectory();
-		if (!directory.exists()) {
-			if (!directory.mkdirs()) {
-				LOGGER.warn("Couldn't create the directory for plugins!\n{}", directory.getAbsolutePath());
-				return false;
-			}
+		if (!directory.exists() && !directory.mkdirs()) {
+			LOGGER.warn("Couldn't create the directory for plugins!\n{}", directory.getAbsolutePath());
+			return false;
 		}
 		return true;
 	}
