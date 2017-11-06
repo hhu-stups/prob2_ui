@@ -262,6 +262,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 					default:
 						break;
 				}
+				break;
 			case TEXT_FIELD:
 				symbolicCheckingFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType, checking);
 				break;

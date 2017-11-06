@@ -151,15 +151,12 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			switch (selectSearchStrategy.getValue()) {
 				case MIXED_BF_DF:
 					break;
-				
 				case BREADTH_FIRST:
 					options = options.breadthFirst(true);
 					break;
-				
 				case DEPTH_FIRST:
 					options = options.depthFirst(true);
 					break;
-				
 				default:
 					throw new IllegalArgumentException("Unhandled search strategy: " + selectSearchStrategy.getValue());
 			}
