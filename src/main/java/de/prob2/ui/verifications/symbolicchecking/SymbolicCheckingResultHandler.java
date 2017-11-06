@@ -162,36 +162,49 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 	
 	public void handleAssertionChecking(SymbolicCheckingFormulaItem item, ConstraintBasedAssertionCheckCommand cmd, StateSpace stateSpace) {
 		ConstraintBasedAssertionCheckCommand.ResultType result = cmd.getResult();
-		if (result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_EXISTS) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.assertionChecking.result.noCounterExampleExists"), Checked.SUCCESS);
-		} else if (result == ConstraintBasedAssertionCheckCommand.ResultType.NO_COUNTER_EXAMPLE_FOUND) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.assertionChecking.result.noCounterExampleFound"), Checked.SUCCESS);
-		} else if (result == ConstraintBasedAssertionCheckCommand.ResultType.COUNTER_EXAMPLE) {
-			item.getCounterExamples().add(cmd.getTrace(stateSpace));
-			showCheckingResult(item, bundle.getString("verifications.symbolic.assertionChecking.result.counterExampleFound"), Checked.FAIL);
-		} else if (result == ConstraintBasedAssertionCheckCommand.ResultType.INTERRUPTED) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.assertionChecking.result.interrupted"), Checked.INTERRUPTED);
+		switch(result) {
+			case NO_COUNTER_EXAMPLE_EXISTS:
+				showCheckingResult(item, bundle.getString("verifications.symbolic.assertionChecking.result.noCounterExampleExists"), Checked.SUCCESS);
+				break;
+			case NO_COUNTER_EXAMPLE_FOUND:
+				showCheckingResult(item, bundle.getString("verifications.symbolic.assertionChecking.result.noCounterExampleFound"), Checked.SUCCESS);
+				break;
+			case COUNTER_EXAMPLE:
+				item.getCounterExamples().add(cmd.getTrace(stateSpace));
+				showCheckingResult(item, bundle.getString("verifications.symbolic.assertionChecking.result.counterExampleFound"), Checked.FAIL);
+				break;
+			case INTERRUPTED:
+				showCheckingResult(item, bundle.getString("verifications.symbolic.assertionChecking.result.interrupted"), Checked.INTERRUPTED);
+				break;
+			default:
+				break;
 		}
 	}
 	
 	public void handleSymbolicChecking(SymbolicCheckingFormulaItem item, SymbolicModelcheckCommand cmd) {
 		SymbolicModelcheckCommand.ResultType result = cmd.getResult();
-		if(result == SymbolicModelcheckCommand.ResultType.SUCCESSFUL) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.success"), Checked.SUCCESS);
-		} else if(result == SymbolicModelcheckCommand.ResultType.COUNTER_EXAMPLE) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.counterExample"), Checked.FAIL);
-		} else if(result == SymbolicModelcheckCommand.ResultType.TIMEOUT) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.timeout"), Checked.TIMEOUT);
-		} else if(result == SymbolicModelcheckCommand.ResultType.INTERRUPTED) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.interrupted"), Checked.INTERRUPTED);
+		switch(result) {
+			case SUCCESSFUL:
+				showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.success"), Checked.SUCCESS);
+				break;
+			case COUNTER_EXAMPLE:
+				showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.counterExample"), Checked.FAIL);
+				break;
+			case TIMEOUT:
+				showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.timeout"), Checked.TIMEOUT);
+				break;
+			case INTERRUPTED:
+				showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.interrupted"), Checked.INTERRUPTED);
+				break;
+			default:
+				break;
 		}
 	}
 		
 	private void showCheckingResult(SymbolicCheckingFormulaItem item, String msg, String header, Checked checked) {
 		Alert.AlertType alertType = checked == Checked.SUCCESS ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR;
 		ArrayList<Trace> traces = new ArrayList<>();
-		CheckingResultItem resultItem = new CheckingResultItem(alertType , checked, msg, header);
-		item.setResultItem(resultItem);
+		item.setResultItem(new CheckingResultItem(alertType , checked, msg, header));
 		item.getCounterExamples().clear();
 		for(Trace trace: traces) {
 			item.getCounterExamples().add(trace);
