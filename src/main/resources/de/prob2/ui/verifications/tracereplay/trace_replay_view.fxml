@@ -31,6 +31,15 @@
 					</tooltip>
 				</Button>
 				<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+					<Button fx:id="loadTraceButton" onAction="#loadTraceFromFile" mnemonicParsing="false" disable="true">
+						<graphic>
+							<FontAwesomeIconView styleClass="icon-dark" glyphName="UPLOAD"
+								size="15" />
+						</graphic>
+						<tooltip>
+							<Tooltip text="%verifications.tracereplay.loadTrace" />
+						</tooltip>
+					</Button>
 					<HelpButton fx:id="helpButton" />
 				</HBox>
 				<VBox.margin>

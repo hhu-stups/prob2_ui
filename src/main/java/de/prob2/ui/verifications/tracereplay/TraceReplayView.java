@@ -2,6 +2,7 @@ package de.prob2.ui.verifications.tracereplay;
 
 import java.io.File;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -20,6 +21,8 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 @Singleton
 public class TraceReplayView extends ScrollPane {
@@ -34,19 +37,25 @@ public class TraceReplayView extends ScrollPane {
 	private Button checkButton;
 	@FXML
 	private Button cancelButton;
+	@FXML
+	private Button loadTraceButton;
 
+	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final TraceLoader traceLoader;
 	private final TraceChecker traceChecker;
 	private final Injector injector;
+	private final ResourceBundle bundle;
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
-			final TraceLoader traceLoader, final TraceChecker traceChecker, final Injector injector) {
+			final TraceLoader traceLoader, final TraceChecker traceChecker, final Injector injector, ResourceBundle bundle) {
+		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.traceLoader = traceLoader;
 		this.traceChecker = traceChecker;
 		this.injector = injector;
+		this.bundle = bundle;
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
 
@@ -57,16 +66,8 @@ public class TraceReplayView extends ScrollPane {
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			if (to == null) {
-				return;
-			}
 			updateTraceTableView(to);
-			to.getTraces().addListener((ListChangeListener<File>) c -> {
-				while (c.next()) {
-					addToTraceTableView(c.getAddedSubList());
-					removeFromTraceTableView(c.getRemoved());
-				}
-			});
+			loadTraceButton.setDisable(to == null);
 		});
 
 		FontSize fontsize = injector.getInstance(FontSize.class);
@@ -75,21 +76,22 @@ public class TraceReplayView extends ScrollPane {
 		statusColumn.minWidthProperty().bind(fontsize.multiply(6.0));
 		statusColumn.maxWidthProperty().bind(fontsize.multiply(6.0));
 
-		traceChecker.currentJobThreadsProperty().addListener((observable, from, to) -> {
-			if (to.isEmpty()) {
-				cancelButton.setDisable(true);
-			} else {
-				cancelButton.setDisable(false);
-			}
-		});
+		traceChecker.currentJobThreadsProperty()
+				.addListener((observable, from, to) -> cancelButton.setDisable(to.isEmpty()));
+		traceTableView.itemsProperty().get()
+				.addListener((ListChangeListener<ReplayTraceItem>) c -> checkButton.setDisable(c.getList().isEmpty()));
 	}
 
 	private void updateTraceTableView(Machine machine) {
 		traceTableView.getItems().clear();
-		checkButton.setDisable(true);
 		if (machine != null) {
 			addToTraceTableView(machine.getTraces());
-			checkButton.setDisable(false);
+			machine.getTraces().addListener((ListChangeListener<File>) c -> {
+				while (c.next()) {
+					addToTraceTableView(c.getAddedSubList());
+					removeFromTraceTableView(c.getRemoved());
+				}
+			});
 		}
 	}
 
@@ -120,5 +122,15 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	public synchronized void cancel() {
 		traceChecker.cancelReplay();
+	}
+
+	@FXML
+	private void loadTraceFromFile() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceLoader.dialog.title"));
+		fileChooser.setInitialDirectory(currentProject.getLocation());
+		fileChooser.getExtensionFilters().add(new ExtensionFilter("Trace (*.trace)", "*.trace"));
+		File traceFile = fileChooser.showOpenDialog(stageManager.getCurrent());
+		currentProject.getCurrentMachine().addTrace(traceFile);
 	}
 }
