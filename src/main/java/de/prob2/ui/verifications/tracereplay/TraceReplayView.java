@@ -17,8 +17,11 @@ import de.prob2.ui.project.machines.Machine;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
@@ -70,6 +73,20 @@ public class TraceReplayView extends ScrollPane {
 			loadTraceButton.setDisable(to == null);
 		});
 
+		this.traceTableView.setRowFactory(param -> {
+
+			final ContextMenu menu = new ContextMenu();
+			final TableRow<ReplayTraceItem> row = new TableRow<>();
+			row.setContextMenu(menu);
+			//
+			final MenuItem item = new MenuItem("Replay Trace"); // TODO: i18n
+			menu.getItems().add(item);
+			//
+			item.setOnAction(event -> this.traceChecker.replayTrace(row.getItem().getTrace(), true));
+			//
+			return row;
+		});
+
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (checkButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 		((FontAwesomeIconView) (cancelButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
@@ -82,7 +99,7 @@ public class TraceReplayView extends ScrollPane {
 				.addListener((ListChangeListener<ReplayTraceItem>) c -> checkButton.setDisable(c.getList().isEmpty()));
 	}
 
-	private void updateTraceTableView(Machine machine) {
+    private void updateTraceTableView(Machine machine) {
 		traceTableView.getItems().clear();
 		if (machine != null) {
 			addToTraceTableView(machine.getTraces());
@@ -108,7 +125,7 @@ public class TraceReplayView extends ScrollPane {
 		for (ReplayTraceItem traceItem : traceTableView.getItems()) {
 			for (File traceFile : traceFiles) {
 				if (traceItem.getLocation().equals(traceFile)) {
-
+					//TODO
 				}
 			}
 		}

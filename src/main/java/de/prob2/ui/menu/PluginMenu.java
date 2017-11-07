@@ -11,16 +11,11 @@ import de.prob2.ui.plugin.ProBPluginManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Created by Christoph Heinzen on 27.07.17.
  */
 @Singleton
 public class PluginMenu extends Menu {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(PluginMenu.class);
 
 	private final ProBPluginManager proBPluginManager;
 	private final Injector injector;

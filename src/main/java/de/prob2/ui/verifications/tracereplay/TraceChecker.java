@@ -22,16 +22,16 @@ public class TraceChecker {
 	}
 
 	void checkMachine(ObservableList<ReplayTraceItem> traceItems) {
-		traceItems.forEach(traceItem -> replayTrace(traceItem.getTrace()));
+		traceItems.forEach(traceItem -> replayTrace(traceItem.getTrace(), false));
 	}
 
-	private void replayTrace(ReplayTrace trace) {
+	public void replayTrace(ReplayTrace trace, final boolean setCurrentAnimation) {
 		Thread replayThread = new Thread(() -> {
 			trace.setStatus(Status.NOT_CHECKED);
 
 			StateSpace stateSpace = currentTrace.getStateSpace();
 			Trace t = new Trace(stateSpace);
-
+			boolean traceReplaySuccess = true;
 			try {
 				for (ReplayTransition transition : trace.getTransitionList()) {
 					t = t.addTransitionWith(transition.getName(), transition.getParameters());
@@ -40,12 +40,19 @@ public class TraceChecker {
 						return;
 					}
 				}
-			} catch (IllegalArgumentException e) {
-				trace.setStatus(Status.FAILED);
-				currentJobThreads.remove(Thread.currentThread());
-				return;
+			} catch (IllegalArgumentException | de.prob.exception.ProBError e ) {
+				traceReplaySuccess = false;
+				//TODO display warning 
 			}
-			trace.setStatus(Status.SUCCESSFUL);
+			if(traceReplaySuccess){
+				trace.setStatus(Status.SUCCESSFUL);
+			}else{
+				trace.setStatus(Status.FAILED);
+			}
+			if (setCurrentAnimation) {
+				// set the current trace in both cases
+			    currentTrace.set(t);
+            }
 			currentJobThreads.remove(Thread.currentThread());
 		});
 		currentJobThreads.add(replayThread);
@@ -56,7 +63,7 @@ public class TraceChecker {
 		currentJobThreads.forEach(Thread::interrupt);
 		currentJobThreads.clear();
 	}
-	
+
 	ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
 	}

@@ -31,9 +31,6 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ro.fortsoft.pf4j.PluginState;
 import ro.fortsoft.pf4j.PluginStateListener;
 import ro.fortsoft.pf4j.PluginWrapper;
@@ -43,8 +40,6 @@ import ro.fortsoft.pf4j.PluginWrapper;
  */
 @Singleton
 public class PluginMenuStage extends Stage {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(PluginMenuStage.class);
 
 	private final ProBPluginManager proBPluginManager;
 	private final ResourceBundle bundle;

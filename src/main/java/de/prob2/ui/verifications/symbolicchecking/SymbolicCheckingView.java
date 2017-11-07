@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -161,18 +160,8 @@ public class SymbolicCheckingView extends AnchorPane {
 			
 			MenuItem changeItem = new MenuItem(bundle.getString("verifications.symbolic.menu.change"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
-			changeItem.setDisable(true);
 			
 			row.setOnMouseClicked(e-> {
-				List<SymbolicCheckingType> changeDisabled = Arrays.asList(
-							SymbolicCheckingType.FIND_DEADLOCK, 
-							SymbolicCheckingType.CHECK_REFINEMENT, 
-							SymbolicCheckingType.CHECK_ASSERTIONS, 
-							SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS,
-							SymbolicCheckingType.BMC,
-							SymbolicCheckingType.IC3,
-							SymbolicCheckingType.KINDUCTION,
-							SymbolicCheckingType.TINDUCTION);
 				
 				if(e.getButton() == MouseButton.SECONDARY) {
 					SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
@@ -181,12 +170,6 @@ public class SymbolicCheckingView extends AnchorPane {
 					} else {
 						showCounterExampleItem.setDisable(false);
 						showCounterExamples(showCounterExampleItem);
-					}
-					
-					if(row.emptyProperty().get() || changeDisabled.contains(item.getType())) {
-						changeItem.setDisable(true);
-					} else {
-						changeItem.setDisable(false);
 					}
 					
 					if(item != null && item.getType() == SymbolicCheckingType.FIND_VALID_STATE) {
@@ -260,7 +243,6 @@ public class SymbolicCheckingView extends AnchorPane {
 		}
 
 	}
-	
 	
 	private void openItem(SymbolicCheckingFormulaItem item) {
 		SymbolicCheckingFormulaInput formulaInput = injector.getInstance(SymbolicCheckingFormulaInput.class);
