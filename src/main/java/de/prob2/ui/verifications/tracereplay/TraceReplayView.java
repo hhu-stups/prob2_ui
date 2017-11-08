@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications.tracereplay;
 
 import java.io.File;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,18 +46,15 @@ public class TraceReplayView extends ScrollPane {
 
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
-	private final TraceLoader traceLoader;
 	private final TraceChecker traceChecker;
 	private final Injector injector;
 	private final ResourceBundle bundle;
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
-			final TraceLoader traceLoader, final TraceChecker traceChecker, final Injector injector,
-			ResourceBundle bundle) {
+			final TraceChecker traceChecker, final Injector injector, final ResourceBundle bundle) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
-		this.traceLoader = traceLoader;
 		this.traceChecker = traceChecker;
 		this.injector = injector;
 		this.bundle = bundle;
@@ -70,11 +66,6 @@ public class TraceReplayView extends ScrollPane {
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("statusIcon"));
 		statusColumn.setStyle("-fx-alignment: CENTER;");
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			updateTraceTableView(to);
-			loadTraceButton.setDisable(to == null);
-		});
 
 		this.traceTableView.setRowFactory(param -> {
 
@@ -90,16 +81,16 @@ public class TraceReplayView extends ScrollPane {
 			return row;
 		});
 
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (checkButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
-		((FontAwesomeIconView) (cancelButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
-		statusColumn.minWidthProperty().bind(fontsize.multiply(6.0));
-		statusColumn.maxWidthProperty().bind(fontsize.multiply(6.0));
-
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			updateTraceTableView(to);
+			loadTraceButton.setDisable(to == null);
+		});
 		traceChecker.currentJobThreadsProperty()
 				.addListener((observable, from, to) -> cancelButton.setDisable(to.isEmpty()));
 		traceTableView.itemsProperty().get()
 				.addListener((ListChangeListener<ReplayTraceItem>) c -> checkButton.setDisable(c.getList().isEmpty()));
+
+		bindIconSizeToFontSize();
 	}
 
 	private void updateTraceTableView(Machine machine) {
@@ -124,6 +115,7 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	private void addToTraceTableView(File traceFile) {
+		TraceLoader traceLoader = injector.getInstance(TraceLoader.class);
 		ReplayTrace trace = traceLoader.loadTrace(traceFile);
 		traceTableView.getItems().add(new ReplayTraceItem(trace, traceFile));
 	}
@@ -151,5 +143,13 @@ public class TraceReplayView extends ScrollPane {
 		fileChooser.getExtensionFilters().add(new ExtensionFilter("Trace (*.trace)", "*.trace"));
 		File traceFile = fileChooser.showOpenDialog(stageManager.getCurrent());
 		currentProject.getCurrentMachine().addTrace(traceFile);
+	}
+	
+	private void bindIconSizeToFontSize() {
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) (checkButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
+		((FontAwesomeIconView) (cancelButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
+		statusColumn.minWidthProperty().bind(fontsize.multiply(6.0));
+		statusColumn.maxWidthProperty().bind(fontsize.multiply(6.0));
 	}
 }
