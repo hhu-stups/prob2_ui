@@ -76,10 +76,10 @@ public class MachineStatusHandler {
 				machine.setLTLCheckedSuccessful();
 				break;
 			case SYMBOLIC:
-				machine.setSymbolicCheckedSuccessful();;
+				machine.setSymbolicCheckedSuccessful();
 				break;
 			case MODELCHECKING:
-				machine.setModelcheckingCheckedSuccessful();;
+				machine.setModelcheckingCheckedSuccessful();
 				break;
 			default:
 				break;
