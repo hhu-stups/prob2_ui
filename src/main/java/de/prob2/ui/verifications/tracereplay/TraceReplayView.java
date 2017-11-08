@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.tracereplay;
 import java.io.File;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -15,6 +16,7 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import javafx.collections.ListChangeListener;
+import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -52,7 +54,8 @@ public class TraceReplayView extends ScrollPane {
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
-			final TraceLoader traceLoader, final TraceChecker traceChecker, final Injector injector, ResourceBundle bundle) {
+			final TraceLoader traceLoader, final TraceChecker traceChecker, final Injector injector,
+			ResourceBundle bundle) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.traceLoader = traceLoader;
@@ -99,36 +102,35 @@ public class TraceReplayView extends ScrollPane {
 				.addListener((ListChangeListener<ReplayTraceItem>) c -> checkButton.setDisable(c.getList().isEmpty()));
 	}
 
-    private void updateTraceTableView(Machine machine) {
+	private void updateTraceTableView(Machine machine) {
 		traceTableView.getItems().clear();
 		if (machine != null) {
 			addToTraceTableView(machine.getTraces());
-			machine.getTraces().addListener((ListChangeListener<File>) c -> {
-				while (c.next()) {
-					addToTraceTableView(c.getAddedSubList());
-					removeFromTraceTableView(c.getRemoved());
+			machine.getTraces().addListener((SetChangeListener<File>) c -> {
+				if (c.wasAdded()) {
+					addToTraceTableView(c.getElementAdded());
+				}
+				if (c.wasRemoved()) {
+					removeFromTraceTableView(c.getElementRemoved());
 				}
 			});
 		}
 	}
 
-	private void addToTraceTableView(List<? extends File> traceFiles) {
+	private void addToTraceTableView(Set<? extends File> traceFiles) {
 		for (File traceFile : traceFiles) {
-			ReplayTrace trace = traceLoader.loadTrace(traceFile);
-			traceTableView.getItems().add(new ReplayTraceItem(trace, traceFile));
+			addToTraceTableView(traceFile);
 		}
 	}
 
-	private void removeFromTraceTableView(List<? extends File> traceFiles) {
-		traceTableView.getItems().stream().filter(traceItem -> !traceFiles.contains(traceItem.getLocation()))
+	private void addToTraceTableView(File traceFile) {
+		ReplayTrace trace = traceLoader.loadTrace(traceFile);
+		traceTableView.getItems().add(new ReplayTraceItem(trace, traceFile));
+	}
+
+	private void removeFromTraceTableView(File traceFile) {
+		traceTableView.getItems().stream().filter(traceItem -> !traceFile.equals(traceItem.getLocation()))
 				.collect(Collectors.toList());
-		for (ReplayTraceItem traceItem : traceTableView.getItems()) {
-			for (File traceFile : traceFiles) {
-				if (traceItem.getLocation().equals(traceFile)) {
-					//TODO
-				}
-			}
-		}
 	}
 
 	@FXML
