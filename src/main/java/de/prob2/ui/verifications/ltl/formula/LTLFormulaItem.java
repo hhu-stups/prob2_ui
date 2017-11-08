@@ -2,6 +2,7 @@ package de.prob2.ui.verifications.ltl.formula;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.IExecutableItem;
 
 import java.util.Objects;
 

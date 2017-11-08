@@ -10,6 +10,8 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.MachineStatusHandler;
+import de.prob2.ui.verifications.Type;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -120,7 +122,8 @@ public final class ModelCheckStats extends AnchorPane {
 		}
 		item.setStats(this);
 		Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-		injector.getInstance(ModelcheckingController.class).updateCurrentMachineStatus(machine);
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, Type.MODELCHECKING);
+		
 		String message = result.getMessage();
 
 		final StateSpace stateSpace = modelChecker.getStateSpace();

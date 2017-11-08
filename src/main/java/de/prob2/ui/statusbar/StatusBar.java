@@ -39,15 +39,7 @@ public class StatusBar extends HBox {
 		}
 	}
 	
-	public enum LTLStatus {
-		ERROR, SUCCESSFUL;
-	}
-	
-	public enum SymbolicStatus {
-		ERROR, SUCCESSFUL;
-	}
-	
-	public enum ModelcheckingStatus {
+	public enum CheckingStatus {
 		ERROR, SUCCESSFUL;
 	}
 	
@@ -58,9 +50,9 @@ public class StatusBar extends HBox {
 	private final CurrentProject currentProject;
 	
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
-	private final ObjectProperty<StatusBar.LTLStatus> ltlStatus;
-	private final ObjectProperty<StatusBar.SymbolicStatus> symbolicStatus;
-	private final ObjectProperty<StatusBar.ModelcheckingStatus> modelcheckingStatus;
+	private final ObjectProperty<StatusBar.CheckingStatus> ltlStatus;
+	private final ObjectProperty<StatusBar.CheckingStatus> symbolicStatus;
+	private final ObjectProperty<StatusBar.CheckingStatus> modelcheckingStatus;
 	private final BooleanProperty operationsViewUpdating;
 	private final BooleanProperty statesViewUpdating;
 	
@@ -73,9 +65,9 @@ public class StatusBar extends HBox {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
-		this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", StatusBar.LTLStatus.SUCCESSFUL);
-		this.symbolicStatus = new SimpleObjectProperty<>(this, "symbolicStatus", StatusBar.SymbolicStatus.SUCCESSFUL);
-		this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", StatusBar.ModelcheckingStatus.SUCCESSFUL);
+		this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", StatusBar.CheckingStatus.SUCCESSFUL);
+		this.symbolicStatus = new SimpleObjectProperty<>(this, "symbolicStatus", StatusBar.CheckingStatus.SUCCESSFUL);
+		this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", StatusBar.CheckingStatus.SUCCESSFUL);
 		this.operationsViewUpdating = new SimpleBooleanProperty(this, "operationsViewUpdating", false);
 		this.statesViewUpdating = new SimpleBooleanProperty(this, "statesViewUpdating", false);
 		
@@ -110,39 +102,39 @@ public class StatusBar extends HBox {
 		this.loadingStatusProperty().set(loadingStatus);
 	}
 	
-	public ObjectProperty<StatusBar.LTLStatus> ltlStatusProperty() {
+	public ObjectProperty<StatusBar.CheckingStatus> ltlStatusProperty() {
 		return this.ltlStatus;
 	}
 	
-	public StatusBar.LTLStatus getLtlStatus() {
+	public StatusBar.CheckingStatus getLtlStatus() {
 		return this.ltlStatusProperty().get();
 	}
 		
-	public void setLtlStatus(final StatusBar.LTLStatus ltlStatus) {
+	public void setLtlStatus(final StatusBar.CheckingStatus ltlStatus) {
 		this.ltlStatusProperty().set(ltlStatus);
 	}
 	
-	public ObjectProperty<StatusBar.SymbolicStatus> symbolicStatusProperty() {
+	public ObjectProperty<StatusBar.CheckingStatus> symbolicStatusProperty() {
 		return this.symbolicStatus;
 	}
 	
-	public StatusBar.SymbolicStatus getSymbolicStatus() {
+	public StatusBar.CheckingStatus getSymbolicStatus() {
 		return this.symbolicStatusProperty().get();
 	}
 	
-	public void setSymbolicStatus(final StatusBar.SymbolicStatus symbolicStatus) {
+	public void setSymbolicStatus(final StatusBar.CheckingStatus symbolicStatus) {
 		this.symbolicStatusProperty().set(symbolicStatus);
 	}
 	
-	public ObjectProperty<StatusBar.ModelcheckingStatus> modelcheckingStatusProperty() {
+	public ObjectProperty<StatusBar.CheckingStatus> modelcheckingStatusProperty() {
 		return this.modelcheckingStatus;
 	}
 	
-	public StatusBar.ModelcheckingStatus getModelcheckingStatus() {
+	public StatusBar.CheckingStatus getModelcheckingStatus() {
 		return this.modelcheckingStatusProperty().get();
 	}
 	
-	public void setModelcheckingStatus(final StatusBar.ModelcheckingStatus modelcheckingStatus) {
+	public void setModelcheckingStatus(final StatusBar.CheckingStatus modelcheckingStatus) {
 		this.modelcheckingStatus.set(modelcheckingStatus);
 	}
 	
@@ -182,15 +174,15 @@ public class StatusBar extends HBox {
 			if (!this.currentTrace.getCurrentState().getStateErrors().isEmpty()) {
 				errorMessages.add(resourceBundle.getString("statusbar.errors.stateErrors"));
 			}
-			if (this.getLtlStatus() == StatusBar.LTLStatus.ERROR) {
+			if (this.getLtlStatus() == StatusBar.CheckingStatus.ERROR) {
 				errorMessages.add(resourceBundle.getString("statusbar.errors.ltlError"));
 			}
 			
-			if (this.getSymbolicStatus() == StatusBar.SymbolicStatus.ERROR) {
+			if (this.getSymbolicStatus() == StatusBar.CheckingStatus.ERROR) {
 				errorMessages.add(resourceBundle.getString("statusbar.errors.symbolicError"));
 			}
 			
-			if (this.getModelcheckingStatus() == StatusBar.ModelcheckingStatus.ERROR) {
+			if (this.getModelcheckingStatus() == StatusBar.CheckingStatus.ERROR) {
 				errorMessages.add(resourceBundle.getString("statusbar.errors.modelcheckError"));
 			}
 			
@@ -207,9 +199,9 @@ public class StatusBar extends HBox {
 	}
 	
 	public void reset() {
-		setModelcheckingStatus(ModelcheckingStatus.SUCCESSFUL);
-		setLtlStatus(LTLStatus.SUCCESSFUL);
-		setSymbolicStatus(SymbolicStatus.SUCCESSFUL);
+		setModelcheckingStatus(CheckingStatus.SUCCESSFUL);
+		setLtlStatus(CheckingStatus.SUCCESSFUL);
+		setSymbolicStatus(CheckingStatus.SUCCESSFUL);
 		setLoadingStatus(LoadingStatus.NOT_LOADING);
 		setOperationsViewUpdating(false);
 		setStatesViewUpdating(false);

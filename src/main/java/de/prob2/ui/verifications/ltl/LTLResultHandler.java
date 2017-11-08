@@ -30,10 +30,10 @@ import javafx.scene.control.Alert;
 
 @Singleton
 public class LTLResultHandler extends AbstractResultHandler {
+	
 	@Inject
 	public LTLResultHandler(final StageManager stageManager, final ResourceBundle bundle) {
-		super(stageManager, bundle);
-		
+		super(stageManager, bundle);	
 		this.type = CheckingType.LTL;
 		this.success.addAll(Arrays.asList(LTLOk.class));
 		this.counterExample.addAll(Arrays.asList(LTLCounterExample.class));

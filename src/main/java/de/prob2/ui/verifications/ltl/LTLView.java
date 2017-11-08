@@ -18,8 +18,8 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
-import de.prob2.ui.verifications.ShouldExecuteValueFactory.Type;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaDialog;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -184,7 +184,7 @@ public class LTLView extends AnchorPane{
 					item.setChecked(result);
 					Thread currentThread = Thread.currentThread();
 					Platform.runLater(() -> {
-						checker.checkMachineStatus(machine);
+						injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, de.prob2.ui.verifications.Type.LTL);
 						tvFormula.refresh();
 						currentJobThreads.remove(currentThread);
 					});
@@ -236,7 +236,7 @@ public class LTLView extends AnchorPane{
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(Type.LTL, injector));
+		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(de.prob2.ui.verifications.Type.LTL, injector));
 		
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		addPatternButton.disableProperty().bind(currentTrace.existsProperty().not());
@@ -381,7 +381,7 @@ public class LTLView extends AnchorPane{
 			checker.checkMachine(machine);
 			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
-				checker.checkMachineStatus(machine);
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, de.prob2.ui.verifications.Type.LTL);
 				tvFormula.refresh();
 				currentJobThreads.remove(currentThread);
 			});
