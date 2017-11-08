@@ -18,6 +18,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
@@ -121,13 +122,13 @@ public class SymbolicCheckingView extends AnchorPane {
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(de.prob2.ui.verifications.Type.SYMBOLIC, injector));
+		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.SYMBOLIC, injector));
 		
 		tvFormula.setOnMouseClicked(e-> {
 			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 &&  item != null && currentTrace.exists()) {
 				symbolicCheckHandler.handleItem(item);
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), de.prob2.ui.verifications.Type.SYMBOLIC);
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
 			}
 		});
 	}
@@ -141,7 +142,7 @@ public class SymbolicCheckingView extends AnchorPane {
 			MenuItem check = new MenuItem(bundle.getString("verifications.symbolic.menu.checkSeparately"));
 			check.setOnAction(e-> {
 				symbolicCheckHandler.handleItem(row.getItem());
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), de.prob2.ui.verifications.Type.SYMBOLIC);
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
 			});
 			check.disableProperty().bind(row.emptyProperty());
 			
@@ -204,7 +205,7 @@ public class SymbolicCheckingView extends AnchorPane {
 	public void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
 		symbolicCheckHandler.handleMachine(machine);
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, de.prob2.ui.verifications.Type.SYMBOLIC);
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
 		refresh();
 	}
 	

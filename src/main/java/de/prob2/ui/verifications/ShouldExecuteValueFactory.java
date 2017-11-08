@@ -12,11 +12,11 @@ import javafx.util.Callback;
 
 public class ShouldExecuteValueFactory implements Callback<TableColumn.CellDataFeatures<IExecutableItem, CheckBox>, ObservableValue<CheckBox>> {
 	
-	private Type type;
+	private CheckingType type;
 	
 	private final Injector injector;
 	
-	public ShouldExecuteValueFactory(Type type, final Injector injector) {
+	public ShouldExecuteValueFactory(CheckingType type, final Injector injector) {
 		this.injector = injector;
 		this.type = type;
 	}

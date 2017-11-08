@@ -19,6 +19,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
@@ -112,7 +113,7 @@ public class SymbolicFormulaChecker {
 		
 	public void updateMachine(Machine machine) {
 		final SymbolicCheckingView symbolicCheckingView = injector.getInstance(SymbolicCheckingView.class);
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, de.prob2.ui.verifications.Type.SYMBOLIC);
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
 		symbolicCheckingView.refresh();
 	}
 	

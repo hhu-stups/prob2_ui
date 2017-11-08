@@ -17,6 +17,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
@@ -184,7 +185,7 @@ public class LTLView extends AnchorPane{
 					item.setChecked(result);
 					Thread currentThread = Thread.currentThread();
 					Platform.runLater(() -> {
-						injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, de.prob2.ui.verifications.Type.LTL);
+						injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
 						tvFormula.refresh();
 						currentJobThreads.remove(currentThread);
 					});
@@ -236,7 +237,7 @@ public class LTLView extends AnchorPane{
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(de.prob2.ui.verifications.Type.LTL, injector));
+		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.LTL, injector));
 		
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		addPatternButton.disableProperty().bind(currentTrace.existsProperty().not());
@@ -381,7 +382,7 @@ public class LTLView extends AnchorPane{
 			checker.checkMachine(machine);
 			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, de.prob2.ui.verifications.Type.LTL);
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
 				tvFormula.refresh();
 				currentJobThreads.remove(currentThread);
 			});

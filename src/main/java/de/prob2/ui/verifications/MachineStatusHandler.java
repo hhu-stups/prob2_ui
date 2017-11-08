@@ -21,7 +21,7 @@ public class MachineStatusHandler {
 		this.injector = injector;
 	}
 	
-	public void updateMachineStatus(Machine machine, Type type) {
+	public void updateMachineStatus(Machine machine, CheckingType type) {
 		List<? extends IExecutableItem> items = getItems(machine, type);
 		for(IExecutableItem item : items) {
 			if(!item.shouldExecute()) {
@@ -37,7 +37,7 @@ public class MachineStatusHandler {
 		updateStatusBar(type, StatusBar.CheckingStatus.SUCCESSFUL);
 	}
 	
-	private void updateStatusBar(Type type, CheckingStatus status) {
+	private void updateStatusBar(CheckingType type, CheckingStatus status) {
 		switch(type) {
 			case LTL:
 				injector.getInstance(StatusBar.class).setLtlStatus(status);
@@ -53,7 +53,7 @@ public class MachineStatusHandler {
 		}
 	}
 	
-	private void refreshMachineStatusFailed(Machine machine, Type type) {
+	private void refreshMachineStatusFailed(Machine machine, CheckingType type) {
 		switch(type) {
 			case LTL:
 				machine.setLTLCheckedFailed();
@@ -70,7 +70,7 @@ public class MachineStatusHandler {
 		injector.getInstance(MachineTableView.class).refresh();
 	}
 	
-	private void refreshMachineStatusSuccess(Machine machine, Type type) {
+	private void refreshMachineStatusSuccess(Machine machine, CheckingType type) {
 		switch(type) {
 			case LTL:
 				machine.setLTLCheckedSuccessful();
@@ -87,7 +87,7 @@ public class MachineStatusHandler {
 		injector.getInstance(MachineTableView.class).refresh();
 	}
 	
-	private List<? extends IExecutableItem> getItems(Machine machine, Type type) {
+	private List<? extends IExecutableItem> getItems(Machine machine, CheckingType type) {
 		switch(type) {
 			case LTL:
 				return machine.getLTLFormulas();
