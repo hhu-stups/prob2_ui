@@ -18,10 +18,9 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingType;
+import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -111,27 +110,10 @@ public class SymbolicFormulaChecker {
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}
-	
-	public void updateMachineStatus(Machine machine) {
-		for(SymbolicCheckingFormulaItem formula : machine.getSymbolicCheckingFormulas()) {
-			if(!formula.shouldExecute()) {
-				continue;
-			}
-			if(formula.getChecked() == Checked.FAIL) {
-				machine.setSymbolicCheckedFailed();
-				injector.getInstance(MachineTableView.class).refresh();
-				injector.getInstance(StatusBar.class).setSymbolicStatus(StatusBar.SymbolicStatus.ERROR);
-				return;
-			}
-		}
-		machine.setSymbolicCheckedSuccessful();
-		injector.getInstance(MachineTableView.class).refresh();
-		injector.getInstance(StatusBar.class).setSymbolicStatus(StatusBar.SymbolicStatus.SUCCESSFUL);
-	}
 		
 	public void updateMachine(Machine machine) {
 		final SymbolicCheckingView symbolicCheckingView = injector.getInstance(SymbolicCheckingView.class);
-		updateMachineStatus(machine);
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
 		symbolicCheckingView.refresh();
 	}
 	

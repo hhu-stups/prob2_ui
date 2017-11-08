@@ -29,13 +29,11 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
-import de.prob2.ui.verifications.ShouldExecuteValueFactory.Type;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -260,7 +258,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(Type.MODELCHECKING, injector));
+		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.MODELCHECKING, injector));
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addModelCheckButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
@@ -523,23 +521,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 			LOGGER.error("Exception in isFinished", e);
 			Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("verifications.modelchecking.exceptionWhileRunningJob"), e)).show());
 		}
-	}
-	
-	public void updateCurrentMachineStatus(Machine machine) {
-		for(ModelCheckingItem item : machine.getModelcheckingItems()) {
-			if(!item.shouldExecute()) {
-				continue;
-			}
-			if(item.getChecked() == Checked.FAIL) {
-				machine.setModelcheckingCheckedFailed();
-				injector.getInstance(MachineTableView.class).refresh();
-				injector.getInstance(StatusBar.class).setModelcheckingStatus(StatusBar.ModelcheckingStatus.ERROR);
-				return;
-			}
-		}
-		machine.setModelcheckingCheckedSuccessful();
-		injector.getInstance(MachineTableView.class).refresh();
-		injector.getInstance(StatusBar.class).setModelcheckingStatus(StatusBar.ModelcheckingStatus.SUCCESSFUL);
 	}
 	
 }

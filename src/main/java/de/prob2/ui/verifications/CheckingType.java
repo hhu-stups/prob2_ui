@@ -3,6 +3,7 @@ package de.prob2.ui.verifications;
 public enum CheckingType {
 	LTL("verifications.checkingType.ltl"),
 	SYMBOLIC("verifications.checkingType.symbolic"),
+	MODELCHECKING("verifications.checkingType.modelchecking")
 	;
 	
 	private final String key;

@@ -16,7 +16,6 @@ import de.prob.statespace.State;
 
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
@@ -57,26 +56,8 @@ public class LTLFormulaChecker {
 			}
 			item.setChecked(result);
 		}
-		Platform.runLater(() -> injector.getInstance(StatusBar.class).setLtlStatus(failed.get(0) ? StatusBar.LTLStatus.ERROR : StatusBar.LTLStatus.SUCCESSFUL));
+		Platform.runLater(() -> injector.getInstance(StatusBar.class).setLtlStatus(failed.get(0) ? StatusBar.CheckingStatus.ERROR : StatusBar.CheckingStatus.SUCCESSFUL));
 	
-	}
-	
-	public void checkMachineStatus(Machine machine) {
-		for(LTLFormulaItem item : machine.getLTLFormulas()) {
-			if(!item.shouldExecute()) {
-				continue;
-			}
-			Checked checked = item.getChecked();
-			if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
-				machine.setLTLCheckedFailed();
-				injector.getInstance(MachineTableView.class).refresh();
-				injector.getInstance(StatusBar.class).setLtlStatus(StatusBar.LTLStatus.ERROR);
-				return;
-			}
-		}
-		machine.setLTLCheckedSuccessful();
-		injector.getInstance(MachineTableView.class).refresh();
-		injector.getInstance(StatusBar.class).setLtlStatus(StatusBar.LTLStatus.SUCCESSFUL);
 	}
 	
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {

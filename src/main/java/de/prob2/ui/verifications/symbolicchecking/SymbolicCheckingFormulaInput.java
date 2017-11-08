@@ -82,7 +82,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		this.injector = injector;
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "symbolic_checking_formula_input.fxml");
-		noneCheckings = new EnumMap<SymbolicCheckingType, String>(SymbolicCheckingType.class);
+		noneCheckings = new EnumMap<>(SymbolicCheckingType.class);
 		initializeNoneCheckings();
 	}
 	
