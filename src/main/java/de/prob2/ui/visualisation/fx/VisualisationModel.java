@@ -155,9 +155,14 @@ public class VisualisationModel {
 	public Object getPreviousValue(String formula) {
 		LOGGER.debug("Try to get previous value of formula \"{}\".", formula);
 		if (newTrace.getPreviousState() != null) {
-			EvalResult value = evalState(newTrace.getPreviousState(), formula);
-			LOGGER.debug("Evaluated previous value of formula \"{}\" and got the result: {}", formula, value);
-			return value != null ? value.translate().getValue() : null;
+			try {
+				EvalResult value = evalState(newTrace.getPreviousState(), formula);
+				LOGGER.debug("Evaluated previous value of formula \"{}\" and got the result: {}", formula, value);
+				return value != null ? value.translate().getValue() : null;
+			} catch (Exception e) {
+				LOGGER.debug("Exception while trying to get the value for formula \"{}\" out of the map. Returning null.", formula);
+				return null;
+			}
 		}
 		LOGGER.debug("The previous state is null. Returning null");
 		return null;
@@ -185,7 +190,16 @@ public class VisualisationModel {
 
 	private Object evalCurrent(String formula) {
 		EvalResult value = evalState(newTrace.getCurrentState(), formula);
-		return value != null ? value.translate().getValue() : null;
+		if (value == null) {
+			return null;
+		} else {
+			try {
+				return value.translate().getValue();
+			} catch (Exception e) {
+				LOGGER.debug("Eval current failed, returning null.", e);
+				return null;
+			}
+		}
 	}
 
 	private EvalResult evalState(State state, String formula) {
