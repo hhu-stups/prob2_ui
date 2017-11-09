@@ -114,6 +114,9 @@ public class TraceReplayView extends ScrollPane {
 
 	private void addToTraceTableView(List<? extends File> traceFiles) {
 		for (File traceFile : traceFiles) {
+			if(traceFile == null) {
+				continue;
+			}
 			ReplayTrace trace = traceLoader.loadTrace(traceFile);
 			traceTableView.getItems().add(new ReplayTraceItem(trace, traceFile));
 		}

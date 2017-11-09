@@ -525,8 +525,8 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				// isFinished was already called for this job
 				return;
 			}
-			currentStats.isFinished(job, timeElapsed, result);
 			Platform.runLater(() -> {
+				currentStats.isFinished(job, timeElapsed, result);
 				this.stageController.hide();
 				injector.getInstance(OperationsView.class).update(currentTrace.get());
 				injector.getInstance(StatsView.class).update(currentTrace.get());
