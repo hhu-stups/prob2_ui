@@ -46,6 +46,9 @@
 							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 						</columnResizePolicy>
 						<columns>
+							<TableColumn fx:id="shouldExecuteColumn"
+								minWidth="40.0" prefWidth="40.0" maxWidth = "40.0"
+								text="" />
 							<TableColumn fx:id="formulaStatusColumn" minWidth="80.0"
 								maxWidth="80.0" prefWidth="80.0" text="%verifications.columns.status" />
 							<TableColumn fx:id="formulaNameColumn" minWidth="120.0"
@@ -54,9 +57,6 @@
 							<TableColumn fx:id="formulaDescriptionColumn"
 								minWidth="120.0" prefWidth="120.0"
 								text="%verifications.columns.description" />
-							<TableColumn fx:id="shouldExecuteColumn"
-								minWidth="50.0" prefWidth="50.0"
-								text="" />
 						</columns>
 						<placeholder>
 							<Label text="%verifications.ltl.formula.noFormulas" />
