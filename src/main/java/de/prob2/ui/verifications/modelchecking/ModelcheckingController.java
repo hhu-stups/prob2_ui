@@ -33,6 +33,7 @@ import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
@@ -259,6 +260,20 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.MODELCHECKING, injector));
+		CheckBox selectAll = new CheckBox();
+		selectAll.setSelected(true);
+		selectAll.selectedProperty().addListener((observable, from, to) -> {
+			for(IExecutableItem item : tvItems.getItems()) {
+				item.setShouldExecute(to);
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
+				tvItems.refresh();
+			}
+		});
+		shouldExecuteColumn.setGraphic(selectAll);
+		shouldExecuteColumn.setMaxWidth(this.getPrefWidth());
+		
+		
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addModelCheckButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));

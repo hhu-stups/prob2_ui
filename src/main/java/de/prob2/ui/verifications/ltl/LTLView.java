@@ -239,6 +239,19 @@ public class LTLView extends AnchorPane{
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.LTL, injector));
 		
+		CheckBox selectAll = new CheckBox();
+		selectAll.setSelected(true);
+		selectAll.selectedProperty().addListener((observable, from, to) -> {
+			for(IExecutableItem item : tvFormula.getItems()) {
+				item.setShouldExecute(to);
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+				tvFormula.refresh();
+			}
+		});
+		shouldExecuteColumn.setGraphic(selectAll);
+		shouldExecuteColumn.setMaxWidth(this.getPrefWidth());
+		
 		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
 		addPatternButton.disableProperty().bind(currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(currentJobThreads.emptyProperty());

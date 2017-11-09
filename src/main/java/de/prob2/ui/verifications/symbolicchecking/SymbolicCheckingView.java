@@ -123,7 +123,17 @@ public class SymbolicCheckingView extends AnchorPane {
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.SYMBOLIC, injector));
-		shouldExecuteColumn.setGraphic(new CheckBox());
+		CheckBox selectAll = new CheckBox();
+		selectAll.setSelected(true);
+		selectAll.selectedProperty().addListener((observable, from, to) -> {
+			for(IExecutableItem item : tvFormula.getItems()) {
+				item.setShouldExecute(to);
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
+				tvFormula.refresh();
+			}
+		});
+		shouldExecuteColumn.setGraphic(selectAll);
 		shouldExecuteColumn.setMaxWidth(this.getPrefWidth());
 		tvFormula.setOnMouseClicked(e-> {
 			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
