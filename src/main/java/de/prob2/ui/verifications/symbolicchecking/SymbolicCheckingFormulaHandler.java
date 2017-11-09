@@ -125,7 +125,8 @@ public class SymbolicCheckingFormulaHandler {
 		if(!item.shouldExecute()) {
 			return;
 		}
-		switch(item.getType()) {
+		SymbolicCheckingType type = item.getType();
+		switch(type) {
 			case INVARIANT:
 				handleInvariant(item.getCode());
 				break;
@@ -150,20 +151,12 @@ public class SymbolicCheckingFormulaHandler {
 			case FIND_REDUNDANT_INVARIANTS:
 				findRedundantInvariants(item);
 				break;
-			case IC3:
-				handleSymbolic(item, SymbolicModelcheckCommand.Algorithm.IC3);
-				break;
-			case TINDUCTION:
-				handleSymbolic(item, SymbolicModelcheckCommand.Algorithm.TINDUCTION);
-				break;
-			case KINDUCTION:
-				handleSymbolic(item, SymbolicModelcheckCommand.Algorithm.KINDUCTION);
-				break;
-			case BMC:
-				handleSymbolic(item, SymbolicModelcheckCommand.Algorithm.BMC);
-				break;
 			default:
-				break;
+				SymbolicModelcheckCommand.Algorithm algorithm = type.getAlgorithm();
+				if(algorithm != null) {
+					handleSymbolic(item, algorithm);
+					break;
+				}
 		}
 	}
 	
