@@ -519,23 +519,18 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@Override
 	public void isFinished(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-		try {
-			final IModelCheckJob job = jobs.remove(jobId);
-			if (job == null) {
-				// isFinished was already called for this job
-				return;
-			}
-			Platform.runLater(() -> {
-				currentStats.isFinished(job, timeElapsed, result);
-				this.stageController.hide();
-				injector.getInstance(OperationsView.class).update(currentTrace.get());
-				injector.getInstance(StatsView.class).update(currentTrace.get());
-				tvItems.refresh();
-			});
-		} catch (RuntimeException e) {
-			LOGGER.error("Exception in isFinished", e);
-			Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("verifications.modelchecking.exceptionWhileRunningJob"), e)).show());
+		final IModelCheckJob job = jobs.remove(jobId);
+		if (job == null) {
+			// isFinished was already called for this job
+			return;
 		}
+		Platform.runLater(() -> {
+			currentStats.isFinished(job, timeElapsed, result);
+			this.stageController.hide();
+			injector.getInstance(OperationsView.class).update(currentTrace.get());
+			injector.getInstance(StatsView.class).update(currentTrace.get());
+			tvItems.refresh();
+		});
 	}
 	
 }
