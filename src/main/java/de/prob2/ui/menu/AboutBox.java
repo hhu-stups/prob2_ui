@@ -52,19 +52,8 @@ public final class AboutBox extends Stage {
 			LOGGER.error("Failed to load build info", e);
 		}
 		
-		try {
-			this.kernelVersion = Main.getVersion();
-			this.kernelCommit = Main.getGitSha();
-		} catch (IOException e) {
-			LOGGER.error("Failed to get kernel version and commit", e);
-			final String message = String.format(this.bundle.getString("about.ioError"), e);
-			if (this.kernelVersion == null) {
-				this.kernelVersion = message;
-			}
-			if (this.kernelCommit == null) {
-				this.kernelCommit = message;
-			}
-		}
+		this.kernelVersion = Main.getVersion();
+		this.kernelCommit = Main.getGitSha();
 		
 		stageManager.loadFXML(this, "about_box.fxml");
 	}
