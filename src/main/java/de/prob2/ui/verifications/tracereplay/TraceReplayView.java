@@ -68,11 +68,9 @@ public class TraceReplayView extends ScrollPane {
 		this.traceChecker.getReplayTraces().addListener((MapChangeListener<File,ReplayTrace>) c -> {
 			System.out.print(c.getKey() + ",");
 			if (c.wasAdded()) {
-				System.out.println(c.getValueAdded() + " added");
 				traceTableView.getItems().add(new ReplayTraceItem(c.getValueAdded(), c.getKey()));
 			}
 			if (c.wasRemoved()) {
-				System.out.println(c.getValueRemoved() + " removed");
 				traceTableView.getItems().stream().filter(traceItem -> !c.getKey().equals(traceItem.getLocation()))
 				.collect(Collectors.toList());
 			}
