@@ -81,7 +81,7 @@ public class VisualisationController {
 		this.currentMachine = currentProject.currentMachineProperty();
 		this.tabPane = mainView.getTabPane();
 		this.bundle = bundle;
-		visualisationModel = new VisualisationModel(currentTrace, stageManager, bundle);
+		this.visualisationModel = new VisualisationModel(currentTrace, stageManager, bundle);
 
 		currentTraceChangeListener = (observable, oldTrace, newTrace) -> {
 			if (newTrace != null) {
