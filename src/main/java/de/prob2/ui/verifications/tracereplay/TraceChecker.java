@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.tracereplay;
 import java.io.File;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -17,14 +18,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.collections.SetChangeListener;
 
+@Singleton
 public class TraceChecker {
-
-	private ObservableMap<File, ReplayTrace> replayTraces = new SimpleMapProperty<>(this, "replayTraces", FXCollections.observableHashMap());
 
 	private final TraceLoader traceLoader;
 	private final CurrentTrace currentTrace;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
+	private ObservableMap<File, ReplayTrace> replayTraces = new SimpleMapProperty<>(this, "replayTraces", FXCollections.observableHashMap());
+
 
 	@Inject
 	private TraceChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -81,10 +83,28 @@ public class TraceChecker {
 		currentJobThreads.clear();
 	}
 
+	public void resetStatus() {
+		cancelReplay();
+		replayTraces.forEach((file,trace) -> trace.setStatus(Status.NOT_CHECKED));
+	}
+
 	ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
 	}
 
+	private void addTrace(File traceFile) {
+		ReplayTrace trace = traceLoader.loadTrace(traceFile);
+		replayTraces.put(traceFile, trace);
+	}
+
+	private void removeTrace(File traceFile) {
+		replayTraces.remove(traceFile);
+	}
+
+	ObservableMap<File, ReplayTrace> getReplayTraces() {
+		return replayTraces;
+	}
+	
 	private void updateReplayTraces(Machine machine) {
 		replayTraces.clear();
 		if (machine != null) {
@@ -100,18 +120,5 @@ public class TraceChecker {
 				}
 			});
 		}
-	}
-
-	private void addTrace(File traceFile) {
-		ReplayTrace trace = traceLoader.loadTrace(traceFile);
-		replayTraces.put(traceFile, trace);
-	}
-
-	private void removeTrace(File traceFile) {
-		replayTraces.remove(traceFile);
-	}
-
-	ObservableMap<File, ReplayTrace> getReplayTraces() {
-		return replayTraces;
 	}
 }
