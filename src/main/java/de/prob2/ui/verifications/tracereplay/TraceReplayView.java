@@ -66,7 +66,6 @@ public class TraceReplayView extends ScrollPane {
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
 		this.traceChecker.getReplayTraces().addListener((MapChangeListener<File,ReplayTrace>) c -> {
-			System.out.print(c.getKey() + ",");
 			if (c.wasAdded()) {
 				traceTableView.getItems().add(new ReplayTraceItem(c.getValueAdded(), c.getKey()));
 			}
