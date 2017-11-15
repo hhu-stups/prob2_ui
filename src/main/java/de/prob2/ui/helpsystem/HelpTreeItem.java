@@ -16,17 +16,10 @@ public class HelpTreeItem extends TreeItem<String>{
 	private boolean isFirstTimeLeaf = true;
 	private File file;
 
-	public HelpTreeItem(final File file) throws IOException {
+	public HelpTreeItem(final File file) {
 		super(file.getName());
 		this.file = file;
 		if (file.isFile()) {
-			/*String text = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
-			text = text.replaceAll("\\s+", " ");
-			Pattern p = Pattern.compile("<title>(.*?)</title>");
-			Matcher m = p.matcher(text);
-			while (m.find()) {
-				this.setValue(m.group(1));
-			}*/
 			this.setValue(file.getName().replace(".md.html",""));
 		} else {
 			this.setValue(this.getValue().replace(File.separator,""));
