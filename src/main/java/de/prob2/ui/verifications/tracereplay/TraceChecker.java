@@ -25,8 +25,8 @@ public class TraceChecker {
 	private final CurrentTrace currentTrace;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
-	private ObservableMap<File, ReplayTrace> replayTraces = new SimpleMapProperty<>(this, "replayTraces", FXCollections.observableHashMap());
-
+	private ObservableMap<File, ReplayTrace> replayTraces = new SimpleMapProperty<>(this, "replayTraces",
+			FXCollections.observableHashMap());
 
 	@Inject
 	private TraceChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -61,13 +61,8 @@ public class TraceChecker {
 				}
 			} catch (IllegalArgumentException | de.prob.exception.ProBError e) {
 				traceReplaySuccess = false;
-				// TODO display warning
 			}
-			if (traceReplaySuccess) {
-				trace.setStatus(Status.SUCCESSFUL);
-			} else {
-				trace.setStatus(Status.FAILED);
-			}
+			trace.setStatus(traceReplaySuccess ? Status.SUCCESSFUL : Status.FAILED);
 			if (setCurrentAnimation) {
 				// set the current trace in both cases
 				currentTrace.set(t);
@@ -85,7 +80,7 @@ public class TraceChecker {
 
 	public void resetStatus() {
 		cancelReplay();
-		replayTraces.forEach((file,trace) -> trace.setStatus(Status.NOT_CHECKED));
+		replayTraces.forEach((file, trace) -> trace.setStatus(Status.NOT_CHECKED));
 	}
 
 	ListProperty<Thread> currentJobThreadsProperty() {
@@ -104,7 +99,7 @@ public class TraceChecker {
 	ObservableMap<File, ReplayTrace> getReplayTraces() {
 		return replayTraces;
 	}
-	
+
 	private void updateReplayTraces(Machine machine) {
 		replayTraces.clear();
 		if (machine != null) {

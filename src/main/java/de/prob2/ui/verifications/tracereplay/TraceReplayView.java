@@ -66,13 +66,13 @@ public class TraceReplayView extends ScrollPane {
 		statusColumn.setStyle("-fx-alignment: CENTER;");
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-		this.traceChecker.getReplayTraces().addListener((MapChangeListener<File,ReplayTrace>) c -> {
+		this.traceChecker.getReplayTraces().addListener((MapChangeListener<File, ReplayTrace>) c -> {
 			if (c.wasAdded()) {
 				traceTableView.getItems().add(new ReplayTraceItem(c.getValueAdded(), c.getKey()));
 			}
 			if (c.wasRemoved()) {
-				traceTableView.getItems().stream().filter(traceItem -> !c.getKey().equals(traceItem.getLocation()))
-				.collect(Collectors.toList());
+				traceTableView.getItems().setAll(traceTableView.getItems().stream()
+						.filter(traceItem -> !c.getKey().equals(traceItem.getLocation())).collect(Collectors.toList()));
 			}
 		});
 
