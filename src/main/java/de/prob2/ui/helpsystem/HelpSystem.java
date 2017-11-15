@@ -69,7 +69,7 @@ public class HelpSystem extends StackPane {
 		webEngine.load(((HelpTreeItem) treeView.getRoot().getChildren().get(0)).getFile().toURI().toString());
 	}
 
-	private TreeItem<String> createNode(final File file) throws IOException {
+	private TreeItem<String> createNode(final File file) {
 		HelpTreeItem hti = new HelpTreeItem(file);
 		if (!file.getName().contains(":")) {
 			Platform.runLater(() -> hti.setExpanded(true));

@@ -62,7 +62,7 @@ public class HelpTreeItem extends TreeItem<String>{
 		return FXCollections.emptyObservableList();
 	}
 
-	private TreeItem<String> createNode(final File file) throws IOException {
+	private TreeItem<String> createNode(final File file) {
 		HelpTreeItem hti = new HelpTreeItem(file);
 		if (hti.isLeaf()) {
 			HelpSystem.fileMap.put(file, hti);
