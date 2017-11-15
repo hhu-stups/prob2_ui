@@ -56,6 +56,6 @@ public class TraceSaver {
 			LOGGER.warn("Failed to save trace", exc);
 			return;
 		}
-		machine.addTrace(file);
+		machine.addTraceFile(file);
 	}
 }

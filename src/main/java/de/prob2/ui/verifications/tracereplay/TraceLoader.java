@@ -57,8 +57,8 @@ public class TraceLoader {
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 				Platform.runLater(() -> {
 					Machine currentMachine = currentProject.getCurrentMachine();
-					if(currentMachine.getTraces().contains(file)) {
-						currentMachine.removeTrace(file);
+					if(currentMachine.getTraceFiles().contains(file)) {
+						currentMachine.removeTraceFile(file);
 					} 
 				});
 			}

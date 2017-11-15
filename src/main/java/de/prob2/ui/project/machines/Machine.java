@@ -300,16 +300,16 @@ public class Machine {
 		this.changed.set(true);
 	}
 	
-	public ObservableSet<File> getTraces() {
+	public ObservableSet<File> getTraceFiles() {
 		return this.traces;
 	}
 	
-	public void addTrace(File traceFile) {
+	public void addTraceFile(File traceFile) {
 		this.traces.add(traceFile);
 		this.changed.set(true);
 	}
 	
-	public void removeTrace(File traceFile) {
+	public void removeTraceFile(File traceFile) {
 		this.traces.remove(traceFile);
 		this.changed.set(true);
 	}
