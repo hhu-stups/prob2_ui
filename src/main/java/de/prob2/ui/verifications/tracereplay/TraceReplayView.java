@@ -23,6 +23,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -85,6 +86,11 @@ public class TraceReplayView extends ScrollPane {
 			//
 			item.setOnAction(event -> this.traceChecker.replayTrace(row.getItem().getLocation(), true));
 			//
+			row.setOnMouseClicked(event -> {
+				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					this.traceChecker.replayTrace(row.getItem().getLocation(), true);
+				}
+			});
 			return row;
 		});
 
