@@ -28,8 +28,9 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.scene.paint.Color;
 
 public class Machine {
@@ -95,7 +96,7 @@ public class Machine {
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
-	private ObservableList<File> traces;
+	private ObservableSet<File> traces;
 	private ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
 	private transient BooleanProperty changed = new SimpleBooleanProperty(false);
@@ -110,7 +111,7 @@ public class Machine {
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
-		this.traces = new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList());
+		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
 	}
 	
@@ -299,16 +300,16 @@ public class Machine {
 		this.changed.set(true);
 	}
 	
-	public ObservableList<File> getTraces() {
+	public ObservableSet<File> getTraceFiles() {
 		return this.traces;
 	}
 	
-	public void addTrace(File traceFile) {
+	public void addTraceFile(File traceFile) {
 		this.traces.add(traceFile);
 		this.changed.set(true);
 	}
 	
-	public void removeTrace(File traceFile) {
+	public void removeTraceFile(File traceFile) {
 		this.traces.remove(traceFile);
 		this.changed.set(true);
 	}
@@ -346,7 +347,7 @@ public class Machine {
 			this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
 		}
 		if(traces == null) {
-			this.traces = new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList());
+			this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
 		}
 		if(modelcheckingItems == null) {
 			this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());

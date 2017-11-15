@@ -13,12 +13,10 @@ public class ReplayTraceItem {
 
 	private ObjectProperty<FontAwesomeIconView> statusIcon;
 	private final String name;
-	private final ReplayTrace trace;
 	private final File location;
 
 	public ReplayTraceItem(ReplayTrace trace, File traceFile) {
 		this.name = traceFile.getName();
-		this.trace = trace;
 		this.location = traceFile;
 		this.statusIcon = new SimpleObjectProperty<>();
 		this.setStatus(trace.getStatus().get());
@@ -54,10 +52,6 @@ public class ReplayTraceItem {
 
 	public String getName() {
 		return name;
-	}
-
-	public ReplayTrace getTrace() {
-		return trace;
 	}
 	
 	public File getLocation() {

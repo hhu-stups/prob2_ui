@@ -24,7 +24,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
-
+import de.prob2.ui.verifications.tracereplay.TraceChecker;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -147,6 +147,7 @@ public class FileMenu extends Menu {
 	private void handleReloadMachine() {
 		try {
 			this.currentTrace.reload(this.currentTrace.get());
+			injector.getInstance(TraceChecker.class).resetStatus();
 		} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 			LOGGER.error("Model reload failed", e);
 			stageManager.makeExceptionAlert(Alert.AlertType.ERROR, bundle.getString("menu.edit.errors.couldNotReload"), e).showAndWait();
