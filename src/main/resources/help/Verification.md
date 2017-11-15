@@ -33,5 +33,7 @@ By pressing the plus button you can add several symbolic checking variants. The 
 The dropdown menu allows you to select the type of check. Some variants of the symbolic checking might need additional parameters (e.g. Invariant needs an operation).
 
 ## Trace Replay
+
 ![Trace Replay](screenshots/Verifications/Trace%20Replay.png)
+
 The Trace Replay tab allows you to load a trace from your hard drive to be replayed by the machine.
