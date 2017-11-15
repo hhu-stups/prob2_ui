@@ -19,7 +19,6 @@ import de.prob.statespace.Trace;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
-import de.prob2.ui.menu.VisualisationMenu;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -54,7 +53,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class VisualisationController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationMenu.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationController.class);
 
 	private final ChangeListener<Trace> currentTraceChangeListener;
 	private final StageManager stageManager;

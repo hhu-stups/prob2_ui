@@ -33,8 +33,12 @@ import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -259,6 +263,20 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.MODELCHECKING, injector));
+		CheckBox selectAll = new CheckBox();
+		selectAll.setSelected(true);
+		selectAll.selectedProperty().addListener((observable, from, to) -> {
+			for(IExecutableItem item : tvItems.getItems()) {
+				item.setShouldExecute(to);
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
+				tvItems.refresh();
+			}
+		});
+		shouldExecuteColumn.setGraphic(selectAll);
+		shouldExecuteColumn.setMaxWidth(this.getPrefWidth());
+		
+		
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (addModelCheckButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
@@ -313,12 +331,17 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		tvItems.setRowFactory(table -> {
 			final TableRow<ModelCheckingItem> row = new TableRow<>();
 			
+			final BooleanBinding disableErrorItemsBinding = Bindings.createBooleanBinding(
+				() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || row.getItem().getStats().getTrace() == null,
+				row.emptyProperty(), row.itemProperty());
+			
 			MenuItem showTraceToErrorItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.showTraceToError"));
 			showTraceToErrorItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 				currentTrace.set(item.getStats().getTrace());
 				injector.getInstance(StatsView.class).update(item.getStats().getTrace());
 			});
+			showTraceToErrorItem.disableProperty().bind(disableErrorItemsBinding);
 			
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.checkSeparately"));
 			checkItem.setOnAction(e-> {
@@ -326,6 +349,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				item.setOptions(item.getOptions().recheckExisting(true));
 				checkItem(item);
 			});
+			checkItem.disableProperty().bind(row.emptyProperty());
 			
 			MenuItem showFullValueItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.showFullValue"));
 			showFullValueItem.setOnAction(e-> {
@@ -334,6 +358,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				fullValueStage.setValues(item.getStrategy(), item.getDescription());
 				fullValueStage.show();
 			});
+			showFullValueItem.disableProperty().bind(row.emptyProperty());
 			
 			MenuItem searchForNewErrorsItem = new MenuItem(bundle.getString("verifications.modelchecking.stage.options.searchForNewErrors"));
 			searchForNewErrorsItem.setOnAction(e-> {
@@ -341,32 +366,17 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 				item.setOptions(item.getOptions().recheckExisting(false));
 				checkItem(item);
 			});
+			searchForNewErrorsItem.disableProperty().bind(disableErrorItemsBinding);
 			
 			MenuItem removeItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.remove"));
 			removeItem.setOnAction(e -> removeItem());
 			removeItem.disableProperty().bind(row.emptyProperty());
 			
-			row.setOnMouseClicked(e-> {
-				if(e.getButton() == MouseButton.SECONDARY) {
-					ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-					if(row.emptyProperty().get()) {
-						checkItem.setDisable(true);
-						showFullValueItem.setDisable(true);
-					} else {
-						checkItem.setDisable(false);
-						showFullValueItem.setDisable(false);
-					}
-					if(row.emptyProperty().get() || item.getStats() == null || item.getStats().getTrace() == null) {
-						showTraceToErrorItem.setDisable(true);
-						searchForNewErrorsItem.setDisable(true);
-					} else {
-						showTraceToErrorItem.setDisable(false);
-						searchForNewErrorsItem.setDisable(false);
-					}
-					
-				}
-			});
-			row.setContextMenu(new ContextMenu(showTraceToErrorItem, checkItem, showFullValueItem, searchForNewErrorsItem, removeItem));
+			row.contextMenuProperty().bind(
+				Bindings.when(row.emptyProperty())
+				.then((ContextMenu)null)
+				.otherwise(new ContextMenu(showTraceToErrorItem, checkItem, showFullValueItem, searchForNewErrorsItem, removeItem))
+			);
 			return row;
 		});
 	}
@@ -504,23 +514,18 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 
 	@Override
 	public void isFinished(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-		try {
-			final IModelCheckJob job = jobs.remove(jobId);
-			if (job == null) {
-				// isFinished was already called for this job
-				return;
-			}
-			currentStats.isFinished(job, timeElapsed, result);
-			Platform.runLater(() -> {
-				this.stageController.hide();
-				injector.getInstance(OperationsView.class).update(currentTrace.get());
-				injector.getInstance(StatsView.class).update(currentTrace.get());
-				tvItems.refresh();
-			});
-		} catch (RuntimeException e) {
-			LOGGER.error("Exception in isFinished", e);
-			Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("verifications.modelchecking.exceptionWhileRunningJob"), e)).show());
+		final IModelCheckJob job = jobs.remove(jobId);
+		if (job == null) {
+			// isFinished was already called for this job
+			return;
 		}
+		Platform.runLater(() -> {
+			currentStats.isFinished(job, timeElapsed, result);
+			this.stageController.hide();
+			injector.getInstance(OperationsView.class).update(currentTrace.get());
+			injector.getInstance(StatsView.class).update(currentTrace.get());
+			tvItems.refresh();
+		});
 	}
 	
 }

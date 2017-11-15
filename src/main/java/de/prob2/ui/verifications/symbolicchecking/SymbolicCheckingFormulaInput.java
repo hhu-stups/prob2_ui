@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.symbolicchecking;
 
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -32,22 +31,6 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	
 	private final CurrentProject currentProject;
 	
-	private static final String FIND_REDUNDANT_INVARIANTS = "FIND REDUNDANT INVARIANTS";
-	
-	private static final String FIND_DEADLOCK = "FIND DEADLOCK";
-	
-	private static final String ASSERTION_CHECKING = "Assertion Checking";
-	
-	private static final String REFINEMENT_CHECKING = "Refinement Checking";
-	
-	private static final String IC3 = "IC3";
-	
-	private static final String TINDUCTION = "TINDUCTION";
-	
-	private static final String KINDUCTION = "KINDUCTION";
-	
-	private static final String BMC = "BMC";
-	
 	@FXML
 	private Button btAdd;
 	
@@ -68,8 +51,6 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	
 	private ArrayList<String> events;
 	
-	private final EnumMap<SymbolicCheckingType, String> noneCheckings;
-	
 	@Inject
 	public SymbolicCheckingFormulaInput(final StageManager stageManager, 
 										final SymbolicCheckingFormulaHandler symbolicCheckingFormulaHandler,
@@ -82,8 +63,6 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		this.injector = injector;
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "symbolic_checking_formula_input.fxml");
-		noneCheckings = new EnumMap<>(SymbolicCheckingType.class);
-		initializeNoneCheckings();
 	}
 	
 	@FXML
@@ -91,17 +70,6 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		this.update();
 		currentTrace.addListener((observable, from, to) -> update());
 		setCheckListeners();
-	}
-	
-	private void initializeNoneCheckings() {
-		noneCheckings.put(SymbolicCheckingType.FIND_DEADLOCK, FIND_DEADLOCK);
-		noneCheckings.put(SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS, FIND_REDUNDANT_INVARIANTS);
-		noneCheckings.put(SymbolicCheckingType.CHECK_ASSERTIONS, ASSERTION_CHECKING);
-		noneCheckings.put(SymbolicCheckingType.CHECK_REFINEMENT, REFINEMENT_CHECKING);
-		noneCheckings.put(SymbolicCheckingType.IC3, IC3);
-		noneCheckings.put(SymbolicCheckingType.TINDUCTION, TINDUCTION);
-		noneCheckings.put(SymbolicCheckingType.KINDUCTION, KINDUCTION);
-		noneCheckings.put(SymbolicCheckingType.BMC, BMC);
 	}
 	
 	private void setChangeListeners(SymbolicCheckingFormulaItem item) {
@@ -153,32 +121,24 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 					symbolicCheckingFormulaHandler.findValidState(formulaItem);
 					break;
 				default:
-					formula = noneCheckings.get(checkingType);
+					formula = checkingType.getName();
 					formulaItem = new SymbolicCheckingFormulaItem(formula, formula, checkingType);
 					switch(checkingType) {
-					case FIND_REDUNDANT_INVARIANTS: 
-						symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem); 
-						break;
-					case CHECK_ASSERTIONS: 
-						symbolicCheckingFormulaHandler.handleAssertions(formulaItem); 
-						break;
-					case CHECK_REFINEMENT: 
-						symbolicCheckingFormulaHandler.handleRefinement(formulaItem); 
-						break;
-					case IC3: 
-						symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.IC3); 
-						break;
-					case TINDUCTION: 
-						symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.TINDUCTION); 
-						break;
-					case KINDUCTION: 
-						symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.KINDUCTION);
-						break;
-					case BMC:
-						symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, SymbolicModelcheckCommand.Algorithm.BMC);
-						break;
-					default:
-						break;
+						case FIND_REDUNDANT_INVARIANTS: 
+							symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem); 
+							break;
+						case CHECK_ASSERTIONS: 
+							symbolicCheckingFormulaHandler.handleAssertions(formulaItem); 
+							break;
+						case CHECK_REFINEMENT: 
+							symbolicCheckingFormulaHandler.handleRefinement(formulaItem); 
+							break;
+						default:
+							SymbolicModelcheckCommand.Algorithm algorithm = checkingType.getAlgorithm();
+							if(algorithm != null) {
+								symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, algorithm);
+							}
+							break;
 				}
 			}
 			injector.getInstance(SymbolicCheckingChoosingStage.class).close();
@@ -213,7 +173,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		} else if(choosingStage.getGUIType() == GUIType.CHOICE_BOX) {
 			formula = cbOperations.getSelectionModel().getSelectedItem();
 		} else {
-			formula = noneCheckings.get(choosingStage.getCheckingType());
+			formula = choosingStage.getCheckingType().getName();
 		}
 		SymbolicCheckingFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getCheckingType());
 		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
@@ -267,10 +227,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 				symbolicCheckingFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType, checking);
 				break;
 			case NONE:
-				formula = noneCheckings.get(checkingType);
-				if(formula == null) {
-					break;
-				}
+				formula = checkingType.getName();
 				symbolicCheckingFormulaHandler.addFormula(formula, formula, checkingType, checking);
 				break;
 			default:

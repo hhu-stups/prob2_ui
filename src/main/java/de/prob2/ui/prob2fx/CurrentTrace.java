@@ -139,7 +139,6 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 			}
 		});
 		this.api = api;
-		this.api.setLoadVariablesByDefault(false);
 		
 		this.exists = new ROBoolProp("exists", () -> this.get() != null);
 

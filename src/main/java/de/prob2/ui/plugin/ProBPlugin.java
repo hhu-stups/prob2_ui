@@ -59,10 +59,6 @@ public abstract class ProBPlugin extends Plugin{
 	 */
 	public abstract void stopPlugin();
 
-	/**
-	 * {@inheritDoc}
-	 * @throws PluginException
-	 */
 	@Override
 	public final void start() throws PluginException {
 		if (!started) {
@@ -71,10 +67,6 @@ public abstract class ProBPlugin extends Plugin{
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * @throws PluginException
-	 */
 	@Override
 	public final void stop() throws PluginException {
 		if (started) {

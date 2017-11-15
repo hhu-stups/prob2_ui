@@ -77,7 +77,7 @@ public class TraceReplayView extends ScrollPane {
 				.collect(Collectors.toList());
 			}
 		});
-		
+
 		this.traceTableView.setRowFactory(param -> {
 			final ContextMenu menu = new ContextMenu();
 			final TableRow<ReplayTraceItem> row = new TableRow<>();
