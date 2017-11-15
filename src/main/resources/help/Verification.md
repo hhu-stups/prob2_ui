@@ -30,7 +30,7 @@ By pressing the plus button you can add several symbolic checking variants. The 
 
 ![Add SC](screenshots/Verifications/Add%20SC.png)
 
-The dropdown menu allows you to select the type of check. Some variants of the symbolic checking might need additional parameters (e.g. Invariants needs an operation).
+The dropdown menu allows you to select the type of check. Some variants of the symbolic checking might need additional parameters (e.g. Invariant needs an operation).
 
 ## Trace Replay
 ![Trace Replay](screenshots/Verifications/Trace%20Replay.png)
