@@ -23,13 +23,7 @@ import de.prob2.ui.project.runconfigurations.Runconfiguration;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -180,5 +174,9 @@ public class MachinesTab extends Tab {
 			splitPane.getItems().remove(0);
 			machineView.getMachinesItem().setId("machines-item");
 		}
+	}
+
+	public void disableMachineView(boolean disable){
+		splitPane.setDisable(disable);
 	}
 }

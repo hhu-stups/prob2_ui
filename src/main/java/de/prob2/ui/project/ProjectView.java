@@ -58,7 +58,7 @@ public final class ProjectView extends AnchorPane {
 	}
 
 	public void disableMachinesTab(boolean disable){
-		machinesTab.setDisable(disable);
+		machinesTab.disableMachineView(disable);
 	}
 	
 }
