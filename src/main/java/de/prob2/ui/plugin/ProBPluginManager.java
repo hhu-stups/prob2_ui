@@ -126,6 +126,10 @@ public class ProBPluginManager {
 				LOGGER.warn("Tried to copy and load/start the plugin {}.\nThis exception was thrown: ", pluginFileName, e);
 				showWarningAlert("plugins.error.load", pluginFileName);
 				//if an error occurred, delete the plugin file
+				PluginWrapper wrapper = pluginManager.getPlugin(plugin.toPath());
+				if (wrapper != null) {
+					pluginManager.deletePlugin(wrapper.getPluginId());
+				}
 				try {
 					Files.deleteIfExists(plugin.toPath());
 				} catch (IOException ex) {
@@ -280,6 +284,9 @@ public class ProBPluginManager {
 			throw new PluginException("Could not load the plugin '" + pluginFileName + "'.");
 		} else {
 			PluginWrapper pluginWrapper = pluginManager.getPlugin(loadedPluginId);
+			if (pluginWrapper.getPlugin() instanceof InvalidPlugin) {
+				throw new PluginException("Could not create an instance of the plugin '" + pluginFileName + "'.");
+			}
 			//because we don't use the enabled/disabled.txt of PF4J, the only reason for a
 			//plugin to be disabled is, when it has the wrong version
 			if (pluginWrapper.getPluginState() == PluginState.DISABLED) {
@@ -444,7 +451,7 @@ public class ProBPluginManager {
 				} catch (Exception e) {
 					LOGGER.error(e.getMessage(), e);
 				}
-				return null;
+				return new InvalidPlugin(pluginWrapper);
 			};
 		}
 
@@ -476,12 +483,34 @@ public class ProBPluginManager {
 		}
 
 		private PluginWrapper getPlugin(Path pluginPath) {
-			for (PluginWrapper pluginWrapper : pluginManager.getPlugins()) {
+			for (PluginWrapper pluginWrapper : getPlugins()) {
 				if (pluginWrapper.getPluginPath().equals(pluginPath)) {
 					return pluginWrapper;
 				}
 			}
 			return null;
+		}
+	}
+
+	public class InvalidPlugin extends ProBPlugin {
+
+		public InvalidPlugin(PluginWrapper wrapper) {
+			super(wrapper, null, null);
+		}
+
+		@Override
+		public String getName() {
+			return "InvalidPlugin";
+		}
+
+		@Override
+		public void startPlugin() {
+
+		}
+
+		@Override
+		public void stopPlugin() {
+
 		}
 	}
 }

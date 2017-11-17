@@ -76,7 +76,6 @@ public class PluginMenuStage extends Stage {
 
 	@FXML
 	private void initialize() {
-		//TODO: check how to sort a tableview proper
 		pathTextField.setText(proBPluginManager.getPluginDirectory().getAbsolutePath());
 
 		pluginList = FXCollections.observableArrayList(getProBJarPluginManager().getPlugins());
@@ -84,19 +83,30 @@ public class PluginMenuStage extends Stage {
 
 		stateListener = event -> {
 			PluginWrapper plugin = event.getPlugin();
-			if (pluginList.contains(plugin) && !getProBJarPluginManager().getPlugins().contains(plugin)) {
-				//a plugin was removed
-				pluginList.remove(plugin);
-			} else if (!pluginList.contains(plugin) && getProBJarPluginManager().getPlugins().contains(plugin)) {
-				//a new plugin was added
-				pluginList.add(plugin);
+			if (plugin.getPlugin() != null) {
+				if (pluginList.contains(plugin) && !getProBJarPluginManager().getPlugins().contains(plugin)) {
+					//a plugin was removed
+					pluginList.remove(plugin);
+				} else if (!pluginList.contains(plugin) && getProBJarPluginManager().getPlugins().contains(plugin)) {
+					TableColumn<PluginWrapper, ?> sortcolumn = null;
+					TableColumn.SortType st = null;
+					if (pluginTableView.getSortOrder().size()>0) {
+						sortcolumn = pluginTableView.getSortOrder().get(0);
+						st = sortcolumn.getSortType();
+					}
+					//a new plugin was added
+					pluginList.add(plugin);
+					if (sortcolumn!=null) {
+						pluginTableView.getSortOrder().clear();
+						pluginTableView.getSortOrder().add(sortcolumn);
+						sortcolumn.setSortType(st);
+						sortcolumn.setSortable(true); // This performs a sort
+					}
+				}
 			}
 		};
 
 		getProBJarPluginManager().addPluginStateListener(stateListener);
-		//TODO: check listener and list handling when stage not shown
-		//this.setOnCloseRequest(closeEvent -> getProBJarPluginManager().removePluginStateListener(stateListener));
-		//this.setOnShown(event -> {System.out.println();});
 
 		configureColumns();
 		configureContextMenu();
@@ -113,6 +123,9 @@ public class PluginMenuStage extends Stage {
 		SortedList<PluginWrapper> pluginSortedFilteredList = new SortedList<>(pluginFilteredList);
 		pluginSortedFilteredList.comparatorProperty().bind(pluginTableView.comparatorProperty());
 		pluginTableView.setItems(pluginSortedFilteredList);
+		pluginTableView.getSortOrder().add(nameCol);
+		nameCol.setSortType(TableColumn.SortType.ASCENDING);
+		nameCol.setSortable(true);// This performs a sort
 	}
 
 	@FXML
