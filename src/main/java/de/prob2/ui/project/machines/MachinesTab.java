@@ -17,6 +17,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.EditMenu;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.preferences.DefaultPreference;
+import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 
 import javafx.fxml.FXML;
@@ -95,7 +97,13 @@ public class MachinesTab extends Tab {
 
 				final Menu startAnimationMenu = new Menu(bundle.getString("project.machines.tab.menu.startAnimation"));
 
-				ContextMenu contextMenu = new ContextMenu(editMachineMenuItem, removeMachineMenuItem, editFileMenuItem,
+				final MenuItem showDescription = new MenuItem(bundle.getString("project.machines.tab.menu.machineDescription"));
+				showDescription.setOnAction(event -> {
+					showMachineView(machinesItem);
+					machinesItem.setId("machines-item-selected");
+				});
+
+				ContextMenu contextMenu = new ContextMenu(showDescription, editMachineMenuItem, removeMachineMenuItem, editFileMenuItem,
 						editExternalMenuItem, startAnimationMenu);
 
 				machinesItem.setOnMouseClicked(event -> {
@@ -103,8 +111,7 @@ public class MachinesTab extends Tab {
 						updateAnimationMenu(startAnimationMenu, machine);
 						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-						showMachineView(machinesItem);
-						machinesItem.setId("machines-item-selected");
+						currentProject.startAnimation(new Runconfiguration(machine, new DefaultPreference()));
 					}
 				});
 			}
@@ -116,8 +123,18 @@ public class MachinesTab extends Tab {
 
 	private void updateAnimationMenu(final Menu startAnimationMenu, Machine machine) {
 		startAnimationMenu.getItems().clear();
-		for (Runconfiguration runconfiguration : currentProject.getRunconfigurations(machine)) {
-			final MenuItem item = new MenuItem(runconfiguration.toString());
+
+		DefaultPreference defaultPreference = new DefaultPreference();
+		final Runconfiguration defRunconfiguration = new Runconfiguration(machine, defaultPreference);
+		final MenuItem defItem = new MenuItem(defaultPreference.toString());
+		defItem.setOnAction(e -> currentProject.startAnimation(defRunconfiguration));
+		startAnimationMenu.getItems().add(defItem);
+
+		if(currentProject.getPreferences().isEmpty())
+			return;
+		for(Preference preference : currentProject.getPreferences()){
+			final MenuItem item = new MenuItem(preference.toString());
+			final Runconfiguration runconfiguration = new Runconfiguration(machine, preference);
 			item.setOnAction(e -> currentProject.startAnimation(runconfiguration));
 			startAnimationMenu.getItems().add(item);
 		}

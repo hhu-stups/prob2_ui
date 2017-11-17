@@ -120,13 +120,7 @@ public class ProB2 extends Application {
 		}
 
 		if (runtimeOptions.getRunconfig() != null) {
-			Runconfiguration found = null;
-			for (final Runconfiguration r : currentProject.getRunconfigurations()) {
-				if (r.getName().equals(runtimeOptions.getRunconfig())) {
-					found = r;
-					break;
-				}
-			}
+			Runconfiguration found = currentProject.getCurrentRunconfiguration();
 
 			if (found == null) {
 				stageManager

@@ -23,7 +23,6 @@ import de.prob2.ui.project.ProjectTab;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.project.machines.MachinesTab;
 import de.prob2.ui.project.preferences.PreferencesTab;
-import de.prob2.ui.project.runconfigurations.RunconfigurationsTab;
 import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.project.verifications.VerificationsTab;
 import de.prob2.ui.states.StateErrorsView;
@@ -91,7 +90,6 @@ public class ProB2Module extends AbstractModule {
 		bind(PreferencesView.class);
 		bind(ProjectView.class);
 		bind(ProjectTab.class);
-		bind(RunconfigurationsTab.class);
 		bind(StateErrorsView.class);
 		bind(StatesView.class);
 		bind(StatsView.class);

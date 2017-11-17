@@ -48,7 +48,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final StringProperty description;
 	private final ListProperty<Machine> machines;
 	private final ListProperty<Preference> preferences;
-	private final ReadOnlyListProperty<Runconfiguration> runconfigurations;
 	private final ObjectProperty<Runconfiguration> currentRunconfiguration;
 	private final ObjectProperty<Machine> currentMachine;
 
@@ -79,8 +78,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.description = new SimpleStringProperty(this, "description", "");
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
 		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
-		this.runconfigurations = new SimpleListProperty<>(this, "runconfigurations",
-				FXCollections.observableArrayList());
 		this.currentRunconfiguration = new SimpleObjectProperty<>(this, "currentRunconfiguration", null);
 		this.currentMachine = new SimpleObjectProperty<>(this, "currentMachine", null);
 		this.location = new SimpleObjectProperty<>(this, "location", null);
@@ -94,7 +91,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.description.set(to.getDescription());
 				this.machines.setAll(to.getMachines());
 				this.preferences.setAll(to.getPreferences());
-				this.runconfigurations.setAll(to.getRunconfigurations());
 				this.location.set(to.getLocation());
 				if (!to.equals(from)) {
 					this.saved.set(false);
@@ -141,54 +137,27 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void addMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.add(machine);
-		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
-				this.getRunconfigurations(), this.getLocation()));
+		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
 	}
 
 	public void removeMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.remove(machine);
-		List<Runconfiguration> runconfigsList = new ArrayList<>(this.getRunconfigurations());
-		runconfigsList.removeAll(this.getRunconfigurations(machine));
-		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(),
-				runconfigsList, this.getLocation()));
+		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
 	}
 
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);
-		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
-				this.getRunconfigurations(), this.getLocation()));
+		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getLocation()));
 	}
 
 	public void removePreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.remove(preference);
-		List<Runconfiguration> runconfigsList = new ArrayList<>(this.getRunconfigurations());
-		this.getRunconfigurations().stream().filter(r -> r.getPreference().getName().equals(preference.getName()))
-				.forEach(runconfigsList::remove);
-		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList,
-				runconfigsList, this.getLocation()));
+		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getLocation()));
 	}
 
-	public void addRunconfiguration(Runconfiguration runconfiguration) {
-		List<Runconfiguration> runconfigs = this.getRunconfigurations();
-		runconfigs.add(runconfiguration);
-		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
-				runconfigs, this.getLocation()));
-	}
-
-	public void removeRunconfiguration(Runconfiguration runconfiguration) {
-		List<Runconfiguration> runconfigs = this.getRunconfigurations();
-		runconfigs.remove(runconfiguration);
-		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getPreferences(),
-				runconfigs, this.getLocation()));
-	}
-
-	public List<Runconfiguration> getRunconfigurations(Machine machine) {
-		return getRunconfigurations().stream().filter(runconfig -> machine.equals(runconfig.getMachine()))
-				.collect(Collectors.toList());
-	}
 
 	public ReadOnlyObjectProperty<Runconfiguration> currentRunconfigurationProperty() {
 		return this.currentRunconfiguration;
@@ -213,13 +182,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public void changeName(String newName) {
-		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(),
-				this.getRunconfigurations(), this.getLocation()));
+		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(), this.getLocation()));
 	}
 
 	public void changeDescription(String newDescription) {
-		this.update(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(),
-				this.getRunconfigurations(), this.getLocation()));
+		this.update(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(), this.getLocation()));
 	}
 
 	@Override
@@ -296,14 +263,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public List<Preference> getPreferences() {
 		return this.preferencesProperty().get();
-	}
-
-	public ReadOnlyListProperty<Runconfiguration> runconfigurationsProperty() {
-		return this.runconfigurations;
-	}
-
-	public List<Runconfiguration> getRunconfigurations() {
-		return this.runconfigurationsProperty().get();
 	}
 
 	public ObjectProperty<File> locationProperty() {

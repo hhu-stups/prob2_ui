@@ -384,8 +384,7 @@ public class LTLView extends AnchorPane{
 	
 	private void updateProject() {
 		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-				currentProject.getMachines(), currentProject.getPreferences(), currentProject.getRunconfigurations(), 
-				currentProject.getLocation()));
+				currentProject.getMachines(), currentProject.getPreferences(), currentProject.getLocation()));
 	}
 	
 	@FXML
