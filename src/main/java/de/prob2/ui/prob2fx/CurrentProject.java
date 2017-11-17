@@ -3,13 +3,11 @@ package de.prob2.ui.prob2fx;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -92,11 +90,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.machines.setAll(to.getMachines());
 				this.preferences.setAll(to.getPreferences());
 				this.location.set(to.getLocation());
-				if (!to.equals(from)) {
-					this.saved.set(false);
-					this.currentRunconfiguration.set(null);
-					this.currentMachine.set(null);
-				}
 			}
 		});
 		this.currentMachineProperty().addListener((observable, from, to) -> {
@@ -143,6 +136,12 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void removeMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.remove(machine);
+		if(machine.equals(currentMachine.get())) {
+			this.saved.set(false);
+			this.currentRunconfiguration.set(null);
+			this.currentMachine.set(null);
+			animations.removeTrace(currentTrace.get());
+		}
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
 	}
 
