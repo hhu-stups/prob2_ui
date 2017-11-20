@@ -2,7 +2,6 @@ package de.prob2.ui.preferences;
 
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -17,7 +16,6 @@ import de.prob2.ui.internal.StageManager;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
@@ -42,17 +40,11 @@ public final class PreferencesView extends BorderPane {
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
-	private final StageManager stageManager;
-	private final ResourceBundle bundle;
-	
 	private final ObjectProperty<ProBPreferences> preferences;
 	
 	@Inject
-	private PreferencesView(final StageManager stageManager, final ResourceBundle bundle) {
+	private PreferencesView(final StageManager stageManager) {
 		super();
-		
-		this.stageManager = stageManager;
-		this.bundle = bundle;
 		
 		this.preferences = new SimpleObjectProperty<>(this, "preferences", null);
 		
@@ -82,7 +74,7 @@ public final class PreferencesView extends BorderPane {
 		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
 		
 		tvValue.setCellFactory(col -> {
-			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell<>(this.stageManager, bundle);
+			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell(this.preferencesProperty());
 			cell.tableRowProperty().addListener((observable, from, to) ->
 				to.treeItemProperty().addListener((observable1, from1, to1) ->
 					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem)
@@ -100,16 +92,13 @@ public final class PreferencesView extends BorderPane {
 		tv.getRoot().setValue(new CategoryPrefTreeItem("Preferences (this should be invisible)"));
 		
 		final ChangeListener<StateSpace> updatePreferencesCL = (observable, from, to) -> this.updatePreferences();
-		final MapChangeListener<String, String> updatePreferencesMCL = change -> this.updatePreferences();
 		this.preferencesProperty().addListener((observable, from, to) -> {
 			if (from != null) {
 				from.stateSpaceProperty().removeListener(updatePreferencesCL);
-				from.getChangedPreferences().removeListener(updatePreferencesMCL);
 			}
 			
 			if (to != null) {
 				to.stateSpaceProperty().addListener(updatePreferencesCL);
-				to.getChangedPreferences().addListener(updatePreferencesMCL);
 			}
 			
 			this.updatePreferences();
