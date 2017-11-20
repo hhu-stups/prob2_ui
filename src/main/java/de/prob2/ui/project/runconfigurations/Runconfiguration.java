@@ -14,14 +14,11 @@ public class Runconfiguration {
 	public Runconfiguration(Machine machine, Preference preference) {
 		this.machine = machine;
 		this.preference = preference;
-		this.name = this.machine.getName() + "." + this.preference.getName();
+		this.name = "";
 	}
 
 	public String getName() {
-		if (machine != null && preference != null) {
-			this.name = this.machine.getName() + "." + this.preference.getName();
-		}
-		return this.name;
+		return getPreferenceName();
 	}
 
 	public Machine getMachine() {
@@ -32,12 +29,11 @@ public class Runconfiguration {
 		return preference;
 	}
 
-	public String getMachineName() {
-		return this.getName().split("\\.")[0];
-	}
-
 	public String getPreferenceName() {
-		return this.getName().split("\\.")[1];
+		if (preference != null) {
+			return this.preference.getName();
+		}
+		return this.name;
 	}
 
 	@Override

@@ -6,8 +6,8 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.runconfigurations.RunconfigurationsTab;
 
+import de.prob2.ui.project.machines.MachinesTab;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
@@ -23,7 +23,7 @@ public final class ProjectView extends AnchorPane {
 	@FXML
 	private ProjectTab projectTab;
 	@FXML
-	private RunconfigurationsTab runconfigurationsTab;
+	private MachinesTab machinesTab;
 
 	private final CurrentProject currentProject;
 	private final Injector injector;
@@ -56,9 +56,9 @@ public final class ProjectView extends AnchorPane {
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();
 	}
-	
-	public void disableRunconfigurationsTable(boolean disable) {
-		runconfigurationsTab.disableTable(disable);
+
+	public void disableMachinesTab(boolean disable){
+		machinesTab.disableMachineView(disable);
 	}
 	
 }

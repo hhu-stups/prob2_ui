@@ -20,6 +20,9 @@ import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.DefaultPreference;
+import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.plugin.ProBPluginManager;
 
@@ -119,22 +122,28 @@ public class ProB2 extends Application {
 			injector.getInstance(ProjectManager.class).openProject(new File(runtimeOptions.getProject()));
 		}
 
-		if (runtimeOptions.getRunconfig() != null) {
-			Runconfiguration found = null;
-			for (final Runconfiguration r : currentProject.getRunconfigurations()) {
-				if (r.getName().equals(runtimeOptions.getRunconfig())) {
-					found = r;
-					break;
-				}
+		if (runtimeOptions.getMachine() != null) {
+			final Machine foundMachine = currentProject.get().getMachine(runtimeOptions.getMachine());
+
+			final Preference foundPreference;
+			if (runtimeOptions.getPreference() == null) {
+				foundPreference = new DefaultPreference();
+			} else {
+				foundPreference = currentProject.get().getPreference(runtimeOptions.getPreference());
 			}
 
-			if (found == null) {
-				stageManager
-						.makeAlert(Alert.AlertType.ERROR, String.format("No runconfiguration %s exists in project %s.",
-								runtimeOptions.getRunconfig(), currentProject.getName()))
-						.show();
+			if (foundMachine == null) {
+				stageManager.makeAlert(
+					Alert.AlertType.ERROR,
+					String.format("There is no machine %s in project %s.", runtimeOptions.getMachine(), currentProject.getName())
+				).show();
+			} else if (foundPreference == null) {
+				stageManager.makeAlert(
+					Alert.AlertType.ERROR,
+					String.format("There is no preference %s in project %s.", runtimeOptions.getPreference(), currentProject.getName())
+				).show();
 			} else {
-				currentProject.startAnimation(found);
+				currentProject.startAnimation(new Runconfiguration(foundMachine, foundPreference));
 			}
 		}
 
@@ -189,10 +198,9 @@ public class ProB2 extends Application {
 		final Options options = new Options();
 
 		options.addOption(null, "project", true, "Open the specified project on startup.");
-		options.addOption(null, "runconfig", true,
-				"Run the specified run configuration on startup. Requires a project to be loaded first (using --open-project).");
-		options.addOption(null, "no-load-config", false,
-				"Do not load the user config file, use the default config instead.");
+		options.addOption(null, "machine", true, "Load the specified machine from the project on startup. Requires --project.");
+		options.addOption(null, "preference", true, "Use the specified preference set from the project when loading the machine. Requires --project and --machine.");
+		options.addOption(null, "no-load-config", false, "Do not load the user config file, use the default config instead.");
 		options.addOption(null, "no-save-config", false, "Do not save the user config file.");
 
 		final CommandLineParser clParser = new PosixParser();
@@ -209,12 +217,21 @@ public class ProB2 extends Application {
 			throw die("Positional arguments are not allowed: " + cl.getArgList(), 2);
 		}
 
-		if (cl.hasOption("runconfig") && !cl.hasOption("project")) {
-			throw die("Invalid combination of options: --runconfig requires --project", 2);
+		if (cl.hasOption("machine") && !cl.hasOption("project")) {
+			throw die("Invalid combination of options: --machine requires --project", 2);
 		}
 
-		final RuntimeOptions runtimeOpts = new RuntimeOptions(cl.getOptionValue("project"),
-				cl.getOptionValue("runconfig"), !cl.hasOption("no-load-config"), !cl.hasOption("no-save-config"));
+		if (cl.hasOption("preference") && !cl.hasOption("machine")) {
+			throw die("Invalid combination of options: --preference requires --machine", 2);
+		}
+
+		final RuntimeOptions runtimeOpts = new RuntimeOptions(
+			cl.getOptionValue("project"),
+			cl.getOptionValue("machine"),
+			cl.getOptionValue("preference"),
+			!cl.hasOption("no-load-config"), 
+			!cl.hasOption("no-save-config")
+		);
 		LOGGER.info("Created runtime options: {}", runtimeOpts);
 
 		return runtimeOpts;

@@ -1,37 +1,25 @@
 package de.prob2.ui.project;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.project.runconfigurations.Runconfiguration;
-
-import java.io.File;
-import java.util.*;
 
 public class Project {
 	private String name;
 	private String description;
 	private List<Machine> machines = new ArrayList<>();
 	private List<Preference> preferences = new ArrayList<>();
-	private Set<Runconfiguration> runconfigurations = new HashSet<>();
 	private transient File location;
-	
-	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
-			List<Runconfiguration> runconfigurations, File location) {
+
+	public Project(String name, String description, List<Machine> machines, List<Preference> preferences, File location) {
 		this.name = name;
 		this.description = description;
 		this.machines.addAll(machines);
 		this.preferences.addAll(preferences);
-		this.runconfigurations.addAll(runconfigurations);
-		this.location = location;
-	}
-	
-	public Project(String name, String description, List<Machine> machines, List<Preference> preferences,
-			Set<Runconfiguration> runconfigurations, File location) {
-		this.name = name;
-		this.description = description;
-		this.machines.addAll(machines);
-		this.preferences.addAll(preferences);
-		this.runconfigurations.addAll(runconfigurations);
 		this.location = location;
 	}
 
@@ -72,6 +60,15 @@ public class Project {
 		this.machines = machines;
 	}
 	
+	public Machine getMachine(final String name) {
+		for (final Machine machine : this.getMachines()) {
+			if (machine.getName().equals(name)) {
+				return machine;
+			}
+		}
+		return null;
+	}
+	
 	public List<Preference> getPreferences() {
 		return preferences;
 	}
@@ -80,12 +77,13 @@ public class Project {
 		this.preferences = preferences;
 	}
 	
-	public Set<Runconfiguration> getRunconfigurations() {
-		return runconfigurations;
-	}
-	
-	public void setRunconfigurations(Set<Runconfiguration> runconfigurations) {
-		this.runconfigurations = runconfigurations;
+	public Preference getPreference(final String name) {
+		for (final Preference pref : this.getPreferences()) {
+			if (pref.getName().equals(name)) {
+				return pref;
+			}
+		}
+		return null;
 	}
 	
 	public File getLocation() {
@@ -110,12 +108,11 @@ public class Project {
 				otherProject.description.equals(this.description) &&
 				otherProject.machines.equals(this.machines) &&
 				otherProject.preferences.equals(this.preferences) &&
-				otherProject.runconfigurations.equals(this.runconfigurations) &&
 				otherProject.location.equals(this.location);
 	}
 
 	@Override
 	public int hashCode() {
-		 return Objects.hash(name, description, machines, preferences, runconfigurations, location);
+		 return Objects.hash(name, description, machines, preferences, location);
 	}
 }

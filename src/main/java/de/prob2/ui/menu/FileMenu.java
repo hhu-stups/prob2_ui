@@ -123,7 +123,6 @@ public class FileMenu extends Menu {
 		currentProject.set(new Project(shortName, description, machine, projectLocation.toFile()));
 
 		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
-		currentProject.addRunconfiguration(defaultRunconfig);
 		currentProject.startAnimation(defaultRunconfig);
 	}
 

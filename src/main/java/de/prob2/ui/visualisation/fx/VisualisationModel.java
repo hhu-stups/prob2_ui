@@ -7,7 +7,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import org.codehaus.groovy.util.HashCodeHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -12,7 +12,7 @@ public class FontSizeClickTest extends GuiTest {
 
 	@Override
 	public Parent getRootNode(){
-		RuntimeOptions runtimeOptions = new RuntimeOptions(null, null, false, false);
+		RuntimeOptions runtimeOptions = new RuntimeOptions(null, null, null, false, false);
 		Injector injector = Guice.createInjector(Stage.PRODUCTION, new ProB2Module(runtimeOptions));
 		return injector.getInstance(MainController.class);
 	}

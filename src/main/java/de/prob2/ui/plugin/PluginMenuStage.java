@@ -90,7 +90,7 @@ public class PluginMenuStage extends Stage {
 				} else if (!pluginList.contains(plugin) && getProBJarPluginManager().getPlugins().contains(plugin)) {
 					TableColumn<PluginWrapper, ?> sortcolumn = null;
 					TableColumn.SortType st = null;
-					if (pluginTableView.getSortOrder().size()>0) {
+					if (!pluginTableView.getSortOrder().isEmpty()) {
 						sortcolumn = pluginTableView.getSortOrder().get(0);
 						st = sortcolumn.getSortType();
 					}
