@@ -39,6 +39,7 @@ public class VerificationsTest extends GuiTest{
 					break;
 				}
 			}
+			
 
 			if (found == null) {
 				return injector.getInstance(MainController.class);
