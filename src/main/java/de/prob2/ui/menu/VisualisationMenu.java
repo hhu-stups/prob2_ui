@@ -32,12 +32,12 @@ public class VisualisationMenu extends Menu{
 
 	private final VisualisationController visualisationController;
 	
-	private final DotView dotView;
+	//private final DotView dotView;
 
 	@Inject
-	public VisualisationMenu(final StageManager stageManager, final VisualisationController visualisationController, final DotView dotView) {
+	public VisualisationMenu(final StageManager stageManager, final VisualisationController visualisationController/*, final DotView dotView*/) {
 		this.visualisationController = visualisationController;
-		this.dotView = dotView;
+		//this.dotView = dotView;
 		stageManager.loadFXML(this, "visualisationMenu.fxml");
 	}
 
@@ -68,10 +68,10 @@ public class VisualisationMenu extends Menu{
 		visualisationController.detachVisualisation();
 	}
 	
-	@FXML
+	/*@FXML
 	private void showCurrentState() {
 		dotView.show();
-	}
+	}*/
 	
 
 }
