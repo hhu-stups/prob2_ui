@@ -30,6 +30,7 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -316,7 +317,7 @@ public class VisualisationController {
 	}
 
 	public void detachVisualisation() {
-		final Node visualisationContent = visualisationTab.getContent();
+		Node visualisationContent = visualisationTab.getContent();
 		setZeroAnchor(visualisationContent);
 		Scene visualisationScene = new Scene(new AnchorPane(visualisationContent));
 		visualizationStage = stageManager.makeStage(visualisationScene, null);
@@ -324,8 +325,12 @@ public class VisualisationController {
 		visualizationStage.setTitle(visualisation.get().getName());
 		visualizationStage.setOnCloseRequest(event -> {
 			if (visualisation.isNotNull().get()) {
-				visualisationTab.setContent(visualisationContent);
-				visualisationTab.getTabPane().getSelectionModel().select(visualisationTab);
+				Parent rootPane = visualizationStage.getScene().getRoot();
+				ObservableList<Node> rootChildren = rootPane.getChildrenUnmodifiable();
+				if (rootChildren.size() == 1) {
+					visualisationTab.setContent(rootChildren.get(0));
+					visualisationTab.getTabPane().getSelectionModel().select(visualisationTab);
+				}
 			}
 			detached.set(false);
 			visualizationStage = null;
@@ -336,6 +341,7 @@ public class VisualisationController {
 	}
 
 	private void setVisualisationContent(Node visualisationContent) {
+
 		if (detached.get()) {
 			Parent parent  = visualizationStage.getScene().getRoot();
 			AnchorPane pane = (parent != null) ? (AnchorPane) parent : new AnchorPane();
