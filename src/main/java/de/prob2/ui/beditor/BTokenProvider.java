@@ -36,7 +36,7 @@ public class BTokenProvider {
 			addTokens("b-assignment-logical", TAssign.class, TOutputParameters.class, TDoubleVerticalBar.class, TAssert.class,
 					TClosure.class, TClosure1.class, TConjunction.class, TDirectProduct.class, TDivision.class, TEmptySet.class, TDoubleColon.class,
 					TDoubleEqual.class, TEqual.class, TElementOf.class, TEquivalence.class, TGreaterEqual.class, TLessEqual.class, TNotEqual.class,
-					TGreater.class, TLess.class, TImplies.class, TLogicalOr.class, TInterval.class, TUnion.class, TOr.class, TNonInclusion.class,
+					TGreater.class, TLess.class, TImplies.class, TLogicalOr.class, TInterval.class, TUnion.class, TIntersection.class, TOr.class, TNonInclusion.class,
 					TTotalBijection.class, TTotalFunction.class, TTotalInjection.class, TTotalRelation.class, TTotalSurjection.class,
 					TTotalSurjectionRelation.class, TPartialBijection.class, TPartialFunction.class, TPartialInjection.class, TPartialSurjection.class, TSetRelation.class,
 					TFin.class, TFin1.class, TPerm.class, TSeq.class, TSeq1.class, TIseq.class,
@@ -92,21 +92,22 @@ public class BTokenProvider {
 		firstLineTokens.clear();
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
 		int currentLine = Integer.parseInt(line);
-		try {
-			Token t;
-			do {
+		Token t = null;
+		
+		do {
+			try {
 				t = lexer.next();
-				if (!"\n".equals(t.getText())) {
-					if(t.getLine() == currentLine) {
-						firstLineTokens.add(t);
-					} else  if (t.getLine() - 1 >= currentLine) {
-						tokens.add(t);
-					}
+			} catch (LexerException | IOException e) {
+				LOGGER.error("Failed to lex", e);
+			}
+			if (!"\n".equals(t.getText()) ) {
+				if(t.getLine() == currentLine && !(t instanceof TWhiteSpace)) {
+					firstLineTokens.add(t);
+				} else  if (t.getLine() - 1 >= currentLine) {
+					tokens.add(t);
 				}
-			} while (!(t instanceof EOF));
-		} catch (LexerException | IOException e) {
-			LOGGER.error("Failed to lex", e);
-		}
+			}
+		} while (!(t instanceof EOF));
 		if (!initialized.get()) {
 			this.text = text;
 			initialized.set(true);

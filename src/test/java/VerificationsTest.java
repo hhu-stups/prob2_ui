@@ -10,7 +10,7 @@ import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-
+import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 
@@ -31,6 +31,7 @@ public class VerificationsTest extends GuiTest{
 		RuntimeOptions runtimeOptions = new RuntimeOptions("src/test/resources/Lift/Lift0.json", "lift0", "default", false, false);
 		Injector injector = Guice.createInjector(Stage.PRODUCTION, new ProB2Module(runtimeOptions));
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
+
 		injector.getInstance(ProjectManager.class).openProject(new File(runtimeOptions.getProject()));
 		currentProject.startAnimation(new Runconfiguration(
 			currentProject.get().getMachine(runtimeOptions.getMachine()),

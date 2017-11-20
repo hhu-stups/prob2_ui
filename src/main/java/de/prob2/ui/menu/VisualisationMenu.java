@@ -2,6 +2,8 @@ package de.prob2.ui.menu;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import de.prob2.ui.dotty.DotView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.fx.VisualisationController;
 import javafx.fxml.FXML;
@@ -29,10 +31,13 @@ public class VisualisationMenu extends Menu{
 	private MenuItem detachVisualisationItem;
 
 	private final VisualisationController visualisationController;
+	
+	private final DotView dotView;
 
 	@Inject
-	public VisualisationMenu(final StageManager stageManager, final VisualisationController visualisationController) {
+	public VisualisationMenu(final StageManager stageManager, final VisualisationController visualisationController, final DotView dotView) {
 		this.visualisationController = visualisationController;
+		this.dotView = dotView;
 		stageManager.loadFXML(this, "visualisationMenu.fxml");
 	}
 
@@ -57,9 +62,16 @@ public class VisualisationMenu extends Menu{
 		visualisationController.openVisualisation();
 	}
 
-	@FXML void detachVisualisation() {
+	@FXML 
+	void detachVisualisation() {
 		LOGGER.debug("Detach menu-item called.");
 		visualisationController.detachVisualisation();
 	}
+	
+	@FXML
+	private void showCurrentState() {
+		dotView.show();
+	}
+	
 
 }
