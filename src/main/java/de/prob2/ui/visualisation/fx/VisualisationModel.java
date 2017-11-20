@@ -1,25 +1,21 @@
 package de.prob2.ui.visualisation.fx;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 import de.prob.animator.domainobjects.*;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-
-import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
-import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-
+import org.codehaus.groovy.util.HashCodeHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 /**
  * @author Christoph Heinzen
@@ -54,26 +50,14 @@ public class VisualisationModel {
 		this.oldTrace = oldTrace;
 		this.newTrace = newTrace;
 		if (oldTrace != null) {
-			/*Map<IEvalElement, AbstractEvalResult> oldValues = oldTrace.getCurrentState().getValues();
-			oldStringToResult = oldValues.keySet().stream()
-					.filter(element -> element instanceof EventB)
-					.map(element -> (EventB) element)
-					.filter(eventB -> oldValues.get(eventB) instanceof EvalResult)
-					.collect(Collectors.toMap(EventB::toString, eventB -> (EvalResult) oldValues.get(eventB)));*/
 			oldStringToResult = translateValuesMap( oldTrace.getCurrentState().getValues());
 		} else {
-			oldStringToResult = null;
+			oldStringToResult = new HashMap<>();
 		}
 		if (newTrace != null) {
-			/*Map<IEvalElement, AbstractEvalResult> newValues = newTrace.getCurrentState().getValues();
-			newStringToResult = newValues.keySet().stream()
-					.filter(element -> element instanceof EventB)
-					.map(element -> (EventB) element)
-					.filter(eventB -> newValues.get(eventB) instanceof EvalResult)
-					.collect(Collectors.toMap(EventB::toString, eventB -> (EvalResult) newValues.get(eventB)));*/
 			newStringToResult = translateValuesMap( newTrace.getCurrentState().getValues());
 		} else {
-			newStringToResult = null;
+			newStringToResult = new HashMap<>();
 		}
 	}
 
@@ -86,7 +70,7 @@ public class VisualisationModel {
 		LOGGER.debug("Look up if the formula \"{}\" has changed its value.", formula);
 		if (oldTrace == null) {
 			LOGGER.debug("The old trace is null, so the value of formula \"{}\" has changed.", formula);
-			return true;
+			return newTrace != null;
 		}
 
 		EvalResult oldValue;
@@ -120,8 +104,8 @@ public class VisualisationModel {
 		LOGGER.debug("The value of formula \"{}\" could be evaluated for the new and the old trace.", formula);
 		if ((oldValue.getValue().equals(newValue.getValue()) && newValueFromMap && oldValueFromMap) ||
 				(newValueFromMap ^ oldValueFromMap)) {
-			/*first case: if the new and the oldValue are both from the maps and equal, it could be that they are only
-						  equal because there short representation is equal and their expanded may be unequal
+			/*first case: if the new and the oldValue are both from the maps and equal, it could happen that they are only
+						  equal because their short representations are equal and their expanded may be unequal
 			  second case: if only one value is from a map and the other one is evaluated, we would compare a short
 			               representation to an expanded one*/
 			oldValue = evalState(oldTrace.getCurrentState(), formula);
