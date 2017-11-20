@@ -9,13 +9,12 @@ import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.prolog.term.ListPrologTerm;
-import de.prob.statespace.StateSpace;
 
 import de.prob2.ui.internal.StageManager;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
@@ -41,12 +40,14 @@ public final class PreferencesView extends BorderPane {
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
 	private final ObjectProperty<ProBPreferences> preferences;
+	private final InvalidationListener refreshIL;
 	
 	@Inject
 	private PreferencesView(final StageManager stageManager) {
 		super();
 		
 		this.preferences = new SimpleObjectProperty<>(this, "preferences", null);
+		this.refreshIL = o -> this.refresh();
 		
 		stageManager.loadFXML(this, "preferences_view.fxml");
 	}
@@ -65,7 +66,7 @@ public final class PreferencesView extends BorderPane {
 	
 	@FXML
 	private void initialize() {
-		this.prefSearchField.textProperty().addListener(observable -> this.updatePreferences());
+		this.prefSearchField.textProperty().addListener(observable -> this.refresh());
 		
 		this.tv.getSelectionModel().clearSelection();
 		
@@ -91,21 +92,20 @@ public final class PreferencesView extends BorderPane {
 		
 		tv.getRoot().setValue(new CategoryPrefTreeItem("Preferences (this should be invisible)"));
 		
-		final ChangeListener<StateSpace> updatePreferencesCL = (observable, from, to) -> this.updatePreferences();
 		this.preferencesProperty().addListener((observable, from, to) -> {
 			if (from != null) {
-				from.stateSpaceProperty().removeListener(updatePreferencesCL);
+				from.stateSpaceProperty().removeListener(this.refreshIL);
 			}
 			
 			if (to != null) {
-				to.stateSpaceProperty().addListener(updatePreferencesCL);
+				to.stateSpaceProperty().addListener(this.refreshIL);
 			}
 			
-			this.updatePreferences();
+			this.refresh();
 		});
 	}
 	
-	private void updatePreferences() {
+	public void refresh() {
 		if (!this.getPreferences().hasStateSpace()) {
 			this.tv.getRoot().getChildren().clear();
 			return;

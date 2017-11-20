@@ -171,6 +171,7 @@ public final class PreferencesStage extends Stage {
 	@FXML
 	private void handleUndoChanges() {
 		this.globalProBPrefs.rollback();
+		this.globalPrefsView.refresh();
 	}
 	
 	@FXML
@@ -178,6 +179,7 @@ public final class PreferencesStage extends Stage {
 		for (ProBPreference pref : this.globalProBPrefs.getPreferences().values()) {
 			this.globalProBPrefs.setPreferenceValue(pref.name, pref.defaultValue);
 		}
+		this.globalPrefsView.refresh();
 	}
 	
 	@FXML
