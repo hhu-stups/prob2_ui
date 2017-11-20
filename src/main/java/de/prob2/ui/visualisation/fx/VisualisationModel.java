@@ -1,7 +1,6 @@
 package de.prob2.ui.visualisation.fx;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -10,11 +9,9 @@ import de.prob.animator.domainobjects.*;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 
-import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
-import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 

@@ -2,7 +2,6 @@ package de.prob2.ui.project;
 
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.project.runconfigurations.Runconfiguration;
 
 import java.io.File;
 import java.util.*;
