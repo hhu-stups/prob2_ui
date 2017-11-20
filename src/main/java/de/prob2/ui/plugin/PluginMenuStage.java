@@ -124,7 +124,6 @@ public class PluginMenuStage extends Stage {
 		pluginSortedFilteredList.comparatorProperty().bind(pluginTableView.comparatorProperty());
 		pluginTableView.setItems(pluginSortedFilteredList);
 		pluginTableView.getSortOrder().add(nameCol);
-		nameCol.setSortType(TableColumn.SortType.ASCENDING);
 		nameCol.setSortable(true);// This performs a sort
 	}
 
