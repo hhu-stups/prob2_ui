@@ -1,10 +1,12 @@
 package de.prob2.ui.project;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-
-import java.io.File;
-import java.util.*;
 
 public class Project {
 	private String name;
@@ -58,12 +60,30 @@ public class Project {
 		this.machines = machines;
 	}
 	
+	public Machine getMachine(final String name) {
+		for (final Machine machine : this.getMachines()) {
+			if (machine.getName().equals(name)) {
+				return machine;
+			}
+		}
+		return null;
+	}
+	
 	public List<Preference> getPreferences() {
 		return preferences;
 	}
 
 	public void setPreferences(List<Preference> preferences) {
 		this.preferences = preferences;
+	}
+	
+	public Preference getPreference(final String name) {
+		for (final Preference pref : this.getPreferences()) {
+			if (pref.getName().equals(name)) {
+				return pref;
+			}
+		}
+		return null;
 	}
 	
 	public File getLocation() {
