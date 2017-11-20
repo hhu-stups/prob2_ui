@@ -15,7 +15,7 @@ public class NewProjectTest extends GuiTest{
 
 	@Override
 	public Parent getRootNode(){
-		RuntimeOptions runtimeOptions = new RuntimeOptions(null, null, false, false);
+		RuntimeOptions runtimeOptions = new RuntimeOptions(null, null, null, false, false);
 		if(mainStage) {
 			Injector injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, new ProB2Module(runtimeOptions));
 			return injector.getInstance(MainController.class);
