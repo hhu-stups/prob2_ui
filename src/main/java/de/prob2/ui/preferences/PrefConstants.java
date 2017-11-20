@@ -1,8 +1,10 @@
 package de.prob2.ui.preferences;
 
-import javafx.scene.paint.Color;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.*;
+import javafx.scene.paint.Color;
 
 final class PrefConstants {
 	// Valid values for named list-like types.
@@ -52,18 +54,6 @@ final class PrefConstants {
 			"windows 1252",
 		});
 		VALID_TYPE_VALUES = Collections.unmodifiableMap(validTypeValues);
-	}
-	
-	// Value types that are always editable, such as bool (CheckBox) or [] (ComboBox).
-	static final Set<String> ALWAYS_EDITABLE;
-	
-	static {
-		final Set<String> alwaysEditable = new HashSet<>();
-		alwaysEditable.add("bool");
-		alwaysEditable.add("rgb_color");
-		alwaysEditable.add("[]");
-		alwaysEditable.addAll(VALID_TYPE_VALUES.keySet());
-		ALWAYS_EDITABLE = Collections.unmodifiableSet(alwaysEditable);
 	}
 	
 	// Color values for the subset of Tk colors allowed by ProB.
