@@ -5,6 +5,7 @@ import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
@@ -194,9 +195,27 @@ public class VisualisationModel {
 	 * Tries to randomly execute the given number of events.
 	 *
 	 * @param number Number of events
+	 * @param time time in millis between two event-executions
+	 * @param stopOnInvariantViolation indicates if further events should be executed when an invariant is violated
 	 */
-	public void executeRandomEvents(int number) {
-		currentTrace.set(currentTrace.get().randomAnimation(number));
+	public void executeRandomEvents(int number, long time, boolean stopOnInvariantViolation) {
+		Task<Void> task = new Task<Void>() {
+			@Override
+			protected Void call() throws Exception {
+				boolean outgoingTransitions = true;
+				boolean invariantViolated = false;
+				for (int i = 0; i <  number && outgoingTransitions && !invariantViolated; i++) {
+					currentTrace.set(currentTrace.get().randomAnimation(1));
+					outgoingTransitions = currentTrace.getCurrentState().getOutTransitions().size() > 0;
+					if (stopOnInvariantViolation) {
+						invariantViolated = !currentTrace.getCurrentState().isInvariantOk();
+					}
+					Thread.sleep(time);
+				}
+				return null;
+			}
+		};
+		new Thread(task).start();
 	}
 
 	private Map<String, EvalResult> translateValuesMap(Map<IEvalElement, AbstractEvalResult> values) {
