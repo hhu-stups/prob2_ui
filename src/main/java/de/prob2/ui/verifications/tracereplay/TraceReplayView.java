@@ -9,6 +9,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -43,6 +44,8 @@ public class TraceReplayView extends ScrollPane {
 	private Button cancelButton;
 	@FXML
 	private Button loadTraceButton;
+	@FXML
+	private HelpButton helpButton;
 
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
@@ -63,6 +66,7 @@ public class TraceReplayView extends ScrollPane {
 
 	@FXML
 	private void initialize() {
+		helpButton.setHelpContent("Verification.md.html");
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("statusIcon"));
 		statusColumn.setStyle("-fx-alignment: CENTER;");
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
