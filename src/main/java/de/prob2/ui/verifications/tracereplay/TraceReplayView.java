@@ -98,8 +98,12 @@ public class TraceReplayView extends ScrollPane {
 			showErrorItem.setOnAction(event -> stageManager
 					.makeExceptionAlert(AlertType.ERROR, "", row.getItem().getTrace().getError()).showAndWait());
 			showErrorItem.setDisable(true);
+			
+			final MenuItem deleteTraceItem = new MenuItem(
+					bundle.getString("verifications.tracereplay.contextMenu.deleteTrace"));
+			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
 
-			final ContextMenu menu = new ContextMenu(replayTraceItem, showErrorItem);
+			final ContextMenu menu = new ContextMenu(replayTraceItem, showErrorItem,deleteTraceItem);
 			row.setContextMenu(menu);
 
 			row.itemProperty().addListener((o,f,t) -> {
