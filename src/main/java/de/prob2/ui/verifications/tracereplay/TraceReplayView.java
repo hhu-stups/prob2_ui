@@ -77,15 +77,14 @@ public class TraceReplayView extends ScrollPane {
 		});
 
 		this.traceTableView.setRowFactory(param -> {
-			final ContextMenu menu = new ContextMenu();
 			final TableRow<ReplayTraceItem> row = new TableRow<>();
+			
+			final MenuItem replayTraceItem = new MenuItem(bundle.getString("verifications.tracereplay.contextMenu.replayTrace"));
+			replayTraceItem.setOnAction(event -> this.traceChecker.replayTrace(row.getItem().getLocation(), true));
+			
+			final ContextMenu menu = new ContextMenu(replayTraceItem);
 			row.setContextMenu(menu);
-			//
-			final MenuItem item = new MenuItem("Replay Trace"); // TODO: i18n
-			menu.getItems().add(item);
-			//
-			item.setOnAction(event -> this.traceChecker.replayTrace(row.getItem().getLocation(), true));
-			//
+			
 			row.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 					this.traceChecker.replayTrace(row.getItem().getLocation(), true);
