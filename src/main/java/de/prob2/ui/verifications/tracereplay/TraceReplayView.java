@@ -15,6 +15,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -76,15 +77,51 @@ public class TraceReplayView extends ScrollPane {
 			}
 		});
 
+		initTableRows();	
+
+	currentProject.currentMachineProperty().addListener((observable,from,to)->loadTraceButton.setDisable(to==null));traceChecker.currentJobThreadsProperty().addListener((observable,from,to)->cancelButton.setDisable(to.isEmpty()));traceTableView.itemsProperty().get().addListener((ListChangeListener<ReplayTraceItem>)c->checkButton.setDisable(c.getList().isEmpty()));
+
+	bindIconSizeToFontSize();
+
+	}
+
+	private void initTableRows() {
 		this.traceTableView.setRowFactory(param -> {
 			final TableRow<ReplayTraceItem> row = new TableRow<>();
-			
-			final MenuItem replayTraceItem = new MenuItem(bundle.getString("verifications.tracereplay.contextMenu.replayTrace"));
+
+			final MenuItem replayTraceItem = new MenuItem(
+					bundle.getString("verifications.tracereplay.contextMenu.replayTrace"));
 			replayTraceItem.setOnAction(event -> this.traceChecker.replayTrace(row.getItem().getLocation(), true));
+
+			final MenuItem showErrorItem = new MenuItem(
+					bundle.getString("verifications.tracereplay.contextMenu.showError"));
+			showErrorItem.setOnAction(event -> stageManager
+					.makeExceptionAlert(AlertType.ERROR, "", row.getItem().getTrace().getError()).showAndWait());
+			showErrorItem.setDisable(true);
 			
-			final ContextMenu menu = new ContextMenu(replayTraceItem);
+			final MenuItem deleteTraceItem = new MenuItem(
+					bundle.getString("verifications.tracereplay.contextMenu.deleteTrace"));
+			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
+
+			final ContextMenu menu = new ContextMenu(replayTraceItem, showErrorItem,deleteTraceItem);
 			row.setContextMenu(menu);
-			
+
+			row.itemProperty().addListener((o,f,t) -> {
+				if(t == null) {
+					return;
+				}
+				t.getTrace().getStatus().addListener((observable, from, to) -> {
+					switch (to) {
+					case FAILED:
+						showErrorItem.setDisable(false);
+						break;
+					default:
+						showErrorItem.setDisable(true);
+						break;
+					}
+				});
+			});
+
 			row.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 					this.traceChecker.replayTrace(row.getItem().getLocation(), true);
@@ -92,15 +129,6 @@ public class TraceReplayView extends ScrollPane {
 			});
 			return row;
 		});
-
-		currentProject.currentMachineProperty()
-				.addListener((observable, from, to) -> loadTraceButton.setDisable(to == null));
-		traceChecker.currentJobThreadsProperty()
-				.addListener((observable, from, to) -> cancelButton.setDisable(to.isEmpty()));
-		traceTableView.itemsProperty().get()
-				.addListener((ListChangeListener<ReplayTraceItem>) c -> checkButton.setDisable(c.getList().isEmpty()));
-
-		bindIconSizeToFontSize();
 	}
 
 	@FXML
