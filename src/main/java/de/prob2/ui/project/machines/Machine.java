@@ -88,7 +88,7 @@ public class Machine {
 	
 	protected transient FontAwesomeIconView ltlstatus;
 	protected transient FontAwesomeIconView symboliccheckingstatus;
-	protected transient FontAwesomeIconView modelcheckingstatus;
+	protected transient FontAwesomeIconView modelcheckstatus;
 	private String name;
 	private String description;
 	private String location;
@@ -104,6 +104,7 @@ public class Machine {
 	public Machine(String name, String description, Path location, Machine.Type type) {
 		initializeLTLStatus();
 		initializeSymbolicCheckingStatus();
+		initializeModelcheckingStatus();
 		this.name = name;
 		this.description = description;
 		this.location = location.toString();
@@ -170,8 +171,8 @@ public class Machine {
 	}
 	
 	public void initializeModelcheckingStatus() {
-		this.modelcheckingstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
-		this.modelcheckingstatus.setFill(Color.BLUE);
+		this.modelcheckstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		this.modelcheckstatus.setFill(Color.BLUE);
 		if (modelcheckingItems != null) {
 			for (ModelCheckingItem item : modelcheckingItems) {
 				item.initializeStatus();
@@ -188,7 +189,7 @@ public class Machine {
 	}
 	
 	public FontAwesomeIconView getModelcheckStatus() {
-		return modelcheckingstatus;
+		return modelcheckstatus;
 	}
 	
 	
@@ -237,13 +238,13 @@ public class Machine {
 	public void setModelcheckingCheckedSuccessful() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
 		icon.setFill(Color.GREEN);
-		this.modelcheckingstatus = icon;
+		this.modelcheckstatus = icon;
 	}
 
 	public void setModelcheckingCheckedFailed() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
 		icon.setFill(Color.RED);
-		this.modelcheckingstatus = icon;
+		this.modelcheckstatus = icon;
 	}
 		
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {

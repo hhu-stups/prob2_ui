@@ -119,11 +119,11 @@ public class MachineLoader {
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
 			try {
+				injector.getInstance(ProjectView.class).disableMachinesTab(true);
 				setLoadingStatus(StatusBar.LoadingStatus.REMOVING_OLD_ANIMATION);
 				if (currentTrace.exists()) {
 					this.animations.removeTrace(currentTrace.get());
 				}
-				injector.getInstance(ProjectView.class).disableRunconfigurationsTable(true);
 
 				setLoadingStatus(StatusBar.LoadingStatus.LOADING_FILE);
 				final Path path = getPathToMachine(machine);
@@ -134,7 +134,7 @@ public class MachineLoader {
 
 				setLoadingStatus(StatusBar.LoadingStatus.ADDING_ANIMATION);
 				this.animations.addNewAnimation(new Trace(stateSpace));
-				injector.getInstance(ProjectView.class).disableRunconfigurationsTable(false);
+				injector.getInstance(ProjectView.class).disableMachinesTab(false);
 			} finally {
 				setLoadingStatus(StatusBar.LoadingStatus.NOT_LOADING);
 			}

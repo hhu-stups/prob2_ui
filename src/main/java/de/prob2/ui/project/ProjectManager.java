@@ -11,13 +11,9 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 import org.hildan.fxgson.FxGson;
 import org.slf4j.Logger;
@@ -31,9 +27,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -76,7 +70,7 @@ public class ProjectManager {
 	public void saveCurrentProject() {
 		Project project = currentProject.get();
 		currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(),
-				project.getPreferences(), project.getRunconfigurations(), project.getLocation()));
+				project.getPreferences(), project.getLocation()));
 		File savedFile = saveProject(project);
 		if (savedFile != null) {
 			addToRecentProjects(savedFile);
@@ -115,7 +109,6 @@ public class ProjectManager {
 		Project project = loadProject(file);
 		if(project != null) {
 			replaceMissingWithDefaults(project);
-			setupRunconfigurations(project);
 			initializeLTL(project);
 			currentProject.set(project);
 			addToRecentProjects(file);
@@ -150,23 +143,6 @@ public class ProjectManager {
 			}
 		}
 		project.setPreferences(prefList);
-		project.setRunconfigurations(
-				(project.getRunconfigurations() == null) ? new HashSet<>() : project.getRunconfigurations());
-	}
-
-	private void setupRunconfigurations(Project project) {
-		Set<Runconfiguration> newRunconfigs = new HashSet<>();
-		Map<String, Machine> machinesMap = getMachinesAsMap(project);
-		Map<String, Preference> prefsMap = getPreferencesAsMap(project);
-		for (Runconfiguration runconfig : project.getRunconfigurations()) {
-			Machine m = machinesMap.get(runconfig.getMachineName());
-			Preference p = prefsMap.get(runconfig.getPreferenceName());
-			if (p == null) {
-				p = new DefaultPreference();
-			}
-			newRunconfigs.add(new Runconfiguration(m, p));
-		}
-		project.setRunconfigurations(newRunconfigs);
 	}
 
 	private void initializeLTL(Project project) {
@@ -174,21 +150,5 @@ public class ProjectManager {
 			machine.initializeLTLStatus();
 			machine.initializeSymbolicCheckingStatus();
 		}
-	}
-
-	private Map<String, Preference> getPreferencesAsMap(Project project) {
-		Map<String, Preference> prefsMap = new HashMap<>();
-		for (Preference p : project.getPreferences()) {
-			prefsMap.put(p.getName(), p);
-		}
-		return prefsMap;
-	}
-
-	private Map<String, Machine> getMachinesAsMap(Project project) {
-		Map<String, Machine> machinesMap = new HashMap<>();
-		for (Machine m : project.getMachines()) {
-			machinesMap.put(m.getName(), m);
-		}
-		return machinesMap;
 	}
 }
