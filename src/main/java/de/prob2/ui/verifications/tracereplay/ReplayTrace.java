@@ -13,6 +13,7 @@ public class ReplayTrace {
 
 	private transient ObjectProperty<Status> status;
 	private final  List<ReplayTransition> transitionList = new ArrayList<>();
+	private Exception error;
 
 	public ReplayTrace(Trace trace) {
 		for(Transition t: trace.getTransitionList()) {
@@ -29,10 +30,21 @@ public class ReplayTrace {
 		if(this.status == null) {
 			this.status = new SimpleObjectProperty<>();
 		}
+		if(!status.equals(Status.FAILED)) {
+			this.error = null;
+		}
 		this.status.set(status);
+	}
+	
+	public void setError(Exception e) {
+		this.error = e;
 	}
 	
 	public ObjectProperty<Status> getStatus() {
 		return status;
+	}
+	
+	public Exception getError() {
+		return error;
 	}
 }
