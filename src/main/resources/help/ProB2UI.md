@@ -1,4 +1,5 @@
 # The ProB2 JavaFX Main Window
+
 By default the main window is split into three vertical panes (see below).
 
 * In the left pane, the Operations view , showing the operations whose preconditions and guards are true in this state (the view also uses a blue circular arrow icon when an operation does not change the state);
@@ -15,6 +16,7 @@ By default the main window is split into three vertical panes (see below).
 ![ProB2 JavaFX UI Overview](screenshots/Overview.png)
 
 # The ProB2 JavaFX Main Menu Bar
+
 The menu bar contains the various commands to access the features of ProB. It includes the menus
 * File,
 * Edit,

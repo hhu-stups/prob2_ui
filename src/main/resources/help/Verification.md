@@ -1,4 +1,5 @@
 # Verification View
+
 The Verification View provides 4 different methods to test a machine:
 
 * Modelchecking,
@@ -7,6 +8,7 @@ The Verification View provides 4 different methods to test a machine:
 * Trace Replay
 
 In each tab you can add multiple tests to check you currently selected machine and interrupt the checking process by pressing the "Cancel" button.
+
 ## Modelchecking
 
 ![Modelchecking](screenshots/Verifications/Modelchecking.png)
