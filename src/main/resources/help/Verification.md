@@ -1,4 +1,5 @@
-The Verification View provides 3 different methods to test a machine:
+# Verification View
+The Verification View provides 4 different methods to test a machine:
 
 * Modelchecking,
 * LTL Verifications,
