@@ -33,7 +33,7 @@
 				<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
 					<Button fx:id="loadTraceButton" onAction="#loadTraceFromFile" mnemonicParsing="false" disable="true">
 						<graphic>
-							<FontAwesomeIconView styleClass="icon-dark" glyphName="UPLOAD"
+							<FontAwesomeIconView styleClass="icon-dark" glyphName="DOWNLOAD"
 								size="15" />
 						</graphic>
 						<tooltip>
