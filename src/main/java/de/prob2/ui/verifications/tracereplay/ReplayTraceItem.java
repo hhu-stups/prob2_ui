@@ -14,10 +14,12 @@ public class ReplayTraceItem {
 	private ObjectProperty<FontAwesomeIconView> statusIcon;
 	private final String name;
 	private final File location;
+	private final ReplayTrace trace;
 
 	public ReplayTraceItem(ReplayTrace trace, File traceFile) {
 		this.name = traceFile.getName();
 		this.location = traceFile;
+		this.trace = trace;
 		this.statusIcon = new SimpleObjectProperty<>();
 		this.setStatus(trace.getStatus().get());
 		trace.getStatus().addListener((observable, from, to) -> setStatus(to));
@@ -56,5 +58,9 @@ public class ReplayTraceItem {
 	
 	public File getLocation() {
 		return location;
+	}
+	
+	public ReplayTrace getTrace() {
+		return trace;
 	}
 }
