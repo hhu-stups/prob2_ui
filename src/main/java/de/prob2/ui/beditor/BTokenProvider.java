@@ -91,23 +91,27 @@ public class BTokenProvider {
 		tokens.clear();
 		firstLineTokens.clear();
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
-		int currentLine = Integer.parseInt(line);
+		int beginLine = Integer.parseInt(line);
 		Token t = null;
-		
+		System.out.println("--------------------------------");
 		do {
 			try {
 				t = lexer.next();
 			} catch (LexerException | IOException e) {
 				LOGGER.error("Failed to lex", e);
 			}
-			if (!"\n".equals(t.getText()) ) {
-				if(t.getLine() == currentLine && !(t instanceof TWhiteSpace)) {
+
+			if (!"\n".equals(t.getText())) {
+				if(t.getLine() == beginLine) {
+					System.out.println(t.getClass());
 					firstLineTokens.add(t);
-				} else  if (t.getLine() - 1 >= currentLine) {
+				} else  if (t.getLine() > beginLine) {
+					System.out.println(t.getClass());
 					tokens.add(t);
 				}
 			}
 		} while (!(t instanceof EOF));
+		firstLineTokens.addAll(tokens);
 		if (!initialized.get()) {
 			this.text = text;
 			initialized.set(true);
@@ -115,7 +119,11 @@ public class BTokenProvider {
 	}
 
 	public Token poll() {
-		return tokens.poll();
+		Token t = tokens.poll();
+		if(t != null) {
+			System.out.println("POLL: " + t.getClass());
+		}
+		return t;
 	}
 	
 	public Token peek() {
@@ -127,8 +135,11 @@ public class BTokenProvider {
 	}
 	
 	public Token firstLinePoll() {
-		return firstLineTokens.poll();
+		Token t = firstLineTokens.poll();
+		System.out.println("POLL: " + t.getClass());
+		return t;
 	}
+	
 	
 	public String getStyleClassFromToken(Token t) {
 		String clazz = syntaxClasses.get(t.getClass());

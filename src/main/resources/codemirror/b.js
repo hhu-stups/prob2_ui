@@ -20,19 +20,19 @@ CodeMirror.defineMode("b", function() {
 			if (state.comment) {
 				stream.next();
 				return 'b-comment';
-			} else {
+			} else if(blexer !== null) {				
 				var t = blexer.peek();
-
 				if(t !== null) {
 					if(stream.match(t.getText(), true)) {
 						blexer.poll();	
 						return blexer.getStyleClassFromToken(t);
 					} else {
 						t = blexer.firstLinePeek();
+
 						if (t !== null && stream.match(t.getText(), true)) {
 							blexer.firstLinePoll();
 							return blexer.getStyleClassFromToken(t);
-						}
+						} 
 					}
 				}
 				stream.next();
