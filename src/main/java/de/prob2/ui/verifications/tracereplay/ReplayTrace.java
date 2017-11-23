@@ -11,7 +11,7 @@ import javafx.beans.property.SimpleObjectProperty;
 public class ReplayTrace {
 	enum Status {SUCCESSFUL, FAILED, NOT_CHECKED}
 
-	private transient ObjectProperty<Status> status;
+	private ObjectProperty<Status> status;
 	private final  List<ReplayTransition> transitionList = new ArrayList<>();
 	private Exception error;
 
