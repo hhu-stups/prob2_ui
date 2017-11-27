@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.ProBError;
 
 import de.prob2.ui.layout.FontSize;
@@ -308,7 +309,9 @@ public final class StageManager {
 
 		if (exc instanceof ProBError && ((ProBError) exc).getErrors() != null) {
 			final ListView<String> errorsListView = new ListView<>();
-			errorsListView.getItems().setAll(((ProBError) exc).getErrors());
+			for (final ErrorItem error : ((ProBError)exc).getErrors()) {
+				errorsListView.getItems().add(error.toString());
+			}
 			errorsListView.setPrefSize(480, 160);
 			alert.getDialogPane().setContent(new VBox(new Label(alert.getContentText()), errorsListView));
 		}
