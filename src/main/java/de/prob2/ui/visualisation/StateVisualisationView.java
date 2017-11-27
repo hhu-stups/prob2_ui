@@ -53,7 +53,7 @@ public class StateVisualisationView extends AnchorPane {
 	public void visualiseState(State state) throws FileNotFoundException {
 		visualisationGridPane.getChildren().clear();
 		visualisationPossible.set(false);
-		if (state == null || !state.isInitialised() || currentProject.getCurrentRunconfiguration() == null) {
+		if (state == null || !state.isInitialised() || currentProject.getCurrentMachine() == null) {
 			return;
 		}
 		StateSpace stateSpace = state.getStateSpace();
@@ -136,7 +136,7 @@ public class StateVisualisationView extends AnchorPane {
 	private Image getImage(String imageURL) throws FileNotFoundException {
 		final Path projectFolder = Paths.get(currentProject.get().getLocation().getPath());
 		// look in machine folder
-		final Path machineFile = currentProject.getCurrentRunconfiguration().getMachine().getPath();
+		final Path machineFile = currentProject.getCurrentMachine().getPath();
 		final Path machineFolder = projectFolder.resolve(machineFile).getParent();
 		File imagePath = machineFolder.resolve(imageURL).toFile();
 		final File imageInMachineFolder = imagePath;

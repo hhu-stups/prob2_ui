@@ -4,7 +4,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -19,7 +18,6 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.project.verifications.MachineTableView;
 
 import javafx.beans.binding.Bindings;
@@ -45,8 +43,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final StringProperty description;
 	private final ListProperty<Machine> machines;
 	private final ListProperty<Preference> preferences;
-	private final ObjectProperty<Runconfiguration> currentRunconfiguration;
 	private final ObjectProperty<Machine> currentMachine;
+	private final ObjectProperty<Preference> currentPreference;
 
 	private final ObjectProperty<File> location;
 	private final BooleanProperty saved;
@@ -75,8 +73,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.description = new SimpleStringProperty(this, "description", "");
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
 		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
-		this.currentRunconfiguration = new SimpleObjectProperty<>(this, "currentRunconfiguration", null);
 		this.currentMachine = new SimpleObjectProperty<>(this, "currentMachine", null);
+		this.currentPreference = new SimpleObjectProperty<>(this, "currentPreference", null);
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
 
@@ -106,21 +104,15 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.preferences.clear();
 		this.location.set(null);
 		this.saved.set(true);
-		this.currentRunconfiguration.set(null);
 		this.currentMachine.set(null);
+		this.currentPreference.set(null);
 	}
 
-	public void startAnimation(Runconfiguration runconfiguration) {
-		Machine m = runconfiguration.getMachine();
-		Map<String, String> pref = runconfiguration.getPreference().getPreferences();
-		if (m != null && pref != null) {
-			MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
-			machineLoader.loadAsync(m, pref);
-			this.currentRunconfiguration.set(runconfiguration);
-			this.currentMachine.set(runconfiguration.getMachine());
-		} else {
-			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.couldNotLoadMachine"), runconfiguration.getMachine(), runconfiguration.getPreference())).showAndWait();
-		}
+	public void startAnimation(Machine m, Preference p) {
+		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
+		machineLoader.loadAsync(m, p.getPreferences());
+		this.currentMachine.set(m);
+		this.currentPreference.set(p);
 	}
 
 	public void addMachine(Machine machine) {
@@ -134,8 +126,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		machinesList.remove(machine);
 		if(machine.equals(currentMachine.get())) {
 			this.saved.set(false);
-			this.currentRunconfiguration.set(null);
 			this.currentMachine.set(null);
+			this.currentPreference.set(null);
 			animations.removeTrace(currentTrace.get());
 		}
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
@@ -153,21 +145,20 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getLocation()));
 	}
 
-
-	public ReadOnlyObjectProperty<Runconfiguration> currentRunconfigurationProperty() {
-		return this.currentRunconfiguration;
-	}
-
-	public Runconfiguration getCurrentRunconfiguration() {
-		return this.currentRunconfigurationProperty().get();
-	}
-
 	public ReadOnlyObjectProperty<Machine> currentMachineProperty() {
 		return this.currentMachine;
 	}
 
 	public Machine getCurrentMachine() {
 		return this.currentMachineProperty().get();
+	}
+
+	public ReadOnlyObjectProperty<Preference> currentPreferenceProperty() {
+		return this.currentPreference;
+	}
+
+	public Preference getCurrentPreference() {
+		return this.currentPreferenceProperty().get();
 	}
 
 	public void initializeMachines() {

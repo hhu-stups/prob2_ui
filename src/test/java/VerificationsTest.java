@@ -9,7 +9,6 @@ import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectManager;
-import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -33,10 +32,10 @@ public class VerificationsTest extends GuiTest{
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 
 		injector.getInstance(ProjectManager.class).openProject(new File(runtimeOptions.getProject()));
-		currentProject.startAnimation(new Runconfiguration(
+		currentProject.startAnimation(
 			currentProject.get().getMachine(runtimeOptions.getMachine()),
 			currentProject.get().getPreference(runtimeOptions.getPreference())
-		));
+		);
 
 		if(!mainStage){
 			return injector.getInstance(ModelcheckingController.class);

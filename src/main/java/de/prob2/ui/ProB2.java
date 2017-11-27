@@ -23,7 +23,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.project.runconfigurations.Runconfiguration;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -142,7 +141,7 @@ public class ProB2 extends Application {
 					String.format("There is no preference %s in project %s.", runtimeOptions.getPreference(), currentProject.getName())
 				).show();
 			} else {
-				currentProject.startAnimation(new Runconfiguration(foundMachine, foundPreference));
+				currentProject.startAnimation(foundMachine, foundPreference);
 			}
 		}
 
@@ -156,8 +155,8 @@ public class ProB2 extends Application {
 
 		final StringBuilder title = new StringBuilder();
 
-		if (currentProject.getCurrentRunconfiguration() != null) {
-			title.append(currentProject.getCurrentRunconfiguration());
+		if (currentProject.getCurrentMachine() != null) {
+			title.append(currentProject.getCurrentMachine());
 			if (currentTrace.exists()) {
 				final File modelFile = currentTrace.getModel().getModelFile();
 				if (modelFile != null) {

@@ -18,7 +18,6 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.EditMenu;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.project.runconfigurations.Runconfiguration;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -110,7 +109,7 @@ public class MachinesTab extends Tab {
 						updateAnimationMenu(startAnimationMenu, machine);
 						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-						currentProject.startAnimation(new Runconfiguration(machine, Preference.DEFAULT));
+						currentProject.startAnimation(machine, Preference.DEFAULT);
 					}
 				});
 			}
@@ -123,17 +122,15 @@ public class MachinesTab extends Tab {
 	private void updateAnimationMenu(final Menu startAnimationMenu, Machine machine) {
 		startAnimationMenu.getItems().clear();
 
-		final Runconfiguration defRunconfiguration = new Runconfiguration(machine, Preference.DEFAULT);
-		final MenuItem defItem = new MenuItem(defRunconfiguration.getPreference().toString());
-		defItem.setOnAction(e -> currentProject.startAnimation(defRunconfiguration));
+		final MenuItem defItem = new MenuItem(Preference.DEFAULT.toString());
+		defItem.setOnAction(e -> currentProject.startAnimation(machine, Preference.DEFAULT));
 		startAnimationMenu.getItems().add(defItem);
 
 		if(currentProject.getPreferences().isEmpty())
 			return;
 		for(Preference preference : currentProject.getPreferences()){
 			final MenuItem item = new MenuItem(preference.toString());
-			final Runconfiguration runconfiguration = new Runconfiguration(machine, preference);
-			item.setOnAction(e -> currentProject.startAnimation(runconfiguration));
+			item.setOnAction(e -> currentProject.startAnimation(machine, preference));
 			startAnimationMenu.getItems().add(item);
 		}
 		if (startAnimationMenu.getItems().isEmpty()) {

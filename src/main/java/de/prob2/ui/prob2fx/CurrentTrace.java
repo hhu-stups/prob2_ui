@@ -380,7 +380,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		}
 		
 		final CurrentProject currentProject = this.injector.getInstance(CurrentProject.class);
-		final Machine currentMachine = currentProject.getCurrentRunconfiguration().getMachine();
+		final Machine currentMachine = currentProject.getCurrentMachine();
 		assert currentMachine != null;
 		final String filename = trace.getModel().getModelFile().getAbsolutePath();
 		final Trace newTrace = new Trace(currentMachine.getType().getLoader().load(api, filename, preferences));
