@@ -1,12 +1,14 @@
 package de.prob2.ui.verifications.tracereplay;
 
 import java.io.File;
+import java.util.List;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -54,11 +56,18 @@ public class TraceChecker {
 			trace.setStatus(Status.NOT_CHECKED);
 
 			StateSpace stateSpace = currentTrace.getStateSpace();
+			
 			Trace t = new Trace(stateSpace);
 			boolean traceReplaySuccess = true;
 			try {
 				for (ReplayTransition transition : trace.getTransitionList()) {
-					t = t.addTransitionWith(transition.getName(), transition.getParameters());
+					List<Transition> possibleTransitions = stateSpace.getTransitionsBasedOnParameterValues(
+							t.getCurrentState(), transition.getName(), transition.getParameterValues(), 1);
+					if (possibleTransitions.isEmpty()) {
+						traceReplaySuccess = false;
+						break;
+					}
+					t = t.add(possibleTransitions.get(0));
 					if (Thread.currentThread().isInterrupted()) {
 						currentJobThreads.remove(Thread.currentThread());
 						return;
@@ -68,13 +77,12 @@ public class TraceChecker {
 				traceReplaySuccess = false;
 				trace.setError(e);
 			}
-			
+
 			trace.setStatus(traceReplaySuccess ? Status.SUCCESSFUL : Status.FAILED);
-			
 			if (setCurrentAnimation) {
 				// set the current trace in both cases
 				currentTrace.set(t);
-				
+
 				if (trace.getError() != null) {
 					Platform.runLater(
 							() -> stageManager.makeExceptionAlert(AlertType.ERROR, "", trace.getError()).showAndWait());
