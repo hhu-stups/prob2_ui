@@ -17,13 +17,18 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.EditMenu;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -105,7 +110,7 @@ public class MachinesTab extends Tab {
 						updateAnimationMenu(startAnimationMenu, machine);
 						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-						currentProject.startAnimation(new Runconfiguration(machine, new DefaultPreference()));
+						currentProject.startAnimation(new Runconfiguration(machine, Preference.DEFAULT));
 					}
 				});
 			}
@@ -118,9 +123,8 @@ public class MachinesTab extends Tab {
 	private void updateAnimationMenu(final Menu startAnimationMenu, Machine machine) {
 		startAnimationMenu.getItems().clear();
 
-		DefaultPreference defaultPreference = new DefaultPreference();
-		final Runconfiguration defRunconfiguration = new Runconfiguration(machine, defaultPreference);
-		final MenuItem defItem = new MenuItem(defaultPreference.toString());
+		final Runconfiguration defRunconfiguration = new Runconfiguration(machine, Preference.DEFAULT);
+		final MenuItem defItem = new MenuItem(defRunconfiguration.getPreference().toString());
 		defItem.setOnAction(e -> currentProject.startAnimation(defRunconfiguration));
 		startAnimationMenu.getItems().add(defItem);
 

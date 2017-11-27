@@ -1,11 +1,13 @@
 package de.prob2.ui.project.preferences;
 
+import java.util.Collections;
 import java.util.Map;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
 public class Preference {
+	public static final Preference DEFAULT = new Preference("default", Collections.emptyMap());
 
 	private String name;
 	private Map<String, String> preferences;

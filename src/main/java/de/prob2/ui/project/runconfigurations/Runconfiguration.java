@@ -1,10 +1,9 @@
 package de.prob2.ui.project.runconfigurations;
 
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.preferences.DefaultPreference;
-import de.prob2.ui.project.preferences.Preference;
-
 import java.util.Objects;
+
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.Preference;
 
 public class Runconfiguration {
 	private String name;
@@ -38,7 +37,7 @@ public class Runconfiguration {
 
 	@Override
 	public String toString() {
-		if (this.preference instanceof DefaultPreference) {
+		if (Preference.DEFAULT.equals(this.preference)) {
 			return this.machine.getName();
 		}
 		return this.getName();

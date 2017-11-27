@@ -21,10 +21,11 @@ import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.preferences.DefaultPreference;
+import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import de.prob2.ui.verifications.tracereplay.TraceChecker;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -122,7 +123,7 @@ public class FileMenu extends Menu {
 		final Machine machine = new Machine(shortName, "", relative);
 		currentProject.set(new Project(shortName, description, machine, projectLocation.toFile()));
 
-		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, new DefaultPreference());
+		final Runconfiguration defaultRunconfig = new Runconfiguration(machine, Preference.DEFAULT);
 		currentProject.startAnimation(defaultRunconfig);
 	}
 

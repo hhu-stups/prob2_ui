@@ -17,14 +17,13 @@ import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.persistence.UIPersistence;
+import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
-import de.prob2.ui.plugin.ProBPluginManager;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -127,7 +126,7 @@ public class ProB2 extends Application {
 
 			final Preference foundPreference;
 			if (runtimeOptions.getPreference() == null) {
-				foundPreference = new DefaultPreference();
+				foundPreference = Preference.DEFAULT;
 			} else {
 				foundPreference = currentProject.get().getPreference(runtimeOptions.getPreference());
 			}

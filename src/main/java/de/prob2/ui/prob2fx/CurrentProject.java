@@ -3,7 +3,6 @@ package de.prob2.ui.prob2fx;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,10 +18,10 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.preferences.DefaultPreference;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.runconfigurations.Runconfiguration;
 import de.prob2.ui.project.verifications.MachineTableView;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -113,10 +112,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void startAnimation(Runconfiguration runconfiguration) {
 		Machine m = runconfiguration.getMachine();
-		Map<String, String> pref = new HashMap<>();
-		if (!(runconfiguration.getPreference() instanceof DefaultPreference)) {
-			pref = runconfiguration.getPreference().getPreferences();
-		}
+		Map<String, String> pref = runconfiguration.getPreference().getPreferences();
 		if (m != null && pref != null) {
 			MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 			machineLoader.loadAsync(m, pref);
