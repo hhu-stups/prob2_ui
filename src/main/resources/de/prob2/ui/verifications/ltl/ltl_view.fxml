@@ -30,10 +30,10 @@
 					</HBox>
 					<VBox spacing="5.0" alignment="TOP_RIGHT">
 						<Button fx:id="addFormulaButton" disable="true" onAction="#addFormula" prefWidth="140.0"
-							styleClass="button-blue" text="Add LTL Formula">
+							styleClass="button-blue" text="%verifications.ltl.formula.add">
 						</Button>
 						<Button fx:id="addPatternButton" disable="true" onAction="#addPattern" prefWidth="140.0"
-							styleClass="button-blue" text="Add LTL Pattern">
+							styleClass="button-blue" text="%verifications.ltl.pattern.add">
 						</Button>
 					</VBox>
 					<VBox.margin>
