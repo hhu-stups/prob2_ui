@@ -19,8 +19,8 @@ public class ExecuteRightClickCommand extends AbstractCommand {
 
 	public ExecuteRightClickCommand(String stateId, int row, int column, String option) {
 		this.stateId = stateId;
-		this.row = row;
-		this.column = column;
+		this.row = row-1;
+		this.column = column+1;
 		this.option = option;
 	}
 

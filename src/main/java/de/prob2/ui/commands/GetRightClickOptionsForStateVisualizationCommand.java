@@ -24,8 +24,8 @@ public class GetRightClickOptionsForStateVisualizationCommand extends AbstractCo
 
 	public GetRightClickOptionsForStateVisualizationCommand(String stateId, int row, int column) {
 		this.stateId = stateId;
-		this.row = row;
-		this.column = column;
+		this.row = row-1;
+		this.column = column+1;
 	}
 
 	@Override
