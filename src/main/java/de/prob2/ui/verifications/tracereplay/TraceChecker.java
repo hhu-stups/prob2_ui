@@ -58,6 +58,7 @@ public class TraceChecker {
 			StateSpace stateSpace = currentTrace.getStateSpace();
 			
 			Trace t = new Trace(stateSpace);
+			t.setExploreStateByDefault(false);
 			boolean traceReplaySuccess = true;
 			try {
 				for (ReplayTransition transition : trace.getTransitionList()) {
@@ -79,14 +80,17 @@ public class TraceChecker {
 			}
 
 			trace.setStatus(traceReplaySuccess ? Status.SUCCESSFUL : Status.FAILED);
+			t.setExploreStateByDefault(true);
 			if (setCurrentAnimation) {
 				// set the current trace in both cases
+				t.getCurrentState().explore();
 				currentTrace.set(t);
-
+				
 				if (trace.getError() != null) {
 					Platform.runLater(
 							() -> stageManager.makeExceptionAlert(AlertType.ERROR, "", trace.getError()).showAndWait());
 				}
+				
 			}
 			currentJobThreads.remove(Thread.currentThread());
 		});
