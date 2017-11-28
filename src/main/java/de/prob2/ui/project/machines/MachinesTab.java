@@ -18,7 +18,8 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.EditMenu;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.preferences.Preference;
-
+import de.prob2.ui.statusbar.StatusBar;
+import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -51,7 +52,8 @@ public class MachinesTab extends Tab {
 	private final Injector injector;
 
 	@Inject
-	private MachinesTab(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final Injector injector) {
+	private MachinesTab(final StageManager stageManager, final ResourceBundle bundle,
+			final CurrentProject currentProject, final Injector injector) {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
@@ -65,44 +67,52 @@ public class MachinesTab extends Tab {
 		noMachinesStack.managedProperty().bind(currentProject.machinesProperty().emptyProperty());
 		noMachinesStack.visibleProperty().bind(currentProject.machinesProperty().emptyProperty());
 
+		injector.getInstance(StatusBar.class).loadingStatusProperty()
+				.addListener((observable, from, to) -> splitPane.setDisable(to == LoadingStatus.LOADING_FILE));
+
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
 			if (node instanceof MachineView && !to.contains(((MachineView) node).getMachine())) {
 				closeMachineView();
 			}
-			
+
 			machinesVBox.getChildren().clear();
 			for (Machine machine : to) {
 				MachinesItem machinesItem = new MachinesItem(machine, stageManager);
 				machinesVBox.getChildren().add(machinesItem);
 
-				final MenuItem editMachineMenuItem = new MenuItem(bundle.getString("project.machines.tab.menu.editMachineConfiguration"));
+				final MenuItem editMachineMenuItem = new MenuItem(
+						bundle.getString("project.machines.tab.menu.editMachineConfiguration"));
 				editMachineMenuItem.setOnAction(event -> injector.getInstance(EditMachinesDialog.class)
 						.editAndShow(machine).ifPresent(result -> {
-					machinesItem.refresh();
-					showMachineView(machinesItem);
-				}));
+							machinesItem.refresh();
+							showMachineView(machinesItem);
+						}));
 
-				final MenuItem removeMachineMenuItem = new MenuItem(bundle.getString("project.machines.tab.menu.removeMachine"));
+				final MenuItem removeMachineMenuItem = new MenuItem(
+						bundle.getString("project.machines.tab.menu.removeMachine"));
 				removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(machine));
 
-				final MenuItem editFileMenuItem = new MenuItem(bundle.getString("project.machines.tab.menu.editMachineFile"));
+				final MenuItem editFileMenuItem = new MenuItem(
+						bundle.getString("project.machines.tab.menu.editMachineFile"));
 				editFileMenuItem.setOnAction(event -> injector.getInstance(EditMenu.class).showEditorStage(machine));
 
-				final MenuItem editExternalMenuItem = new MenuItem(bundle.getString("project.machines.tab.menu.editMachineFileInExternalEditor"));
+				final MenuItem editExternalMenuItem = new MenuItem(
+						bundle.getString("project.machines.tab.menu.editMachineFileInExternalEditor"));
 				editExternalMenuItem
 						.setOnAction(event -> injector.getInstance(EditMenu.class).showExternalEditor(machine));
 
 				final Menu startAnimationMenu = new Menu(bundle.getString("project.machines.tab.menu.startAnimation"));
 
-				final MenuItem showDescription = new MenuItem(bundle.getString("project.machines.tab.menu.machineDescription"));
+				final MenuItem showDescription = new MenuItem(
+						bundle.getString("project.machines.tab.menu.machineDescription"));
 				showDescription.setOnAction(event -> {
 					showMachineView(machinesItem);
 					machinesItem.setId("machines-item-selected");
 				});
 
-				ContextMenu contextMenu = new ContextMenu(showDescription, editMachineMenuItem, removeMachineMenuItem, editFileMenuItem,
-						editExternalMenuItem, startAnimationMenu);
+				ContextMenu contextMenu = new ContextMenu(showDescription, editMachineMenuItem, removeMachineMenuItem,
+						editFileMenuItem, editExternalMenuItem, startAnimationMenu);
 
 				machinesItem.setOnMouseClicked(event -> {
 					if (event.getButton().equals(MouseButton.SECONDARY) && event.getClickCount() == 1) {
@@ -126,9 +136,9 @@ public class MachinesTab extends Tab {
 		defItem.setOnAction(e -> currentProject.startAnimation(machine, Preference.DEFAULT));
 		startAnimationMenu.getItems().add(defItem);
 
-		if(currentProject.getPreferences().isEmpty())
+		if (currentProject.getPreferences().isEmpty())
 			return;
-		for(Preference preference : currentProject.getPreferences()){
+		for (Preference preference : currentProject.getPreferences()) {
 			final MenuItem item = new MenuItem(preference.toString());
 			item.setOnAction(e -> currentProject.startAnimation(machine, preference));
 			startAnimationMenu.getItems().add(item);
@@ -149,11 +159,15 @@ public class MachinesTab extends Tab {
 		final Path absolute = selected.toPath();
 		final Path relative = projectLocation.relativize(absolute);
 		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
-			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.error.machineAlreadyExists"), relative)).showAndWait();
+			stageManager
+					.makeAlert(Alert.AlertType.ERROR,
+							String.format(bundle.getString("project.machines.error.machineAlreadyExists"), relative))
+					.showAndWait();
 			return;
 		}
 
-		final Set<String> machineNamesSet = currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toSet());
+		final Set<String> machineNamesSet = currentProject.getMachines().stream().map(Machine::getName)
+				.collect(Collectors.toSet());
 		String[] n = relative.toFile().getName().split("\\.");
 		String name = n[0];
 		int i = 1;
@@ -171,13 +185,9 @@ public class MachinesTab extends Tab {
 
 	void closeMachineView() {
 		if (splitPane.getItems().get(0) instanceof MachineView) {
-			MachineView machineView = (MachineView) splitPane.getItems().get(0);		
+			MachineView machineView = (MachineView) splitPane.getItems().get(0);
 			splitPane.getItems().remove(0);
 			machineView.getMachinesItem().setId("machines-item");
 		}
-	}
-
-	public void disableMachineView(boolean disable){
-		splitPane.setDisable(disable);
 	}
 }

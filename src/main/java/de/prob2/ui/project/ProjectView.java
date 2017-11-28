@@ -55,10 +55,5 @@ public final class ProjectView extends AnchorPane {
 		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();
-	}
-
-	public void disableMachinesTab(boolean disable){
-		machinesTab.disableMachineView(disable);
-	}
-	
+	}	
 }

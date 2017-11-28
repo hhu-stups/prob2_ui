@@ -8,12 +8,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.node.*;
-
+import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
+import de.be4.classicalb.core.parser.node.AMachineHeader;
+import de.be4.classicalb.core.parser.node.AMachineMachineVariant;
+import de.be4.classicalb.core.parser.node.EOF;
+import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.Api;
@@ -21,20 +27,15 @@ import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
-
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachineLoader {
@@ -60,12 +61,11 @@ public class MachineLoader {
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final StatusBar statusBar;
-	private final Injector injector;
 
 	@Inject
 	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager,
 				final ResourceBundle bundle, final AnimationSelector animations, final CurrentTrace currentTrace,
-				final GlobalPreferences globalPreferences, final StatusBar statusBar, final Injector injector) {
+				final GlobalPreferences globalPreferences, final StatusBar statusBar) {
 
 		this.api = api;
 		this.openLock = new Object();
@@ -76,7 +76,6 @@ public class MachineLoader {
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.statusBar = statusBar;
-		this.injector = injector;
 	}
 
 	public StateSpace getEmptyStateSpace(final Map<String, String> prefs) {
@@ -119,7 +118,6 @@ public class MachineLoader {
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
 			try {
-				injector.getInstance(ProjectView.class).disableMachinesTab(true);
 				setLoadingStatus(StatusBar.LoadingStatus.REMOVING_OLD_ANIMATION);
 				if (currentTrace.exists()) {
 					this.animations.removeTrace(currentTrace.get());
@@ -134,7 +132,6 @@ public class MachineLoader {
 
 				setLoadingStatus(StatusBar.LoadingStatus.ADDING_ANIMATION);
 				this.animations.addNewAnimation(new Trace(stateSpace));
-				injector.getInstance(ProjectView.class).disableMachinesTab(false);
 			} finally {
 				setLoadingStatus(StatusBar.LoadingStatus.NOT_LOADING);
 			}
