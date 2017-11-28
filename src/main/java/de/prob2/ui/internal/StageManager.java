@@ -305,7 +305,7 @@ public final class StageManager {
 
 	public Alert makeExceptionAlert(final Alert.AlertType alertType, final String contentText, final Throwable exc) {
 		final String message = exc instanceof ProBError ? ((ProBError) exc).getOriginalMessage() : exc.getMessage();
-		final Alert alert = this.makeAlert(alertType, contentText + '\n' + message);
+		final Alert alert = this.makeAlert(alertType, contentText + ":\n" + message);
 
 		if (exc instanceof ProBError && ((ProBError) exc).getErrors() != null) {
 			final ListView<String> errorsListView = new ListView<>();
