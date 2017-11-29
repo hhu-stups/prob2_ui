@@ -45,7 +45,7 @@
 					<Button fx:id="saveTraceButton" mnemonicParsing="false" onAction="#saveTrace">
 						<graphic>
 							<FontAwesomeIconView styleClass="icon-dark"
-								glyphName="UPLOAD" size="15" />
+								glyphName="SAVE" size="15" />
 						</graphic>
 						<tooltip>
 							<Tooltip text="%history.buttons.saveTrace.tooltip" />
