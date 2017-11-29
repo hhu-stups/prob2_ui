@@ -13,6 +13,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.verifications.tracereplay.ReplayTrace.Status;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
@@ -115,13 +116,10 @@ public class TraceReplayView extends ScrollPane {
 					return;
 				}
 				t.getTrace().getStatus().addListener((observable, from, to) -> {
-					switch (to) {
-					case FAILED:
+					if(to == Status.FAILED) {
 						showErrorItem.setDisable(false);
-						break;
-					default:
+					} else {
 						showErrorItem.setDisable(true);
-						break;
 					}
 				});
 			});
