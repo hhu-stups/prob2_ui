@@ -3,12 +3,9 @@ package de.prob2.ui.verifications.tracereplay;
 import java.io.File;
 import java.util.List;
 
-import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetOperationByPredicateCommand;
-import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -59,26 +56,17 @@ public class TraceChecker {
 			trace.setStatus(Status.NOT_CHECKED);
 
 			StateSpace stateSpace = currentTrace.getStateSpace();
-
+			
 			Trace t = new Trace(stateSpace);
 			t.setExploreStateByDefault(false);
 			boolean traceReplaySuccess = true;
 			try {
-				for (ReplayTraceTransition transition : trace.getTransitionList()) {
-					String predicate = transition.getParameterPredicates().isEmpty() ? "1=1"
-							: Joiner.on(" & ").join(transition.getParameterPredicates());
-					final IEvalElement pred = stateSpace.getModel().parseFormula(predicate);
-					final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
-							t.getCurrentState().getId(), transition.getOperationName(), pred, 1);
-					stateSpace.execute(command);
-					if (command.hasErrors()) {
-						throw new IllegalArgumentException(
-								"Executing operation " + transition.getOperationName() + " with predicate " + predicate
-										+ " produced errors: " + Joiner.on(", ").join(command.getErrors()));
-					}
-					List<Transition> possibleTransitions = command.getNewTransitions();
+				for (ReplayTransition transition : trace.getTransitionList()) {
+					List<Transition> possibleTransitions = stateSpace.getTransitionsBasedOnParameterValues(
+							t.getCurrentState(), transition.getName(), transition.getParameterValues(), 1);
 					if (possibleTransitions.isEmpty()) {
 						traceReplaySuccess = false;
+						break;
 					}
 					t = t.add(possibleTransitions.get(0));
 					if (Thread.currentThread().isInterrupted()) {
@@ -97,12 +85,12 @@ public class TraceChecker {
 				// set the current trace in both cases
 				t.getCurrentState().explore();
 				currentTrace.set(t);
-
+				
 				if (trace.getError() != null) {
 					Platform.runLater(
 							() -> stageManager.makeExceptionAlert(AlertType.ERROR, "", trace.getError()).showAndWait());
 				}
-
+				
 			}
 			currentJobThreads.remove(Thread.currentThread());
 		});

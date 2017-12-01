@@ -8,46 +8,42 @@ import de.prob.statespace.Transition;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class ReplayTrace{
-
-	enum Status {
-		SUCCESSFUL, FAILED, NOT_CHECKED
-	}
+public class ReplayTrace {
+	enum Status {SUCCESSFUL, FAILED, NOT_CHECKED}
 
 	private transient ObjectProperty<Status> status;
-	private final List<ReplayTraceTransition> transitionList = new ArrayList<>();
-	private transient Exception error;
+	private final  List<ReplayTransition> transitionList = new ArrayList<>();
+	private Exception error;
 
 	public ReplayTrace(Trace trace) {
-
-		for (Transition transition : trace.getTransitionList()) {
-			transitionList.add(new ReplayTraceTransition(transition));
+		for(Transition t: trace.getTransitionList()) {
+			transitionList.add(new ReplayTransition(t.getName(), t.getParams()));
 		}
 		this.setStatus(Status.NOT_CHECKED);
 	}
-
-	public List<ReplayTraceTransition> getTransitionList() {
+	
+	public List<ReplayTransition> getTransitionList() {
 		return transitionList;
 	}
-
+	
 	public void setStatus(Status status) {
-		if (this.status == null) {
+		if(this.status == null) {
 			this.status = new SimpleObjectProperty<>();
 		}
-		if (!status.equals(Status.FAILED)) {
+		if(!status.equals(Status.FAILED)) {
 			this.error = null;
 		}
 		this.status.set(status);
 	}
-
+	
 	public void setError(Exception e) {
 		this.error = e;
 	}
-
+	
 	public ObjectProperty<Status> getStatus() {
 		return status;
 	}
-
+	
 	public Exception getError() {
 		return error;
 	}
