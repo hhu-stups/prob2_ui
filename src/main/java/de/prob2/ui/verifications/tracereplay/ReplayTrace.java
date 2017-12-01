@@ -13,7 +13,7 @@ public class ReplayTrace {
 
 	private transient ObjectProperty<Status> status;
 	private final  List<ReplayTransition> transitionList = new ArrayList<>();
-	private Exception error;
+	private transient Exception error;
 
 	public ReplayTrace(Trace trace) {
 		for(Transition t: trace.getTransitionList()) {
