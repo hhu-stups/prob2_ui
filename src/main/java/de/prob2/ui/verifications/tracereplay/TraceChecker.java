@@ -9,6 +9,8 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.check.tracereplay.PersistentTransition;
+import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -64,9 +66,13 @@ public class TraceChecker {
 			t.setExploreStateByDefault(false);
 			boolean traceReplaySuccess = true;
 			try {
-				for (ReplayTraceTransition transition : trace.getTransitionList()) {
-					String predicate = transition.getParameterPredicates().isEmpty() ? "1=1"
-							: Joiner.on(" & ").join(transition.getParameterPredicates());
+				for (PersistentTransition transition : trace.getStoredTrace().getTransitionList()) {
+					String predicate = new PredicateBuilder().addMap(transition.getParameters())
+							//TODO destination state variables are currently not supported 
+							//.addMap(transition.getDestinationStateVariables())
+							// TODO output parameters are currently not supported by ExecuteOperationByPredicate
+							// .addMap(transition.getOuputParameters()) 
+							.toString();
 					final IEvalElement pred = stateSpace.getModel().parseFormula(predicate);
 					final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
 							t.getCurrentState().getId(), transition.getOperationName(), pred, 1);

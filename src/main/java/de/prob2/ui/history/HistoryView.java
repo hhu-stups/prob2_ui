@@ -8,6 +8,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -188,7 +189,7 @@ public final class HistoryView extends AnchorPane {
 	@FXML
 	private void saveTrace() {
 		TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
-		traceSaver.saveTrace(new ReplayTrace(currentTrace.get()), currentProject.getCurrentMachine());
+		traceSaver.saveTrace(new PersistentTrace(currentTrace.get()), currentProject.getCurrentMachine());
 	}
 
 }

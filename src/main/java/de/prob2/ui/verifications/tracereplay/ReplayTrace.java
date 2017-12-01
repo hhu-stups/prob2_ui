@@ -1,33 +1,32 @@
 package de.prob2.ui.verifications.tracereplay;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class ReplayTrace{
+public class ReplayTrace {
 
 	enum Status {
 		SUCCESSFUL, FAILED, NOT_CHECKED
 	}
 
-	private transient ObjectProperty<Status> status;
-	private final List<ReplayTraceTransition> transitionList = new ArrayList<>();
-	private transient Exception error;
+	private ObjectProperty<Status> status;
+	private PersistentTrace persistentTrace;
+	private Exception error;
 
 	public ReplayTrace(Trace trace) {
-
-		for (Transition transition : trace.getTransitionList()) {
-			transitionList.add(new ReplayTraceTransition(transition));
-		}
+		this.persistentTrace = new PersistentTrace(trace);
 		this.setStatus(Status.NOT_CHECKED);
 	}
 
-	public List<ReplayTraceTransition> getTransitionList() {
-		return transitionList;
+	public ReplayTrace(PersistentTrace pTrace) {
+		this.persistentTrace = pTrace;
+		this.setStatus(Status.NOT_CHECKED);
+	}
+
+	public PersistentTrace getStoredTrace() {
+		return this.persistentTrace;
 	}
 
 	public void setStatus(Status status) {
