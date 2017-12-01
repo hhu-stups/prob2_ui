@@ -14,6 +14,7 @@ import de.prob2.ui.persistence.UIState;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableIntegerValue;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
@@ -71,7 +72,8 @@ public class MainController extends BorderPane {
 			})
 		);
 		final ObservableIntegerValue size = this.injector.getInstance(HistoryView.class).getObservableHistorySize();
-		this.historyTP.textProperty().bind(Bindings.format(this.resourceBundle.getString("tptitles.historyWithSize"), size));
+		final ObservableValue<Number> current = this.injector.getInstance(HistoryView.class).getCurrentHistoryPositionProperty();
+		this.historyTP.textProperty().bind(Bindings.format(this.resourceBundle.getString("tptitles.historyWithSize"), size, current));
 	}
 
 	public double[] getHorizontalDividerPositions() {

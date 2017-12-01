@@ -18,8 +18,14 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.tracereplay.ReplayTrace;
 import de.prob2.ui.verifications.tracereplay.TraceSaver;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.IntegerBinding;
+import javafx.beans.binding.NumberBinding;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableIntegerValue;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
@@ -151,10 +157,15 @@ public final class HistoryView extends AnchorPane {
 			// Root item has no transition
 			return "---root---";
 		} else {
-			// Evaluate the transition so the pretty rep includes argument list and result
+			// Evaluate the transition so the pretty rep includes argument list
+			// and result
 			transition.evaluate();
 			return transition.getPrettyRep().replace("<--", "←");
 		}
+	}
+
+	public NumberBinding getCurrentHistoryPositionProperty() {
+		return Bindings.createIntegerBinding(() -> currentTrace.get() == null? 0 : currentTrace.get().getCurrent().getIndex() + 2, currentTrace);
 	}
 
 	public ObservableIntegerValue getObservableHistorySize() {
