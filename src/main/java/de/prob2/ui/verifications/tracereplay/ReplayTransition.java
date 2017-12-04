@@ -4,11 +4,11 @@ import java.util.List;
 
 public class ReplayTransition {
 	private final String name;
-	private final List<String> parameterValues;
+	private final List<String> parameters;
 
 	public ReplayTransition(final String name, final List<String> parameters) {
 		this.name = name;
-		this.parameterValues = parameters;
+		this.parameters = parameters;
 	}
 	
 	public String getName() {
@@ -16,6 +16,6 @@ public class ReplayTransition {
 	}
 	
 	public List<String> getParameterValues() {
-		return parameterValues;
+		return parameters;
 	}
 }
