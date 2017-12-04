@@ -224,7 +224,7 @@ public class VisualisationModel {
 				return null;
 			}
 		};
-		new Thread(task).start();
+		new Thread(task, "Random Event Execution Thread").start();
 	}
 
 	private Map<String, EvalResult> translateValuesMap(Map<IEvalElement, AbstractEvalResult> values) {

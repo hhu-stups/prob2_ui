@@ -110,7 +110,7 @@ public class TraceChecker {
 				
 			}
 			currentJobThreads.remove(Thread.currentThread());
-		});
+		}, "Trace Replay Thread");
 		currentJobThreads.add(replayThread);
 		replayThread.start();
 	}
