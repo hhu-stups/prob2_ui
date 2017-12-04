@@ -357,7 +357,7 @@ public final class OperationsView extends AnchorPane {
 					break;
 				
 				default:
-					params = transition.getParams();
+					params = transition.getParameterValues();
 			}
 
 			final boolean explored = transition.getDestination().isExplored();

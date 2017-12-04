@@ -7,15 +7,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
-
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
+
 import groovy.lang.MetaMethod;
 import groovy.lang.MetaProperty;
 import groovy.lang.PropertyValue;
+
 import javafx.collections.ObservableList;
 
-public class GroovyClassHandler {
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+
+public final class GroovyClassHandler {
+	private GroovyClassHandler() {
+		throw new IllegalStateException("Utility class");
+	}
 	
 	public static void handleProperties(Class<?> clazz, ObservableList<GroovyClassPropertyItem> fields, Object object) {
 		for (Field f : clazz.getFields()) {

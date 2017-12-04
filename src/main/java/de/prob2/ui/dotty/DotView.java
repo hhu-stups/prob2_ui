@@ -5,10 +5,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseButton;
-import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
@@ -20,8 +20,6 @@ public class DotView extends Stage {
 	
 	@FXML
 	private ScrollPane pane;
-	
-	private WebEngine engine;
 	
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
@@ -61,8 +59,7 @@ public class DotView extends Stage {
 	
 	@FXML
 	public void initialize() {
-		engine = dotView.getEngine();
-		engine.load(this.getClass().getResource("GCD.svg").toExternalForm());
+		dotView.getEngine().load(this.getClass().getResource("GCD.svg").toExternalForm());
 	}
 
 }

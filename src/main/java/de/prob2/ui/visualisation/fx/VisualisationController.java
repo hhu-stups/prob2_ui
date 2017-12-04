@@ -260,7 +260,7 @@ public class VisualisationController {
 				}
 			}
 
-			LOGGER.debug("The following formulas have changed their values: {}", String.join(" ", changedFormulas));
+			LOGGER.debug("The following formulas have changed their values: {}", changedFormulas);
 
 			Set<FormulaListener> listenersToTrigger = new HashSet<>();
 			for (String formula : changedFormulas) {
@@ -280,7 +280,7 @@ public class VisualisationController {
 						formulaValueMap.put(formulas[i], formulaValue);
 					}
 				}
-				LOGGER.debug("Call listener for formulas: {}", String.join(" ", formulas));
+				LOGGER.debug("Call listener for formulas: {}", (Object)formulas);
 				try {
 					listener.variablesChanged(formulaValues);
 				} catch (Exception e) {

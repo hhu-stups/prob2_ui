@@ -62,7 +62,7 @@ public final class StateErrorsView extends AnchorPane {
 	
 	@FXML
 	private void initialize() {
-		this.lv.setCellFactory(lv -> new StateErrorsView.StateErrorCell());
+		this.lv.setCellFactory(view -> new StateErrorsView.StateErrorCell());
 		
 		this.currentTrace.addListener((o, from, to) -> {
 			if (to == null) {
