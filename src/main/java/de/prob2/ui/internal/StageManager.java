@@ -1,9 +1,7 @@
 package de.prob2.ui.internal;
 
-import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,9 +22,6 @@ import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
 
-import de.prob.animator.domainobjects.ErrorItem;
-import de.prob.exception.ProBError;
-
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.machines.Machine;
@@ -43,15 +38,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
-import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -303,27 +294,8 @@ public final class StageManager {
 		return alert;
 	}
 
-	public Alert makeExceptionAlert(final Alert.AlertType alertType, final String contentText, final Throwable exc) {
-		final String message = exc instanceof ProBError ? ((ProBError) exc).getOriginalMessage() : exc.getMessage();
-		final Alert alert = this.makeAlert(alertType, contentText + ":\n" + message);
-
-		if (exc instanceof ProBError && ((ProBError) exc).getErrors() != null) {
-			final ListView<String> errorsListView = new ListView<>();
-			for (final ErrorItem error : ((ProBError)exc).getErrors()) {
-				errorsListView.getItems().add(error.toString());
-			}
-			errorsListView.setPrefSize(480, 160);
-			alert.getDialogPane().setContent(new VBox(new Label(alert.getContentText()), errorsListView));
-		}
-
-		final TextArea textArea = new TextArea();
-		try (final CharArrayWriter caw = new CharArrayWriter(); final PrintWriter pw = new PrintWriter(caw)) {
-			exc.printStackTrace(pw);
-			textArea.setText(caw.toString());
-		}
-		alert.getDialogPane().setExpandableContent(textArea);
-
-		return alert;
+	public Alert makeExceptionAlert(final String contentText, final Throwable exc) {
+		return new ExceptionAlert(this, this.bundle, contentText, exc);
 	}
 	
 	/**

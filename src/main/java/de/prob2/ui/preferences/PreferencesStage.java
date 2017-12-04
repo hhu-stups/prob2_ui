@@ -28,7 +28,6 @@ import javafx.beans.InvalidationListener;
 import javafx.collections.MapChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -190,7 +189,7 @@ public final class PreferencesStage extends Stage {
 			this.globalProBPrefs.apply();
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
-			stageManager.makeExceptionAlert(Alert.AlertType.ERROR, "Failed to apply preference changes", e).show();
+			stageManager.makeExceptionAlert("Failed to apply preference changes", e).show();
 		}
 		
 		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();
@@ -207,7 +206,7 @@ public final class PreferencesStage extends Stage {
 				this.currentTrace.reload(this.currentTrace.get(), this.globalPreferences);
 			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 				LOGGER.error("Failed to reload machine", e);
-				this.stageManager.makeExceptionAlert(Alert.AlertType.ERROR, "Failed to reload machine", e).show();
+				this.stageManager.makeExceptionAlert("Failed to reload machine", e).show();
 			}
 		}
 	}
