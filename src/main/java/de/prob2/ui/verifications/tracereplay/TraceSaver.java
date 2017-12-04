@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 
+import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
@@ -39,7 +40,7 @@ public class TraceSaver {
 		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	}
 
-	public void saveTrace(ReplayTrace trace, Machine machine) {
+	public void saveTrace(PersistentTrace trace, Machine machine) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceSaver.dialog.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation());

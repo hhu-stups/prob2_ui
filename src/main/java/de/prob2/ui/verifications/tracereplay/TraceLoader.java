@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 
+import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.tracereplay.ReplayTrace.Status;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -41,10 +41,9 @@ public class TraceLoader {
 	}
 
 	public ReplayTrace loadTrace(File file) {
-		ReplayTrace trace;
 		try (final Reader reader = new InputStreamReader(new FileInputStream(file), PROJECT_CHARSET)) {
-			trace = gson.fromJson(reader, ReplayTrace.class);
-			trace.setStatus(Status.NOT_CHECKED);
+			PersistentTrace pTrace = gson.fromJson(reader, PersistentTrace.class);
+			return new ReplayTrace(pTrace);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Trace file not found", exc);
 			Alert alert = stageManager.makeAlert(AlertType.ERROR,
@@ -67,6 +66,5 @@ public class TraceLoader {
 			LOGGER.warn("Failed to open project file", exc);
 			return null;
 		}
-		return trace;
 	}
 }
