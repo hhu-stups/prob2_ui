@@ -284,8 +284,8 @@ public class VisualisationController {
 				try {
 					listener.variablesChanged(formulaValues);
 				} catch (Exception e) {
-					Alert alert = stageManager.makeExceptionAlert(Alert.AlertType.WARNING,
-							format("visualisation.controller.listener.exception", String.join(" ", formulas)), e);
+					Alert alert = stageManager.makeExceptionAlert(
+						format("visualisation.controller.listener.exception", String.join(" ", formulas)), e);
 					alert.initOwner(stageManager.getCurrent());
 					alert.show();
 					LOGGER.warn("Exception while calling the formula listener for the formulas:\n\"" +

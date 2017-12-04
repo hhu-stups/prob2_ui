@@ -21,7 +21,6 @@ import javafx.beans.property.SimpleMapProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.collections.SetChangeListener;
-import javafx.scene.control.Alert.AlertType;
 
 @Singleton
 public class TraceChecker {
@@ -87,8 +86,7 @@ public class TraceChecker {
 				currentTrace.set(t);
 				
 				if (trace.getError() != null) {
-					Platform.runLater(
-							() -> stageManager.makeExceptionAlert(AlertType.ERROR, "", trace.getError()).showAndWait());
+					Platform.runLater(() -> stageManager.makeExceptionAlert("", trace.getError()).showAndWait());
 				}
 				
 			}

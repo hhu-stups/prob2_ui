@@ -17,7 +17,6 @@ import de.prob2.ui.verifications.tracereplay.ReplayTrace.Status;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -101,7 +100,7 @@ public class TraceReplayView extends ScrollPane {
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.showError"));
 			showErrorItem.setOnAction(event -> stageManager
-					.makeExceptionAlert(AlertType.ERROR, "", row.getItem().getTrace().getError()).showAndWait());
+					.makeExceptionAlert("", row.getItem().getTrace().getError()).showAndWait());
 			showErrorItem.setDisable(true);
 			
 			final MenuItem deleteTraceItem = new MenuItem(
