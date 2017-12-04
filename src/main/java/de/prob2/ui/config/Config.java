@@ -145,6 +145,10 @@ public final class Config {
 	 * @return basic settings from the config file
 	 */
 	private static BasicConfigData loadBasicConfig() {
+		if(!LOCATION.exists()) {
+			logger.info("Config file not found ('{}'), while loading basic config, loading default settings", LOCATION.getAbsolutePath() );
+			return new BasicConfigData();
+		}
 		try (
 			final InputStream is = new FileInputStream(LOCATION);
 			final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
@@ -155,9 +159,6 @@ public final class Config {
 				return new BasicConfigData();
 			}
 			return data;
-		} catch (FileNotFoundException exc) {
-			logger.info("Config file not found, while loading basic config, loading default settings", exc);
-			return new BasicConfigData();
 		} catch (IOException exc) {
 			logger.warn("Failed to open config file while loading basic config", exc);
 			return new BasicConfigData();
@@ -249,7 +250,7 @@ public final class Config {
 					configData = new ConfigData();
 				}
 			} catch (FileNotFoundException exc) {
-				logger.info("Config file not found, loading default settings", exc);
+				logger.info("Config file not found, loading default settings");
 				configData = new ConfigData();
 			} catch (IOException exc) {
 				logger.warn("Failed to open config file", exc);
