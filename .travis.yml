@@ -73,5 +73,6 @@ cache:
   - $HOME/.gradle/wrapper/
 
 after_success:
+- git fetch --unshallow
 - ./gradlew sonarqube --info --stacktrace
 - travis-custom-deploy sftp build/distributions/*.zip
