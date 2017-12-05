@@ -9,11 +9,11 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ResourceBundle;
 
-import org.hildan.fxgson.FxGson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 
 import de.prob.check.tracereplay.PersistentTrace;
@@ -37,7 +37,7 @@ public class TraceSaver {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+		this.gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	}
 
 	public void saveTrace(PersistentTrace trace, Machine machine) {
