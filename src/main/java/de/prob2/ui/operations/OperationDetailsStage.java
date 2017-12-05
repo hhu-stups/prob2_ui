@@ -34,14 +34,14 @@ class OperationDetailsStage extends Stage {
 	
 	private static final class ValueItem {
 		private final ValueType type;
-		private final int index;
+		private final String name;
 		private final String value;
 		
-		ValueItem(final ValueType type, final int index, final String value) {
+		ValueItem(final ValueType type, final String name, final String value ) {
 			super();
 			
 			this.type = type;
-			this.index = index;
+			this.name = name;
 			this.value = value;
 		}
 		
@@ -49,8 +49,9 @@ class OperationDetailsStage extends Stage {
 			return type;
 		}
 		
-		private int getIndex() {
-			return index;
+		
+		public String getName() {
+			return name;
 		}
 		
 		public String getValue() {
@@ -73,7 +74,7 @@ class OperationDetailsStage extends Stage {
 				this.setText(String.format(
 					bundle.getString("operationDetails.format"),
 					bundle.getString(item.getType().getKey()),
-					item.getIndex(),
+					item.getName(),
 					item.getValue()
 				));
 			}
@@ -109,15 +110,19 @@ class OperationDetailsStage extends Stage {
 				this.setTitle(bundle.getString("operationDetails.title"));
 			} else {
 				this.setTitle(String.format(bundle.getString("operationDetails.titleWithName"), to.getName()));
-				final List<String> params = to.getParams();
-				for (int i = 0; i < params.size(); i++) {
-					final String param = params.get(i);
-					this.valuesListView.getItems().add(new ValueItem(ValueType.PARAM, i+1, param));
+				final List<String> paramNames = to.getParameterNames();
+				final List<String> paramValues = to.getParameterValues();
+				for (int i = 0; i < paramValues.size(); i++) {
+					String name = i < paramNames.size() ? paramNames.get(i): "#" + (i + 1);
+					final String param = paramValues.get(i);
+					this.valuesListView.getItems().add(new ValueItem(ValueType.PARAM, name, param));
 				}
+				final List<String> outputParamNames = to.getOutputParameterNames();
 				final List<String> returnValues = to.getReturnValues();
 				for (int i = 0; i < returnValues.size(); i++) {
+					final String name = i < outputParamNames.size() ? outputParamNames.get(i): "#" + (i + 1);
 					final String retval = returnValues.get(i);
-					this.valuesListView.getItems().add(new ValueItem(ValueType.RETURN_VALUE, i+1, retval));
+					this.valuesListView.getItems().add(new ValueItem(ValueType.RETURN_VALUE, name, retval));
 				}
 			}
 		});

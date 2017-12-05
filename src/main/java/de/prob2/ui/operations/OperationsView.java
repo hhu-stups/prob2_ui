@@ -21,7 +21,7 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
+import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
@@ -112,19 +112,19 @@ public final class OperationsView extends AnchorPane {
 		private String formatOperationItem(final OperationItem item) {
 			StringBuilder sb = new StringBuilder();
 			
-			final List<String> returnValues = item.getReturnValues();
-			if (!returnValues.isEmpty()) {
-				sb.append(String.join(", ", returnValues));
-				sb.append(" ← ");
-			}
-			
 			sb.append(getPrettyName(item.getName()));
 			
-			final List<String> params = item.getParams();
+			final List<String> params = item.getParameterValues();
 			if (!params.isEmpty()) {
 				sb.append('(');
 				sb.append(String.join(", ", params));
 				sb.append(')');
+			}
+			
+			final List<String> returnValues = item.getReturnValues();
+			if (!returnValues.isEmpty()) {
+				sb.append(" → ");
+				sb.append(String.join(", ", returnValues));
 			}
 			
 			return sb.toString();
@@ -363,8 +363,18 @@ public final class OperationsView extends AnchorPane {
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			final boolean skip = transition.getSource().equals(transition.getDestination());
+			OperationInfo machineOperationInfo = trace.getStateSpace().getLoadedMachine().getMachineOperationInfo(transition.getName());
+			List<String> paramNames;
+			List<String> outputNames;
+			if(machineOperationInfo!=null) {
+				paramNames = machineOperationInfo.getParameterNames();
+				outputNames = machineOperationInfo.getOutputParameterNames();
+			}else {
+				paramNames = Collections.emptyList();
+				outputNames = Collections.emptyList();
+			}
 			OperationItem operationItem = new OperationItem(trace, transition.getId(), transition.getName(), params,
-					transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip);
+					transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip, paramNames, outputNames);
 			events.add(operationItem);
 		}
 		showDisabledAndWithTimeout(trace, disabled, withTimeout);
@@ -373,7 +383,7 @@ public final class OperationsView extends AnchorPane {
 
 		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
 			events.add(new OperationItem(trace, "-", bundle.getString("operations.maxReached"), Collections.emptyList(),
-					Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false));
+					Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false,Collections.emptyList(),Collections.emptyList()));
 		}
 
 		final List<OperationItem> filtered = applyFilter(filter);
@@ -391,14 +401,14 @@ public final class OperationsView extends AnchorPane {
 				if (!"$initialise_machine".equals(s)) {
 					events.add(new OperationItem(trace, s, s, opToParams.get(s), Collections.emptyList(),
 							withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
-							false, false, false));
+							false, false, false,Collections.emptyList(),Collections.emptyList()));
 				}
 			}
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
 				events.add(new OperationItem(trace, s, s, Collections.emptyList(), Collections.emptyList(),
-						OperationItem.Status.TIMEOUT, false, false, false));
+						OperationItem.Status.TIMEOUT, false, false, false,Collections.emptyList(), Collections.emptyList()));
 			}
 		}
 	}
@@ -423,7 +433,7 @@ public final class OperationsView extends AnchorPane {
 
 	private int compareAlphanumeric(final OperationItem left, final OperationItem right) {
 		if (left.getName().equals(right.getName())) {
-			return compareParams(left.getParams(), right.getParams());
+			return compareParams(left.getParameterValues(), right.getParameterValues());
 		} else {
 			return alphanumericComparator.compare(left.getName(), right.getName());
 		}
@@ -431,7 +441,7 @@ public final class OperationsView extends AnchorPane {
 
 	private int compareModelOrder(final OperationItem left, final OperationItem right) {
 		if (left.getName().equals(right.getName())) {
-			return compareParams(left.getParams(), right.getParams());
+			return compareParams(left.getParameterValues(), right.getParameterValues());
 		} else {
 			return Integer.compare(opNames.indexOf(left.getName()), opNames.indexOf(right.getName()));
 		}
