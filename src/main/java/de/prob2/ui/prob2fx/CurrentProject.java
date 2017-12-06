@@ -48,6 +48,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	private final ObjectProperty<File> location;
 	private final BooleanProperty saved;
+	private final BooleanProperty newProject;
 
 	private final ObjectProperty<Path> defaultLocation;
 	private final StageManager stageManager;
@@ -77,6 +78,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.currentPreference = new SimpleObjectProperty<>(this, "currentPreference", null);
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
+		this.newProject = new SimpleBooleanProperty(this, "newProject", false);
 
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
@@ -88,7 +90,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.preferences.setAll(to.getPreferences());
 				this.location.set(to.getLocation());
 				this.saved.set(false);
-				if (!to.equals(from)) {
+				if (from != null && !to.getLocation().equals(from.getLocation())) {
 					this.currentMachine.set(null);
 				}
 			}
@@ -172,6 +174,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public void changeName(String newName) {
+		this.setNewProject(true);
 		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(), this.getLocation()));
 	}
 
@@ -189,6 +192,12 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 		update(project);
 		initializeMachines();
+	}
+	
+	public void set(Project project, boolean newProject) {
+		this.set(project);
+		this.setSaved(!newProject);
+		this.setNewProject(newProject);
 	}
 
 	public void update(Project project) {
@@ -284,6 +293,18 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public boolean isSaved() {
 		return this.savedProperty().get();
+	}
+	
+	public ReadOnlyBooleanProperty newProjectProperty() {
+		return this.newProject;
+	}
+
+	public void setNewProject(boolean newProject) {
+		this.newProject.set(newProject);
+	}
+
+	public boolean isNewProject() {
+		return this.newProjectProperty().get();
 	}
 
 	private boolean confirmReplacingProject() {
