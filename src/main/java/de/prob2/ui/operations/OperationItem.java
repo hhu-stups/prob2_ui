@@ -4,7 +4,9 @@ import com.google.common.base.MoreObjects;
 import de.prob.statespace.Trace;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class OperationItem {
@@ -23,6 +25,8 @@ public class OperationItem {
 	private final boolean explored;
 	private final boolean errored;
 	private final boolean skip;
+	private final Map<String, String> constants;
+	private final Map<String, String> variables;
 
 	public OperationItem(
 		final Trace trace,
@@ -35,7 +39,9 @@ public class OperationItem {
 		final boolean errored,
 		final boolean skip,
 		final List<String> parameterNames,
-		final List<String> returnParameterNames
+		final List<String> returnParameterNames,
+		final Map<String, String> constants,
+		final Map<String, String> variables
 	) {
 		this.trace = Objects.requireNonNull(trace);
 		this.id = Objects.requireNonNull(id);
@@ -48,6 +54,8 @@ public class OperationItem {
 		this.skip = skip;
 		this.parameterNames = Objects.requireNonNull(parameterNames);
 		this.outputParameterNames = Objects.requireNonNull(returnParameterNames);
+		this.constants = Objects.requireNonNull(constants);
+		this.variables = Objects.requireNonNull(variables);
 	}
 	
 	public Trace getTrace() {
@@ -60,6 +68,14 @@ public class OperationItem {
 	
 	public List<String> getParameterNames() {
 		return new ArrayList<>(parameterNames);
+	}
+	
+	public Map<String, String> getConstants(){
+		return this.constants;
+	}
+	
+	public Map<String, String> getVariables(){
+		return this.variables;
 	}
 	
 	public List<String> getParameterValues() {

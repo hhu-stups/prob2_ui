@@ -1,6 +1,8 @@
 package de.prob2.ui.operations;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -19,6 +21,8 @@ class OperationDetailsStage extends Stage {
 	private enum ValueType {
 		PARAM("operationDetails.type.parameter"),
 		RETURN_VALUE("operationDetails.type.returnValue"),
+		CONSTANT("operationDetails.type.constant"),
+		VARIABLE("operationDetails.type.variable"),
 		;
 		
 		private final String key;
@@ -124,10 +128,22 @@ class OperationDetailsStage extends Stage {
 					final String retval = returnValues.get(i);
 					this.valuesListView.getItems().add(new ValueItem(ValueType.RETURN_VALUE, name, retval));
 				}
+				
+				addToValuesListView(ValueType.CONSTANT, to.getConstants());
+				addToValuesListView(ValueType.VARIABLE, to.getVariables());
 			}
 		});
 	}
 	
+	private void addToValuesListView(ValueType type, Map<String, String> map) {
+		for (Entry<String, String> element : map.entrySet()) {
+			String name = element.getKey();
+			String value = element.getValue();
+			this.valuesListView.getItems().add(new ValueItem(type, name, value));
+		}
+		
+	}
+
 	public ObjectProperty<OperationItem> itemProperty() {
 		return item;
 	}

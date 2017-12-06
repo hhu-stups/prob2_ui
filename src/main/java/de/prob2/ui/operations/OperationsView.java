@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -75,18 +76,15 @@ public final class OperationsView extends AnchorPane {
 			super();
 
 			getStyleClass().add("operations-cell");
-			
+
 			this.setOnMouseClicked(event -> {
-				if (
-					event.getButton() == MouseButton.PRIMARY
-					&& this.getItem() != null
-					&& this.getItem().getStatus() == OperationItem.Status.ENABLED
-					&& this.getItem().getTrace().equals(currentTrace.get())
-				) {
+				if (event.getButton() == MouseButton.PRIMARY && this.getItem() != null
+						&& this.getItem().getStatus() == OperationItem.Status.ENABLED
+						&& this.getItem().getTrace().equals(currentTrace.get())) {
 					currentTrace.set(currentTrace.get().add(this.getItem().getId()));
 				}
 			});
-			
+
 			final MenuItem showDetailsItem = new MenuItem(bundle.getString("operations.showDetails"));
 			showDetailsItem.setOnAction(event -> {
 				final OperationDetailsStage stage = injector.getInstance(OperationDetailsStage.class);
@@ -95,38 +93,48 @@ public final class OperationsView extends AnchorPane {
 			});
 			this.setContextMenu(new ContextMenu(showDetailsItem));
 		}
-		
+
 		private String getPrettyName(final String name) {
 			switch (name) {
-				case "$setup_constants":
-					return "SETUP_CONSTANTS";
-				
-				case "$initialise_machine":
-					return "INITIALISATION";
-				
-				default:
-					return name;
+			case "$setup_constants":
+				return "SETUP_CONSTANTS";
+
+			case "$initialise_machine":
+				return "INITIALISATION";
+
+			default:
+				return name;
 			}
 		}
-		
+
 		private String formatOperationItem(final OperationItem item) {
 			StringBuilder sb = new StringBuilder();
-			
+
 			sb.append(getPrettyName(item.getName()));
-			
+
 			final List<String> params = item.getParameterValues();
 			if (!params.isEmpty()) {
 				sb.append('(');
 				sb.append(String.join(", ", params));
 				sb.append(')');
+			} else {
+				HashMap<String, String> stateValues = new HashMap<>();
+				stateValues.putAll(item.getConstants());
+				stateValues.putAll(item.getVariables());
+				if (!stateValues.isEmpty()) {
+					sb.append('(');
+					sb.append(stateValues.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
+							.collect(Collectors.joining(", ")));
+					sb.append(')');
+				}
 			}
-			
+
 			final List<String> returnValues = item.getReturnValues();
 			if (!returnValues.isEmpty()) {
 				sb.append(" → ");
 				sb.append(String.join(", ", returnValues));
 			}
-			
+
 			return sb.toString();
 		}
 
@@ -241,7 +249,8 @@ public final class OperationsView extends AnchorPane {
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
-			final Injector injector, final ResourceBundle bundle, final StatusBar statusBar, final StopActions stopActions) {
+			final Injector injector, final ResourceBundle bundle, final StatusBar statusBar,
+			final StopActions stopActions) {
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
@@ -287,7 +296,7 @@ public final class OperationsView extends AnchorPane {
 		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 	}
 
-	private List<String> extractParamsFromNextState(final Trace trace, final Transition transition,
+	private LinkedHashMap<String, String> getNextStateValues(final Trace trace, final Transition transition,
 			final Class<? extends AbstractFormulaElement> type) {
 		// It seems that there is no way to easily find out the
 		// constant/variable values which a specific $setup_constants or
@@ -295,28 +304,27 @@ public final class OperationsView extends AnchorPane {
 		// So we look at the values of all constants/variables in the
 		// transition's destination state.
 		final List<IEvalElement> formulas = new ArrayList<>();
-		if(trace.getStateSpace().getMainComponent() != null){
+		if (trace.getStateSpace().getMainComponent() != null) {
 			for (final AbstractFormulaElement c : trace.getStateSpace().getMainComponent().getChildrenOfType(type)) {
 				formulas.add(c.getFormula());
 			}
 		}
 
-
-		final List<String> params = new ArrayList<>();
+		final LinkedHashMap<String, String> stateValues = new LinkedHashMap<>();
 		final List<AbstractEvalResult> results = transition.getDestination().eval(formulas);
 		for (int i = 0; i < formulas.size(); i++) {
 			final AbstractEvalResult value = results.get(i);
 			final String valueString;
 			if (value instanceof EvalResult) {
-				valueString = ((EvalResult)value).getValue();
+				valueString = ((EvalResult) value).getValue();
 			} else {
 				// noinspection ObjectToString
 				valueString = value.toString();
 			}
-			params.add(formulas.get(i).getCode() + '=' + valueString);
+			stateValues.put(formulas.get(i).getCode(), valueString);
 		}
 
-		return params;
+		return stateValues;
 	}
 
 	public void update(final Trace trace) {
@@ -334,7 +342,7 @@ public final class OperationsView extends AnchorPane {
 			this.statusBar.setOperationsViewUpdating(true);
 			this.opsListView.setDisable(true);
 		});
-		
+
 		if (!trace.getModel().equals(currentModel)) {
 			updateModel(trace);
 		}
@@ -346,35 +354,45 @@ public final class OperationsView extends AnchorPane {
 		for (Transition transition : operations) {
 			disabled.remove(transition.getName());
 
-			final List<String> params;
+			final List<String> paramValues;
+			final Map<String, String> constants;
+			final Map<String, String> variables;
 			switch (transition.getName()) {
-				case "$setup_constants":
-					params = this.extractParamsFromNextState(trace, transition, Constant.class);
-					break;
-				
-				case "$initialise_machine":
-					params = this.extractParamsFromNextState(trace, transition, Variable.class);
-					break;
-				
-				default:
-					params = transition.getParameterValues();
+			case "$setup_constants":
+				paramValues = Collections.emptyList();
+				constants = this.getNextStateValues(trace, transition, Constant.class);
+				variables = Collections.emptyMap();
+				break;
+
+			case "$initialise_machine":
+				paramValues = Collections.emptyList();
+				variables = this.getNextStateValues(trace, transition, Variable.class);
+				constants = Collections.emptyMap();
+				break;
+
+			default:
+				paramValues = transition.getParameterValues();
+				constants = Collections.emptyMap();
+				variables = Collections.emptyMap();
 			}
 
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			final boolean skip = transition.getSource().equals(transition.getDestination());
-			OperationInfo machineOperationInfo = trace.getStateSpace().getLoadedMachine().getMachineOperationInfo(transition.getName());
+			OperationInfo machineOperationInfo = trace.getStateSpace().getLoadedMachine()
+					.getMachineOperationInfo(transition.getName());
 			List<String> paramNames;
 			List<String> outputNames;
-			if(machineOperationInfo!=null) {
+			if (machineOperationInfo != null) {
 				paramNames = machineOperationInfo.getParameterNames();
 				outputNames = machineOperationInfo.getOutputParameterNames();
-			}else {
+			} else {
 				paramNames = Collections.emptyList();
 				outputNames = Collections.emptyList();
 			}
-			OperationItem operationItem = new OperationItem(trace, transition.getId(), transition.getName(), params,
-					transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip, paramNames, outputNames);
+			OperationItem operationItem = new OperationItem(trace, transition.getId(), transition.getName(), paramValues,
+					transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip, paramNames,
+					outputNames, constants, variables);
 			events.add(operationItem);
 		}
 		showDisabledAndWithTimeout(trace, disabled, withTimeout);
@@ -383,11 +401,12 @@ public final class OperationsView extends AnchorPane {
 
 		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
 			events.add(new OperationItem(trace, "-", bundle.getString("operations.maxReached"), Collections.emptyList(),
-					Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false,Collections.emptyList(),Collections.emptyList()));
+					Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false,
+					Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap()));
 		}
 
 		final List<OperationItem> filtered = applyFilter(filter);
-		
+
 		Platform.runLater(() -> {
 			opsListView.getItems().setAll(filtered);
 			this.opsListView.setDisable(false);
@@ -395,20 +414,23 @@ public final class OperationsView extends AnchorPane {
 		});
 	}
 
-	private void showDisabledAndWithTimeout(final Trace trace, final Set<String> notEnabled, final Set<String> withTimeout) {
+	private void showDisabledAndWithTimeout(final Trace trace, final Set<String> notEnabled,
+			final Set<String> withTimeout) {
 		if (showDisabledOps) {
 			for (String s : notEnabled) {
 				if (!"$initialise_machine".equals(s)) {
 					events.add(new OperationItem(trace, s, s, opToParams.get(s), Collections.emptyList(),
 							withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
-							false, false, false,Collections.emptyList(),Collections.emptyList()));
+							false, false, false, Collections.emptyList(), Collections.emptyList(),
+							Collections.emptyMap(), Collections.emptyMap()));
 				}
 			}
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
 				events.add(new OperationItem(trace, s, s, Collections.emptyList(), Collections.emptyList(),
-						OperationItem.Status.TIMEOUT, false, false, false,Collections.emptyList(), Collections.emptyList()));
+						OperationItem.Status.TIMEOUT, false, false, false, Collections.emptyList(),
+						Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap()));
 			}
 		}
 	}
@@ -479,7 +501,8 @@ public final class OperationsView extends AnchorPane {
 	}
 
 	private List<OperationItem> applyFilter(final String filter) {
-		return events.stream().filter(op -> op.getName().toLowerCase().contains(filter.toLowerCase())).collect(Collectors.toList());
+		return events.stream().filter(op -> op.getName().toLowerCase().contains(filter.toLowerCase()))
+				.collect(Collectors.toList());
 	}
 
 	private void doSort() {
