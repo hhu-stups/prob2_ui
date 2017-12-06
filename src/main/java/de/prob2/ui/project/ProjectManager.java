@@ -30,6 +30,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
 @Singleton
@@ -53,9 +54,8 @@ public class ProjectManager {
 		this.recentProjects = recentProjects;
 	}
 
-	private File saveProject(Project project) {
-		File file = new File(project.getLocation() + File.separator + project.getName() + ".json");
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), PROJECT_CHARSET)) {
+	private File saveProject(Project project, File location) {
+		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(location), PROJECT_CHARSET)) {
 			gson.toJson(project, writer);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
@@ -64,15 +64,28 @@ public class ProjectManager {
 			LOGGER.warn("Failed to save project", exc);
 			return null;
 		}
-		return file;
+		return location;
 	}
 
 	public void saveCurrentProject() {
 		Project project = currentProject.get();
+		File location = new File(project.getLocation() + File.separator + project.getName() + ".json");
+
+		if (currentProject.isNewProject() && location.exists()) {
+			Optional<ButtonType> result = stageManager.makeAlert(AlertType.WARNING,
+					location + " " + bundle.getString("project.projectManager.fileAlreadyExistsWarning"), ButtonType.YES, ButtonType.NO)
+					.showAndWait(); 
+			if (result.get() == ButtonType.NO) {
+				return;
+			}
+		}
+		
 		currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(),
 				project.getPreferences(), project.getLocation()));
-		File savedFile = saveProject(project);
+		
+		File savedFile = saveProject(project, location);
 		if (savedFile != null) {
+			currentProject.setNewProject(false);
 			addToRecentProjects(savedFile);
 			currentProject.setSaved(true);
 			for (Machine machine : currentProject.get().getMachines()) {
@@ -81,7 +94,9 @@ public class ProjectManager {
 			for (Preference pref : currentProject.get().getPreferences()) {
 				pref.changedProperty().set(false);
 			}
+
 		}
+
 	}
 
 	private Project loadProject(File file) {
@@ -91,7 +106,9 @@ public class ProjectManager {
 			project.setLocation(file.getParentFile());
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
-			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.fileNotFound.content"), file), ButtonType.YES, ButtonType.NO);
+			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
+					String.format(bundle.getString("project.fileNotFound.content"), file), ButtonType.YES,
+					ButtonType.NO);
 			alert.setHeaderText(bundle.getString("project.fileNotFound.header"));
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
@@ -107,12 +124,12 @@ public class ProjectManager {
 
 	public void openProject(File file) {
 		Project project = loadProject(file);
-		if(project != null) {
+		if (project != null) {
 			replaceMissingWithDefaults(project);
 			initializeLTL(project);
-			currentProject.set(project, true);
+			currentProject.set(project, false);
 			addToRecentProjects(file);
-		} 
+		}
 	}
 
 	private void addToRecentProjects(File file) {
