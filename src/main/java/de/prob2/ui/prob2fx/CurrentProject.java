@@ -88,7 +88,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.preferences.setAll(to.getPreferences());
 				this.location.set(to.getLocation());
 				this.saved.set(false);
-				if (!to.equals(from)) {
+				if (from != null && !to.getLocation().equals(from.getLocation())) {
 					this.currentMachine.set(null);
 				}
 			}
