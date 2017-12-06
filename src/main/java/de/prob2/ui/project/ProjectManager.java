@@ -110,7 +110,7 @@ public class ProjectManager {
 		if(project != null) {
 			replaceMissingWithDefaults(project);
 			initializeLTL(project);
-			currentProject.set(project);
+			currentProject.set(project, true);
 			addToRecentProjects(file);
 		} 
 	}

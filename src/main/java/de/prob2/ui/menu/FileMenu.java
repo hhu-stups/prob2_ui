@@ -119,7 +119,7 @@ public class FileMenu extends Menu {
 		final String shortName = file.getName().substring(0, file.getName().lastIndexOf('.'));
 		final String description = String.format(bundle.getString("project.automaticDescription"), absolute);
 		final Machine machine = new Machine(shortName, "", relative);
-		currentProject.set(new Project(shortName, description, machine, projectLocation.toFile()));
+		currentProject.set(new Project(shortName, description, machine, projectLocation.toFile()), false);
 
 		currentProject.startAnimation(machine, Preference.DEFAULT);
 	}

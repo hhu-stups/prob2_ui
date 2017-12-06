@@ -190,6 +190,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		update(project);
 		initializeMachines();
 	}
+	
+	public void set(Project project, boolean save) {
+		this.set(project);
+		this.setSaved(save);
+	}
 
 	public void update(Project project) {
 		super.set(project);
