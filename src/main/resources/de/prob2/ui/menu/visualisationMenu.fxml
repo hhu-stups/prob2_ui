@@ -7,4 +7,5 @@
 	<MenuItem fx:id="openVisualisationItem" text="%menu.visualisation.items.select" onAction="#openVisualisation"/>
 	<MenuItem fx:id="stopVisualisationItem" text="%menu.visualisation.items.stop" onAction="#stopVisualisation"/>
 	<MenuItem fx:id="detachVisualisationItem" text="%menu.visualisation.items.detach" onAction="#detachVisualisation"/>
+	<MenuItem fx:id="currentStateItem" text="Show Current State as graph" onAction="#showCurrentState"/>
 </fx:root>

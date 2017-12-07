@@ -4,7 +4,10 @@ package de.prob2.ui.dotty;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.GetSvgForVisualizationCommand;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseButton;
@@ -27,9 +30,12 @@ public class DotView extends Stage {
 	private double oldMousePositionY = -1;
 	private double dragFactor = 1;
 	
+	private CurrentTrace currentTrace;
+	
 	@Inject
-	public DotView(final StageManager stageManager) {
+	public DotView(final StageManager stageManager, final CurrentTrace currentTrace) {
 		stageManager.loadFXML(this, "dot_view.fxml");
+		this.currentTrace = currentTrace;
 		dotView.setContextMenuEnabled(false);
 		dotView.setOnMouseMoved(e-> {
 			oldMousePositionX = e.getSceneX();
@@ -41,6 +47,9 @@ public class DotView extends Stage {
 			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
+			GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(currentTrace.getStateSpace());
+			currentTrace.getStateSpace().execute(cmd);
+			System.out.println(cmd);
 
 		});
 		dotView.setOnMouseClicked(e-> {
@@ -61,8 +70,9 @@ public class DotView extends Stage {
 	
 	@FXML
 	public void initialize() {
-		engine = dotView.getEngine();
-		engine.load(this.getClass().getResource("GCD.svg").toExternalForm());
+		//engine = dotView.getEngine();
+		//engine.load(this.getClass().getResource("GCD.svg").toExternalForm());
+
 	}
 
 }

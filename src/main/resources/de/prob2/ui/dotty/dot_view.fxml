@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.web.WebView?>
+<?import de.prob2.ui.dotty.DotView?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+
+<fx:root type="DotView" title="State as Graph Visualization" minWidth="240" minHeight="160" width="600.0" height="400.0" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene stylesheets="@/prob.css">
+			<StackPane>
+				<children>
+					<ScrollPane fx:id ="pane" fitToHeight="true" fitToWidth="true">
+   						<content>
+     			  			<WebView fx:id="dotView" prefWidth="600.0" prefHeight="400.0"/>
+  						 </content>
+					</ScrollPane>
+				</children>
+			</StackPane>
+		</Scene>
+	</scene>
+</fx:root>
