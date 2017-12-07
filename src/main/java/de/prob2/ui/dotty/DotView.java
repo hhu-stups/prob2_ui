@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetSvgForVisualizationCommand;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
@@ -14,7 +13,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
-@Singleton
 public class DotView extends Stage {
 	
 	@FXML
@@ -44,10 +42,10 @@ public class DotView extends Stage {
 			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
-			GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(currentTrace.getStateSpace());
+			GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand();
 			currentTrace.getStateSpace().execute(cmd);
 			System.out.println(cmd);
-
+			
 		});
 		dotView.setOnMouseClicked(e-> {
 			if(e.getClickCount() < 2) {
