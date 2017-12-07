@@ -30,12 +30,9 @@ import de.prob.model.classicalb.Operation;
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
 import de.prob.model.representation.AbstractElement;
-import de.prob.model.representation.AbstractFormulaElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.BEvent;
-import de.prob.model.representation.Constant;
 import de.prob.model.representation.Machine;
-import de.prob.model.representation.Variable;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
@@ -118,7 +115,7 @@ public final class OperationsView extends AnchorPane {
 				sb.append(String.join(", ", params));
 				sb.append(')');
 			} else {
-				HashMap<String, String> stateValues = new HashMap<>();
+				Map<String, String> stateValues = new LinkedHashMap<>();
 				stateValues.putAll(item.getConstants());
 				stateValues.putAll(item.getVariables());
 				if (!stateValues.isEmpty()) {
@@ -296,21 +293,13 @@ public final class OperationsView extends AnchorPane {
 		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 	}
 
-	private LinkedHashMap<String, String> getNextStateValues(final Trace trace, final Transition transition,
-			final Class<? extends AbstractFormulaElement> type) {
+	private LinkedHashMap<String, String> getNextStateValues(Transition transition, List<IEvalElement> formulas){
 		// It seems that there is no way to easily find out the
 		// constant/variable values which a specific $setup_constants or
 		// $initialise_machine transition would set.
 		// So we look at the values of all constants/variables in the
 		// transition's destination state.
-		final List<IEvalElement> formulas = new ArrayList<>();
-		if (trace.getStateSpace().getMainComponent() != null) {
-			for (final AbstractFormulaElement c : trace.getStateSpace().getMainComponent().getChildrenOfType(type)) {
-				formulas.add(c.getFormula());
-			}
-		}
-
-		final LinkedHashMap<String, String> stateValues = new LinkedHashMap<>();
+		final LinkedHashMap<String, String> values = new LinkedHashMap<>();
 		final List<AbstractEvalResult> results = transition.getDestination().eval(formulas);
 		for (int i = 0; i < formulas.size(); i++) {
 			final AbstractEvalResult value = results.get(i);
@@ -321,12 +310,12 @@ public final class OperationsView extends AnchorPane {
 				// noinspection ObjectToString
 				valueString = value.toString();
 			}
-			stateValues.put(formulas.get(i).getCode(), valueString);
+			values.put(formulas.get(i).getCode(), valueString);
 		}
 
-		return stateValues;
+		return values;
 	}
-
+	
 	public void update(final Trace trace) {
 		if (trace == null) {
 			currentModel = null;
@@ -360,13 +349,13 @@ public final class OperationsView extends AnchorPane {
 			switch (transition.getName()) {
 			case "$setup_constants":
 				paramValues = Collections.emptyList();
-				constants = this.getNextStateValues(trace, transition, Constant.class);
+				constants = this.getNextStateValues(transition, trace.getStateSpace().getLoadedMachine().getConstantEvalElements());
 				variables = Collections.emptyMap();
 				break;
 
 			case "$initialise_machine":
 				paramValues = Collections.emptyList();
-				variables = this.getNextStateValues(trace, transition, Variable.class);
+				variables = this.getNextStateValues(transition, trace.getStateSpace().getLoadedMachine().getVariableEvalElements());
 				constants = Collections.emptyMap();
 				break;
 
