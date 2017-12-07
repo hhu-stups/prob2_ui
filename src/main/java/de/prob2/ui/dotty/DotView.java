@@ -42,10 +42,10 @@ public class DotView extends Stage {
 			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
-			GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(GetSvgForVisualizationCommand.Option.DEPENDENCE_GRAPH);
+			/*GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(GetSvgForVisualizationCommand.Option.DEPENDENCE_GRAPH);
 			currentTrace.getStateSpace().execute(cmd);
 			System.out.println(currentTrace.getStateSpace().getTrace(currentTrace.getCurrentState().getId()));
-			System.out.println(cmd);
+			System.out.println(cmd);*/
 			
 		});
 		dotView.setOnMouseClicked(e-> {
@@ -68,7 +68,7 @@ public class DotView extends Stage {
 	public void initialize() {
 		//engine = dotView.getEngine();
 		//engine.load(this.getClass().getResource("GCD.svg").toExternalForm());
-		dotView.getEngine().load(this.getClass().getResource("GCD.svg").toExternalForm());
+		//dotView.getEngine().load(this.getClass().getResource("GCD.svg").toExternalForm());
 	}
 
 }
