@@ -3,7 +3,6 @@ package de.prob2.ui.beditor;
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.web.WebEngine;
 import netscape.javascript.JSObject;
 import org.slf4j.Logger;
@@ -13,8 +12,8 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.StringReader;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingDeque;
 
 
 public class BTokenProvider {
@@ -23,13 +22,13 @@ public class BTokenProvider {
 	
 	private static final Map<Class<? extends Token>, String> syntaxClasses = new HashMap<>();
 	
-	private LinkedList<Token> tokens;
+	private LinkedBlockingDeque<Token> tokens;
 	
-	private LinkedList<Token> firstLineTokens;
-		
-	private SimpleBooleanProperty initialized;
+	private LinkedBlockingDeque<Token> firstLineTokens;
 	
-	private String text;
+	private WebEngine engine;
+	
+	private boolean initialized;
 	
 	static {
 			addTokens("b-type", TIdentifierLiteral.class);
@@ -66,18 +65,12 @@ public class BTokenProvider {
 		}
 	
 	public BTokenProvider(WebEngine engine) {
-		this.tokens = new LinkedList<>();
-		this.firstLineTokens = new LinkedList<>();
+		this.initialized = false;
+		this.tokens = new LinkedBlockingDeque<>();
+		this.firstLineTokens = new LinkedBlockingDeque<>();
 		JSObject jsobj = (JSObject) engine.executeScript("window");
 		jsobj.setMember("blexer", this);
-		initialized = new SimpleBooleanProperty(false);
-		
-		initialized.addListener((observable, oldValue, newValue) -> {
-			if (newValue && !oldValue) {
-				final JSObject editor = (JSObject) engine.executeScript("editor");
-				editor.call("setValue", text);
-			}
-		});
+		this.engine = engine;
 	}
 	
 	@SafeVarargs
@@ -93,37 +86,30 @@ public class BTokenProvider {
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
 		int beginLine = Integer.parseInt(line);
 		Token t = null;
-		System.out.println("--------------------------------");
 		do {
 			try {
 				t = lexer.next();
 			} catch (LexerException | IOException e) {
 				LOGGER.error("Failed to lex", e);
 			}
-
-			if (!"\n".equals(t.getText())) {
+			if (!"\n".equals(t.getText()) && !(t instanceof TWhiteSpace)) {
 				if(t.getLine() == beginLine) {
-					System.out.println(t.getClass());
 					firstLineTokens.add(t);
 				} else  if (t.getLine() > beginLine) {
-					System.out.println(t.getClass());
 					tokens.add(t);
 				}
 			}
 		} while (!(t instanceof EOF));
 		firstLineTokens.addAll(tokens);
-		if (!initialized.get()) {
-			this.text = text;
-			initialized.set(true);
+		if(!initialized) {
+			final JSObject editor = (JSObject) engine.executeScript("editor");
+			editor.call("setValue", text);
+			initialized = true;
 		}
 	}
 
 	public Token poll() {
-		Token t = tokens.poll();
-		if(t != null) {
-			System.out.println("POLL: " + t.getClass());
-		}
-		return t;
+		return tokens.poll();
 	}
 	
 	public Token peek() {
@@ -135,9 +121,7 @@ public class BTokenProvider {
 	}
 	
 	public Token firstLinePoll() {
-		Token t = firstLineTokens.poll();
-		System.out.println("POLL: " + t.getClass());
-		return t;
+		return firstLineTokens.poll();
 	}
 	
 	
@@ -149,11 +133,19 @@ public class BTokenProvider {
 		return clazz;
 	}
 	
-	public boolean isInitialized() {
-		return initialized.get();
-	}
-	
 	public void jslog(String msg) {
 		LOGGER.debug(msg);
+	}
+	
+	public boolean isInitialized() {
+		return initialized;
+	}
+	
+	public int size() {
+		return tokens.size();
+	}
+	
+	public int firstLineSize() {
+		return firstLineTokens.size();
 	}
 }

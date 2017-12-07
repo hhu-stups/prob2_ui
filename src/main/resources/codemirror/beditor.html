@@ -13,7 +13,6 @@
 		</div>
 		<script>
 			var TO;
-			var oldLine;
 			
 			function onChange(cm) {
 				var line = cm.getCursor().line;
@@ -23,17 +22,10 @@
 						blexer.computeHighlighting(cm.getValue(), line + '');
 					}, 500);
 				} else {
-					if(oldLine + 1 == line) {
-						line -= 1;
-					}
 					blexer.computeHighlighting(cm.getValue(), line + '');
 				}
 			}
 			
-			function beforeChange(cm) {
-				oldLine = cm.getCursor().line;
-			}
-
 			var code = document.getElementById('code');
 			var editor = CodeMirror.fromTextArea(code, {
 				lineNumbers: true,
@@ -44,7 +36,6 @@
 			});
 			
 			editor.on("change", onChange);			
-			editor.on("beforeChange", beforeChange);
 			
 			function changeFontSize(size) {
 				editor.getWrapperElement().style["font-size"] = size+"px";

@@ -56,7 +56,6 @@ public class BEditorStage extends Stage {
 		engine.load(ProB2.class.getClassLoader().getResource("codemirror/beditor.html").toURI().toString());
 		engine.setJavaScriptEnabled(true);
 		new BTokenProvider(engine);
-
 	}
 	
 	@FXML

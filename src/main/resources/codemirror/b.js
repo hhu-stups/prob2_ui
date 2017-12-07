@@ -5,9 +5,11 @@ CodeMirror.defineMode("b", function() {
 				"comment" : false
 			};
 		},
-		token: function(stream, state) {
+		token: function(stream, state) {			
 			if (stream.match(/\/\*/, true)) {
-				blexer.poll();
+				if(blexer.size() > 0) {
+					blexer.poll();
+				}
 				state.comment = true;
 				return 'b-comment';
 			}
@@ -20,22 +22,24 @@ CodeMirror.defineMode("b", function() {
 			if (state.comment) {
 				stream.next();
 				return 'b-comment';
-			} else if(blexer !== null) {				
-				var t = blexer.peek();
-				if(t !== null) {
+			} else if(blexer !== null) {
+				if(blexer.size() > 0) {
+					var t = blexer.peek();
 					if(stream.match(t.getText(), true)) {
 						blexer.poll();	
 						return blexer.getStyleClassFromToken(t);
 					} else {
-						t = blexer.firstLinePeek();
-
-						if (t !== null && stream.match(t.getText(), true)) {
-							blexer.firstLinePoll();
-							return blexer.getStyleClassFromToken(t);
+						if (blexer.firstLineSize() > 0) {
+							t = blexer.firstLinePeek();
+							if(stream.match(t.getText(), true)) {
+								blexer.firstLinePoll();
+								return blexer.getStyleClassFromToken(t);
+							}
 						} 
 					}
 				}
 				stream.next();
+				return "b-nothing";
 			}
 		}
 	};
