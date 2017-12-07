@@ -79,7 +79,7 @@ public class ProB2 extends Application {
 					final String message = String.format(
 							"An internal exception occurred and was not caught. This is probably a bug.%nThread: %s",
 							thread);
-					final Alert alert = stageManager.makeExceptionAlert(Alert.AlertType.ERROR, message, exc);
+					final Alert alert = stageManager.makeExceptionAlert(message, exc);
 					alert.setHeaderText("Uncaught internal exception");
 					alert.show();
 				});

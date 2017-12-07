@@ -1,22 +1,31 @@
 package de.prob2.ui.visualisation.fx;
 
-import de.prob.animator.domainobjects.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+import de.prob.animator.domainobjects.AbstractEvalElement;
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.EventB;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.animator.domainobjects.TranslatedEvalResult;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 /**
  * @author Christoph Heinzen
@@ -105,10 +114,10 @@ public class VisualisationModel {
 		LOGGER.debug("The value of formula \"{}\" could be evaluated for the new and the old trace.", formula);
 		if ((oldValue.getValue().equals(newValue.getValue()) && newValueFromMap && oldValueFromMap) ||
 				(newValueFromMap ^ oldValueFromMap)) {
-			/*first case: if the new and the oldValue are both from the maps and equal, it could happen that they are only
-						  equal because their short representations are equal and their expanded may be unequal
-			  second case: if only one value is from a map and the other one is evaluated, we would compare a short
-			               representation to an expanded one*/
+			/*
+			first case: if the new and the oldValue are both from the maps and equal, it could happen that they are only equal because their short representations are equal and their expanded may be unequal
+			second case: if only one value is from a map and the other one is evaluated, we would compare a short representation to an expanded one
+			*/
 			oldValue = evalState(oldTrace.getCurrentState(), formula);
 			newValue = evalState(newTrace.getCurrentState(), formula);
 			if (newValue == null) {
@@ -180,9 +189,9 @@ public class VisualisationModel {
 	 */
 	public boolean executeEvent(String event, String... predicates) {
 		Trace currentTrace = this.currentTrace.get();
-		LOGGER.debug("Try to execute event \"{}\" with predicates: {}.", event, String.join(" ", predicates));
+		LOGGER.debug("Try to execute event \"{}\" with predicates: {}", event, predicates);
 		if (currentTrace.canExecuteEvent(event, predicates)) {
-			LOGGER.debug("Event \"{}\" is executable. Execute it.");
+			LOGGER.debug("Event \"{}\" is executable. Execute it.", event);
 			Trace resultTrace = currentTrace.execute(event, predicates);
 			this.currentTrace.set(resultTrace);
 			return true;
@@ -206,7 +215,7 @@ public class VisualisationModel {
 				boolean invariantViolated = false;
 				for (int i = 0; i <  number && outgoingTransitions && !invariantViolated; i++) {
 					currentTrace.set(currentTrace.get().randomAnimation(1));
-					outgoingTransitions = currentTrace.getCurrentState().getOutTransitions().size() > 0;
+					outgoingTransitions = !currentTrace.getCurrentState().getOutTransitions().isEmpty();
 					if (stopOnInvariantViolation) {
 						invariantViolated = !currentTrace.getCurrentState().isInvariantOk();
 					}
@@ -215,7 +224,7 @@ public class VisualisationModel {
 				return null;
 			}
 		};
-		new Thread(task).start();
+		new Thread(task, "Random Event Execution Thread").start();
 	}
 
 	private Map<String, EvalResult> translateValuesMap(Map<IEvalElement, AbstractEvalResult> values) {

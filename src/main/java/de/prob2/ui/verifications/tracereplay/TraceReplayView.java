@@ -17,7 +17,6 @@ import de.prob2.ui.verifications.tracereplay.ReplayTrace.Status;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -82,11 +81,16 @@ public class TraceReplayView extends ScrollPane {
 			}
 		});
 
-		initTableRows();	
+		initTableRows();
 
-	currentProject.currentMachineProperty().addListener((observable,from,to)->loadTraceButton.setDisable(to==null));traceChecker.currentJobThreadsProperty().addListener((observable,from,to)->cancelButton.setDisable(to.isEmpty()));traceTableView.itemsProperty().get().addListener((ListChangeListener<ReplayTraceItem>)c->checkButton.setDisable(c.getList().isEmpty()));
+		currentProject.currentMachineProperty()
+				.addListener((observable, from, to) -> loadTraceButton.setDisable(to == null));
+		traceChecker.currentJobThreadsProperty()
+				.addListener((observable, from, to) -> cancelButton.setDisable(to.isEmpty()));
+		traceTableView.itemsProperty().get()
+				.addListener((ListChangeListener<ReplayTraceItem>) c -> checkButton.setDisable(c.getList().isEmpty()));
 
-	bindIconSizeToFontSize();
+		bindIconSizeToFontSize();
 
 	}
 
@@ -101,22 +105,23 @@ public class TraceReplayView extends ScrollPane {
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.showError"));
 			showErrorItem.setOnAction(event -> stageManager
-					.makeExceptionAlert(AlertType.ERROR, "", row.getItem().getTrace().getError()).showAndWait());
+					.makeExceptionAlert("", row.getItem().getTrace().getError()).showAndWait());
 			showErrorItem.setDisable(true);
-			
+
 			final MenuItem deleteTraceItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.deleteTrace"));
-			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
+			deleteTraceItem.setOnAction(
+					event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
 
-			final ContextMenu menu = new ContextMenu(replayTraceItem, showErrorItem,deleteTraceItem);
+			final ContextMenu menu = new ContextMenu(replayTraceItem, showErrorItem, deleteTraceItem);
 			row.setContextMenu(menu);
 
-			row.itemProperty().addListener((o,f,t) -> {
-				if(t == null) {
+			row.itemProperty().addListener((o, f, t) -> {
+				if (t == null) {
 					return;
 				}
 				t.getTrace().getStatus().addListener((observable, from, to) -> {
-					if(to == Status.FAILED) {
+					if (to == Status.FAILED) {
 						showErrorItem.setDisable(false);
 					} else {
 						showErrorItem.setDisable(true);

@@ -13,6 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.GetMachineStructureCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
@@ -30,6 +31,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.formula.FormulaGenerator;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
 
@@ -39,8 +41,10 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
@@ -56,17 +60,27 @@ import org.slf4j.LoggerFactory;
 public final class StatesView extends AnchorPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StatesView.class);
 	private static final TreeItem<StateItem<?>> LOADING_ITEM;
-	
+
 	static {
 		LOADING_ITEM = new TreeItem<>(new StateItem<>("Loading...", false));
 		LOADING_ITEM.getChildren().add(new TreeItem<>(new StateItem<>("Loading", false)));
 	}
 
-	@FXML private TreeTableView<StateItem<?>> tv;
-	@FXML private TreeTableColumn<StateItem<?>, StateItem<?>> tvName;
-	@FXML private TreeTableColumn<StateItem<?>, StateItem<?>> tvValue;
-	@FXML private TreeTableColumn<StateItem<?>, StateItem<?>> tvPreviousValue;
-	@FXML private TreeItem<StateItem<?>> tvRootItem;
+	@FXML
+	private Button searchButton;
+	@FXML
+	private TextField filterState;
+
+	@FXML
+	private TreeTableView<StateItem<?>> tv;
+	@FXML
+	private TreeTableColumn<StateItem<?>, StateItem<?>> tvName;
+	@FXML
+	private TreeTableColumn<StateItem<?>, StateItem<?>> tvValue;
+	@FXML
+	private TreeTableColumn<StateItem<?>, StateItem<?>> tvPreviousValue;
+	@FXML
+	private TreeItem<StateItem<?>> tvRootItem;
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
@@ -80,16 +94,12 @@ public final class StatesView extends AnchorPane {
 	private final Map<IEvalElement, AbstractEvalResult> previousValues;
 	private final ExecutorService updater;
 
+	private String filter = "";
+
 	@Inject
-	private StatesView(
-		final Injector injector,
-		final CurrentTrace currentTrace,
-		final FormulaGenerator formulaGenerator,
-		final StatusBar statusBar,
-		final StageManager stageManager,
-		final ResourceBundle bundle,
-		final StopActions stopActions
-	) {
+	private StatesView(final Injector injector, final CurrentTrace currentTrace,
+			final FormulaGenerator formulaGenerator, final StatusBar statusBar, final StageManager stageManager,
+			final ResourceBundle bundle, final StopActions stopActions) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.formulaGenerator = formulaGenerator;
@@ -105,7 +115,7 @@ public final class StatesView extends AnchorPane {
 
 		stageManager.loadFXML(this, "states_view.fxml");
 	}
-	
+
 	@FXML
 	private void initialize() {
 		tv.setRowFactory(view -> initTableRow());
@@ -114,7 +124,8 @@ public final class StatesView extends AnchorPane {
 		this.tvValue.setCellFactory(col -> new ValueCell(bundle, this.currentValues, true));
 		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle, this.previousValues, false));
 
-		final Callback<TreeTableColumn.CellDataFeatures<StateItem<?>, StateItem<?>>, ObservableValue<StateItem<?>>> cellValueFactory = data -> Bindings.createObjectBinding(data.getValue()::getValue, this.currentTrace);
+		final Callback<TreeTableColumn.CellDataFeatures<StateItem<?>, StateItem<?>>, ObservableValue<StateItem<?>>> cellValueFactory = data -> Bindings
+				.createObjectBinding(data.getValue()::getValue, this.currentTrace);
 		this.tvName.setCellValueFactory(cellValueFactory);
 		this.tvValue.setCellValueFactory(cellValueFactory);
 		this.tvPreviousValue.setCellValueFactory(cellValueFactory);
@@ -133,69 +144,69 @@ public final class StatesView extends AnchorPane {
 		};
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
+
+		bindIconSizeToFontSize();
 	}
-	
+
+	private void bindIconSizeToFontSize() {
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) (searchButton.getGraphic())).glyphSizeProperty().bind(fontsize);
+	}
+
 	private TreeTableRow<StateItem<?>> initTableRow() {
 		final TreeTableRow<StateItem<?>> row = new TreeTableRow<>();
 
 		row.itemProperty().addListener((observable, from, to) -> {
 			row.getStyleClass().remove("changed");
 			if (to != null && to.getContents() instanceof ASTFormula) {
-				final IEvalElement formula = ((ASTFormula)to.getContents()).getFormula();
+				final IEvalElement formula = ((ASTFormula) to.getContents()).getFormula();
 				final AbstractEvalResult current = this.currentValues.get(formula);
 				final AbstractEvalResult previous = this.previousValues.get(formula);
 
-				if (current != null && previous != null && (
-					!current.getClass().equals(previous.getClass())
-					|| current instanceof EvalResult && !((EvalResult)current).getValue().equals(((EvalResult)previous).getValue())
-				)) {
+				if (current != null && previous != null
+						&& (!current.getClass().equals(previous.getClass()) || current instanceof EvalResult
+								&& !((EvalResult) current).getValue().equals(((EvalResult) previous).getValue()))) {
 					row.getStyleClass().add("changed");
 				}
 			}
 		});
 
 		final MenuItem visualizeExpressionItem = new MenuItem(bundle.getString("states.menu.visualizeExpression"));
-		// Expression can only be shown if the row item contains an ASTFormula and the current state is initialized.
-		visualizeExpressionItem.disableProperty().bind(
-			Bindings.createBooleanBinding(() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
-			.or(currentTrace.currentStateProperty().initializedProperty().not())
-		);
+		// Expression can only be shown if the row item contains an ASTFormula
+		// and the current state is initialized.
+		visualizeExpressionItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
+				.or(currentTrace.currentStateProperty().initializedProperty().not()));
 		visualizeExpressionItem.setOnAction(event -> {
 			try {
-				formulaGenerator.showFormula(((ASTFormula)row.getItem().getContents()).getFormula());
+				formulaGenerator.showFormula(((ASTFormula) row.getItem().getContents()).getFormula());
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
-				stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("states.error.couldNotVisualize"), e)).showAndWait();
+				stageManager.makeAlert(Alert.AlertType.ERROR,
+						String.format(bundle.getString("states.error.couldNotVisualize"), e)).showAndWait();
 			}
 		});
-		
+
 		final MenuItem showFullValueItem = new MenuItem(bundle.getString("states.menu.showFullValue"));
-		// Full value can only be shown if the row item contains an ASTFormula, and the corresponding value is an EvalResult.
+		// Full value can only be shown if the row item contains an ASTFormula,
+		// and the corresponding value is an EvalResult.
 		showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
-			() -> row.getItem() == null || !(
-				row.getItem().getContents() instanceof ASTFormula
-				&& this.currentValues.get(((ASTFormula)row.getItem().getContents()).getFormula()) instanceof EvalResult
-			),
-			row.itemProperty()
-		));
+				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula && this.currentValues
+						.get(((ASTFormula) row.getItem().getContents()).getFormula()) instanceof EvalResult),
+				row.itemProperty()));
 		showFullValueItem.setOnAction(event -> this.showFullValue(row.getItem()));
 
 		final MenuItem showErrorsItem = new MenuItem(bundle.getString("states.menu.showErrors"));
-		// Errors can only be shown if the row contains an ASTFormula whose value is an EvaluationErrorResult.
+		// Errors can only be shown if the row contains an ASTFormula whose
+		// value is an EvaluationErrorResult.
 		showErrorsItem.disableProperty().bind(Bindings.createBooleanBinding(
-			() -> row.getItem() == null || !(
-				row.getItem().getContents() instanceof ASTFormula
-				&& this.currentValues.get(((ASTFormula)row.getItem().getContents()).getFormula()) instanceof EvaluationErrorResult
-			),
-			row.itemProperty()
-		));
+				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula && this.currentValues
+						.get(((ASTFormula) row.getItem().getContents()).getFormula()) instanceof EvaluationErrorResult),
+				row.itemProperty()));
 		showErrorsItem.setOnAction(event -> this.showError(row.getItem()));
 
-		row.contextMenuProperty().bind(
-			Bindings.when(row.emptyProperty())
-			.then((ContextMenu) null)
-			.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem, showErrorsItem))
-		);
+		row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null)
+				.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem, showErrorsItem)));
 
 		// Double-click on an item triggers "show full value" if allowed.
 		row.setOnMouseClicked(event -> {
@@ -210,24 +221,25 @@ public final class StatesView extends AnchorPane {
 	private static void getInitialExpandedFormulas(final List<PrologASTNode> nodes, final List<IEvalElement> formulas) {
 		for (final PrologASTNode node : nodes) {
 			if (node instanceof ASTFormula) {
-				formulas.add(((ASTFormula)node).getFormula());
+				formulas.add(((ASTFormula) node).getFormula());
 			}
-			if (node instanceof ASTCategory && ((ASTCategory)node).isExpanded()) {
+			if (node instanceof ASTCategory && ((ASTCategory) node).isExpanded()) {
 				getInitialExpandedFormulas(node.getSubnodes(), formulas);
 			}
 		}
 	}
-	
+
 	private static List<IEvalElement> getInitialExpandedFormulas(final List<PrologASTNode> nodes) {
 		final List<IEvalElement> formulas = new ArrayList<>();
 		getInitialExpandedFormulas(nodes, formulas);
 		return formulas;
 	}
 
-	private static void getExpandedFormulas(final List<TreeItem<StateItem<?>>> treeItems, final List<IEvalElement> formulas) {
+	private static void getExpandedFormulas(final List<TreeItem<StateItem<?>>> treeItems,
+			final List<IEvalElement> formulas) {
 		for (final TreeItem<StateItem<?>> ti : treeItems) {
 			if (ti.getValue().getContents() instanceof ASTFormula) {
-				formulas.add(((ASTFormula)ti.getValue().getContents()).getFormula());
+				formulas.add(((ASTFormula) ti.getValue().getContents()).getFormula());
 			}
 			if (ti.isExpanded()) {
 				getExpandedFormulas(ti.getChildren(), formulas);
@@ -250,17 +262,33 @@ public final class StatesView extends AnchorPane {
 		}
 	}
 
+	@FXML
+	private void handleSearchButton() {
+		filter = filterState.getText();
+		this.tvRootItem.getChildren().clear();
+		buildNodes(this.tvRootItem, this.rootNodes);
+		this.currentTrace.getStateSpace().subscribe(this, getExpandedFormulas(tvRootItem.getChildren()));
+		this.updateValueMaps(this.currentTrace.get());
+	}
+
 	private void buildNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(nodes);
-		
+
 		assert treeItem.getChildren().isEmpty();
-		
+
 		for (final PrologASTNode node : nodes) {
 			final TreeItem<StateItem<?>> subTreeItem = new TreeItem<>();
-			if (node instanceof ASTCategory && ((ASTCategory)node).isExpanded()) {
+			if (node instanceof ASTCategory && ((ASTCategory) node).isExpanded()) {
 				subTreeItem.setExpanded(true);
 			}
+			if (hasFilter() && node instanceof ASTFormula) {
+				ASTFormula formula = (ASTFormula) node;
+				if (!formula.getFormula().getCode().toLowerCase().contains(filter.toLowerCase())) {
+					continue;
+				}
+			}
+
 			treeItem.getChildren().add(subTreeItem);
 			subTreeItem.setValue(new StateItem<>(node, false));
 			subTreeItem.expandedProperty().addListener((o, from, to) -> {
@@ -273,15 +301,25 @@ public final class StatesView extends AnchorPane {
 				this.updateValueMaps(this.currentTrace.get());
 			});
 			buildNodes(subTreeItem, node.getSubnodes());
+			if (node instanceof ASTCategory && subTreeItem.getChildren().isEmpty()) {
+				// remove categories without children
+				treeItem.getChildren().remove(subTreeItem);
+			}
 		}
 	}
 
-	private static void updateNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
+	private void updateNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(nodes);
-		
+
 		assert treeItem.getChildren().size() == nodes.size();
-		
+
+		if (treeItem.getChildren().size() == nodes.size()) {
+			treeItem.getChildren().clear();
+			buildNodes(treeItem, nodes);
+			return;
+		}
+
 		for (int i = 0; i < nodes.size(); i++) {
 			final TreeItem<StateItem<?>> subTreeItem = treeItem.getChildren().get(i);
 			final PrologASTNode node = nodes.get(i);
@@ -290,15 +328,20 @@ public final class StatesView extends AnchorPane {
 		}
 	}
 
+	private boolean hasFilter() {
+		return !this.filter.equals("");
+	}
+
 	private void updateRoot(final Trace from, final Trace to) {
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
-		
+
 		Platform.runLater(() -> {
 			this.statusBar.setStatesViewUpdating(true);
 			this.tv.setDisable(true);
 		});
-		
-		// If the model has changed or the machine structure hasn't been loaded yet, update it and rebuild the tree view.
+
+		// If the model has changed or the machine structure hasn't been loaded
+		// yet, update it and rebuild the tree view.
 		final boolean rebuildTree = this.rootNodes == null || from == null || !from.getModel().equals(to.getModel());
 		if (rebuildTree) {
 			final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
@@ -306,11 +349,11 @@ public final class StatesView extends AnchorPane {
 			this.rootNodes = cmd.getPrologASTList();
 			to.getStateSpace().subscribe(this, getInitialExpandedFormulas(this.rootNodes));
 		}
-		
+
 		this.updateValueMaps(to);
-		
+
 		Platform.runLater(() -> {
-			if (rebuildTree) {
+			if (rebuildTree || hasFilter()) {
 				this.tvRootItem.getChildren().clear();
 				buildNodes(this.tvRootItem, this.rootNodes);
 			} else {
@@ -322,11 +365,12 @@ public final class StatesView extends AnchorPane {
 			this.statusBar.setStatesViewUpdating(false);
 		});
 	}
-	
+
 	private void showError(StateItem<?> stateItem) {
 		final FullValueStage stage = injector.getInstance(FullValueStage.class);
 		if (stateItem.getContents() instanceof ASTFormula) {
-			final AbstractEvalResult result = this.currentValues.get(((ASTFormula)stateItem.getContents()).getFormula());
+			final AbstractEvalResult result = this.currentValues
+					.get(((ASTFormula) stateItem.getContents()).getFormula());
 			if (result instanceof EvaluationErrorResult) {
 				stage.setTitle(stateItem.toString());
 				stage.setCurrentValue(String.join("\n", ((EvaluationErrorResult) result).getErrors()));
@@ -342,16 +386,18 @@ public final class StatesView extends AnchorPane {
 
 	private static String getResultValue(final ASTFormula element, final State state) {
 		final AbstractEvalResult result = state.eval(element.getFormula(FormulaExpand.EXPAND));
-		return result instanceof EvalResult ? ((EvalResult)result).getValue() : null;
+		return result instanceof EvalResult ? ((EvalResult) result).getValue() : null;
 	}
 
 	private void showFullValue(StateItem<?> stateItem) {
 		final FullValueStage stage = injector.getInstance(FullValueStage.class);
 		if (stateItem.getContents() instanceof ASTFormula) {
-			final ASTFormula element = (ASTFormula)stateItem.getContents();
+			final ASTFormula element = (ASTFormula) stateItem.getContents();
 			stage.setTitle(element.getFormula().toString());
 			stage.setCurrentValue(getResultValue(element, this.currentTrace.getCurrentState()));
-			stage.setPreviousValue(this.currentTrace.canGoBack() ? getResultValue(element, this.currentTrace.get().getPreviousState()) : null);
+			stage.setPreviousValue(
+					this.currentTrace.canGoBack() ? getResultValue(element, this.currentTrace.get().getPreviousState())
+							: null);
 			stage.setFormattingEnabled(true);
 		} else {
 			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());

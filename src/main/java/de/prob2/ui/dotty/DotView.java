@@ -11,7 +11,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseButton;
-import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
@@ -23,8 +22,6 @@ public class DotView extends Stage {
 	
 	@FXML
 	private ScrollPane pane;
-	
-	private WebEngine engine;
 	
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
@@ -72,7 +69,7 @@ public class DotView extends Stage {
 	public void initialize() {
 		//engine = dotView.getEngine();
 		//engine.load(this.getClass().getResource("GCD.svg").toExternalForm());
-
+		dotView.getEngine().load(this.getClass().getResource("GCD.svg").toExternalForm());
 	}
 
 }

@@ -189,7 +189,7 @@ public class LTLView extends AnchorPane{
 						tvFormula.refresh();
 						currentJobThreads.remove(currentThread);
 					});
-				});
+				}, "LTL Checking Thread");
 				currentJobThreads.add(checkingThread);
 				checkingThread.start();
 			});
@@ -398,7 +398,7 @@ public class LTLView extends AnchorPane{
 				tvFormula.refresh();
 				currentJobThreads.remove(currentThread);
 			});
-		});
+		}, "LTL Checking Thread");
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}

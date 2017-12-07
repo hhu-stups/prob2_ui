@@ -3,9 +3,14 @@ package de.prob2.ui.verifications.tracereplay;
 import java.io.File;
 import java.util.List;
 
+import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.GetOperationByPredicateCommand;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.check.tracereplay.PersistentTransition;
+import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -21,7 +26,6 @@ import javafx.beans.property.SimpleMapProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.collections.SetChangeListener;
-import javafx.scene.control.Alert.AlertType;
 
 @Singleton
 public class TraceChecker {
@@ -56,14 +60,28 @@ public class TraceChecker {
 			trace.setStatus(Status.NOT_CHECKED);
 
 			StateSpace stateSpace = currentTrace.getStateSpace();
-			
+
 			Trace t = new Trace(stateSpace);
 			t.setExploreStateByDefault(false);
 			boolean traceReplaySuccess = true;
 			try {
-				for (ReplayTransition transition : trace.getTransitionList()) {
-					List<Transition> possibleTransitions = stateSpace.getTransitionsBasedOnParameterValues(
-							t.getCurrentState(), transition.getName(), transition.getParameterValues(), 1);
+				for (PersistentTransition transition : trace.getStoredTrace().getTransitionList()) {
+					String predicate = new PredicateBuilder().addMap(transition.getParameters())
+							//TODO destination state variables are currently not supported 
+							//.addMap(transition.getDestinationStateVariables())
+							// TODO output parameters are currently not supported by ExecuteOperationByPredicate
+							// .addMap(transition.getOuputParameters()) 
+							.toString();
+					final IEvalElement pred = stateSpace.getModel().parseFormula(predicate);
+					final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
+							t.getCurrentState().getId(), transition.getOperationName(), pred, 1);
+					stateSpace.execute(command);
+					if (command.hasErrors()) {
+						throw new IllegalArgumentException(
+								"Executing operation " + transition.getOperationName() + " with predicate " + predicate
+										+ " produced errors: " + Joiner.on(", ").join(command.getErrors()));
+					}
+					List<Transition> possibleTransitions = command.getNewTransitions();
 					if (possibleTransitions.isEmpty()) {
 						traceReplaySuccess = false;
 						break;
@@ -87,13 +105,12 @@ public class TraceChecker {
 				currentTrace.set(t);
 				
 				if (trace.getError() != null) {
-					Platform.runLater(
-							() -> stageManager.makeExceptionAlert(AlertType.ERROR, "", trace.getError()).showAndWait());
+					Platform.runLater(() -> stageManager.makeExceptionAlert("", trace.getError()).showAndWait());
 				}
 				
 			}
 			currentJobThreads.remove(Thread.currentThread());
-		});
+		}, "Trace Replay Thread");
 		currentJobThreads.add(replayThread);
 		replayThread.start();
 	}

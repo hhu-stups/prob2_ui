@@ -30,7 +30,6 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
@@ -120,7 +119,7 @@ public class FileMenu extends Menu {
 		final String shortName = file.getName().substring(0, file.getName().lastIndexOf('.'));
 		final String description = String.format(bundle.getString("project.automaticDescription"), absolute);
 		final Machine machine = new Machine(shortName, "", relative);
-		currentProject.set(new Project(shortName, description, machine, projectLocation.toFile()));
+		currentProject.set(new Project(shortName, description, machine, projectLocation.toFile()), true);
 
 		currentProject.startAnimation(machine, Preference.DEFAULT);
 	}
@@ -148,7 +147,7 @@ public class FileMenu extends Menu {
 			injector.getInstance(TraceChecker.class).resetStatus();
 		} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 			LOGGER.error("Model reload failed", e);
-			stageManager.makeExceptionAlert(Alert.AlertType.ERROR, bundle.getString("menu.edit.errors.couldNotReload"), e).showAndWait();
+			stageManager.makeExceptionAlert(bundle.getString("menu.edit.errors.couldNotReload"), e).showAndWait();
 		}
 	}
 

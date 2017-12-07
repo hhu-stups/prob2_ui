@@ -10,7 +10,7 @@
 	<scene>
 		<Scene>
 			<StackPane>
-				<SplitPane dividerPositions="0.4">
+				<SplitPane dividerPositions="0.6">
 					<ListView fx:id="valuesListView"/>
 					<TextArea fx:id="textArea" editable="false" wrapText="true"/>
 				</SplitPane>

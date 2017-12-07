@@ -4,7 +4,9 @@ import com.google.common.base.MoreObjects;
 import de.prob.statespace.Trace;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class OperationItem {
@@ -15,12 +17,16 @@ public class OperationItem {
 	private final Trace trace;
 	private final String id;
 	private final String name;
-	private final List<String> params;
+	private final List<String> parameterNames;
+	private final List<String> parameterValues;
 	private final List<String> returnValues;
+	private final List<String> outputParameterNames;
 	private final OperationItem.Status status;
 	private final boolean explored;
 	private final boolean errored;
 	private final boolean skip;
+	private final Map<String, String> constants;
+	private final Map<String, String> variables;
 
 	public OperationItem(
 		final Trace trace,
@@ -31,17 +37,25 @@ public class OperationItem {
 		final OperationItem.Status status,
 		final boolean explored,
 		final boolean errored,
-		final boolean skip
+		final boolean skip,
+		final List<String> parameterNames,
+		final List<String> returnParameterNames,
+		final Map<String, String> constants,
+		final Map<String, String> variables
 	) {
 		this.trace = Objects.requireNonNull(trace);
 		this.id = Objects.requireNonNull(id);
 		this.name = Objects.requireNonNull(name);
-		this.params = Objects.requireNonNull(params);
+		this.parameterValues = Objects.requireNonNull(params);
 		this.returnValues = Objects.requireNonNull(returnValues);
 		this.status = Objects.requireNonNull(status);
 		this.explored = explored;
 		this.errored = errored;
 		this.skip = skip;
+		this.parameterNames = Objects.requireNonNull(parameterNames);
+		this.outputParameterNames = Objects.requireNonNull(returnParameterNames);
+		this.constants = Objects.requireNonNull(constants);
+		this.variables = Objects.requireNonNull(variables);
 	}
 	
 	public Trace getTrace() {
@@ -52,8 +66,20 @@ public class OperationItem {
 		return name;
 	}
 	
-	public List<String> getParams() {
-		return new ArrayList<>(params);
+	public List<String> getParameterNames() {
+		return new ArrayList<>(parameterNames);
+	}
+	
+	public Map<String, String> getConstants(){
+		return this.constants;
+	}
+	
+	public Map<String, String> getVariables(){
+		return this.variables;
+	}
+	
+	public List<String> getParameterValues() {
+		return new ArrayList<>(parameterValues);
 	}
 	
 	public String getId() {
@@ -62,6 +88,10 @@ public class OperationItem {
 	
 	public OperationItem.Status getStatus() {
 		return status;
+	}
+	
+	public List<String> getOutputParameterNames() {
+		return new ArrayList<>(outputParameterNames);
 	}
 	
 	public List<String> getReturnValues() {
@@ -86,7 +116,7 @@ public class OperationItem {
 			.add("trace", trace)
 			.add("id", id)
 			.add("name", name)
-			.add("params", params)
+			.add("params", parameterValues)
 			.add("returnValues", returnValues)
 			.add("status", status)
 			.add("explored", explored)

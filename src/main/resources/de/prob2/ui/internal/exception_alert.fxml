@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Alert?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.VBox?>
+<fx:root type="Alert" resizable="true" alertType="ERROR" xmlns:fx="http://javafx.com/fxml/1">
+	<dialogPane>
+		<DialogPane>
+			<content>
+				<VBox fx:id="contentVBox">
+					<Label fx:id="label" VBox.vgrow="NEVER"/>
+					<TableView fx:id="proBErrorTable" minHeight="160" prefHeight="160" VBox.vgrow="ALWAYS">
+						<columns>
+							<TableColumn fx:id="typeColumn" editable="false" minWidth="80" text="%exceptionAlert.proBErrorTable.columns.type"/>
+							<TableColumn fx:id="messageColumn" editable="false" minWidth="80" prefWidth="320" text="%exceptionAlert.proBErrorTable.columns.message"/>
+							<TableColumn fx:id="locationsColumn" editable="false" minWidth="80" prefWidth="160" text="%exceptionAlert.proBErrorTable.columns.locations"/>
+						</columns>
+						<placeholder>
+							<Label text="%exceptionAlert.proBErrorTable.placeholder"/>
+						</placeholder>
+					</TableView>
+				</VBox>
+			</content>
+			<expandableContent>
+				<TextArea fx:id="stackTraceTextArea" editable="false"/>
+			</expandableContent>
+		</DialogPane>
+	</dialogPane>
+</fx:root>
