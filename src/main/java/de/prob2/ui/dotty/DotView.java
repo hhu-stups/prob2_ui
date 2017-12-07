@@ -42,8 +42,9 @@ public class DotView extends Stage {
 			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
-			GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand();
+			GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(GetSvgForVisualizationCommand.Option.DEPENDENCE_GRAPH);
 			currentTrace.getStateSpace().execute(cmd);
+			System.out.println(currentTrace.getStateSpace().getTrace(currentTrace.getCurrentState().getId()));
 			System.out.println(cmd);
 			
 		});
