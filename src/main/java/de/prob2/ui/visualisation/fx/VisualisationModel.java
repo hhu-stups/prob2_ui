@@ -21,6 +21,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
@@ -43,6 +45,7 @@ public class VisualisationModel {
 	private Trace newTrace;
 	private Map<String, EvalResult> oldStringToResult;
 	private Map<String, EvalResult> newStringToResult;
+	private boolean randomExecution;
 
 	public VisualisationModel(CurrentTrace currentTrace, StageManager stageManager, ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
@@ -206,14 +209,17 @@ public class VisualisationModel {
 	 * @param number Number of events
 	 * @param time time in millis between two event-executions
 	 * @param stopOnInvariantViolation indicates if further events should be executed when an invariant is violated
+	 * @param afterExecution handler to react when the task ended (if task has succeeded, failed or was canceled)
 	 */
-	public void executeRandomEvents(int number, long time, boolean stopOnInvariantViolation) {
+	public void executeRandomEvents(int number, long time, boolean stopOnInvariantViolation,
+									EventHandler<WorkerStateEvent> afterExecution) {
 		Task<Void> task = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
+				randomExecution = true;
 				boolean outgoingTransitions = true;
 				boolean invariantViolated = false;
-				for (int i = 0; i <  number && outgoingTransitions && !invariantViolated; i++) {
+				for (int i = 0; i <  number && outgoingTransitions && !invariantViolated && randomExecution; i++) {
 					currentTrace.set(currentTrace.get().randomAnimation(1));
 					outgoingTransitions = !currentTrace.getCurrentState().getOutTransitions().isEmpty();
 					if (stopOnInvariantViolation) {
@@ -224,15 +230,39 @@ public class VisualisationModel {
 				return null;
 			}
 		};
-		new Thread(task, "Random Event Execution Thread").start();
+		if (afterExecution != null) {
+			task.setOnCancelled(afterExecution);
+			task.setOnFailed(afterExecution);
+			task.setOnSucceeded(afterExecution);
+		}
+		Thread thread = new Thread(task, "Random Event Execution Thread");
+		thread.start();
+	}
+
+	/**
+	 * Stops the random execution of events.
+	 */
+	public void stopRandomExecution() {
+		randomExecution = false;
 	}
 
 	private Map<String, EvalResult> translateValuesMap(Map<IEvalElement, AbstractEvalResult> values) {
-		return values.keySet().stream()
-				.filter(element -> element instanceof AbstractEvalElement)
-				.map(element -> (AbstractEvalElement) element)
-				.filter(element -> values.get(element) instanceof EvalResult)
-				.collect(Collectors.toMap(AbstractEvalElement::getCode, element -> (EvalResult) values.get(element)));
+		Map<String, EvalResult> ret = new HashMap<>(values.size());
+		for (Map.Entry<IEvalElement, AbstractEvalResult> entry : values.entrySet()) {
+			IEvalElement key = entry.getKey();
+			AbstractEvalResult value = entry.getValue();
+			//filter for constants and variables
+			if (key instanceof AbstractEvalElement && value instanceof EvalResult) {
+				String filteredKey = key.getCode();
+				EvalResult filteredValue = (EvalResult) value;
+				//check for duplicate keys
+				if (!ret.containsKey(filteredKey)) {
+					ret.put(filteredKey, filteredValue);
+				}
+
+			}
+		}
+		return ret;
 	}
 
 	private Object evalCurrent(String formula) {
