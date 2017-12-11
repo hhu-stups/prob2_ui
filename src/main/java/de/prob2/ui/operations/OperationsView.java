@@ -26,6 +26,7 @@ import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.exception.ProBError;
 import de.prob.model.classicalb.Operation;
 import de.prob.model.eventb.Event;
 import de.prob.model.eventb.EventParameter;
@@ -293,7 +294,7 @@ public final class OperationsView extends AnchorPane {
 		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 	}
 
-	private LinkedHashMap<String, String> getNextStateValues(Transition transition, List<IEvalElement> formulas){
+	private LinkedHashMap<String, String> getNextStateValues(Transition transition, List<IEvalElement> formulas) {
 		// It seems that there is no way to easily find out the
 		// constant/variable values which a specific $setup_constants or
 		// $initialise_machine transition would set.
@@ -315,7 +316,7 @@ public final class OperationsView extends AnchorPane {
 
 		return values;
 	}
-	
+
 	public void update(final Trace trace) {
 		if (trace == null) {
 			currentModel = null;
@@ -349,13 +350,15 @@ public final class OperationsView extends AnchorPane {
 			switch (transition.getName()) {
 			case "$setup_constants":
 				paramValues = Collections.emptyList();
-				constants = this.getNextStateValues(transition, trace.getStateSpace().getLoadedMachine().getConstantEvalElements());
+				constants = this.getNextStateValues(transition,
+						trace.getStateSpace().getLoadedMachine().getConstantEvalElements());
 				variables = Collections.emptyMap();
 				break;
 
 			case "$initialise_machine":
 				paramValues = Collections.emptyList();
-				variables = this.getNextStateValues(transition, trace.getStateSpace().getLoadedMachine().getVariableEvalElements());
+				variables = this.getNextStateValues(transition,
+						trace.getStateSpace().getLoadedMachine().getVariableEvalElements());
 				constants = Collections.emptyMap();
 				break;
 
@@ -368,30 +371,39 @@ public final class OperationsView extends AnchorPane {
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			final boolean skip = transition.getSource().equals(transition.getDestination());
-			OperationInfo machineOperationInfo = trace.getStateSpace().getLoadedMachine()
-					.getMachineOperationInfo(transition.getName());
-			List<String> paramNames;
-			List<String> outputNames;
-			if (machineOperationInfo != null) {
-				paramNames = machineOperationInfo.getParameterNames();
-				outputNames = machineOperationInfo.getOutputParameterNames();
-			} else {
-				paramNames = Collections.emptyList();
-				outputNames = Collections.emptyList();
+			OperationInfo machineOperationInfo= null;
+			try {
+				machineOperationInfo = trace.getStateSpace().getLoadedMachine()
+						.getMachineOperationInfo(transition.getName());
+				List<String> paramNames;
+				List<String> outputNames;
+				if (machineOperationInfo != null) {
+					paramNames = machineOperationInfo.getParameterNames();
+					outputNames = machineOperationInfo.getOutputParameterNames();
+				} else {
+					paramNames = Collections.emptyList();
+					outputNames = Collections.emptyList();
+				}
+				OperationItem operationItem = new OperationItem(trace, transition.getId(), transition.getName(),
+						paramValues, transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip,
+						paramNames, outputNames, constants, variables);
+				events.add(operationItem);
+			} catch (ProBError e) {
+				//TODO temp fix for get_machine_operation_info which currently does not support Event-B models properly
+				OperationItem operationItem = new OperationItem(trace, transition.getId(), transition.getName(),
+						paramValues, transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip,
+						Collections.emptyList(), Collections.emptyList(), constants, variables);
+				events.add(operationItem);
 			}
-			OperationItem operationItem = new OperationItem(trace, transition.getId(), transition.getName(), paramValues,
-					transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip, paramNames,
-					outputNames, constants, variables);
-			events.add(operationItem);
+
 		}
 		showDisabledAndWithTimeout(trace, disabled, withTimeout);
 
 		doSort();
 
 		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
-			events.add(new OperationItem(trace, "-", bundle.getString("operations.maxReached"), Collections.emptyList(),
-					Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false,
-					Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap()));
+			events.add(new OperationItem(trace, "-", bundle.getString("operations.maxReached"),
+					OperationItem.Status.MAX_REACHED));
 		}
 
 		final List<OperationItem> filtered = applyFilter(filter);
