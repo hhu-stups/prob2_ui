@@ -2,23 +2,34 @@ package de.prob2.ui.internal;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
+
+import com.google.inject.Injector;
+
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.ProBError;
 
+import de.prob2.ui.menu.EditMenu;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
@@ -33,16 +44,18 @@ public final class ExceptionAlert extends Alert {
 	
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
+	private final EditMenu editMenu;
 	private final String text;
 	private final Throwable exc;
 	
-	public ExceptionAlert(final StageManager stageManager, final ResourceBundle bundle, final String text, final Throwable exc) {
+	public ExceptionAlert(final Injector injector, final String text, final Throwable exc) {
 		super(Alert.AlertType.NONE); // Alert type is set in FXML
 		
 		Objects.requireNonNull(exc);
 		
-		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.stageManager = injector.getInstance(StageManager.class);
+		this.bundle = injector.getInstance(ResourceBundle.class);
+		this.editMenu = injector.getInstance(EditMenu.class);
 		this.text = text;
 		this.exc = exc;
 		
@@ -115,13 +128,24 @@ public final class ExceptionAlert extends Alert {
 					super.updateItem(item, empty);
 					
 					if (empty || item == null) {
-						this.setText(null);
+						this.setGraphic(null);
 					} else {
-						this.setText(item.getLocations().stream().map(ErrorItem.Location::toString).collect(Collectors.joining("\n")));
+						final VBox vbox = new VBox();
+						for (final ErrorItem.Location location : item.getLocations()) {
+							final Button openLocationButton = new Button(null, new FontAwesomeIconView(FontAwesomeIcon.PENCIL));
+							openLocationButton.setOnAction(event -> openLocationInEditor(location));
+							final Label label = new Label(location.toString());
+							label.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
+							final HBox hbox = new HBox(openLocationButton, label);
+							HBox.setHgrow(openLocationButton, Priority.NEVER);
+							HBox.setHgrow(label, Priority.ALWAYS);
+							hbox.setAlignment(Pos.CENTER_LEFT);
+							vbox.getChildren().add(hbox);
+						}
+						this.setGraphic(vbox);
 					}
 				}
 			};
-			cell.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
 			return cell;
 		});
 		
@@ -135,5 +159,10 @@ public final class ExceptionAlert extends Alert {
 		} else {
 			this.contentVBox.getChildren().remove(this.proBErrorTable);
 		}
+	}
+	
+	private void openLocationInEditor(final ErrorItem.Location location) {
+		// TODO Jump to error location in file
+		editMenu.showEditorStage(Paths.get(location.getFilename()));
 	}
 }

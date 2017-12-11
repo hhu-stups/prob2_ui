@@ -295,7 +295,7 @@ public final class StageManager {
 	}
 
 	public Alert makeExceptionAlert(final String contentText, final Throwable exc) {
-		return new ExceptionAlert(this, this.bundle, contentText, exc);
+		return new ExceptionAlert(this.injector, contentText, exc);
 	}
 	
 	/**
