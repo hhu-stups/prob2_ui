@@ -154,7 +154,7 @@ public final class ExceptionAlert extends Alert {
 			this.stackTraceTextArea.setText(caw.toString());
 		}
 		
-		if (exc instanceof ProBError) {
+		if (exc instanceof ProBError && ((ProBError)exc).getErrors() != null) {
 			this.proBErrorTable.getItems().setAll(((ProBError)exc).getErrors());
 		} else {
 			this.contentVBox.getChildren().remove(this.proBErrorTable);
