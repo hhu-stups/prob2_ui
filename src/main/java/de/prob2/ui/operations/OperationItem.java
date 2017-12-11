@@ -1,13 +1,14 @@
 package de.prob2.ui.operations;
 
-import com.google.common.base.MoreObjects;
-import de.prob.statespace.Trace;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import com.google.common.base.MoreObjects;
+
+import de.prob.statespace.Trace;
 
 public class OperationItem {
 	public enum Status {
@@ -57,7 +58,7 @@ public class OperationItem {
 			final OperationItem.Status status
 		) {
 		this(trace, id, name, Collections.emptyList(),
-				Collections.emptyList(), OperationItem.Status.MAX_REACHED, false, false, false,
+				Collections.emptyList(), status, false, false, false,
 				Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
 		
 		}

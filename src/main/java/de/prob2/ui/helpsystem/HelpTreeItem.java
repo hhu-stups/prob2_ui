@@ -1,14 +1,11 @@
 package de.prob2.ui.helpsystem;
 
 import java.io.File;
-import java.io.IOException;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
-
-import org.slf4j.LoggerFactory;
 
 public class HelpTreeItem extends TreeItem<String>{
 	private boolean isLeaf;
@@ -31,11 +28,7 @@ public class HelpTreeItem extends TreeItem<String>{
 	@Override public ObservableList<TreeItem<String>> getChildren() {
 		if (isFirstTimeChildren) {
 			isFirstTimeChildren = false;
-			try {
-				super.getChildren().setAll(buildChildren(this));
-			} catch (IOException e) {
-				LoggerFactory.getLogger(HelpTreeItem.class).error("Can not build children",e);
-			}
+			super.getChildren().setAll(buildChildren(this));
 		}
 		return super.getChildren();
 	}
@@ -48,7 +41,7 @@ public class HelpTreeItem extends TreeItem<String>{
 		return isLeaf;
 	}
 
-	private ObservableList<TreeItem<String>> buildChildren(HelpTreeItem helpTreeItem) throws IOException {
+	private ObservableList<TreeItem<String>> buildChildren(HelpTreeItem helpTreeItem) {
 		File f = helpTreeItem.file;
 		if (f != null && f.isDirectory()) {
 			ObservableList<TreeItem<String>> children = FXCollections.observableArrayList();

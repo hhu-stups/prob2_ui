@@ -2,11 +2,10 @@ package de.prob2.ui.dotty;
 
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetSvgForVisualizationCommand;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseButton;
