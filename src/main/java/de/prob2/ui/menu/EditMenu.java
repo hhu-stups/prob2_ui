@@ -22,7 +22,6 @@ import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
-import de.prob2.ui.project.machines.Machine;
 
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -72,12 +71,12 @@ public class EditMenu extends Menu {
 
 	@FXML
 	private void handleEditCurrentMachine() {
-		showEditorStage(currentProject.getCurrentMachine());
+		showEditorStage(currentProject.getLocation().toPath().resolve(currentProject.getCurrentMachine().getPath()));
 	}
 
 	@FXML
 	private void handleEditCurrentMachineInExternalEditor() {
-		showExternalEditor(currentProject.getCurrentMachine());
+		showExternalEditor(currentProject.getLocation().toPath().resolve(currentProject.getCurrentMachine().getPath()));
 	}
 
 	@FXML
@@ -91,9 +90,8 @@ public class EditMenu extends Menu {
 		return preferencesItem;
 	}
 
-	public void showEditorStage(Machine machine) {
+	public void showEditorStage(Path path) {
 		final BEditorStage editorStage = injector.getInstance(BEditorStage.class);
-		final Path path = currentProject.getLocation().toPath().resolve(machine.getPath());
 		final String text;
 		try (final Stream<String> lines = Files.lines(path)) {
 			text = lines.collect(Collectors.joining(System.lineSeparator()));
@@ -107,23 +105,22 @@ public class EditMenu extends Menu {
 				editorStage.setTextEditor(text, path);
 			}
 		});
-		editorStage.setTitle(machine.getFileName());
+		editorStage.setTitle(path.getFileName().toString());
 		editorStage.show();
 	}
 
-	public void showExternalEditor(Machine machine) {
+	public void showExternalEditor(Path path) {
 		final StateSpace stateSpace = machineLoader.getEmptyStateSpace(globalPreferences);
 		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
 		stateSpace.execute(cmd);
 		final File editor = new File(cmd.getValue());
-		final Path machinePath = currentProject.getLocation().toPath().resolve(machine.getPath());
 		final String[] cmdline;
 		if (ProB2Module.IS_MAC && editor.isDirectory()) {
 			// On Mac, use the open tool to start app bundles
-			cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(), machinePath.toString() };
+			cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(), path.toString() };
 		} else {
 			// Run normal executables directly
-			cmdline = new String[] { editor.getAbsolutePath(), machinePath.toString() };
+			cmdline = new String[] { editor.getAbsolutePath(), path.toString() };
 		}
 		final ProcessBuilder processBuilder = new ProcessBuilder(cmdline);
 		try {

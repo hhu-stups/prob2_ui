@@ -95,12 +95,13 @@ public class MachinesTab extends Tab {
 
 				final MenuItem editFileMenuItem = new MenuItem(
 						bundle.getString("project.machines.tab.menu.editMachineFile"));
-				editFileMenuItem.setOnAction(event -> injector.getInstance(EditMenu.class).showEditorStage(machine));
+				editFileMenuItem.setOnAction(event -> injector.getInstance(EditMenu.class)
+					.showEditorStage(currentProject.getLocation().toPath().resolve(machine.getPath())));
 
 				final MenuItem editExternalMenuItem = new MenuItem(
 						bundle.getString("project.machines.tab.menu.editMachineFileInExternalEditor"));
-				editExternalMenuItem
-						.setOnAction(event -> injector.getInstance(EditMenu.class).showExternalEditor(machine));
+				editExternalMenuItem.setOnAction(event -> injector.getInstance(EditMenu.class)
+					.showExternalEditor(currentProject.getLocation().toPath().resolve(machine.getPath())));
 
 				final Menu startAnimationMenu = new Menu(bundle.getString("project.machines.tab.menu.startAnimation"));
 
