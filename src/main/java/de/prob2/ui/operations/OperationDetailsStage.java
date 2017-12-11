@@ -10,11 +10,12 @@ import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 import javafx.stage.Stage;
 
 class OperationDetailsStage extends Stage {
@@ -41,24 +42,9 @@ class OperationDetailsStage extends Stage {
 		}
 	}
 	
-	private final class ValueCell extends TreeCell<ValueItem> {
-		private ValueCell() {
-			super();
-		}
-		
-		@Override
-		protected void updateItem(final ValueItem item, final boolean empty) {
-			super.updateItem(item, empty);
-			
-			if (item == null || empty) {
-				this.setText(null);
-			} else {
-				this.setText(item.getName());
-			}
-		}
-	}
-	
-	@FXML private TreeView<ValueItem> valuesTreeView;
+	@FXML private TreeTableView<ValueItem> valuesTreeView;
+	@FXML private TreeTableColumn<ValueItem, String> nameColumn;
+	@FXML private TreeTableColumn<ValueItem, String> valueColumn;
 	@FXML private TreeItem<ValueItem> rootItem;
 	@FXML private TreeItem<ValueItem> parametersItem;
 	@FXML private TreeItem<ValueItem> returnValuesItem;
@@ -83,8 +69,10 @@ class OperationDetailsStage extends Stage {
 	
 	@FXML
 	private void initialize() {
-		this.valuesTreeView.setCellFactory(lv -> new ValueCell());
 		this.valuesTreeView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> this.textArea.setText(to == null ? null : to.getValue().getValue()));
+		
+		this.nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getValue().getName()));
+		this.valueColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getValue().getValue()));
 		
 		this.rootItem.setValue(new ValueItem("Values (this root item should be invisible)", ""));
 		this.parametersItem.setValue(new ValueItem(bundle.getString("operationDetails.groups.parameters"), ""));
