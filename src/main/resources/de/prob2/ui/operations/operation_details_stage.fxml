@@ -1,17 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+<?import javafx.scene.control.TreeItem?>
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="Operation Details">
 	<scene>
 		<Scene>
 			<StackPane>
 				<SplitPane dividerPositions="0.6">
-					<ListView fx:id="valuesListView"/>
+					<TreeView fx:id="valuesTreeView" showRoot="false">
+						<TreeItem fx:id="rootItem" expanded="true">
+							<children>
+								<TreeItem fx:id="parametersItem" expanded="true"/>
+								<TreeItem fx:id="returnValuesItem" expanded="true"/>
+								<TreeItem fx:id="constantsItem" expanded="true"/>
+								<TreeItem fx:id="variablesItem" expanded="true"/>
+							</children>
+						</TreeItem>
+					</TreeView>
 					<TextArea fx:id="textArea" editable="false" wrapText="true"/>
 				</SplitPane>
 			</StackPane>
