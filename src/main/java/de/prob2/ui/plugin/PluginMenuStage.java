@@ -78,8 +78,7 @@ public class PluginMenuStage extends Stage {
 	private void initialize() {
 		pathTextField.setText(proBPluginManager.getPluginDirectory().getAbsolutePath());
 
-		pluginList = FXCollections.observableArrayList(getProBJarPluginManager().getPlugins());
-		pluginList.sort(Comparator.comparing(pluginWrapper -> ((ProBPlugin) pluginWrapper.getPlugin()).getName()));
+		pluginList = FXCollections.observableArrayList();
 
 		stateListener = event -> {
 			PluginWrapper plugin = event.getPlugin();
@@ -88,20 +87,8 @@ public class PluginMenuStage extends Stage {
 					//a plugin was removed
 					pluginList.remove(plugin);
 				} else if (!pluginList.contains(plugin) && getProBJarPluginManager().getPlugins().contains(plugin)) {
-					TableColumn<PluginWrapper, ?> sortcolumn = null;
-					TableColumn.SortType st = null;
-					if (!pluginTableView.getSortOrder().isEmpty()) {
-						sortcolumn = pluginTableView.getSortOrder().get(0);
-						st = sortcolumn.getSortType();
-					}
 					//a new plugin was added
 					pluginList.add(plugin);
-					if (sortcolumn!=null) {
-						pluginTableView.getSortOrder().clear();
-						pluginTableView.getSortOrder().add(sortcolumn);
-						sortcolumn.setSortType(st);
-						sortcolumn.setSortable(true); // This performs a sort
-					}
 				}
 			}
 		};
@@ -125,7 +112,8 @@ public class PluginMenuStage extends Stage {
 		pluginTableView.setItems(pluginSortedFilteredList);
 		pluginTableView.getSortOrder().add(nameCol);
 		pluginTableView.setSelectionModel(null);
-		nameCol.setSortable(true);// This performs a sort
+
+		pluginList.addAll(getProBJarPluginManager().getPlugins());
 	}
 
 	@FXML
@@ -136,10 +124,9 @@ public class PluginMenuStage extends Stage {
 	@FXML
 	private void reloadPlugins() {
 		proBPluginManager.reloadPlugins();
-		List<PluginWrapper> plugins = getProBJarPluginManager().getPlugins();
-		plugins.sort(Comparator.comparing(pluginWrapper -> ((ProBPlugin) pluginWrapper.getPlugin()).getName()));
 		pluginList.clear();
-		pluginList.addAll(plugins);
+		pluginList.addAll(getProBJarPluginManager().getPlugins());
+		//TODO: give the user the information what happened
 	}
 
 	@FXML
@@ -157,6 +144,7 @@ public class PluginMenuStage extends Stage {
 		nameCol.setCellFactory(TextFieldTableCell.forTableColumn());
 		nameCol.setCellValueFactory(param -> new SimpleStringProperty(((ProBPlugin)param.getValue().getPlugin()).getName()));
 		nameCol.setSortType(TableColumn.SortType.ASCENDING);
+		nameCol.setSortable(false);
 
 		versionCol.setCellFactory(param -> {
 			TextFieldTableCell<PluginWrapper, String> cell = new TextFieldTableCell<>();
@@ -164,6 +152,7 @@ public class PluginMenuStage extends Stage {
 			return cell;
 		});
 		versionCol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getDescriptor().getVersion().toString()));
+		versionCol.setSortable(false);
 
 		activeCol.setCellFactory(param -> {
 			CheckBoxTableCell<PluginWrapper, Boolean> cell = new CheckBoxTableCell<>();
@@ -183,6 +172,7 @@ public class PluginMenuStage extends Stage {
 			});
 			return booleanProp;
 		});
+		activeCol.setSortable(false);
 	}
 
 	private void configureContextMenu() {
