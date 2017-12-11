@@ -774,6 +774,10 @@
 	-fx-text-fill: -prob-aqua;
 }
 
+.operations-cell.unexplored:selected {
+	-fx-text-fill: white;
+}
+
 .operations-cell.errored .glyph-icon,
 .operations-cell.unexplored .glyph-icon,
 .operations-cell.normal .glyph-icon {
