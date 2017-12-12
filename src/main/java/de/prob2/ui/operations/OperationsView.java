@@ -389,7 +389,7 @@ public final class OperationsView extends AnchorPane {
 						paramNames, outputNames, constants, variables);
 				events.add(operationItem);
 			} catch (ProBError e) {
-				//TODO temp fix for get_machine_operation_info which currently does not support Event-B models properly
+				// fallback solution if getMachineOperationInfo throws a ProBError
 				OperationItem operationItem = new OperationItem(trace, transition.getId(), transition.getName(),
 						paramValues, transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip,
 						Collections.emptyList(), Collections.emptyList(), constants, variables);
