@@ -21,7 +21,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.machines.Machine;
@@ -69,6 +69,7 @@ public final class StageManager {
 	private final MenuToolkit menuToolkit;
 	private final UIState uiState;
 	private final ResourceBundle bundle;
+	private final FileChooserManager fileChooserManager;
 
 	private final ObjectProperty<Stage> current;
 	private final Map<Stage, Void> registered;
@@ -76,7 +77,7 @@ public final class StageManager {
 	private Stage mainStage;
 
 	@Inject
-	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState, final ResourceBundle bundle) {
+	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
 		this.injector = injector;
 		this.menuToolkit = menuToolkit;
 		this.uiState = uiState;
@@ -85,6 +86,7 @@ public final class StageManager {
 		this.current = new SimpleObjectProperty<>(this, "current");
 		this.registered = new WeakHashMap<>();
 		this.globalMacMenuBar = null;
+		this.fileChooserManager = fileChooserManager;
 	}
 
 	/**
@@ -328,8 +330,7 @@ public final class StageManager {
 		
 		allExts.sort(String::compareTo);
 		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
-		
-		return fileChooser.showOpenDialog(window);
+		return fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 	
 	/**
@@ -513,4 +514,5 @@ public final class StageManager {
 		this.getRegistered().stream().filter(StageManager::isUseGlobalMacMenuBar)
 				.forEach(stage -> this.setMacMenuBar(stage, null));
 	}
+
 }

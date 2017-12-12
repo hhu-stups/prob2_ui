@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob2.ui.MainController;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
@@ -32,12 +33,14 @@ public class PerspectivesMenu extends Menu {
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
+	private final FileChooserManager fileChooserManager;
 
 	@Inject
-	private PerspectivesMenu(final StageManager stageManager, final Injector injector, final ResourceBundle bundle) {
+	private PerspectivesMenu(final StageManager stageManager, final Injector injector, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
+		this.fileChooserManager = fileChooserManager;
 		stageManager.loadFXML(this, "perspectivesMenu.fxml");
 	}
 
@@ -69,7 +72,7 @@ public class PerspectivesMenu extends Menu {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
 		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.fxml"), "*.fxml"));
-		File selectedFile = fileChooser.showOpenDialog(stageManager.getMainStage());
+		File selectedFile = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.PERSPECTIVES ,stageManager.getMainStage());
 		if (selectedFile != null) {
 			try {
 				MainController main = injector.getInstance(MainController.class);

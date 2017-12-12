@@ -17,7 +17,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
-
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.scene.control.Alert;
@@ -68,6 +69,7 @@ public class ProBPluginManager {
 	private List<String> inactivePluginIds;
 	private File pluginDirectory;
 	private ProBJarPluginManager pluginManager;
+	final FileChooserManager fileChooserManager;
 
 	/**
 	 * Should only be used by the Guice-Injector.
@@ -78,12 +80,13 @@ public class ProBPluginManager {
 	 * @param bundle {@link ResourceBundle} used in the prob2-ui application
 	 */
 	@Inject
-	public ProBPluginManager(ProBPluginUIConnection proBPluginUIConnection, StageManager stageManager, ResourceBundle bundle) {
+	public ProBPluginManager(ProBPluginUIConnection proBPluginUIConnection, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager) {
 		this.proBPluginUIConnection = proBPluginUIConnection;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.pluginManager = new ProBJarPluginManager();
 		createPluginDirectory();
+		this.fileChooserManager = fileChooserManager;
 	}
 
 	/**
@@ -306,7 +309,7 @@ public class ProBPluginManager {
 		fileChooser.setTitle(bundle.getString("menu.plugin.items.add"));
 		fileChooser.getExtensionFilters()
 				.addAll(new FileChooser.ExtensionFilter("ProB2 Plugins", "*.jar"));
-		return fileChooser.showOpenDialog(stage);
+		return fileChooserManager.showOpenDialog(fileChooser, Kind.PLUGINS, stage);
 	}
 
 	/*
