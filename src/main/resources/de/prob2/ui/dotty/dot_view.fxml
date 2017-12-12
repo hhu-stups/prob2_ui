@@ -1,21 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.web.WebView?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.Insets?>
 <?import de.prob2.ui.dotty.DotView?>
+<?import de.prob2.ui.dotty.DotChoiceItem?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.Group?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.HBox?>
 
-<fx:root type="DotView" title="State as Graph Visualization" minWidth="240" minHeight="160" width="600.0" height="400.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="DotView" title="Graph Visualization" minWidth="240" minHeight="160" width="600.0" height="400.0" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<StackPane>
 				<children>
 					<ScrollPane fx:id ="pane" fitToHeight="true" fitToWidth="true">
    						<content>
-     			  			<WebView fx:id="dotView" prefWidth="600.0" prefHeight="400.0"/>
+   							<VBox alignment="CENTER" spacing="30.0" prefHeight="50.0" prefWidth="200.0">
+   								<HBox alignment="CENTER" prefHeight="47.0" prefWidth="200.0">
+	   								<VBox.margin>
+										<Insets top="30"/>
+									</VBox.margin>
+		   							<ChoiceBox fx:id="cbChoice" prefWidth="250.0">
+						           		<items>
+											<FXCollections fx:factory="observableArrayList">
+												<DotChoiceItem visualisationType="DFA_MERGE"/>
+											    <DotChoiceItem visualisationType="STATE_AS_GRAPH"/>
+											    <DotChoiceItem visualisationType="INVARIANT"/>
+											    <DotChoiceItem visualisationType="PROPERTIES"/>
+											    <DotChoiceItem visualisationType="ASSERTIONS"/>
+											    <DotChoiceItem visualisationType="DEADLOCK"/>
+											    <DotChoiceItem visualisationType="GOAL"/>
+											    <DotChoiceItem visualisationType="LAST_ERROR"/>
+											    <DotChoiceItem visualisationType="ENABLE_GRAPH"/>
+											    <DotChoiceItem visualisationType="DEPENDENCE_GRAPH"/>
+											    <DotChoiceItem visualisationType="DEFINITIONS"/>
+											    <DotChoiceItem visualisationType="EXPR_AS_GRAPH"/>
+											    <DotChoiceItem visualisationType="FORMULA_TREE"/>
+											    <DotChoiceItem visualisationType="TRANSITION_DIAGRAM"/>
+											    <DotChoiceItem visualisationType="PREDICATE_DEPENDENCY"/>
+											    <DotChoiceItem visualisationType="STATE_SPACE"/>
+											 </FXCollections>
+										</items>
+						           	</ChoiceBox>
+						           	
+					           	</HBox>
+					           	<HBox alignment="CENTER">
+					           		<Button fx:id="visualizeButton" disable="false" onAction="#visualize"
+					           			text = "Visualize" styleClass="button-blue" prefWidth="130.0"/>
+					           	</HBox>
+					           	<HBox alignment="CENTER">
+					           		<WebView fx:id="dotView" prefWidth="600.0" prefHeight="400.0"/>
+					           	</HBox>
+				           	</VBox>
   						 </content>
 					</ScrollPane>
 				</children>

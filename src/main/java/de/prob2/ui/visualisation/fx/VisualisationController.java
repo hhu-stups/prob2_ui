@@ -16,7 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
-
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -62,6 +62,7 @@ public class VisualisationController {
 	private final ResourceBundle bundle;
 	private final TabPane tabPane;
 	private final ReadOnlyObjectProperty<Machine> currentMachine;
+	private final FileChooserManager fileChooserManager;
 
 	private HashMap<String, List<FormulaListener>> formulaListenerMap;
 	private HashMap<String, EventListener> eventListenerMap;
@@ -73,16 +74,18 @@ public class VisualisationController {
 	private Label placeHolderLabel;
 	private VisualisationModel visualisationModel;
 	private VisualisationLoader visualisationLoader;
+	
 
 	@Inject
 	public VisualisationController(StageManager stageManager, CurrentTrace currentTrace, CurrentProject currentProject,
-								   MainView mainView, ResourceBundle bundle) {
+								   MainView mainView, ResourceBundle bundle, FileChooserManager fileChooserManager) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentMachine = currentProject.currentMachineProperty();
 		this.tabPane = mainView.getTabPane();
 		this.bundle = bundle;
 		this.visualisationModel = new VisualisationModel(currentTrace, stageManager, bundle);
+		this.fileChooserManager = fileChooserManager;
 
 		currentTraceChangeListener = (observable, oldTrace, newTrace) -> {
 			if (newTrace != null) {
@@ -153,8 +156,9 @@ public class VisualisationController {
 		fileChooser.getExtensionFilters()
 				.addAll(new FileChooser.ExtensionFilter("Visualisation-JAR", "*.jar"),
 						new FileChooser.ExtensionFilter("Visualisation-Class", "*.java"));
-		File selectedVisualisation = fileChooser.showOpenDialog(stageManager.getCurrent());
-
+		File selectedVisualisation = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+		
+		
 		if (selectedVisualisation != null) {
 			LOGGER.debug("Try to load visualisation from file {}.", selectedVisualisation.getName());
 			if (visualisationLoader == null) {

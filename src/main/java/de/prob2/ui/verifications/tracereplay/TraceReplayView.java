@@ -104,8 +104,8 @@ public class TraceReplayView extends ScrollPane {
 
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.showError"));
-			showErrorItem.setOnAction(event -> stageManager
-					.makeExceptionAlert("", row.getItem().getTrace().getError()).showAndWait());
+			showErrorItem.setOnAction(
+					event -> stageManager.makeExceptionAlert("", row.getItem().getTrace().getError()).showAndWait());
 			showErrorItem.setDisable(true);
 
 			final MenuItem deleteTraceItem = new MenuItem(
@@ -155,7 +155,9 @@ public class TraceReplayView extends ScrollPane {
 		fileChooser.setInitialDirectory(currentProject.getLocation());
 		fileChooser.getExtensionFilters().add(new ExtensionFilter("Trace (*.trace)", "*.trace"));
 		File traceFile = fileChooser.showOpenDialog(stageManager.getCurrent());
-		currentProject.getCurrentMachine().addTraceFile(traceFile);
+		if (traceFile != null) {
+			currentProject.getCurrentMachine().addTraceFile(traceFile);
+		}
 	}
 
 	private void bindIconSizeToFontSize() {

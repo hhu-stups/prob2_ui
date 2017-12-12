@@ -1,12 +1,17 @@
 package de.prob2.ui.dotty;
 
 
+import java.io.File;
+
 import com.google.inject.Inject;
 
+import de.prob.Main;
+import de.prob.animator.command.GetSvgForVisualizationCommand;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseButton;
 import javafx.scene.web.WebView;
@@ -18,18 +23,28 @@ public class DotView extends Stage {
 	private WebView dotView;
 	
 	@FXML
+	private ChoiceBox<DotChoiceItem> cbChoice;
+	
+	@FXML
 	private ScrollPane pane;
 	
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
 	private double dragFactor = 1;
 	
-	private CurrentTrace currentTrace;
+	private final CurrentTrace currentTrace;
+	
+	private static final File FILE = new File(Main.getProBDirectory()
+			+ File.separator + "prob2ui" + File.separator + "out.svg");
 	
 	@Inject
 	public DotView(final StageManager stageManager, final CurrentTrace currentTrace) {
 		stageManager.loadFXML(this, "dot_view.fxml");
 		this.currentTrace = currentTrace;
+	}
+	
+	@FXML
+	public void initialize() {
 		dotView.setContextMenuEnabled(false);
 		dotView.setOnMouseMoved(e-> {
 			oldMousePositionX = e.getSceneX();
@@ -41,10 +56,7 @@ public class DotView extends Stage {
 			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
-			/*GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(GetSvgForVisualizationCommand.Option.DEPENDENCE_GRAPH);
-			currentTrace.getStateSpace().execute(cmd);
-			System.out.println(currentTrace.getStateSpace().getTrace(currentTrace.getCurrentState().getId()));
-			System.out.println(cmd);*/
+
 			
 		});
 		dotView.setOnMouseClicked(e-> {
@@ -61,13 +73,14 @@ public class DotView extends Stage {
 			pane.setHvalue(e.getX() / pane.getWidth());
 			pane.setVvalue(e.getY() / pane.getHeight());
 		});
+
 	}
 	
 	@FXML
-	public void initialize() {
-		//engine = dotView.getEngine();
-		//engine.load(this.getClass().getResource("GCD.svg").toExternalForm());
-		//dotView.getEngine().load(this.getClass().getResource("GCD.svg").toExternalForm());
+	public void visualize() {
+		GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(cbChoice.getValue().geVisualisationType().getOption(), FILE);
+		currentTrace.getStateSpace().execute(cmd);
+		dotView.getEngine().load(FILE.toURI().toString());
 	}
 
 }

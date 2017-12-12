@@ -15,8 +15,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import com.google.gson.Gson;
+import org.hildan.fxgson.FxGson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -25,16 +28,12 @@ import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
-
-import org.hildan.fxgson.FxGson;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 @Singleton
 public class ProjectManager {
@@ -72,20 +71,32 @@ public class ProjectManager {
 
 	public void saveCurrentProject() {
 		Project project = currentProject.get();
+		String name = project.getName();
 		File location = new File(project.getLocation() + File.separator + project.getName() + ".json");
 
 		if (currentProject.isNewProject() && location.exists()) {
-			Optional<ButtonType> result = stageManager.makeAlert(AlertType.WARNING,
-					location + " " + bundle.getString("project.projectManager.fileAlreadyExistsWarning"), ButtonType.YES, ButtonType.NO)
-					.showAndWait(); 
-			if (!result.isPresent() || result.get() == ButtonType.NO) {
+			ButtonType renameBT = new ButtonType((bundle.getString("common.rename")));
+			Optional<ButtonType> result = stageManager
+					.makeAlert(AlertType.WARNING,
+							String.format(bundle.getString("project.projectManager.fileAlreadyExistsWarning"),
+									location),
+							new ButtonType((bundle.getString("common.replace"))), renameBT, ButtonType.CANCEL)
+					.showAndWait();
+			if (!result.isPresent() || result.get() == ButtonType.CANCEL) {
 				return;
+			} else if (result.get().equals(renameBT)) {
+				FileChooser fileChooser = new FileChooser();
+				fileChooser.setInitialDirectory(currentProject.getLocation());
+				fileChooser.setInitialFileName(project.getName() + ".json");
+				fileChooser.getExtensionFilters().add(new ExtensionFilter("Project (*.json)", "*.json"));
+				location = fileChooser.showSaveDialog(stageManager.getCurrent());
+				name = location.getName().substring(0, location.getName().lastIndexOf("."));
 			}
 		}
-		
-		currentProject.update(new Project(project.getName(), project.getDescription(), project.getMachines(),
+
+		currentProject.update(new Project(name, project.getDescription(), project.getMachines(),
 				project.getPreferences(), project.getLocation()));
-		
+
 		File savedFile = saveProject(project, location);
 		if (savedFile != null) {
 			currentProject.setNewProject(false);

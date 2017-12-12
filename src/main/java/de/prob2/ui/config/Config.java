@@ -29,6 +29,7 @@ import com.google.inject.Singleton;
 import de.prob.Main;
 
 import de.prob2.ui.MainController;
+import de.prob2.ui.config.FileChooserManager.FileChooserInitialDirectories;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
@@ -86,7 +87,8 @@ public final class Config {
 		boolean operationsShowNotEnabled;
 		Map<String, String> globalPreferences;
 		private String pluginDirectory;
-
+		private FileChooserInitialDirectories fileChooserInitialDirectories;
+		
 		private ConfigData() {}
 	}
 
@@ -106,6 +108,8 @@ public final class Config {
 	private final GlobalPreferences globalPreferences;
 	private final RuntimeOptions runtimeOptions;
 	private final ProBPluginManager proBPluginManager;
+	private final FileChooserManager fileChooserManager;
+	
 
 	@Inject
 	private Config(
@@ -118,7 +122,8 @@ public final class Config {
 		final GlobalPreferences globalPreferences,
 		final RuntimeOptions runtimeOptions,
 		final StopActions stopActions,
-		final ProBPluginManager proBPluginManager
+		final ProBPluginManager proBPluginManager,
+		final FileChooserManager fileChooserManager
 	) {
 		this.recentProjects = recentProjects;
 		this.uiState = uiState;
@@ -129,6 +134,7 @@ public final class Config {
 		this.globalPreferences = globalPreferences;
 		this.runtimeOptions = runtimeOptions;
 		this.proBPluginManager = proBPluginManager;
+		this.fileChooserManager = fileChooserManager;
 
 		if (!LOCATION.getParentFile().exists() && !LOCATION.getParentFile().mkdirs()) {
 			logger.warn("Failed to create the parent directory for the config file {}", LOCATION.getAbsolutePath());
@@ -305,6 +311,9 @@ public final class Config {
 		this.globalPreferences.putAll(configData.globalPreferences);
 
 		this.proBPluginManager.setPluginDirectory(configData.pluginDirectory);
+		this.fileChooserManager.setInitialDirectories(configData.fileChooserInitialDirectories);
+		
+		
 	}
 
 	public void save() {
@@ -352,6 +361,7 @@ public final class Config {
 		configData.globalPreferences = new HashMap<>(this.globalPreferences);
 
 		configData.pluginDirectory = proBPluginManager.getPluginDirectory().getAbsolutePath();
+		configData.fileChooserInitialDirectories = fileChooserManager.getFileChooserInitialDirectories();
 
 		try (
 			final OutputStream os = new FileOutputStream(LOCATION);

@@ -71,7 +71,7 @@ public class VisualisationMenu extends Menu{
 	}
 	
 	@FXML
-	private void showCurrentState() {
+	private void openGraphVisualisation() {
 		dotView.show();
 	}
 	
