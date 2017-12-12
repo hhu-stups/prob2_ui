@@ -434,7 +434,7 @@ public class ProBPluginManager {
 					pluginClass = pluginWrapper.getPluginClassLoader().loadClass(pluginClassName);
 				} catch (ClassNotFoundException e) {
 					LOGGER.error(e.getMessage(), e);
-					return null;
+					return new InvalidPlugin(pluginWrapper);
 				}
 
 				// once we have the clazz, we can do some checks on it to ensure
@@ -443,7 +443,7 @@ public class ProBPluginManager {
 				if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)
 						|| (!ProBPlugin.class.isAssignableFrom(pluginClass))) {
 					LOGGER.error("The plugin clazz '{}' is not a valid ProBPlugin", pluginClassName);
-					return null;
+					return new InvalidPlugin(pluginWrapper);
 				}
 
 				// create the ProBPlugin instance
