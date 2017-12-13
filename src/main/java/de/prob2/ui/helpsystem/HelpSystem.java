@@ -16,6 +16,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import com.google.inject.Inject;
@@ -50,6 +51,7 @@ public class HelpSystem extends StackPane {
 		URI uri = ProB2.class.getClassLoader().getResource("help/").toURI();
 		File helpMainDirectory = getHelpMainDirectory(uri);
 
+		System.out.println(Locale.getDefault());
 		treeView.setRoot(createNode(helpMainDirectory));
 		treeView.setShowRoot(false);
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
