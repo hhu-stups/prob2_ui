@@ -2,6 +2,7 @@ package de.prob2.ui.dotty;
 
 
 import java.io.File;
+import java.util.ArrayList;
 
 import com.google.inject.Inject;
 
@@ -85,7 +86,11 @@ public class DotView extends Stage {
 	
 	@FXML
 	public void visualize() {
-		GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(cbChoice.getValue().geVisualisationType().getOption(), FILE);
+		ArrayList<String> formulas = new ArrayList<>();
+		if(cbChoice.getSelectionModel().getSelectedItem().hasFormula()) {
+			formulas.add(tfFormula.getText());
+		}
+		GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(cbChoice.getValue().geVisualisationType().getOption(), FILE, formulas);
 		currentTrace.getStateSpace().execute(cmd);
 		dotView.getEngine().load(FILE.toURI().toString());
 	}
