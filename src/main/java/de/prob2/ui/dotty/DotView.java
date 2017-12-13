@@ -4,10 +4,12 @@ package de.prob2.ui.dotty;
 import java.io.File;
 import java.util.ArrayList;
 
+
 import com.google.inject.Inject;
 
 import de.prob.Main;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
