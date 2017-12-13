@@ -13,6 +13,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -24,6 +25,9 @@ public class DotView extends Stage {
 	
 	@FXML
 	private ChoiceBox<DotChoiceItem> cbChoice;
+	
+	@FXML
+	private TextField tfFormula;
 	
 	@FXML
 	private ScrollPane pane;
@@ -73,7 +77,10 @@ public class DotView extends Stage {
 			pane.setHvalue(e.getX() / pane.getWidth());
 			pane.setVvalue(e.getY() / pane.getHeight());
 		});
-
+		cbChoice.getSelectionModel().selectFirst();
+		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> 
+			tfFormula.setVisible(to.hasFormula())
+		);
 	}
 	
 	@FXML
