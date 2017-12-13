@@ -314,7 +314,7 @@ public final class StatesView extends AnchorPane {
 
 		assert treeItem.getChildren().size() == nodes.size();
 
-		if (treeItem.getChildren().size() == nodes.size()) {
+		if (treeItem.getChildren().size() != nodes.size()) {
 			treeItem.getChildren().clear();
 			buildNodes(treeItem, nodes);
 			return;
