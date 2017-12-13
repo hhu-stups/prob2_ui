@@ -6,8 +6,11 @@ public class DotChoiceItem {
 	
 	private DotVisualisationType visualisationType;
 	
-	public DotChoiceItem(@NamedArg("visualisationType") DotVisualisationType name) {
+	private boolean hasFormula;
+	
+	public DotChoiceItem(@NamedArg("visualisationType") DotVisualisationType name, @NamedArg("hasFormula") boolean hasFormula) {
 		this.visualisationType = name;
+		this.hasFormula = hasFormula;
 	}
 	
 	public String toString() {
@@ -16,6 +19,10 @@ public class DotChoiceItem {
 	
 	public DotVisualisationType geVisualisationType() {
 		return visualisationType;
+	}
+	
+	public boolean hasFormula() {
+		return hasFormula;
 	}
 	
 	

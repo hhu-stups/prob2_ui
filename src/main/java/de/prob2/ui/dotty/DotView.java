@@ -2,17 +2,21 @@ package de.prob2.ui.dotty;
 
 
 import java.io.File;
+import java.util.ArrayList;
+
 
 import com.google.inject.Inject;
 
 import de.prob.Main;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -24,6 +28,9 @@ public class DotView extends Stage {
 	
 	@FXML
 	private ChoiceBox<DotChoiceItem> cbChoice;
+	
+	@FXML
+	private TextField tfFormula;
 	
 	@FXML
 	private ScrollPane pane;
@@ -73,12 +80,19 @@ public class DotView extends Stage {
 			pane.setHvalue(e.getX() / pane.getWidth());
 			pane.setVvalue(e.getY() / pane.getHeight());
 		});
-
+		cbChoice.getSelectionModel().selectFirst();
+		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> 
+			tfFormula.setVisible(to.hasFormula())
+		);
 	}
 	
 	@FXML
 	public void visualize() {
-		GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(cbChoice.getValue().geVisualisationType().getOption(), FILE);
+		ArrayList<String> formulas = new ArrayList<>();
+		if(cbChoice.getSelectionModel().getSelectedItem().hasFormula()) {
+			formulas.add(tfFormula.getText());
+		}
+		GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(cbChoice.getValue().geVisualisationType().getOption(), FILE, formulas);
 		currentTrace.getStateSpace().execute(cmd);
 		dotView.getEngine().load(FILE.toURI().toString());
 	}

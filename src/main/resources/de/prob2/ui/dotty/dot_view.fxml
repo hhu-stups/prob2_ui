@@ -26,22 +26,22 @@
 		   							<ChoiceBox fx:id="cbChoice" prefWidth="250.0">
 						           		<items>
 											<FXCollections fx:factory="observableArrayList">
-												<DotChoiceItem visualisationType="DFA_MERGE"/>
-											    <DotChoiceItem visualisationType="STATE_AS_GRAPH"/>
-											    <DotChoiceItem visualisationType="INVARIANT"/>
-											    <DotChoiceItem visualisationType="PROPERTIES"/>
-											    <DotChoiceItem visualisationType="ASSERTIONS"/>
-											    <DotChoiceItem visualisationType="DEADLOCK"/>
-											    <DotChoiceItem visualisationType="GOAL"/>
-											    <DotChoiceItem visualisationType="LAST_ERROR"/>
-											    <DotChoiceItem visualisationType="ENABLE_GRAPH"/>
-											    <DotChoiceItem visualisationType="DEPENDENCE_GRAPH"/>
-											    <DotChoiceItem visualisationType="DEFINITIONS"/>
-											    <DotChoiceItem visualisationType="EXPR_AS_GRAPH"/>
-											    <DotChoiceItem visualisationType="FORMULA_TREE"/>
-											    <DotChoiceItem visualisationType="TRANSITION_DIAGRAM"/>
-											    <DotChoiceItem visualisationType="PREDICATE_DEPENDENCY"/>
-											    <DotChoiceItem visualisationType="STATE_SPACE"/>
+												<DotChoiceItem visualisationType="STATE_SPACE" hasFormula = "false"/>
+												<DotChoiceItem visualisationType="DFA_MERGE" hasFormula = "false"/>
+											    <DotChoiceItem visualisationType="STATE_AS_GRAPH" hasFormula = "false"/>
+											    <DotChoiceItem visualisationType="INVARIANT" hasFormula = "false"/>
+											    <DotChoiceItem visualisationType="PROPERTIES" hasFormula = "false"/>
+											    <DotChoiceItem visualisationType="ASSERTIONS" hasFormula = "false"/>
+											    <DotChoiceItem visualisationType="DEADLOCK" hasFormula = "false"/>
+											    <DotChoiceItem visualisationType="GOAL" hasFormula = "false"/>
+											    <DotChoiceItem visualisationType="LAST_ERROR" hasFormula = "false"/>
+											    <DotChoiceItem visualisationType="ENABLE_GRAPH" hasFormula = "false"/>
+											    <DotChoiceItem visualisationType="DEPENDENCE_GRAPH" hasFormula = "false"/>
+											    <DotChoiceItem visualisationType="DEFINITIONS" hasFormula = "false"/>
+											    <DotChoiceItem visualisationType="EXPR_AS_GRAPH" hasFormula = "true"/>
+											    <DotChoiceItem visualisationType="FORMULA_TREE" hasFormula = "true"/>
+											    <DotChoiceItem visualisationType="TRANSITION_DIAGRAM" hasFormula = "true"/>
+											    <DotChoiceItem visualisationType="PREDICATE_DEPENDENCY" hasFormula = "true"/>
 											 </FXCollections>
 										</items>
 						           	</ChoiceBox>
@@ -51,8 +51,11 @@
 					           		<Button fx:id="visualizeButton" disable="false" onAction="#visualize"
 					           			text = "Visualize" styleClass="button-blue" prefWidth="130.0"/>
 					           	</HBox>
+					       		<HBox alignment="CENTER">
+									<TextField fx:id="tfFormula" visible="false" HBox.hgrow="ALWAYS"/>
+					           	</HBox>
 					           	<HBox alignment="CENTER">
-					           		<WebView fx:id="dotView" prefWidth="600.0" prefHeight="400.0"/>
+					           		<WebView fx:id="dotView" HBox.hgrow="ALWAYS"/>
 					           	</HBox>
 				           	</VBox>
   						 </content>
