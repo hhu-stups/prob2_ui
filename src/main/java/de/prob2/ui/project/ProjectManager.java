@@ -90,7 +90,7 @@ public class ProjectManager {
 				fileChooser.setInitialFileName(project.getName() + ".json");
 				fileChooser.getExtensionFilters().add(new ExtensionFilter("Project (*.json)", "*.json"));
 				location = fileChooser.showSaveDialog(stageManager.getCurrent());
-				name = location.getName().substring(0, location.getName().lastIndexOf("."));
+				name = location.getName().substring(0, location.getName().lastIndexOf('.'));
 			}
 		}
 
