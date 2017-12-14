@@ -9,6 +9,8 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -52,15 +54,18 @@ public class TraceReplayView extends ScrollPane {
 	private final TraceChecker traceChecker;
 	private final Injector injector;
 	private final ResourceBundle bundle;
+	private final FileChooserManager fileChooserManager;
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
-			final TraceChecker traceChecker, final Injector injector, final ResourceBundle bundle) {
+			final TraceChecker traceChecker, final Injector injector, final ResourceBundle bundle,
+			final FileChooserManager fileChooserManager) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.traceChecker = traceChecker;
 		this.injector = injector;
 		this.bundle = bundle;
+		this.fileChooserManager = fileChooserManager;
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
 
@@ -154,7 +159,7 @@ public class TraceReplayView extends ScrollPane {
 		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceLoader.dialog.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation());
 		fileChooser.getExtensionFilters().add(new ExtensionFilter("Trace (*.trace)", "*.trace"));
-		File traceFile = fileChooser.showOpenDialog(stageManager.getCurrent());
+		File traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
 			currentProject.getCurrentMachine().addTraceFile(traceFile);
 		}

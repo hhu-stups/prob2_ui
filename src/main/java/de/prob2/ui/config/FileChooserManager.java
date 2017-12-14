@@ -14,7 +14,7 @@ import javafx.stage.Window;
 @Singleton
 public class FileChooserManager {
 	public enum Kind {
-		PROJECTS_AND_MACHINES, PLUGINS, VISUALISATIONS, PERSPECTIVES
+		PROJECTS_AND_MACHINES, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES
 	}
 
 	private final Map<Kind, File> initialDirectories = new EnumMap<>(Kind.class);
