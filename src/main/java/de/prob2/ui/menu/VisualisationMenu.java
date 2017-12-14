@@ -1,6 +1,7 @@
 package de.prob2.ui.menu;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.dotty.DotView;
@@ -34,12 +35,12 @@ public class VisualisationMenu extends Menu{
 
 	private final VisualisationController visualisationController;
 	
-	private final DotView dotView;
+	private final Injector injector;
 
 	@Inject
-	public VisualisationMenu(final StageManager stageManager, final VisualisationController visualisationController, final DotView dotView) {
+	public VisualisationMenu(final StageManager stageManager, final VisualisationController visualisationController, final Injector injector) {
 		this.visualisationController = visualisationController;
-		this.dotView = dotView;
+		this.injector = injector;
 		stageManager.loadFXML(this, "visualisationMenu.fxml");
 	}
 
@@ -72,7 +73,7 @@ public class VisualisationMenu extends Menu{
 	
 	@FXML
 	private void openGraphVisualisation() {
-		dotView.show();
+		injector.getInstance(DotView.class).show();
 	}
 	
 

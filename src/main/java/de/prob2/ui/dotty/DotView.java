@@ -3,6 +3,7 @@ package de.prob2.ui.dotty;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +25,13 @@ import javafx.scene.layout.Region;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
+
 public class DotView extends Stage {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
+	
+	private static final File FILE = new File(Main.getProBDirectory()
+			+ File.separator + "prob2ui" + File.separator + "out.svg");
 	
 	@FXML
 	private WebView dotView;
@@ -46,13 +51,14 @@ public class DotView extends Stage {
 	
 	private final CurrentTrace currentTrace;
 	
-	private static final File FILE = new File(Main.getProBDirectory()
-			+ File.separator + "prob2ui" + File.separator + "out.svg");
+	private final ResourceBundle bundle;
+	
 	
 	@Inject
-	public DotView(final StageManager stageManager, final CurrentTrace currentTrace) {
+	public DotView(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		stageManager.loadFXML(this, "dot_view.fxml");
 		this.currentTrace = currentTrace;
+		this.bundle = bundle;
 	}
 	
 	@FXML
@@ -86,9 +92,10 @@ public class DotView extends Stage {
 			pane.setVvalue(e.getY() / pane.getHeight());
 		});
 		cbChoice.getSelectionModel().selectFirst();
-		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> 
-			tfFormula.setVisible(to.hasFormula())
-		);
+		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			tfFormula.setVisible(to.hasFormula());
+			dotView.getEngine().loadContent("");
+		});
 	}
 	
 	@FXML
@@ -104,8 +111,8 @@ public class DotView extends Stage {
 		} catch(ProBError e) {
 			LOGGER.error(e.getMessage());
 			Alert alert = new Alert(Alert.AlertType.ERROR);
-			alert.setHeaderText("Visualisation not possible!");
-			alert.setTitle("Graph Visualisation not possible!");
+			alert.setHeaderText(bundle.getString("dotview.error.header"));
+			alert.setTitle(bundle.getString("dotview.error.title"));
 			alert.setContentText(e.getMessage());
 			alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 			alert.showAndWait();

@@ -11,7 +11,7 @@
 <?import javafx.scene.Group?>
 <?import javafx.scene.layout.HBox?>
 
-<fx:root type="DotView" title="Graph Visualization" minWidth="240" minHeight="160" width="600.0" height="400.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="DotView" title="%dotview.header" minWidth="240" minHeight="160" width="600.0" height="400.0" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<StackPane>
