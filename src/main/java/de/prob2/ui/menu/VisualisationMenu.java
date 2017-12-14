@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.dotty.DotView;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.fx.VisualisationController;
 
 import javafx.fxml.FXML;
@@ -32,14 +33,21 @@ public class VisualisationMenu extends Menu{
 
 	@FXML
 	private MenuItem detachVisualisationItem;
+	
+	@FXML
+	private MenuItem graphVisualisationItem;
 
 	private final VisualisationController visualisationController;
 	
 	private final Injector injector;
+	
+	private final CurrentTrace currentTrace;
 
 	@Inject
-	public VisualisationMenu(final StageManager stageManager, final VisualisationController visualisationController, final Injector injector) {
+	public VisualisationMenu(final StageManager stageManager, final VisualisationController visualisationController, 
+							final Injector injector, final CurrentTrace currentTrace) {
 		this.visualisationController = visualisationController;
+		this.currentTrace = currentTrace;
 		this.injector = injector;
 		stageManager.loadFXML(this, "visualisationMenu.fxml");
 	}
@@ -51,6 +59,7 @@ public class VisualisationMenu extends Menu{
 		stopVisualisationItem.disableProperty().bind(visualisationController.visualisationProperty().isNull());
 		detachVisualisationItem.disableProperty()
 				.bind(visualisationController.visualisationProperty().isNull().or(visualisationController.detachProperty()));
+		graphVisualisationItem.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 
 	@FXML

@@ -2,6 +2,8 @@ package de.prob2.ui.dotty;
 
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -107,7 +109,7 @@ public class DotView extends Stage {
 		GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(cbChoice.getValue().geVisualisationType().getOption(), FILE, formulas);
 		try {
 			currentTrace.getStateSpace().execute(cmd);
-			dotView.getEngine().load(FILE.toURI().toString());
+			loadGraph();
 		} catch(ProBError e) {
 			LOGGER.error(e.getMessage());
 			Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -117,6 +119,16 @@ public class DotView extends Stage {
 			alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 			alert.showAndWait();
 		}
+	}
+	
+	private void loadGraph() {
+		try {
+			String content = new String(Files.readAllBytes(FILE.toPath()));
+			dotView.getEngine().loadContent("<center>" + content + "</center>");
+		} catch (IOException e) {
+			LOGGER.error(e.getMessage());
+		}
+		
 	}
 
 }
