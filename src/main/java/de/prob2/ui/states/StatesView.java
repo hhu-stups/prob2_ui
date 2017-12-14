@@ -314,12 +314,6 @@ public final class StatesView extends AnchorPane {
 
 		assert treeItem.getChildren().size() == nodes.size();
 
-		if (treeItem.getChildren().size() != nodes.size()) {
-			treeItem.getChildren().clear();
-			buildNodes(treeItem, nodes);
-			return;
-		}
-
 		for (int i = 0; i < nodes.size(); i++) {
 			final TreeItem<StateItem<?>> subTreeItem = treeItem.getChildren().get(i);
 			final PrologASTNode node = nodes.get(i);
