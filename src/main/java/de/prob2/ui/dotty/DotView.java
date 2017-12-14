@@ -4,24 +4,29 @@ package de.prob2.ui.dotty;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
 import de.prob.Main;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
-
+import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Region;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 public class DotView extends Stage {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
 	
 	@FXML
 	private WebView dotView;
@@ -93,8 +98,18 @@ public class DotView extends Stage {
 			formulas.add(tfFormula.getText());
 		}
 		GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(cbChoice.getValue().geVisualisationType().getOption(), FILE, formulas);
-		currentTrace.getStateSpace().execute(cmd);
-		dotView.getEngine().load(FILE.toURI().toString());
+		try {
+			currentTrace.getStateSpace().execute(cmd);
+			dotView.getEngine().load(FILE.toURI().toString());
+		} catch(ProBError e) {
+			LOGGER.error(e.getMessage());
+			Alert alert = new Alert(Alert.AlertType.ERROR);
+			alert.setHeaderText("Visualisation not possible!");
+			alert.setTitle("Graph Visualisation not possible!");
+			alert.setContentText(e.getMessage());
+			alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+			alert.showAndWait();
+		}
 	}
 
 }
