@@ -42,7 +42,7 @@ public final class HistoryView extends AnchorPane {
 			if (item == null) {
 				setGraphic(new Text());
 			} else {
-				final Text text = new Text(transitionToString(item.transition));
+				final Text text = new Text(item.index + ") "+ transitionToString(item.transition));
 
 				switch (item.status) {
 				case PAST:
@@ -96,11 +96,12 @@ public final class HistoryView extends AnchorPane {
 			lvHistory.getItems().clear();
 			if (to != null) {
 				int currentPos = to.getCurrent().getIndex();
-				addItems(lvHistory, currentPos);
+				addItems(lvHistory, currentPos, 0);
 				List<Transition> transitionList = to.getTransitionList();
 				for (int i = 0; i < transitionList.size(); i++) {
+					int index = i + 1;
 					HistoryStatus status = getStatus(i, currentPos);
-					lvHistory.getItems().add(new HistoryItem(transitionList.get(i), status));
+					lvHistory.getItems().add(new HistoryItem(transitionList.get(i), status, index));
 				}
 			}
 
@@ -190,14 +191,17 @@ public final class HistoryView extends AnchorPane {
 		}
 	}
 
-	private void addItems(ListView<HistoryItem> lvHistory, int currentPos) {
-		lvHistory.getItems().add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST));
+	private void addItems(ListView<HistoryItem> lvHistory, int currentPos, int index) {
+		lvHistory.getItems().add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST, index));
 	}
 
 	@FXML
 	private void saveTrace() {
 		TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
-		traceSaver.saveTrace(new PersistentTrace(currentTrace.get()), currentProject.getCurrentMachine());
+		if(currentTrace.get() != null) {
+			traceSaver.saveTrace(new PersistentTrace(currentTrace.get(), currentTrace.get().getCurrent().getIndex() + 1), currentProject.getCurrentMachine());
+		}
+		
 	}
 
 }
