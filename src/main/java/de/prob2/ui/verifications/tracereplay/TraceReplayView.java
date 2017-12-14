@@ -1,6 +1,8 @@
 package de.prob2.ui.verifications.tracereplay;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -158,7 +160,14 @@ public class TraceReplayView extends ScrollPane {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceLoader.dialog.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation());
-		fileChooser.getExtensionFilters().add(new ExtensionFilter("Trace (*.trace)", "*.trace"));
+		final List<String> allExts = new ArrayList<>();
+		allExts.add("*.json");
+		allExts.add("*.trace");
+		allExts.sort(String::compareTo);
+		fileChooser.getExtensionFilters().addAll(
+				new ExtensionFilter("All supported trace formats", allExts),
+				new ExtensionFilter("Trace (*.trace)", "*.trace"),
+				new ExtensionFilter("Trace (*.json)", "*.json"));
 		File traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
 			currentProject.getCurrentMachine().addTraceFile(traceFile);
