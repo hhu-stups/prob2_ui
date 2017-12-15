@@ -7,25 +7,25 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob.Main;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
 import de.prob.exception.ProBError;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.Region;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class DotView extends Stage {
@@ -51,16 +51,18 @@ public class DotView extends Stage {
 	private double oldMousePositionY = -1;
 	private double dragFactor = 1;
 	
+	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
-	
 	private final ResourceBundle bundle;
 	
 	
 	@Inject
 	public DotView(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
-		stageManager.loadFXML(this, "dot_view.fxml");
+		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
+		
+		stageManager.loadFXML(this, "dot_view.fxml");
 	}
 	
 	@FXML
@@ -110,25 +112,15 @@ public class DotView extends Stage {
 		try {
 			currentTrace.getStateSpace().execute(cmd);
 			loadGraph();
-		} catch(ProBError e) {
-			LOGGER.error(e.getMessage());
-			Alert alert = new Alert(Alert.AlertType.ERROR);
-			alert.setHeaderText(bundle.getString("dotview.error.header"));
-			alert.setTitle(bundle.getString("dotview.error.title"));
-			alert.setContentText(e.getMessage());
-			alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-			alert.showAndWait();
+		} catch (IOException | ProBError e) {
+			LOGGER.error("Graph visualization failed", e);
+			stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
 		}
 	}
 	
-	private void loadGraph() {
-		try {
-			String content = new String(Files.readAllBytes(FILE.toPath()));
-			dotView.getEngine().loadContent("<center>" + content + "</center>");
-		} catch (IOException e) {
-			LOGGER.error(e.getMessage());
-		}
-		
+	private void loadGraph() throws IOException {
+		String content = new String(Files.readAllBytes(FILE.toPath()));
+		dotView.getEngine().loadContent("<center>" + content + "</center>");
 	}
 
 }
