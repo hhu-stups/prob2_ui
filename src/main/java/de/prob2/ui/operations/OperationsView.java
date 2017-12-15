@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
@@ -58,6 +59,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
@@ -76,10 +78,8 @@ public final class OperationsView extends AnchorPane {
 			getStyleClass().add("operations-cell");
 
 			this.setOnMouseClicked(event -> {
-				if (event.getButton() == MouseButton.PRIMARY && this.getItem() != null
-						&& this.getItem().getStatus() == OperationItem.Status.ENABLED
-						&& this.getItem().getTrace().equals(currentTrace.get())) {
-					currentTrace.set(currentTrace.get().add(this.getItem().getId()));
+				if (event.getButton() == MouseButton.PRIMARY) {
+					executeOperationIfPossible(this.getItem());
 				}
 			});
 
@@ -264,6 +264,11 @@ public final class OperationsView extends AnchorPane {
 	public void initialize() {
 		helpButton.setHelpContent("ProB2UI.md.html");
 		opsListView.setCellFactory(lv -> new OperationsCell());
+		opsListView.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ENTER) {
+				executeOperationIfPossible(opsListView.getSelectionModel().getSelectedItem());
+			}
+		});
 
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
@@ -292,6 +297,16 @@ public final class OperationsView extends AnchorPane {
 				.addListener((observable, from, to) -> ((FontAwesomeIconView) (disabledOpsToggle.getGraphic()))
 						.glyphSizeProperty().bind(fontsize.add(2)));
 		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
+	}
+
+	private void executeOperationIfPossible(final OperationItem item) {
+		if (
+			item != null
+			&& item.getStatus() == OperationItem.Status.ENABLED
+			&& item.getTrace().equals(currentTrace.get())
+		) {
+			currentTrace.set(currentTrace.get().add(item.getId()));
+		}
 	}
 
 	private LinkedHashMap<String, String> getNextStateValues(Transition transition, List<IEvalElement> formulas) {
