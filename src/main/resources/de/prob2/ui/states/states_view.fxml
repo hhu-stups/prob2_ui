@@ -1,42 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.*?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TreeItem?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <fx:root type="AnchorPane" minWidth="240" minHeight="70" xmlns:fx="http://javafx.com/fxml/1">
-  <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+	<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
-    <AnchorPane>
-      <HBox spacing="10.0" AnchorPane.leftAnchor="10.0"
-        AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0"
-        AnchorPane.bottomAnchor="10.0" alignment="CENTER">
-        <Button fx:id="searchButton" styleClass="button-dark"
-          alignment="CENTER" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
-          onAction="#handleSearchButton" HBox.hgrow="NEVER" prefHeight="${searchButton.width}">
-          <graphic>
-            <FontAwesomeIconView glyphName="SEARCH"
-              styleClass="icon-basic" />
-          </graphic>
-        </Button>
-        <TextField fx:id="filterState" onAction="#handleSearchButton"
-          promptText="%states.search.prompt" HBox.hgrow="ALWAYS" />
-        <HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
-      </HBox>
-    </AnchorPane>
-    <TreeTableView fx:id="tv" VBox.vgrow="always" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxWidth="Infinity" showRoot="false">
-  		<columnResizePolicy>
-  			<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-  		</columnResizePolicy>
-  		<columns>
-  			<TreeTableColumn fx:id="tvName" id="name" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.columns.name" />
-  			<TreeTableColumn fx:id="tvValue" id="value" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.columns.value" />
-  			<TreeTableColumn fx:id="tvPreviousValue" id="previousValue" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.columns.previousValue" />
-  		</columns>
-  		<placeholder>
-  			<Label text="%common.noModelLoaded"/>
-  		</placeholder>
-  		<TreeItem fx:id="tvRootItem" expanded="true" />
-    </TreeTableView>
-  </VBox> 
+		<AnchorPane>
+			<HBox spacing="10.0" AnchorPane.leftAnchor="10.0"
+				AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0"
+				AnchorPane.bottomAnchor="10.0" alignment="CENTER">
+				<Button fx:id="searchButton" styleClass="button-dark"
+					alignment="CENTER" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
+					onAction="#handleSearchButton" HBox.hgrow="NEVER" prefHeight="${searchButton.width}">
+					<graphic>
+						<FontAwesomeIconView glyphName="SEARCH"
+							styleClass="icon-basic" />
+					</graphic>
+				</Button>
+				<TextField fx:id="filterState" onAction="#handleSearchButton"
+					promptText="%states.search.prompt" HBox.hgrow="ALWAYS" />
+				<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
+			</HBox>
+		</AnchorPane>
+		<TreeTableView fx:id="tv" VBox.vgrow="always" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxWidth="Infinity" showRoot="false">
+			<columnResizePolicy>
+				<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+			</columnResizePolicy>
+			<columns>
+				<TreeTableColumn fx:id="tvName" id="name" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.columns.name" />
+				<TreeTableColumn fx:id="tvValue" id="value" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.columns.value" />
+				<TreeTableColumn fx:id="tvPreviousValue" id="previousValue" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.columns.previousValue" />
+			</columns>
+			<placeholder>
+				<Label text="%common.noModelLoaded"/>
+			</placeholder>
+			<TreeItem fx:id="tvRootItem" expanded="true" />
+		</TreeTableView>
+	</VBox> 
 </fx:root>
