@@ -44,8 +44,9 @@
 								</items>
 						     </ChoiceBox>
 					     </HBox>
-					     <HBox alignment="CENTER">
-							<TextField fx:id="tfFormula" visible="false" HBox.hgrow="ALWAYS"/>
+					     <HBox fx:id="enterFormulaBox" visible="false" alignment="CENTER">
+					     	<Label text="%dotview.enterFormula" />
+							<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
 					     </HBox>
 					     <HBox alignment="CENTER">
 					     	<Button fx:id="visualizeButton" disable="false" onAction="#visualize"

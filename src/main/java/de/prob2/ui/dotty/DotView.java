@@ -21,6 +21,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
@@ -43,6 +44,9 @@ public class DotView extends Stage {
 	
 	@FXML
 	private TextField tfFormula;
+	
+	@FXML
+	private HBox enterFormulaBox;
 	
 	@FXML
 	private ScrollPane pane;
@@ -97,7 +101,7 @@ public class DotView extends Stage {
 		});
 		cbChoice.getSelectionModel().selectFirst();
 		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			tfFormula.setVisible(to.hasFormula());
+			enterFormulaBox.setVisible(to.hasFormula());
 			dotView.getEngine().loadContent("");
 		});
 	}
