@@ -67,7 +67,6 @@ public class DotView extends Stage {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
-		
 		stageManager.loadFXML(this, "dot_view.fxml");
 	}
 	
@@ -87,6 +86,7 @@ public class DotView extends Stage {
 
 			
 		});
+
 		dotView.setOnMouseClicked(e-> {
 			if(e.getClickCount() < 2) {
 				return;

@@ -14,10 +14,12 @@
 <fx:root type="DotView" title="%dotview.header" minWidth="240" minHeight="160" width="600.0" height="400.0" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<StackPane>
+			<AnchorPane>
 				<children>
-   					<VBox alignment="CENTER" spacing="30.0">
-   						<HBox alignment="CENTER">
+   					<VBox alignment="TOP_CENTER" prefWidth="Infinity" prefHeight="Infinity" spacing="30.0" AnchorPane.bottomAnchor="0.0"
+						AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+						AnchorPane.topAnchor="0.0">
+   						<HBox alignment="TOP_CENTER" VBox.vgrow="NEVER">
 	   						<VBox.margin>
 								<Insets top="30"/>
 							</VBox.margin>
@@ -44,22 +46,20 @@
 								</items>
 						     </ChoiceBox>
 					     </HBox>
-					     <HBox fx:id="enterFormulaBox" visible="false" alignment="CENTER">
-					     	<Label text="%dotview.enterFormula" />
+					     <HBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
+					     	<Label text="%dotview.enterFormula" HBox.hgrow="NEVER" />
 							<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
 					     </HBox>
-					     <HBox alignment="CENTER">
-					     	<Button fx:id="visualizeButton" disable="false" onAction="#visualize"
-					           	text = "Visualize" styleClass="button-blue" prefWidth="130.0"/>
-					     </HBox>
-					     <ScrollPane fx:id ="pane" fitToHeight="true" fitToWidth="true">
-   							<content>
-					           	<WebView fx:id="dotView"/>
-					        </content>
+					     <Button fx:id="visualizeButton" disable="false" onAction="#visualize"
+					           text = "Visualize" styleClass="button-blue" prefWidth="130.0" VBox.vgrow="NEVER"/>
+					     <ScrollPane fx:id ="pane" fitToHeight="true" fitToWidth="true" styleClass="border" VBox.vgrow="ALWAYS">
+		   					<content>
+							   <WebView maxWidth="Infinity" maxHeight ="Infinity" fx:id="dotView"/>
+							</content>
 						</ScrollPane>
 				     </VBox>
 				</children>
-			</StackPane>
+			</AnchorPane>
 		</Scene>
 	</scene>
 </fx:root>
