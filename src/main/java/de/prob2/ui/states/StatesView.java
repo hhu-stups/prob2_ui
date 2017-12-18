@@ -265,10 +265,8 @@ public final class StatesView extends AnchorPane {
 	@FXML
 	private void handleSearchButton() {
 		filter = filterState.getText();
-		this.tvRootItem.getChildren().clear();
-		buildNodes(this.tvRootItem, this.rootNodes);
-		this.currentTrace.getStateSpace().subscribe(this, getExpandedFormulas(tvRootItem.getChildren()));
-		this.updateValueMaps(this.currentTrace.get());
+		// When the filter is changed, pass null as the previous trace to force a rebuild of the tree.
+		this.updateRoot(null, currentTrace.get());
 	}
 
 	private void buildNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
@@ -282,7 +280,7 @@ public final class StatesView extends AnchorPane {
 			if (node instanceof ASTCategory && ((ASTCategory) node).isExpanded()) {
 				subTreeItem.setExpanded(true);
 			}
-			if (hasFilter() && node instanceof ASTFormula) {
+			if (!this.filter.isEmpty() && node instanceof ASTFormula) {
 				ASTFormula formula = (ASTFormula) node;
 				if (!formula.getFormula().getCode().toLowerCase().contains(filter.toLowerCase())) {
 					continue;
@@ -327,10 +325,6 @@ public final class StatesView extends AnchorPane {
 		}
 	}
 
-	private boolean hasFilter() {
-		return !this.filter.equals("");
-	}
-
 	private void updateRoot(final Trace from, final Trace to) {
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 
@@ -352,7 +346,7 @@ public final class StatesView extends AnchorPane {
 		this.updateValueMaps(to);
 
 		Platform.runLater(() -> {
-			if (rebuildTree || hasFilter()) {
+			if (rebuildTree) {
 				this.tvRootItem.getChildren().clear();
 				buildNodes(this.tvRootItem, this.rootNodes);
 			} else {
