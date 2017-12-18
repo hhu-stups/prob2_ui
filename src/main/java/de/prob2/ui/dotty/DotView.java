@@ -11,6 +11,8 @@ import com.google.inject.Inject;
 
 import de.prob.Main;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
+import de.prob.animator.domainobjects.ClassicalB;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 
 import de.prob2.ui.internal.StageManager;
@@ -104,9 +106,9 @@ public class DotView extends Stage {
 	
 	@FXML
 	public void visualize() {
-		ArrayList<String> formulas = new ArrayList<>();
+		ArrayList<IEvalElement> formulas = new ArrayList<>();
 		if(cbChoice.getSelectionModel().getSelectedItem().hasFormula()) {
-			formulas.add(tfFormula.getText());
+			formulas.add(new ClassicalB(tfFormula.getText()));
 		}
 		GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(cbChoice.getValue().geVisualisationType().getOption(), FILE, formulas);
 		try {
