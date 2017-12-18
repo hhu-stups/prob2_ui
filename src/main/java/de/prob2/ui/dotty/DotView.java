@@ -12,6 +12,7 @@ import com.google.inject.Inject;
 import de.prob.Main;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
 import de.prob.animator.domainobjects.ClassicalB;
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 
@@ -111,14 +112,14 @@ public class DotView extends Stage {
 	@FXML
 	public void visualize() {
 		ArrayList<IEvalElement> formulas = new ArrayList<>();
-		if(cbChoice.getSelectionModel().getSelectedItem().hasFormula()) {
-			formulas.add(new ClassicalB(tfFormula.getText()));
-		}
-		GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(cbChoice.getValue().geVisualisationType().getOption(), FILE, formulas);
 		try {
+			if(cbChoice.getSelectionModel().getSelectedItem().hasFormula()) {
+				formulas.add(new ClassicalB(tfFormula.getText()));
+			}
+			GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(cbChoice.getValue().geVisualisationType().getOption(), FILE, formulas);
 			currentTrace.getStateSpace().execute(cmd);
 			loadGraph();
-		} catch (IOException | ProBError e) {
+		} catch (IOException | ProBError | EvaluationException e) {
 			LOGGER.error("Graph visualization failed", e);
 			stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
 		}
