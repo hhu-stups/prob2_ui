@@ -13,6 +13,7 @@ import de.prob.statespace.Trace;
 
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
@@ -112,6 +113,9 @@ public class SymbolicCheckingView extends AnchorPane {
 				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
 			}
 		});
+		
+		FontSize fontsize = injector.getInstance(FontSize.class);
+		((FontAwesomeIconView) (addFormulaButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 	}
 	
 	private void setBindings() {
