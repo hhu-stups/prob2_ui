@@ -16,9 +16,7 @@
 			<VBox spacing="5.0" AnchorPane.bottomAnchor="0.0"
 				AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 				AnchorPane.topAnchor="6.0" alignment="TOP_RIGHT">
-				<VBox spacing="5.0" AnchorPane.bottomAnchor="0.0"
-					AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-					AnchorPane.topAnchor="6.0" alignment="TOP_RIGHT">
+				<VBox spacing="5.0" VBox.vgrow="always">
 					<HBox spacing="5.0" alignment="CENTER_LEFT">
 						<HBox spacing="5.0" alignment="BOTTOM_LEFT" HBox.hgrow="ALWAYS">
 							<Button fx:id="checkMachineButton" 
@@ -39,7 +37,7 @@
 							<HelpButton fx:id="helpButton" AnchorPane.rightAnchor="-8"/>
 						</HBox>
 					</HBox>
-					<TableView fx:id="tvFormula" minHeight="420.0">
+					<TableView fx:id="tvFormula" minHeight="420.0" VBox.vgrow="always">
 						<columnResizePolicy>
 							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 						</columnResizePolicy>
