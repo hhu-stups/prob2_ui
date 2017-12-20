@@ -1,11 +1,14 @@
 package de.prob2.ui.states;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -14,6 +17,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.command.GetMachineStructureCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
@@ -91,6 +95,7 @@ public final class StatesView extends AnchorPane {
 
 	private List<PrologASTNode> rootNodes;
 	private List<PrologASTNode> filteredRootNodes;
+	private final Set<IEvalElement> subscribedFormulas;
 	private final Map<IEvalElement, AbstractEvalResult> currentValues;
 	private final Map<IEvalElement, AbstractEvalResult> previousValues;
 	private final ExecutorService updater;
@@ -110,6 +115,7 @@ public final class StatesView extends AnchorPane {
 
 		this.rootNodes = null;
 		this.filteredRootNodes = null;
+		this.subscribedFormulas = new HashSet<>();
 		this.currentValues = new HashMap<>();
 		this.previousValues = new HashMap<>();
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "StatesView Updater"));
@@ -256,6 +262,16 @@ public final class StatesView extends AnchorPane {
 		return formulas;
 	}
 
+	private void subscribeFormulas(final Collection<? extends IEvalElement> formulas) {
+		this.currentTrace.getStateSpace().subscribe(this, formulas);
+		this.subscribedFormulas.addAll(formulas);
+	}
+
+	private void unsubscribeFormulas(final Collection<? extends IEvalElement> formulas) {
+		this.currentTrace.getStateSpace().unsubscribe(this, formulas);
+		this.subscribedFormulas.removeAll(formulas);
+	}
+
 	private void updateValueMaps(final Trace trace) {
 		this.currentValues.clear();
 		this.currentValues.putAll(trace.getCurrentState().getValues());
@@ -312,9 +328,9 @@ public final class StatesView extends AnchorPane {
 			subTreeItem.expandedProperty().addListener((o, from, to) -> {
 				final List<IEvalElement> formulas = getExpandedFormulas(subTreeItem.getChildren());
 				if (to) {
-					this.currentTrace.getStateSpace().subscribe(this, formulas);
+					this.subscribeFormulas(formulas);
 				} else {
-					this.currentTrace.getStateSpace().unsubscribe(this, formulas);
+					this.unsubscribeFormulas(formulas);
 				}
 				this.updateValueMaps(this.currentTrace.get());
 			});
@@ -355,7 +371,8 @@ public final class StatesView extends AnchorPane {
 		// If the root nodes were reloaded or the filter has changed, update the filtered node list.
 		if (reloadRootNodes || filterChanged) {
 			this.filteredRootNodes = filterNodes(this.rootNodes, this.filter);
-			to.getStateSpace().subscribe(this, getInitialExpandedFormulas(this.filteredRootNodes));
+			this.unsubscribeFormulas(this.subscribedFormulas);
+			this.subscribeFormulas(getInitialExpandedFormulas(this.filteredRootNodes));
 		}
 
 		this.updateValueMaps(to);
