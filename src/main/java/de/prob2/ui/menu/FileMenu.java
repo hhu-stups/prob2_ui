@@ -32,6 +32,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -79,6 +80,8 @@ public class FileMenu extends Menu {
 			this.clearRecentProjects.setDisable(newItems.isEmpty());
 			if (newItems.isEmpty()) {
 				newItems.add(this.recentProjectsPlaceholder);
+			}else {
+				newItems.get(0).setAccelerator(KeyCombination.valueOf("Shortcut+0"));
 			}
 			newItems.addAll(recentItems.subList(recentItems.size() - 2, recentItems.size()));
 			this.recentProjectsMenu.getItems().setAll(newItems);
@@ -110,6 +113,14 @@ public class FileMenu extends Menu {
 		} else {
 			this.createProjectFromFile(selected);
 		}
+	}
+	
+	@FXML
+	private void handleOpenLastProject() {
+		if(this.recentProjects.isEmpty()) {
+			return;
+		}
+		this.openProject(new File(this.recentProjects.get(0)));
 	}
 
 	private void createProjectFromFile(File file) {

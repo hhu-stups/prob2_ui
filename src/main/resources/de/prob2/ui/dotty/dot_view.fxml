@@ -11,57 +11,55 @@
 <?import javafx.scene.Group?>
 <?import javafx.scene.layout.HBox?>
 
-<fx:root type="DotView" title="Graph Visualization" minWidth="240" minHeight="160" width="600.0" height="400.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="DotView" title="%dotview.header" minWidth="240" minHeight="160" width="600.0" height="400.0" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<StackPane>
+			<AnchorPane>
 				<children>
-					<ScrollPane fx:id ="pane" fitToHeight="true" fitToWidth="true">
-   						<content>
-   							<VBox alignment="CENTER" spacing="30.0" prefHeight="50.0" prefWidth="200.0">
-   								<HBox alignment="CENTER" prefHeight="47.0" prefWidth="200.0">
-	   								<VBox.margin>
-										<Insets top="30"/>
-									</VBox.margin>
-		   							<ChoiceBox fx:id="cbChoice" prefWidth="250.0">
-						           		<items>
-											<FXCollections fx:factory="observableArrayList">
-												<DotChoiceItem visualisationType="STATE_SPACE" hasFormula = "false"/>
-												<DotChoiceItem visualisationType="DFA_MERGE" hasFormula = "false"/>
-											    <DotChoiceItem visualisationType="STATE_AS_GRAPH" hasFormula = "false"/>
-											    <DotChoiceItem visualisationType="INVARIANT" hasFormula = "false"/>
-											    <DotChoiceItem visualisationType="PROPERTIES" hasFormula = "false"/>
-											    <DotChoiceItem visualisationType="ASSERTIONS" hasFormula = "false"/>
-											    <DotChoiceItem visualisationType="DEADLOCK" hasFormula = "false"/>
-											    <DotChoiceItem visualisationType="GOAL" hasFormula = "false"/>
-											    <DotChoiceItem visualisationType="LAST_ERROR" hasFormula = "false"/>
-											    <DotChoiceItem visualisationType="ENABLE_GRAPH" hasFormula = "false"/>
-											    <DotChoiceItem visualisationType="DEPENDENCE_GRAPH" hasFormula = "false"/>
-											    <DotChoiceItem visualisationType="DEFINITIONS" hasFormula = "false"/>
-											    <DotChoiceItem visualisationType="EXPR_AS_GRAPH" hasFormula = "true"/>
-											    <DotChoiceItem visualisationType="FORMULA_TREE" hasFormula = "true"/>
-											    <DotChoiceItem visualisationType="TRANSITION_DIAGRAM" hasFormula = "true"/>
-											    <DotChoiceItem visualisationType="PREDICATE_DEPENDENCY" hasFormula = "true"/>
-											 </FXCollections>
-										</items>
-						           	</ChoiceBox>
-						           	
-					           	</HBox>
-					           	<HBox alignment="CENTER">
-					           		<Button fx:id="visualizeButton" disable="false" onAction="#visualize"
-					           			text = "Visualize" styleClass="button-blue" prefWidth="130.0"/>
-					           	</HBox>
-					       		<HBox alignment="CENTER">
-									<TextField fx:id="tfFormula" visible="false" HBox.hgrow="ALWAYS"/>
-					           	</HBox>
-					           	<HBox alignment="CENTER">
-					           		<WebView fx:id="dotView" HBox.hgrow="ALWAYS"/>
-					           	</HBox>
-				           	</VBox>
-  						 </content>
-					</ScrollPane>
+   					<VBox alignment="TOP_CENTER" prefWidth="Infinity" prefHeight="Infinity" spacing="30.0" AnchorPane.bottomAnchor="0.0"
+						AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+						AnchorPane.topAnchor="0.0">
+   						<HBox alignment="TOP_CENTER" VBox.vgrow="NEVER">
+	   						<VBox.margin>
+								<Insets top="30"/>
+							</VBox.margin>
+		   					<ChoiceBox fx:id="cbChoice" prefWidth="250.0">
+						      <items>
+									<FXCollections fx:factory="observableArrayList">
+										<DotChoiceItem visualisationType="STATE_SPACE" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="DFA_MERGE" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="STATE_AS_GRAPH" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="INVARIANT" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="PROPERTIES" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="ASSERTIONS" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="DEADLOCK" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="GOAL" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="LAST_ERROR" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="ENABLE_GRAPH" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="DEPENDENCE_GRAPH" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="DEFINITIONS" hasFormula = "false"/>
+										<DotChoiceItem visualisationType="EXPR_AS_GRAPH" hasFormula = "true"/>
+										<DotChoiceItem visualisationType="FORMULA_TREE" hasFormula = "true"/>
+										<DotChoiceItem visualisationType="TRANSITION_DIAGRAM" hasFormula = "true"/>
+										<DotChoiceItem visualisationType="PREDICATE_DEPENDENCY" hasFormula = "true"/>
+									</FXCollections>
+								</items>
+						     </ChoiceBox>
+					     </HBox>
+					     <HBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
+					     	<Label text="%dotview.enterFormula" HBox.hgrow="NEVER" />
+							<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
+					     </HBox>
+					     <Button fx:id="visualizeButton" disable="false" onAction="#visualize"
+					           text = "Visualize" styleClass="button-blue" prefWidth="130.0" VBox.vgrow="NEVER"/>
+					     <ScrollPane fx:id ="pane" fitToHeight="true" fitToWidth="true" styleClass="border" VBox.vgrow="ALWAYS">
+		   					<content>
+							   <WebView maxWidth="Infinity" maxHeight ="Infinity" fx:id="dotView"/>
+							</content>
+						</ScrollPane>
+				     </VBox>
 				</children>
-			</StackPane>
+			</AnchorPane>
 		</Scene>
 	</scene>
 </fx:root>

@@ -6,13 +6,15 @@ public class HistoryItem {
 
 	public final HistoryStatus status;
 	public final Transition transition;
+	public final int index;
 	
-	public HistoryItem(HistoryStatus status) {
-		this(null, status);
+	public HistoryItem(HistoryStatus status, int i) {
+		this(null, status, i);
 	}
 
-	public HistoryItem(Transition transition, HistoryStatus status) {
+	public HistoryItem(Transition transition, HistoryStatus status, int i) {
 		this.transition = transition;
 		this.status = status;
+		this.index = i;
 	}
 }

@@ -65,9 +65,16 @@ public final class ExceptionAlert extends Alert {
 	@FXML
 	private void initialize() {
 		stageManager.register(this);
+		ProBError proBError = null;
+		for (Throwable e = this.exc; e != null; e = e.getCause()) {
+			if (e instanceof ProBError) {
+				proBError = (ProBError)e;
+				break;
+			}
+		}
 		final String message;
-		if (this.exc instanceof ProBError) {
-			message = ((ProBError)this.exc).getOriginalMessage();
+		if (proBError != null) {
+			message = proBError.getOriginalMessage();
 		} else {
 			message = this.exc.getMessage();
 		}
@@ -154,8 +161,8 @@ public final class ExceptionAlert extends Alert {
 			this.stackTraceTextArea.setText(caw.toString());
 		}
 		
-		if (exc instanceof ProBError && ((ProBError)exc).getErrors() != null) {
-			this.proBErrorTable.getItems().setAll(((ProBError)exc).getErrors());
+		if (proBError != null && proBError.getErrors() != null) {
+			this.proBErrorTable.getItems().setAll(proBError.getErrors());
 		} else {
 			this.contentVBox.getChildren().remove(this.proBErrorTable);
 		}
