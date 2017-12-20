@@ -149,6 +149,7 @@ public final class HistoryView extends AnchorPane {
 		((FontAwesomeIconView) (btBack.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 		((FontAwesomeIconView) (btForward.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 		((FontAwesomeIconView) (tbReverse.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
+		((FontAwesomeIconView) (saveTraceButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 	}
 
 	public static String transitionToString(final Transition transition) {

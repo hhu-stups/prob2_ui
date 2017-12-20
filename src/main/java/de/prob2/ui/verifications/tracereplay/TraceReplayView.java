@@ -178,6 +178,7 @@ public class TraceReplayView extends ScrollPane {
 		FontSize fontsize = injector.getInstance(FontSize.class);
 		((FontAwesomeIconView) (checkButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 		((FontAwesomeIconView) (cancelButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
+		((FontAwesomeIconView) (loadTraceButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2.0));
 		statusColumn.minWidthProperty().bind(fontsize.multiply(6.0));
 		statusColumn.maxWidthProperty().bind(fontsize.multiply(6.0));
 	}

@@ -1,11 +1,14 @@
 package de.prob2.ui.states;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -14,6 +17,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.command.GetMachineStructureCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
@@ -93,6 +97,8 @@ public final class StatesView extends AnchorPane {
 	private final ResourceBundle bundle;
 
 	private List<PrologASTNode> rootNodes;
+	private List<PrologASTNode> filteredRootNodes;
+	private final Set<IEvalElement> subscribedFormulas;
 	private final Map<IEvalElement, AbstractEvalResult> currentValues;
 	private final Map<IEvalElement, AbstractEvalResult> previousValues;
 	private final ExecutorService updater;
@@ -111,6 +117,8 @@ public final class StatesView extends AnchorPane {
 		this.bundle = bundle;
 
 		this.rootNodes = null;
+		this.filteredRootNodes = null;
+		this.subscribedFormulas = new HashSet<>();
 		this.currentValues = new HashMap<>();
 		this.previousValues = new HashMap<>();
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "StatesView Updater"));
@@ -139,11 +147,12 @@ public final class StatesView extends AnchorPane {
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			if (to == null) {
 				this.rootNodes = null;
+				this.filteredRootNodes = null;
 				this.currentValues.clear();
 				this.previousValues.clear();
 				this.tv.getRoot().getChildren().clear();
 			} else {
-				this.updater.execute(() -> this.updateRoot(from, to));
+				this.updater.execute(() -> this.updateRoot(from, to, false));
 			}
 		};
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
@@ -257,6 +266,16 @@ public final class StatesView extends AnchorPane {
 		return formulas;
 	}
 
+	private void subscribeFormulas(final Collection<? extends IEvalElement> formulas) {
+		this.currentTrace.getStateSpace().subscribe(this, formulas);
+		this.subscribedFormulas.addAll(formulas);
+	}
+
+	private void unsubscribeFormulas(final Collection<? extends IEvalElement> formulas) {
+		this.currentTrace.getStateSpace().unsubscribe(this, formulas);
+		this.subscribedFormulas.removeAll(formulas);
+	}
+
 	private void updateValueMaps(final Trace trace) {
 		this.currentValues.clear();
 		this.currentValues.putAll(trace.getCurrentState().getValues());
@@ -269,8 +288,31 @@ public final class StatesView extends AnchorPane {
 	@FXML
 	private void handleSearchButton() {
 		filter = filterState.getText();
-		// When the filter is changed, pass null as the previous trace to force a rebuild of the tree.
-		this.updateRoot(null, currentTrace.get());
+		this.updateRoot(currentTrace.get(), currentTrace.get(), true);
+	}
+
+	private List<PrologASTNode> filterNodes(final List<PrologASTNode> nodes, final String filter) {
+		if (filter.isEmpty()) {
+			return nodes;
+		}
+		
+		final List<PrologASTNode> filteredNodes = new ArrayList<>();
+		for (final PrologASTNode node : nodes) {
+			if (node instanceof ASTFormula) {
+				if (((ASTFormula)node).getPrettyPrint().contains(filter)) {
+					filteredNodes.add(node);
+				}
+			} else if (node instanceof ASTCategory) {
+				final List<PrologASTNode> filteredSubnodes = filterNodes(node.getSubnodes(), filter);
+				if (!filteredSubnodes.isEmpty()) {
+					final ASTCategory category = (ASTCategory)node;
+					filteredNodes.add(new ASTCategory(filteredSubnodes, category.getName(), category.isExpanded(), category.isPropagated()));
+				}
+			} else {
+				throw new IllegalArgumentException("Unknown node type: " + node.getClass());
+			}
+		}
+		return filteredNodes;
 	}
 
 	private void buildNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
@@ -284,29 +326,19 @@ public final class StatesView extends AnchorPane {
 			if (node instanceof ASTCategory && ((ASTCategory) node).isExpanded()) {
 				subTreeItem.setExpanded(true);
 			}
-			if (!this.filter.isEmpty() && node instanceof ASTFormula) {
-				ASTFormula formula = (ASTFormula) node;
-				if (!formula.getFormula().getCode().toLowerCase().contains(filter.toLowerCase())) {
-					continue;
-				}
-			}
 
 			treeItem.getChildren().add(subTreeItem);
 			subTreeItem.setValue(new StateItem<>(node, false));
 			subTreeItem.expandedProperty().addListener((o, from, to) -> {
 				final List<IEvalElement> formulas = getExpandedFormulas(subTreeItem.getChildren());
 				if (to) {
-					this.currentTrace.getStateSpace().subscribe(this, formulas);
+					this.subscribeFormulas(formulas);
 				} else {
-					this.currentTrace.getStateSpace().unsubscribe(this, formulas);
+					this.unsubscribeFormulas(formulas);
 				}
 				this.updateValueMaps(this.currentTrace.get());
 			});
 			buildNodes(subTreeItem, node.getSubnodes());
-			if (node instanceof ASTCategory && subTreeItem.getChildren().isEmpty()) {
-				// remove categories without children
-				treeItem.getChildren().remove(subTreeItem);
-			}
 		}
 	}
 
@@ -314,12 +346,7 @@ public final class StatesView extends AnchorPane {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(nodes);
 
-		if (treeItem.getChildren().size() != nodes.size()) {
-			treeItem.getChildren().clear();
-			buildNodes(treeItem, nodes);
-			return;
-		}
-
+		assert treeItem.getChildren().size() == nodes.size();
 		
 		for (int i = 0; i < nodes.size(); i++) {
 			final TreeItem<StateItem<?>> subTreeItem = treeItem.getChildren().get(i);
@@ -329,7 +356,7 @@ public final class StatesView extends AnchorPane {
 		}
 	}
 
-	private void updateRoot(final Trace from, final Trace to) {
+	private void updateRoot(final Trace from, final Trace to, final boolean filterChanged) {
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 
 		Platform.runLater(() -> {
@@ -339,22 +366,27 @@ public final class StatesView extends AnchorPane {
 
 		// If the model has changed or the machine structure hasn't been loaded
 		// yet, update it and rebuild the tree view.
-		final boolean rebuildTree = this.rootNodes == null || from == null || !from.getModel().equals(to.getModel());
-		if (rebuildTree) {
+		final boolean reloadRootNodes = this.rootNodes == null || from == null || !from.getModel().equals(to.getModel());
+		if (reloadRootNodes) {
 			final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
 			to.getStateSpace().execute(cmd);
 			this.rootNodes = cmd.getPrologASTList();
-			to.getStateSpace().subscribe(this, getInitialExpandedFormulas(this.rootNodes));
+		}
+		// If the root nodes were reloaded or the filter has changed, update the filtered node list.
+		if (reloadRootNodes || filterChanged) {
+			this.filteredRootNodes = filterNodes(this.rootNodes, this.filter);
+			this.unsubscribeFormulas(this.subscribedFormulas);
+			this.subscribeFormulas(getInitialExpandedFormulas(this.filteredRootNodes));
 		}
 
 		this.updateValueMaps(to);
 
 		Platform.runLater(() -> {
-			if (rebuildTree) {
+			if (reloadRootNodes || filterChanged) {
 				this.tvRootItem.getChildren().clear();
-				buildNodes(this.tvRootItem, this.rootNodes);
+				buildNodes(this.tvRootItem, this.filteredRootNodes);
 			} else {
-				updateNodes(this.tvRootItem, this.rootNodes);
+				updateNodes(this.tvRootItem, this.filteredRootNodes);
 			}
 			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
