@@ -12,6 +12,7 @@ import de.prob.Main;
 
 import de.prob2.ui.internal.StageManager;
 
+import de.prob2.ui.persistence.UIState;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -19,9 +20,9 @@ import javafx.stage.Stage;
 @Singleton
 public class HelpSystemStage extends Stage {
 	@Inject
-	private HelpSystemStage(final StageManager stageManager, ResourceBundle bundle) throws URISyntaxException, IOException {
+	private HelpSystemStage(final StageManager stageManager, ResourceBundle bundle, final UIState uiState) throws URISyntaxException, IOException {
 		this.setTitle(bundle.getString("helpsystem.stage.title"));
-		this.setScene(new Scene(new HelpSystem(stageManager)));
+		this.setScene(new Scene(new HelpSystem(stageManager, uiState)));
 		stageManager.register(this, this.getClass().getName());
 		setContent(new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + "ProB2UI.md.html"));
 	}
