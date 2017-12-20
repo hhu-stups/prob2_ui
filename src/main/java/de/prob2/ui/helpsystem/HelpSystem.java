@@ -27,7 +27,10 @@ import de.prob.Main;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
 
+import de.prob2.ui.persistence.UIState;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.TreeItem;
@@ -43,16 +46,30 @@ public class HelpSystem extends StackPane {
 	@FXML private TreeView<String> treeView;
 	@FXML private WebView webView;
 	WebEngine webEngine;
+	URI helpURI;
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
 
 	@Inject
-	public HelpSystem(final StageManager stageManager) throws URISyntaxException, IOException {
+	public HelpSystem(final StageManager stageManager, final UIState uiState) throws URISyntaxException, IOException {
 		stageManager.loadFXML(this, "helpsystem.fxml");
-		URI uri = ProB2.class.getClassLoader().getResource("help/").toURI();
-		File helpMainDirectory = getHelpMainDirectory(uri);
+		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
+		File helpDefaultDirectory = getHelpDirectory("help_en");
+		// this needs to be updated if new translations of help are added
+		if (uiState.getLocaleOverride().equals(Locale.GERMAN)) {
+			helpDefaultDirectory = getHelpDirectory("help_de");
+		}
 
-		System.out.println(Locale.getDefault());
-		treeView.setRoot(createNode(helpMainDirectory));
+		/*uiState.localeOverrideProperty().addListener(new ChangeListener<Locale>() {
+			@Override
+			public void changed(ObservableValue<? extends Locale> observable, Locale oldValue, Locale newValue) {
+				if (newValue.equals(Locale.GERMAN)) {
+					changeHelpLanguage("help_de");
+				} else {
+					changeHelpLanguage("help_en");
+				}
+			}
+		});*/
+		treeView.setRoot(createNode(helpDefaultDirectory));
 		treeView.setShowRoot(false);
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal!=null && newVal.isLeaf()){
@@ -109,20 +126,20 @@ public class HelpSystem extends StackPane {
 		});
 	}
 
-	private File getHelpMainDirectory(URI uri) throws IOException {
-		if (uri.toString().startsWith("jar:")) {
+	private File getHelpDirectory(String localeHelpDirectory) throws IOException {
+		if (helpURI.toString().startsWith("jar:")) {
 			Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
 			Map<String, String> env = new HashMap<>();
 			env.put("create", "true");
-			try (FileSystem jarFileSystem = FileSystems.newFileSystem(uri, env)) {
+			try (FileSystem jarFileSystem = FileSystems.newFileSystem(helpURI, env)) {
 				Path source = jarFileSystem.getPath("/help/");
 				if (!target.toFile().exists()) {
 					copyHelp(source, target);
 				}
 			}
-			return new File(Main.getProBDirectory() + "prob2ui" + File.separator +"help");
+			return new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + localeHelpDirectory);
 		} else {
-			return new File(uri);
+			return new File(helpURI.toString()+localeHelpDirectory);
 		}
 	}
 
@@ -138,5 +155,15 @@ public class HelpSystem extends StackPane {
 				LoggerFactory.getLogger(HelpSystem.class).error("Malformed URL", e);
 			}
 		}
+	}
+
+	private void changeHelpLanguage(String localeHelpDirectory) {
+		File helpDirectory = null;
+		try {
+			helpDirectory = getHelpDirectory(localeHelpDirectory);
+		} catch (IOException e) {
+			LoggerFactory.getLogger(HelpSystem.class).error("Can not load help", e);
+		}
+		treeView.setRoot(createNode(helpDirectory));
 	}
 }
