@@ -19,6 +19,7 @@ import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
@@ -93,6 +94,7 @@ public class Machine {
 	private String description;
 	private String location;
 	private Machine.Type type;
+	public Preference lastUsed;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
@@ -109,6 +111,7 @@ public class Machine {
 		this.description = description;
 		this.location = location.toString();
 		this.type = type;
+		this.lastUsed = Preference.DEFAULT;
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());

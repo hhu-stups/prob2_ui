@@ -12,6 +12,7 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
+import de.prob.exception.ProBError;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -120,7 +121,7 @@ public class MachinesTab extends Tab {
 						updateAnimationMenu(startAnimationMenu, machine);
 						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-						currentProject.startAnimation(machine, Preference.DEFAULT);
+						currentProject.startAnimation(machine, machine.lastUsed);
 					}
 				});
 			}
@@ -141,7 +142,9 @@ public class MachinesTab extends Tab {
 			return;
 		for (Preference preference : currentProject.getPreferences()) {
 			final MenuItem item = new MenuItem(preference.toString());
-			item.setOnAction(e -> currentProject.startAnimation(machine, preference));
+			item.setOnAction(e -> {
+				currentProject.startAnimation(machine, preference);
+				machine.lastUsed = preference;});
 			startAnimationMenu.getItems().add(item);
 		}
 		if (startAnimationMenu.getItems().isEmpty()) {
