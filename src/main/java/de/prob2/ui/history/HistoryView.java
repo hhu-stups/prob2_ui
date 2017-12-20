@@ -90,7 +90,7 @@ public final class HistoryView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("History.md.html");
+		helpButton.setHelpContent(this.getClass());
 		this.setMinWidth(100);
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			lvHistory.getItems().clear();

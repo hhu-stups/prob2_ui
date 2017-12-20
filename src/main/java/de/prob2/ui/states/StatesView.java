@@ -29,6 +29,7 @@ import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.formula.FormulaGenerator;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
@@ -70,6 +71,8 @@ public final class StatesView extends AnchorPane {
 	private Button searchButton;
 	@FXML
 	private TextField filterState;
+	@FXML
+	private HelpButton helpButton;
 
 	@FXML
 	private TreeTableView<StateItem<?>> tv;
@@ -118,6 +121,7 @@ public final class StatesView extends AnchorPane {
 
 	@FXML
 	private void initialize() {
+		helpButton.setHelpContent(this.getClass());
 		tv.setRowFactory(view -> initTableRow());
 
 		this.tvName.setCellFactory(col -> new NameCell());

@@ -29,8 +29,6 @@ import de.prob2.ui.internal.StageManager;
 
 import de.prob2.ui.persistence.UIState;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.TreeItem;
@@ -47,29 +45,25 @@ public class HelpSystem extends StackPane {
 	@FXML private WebView webView;
 	WebEngine webEngine;
 	URI helpURI;
+	UIState uiState;
+	String helpSubdirectoryString = "help_en";
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
+	private String[] languages = {"de", "en"};
 
 	@Inject
 	public HelpSystem(final StageManager stageManager, final UIState uiState) throws URISyntaxException, IOException {
 		stageManager.loadFXML(this, "helpsystem.fxml");
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
-		File helpDefaultDirectory = getHelpDirectory("help_en");
 		// this needs to be updated if new translations of help are added
-		if (uiState.getLocaleOverride().equals(Locale.GERMAN)) {
-			helpDefaultDirectory = getHelpDirectory("help_de");
-		}
-
-		/*uiState.localeOverrideProperty().addListener(new ChangeListener<Locale>() {
-			@Override
-			public void changed(ObservableValue<? extends Locale> observable, Locale oldValue, Locale newValue) {
-				if (newValue.equals(Locale.GERMAN)) {
-					changeHelpLanguage("help_de");
-				} else {
-					changeHelpLanguage("help_en");
-				}
+		for (String language : languages) {
+			if (isCurrentLanguage(language)) {
+				helpSubdirectoryString = "help_" + language;
 			}
-		});*/
-		treeView.setRoot(createNode(helpDefaultDirectory));
+		}
+		File helpSubdirectory = getHelpDirectory();
+
+
+		treeView.setRoot(createNode(helpSubdirectory));
 		treeView.setShowRoot(false);
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal!=null && newVal.isLeaf()){
@@ -126,7 +120,7 @@ public class HelpSystem extends StackPane {
 		});
 	}
 
-	private File getHelpDirectory(String localeHelpDirectory) throws IOException {
+	private File getHelpDirectory() throws IOException, URISyntaxException {
 		if (helpURI.toString().startsWith("jar:")) {
 			Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
 			Map<String, String> env = new HashMap<>();
@@ -137,9 +131,9 @@ public class HelpSystem extends StackPane {
 					copyHelp(source, target);
 				}
 			}
-			return new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + localeHelpDirectory);
+			return new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + helpSubdirectoryString);
 		} else {
-			return new File(helpURI.toString()+localeHelpDirectory);
+			return new File(ProB2.class.getClassLoader().getResource("help/" + helpSubdirectoryString).toURI());
 		}
 	}
 
@@ -157,13 +151,11 @@ public class HelpSystem extends StackPane {
 		}
 	}
 
-	private void changeHelpLanguage(String localeHelpDirectory) {
-		File helpDirectory = null;
+	private boolean isCurrentLanguage(String language) {
 		try {
-			helpDirectory = getHelpDirectory(localeHelpDirectory);
-		} catch (IOException e) {
-			LoggerFactory.getLogger(HelpSystem.class).error("Can not load help", e);
+			return uiState.getLocaleOverride().toString().startsWith(language);
+		} catch (NullPointerException e) {
+			return Locale.getDefault().toString().startsWith(language);
 		}
-		treeView.setRoot(createNode(helpDirectory));
 	}
 }

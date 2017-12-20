@@ -73,7 +73,7 @@ public class TraceReplayView extends ScrollPane {
 
 	@FXML
 	private void initialize() {
-		helpButton.setHelpContent("Verification.md.html");
+		helpButton.setHelpContent(this.getClass());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("statusIcon"));
 		statusColumn.setStyle("-fx-alignment: CENTER;");
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));

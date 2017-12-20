@@ -262,7 +262,7 @@ public final class OperationsView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("ProB2UI.md.html");
+		helpButton.setHelpContent(this.getClass());
 		opsListView.setCellFactory(lv -> new OperationsCell());
 		opsListView.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.ENTER) {

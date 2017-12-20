@@ -43,7 +43,7 @@ public class PreferencesTab extends Tab {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("Project.md.html");
+		helpButton.setHelpContent(this.getClass());
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
 		preferencesListView.setCellFactory(listView -> initListCell());
 

@@ -19,12 +19,15 @@ import javafx.stage.Stage;
 
 @Singleton
 public class HelpSystemStage extends Stage {
+	HelpSystem help;
+
 	@Inject
 	private HelpSystemStage(final StageManager stageManager, ResourceBundle bundle, final UIState uiState) throws URISyntaxException, IOException {
 		this.setTitle(bundle.getString("helpsystem.stage.title"));
-		this.setScene(new Scene(new HelpSystem(stageManager, uiState)));
+		help = new HelpSystem(stageManager, uiState);
+		this.setScene(new Scene(help));
 		stageManager.register(this, this.getClass().getName());
-		setContent(new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + "ProB2UI.md.html"));
+		setContent(new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + help.helpSubdirectoryString + File.separator+ "ProB2UI.md.html"));
 	}
 
 	public void setContent(File file) {

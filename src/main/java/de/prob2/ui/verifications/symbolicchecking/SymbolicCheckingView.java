@@ -93,7 +93,7 @@ public class SymbolicCheckingView extends AnchorPane {
 	
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("Verification.md.html");
+		helpButton.setHelpContent(this.getClass());
 		setBindings();
 		setContextMenu();
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
