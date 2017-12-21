@@ -823,6 +823,12 @@
 	-fx-font-weight: bold;
 	-fx-font-size: 1.1em; 
 }
+#machines-icon-running {
+	-fx-fill: limegreen;
+}
+#machines-icon {
+	-fx-fill: darkgray;
+}
 #machines-item-location {
 	-fx-font-family: ARIAL;
 	-fx-font-style: italic;

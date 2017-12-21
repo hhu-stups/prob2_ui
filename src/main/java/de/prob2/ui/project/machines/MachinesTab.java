@@ -10,6 +10,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob.exception.ProBError;
@@ -21,6 +22,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -118,10 +120,12 @@ public class MachinesTab extends Tab {
 
 				machinesItem.setOnMouseClicked(event -> {
 					if (event.getButton().equals(MouseButton.SECONDARY) && event.getClickCount() == 1) {
-						updateAnimationMenu(startAnimationMenu, machine);
+						updateAnimationMenu(startAnimationMenu, machine, machinesItem);
 						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 						currentProject.startAnimation(machine, machine.lastUsed);
+						resetMachineIcons();
+						machinesItem.setRunning();
 					}
 				});
 			}
@@ -131,7 +135,13 @@ public class MachinesTab extends Tab {
 		((FontAwesomeIconView) (addMachineButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 	}
 
-	private void updateAnimationMenu(final Menu startAnimationMenu, Machine machine) {
+	private void resetMachineIcons(){
+		for(Node machinesItem :  machinesVBox.getChildren()){
+			((MachinesItem) machinesItem).setNotRunning();
+		}
+	}
+
+	private void updateAnimationMenu(final Menu startAnimationMenu, Machine machine, MachinesItem machinesItem) {
 		startAnimationMenu.getItems().clear();
 
 		final MenuItem defItem = new MenuItem(Preference.DEFAULT.toString());
@@ -140,11 +150,15 @@ public class MachinesTab extends Tab {
 
 		if (currentProject.getPreferences().isEmpty())
 			return;
+
 		for (Preference preference : currentProject.getPreferences()) {
 			final MenuItem item = new MenuItem(preference.toString());
 			item.setOnAction(e -> {
 				currentProject.startAnimation(machine, preference);
-				machine.lastUsed = preference;});
+				machine.lastUsed = preference;
+				resetMachineIcons();
+				machinesItem.setRunning();
+			});
 			startAnimationMenu.getItems().add(item);
 		}
 		if (startAnimationMenu.getItems().isEmpty()) {
