@@ -356,6 +356,9 @@ public class Machine {
 		if(modelcheckingItems == null) {
 			this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
 		}
+		if(lastUsed == null){
+			lastUsed = Preference.DEFAULT;
+		}
 		this.changed = new SimpleBooleanProperty(false);
 	}
 	
