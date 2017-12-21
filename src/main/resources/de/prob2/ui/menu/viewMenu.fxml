@@ -9,5 +9,15 @@
 		accelerator="Alt+Shortcut+PLUS" onAction="#handleIncreaseFontSize" />
 	<MenuItem fx:id="viewMenu_smaller" text="%menu.view.smaller"
 		accelerator="Alt+Shortcut+MINUS" onAction="#handleDecreaseFontSize" />
+	<Menu text="%menu.perspectives.items.preset" fx:id="presetPerspectivesMenu">
+		<MenuItem text="%menu.perspectives.items.preset.default"
+				  onAction="#handleLoadDefault" />
+		<MenuItem text="%menu.perspectives.items.preset.separated"
+				  onAction="#handleLoadSeparated" />
+		<MenuItem text="%menu.perspectives.items.preset.separated2"
+				  onAction="#handleLoadSeparated2" />
+	</Menu>
+	<MenuItem text="%menu.perspectives.items.detach" onAction="#handleLoadDetached" />
+	<MenuItem text="%menu.perspectives.items.load" onAction="#handleLoadPerspective" />
 </fx:root>
 

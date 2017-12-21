@@ -10,19 +10,16 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
-import de.prob.exception.ProBError;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.menu.EditMenu;
+import de.prob2.ui.menu.EditPreferencesProvider;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -98,12 +95,12 @@ public class MachinesTab extends Tab {
 
 				final MenuItem editFileMenuItem = new MenuItem(
 						bundle.getString("project.machines.tab.menu.editMachineFile"));
-				editFileMenuItem.setOnAction(event -> injector.getInstance(EditMenu.class)
+				editFileMenuItem.setOnAction(event -> injector.getInstance(EditPreferencesProvider.class)
 					.showEditorStage(currentProject.getLocation().toPath().resolve(machine.getPath())));
 
 				final MenuItem editExternalMenuItem = new MenuItem(
 						bundle.getString("project.machines.tab.menu.editMachineFileInExternalEditor"));
-				editExternalMenuItem.setOnAction(event -> injector.getInstance(EditMenu.class)
+				editExternalMenuItem.setOnAction(event -> injector.getInstance(EditPreferencesProvider.class)
 					.showExternalEditor(currentProject.getLocation().toPath().resolve(machine.getPath())));
 
 				final Menu startAnimationMenu = new Menu(bundle.getString("project.machines.tab.menu.startAnimation"));

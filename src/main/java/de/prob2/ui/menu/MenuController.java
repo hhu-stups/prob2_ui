@@ -26,7 +26,7 @@ public final class MenuController extends MenuBar {
 	private final StageManager stageManager;
 
 	@FXML
-	private EditMenu editMenu;
+	private FileMenu fileMenu;
 	@FXML
 	private Menu windowMenu;
 	@FXML
@@ -46,9 +46,9 @@ public final class MenuController extends MenuBar {
 			MenuItem aboutItem = helpMenu.getAboutItem();
 			helpMenu.getItems().remove(aboutItem);
 
-			// Remove Preferences menu item from Edit
-			MenuItem preferencesItem = editMenu.getPreferencesItem();
-			editMenu.getItems().remove(preferencesItem);
+			// Remove Preferences menu item from FileMenu
+			MenuItem preferencesItem = fileMenu.getPreferencesItem();
+			fileMenu.getItems().remove(preferencesItem);
 			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
 
 			// Create Mac-style application menu

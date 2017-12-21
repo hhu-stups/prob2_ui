@@ -19,29 +19,18 @@ import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
-import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
 
 import javafx.concurrent.Worker;
-import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.stage.Stage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EditMenu extends Menu {
-	private static final Logger LOGGER = LoggerFactory.getLogger(EditMenu.class);
-
-	@FXML
-	private MenuItem editCurrentMachineItem;
-	@FXML
-	private MenuItem editCurrentMachineInExternalEditorItem;
-	@FXML
-	private MenuItem preferencesItem;
+public class EditPreferencesProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(EditPreferencesProvider.class);
 
 	private final CurrentProject currentProject;
 	private final Injector injector;
@@ -51,43 +40,14 @@ public class EditMenu extends Menu {
 	private final ResourceBundle bundle;
 
 	@Inject
-	private EditMenu(final StageManager stageManager, final CurrentProject currentProject, final Injector injector,
-			final MachineLoader machineLoader, final GlobalPreferences globalPreferences, final ResourceBundle bundle) {
+	private EditPreferencesProvider(final StageManager stageManager, final CurrentProject currentProject, final Injector injector,
+									final MachineLoader machineLoader, final GlobalPreferences globalPreferences, final ResourceBundle bundle) {
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.machineLoader = machineLoader;
 		this.globalPreferences = globalPreferences;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		stageManager.loadFXML(this, "editMenu.fxml");
-	}
-
-	@FXML
-	public void initialize() {
-		this.editCurrentMachineItem.disableProperty().bind(currentProject.currentMachineProperty().isNull());
-		this.editCurrentMachineInExternalEditorItem.disableProperty()
-				.bind(currentProject.currentMachineProperty().isNull());
-	}
-
-	@FXML
-	private void handleEditCurrentMachine() {
-		showEditorStage(currentProject.getLocation().toPath().resolve(currentProject.getCurrentMachine().getPath()));
-	}
-
-	@FXML
-	private void handleEditCurrentMachineInExternalEditor() {
-		showExternalEditor(currentProject.getLocation().toPath().resolve(currentProject.getCurrentMachine().getPath()));
-	}
-
-	@FXML
-	private void handlePreferences() {
-		final Stage preferencesStage = injector.getInstance(PreferencesStage.class);
-		preferencesStage.show();
-		preferencesStage.toFront();
-	}
-
-	MenuItem getPreferencesItem() {
-		return preferencesItem;
 	}
 
 	public void showEditorStage(Path path) {

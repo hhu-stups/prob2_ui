@@ -14,7 +14,7 @@ import de.prob2.ui.consoles.groovy.GroovyInterpreter;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.DetachViewStageController;
-import de.prob2.ui.menu.PerspectivesMenu;
+import de.prob2.ui.menu.ViewMenu;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.states.StatesView;
 
@@ -94,7 +94,7 @@ public final class UIPersistence {
 	}
 	
 	public void open() {
-		final PerspectivesMenu perspectivesMenu = injector.getInstance(PerspectivesMenu.class);
+		final ViewMenu perspectivesMenu = injector.getInstance(ViewMenu.class);
 		final MainController main = injector.getInstance(MainController.class);
 		
 		for (final String id : new HashSet<>(uiState.getSavedVisibleStages())) {

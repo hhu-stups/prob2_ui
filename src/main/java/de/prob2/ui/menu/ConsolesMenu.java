@@ -20,13 +20,6 @@ public class ConsolesMenu extends Menu {
 	}
 
 	@FXML
-	private void handleGroovyConsole() {
-		final Stage groovyConsoleStage = injector.getInstance(GroovyConsoleStage.class);
-		groovyConsoleStage.show();
-		groovyConsoleStage.toFront();
-	}
-
-	@FXML
 	private void handleBConsole() {
 		final Stage bConsoleStage = injector.getInstance(BConsoleStage.class);
 		bConsoleStage.show();

@@ -101,7 +101,7 @@ public final class DetachViewStageController extends Stage {
 		if (guiState.contains(DETACHED)){
 			guiState = guiState.replace(DETACHED,"");
 		}
-		final Parent root = injector.getInstance(PerspectivesMenu.class).loadPreset(guiState);
+		final Parent root = injector.getInstance(ViewMenu.class).loadPreset(guiState);
 		((MainController)root).getAccordions().forEach(this::removeTitledPanes);
 		updateWrapperStages();
 		if (!uiState.getGuiState().contains(DETACHED)) {

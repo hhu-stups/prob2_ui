@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+
+<fx:root type="Menu" text="%menu.advancedOptions" xmlns:fx="http://javafx.com/fxml/1">
+	<MenuItem text="%menu.consoles.items.groovy" onAction="#handleGroovyConsole" />
+	<MenuItem text="%menu.advancedOptions.items.reload" onAction="#reloadPlugins"/>
+	<MenuItem text="%menu.advancedOptions.items.add" onAction="#addPlugin" />
+	<MenuItem text="%menu.advancedOptions.items.menu" onAction="#showPluginMenu"/>
+	<Menu text="%menu.visualisation" xmlns:fx="http://javafx.com/fxml/1">
+		<MenuItem fx:id="openVisualisationItem" text="%menu.visualisation.items.select" onAction="#openVisualisation"/>
+		<MenuItem fx:id="stopVisualisationItem" text="%menu.visualisation.items.stop" onAction="#stopVisualisation"/>
+		<MenuItem fx:id="detachVisualisationItem" text="%menu.visualisation.items.detach" onAction="#detachVisualisation"/>
+	</Menu>
+</fx:root>
+

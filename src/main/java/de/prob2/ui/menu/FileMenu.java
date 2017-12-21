@@ -15,6 +15,7 @@ import de.prob.exception.ProBError;
 import de.prob.scripting.ModelTranslationError;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.NewProjectStage;
@@ -42,6 +43,8 @@ import org.slf4j.LoggerFactory;
 public class FileMenu extends Menu {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileMenu.class);
 
+	@FXML
+	private MenuItem preferencesItem;
 	@FXML
 	private Menu recentProjectsMenu;
 	@FXML
@@ -179,5 +182,16 @@ public class FileMenu extends Menu {
 			newItems.add(item);
 		}
 		return newItems;
+	}
+
+	MenuItem getPreferencesItem() {
+		return preferencesItem;
+	}
+
+	@FXML
+	private void handlePreferences() {
+		final Stage preferencesStage = injector.getInstance(PreferencesStage.class);
+		preferencesStage.show();
+		preferencesStage.toFront();
 	}
 }

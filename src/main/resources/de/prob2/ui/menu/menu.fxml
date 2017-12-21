@@ -7,13 +7,10 @@
 <fx:root type="MenuBar" xmlns:fx="http://javafx.com/fxml"
 		 BorderPane.alignment="CENTER">
 	<FileMenu fx:id="fileMenu" />
-	<EditMenu fx:id="editMenu" />
-	<FormulaMenu fx:id="formulaMenu" />
-	<ConsolesMenu fx:id="consolesMenu" />
-	<PerspectivesMenu fx:id="perspectivesMenu" />
 	<ViewMenu fx:id="viewMenu" />
-	<PluginMenu fx:id="pluginMenu"/>
+	<ConsolesMenu fx:id="consolesMenu" />
 	<VisualisationMenu fx:id="visualisationMenu"/>
 	<Menu fx:id="windowMenu" text="%menu.window" />
+	<AdvancedOptions fx:id="pluginMenu"/>
 	<HelpMenu fx:id="helpMenu" />
 </fx:root>

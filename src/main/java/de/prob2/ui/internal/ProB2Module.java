@@ -76,13 +76,11 @@ public class ProB2Module extends AbstractModule {
 		bind(MainView.class);
 		bind(MenuController.class);
 		bind(FileMenu.class);
-		bind(EditMenu.class);
-		bind(FormulaMenu.class);
+		bind(EditPreferencesProvider.class);
 		bind(ConsolesMenu.class);
-		bind(PerspectivesMenu.class);
 		bind(ViewMenu.class);
-		bind(PluginMenu.class);
 		bind(HelpMenu.class);
+		bind(VisualisationMenu.class);
 		bind(MachineTableView.class);
 		bind(ModelcheckingController.class);
 		bind(OperationsView.class);
@@ -102,11 +100,11 @@ public class ProB2Module extends AbstractModule {
 		bind(SymbolicCheckingView.class);
 		bind(SymbolicCheckingFormulaInput.class);
 
+		bind(VisualisationController.class);
+		bind(AdvancedOptions.class);
+
 		bind(ProBPluginManager.class);
 		bind(ProBPluginUIConnection.class);
-
-		bind(VisualisationController.class);
-		bind(VisualisationMenu.class);
 		
 		bind(TraceChecker.class);
 	}
