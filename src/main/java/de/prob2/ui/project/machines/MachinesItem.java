@@ -29,7 +29,8 @@ public class MachinesItem extends VBox {
 		final FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
 		icon.setId("machines-icon");
 		nameLabel.setGraphic(icon);
-	}
+        nameLabel.setText(machine.lastUsed.getName() + " : " + machine.getName());
+    }
 	
 	Machine getMachine() {
 		return machine;
@@ -40,7 +41,7 @@ public class MachinesItem extends VBox {
 	}
 
 	public void setRunning(){
-		final FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
+		final FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.SPINNER);
 		icon.setId("machines-icon-running");
 		nameLabel.setGraphic(icon);
 		nameLabel.setText(machine.lastUsed.getName() + " : " + machine.getName());
