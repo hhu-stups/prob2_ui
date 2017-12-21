@@ -39,7 +39,8 @@ public class AdvancedOptions extends Menu {
 
 
 	@Inject
-	public AdvancedOptions(final StageManager stageManager, final ProBPluginManager proBPluginManager, final VisualisationController visualisationController, final Injector injector) {
+	public AdvancedOptions(final StageManager stageManager, final ProBPluginManager proBPluginManager,
+						   final VisualisationController visualisationController, final Injector injector) {
 		this.proBPluginManager = proBPluginManager;
 		this.injector = injector;
 		stageManager.loadFXML(this, "advancedOptions.fxml");
