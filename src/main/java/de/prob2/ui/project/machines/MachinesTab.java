@@ -145,7 +145,12 @@ public class MachinesTab extends Tab {
 		startAnimationMenu.getItems().clear();
 
 		final MenuItem defItem = new MenuItem(Preference.DEFAULT.toString());
-		defItem.setOnAction(e -> currentProject.startAnimation(machine, Preference.DEFAULT));
+		defItem.setOnAction(e -> {
+			currentProject.startAnimation(machine, Preference.DEFAULT);
+			machine.lastUsed = Preference.DEFAULT;
+			resetMachineIcons();
+			machinesItem.setRunning();
+		});
 		startAnimationMenu.getItems().add(defItem);
 
 		if (currentProject.getPreferences().isEmpty())
