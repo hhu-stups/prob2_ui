@@ -55,14 +55,14 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public final class StatesView extends AnchorPane {
+public final class StatesView extends VBox {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StatesView.class);
 	private static final TreeItem<StateItem<?>> LOADING_ITEM;
 
