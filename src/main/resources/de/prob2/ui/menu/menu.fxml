@@ -10,7 +10,7 @@
 	<ViewMenu fx:id="viewMenu" />
 	<ConsolesMenu fx:id="consolesMenu" />
 	<VisualisationMenu fx:id="visualisationMenu"/>
-	<Menu fx:id="windowMenu" text="%menu.window" />
 	<AdvancedOptions fx:id="pluginMenu"/>
+	<Menu fx:id="windowMenu" text="%menu.window" />
 	<HelpMenu fx:id="helpMenu" />
 </fx:root>
