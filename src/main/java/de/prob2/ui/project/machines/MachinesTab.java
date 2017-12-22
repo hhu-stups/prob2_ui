@@ -120,7 +120,7 @@ public class MachinesTab extends Tab {
 						updateAnimationMenu(startAnimationMenu, machine, machinesItem);
 						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-						currentProject.startAnimation(machine, machine.lastUsed);
+						currentProject.startAnimation(machine, machine.getLastUsed());
 						resetMachineIcons();
 						machinesItem.setRunning();
 					}
@@ -144,7 +144,7 @@ public class MachinesTab extends Tab {
 		final MenuItem defItem = new MenuItem(Preference.DEFAULT.toString());
 		defItem.setOnAction(e -> {
 			currentProject.startAnimation(machine, Preference.DEFAULT);
-			machine.lastUsed = Preference.DEFAULT;
+			machine.setLastUsed(Preference.DEFAULT);
 			resetMachineIcons();
 			machinesItem.setRunning();
 		});
@@ -157,7 +157,7 @@ public class MachinesTab extends Tab {
 			final MenuItem item = new MenuItem(preference.toString());
 			item.setOnAction(e -> {
 				currentProject.startAnimation(machine, preference);
-				machine.lastUsed = preference;
+				machine.setLastUsed(preference);
 				resetMachineIcons();
 				machinesItem.setRunning();
 			});

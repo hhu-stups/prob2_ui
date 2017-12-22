@@ -94,7 +94,7 @@ public class Machine {
 	private String description;
 	private String location;
 	private Machine.Type type;
-	public Preference lastUsed;
+	private Preference lastUsed;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
@@ -145,6 +145,14 @@ public class Machine {
 	
 	public Machine.Type getType() {
 		return this.type;
+	}
+	
+	public Preference getLastUsed() {
+		return lastUsed;
+	}
+	
+	public void setLastUsed(Preference lastUsed) {
+		this.lastUsed = lastUsed;
 	}
 	
 	public void initializeLTLStatus() {
