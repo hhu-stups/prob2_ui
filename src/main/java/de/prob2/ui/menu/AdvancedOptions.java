@@ -35,7 +35,7 @@ public class AdvancedOptions extends Menu {
 	private final ProBPluginManager proBPluginManager;
 	private final VisualisationController visualisationController;
 	private final Injector injector;
-	private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationMenu.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AdvancedOptions.class);
 
 
 	@Inject
