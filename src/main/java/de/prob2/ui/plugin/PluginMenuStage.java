@@ -89,6 +89,7 @@ public class PluginMenuStage extends Stage {
 				} else if (!pluginList.contains(plugin) && getProBJarPluginManager().getPlugins().contains(plugin)) {
 					//a new plugin was added
 					pluginList.add(plugin);
+					FXCollections.sort(pluginList, Comparator.comparing(o -> ((ProBPlugin) o.getPlugin()).getName()));
 				}
 			}
 		};
@@ -107,10 +108,7 @@ public class PluginMenuStage extends Stage {
 					return ((ProBPlugin) plugin.getPlugin()).getName().toLowerCase().contains(newValue.toLowerCase());
 				}));
 
-		SortedList<PluginWrapper> pluginSortedFilteredList = new SortedList<>(pluginFilteredList);
-		pluginSortedFilteredList.comparatorProperty().bind(pluginTableView.comparatorProperty());
-		pluginTableView.setItems(pluginSortedFilteredList);
-		pluginTableView.getSortOrder().add(nameCol);
+		pluginTableView.setItems(pluginFilteredList);
 		pluginTableView.setSelectionModel(null);
 
 		pluginList.addAll(getProBJarPluginManager().getPlugins());
@@ -143,7 +141,6 @@ public class PluginMenuStage extends Stage {
 	private void configureColumns() {
 		nameCol.setCellFactory(TextFieldTableCell.forTableColumn());
 		nameCol.setCellValueFactory(param -> new SimpleStringProperty(((ProBPlugin)param.getValue().getPlugin()).getName()));
-		nameCol.setSortType(TableColumn.SortType.ASCENDING);
 		nameCol.setSortable(false);
 
 		versionCol.setCellFactory(param -> {
