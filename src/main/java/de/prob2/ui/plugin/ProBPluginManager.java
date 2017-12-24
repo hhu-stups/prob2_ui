@@ -469,7 +469,7 @@ public class ProBPluginManager {
 			//TODO: show what is wrong in an alert
 			super.validatePluginDescriptor(descriptor);
 			if (StringUtils.isEmpty(descriptor.getRequires()) || descriptor.getRequires().equals("*")) {
-				throw new PluginException("Plugin-Requires has to be specified");
+				throw new PluginException("Plugin-Requires has to be specified!");
 			}
 			if (!descriptor.getDependencies().isEmpty()) {
 				StringBuilder builder = new StringBuilder("Plugin-Dependencies are not supported but the plugin has the following dependencies:");
@@ -479,10 +479,6 @@ public class ProBPluginManager {
 				}
 				throw new PluginException(builder.toString());
 			}
-		}
-
-		public ProBPluginManager getPluginManager() {
-			return ProBPluginManager.this;
 		}
 
 		private PluginWrapper getPlugin(Path pluginPath) {

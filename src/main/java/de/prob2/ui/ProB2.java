@@ -238,13 +238,13 @@ public class ProB2 extends Application {
 	@Override
 	public void stop() {
 		if (injector != null) {
+			ProBPluginManager proBPluginManager = injector.getInstance(ProBPluginManager.class);
+			proBPluginManager.getPluginManager().stopPlugins();
 			injector.getInstance(StopActions.class).run();
 		}
 	}
 
 	private void handleCloseRequest(Event event, CurrentProject currentProject, StageManager stageManager) {
-		ProBPluginManager proBPluginManager = injector.getInstance(ProBPluginManager.class);
-		proBPluginManager.getPluginManager().stopPlugins();
 		if (!currentProject.isSaved()) {
 			ButtonType save = new ButtonType(bundle.getString("common.save"), ButtonBar.ButtonData.YES);
 			ButtonType doNotSave = new ButtonType(bundle.getString("common.doNotSave"), ButtonBar.ButtonData.NO);
@@ -260,6 +260,7 @@ public class ProB2 extends Application {
 				Platform.exit();
 			}
 		} else {
+
 			Platform.exit();
 		}
 	}

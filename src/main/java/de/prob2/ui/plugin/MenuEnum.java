@@ -10,6 +10,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 
 public enum MenuEnum {
+	//TODO adapt to new menus
 	FILE_MENU("fileMenu"),
 	RECENT_PROJECTS_MENU("recentProjectsMenu"),
 	EDIT_MENU("editMenu"),
