@@ -28,16 +28,16 @@ import org.slf4j.LoggerFactory;
  * @since 11.08.17
  */
 @Singleton
-public class ProBPluginUIConnection {
+public class ProBPluginHelper {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginUIConnection.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginHelper.class);
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
 
 	@Inject
-	public ProBPluginUIConnection(Injector injector, CurrentTrace currentTrace, StageManager stageManager) {
+	public ProBPluginHelper(Injector injector, CurrentTrace currentTrace, StageManager stageManager) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;

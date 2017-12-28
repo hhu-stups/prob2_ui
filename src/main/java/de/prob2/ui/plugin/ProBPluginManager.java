@@ -62,7 +62,7 @@ public class ProBPluginManager {
 			+ File.separator + "prob2ui"
 			+ File.separator + "plugins");
 
-	private final ProBPluginUIConnection proBPluginUIConnection;
+	private final ProBPluginHelper proBPluginHelper;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
@@ -75,13 +75,13 @@ public class ProBPluginManager {
 	 * Should only be used by the Guice-Injector.
 	 * Do not call this constructor.
 	 *
-	 * @param proBPluginUIConnection singleton instance of {@link ProBPluginUIConnection} used in the prob2-ui application
+	 * @param proBPluginHelper singleton instance of {@link ProBPluginHelper} used in the prob2-ui application
 	 * @param stageManager singleton instance of {@link StageManager} used in the prob2-ui application
 	 * @param bundle {@link ResourceBundle} used in the prob2-ui application
 	 */
 	@Inject
-	public ProBPluginManager(ProBPluginUIConnection proBPluginUIConnection, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager) {
-		this.proBPluginUIConnection = proBPluginUIConnection;
+	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+		this.proBPluginHelper = proBPluginHelper;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.pluginManager = new ProBJarPluginManager();
@@ -203,13 +203,13 @@ public class ProBPluginManager {
 	}
 
 	/**
-	 * Getter for the singleton instance of the {@link ProBPluginUIConnection} of
+	 * Getter for the singleton instance of the {@link ProBPluginHelper} of
 	 * the prob2-ui application.
 	 *
-	 * @return singleton instance of the {@link ProBPluginUIConnection}
+	 * @return singleton instance of the {@link ProBPluginHelper}
 	 */
-	public ProBPluginUIConnection getProBPluginUIConnection() {
-		return proBPluginUIConnection;
+	public ProBPluginHelper getProBPluginHelper() {
+		return proBPluginHelper;
 	}
 
 	/**
@@ -449,8 +449,8 @@ public class ProBPluginManager {
 				// create the ProBPlugin instance
 				try {
 					Constructor<?> constructor =
-							pluginClass.getConstructor(PluginWrapper.class, ProBPluginManager.class, ProBPluginUIConnection.class);
-					return (ProBPlugin) constructor.newInstance(pluginWrapper, ProBPluginManager.this, proBPluginUIConnection);
+							pluginClass.getConstructor(PluginWrapper.class, ProBPluginManager.class, ProBPluginHelper.class);
+					return (ProBPlugin) constructor.newInstance(pluginWrapper, ProBPluginManager.this, proBPluginHelper);
 				} catch (Exception e) {
 					LOGGER.error(e.getMessage(), e);
 				}

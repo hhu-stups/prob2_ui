@@ -32,12 +32,12 @@ public abstract class ProBPlugin extends Plugin{
 
 	private boolean started = false;
 	private final ProBPluginManager proBPluginManager;
-	private final ProBPluginUIConnection proBPluginUIConnection;
+	private final ProBPluginHelper proBPluginHelper;
 
-	public ProBPlugin (PluginWrapper pluginWrapper, ProBPluginManager proBPluginManager, ProBPluginUIConnection proBPluginUIConnection) {
+	public ProBPlugin (PluginWrapper pluginWrapper, ProBPluginManager proBPluginManager, ProBPluginHelper proBPluginHelper) {
 		super(pluginWrapper);
 		this.proBPluginManager = proBPluginManager;
-		this.proBPluginUIConnection = proBPluginUIConnection;
+		this.proBPluginHelper = proBPluginHelper;
 	}
 
 	/**
@@ -76,14 +76,14 @@ public abstract class ProBPlugin extends Plugin{
 	}
 
 	/**
-	 * Getter for the singleton instance of the {@link ProBPluginUIConnection} of
-	 * the prob2-ui application. Uses the {@code getProBPluginUIConnection()} method of the
+	 * Getter for the singleton instance of the {@link ProBPluginHelper} of
+	 * the prob2-ui application. Uses the {@code getProBPluginHelper()} method of the
 	 * {@link ProBPluginManager}.
 	 *
-	 * @return singleton instance of the {@link ProBPluginUIConnection}
+	 * @return singleton instance of the {@link ProBPluginHelper}
 	 */
-	public ProBPluginUIConnection getProBPluginUIConnection() {
-		return proBPluginUIConnection;
+	public ProBPluginHelper getProBPluginHelper() {
+		return proBPluginHelper;
 	}
 
 	/**
@@ -117,6 +117,6 @@ public abstract class ProBPlugin extends Plugin{
 	 * @return singleton instance of the {@link Injector}
 	 */
 	public Injector getInjector() {
-		return getProBPluginUIConnection().getInjector();
+		return getProBPluginHelper().getInjector();
 	}
 }
