@@ -56,7 +56,7 @@ public class DotView extends Stage {
 	
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
-	private double dragFactor = 1;
+	private double dragFactor = 0.84;
 	
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
@@ -84,23 +84,26 @@ public class DotView extends Stage {
 			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
-
-			
 		});
 
 		dotView.setOnMouseClicked(e-> {
 			if(e.getClickCount() < 2) {
 				return;
 			}
+			
+			double x = e.getX()/(2*dragFactor);
+			double y = e.getY()/(2*dragFactor);
+			
+			dotView.getEngine().executeScript("scrollBy(" + x + "," + y +")");
+			
 			if(e.getButton() == MouseButton.SECONDARY) {
-				dotView.setZoom(dotView.getZoom() * 0.5);
+				dotView.setZoom(dotView.getZoom() * 0.8);
 				dragFactor *= 0.8;
 			} else {
-				dotView.setZoom(dotView.getZoom() * 2);
+				dotView.setZoom(dotView.getZoom() * 1.3);
 				dragFactor *= 1.3;
 			}
-			pane.setHvalue(e.getX() / pane.getWidth());
-			pane.setVvalue(e.getY() / pane.getHeight());
+			
 		});
 		cbChoice.getSelectionModel().selectFirst();
 		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
@@ -127,6 +130,13 @@ public class DotView extends Stage {
 	
 	private void loadGraph() throws IOException {
 		String content = new String(Files.readAllBytes(FILE.toPath()));
+        StringBuilder script = new StringBuilder().append("<head>");
+        script.append("   <script language=\"javascript\" type=\"text/javascript\">");
+        script.append("       function scrollBy(xPos, yPos){");
+        script.append("           window.scrollBy(xPos, yPos);");
+        script.append("       }");
+        script.append("   </script>");
+        script.append("</head>");
 		dotView.getEngine().loadContent("<center>" + content + "</center>");
 	}
 
