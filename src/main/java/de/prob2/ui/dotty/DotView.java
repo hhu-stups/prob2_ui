@@ -130,13 +130,13 @@ public class DotView extends Stage {
 	
 	private void loadGraph() throws IOException {
 		String content = new String(Files.readAllBytes(FILE.toPath()));
-        StringBuilder script = new StringBuilder().append("<head>");
-        script.append("   <script language=\"javascript\" type=\"text/javascript\">");
-        script.append("       function scrollBy(xPos, yPos){");
-        script.append("           window.scrollBy(xPos, yPos);");
-        script.append("       }");
-        script.append("   </script>");
-        script.append("</head>");
+		StringBuilder script = new StringBuilder().append("<head>");
+		script.append("   <script language=\"javascript\" type=\"text/javascript\">");
+		script.append("       function scrollBy(xPos, yPos){");
+		script.append("           window.scrollBy(xPos, yPos);");
+		script.append("       }");
+		script.append("   </script>");
+		script.append("</head>");
 		dotView.getEngine().loadContent("<center>" + content + "</center>");
 	}
 
