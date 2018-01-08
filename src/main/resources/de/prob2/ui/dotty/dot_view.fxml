@@ -6,7 +6,6 @@
 <?import javafx.collections.*?>
 <?import javafx.geometry.Insets?>
 <?import de.prob2.ui.dotty.DotView?>
-<?import de.prob2.ui.dotty.DotChoiceItem?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.Group?>
 <?import javafx.scene.layout.HBox?>
