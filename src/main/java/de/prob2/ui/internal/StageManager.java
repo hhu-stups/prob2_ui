@@ -27,6 +27,7 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.machines.Machine;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -127,19 +128,17 @@ public final class StageManager {
 			LOGGER.error("Loading fxml failed", e);
 		}
 
-		String fontSizeCssString = "-fx-font-size: %dpx;";
+		final FontSize fontSize = injector.getInstance(FontSize.class);
+		final StringExpression fontSizeCssValue = Bindings.format("-fx-font-size: %dpx;", fontSize.fontSizeProperty());
 		if (controller instanceof Node) {
 			Node controllerNode = (Node) controller;
-			FontSize fontSize = injector.getInstance(FontSize.class);
-			controllerNode.styleProperty().bind(Bindings.format(fontSizeCssString, fontSize));
+			controllerNode.styleProperty().bind(fontSizeCssValue);
 		} else if (controller instanceof Stage) {
 			Stage controllerStage = (Stage) controller;
-			FontSize fontSize = injector.getInstance(FontSize.class);
-			controllerStage.getScene().getRoot().styleProperty().bind(Bindings.format(fontSizeCssString, fontSize));
+			controllerStage.getScene().getRoot().styleProperty().bind(fontSizeCssValue);
 		} else if (controller instanceof Dialog<?>) {
 			Dialog<?> controllerDialog = (Dialog<?>) controller;
-			FontSize fontSize = injector.getInstance(FontSize.class);
-			controllerDialog.getDialogPane().styleProperty().bind(Bindings.format(fontSizeCssString, fontSize));
+			controllerDialog.getDialogPane().styleProperty().bind(fontSizeCssValue);
 		}
 	}
 

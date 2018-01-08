@@ -6,14 +6,10 @@ import java.util.HashMap;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.Main;
 
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
-
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.project.ProjectTab;
 import de.prob2.ui.project.machines.MachinesTab;
@@ -24,14 +20,15 @@ import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.verifications.tracereplay.TraceReplayView;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
 public class HelpButton extends Button{
 	private Injector injector;
 	private File helpContent;
-	private HashMap<Class, String> germanHelpMap = new HashMap<>();
-	private HashMap<Class, String> englishHelpMap = new HashMap<>();
+	private HashMap<Class<?>, String> germanHelpMap = new HashMap<>();
+	private HashMap<Class<?>, String> englishHelpMap = new HashMap<>();
 
 	@Inject
 	private HelpButton(StageManager stageManager, Injector injector) {
@@ -41,8 +38,6 @@ public class HelpButton extends Button{
 
 	@FXML
 	private void initialize() {
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (this.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 		germanHelpMap.put(HistoryView.class, "Verlauf.md.html");
 		germanHelpMap.put(OperationsView.class, "ProB2UI.md.html");
 		germanHelpMap.put(ProjectTab.class, "Projekt.md.html");
@@ -79,7 +74,7 @@ public class HelpButton extends Button{
 		helpSystemStage.toFront();
 	}
 
-	public void setHelpContent(Class clazz) {
+	public void setHelpContent(Class<?> clazz) {
 		switch (injector.getInstance(HelpSystemStage.class).help.helpSubdirectoryString) {
 			case "help_de":
 				setGermanHelp(clazz);
@@ -92,7 +87,7 @@ public class HelpButton extends Button{
 		//helpContent = new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + fileName);
 	}
 
-	private void setGermanHelp(Class clazz) {
+	private void setGermanHelp(Class<?> clazz) {
 		setHelp(clazz,
 				Main.getProBDirectory() +
 						"prob2ui" + File.separator +
@@ -101,7 +96,7 @@ public class HelpButton extends Button{
 				germanHelpMap);
 	}
 
-	private void setEnglishHelp(Class clazz) {
+	private void setEnglishHelp(Class<?> clazz) {
 		setHelp(clazz,
 				Main.getProBDirectory() +
 						"prob2ui" + File.separator +
@@ -110,9 +105,9 @@ public class HelpButton extends Button{
 				englishHelpMap);
 	}
 
-	private void setHelp(Class clazz, String main, HashMap<Class, String> map) {
+	private void setHelp(Class<?> clazz, String main, HashMap<Class<?>, String> map) {
 		helpContent = new File(main + "ProB2UI.md.html");
-		for (Class c : map.keySet()) {
+		for (Class<?> c : map.keySet()) {
 			if (clazz.equals(c)) {
 				helpContent = new File(main + map.get(c));
 			}

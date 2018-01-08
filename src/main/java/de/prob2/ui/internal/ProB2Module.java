@@ -14,6 +14,7 @@ import de.prob2.ui.MainController;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryView;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.*;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.plugin.ProBPluginHelper;
@@ -65,6 +66,7 @@ public class ProB2Module extends AbstractModule {
 		final MenuToolkit toolkit = IS_MAC && "true".equals(System.getProperty("de.prob2.ui.useMacMenuBar", "true")) ? MenuToolkit.toolkit(locale) : null;
 		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
+		bind(FontSize.class);
 		
 		// Controllers
 		bind(HistoryView.class);

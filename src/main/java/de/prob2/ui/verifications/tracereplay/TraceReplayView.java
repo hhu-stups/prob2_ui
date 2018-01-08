@@ -7,17 +7,17 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.verifications.tracereplay.ReplayTrace.Status;
+
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
@@ -54,18 +54,20 @@ public class TraceReplayView extends ScrollPane {
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final TraceChecker traceChecker;
-	private final Injector injector;
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
 
 	@Inject
-	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
-			final TraceChecker traceChecker, final Injector injector, final ResourceBundle bundle,
-			final FileChooserManager fileChooserManager) {
+	private TraceReplayView(
+		final StageManager stageManager,
+		final CurrentProject currentProject,
+		final TraceChecker traceChecker,
+		final ResourceBundle bundle,
+		final FileChooserManager fileChooserManager
+	) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.traceChecker = traceChecker;
-		this.injector = injector;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
@@ -96,9 +98,6 @@ public class TraceReplayView extends ScrollPane {
 				.addListener((observable, from, to) -> cancelButton.setDisable(to.isEmpty()));
 		traceTableView.itemsProperty().get()
 				.addListener((ListChangeListener<ReplayTraceItem>) c -> checkButton.setDisable(c.getList().isEmpty()));
-
-		bindIconSizeToFontSize();
-
 	}
 
 	private void initTableRows() {
@@ -172,14 +171,5 @@ public class TraceReplayView extends ScrollPane {
 		if (traceFile != null) {
 			currentProject.getCurrentMachine().addTraceFile(traceFile);
 		}
-	}
-
-	private void bindIconSizeToFontSize() {
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (checkButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
-		((FontAwesomeIconView) (cancelButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
-		((FontAwesomeIconView) (loadTraceButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2.0));
-		statusColumn.minWidthProperty().bind(fontsize.multiply(6.0));
-		statusColumn.maxWidthProperty().bind(fontsize.multiply(6.0));
 	}
 }

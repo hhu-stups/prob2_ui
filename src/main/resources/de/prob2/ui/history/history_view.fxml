@@ -2,11 +2,19 @@
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <fx:root stylesheets="@/prob.css" type="AnchorPane"
 		 xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
 	<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="15.0" spacing="10.0">
 		<AnchorPane>
@@ -16,7 +24,7 @@
 					<Button fx:id="btBack" mnemonicParsing="false">
 						<graphic>
 							<FontAwesomeIconView styleClass="icon-dark"
-								glyphName="CHEVRON_LEFT" size="15" />
+								glyphName="CHEVRON_LEFT" glyphSize="${fontSize.fontSize + 2}"/>
 						</graphic>
 						<tooltip>
 							<Tooltip text="%history.buttons.back.tooltip" />
@@ -25,7 +33,7 @@
 					<Button fx:id="btForward" mnemonicParsing="false">
 						<graphic>
 							<FontAwesomeIconView styleClass="icon-dark"
-								glyphName="CHEVRON_RIGHT" size="15" />
+								glyphName="CHEVRON_RIGHT" glyphSize="${fontSize.fontSize + 2}"/>
 						</graphic>
 						<tooltip>
 							<Tooltip text="%history.buttons.forward.tooltip" />
@@ -36,7 +44,7 @@
 					<ToggleButton fx:id="tbReverse" mnemonicParsing="false">
 						<graphic>
 							<FontAwesomeIconView styleClass="icon-dark"
-								glyphName="SORT" size="15" />
+								glyphName="SORT" glyphSize="${fontSize.fontSize + 2}"/>
 						</graphic>
 						<tooltip>
 							<Tooltip text="%history.buttons.reverse.tooltip" />
@@ -45,7 +53,7 @@
 					<Button fx:id="saveTraceButton" mnemonicParsing="false" onAction="#saveTrace">
 						<graphic>
 							<FontAwesomeIconView styleClass="icon-dark"
-								glyphName="SAVE" size="15" />
+								glyphName="SAVE" glyphSize="${fontSize.fontSize + 2}"/>
 						</graphic>
 						<tooltip>
 							<Tooltip text="%history.buttons.saveTrace.tooltip" />

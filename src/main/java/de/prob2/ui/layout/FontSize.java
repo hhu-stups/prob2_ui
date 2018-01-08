@@ -2,29 +2,39 @@ package de.prob2.ui.layout;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
 @Singleton
-public class FontSize extends SimpleIntegerProperty {
-
-	private int defaultFontSize = 13;
+public final class FontSize {
+	private static final int DEFAULT_FONT_SIZE = 13;
+	
+	private final IntegerProperty fontSize;
 	
 	@Inject
-	public FontSize() {
-		this.setDefault();
+	private FontSize() {
+		this.fontSize = new SimpleIntegerProperty(this, "fontSize", DEFAULT_FONT_SIZE);
+		this.fontSize.addListener((o, from, to) -> {
+			if (to.intValue() <= 1) {
+				this.setFontSize(2);
+			}
+		});
 	}
 	
-	@Override
-	public void set(int newValue) {
-		if(newValue <= 1) {
-			super.set(2);
-		} else {
-			super.set(newValue);
-		}
-		
+	public IntegerProperty fontSizeProperty() {
+		return this.fontSize;
 	}
 	
-	public void setDefault() {
-		this.set(defaultFontSize);
+	public int getFontSize() {
+		return this.fontSizeProperty().get();
+	}
+	
+	public void setFontSize(final int fontSize) {
+		this.fontSizeProperty().set(fontSize);
+	}
+	
+	public void resetFontSize() {
+		this.setFontSize(DEFAULT_FONT_SIZE);
 	}
 }

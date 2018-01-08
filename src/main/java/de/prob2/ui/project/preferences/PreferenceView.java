@@ -1,11 +1,10 @@
 package de.prob2.ui.project.preferences;
 
 import com.google.inject.Injector;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
+
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
@@ -16,8 +15,6 @@ public class PreferenceView extends AnchorPane {
 	private Label titelLabel;
 	@FXML
 	private Text prefText;
-	@FXML
-	private Button closePreferenceViewButton;
 	
 	private final Preference preference;
 	private final Injector injector;
@@ -38,9 +35,6 @@ public class PreferenceView extends AnchorPane {
 		}
 		String prefs = builder.toString();
 		prefText.setText(prefs);
-		
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (closePreferenceViewButton.getGraphic())).glyphSizeProperty().bind(fontsize);
 	}
 
 	@FXML

@@ -5,14 +5,19 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
 import javafx.scene.input.MouseButton;
 
 @Singleton
@@ -22,8 +27,6 @@ public class PreferencesTab extends Tab {
 	private ListView<Preference> preferencesListView;
 	@FXML
 	private SplitPane splitPane;
-	@FXML
-	private Button addPreferenceButton;
 	@FXML
 	private HelpButton helpButton;
 
@@ -46,9 +49,6 @@ public class PreferencesTab extends Tab {
 		helpButton.setHelpContent(this.getClass());
 		preferencesListView.itemsProperty().bind(currentProject.preferencesProperty());
 		preferencesListView.setCellFactory(listView -> initListCell());
-
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (addPreferenceButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 
 		currentProject.preferencesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);

@@ -72,7 +72,6 @@ public class FormulaInputDialog extends Dialog<Void> {
 		});
 
 		FontSize fontsize = injector.getInstance(FontSize.class);
-		icon.glyphSizeProperty().bind(fontsize.multiply(6));
 
 		Platform.runLater(() -> {
 			DialogPane dialogPane = this.getDialogPane();
@@ -80,13 +79,13 @@ public class FormulaInputDialog extends Dialog<Void> {
 			FontAwesomeIconView detailsInitIcon = new FontAwesomeIconView(
 					dialogPane.isExpanded() ? FontAwesomeIcon.CHEVRON_UP: FontAwesomeIcon.CHEVRON_DOWN);
 			detailsInitIcon.setStyleClass("icon-dark");
-			detailsInitIcon.glyphSizeProperty().bind(fontsize);
+			detailsInitIcon.glyphSizeProperty().bind(fontsize.fontSizeProperty());
 			detailsButton.setGraphic(detailsInitIcon);
 			dialogPane.expandedProperty().addListener((observable, from, to) -> {
 				FontAwesomeIconView detailsIcon = new FontAwesomeIconView(
 						to ? FontAwesomeIcon.CHEVRON_UP: FontAwesomeIcon.CHEVRON_DOWN);
 				detailsIcon.setStyleClass("icon-dark");
-				detailsIcon.glyphSizeProperty().bind(fontsize);
+				detailsIcon.glyphSizeProperty().bind(fontsize.fontSizeProperty());
 				detailsButton.setGraphic(detailsIcon);
 			});
 		});

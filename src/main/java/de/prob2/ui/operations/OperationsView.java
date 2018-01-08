@@ -187,7 +187,7 @@ public final class OperationsView extends AnchorPane {
 					throw new IllegalStateException("Unhandled status: " + item.getStatus());
 				}
 				FontSize fontsize = injector.getInstance(FontSize.class);
-				icon.glyphSizeProperty().bind(fontsize);
+				icon.glyphSizeProperty().bind(fontsize.fontSizeProperty());
 				setGraphic(icon);
 			} else {
 				setDisable(true);
@@ -206,8 +206,6 @@ public final class OperationsView extends AnchorPane {
 	private Button backButton;
 	@FXML
 	private Button forwardButton;
-	@FXML
-	private Button searchButton;
 	@FXML
 	private Button sortButton;
 	@FXML
@@ -282,21 +280,6 @@ public final class OperationsView extends AnchorPane {
 
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
-
-		bindIconSizeToFontSize();
-	}
-
-	private void bindIconSizeToFontSize() {
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (searchButton.getGraphic())).glyphSizeProperty().bind(fontsize);
-		((FontAwesomeIconView) (backButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
-		((FontAwesomeIconView) (forwardButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
-		sortButton.graphicProperty().addListener((observable, from,
-				to) -> ((FontAwesomeIconView) (sortButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2)));
-		disabledOpsToggle.graphicProperty()
-				.addListener((observable, from, to) -> ((FontAwesomeIconView) (disabledOpsToggle.getGraphic()))
-						.glyphSizeProperty().bind(fontsize.add(2)));
-		((FontAwesomeIconView) (randomButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 	}
 
 	private void executeOperationIfPossible(final OperationItem item) {
@@ -488,12 +471,9 @@ public final class OperationsView extends AnchorPane {
 	@FXML
 	private void handleDisabledOpsToggle() {
 		showDisabledOps = disabledOpsToggle.isSelected();
-		FontAwesomeIconView icon = new FontAwesomeIconView(
-				showDisabledOps ? FontAwesomeIcon.EYE : FontAwesomeIcon.EYE_SLASH);
+		final FontAwesomeIcon icon = showDisabledOps ? FontAwesomeIcon.EYE : FontAwesomeIcon.EYE_SLASH;
 		update(currentTrace.get());
-		icon.setSize("15");
-		icon.setStyleClass(ICON_DARK);
-		disabledOpsToggle.setGraphic(icon);
+		((FontAwesomeIconView)disabledOpsToggle.getGraphic()).setIcon(icon);
 	}
 
 	@FXML
@@ -545,21 +525,21 @@ public final class OperationsView extends AnchorPane {
 
 	@FXML
 	private void handleSortButton() {
-		FontAwesomeIconView icon;
+		final FontAwesomeIcon icon;
 		switch (sortMode) {
 		case MODEL_ORDER:
 			sortMode = SortMode.A_TO_Z;
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
+			icon = FontAwesomeIcon.SORT_ALPHA_ASC;
 			break;
 
 		case A_TO_Z:
 			sortMode = SortMode.Z_TO_A;
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
+			icon = FontAwesomeIcon.SORT_ALPHA_DESC;
 			break;
 
 		case Z_TO_A:
 			sortMode = SortMode.MODEL_ORDER;
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT);
+			icon = FontAwesomeIcon.SORT;
 			break;
 
 		default:
@@ -568,9 +548,7 @@ public final class OperationsView extends AnchorPane {
 
 		doSort();
 		opsListView.getItems().setAll(applyFilter(filter));
-		icon.setSize("15");
-		icon.setStyleClass(ICON_DARK);
-		sortButton.setGraphic(icon);
+		((FontAwesomeIconView)sortButton.getGraphic()).setIcon(icon);
 	}
 
 	@FXML
@@ -645,17 +623,15 @@ public final class OperationsView extends AnchorPane {
 
 	public void setShowDisabledOps(boolean showDisabledOps) {
 		this.showDisabledOps = showDisabledOps;
-		FontAwesomeIconView icon;
+		final FontAwesomeIcon icon;
 		if (showDisabledOps) {
-			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE);
+			icon = FontAwesomeIcon.EYE;
 			disabledOpsToggle.setSelected(true);
 		} else {
-			icon = new FontAwesomeIconView(FontAwesomeIcon.EYE_SLASH);
+			icon = FontAwesomeIcon.EYE_SLASH;
 			disabledOpsToggle.setSelected(false);
 		}
-		icon.setSize("15");
-		icon.setStyleClass(ICON_DARK);
-		disabledOpsToggle.setGraphic(icon);
+		((FontAwesomeIconView)disabledOpsToggle.getGraphic()).setIcon(icon);
 	}
 
 	public boolean getShowDisabledOps() {

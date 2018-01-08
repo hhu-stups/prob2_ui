@@ -9,11 +9,11 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
@@ -23,6 +23,7 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -113,9 +114,6 @@ public class SymbolicCheckingView extends AnchorPane {
 				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
 			}
 		});
-		
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (addFormulaButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 	}
 	
 	private void setBindings() {

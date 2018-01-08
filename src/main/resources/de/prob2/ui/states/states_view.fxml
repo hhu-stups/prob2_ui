@@ -2,6 +2,7 @@
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.states.StatesView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -13,13 +14,16 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <fx:root type="StatesView" minWidth="240" minHeight="70" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
 	<HBox spacing="10.0" alignment="CENTER">
 		<padding>
 			<Insets topRightBottomLeft="10.0"/>
 		</padding>
 		<Button fx:id="searchButton" styleClass="button-dark" alignment="CENTER" onAction="#handleSearchButton" HBox.hgrow="NEVER" prefHeight="${searchButton.width}">
 			<graphic>
-				<FontAwesomeIconView glyphName="SEARCH" styleClass="icon-basic" />
+				<FontAwesomeIconView glyphName="SEARCH" styleClass="icon-basic" glyphSize="${fontSize.fontSize}"/>
 			</graphic>
 		</Button>
 		<TextField fx:id="filterState" onAction="#handleSearchButton" promptText="%states.search.prompt" HBox.hgrow="ALWAYS" />
