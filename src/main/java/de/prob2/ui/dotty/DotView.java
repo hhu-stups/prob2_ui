@@ -10,12 +10,14 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 
 import de.prob.Main;
+import de.prob.animator.command.GetAllDotCommands;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
 import de.prob.animator.domainobjects.ClassicalB;
+import de.prob.animator.domainobjects.DotCommandItem;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
-
+import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -31,7 +33,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class DotView extends Stage {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
@@ -43,7 +44,7 @@ public class DotView extends Stage {
 	private WebView dotView;
 	
 	@FXML
-	private ChoiceBox<DotChoiceItem> cbChoice;
+	private ChoiceBox<DotCommandItem> cbChoice;
 	
 	@FXML
 	private TextField tfFormula;
@@ -101,29 +102,42 @@ public class DotView extends Stage {
 			
 			double x = e.getX()/(2*dragFactor);
 			double y = e.getY()/(2*dragFactor);
-			
 			dotView.getEngine().executeScript("scrollBy(" + x + "," + y +")");
-			
-
-			
 		});
+		
 		cbChoice.getSelectionModel().selectFirst();
 		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			enterFormulaBox.setVisible(to.hasFormula());
+			enterFormulaBox.setVisible(to.getArity() > 0);
 			dotView.getEngine().loadContent("");
 		});
+		//fillCommands();
+		//currentTrace.currentStateProperty().addListener((observable, from, to) ->  fillCommands());
 	}
+	
+	/*private void fillCommands() {
+		cbChoice.getItems().clear();
+		State id = currentTrace.getCurrentState();
+		GetAllDotCommands cmd = new GetAllDotCommands(id);
+		currentTrace.getStateSpace().execute(cmd);
+		for(DotCommandItem item : cmd.getCommands()) {
+			cbChoice.getItems().add(item);
+		}
+	}*/
 	
 	@FXML
 	public void visualize() {
 		ArrayList<IEvalElement> formulas = new ArrayList<>();
 		try {
-			if(cbChoice.getSelectionModel().getSelectedItem().hasFormula()) {
-				formulas.add(new ClassicalB(tfFormula.getText()));
+			DotCommandItem item = cbChoice.getValue();
+			if(item != null) {
+				if(item.getArity() > 0) {
+					formulas.add(new ClassicalB(tfFormula.getText()));
+				}
+				State id = currentTrace.getCurrentState();
+				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, FILE, formulas);
+				currentTrace.getStateSpace().execute(cmd);
+				loadGraph();
 			}
-			GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(cbChoice.getValue().geVisualisationType().getOption(), FILE, formulas);
-			currentTrace.getStateSpace().execute(cmd);
-			loadGraph();
 		} catch (IOException | ProBError | EvaluationException e) {
 			LOGGER.error("Graph visualization failed", e);
 			stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
