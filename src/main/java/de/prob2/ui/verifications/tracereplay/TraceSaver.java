@@ -9,19 +9,22 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ResourceBundle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import com.google.inject.Inject;
 
 import de.prob.check.tracereplay.PersistentTrace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TraceSaver {
 	private static final Charset TRACE_CHARSET = Charset.forName("UTF-8");
@@ -44,7 +47,7 @@ public class TraceSaver {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceSaver.dialog.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation());
-		fileChooser.setInitialFileName(machine.getName());
+		fileChooser.setInitialFileName(machine.getName() + ".trace");
 		fileChooser.getExtensionFilters().add(new ExtensionFilter("Trace (*.trace)", "*.trace"));
 		File file = fileChooser.showSaveDialog(stageManager.getCurrent());
 		
