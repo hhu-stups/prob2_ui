@@ -27,8 +27,8 @@ import javafx.scene.control.Button;
 public class HelpButton extends Button{
 	private Injector injector;
 	private File helpContent;
-	private HashMap<Class, String> germanHelpMap = new HashMap<>();
-	private HashMap<Class, String> englishHelpMap = new HashMap<>();
+	private HashMap<Class<?>, String> germanHelpMap = new HashMap<>();
+	private HashMap<Class<?>, String> englishHelpMap = new HashMap<>();
 
 	@Inject
 	private HelpButton(StageManager stageManager, Injector injector) {
@@ -74,7 +74,7 @@ public class HelpButton extends Button{
 		helpSystemStage.toFront();
 	}
 
-	public void setHelpContent(Class clazz) {
+	public void setHelpContent(Class<?> clazz) {
 		switch (injector.getInstance(HelpSystemStage.class).help.helpSubdirectoryString) {
 			case "help_de":
 				setGermanHelp(clazz);
@@ -87,7 +87,7 @@ public class HelpButton extends Button{
 		//helpContent = new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + fileName);
 	}
 
-	private void setGermanHelp(Class clazz) {
+	private void setGermanHelp(Class<?> clazz) {
 		setHelp(clazz,
 				Main.getProBDirectory() +
 						"prob2ui" + File.separator +
@@ -96,7 +96,7 @@ public class HelpButton extends Button{
 				germanHelpMap);
 	}
 
-	private void setEnglishHelp(Class clazz) {
+	private void setEnglishHelp(Class<?> clazz) {
 		setHelp(clazz,
 				Main.getProBDirectory() +
 						"prob2ui" + File.separator +
@@ -105,9 +105,9 @@ public class HelpButton extends Button{
 				englishHelpMap);
 	}
 
-	private void setHelp(Class clazz, String main, HashMap<Class, String> map) {
+	private void setHelp(Class<?> clazz, String main, HashMap<Class<?>, String> map) {
 		helpContent = new File(main + "ProB2UI.md.html");
-		for (Class c : map.keySet()) {
+		for (Class<?> c : map.keySet()) {
 			if (clazz.equals(c)) {
 				helpContent = new File(main + map.get(c));
 			}
