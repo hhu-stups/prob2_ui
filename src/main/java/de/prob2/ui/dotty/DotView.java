@@ -56,7 +56,7 @@ public class DotView extends Stage {
 	
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
-	private double dragFactor = 0.84;
+	private double dragFactor = 0.83;
 	
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
@@ -91,18 +91,20 @@ public class DotView extends Stage {
 				return;
 			}
 			
+			if(e.getButton() == MouseButton.SECONDARY) {
+				dotView.setZoom(dotView.getZoom() * 0.9);
+				dragFactor *= 0.9;
+			} else {
+				dotView.setZoom(dotView.getZoom() * 1.1);
+				dragFactor *= 1.1;
+			}
+			
 			double x = e.getX()/(2*dragFactor);
 			double y = e.getY()/(2*dragFactor);
 			
 			dotView.getEngine().executeScript("scrollBy(" + x + "," + y +")");
 			
-			if(e.getButton() == MouseButton.SECONDARY) {
-				dotView.setZoom(dotView.getZoom() * 0.8);
-				dragFactor *= 0.8;
-			} else {
-				dotView.setZoom(dotView.getZoom() * 1.3);
-				dragFactor *= 1.3;
-			}
+
 			
 		});
 		cbChoice.getSelectionModel().selectFirst();

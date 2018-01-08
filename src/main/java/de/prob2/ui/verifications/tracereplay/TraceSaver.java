@@ -47,16 +47,18 @@ public class TraceSaver {
 		fileChooser.setInitialFileName(machine.getName());
 		fileChooser.getExtensionFilters().add(new ExtensionFilter("Trace (*.trace)", "*.trace"));
 		File file = fileChooser.showSaveDialog(stageManager.getCurrent());
-
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), TRACE_CHARSET)) {
-			gson.toJson(trace, writer);
-		} catch (FileNotFoundException exc) {
-			LOGGER.warn("Failed to create trace data file", exc);
-			return;
-		} catch (IOException exc) {
-			LOGGER.warn("Failed to save trace", exc);
-			return;
+		
+		if(file != null) {
+			try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), TRACE_CHARSET)) {
+				gson.toJson(trace, writer);
+			} catch (FileNotFoundException exc) {
+				LOGGER.warn("Failed to create trace data file", exc);
+				return;
+			} catch (IOException exc) {
+				LOGGER.warn("Failed to save trace", exc);
+				return;
+			}
+			machine.addTraceFile(file);
 		}
-		machine.addTraceFile(file);
 	}
 }
