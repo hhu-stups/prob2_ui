@@ -8,7 +8,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 
 @Singleton
 public final class FontSize {
-	private static final int DEFAULT_FONT_SIZE = 13;
+	public static final int DEFAULT_FONT_SIZE = 13;
 	
 	private final IntegerProperty fontSize;
 	

@@ -1,5 +1,6 @@
 package de.prob2.ui.persistence;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -107,12 +108,16 @@ public final class UIPersistence {
 			perspectivesMenu.loadPreset(uiState.getGuiState());
 		}
 		
+		
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
 		int j = 0;
 		for (GroovyObjectItem groovyObject : groovyObjects) {
 			if (uiState.getSavedStageBoxes().containsKey("#GroovyObjectId:" + groovyObject.getName())) {
-				groovyObject.show(GroovyObjectItem.ShowEnum.PERSISTENCE, j);
-				j++;
+				List<String> initialObjects = Arrays.asList("animations", "api", "inConsole", "engine");
+				if(initialObjects.contains(groovyObject.getName())) {
+					groovyObject.show(GroovyObjectItem.ShowEnum.PERSISTENCE, j);
+					j++;
+				}
 			}
 		}
 		
@@ -130,5 +135,6 @@ public final class UIPersistence {
 		final OperationsView operationsView = injector.getInstance(OperationsView.class);
 		operationsView.setSortMode(uiState.getOperationsSortMode());
 		operationsView.setShowDisabledOps(uiState.getOperationsShowNotEnabled());
+		
 	}
 }

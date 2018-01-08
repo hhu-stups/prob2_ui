@@ -57,6 +57,7 @@ public class GroovyObjectItem extends GroovyAbstractItem {
 		} else {
 			classstage.openTab(uiState.getGroovyObjectTabs().get(index));
 			classstage.setIndex(index);
+			return;
 		}
 		classstage.setIndex(uiState.getGroovyObjectTabs().size() - 1);
 		classstage.toFront();

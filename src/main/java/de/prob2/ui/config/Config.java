@@ -34,6 +34,7 @@ import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.operations.OperationsView;
@@ -67,6 +68,7 @@ public final class Config {
 	 */
 	private static final class ConfigData extends BasicConfigData {
 		int maxRecentProjects;
+		int fontSize;
 		List<String> recentProjects;
 		Console.ConfigData groovyConsoleSettings;
 		Console.ConfigData bConsoleSettings;
@@ -88,6 +90,7 @@ public final class Config {
 		Map<String, String> globalPreferences;
 		private String pluginDirectory;
 		private FileChooserInitialDirectories fileChooserInitialDirectories;
+		
 		
 		private ConfigData() {}
 	}
@@ -189,6 +192,9 @@ public final class Config {
 		}
 		if (configData.recentProjects == null) {
 			configData.recentProjects = new ArrayList<>();
+		}
+		if (configData.fontSize <= 0) {
+			configData.fontSize = FontSize.DEFAULT_FONT_SIZE;
 		}
 		if (configData.guiState == null || configData.guiState.isEmpty()) {
 			configData.guiState = "main.fxml";
@@ -313,6 +319,7 @@ public final class Config {
 		this.proBPluginManager.setPluginDirectory(configData.pluginDirectory);
 		this.fileChooserManager.setInitialDirectories(configData.fileChooserInitialDirectories);
 		
+		this.injector.getInstance(FontSize.class).setFontSize(configData.fontSize);
 		
 	}
 
@@ -335,6 +342,7 @@ public final class Config {
 		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentProjects = this.recentProjects.getMaximum();
 		configData.recentProjects = new ArrayList<>(this.recentProjects);
+		configData.fontSize = injector.getInstance(FontSize.class).getFontSize();
 		configData.defaultProjectLocation = this.currentProject.getDefaultLocation().toString();
 		configData.currentPreference = injector.getInstance(PreferencesStage.class).getTabPersistenceHandler().getCurrentTab();
 		configData.currentMainTab = injector.getInstance(MainView.class).getTabPersistenceHandler().getCurrentTab();
