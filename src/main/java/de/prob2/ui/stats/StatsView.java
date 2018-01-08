@@ -4,19 +4,21 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -63,14 +65,14 @@ public class StatsView extends ScrollPane {
 
 	private final ResourceBundle bundle;
 	private final CurrentTrace currentTrace;
-	private final Injector injector;
+	private final FontSize fontSize;
 
 	@Inject
 	public StatsView(final ResourceBundle bundle, final StageManager stageManager, final CurrentTrace currentTrace,
-			final Injector injector) {
+			final FontSize fontSize) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
-		this.injector = injector;
+		this.fontSize = fontSize;
 		stageManager.loadFXML(this, "stats_view.fxml");
 	}
 
@@ -87,9 +89,7 @@ public class StatsView extends ScrollPane {
 		this.currentTrace.addListener((observable, from, to) -> this.update(to));
 		this.update(currentTrace.get());
 
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) extendedStatsToggle.getGraphic()).glyphSizeProperty().bind(fontsize.multiply(1.2));
-		((FontAwesomeIconView) helpButton.getGraphic()).glyphSizeProperty().bind(fontsize.multiply(1.2));
+		((FontAwesomeIconView) helpButton.getGraphic()).glyphSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
 
 		numberOfStatesAnchorPane.widthProperty().addListener((observable, from, to) -> {
 			stateStats.getColumnConstraints().get(1).setMinWidth(to.doubleValue());
@@ -104,24 +104,20 @@ public class StatsView extends ScrollPane {
 
 	@FXML
 	private void handleExtendedStatsToggle() {
-		FontAwesomeIconView icon;
-		Tooltip tooltip;
-		FontSize fontsize = injector.getInstance(FontSize.class);
+		final FontAwesomeIcon icon;
+		final String text;
 		if (extendedStatsToggle.isSelected()) {
 			this.update(currentTrace.get());
 
-			icon = new FontAwesomeIconView(FontAwesomeIcon.CLOSE);
-			tooltip = new Tooltip(bundle.getString("stats.hideExtendedStats"));
-			extendedStatsToggle.setText(bundle.getString("stats.hideExtendedStats"));
+			icon = FontAwesomeIcon.CLOSE;
+			text = bundle.getString("stats.hideExtendedStats");
 		} else {
-			icon = new FontAwesomeIconView(FontAwesomeIcon.PLUS_CIRCLE);
-			tooltip = new Tooltip(bundle.getString("stats.showExtendedStats"));
-			extendedStatsToggle.setText(bundle.getString("stats.showExtendedStats"));
+			icon = FontAwesomeIcon.PLUS_CIRCLE;
+			text = bundle.getString("stats.showExtendedStats");
 		}
-		icon.setStyleClass("icon-dark");
-		icon.glyphSizeProperty().bind(fontsize.multiply(1.2));
-		extendedStatsToggle.setGraphic(icon);
-		extendedStatsToggle.setTooltip(tooltip);
+		((FontAwesomeIconView)extendedStatsToggle.getGraphic()).setIcon(icon);
+		extendedStatsToggle.setText(text);
+		extendedStatsToggle.setTooltip(new Tooltip(text));
 	}
 
 	public void update(Trace trace) {

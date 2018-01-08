@@ -24,7 +24,6 @@ import de.prob.statespace.StateSpace;
 
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -278,8 +277,6 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		
 		
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (addModelCheckButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 	}
 	
 	private void setListeners() {

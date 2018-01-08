@@ -7,15 +7,12 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.tracereplay.TraceSaver;
@@ -139,17 +136,8 @@ public final class HistoryView extends AnchorPane {
 			}
 		});
 
-		bindIconSizeToFontSize();
 		saveTraceButton.disableProperty()
 				.bind(currentProject.existsProperty().and(currentTrace.existsProperty()).not());
-	}
-
-	private void bindIconSizeToFontSize() {
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (btBack.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
-		((FontAwesomeIconView) (btForward.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
-		((FontAwesomeIconView) (tbReverse.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
-		((FontAwesomeIconView) (saveTraceButton.getGraphic())).glyphSizeProperty().bind(fontsize.add(2));
 	}
 
 	public static String transitionToString(final Transition transition) {

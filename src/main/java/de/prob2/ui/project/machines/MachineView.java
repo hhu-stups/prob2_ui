@@ -3,11 +3,10 @@ package de.prob2.ui.project.machines;
 import java.util.ResourceBundle;
 
 import com.google.inject.Injector;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
+
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
@@ -18,8 +17,6 @@ public class MachineView extends AnchorPane {
 	private Label titelLabel;
 	@FXML
 	private Text descriptionText;
-	@FXML
-	private Button closeMachineViewButton;
 	
 	private final MachinesItem machinesItem;
 	private final Machine machine;
@@ -38,9 +35,6 @@ public class MachineView extends AnchorPane {
 	public void initialize() {
 		titelLabel.setText(String.format(bundle.getString("project.machines.descriptionView.title"),machine.getName()));
 		descriptionText.setText(machine.getDescription().isEmpty()? bundle.getString("project.machines.descriptionView.placeholder") : machine.getDescription());
-		
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (closeMachineViewButton.getGraphic())).glyphSizeProperty().bind(fontsize);
 	}
 
 	@FXML

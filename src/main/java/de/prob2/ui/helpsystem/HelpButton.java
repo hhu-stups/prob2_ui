@@ -6,14 +6,10 @@ import java.util.HashMap;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.Main;
 
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
-
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.project.ProjectTab;
 import de.prob2.ui.project.machines.MachinesTab;
@@ -24,6 +20,7 @@ import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.verifications.tracereplay.TraceReplayView;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
@@ -41,8 +38,6 @@ public class HelpButton extends Button{
 
 	@FXML
 	private void initialize() {
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (this.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(2.0));
 		germanHelpMap.put(HistoryView.class, "Verlauf.md.html");
 		germanHelpMap.put(OperationsView.class, "ProB2UI.md.html");
 		germanHelpMap.put(ProjectTab.class, "Projekt.md.html");

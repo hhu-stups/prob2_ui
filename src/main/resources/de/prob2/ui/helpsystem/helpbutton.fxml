@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Tooltip?>
 <fx:root type="Button" onAction="#openHelp" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
 	<graphic>
-		<FontAwesomeIconView styleClass="icon-dark" glyphName="QUESTION_CIRCLE"/>
+		<FontAwesomeIconView styleClass="icon-dark" glyphName="QUESTION_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
 	</graphic>
 	<tooltip>
 		<Tooltip text="%menu.help" />

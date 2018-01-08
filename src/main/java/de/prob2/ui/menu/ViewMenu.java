@@ -1,7 +1,12 @@
 package de.prob2.ui.menu;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.history.HistoryView;
@@ -12,18 +17,16 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ResourceBundle;
 
 public class ViewMenu extends Menu {
 	private static final Logger logger = LoggerFactory.getLogger(ViewMenu.class);
@@ -32,32 +35,37 @@ public class ViewMenu extends Menu {
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
+	private final FontSize fontSize;
 
 	@Inject
-	private ViewMenu(final StageManager stageManager, final Injector injector, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+	private ViewMenu(
+		final StageManager stageManager,
+		final Injector injector,
+		final ResourceBundle bundle,
+		final FileChooserManager fileChooserManager,
+		final FontSize fontSize
+	) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
+		this.fontSize = fontSize;
 		stageManager.loadFXML(this, "viewMenu.fxml");
 	}
 
 	@FXML
 	private void handleDefaultFontSize() {
-		FontSize fontSize = injector.getInstance(FontSize.class);
-		fontSize.setDefault();
+		fontSize.resetFontSize();
 	}
 
 	@FXML
 	private void handleIncreaseFontSize() {
-		FontSize fontSize = injector.getInstance(FontSize.class);
-		fontSize.set(fontSize.get() + 1);
+		fontSize.setFontSize(fontSize.getFontSize() + 1);
 	}
 
 	@FXML
 	private void handleDecreaseFontSize() {
-		FontSize fontSize = injector.getInstance(FontSize.class);
-		fontSize.set(fontSize.get() - 1);
+		fontSize.setFontSize(fontSize.getFontSize() - 1);
 	}
 
 	@FXML

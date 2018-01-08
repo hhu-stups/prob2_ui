@@ -5,10 +5,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ClassicalB;
@@ -22,7 +19,6 @@ import de.prob.statespace.TraceElement;
 
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.binding.Bindings;
@@ -126,18 +122,16 @@ public final class HistoryChartStage extends Stage {
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final ResourceBundle bundle;
-	private final Injector injector;
 
 	private final ObservableList<LineChart<Number, Number>> separateCharts;
 
 	@Inject
-	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle, final Injector injector) {
+	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		super();
 
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
-		this.injector = injector;
 
 		this.separateCharts = FXCollections.observableArrayList();
 
@@ -185,10 +179,6 @@ public final class HistoryChartStage extends Stage {
 		});
 		this.currentTrace.addListener((observable, from, to) -> this.updateStartChoiceBox());
 		this.updateStartChoiceBox();
-
-		FontSize fontsize = injector.getInstance(FontSize.class);
-		((FontAwesomeIconView) (addButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(1.2));
-		((FontAwesomeIconView) (removeButton.getGraphic())).glyphSizeProperty().bind(fontsize.multiply(1.2));
 	}
 
 	@FXML

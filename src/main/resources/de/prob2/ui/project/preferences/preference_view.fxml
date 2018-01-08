@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import de.prob2.ui.layout.FontSize?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1" stylesheets="@/prob.css">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
 	<VBox spacing="5" AnchorPane.topAnchor="6"
 		AnchorPane.bottomAnchor="-4" AnchorPane.leftAnchor="0"
 		AnchorPane.rightAnchor="0">
@@ -28,9 +33,9 @@
 			</ScrollPane>
 		</AnchorPane>
 	</VBox>
-	<Button fx:id="closePreferenceViewButton" AnchorPane.rightAnchor="2.0" onAction="#closePreferenceView">
+	<Button AnchorPane.rightAnchor="2.0" onAction="#closePreferenceView">
 		<graphic>
-			<FontAwesomeIconView fill="#555560" glyphName="CLOSE" />
+			<FontAwesomeIconView fill="#555560" glyphName="CLOSE" glyphSize="${fontSize.fontSize}" />
 		</graphic>
 	</Button>
 </fx:root>
