@@ -108,6 +108,7 @@ public final class UIPersistence {
 			perspectivesMenu.loadPreset(uiState.getGuiState());
 		}
 		
+		
 		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
 		int j = 0;
 		for (GroovyObjectItem groovyObject : groovyObjects) {
@@ -134,5 +135,6 @@ public final class UIPersistence {
 		final OperationsView operationsView = injector.getInstance(OperationsView.class);
 		operationsView.setSortMode(uiState.getOperationsSortMode());
 		operationsView.setShowDisabledOps(uiState.getOperationsShowNotEnabled());
+		
 	}
 }
