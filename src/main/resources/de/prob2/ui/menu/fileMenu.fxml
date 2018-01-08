@@ -13,6 +13,9 @@
 		<MenuItem fx:id="clearRecentProjects"
 			text="%menu.file.items.openRecentProject.items.clear" onAction="#handleClearRecentProjects" />
 	</Menu>
+	<SeparatorMenuItem />
+	<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"
+			  onAction="#handleClose" />
 	<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject"
 			  accelerator="Shortcut+S" onAction="#saveProject" />
 	<SeparatorMenuItem />
@@ -21,8 +24,5 @@
 	<SeparatorMenuItem />
 	<MenuItem fx:id="preferencesItem" text="%menu.edit.items.preferences"
 			  onAction="#handlePreferences" />
-	<SeparatorMenuItem />
-	<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"
-			  onAction="#handleClose" />
 </fx:root>
 
