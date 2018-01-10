@@ -84,10 +84,10 @@ public class PluginMenuStage extends Stage {
 			PluginWrapper plugin = event.getPlugin();
 			if (plugin.getPlugin() != null) {
 				if (pluginList.contains(plugin) && !getProBJarPluginManager().getPlugins().contains(plugin)) {
-					//a plugin was removed
+					// a plugin was removed
 					pluginList.remove(plugin);
 				} else if (!pluginList.contains(plugin) && getProBJarPluginManager().getPlugins().contains(plugin)) {
-					//a new plugin was added
+					// a new plugin was added
 					pluginList.add(plugin);
 					FXCollections.sort(pluginList, Comparator.comparing(o -> ((ProBPlugin) o.getPlugin()).getName()));
 				}

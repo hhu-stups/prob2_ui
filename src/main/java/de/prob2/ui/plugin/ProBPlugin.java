@@ -8,6 +8,8 @@ import ro.fortsoft.pf4j.PluginException;
 import ro.fortsoft.pf4j.PluginManager;
 import ro.fortsoft.pf4j.PluginWrapper;
 
+import java.util.ResourceBundle;
+
 /**
  * This class will be extended by all plug-ins and
  * serves as the common class between a plug-in and the prob2-ui application.
@@ -49,29 +51,49 @@ public abstract class ProBPlugin extends Plugin{
 
 	/**
 	 * Starts the plug-in and ensures that the {@code start} method of the plug-in is only called
-	 * when the plug-in has not yet been started.
+	 * when the plug-in has not yet been started. If an exception gets thrown during the method the
+	 * {@code stopPlugin} method will be called.
 	 */
-	public abstract void startPlugin();
+	public abstract void startPlugin() throws Exception;
 
 	/**
 	 * Stops the plug-in and ensures that the {@code stop} method of the plug-in is only called
-	 * when the plug-in has not yet been stopped.
+	 * when the plug-in has not yet been stopped. The stop method is also called when the {@code startPlugin}
+	 * method throws an exception so that this method should be prepared for that.
 	 */
-	public abstract void stopPlugin();
+	public abstract void stopPlugin() throws Exception;
 
 	@Override
 	public final void start() throws PluginException {
 		if (!started) {
-			startPlugin();
-			started = true;
+			try {
+				startPlugin();
+				started = true;
+			} catch (Exception ex) {
+				LOGGER.warn("Exception while starting the plug-in " + getName(), ex);
+				getProBPluginHelper().getStageManager().makeExceptionAlert(
+						String.format(
+								getInjector().getInstance(ResourceBundle.class).getString("plugins.error.start"),
+								getName()),
+						ex).show();
+			}
 		}
 	}
 
 	@Override
 	public final void stop() throws PluginException {
 		if (started) {
-			stopPlugin();
-			started = false;
+			try {
+				stopPlugin();
+				started = false;
+			} catch (Exception ex) {
+				LOGGER.warn("Exception while stopping the plug-in " + getName(), ex);
+				getProBPluginHelper().getStageManager().makeExceptionAlert(
+						String.format(
+								getInjector().getInstance(ResourceBundle.class).getString("plugins.error.stop"),
+								getName()),
+						ex).show();
+			}
 		}
 	}
 
