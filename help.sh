@@ -5,7 +5,15 @@ function conversion {
 		echo "   Found .md file. Converting..."
 		rm -f *.md.hmtl
 		for f in *.md; do pandoc "${f}" -f markdown_github -t html -s -o "${f}.html"; done
-		for f in *.md.html; do sed -i "" s/.md/.md.html/g "${f}"; done
+		if [ $(uname -s) == "Darwin" ]; then
+			for f in *.md.html; do 
+				sed -i "" s/.md/.md.html/g "${f}"; 
+			done
+		else
+			for f in *.md.html; do 
+				sed -i s/.md/.md.html/g "${f}"; 
+			done
+		fi
 		echo "   done"
 	else
 		echo "   No .md files found."
