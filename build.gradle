@@ -140,6 +140,7 @@ task fatJar(type: Jar) {
 task createHelp(type: Exec) {
 	commandLine './help.sh'
 }
+compileJava.dependsOn createHelp
 
 allprojects {
 	final probHome = System.getenv("PROB_HOME")
