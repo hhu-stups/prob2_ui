@@ -22,6 +22,7 @@ addons:
   apt:
     packages:
     - oracle-java8-installer
+    - pandoc
   sonarcloud:
     branches:
     - master
