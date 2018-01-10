@@ -24,7 +24,6 @@ import de.prob2.ui.project.MachineLoader;
 
 import javafx.concurrent.Worker;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Menu;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

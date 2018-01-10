@@ -3,7 +3,6 @@ package de.prob2.ui.menu;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob2.ui.consoles.b.BConsoleStage;
-import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;

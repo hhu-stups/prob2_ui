@@ -9,7 +9,6 @@ import de.prob2.ui.dotty.DotView;
 import de.prob2.ui.formula.FormulaInputDialog;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.visualisation.fx.VisualisationController;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Dialog;

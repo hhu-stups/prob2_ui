@@ -2,6 +2,7 @@ package de.prob2.ui.helpsystem;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -27,8 +28,8 @@ import javafx.scene.control.Button;
 public class HelpButton extends Button{
 	private Injector injector;
 	private File helpContent;
-	private HashMap<Class<?>, String> germanHelpMap = new HashMap<>();
-	private HashMap<Class<?>, String> englishHelpMap = new HashMap<>();
+	private Map<Class<?>, String> germanHelpMap = new HashMap<>();
+	private Map<Class<?>, String> englishHelpMap = new HashMap<>();
 
 	@Inject
 	private HelpButton(StageManager stageManager, Injector injector) {
@@ -38,6 +39,7 @@ public class HelpButton extends Button{
 
 	@FXML
 	private void initialize() {
+		// this needs to be updated if new translations of help are added and/or if new help buttons are added
 		germanHelpMap.put(HistoryView.class, "Verlauf.md.html");
 		germanHelpMap.put(OperationsView.class, "ProB2UI.md.html");
 		germanHelpMap.put(ProjectTab.class, "Projekt.md.html");
@@ -61,7 +63,6 @@ public class HelpButton extends Button{
 		englishHelpMap.put(SymbolicCheckingView.class, "Verification.md.html");
 		englishHelpMap.put(TraceReplayView.class, "Verification.md.html");
 		englishHelpMap.put(StatesView.class, "Main View" + File.separator + "State.md.html");
-
 	}
 
 	@FXML
@@ -84,7 +85,6 @@ public class HelpButton extends Button{
 				setEnglishHelp(clazz);
 				break;
 		}
-		//helpContent = new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + fileName);
 	}
 
 	private void setGermanHelp(Class<?> clazz) {
@@ -105,11 +105,11 @@ public class HelpButton extends Button{
 				englishHelpMap);
 	}
 
-	private void setHelp(Class<?> clazz, String main, HashMap<Class<?>, String> map) {
+	private void setHelp(Class<?> clazz, String main, Map<Class<?>, String> map) {
 		helpContent = new File(main + "ProB2UI.md.html");
-		for (Class<?> c : map.keySet()) {
-			if (clazz.equals(c)) {
-				helpContent = new File(main + map.get(c));
+		for (Map.Entry<Class<?>, String> e : map.entrySet()) {
+			if (clazz.equals(e.getKey())) {
+				helpContent = new File(main + e.getValue());
 			}
 		}
 	}
