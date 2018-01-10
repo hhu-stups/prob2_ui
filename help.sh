@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 function conversion {
 	count=`ls -1 *.md 2>/dev/null | wc -l`
 	if [ $count != 0 ]; then
