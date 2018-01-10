@@ -11,32 +11,32 @@ In each tab you can add multiple tests to check you currently selected machine a
 
 ## Modelchecking
 
-![Modelchecking](screenshots/Verifications/Modelchecking.png)
+![Modelchecking](../screenshots/Verifications/Modelchecking.png)
 
 By pressing the plus button you can add several model checking variants. The following view will be shown:
 
-![Modelchecking Stage](screenshots/Verifications/Modelchecking%20Stage.png)
+![Modelchecking Stage](../screenshots/Verifications/Modelchecking%20Stage.png)
 
 Select one of the search strategies (breadth first, depth first or a mix of both) and the checkboxes containing  different possible errors like deadlocks to be checked for. By pushing the "Model Check" button your selected variant will be added to the list shown at the top of the Modelchecking Tab.
 
 ## LTL Verifications
 
-![LTL](screenshots/Verifications/LTL.png)
+![LTL](../screenshots/Verifications/LTL.png)
 
 By pressing the "Add LTL Formula" or "Add LTL Pattern" buttons an editor for each respectively will be opened and you can add LTL formulas or patterns to the lists to be checked for.
 
 ## Symbolic Checking
 
-![Symbolic Checking](screenshots/Verifications/Symbolic%20Checking.png)
+![Symbolic Checking](../screenshots/Verifications/Symbolic%20Checking.png)
 
 By pressing the plus button you can add several symbolic checking variants. The following view will be shown:
 
-![Add SC](screenshots/Verifications/Add%20SC.png)
+![Add SC](../screenshots/Verifications/Add%20SC.png)
 
 The dropdown menu allows you to select the type of check. Some variants of the symbolic checking might need additional parameters (e.g. Invariant needs an operation).
 
 ## Trace Replay
 
-![Trace Replay](screenshots/Verifications/Trace%20Replay.png)
+![Trace Replay](../screenshots/Verifications/Trace%20Replay.png)
 
 The Trace Replay tab allows you to load a trace from your hard drive to be replayed by the machine.

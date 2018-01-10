@@ -48,13 +48,13 @@ public class HelpSystem extends StackPane {
 	UIState uiState;
 	String helpSubdirectoryString = "help_en";
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
+	// this needs to be updated if new translations of help are added
 	private String[] languages = {"de", "en"};
 
 	@Inject
 	public HelpSystem(final StageManager stageManager, final UIState uiState) throws URISyntaxException, IOException {
 		stageManager.loadFXML(this, "helpsystem.fxml");
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
-		// this needs to be updated if new translations of help are added
 		for (String language : languages) {
 			if (isCurrentLanguage(language)) {
 				helpSubdirectoryString = "help_" + language;

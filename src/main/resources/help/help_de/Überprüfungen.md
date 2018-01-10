@@ -11,32 +11,32 @@ In jedem Tab kann man multiple Tests hizufügen um die derzeitig ausgewählte Ms
 
 ## Model-Checking
 
-![Model-Checking](screenshots/Überprüfungen/Model-Checking.png)
+![Model-Checking](../screenshots/Verifications/Modelchecking.png)
 
 Durch Dürcken des Plus-Knopfes kann man diverse Model-Checking-Varianten hinzufügen. Die folgende Ansicht wird gezeigt:
 
-![Model-Checking-Fenster](screenshots/Überprüfungen/Model-Checking-Fenster.png)
+![Model-Checking-Fenster](../screenshots/Verifications/Modelchecking%20Stage.png)
 
 Wählen Sie eine der Suchstrategien (Gemischte Breiten-/Tiefensuche, Breitensuche oder Tiefensuche) und die Checkboxen, die verschiedene mögliche Fehler wie Deadlocks enthalten, um diese zu checken. Durch Drücken des "Model-Check"-Buttons wird die von Ihnen gewählte Variante zur Liste, die oben im Model-Checking-Tab angezeigt wird, hinzugefügt.
 
 ## LTL-Überprüfung
 
-![LTL](screenshots/Überprüfungen/LTL.png)
+![LTL](../screenshots/Verifications/LTL.png)
 
 Durch Drücken von "LTL-Formel hinzufügen" oder "LTL-Pattern hinzufügen" wird ein Editor für das jeweilige geöffnet und man kann LTL-Formeln oder -Patterns zu den Listen hinzufügen, um diese zu checken.
 
 ## Symbolic Checking
 
-![Symbolic Checking](screenshots/Überprüfungen/Symbolic%20Checking.png)
+![Symbolic Checking](../screenshots/Verifications/Symbolic%20Checking.png)
 
 Durch Drücken des Plus-Knopfes kann man verschiedene Symbolic Checking-Varianten hinzufügen. Die folgende Ansicht wird angezeigt:
 
-![SC hinzufügen](screenshots/Überprüfungen/SC%20hinzufügen.png)
+![SC hinzufügen](../screenshots/Verifications/Add%20SC.png)
 
 Das Dropdown-Menü erlaubt es den Typ des Tests auszuwählen. Einige Varianten des Symbolic Checkings verlangen nach zusätzlichen Parametern (z.B. braucht Invariant eine Operation).
 
 ## Trace nachspielen
 
-![Trace nachspielen](screenshots/Überprüfungen/Trace%20nachspielen.png)
+![Trace nachspielen](../screenshots/Verifications/Trace%20Replay.png)
 
 Der "Trace nachspielen"-Tab erlaubt es eine Trace von der Festplatte zu laden und dann von der Maschine nachspielen zu lassen. 
