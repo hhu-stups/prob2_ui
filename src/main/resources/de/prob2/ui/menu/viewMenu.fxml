@@ -10,18 +10,21 @@
 	<MenuItem fx:id="viewMenu_bigger" text="%menu.view.bigger"
 		accelerator="Alt+Shortcut+'+'" onAction="#handleIncreaseFontSize" />
 	<MenuItem fx:id="viewMenu_smaller" text="%menu.view.smaller"
-		accelerator="Alt+Shortcut+'-'" onAction="#handleDecreaseFontSize" />	
+		accelerator="Alt+Shortcut+'-'" onAction="#handleDecreaseFontSize" />
 	<SeparatorMenuItem />
 	<Menu text="%menu.perspectives" fx:id="presetPerspectivesMenu">
 		<MenuItem text="%menu.perspectives.items.preset.default"
-				  onAction="#handleLoadDefault" />
+			onAction="#handleLoadDefault" />
 		<MenuItem text="%menu.perspectives.items.preset.separated"
-				  onAction="#handleLoadSeparated" />
+			onAction="#handleLoadSeparated" />
 		<MenuItem text="%menu.perspectives.items.preset.separated2"
-				  onAction="#handleLoadSeparated2" />
+			onAction="#handleLoadSeparated2" />
 		<SeparatorMenuItem />
 		<MenuItem text="%menu.perspectives.items.load" onAction="#handleLoadPerspective" />
 	</Menu>
 	<MenuItem text="%menu.perspectives.items.detach" onAction="#handleLoadDetached" />
+	<SeparatorMenuItem />
+	<MenuItem fx:id="fullScreenMenuItem" text="%menu.view.enterFullScreen"
+		onAction="#handleFullScreen" accelerator="Shortcut+Ctrl+F" />
 </fx:root>
 

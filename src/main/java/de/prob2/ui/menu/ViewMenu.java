@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -17,16 +20,13 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ViewMenu extends Menu {
 	private static final Logger logger = LoggerFactory.getLogger(ViewMenu.class);
@@ -37,20 +37,31 @@ public class ViewMenu extends Menu {
 	private final FileChooserManager fileChooserManager;
 	private final FontSize fontSize;
 
+	@FXML
+	private MenuItem fullScreenMenuItem;
+
 	@Inject
-	private ViewMenu(
-		final StageManager stageManager,
-		final Injector injector,
-		final ResourceBundle bundle,
-		final FileChooserManager fileChooserManager,
-		final FontSize fontSize
-	) {
+	private ViewMenu(final StageManager stageManager, final Injector injector, final ResourceBundle bundle,
+			final FileChooserManager fileChooserManager, final FontSize fontSize) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
 		this.fontSize = fontSize;
 		stageManager.loadFXML(this, "viewMenu.fxml");
+	}
+
+	@FXML
+	public void initialize() {
+		stageManager.currentProperty().addListener((observable, from, to) -> {
+			if (to != null) {
+				to.fullScreenProperty().addListener((observable1, from1, to1) -> 
+					fullScreenMenuItem.setText(to1 ? bundle.getString("menu.view.exitFullScreen")
+							: bundle.getString("menu.view.enterFullScreen"))
+				);
+			}
+		});
+
 	}
 
 	@FXML
@@ -95,8 +106,10 @@ public class ViewMenu extends Menu {
 	private void handleLoadPerspective() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
-		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.fxml"), "*.fxml"));
-		File selectedFile = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.PERSPECTIVES ,stageManager.getMainStage());
+		fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.fxml"), "*.fxml"));
+		File selectedFile = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.PERSPECTIVES,
+				stageManager.getMainStage());
 		if (selectedFile != null) {
 			try {
 				MainController main = injector.getInstance(MainController.class);
@@ -111,9 +124,17 @@ public class ViewMenu extends Menu {
 				stageManager.getMainStage().getScene().setRoot(root);
 			} catch (IOException e) {
 				logger.error("Loading fxml failed", e);
-				stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("menu.perspectives.errors.couldNotOpen"), e)).showAndWait();
+				stageManager
+						.makeAlert(Alert.AlertType.ERROR,
+								String.format(bundle.getString("menu.perspectives.errors.couldNotOpen"), e))
+						.showAndWait();
 			}
 		}
+	}
+
+	@FXML
+	private void handleFullScreen() {
+		stageManager.getCurrent().setFullScreen(!stageManager.getCurrent().isFullScreen());
 	}
 
 	private void reset() {
