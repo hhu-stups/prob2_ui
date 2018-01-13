@@ -65,11 +65,11 @@ public class ProBPluginManager {
 	private final ProBPluginHelper proBPluginHelper;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
+	private final FileChooserManager fileChooserManager;
 
 	private List<String> inactivePluginIds;
 	private File pluginDirectory;
 	private ProBJarPluginManager pluginManager;
-	final FileChooserManager fileChooserManager;
 
 	/**
 	 * Should only be used by the Guice-Injector.

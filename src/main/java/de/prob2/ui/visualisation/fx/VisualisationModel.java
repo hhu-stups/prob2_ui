@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.domainobjects.AbstractEvalElement;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
@@ -16,6 +17,7 @@ import de.prob.animator.domainobjects.TranslatedEvalResult;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 
+import de.prob.translator.types.BObject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -42,11 +44,10 @@ public class VisualisationModel {
 
 	private Trace oldTrace;
 	private Trace newTrace;
-	private Map<String, EvalResult> oldStringToResult;
-	private Map<String, EvalResult> newStringToResult;
+	private Map<String, Object> valueCache;
 	private boolean randomExecution;
 
-	public VisualisationModel(CurrentTrace currentTrace, StageManager stageManager, ResourceBundle bundle) {
+	VisualisationModel(CurrentTrace currentTrace, StageManager stageManager, ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -58,19 +59,10 @@ public class VisualisationModel {
 	 * @param oldTrace Trace before the last executed transition.
 	 * @param newTrace Current trace.
 	 */
-	public void setTraces(Trace oldTrace, Trace newTrace) {
+	void setTraces(Trace oldTrace, Trace newTrace) {
 		this.oldTrace = oldTrace;
 		this.newTrace = newTrace;
-		if (oldTrace != null) {
-			oldStringToResult = translateValuesMap( oldTrace.getCurrentState().getValues());
-		} else {
-			oldStringToResult = new HashMap<>();
-		}
-		if (newTrace != null) {
-			newStringToResult = translateValuesMap( newTrace.getCurrentState().getValues());
-		} else {
-			newStringToResult = new HashMap<>();
-		}
+		this.valueCache = new HashMap<>();
 	}
 
 	/**
@@ -78,60 +70,29 @@ public class VisualisationModel {
 	 * @param formula Formula that could have changed.
 	 * @return Returns true if the value has changed.
 	 */
-	public boolean hasChanged(String formula) {
+	boolean hasChanged(String formula) {
 		LOGGER.debug("Look up if the formula \"{}\" has changed its value.", formula);
 		if (oldTrace == null) {
 			LOGGER.debug("The old trace is null, so the value of formula \"{}\" has changed.", formula);
 			return newTrace != null;
 		}
-
-		EvalResult oldValue;
-		EvalResult newValue;
-		boolean oldValueFromMap = false;
-		boolean newValueFromMap = false;
-
-		if (oldStringToResult.containsKey(formula)) {
-			oldValue = oldStringToResult.get(formula);
-			oldValueFromMap = true;
-		} else {
-			oldValue = evalState(oldTrace.getCurrentState(), formula);
-		}
-
-		if (newStringToResult.containsKey(formula)) {
-			newValue = newStringToResult.get(formula);
-			newValueFromMap = true;
-		} else {
-			newValue = evalState(newTrace.getCurrentState(), formula);
-		}
-
+		EvalResult oldValue = evalState(oldTrace.getCurrentState(), formula);
+		EvalResult newValue = evalState(newTrace.getCurrentState(), formula);
 		if (newValue == null) {
 			LOGGER.debug("The value of formula \"{}\" couldn't be evaluated in the new trace. Returning false.", formula);
 			return false;
+		}
+		//cache
+		try {
+			BObject translatedValue = newValue.translate().getValue();
+			valueCache.put(formula, translatedValue);
+		}  catch (BCompoundException e) {
+			LOGGER.error("Error while translating the value for the formula \"{}\".", formula, e);
 		}
 		if (oldValue == null) {
 			LOGGER.debug("The value of formula \"{}\" couldn't be evaluated in the old trace, but in the new trace. Returning true.", formula);
 			return true;
 		}
-
-		LOGGER.debug("The value of formula \"{}\" could be evaluated for the new and the old trace.", formula);
-		if ((oldValue.getValue().equals(newValue.getValue()) && newValueFromMap && oldValueFromMap) ||
-				(newValueFromMap ^ oldValueFromMap)) {
-			/*
-			first case: if the new and the oldValue are both from the maps and equal, it could happen that they are only equal because their short representations are equal and their expanded may be unequal
-			second case: if only one value is from a map and the other one is evaluated, we would compare a short representation to an expanded one
-			*/
-			oldValue = evalState(oldTrace.getCurrentState(), formula);
-			newValue = evalState(newTrace.getCurrentState(), formula);
-			if (newValue == null) {
-				LOGGER.debug("The value of formula \"{}\" couldn't be evaluated in the new trace. Returning false.", formula);
-				return false;
-			}
-			if (oldValue == null) {
-				LOGGER.debug("The value of formula \"{}\" couldn't be evaluated in the old trace, but in the new trace. Returning true.", formula);
-				return true;
-			}
-		}
-
 		return !oldValue.getValue().equals(newValue.getValue());
 	}
 
@@ -144,16 +105,9 @@ public class VisualisationModel {
 	 */
 	public Object getValue(String formula) {
 		LOGGER.debug("Get value for formula \"{}\".", formula);
-		if (newStringToResult.containsKey(formula)) {
-			LOGGER.debug("Using map to get value of formula \"{}\".", formula);
-			try {
-				EvalResult value = newStringToResult.get(formula);
-				TranslatedEvalResult translatedValue = value.translate();
-				return translatedValue.getValue();
-			} catch (Exception  e) {
-				LOGGER.debug("Exception while trying to get the value for formula \"{}\" out of the map. Try to eval it.", formula);
-				return evalCurrent(formula);
-			}
+		if (valueCache.containsKey(formula)) {
+			LOGGER.debug("Using cache to get value of formula \"{}\".", formula);
+			return valueCache.get(formula);
 		}
 		LOGGER.debug("Eval trace to get value of formula \"{}\".", formula);
 		return evalCurrent(formula);
@@ -178,7 +132,7 @@ public class VisualisationModel {
 				return null;
 			}
 		}
-		LOGGER.debug("The previous state is null. Returning null");
+		LOGGER.debug("The previous state is null. Returning null.");
 		return null;
 	}
 
@@ -245,7 +199,7 @@ public class VisualisationModel {
 		randomExecution = false;
 	}
 
-	private Map<String, EvalResult> translateValuesMap(Map<IEvalElement, AbstractEvalResult> values) {
+	/*private Map<String, EvalResult> translateValuesMap(Map<IEvalElement, AbstractEvalResult> values) {
 		Map<String, EvalResult> ret = new HashMap<>(values.size());
 		for (Map.Entry<IEvalElement, AbstractEvalResult> entry : values.entrySet()) {
 			IEvalElement key = entry.getKey();
@@ -262,7 +216,7 @@ public class VisualisationModel {
 			}
 		}
 		return ret;
-	}
+	}*/
 
 	private Object evalCurrent(String formula) {
 		EvalResult value = evalState(newTrace.getCurrentState(), formula);
