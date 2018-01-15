@@ -22,7 +22,9 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
@@ -51,6 +53,15 @@ public class DotView extends Stage {
 	
 	@FXML
 	private HBox enterFormulaBox;
+	
+	@FXML
+	private Label lbDescription;
+	
+	@FXML
+	private Label lbAvailable;
+	
+	@FXML
+	private Button visualizeButton;
 	
 	@FXML
 	private ScrollPane pane;
@@ -102,27 +113,42 @@ public class DotView extends Stage {
 			
 			double x = e.getX()/(2*dragFactor);
 			double y = e.getY()/(2*dragFactor);
-			dotView.getEngine().executeScript("scrollBy(" + x + "," + y +")");
+			dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
 		});
 		
 		cbChoice.getSelectionModel().selectFirst();
 		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			enterFormulaBox.setVisible(to.getArity() > 0);
 			dotView.getEngine().loadContent("");
+			if(to == null) {
+				return;
+			}
+			if(!to.isAvailable()) {
+				visualizeButton.setDisable(true);
+				lbAvailable.setText("NOT AVAILABLE!");
+			} else {
+				visualizeButton.setDisable(false);
+				lbAvailable.setText("");
+			}
+			enterFormulaBox.setVisible(to.getArity() > 0);
+			lbDescription.setText(to.getDescription());
 		});
-		//fillCommands();
-		//currentTrace.currentStateProperty().addListener((observable, from, to) ->  fillCommands());
+		fillCommands();
+		currentTrace.currentStateProperty().addListener((observable, from, to) ->  fillCommands());
 	}
 	
-	/*private void fillCommands() {
-		cbChoice.getItems().clear();
-		State id = currentTrace.getCurrentState();
-		GetAllDotCommands cmd = new GetAllDotCommands(id);
-		currentTrace.getStateSpace().execute(cmd);
-		for(DotCommandItem item : cmd.getCommands()) {
-			cbChoice.getItems().add(item);
+	private void fillCommands() {
+		try {
+			cbChoice.getItems().clear();
+			State id = currentTrace.getCurrentState();
+			GetAllDotCommands cmd = new GetAllDotCommands(id);
+			currentTrace.getStateSpace().execute(cmd);
+			for(DotCommandItem item : cmd.getCommands()) {
+				cbChoice.getItems().add(item);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-	}*/
+	}
 	
 	@FXML
 	public void visualize() {
@@ -146,13 +172,6 @@ public class DotView extends Stage {
 	
 	private void loadGraph() throws IOException {
 		String content = new String(Files.readAllBytes(FILE.toPath()));
-		StringBuilder script = new StringBuilder().append("<head>");
-		script.append("   <script language=\"javascript\" type=\"text/javascript\">");
-		script.append("       function scrollBy(xPos, yPos){");
-		script.append("           window.scrollBy(xPos, yPos);");
-		script.append("       }");
-		script.append("   </script>");
-		script.append("</head>");
 		dotView.getEngine().loadContent("<center>" + content + "</center>");
 	}
 

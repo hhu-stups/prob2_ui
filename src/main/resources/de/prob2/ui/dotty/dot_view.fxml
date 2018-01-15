@@ -10,7 +10,7 @@
 <?import javafx.scene.Group?>
 <?import javafx.scene.layout.HBox?>
 
-<fx:root type="DotView" title="%dotview.header" minWidth="240" minHeight="160" width="600.0" height="400.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="DotView" title="%dotview.header" minWidth="600" minHeight="400" width="1080.0" height="720.0" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane>
@@ -24,6 +24,8 @@
 							</VBox.margin>
 		   					<ChoiceBox fx:id="cbChoice" prefWidth="250.0"/>
 					     </HBox>
+					     <Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
+						 <Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
 					     <HBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 					     	<Label text="%dotview.enterFormula" HBox.hgrow="NEVER" />
 							<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
