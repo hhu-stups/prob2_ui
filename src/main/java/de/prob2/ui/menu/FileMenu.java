@@ -84,7 +84,7 @@ public class FileMenu extends Menu {
 			if (newItems.isEmpty()) {
 				newItems.add(this.recentProjectsPlaceholder);
 			}else {
-				newItems.get(0).setAccelerator(KeyCombination.valueOf("Shortcut+0"));
+				newItems.get(0).setAccelerator(KeyCombination.valueOf("Shift+Shortcut+'O'"));
 			}
 			newItems.addAll(recentItems.subList(recentItems.size() - 2, recentItems.size()));
 			this.recentProjectsMenu.getItems().setAll(newItems);
