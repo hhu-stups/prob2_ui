@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.menu.*?>
+<?import de.prob2.ui.menu.AdvancedOptions?>
+<?import de.prob2.ui.menu.FileMenu?>
+<?import de.prob2.ui.menu.HelpMenu?>
+<?import de.prob2.ui.menu.ViewMenu?>
+<?import de.prob2.ui.menu.VisualisationMenu?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.layout.BorderPane?>
@@ -8,7 +12,6 @@
 		 BorderPane.alignment="CENTER">
 	<FileMenu fx:id="fileMenu" />
 	<ViewMenu fx:id="viewMenu" />
-	<ConsolesMenu fx:id="consolesMenu" />
 	<VisualisationMenu fx:id="visualisationMenu"/>
 	<AdvancedOptions fx:id="pluginMenu"/>
 	<Menu fx:id="windowMenu" text="%menu.window" />
