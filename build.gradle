@@ -142,7 +142,7 @@ task createHelp(type: Exec) {
 	outputs.dir("src/main/resources/help")
 	commandLine './help.sh'
 }
-compileJava.dependsOn createHelp
+processResources.dependsOn(createHelp)
 
 allprojects {
 	final probHome = System.getenv("PROB_HOME")
