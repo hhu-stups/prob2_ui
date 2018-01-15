@@ -138,6 +138,8 @@ task fatJar(type: Jar) {
 
 
 task createHelp(type: Exec) {
+	inputs.dir("src/main/resources/help")
+	outputs.dir("src/main/resources/help")
 	commandLine './help.sh'
 }
 compileJava.dependsOn createHelp
