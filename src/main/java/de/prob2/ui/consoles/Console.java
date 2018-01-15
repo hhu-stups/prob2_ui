@@ -59,6 +59,7 @@ public abstract class Console extends StyleClassedTextArea {
 		setEvents();
 		this.reset();
 		this.setWrapText(true);
+		this.getStyleClass().add("console");
 	}
 	
 	public void setEvents() {
