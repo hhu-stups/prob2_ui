@@ -3,7 +3,7 @@ function conversion {
 	count=`ls -1 *.md 2>/dev/null | wc -l`
 	if [ $count != 0 ]; then
 		echo "   Found .md file. Converting..."
-		rm -f *.md.hmtl
+		rm -f *.md.html
 		for f in *.md; do pandoc "${f}" -f markdown_github -t html -s -o "${f}.html"; done
 		if [ $(uname -s) == "Darwin" ]; then
 			for f in *.md.html; do 
