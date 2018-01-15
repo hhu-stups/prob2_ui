@@ -4,16 +4,9 @@ function conversion {
 	if [ $count != 0 ]; then
 		echo "   Found .md file. Converting..."
 		rm -f *.md.html
-		for f in *.md; do pandoc "${f}" -f markdown_github -t html -s -o "${f}.html"; done
-		if [ $(uname -s) == "Darwin" ]; then
-			for f in *.md.html; do 
-				sed -i "" s/.md/.md.html/g "${f}"; 
-			done
-		else
-			for f in *.md.html; do 
-				sed -i s/.md/.md.html/g "${f}"; 
-			done
-		fi
+		for f in *.md; do
+			pandoc "${f}" -f markdown_github -t html -s | sed "s/\.md/.md.html/g" > "${f}.html"
+		done
 		echo "   done"
 	else
 		echo "   No .md files found."
