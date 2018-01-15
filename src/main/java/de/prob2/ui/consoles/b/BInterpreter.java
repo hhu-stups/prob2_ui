@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
@@ -41,9 +42,16 @@ public class BInterpreter implements Executable {
 		if ("clear".equals(instruction.getInstruction())) {
 			return new ConsoleExecResult("clear","", ConsoleExecResultType.PASSED);
 		}
+		final Trace trace = currentTrace.exists() ? currentTrace.get() : defaultTrace;
+		final IEvalElement formula;
 		try {
-			final Trace trace = currentTrace.exists() ? currentTrace.get() : defaultTrace;
-			AbstractEvalResult res = trace.evalCurrent(trace.getModel().parseFormula(instruction.getInstruction(), FormulaExpand.EXPAND));
+			formula = trace.getModel().parseFormula(instruction.getInstruction(), FormulaExpand.EXPAND);
+		} catch (CliError | EvaluationException | ProBError e) {
+			logger.info("Failed to parse B console user input", e);
+			return new ConsoleExecResult("", String.format(bundle.getString("consoles.b.parsingFailed"), e.getMessage()), ConsoleExecResultType.ERROR);
+		}
+		try {
+			AbstractEvalResult res = trace.evalCurrent(formula);
 			// noinspection ObjectToString
 			return new ConsoleExecResult("", res.toString(), ConsoleExecResultType.PASSED);
 		} catch (CliError | EvaluationException | ProBError  e) {
