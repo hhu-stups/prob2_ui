@@ -19,47 +19,27 @@ In der Voreinstellung ist das Hauptfenster in drei vertikale Felder unterteilt (
 
 Die Menüleiste enthält die diversen Kommandos, um auf die Funktionen von ProB zuzugreifen. Sie beinhaltet die Menüs
 * Datei,
-* Bearbeiten,
-* Formel,
-* Konsolen,
-* Perspektiven,
 * Ansicht,
-* Plugins,
 * Visualisierung,
+* Weitere Optionen,
 * Fenster und
 * Hilfe
 
 ![Dateimenü](../screenshots/Menu/File.png)
 
-Das Dateiuntermenü erlaubt es ein neues Projekt anzulegen, existierende Projekte oder Maschinen zu öffnen, ein Projekt aus der Liste der zuletzt verwendete Projekte zu öffnen und/oder die Liste der zuletzt verwendeten Projekte zu löschen, das ProB2 JavaFX UI zu schließen, das aktuelle Projekt zu speichern oder die derzeitig laufende Maschine neu zu laden.
-
-![Bearbeiten-Menü](../screenshots/Menu/Edit.png)
-
-Das Bearbeiten-Untermenü stellt zwei Wege, die aktuelle Maschine zu bearbeiten, zur Verfügung (entweder im Editor, der von der ProB2 JavaFX UI gestellt wird, oder im Standardeditor des Betriebssystems) und erlaubt es, die allgemeinen und globalen Präferenzen in einem separaten Fenster zu editieren.
-
-![Formelmenü](../screenshots/Menu/Formula.png)
-
-Hier können Formeln zur Visualisierung hinzugefügt sowie das Zeitdiagramm angezeigt werden.
-
-![Konsolenmenü](../screenshots/Menu/Consoles.png)
-
-Dieses Untermenü führt zu zwei Konsolen, eine Groovy, eine B.
-
-![Perspektivenmenü](../screenshots/Menu/Perspectives.png)
-
-Das Perspektivenuntermenü erlaubt es das Aussehen der Hauptansicht zu ändern. Die Standardansicht wird oben angezeigt und zwei zusätzliche Perspektiven (Separater Verlauf und Seperater Verlauf und Statistik) sind vorgegeben. Mit ''Komponenten abtrennen'' kann die Ansicht in einzelnen Fenstern angezeigt werden. ''Laden...'' erlaubt es eigene Perspektiven zu laden, indem man dem Programm eine FXML-Datei, die die Ansichten enthält, zur Verfügung stellt, aber man sollte sich dabei bewusst sein, dass das die Fähigkeit Komponenten abzutrennen zerstören kann.
+Das Dateiuntermenü erlaubt es ein neues Projekt anzulegen, existierende Projekte oder Maschinen zu öffnen, ein Projekt aus der Liste der zuletzt verwendete Projekte zu öffnen und/oder die Liste der zuletzt verwendeten Projekte zu löschen, das ProB2 JavaFX UI zu schließen, das aktuelle Projekt zu speichern, die derzeitig laufende Maschine neu zu laden oder Einstellungen zu editieren.
 
 ![Ansichtsmenü](../screenshots/Menu/View.png)
 
-Dieses Untermenü erlaubt es die Schrift- und Buttongröße in dem ProB2 JavaFX UI anzupassen.
-
-![Pluginsmenü](../screenshots/Menu/Plugins.png)
-
-Mit dem Pluginsuntermenü kann man Plugins hinzufügen und/oder neu laden sowie ein Fenster öffnen, das alle geladenen Plugins anzeigt.
+Dieses Untermenü erlaubt es die Schrift- und Buttongröße in dem ProB2 JavaFX UI anzupassen, Perspektiven zu ändern, Komponenten abzutrennen oder in den Fullscreen-Modus zu gehen. Dieses UI bringt 3 verschiedene voreingestellte Perspektiven. Es ist erlaubt eigene Perspektiven zu nutzen, indem man eine FXML-Datei, die die Ansichten enthält, zur Verfügung stellt, aber man sollte sich dabei bewusst sein, dass das die Fähigkeit Komponenten abzutrennen zerstören kann.
 
 ![Visualisierungsmenü](../screenshots/Menu/Visualisation.png)
 
-Das Visualisierungsuntermenü erlaubt es eine Visualisierung zu wählen, zu stoppen und abzutrennen.
+Das Visualisierungsuntermenü stellt verschiedene Formen der Visualisierung zur Verfügung. Man kann eine Formel eingeben, sich das Zeitdiagramm anschauen oder einen Blick auf die Graphvisualisierung werfen.
+
+![Weitere-Optionen-Menu](../screenshots/Menu/Advanced.png)
+
+Dieses Untermenü stellt eine Groovy-Konsole zur Verfügung und erlaubt es Plugins und eigene Visualisierungen zu verwalten.
 
 ![Hilfemenü](../screenshots/Menu/Help.png)
 
