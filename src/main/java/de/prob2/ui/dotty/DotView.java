@@ -124,7 +124,7 @@ public class DotView extends Stage {
 			}
 			if(!to.isAvailable()) {
 				visualizeButton.setDisable(true);
-				lbAvailable.setText("NOT AVAILABLE!");
+				lbAvailable.setText(bundle.getString("dotview.notavailable"));
 			} else {
 				visualizeButton.setDisable(false);
 				lbAvailable.setText("");
@@ -133,7 +133,14 @@ public class DotView extends Stage {
 			lbDescription.setText(to.getDescription());
 		});
 		fillCommands();
-		currentTrace.currentStateProperty().addListener((observable, from, to) ->  fillCommands());
+		currentTrace.currentStateProperty().addListener((observable, from, to) ->  {
+			int index = cbChoice.getSelectionModel().getSelectedIndex();
+			fillCommands();
+			if(index == -1) {
+				return;
+			}
+			cbChoice.getSelectionModel().select(index);
+		});
 	}
 	
 	private void fillCommands() {
@@ -146,7 +153,7 @@ public class DotView extends Stage {
 				cbChoice.getItems().add(item);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("Extract all dot commands failed", e);
 		}
 	}
 	
