@@ -23,8 +23,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
@@ -46,7 +46,7 @@ public class DotView extends Stage {
 	private WebView dotView;
 	
 	@FXML
-	private ChoiceBox<DotCommandItem> cbChoice;
+	private ListView<DotCommandItem> lvChoice;
 	
 	@FXML
 	private TextField tfFormula;
@@ -116,8 +116,8 @@ public class DotView extends Stage {
 			dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
 		});
 		
-		cbChoice.getSelectionModel().selectFirst();
-		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+		lvChoice.getSelectionModel().selectFirst();
+		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			dotView.getEngine().loadContent("");
 			if(to == null) {
 				return;
@@ -134,23 +134,23 @@ public class DotView extends Stage {
 		});
 		fillCommands();
 		currentTrace.currentStateProperty().addListener((observable, from, to) ->  {
-			int index = cbChoice.getSelectionModel().getSelectedIndex();
+			int index = lvChoice.getSelectionModel().getSelectedIndex();
 			fillCommands();
 			if(index == -1) {
 				return;
 			}
-			cbChoice.getSelectionModel().select(index);
+			lvChoice.getSelectionModel().select(index);
 		});
 	}
 	
 	private void fillCommands() {
 		try {
-			cbChoice.getItems().clear();
+			lvChoice.getItems().clear();
 			State id = currentTrace.getCurrentState();
 			GetAllDotCommands cmd = new GetAllDotCommands(id);
 			currentTrace.getStateSpace().execute(cmd);
 			for(DotCommandItem item : cmd.getCommands()) {
-				cbChoice.getItems().add(item);
+				lvChoice.getItems().add(item);
 			}
 		} catch (Exception e) {
 			LOGGER.error("Extract all dot commands failed", e);
@@ -161,7 +161,7 @@ public class DotView extends Stage {
 	public void visualize() {
 		ArrayList<IEvalElement> formulas = new ArrayList<>();
 		try {
-			DotCommandItem item = cbChoice.getValue();
+			DotCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
 			if(item != null) {
 				if(item.getArity() > 0) {
 					formulas.add(new ClassicalB(tfFormula.getText()));
