@@ -15,29 +15,34 @@
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane>
 				<children>
-   					<VBox alignment="TOP_CENTER" prefWidth="Infinity" prefHeight="Infinity" spacing="30.0" AnchorPane.bottomAnchor="0.0"
-						AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-						AnchorPane.topAnchor="0.0">
-   						<HBox alignment="TOP_CENTER" VBox.vgrow="NEVER">
-	   						<VBox.margin>
-								<Insets top="30"/>
-							</VBox.margin>
-		   					<ChoiceBox fx:id="cbChoice" prefWidth="250.0"/>
-					     </HBox>
-					     <Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
-						 <Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
-					     <HBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
-					     	<Label text="%dotview.enterFormula" HBox.hgrow="NEVER" />
-							<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
-					     </HBox>
-					     <Button fx:id="visualizeButton" disable="false" onAction="#visualize"
-					           text = "Visualize" styleClass="button-blue" prefWidth="130.0" VBox.vgrow="NEVER"/>
-					     <ScrollPane fx:id ="pane" fitToHeight="true" fitToWidth="true" styleClass="border" VBox.vgrow="ALWAYS">
-		   					<content>
-							   <WebView fx:id="dotView"/>
+					<SplitPane dividerPositions="0.4" AnchorPane.topAnchor="0.0"
+						AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+						AnchorPane.rightAnchor="0.0">
+						<AnchorPane>
+							<children>
+			   					<VBox alignment="TOP_CENTER" spacing="20.0" AnchorPane.topAnchor="0.0"
+									AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+									AnchorPane.rightAnchor="0.0">
+					   				<ListView fx:id="lvChoice" AnchorPane.bottomAnchor="0.0"
+										AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+										AnchorPane.topAnchor="0.0"/>
+								     <Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
+									 <Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
+								     <HBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
+								     	<Label text="%dotview.enterFormula" HBox.hgrow="NEVER" />
+										<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
+								     </HBox>
+								     <Button fx:id="visualizeButton" disable="false" onAction="#visualize"
+								           text = "Visualize" styleClass="button-blue" prefWidth="130.0" VBox.vgrow="NEVER"/>
+							     </VBox>
+							</children>
+						</AnchorPane>
+						<ScrollPane fx:id ="pane" fitToHeight="true" fitToWidth="true" styleClass="border">
+					   		<content>
+								<WebView fx:id="dotView"/>
 							</content>
 						</ScrollPane>
-				     </VBox>
+					</SplitPane>
 				</children>
 			</AnchorPane>
 		</Scene>
