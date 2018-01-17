@@ -12,6 +12,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob.animator.domainobjects.ErrorItem;
+import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 
 import de.prob2.ui.menu.EditPreferencesProvider;
@@ -66,14 +67,20 @@ public final class ExceptionAlert extends Alert {
 	private void initialize() {
 		stageManager.register(this);
 		ProBError proBError = null;
+		CliError cliError = null;
 		for (Throwable e = this.exc; e != null; e = e.getCause()) {
 			if (e instanceof ProBError) {
 				proBError = (ProBError)e;
 				break;
+			} else if (e instanceof CliError) {
+				cliError = (CliError)e;
+				break;
 			}
 		}
 		final String message;
-		if (proBError != null) {
+		if (cliError != null) {
+			message = bundle.getString("exceptionAlert.cliErrorExplanation") + '\n';
+		} else if (proBError != null) {
 			message = proBError.getOriginalMessage();
 		} else {
 			message = this.exc.getMessage();
