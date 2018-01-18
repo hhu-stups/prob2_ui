@@ -1,34 +1,23 @@
 package de.prob2.ui.visualisation.fx;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
-
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.prob.animator.domainobjects.AbstractEvalElement;
-import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.EvalResult;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.EventB;
-import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.animator.domainobjects.TranslatedEvalResult;
+import de.prob.animator.domainobjects.*;
+import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-
 import de.prob.translator.types.BObject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import de.prob2.ui.visualisation.fx.exception.VisualisationParseException;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * @author Christoph Heinzen
@@ -45,12 +34,15 @@ public class VisualisationModel {
 	private Trace oldTrace;
 	private Trace newTrace;
 	private Map<String, Object> valueCache;
+	private Map<String, IEvalElement> parsedFormulas;
 	private boolean randomExecution;
+	private AbstractModel model;
 
 	VisualisationModel(CurrentTrace currentTrace, StageManager stageManager, ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
+		this.parsedFormulas = new HashMap<>();
 	}
 
 	/**
@@ -66,34 +58,64 @@ public class VisualisationModel {
 	}
 
 	/**
-	 * The methods checks if the value of the given formula was changed through the last transition.
-	 * @param formula Formula that could have changed.
+	 * The methods checks if the value of the given formulas were changed through the last transition.
+	 * @param formulasParam Formulas that could have changed their values.
 	 * @return Returns true if the value has changed.
 	 */
-	boolean hasChanged(String formula) {
-		LOGGER.debug("Look up if the formula \"{}\" has changed its value.", formula);
+	List<String> hasChanged(List<String> formulasParam) throws VisualisationParseException {
+		List<String> formulas = new ArrayList<>(formulasParam);
+		// parse formulas into IEvalElements
+		List<IEvalElement> parsedFormulas = new ArrayList<>(formulas.size());
+		for (String formula: formulas) {
+			parsedFormulas.add(getParsedFormula(formula));
+		}
+		LOGGER.debug("Look up if the formulas {} have changed their values.", String.join(" ", formulas));
 		if (oldTrace == null) {
-			LOGGER.debug("The old trace is null, so the value of formula \"{}\" has changed.", formula);
-			return newTrace != null;
+			if (newTrace != null) {
+				LOGGER.debug("The old trace is null, so the values of the formulas have changed.");
+				return formulas;
+			} else {
+				LOGGER.debug("The old trace is null and also the new trace is null, so the values of the formulas don't have changed.");
+				return new ArrayList<>();
+			}
 		}
-		EvalResult oldValue = evalState(oldTrace.getCurrentState(), formula);
-		EvalResult newValue = evalState(newTrace.getCurrentState(), formula);
-		if (newValue == null) {
-			LOGGER.debug("The value of formula \"{}\" couldn't be evaluated in the new trace. Returning false.", formula);
-			return false;
+		List<AbstractEvalResult> oldAbstractValues = oldTrace.getCurrentState().eval(parsedFormulas);
+		List<AbstractEvalResult> newAbstractValues = newTrace.getCurrentState().eval(parsedFormulas);
+		List<String> changedFormulas = new ArrayList<>(formulas.size());
+		for (int i = 0; i < formulas.size(); i++) {
+			String formula = formulas.get(i);
+			AbstractEvalResult newAbstractValue = newAbstractValues.get(i);
+			EvalResult newValue = null;
+			if (newAbstractValue instanceof EvalResult) {
+				newValue = (EvalResult) newAbstractValue;
+				//cache value so we don't have to eval it again
+				try {
+					BObject translatedValue = newValue.translate().getValue();
+					valueCache.put(formula, translatedValue);
+				}  catch (BCompoundException e) {
+					LOGGER.error("Error while translating the value of the formula \"{}\".", formula, e);
+				}
+			} else {
+				LOGGER.debug("The value of formula \"{}\" couldn't be evaluated in the new trace." +
+						" Considering its value has not changed.", formula);
+				continue;
+			}
+			AbstractEvalResult oldAbstractValue = oldAbstractValues.get(i);
+			EvalResult oldValue = null;
+			if (oldAbstractValue instanceof EvalResult) {
+				oldValue = (EvalResult) oldAbstractValue;
+			} else {
+				LOGGER.debug("The value of formula \"{}\" couldn't be evaluated in the old trace, but in the new trace." +
+						" Considering its value has changed.", formula);
+				changedFormulas.add(formula);
+				continue;
+			}
+			if (!oldValue.getValue().equals(newValue.getValue())) {
+				LOGGER.debug("The value of formula \"{}\" has changed.", formula);
+				changedFormulas.add(formula);
+			}
 		}
-		//cache
-		try {
-			BObject translatedValue = newValue.translate().getValue();
-			valueCache.put(formula, translatedValue);
-		}  catch (BCompoundException e) {
-			LOGGER.error("Error while translating the value for the formula \"{}\".", formula, e);
-		}
-		if (oldValue == null) {
-			LOGGER.debug("The value of formula \"{}\" couldn't be evaluated in the old trace, but in the new trace. Returning true.", formula);
-			return true;
-		}
-		return !oldValue.getValue().equals(newValue.getValue());
+		return changedFormulas;
 	}
 
 	/**
@@ -199,24 +221,26 @@ public class VisualisationModel {
 		randomExecution = false;
 	}
 
-	/*private Map<String, EvalResult> translateValuesMap(Map<IEvalElement, AbstractEvalResult> values) {
-		Map<String, EvalResult> ret = new HashMap<>(values.size());
-		for (Map.Entry<IEvalElement, AbstractEvalResult> entry : values.entrySet()) {
-			IEvalElement key = entry.getKey();
-			AbstractEvalResult value = entry.getValue();
-			//filter for constants and variables
-			if (key instanceof AbstractEvalElement && value instanceof EvalResult) {
-				String filteredKey = key.getCode();
-				EvalResult filteredValue = (EvalResult) value;
-				//check for duplicate keys
-				if (!ret.containsKey(filteredKey)) {
-					ret.put(filteredKey, filteredValue);
-				}
-
+	private IEvalElement getParsedFormula(String formula) throws VisualisationParseException {
+		LOGGER.debug("Try to parse formula \"{}\"", formula);
+		try {
+			if (!newTrace.getModel().equals(model)) {
+				LOGGER.debug("The madel has been changed, so clear the map of parsed formulas!");
+				model = newTrace.getModel();
+				parsedFormulas.clear();
 			}
+			if (parsedFormulas.containsKey(formula)) {
+				LOGGER.debug("The formula is already parsed.");
+				return parsedFormulas.get(formula);
+			}
+			IEvalElement parsedFormula = model.parseFormula(formula, FormulaExpand.EXPAND);
+			parsedFormulas.put(formula, parsedFormula);
+			return parsedFormula;
+		} catch (Throwable t) {
+			LOGGER.warn("Could not parse formula \"{}\".", formula, t);
+			throw new VisualisationParseException(formula, t);
 		}
-		return ret;
-	}*/
+	}
 
 	private Object evalCurrent(String formula) {
 		EvalResult value = evalState(newTrace.getCurrentState(), formula);
@@ -226,7 +250,7 @@ public class VisualisationModel {
 			try {
 				return value.translate().getValue();
 			} catch (Exception e) {
-				LOGGER.debug("Eval current failed, returning null.", e);
+				LOGGER.warn("Eval current failed, returning null.", e);
 				return null;
 			}
 		}
@@ -235,13 +259,14 @@ public class VisualisationModel {
 	private EvalResult evalState(State state, String formula) {
 		LOGGER.debug("Try to evaluate formula {}.", formula);
 		try {
-			AbstractEvalResult evalResult = state.eval(new EventB(formula, Collections.emptySet(), FormulaExpand.EXPAND));
+			IEvalElement parsedFormula = getParsedFormula(formula);
+			AbstractEvalResult evalResult = state.eval(parsedFormula);
 			LOGGER.debug("Evaluated formula \"{}\" and got the result: {}", formula, evalResult);
 			if (evalResult instanceof EvalResult) {
 				return (EvalResult) evalResult;
 			}
 			return null;
-		} catch (EvaluationException evalException) {
+		} catch (EvaluationException | VisualisationParseException evalException) {
 			Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
 					String.format(bundle.getString("visualisation.model.eval"), formula, evalException.getMessage()),
 					ButtonType.OK);

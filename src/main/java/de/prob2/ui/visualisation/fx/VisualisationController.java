@@ -1,20 +1,7 @@
 package de.prob2.ui.visualisation.fx;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.Set;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
@@ -22,10 +9,10 @@ import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.visualisation.fx.exception.VisualisationParseException;
 import de.prob2.ui.visualisation.fx.listener.EventListener;
 import de.prob2.ui.visualisation.fx.listener.FormulaListener;
 import de.prob2.ui.visualisation.fx.loader.VisualisationLoader;
-
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -35,17 +22,15 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
 
 /**
  * @author Christoph Heinzen
@@ -93,7 +78,7 @@ public class VisualisationController {
 					visualisationModel.setTraces(oldTrace, newTrace);
 					if (newTrace.getPreviousState() == null || !newTrace.getPreviousState().isInitialised()) {
 						//the model was initialized in the last event, so constants could have changed
-						setVisualisationContent(visualisation.get().initialize());
+						initVisualisation(visualisation.get());
 					}
 					updateVisualization();
 				} else {
@@ -114,7 +99,7 @@ public class VisualisationController {
 				} else if (!newMachine.equals(oldMachine)) {
 					boolean start = checkMachine(visualisation.getMachines());
 					if (start) {
-						setVisualisationContent(visualisation.initialize());
+						initVisualisation(visualisation);
 					} else {
 						showAlert(Alert.AlertType.INFORMATION,
 								format("visualisation.machine.loaded", newMachine.getName(), visualisation.getName()),
@@ -226,7 +211,7 @@ public class VisualisationController {
 		if (currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
 			LOGGER.debug("Start: The current state is initialised, call initialize() of visualisation.");
 			visualisationModel.setTraces(null, currentTrace.get());
-			setVisualisationContent(loadedVisualisation.initialize());
+			initVisualisation(loadedVisualisation);
 			updateVisualization();
 		}
 		currentTrace.addListener(currentTraceChangeListener);
@@ -242,7 +227,15 @@ public class VisualisationController {
 			if (eventListenerMap != null && !eventListenerMap.isEmpty()) {
 				eventListenerMap.clear();
 			}
-			visualisation.get().stop();
+			try {
+				visualisation.get().stop();
+			} catch (Throwable t) {
+				LOGGER.debug("Could not stop visualisation!");
+				Alert alert = stageManager.makeExceptionAlert(
+						format("visualisation.controller.stop.exception", visualisation.get().getName()), t);
+				alert.initOwner(stageManager.getCurrent());
+				alert.show();
+			}
 			visualisationLoader.closeClassloader();
 			visualisation.set(null);
 			if (detached.get()) {
@@ -253,15 +246,34 @@ public class VisualisationController {
 		}
 	}
 
+	public void initVisualisation(Visualisation visualisation) {
+		try {
+			setVisualisationContent(visualisation.initialize());
+		} catch (Throwable t) {
+			String msg = format("visualisation.controller.initialize.exception", visualisation.getName());
+			Alert alert = stageManager.makeExceptionAlert(msg, t);
+			alert.initOwner(stageManager.getCurrent());
+			alert.show();
+			LOGGER.warn("Exception during the initialisation of the visualisation \"{}\"", visualisation.getName(), t);
+			stopVisualisation();
+		}
+	}
+
 	private void updateVisualization() {
 		//first check which formulas have changed
 		LOGGER.debug("Update visualisation!");
 		if (formulaListenerMap != null) {
-			List<String> changedFormulas = new ArrayList<>();
-			for (String formula : formulaListenerMap.keySet()) {
-				if (visualisationModel.hasChanged(formula)) {
-					changedFormulas.add(formula);
-				}
+			List<String> changedFormulas;
+			try {
+				changedFormulas = visualisationModel.hasChanged(new ArrayList<>(formulaListenerMap.keySet()));
+			} catch (VisualisationParseException parseEx) {
+				LOGGER.warn("Could not parse formula \"{}\" and stopped update of visualisation.", parseEx.getFormula(), parseEx);
+				Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
+						format("visualisation.controller.parse.exception", parseEx.getFormula()),
+						ButtonType.OK);
+				alert.initOwner(stageManager.getCurrent());
+				alert.show();
+				return;
 			}
 
 			LOGGER.debug("The following formulas have changed their values: {}", changedFormulas);
@@ -287,7 +299,7 @@ public class VisualisationController {
 				LOGGER.debug("Call listener for formulas: {}", (Object)formulas);
 				try {
 					listener.variablesChanged(formulaValues);
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					Alert alert = stageManager.makeExceptionAlert(
 						format("visualisation.controller.listener.exception", String.join(" ", formulas)), e);
 					alert.initOwner(stageManager.getCurrent());
@@ -302,7 +314,15 @@ public class VisualisationController {
 			String lastEvent = currentTrace.get().getCurrentTransition().getName();
 			if (eventListenerMap.containsKey(lastEvent)) {
 				LOGGER.info("Last executed event is \"{}\". Call corresponding listener.");
-				eventListenerMap.get(lastEvent).eventExcecuted();
+				try {
+					eventListenerMap.get(lastEvent).eventExcecuted();
+				} catch (Throwable ex) {
+					Alert alert = stageManager.makeExceptionAlert(
+							format("visualisation.controller.listener.event.exception", lastEvent), ex);
+					alert.initOwner(stageManager.getCurrent());
+					alert.show();
+					LOGGER.warn("Exception while calling the event listener for the event \"{}\".", lastEvent, ex);
+				}
 			}
 		}
 	}
@@ -345,7 +365,6 @@ public class VisualisationController {
 	}
 
 	private void setVisualisationContent(Node visualisationContent) {
-
 		if (detached.get()) {
 			Parent parent  = visualizationStage.getScene().getRoot();
 			AnchorPane pane = (parent != null) ? (AnchorPane) parent : new AnchorPane();
