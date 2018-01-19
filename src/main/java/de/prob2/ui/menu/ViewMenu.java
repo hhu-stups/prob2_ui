@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -20,6 +17,7 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -27,6 +25,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ViewMenu extends Menu {
 	private static final Logger logger = LoggerFactory.getLogger(ViewMenu.class);
@@ -56,8 +57,8 @@ public class ViewMenu extends Menu {
 		stageManager.currentProperty().addListener((observable, from, to) -> {
 			if (to != null) {
 				to.fullScreenProperty().addListener((observable1, from1, to1) -> 
-					fullScreenMenuItem.setText(to1 ? bundle.getString("menu.view.exitFullScreen")
-							: bundle.getString("menu.view.enterFullScreen"))
+					fullScreenMenuItem.setText(to1 ? bundle.getString("menu.view.items.exitFullScreen")
+							: bundle.getString("menu.view.items.enterFullScreen"))
 				);
 			}
 		});
@@ -126,7 +127,7 @@ public class ViewMenu extends Menu {
 				logger.error("Loading fxml failed", e);
 				stageManager
 						.makeAlert(Alert.AlertType.ERROR,
-								String.format(bundle.getString("menu.perspectives.errors.couldNotOpen"), e))
+								String.format(bundle.getString("menu.view.errors.couldNotOpen"), e))
 						.showAndWait();
 			}
 		}

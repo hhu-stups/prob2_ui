@@ -56,7 +56,7 @@ public class EditPreferencesProvider {
 			text = lines.collect(Collectors.joining(System.lineSeparator()));
 		} catch (IOException | UncheckedIOException e) {
 			LOGGER.error("Could not read file " + path, e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("menu.edit.errors.couldNotReadFile"), path, e)).showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.error.couldNotReadFile"), path, e)).showAndWait();
 			return;
 		}
 		editorStage.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
@@ -86,7 +86,7 @@ public class EditPreferencesProvider {
 			processBuilder.start();
 		} catch (IOException e) {
 			LOGGER.error("Failed to start external editor", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("menu.edit.errors.couldNotStartEditor"), e)).showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.error.couldNotStartEditor"), e)).showAndWait();
 		}
 	}
 }

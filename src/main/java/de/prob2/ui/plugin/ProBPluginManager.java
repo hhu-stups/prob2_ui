@@ -306,7 +306,7 @@ public class ProBPluginManager {
 
 	private File showFileChooser(@Nonnull final Stage stage) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("menu.advancedOptions.items.addPlugin"));
+		fileChooser.setTitle(bundle.getString("menu.advanced.items.addPlugin"));
 		fileChooser.getExtensionFilters()
 				.addAll(new FileChooser.ExtensionFilter("ProB2 Plugins", "*.jar"));
 		return fileChooserManager.showOpenDialog(fileChooser, Kind.PLUGINS, stage);

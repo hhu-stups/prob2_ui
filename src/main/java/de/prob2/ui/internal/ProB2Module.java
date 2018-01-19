@@ -18,7 +18,7 @@ import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.menu.AdvancedOptions;
+import de.prob2.ui.menu.AdvancedMenu;
 import de.prob2.ui.menu.EditPreferencesProvider;
 import de.prob2.ui.menu.FileMenu;
 import de.prob2.ui.menu.HelpMenu;
@@ -115,7 +115,7 @@ public class ProB2Module extends AbstractModule {
 		bind(ProBPluginHelper.class);
 		bind(ProBPluginManager.class);
 		bind(VisualisationController.class);
-		bind(AdvancedOptions.class);
+		bind(AdvancedMenu.class);
 		
 		bind(TraceChecker.class);
 	}

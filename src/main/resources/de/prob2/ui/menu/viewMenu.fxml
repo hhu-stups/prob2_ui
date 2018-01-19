@@ -5,26 +5,26 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 
 <fx:root type="Menu" text="%menu.view" xmlns:fx="http://javafx.com/fxml/1">
-	<MenuItem fx:id="viewMenu_default" text="%menu.view.default"
+	<MenuItem fx:id="viewMenu_default" text="%menu.view.items.zoomDefault"
 		onAction="#handleDefaultFontSize" accelerator="Shortcut+'0'" />
-	<MenuItem fx:id="viewMenu_bigger" text="%menu.view.bigger"
+	<MenuItem fx:id="viewMenu_bigger" text="%menu.view.items.zoomIn"
 		accelerator="Alt+Shortcut+'+'" onAction="#handleIncreaseFontSize" />
-	<MenuItem fx:id="viewMenu_smaller" text="%menu.view.smaller"
+	<MenuItem fx:id="viewMenu_smaller" text="%menu.view.items.zoomOut"
 		accelerator="Alt+Shortcut+'-'" onAction="#handleDecreaseFontSize" />
 	<SeparatorMenuItem />
-	<Menu text="%menu.perspectives" fx:id="presetPerspectivesMenu">
-		<MenuItem text="%menu.perspectives.items.preset.default"
+	<Menu text="%menu.view.items.perspectives" fx:id="presetPerspectivesMenu">
+		<MenuItem text="%menu.view.items.perspectives.preset.default"
 			onAction="#handleLoadDefault" />
-		<MenuItem text="%menu.perspectives.items.preset.separated"
+		<MenuItem text="%menu.view.items.perspectives.preset.separated"
 			onAction="#handleLoadSeparated" />
-		<MenuItem text="%menu.perspectives.items.preset.separated2"
+		<MenuItem text="%menu.view.items.perspectives.preset.separated2"
 			onAction="#handleLoadSeparated2" />
 		<SeparatorMenuItem />
-		<MenuItem text="%menu.perspectives.items.load" onAction="#handleLoadPerspective" />
+		<MenuItem text="%menu.view.items.perspectives.load" onAction="#handleLoadPerspective" />
 	</Menu>
-	<MenuItem text="%menu.perspectives.items.detach" onAction="#handleLoadDetached" />
+	<MenuItem text="%menu.view.items.detach" onAction="#handleLoadDetached" />
 	<SeparatorMenuItem />
-	<MenuItem fx:id="fullScreenMenuItem" text="%menu.view.enterFullScreen"
+	<MenuItem fx:id="fullScreenMenuItem" text="%menu.view.items.enterFullScreen"
 		onAction="#handleFullScreen" accelerator="Shortcut+Ctrl+F" />
 </fx:root>
 

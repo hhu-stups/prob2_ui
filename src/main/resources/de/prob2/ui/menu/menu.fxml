@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.menu.AdvancedOptions?>
+<?import de.prob2.ui.menu.AdvancedMenu?>
 <?import de.prob2.ui.menu.FileMenu?>
 <?import de.prob2.ui.menu.HelpMenu?>
 <?import de.prob2.ui.menu.ViewMenu?>
@@ -13,7 +13,7 @@
 	<FileMenu fx:id="fileMenu" />
 	<ViewMenu fx:id="viewMenu" />
 	<VisualisationMenu fx:id="visualisationMenu"/>
-	<AdvancedOptions fx:id="pluginMenu"/>
+	<AdvancedMenu fx:id="pluginMenu"/>
 	<Menu fx:id="windowMenu" text="%menu.window" />
 	<HelpMenu fx:id="helpMenu" />
 </fx:root>

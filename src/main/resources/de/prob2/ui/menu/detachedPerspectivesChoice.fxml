@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" fx:id="detached" title="%menu.perspectives.items.detach"
+<fx:root type="Stage" fx:id="detached" title="%menu.view.items.detach"
 		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
@@ -13,25 +13,25 @@
 				<VBox spacing="10" AnchorPane.topAnchor="10.0"
 					AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0"
 					AnchorPane.rightAnchor="0.0">
-					<Label text="%menu.perspectives.items.detach.stage.explanation">
+					<Label text="%detachStage.explanation">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>
 					</Label>
 					<VBox spacing="15.0" styleClass="dark">
 						<CheckBox fx:id="detachOperations"
-							text="%menu.perspectives.items.detach.stage.operations" />
+							text="%detachStage.operations" />
 						<CheckBox fx:id="detachHistory"
-							text="%menu.perspectives.items.detach.stage.history" />
+							text="%detachStage.history" />
 						<CheckBox fx:id="detachVerifications"
-							text="%menu.perspectives.items.detach.stage.verifications" />
+							text="%detachStage.verifications" />
 						<CheckBox fx:id="detachStats"
-							text="%menu.perspectives.items.detach.stage.stats" />
+							text="%detachStage.stats" />
 						<CheckBox fx:id="detachProjects"
-							text="%menu.perspectives.items.detach.stage.projects" />
+							text="%detachStage.projects" />
 					</VBox>
 					<Button fx:id="apply" onAction="#apply"
-						text="%menu.perspectives.items.detach.stage.apply">
+						text="%detachStage.apply">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>

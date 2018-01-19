@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * Created by Christoph Heinzen on 27.07.17.
  */
 @Singleton
-public class AdvancedOptions extends Menu {
+public class AdvancedMenu extends Menu {
 
 	@FXML
 	private MenuItem openVisualisationItem;
@@ -35,15 +35,15 @@ public class AdvancedOptions extends Menu {
 	private final ProBPluginManager proBPluginManager;
 	private final VisualisationController visualisationController;
 	private final Injector injector;
-	private static final Logger LOGGER = LoggerFactory.getLogger(AdvancedOptions.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AdvancedMenu.class);
 
 
 	@Inject
-	public AdvancedOptions(final StageManager stageManager, final ProBPluginManager proBPluginManager,
+	public AdvancedMenu(final StageManager stageManager, final ProBPluginManager proBPluginManager,
 						   final VisualisationController visualisationController, final Injector injector) {
 		this.proBPluginManager = proBPluginManager;
 		this.injector = injector;
-		stageManager.loadFXML(this, "advancedOptions.fxml");
+		stageManager.loadFXML(this, "advancedMenu.fxml");
 		this.visualisationController = visualisationController;
 		openVisualisationItem.disableProperty().bind(visualisationController.currentMachineProperty().isNull());
 		stopVisualisationItem.disableProperty().bind(visualisationController.visualisationProperty().isNull());

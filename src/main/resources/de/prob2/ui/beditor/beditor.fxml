@@ -16,9 +16,6 @@
 							<MenuItem onAction="#handleSaveAs" text="%menu.file.items.saveas"/>
 							<MenuItem onAction="#handleClose" accelerator="Shortcut+W" text="%menu.file.items.close"/>
 						</Menu>
-						<Menu text="%menu.edit">
-							<MenuItem text="%menu.file.items.placeholder"/>
-						</Menu>
 						<Menu text="%menu.help">
 							<MenuItem text="%menu.help.items.about"/>
 						</Menu>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+
+<fx:root type="Menu" text="%menu.advanced" xmlns:fx="http://javafx.com/fxml/1">
+	<MenuItem text="%menu.advanced.items.groovy" onAction="#handleGroovyConsole" />
+	<SeparatorMenuItem />
+	<MenuItem text="%menu.advanced.items.reloadPlugin" onAction="#reloadPlugins"/>
+	<MenuItem text="%menu.advanced.items.addPlugin" onAction="#addPlugin" />
+	<MenuItem text="%menu.advanced.items.pluginMenu" onAction="#showPluginMenu"/>
+	<SeparatorMenuItem />
+	<Menu text="%menu.advanced.items.useVisualisation">
+		<MenuItem fx:id="openVisualisationItem" text="%menu.advanced.items.useVisualisation.select" onAction="#openVisualisation"/>
+		<MenuItem fx:id="stopVisualisationItem" text="%menu.advanced.items.useVisualisation.stop" onAction="#stopVisualisation"/>
+		<MenuItem fx:id="detachVisualisationItem" text="%menu.advanced.useVisualisation.detach" onAction="#detachVisualisation"/>
+	</Menu>
+</fx:root>
+

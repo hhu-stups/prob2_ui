@@ -161,7 +161,7 @@ public class FileMenu extends Menu {
 			injector.getInstance(TraceChecker.class).resetStatus();
 		} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 			LOGGER.error("Model reload failed", e);
-			stageManager.makeExceptionAlert(bundle.getString("menu.edit.errors.couldNotReload"), e).showAndWait();
+			stageManager.makeExceptionAlert(bundle.getString("menu.file.errors.couldNotReload"), e).showAndWait();
 		}
 	}
 
