@@ -9,16 +9,15 @@ import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
 import de.codecentric.centerdevice.util.StageUtils;
+
 import de.prob2.ui.internal.StageManager;
-import javafx.collections.ObservableList;
+
 import javafx.fxml.FXML;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -71,24 +70,7 @@ public final class MenuController extends MenuBar {
 					new SeparatorMenuItem(), quit);
 
 			MenuItem zoomMenuItem = menuToolkit.createZoomMenuItem();
-			zoomMenuItem.setOnAction(event -> {
-				StageUtils.getFocusedStage().ifPresent(stage -> {
-					ObservableList<Screen> screens = Screen.getScreensForRectangle(stage.getX(), stage.getY(),
-							stage.getWidth(), stage.getHeight());
-
-					if (screens.size() == 1) {
-						// > height*0.9 because sometimes the height of the stage changes slightly after zooming
-						// (probably because the maximal height of the stage is the height of the screen minus the height of the doc and the menu bar ?)
-						if (stage.getWidth() == screens.get(0).getBounds().getWidth()
-								&& stage.getHeight() > screens.get(0).getBounds().getHeight()*0.9) {
-							StageUtils.setStageSize(stage, new Rectangle2D(0, 0, screens.get(0).getBounds().getWidth()*0.65, screens.get(0).getBounds().getHeight()*0.7));
-							stage.centerOnScreen();
-						} else {
-							StageUtils.setStageSize(stage, screens.get(0).getBounds());
-						}				
-					}
-				});
-			});
+			zoomMenuItem.setOnAction(event -> StageUtils.getFocusedStage().ifPresent(stage -> stage.setMaximized(!stage.isMaximized())));
 
 			// Add Mac-style items to Window menu
 			windowMenu.getItems().addAll(menuToolkit.createMinimizeMenuItem(), zoomMenuItem,
