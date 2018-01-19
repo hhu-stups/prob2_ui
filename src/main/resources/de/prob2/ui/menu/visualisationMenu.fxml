@@ -6,9 +6,9 @@
 
 <fx:root type="Menu" text="%menu.visualisation" xmlns:fx="http://javafx.com/fxml/1">
 	<MenuItem fx:id="enterFormulaForVisualization"
-			  text="%menu.formula.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />	
+			  text="%menu.visualisation.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />	
 	<MenuItem fx:id="graphVisualisationItem" text="%menu.visualisation.items.graph" onAction="#openGraphVisualisation"/>
 	<SeparatorMenuItem />
-	<MenuItem text="%menu.formula.items.showHistoryChart"
+	<MenuItem text="%menu.visualisation.items.showHistoryChart"
 			  onAction="#handleHistoryChart" />
 </fx:root>

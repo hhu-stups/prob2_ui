@@ -55,9 +55,9 @@
 							<Button text="%pluginsmenu.changepath" onAction="#changePath"
 									styleClass="button-blue"/>
 							<HBox spacing="10.0" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-								<Button text="%menu.advancedOptions.items.add" onAction="#addPlugin"
+								<Button text="%menu.advancedOptions.items.addPlugin" onAction="#addPlugin"
 									styleClass="button-blue"/>
-								<Button text="%menu.advancedOptions.items.reload" onAction="#reloadPlugins"
+								<Button text="%menu.advancedOptions.items.reloadPlugin" onAction="#reloadPlugins"
 									styleClass="button-blue"/>
 
 							</HBox>

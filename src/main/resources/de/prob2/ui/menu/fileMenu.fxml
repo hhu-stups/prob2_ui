@@ -19,10 +19,10 @@
 	<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject"
 			  accelerator="Shortcut+S" onAction="#saveProject" />
 	<SeparatorMenuItem />
-	<MenuItem fx:id="reloadMachineItem" text="%menu.edit.items.reloadMachine"
+	<MenuItem fx:id="reloadMachineItem" text="%menu.file.items.reloadMachine"
 		accelerator="Shortcut+R" onAction="#handleReloadMachine" />
 	<SeparatorMenuItem />
-	<MenuItem fx:id="preferencesItem" text="%menu.edit.items.preferences"
+	<MenuItem fx:id="preferencesItem" text="%menu.file.items.preferences"
 			  onAction="#handlePreferences" />
 </fx:root>
 
