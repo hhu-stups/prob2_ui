@@ -21,9 +21,15 @@ import de.be4.eventbalg.core.parser.EventBParseException;
 import de.hhu.stups.sablecc.patch.SourcePosition;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.ComputationNotCompletedResult;
+import de.prob.animator.domainobjects.EnumerationWarning;
+import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.EvaluationErrorResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.animator.domainobjects.IdentifierNotInitialised;
+import de.prob.animator.domainobjects.WDError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
 
@@ -70,12 +76,14 @@ public class BInterpreter implements Executable {
 	private static final Pattern MESSAGE_WITH_POSITIONS_PATTERN = Pattern.compile("^\\[(\\d+),(\\d+)\\] (.*)$");
 	
 	private final CurrentTrace currentTrace;
+	private final ResourceBundle bundle;
 	private final Trace defaultTrace;
 	private final int promptLength;
 
 	@Inject
 	public BInterpreter(final MachineLoader machineLoader, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
+		this.bundle = bundle;
 		this.defaultTrace = new Trace(machineLoader.getEmptyStateSpace(Collections.emptyMap()));
 		this.promptLength = bundle.getString("consoles.prompt.default").length();
 	}
@@ -146,6 +154,38 @@ public class BInterpreter implements Executable {
 			return String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage());
 		}
 	}
+	
+	private String formatResult(final AbstractEvalResult result) {
+		Objects.requireNonNull(result);
+		final StringBuilder sb = new StringBuilder();
+		if (result instanceof EvalResult) {
+			sb.append(((EvalResult)result).getValue());
+		} else if (result instanceof EvaluationErrorResult) {
+			if (result instanceof IdentifierNotInitialised) {
+				sb.append(bundle.getString("consoles.b.result.notInitialized"));
+			} else if (result instanceof WDError) {
+				sb.append(bundle.getString("consoles.b.result.notWellDefined"));
+			} else {
+				sb.append(bundle.getString("consoles.b.result.evaluationError"));
+			}
+			for (final String s : ((EvaluationErrorResult)result).getErrors()) {
+				sb.append('\n');
+				sb.append(s);
+			}
+		} else if (result instanceof EnumerationWarning) {
+			sb.append(bundle.getString("consoles.b.result.enumerationWarning"));
+		} else if (result instanceof ComputationNotCompletedResult) {
+			sb.append(bundle.getString("consoles.b.result.computationNotCompleted"));
+			final String reason = ((ComputationNotCompletedResult)result).getReason();
+			if (!reason.isEmpty()) {
+				sb.append('\n');
+				sb.append(reason);
+			}
+		} else {
+			throw new IllegalArgumentException("Don't know how to show the value of a " + result.getClass() + " instance");
+		}
+		return sb.toString();
+	}
 
 	@Override
 	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
@@ -161,13 +201,13 @@ public class BInterpreter implements Executable {
 			logger.info("Failed to parse B console user input", e);
 			return new ConsoleExecResult("", this.formatParseException(e), ConsoleExecResultType.ERROR);
 		}
+		final AbstractEvalResult res;
 		try {
-			AbstractEvalResult res = trace.evalCurrent(formula);
-			// noinspection ObjectToString
-			return new ConsoleExecResult("", res.toString(), ConsoleExecResultType.PASSED);
+			res = trace.evalCurrent(formula);
 		} catch (ProBError e) {
 			logger.info("B evaluation failed", e);
 			return new ConsoleExecResult("", e.getMessage(), ConsoleExecResultType.ERROR);
 		}
+		return new ConsoleExecResult("", this.formatResult(res), ConsoleExecResultType.PASSED);
 	}
 }
