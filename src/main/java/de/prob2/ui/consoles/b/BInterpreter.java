@@ -24,7 +24,6 @@ import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
 
@@ -166,7 +165,7 @@ public class BInterpreter implements Executable {
 			AbstractEvalResult res = trace.evalCurrent(formula);
 			// noinspection ObjectToString
 			return new ConsoleExecResult("", res.toString(), ConsoleExecResultType.PASSED);
-		} catch (CliError | EvaluationException | ProBError  e) {
+		} catch (ProBError e) {
 			logger.info("B evaluation failed", e);
 			return new ConsoleExecResult("", e.getMessage(), ConsoleExecResultType.ERROR);
 		}
