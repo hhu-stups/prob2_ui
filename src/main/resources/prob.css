@@ -375,6 +375,10 @@
  * StyledTextArea/Consoles															*
  ************************************************************************************/
 
+.console {
+	-fx-font-family: monospace;
+}
+
 .console .error{
 	-fx-fill:red;
 }
