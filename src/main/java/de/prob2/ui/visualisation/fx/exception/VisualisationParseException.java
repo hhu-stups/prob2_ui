@@ -8,6 +8,7 @@ package de.prob2.ui.visualisation.fx.exception;
  * @since 18.01.18
  */
 public class VisualisationParseException extends Exception{
+	private static final long serialVersionUID = 1L;
 
 	private final String formula;
 
