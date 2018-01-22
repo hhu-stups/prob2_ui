@@ -12,8 +12,8 @@
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
 						<Menu text="%menu.file">
-							<MenuItem onAction="#handleSave" accelerator="Shortcut+S" text="%menu.file.items.save"/>
-							<MenuItem onAction="#handleSaveAs" text="%menu.file.items.saveas"/>
+							<MenuItem onAction="#handleSave" accelerator="Shortcut+S" text="%beditor.menu.file.items.save"/>
+							<MenuItem onAction="#handleSaveAs" text="%beditor.menu.file.items.saveAs"/>
 							<MenuItem onAction="#handleClose" accelerator="Shortcut+W" text="%menu.file.items.close"/>
 						</Menu>
 						<Menu text="%menu.help">
