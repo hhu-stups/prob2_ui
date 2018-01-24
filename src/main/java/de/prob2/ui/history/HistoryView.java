@@ -1,5 +1,6 @@
 package de.prob2.ui.history;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,57 +11,58 @@ import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.tracereplay.TraceSaver;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.text.Text;
 
 @Singleton
 public final class HistoryView extends AnchorPane {
-	private static class TransitionCell extends ListCell<HistoryItem> {
+	private static class TransitionRow extends TableRow<HistoryItem> {
 		@Override
 		protected void updateItem(HistoryItem item, boolean empty) {
 			super.updateItem(item, empty);
-			if (item == null) {
-				setGraphic(new Text());
-			} else {
-				final Text text = new Text(item.index + ") "+ transitionToString(item.transition));
-
-				switch (item.status) {
+			if (item != null) {
+				this.getStyleClass().removeAll(Arrays.asList("past", "present", "future"));
+				
+				switch (item.getStatus()) {
 				case PAST:
-					text.setId("past");
+					this.getStyleClass().add("past");
 					break;
 
 				case FUTURE:
-					text.setId("future");
+					this.getStyleClass().add("future");
 					break;
 
 				default:
-					text.setId("present");
+					this.getStyleClass().add("present");
 					break;
 				}
-				setGraphic(text);
 			}
 		}
 	}
 
 	@FXML
-	private ListView<HistoryItem> lvHistory;
+	private TableView<HistoryItem> historyTableView;
+	@FXML
+	private TableColumn<HistoryItem, Integer> positionColumn;
+	@FXML
+	private TableColumn<HistoryItem, String> transitionColumn;
 	@FXML
 	private ToggleButton tbReverse;
 	@FXML
@@ -88,22 +90,31 @@ public final class HistoryView extends AnchorPane {
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent(this.getClass());
-		this.setMinWidth(100);
+
+		historyTableView.setRowFactory(item -> new TransitionRow());
+		historyTableView.getSelectionModel().setCellSelectionEnabled(true);
+		positionColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
+		transitionColumn.setCellValueFactory(
+				cellData -> new SimpleStringProperty(transitionToString(cellData.getValue().getTransition())));
+
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
-			lvHistory.getItems().clear();
+			historyTableView.getItems().clear();
 			if (to != null) {
 				int currentPos = to.getCurrent().getIndex();
-				addItems(lvHistory, currentPos, 0);
+				// System.out.println(currentPos);
+				historyTableView.getItems()
+						.add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST, 0));
+				// System.out.println(historyTableView.getItems().get(0).getStatus());
 				List<Transition> transitionList = to.getTransitionList();
 				for (int i = 0; i < transitionList.size(); i++) {
 					int index = i + 1;
 					HistoryStatus status = getStatus(i, currentPos);
-					lvHistory.getItems().add(new HistoryItem(transitionList.get(i), status, index));
+					historyTableView.getItems().add(new HistoryItem(transitionList.get(i), status, index));
 				}
 			}
 
 			if (tbReverse.isSelected()) {
-				Collections.reverse(lvHistory.getItems());
+				Collections.reverse(historyTableView.getItems());
 			}
 		};
 		traceChangeListener.changed(currentTrace, null, currentTrace.get());
@@ -112,17 +123,15 @@ public final class HistoryView extends AnchorPane {
 		btBack.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		btForward.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 
-		lvHistory.setCellFactory(item -> new TransitionCell());
-
-		lvHistory.setOnMouseClicked(e -> {
+		historyTableView.setOnMouseClicked(e -> {
 			if (currentTrace.exists()) {
 				currentTrace.set(currentTrace.get().gotoPosition(getCurrentIndex()));
 			}
 		});
 
-		lvHistory.setOnMouseMoved(e -> lvHistory.setCursor(Cursor.HAND));
+		historyTableView.setOnMouseMoved(e -> historyTableView.setCursor(Cursor.HAND));
 
-		tbReverse.setOnAction(e -> Collections.reverse(lvHistory.getItems()));
+		tbReverse.setOnAction(e -> Collections.reverse(historyTableView.getItems()));
 
 		btBack.setOnAction(e -> {
 			if (currentTrace.exists()) {
@@ -153,16 +162,17 @@ public final class HistoryView extends AnchorPane {
 	}
 
 	public NumberBinding getCurrentHistoryPositionProperty() {
-		return Bindings.createIntegerBinding(() -> currentTrace.get() == null? 0 : currentTrace.get().getCurrent().getIndex() + 2, currentTrace);
+		return Bindings.createIntegerBinding(
+				() -> currentTrace.get() == null ? 0 : currentTrace.get().getCurrent().getIndex() + 2, currentTrace);
 	}
 
 	public ObservableIntegerValue getObservableHistorySize() {
-		return Bindings.size(this.lvHistory.itemsProperty().get());
+		return Bindings.size(this.historyTableView.itemsProperty().get());
 	}
 
 	private int getCurrentIndex() {
-		int currentPos = lvHistory.getSelectionModel().getSelectedIndex();
-		int length = lvHistory.getItems().size();
+		int currentPos = historyTableView.getSelectionModel().getSelectedIndex();
+		int length = historyTableView.getItems().size();
 		if (tbReverse.isSelected()) {
 			return length - 2 - currentPos;
 		} else {
@@ -180,17 +190,15 @@ public final class HistoryView extends AnchorPane {
 		}
 	}
 
-	private void addItems(ListView<HistoryItem> lvHistory, int currentPos, int index) {
-		lvHistory.getItems().add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST, index));
-	}
-
 	@FXML
 	private void saveTrace() {
 		TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
-		if(currentTrace.get() != null) {
-			traceSaver.saveTrace(new PersistentTrace(currentTrace.get(), currentTrace.get().getCurrent().getIndex() + 1), currentProject.getCurrentMachine());
+		if (currentTrace.get() != null) {
+			traceSaver.saveTrace(
+					new PersistentTrace(currentTrace.get(), currentTrace.get().getCurrent().getIndex() + 1),
+					currentProject.getCurrentMachine());
 		}
-		
+
 	}
 
 }

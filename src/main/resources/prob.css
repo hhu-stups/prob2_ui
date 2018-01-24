@@ -676,20 +676,22 @@
 }
 
 /* ================== HISTORY VIEW =================== */
-#past {
+.past {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: normal;
 }
 
-#present {
+.present {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: bold;
 }
 
-#future {
+.future {
 	-fx-font-family: ARIAL;
-	-fx-fill: -prob-grey-75;
 	-fx-font-style: italic;
+}
+.future .table-cell {
+	-fx-text-fill: -prob-grey-75;
 }
 
 /* =============== HISTORY CHART STAGE =============== */
