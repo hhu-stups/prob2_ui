@@ -20,7 +20,7 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -177,23 +177,26 @@ public class DotView extends Stage {
 			return;
 		}
 		ArrayList<IEvalElement> formulas = new ArrayList<>();
-		try {
-			if(item.getArity() > 0) {
-				formulas.add(new ClassicalB(tfFormula.getText()));
+		Thread thread = new Thread(() -> {
+			try {
+				if(item.getArity() > 0) {
+					formulas.add(new ClassicalB(tfFormula.getText()));
+				}
+				State id = currentTrace.getCurrentState();
+				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, FILE, formulas);
+				currentTrace.getStateSpace().execute(cmd);
+				loadGraph();
+			} catch (IOException | ProBError | EvaluationException e) {
+				LOGGER.error("Graph visualization failed", e);
+				Platform.runLater(() -> stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show());
 			}
-			State id = currentTrace.getCurrentState();
-			GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, FILE, formulas);
-			currentTrace.getStateSpace().execute(cmd);
-			loadGraph();
-		} catch (IOException | ProBError | EvaluationException e) {
-			LOGGER.error("Graph visualization failed", e);
-			stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
-		}
+		});
+		thread.start();
 	}
 	
 	private void loadGraph() throws IOException {
 		String content = new String(Files.readAllBytes(FILE.toPath()));
-		dotView.getEngine().loadContent("<center>" + content + "</center>");
+		Platform.runLater(() -> dotView.getEngine().loadContent("<center>" + content + "</center>"));
 	}
 
 }
