@@ -196,7 +196,7 @@ public class BInterpreter implements Executable {
 		final AbstractEvalResult res;
 		try {
 			res = trace.evalCurrent(formula);
-		} catch (ProBError e) {
+		} catch (EvaluationException | ProBError e) {
 			logger.info("B evaluation failed", e);
 			return new ConsoleExecResult("", e.getMessage(), ConsoleExecResultType.ERROR);
 		}
