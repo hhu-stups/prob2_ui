@@ -9,9 +9,7 @@ import com.google.inject.Provides;
 import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob.MainModule;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.consoles.b.BConsole;
@@ -26,6 +24,7 @@ import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.menu.ViewMenu;
 import de.prob2.ui.menu.VisualisationMenu;
+import de.prob2.ui.menu.WindowMenu;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.plugin.ProBPluginHelper;
 import de.prob2.ui.plugin.ProBPluginManager;
@@ -51,7 +50,6 @@ import de.prob2.ui.verifications.tracereplay.TraceReplayView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 import de.prob2.ui.visualisation.fx.VisualisationController;
-
 import javafx.fxml.FXMLLoader;
 
 public class ProB2Module extends AbstractModule {
@@ -93,6 +91,7 @@ public class ProB2Module extends AbstractModule {
 		bind(ViewMenu.class);
 		bind(HelpMenu.class);
 		bind(VisualisationMenu.class);
+		bind(WindowMenu.class);
 		bind(MachineTableView.class);
 		bind(ModelcheckingController.class);
 		bind(OperationsView.class);

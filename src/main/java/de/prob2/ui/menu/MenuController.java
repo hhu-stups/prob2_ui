@@ -1,5 +1,6 @@
 package de.prob2.ui.menu;
 
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import javax.annotation.Nullable;
@@ -73,9 +74,9 @@ public final class MenuController extends MenuBar {
 			zoomMenuItem.setOnAction(event -> StageUtils.getFocusedStage().ifPresent(stage -> stage.setMaximized(!stage.isMaximized())));
 
 			// Add Mac-style items to Window menu
-			windowMenu.getItems().addAll(menuToolkit.createMinimizeMenuItem(), zoomMenuItem,
-					menuToolkit.createCycleWindowsItem(), new SeparatorMenuItem(),
-					menuToolkit.createBringAllToFrontItem(), new SeparatorMenuItem());
+			windowMenu.getItems().addAll(0, Arrays.asList(menuToolkit.createMinimizeMenuItem(), zoomMenuItem,
+					menuToolkit.createCycleWindowsItem(), new SeparatorMenuItem()));
+			windowMenu.getItems().addAll(new SeparatorMenuItem(), menuToolkit.createBringAllToFrontItem(), new SeparatorMenuItem());
 			menuToolkit.autoAddWindowMenuItems(windowMenu);
 
 			// Make this the global menu bar

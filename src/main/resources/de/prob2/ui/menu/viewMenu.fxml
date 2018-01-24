@@ -12,18 +12,6 @@
 	<MenuItem fx:id="viewMenu_smaller" text="%menu.view.items.zoomOut"
 		accelerator="Alt+Shortcut+'-'" onAction="#handleDecreaseFontSize" />
 	<SeparatorMenuItem />
-	<Menu text="%menu.view.items.perspectives" fx:id="presetPerspectivesMenu">
-		<MenuItem text="%menu.view.items.perspectives.preset.default"
-			onAction="#handleLoadDefault" />
-		<MenuItem text="%menu.view.items.perspectives.preset.separated"
-			onAction="#handleLoadSeparated" />
-		<MenuItem text="%menu.view.items.perspectives.preset.separated2"
-			onAction="#handleLoadSeparated2" />
-		<SeparatorMenuItem />
-		<MenuItem text="%menu.view.items.perspectives.load" onAction="#handleLoadPerspective" />
-	</Menu>
-	<MenuItem text="%menu.view.items.detach" onAction="#handleLoadDetached" />
-	<SeparatorMenuItem />
 	<MenuItem fx:id="fullScreenMenuItem" text="%menu.view.items.enterFullScreen"
 		onAction="#handleFullScreen" accelerator="Shortcut+Ctrl+F" />
 </fx:root>

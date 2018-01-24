@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -15,15 +18,11 @@ import de.prob2.ui.consoles.groovy.GroovyInterpreter;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.DetachViewStageController;
-import de.prob2.ui.menu.ViewMenu;
+import de.prob2.ui.menu.WindowMenu;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.states.StatesView;
-
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class UIPersistence {
@@ -95,7 +94,7 @@ public final class UIPersistence {
 	}
 	
 	public void open() {
-		final ViewMenu perspectivesMenu = injector.getInstance(ViewMenu.class);
+		final WindowMenu windowMenu = injector.getInstance(WindowMenu.class);
 		final MainController main = injector.getInstance(MainController.class);
 		
 		for (final String id : new HashSet<>(uiState.getSavedVisibleStages())) {
@@ -105,7 +104,7 @@ public final class UIPersistence {
 		if (uiState.getGuiState().contains("detached")) {
 			injector.getInstance(DetachViewStageController.class).apply();
 		} else {
-			perspectivesMenu.loadPreset(uiState.getGuiState());
+			windowMenu.loadPreset(uiState.getGuiState());
 		}
 		
 		
