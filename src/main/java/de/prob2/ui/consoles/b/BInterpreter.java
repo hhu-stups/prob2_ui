@@ -1,6 +1,7 @@
 package de.prob2.ui.consoles.b;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
@@ -11,14 +12,9 @@ import com.google.inject.Inject;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
-import de.be4.classicalb.core.parser.exceptions.BParseException;
-import de.be4.classicalb.core.parser.exceptions.CheckException;
-import de.be4.classicalb.core.parser.exceptions.PreParseException;
 import de.be4.classicalb.core.parser.parser.ParserException;
 import de.be4.eventbalg.core.parser.EventBLexerException;
 import de.be4.eventbalg.core.parser.EventBParseException;
-
-import de.hhu.stups.sablecc.patch.SourcePosition;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ComputationNotCompletedResult;
@@ -96,25 +92,25 @@ public class BInterpreter implements Executable {
 	private ParseError getParseErrorFromException(final Exception e) {
 		if ((
 			e instanceof EvaluationException
-			|| e instanceof BException
+			|| (e instanceof BException && ((BException)e).getLocations().isEmpty())
 			|| e instanceof de.be4.eventbalg.core.parser.BException
 		) && e.getCause() instanceof Exception) {
 			// Check for known "wrapper exceptions" and look at their cause instead.
 			return this.getParseErrorFromException((Exception)e.getCause());
 		} else if (e instanceof BCompoundException && !((BCompoundException)e).getBExceptions().isEmpty()) {
 			return this.getParseErrorFromException(((BCompoundException)e).getBExceptions().get(0));
-		} else if (e instanceof PreParseException && ((PreParseException)e).getTokens().length > 0) {
-			final PreParseException ex = (PreParseException)e;
-			return new ParseError(ex.getTokens()[0].getLine(), ex.getTokens()[0].getPos(), e.getMessage());
+		} else if (e instanceof BException) {
+			final List<BException.Location> locations = ((BException)e).getLocations();
+			assert !locations.isEmpty();
+			final Matcher m = MESSAGE_WITH_POSITIONS_PATTERN.matcher(e.getMessage());
+			final String realMsg = m.find() ? m.group(3) : e.getMessage();
+			return new ParseError(locations.get(0).getStartLine(), locations.get(0).getStartColumn(), realMsg);
 		} else if (e instanceof BLexerException) {
 			final BLexerException ex = (BLexerException)e;
 			return new ParseError(ex.getLastLine(), ex.getLastPos(), e.getMessage());
 		} else if (e instanceof EventBLexerException) {
 			final EventBLexerException ex = (EventBLexerException)e;
 			return new ParseError(ex.getLastLine(), ex.getLastPos(), e.getMessage());
-		} else if (e instanceof BParseException) {
-			final BParseException ex = (BParseException)e;
-			return new ParseError(ex.getToken().getLine(), ex.getToken().getPos(), ex.getRealMsg());
 		} else if (e instanceof EventBParseException) {
 			final EventBParseException ex = (EventBParseException)e;
 			return new ParseError(ex.getToken().getLine(), ex.getToken().getPos(), e.getMessage());
@@ -129,10 +125,6 @@ public class BInterpreter implements Executable {
 			final de.be4.eventbalg.core.parser.parser.ParserException ex =
 				(de.be4.eventbalg.core.parser.parser.ParserException)e;
 			return new ParseError(ex.getToken().getLine(), ex.getToken().getPos(), ex.getRealMsg());
-		} else if (e instanceof CheckException && ((CheckException)e).getNodes().length > 0) {
-			final SourcePosition pos = ((CheckException)e).getNodes()[0].getStartPos();
-			return new ParseError(pos.getLine(), pos.getPos(), e.getMessage()
-			);
 		} else {
 			// The exception doesn't have any accessible position info.
 			// Look for SableCC-style position info in the error message and try to parse it.
@@ -204,7 +196,7 @@ public class BInterpreter implements Executable {
 		final AbstractEvalResult res;
 		try {
 			res = trace.evalCurrent(formula);
-		} catch (ProBError e) {
+		} catch (EvaluationException | ProBError e) {
 			logger.info("B evaluation failed", e);
 			return new ConsoleExecResult("", e.getMessage(), ConsoleExecResultType.ERROR);
 		}

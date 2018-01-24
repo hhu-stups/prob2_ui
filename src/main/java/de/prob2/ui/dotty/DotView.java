@@ -20,13 +20,14 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
@@ -61,7 +62,7 @@ public class DotView extends Stage {
 	private Label lbAvailable;
 	
 	@FXML
-	private Button visualizeButton;
+	private CheckBox cbContinuous;
 	
 	@FXML
 	private ScrollPane pane;
@@ -69,6 +70,7 @@ public class DotView extends Stage {
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.83;
+	private boolean stateChanged = false;
 	
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
@@ -123,14 +125,17 @@ public class DotView extends Stage {
 				return;
 			}
 			if(!to.isAvailable()) {
-				visualizeButton.setDisable(true);
-				lbAvailable.setText(bundle.getString("dotview.notavailable"));
+				lbAvailable.setText(String.join("\n", bundle.getString("dotview.notavailable"), to.getAvailable()));
 			} else {
-				visualizeButton.setDisable(false);
 				lbAvailable.setText("");
 			}
-			enterFormulaBox.setVisible(to.getArity() > 0);
+			boolean needFormula = to.getArity() > 0;
+			enterFormulaBox.setVisible(needFormula);
 			lbDescription.setText(to.getDescription());
+			if(!needFormula && (!stateChanged || cbContinuous.isSelected())) {
+				visualize(to);
+			}
+			stateChanged = false;
 		});
 		fillCommands();
 		currentTrace.currentStateProperty().addListener((observable, from, to) ->  {
@@ -140,6 +145,16 @@ public class DotView extends Stage {
 				return;
 			}
 			lvChoice.getSelectionModel().select(index);
+			stateChanged = true;
+		});
+		tfFormula.setOnKeyPressed(e -> {
+			if(e.getCode().equals(KeyCode.ENTER)) {
+				DotCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
+				if(item == null) {
+					return;
+				}
+				visualize(item);
+			}
 		});
 	}
 	
@@ -157,12 +172,13 @@ public class DotView extends Stage {
 		}
 	}
 	
-	@FXML
-	public void visualize() {
+	public void visualize(DotCommandItem item) {
+		if(!item.isAvailable()) {
+			return;
+		}
 		ArrayList<IEvalElement> formulas = new ArrayList<>();
-		try {
-			DotCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
-			if(item != null) {
+		Thread thread = new Thread(() -> {
+			try {
 				if(item.getArity() > 0) {
 					formulas.add(new ClassicalB(tfFormula.getText()));
 				}
@@ -170,16 +186,17 @@ public class DotView extends Stage {
 				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, FILE, formulas);
 				currentTrace.getStateSpace().execute(cmd);
 				loadGraph();
+			} catch (IOException | ProBError | EvaluationException e) {
+				LOGGER.error("Graph visualization failed", e);
+				Platform.runLater(() -> stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show());
 			}
-		} catch (IOException | ProBError | EvaluationException e) {
-			LOGGER.error("Graph visualization failed", e);
-			stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
-		}
+		});
+		thread.start();
 	}
 	
 	private void loadGraph() throws IOException {
 		String content = new String(Files.readAllBytes(FILE.toPath()));
-		dotView.getEngine().loadContent("<center>" + content + "</center>");
+		Platform.runLater(() -> dotView.getEngine().loadContent("<center>" + content + "</center>"));
 	}
 
 }
