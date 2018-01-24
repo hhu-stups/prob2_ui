@@ -32,6 +32,7 @@
 								     	<Label text="%dotview.enterFormula" HBox.hgrow="NEVER" />
 										<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
 								     </HBox>
+								     <CheckBox text="%dotview.continuousUpdate" fx:id="cbContinuous" HBox.hgrow="ALWAYS"/>
 							     </VBox>
 							</children>
 						</AnchorPane>

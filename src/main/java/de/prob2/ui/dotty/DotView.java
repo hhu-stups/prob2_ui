@@ -22,6 +22,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
@@ -61,11 +62,15 @@ public class DotView extends Stage {
 	private Label lbAvailable;
 	
 	@FXML
+	private CheckBox cbContinuous;
+	
+	@FXML
 	private ScrollPane pane;
 	
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.83;
+	private boolean stateChanged = false;
 	
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
@@ -120,16 +125,17 @@ public class DotView extends Stage {
 				return;
 			}
 			if(!to.isAvailable()) {
-				lbAvailable.setText(bundle.getString("dotview.notavailable"));
+				lbAvailable.setText(String.join("\n", bundle.getString("dotview.notavailable"), to.getAvailable()));
 			} else {
 				lbAvailable.setText("");
 			}
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
 			lbDescription.setText(to.getDescription());
-			if(!needFormula) {
+			if(!needFormula && (!stateChanged || cbContinuous.isSelected())) {
 				visualize(to);
 			}
+			stateChanged = false;
 		});
 		fillCommands();
 		currentTrace.currentStateProperty().addListener((observable, from, to) ->  {
@@ -139,6 +145,7 @@ public class DotView extends Stage {
 				return;
 			}
 			lvChoice.getSelectionModel().select(index);
+			stateChanged = true;
 		});
 		tfFormula.setOnKeyPressed(e -> {
 			if(e.getCode().equals(KeyCode.ENTER)) {
