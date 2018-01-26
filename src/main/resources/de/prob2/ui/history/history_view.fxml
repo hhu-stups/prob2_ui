@@ -39,15 +39,6 @@
 					</Button>
 				</HBox>
 				<HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
-					<ToggleButton fx:id="tbReverse" mnemonicParsing="false">
-						<graphic>
-							<FontAwesomeIconView styleClass="icon-dark"
-								glyphName="SORT" glyphSize="${fontSize.fontSize + 2}" />
-						</graphic>
-						<tooltip>
-							<Tooltip text="%history.buttons.reverse.tooltip" />
-						</tooltip>
-					</ToggleButton>
 					<Button fx:id="saveTraceButton" mnemonicParsing="false"
 						onAction="#saveTrace">
 						<graphic>
@@ -72,8 +63,11 @@
 				<columns>
 					<TableColumn fx:id="positionColumn" minWidth="${fontSize.fontSize * 6}"
 						maxWidth="${fontSize.fontSize * 6}" text="%history.tableView.position" />
-					<TableColumn fx:id="transitionColumn" text="%history.tableView.transition" />
+					<TableColumn fx:id="transitionColumn" text="%history.tableView.transition" sortable="false" />
 				</columns>
+				<sortOrder>
+					<fx:reference source="positionColumn" />
+				</sortOrder>
 				<placeholder>
 					<Label text="%common.noModelLoaded" />
 				</placeholder>

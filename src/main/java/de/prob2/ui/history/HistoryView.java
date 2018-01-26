@@ -1,7 +1,6 @@
 package de.prob2.ui.history;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -11,13 +10,16 @@ import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.tracereplay.TraceSaver;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableIntegerValue;
@@ -27,13 +29,23 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
 @Singleton
 public final class HistoryView extends AnchorPane {
-	private static class TransitionRow extends TableRow<HistoryItem> {
+	private final class TransitionRow extends TableRow<HistoryItem> {
+		private TransitionRow() {
+			super();
+			
+			this.setOnMouseClicked(event -> {
+				final Trace trace = currentTrace.get();
+				if (trace != null && MouseButton.PRIMARY.equals(event.getButton())) {
+					currentTrace.set(trace.gotoPosition(this.getItem().getIndex()));
+				}
+			});
+		}
+		
 		@Override
 		protected void updateItem(HistoryItem item, boolean empty) {
 			super.updateItem(item, empty);
@@ -64,8 +76,6 @@ public final class HistoryView extends AnchorPane {
 	@FXML
 	private TableColumn<HistoryItem, String> transitionColumn;
 	@FXML
-	private ToggleButton tbReverse;
-	@FXML
 	private Button btBack;
 	@FXML
 	private Button btForward;
@@ -93,7 +103,7 @@ public final class HistoryView extends AnchorPane {
 
 		historyTableView.setRowFactory(item -> new TransitionRow());
 		historyTableView.getSelectionModel().setCellSelectionEnabled(true);
-		positionColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
+		positionColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue().getIndex() + 1));
 		transitionColumn.setCellValueFactory(
 				cellData -> new SimpleStringProperty(transitionToString(cellData.getValue().getTransition())));
 
@@ -101,20 +111,14 @@ public final class HistoryView extends AnchorPane {
 			historyTableView.getItems().clear();
 			if (to != null) {
 				int currentPos = to.getCurrent().getIndex();
-				// System.out.println(currentPos);
 				historyTableView.getItems()
-						.add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST, 0));
-				// System.out.println(historyTableView.getItems().get(0).getStatus());
+						.add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST, -1));
 				List<Transition> transitionList = to.getTransitionList();
 				for (int i = 0; i < transitionList.size(); i++) {
-					int index = i + 1;
 					HistoryStatus status = getStatus(i, currentPos);
-					historyTableView.getItems().add(new HistoryItem(transitionList.get(i), status, index));
+					historyTableView.getItems().add(new HistoryItem(transitionList.get(i), status, i));
 				}
-			}
-
-			if (tbReverse.isSelected()) {
-				Collections.reverse(historyTableView.getItems());
+				historyTableView.sort();
 			}
 		};
 		traceChangeListener.changed(currentTrace, null, currentTrace.get());
@@ -123,15 +127,7 @@ public final class HistoryView extends AnchorPane {
 		btBack.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		btForward.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 
-		historyTableView.setOnMouseClicked(e -> {
-			if (currentTrace.exists()) {
-				currentTrace.set(currentTrace.get().gotoPosition(getCurrentIndex()));
-			}
-		});
-
 		historyTableView.setOnMouseMoved(e -> historyTableView.setCursor(Cursor.HAND));
-
-		tbReverse.setOnAction(e -> Collections.reverse(historyTableView.getItems()));
 
 		btBack.setOnAction(e -> {
 			if (currentTrace.exists()) {
@@ -168,16 +164,6 @@ public final class HistoryView extends AnchorPane {
 
 	public ObservableIntegerValue getObservableHistorySize() {
 		return Bindings.size(this.historyTableView.itemsProperty().get());
-	}
-
-	private int getCurrentIndex() {
-		int currentPos = historyTableView.getSelectionModel().getSelectedIndex();
-		int length = historyTableView.getItems().size();
-		if (tbReverse.isSelected()) {
-			return length - 2 - currentPos;
-		} else {
-			return currentPos - 1;
-		}
 	}
 
 	private HistoryStatus getStatus(int i, int currentPos) {
