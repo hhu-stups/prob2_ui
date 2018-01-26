@@ -2,9 +2,6 @@ package de.prob2.ui.menu;
 
 import java.util.ResourceBundle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
@@ -14,8 +11,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 
 public class ViewMenu extends Menu {
-	private static final Logger logger = LoggerFactory.getLogger(ViewMenu.class);
-
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final FontSize fontSize;

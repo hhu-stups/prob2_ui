@@ -10,12 +10,12 @@ import javafx.beans.property.SimpleIntegerProperty;
 public final class FontSize {
 	public static final int DEFAULT_FONT_SIZE = 13;
 	
-	private final IntegerProperty fontSize;
+	private final IntegerProperty size;
 	
 	@Inject
 	private FontSize() {
-		this.fontSize = new SimpleIntegerProperty(this, "fontSize", DEFAULT_FONT_SIZE);
-		this.fontSize.addListener((o, from, to) -> {
+		this.size = new SimpleIntegerProperty(this, "fontSize", DEFAULT_FONT_SIZE);
+		this.size.addListener((o, from, to) -> {
 			if (to.intValue() <= 1) {
 				this.setFontSize(2);
 			}
@@ -23,7 +23,7 @@ public final class FontSize {
 	}
 	
 	public IntegerProperty fontSizeProperty() {
-		return this.fontSize;
+		return this.size;
 	}
 	
 	public int getFontSize() {
