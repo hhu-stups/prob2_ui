@@ -27,6 +27,7 @@ import javafx.scene.layout.BorderPane;
 @Singleton
 public class MainController extends BorderPane {
 	@FXML private TitledPane historyTP;
+	@FXML private HistoryView historyView;
 	@FXML private TitledPane projectTP;
 	@FXML private ProjectView projectView;
 	@FXML private SplitPane horizontalSP;
@@ -63,9 +64,8 @@ public class MainController extends BorderPane {
 						}
 					});
 				}));
-		final ObservableIntegerValue size = this.injector.getInstance(HistoryView.class).getObservableHistorySize();
-		final ObservableValue<Number> current = this.injector.getInstance(HistoryView.class)
-				.getCurrentHistoryPositionProperty();
+		final ObservableIntegerValue size = historyView.getObservableHistorySize();
+		final ObservableValue<Number> current = historyView.getCurrentHistoryPositionProperty();
 		this.historyTP.textProperty()
 				.bind(Bindings.format(this.resourceBundle.getString("tptitles.historyWithSize"), size, current));
 

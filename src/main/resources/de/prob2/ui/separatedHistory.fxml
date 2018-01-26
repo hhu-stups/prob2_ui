@@ -37,7 +37,7 @@
 			<Accordion fx:id="rightAccordion" expandedPane="$historyTP">
 				<panes>
 					<TitledPane text="%tptitles.history" fx:id="historyTP" collapsible="false">
-						<HistoryView/>
+						<HistoryView fx:id="historyView"/>
 					</TitledPane>
 				</panes>
 			</Accordion>
