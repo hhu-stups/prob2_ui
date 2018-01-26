@@ -182,7 +182,7 @@ public class BInterpreter implements Executable {
 	@Override
 	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
 		final String source = instruction.getInstruction();
-		if ("clear".equals(source)) {
+		if (":clear".equals(source)) {
 			return new ConsoleExecResult("clear","", ConsoleExecResultType.PASSED);
 		}
 		final Trace trace = currentTrace.exists() ? currentTrace.get() : defaultTrace;
