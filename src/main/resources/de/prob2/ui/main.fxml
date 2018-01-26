@@ -38,7 +38,7 @@
 							<VerificationsView/>
 						</TitledPane>
 						<TitledPane text="%tptitles.project" id="projectTP" fx:id="projectTP">
-							<ProjectView/>
+							<ProjectView fx:id="projectView"/>
 						</TitledPane>
 					</panes>
 				</Accordion>

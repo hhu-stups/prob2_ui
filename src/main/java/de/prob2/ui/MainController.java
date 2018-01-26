@@ -11,7 +11,9 @@ import com.google.inject.Singleton;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
-
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.ProjectView;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableValue;
@@ -25,15 +27,17 @@ import javafx.scene.layout.BorderPane;
 @Singleton
 public class MainController extends BorderPane {
 	@FXML private TitledPane historyTP;
+	@FXML private TitledPane projectTP;
+	@FXML private ProjectView projectView;
 	@FXML private SplitPane horizontalSP;
 	@FXML private SplitPane verticalSP;
 	@FXML private ObservableList<Accordion> accordions;
-	
+
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final UIState uiState;
 	private final ResourceBundle resourceBundle;
-	
+
 	@Inject
 	public MainController(Injector injector, StageManager stageManager, UIState uiState, ResourceBundle resourceBundle) {
 		this.injector = injector;
@@ -43,6 +47,36 @@ public class MainController extends BorderPane {
 		refresh();
 	}
 
+	@FXML
+	private void initialize() {
+		accordions.forEach(
+				acc -> acc.getPanes().stream().filter(tp -> tp != null && tp.getContent() != null).forEach(tp -> {
+					tp.getContent().setVisible(true);
+					tp.setOnMouseClicked(event -> {
+						if (tp.isExpanded()) {
+							for (TitledPane pane : acc.getPanes()) {
+								uiState.getExpandedTitledPanes().remove(pane.getId());
+							}
+							uiState.getExpandedTitledPanes().add(tp.getId());
+						} else {
+							uiState.getExpandedTitledPanes().remove(tp.getId());
+						}
+					});
+				}));
+		final ObservableIntegerValue size = this.injector.getInstance(HistoryView.class).getObservableHistorySize();
+		final ObservableValue<Number> current = this.injector.getInstance(HistoryView.class)
+				.getCurrentHistoryPositionProperty();
+		this.historyTP.textProperty()
+				.bind(Bindings.format(this.resourceBundle.getString("tptitles.historyWithSize"), size, current));
+
+		Platform.runLater(() -> injector.getInstance(CurrentProject.class).addListener((observable, from, to) -> {
+			if (to != null) {
+				projectTP.setExpanded(true);
+				projectView.showMachines();
+			}
+		}));
+	}
+
 	public void refresh() {
 		String guiState = "main.fxml";
 		if (!uiState.getGuiState().contains("detached")) {
@@ -50,52 +84,27 @@ public class MainController extends BorderPane {
 		}
 		stageManager.loadFXML(this, guiState);
 	}
-	
-	
-	@FXML
-	private void initialize() {
-		accordions.forEach(acc ->
-			acc.getPanes().stream()
-			.filter(tp -> tp != null && tp.getContent() != null)
-			.forEach(tp -> {
-				tp.getContent().setVisible(true);
-				tp.setOnMouseClicked(event -> {
-					if (tp.isExpanded()) {
-						for(TitledPane pane : acc.getPanes()) {
-							uiState.getExpandedTitledPanes().remove(pane.getId());
-						}
-						uiState.getExpandedTitledPanes().add(tp.getId());
-					} else {
-						uiState.getExpandedTitledPanes().remove(tp.getId());
-					}
-				});
-			})
-		);
-		final ObservableIntegerValue size = this.injector.getInstance(HistoryView.class).getObservableHistorySize();
-		final ObservableValue<Number> current = this.injector.getInstance(HistoryView.class).getCurrentHistoryPositionProperty();
-		this.historyTP.textProperty().bind(Bindings.format(this.resourceBundle.getString("tptitles.historyWithSize"), size, current));
-	}
 
 	public double[] getHorizontalDividerPositions() {
 		if (horizontalSP != null) {
 			return horizontalSP.getDividerPositions();
 		}
-		return new double[]{};
+		return new double[] {};
 	}
-	
+
 	public double[] getVerticalDividerPositions() {
 		if (verticalSP != null) {
 			return verticalSP.getDividerPositions();
 		}
-		return new double[]{};
+		return new double[] {};
 	}
-	
-	public void setHorizontalDividerPositions(double [] pos) {
+
+	public void setHorizontalDividerPositions(double[] pos) {
 		if (horizontalSP != null) {
 			horizontalSP.setDividerPositions(pos);
 		}
 	}
-	
+
 	public void setVerticalDividerPositions(double[] pos) {
 		if (verticalSP != null) {
 			verticalSP.setDividerPositions(pos);

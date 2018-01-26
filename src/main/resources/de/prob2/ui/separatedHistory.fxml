@@ -29,7 +29,7 @@
 						<StatsView/>
 					</TitledPane>
 					<TitledPane text="%tptitles.project" fx:id="projectTP">
-						<ProjectView/>
+						<ProjectView fx:id="projectView"/>
 					</TitledPane>
 				</panes>
 			</Accordion>
