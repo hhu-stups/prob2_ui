@@ -1,7 +1,11 @@
 package de.prob2.ui.consoles.groovy;
 
+import javax.script.ScriptEngine;
+
 import com.google.inject.Inject;
+
 import de.prob.scripting.ScriptEngineProvider;
+
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.ConsoleInstruction;
@@ -10,10 +14,9 @@ import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.internal.StageManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.script.ScriptEngine;
 
 public final class GroovyInterpreter implements Executable {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyInterpreter.class);
@@ -35,7 +38,7 @@ public final class GroovyInterpreter implements Executable {
 			groovyObjectStage.showObjects(engine);
 			return new ConsoleExecResult("", "", ConsoleExecResultType.PASSED);
 		} else if ("clear".equals(instruction.getInstruction())) {
-			return new ConsoleExecResult("clear","", ConsoleExecResultType.PASSED);
+			return new ConsoleExecResult("","", ConsoleExecResultType.CLEAR);
 		} else {
 			StringBuilder console = new StringBuilder();
 			engine.put("__console", console);

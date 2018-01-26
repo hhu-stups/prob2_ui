@@ -218,7 +218,7 @@ public abstract class Console extends StyleClassedTextArea {
 			posInList = instructions.size() - 1;
 			ConsoleInstruction instruction = instructions.get(posInList);
 			ConsoleExecResult execResult = interpreter.exec(instruction);
-			if ("clear".equals(execResult.getConsoleOutput())) {
+			if (execResult.getResultType() == ConsoleExecResultType.CLEAR) {
 				reset();
 				return;
 			}
