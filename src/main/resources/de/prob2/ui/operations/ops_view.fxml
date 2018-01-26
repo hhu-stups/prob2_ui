@@ -72,7 +72,7 @@
 									glyphName="SORT" glyphSize="${fontSize.fontSize + 2}"/>
 							</graphic>
 							<tooltip>
-								<Tooltip text="%history.buttons.reverse.tooltip" />
+								<Tooltip text="%operations.sort.tooltip" />
 							</tooltip>
 						</Button>
 						<ToggleButton fx:id="disabledOpsToggle"
