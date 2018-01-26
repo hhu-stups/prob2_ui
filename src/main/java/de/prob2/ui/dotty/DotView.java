@@ -190,7 +190,7 @@ public class DotView extends Stage {
 				LOGGER.error("Graph visualization failed", e);
 				Platform.runLater(() -> stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show());
 			}
-		});
+		}, "Graph Visualizer");
 		thread.start();
 	}
 	
