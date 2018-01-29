@@ -25,6 +25,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -288,7 +289,16 @@ public class ProBPluginManager {
 		} else {
 			PluginWrapper pluginWrapper = pluginManager.getPlugin(loadedPluginId);
 			if (pluginWrapper.getPlugin() instanceof InvalidPlugin) {
-				throw new PluginException("Could not create an instance of the plugin '" + pluginFileName + "'.");
+				InvalidPlugin invPlug = (InvalidPlugin) pluginWrapper.getPlugin();
+				Alert alert;
+				if (invPlug.getException() != null) {
+					alert = stageManager.makeExceptionAlert(invPlug.getMessage(), invPlug.getException());
+				} else {
+					alert = stageManager.makeAlert(Alert.AlertType.WARNING, invPlug.getMessage(), ButtonType.OK);
+				}
+				alert.initOwner(stageManager.getCurrent());
+				alert.initModality(Modality.APPLICATION_MODAL);
+				alert.show();
 			}
 			//because we don't use the enabled/disabled.txt of PF4J, the only reason for a
 			//plugin to be disabled is, when it has the wrong version
@@ -434,7 +444,9 @@ public class ProBPluginManager {
 					pluginClass = pluginWrapper.getPluginClassLoader().loadClass(pluginClassName);
 				} catch (ClassNotFoundException e) {
 					LOGGER.error(e.getMessage(), e);
-					return new InvalidPlugin(pluginWrapper);
+					return new InvalidPlugin(pluginWrapper,
+							String.format(bundle.getString("plugin.load.error.find"), pluginClassName),
+							e);
 				}
 
 				// once we have the clazz, we can do some checks on it to ensure
@@ -443,7 +455,8 @@ public class ProBPluginManager {
 				if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)
 						|| (!ProBPlugin.class.isAssignableFrom(pluginClass))) {
 					LOGGER.error("The plugin clazz '{}' is not a valid ProBPlugin", pluginClassName);
-					return new InvalidPlugin(pluginWrapper);
+					return new InvalidPlugin(pluginWrapper,
+							String.format(bundle.getString("plugin.load.error.modifier"), pluginClassName));
 				}
 
 				// create the ProBPlugin instance
@@ -453,8 +466,11 @@ public class ProBPluginManager {
 					return (ProBPlugin) constructor.newInstance(pluginWrapper, ProBPluginManager.this, proBPluginHelper);
 				} catch (Exception e) {
 					LOGGER.error(e.getMessage(), e);
+					return new InvalidPlugin(pluginWrapper,
+							String.format(bundle.getString("plugin.load.error.create"), pluginClassName),
+							e);
+
 				}
-				return new InvalidPlugin(pluginWrapper);
 			};
 		}
 
@@ -488,28 +504,6 @@ public class ProBPluginManager {
 				}
 			}
 			return null;
-		}
-	}
-
-	public class InvalidPlugin extends ProBPlugin {
-
-		public InvalidPlugin(PluginWrapper wrapper) {
-			super(wrapper, null, null);
-		}
-
-		@Override
-		public String getName() {
-			return "InvalidPlugin";
-		}
-
-		@Override
-		public void startPlugin() {
-
-		}
-
-		@Override
-		public void stopPlugin() {
-
 		}
 	}
 }
