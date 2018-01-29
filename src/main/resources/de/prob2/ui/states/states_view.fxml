@@ -15,7 +15,7 @@
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import de.prob2.ui.consoles.b.BConsoleView?>
 <fx:root type="StatesView" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
@@ -49,10 +49,6 @@
 				<TreeItem fx:id="tvRootItem" expanded="true" />
 			</TreeTableView>
 		</VBox>
-		<VirtualizedScrollPane>
-			<content>
-				<BConsole/>
-			</content>
-		</VirtualizedScrollPane>
+		<BConsoleView/>
 	</SplitPane>
 </fx:root>

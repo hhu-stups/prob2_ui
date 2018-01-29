@@ -197,7 +197,7 @@ public abstract class Console extends StyleClassedTextArea {
 		currentPosInLine = charCounterInLine;
 	}
 	
-	protected void reset() {
+	public void reset() {
 		this.errors.clear();
 		this.replaceText(header + '\n' + prompt);
 	}

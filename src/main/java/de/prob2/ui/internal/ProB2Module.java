@@ -13,6 +13,7 @@ import de.prob.MainModule;
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.consoles.b.BConsole;
+import de.prob2.ui.consoles.b.BConsoleView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.layout.FontSize;
@@ -78,6 +79,7 @@ public class ProB2Module extends AbstractModule {
 		
 		// Controllers
 		bind(BConsole.class);
+		bind(BConsoleView.class);
 		bind(HistoryView.class);
 		bind(MainController.class);
 		bind(LTLFormulaChecker.class);
