@@ -10,19 +10,15 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 
 public enum MenuEnum {
-	//TODO adapt to new menus
 	FILE_MENU("fileMenu"),
-	RECENT_PROJECTS_MENU("recentProjectsMenu"),
-	EDIT_MENU("editMenu"),
-	FORMULA_MENU("formulaMenu"),
-	CONSOLES_MENU("consolesMenu"),
-	PERSPECTIVES_MENU("perspectivesMenu"),
-	PRESET_PERSPECTIVES_MENU("presetPerspectivesMenu"),
 	VIEW_MENU("viewMenu"),
-	PLUGIN_MENU("pluginMenu"),
-	PLUGINS_STOP_MENU("pluginsStopMenu"),
+	VISUALISATION_MENU("visualisationMenu"),
+	ADVANCED_MENU("pluginMenu"),
 	WINDOW_MENU("windowMenu"),
-	HELP_MENU("helpMenu");
+	HELP_MENU("helpMenu"),
+	VISUALISATION_FX_MENU("visualisationFxMenu"),
+	RECENT_PROJECTS_MENU("recentProjectsMenu"),
+	PRESET_PERSPECTIVES_MENU("presetPerspectivesMenu");
 
 	private final String id;
 
