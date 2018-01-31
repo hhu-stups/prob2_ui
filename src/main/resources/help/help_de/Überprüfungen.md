@@ -5,7 +5,7 @@ Die Überprüfungsansicht liefert 4 verschiedene Methoden eine Maschine zu teste
 * Model-Checking,
 * LTL-Überprüfung,
 * Symbolic Checking und
-* Trace nachspielen
+* Pfad nachspielen
 
 In jedem Tab kann man multiple Tests hizufügen um die derzeitig ausgewählte Mschine zu testen und den Überprüfungsprozess durch Drücken des "Abbrechen"-Buttons unterbrechen.
 
@@ -35,8 +35,8 @@ Durch Drücken des Plus-Knopfes kann man verschiedene Symbolic Checking-Variante
 
 Das Dropdown-Menü erlaubt es den Typ des Tests auszuwählen. Einige Varianten des Symbolic Checkings verlangen nach zusätzlichen Parametern (z.B. braucht Invariant eine Operation).
 
-## Trace nachspielen
+## Pfad nachspielen
 
-![Trace nachspielen](../screenshots/Verifications/Trace%20Replay.png)
+![Pfad nachspielen](../screenshots/Verifications/Trace%20Replay.png)
 
-Der "Trace nachspielen"-Tab erlaubt es eine Trace von der Festplatte zu laden und dann von der Maschine nachspielen zu lassen. 
+Der "Pfad nachspielen"-Tab erlaubt es eine Trace von der Festplatte zu laden und dann von der Maschine nachspielen zu lassen. 
