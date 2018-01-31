@@ -21,7 +21,7 @@ The menu bar contains the various commands to access the features of ProB. It in
 * File,
 * View,
 * Visualisation,
-* Advanced Options,
+* Advanced,
 * Window and
 * Help
 
@@ -31,15 +31,19 @@ The File submenu allows you to create a new Project, open an existing project or
 
 ![View Menu](../screenshots/Menu/View.png)
 
-This submenu allows you to adjust font and button size in the ProB2 JavaFX UI, change perspectives, detach components or enter full screen mode. This UI comes with 3 different preset perspectives. It allows you to use your own perspective as well by providing a FXML file containing the views but be aware that this might ruin the ability to detach components.
+This submenu allows you to adjust font and button size in the ProB2 JavaFX UI or enter full screen mode.
 
 ![Visualisation Menu](../screenshots/Menu/Visualisation.png)
 
 The Visualisation submenu provides different forms of visualisation. You can enter a formula, view the history chart or take a look at the graph visualisation.
 
-![Advanced Options Menu](../screenshots/Menu/Advanced.png)
+![Advanced Menu](../screenshots/Menu/Advanced.png)
 
 This submenu provides a Groovy console and allows you to manage your plugins and own visualisations.
+
+![Window Menu](../screenshots/Menu/Window.png)
+
+The Window submenu allows you to change perspectives and detach components. This UI comes with 3 different preset perspectives. It allows you to use your own perspective as well by providing a FXML file containing the views but be aware that this might ruin the ability to detach components.
 
 ![Help Menu](../screenshots/Menu/Help.png)
 
