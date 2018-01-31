@@ -128,9 +128,7 @@ public class Machine {
 		initializeLTLStatus();
 		initializeSymbolicCheckingStatus();
 		initializeModelcheckingStatus();
-		for(SymbolicCheckingFormulaItem item : symbolicCheckingFormulas) {
-			item.initializeCounterExamples();
-		}
+		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeCounterExamples);
 	}
 	
 	public BooleanProperty changedProperty() {
@@ -159,14 +157,10 @@ public class Machine {
 		this.ltlstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.ltlstatus.setFill(Color.BLUE);
 		if (ltlFormulas != null) {
-			for (LTLFormulaItem item : ltlFormulas) {
-				item.initializeStatus();
-			}
+			ltlFormulas.forEach(LTLFormulaItem::initializeStatus);
 		}
 		if (ltlPatterns != null) {
-			for (LTLPatternItem item : ltlPatterns) {
-				item.initializeStatus();
-			}
+			ltlPatterns.forEach(LTLPatternItem::initializeStatus);
 		}
 		patternManager = new PatternManager();
 	}
@@ -175,9 +169,7 @@ public class Machine {
 		this.symboliccheckingstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.symboliccheckingstatus.setFill(Color.BLUE);
 		if (symbolicCheckingFormulas != null) {
-			for (SymbolicCheckingFormulaItem item : symbolicCheckingFormulas) {
-				item.initializeStatus();
-			}
+			symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeStatus);
 		}
 	}
 	
@@ -185,9 +177,7 @@ public class Machine {
 		this.modelcheckstatus = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.modelcheckstatus.setFill(Color.BLUE);
 		if (modelcheckingItems != null) {
-			for (ModelCheckingItem item : modelcheckingItems) {
-				item.initializeStatus();
-			}
+			modelcheckingItems.forEach(ModelCheckingItem::initializeStatus);
 		}
 	}
 	

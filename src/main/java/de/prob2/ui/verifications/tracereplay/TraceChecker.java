@@ -145,9 +145,7 @@ public class TraceChecker {
 	private void updateReplayTraces(Machine machine) {
 		replayTraces.clear();
 		if (machine != null) {
-			for (File traceFile : machine.getTraceFiles()) {
-				addTrace(traceFile);
-			}
+			machine.getTraceFiles().forEach(this::addTrace);
 			machine.getTraceFiles().addListener((SetChangeListener<File>) c -> {
 				if (c.wasAdded()) {
 					addTrace(c.getElementAdded());

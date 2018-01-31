@@ -168,9 +168,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public void initializeMachines() {
-		for (Machine machine : machines) {
-			machine.resetStatus();
-		}
+		machines.forEach(Machine::resetStatus);
 	}
 
 	public void changeName(String newName) {

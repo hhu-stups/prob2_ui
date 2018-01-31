@@ -108,9 +108,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 					symbolicCheckingFormulaHandler.handleSequence(tfFormula.getText()); 
 					break;
 				case CHECK_ALL_OPERATIONS:
-					for(String event : events) {
-						symbolicCheckingFormulaHandler.handleInvariant(event);
-					}
+					events.forEach(symbolicCheckingFormulaHandler::handleInvariant);
 					break;
 				case FIND_DEADLOCK: 
 					symbolicCheckingFormulaHandler.findDeadlock(); 

@@ -161,17 +161,13 @@ public class ProjectManager {
 		List<Machine> machineList = new ArrayList<>();
 		if (project.getMachines() != null) {
 			machineList = project.getMachines();
-			for (Machine machine : machineList) {
-				machine.replaceMissingWithDefaults();
-			}
+			machineList.forEach(Machine::replaceMissingWithDefaults);
 		}
 		project.setMachines(machineList);
 		List<Preference> prefList = new ArrayList<>();
 		if (project.getPreferences() != null) {
 			prefList = project.getPreferences();
-			for (Preference pref : prefList) {
-				pref.replaceMissingWithDefaults();
-			}
+			prefList.forEach(Preference::replaceMissingWithDefaults);
 		}
 		project.setPreferences(prefList);
 	}
