@@ -46,6 +46,8 @@ public class MachinesTab extends Tab {
 	private final ResourceBundle bundle;
 	private final Injector injector;
 
+	private MachinesItem currentMachinesItem;
+
 	@Inject
 	private MachinesTab(final StageManager stageManager, final ResourceBundle bundle,
 			final CurrentProject currentProject, final Injector injector) {
@@ -116,17 +118,26 @@ public class MachinesTab extends Tab {
 						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 						currentProject.startAnimation(machine, machine.getLastUsed());
-						resetMachineIcons();
-						machinesItem.setRunning();
+						currentMachinesItem = machinesItem;
+						refreshMachineIcons();
 					}
 				});
 			}
+			if(machinesVBox.getChildren().size() == 1){
+				currentMachinesItem = ((MachinesItem) machinesVBox.getChildren().get(0));
+			}
+			refreshMachineIcons();
 		});
 	}
 
-	private void resetMachineIcons(){
+	private void refreshMachineIcons(){
 		for(Node machinesItem :  machinesVBox.getChildren()){
 			((MachinesItem) machinesItem).setNotRunning();
+			if(currentProject.getCurrentMachine() != null &&
+					((MachinesItem) machinesItem).getMachine().getName()
+							.equals(currentProject.getCurrentMachine().getName())){
+				((MachinesItem) machinesItem).setRunning();
+			}
 		}
 	}
 
@@ -137,8 +148,8 @@ public class MachinesTab extends Tab {
 		defItem.setOnAction(e -> {
 			currentProject.startAnimation(machine, Preference.DEFAULT);
 			machine.setLastUsed(Preference.DEFAULT);
-			resetMachineIcons();
-			machinesItem.setRunning();
+			currentMachinesItem = machinesItem;
+			refreshMachineIcons();
 		});
 		startAnimationMenu.getItems().add(defItem);
 
@@ -150,8 +161,8 @@ public class MachinesTab extends Tab {
 			item.setOnAction(e -> {
 				currentProject.startAnimation(machine, preference);
 				machine.setLastUsed(preference);
-				resetMachineIcons();
-				machinesItem.setRunning();
+				currentMachinesItem = machinesItem;
+				refreshMachineIcons();
 			});
 			startAnimationMenu.getItems().add(item);
 		}
@@ -177,7 +188,6 @@ public class MachinesTab extends Tab {
 					.showAndWait();
 			return;
 		}
-
 		final Set<String> machineNamesSet = currentProject.getMachines().stream().map(Machine::getName)
 				.collect(Collectors.toSet());
 		String[] n = relative.toFile().getName().split("\\.");
@@ -188,6 +198,7 @@ public class MachinesTab extends Tab {
 			i++;
 		}
 		currentProject.addMachine(new Machine(name, "", relative));
+		refreshMachineIcons();
 	}
 
 	private void showMachineView(MachinesItem machinesItem) {
