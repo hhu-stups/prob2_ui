@@ -9,29 +9,25 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.statespace.StateSpace;
-
 import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
-
 import javafx.concurrent.Worker;
 import javafx.scene.control.Alert;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EditPreferencesProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EditPreferencesProvider.class);
 
-	private final CurrentProject currentProject;
 	private final Injector injector;
 	private final MachineLoader machineLoader;
 	private final GlobalPreferences globalPreferences;
@@ -39,9 +35,8 @@ public class EditPreferencesProvider {
 	private final ResourceBundle bundle;
 
 	@Inject
-	private EditPreferencesProvider(final StageManager stageManager, final CurrentProject currentProject, final Injector injector,
+	private EditPreferencesProvider(final StageManager stageManager, final Injector injector,
 									final MachineLoader machineLoader, final GlobalPreferences globalPreferences, final ResourceBundle bundle) {
-		this.currentProject = currentProject;
 		this.injector = injector;
 		this.machineLoader = machineLoader;
 		this.globalPreferences = globalPreferences;

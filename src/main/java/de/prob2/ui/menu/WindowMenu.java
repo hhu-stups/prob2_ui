@@ -49,10 +49,6 @@ public class WindowMenu extends Menu {
 	}
 
 	@FXML
-	public void initialize() {
-	}
-
-	@FXML
 	private void handleLoadDefault() {
 		reset();
 		loadPreset("main.fxml");
