@@ -49,12 +49,13 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	protected Console(ResourceBundle bundle, String header, Executable interpreter) {
 		this.bundle = bundle;
-		this.header = header;
-		this.prompt = bundle.getString("consoles.prompt.default");
 		this.instructions = new ArrayList<>();
+		this.searchHandler = new ConsoleSearchHandler(this, bundle);
 		this.errors = new ArrayList<>();
 		this.interpreter = interpreter;
-		this.searchHandler = new ConsoleSearchHandler(this, bundle);
+		this.header = header;
+		this.prompt = bundle.getString("consoles.prompt.default");
+		
 		this.requestFollowCaret();
 		setEvents();
 		setDragDrop();
