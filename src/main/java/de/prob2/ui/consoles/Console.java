@@ -44,8 +44,8 @@ public abstract class Console extends StyleClassedTextArea {
 	protected ConsoleSearchHandler searchHandler;
 	protected List<IndexRange> errors;
 	protected Executable interpreter;
-	protected String header;
-	protected String prompt;
+	private final String header;
+	private final String prompt;
 	
 	protected Console(ResourceBundle bundle, String header) {
 		this.bundle = bundle;
