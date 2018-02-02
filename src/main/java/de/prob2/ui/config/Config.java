@@ -14,6 +14,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +30,6 @@ import com.google.inject.Singleton;
 import de.prob.Main;
 
 import de.prob2.ui.MainController;
-import de.prob2.ui.config.FileChooserManager.FileChooserInitialDirectories;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.groovy.GroovyConsole;
@@ -89,7 +89,7 @@ public final class Config {
 		boolean operationsShowNotEnabled;
 		Map<String, String> globalPreferences;
 		private String pluginDirectory;
-		private FileChooserInitialDirectories fileChooserInitialDirectories;
+		private Map<FileChooserManager.Kind, File> fileChooserInitialDirectories;
 		
 		
 		private ConfigData() {}
@@ -247,6 +247,13 @@ public final class Config {
 		if (configData.globalPreferences == null) {
 			configData.globalPreferences = new HashMap<>();
 		}
+
+		if (configData.fileChooserInitialDirectories == null) {
+			configData.fileChooserInitialDirectories = new EnumMap<>(FileChooserManager.Kind.class);
+		}
+		// Gson represents unknown kinds (from older or newer configs) as null.
+		// We simply remove them here, because there's nothing meaningful we can do with them.
+		configData.fileChooserInitialDirectories.remove(null);
 	}
 
 	public void load() {
@@ -317,7 +324,8 @@ public final class Config {
 		this.globalPreferences.putAll(configData.globalPreferences);
 
 		this.proBPluginManager.setPluginDirectory(configData.pluginDirectory);
-		this.fileChooserManager.setInitialDirectories(configData.fileChooserInitialDirectories);
+		this.fileChooserManager.getInitialDirectories().clear();
+		this.fileChooserManager.getInitialDirectories().putAll(configData.fileChooserInitialDirectories);
 		
 		this.injector.getInstance(FontSize.class).setFontSize(configData.fontSize);
 		
@@ -369,7 +377,7 @@ public final class Config {
 		configData.globalPreferences = new HashMap<>(this.globalPreferences);
 
 		configData.pluginDirectory = proBPluginManager.getPluginDirectory().getAbsolutePath();
-		configData.fileChooserInitialDirectories = fileChooserManager.getFileChooserInitialDirectories();
+		configData.fileChooserInitialDirectories = new EnumMap<>(fileChooserManager.getInitialDirectories());
 
 		try (
 			final OutputStream os = new FileOutputStream(LOCATION);
