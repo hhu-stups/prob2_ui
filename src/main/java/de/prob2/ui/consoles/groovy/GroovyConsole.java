@@ -20,11 +20,13 @@ import org.fxmisc.wellbehaved.event.Nodes;
 
 @Singleton
 public class GroovyConsole extends Console {
+	private final GroovyInterpreter groovyInterpreter;
+	
 	@Inject
-	private GroovyConsole(GroovyInterpreter interpreter, ResourceBundle bundle) {
-		super(bundle, bundle.getString("consoles.groovy.header"));
-		this.interpreter = interpreter;
-		interpreter.setCodeCompletion(this);
+	private GroovyConsole(GroovyInterpreter groovyInterpreter, ResourceBundle bundle) {
+		super(bundle, bundle.getString("consoles.groovy.header"), groovyInterpreter);
+		this.groovyInterpreter = groovyInterpreter;
+		this.groovyInterpreter.setCodeCompletion(this);
 		setCodeCompletionEvent();
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
 	}
@@ -40,12 +42,12 @@ public class GroovyConsole extends Console {
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
 		if (getCaretPosition() > this.getText().lastIndexOf('\n') + 2) {
 			int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
-			((GroovyInterpreter) interpreter).triggerCodeCompletion(getCurrentLine().substring(0, caretPosInLine), action);
+			groovyInterpreter.triggerCodeCompletion(getCurrentLine().substring(0, caretPosInLine), action);
 		}
 	}
 	
 	private void setCodeCompletionEvent() {
-		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> ((GroovyInterpreter) interpreter).triggerCloseCodeCompletion());
+		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> groovyInterpreter.triggerCloseCodeCompletion());
 		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, this::handleCodeCompletionEvent);
 	}
 	
@@ -89,7 +91,7 @@ public class GroovyConsole extends Console {
 	}
 	
 	public void closeObjectStage() {
-		((GroovyInterpreter) interpreter).closeObjectStage();
+		groovyInterpreter.closeObjectStage();
 	}
 
 

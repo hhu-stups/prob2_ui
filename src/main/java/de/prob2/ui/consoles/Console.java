@@ -43,16 +43,17 @@ public abstract class Console extends StyleClassedTextArea {
 	protected int posInList = -1;
 	protected ConsoleSearchHandler searchHandler;
 	protected List<IndexRange> errors;
-	protected Executable interpreter;
+	private final Executable interpreter;
 	private final String header;
 	private final String prompt;
 	
-	protected Console(ResourceBundle bundle, String header) {
+	protected Console(ResourceBundle bundle, String header, Executable interpreter) {
 		this.bundle = bundle;
 		this.header = header;
 		this.prompt = bundle.getString("consoles.prompt.default");
 		this.instructions = new ArrayList<>();
 		this.errors = new ArrayList<>();
+		this.interpreter = interpreter;
 		this.searchHandler = new ConsoleSearchHandler(this, bundle);
 		this.requestFollowCaret();
 		setEvents();
