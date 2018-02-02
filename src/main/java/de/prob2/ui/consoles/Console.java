@@ -29,10 +29,6 @@ public abstract class Console extends StyleClassedTextArea {
 		private List<int[]> errorRanges;
 		
 		protected ConfigData() {}
-		
-		public String getText() {
-			return text;
-		}
 	}
 	
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
