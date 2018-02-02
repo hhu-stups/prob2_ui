@@ -42,7 +42,7 @@ public abstract class Console extends StyleClassedTextArea {
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
 	protected ConsoleSearchHandler searchHandler;
-	protected List<IndexRange> errors;
+	private final List<IndexRange> errors;
 	private final Executable interpreter;
 	private final String header;
 	private final String prompt;
@@ -396,7 +396,7 @@ public abstract class Console extends StyleClassedTextArea {
 		charCounterInLine = settings.charCounterInLine;
 		currentPosInLine = settings.currentPosInLine;
 		this.moveTo(settings.caretPosition);
-		errors = new ArrayList<>();
+		errors.clear();
 		for (final int[] range : settings.errorRanges) {
 			errors.add(new IndexRange(range[0], range[1]));
 			this.setStyleClass(range[0], range[1], "error");
