@@ -34,7 +34,7 @@ public abstract class Console extends StyleClassedTextArea {
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
 	
 	private final ResourceBundle bundle;
-	protected List<ConsoleInstruction> instructions;
+	private final List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
@@ -352,11 +352,11 @@ public abstract class Console extends StyleClassedTextArea {
 			return;
 		}
 		
-		instructions = new ArrayList<>();
+		instructions.clear();
 		for (final String instruction : settings.instructions) {
 			instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
-			posInList++;
 		}
+		posInList = instructions.size();
 		this.replaceText(settings.text);
 		charCounterInLine = settings.charCounterInLine;
 		currentPosInLine = settings.currentPosInLine;
