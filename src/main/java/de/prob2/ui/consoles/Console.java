@@ -41,7 +41,7 @@ public abstract class Console extends StyleClassedTextArea {
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
-	protected ConsoleSearchHandler searchHandler;
+	private final ConsoleSearchHandler searchHandler;
 	private final List<IndexRange> errors;
 	private final Executable interpreter;
 	private final String header;
