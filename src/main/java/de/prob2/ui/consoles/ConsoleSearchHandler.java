@@ -7,11 +7,11 @@ import java.util.ResourceBundle;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-public class ConsoleSearchHandler {
+public final class ConsoleSearchHandler {
 	
-	protected boolean searchActive = false;
-	protected List<SearchResult> searchResults;
-	protected int currentSearchIndex = 0;
+	private boolean searchActive = false;
+	private final List<SearchResult> searchResults;
+	private int currentSearchIndex = 0;
 	private final Console parent;
 	private final ResourceBundle bundle;
 	
@@ -39,7 +39,7 @@ public class ConsoleSearchHandler {
 		searchActive = false;
 	}
 	
-	protected void searchResult(KeyEvent e) {
+	private void searchResult(KeyEvent e) {
 		searchResults.clear();
 		String key = getSearchCurrent();
 		if (e.getCode() == KeyCode.BACK_SPACE) {
@@ -68,7 +68,7 @@ public class ConsoleSearchHandler {
 		return parent.getText().substring(posOfColon, parent.getText().length());
 	}
 	
-	protected void handleKey(KeyEvent e) {
+	void handleKey(KeyEvent e) {
 		if (isActive()) {
 			currentSearchIndex = 0;
 			searchResult(e);
@@ -76,13 +76,13 @@ public class ConsoleSearchHandler {
 		}
 	}
 	
-	protected void handleEnter() {
+	void handleEnter() {
 		if (isActive()) {
 			deactivateSearch();
 		}
 	}
 	
-	protected boolean handleDeletion(KeyEvent e) {
+	boolean handleDeletion(KeyEvent e) {
 		if (isActive()) {
 			if (e.getCode() == KeyCode.DELETE) {
 				parent.deactivateSearch();
@@ -94,7 +94,7 @@ public class ConsoleSearchHandler {
 		return false;
 	}
 	
-	protected void refreshSearch() {
+	private void refreshSearch() {
 		final String format = bundle.getString(searchResults.get(0).getFound() ? "consoles.prompt.backwardSearch" : "consoles.prompt.backwardSearchFailed");
 		final String addition = String.format(format, getSearchCurrent(), searchResults.get(currentSearchIndex).getResult());
 		int posOfEnter = parent.getText().lastIndexOf('\n');
@@ -105,7 +105,7 @@ public class ConsoleSearchHandler {
 		parent.scrollYToPixel(Double.MAX_VALUE);
 	}
 	
-	protected void searchNext() {
+	void searchNext() {
 		currentSearchIndex = Math.min(searchResults.size() - 1, currentSearchIndex + 1);
 		refreshSearch();
 	}
