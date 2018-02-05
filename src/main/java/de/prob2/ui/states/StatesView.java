@@ -262,7 +262,9 @@ public final class StatesView extends StackPane {
 	}
 
 	private void unsubscribeFormulas(final Collection<? extends IEvalElement> formulas) {
-		this.currentTrace.getStateSpace().unsubscribe(this, formulas);
+		if(this.currentTrace != null && this.currentTrace.getStateSpace()!= null) {
+			this.currentTrace.getStateSpace().unsubscribe(this, formulas);
+		}
 		this.subscribedFormulas.removeAll(formulas);
 	}
 
