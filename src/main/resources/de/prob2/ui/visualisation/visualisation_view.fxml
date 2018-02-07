@@ -10,11 +10,15 @@
 	<StackPane fx:id="probLogoStackPane" AnchorPane.bottomAnchor="0.0"
 		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 		AnchorPane.topAnchor="0.0">
-		<ImageView>
-			<image>
-				<Image url="prob_logo.gif" />
-			</image>
-		</ImageView>
+		<VBox spacing="10" alignment="CENTER">
+			<ImageView>
+				<image>
+					<Image url="prob_logo.gif" />
+				</image>
+			</ImageView>
+			<Label fx:id="placeholderLabel" text="%common.noModelLoaded"
+				alignment="CENTER" />
+		</VBox>
 	</StackPane>
 	<ScrollPane fx:id="visualisationScrollPane"
 		AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
