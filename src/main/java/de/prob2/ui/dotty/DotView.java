@@ -2,7 +2,6 @@ package de.prob2.ui.dotty;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -230,7 +229,7 @@ public class DotView extends Stage {
 				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, FILE, formulas);
 				currentTrace.getStateSpace().execute(cmd);
 				loadGraph();
-			} catch (IOException | ProBError | EvaluationException e) {
+			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Graph visualization failed", e);
 				Platform.runLater(() -> stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show());
 			}
@@ -238,7 +237,7 @@ public class DotView extends Stage {
 		currentThread.start();
 	}
 	
-	private void loadGraph() throws IOException {
+	private void loadGraph() {
 		Platform.runLater(() -> {
 			String content = "";
 			try {
