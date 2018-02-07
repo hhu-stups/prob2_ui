@@ -36,23 +36,25 @@
 					</tooltip>
 				</Button>
 				<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+					<MenuButton fx:id="addMenuButton" mnemonicParsing="false">
+						<items>
+							<MenuItem fx:id="addFormulaButton" onAction="#addFormula"
+								text="%verifications.ltl.formula.add" />
+							<MenuItem fx:id="addPatternButton" onAction="#addPattern"
+								text="%verifications.ltl.pattern.add" />
+						</items>
+						<graphic>
+							<FontAwesomeIconView styleClass="icon-dark"
+								glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
+						</graphic>
+						<tooltip>
+							<Tooltip text="%verifications.ltl.add.tooltip" />
+						</tooltip>
+					</MenuButton>
 					<HelpButton fx:id="helpButton" />
 				</HBox>
 				<VBox.margin>
 					<Insets bottom="0.0" left="10.0" right="0.0" top="5.0" />
-				</VBox.margin>
-			</HBox>
-			<HBox spacing="5.0" alignment="CENTER_RIGHT">
-				<VBox spacing="5.0" alignment="TOP_RIGHT">
-					<Button fx:id="addFormulaButton" disable="true" onAction="#addFormula"
-						prefWidth="140.0" styleClass="button-blue" text="%verifications.ltl.formula.add">
-					</Button>
-					<Button fx:id="addPatternButton" disable="true" onAction="#addPattern"
-						prefWidth="140.0" styleClass="button-blue" text="%verifications.ltl.pattern.add">
-					</Button>
-				</VBox>
-				<VBox.margin>
-					<Insets left="5" right="5" />
 				</VBox.margin>
 			</HBox>
 			<VBox styleClass="border" spacing="0.0">

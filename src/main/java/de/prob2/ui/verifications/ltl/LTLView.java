@@ -35,6 +35,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
@@ -45,63 +46,45 @@ import javafx.scene.input.MouseButton;
 
 @Singleton
 public class LTLView extends ScrollPane {
-				
-	@FXML
-	private Button addFormulaButton;
 	
+	@FXML 
+	private MenuButton addMenuButton;
 	@FXML
-	private Button addPatternButton;
-	
+	private MenuItem addFormulaButton;
+	@FXML
+	private MenuItem addPatternButton;
 	@FXML
 	private Button checkMachineButton;
-	
 	@FXML
 	private Button cancelButton;
-
 	@FXML
 	private HelpButton helpButton;
-	
 	@FXML
 	private TableView<LTLPatternItem> tvPattern;
-	
 	@FXML
 	private TableColumn<LTLPatternItem, FontAwesomeIconView> patternStatusColumn;
-	
 	@FXML
 	private TableColumn<LTLPatternItem, String> patternNameColumn;
-	
 	@FXML
 	private TableColumn<LTLPatternItem, String> patternDescriptionColumn;
-	
 	@FXML
 	private TableView<LTLFormulaItem> tvFormula;
-	
 	@FXML
 	private TableColumn<LTLFormulaItem, FontAwesomeIconView> formulaStatusColumn;
-	
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaNameColumn;
-	
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
-	
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
 	
 	private final ResourceBundle bundle;
-	
 	private final Injector injector;
-	
 	private final CurrentTrace currentTrace;
-	
 	private final CurrentProject currentProject;
-		
 	private final LTLFormulaChecker checker;
-	
 	private final LTLPatternParser patternParser;
-	
 	private final LTLResultHandler resultHandler;
-	
 	private final ListProperty<Thread> currentJobThreads;
 				
 	@Inject
@@ -251,8 +234,7 @@ public class LTLView extends ScrollPane {
 		shouldExecuteColumn.setGraphic(selectAll);
 		shouldExecuteColumn.setMaxWidth(this.getPrefWidth());
 		
-		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not());
-		addPatternButton.disableProperty().bind(currentTrace.existsProperty().not());
+		addMenuButton.disableProperty().bind(currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(currentJobThreads.emptyProperty());
 		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
