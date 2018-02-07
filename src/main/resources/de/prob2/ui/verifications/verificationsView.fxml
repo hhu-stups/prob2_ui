@@ -23,14 +23,14 @@
 					<LTLView />
 				</content>
 			</Tab>
-			<Tab fx:id="tabSymbolic" id="symbolic" text="%verification.tabs.symbolic.title">
-				<content>
-					<SymbolicCheckingView />
-				</content>
-			</Tab>
 			<Tab fx:id="tabTraceReplay" text="%verification.tabs.tracereplay.title">
 				<content>
 					<TraceReplayView />
+				</content>
+			</Tab>
+			<Tab fx:id="tabSymbolic" id="symbolic" text="%verification.tabs.symbolic.title">
+				<content>
+					<SymbolicCheckingView />
 				</content>
 			</Tab>
 		</tabs>
