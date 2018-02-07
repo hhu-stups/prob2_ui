@@ -18,7 +18,7 @@ import de.prob2.ui.project.preferences.PreferencesTab;
 import de.prob2.ui.states.StatesView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.ltl.LTLView;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.verifications.tracereplay.TraceReplayView;
 
@@ -47,7 +47,7 @@ public class HelpButton extends Button{
 		germanHelpMap.put(PreferencesTab.class, "Projekt.md.html");
 		germanHelpMap.put(StatsView.class, "Statistik.md.html");
 		germanHelpMap.put(LTLView.class, "Überprüfungen.md.html");
-		germanHelpMap.put(ModelcheckingController.class, "Überprüfungen.md.html");
+		germanHelpMap.put(ModelcheckingView.class, "Überprüfungen.md.html");
 		germanHelpMap.put(SymbolicCheckingView.class, "Überprüfungen.md.html");
 		germanHelpMap.put(TraceReplayView.class, "Überprüfungen.md.html");
 		germanHelpMap.put(StatesView.class, "Hauptansicht" + File.separator + "Zustandsansicht.md.html");
@@ -59,7 +59,7 @@ public class HelpButton extends Button{
 		englishHelpMap.put(PreferencesTab.class, "Project.md.html");
 		englishHelpMap.put(StatsView.class, "Statistics.md.html");
 		englishHelpMap.put(LTLView.class, "Verification.md.html");
-		englishHelpMap.put(ModelcheckingController.class, "Verification.md.html");
+		englishHelpMap.put(ModelcheckingView.class, "Verification.md.html");
 		englishHelpMap.put(SymbolicCheckingView.class, "Verification.md.html");
 		englishHelpMap.put(TraceReplayView.class, "Verification.md.html");
 		englishHelpMap.put(StatesView.class, "Main View" + File.separator + "State.md.html");

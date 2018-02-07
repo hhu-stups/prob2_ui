@@ -39,7 +39,7 @@ public final class ModelCheckStats extends AnchorPane {
 	@FXML private Label totalStates;
 	@FXML private Label totalTransitions;
 
-	private ModelcheckingController modelcheckingController;
+	private ModelcheckingView modelcheckingController;
 	private Trace trace;
 	
 	private final StatsView statsView;
@@ -49,7 +49,7 @@ public final class ModelCheckStats extends AnchorPane {
 	private final Injector injector;
 	
 	@Inject
-	public ModelCheckStats(final StageManager stageManager, final ModelcheckingController modelcheckingController, final StatsView statsView,
+	public ModelCheckStats(final StageManager stageManager, final ModelcheckingView modelcheckingController, final StatsView statsView,
 							final Injector injector) {
 		this.modelcheckingController = modelcheckingController;
 		this.statsView = statsView;

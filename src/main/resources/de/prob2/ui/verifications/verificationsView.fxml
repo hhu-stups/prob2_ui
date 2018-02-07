@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView?>
-<?import de.prob2.ui.verifications.modelchecking.ModelcheckingController?>
+<?import de.prob2.ui.verifications.modelchecking.ModelcheckingView?>
 <?import de.prob2.ui.verifications.ltl.LTLView?>
 <?import de.prob2.ui.verifications.tracereplay.TraceReplayView?>
 <?import de.prob2.ui.verifications.VerificationsView?>
@@ -15,7 +15,7 @@
 		<tabs>
 			<Tab fx:id="tabModelchecking" id="modelchecking" text="%verification.tabs.modelchecking.title">
 				<content>
-					<ModelcheckingController />
+					<ModelcheckingView />
 				</content>
 			</Tab>
 			<Tab fx:id="tabLTL" id="ltl" text="%verification.tabs.ltl.title">

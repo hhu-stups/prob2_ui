@@ -63,7 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public final class ModelcheckingController extends ScrollPane implements IModelCheckListener {
+public final class ModelcheckingView extends ScrollPane implements IModelCheckListener {
 	private enum SearchStrategy {
 		MIXED_BF_DF("verifications.modelchecking.stage.strategy.items.mixedBfDf"),
 		BREADTH_FIRST("verifications.modelchecking.stage.strategy.items.breadthFirst"),
@@ -182,7 +182,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		}
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingView.class);
 	private static final AtomicInteger threadCounter = new AtomicInteger(0);
 
 	@FXML
@@ -229,7 +229,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 	private Object lock = new Object();
 
 	@Inject
-	private ModelcheckingController(final CurrentTrace currentTrace,
+	private ModelcheckingView(final CurrentTrace currentTrace,
 			final CurrentProject currentProject, final StageManager stageManager, 
 			final StatsView statsView, final Injector injector, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
@@ -240,7 +240,7 @@ public final class ModelcheckingController extends ScrollPane implements IModelC
 		this.bundle = bundle;
 		this.currentJobs = new SimpleListProperty<>(this, "currentJobs", FXCollections.observableArrayList());
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
-		stageManager.loadFXML(this, "modelchecking_stats_view.fxml");
+		stageManager.loadFXML(this, "modelchecking_view.fxml");
 		this.stageController = new ModelcheckingStageController(stageManager);
 		this.jobs = new HashMap<>();
 	}

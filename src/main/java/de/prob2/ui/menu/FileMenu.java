@@ -23,7 +23,7 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingController;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.tracereplay.TraceChecker;
 
 import javafx.application.Platform;
@@ -141,7 +141,7 @@ public class FileMenu extends Menu {
 	private void openProject(File file) {
 		injector.getInstance(ProjectManager.class).openProject(file);
 
-		Platform.runLater(() -> injector.getInstance(ModelcheckingController.class).resetView());
+		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).resetView());
 	}
 
 	@FXML
