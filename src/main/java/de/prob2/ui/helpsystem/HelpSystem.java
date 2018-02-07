@@ -1,5 +1,6 @@
 package de.prob2.ui.helpsystem;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -76,7 +77,21 @@ public class HelpSystem extends StackPane {
 		webEngine.setUserStyleSheetLocation(this.getClass().getResource("help.css").toString());
 		webEngine.setJavaScriptEnabled(true);
 		webEngine.getLoadWorker().stateProperty().addListener((obs, oldVal, newVal) -> {
-			if (newVal == Worker.State.SUCCEEDED) {
+			String url = webEngine.getLoadWorker().getMessage().trim().replace("Loading ","");
+			if (url.contains("http://") || url.contains("https://")) {
+				webEngine.getLoadWorker().cancel();
+				try {
+					//TODO xdg-open opens two(!) tabs, prevention?
+					//FIXME Runtime.getRuntime().exec() seems to trigger fatal error in java
+					if (Runtime.getRuntime().exec(new String[] { "which", "xdg-open" }).getInputStream().read() != -1) {
+						Runtime.getRuntime().exec(new String[] { "xdg-open", url });
+					} else {
+						Desktop.getDesktop().browse(new URI(url));
+					}
+				} catch (IOException | URISyntaxException e) {
+					LoggerFactory.getLogger(HelpSystem.class).error("Can not load URL in external browser", e);
+				}
+			} else if (newVal == Worker.State.SUCCEEDED) {
 				findMatchingTreeViewEntryToSelect();
 			}
 		});
