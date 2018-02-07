@@ -72,12 +72,13 @@ public class VisualisationView extends AnchorPane {
 		});
 
 		currentTrace.addListener((observable, from, to) -> {
-			String notInitialised = bundle.getString("visualisation.placeholder.notInitialised");
-			String noAnimation = bundle.getString("visualisation.placeholder.noAnimationFunction");
-			String noModel = bundle.getString("common.noModelLoaded");
-
-			placeholderLabel.setText(
-					to != null ? (currentTrace.getCurrentState().isInitialised() ? noAnimation : notInitialised): noModel);
+			if(to == null) {
+				placeholderLabel.setText(bundle.getString("common.noModelLoaded"));
+			} else if (currentTrace.getCurrentState().isInitialised()) {
+				placeholderLabel.setText(bundle.getString("visualisation.placeholder.noAnimationFunction"));
+			} else {
+				placeholderLabel.setText(bundle.getString("visualisation.placeholder.notInitialised"));
+			}
 		});
 
 	}
