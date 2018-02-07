@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.consoles.b.BConsole?>
 <?import de.prob2.ui.consoles.b.BConsoleView?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
@@ -14,16 +12,13 @@
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
-	<HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
-		<Button onAction="#handleClear">
-			<graphic>
-				<FontAwesomeIconView styleClass="icon-dark" glyphName="TRASH" glyphSize="${fontSize.fontSize * 2}"/>
-			</graphic>
-			<tooltip>
-				<Tooltip text="%consoles.b.toolbar.clear.tooltip"/>
-			</tooltip>
-		</Button>
-		<Label fx:id="languageLabel" text="%consoles.b.toolbar.language.classicalB"/>
+	<HBox VBox.vgrow="NEVER">
+		<HBox HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
+			<Label fx:id="languageLabel" text="%consoles.b.toolbar.language.classicalB"/>
+		</HBox>
+		<HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
+			<Button onAction="#handleClear" text="%consoles.b.toolbar.clear"/>
+		</HBox>
 	</HBox>
 	<VirtualizedScrollPane VBox.vgrow="ALWAYS">
 		<content>
