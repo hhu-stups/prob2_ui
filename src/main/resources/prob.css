@@ -655,6 +655,62 @@
 	-fx-background-color: -prob-white-75;
 }
 
+/* ================== DOTTY VIEW ================= */
+.dot-command-cell {
+	-fx-border-color: transparent;
+	-fx-border-width: 0.0 0.0 0.0 0.3em;
+	-fx-graphic-text-gap: 10;
+	-fx-padding: 0.4em 0.0 0.4em 1.0em;
+}
+
+.dot-command-cell.dotcommandenabled {
+	-fx-font-family: ARIAL;
+	-fx-fill: white;
+	-fx-text-fill: -prob-aqua;
+}
+
+.dot-command-cell.dotcommandenabled:selected:hover {
+	-fx-text-fill: white;
+}
+
+.dot-command-cell.dotcommanddisabled {
+	-fx-font-family: ARIAL;
+	-fx-fill: white;
+	-fx-text-fill: -prob-orange;
+}
+
+.dot-command-cell:selected {
+	-fx-background-color: -prob-grey-50;
+	-fx-fill: -prob-grey-50;
+	-fx-text-fill: white;
+}
+
+.dot-command-cell:selected:hover {
+	-fx-background-color: -prob-grey;
+	-fx-text-fill: white;
+}
+
+.dotCommandItemBackground {
+	-fx-fill: white;
+	-fx-text-fill: white;
+}
+
+.dotCommandItemBackground:hover {
+	-fx-fill: white;
+	-fx-text-fill: white;
+}
+
+.dotCommandItemBackgroundSelected {
+	-fx-fill: white;
+	-fx-text-fill: white;
+}
+
+.dotCommandItemBackgroundSelected:hover {
+	-fx-fill: white;
+	-fx-text-fill: white;
+}
+
+
 /* ================== FORMULA DIALOG ================= */
 
 #formula-dialog-header {
