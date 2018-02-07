@@ -102,6 +102,8 @@ public class DotView extends Stage {
 	private final CurrentProject currentProject;
 	private final ResourceBundle bundle;
 	
+	private Thread currentThread;
+	
 	
 	@Inject
 	public DotView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -213,7 +215,10 @@ public class DotView extends Stage {
 			return;
 		}
 		ArrayList<IEvalElement> formulas = new ArrayList<>();
-		Thread thread = new Thread(() -> {
+		if(currentThread != null) {
+			currentThread.interrupt();
+		}
+		currentThread = new Thread(() -> {
 			try {
 				if(item.getArity() > 0) {
 					formulas.add(new ClassicalB(tfFormula.getText()));
@@ -227,12 +232,20 @@ public class DotView extends Stage {
 				Platform.runLater(() -> stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show());
 			}
 		}, "Graph Visualizer");
-		thread.start();
+		currentThread.start();
 	}
 	
 	private void loadGraph() throws IOException {
-		String content = new String(Files.readAllBytes(FILE.toPath()));
-		Platform.runLater(() -> dotView.getEngine().loadContent("<center>" + content + "</center>"));
+		Platform.runLater(() -> {
+			String content = "";
+			try {
+				content = new String(Files.readAllBytes(FILE.toPath()));
+			} catch (Exception e) {
+				LOGGER.error("Reading dot file failed", e);
+				return;
+			}
+			dotView.getEngine().loadContent("<center>" + content + "</center>");
+		});
 	}
 
 }
