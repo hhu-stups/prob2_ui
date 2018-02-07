@@ -102,6 +102,8 @@ public class DotView extends Stage {
 	private final CurrentProject currentProject;
 	private final ResourceBundle bundle;
 	
+	private Thread currentThread;
+	
 	
 	@Inject
 	public DotView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -115,36 +117,7 @@ public class DotView extends Stage {
 	
 	@FXML
 	public void initialize() {
-		dotView.setContextMenuEnabled(false);
-		dotView.setOnMouseMoved(e-> {
-			oldMousePositionX = e.getSceneX();
-			oldMousePositionY = e.getSceneY();
-		});
-		
-		dotView.setOnMouseDragged(e-> {
-			pane.setHvalue(pane.getHvalue() + (-e.getSceneX() + oldMousePositionX)/(pane.getWidth() * dragFactor));
-			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
-			oldMousePositionX = e.getSceneX();
-			oldMousePositionY = e.getSceneY();
-		});
-
-		dotView.setOnMouseClicked(e-> {
-			if(e.getClickCount() < 2) {
-				return;
-			}
-			
-			if(e.getButton() == MouseButton.SECONDARY) {
-				dotView.setZoom(dotView.getZoom() * 0.9);
-				dragFactor *= 0.9;
-			} else {
-				dotView.setZoom(dotView.getZoom() * 1.1);
-				dragFactor *= 1.1;
-			}
-			
-			double x = e.getX()/(2*dragFactor);
-			double y = e.getY()/(2*dragFactor);
-			dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
-		});
+		initializeZooming();
 		
 		lvChoice.getSelectionModel().selectFirst();
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
@@ -194,6 +167,38 @@ public class DotView extends Stage {
 		lvChoice.setCellFactory(item -> new DotCommandCell());
 	}
 	
+	private void initializeZooming() {
+		dotView.setOnMouseMoved(e-> {
+			oldMousePositionX = e.getSceneX();
+			oldMousePositionY = e.getSceneY();
+		});
+		
+		dotView.setOnMouseDragged(e-> {
+			pane.setHvalue(pane.getHvalue() + (-e.getSceneX() + oldMousePositionX)/(pane.getWidth() * dragFactor));
+			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
+			oldMousePositionX = e.getSceneX();
+			oldMousePositionY = e.getSceneY();
+		});
+
+		dotView.setOnMouseClicked(e-> {
+			if(e.getClickCount() < 2) {
+				return;
+			}
+			
+			if(e.getButton() == MouseButton.SECONDARY) {
+				dotView.setZoom(dotView.getZoom() * 0.9);
+				dragFactor *= 0.9;
+			} else {
+				dotView.setZoom(dotView.getZoom() * 1.1);
+				dragFactor *= 1.1;
+			}
+			
+			double x = e.getX()/(2*dragFactor);
+			double y = e.getY()/(2*dragFactor);
+			dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
+		});
+	}
+	
 	private void fillCommands() {
 		try {
 			lvChoice.getItems().clear();
@@ -208,12 +213,15 @@ public class DotView extends Stage {
 		}
 	}
 	
-	public void visualize(DotCommandItem item) {
+	private void visualize(DotCommandItem item) {
 		if(!item.isAvailable()) {
 			return;
 		}
 		ArrayList<IEvalElement> formulas = new ArrayList<>();
-		Thread thread = new Thread(() -> {
+		if(currentThread != null) {
+			currentThread.interrupt();
+		}
+		currentThread = new Thread(() -> {
 			try {
 				if(item.getArity() > 0) {
 					formulas.add(new ClassicalB(tfFormula.getText()));
@@ -227,12 +235,20 @@ public class DotView extends Stage {
 				Platform.runLater(() -> stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show());
 			}
 		}, "Graph Visualizer");
-		thread.start();
+		currentThread.start();
 	}
 	
 	private void loadGraph() throws IOException {
-		String content = new String(Files.readAllBytes(FILE.toPath()));
-		Platform.runLater(() -> dotView.getEngine().loadContent("<center>" + content + "</center>"));
+		Platform.runLater(() -> {
+			String content = "";
+			try {
+				content = new String(Files.readAllBytes(FILE.toPath()));
+			} catch (Exception e) {
+				LOGGER.error("Reading dot file failed", e);
+				return;
+			}
+			dotView.getEngine().loadContent("<center>" + content + "</center>");
+		});
 	}
 
 }
