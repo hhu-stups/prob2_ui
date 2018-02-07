@@ -24,7 +24,7 @@ public class GroovyConsole extends Console {
 	
 	@Inject
 	private GroovyConsole(GroovyInterpreter groovyInterpreter, ResourceBundle bundle) {
-		super(bundle, bundle.getString("consoles.groovy.header"), groovyInterpreter);
+		super(bundle, bundle.getString("consoles.groovy.header"), bundle.getString("consoles.groovy.prompt"), groovyInterpreter);
 		this.groovyInterpreter = groovyInterpreter;
 		this.groovyInterpreter.setCodeCompletion(this);
 		setCodeCompletionEvent();
@@ -40,9 +40,9 @@ public class GroovyConsole extends Console {
 	}
 	
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
-		if (getCaretPosition() > this.getText().lastIndexOf('\n') + 2) {
-			int caretPosInLine = getCurrentLine().length() - (getLength() - getCaretPosition());
-			groovyInterpreter.triggerCodeCompletion(getCurrentLine().substring(0, caretPosInLine), action);
+		if (getCaretPosition() >= this.getInputStart()) {
+			int caretPosInLine = getCaretPosition() - getInputStart();
+			groovyInterpreter.triggerCodeCompletion(getInput().substring(0, caretPosInLine), action);
 		}
 	}
 	

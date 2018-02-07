@@ -74,14 +74,12 @@ public class BInterpreter implements Executable {
 	private final CurrentTrace currentTrace;
 	private final ResourceBundle bundle;
 	private final Trace defaultTrace;
-	private final int promptLength;
 
 	@Inject
 	public BInterpreter(final MachineLoader machineLoader, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
 		this.defaultTrace = new Trace(machineLoader.getEmptyStateSpace(Collections.emptyMap()));
-		this.promptLength = bundle.getString("consoles.prompt.default").length();
 	}
 	
 	// The exceptions thrown while parsing are not standardized in any way.
@@ -137,11 +135,11 @@ public class BInterpreter implements Executable {
 		}
 	}
 	
-	private String formatParseException(final Exception e) {
+	private String formatParseException(final String source, final Exception e) {
 		final ParseError error = this.getParseErrorFromException(e);
 		
 		if (error != null) {
-			return String.format("%" + (error.getColumn() + this.promptLength) + "s\n%s", '^', error.getMessage());
+			return String.format("%s\n%" + error.getColumn() + "s\n%s", source, '^', error.getMessage());
 		} else {
 			return String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage());
 		}
@@ -191,7 +189,7 @@ public class BInterpreter implements Executable {
 			formula = trace.getModel().parseFormula(source, FormulaExpand.EXPAND);
 		} catch (EvaluationException e) {
 			logger.info("Failed to parse B console user input", e);
-			return new ConsoleExecResult("", this.formatParseException(e), ConsoleExecResultType.ERROR);
+			return new ConsoleExecResult("", this.formatParseException(source, e), ConsoleExecResultType.ERROR);
 		}
 		final AbstractEvalResult res;
 		try {

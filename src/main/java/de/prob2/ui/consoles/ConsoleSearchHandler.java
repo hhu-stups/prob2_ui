@@ -58,13 +58,13 @@ public final class ConsoleSearchHandler {
 	}
 	
 	public String getSearchCurrent() {
-		int posOfFirstQuotation = parent.getCurrentLine().indexOf(39);
-		int posOfLastQuotation = parent.getCurrentLine().lastIndexOf(39);
-		return parent.getCurrentLine().substring(posOfFirstQuotation + 1, posOfLastQuotation);
+		int posOfFirstQuotation = parent.getLine().indexOf('\'');
+		int posOfLastQuotation = parent.getLine().lastIndexOf('\'');
+		return parent.getLine().substring(posOfFirstQuotation + 1, posOfLastQuotation);
 	}
 	
 	public String getCurrentSearchResult() {
-		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf('\n') + 5;
+		int posOfColon = parent.getText().indexOf(':', parent.getLineStart()) + 1;
 		return parent.getText().substring(posOfColon, parent.getText().length());
 	}
 	
@@ -87,7 +87,7 @@ public final class ConsoleSearchHandler {
 			if (e.getCode() == KeyCode.DELETE) {
 				parent.deactivateSearch();
 				return true;
-			} else if (parent.getCaretPosition() != parent.getLength() - parent.getCurrentLine().length() + parent.getCurrentLine().indexOf('\'') + 1) {
+			} else if (parent.getCaretPosition() != parent.getText().indexOf('\'', parent.getLineStart()) + 1) {
 				handleKey(e);
 			}
 		}
@@ -97,11 +97,10 @@ public final class ConsoleSearchHandler {
 	private void refreshSearch() {
 		final String format = bundle.getString(searchResults.get(0).getFound() ? "consoles.prompt.backwardSearch" : "consoles.prompt.backwardSearchFailed");
 		final String addition = String.format(format, getSearchCurrent(), searchResults.get(currentSearchIndex).getResult());
-		int posOfEnter = parent.getText().lastIndexOf('\n');
-		parent.deleteText(posOfEnter + 1, parent.getText().length());
+		parent.deleteText(parent.getLineStart(), parent.getText().length());
 		parent.appendText(addition);
-		int posOfColon = parent.getCurrentLine().indexOf(':') + parent.getText().lastIndexOf('\n') + 4;
-		parent.moveTo(posOfColon -1);
+		int posOfColon = parent.getText().indexOf(':', parent.getLineStart());
+		parent.moveTo(posOfColon - 1);
 		parent.scrollYToPixel(Double.MAX_VALUE);
 	}
 	

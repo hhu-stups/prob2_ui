@@ -1,8 +1,13 @@
 package de.prob2.ui.consoles.groovy.codecompletion;
 
+import java.util.Optional;
+
+import javax.script.ScriptEngine;
+
 import de.prob2.ui.consoles.groovy.GroovyConsole;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
 import de.prob2.ui.internal.StageManager;
+
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,9 +18,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
-
-import javax.script.ScriptEngine;
-import java.util.Optional;
 
 public class GroovyCodeCompletion extends Popup {
 	@FXML private ListView<GroovyAbstractItem> lvSuggestions;
@@ -175,7 +177,7 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	private boolean handleLeft() {
-		if (getParent().getCurrentPosInLine() == 0 || ';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1) || '.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
+		if (getParent().getCurrentPosInLine() == 0 || getParent().getInput().charAt(getParent().getCurrentPosInLine() - 1) == ';' || getParent().getInput().charAt(getParent().getCurrentPosInLine() - 1) == '.') {
 			deactivate();
 			return true;
 		}
@@ -184,7 +186,7 @@ public class GroovyCodeCompletion extends Popup {
 	}
 	
 	private boolean handleRight() {
-		if (getParent().getCurrentPosInLine() == getParent().getCurrentLine().length() || ';' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine())) {
+		if (getParent().getCurrentPosInLine() == getParent().getInput().length() || getParent().getInput().charAt(getParent().getCurrentPosInLine()) == ';') {
 			deactivate();
 			return true;
 		}
@@ -237,7 +239,7 @@ public class GroovyCodeCompletion extends Popup {
 			charCounterInSuggestion--;
 			currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.max(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
 		}
-		if (getParent().getCurrentPosInLine() == 0 || '.' == getParent().getCurrentLine().charAt(getParent().getCurrentPosInLine() - 1)) {
+		if (getParent().getCurrentPosInLine() == 0 || getParent().getInput().charAt(getParent().getCurrentPosInLine() - 1) == '.') {
 			deactivate();
 		}
 	}

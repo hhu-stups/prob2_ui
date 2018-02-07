@@ -38,20 +38,28 @@ public class BConsoleView extends VBox {
 	@FXML
 	private void initialize() {
 		this.currentTrace.addListener((o, from, to) -> {
-			final String text;
+			final String lang;
+			final String prompt;
 			if (to == null) {
-				text = this.bundle.getString("consoles.b.toolbar.language.classicalB");
+				lang = this.bundle.getString("consoles.b.toolbar.language.classicalB");
+				prompt = this.bundle.getString("consoles.b.prompt.classicalB");
 			} else {
 				final AbstractModel model = to.getModel();
 				if (model instanceof EventBModel) {
-					text = this.bundle.getString("consoles.b.toolbar.language.eventB");
+					lang = this.bundle.getString("consoles.b.toolbar.language.eventB");
+					prompt = this.bundle.getString("consoles.b.prompt.eventB");
 				} else if (model instanceof CSPModel) {
-					text = this.bundle.getString("consoles.b.toolbar.language.csp");
+					lang = this.bundle.getString("consoles.b.toolbar.language.csp");
+					prompt = this.bundle.getString("consoles.b.prompt.csp");
 				} else {
-					text = this.bundle.getString("consoles.b.toolbar.language.classicalB");
+					lang = this.bundle.getString("consoles.b.toolbar.language.classicalB");
+					prompt = this.bundle.getString("consoles.b.prompt.classicalB");
 				}
 			}
-			Platform.runLater(() -> this.languageLabel.setText(text));
+			Platform.runLater(() -> {
+				this.languageLabel.setText(lang);
+				this.bConsole.setPrompt(prompt);
+			});
 		});
 	}
 	
