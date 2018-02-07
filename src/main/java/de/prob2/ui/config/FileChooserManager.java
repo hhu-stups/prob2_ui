@@ -2,9 +2,7 @@ package de.prob2.ui.config;
 
 import java.io.File;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.google.inject.Singleton;
 
@@ -57,41 +55,7 @@ public class FileChooserManager {
 		}
 	}
 
-	public void setInitialDirectories(FileChooserInitialDirectories dirs) {
-		if (dirs != null) {
-			for (Entry<String, String> entry : dirs.directories.entrySet()) {
-				final String name = entry.getKey();
-				final File dir = new File(entry.getValue());
-				if (contains(name) && dir.exists() && dir.isDirectory()) {
-					Kind kind = Kind.valueOf(name);
-					this.initialDirectories.put(kind, dir);
-				}
-			}
-		}
+	public Map<Kind, File> getInitialDirectories() {
+		return initialDirectories;
 	}
-
-	private static boolean contains(String name) {
-		for (Kind c : Kind.values()) {
-			if (c.name().equals(name)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public FileChooserInitialDirectories getFileChooserInitialDirectories() {
-		return new FileChooserInitialDirectories(initialDirectories);
-	}
-
-	// gson format
-	public static class FileChooserInitialDirectories {
-		final Map<String, String> directories = new HashMap<>();
-		FileChooserInitialDirectories(Map<Kind, File> initialDirectories) {
-			for (Entry<Kind, File> entry : initialDirectories.entrySet()) {
-				directories.put(entry.getKey().toString(), entry.getValue().getAbsolutePath());
-			}
-		}
-
-	}
-
 }

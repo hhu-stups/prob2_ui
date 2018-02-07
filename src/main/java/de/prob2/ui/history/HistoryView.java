@@ -37,7 +37,7 @@ public final class HistoryView extends AnchorPane {
 	private final class TransitionRow extends TableRow<HistoryItem> {
 		private TransitionRow() {
 			super();
-			
+
 			this.setOnMouseClicked(event -> {
 				final Trace trace = currentTrace.get();
 				if (trace != null && this.getItem() != null && MouseButton.PRIMARY.equals(event.getButton())) {
@@ -45,7 +45,7 @@ public final class HistoryView extends AnchorPane {
 				}
 			});
 		}
-		
+
 		@Override
 		protected void updateItem(HistoryItem item, boolean empty) {
 			super.updateItem(item, empty);
@@ -158,11 +158,12 @@ public final class HistoryView extends AnchorPane {
 
 	public NumberBinding getCurrentHistoryPositionProperty() {
 		return Bindings.createIntegerBinding(
-				() -> currentTrace.get() == null ? 0 : currentTrace.get().getCurrent().getIndex() + 2, currentTrace);
+				() -> currentTrace.get() == null ? 0 : currentTrace.get().getCurrent().getIndex() + 1, currentTrace);
 	}
 
 	public ObservableIntegerValue getObservableHistorySize() {
-		return Bindings.size(this.historyTableView.itemsProperty().get());
+		return Bindings.createIntegerBinding(() -> Math.max(this.historyTableView.itemsProperty().get().size() - 1, 0),
+				historyTableView.itemsProperty().get());
 	}
 
 	private HistoryStatus getStatus(int i, int currentPos) {

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -19,11 +20,13 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -37,6 +40,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DotView extends Stage {
+	
+	private final class DotCommandCell extends ListCell<DotCommandItem> {
+		
+		public DotCommandCell() {
+			super();
+			getStyleClass().add("dot-command-cell");
+		}
+		
+		@Override
+		protected void updateItem(DotCommandItem item, boolean empty) {
+			super.updateItem(item, empty);
+			this.getStyleClass().removeAll(Arrays.asList("dotcommandenabled", "dotcommanddisabled"));
+			if(item != null && !empty) {
+				setText(item.getName());
+				if(item.isAvailable()) {
+					getStyleClass().add("dotcommandenabled");
+				} else {
+					getStyleClass().add("dotcommanddisabled");
+				}
+			}
+		}
+	}
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
 	
@@ -74,13 +99,18 @@ public class DotView extends Stage {
 	
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 	private final ResourceBundle bundle;
+	
+	private Thread currentThread;
 	
 	
 	@Inject
-	public DotView(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	public DotView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
+			final ResourceBundle bundle) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "dot_view.fxml");
 	}
@@ -120,7 +150,6 @@ public class DotView extends Stage {
 		
 		lvChoice.getSelectionModel().selectFirst();
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			dotView.getEngine().loadContent("");
 			if(to == null) {
 				return;
 			}
@@ -133,6 +162,7 @@ public class DotView extends Stage {
 			enterFormulaBox.setVisible(needFormula);
 			lbDescription.setText(to.getDescription());
 			if(!needFormula && (!stateChanged || cbContinuous.isSelected())) {
+				dotView.getEngine().loadContent("");
 				visualize(to);
 			}
 			stateChanged = false;
@@ -147,6 +177,12 @@ public class DotView extends Stage {
 			lvChoice.getSelectionModel().select(index);
 			stateChanged = true;
 		});
+		
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			fillCommands();
+			dotView.getEngine().loadContent("");
+		});
+		
 		tfFormula.setOnKeyPressed(e -> {
 			if(e.getCode().equals(KeyCode.ENTER)) {
 				DotCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
@@ -156,6 +192,8 @@ public class DotView extends Stage {
 				visualize(item);
 			}
 		});
+		
+		lvChoice.setCellFactory(item -> new DotCommandCell());
 	}
 	
 	private void fillCommands() {
@@ -177,7 +215,10 @@ public class DotView extends Stage {
 			return;
 		}
 		ArrayList<IEvalElement> formulas = new ArrayList<>();
-		Thread thread = new Thread(() -> {
+		if(currentThread != null) {
+			currentThread.interrupt();
+		}
+		currentThread = new Thread(() -> {
 			try {
 				if(item.getArity() > 0) {
 					formulas.add(new ClassicalB(tfFormula.getText()));
@@ -191,12 +232,20 @@ public class DotView extends Stage {
 				Platform.runLater(() -> stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show());
 			}
 		}, "Graph Visualizer");
-		thread.start();
+		currentThread.start();
 	}
 	
 	private void loadGraph() throws IOException {
-		String content = new String(Files.readAllBytes(FILE.toPath()));
-		Platform.runLater(() -> dotView.getEngine().loadContent("<center>" + content + "</center>"));
+		Platform.runLater(() -> {
+			String content = "";
+			try {
+				content = new String(Files.readAllBytes(FILE.toPath()));
+			} catch (Exception e) {
+				LOGGER.error("Reading dot file failed", e);
+				return;
+			}
+			dotView.getEngine().loadContent("<center>" + content + "</center>");
+		});
 	}
 
 }

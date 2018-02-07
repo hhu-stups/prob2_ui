@@ -9,8 +9,7 @@ import de.prob2.ui.consoles.Console;
 @Singleton
 public final class BConsole extends Console {
 	@Inject
-	private BConsole(BInterpreter interpreter, ResourceBundle bundle) {
-		super(bundle, bundle.getString("consoles.b.header"));
-		this.interpreter = interpreter;
+	private BConsole(BInterpreter bInterpreter, ResourceBundle bundle) {
+		super(bundle, bundle.getString("consoles.b.header"), bInterpreter);
 	}
 }

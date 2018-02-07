@@ -1,5 +1,6 @@
 package de.prob2.ui.consoles;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -8,10 +9,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javafx.scene.control.IndexRange;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.TransferMode;
 
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.wellbehaved.event.EventPattern;
@@ -29,34 +32,33 @@ public abstract class Console extends StyleClassedTextArea {
 		private List<int[]> errorRanges;
 		
 		protected ConfigData() {}
-		
-		public String getText() {
-			return text;
-		}
 	}
 	
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
 	
 	private final ResourceBundle bundle;
-	protected List<ConsoleInstruction> instructions;
+	private final List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
-	protected ConsoleSearchHandler searchHandler;
-	protected List<IndexRange> errors;
-	protected Executable interpreter;
-	protected String header;
-	protected String prompt;
+	private final ConsoleSearchHandler searchHandler;
+	private final List<IndexRange> errors;
+	private final Executable interpreter;
+	private final String header;
+	private final String prompt;
 	
-	protected Console(ResourceBundle bundle, String header) {
+	protected Console(ResourceBundle bundle, String header, Executable interpreter) {
 		this.bundle = bundle;
+		this.instructions = new ArrayList<>();
+		this.searchHandler = new ConsoleSearchHandler(this, bundle);
+		this.errors = new ArrayList<>();
+		this.interpreter = interpreter;
 		this.header = header;
 		this.prompt = bundle.getString("consoles.prompt.default");
-		this.instructions = new ArrayList<>();
-		this.errors = new ArrayList<>();
-		this.searchHandler = new ConsoleSearchHandler(this, bundle);
+		
 		this.requestFollowCaret();
 		setEvents();
+		setDragDrop();
 		this.reset();
 		this.setWrapText(true);
 		this.getStyleClass().add("console");
@@ -89,7 +91,37 @@ public abstract class Console extends StyleClassedTextArea {
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DELETE, KeyCombination.ALT_DOWN), KeyEvent::consume));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e-> this.handleEnter()));
 	}
+	
+	private void setDragDrop() {
+		this.setOnDragOver(e-> {
+			Dragboard dragboard = e.getDragboard();
+			if (dragboard.hasFiles()) {
+				e.acceptTransferModes(TransferMode.COPY);
+			} else {
+				e.consume();
+			}
+		});
 		
+		this.setOnDragDropped(e-> {
+			Dragboard dragboard = e.getDragboard();
+			boolean success = false;
+			int lastPosOfEnter = this.getText().lastIndexOf('\n');
+			if (dragboard.hasFiles() && this.getCaretPosition() >= lastPosOfEnter + 3) {
+				success = true;
+				for (File file : dragboard.getFiles()) {
+					String path = file.getAbsolutePath();
+					int caretPosition = this.getCaretPosition();
+					this.insertText(this.getCaretPosition(), path);
+					charCounterInLine += path.length();
+					currentPosInLine += path.length();
+					this.moveTo(caretPosition + path.length());
+				}
+			}
+			e.setDropCompleted(success);
+			e.consume();
+		});
+	}
+	
 	@Override
 	public void paste() {
 		if (searchHandler.isActive()) {
@@ -356,16 +388,16 @@ public abstract class Console extends StyleClassedTextArea {
 			return;
 		}
 		
-		instructions = new ArrayList<>();
+		instructions.clear();
 		for (final String instruction : settings.instructions) {
 			instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
-			posInList++;
 		}
+		posInList = instructions.size();
 		this.replaceText(settings.text);
 		charCounterInLine = settings.charCounterInLine;
 		currentPosInLine = settings.currentPosInLine;
 		this.moveTo(settings.caretPosition);
-		errors = new ArrayList<>();
+		errors.clear();
 		for (final int[] range : settings.errorRanges) {
 			errors.add(new IndexRange(range[0], range[1]));
 			this.setStyleClass(range[0], range[1], "error");
