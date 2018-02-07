@@ -38,7 +38,7 @@
 						</AnchorPane>
 						<ScrollPane fx:id ="pane" fitToHeight="true" fitToWidth="true" styleClass="border">
 					   		<content>
-								<WebView fx:id="dotView"/>
+								<WebView fx:id="dotView" contextMenuEnabled="false"/>
 							</content>
 						</ScrollPane>
 					</SplitPane>

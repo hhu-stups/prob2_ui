@@ -117,36 +117,7 @@ public class DotView extends Stage {
 	
 	@FXML
 	public void initialize() {
-		dotView.setContextMenuEnabled(false);
-		dotView.setOnMouseMoved(e-> {
-			oldMousePositionX = e.getSceneX();
-			oldMousePositionY = e.getSceneY();
-		});
-		
-		dotView.setOnMouseDragged(e-> {
-			pane.setHvalue(pane.getHvalue() + (-e.getSceneX() + oldMousePositionX)/(pane.getWidth() * dragFactor));
-			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
-			oldMousePositionX = e.getSceneX();
-			oldMousePositionY = e.getSceneY();
-		});
-
-		dotView.setOnMouseClicked(e-> {
-			if(e.getClickCount() < 2) {
-				return;
-			}
-			
-			if(e.getButton() == MouseButton.SECONDARY) {
-				dotView.setZoom(dotView.getZoom() * 0.9);
-				dragFactor *= 0.9;
-			} else {
-				dotView.setZoom(dotView.getZoom() * 1.1);
-				dragFactor *= 1.1;
-			}
-			
-			double x = e.getX()/(2*dragFactor);
-			double y = e.getY()/(2*dragFactor);
-			dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
-		});
+		initializeZooming();
 		
 		lvChoice.getSelectionModel().selectFirst();
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
@@ -196,6 +167,38 @@ public class DotView extends Stage {
 		lvChoice.setCellFactory(item -> new DotCommandCell());
 	}
 	
+	private void initializeZooming() {
+		dotView.setOnMouseMoved(e-> {
+			oldMousePositionX = e.getSceneX();
+			oldMousePositionY = e.getSceneY();
+		});
+		
+		dotView.setOnMouseDragged(e-> {
+			pane.setHvalue(pane.getHvalue() + (-e.getSceneX() + oldMousePositionX)/(pane.getWidth() * dragFactor));
+			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
+			oldMousePositionX = e.getSceneX();
+			oldMousePositionY = e.getSceneY();
+		});
+
+		dotView.setOnMouseClicked(e-> {
+			if(e.getClickCount() < 2) {
+				return;
+			}
+			
+			if(e.getButton() == MouseButton.SECONDARY) {
+				dotView.setZoom(dotView.getZoom() * 0.9);
+				dragFactor *= 0.9;
+			} else {
+				dotView.setZoom(dotView.getZoom() * 1.1);
+				dragFactor *= 1.1;
+			}
+			
+			double x = e.getX()/(2*dragFactor);
+			double y = e.getY()/(2*dragFactor);
+			dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
+		});
+	}
+	
 	private void fillCommands() {
 		try {
 			lvChoice.getItems().clear();
@@ -210,7 +213,7 @@ public class DotView extends Stage {
 		}
 	}
 	
-	public void visualize(DotCommandItem item) {
+	private void visualize(DotCommandItem item) {
 		if(!item.isAvailable()) {
 			return;
 		}
