@@ -33,7 +33,6 @@ public final class GroovyInterpreter implements Executable {
 	
 	@Override
 	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
-		logger.trace("Exec");
 		if ("inspect".equals(instruction.getInstruction())) {
 			groovyObjectStage.showObjects(engine);
 			return new ConsoleExecResult("", "", ConsoleExecResultType.PASSED);
@@ -42,13 +41,11 @@ public final class GroovyInterpreter implements Executable {
 		} else {
 			StringBuilder console = new StringBuilder();
 			engine.put("__console", console);
-			logger.trace("Eval {} on {}", instruction.getInstruction(), engine);
 			String resultString;
 			ConsoleExecResultType resultType = ConsoleExecResultType.PASSED;
 			try {
 				Object eval = engine.eval(instruction.getInstruction());
 				resultString = eval.toString();
-				logger.trace("Evaled {} to {}", instruction.getInstruction(), resultString);
 			} catch (Throwable e) {
 				logger.debug("Groovy Evaluation failed", e);
 				resultString = e.toString();
