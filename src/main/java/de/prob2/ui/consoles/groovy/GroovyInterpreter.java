@@ -1,6 +1,7 @@
 package de.prob2.ui.consoles.groovy;
 
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 import com.google.inject.Inject;
 
@@ -39,19 +40,40 @@ public final class GroovyInterpreter implements Executable {
 		} else if ("clear".equals(instruction.getInstruction())) {
 			return new ConsoleExecResult("","", ConsoleExecResultType.CLEAR);
 		} else {
-			StringBuilder console = new StringBuilder();
+			final StringBuilder console = new StringBuilder();
 			engine.put("__console", console);
-			String resultString;
-			ConsoleExecResultType resultType = ConsoleExecResultType.PASSED;
+			final Object evalResult;
 			try {
-				Object eval = engine.eval(instruction.getInstruction());
-				resultString = eval.toString();
+				evalResult = engine.eval(instruction.getInstruction());
+			} catch (ScriptException e) {
+				logger.debug("Groovy console user code threw an exception", e);
+				return new ConsoleExecResult(console.toString(), e.getCause().toString(), ConsoleExecResultType.ERROR);
+			} catch (Error e) {
+				logger.warn("Groovy console user code threw an Error", e);
+				return new ConsoleExecResult(console.toString(), e.toString(), ConsoleExecResultType.ERROR);
 			} catch (Throwable e) {
-				logger.debug("Groovy Evaluation failed", e);
-				resultString = e.toString();
-				resultType = ConsoleExecResultType.ERROR;
+				// Groovy does not enforce declaration of checked Exceptions/Throwables like Java does,
+				// which means that the eval call can throw a checked Throwable even though it has no checked exceptions declared.
+				// The Groovy script engine wraps Exceptions (including checked ones) in a ScriptException, but not Throwables,
+				// so we need to manually catch them here.
+				logger.warn("Groovy console user code threw an unexpected Throwable", e);
+				return new ConsoleExecResult(console.toString(), e.toString(), ConsoleExecResultType.ERROR);
 			}
-			return new ConsoleExecResult(console.toString(), resultString, resultType);
+			final String resultString;
+			try {
+				resultString = evalResult.toString();
+			} catch (RuntimeException e) {
+				logger.debug("Groovy console result toString threw an exception", e);
+				return new ConsoleExecResult(console.toString(), e.toString(), ConsoleExecResultType.ERROR);
+			} catch (Error e) {
+				logger.warn("Groovy console result toString threw an Error", e);
+				return new ConsoleExecResult(console.toString(), e.toString(), ConsoleExecResultType.ERROR);
+			} catch (Throwable e) {
+				// Same as above, Groovy code can throw checked Exceptions/Throwables without declaring them.
+				logger.warn("Groovy console result toString threw an unexpected Throwable", e);
+				return new ConsoleExecResult(console.toString(), e.toString(), ConsoleExecResultType.ERROR);
+			}
+			return new ConsoleExecResult(console.toString(), resultString, ConsoleExecResultType.PASSED);
 		}
 	}
 	
