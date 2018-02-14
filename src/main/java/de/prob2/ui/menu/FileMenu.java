@@ -98,14 +98,14 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	private void createNewProject() {
+	public void createNewProject() {
 		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();
 	}
 
 	@FXML
-	private void handleOpen() {
+	public void handleOpen() {
 		final File selected = stageManager.showOpenProjectOrMachineChooser(stageManager.getMainStage());
 		if (selected == null) {
 			return;
