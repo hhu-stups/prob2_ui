@@ -5,14 +5,13 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.menu.FileMenu;
 import de.prob2.ui.prob2fx.CurrentProject;
-
 import de.prob2.ui.project.machines.MachinesTab;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 
 @Singleton
 public final class ProjectView extends AnchorPane {
@@ -52,9 +51,12 @@ public final class ProjectView extends AnchorPane {
 
 	@FXML
 	private void createNewProject() {
-		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
-		newProjectStage.showAndWait();
-		newProjectStage.toFront();
+		injector.getInstance(FileMenu.class).createNewProject();
+	}
+	
+	@FXML
+	private void openProject() {
+		injector.getInstance(FileMenu.class).handleOpen();
 	}
 
 	public void showMachines() {
