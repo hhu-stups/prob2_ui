@@ -81,13 +81,15 @@ public class HelpSystem extends StackPane {
 			if (url.contains("http://") || url.contains("https://")) {
 				webEngine.getLoadWorker().cancel();
 				try {
-					//TODO xdg-open opens two(!) tabs, prevention?
-					//FIXME Runtime.getRuntime().exec() seems to trigger fatal error in java
-					if (Runtime.getRuntime().exec(new String[] { "which", "xdg-open" }).getInputStream().read() != -1) {
+					// xdg-open opens two(!) tabs, prevention?
+					// Runtime.getRuntime().exec() seems to trigger fatal error in java <- updating java has not fixed this, resorting to Desktop class
+					/*if (Runtime.getRuntime().exec(new String[] { "which", "xdg-open" }).getInputStream().read() != -1) {
 						Runtime.getRuntime().exec(new String[] { "xdg-open", url });
-					} else {
+					} else {*/
+					// FIXME (Unsupported Desktop class seems to be a KDE problem...)
+					// FIXME (Doesn't seem to work on my Gnome Classic or Gnome desktops either although java.awt.Desktop should at least be supported here...)
 						Desktop.getDesktop().browse(new URI(url));
-					}
+					//}
 				} catch (IOException | URISyntaxException e) {
 					LoggerFactory.getLogger(HelpSystem.class).error("Can not load URL in external browser", e);
 				}

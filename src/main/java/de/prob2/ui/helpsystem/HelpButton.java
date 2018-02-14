@@ -1,29 +1,21 @@
 package de.prob2.ui.helpsystem;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob.Main;
 
-import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.operations.OperationsView;
-import de.prob2.ui.project.ProjectTab;
-import de.prob2.ui.project.machines.MachinesTab;
-import de.prob2.ui.project.preferences.PreferencesTab;
-import de.prob2.ui.states.StatesView;
-import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.verifications.ltl.LTLView;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
-import de.prob2.ui.verifications.tracereplay.TraceReplayView;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import org.slf4j.LoggerFactory;
 
 public class HelpButton extends Button{
 	private Injector injector;
@@ -40,29 +32,23 @@ public class HelpButton extends Button{
 	@FXML
 	private void initialize() {
 		// this needs to be updated if new translations of help are added and/or if new help buttons are added
-		germanHelpMap.put(HistoryView.class, "Verlauf.md.html");
-		germanHelpMap.put(OperationsView.class, "ProB2UI.md.html");
-		germanHelpMap.put(ProjectTab.class, "Projekt.md.html");
-		germanHelpMap.put(MachinesTab.class, "Projekt.md.html");
-		germanHelpMap.put(PreferencesTab.class, "Projekt.md.html");
-		germanHelpMap.put(StatsView.class, "Statistik.md.html");
-		germanHelpMap.put(LTLView.class, "Überprüfungen.md.html");
-		germanHelpMap.put(ModelcheckingView.class, "Überprüfungen.md.html");
-		germanHelpMap.put(SymbolicCheckingView.class, "Überprüfungen.md.html");
-		germanHelpMap.put(TraceReplayView.class, "Überprüfungen.md.html");
-		germanHelpMap.put(StatesView.class, "Hauptansicht" + File.separator + "Zustandsansicht.md.html");
+		prepareMap(germanHelpMap, this.getClass().getClassLoader().getResourceAsStream("help/help_de.txt"));
+		prepareMap(englishHelpMap, this.getClass().getClassLoader().getResourceAsStream("help/help_en.txt"));
+	}
 
-		englishHelpMap.put(HistoryView.class, "History.md.html");
-		englishHelpMap.put(OperationsView.class, "ProB2UI.md.html");
-		englishHelpMap.put(ProjectTab.class, "Project.md.html");
-		englishHelpMap.put(MachinesTab.class, "Project.md.html");
-		englishHelpMap.put(PreferencesTab.class, "Project.md.html");
-		englishHelpMap.put(StatsView.class, "Statistics.md.html");
-		englishHelpMap.put(LTLView.class, "Verification.md.html");
-		englishHelpMap.put(ModelcheckingView.class, "Verification.md.html");
-		englishHelpMap.put(SymbolicCheckingView.class, "Verification.md.html");
-		englishHelpMap.put(TraceReplayView.class, "Verification.md.html");
-		englishHelpMap.put(StatesView.class, "Main View" + File.separator + "State.md.html");
+	private void prepareMap(Map map, InputStream stream) {
+		Scanner scanner = new Scanner(stream);
+		while (scanner.hasNext()) {
+			String s = scanner.nextLine();
+			int splitIndex = s.indexOf(",");
+			String className = s.substring(0, splitIndex);
+			String htmlFileName = s.substring(splitIndex + 1);
+			try {
+				map.put(Class.forName(className), htmlFileName);
+			} catch (ClassNotFoundException e) {
+				LoggerFactory.getLogger(HelpButton.class).error("No class with this name found", e);
+			}
+		}
 	}
 
 	@FXML
@@ -78,31 +64,23 @@ public class HelpButton extends Button{
 	public void setHelpContent(Class<?> clazz) {
 		switch (injector.getInstance(HelpSystemStage.class).help.helpSubdirectoryString) {
 			case "help_de":
-				setGermanHelp(clazz);
+				setHelp(clazz,
+						Main.getProBDirectory() +
+								"prob2ui" + File.separator +
+								"help" + File.separator +
+								"help_de" + File.separator,
+						germanHelpMap);
 				break;
 			case "help_en":
 			default:
-				setEnglishHelp(clazz);
+				setHelp(clazz,
+						Main.getProBDirectory() +
+								"prob2ui" + File.separator +
+								"help" + File.separator +
+								"help_en" + File.separator,
+						englishHelpMap);
 				break;
 		}
-	}
-
-	private void setGermanHelp(Class<?> clazz) {
-		setHelp(clazz,
-				Main.getProBDirectory() +
-						"prob2ui" + File.separator +
-						"help" + File.separator +
-						"help_de" + File.separator,
-				germanHelpMap);
-	}
-
-	private void setEnglishHelp(Class<?> clazz) {
-		setHelp(clazz,
-				Main.getProBDirectory() +
-						"prob2ui" + File.separator +
-						"help" + File.separator +
-						"help_en" + File.separator,
-				englishHelpMap);
 	}
 
 	private void setHelp(Class<?> clazz, String main, Map<Class<?>, String> map) {
