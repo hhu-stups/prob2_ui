@@ -1,9 +1,7 @@
 package de.prob2.ui.helpsystem;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -32,13 +30,13 @@ public class HelpButton extends Button{
 	}
 
 	@FXML
-	private void initialize() throws ClassNotFoundException, IOException, URISyntaxException {
+	private void initialize() {
 		// this needs to be updated if new translations of help are added and/or if new help buttons are added
 		prepareMap(germanHelpMap, this.getClass().getClassLoader().getResourceAsStream("help/help_de.txt"));
 		prepareMap(englishHelpMap, this.getClass().getClassLoader().getResourceAsStream("help/help_en.txt"));
 	}
 
-	private void prepareMap(Map map, InputStream stream) throws IOException, URISyntaxException {
+	private void prepareMap(Map map, InputStream stream) {
 		Scanner scanner = new Scanner(stream);
 		while (scanner.hasNext()) {
 			String s = scanner.nextLine();
