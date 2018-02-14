@@ -1,15 +1,17 @@
 package de.prob2.ui.project;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.FileMenu;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.MachinesTab;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 
@@ -23,14 +25,16 @@ public final class ProjectView extends AnchorPane {
 	private ProjectTab projectTab;
 	@FXML
 	private MachinesTab machinesTab;
+	@FXML
+	private MenuButton recentProjectButton;
 
 	private final CurrentProject currentProject;
-	private final Injector injector;
+	private final FileMenu fileMenu;
 
 	@Inject
-	private ProjectView(final StageManager stageManager, final CurrentProject currentProject, final Injector injector) {
+	private ProjectView(final StageManager stageManager, final CurrentProject currentProject, final FileMenu fileMenu) {
 		this.currentProject = currentProject;
-		this.injector = injector;
+		this.fileMenu = fileMenu;
 		stageManager.loadFXML(this, "project_view.fxml");
 	}
 
@@ -47,16 +51,23 @@ public final class ProjectView extends AnchorPane {
 			}
 			projectTab.projectDescriptionText.setWrappingWidth(newValue.doubleValue() - 20);
 		});
+
+		recentProjectButton.getItems().setAll(fileMenu.getRecentProjectsMenu().getItems());
+		fileMenu.getRecentProjectsMenu().getItems().addListener((ListChangeListener<MenuItem>)(c -> {
+			recentProjectButton.getItems().clear();
+			recentProjectButton.getItems().setAll(fileMenu.getRecentProjectsMenu().getItems());
+		})); 
+		
 	}
 
 	@FXML
 	private void createNewProject() {
-		injector.getInstance(FileMenu.class).createNewProject();
+		fileMenu.createNewProject();
 	}
 	
 	@FXML
 	private void openProject() {
-		injector.getInstance(FileMenu.class).handleOpen();
+		fileMenu.handleOpen();
 	}
 
 	public void showMachines() {

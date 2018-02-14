@@ -16,6 +16,8 @@
 				onAction="#createNewProject" styleClass="button-blue" />
 			<Button fx:id="openProjectButton" text="%menu.file.items.open"
 				onAction="#openProject" styleClass="button-blue" />
+			<MenuButton fx:id="recentProjectButton" text="%menu.file.items.openRecentProject"
+				styleClass="button-blue" />
 		</VBox>
 	</StackPane>
 	<TabPane fx:id="projectTabPane" AnchorPane.topAnchor="0"

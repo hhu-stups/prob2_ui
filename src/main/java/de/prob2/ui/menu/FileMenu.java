@@ -194,4 +194,8 @@ public class FileMenu extends Menu {
 		preferencesStage.show();
 		preferencesStage.toFront();
 	}
+
+	public Menu getRecentProjectsMenu() {
+		return recentProjectsMenu;
+	}
 }
