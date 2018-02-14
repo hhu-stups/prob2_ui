@@ -27,8 +27,8 @@ public class HelpButton extends Button{
 		stageManager.loadFXML(this, "helpbutton.fxml");
 	}
 
-	private Map prepareMap(InputStream stream) {
-		Map map = new HashMap<Class<?>, String>();
+	private Map<Class<?>, String> prepareMap(InputStream stream) {
+		Map<Class<?>, String> map = new HashMap<>();
 		Scanner scanner = new Scanner(stream);
 		while (scanner.hasNext()) {
 			String s = scanner.nextLine();
