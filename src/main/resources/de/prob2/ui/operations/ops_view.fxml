@@ -129,6 +129,16 @@
 								<Tooltip text="%operations.random.tooltip" />
 							</tooltip>
 						</MenuButton>
+						<Button fx:id="reloadButton" mnemonicParsing="false"
+							onAction="#handleReloadButton">
+							<graphic>
+								<FontAwesomeIconView styleClass="icon-dark"
+									glyphName="UNDO" glyphSize="${fontSize.fontSize + 2}" />
+							</graphic>
+							<tooltip>
+								<Tooltip text="%operations.reload.tooltip" />
+							</tooltip>
+						</Button>
 					</HBox>
 				</HBox>
 			</AnchorPane>

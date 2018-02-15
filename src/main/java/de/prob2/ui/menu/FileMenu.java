@@ -155,7 +155,7 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	private void handleReloadMachine() {
+	public void handleReloadMachine() {
 		try {
 			this.currentTrace.reload(this.currentTrace.get());
 			injector.getInstance(TraceChecker.class).resetStatus();
