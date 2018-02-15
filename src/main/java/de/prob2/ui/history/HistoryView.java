@@ -75,9 +75,13 @@ public final class HistoryView extends AnchorPane {
 	@FXML
 	private TableColumn<HistoryItem, String> transitionColumn;
 	@FXML
-	private Button btBack;
+	private Button backButton;
 	@FXML
-	private Button btForward;
+	private Button fastBackButton;
+	@FXML
+	private Button forwardButton;
+	@FXML
+	private Button fastForwardButton;
 	@FXML
 	private Button saveTraceButton;
 	@FXML
@@ -123,22 +127,12 @@ public final class HistoryView extends AnchorPane {
 		traceChangeListener.changed(currentTrace, null, currentTrace.get());
 		currentTrace.addListener(traceChangeListener);
 
-		btBack.disableProperty().bind(currentTrace.canGoBackProperty().not());
-		btForward.disableProperty().bind(currentTrace.canGoForwardProperty().not());
+		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
+		fastBackButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
+		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
+		fastForwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 
 		historyTableView.setOnMouseMoved(e -> historyTableView.setCursor(Cursor.HAND));
-
-		btBack.setOnAction(e -> {
-			if (currentTrace.exists()) {
-				currentTrace.set(currentTrace.back());
-			}
-		});
-
-		btForward.setOnAction(e -> {
-			if (currentTrace.exists()) {
-				currentTrace.set(currentTrace.forward());
-			}
-		});
 
 		saveTraceButton.disableProperty()
 				.bind(currentProject.existsProperty().and(currentTrace.existsProperty()).not());
@@ -185,6 +179,38 @@ public final class HistoryView extends AnchorPane {
 					currentProject.getCurrentMachine());
 		}
 
+	}
+	
+	@FXML
+	private void handleBackButton() {
+		if (currentTrace.exists()) {
+			currentTrace.set(currentTrace.back());
+		}
+	}
+	
+	@FXML
+	private void handleFastBackButton() {
+		if (currentTrace.exists()) {
+			while(currentTrace.canGoBack()) {
+				currentTrace.set(currentTrace.back());
+			}
+		}
+	}
+
+	@FXML
+	private void handleForwardButton() {
+		if (currentTrace.exists()) {
+			currentTrace.set(currentTrace.forward());
+		}
+	}
+	
+	@FXML
+	private void handleFastForwardButton() {
+		if (currentTrace.exists()) {
+			while(currentTrace.canGoForward()) {
+				currentTrace.set(currentTrace.forward());
+			}
+		}
 	}
 
 }
