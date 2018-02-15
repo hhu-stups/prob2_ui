@@ -6,7 +6,6 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <?import javafx.collections.*?>
-<?import java.lang.String?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaInput?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingItem?>
 

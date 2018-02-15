@@ -3,12 +3,8 @@
 <?import javafx.scene.web.WebView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.collections.*?>
-<?import javafx.geometry.Insets?>
 <?import de.prob2.ui.dotty.DotView?>
 <?import javafx.scene.Scene?>
-<?import javafx.scene.Group?>
-<?import javafx.scene.layout.HBox?>
 
 <fx:root type="DotView" title="%dotview.header" minWidth="600" minHeight="400" width="1080.0" height="720.0" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
