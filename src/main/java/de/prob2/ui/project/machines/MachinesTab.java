@@ -2,6 +2,7 @@ package de.prob2.ui.project.machines;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,18 +15,21 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.EditPreferencesProvider;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
-
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -88,17 +92,23 @@ public class MachinesTab extends Tab {
 
 				final MenuItem removeMachineMenuItem = new MenuItem(
 						bundle.getString("project.machines.tab.menu.removeMachine"));
-				removeMachineMenuItem.setOnAction(event -> currentProject.removeMachine(machine));
+				removeMachineMenuItem.setOnAction(event -> {
+					Optional<ButtonType> result = stageManager.makeAlert(AlertType.CONFIRMATION,
+							String.format(bundle.getString("project.machines.removeDialog.message"), machine.getName())).showAndWait();
+					if (result.isPresent() && result.get().equals(ButtonType.OK)) {
+						currentProject.removeMachine(machine);
+					}
+				});
 
 				final MenuItem editFileMenuItem = new MenuItem(
 						bundle.getString("project.machines.tab.menu.editMachineFile"));
 				editFileMenuItem.setOnAction(event -> injector.getInstance(EditPreferencesProvider.class)
-					.showEditorStage(currentProject.getLocation().toPath().resolve(machine.getPath())));
+						.showEditorStage(currentProject.getLocation().toPath().resolve(machine.getPath())));
 
 				final MenuItem editExternalMenuItem = new MenuItem(
 						bundle.getString("project.machines.tab.menu.editMachineFileInExternalEditor"));
 				editExternalMenuItem.setOnAction(event -> injector.getInstance(EditPreferencesProvider.class)
-					.showExternalEditor(currentProject.getLocation().toPath().resolve(machine.getPath())));
+						.showExternalEditor(currentProject.getLocation().toPath().resolve(machine.getPath())));
 
 				final Menu startAnimationMenu = new Menu(bundle.getString("project.machines.tab.menu.startAnimation"));
 
@@ -123,19 +133,18 @@ public class MachinesTab extends Tab {
 					}
 				});
 			}
-			if(machinesVBox.getChildren().size() == 1){
+			if (machinesVBox.getChildren().size() == 1) {
 				currentMachinesItem = ((MachinesItem) machinesVBox.getChildren().get(0));
 			}
 			refreshMachineIcons();
 		});
 	}
 
-	private void refreshMachineIcons(){
-		for(Node machinesItem :  machinesVBox.getChildren()){
+	private void refreshMachineIcons() {
+		for (Node machinesItem : machinesVBox.getChildren()) {
 			((MachinesItem) machinesItem).setNotRunning();
-			if(currentProject.getCurrentMachine() != null &&
-					((MachinesItem) machinesItem).getMachine().getName()
-							.equals(currentProject.getCurrentMachine().getName())){
+			if (currentProject.getCurrentMachine() != null && ((MachinesItem) machinesItem).getMachine().getName()
+					.equals(currentProject.getCurrentMachine().getName())) {
 				((MachinesItem) machinesItem).setRunning();
 			}
 		}
