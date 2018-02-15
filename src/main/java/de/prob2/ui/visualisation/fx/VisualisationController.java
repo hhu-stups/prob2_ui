@@ -1,8 +1,22 @@
 package de.prob2.ui.visualisation.fx;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.Set;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
@@ -13,6 +27,7 @@ import de.prob2.ui.visualisation.fx.exception.VisualisationParseException;
 import de.prob2.ui.visualisation.fx.listener.EventListener;
 import de.prob2.ui.visualisation.fx.listener.FormulaListener;
 import de.prob2.ui.visualisation.fx.loader.VisualisationLoader;
+
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -22,15 +37,17 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.*;
 
 /**
  * @author Christoph Heinzen
@@ -313,7 +330,7 @@ public class VisualisationController {
 		if (eventListenerMap != null) {
 			String lastEvent = currentTrace.get().getCurrentTransition().getName();
 			if (eventListenerMap.containsKey(lastEvent)) {
-				LOGGER.info("Last executed event is \"{}\". Call corresponding listener.");
+				LOGGER.info("Last executed event is \"{}\". Call corresponding listener.", lastEvent);
 				try {
 					eventListenerMap.get(lastEvent).eventExcecuted();
 				} catch (Throwable ex) {
