@@ -64,8 +64,7 @@ public final class ConsoleSearchHandler {
 	}
 	
 	public String getCurrentSearchResult() {
-		int posOfColon = parent.getText().indexOf(':', parent.getLineStart()) + 1;
-		return parent.getText().substring(posOfColon, parent.getText().length());
+		return parent.getLine().substring(parent.getLine().indexOf(':') + 1);
 	}
 	
 	void handleKey(KeyEvent e) {
@@ -87,7 +86,7 @@ public final class ConsoleSearchHandler {
 			if (e.getCode() == KeyCode.DELETE) {
 				parent.deactivateSearch();
 				return true;
-			} else if (parent.getCaretPosition() != parent.getText().indexOf('\'', parent.getLineStart()) + 1) {
+			} else if (parent.getCaretPosition() != parent.getAbsolutePosition(parent.getLineNumber(), parent.getLine().indexOf('\'')) + 1) {
 				handleKey(e);
 			}
 		}
@@ -97,10 +96,9 @@ public final class ConsoleSearchHandler {
 	private void refreshSearch() {
 		final String format = bundle.getString(searchResults.get(0).getFound() ? "consoles.prompt.backwardSearch" : "consoles.prompt.backwardSearchFailed");
 		final String addition = String.format(format, getSearchCurrent(), searchResults.get(currentSearchIndex).getResult());
-		parent.deleteText(parent.getLineStart(), parent.getText().length());
+		parent.deleteText(parent.getLineStart(), parent.getLength());
 		parent.appendText(addition);
-		int posOfColon = parent.getText().indexOf(':', parent.getLineStart());
-		parent.moveTo(posOfColon - 1);
+		parent.moveTo(parent.getAbsolutePosition(parent.getLineNumber(), parent.getLine().indexOf(':')) - 1);
 		parent.scrollYToPixel(Double.MAX_VALUE);
 	}
 	

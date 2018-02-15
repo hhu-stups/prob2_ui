@@ -190,8 +190,8 @@ public class GroovyCodeCompletion extends Popup {
 			deactivate();
 			return true;
 		}
-		if (getParent().getCaretPosition() != getParent().getText().length()) {
-			currentSuggestion += Character.toString(getParent().getText().charAt(getParent().getCaretPosition()));
+		if (getParent().getCaretPosition() != getParent().getLength()) {
+			currentSuggestion += getParent().getText(getParent().getCaretPosition(), getParent().getCaretPosition()+1);
 			charCounterInSuggestion += 1;
 			currentPosInSuggestion = Math.min(currentSuggestion.length(), currentPosInSuggestion + 1);
 		}
@@ -228,7 +228,7 @@ public class GroovyCodeCompletion extends Popup {
 			charCounterInSuggestion--;
 			currentSuggestion = currentSuggestion.substring(0, currentPosInSuggestion) + currentSuggestion.substring(Math.min(currentPosInSuggestion + 1, currentSuggestion.length()), currentSuggestion.length());
 		}
-		if (getParent().getCaretPosition() == getParent().getText().length()) {
+		if (getParent().getCaretPosition() == getParent().getLength()) {
 			deactivate();
 		}
 	}

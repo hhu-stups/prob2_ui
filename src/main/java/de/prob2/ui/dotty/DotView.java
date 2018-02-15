@@ -132,11 +132,11 @@ public class DotView extends Stage {
 			enterFormulaBox.setVisible(needFormula);
 			lbDescription.setText(to.getDescription());
 			String currentFormula = tfFormula.getText();
-			if(!currentFormula.isEmpty() && !stateChanged || cbContinuous.isSelected()) {
+			if((!needFormula || !currentFormula.isEmpty()) && (!stateChanged || cbContinuous.isSelected())) {
 				dotView.getEngine().loadContent("");
 				visualize(to);
+				stateChanged = !stateChanged;
 			}
-			stateChanged = false;
 		});
 		fillCommands();
 		currentTrace.currentStateProperty().addListener((observable, from, to) ->  {
@@ -148,7 +148,7 @@ public class DotView extends Stage {
 			lvChoice.getSelectionModel().select(index);
 			stateChanged = true;
 		});
-		
+
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			fillCommands();
 			dotView.getEngine().loadContent("");
