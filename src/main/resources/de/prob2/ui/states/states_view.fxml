@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-<?import de.prob2.ui.consoles.b.BConsole?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.states.StatesView?>
