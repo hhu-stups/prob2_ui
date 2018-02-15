@@ -22,11 +22,13 @@ public final class ProjectView extends AnchorPane {
 	@FXML
 	private Button newProjectButton;
 	@FXML
+	private Button openProjectButton;
+	@FXML
+	private MenuButton recentProjectButton;
+	@FXML
 	private ProjectTab projectTab;
 	@FXML
 	private MachinesTab machinesTab;
-	@FXML
-	private MenuButton recentProjectButton;
 
 	private final CurrentProject currentProject;
 	private final FileMenu fileMenu;
@@ -42,6 +44,8 @@ public final class ProjectView extends AnchorPane {
 	public void initialize() {
 		projectTabPane.visibleProperty().bind(currentProject.existsProperty());
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
+		recentProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
+		openProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 		
 		projectTab.projectDescriptionTextArea.maxWidthProperty().bind(this.projectTabPane.widthProperty().subtract(50));
 		this.projectTabPane.widthProperty().addListener((observableValue, oldValue, newValue) -> {
