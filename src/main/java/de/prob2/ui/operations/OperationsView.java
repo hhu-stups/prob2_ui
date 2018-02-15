@@ -205,7 +205,11 @@ public final class OperationsView extends AnchorPane {
 	@FXML
 	private Button backButton;
 	@FXML
+	private Button fastBackButton;
+	@FXML
 	private Button forwardButton;
+	@FXML
+	private Button fastForwardButton;
 	@FXML
 	private Button sortButton;
 	@FXML
@@ -269,7 +273,9 @@ public final class OperationsView extends AnchorPane {
 		});
 
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
+		fastBackButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
+		fastForwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 		randomButton.disableProperty().bind(currentTrace.existsProperty().not());
 
 		randomText.textProperty().addListener((observable, from, to) -> {
@@ -482,11 +488,29 @@ public final class OperationsView extends AnchorPane {
 			currentTrace.set(currentTrace.back());
 		}
 	}
+	
+	@FXML
+	private void handleFastBackButton() {
+		if (currentTrace.exists()) {
+			while(currentTrace.canGoBack()) {
+				currentTrace.set(currentTrace.back());
+			}
+		}
+	}
 
 	@FXML
 	private void handleForwardButton() {
 		if (currentTrace.exists()) {
 			currentTrace.set(currentTrace.forward());
+		}
+	}
+	
+	@FXML
+	private void handleFastForwardButton() {
+		if (currentTrace.exists()) {
+			while(currentTrace.canGoForward()) {
+				currentTrace.set(currentTrace.forward());
+			}
 		}
 	}
 
