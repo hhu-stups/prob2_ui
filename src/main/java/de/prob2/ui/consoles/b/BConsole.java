@@ -18,11 +18,11 @@ public final class BConsole extends Console {
 		currentTrace.addListener((o, from, to) -> {
 			final String message;
 			if (to == null) {
-				message = "Model unloaded";
+				message = bundle.getString("consoles.b.message.modelUnloaded");
 			} else {
 				final File modelFile = to.getStateSpace().getModel().getModelFile();
 				final String name = modelFile == null ? to.getStateSpace().getMainComponent().toString() : modelFile.getName();
-				message = "Model loaded: " + name;
+				message = String.format(bundle.getString("consoles.b.message.modelLoaded"), name);
 			}
 			this.insertText(this.getLineNumber(), 0, message + '\n');
 			this.requestFollowCaret();
