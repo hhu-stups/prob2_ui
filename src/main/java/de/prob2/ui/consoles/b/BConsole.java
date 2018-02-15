@@ -24,7 +24,7 @@ public final class BConsole extends Console {
 				final String name = modelFile == null ? to.getStateSpace().getMainComponent().toString() : modelFile.getName();
 				message = "Model loaded: " + name;
 			}
-			this.insertText(this.getLineStart(), message + '\n');
+			this.insertText(this.getLineNumber(), 0, message + '\n');
 			this.requestFollowCaret();
 		});
 	}

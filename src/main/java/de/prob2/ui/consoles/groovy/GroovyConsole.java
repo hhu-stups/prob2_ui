@@ -65,13 +65,13 @@ public class GroovyConsole extends Console {
 	private void handleChooseSuggestion(CodeCompletionEvent e) {
 		String choice = e.getChoice();
 		String suggestion = e.getCurrentSuggestion();
-		int indexSkipped = getIndexSkipped(this.getText().substring(this.getCaretPosition()), choice, suggestion);
+		int indexSkipped = getIndexSkipped(this.getText(this.getCaretPosition(), this.getLength()), choice, suggestion);
 		int indexOfRest = this.getCaretPosition() + indexSkipped;
-		int oldLength = this.getText().length();
-		String addition = choice + this.getText().substring(indexOfRest);
-		this.deleteText(this.getCaretPosition() - suggestion.length(), this.getText().length());
+		int oldLength = this.getLength();
+		String addition = choice + this.getText(indexOfRest, this.getLength());
+		this.deleteText(this.getCaretPosition() - suggestion.length(), this.getLength());
 		this.appendText(addition);
-		int diff = this.getText().length() - oldLength;
+		int diff = this.getLength() - oldLength;
 		currentPosInLine += diff + indexSkipped;
 		charCounterInLine += diff;
 		this.moveTo(indexOfRest + diff);

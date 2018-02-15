@@ -2,6 +2,7 @@ package de.prob2.ui.consoles;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -66,9 +67,7 @@ public abstract class Console extends StyleClassedTextArea {
 		this.getStyleClass().add("console");
 		
 		this.promptProperty().addListener((o, from, to) -> {
-			final int oldPromptStart = this.getLineStart();
-			final int oldPromptEnd = oldPromptStart + from.length();
-			this.replace(oldPromptStart, oldPromptEnd, to, this.getStyleAtPosition(oldPromptStart));
+			this.replace(this.getLineNumber(), 0, this.getLineNumber(), from.length(), to, this.getStyleAtPosition(this.getLineNumber(), 0));
 		});
 	}
 	
@@ -137,9 +136,9 @@ public abstract class Console extends StyleClassedTextArea {
 		if (this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
 			goToLastPos();
 		}
-		String oldText = this.getText();
+		final int oldLength = this.getLength();
 		super.paste();
-		int diff = this.getLength() - oldText.length();
+		final int diff = this.getLength() - oldLength;
 		charCounterInLine += diff;
 		currentPosInLine += diff;
 	}
@@ -201,11 +200,10 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	protected void activateSearch() {
-		int posOfEnter = this.getText().lastIndexOf('\n');
 		final String input = this.getInput();
-		this.deleteText(posOfEnter + 1, this.getText().length());
+		this.deleteText(getLineNumber(), 0, getLineNumber(), this.getParagraphLength(getLineNumber()));
 		this.appendText(String.format(bundle.getString("consoles.prompt.backwardSearch"), "", input));
-		this.moveTo(this.getText().lastIndexOf('\''));
+		this.moveTo(getLineNumber(), this.getLine().lastIndexOf('\''));
 		currentPosInLine = 0;
 		charCounterInLine = 0;
 		searchHandler.activateSearch();
@@ -213,11 +211,10 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	protected void deactivateSearch() {
 		if (searchHandler.isActive()) {
-			int posOfEnter = this.getText().lastIndexOf('\n');
 			String searchResult = searchHandler.getCurrentSearchResult();
-			this.deleteText(posOfEnter + 1, this.getText().length());
+			this.deleteText(getLineNumber(), 0, getLineNumber(), this.getParagraphLength(getLineNumber()));
 			this.appendText(prompt.get() + searchResult);
-			this.moveTo(this.getText().length());
+			this.moveTo(this.getLength());
 			charCounterInLine = searchResult.length();
 			currentPosInLine = charCounterInLine;
 			searchHandler.deactivateSearch();
@@ -259,15 +256,15 @@ public abstract class Console extends StyleClassedTextArea {
 			}
 			this.appendText("\n" + execResult);
 			if (execResult.getResultType() == ConsoleExecResultType.ERROR) {
-				int begin = this.getText().length() - execResult.toString().length();
-				int end = this.getText().length();
-				this.setStyleClass(begin, end, "error");
+				final int begin = this.getAbsolutePosition(getLineNumber(), 0);
+				final int end = this.getLength();
+				this.setStyle(getLineNumber(), Collections.singletonList("error"));
 				errors.add(new IndexRange(begin, end));
 			}
 		}
 		searchHandler.handleEnter();
 		this.appendText('\n' + prompt.get());
-		this.setStyleClass(this.getLineStart(), this.getText().length(), "current");
+		this.setStyle(getLineNumber(), Collections.singletonList("current"));
 		this.scrollYToPixel(Double.MAX_VALUE);
 		goToLastPos();
 	}
@@ -323,7 +320,7 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	private void setTextAfterArrowKey() {
 		String currentLine = instructions.get(posInList).getInstruction();
-		this.deleteText(this.getInputStart(), this.getText().length());
+		this.deleteText(this.getInputStart(), this.getLength());
 		this.appendText(currentLine);
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
@@ -375,12 +372,16 @@ public abstract class Console extends StyleClassedTextArea {
 		this.promptProperty().set(prompt);
 	}
 	
+	public int getLineNumber() {
+		return this.getParagraphs().size()-1;
+	}
+	
 	public int getLineStart() {
-		return this.getText().lastIndexOf('\n') + 1;
+		return this.getAbsolutePosition(getLineNumber(), 0);
 	}
 	
 	public String getLine() {
-		return this.getText().substring(this.getLineStart());
+		return this.getParagraph(this.getLineNumber()).getText();
 	}
 	
 	public int getInputStart() {
@@ -388,13 +389,12 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public String getInput() {
-		return this.getText().substring(this.getInputStart());
+		return this.getLine().substring(this.getPrompt().length());
 	}
 	
 	public Console.ConfigData getSettings() {
 		final Console.ConfigData configData = new Console.ConfigData();
-		configData.instructions = new ArrayList<>();
-		configData.instructions.addAll(instructions.stream().map(ConsoleInstruction::getInstruction).collect(Collectors.toList()));
+		configData.instructions = instructions.stream().map(ConsoleInstruction::getInstruction).collect(Collectors.toList());
 		configData.text = getText();
 		configData.charCounterInLine = charCounterInLine;
 		configData.currentPosInLine = currentPosInLine;
