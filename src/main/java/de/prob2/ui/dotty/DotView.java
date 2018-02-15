@@ -131,7 +131,8 @@ public class DotView extends Stage {
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
 			lbDescription.setText(to.getDescription());
-			if(!needFormula && (!stateChanged || cbContinuous.isSelected())) {
+			String currentFormula = tfFormula.getText();
+			if(!currentFormula.isEmpty() && !stateChanged || cbContinuous.isSelected()) {
 				dotView.getEngine().loadContent("");
 				visualize(to);
 			}
