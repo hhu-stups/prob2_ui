@@ -119,11 +119,12 @@ public class MachinesTab extends Tab {
 				ContextMenu contextMenu = new ContextMenu(showDescription, editMachineMenuItem, removeMachineMenuItem,
 						editFileMenuItem, editExternalMenuItem, startAnimationMenu);
 
+				machinesItem.setOnContextMenuRequested(event -> {
+					updateAnimationMenu(startAnimationMenu, machine, machinesItem);
+					contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
+				});
 				machinesItem.setOnMouseClicked(event -> {
-					if (event.getButton().equals(MouseButton.SECONDARY) && event.getClickCount() == 1) {
-						updateAnimationMenu(startAnimationMenu, machine, machinesItem);
-						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
-					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 						currentProject.startAnimation(machine, machine.getLastUsed());
 						refreshMachineIcons();
 					}
