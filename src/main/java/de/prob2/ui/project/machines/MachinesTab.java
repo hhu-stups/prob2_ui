@@ -15,21 +15,20 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.EditPreferencesProvider;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
-import javafx.application.Platform;
+
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -49,8 +48,6 @@ public class MachinesTab extends Tab {
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final Injector injector;
-
-	private MachinesItem currentMachinesItem;
 
 	@Inject
 	private MachinesTab(final StageManager stageManager, final ResourceBundle bundle,
@@ -128,13 +125,11 @@ public class MachinesTab extends Tab {
 						contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 					} else if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 						currentProject.startAnimation(machine, machine.getLastUsed());
-						currentMachinesItem = machinesItem;
 						refreshMachineIcons();
 					}
 				});
 			}
 			if (machinesVBox.getChildren().size() == 1) {
-				currentMachinesItem = ((MachinesItem) machinesVBox.getChildren().get(0));
 			}
 			refreshMachineIcons();
 		});
@@ -157,7 +152,6 @@ public class MachinesTab extends Tab {
 		defItem.setOnAction(e -> {
 			currentProject.startAnimation(machine, Preference.DEFAULT);
 			machine.setLastUsed(Preference.DEFAULT);
-			currentMachinesItem = machinesItem;
 			refreshMachineIcons();
 		});
 		startAnimationMenu.getItems().add(defItem);
@@ -170,7 +164,6 @@ public class MachinesTab extends Tab {
 			item.setOnAction(e -> {
 				currentProject.startAnimation(machine, preference);
 				machine.setLastUsed(preference);
-				currentMachinesItem = machinesItem;
 				refreshMachineIcons();
 			});
 			startAnimationMenu.getItems().add(item);
