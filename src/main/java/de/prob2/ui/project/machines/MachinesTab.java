@@ -148,6 +148,8 @@ public class MachinesTab extends Tab {
 
 		for (Preference preference : currentProject.getPreferences()) {
 			final MenuItem item = new MenuItem(preference.toString());
+			// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
+			item.setMnemonicParsing(false);
 			item.setOnAction(e -> {
 				currentProject.startAnimation(machinesItem.getMachine(), preference);
 				machinesItem.getMachine().setLastUsed(preference);
