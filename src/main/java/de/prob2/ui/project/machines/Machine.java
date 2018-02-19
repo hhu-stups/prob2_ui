@@ -106,37 +106,20 @@ public class Machine {
 	private ObservableSet<File> traces;
 	private ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
-	private transient BooleanProperty changed = new SimpleBooleanProperty(false);
+	private transient BooleanProperty changed;
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
-		initializeLTLStatus();
-		initializeSymbolicCheckingStatus();
-		initializeModelcheckingStatus();
-		this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", CheckingStatus.UNKNOWN);
-		this.symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", CheckingStatus.UNKNOWN);
-		this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", CheckingStatus.UNKNOWN);
 		this.name = name;
 		this.description = description;
 		this.location = location.toString();
 		this.type = type;
-		this.lastUsed = Preference.DEFAULT;
-		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
-		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
-		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
-		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
-		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
+		this.replaceMissingWithDefaults();
+		this.resetStatus();
 	}
 	
 	public Machine(String name, String description, Path location) {
 		this(name, description, location,
 			Machine.Type.fromExtension(StageManager.getExtension(location.getFileName().toString())));
-	}
-	
-	public void resetStatus() {
-		initializeLTLStatus();
-		initializeSymbolicCheckingStatus();
-		initializeModelcheckingStatus();
-		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeCounterExamples);
 	}
 	
 	public BooleanProperty changedProperty() {
@@ -161,7 +144,7 @@ public class Machine {
 		this.lastUsed = lastUsed;
 	}
 	
-	public void initializeLTLStatus() {
+	public void resetStatus() {
 		if (ltlFormulas != null) {
 			ltlFormulas.forEach(LTLFormulaItem::initializeStatus);
 		}
@@ -169,15 +152,10 @@ public class Machine {
 			ltlPatterns.forEach(LTLPatternItem::initializeStatus);
 		}
 		patternManager = new PatternManager();
-	}
-	
-	public void initializeSymbolicCheckingStatus() {
 		if (symbolicCheckingFormulas != null) {
 			symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeStatus);
+			symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeCounterExamples);
 		}
-	}
-	
-	public void initializeModelcheckingStatus() {
 		if (modelcheckingItems != null) {
 			modelcheckingItems.forEach(ModelCheckingItem::initializeStatus);
 		}

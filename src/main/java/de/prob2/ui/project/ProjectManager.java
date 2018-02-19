@@ -15,11 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import org.hildan.fxgson.FxGson;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -28,12 +25,18 @@ import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
+
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+
+import org.hildan.fxgson.FxGson;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class ProjectManager {
@@ -140,7 +143,7 @@ public class ProjectManager {
 		Project project = loadProject(file);
 		if (project != null) {
 			replaceMissingWithDefaults(project);
-			initializeLTL(project);
+			project.getMachines().forEach(Machine::resetStatus);
 			currentProject.set(project, false);
 			addToRecentProjects(file);
 		}
@@ -170,12 +173,5 @@ public class ProjectManager {
 			prefList.forEach(Preference::replaceMissingWithDefaults);
 		}
 		project.setPreferences(prefList);
-	}
-
-	private void initializeLTL(Project project) {
-		for (Machine machine : project.getMachines()) {
-			machine.initializeLTLStatus();
-			machine.initializeSymbolicCheckingStatus();
-		}
 	}
 }
