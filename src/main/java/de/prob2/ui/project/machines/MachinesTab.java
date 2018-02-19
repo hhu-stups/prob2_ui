@@ -76,7 +76,7 @@ public class MachinesTab extends Tab {
 
 			machinesVBox.getChildren().clear();
 			for (Machine machine : to) {
-				MachinesItem machinesItem = new MachinesItem(machine, stageManager);
+				MachinesItem machinesItem = new MachinesItem(machine, stageManager, currentProject);
 				machinesVBox.getChildren().add(machinesItem);
 
 				final MenuItem editMachineMenuItem = new MenuItem(
@@ -120,40 +120,26 @@ public class MachinesTab extends Tab {
 						editFileMenuItem, editExternalMenuItem, startAnimationMenu);
 
 				machinesItem.setOnContextMenuRequested(event -> {
-					updateAnimationMenu(startAnimationMenu, machine, machinesItem);
+					updateAnimationMenu(startAnimationMenu, machinesItem);
 					contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
 				});
 				machinesItem.setOnMouseClicked(event -> {
 					if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 						currentProject.startAnimation(machine, machine.getLastUsed());
-						refreshMachineIcons();
 					}
 				});
 			}
-			if (machinesVBox.getChildren().size() == 1) {
-			}
-			refreshMachineIcons();
 		});
 	}
 
-	private void refreshMachineIcons() {
-		for (Node machinesItem : machinesVBox.getChildren()) {
-			((MachinesItem) machinesItem).setNotRunning();
-			if (currentProject.getCurrentMachine() != null && ((MachinesItem) machinesItem).getMachine().getName()
-					.equals(currentProject.getCurrentMachine().getName())) {
-				((MachinesItem) machinesItem).setRunning();
-			}
-		}
-	}
-
-	private void updateAnimationMenu(final Menu startAnimationMenu, Machine machine, MachinesItem machinesItem) {
+	private void updateAnimationMenu(final Menu startAnimationMenu, MachinesItem machinesItem) {
 		startAnimationMenu.getItems().clear();
 
 		final MenuItem defItem = new MenuItem(Preference.DEFAULT.toString());
 		defItem.setOnAction(e -> {
-			currentProject.startAnimation(machine, Preference.DEFAULT);
-			machine.setLastUsed(Preference.DEFAULT);
-			refreshMachineIcons();
+			currentProject.startAnimation(machinesItem.getMachine(), Preference.DEFAULT);
+			machinesItem.getMachine().setLastUsed(Preference.DEFAULT);
+			machinesItem.refresh();
 		});
 		startAnimationMenu.getItems().add(defItem);
 
@@ -163,9 +149,9 @@ public class MachinesTab extends Tab {
 		for (Preference preference : currentProject.getPreferences()) {
 			final MenuItem item = new MenuItem(preference.toString());
 			item.setOnAction(e -> {
-				currentProject.startAnimation(machine, preference);
-				machine.setLastUsed(preference);
-				refreshMachineIcons();
+				currentProject.startAnimation(machinesItem.getMachine(), preference);
+				machinesItem.getMachine().setLastUsed(preference);
+				machinesItem.refresh();
 			});
 			startAnimationMenu.getItems().add(item);
 		}
@@ -201,7 +187,6 @@ public class MachinesTab extends Tab {
 			i++;
 		}
 		currentProject.addMachine(new Machine(name, "", relative));
-		refreshMachineIcons();
 	}
 
 	private void showMachineView(MachinesItem machinesItem) {
