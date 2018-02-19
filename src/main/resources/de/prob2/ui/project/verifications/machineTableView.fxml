@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.project.verifications.MachineTableView?>
-<?import javafx.scene.control.*?>
-<fx:root stylesheets="@/prob.css" minHeight="150" type="MachineTableView"
-		 xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<fx:root type="MachineTableView" stylesheets="@/prob.css" styleClass="machine-table-view" minHeight="150" xmlns:fx="http://javafx.com/fxml/1">
 	<columnResizePolicy>
 		<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 	</columnResizePolicy>

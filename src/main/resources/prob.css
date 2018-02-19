@@ -910,6 +910,19 @@
 	-fx-font-size: 1em;
 }
 
+.machine-table-view .status-icon.unknown {
+	-glyph-name: "QUESTION_CIRCLE";
+	-fx-fill: blue;
+}
+.machine-table-view .status-icon.successful {
+	-glyph-name: "CHECK";
+	-fx-fill: green;
+}
+.machine-table-view .status-icon.failed {
+	-glyph-name: "REMOVE";
+	-fx-fill: red;
+}
+
 /* =================== STATES VIEW =================== */
 
 .changed .tree-table-cell {
