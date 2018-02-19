@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.Api;
@@ -124,12 +123,6 @@ public class Machine {
 	
 	public BooleanProperty changedProperty() {
 		return changed;
-	}
-
-	public String getFileName() {
-		String pattern = Pattern.quote(System.getProperty("file.separator"));
-		String[] splittedFileName = location.split(pattern);
-		return splittedFileName[splittedFileName.length - 1];
 	}
 	
 	public Machine.Type getType() {
