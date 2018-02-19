@@ -52,7 +52,7 @@ public class LTLFormulaChecker {
 			Checked result = this.checkFormula(item, machine);
 			if(result == Checked.FAIL || result == Checked.EXCEPTION) {
 				failed.set(0, true);
-				machine.setLTLCheckedFailed();
+				machine.setLtlStatus(Machine.CheckingStatus.FAILED);
 			}
 			item.setChecked(result);
 		}

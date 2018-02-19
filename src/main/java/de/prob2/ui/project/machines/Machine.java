@@ -237,30 +237,6 @@ public class Machine {
 		this.changed.set(true);
 	}
 	
-	public void setLTLCheckedSuccessful() {
-		this.setLtlStatus(CheckingStatus.SUCCESSFUL);
-	}
-
-	public void setLTLCheckedFailed() {
-		this.setLtlStatus(CheckingStatus.FAILED);
-	}
-	
-	public void setSymbolicCheckedSuccessful() {
-		this.setSymbolicCheckingStatus(CheckingStatus.SUCCESSFUL);
-	}
-
-	public void setSymbolicCheckedFailed() {
-		this.setSymbolicCheckingStatus(CheckingStatus.FAILED);
-	}
-	
-	public void setModelcheckingCheckedSuccessful() {
-		this.setModelcheckingStatus(CheckingStatus.SUCCESSFUL);
-	}
-
-	public void setModelcheckingCheckedFailed() {
-		this.setModelcheckingStatus(CheckingStatus.FAILED);
-	}
-		
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {
 		return ltlFormulas;
 	}

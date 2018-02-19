@@ -9,11 +9,9 @@ import com.google.inject.Singleton;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.statusbar.StatusBar.CheckingStatus;
 
 @Singleton
-public class MachineStatusHandler {
-	
+public final class MachineStatusHandler {
 	private final Injector injector;
 	
 	@Inject
@@ -28,16 +26,16 @@ public class MachineStatusHandler {
 				continue;
 			}
 			if(item.getChecked() == Checked.FAIL || item.getChecked() == Checked.EXCEPTION) {
-				refreshMachineStatusFailed(machine, type);
+				refreshMachineStatus(machine, type, Machine.CheckingStatus.FAILED);
 				updateStatusBar(type, StatusBar.CheckingStatus.ERROR);
 				return;
 			}
 		}
-		refreshMachineStatusSuccess(machine, type);
+		refreshMachineStatus(machine, type, Machine.CheckingStatus.SUCCESSFUL);
 		updateStatusBar(type, StatusBar.CheckingStatus.SUCCESSFUL);
 	}
 	
-	private void updateStatusBar(CheckingType type, CheckingStatus status) {
+	private void updateStatusBar(CheckingType type, StatusBar.CheckingStatus status) {
 		switch(type) {
 			case LTL:
 				injector.getInstance(StatusBar.class).setLtlStatus(status);
@@ -53,33 +51,16 @@ public class MachineStatusHandler {
 		}
 	}
 	
-	private void refreshMachineStatusFailed(Machine machine, CheckingType type) {
+	private void refreshMachineStatus(Machine machine, CheckingType type, Machine.CheckingStatus status) {
 		switch(type) {
 			case LTL:
-				machine.setLTLCheckedFailed();
+				machine.setLtlStatus(status);
 				break;
 			case SYMBOLIC:
-				machine.setSymbolicCheckedFailed();
+				machine.setSymbolicCheckingStatus(status);
 				break;
 			case MODELCHECKING:
-				machine.setModelcheckingCheckedFailed();
-				break;
-			default:
-				break;
-		}
-		injector.getInstance(MachineTableView.class).refresh();
-	}
-	
-	private void refreshMachineStatusSuccess(Machine machine, CheckingType type) {
-		switch(type) {
-			case LTL:
-				machine.setLTLCheckedSuccessful();
-				break;
-			case SYMBOLIC:
-				machine.setSymbolicCheckedSuccessful();
-				break;
-			case MODELCHECKING:
-				machine.setModelcheckingCheckedSuccessful();
+				machine.setModelcheckingStatus(status);
 				break;
 			default:
 				break;
@@ -101,5 +82,4 @@ public class MachineStatusHandler {
 		return null;
 		
 	}
-		
 }
