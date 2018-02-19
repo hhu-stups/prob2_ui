@@ -1,8 +1,5 @@
 package de.prob2.ui.project.machines;
 
-import com.google.inject.Inject;
-
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob2.ui.internal.StageManager;
@@ -12,26 +9,21 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 public class MachinesItem extends VBox {
-	@FXML
-	private Label nameLabel;
-	@FXML
-	private Label locationLabel;
+	@FXML private Label nameLabel;
+	@FXML private FontAwesomeIconView runningIcon;
+	@FXML private Label locationLabel;
 
-	private Machine machine;
+	private final Machine machine;
 
-	@Inject
-	MachinesItem(Machine machine, final StageManager stageManager) {
+	MachinesItem(final Machine machine, final StageManager stageManager) {
 		this.machine = machine;
 		stageManager.loadFXML(this, "machines_item.fxml");
 	}
 
 	@FXML
-	public void initialize() {
+	private void initialize() {
 		nameLabel.setText(machine.getName());
 		locationLabel.setText(machine.getPath().toString());
-		final FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
-		icon.getStyleClass().add("icon");
-		nameLabel.setGraphic(icon);
 		nameLabel.setText(machine.getLastUsed().getName() + " : " + machine.getName());
 	}
 	
@@ -39,21 +31,17 @@ public class MachinesItem extends VBox {
 		return machine;
 	}
 
-	public void refresh() {
+	void refresh() {
 		nameLabel.setText(machine.getName());
 	}
 
-	public void setRunning(){
-		final FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.SPINNER);
-		icon.getStyleClass().addAll("icon", "running");
-		nameLabel.setGraphic(icon);
+	void setRunning() {
+		runningIcon.getStyleClass().add("running");
 		nameLabel.setText(machine.getLastUsed().getName() + " : " + machine.getName());
 	}
 
-	public void setNotRunning(){
-		final FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
-		icon.getStyleClass().add("icon");
-		nameLabel.setGraphic(icon);
+	void setNotRunning() {
+		runningIcon.getStyleClass().remove("running");
 		nameLabel.setText(machine.getLastUsed().getName() + " : " + machine.getName());
 	}
 }

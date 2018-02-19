@@ -897,9 +897,11 @@
 	-fx-font-size: 0.9em;
 }
 .machines-item .icon {
+	-glyph-name: "PLAY";
 	-fx-fill: darkgray;
 }
 .machines-item .icon.running {
+	-glyph-name: "SPINNER";
 	-fx-fill: limegreen;
 }
 #project-location {
