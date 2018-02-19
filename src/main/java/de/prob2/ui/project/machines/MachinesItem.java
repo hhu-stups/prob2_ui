@@ -1,9 +1,12 @@
 package de.prob2.ui.project.machines;
 
 import com.google.inject.Inject;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob2.ui.internal.StageManager;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -27,7 +30,7 @@ public class MachinesItem extends VBox {
 		nameLabel.setText(machine.getName());
 		locationLabel.setText(machine.getPath().toString());
 		final FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
-		icon.setId("machines-icon");
+		icon.getStyleClass().add("icon");
 		nameLabel.setGraphic(icon);
 		nameLabel.setText(machine.getLastUsed().getName() + " : " + machine.getName());
 	}
@@ -42,14 +45,14 @@ public class MachinesItem extends VBox {
 
 	public void setRunning(){
 		final FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.SPINNER);
-		icon.setId("machines-icon-running");
+		icon.getStyleClass().addAll("icon", "running");
 		nameLabel.setGraphic(icon);
 		nameLabel.setText(machine.getLastUsed().getName() + " : " + machine.getName());
 	}
 
 	public void setNotRunning(){
 		final FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
-		icon.setId("machines-icon");
+		icon.getStyleClass().add("icon");
 		nameLabel.setGraphic(icon);
 		nameLabel.setText(machine.getLastUsed().getName() + " : " + machine.getName());
 	}

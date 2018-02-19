@@ -113,7 +113,7 @@ public class MachinesTab extends Tab {
 						bundle.getString("project.machines.tab.menu.machineDescription"));
 				showDescription.setOnAction(event -> {
 					showMachineView(machinesItem);
-					machinesItem.setId("machines-item-selected");
+					machinesItem.getStyleClass().add("selected");
 				});
 
 				ContextMenu contextMenu = new ContextMenu(showDescription, editMachineMenuItem, removeMachineMenuItem,
@@ -213,7 +213,7 @@ public class MachinesTab extends Tab {
 		if (splitPane.getItems().get(0) instanceof MachineView) {
 			MachineView machineView = (MachineView) splitPane.getItems().get(0);
 			splitPane.getItems().remove(0);
-			machineView.getMachinesItem().setId("machines-item");
+			machineView.getMachinesItem().getStyleClass().remove("selected");
 		}
 	}
 }
