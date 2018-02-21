@@ -71,6 +71,16 @@
 							<Tooltip text="%history.buttons.saveTrace.tooltip" />
 						</tooltip>
 					</Button>
+					<Button fx:id="reloadButton" mnemonicParsing="false"
+							onAction="#handleReloadButton">
+							<graphic>
+								<FontAwesomeIconView styleClass="icon-dark"
+									glyphName="UNDO" glyphSize="${fontSize.fontSize + 2}" />
+							</graphic>
+							<tooltip>
+								<Tooltip text="%operations.reload.tooltip" />
+							</tooltip>
+						</Button>
 					<HelpButton fx:id="helpButton" />
 				</HBox>
 			</HBox>
