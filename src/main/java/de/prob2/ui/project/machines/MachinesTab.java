@@ -82,10 +82,7 @@ public class MachinesTab extends Tab {
 				final MenuItem editMachineMenuItem = new MenuItem(
 						bundle.getString("project.machines.tab.menu.editMachineConfiguration"));
 				editMachineMenuItem.setOnAction(event -> injector.getInstance(EditMachinesDialog.class)
-						.editAndShow(machine).ifPresent(result -> {
-							machinesItem.refresh();
-							showMachineView(machinesItem);
-						}));
+						.editAndShow(machine).ifPresent(result -> showMachineView(machinesItem)));
 
 				final MenuItem removeMachineMenuItem = new MenuItem(
 						bundle.getString("project.machines.tab.menu.removeMachine"));
@@ -139,7 +136,6 @@ public class MachinesTab extends Tab {
 		defItem.setOnAction(e -> {
 			currentProject.startAnimation(machinesItem.getMachine(), Preference.DEFAULT);
 			machinesItem.getMachine().setLastUsed(Preference.DEFAULT);
-			machinesItem.refresh();
 		});
 		startAnimationMenu.getItems().add(defItem);
 
@@ -153,7 +149,6 @@ public class MachinesTab extends Tab {
 			item.setOnAction(e -> {
 				currentProject.startAnimation(machinesItem.getMachine(), preference);
 				machinesItem.getMachine().setLastUsed(preference);
-				machinesItem.refresh();
 			});
 			startAnimationMenu.getItems().add(item);
 		}

@@ -7,6 +7,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -29,6 +30,11 @@ public class MachinesItem extends VBox {
 	@FXML
 	private void initialize() {
 		this.refresh();
+		this.nameLabel.textProperty().bind(Bindings.format(
+			"%s : %s",
+			Bindings.createStringBinding(() -> machine.getLastUsed().getName(), machine.lastUsedProperty()),
+			machine.nameProperty()
+		));
 		locationLabel.setText(machine.getPath().toString());
 		currentProject.currentMachineProperty().addListener(o -> this.refresh());
 	}
@@ -37,7 +43,7 @@ public class MachinesItem extends VBox {
 		return machine;
 	}
 
-	void refresh() {
+	private void refresh() {
 		if (this.machine.equals(currentProject.getCurrentMachine())) {
 			if (!runningIcon.getStyleClass().contains("running")) {
 				runningIcon.getStyleClass().add("running");
@@ -45,6 +51,5 @@ public class MachinesItem extends VBox {
 		} else {
 			runningIcon.getStyleClass().remove("running");
 		}
-		nameLabel.setText(machine.getLastUsed().getName() + " : " + machine.getName());
 	}
 }
