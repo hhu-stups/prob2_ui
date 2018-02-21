@@ -31,6 +31,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleSetProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
@@ -94,11 +96,11 @@ public class Machine {
 	private transient ObjectProperty<CheckingStatus> ltlStatus;
 	private transient ObjectProperty<CheckingStatus> symbolicCheckingStatus;
 	private transient ObjectProperty<CheckingStatus> modelcheckingStatus;
-	private String name;
-	private String description;
+	private StringProperty name;
+	private StringProperty description;
 	private String location;
 	private Machine.Type type;
-	private Preference lastUsed;
+	private ObjectProperty<Preference> lastUsed;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
@@ -108,8 +110,8 @@ public class Machine {
 	private transient BooleanProperty changed;
 
 	public Machine(String name, String description, Path location, Machine.Type type) {
-		this.name = name;
-		this.description = description;
+		this.name = new SimpleStringProperty(this, "name", name);
+		this.description = new SimpleStringProperty(this, "description", description);
 		this.location = location.toString();
 		this.type = type;
 		this.replaceMissingWithDefaults();
@@ -125,16 +127,28 @@ public class Machine {
 		return changed;
 	}
 	
+	public boolean isChanged() {
+		return this.changedProperty().get();
+	}
+	
+	public void setChanged(final boolean changed) {
+		this.changedProperty().set(changed);
+	}
+	
 	public Machine.Type getType() {
 		return this.type;
 	}
 	
-	public Preference getLastUsed() {
-		return lastUsed;
+	public ObjectProperty<Preference> lastUsedProperty() {
+		return this.lastUsed;
 	}
 	
-	public void setLastUsed(Preference lastUsed) {
-		this.lastUsed = lastUsed;
+	public Preference getLastUsed() {
+		return this.lastUsedProperty().get();
+	}
+	
+	public void setLastUsed(final Preference lastUsed) {
+		this.lastUsedProperty().set(lastUsed);
 	}
 	
 	public void resetStatus() {
@@ -190,22 +204,28 @@ public class Machine {
 		this.modelcheckingStatusProperty().set(status);
 	}
 	
-	public String getName() {
-		return name;
+	public StringProperty nameProperty() {
+		return this.name;
 	}
 	
-	public void setName(String name) {
-		this.name = name;
-		this.changed.set(true);
+	public String getName() {
+		return this.nameProperty().get();
+	}
+	
+	public void setName(final String name) {
+		this.nameProperty().set(name);
+	}
+	
+	public StringProperty descriptionProperty() {
+		return this.description;
 	}
 
 	public String getDescription() {
-		return description;
+		return this.descriptionProperty().get();
 	}
 	
-	public void setDescription(String description) {
-		this.description = description;
-		this.changed.set(true);
+	public void setDescription(final String description) {
+		this.descriptionProperty().set(description);
 	}
 	
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {
@@ -218,12 +238,12 @@ public class Machine {
 	
 	public void addLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.add(formula);
-		this.changed.set(true);
+		this.setChanged(true);
 	}
 	
 	public void removeLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.remove(formula);
-		this.changed.set(true);
+		this.setChanged(true);
 	}
 	
 	public ListProperty<LTLPatternItem> ltlPatternsProperty() {
@@ -236,12 +256,12 @@ public class Machine {
 	
 	public void addLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.add(pattern);
-		this.changed.set(true);
+		this.setChanged(true);
 	}
 	
 	public void removeLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.remove(pattern);
-		this.changed.set(true);
+		this.setChanged(true);
 	}
 	
 	public ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulasProperty() {
@@ -254,12 +274,12 @@ public class Machine {
 	
 	public void addSymbolicCheckingFormula(SymbolicCheckingFormulaItem formula) {
 		symbolicCheckingFormulas.add(formula);
-		this.changed.set(true);
+		this.setChanged(true);
 	}
 	
 	public void removeSymbolicCheckingFormula(SymbolicCheckingFormulaItem formula) {
 		symbolicCheckingFormulas.remove(formula);
-		this.changed.set(true);
+		this.setChanged(true);
 	}
 	
 	public ObservableSet<File> getTraceFiles() {
@@ -268,12 +288,12 @@ public class Machine {
 	
 	public void addTraceFile(File traceFile) {
 		this.traces.add(traceFile);
-		this.changed.set(true);
+		this.setChanged(true);
 	}
 	
 	public void removeTraceFile(File traceFile) {
 		this.traces.remove(traceFile);
-		this.changed.set(true);
+		this.setChanged(true);
 	}
 
 	public ListProperty<ModelCheckingItem> modelcheckingItemsProperty() {
@@ -286,12 +306,12 @@ public class Machine {
 	
 	public void addModelcheckingItem(ModelCheckingItem item) {
 		modelcheckingItems.add(item);
-		Platform.runLater(() -> this.changed.set(true));
+		Platform.runLater(() -> this.setChanged(true));
 	}
 	
 	public void removeModelcheckingItem(ModelCheckingItem item) {
 		modelcheckingItems.remove(item);
-		Platform.runLater(() -> this.changed.set(true));
+		Platform.runLater(() -> this.setChanged(true));
 	}
 	
 		
@@ -324,9 +344,11 @@ public class Machine {
 			this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
 		}
 		if(lastUsed == null){
-			lastUsed = Preference.DEFAULT;
+			lastUsed = new SimpleObjectProperty<>(this, "lastUsed", Preference.DEFAULT);
 		}
 		this.changed = new SimpleBooleanProperty(false);
+		this.nameProperty().addListener(o -> this.setChanged(true));
+		this.descriptionProperty().addListener(o -> this.setChanged(true));
 	}
 	
 	public Path getPath() {
@@ -347,7 +369,7 @@ public class Machine {
 	
 	@Override
 	public String toString() {
-		return this.name;
+		return this.getName();
 	}
 
 	@Override
