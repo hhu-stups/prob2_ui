@@ -24,6 +24,7 @@ public class MachineTableView extends TableView<Machine> {
 			
 			this.setText(null);
 			final FontAwesomeIconView iconView = new FontAwesomeIconView();
+			iconView.setVisible(false);
 			iconView.getStyleClass().addAll("status-icon", "unknown");
 			this.setGraphic(iconView);
 		}
@@ -33,7 +34,10 @@ public class MachineTableView extends TableView<Machine> {
 			super.updateItem(item, empty);
 			
 			this.getGraphic().getStyleClass().removeAll("unknown", "successful", "failed");
-			if (!empty && item != null) {
+			if (empty || item == null) {
+				this.getGraphic().setVisible(false);
+			} else {
+				this.getGraphic().setVisible(true);
 				final String styleClass;
 				switch (item) {
 					case UNKNOWN:
