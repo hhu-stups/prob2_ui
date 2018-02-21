@@ -8,21 +8,30 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<fx:root type="BConsoleView" stylesheets="@/prob.css" maxWidth="Infinity" maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.geometry.Insets?>
+
+<fx:root type="BConsoleView" stylesheets="@/prob.css" maxWidth="Infinity"
+	maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
-		<FontSize fx:id="fontSize"/>
+		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<HBox VBox.vgrow="NEVER">
 		<HBox HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
-			<Label fx:id="languageLabel" text="%consoles.b.toolbar.language.classicalB"/>
+			<Label fx:id="languageLabel" text="%consoles.b.toolbar.language.classicalB" />
 		</HBox>
 		<HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
-			<Button onAction="#handleClear" text="%consoles.b.toolbar.clear"/>
+			<Button onAction="#handleClear" text="%consoles.b.toolbar.clear"
+				styleClass="button-blue" />
 		</HBox>
+		<VBox.margin>
+			<Insets top="2" bottom="2" />
+		</VBox.margin>
 	</HBox>
-	<VirtualizedScrollPane VBox.vgrow="ALWAYS">
-		<content>
-			<BConsole fx:id="bConsole"/>
-		</content>
-	</VirtualizedScrollPane>
+	<HBox VBox.vgrow="ALWAYS" alignment="CENTER" styleClass="border">
+		<VirtualizedScrollPane HBox.hgrow="ALWAYS">
+			<content>
+				<BConsole fx:id="bConsole" />
+			</content>
+		</VirtualizedScrollPane>
+	</HBox>
 </fx:root>
