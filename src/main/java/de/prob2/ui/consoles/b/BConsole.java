@@ -15,13 +15,13 @@ public final class BConsole extends Console {
 	private BConsole(BInterpreter bInterpreter, ResourceBundle bundle, CurrentTrace currentTrace) {
 		super(bundle, bundle.getString("consoles.b.header"), bundle.getString("consoles.b.prompt.classicalB"), bInterpreter);
 		
-		currentTrace.addListener((o, from, to) -> {
+		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
 			final String message;
 			if (to == null) {
 				message = bundle.getString("consoles.b.message.modelUnloaded");
 			} else {
-				final File modelFile = to.getStateSpace().getModel().getModelFile();
-				final String name = modelFile == null ? to.getStateSpace().getMainComponent().toString() : modelFile.getName();
+				final File modelFile = to.getModel().getModelFile();
+				final String name = modelFile == null ? to.getMainComponent().toString() : modelFile.getName();
 				message = String.format(bundle.getString("consoles.b.message.modelLoaded"), name);
 			}
 			this.insertText(this.getLineNumber(), 0, message + '\n');
