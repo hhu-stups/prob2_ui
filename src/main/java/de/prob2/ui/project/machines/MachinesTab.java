@@ -105,6 +105,27 @@ public class MachinesTab extends Tab {
 						.showExternalEditor(currentProject.getLocation().toPath().resolve(machine.getPath())));
 
 				final Menu startAnimationMenu = new Menu(bundle.getString("project.machines.tab.menu.startAnimation"));
+				currentProject.preferencesProperty().addListener((o, from2, to2) -> {
+					startAnimationMenu.getItems().clear();
+					
+					final MenuItem defItem = new MenuItem(Preference.DEFAULT.getName());
+					defItem.setOnAction(e -> {
+						currentProject.startAnimation(machinesItem.getMachine(), Preference.DEFAULT);
+						machinesItem.getMachine().setLastUsed(Preference.DEFAULT);
+					});
+					startAnimationMenu.getItems().add(defItem);
+					
+					for (Preference preference : to2) {
+						final MenuItem item = new MenuItem(preference.getName());
+						// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
+						item.setMnemonicParsing(false);
+						item.setOnAction(e -> {
+							currentProject.startAnimation(machinesItem.getMachine(), preference);
+							machinesItem.getMachine().setLastUsed(preference);
+						});
+						startAnimationMenu.getItems().add(item);
+					}
+				});
 
 				final MenuItem showDescription = new MenuItem(
 						bundle.getString("project.machines.tab.menu.machineDescription"));
@@ -116,10 +137,7 @@ public class MachinesTab extends Tab {
 				ContextMenu contextMenu = new ContextMenu(showDescription, editMachineMenuItem, removeMachineMenuItem,
 						editFileMenuItem, editExternalMenuItem, startAnimationMenu);
 
-				machinesItem.setOnContextMenuRequested(event -> {
-					updateAnimationMenu(startAnimationMenu, machinesItem);
-					contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY());
-				});
+				machinesItem.setOnContextMenuRequested(event -> contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY()));
 				machinesItem.setOnMouseClicked(event -> {
 					if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 						currentProject.startAnimation(machine, machine.getLastUsed());
@@ -127,34 +145,6 @@ public class MachinesTab extends Tab {
 				});
 			}
 		});
-	}
-
-	private void updateAnimationMenu(final Menu startAnimationMenu, MachinesItem machinesItem) {
-		startAnimationMenu.getItems().clear();
-
-		final MenuItem defItem = new MenuItem(Preference.DEFAULT.toString());
-		defItem.setOnAction(e -> {
-			currentProject.startAnimation(machinesItem.getMachine(), Preference.DEFAULT);
-			machinesItem.getMachine().setLastUsed(Preference.DEFAULT);
-		});
-		startAnimationMenu.getItems().add(defItem);
-
-		if (currentProject.getPreferences().isEmpty())
-			return;
-
-		for (Preference preference : currentProject.getPreferences()) {
-			final MenuItem item = new MenuItem(preference.toString());
-			// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
-			item.setMnemonicParsing(false);
-			item.setOnAction(e -> {
-				currentProject.startAnimation(machinesItem.getMachine(), preference);
-				machinesItem.getMachine().setLastUsed(preference);
-			});
-			startAnimationMenu.getItems().add(item);
-		}
-		if (startAnimationMenu.getItems().isEmpty()) {
-			startAnimationMenu.setDisable(true);
-		}
 	}
 
 	@FXML
