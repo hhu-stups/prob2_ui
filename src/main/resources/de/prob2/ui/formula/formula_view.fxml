@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.Scene?>
+<?import de.prob2.ui.formula.FormulaStage?>
+<?import javafx.geometry.Insets?>
+
+<fx:root type="FormulaStage" title="%formula.input.title" xmlns="http://javafx.com/javafx/8.0.91"
+		 xmlns:fx="http://javafx.com/fxml/1" minWidth="600" minHeight="400" width="1440.0" height="800.0">
+	<scene>
+		<Scene stylesheets="@/prob.css" width="1024" height="768">
+			<AnchorPane>
+				<children>
+					<VBox alignment="TOP_CENTER" prefWidth="Infinity" prefHeight="Infinity" spacing="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="20.0"
+							AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0">
+						<HBox>
+							<VBox spacing="15" HBox.hgrow="ALWAYS" alignment="CENTER">
+								<HBox spacing="10" alignment="CENTER">
+									<Label alignment="CENTER" text="%formula.input.enterFormula" />
+									<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
+									<Button fx:id="btApply" text="Apply" onAction="#apply" styleClass="button-blue"/>
+								</HBox>
+							</VBox>
+						</HBox>
+						<HBox VBox.vgrow="ALWAYS">
+							<StackPane fx:id="stackPane" HBox.hgrow="ALWAYS">
+								<children>
+									<ScrollPane fx:id="formulaPane"/>
+								</children>
+							</StackPane>
+						</HBox>
+					</VBox>
+				</children>
+			</AnchorPane>
+		</Scene>
+	</scene>
+</fx:root>

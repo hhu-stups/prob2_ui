@@ -61,7 +61,7 @@ public class BTokenProvider {
 					TProperties.class,
 					TConstants.class, TAbstractConstants.class, TConcreteConstants.class, TConstraints.class, TSets.class,
 					TDefinitions.class);
-			addTokens("b-comment", TComment.class, TCommentBody.class, TCommentEnd.class);
+			addTokens("b-comment", TComment.class, TCommentBody.class, TCommentEnd.class, TLineComment.class);
 		}
 	
 	public BTokenProvider(WebEngine engine) {

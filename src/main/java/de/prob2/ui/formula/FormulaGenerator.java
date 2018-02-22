@@ -16,13 +16,11 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 public final class FormulaGenerator {
 	
 	private final CurrentTrace currentTrace;
-	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
 	@Inject
 	private FormulaGenerator(final CurrentTrace currentTrace, final StageManager stageManager, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
-		this.stageManager = stageManager;
 		this.bundle = bundle;
 	}
 
@@ -37,15 +35,14 @@ public final class FormulaGenerator {
 		final ExpandFormulaCommand expandCmd = new ExpandFormulaCommand(insertCmd.getFormulaId(),
 				currentTrace.getCurrentState());
 		currentTrace.getStateSpace().execute(expandCmd);
-
 		return expandCmd.getResult();
 	}
 
-	public void showFormula(final IEvalElement formula) {
-		new FormulaView(stageManager, new FormulaGraph(new FormulaNode(expandFormula(formula))), bundle).show();
+	public FormulaView showFormula(final IEvalElement formula) {
+		return new FormulaView(new FormulaGraph(new FormulaNode(expandFormula(formula))), bundle);
 	}
 
-	public void parseAndShowFormula(final String formula) {
-		showFormula(currentTrace.getModel().parseFormula(formula));
+	public FormulaView parseAndShowFormula(final String formula) {
+		return showFormula(currentTrace.getModel().parseFormula(formula));
 	}
 }

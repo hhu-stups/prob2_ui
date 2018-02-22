@@ -52,6 +52,7 @@ public class FormulaGraph extends Region {
 			return 0;
 		}
 		int max = 0;
+		
 		for (int i = 0; i < root.next.size(); i++) {
 			max = Math.max(max, depth(root.next.get(i)));
 		}

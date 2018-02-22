@@ -6,12 +6,11 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.dotty.DotView;
-import de.prob2.ui.formula.FormulaInputDialog;
+import de.prob2.ui.formula.FormulaStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 
@@ -59,8 +58,8 @@ public class VisualisationMenu extends Menu{
 
 	@FXML
 	private void handleFormulaInput() {
-		final Dialog<Void> formulaInputStage = injector.getInstance(FormulaInputDialog.class);
-		formulaInputStage.showAndWait();
+		final Stage formulaStage = injector.getInstance(FormulaStage.class);
+		formulaStage.showAndWait();
 	}
 
 	@FXML

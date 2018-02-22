@@ -2,37 +2,23 @@ package de.prob2.ui.formula;
 
 import java.util.ResourceBundle;
 
-import de.prob2.ui.internal.StageManager;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Scale;
-import javafx.stage.Stage;
 
-public class FormulaView extends Stage {
+public class FormulaView extends Group {
 	
-	private Group group;
-	private ScrollPane root;
 	private FormulaGraph graph;
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.84;
 	
-	public FormulaView(StageManager stageManager, FormulaGraph data, ResourceBundle bundle) {
-		super();
+	public FormulaView(FormulaGraph data, ResourceBundle bundle) {
 		graph = data;
 		setEventListeners();
-		group = new Group();
-		root = new ScrollPane(group);
-		group.getChildren().add(graph);
-		// Wrap root in a StackPane so the Mac menu bar can be set
-		// (the root has to be a Pane subclass, and ScrollPane extends Control and not Pane)
-		this.setScene(new Scene(new StackPane(root), 1024, 768));
-		this.setTitle(bundle.getString("formula.view.title"));
-		stageManager.register(this, null);
+		this.getChildren().add(graph);
 	}
 	
 	private void setEventListeners() {
@@ -43,14 +29,15 @@ public class FormulaView extends Stage {
 		});
 		
 		graph.setOnMouseDragged(e-> {
+			ScrollPane parent = (ScrollPane) this.getParent().getParent().getParent();
 			graph.setCursor(Cursor.MOVE);
-			root.setHvalue(root.getHvalue() + (-e.getSceneX() + oldMousePositionX)/(graph.getWidth() * dragFactor));
-			root.setVvalue(root.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(graph.getHeight() * dragFactor));
+			parent.setHvalue(parent.getHvalue() + (-e.getSceneX() + oldMousePositionX)/(graph.getWidth() * dragFactor));
+			parent.setVvalue(parent.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(graph.getHeight() * dragFactor));
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
-
 		});
 		graph.setOnMouseClicked(e -> {
+			ScrollPane parent = (ScrollPane) this.getParent().getParent().getParent();
 			if (e.getClickCount() < 2) {
 				return;
 			}
@@ -62,11 +49,10 @@ public class FormulaView extends Stage {
 				graph.getTransforms().add(new Scale(0.8, 0.8));
 				dragFactor *= 0.8;
 			}
-			
-			group.getChildren().clear();
-			group.getChildren().add(graph);
-			root.setHvalue(e.getX() / graph.getWidth());
-			root.setVvalue(e.getY() / graph.getHeight());
+			this.getChildren().clear();
+			this.getChildren().add(graph);
+			parent.setHvalue(e.getX() / graph.getWidth());
+			parent.setVvalue(e.getY() / graph.getHeight());
 		});
 	}
 }
