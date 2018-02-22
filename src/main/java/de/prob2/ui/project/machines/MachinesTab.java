@@ -2,7 +2,8 @@ package de.prob2.ui.project.machines;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Optional;
+import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,6 +11,8 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
@@ -19,30 +22,140 @@ import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
 
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 
 @Singleton
 public class MachinesTab extends Tab {
-	@FXML
-	private VBox machinesVBox;
-	@FXML
-	private StackPane noMachinesStack;
-	@FXML
-	private SplitPane splitPane;
-	@FXML
-	private HelpButton helpButton;
+	private final class MachinesItem extends ListCell<Machine> {
+		@FXML private Label nameLabel;
+		@FXML private FontAwesomeIconView runningIcon;
+		@FXML private Label locationLabel;
+		@FXML private ContextMenu contextMenu;
+		@FXML private Menu startAnimationMenu;
+		
+		private Machine machine;
+		
+		private MachinesItem() {
+			stageManager.loadFXML(this, "machines_item.fxml");
+		}
+		
+		@FXML
+		private void initialize() {
+			currentProject.currentMachineProperty().addListener(o -> this.refresh());
+			this.setOnMouseClicked(event -> {
+				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					startMachine(this.machine);
+				}
+			});
+			currentProject.preferencesProperty().addListener((o, from, to) -> updatePreferences(to));
+			this.updatePreferences(currentProject.getPreferences());
+		}
+		
+		@FXML
+		private void handleShowDescription() {
+			showMachineView(this.machine);
+			machinesList.getSelectionModel().select(this.machine);
+		}
+		
+		@FXML
+		private void handleEditConfiguration() {
+			injector.getInstance(EditMachinesDialog.class).editAndShow(this.machine).ifPresent(result -> showMachineView(this.machine));
+		}
+		
+		@FXML
+		private void handleRemove() {
+			stageManager.makeAlert(Alert.AlertType.CONFIRMATION, String.format(bundle.getString("project.machines.removeDialog.message"), this.machine.getName())).showAndWait().ifPresent(buttonType -> {
+				if (buttonType.equals(ButtonType.OK)) {
+					currentProject.removeMachine(this.machine);
+				}
+			});
+		}
+		
+		@FXML
+		private void handleEditFile() {
+			injector.getInstance(EditPreferencesProvider.class).showEditorStage(currentProject.getLocation().toPath().resolve(this.machine.getPath()));
+		}
+		
+		@FXML
+		private void handleEditFileExternal() {
+			injector.getInstance(EditPreferencesProvider.class).showExternalEditor(currentProject.getLocation().toPath().resolve(this.machine.getPath()));
+		}
+		
+		private void refresh() {
+			if (Objects.equals(this.machine, currentProject.getCurrentMachine())) {
+				if (!runningIcon.getStyleClass().contains("running")) {
+					runningIcon.getStyleClass().add("running");
+				}
+			} else {
+				runningIcon.getStyleClass().remove("running");
+			}
+		}
+		
+		private void updatePreferences(final List<Preference> prefs) {
+			startAnimationMenu.getItems().clear();
+			
+			final MenuItem defItem = new MenuItem(Preference.DEFAULT.getName());
+			defItem.setOnAction(e -> {
+				currentProject.startAnimation(this.machine, Preference.DEFAULT);
+				this.machine.setLastUsed(Preference.DEFAULT);
+			});
+			startAnimationMenu.getItems().add(defItem);
+			
+			for (Preference preference : prefs) {
+				final MenuItem menuItem = new MenuItem(preference.getName());
+				// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
+				menuItem.setMnemonicParsing(false);
+				menuItem.setOnAction(e -> {
+					currentProject.startAnimation(this.machine, preference);
+					this.machine.setLastUsed(preference);
+				});
+				startAnimationMenu.getItems().add(menuItem);
+			}
+		}
+		
+		@Override
+		protected void updateItem(final Machine item, final boolean empty) {
+			super.updateItem(item, empty);
+			
+			if (empty || item == null) {
+				this.machine = null;
+				this.nameLabel.textProperty().unbind();
+				this.nameLabel.setText(null);
+				this.runningIcon.setVisible(false);
+				this.locationLabel.setText(null);
+				this.setContextMenu(null);
+			} else {
+				this.machine = item;
+				this.refresh();
+				this.nameLabel.textProperty().bind(Bindings.format(
+					"%s : %s",
+					Bindings.createStringBinding(() -> machine.getLastUsed().getName(), machine.lastUsedProperty()),
+					machine.nameProperty()
+				));
+				this.runningIcon.setVisible(true);
+				this.locationLabel.setText(machine.getPath().toString());
+				this.setContextMenu(contextMenu);
+			}
+		}
+	}
+	
+	@FXML private ListView<Machine> machinesList;
+	@FXML private SplitPane splitPane;
+	@FXML private HelpButton helpButton;
 
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
@@ -62,87 +175,21 @@ public class MachinesTab extends Tab {
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent(this.getClass());
-		noMachinesStack.managedProperty().bind(currentProject.machinesProperty().emptyProperty());
-		noMachinesStack.visibleProperty().bind(currentProject.machinesProperty().emptyProperty());
 
 		injector.getInstance(StatusBar.class).loadingStatusProperty()
 				.addListener((observable, from, to) -> splitPane.setDisable(to == LoadingStatus.LOADING_FILE));
 
+		machinesList.setCellFactory(lv -> this.new MachinesItem());
+		machinesList.itemsProperty().bind(currentProject.machinesProperty());
+		machinesList.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ENTER) {
+				startMachine(machinesList.getSelectionModel().getSelectedItem());
+			}
+		});
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
 			if (node instanceof MachineView && !to.contains(((MachineView) node).getMachine())) {
 				closeMachineView();
-			}
-
-			machinesVBox.getChildren().clear();
-			for (Machine machine : to) {
-				MachinesItem machinesItem = new MachinesItem(machine, stageManager, currentProject);
-				machinesVBox.getChildren().add(machinesItem);
-
-				final MenuItem editMachineMenuItem = new MenuItem(
-						bundle.getString("project.machines.tab.menu.editMachineConfiguration"));
-				editMachineMenuItem.setOnAction(event -> injector.getInstance(EditMachinesDialog.class)
-						.editAndShow(machine).ifPresent(result -> showMachineView(machinesItem)));
-
-				final MenuItem removeMachineMenuItem = new MenuItem(
-						bundle.getString("project.machines.tab.menu.removeMachine"));
-				removeMachineMenuItem.setOnAction(event -> {
-					Optional<ButtonType> result = stageManager.makeAlert(AlertType.CONFIRMATION,
-							String.format(bundle.getString("project.machines.removeDialog.message"), machine.getName())).showAndWait();
-					if (result.isPresent() && result.get().equals(ButtonType.OK)) {
-						currentProject.removeMachine(machine);
-					}
-				});
-
-				final MenuItem editFileMenuItem = new MenuItem(
-						bundle.getString("project.machines.tab.menu.editMachineFile"));
-				editFileMenuItem.setOnAction(event -> injector.getInstance(EditPreferencesProvider.class)
-						.showEditorStage(currentProject.getLocation().toPath().resolve(machine.getPath())));
-
-				final MenuItem editExternalMenuItem = new MenuItem(
-						bundle.getString("project.machines.tab.menu.editMachineFileInExternalEditor"));
-				editExternalMenuItem.setOnAction(event -> injector.getInstance(EditPreferencesProvider.class)
-						.showExternalEditor(currentProject.getLocation().toPath().resolve(machine.getPath())));
-
-				final Menu startAnimationMenu = new Menu(bundle.getString("project.machines.tab.menu.startAnimation"));
-				currentProject.preferencesProperty().addListener((o, from2, to2) -> {
-					startAnimationMenu.getItems().clear();
-					
-					final MenuItem defItem = new MenuItem(Preference.DEFAULT.getName());
-					defItem.setOnAction(e -> {
-						currentProject.startAnimation(machinesItem.getMachine(), Preference.DEFAULT);
-						machinesItem.getMachine().setLastUsed(Preference.DEFAULT);
-					});
-					startAnimationMenu.getItems().add(defItem);
-					
-					for (Preference preference : to2) {
-						final MenuItem item = new MenuItem(preference.getName());
-						// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
-						item.setMnemonicParsing(false);
-						item.setOnAction(e -> {
-							currentProject.startAnimation(machinesItem.getMachine(), preference);
-							machinesItem.getMachine().setLastUsed(preference);
-						});
-						startAnimationMenu.getItems().add(item);
-					}
-				});
-
-				final MenuItem showDescription = new MenuItem(
-						bundle.getString("project.machines.tab.menu.machineDescription"));
-				showDescription.setOnAction(event -> {
-					showMachineView(machinesItem);
-					machinesItem.getStyleClass().add("selected");
-				});
-
-				ContextMenu contextMenu = new ContextMenu(showDescription, editMachineMenuItem, removeMachineMenuItem,
-						editFileMenuItem, editExternalMenuItem, startAnimationMenu);
-
-				machinesItem.setOnContextMenuRequested(event -> contextMenu.show(machinesItem, event.getScreenX(), event.getScreenY()));
-				machinesItem.setOnMouseClicked(event -> {
-					if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-						currentProject.startAnimation(machine, machine.getLastUsed());
-					}
-				});
 			}
 		});
 	}
@@ -176,16 +223,21 @@ public class MachinesTab extends Tab {
 		currentProject.addMachine(new Machine(name, "", relative));
 	}
 
-	private void showMachineView(MachinesItem machinesItem) {
+	private void showMachineView(final Machine machine) {
 		closeMachineView();
-		splitPane.getItems().add(0, new MachineView(machinesItem, stageManager, injector));
+		splitPane.getItems().add(0, new MachineView(machine, stageManager, injector));
 	}
 
 	void closeMachineView() {
 		if (splitPane.getItems().get(0) instanceof MachineView) {
-			MachineView machineView = (MachineView) splitPane.getItems().get(0);
 			splitPane.getItems().remove(0);
-			machineView.getMachinesItem().getStyleClass().remove("selected");
+			machinesList.getSelectionModel().clearSelection();
+		}
+	}
+	
+	private void startMachine(final Machine machine) {
+		if (machine != null) {
+			currentProject.startAnimation(machine, machine.getLastUsed());
 		}
 	}
 }

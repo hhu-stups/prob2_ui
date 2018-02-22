@@ -18,14 +18,12 @@ public class MachineView extends AnchorPane {
 	@FXML
 	private Text descriptionText;
 	
-	private final MachinesItem machinesItem;
 	private final Machine machine;
 	private final Injector injector;
 	private final ResourceBundle bundle;
 	
-	MachineView(final MachinesItem machinesItem, final StageManager stageManager, final Injector injector) {
-		this.machinesItem = machinesItem;
-		this.machine = machinesItem.getMachine();
+	MachineView(final Machine machine, final StageManager stageManager, final Injector injector) {
+		this.machine = machine;
 		this.injector = injector;
 		this.bundle = injector.getInstance(ResourceBundle.class);
 		stageManager.loadFXML(this, "machine_view.fxml");
@@ -44,9 +42,5 @@ public class MachineView extends AnchorPane {
 
 	Machine getMachine() {
 		return this.machine;
-	}
-	
-	MachinesItem getMachinesItem() {
-		return machinesItem;
 	}
 }
