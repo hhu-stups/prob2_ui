@@ -6,7 +6,7 @@
 <?import de.prob2.ui.dotty.DotView?>
 <?import javafx.scene.Scene?>
 
-<fx:root type="DotView" title="%dotview.header" minWidth="600" minHeight="400" width="1080.0" height="720.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="DotView" title="%dotview.header" minWidth="600" minHeight="400" width="1080.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane>
@@ -24,10 +24,10 @@
 										AnchorPane.topAnchor="0.0"/>
 								     <Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
 									 <Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
-								     <HBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
+								     <VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 								     	<Label text="%dotview.enterFormula" HBox.hgrow="NEVER" />
-										<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
-								     </HBox>
+										<TextArea fx:id="taFormula" HBox.hgrow="ALWAYS"/>
+								     </VBox>
 								     <CheckBox text="%dotview.continuousUpdate" fx:id="cbContinuous" HBox.hgrow="ALWAYS"/>
 							     </VBox>
 							</children>

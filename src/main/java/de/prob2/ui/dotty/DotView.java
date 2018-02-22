@@ -28,10 +28,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
@@ -74,10 +74,10 @@ public class DotView extends Stage {
 	private ListView<DotCommandItem> lvChoice;
 	
 	@FXML
-	private TextField tfFormula;
+	private TextArea taFormula;
 	
 	@FXML
-	private HBox enterFormulaBox;
+	private VBox enterFormulaBox;
 	
 	@FXML
 	private Label lbDescription;
@@ -131,7 +131,7 @@ public class DotView extends Stage {
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
 			lbDescription.setText(to.getDescription());
-			String currentFormula = tfFormula.getText();
+			String currentFormula = taFormula.getText();
 			if((!needFormula || !currentFormula.isEmpty()) && (!stateChanged || cbContinuous.isSelected())) {
 				dotView.getEngine().loadContent("");
 				visualize(to);
@@ -154,7 +154,7 @@ public class DotView extends Stage {
 			dotView.getEngine().loadContent("");
 		});
 		
-		tfFormula.setOnKeyPressed(e -> {
+		taFormula.setOnKeyPressed(e -> {
 			if(e.getCode().equals(KeyCode.ENTER)) {
 				DotCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
 				if(item == null) {
@@ -224,7 +224,7 @@ public class DotView extends Stage {
 		currentThread = new Thread(() -> {
 			try {
 				if(item.getArity() > 0) {
-					formulas.add(new ClassicalB(tfFormula.getText()));
+					formulas.add(new ClassicalB(taFormula.getText()));
 				}
 				State id = currentTrace.getCurrentState();
 				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, FILE, formulas);
@@ -242,7 +242,10 @@ public class DotView extends Stage {
 		Platform.runLater(() -> {
 			String content = "";
 			try {
-				content = new String(Files.readAllBytes(FILE.toPath()));
+			/*
+			 * FIXME: Fix rendering problem in JavaFX WebView
+			 */
+			content = new String(Files.readAllBytes(FILE.toPath())).replaceAll("font-size=\"12.00\"", "font-size=\"10.00\"");
 			} catch (Exception e) {
 				LOGGER.error("Reading dot file failed", e);
 				return;
