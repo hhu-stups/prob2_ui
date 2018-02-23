@@ -1,18 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-<?import de.prob2.ui.project.machines.MachinesItem?>
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
-<fx:root type="MachinesItem" stylesheets="@/prob.css" styleClass="machines-item" xmlns:fx="http://javafx.com/fxml/1">
-	<Label fx:id="nameLabel" styleClass="name">
-		<graphic>
-			<FontAwesomeIconView fx:id="runningIcon" styleClass="icon"/>
-		</graphic>
-	</Label>
-	<Label fx:id="locationLabel" styleClass="location" />
-	<padding>
-		<Insets left="6.0" right="6.0" top="2.0" bottom="2.0" />
-	</padding>
+<?import javafx.scene.control.ListCell?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Menu?>
+<fx:root type="ListCell" stylesheets="@/prob.css" styleClass="machines-item" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<ContextMenu fx:id="contextMenu">
+			<items>
+				<MenuItem text="%project.machines.tab.menu.machineDescription" onAction="#handleShowDescription"/>
+				<MenuItem text="%project.machines.tab.menu.editMachineConfiguration" onAction="#handleEditConfiguration"/>
+				<MenuItem text="%project.machines.tab.menu.removeMachine" onAction="#handleRemove"/>
+				<MenuItem text="%project.machines.tab.menu.editMachineFile" onAction="#handleEditFile"/>
+				<MenuItem text="%project.machines.tab.menu.editMachineFileInExternalEditor" onAction="#handleEditFileExternal"/>
+				<Menu fx:id="startAnimationMenu" text="%project.machines.tab.menu.startAnimation"/>
+			</items>
+		</ContextMenu>
+	</fx:define>
+	<graphic>
+		<VBox>
+			<Label fx:id="nameLabel" styleClass="name">
+				<graphic>
+					<FontAwesomeIconView fx:id="runningIcon" styleClass="icon"/>
+				</graphic>
+			</Label>
+			<Label fx:id="locationLabel" styleClass="location" />
+		</VBox>
+	</graphic>
 </fx:root>
-
