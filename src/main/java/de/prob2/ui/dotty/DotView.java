@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import com.google.inject.Inject;
 
@@ -23,14 +24,16 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -61,6 +64,7 @@ public class DotView extends Stage {
 			}
 		}
 	}
+	
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
 	
@@ -156,11 +160,15 @@ public class DotView extends Stage {
 		
 		taFormula.setOnKeyPressed(e -> {
 			if(e.getCode().equals(KeyCode.ENTER)) {
-				DotCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
-				if(item == null) {
-					return;
+				if(!e.isShiftDown()) {
+					DotCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
+					if(item == null) {
+						return;
+					}
+					visualize(item);
+				} else {
+					taFormula.insertText(taFormula.getCaretPosition(), "\n");
 				}
-				visualize(item);
 			}
 		});
 		
@@ -178,24 +186,6 @@ public class DotView extends Stage {
 			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
-		});
-
-		dotView.setOnMouseClicked(e-> {
-			if(e.getClickCount() < 2) {
-				return;
-			}
-			
-			if(e.getButton() == MouseButton.SECONDARY) {
-				dotView.setZoom(dotView.getZoom() * 0.9);
-				dragFactor *= 0.9;
-			} else {
-				dotView.setZoom(dotView.getZoom() * 1.1);
-				dragFactor *= 1.1;
-			}
-			
-			double x = e.getX()/(2*dragFactor);
-			double y = e.getY()/(2*dragFactor);
-			dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
 		});
 	}
 	
@@ -252,6 +242,40 @@ public class DotView extends Stage {
 			}
 			dotView.getEngine().loadContent("<center>" + content + "</center>");
 		});
+	}
+	
+	@FXML
+	private void zoomIn() {
+		zoomByFactor(1.15);
+		adjustScroll();
+	}
+	
+	@FXML
+	private void zoomOut() {
+		zoomByFactor(0.85);
+		adjustScroll();
+	}
+	
+	private void zoomByFactor(double factor) {
+		dotView.setZoom(dotView.getZoom() * factor);
+		dragFactor *= factor;
+	}
+	
+	private void adjustScroll() {
+	    Set<Node> nodes = pane.lookupAll(".scroll-bar");
+	    double x = 0.0;
+	    double y = 0.0;
+	    for (final Node node : nodes) {
+	        if (node instanceof ScrollBar) {
+	            ScrollBar sb = (ScrollBar) node;
+	            if (sb.getOrientation() == Orientation.VERTICAL) {
+	            	x = sb.getPrefHeight()/2;
+	            } else {
+	            	y = sb.getPrefWidth()/2;
+	            }
+	        }
+	    }
+		dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
 	}
 
 }
