@@ -28,7 +28,7 @@ public class FormulaNode extends Region {
 		}
 		width = text.getLayoutBounds().getWidth();
 		height = text.getLayoutBounds().getHeight();
-		rectangle = new Rectangle(width * 1.3, height * 2);
+		rectangle = new Rectangle(width * 1.24, height * 2);
 		color = calculateColor(data);
 		if (data.getChildren() == null || data.getChildren().isEmpty()) {
 			return;
@@ -50,7 +50,7 @@ public class FormulaNode extends Region {
 	
 	public void setPosition(double x, double y) {
 		text.setX(x);
-		text.setY(y);
+		text.setY(y + height/2);
 		rectangle.setX(x);
 		rectangle.setY(y - height);
 		draw();

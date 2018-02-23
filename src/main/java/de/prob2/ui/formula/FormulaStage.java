@@ -1,13 +1,9 @@
 package de.prob2.ui.formula;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
@@ -16,9 +12,7 @@ import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
 
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
@@ -32,23 +26,15 @@ public class FormulaStage extends Stage {
 
 	@FXML
 	private TextField tfFormula;
-	@FXML
-	private TextArea exceptionText;
-	@FXML
-	private Label lbHeader;
-	@FXML
-	private FontAwesomeIconView icon;
 
 	@FXML
 	private ScrollPane formulaPane;
 	
 	private final Injector injector;
-	private final ResourceBundle bundle;
 
 	@Inject
-	public FormulaStage(StageManager stageManager, Injector injector, ResourceBundle bundle) {
+	public FormulaStage(StageManager stageManager, Injector injector) {
 		this.injector = injector;
-		this.bundle = bundle;
 		stageManager.loadFXML(this, "formula_view.fxml");
 	}
 
@@ -68,11 +54,8 @@ public class FormulaStage extends Stage {
 			formulaPane.setContent((formulaGenerator.parseAndShowFormula(tfFormula.getText())));
 		} catch (EvaluationException | ProBError exception) {
 			logger.error("Evaluation of formula failed", exception);
-			lbHeader.setText(bundle.getString("formula.input.couldNotVisualize"));
 			tfFormula.getStyleClass().add("text-field-error");
-			icon.setIcon(FontAwesomeIcon.MINUS_CIRCLE);
 		}
 	}
-	
 	
 }

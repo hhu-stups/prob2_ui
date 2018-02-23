@@ -66,9 +66,7 @@ public abstract class Console extends StyleClassedTextArea {
 		this.setWrapText(true);
 		this.getStyleClass().add("console");
 		
-		this.promptProperty().addListener((o, from, to) -> {
-			this.replace(this.getLineNumber(), 0, this.getLineNumber(), from.length(), to, this.getStyleAtPosition(this.getLineNumber(), 0));
-		});
+		this.promptProperty().addListener((o, from, to) -> this.replace(this.getLineNumber(), 0, this.getLineNumber(), from.length(), to, this.getStyleAtPosition(this.getLineNumber(), 0)));
 	}
 	
 	public void setEvents() {
