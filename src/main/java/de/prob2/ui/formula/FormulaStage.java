@@ -52,6 +52,7 @@ public class FormulaStage extends Stage {
 		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
 		try {
 			formulaPane.setContent((formulaGenerator.parseAndShowFormula(tfFormula.getText())));
+			tfFormula.getStyleClass().remove("text-field-error");
 		} catch (EvaluationException | ProBError exception) {
 			logger.error("Evaluation of formula failed", exception);
 			tfFormula.getStyleClass().add("text-field-error");

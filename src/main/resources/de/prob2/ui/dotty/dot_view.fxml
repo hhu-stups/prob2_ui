@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.web.WebView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import de.prob2.ui.dotty.DotView?>
 <?import javafx.scene.Scene?>
+<?import de.prob2.ui.layout.FontSize?>
 
-<fx:root type="DotView" title="%dotview.header" minWidth="600" minHeight="400" width="1080.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="DotView" title="%dotview.header" minWidth="600" minHeight="400" width="1200.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane>
@@ -17,12 +22,29 @@
 						<AnchorPane>
 							<children>
 			   					<VBox alignment="TOP_CENTER" spacing="20.0" AnchorPane.topAnchor="0.0"
-									AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-									AnchorPane.rightAnchor="0.0">
+									AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0"
+									AnchorPane.rightAnchor="5.0">
 					   				<ListView fx:id="lvChoice" AnchorPane.bottomAnchor="0.0"
 										AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 										AnchorPane.topAnchor="0.0"/>
+									<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+										<Button fx:id="zoomInButton" disable="false"
+											contentDisplay="GRAPHIC_ONLY" onAction="#zoomIn">
+											<graphic>
+												<FontAwesomeIconView styleClass="icon-dark"
+													glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
+											</graphic>
+										</Button>
+										<Button fx:id="zoomOutButton" disable="false"
+											contentDisplay="GRAPHIC_ONLY" onAction="#zoomOut">
+											<graphic>
+												<FontAwesomeIconView styleClass="icon-dark"
+													glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
+											</graphic>
+										</Button>
+									</HBox>
 								     <Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
+								     
 									 <Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
 								     <VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 								     	<Label text="%dotview.enterFormula" HBox.hgrow="NEVER" />
