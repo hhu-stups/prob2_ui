@@ -51,6 +51,7 @@ public final class PreferencesStage extends Stage {
 		Locale.ENGLISH,
 		Locale.FRENCH,
 		Locale.GERMAN,
+		new Locale("pt"),
 	};
 
 	@FXML private Spinner<Integer> recentProjectsCountSpinner;
