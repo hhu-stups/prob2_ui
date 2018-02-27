@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import de.prob.Main;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob.scripting.Api;
 
@@ -85,6 +86,9 @@ public class ProB2 extends Application {
 				});
 			});
 			LOGGER.info("probcli version: {}", injector.getInstance(Api.class).getVersion());
+
+			System.setProperty("prob.stdlib", Main.getProBDirectory() + File.separator + "stdlib");
+
 			// Load config file
 			injector.getInstance(Config.class);
 
