@@ -106,12 +106,6 @@ public class TraceChecker {
 	private Transition replayPersistentTransition(StateSpace stateSpace, Trace t,
 			PersistentTransition persistentTransition, boolean setCurrentAnimation) {
 		String predicate = new PredicateBuilder().addMap(persistentTransition.getParameters())
-				// TODO destination state variables are currently
-				// not supported
-				// .addMap(transition.getDestinationStateVariables())
-				// TODO output parameters are currently not
-				// supported by ExecuteOperationByPredicate
-				// .addMap(transition.getOuputParameters())
 				.toString();
 		final IEvalElement pred = stateSpace.getModel().parseFormula(predicate);
 		final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
@@ -131,6 +125,14 @@ public class TraceChecker {
 			return null;
 		}
 		Transition trans = possibleTransitions.get(0);
+		if (!checkOutputParams(stateSpace, trans, persistentTransition, setCurrentAnimation)) {
+			return null;
+		}
+		return trans;
+	}
+
+	private boolean checkOutputParams(StateSpace stateSpace, Transition trans,
+			PersistentTransition persistentTransition, boolean setCurrentAnimation) {
 		String operationName = trans.getName();
 		OperationInfo machineOperationInfo = stateSpace.getLoadedMachine().getMachineOperationInfo(operationName);
 		if (machineOperationInfo != null) {
@@ -144,9 +146,9 @@ public class TraceChecker {
 						String stringValue = persistentTransition.getOuputParameters().get(outputParamName);
 						BObject bValue = Translator.translate(stringValue);
 						if (!bValue.equals(paramValueFromTransition)) {
-							// TODO do we need further checks here
+							// do we need further checks here?
 							// because the value translator does not
-							// support enum value properly
+							// support enum values properly
 							if (setCurrentAnimation) {
 								String errorMessage = String.format(
 										"Can not replay operation '%s'. The value of the ouput parameter '%s' does not match.\n"
@@ -156,17 +158,17 @@ public class TraceChecker {
 									Platform.runLater(() -> getReplayErrorAlert(errorMessage).showAndWait());
 								});
 							}
-							return null;
+							return false;
 						}
 					}
 
 				}
 			} catch (BCompoundException e) {
 				Platform.runLater(() -> stageManager.makeExceptionAlert("", e.getFirstException()).showAndWait());
-				return null;
+				return false;
 			}
 		}
-		return trans;
+		return true;
 	}
 
 	private Alert getReplayErrorAlert(String errorMessage) {
