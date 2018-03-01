@@ -108,6 +108,8 @@ public class DotView extends Stage {
 	
 	private Thread currentThread;
 	
+	private Thread loadedThread;
+	
 	private boolean loaded;
 	
 	
@@ -208,9 +210,7 @@ public class DotView extends Stage {
 			return;
 		}
 		ArrayList<IEvalElement> formulas = new ArrayList<>();
-		if(currentThread != null) {
-			currentThread.interrupt();
-		}
+		interrupt();
 		loaded = false;
 		currentThread = new Thread(() -> {
 			try {
@@ -223,21 +223,22 @@ public class DotView extends Stage {
 				loadGraph();
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Graph visualization failed", e);
-				Platform.runLater(() -> stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show());
+				Platform.runLater(() -> {
+					stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
+					dotView.getEngine().loadContent("");
+				});
 			}
 		}, "Graph Visualizer");
 		currentThread.start();
 		
-		Thread loadedThread = new Thread(() -> {
+		loadedThread = new Thread(() -> {
 			try {
 				Thread.sleep(500);
 				if(!loaded) {
-					Platform.runLater(() -> {
-						dotView.getEngine().loadContent("<center><h1>"+ bundle.getString("dotview.loading") +"</h1></center>");
-					});
+					Platform.runLater(() -> dotView.getEngine().loadContent("<center><h1>"+ bundle.getString("dotview.loading") +"</h1></center>"));
 				}
-			} catch (Exception e) {
-				LOGGER.error(e.getMessage());
+			} catch (InterruptedException e) {
+				LOGGER.error("",e);
 			}
 		});
 		loadedThread.start();
@@ -261,6 +262,14 @@ public class DotView extends Stage {
 	}
 	
 	@FXML
+	private void cancel() {
+		interrupt();
+		if(!loaded) {
+			dotView.getEngine().loadContent("");
+		}
+	}
+	
+	@FXML
 	private void zoomIn() {
 		zoomByFactor(1.15);
 		adjustScroll();
@@ -275,6 +284,15 @@ public class DotView extends Stage {
 	@FXML
 	private void handleClose() {
 		this.close();
+	}
+	
+	private void interrupt() {
+		if(currentThread != null) {
+			currentThread.interrupt();
+		}
+		if(loadedThread != null) {
+			loadedThread.interrupt();
+		}
 	}
 	
 	private void zoomByFactor(double factor) {
