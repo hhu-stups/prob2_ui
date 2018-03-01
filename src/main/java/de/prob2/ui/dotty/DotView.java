@@ -170,7 +170,6 @@ public class DotView extends Stage {
 				}
 			}
 		});
-		
 		lvChoice.setCellFactory(item -> new DotCommandCell());
 	}
 	
@@ -253,6 +252,11 @@ public class DotView extends Stage {
 	private void zoomOut() {
 		zoomByFactor(0.85);
 		adjustScroll();
+	}
+	
+	@FXML
+	private void handleClose() {
+		this.close();
 	}
 	
 	private void zoomByFactor(double factor) {

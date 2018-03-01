@@ -64,6 +64,9 @@ public class FormulaStage extends Stage {
 	
 	@FXML
 	private void zoomIn() {
+		if(formulaView == null) {
+			return;
+		}
 		formulaView.zoomByFactor(1.3);
 		formulaPane.setHvalue(formulaPane.getHvalue() * 1.3);
 		formulaPane.setVvalue(formulaPane.getVvalue() * 1.3);
@@ -71,9 +74,17 @@ public class FormulaStage extends Stage {
 	
 	@FXML
 	private void zoomOut() {
+		if(formulaView == null) {
+			return;
+		}
 		formulaView.zoomByFactor(0.8);
 		formulaPane.setHvalue(formulaPane.getHvalue() * 0.8);
 		formulaPane.setVvalue(formulaPane.getVvalue() * 0.8);
+	}
+	
+	@FXML
+	private void handleClose() {
+		this.close();
 	}
 	
 }
