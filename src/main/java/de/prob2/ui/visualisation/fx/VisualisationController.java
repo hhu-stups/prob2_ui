@@ -383,7 +383,7 @@ public class VisualisationController {
 
 	private void setVisualisationContent(Node visualisationContent) {
 		if (detached.get()) {
-			Parent parent  = visualizationStage.getScene().getRoot();
+			Parent parent = visualizationStage.getScene().getRoot();
 			AnchorPane pane = (parent != null) ? (AnchorPane) parent : new AnchorPane();
 			pane.getChildren().clear();
 			setZeroAnchor(visualisationContent);

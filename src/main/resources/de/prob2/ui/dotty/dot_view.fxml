@@ -32,57 +32,51 @@
 				</top>
 				<center>
 					<AnchorPane>
-						<children>
-							<SplitPane dividerPositions="0.4" AnchorPane.topAnchor="0.0"
-								AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-								AnchorPane.rightAnchor="0.0">
-								<AnchorPane>
-									<children>
-					   					<VBox alignment="TOP_CENTER" spacing="20.0" AnchorPane.topAnchor="0.0"
-											AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-											AnchorPane.rightAnchor="0.0">
-							   				<ListView fx:id="lvChoice" AnchorPane.bottomAnchor="0.0"
-												AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-												AnchorPane.topAnchor="0.0"/>
-											<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-												<Button fx:id="cancelButton" onAction="#cancel">
-													<graphic>
-														<FontAwesomeIconView styleClass="icon-dark"
-															glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
-													</graphic>
-												</Button>
-												<Button fx:id="zoomInButton" disable="false"
-													contentDisplay="GRAPHIC_ONLY" onAction="#zoomIn">
-													<graphic>
-														<FontAwesomeIconView styleClass="icon-dark"
-															glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
-													</graphic>
-												</Button>
-												<Button fx:id="zoomOutButton" disable="false"
-													contentDisplay="GRAPHIC_ONLY" onAction="#zoomOut">
-													<graphic>
-														<FontAwesomeIconView styleClass="icon-dark"
-															glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
-													</graphic>
-												</Button>
-											</HBox>
-										     <Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
-											 <Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
-										     <VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
-										     	<Label text="%dotview.enterFormula" HBox.hgrow="NEVER" />
-												<TextArea fx:id="taFormula" HBox.hgrow="ALWAYS"/>
-										     </VBox>
-										     <CheckBox text="%dotview.continuousUpdate" fx:id="cbContinuous" HBox.hgrow="ALWAYS"/>
-									     </VBox>
-									</children>
-								</AnchorPane>
-								<ScrollPane fx:id ="pane" fitToHeight="true" fitToWidth="true" styleClass="border">
-							   		<content>
-										<WebView fx:id="dotView" contextMenuEnabled="false"/>
-									</content>
-								</ScrollPane>
-							</SplitPane>
-						</children>
+						<SplitPane dividerPositions="0.4" AnchorPane.topAnchor="0.0"
+							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+							AnchorPane.rightAnchor="0.0">
+							<AnchorPane>
+								<VBox alignment="TOP_CENTER" spacing="20.0" AnchorPane.topAnchor="0.0"
+									AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+									AnchorPane.rightAnchor="0.0">
+									<ListView fx:id="lvChoice" AnchorPane.bottomAnchor="0.0"
+										AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+										AnchorPane.topAnchor="0.0"/>
+									<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+										<Button fx:id="cancelButton" onAction="#cancel">
+											<graphic>
+												<FontAwesomeIconView styleClass="icon-dark"
+													glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
+											</graphic>
+										</Button>
+										<Button fx:id="zoomInButton" disable="false"
+											contentDisplay="GRAPHIC_ONLY" onAction="#zoomIn">
+											<graphic>
+												<FontAwesomeIconView styleClass="icon-dark"
+													glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
+											</graphic>
+										</Button>
+										<Button fx:id="zoomOutButton" disable="false"
+											contentDisplay="GRAPHIC_ONLY" onAction="#zoomOut">
+											<graphic>
+												<FontAwesomeIconView styleClass="icon-dark"
+													glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
+											</graphic>
+										</Button>
+									</HBox>
+									<Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
+									<Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
+									<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
+										<Label text="%dotview.enterFormula" HBox.hgrow="NEVER"/>
+										<TextArea fx:id="taFormula" HBox.hgrow="ALWAYS"/>
+									</VBox>
+									<CheckBox text="%dotview.continuousUpdate" fx:id="cbContinuous" HBox.hgrow="ALWAYS"/>
+								</VBox>
+							</AnchorPane>
+							<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border">
+								<WebView fx:id="dotView" contextMenuEnabled="false"/>
+							</ScrollPane>
+						</SplitPane>
 					</AnchorPane>
 				</center>
 			</BorderPane>

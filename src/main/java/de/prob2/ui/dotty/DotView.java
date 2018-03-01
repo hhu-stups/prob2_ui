@@ -147,7 +147,7 @@ public class DotView extends Stage {
 			}
 		});
 		fillCommands();
-		currentTrace.currentStateProperty().addListener((observable, from, to) ->  {
+		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
 			int index = lvChoice.getSelectionModel().getSelectedIndex();
 			fillCommands();
 			if(index == -1) {
@@ -301,19 +301,19 @@ public class DotView extends Stage {
 	}
 	
 	private void adjustScroll() {
-	    Set<Node> nodes = pane.lookupAll(".scroll-bar");
-	    double x = 0.0;
-	    double y = 0.0;
-	    for (final Node node : nodes) {
-	        if (node instanceof ScrollBar) {
-	            ScrollBar sb = (ScrollBar) node;
-	            if (sb.getOrientation() == Orientation.VERTICAL) {
-	            	x = sb.getPrefHeight()/2;
-	            } else {
-	            	y = sb.getPrefWidth()/2;
-	            }
-	        }
-	    }
+		Set<Node> nodes = pane.lookupAll(".scroll-bar");
+		double x = 0.0;
+		double y = 0.0;
+		for (final Node node : nodes) {
+			if (node instanceof ScrollBar) {
+				ScrollBar sb = (ScrollBar) node;
+				if (sb.getOrientation() == Orientation.VERTICAL) {
+					x = sb.getPrefHeight()/2;
+				} else {
+					y = sb.getPrefWidth()/2;
+				}
+			}
+		}
 		dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
 	}
 
