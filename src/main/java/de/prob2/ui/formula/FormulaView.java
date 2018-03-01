@@ -1,7 +1,5 @@
 package de.prob2.ui.formula;
 
-import java.util.ResourceBundle;
-
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
@@ -14,7 +12,7 @@ public class FormulaView extends Group {
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.84;
 	
-	public FormulaView(FormulaGraph data, ResourceBundle bundle) {
+	public FormulaView(FormulaGraph data) {
 		graph = data;
 		setEventListeners();
 		this.getChildren().add(graph);

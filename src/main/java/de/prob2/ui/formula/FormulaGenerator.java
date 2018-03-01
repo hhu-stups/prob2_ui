@@ -1,7 +1,5 @@
 package de.prob2.ui.formula;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.animator.command.ExpandFormulaCommand;
@@ -9,19 +7,16 @@ import de.prob.animator.command.InsertFormulaForVisualizationCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 @Singleton
 public final class FormulaGenerator {
 	
 	private final CurrentTrace currentTrace;
-	private final ResourceBundle bundle;
 
 	@Inject
-	private FormulaGenerator(final CurrentTrace currentTrace, final StageManager stageManager, final ResourceBundle bundle) {
+	private FormulaGenerator(final CurrentTrace currentTrace) {
 		this.currentTrace = currentTrace;
-		this.bundle = bundle;
 	}
 
 	private ExpandedFormula expandFormula(final IEvalElement formula) {
@@ -39,7 +34,7 @@ public final class FormulaGenerator {
 	}
 
 	public FormulaView showFormula(final IEvalElement formula) {
-		return new FormulaView(new FormulaGraph(new FormulaNode(expandFormula(formula))), bundle);
+		return new FormulaView(new FormulaGraph(new FormulaNode(expandFormula(formula))));
 	}
 
 	public FormulaView parseAndShowFormula(final String formula) {

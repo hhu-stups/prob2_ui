@@ -108,6 +108,8 @@ public class DotView extends Stage {
 	
 	private Thread currentThread;
 	
+	private boolean loaded;
+	
 	
 	@Inject
 	public DotView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -209,6 +211,7 @@ public class DotView extends Stage {
 		if(currentThread != null) {
 			currentThread.interrupt();
 		}
+		loaded = false;
 		currentThread = new Thread(() -> {
 			try {
 				if(item.getArity() > 0) {
@@ -224,6 +227,20 @@ public class DotView extends Stage {
 			}
 		}, "Graph Visualizer");
 		currentThread.start();
+		
+		Thread loadedThread = new Thread(() -> {
+			try {
+				Thread.sleep(500);
+				if(!loaded) {
+					Platform.runLater(() -> {
+						dotView.getEngine().loadContent("<center><h1>"+ bundle.getString("dotview.loading") +"</h1></center>");
+					});
+				}
+			} catch (Exception e) {
+				LOGGER.error(e.getMessage());
+			}
+		});
+		loadedThread.start();
 	}
 	
 	private void loadGraph() {
@@ -239,6 +256,7 @@ public class DotView extends Stage {
 				return;
 			}
 			dotView.getEngine().loadContent("<center>" + content + "</center>");
+			loaded = true;
 		});
 	}
 	
