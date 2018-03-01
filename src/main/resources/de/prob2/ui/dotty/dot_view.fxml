@@ -22,8 +22,8 @@
 						<AnchorPane>
 							<children>
 			   					<VBox alignment="TOP_CENTER" spacing="20.0" AnchorPane.topAnchor="0.0"
-									AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0"
-									AnchorPane.rightAnchor="5.0">
+									AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+									AnchorPane.rightAnchor="0.0">
 					   				<ListView fx:id="lvChoice" AnchorPane.bottomAnchor="0.0"
 										AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 										AnchorPane.topAnchor="0.0"/>
@@ -44,7 +44,6 @@
 										</Button>
 									</HBox>
 								     <Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
-								     
 									 <Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
 								     <VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 								     	<Label text="%dotview.enterFormula" HBox.hgrow="NEVER" />

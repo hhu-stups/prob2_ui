@@ -95,10 +95,11 @@ public class DotView extends Stage {
 	@FXML
 	private ScrollPane pane;
 	
+	private DotCommandItem currentItem;
+	
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.83;
-	private boolean stateChanged = false;
 	
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
@@ -121,7 +122,6 @@ public class DotView extends Stage {
 	@FXML
 	public void initialize() {
 		initializeZooming();
-		
 		lvChoice.getSelectionModel().selectFirst();
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to == null) {
@@ -136,10 +136,10 @@ public class DotView extends Stage {
 			enterFormulaBox.setVisible(needFormula);
 			lbDescription.setText(to.getDescription());
 			String currentFormula = taFormula.getText();
-			if((!needFormula || !currentFormula.isEmpty()) && (!stateChanged || cbContinuous.isSelected())) {
+			if((!needFormula || !currentFormula.isEmpty()) && (currentItem == null || !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
 				dotView.getEngine().loadContent("");
 				visualize(to);
-				stateChanged = !stateChanged;
+				currentItem = to;
 			}
 		});
 		fillCommands();
@@ -150,7 +150,6 @@ public class DotView extends Stage {
 				return;
 			}
 			lvChoice.getSelectionModel().select(index);
-			stateChanged = true;
 		});
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {

@@ -58,8 +58,7 @@ public class VisualisationMenu extends Menu{
 
 	@FXML
 	private void handleFormulaInput() {
-		final Stage formulaStage = injector.getInstance(FormulaStage.class);
-		formulaStage.showAndWait();
+		injector.getInstance(FormulaStage.class).show();
 	}
 
 	@FXML
