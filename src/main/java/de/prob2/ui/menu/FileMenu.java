@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.ModelTranslationError;
@@ -54,6 +55,8 @@ public class FileMenu extends Menu {
 	@FXML
 	private MenuItem saveProjectItem;
 	@FXML
+	private MenuItem viewFormattedCodeItem;
+	@FXML
 	private MenuItem reloadMachineItem;
 
 	private final RecentProjects recentProjects;
@@ -94,6 +97,7 @@ public class FileMenu extends Menu {
 
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
 
+		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.existsProperty().not());
 		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not());
 	}
 
@@ -152,6 +156,16 @@ public class FileMenu extends Menu {
 	@FXML
 	private void saveProject() {
 		injector.getInstance(ProjectManager.class).saveCurrentProject();
+	}
+
+	@FXML
+	public void handleViewFormattedCode() {
+		final GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
+		this.currentTrace.getStateSpace().execute(cmd);
+		final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
+		stage.setTitle(currentProject.getCurrentMachine().getName());
+		stage.setCode(cmd.getPrettyPrint());
+		stage.show();
 	}
 
 	@FXML
