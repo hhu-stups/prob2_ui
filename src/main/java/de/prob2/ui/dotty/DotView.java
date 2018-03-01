@@ -238,7 +238,8 @@ public class DotView extends Stage {
 					Platform.runLater(() -> dotView.getEngine().loadContent("<center><h1>"+ bundle.getString("dotview.loading") +"</h1></center>"));
 				}
 			} catch (InterruptedException e) {
-				LOGGER.error("",e);
+				LOGGER.debug("DotView loading interrupted (this is not an error)", e);
+				Thread.currentThread().interrupt();
 			}
 		});
 		loadedThread.start();
