@@ -95,7 +95,7 @@ public class BTokenProvider {
 			if (!"\n".equals(t.getText()) && !(t instanceof TWhiteSpace)) {
 				if(t.getLine() == beginLine) {
 					firstLineTokens.add(t);
-				} else  if (t.getLine() > beginLine) {
+				} else if (t.getLine() > beginLine) {
 					tokens.add(t);
 				}
 			}

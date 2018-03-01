@@ -299,7 +299,7 @@ public abstract class Console extends StyleClassedTextArea {
 		
 	private void handleLeft() {
 		deactivateSearch();
-		if (currentPosInLine > 0 && this.getLength() - this.getCaretPosition()  <= charCounterInLine) {
+		if (currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine--;
 			this.moveTo(this.getCaretPosition() - 1);
 		} else if (currentPosInLine == 0) {

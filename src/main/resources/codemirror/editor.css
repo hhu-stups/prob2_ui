@@ -83,7 +83,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 }
 
 /* Hint */
-.CodeMirror-hint  {
+.CodeMirror-hint {
 	white-space: nowrap;
 }
 

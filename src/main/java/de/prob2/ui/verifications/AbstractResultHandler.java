@@ -121,7 +121,7 @@ public abstract class AbstractResultHandler {
 			item.setCheckedSuccessful();
 		} else if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
 			item.setCheckedFailed();
-		}  else if(checked == Checked.INTERRUPTED) {
+		} else if(checked == Checked.INTERRUPTED) {
 			item.setCheckInterrupted();
 		}
 	}
