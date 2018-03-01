@@ -45,6 +45,12 @@
 												AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 												AnchorPane.topAnchor="0.0"/>
 											<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+												<Button fx:id="cancelButton" onAction="#cancel">
+													<graphic>
+														<FontAwesomeIconView styleClass="icon-dark"
+															glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
+													</graphic>
+												</Button>
 												<Button fx:id="zoomInButton" disable="false"
 													contentDisplay="GRAPHIC_ONLY" onAction="#zoomIn">
 													<graphic>
