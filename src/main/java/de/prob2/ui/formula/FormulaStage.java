@@ -31,6 +31,8 @@ public class FormulaStage extends Stage {
 	private ScrollPane formulaPane;
 	
 	private final Injector injector;
+	
+	private FormulaView formulaView;
 
 	@Inject
 	public FormulaStage(StageManager stageManager, Injector injector) {
@@ -51,12 +53,27 @@ public class FormulaStage extends Stage {
 	private void apply() {
 		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
 		try {
-			formulaPane.setContent((formulaGenerator.parseAndShowFormula(tfFormula.getText())));
+			formulaView = formulaGenerator.parseAndShowFormula(tfFormula.getText());
+			formulaPane.setContent(formulaView);
 			tfFormula.getStyleClass().remove("text-field-error");
 		} catch (EvaluationException | ProBError exception) {
 			logger.error("Evaluation of formula failed", exception);
 			tfFormula.getStyleClass().add("text-field-error");
 		}
+	}
+	
+	@FXML
+	private void zoomIn() {
+		formulaView.zoomByFactor(1.3);
+		formulaPane.setHvalue(formulaPane.getHvalue() * 1.3);
+		formulaPane.setVvalue(formulaPane.getVvalue() * 1.3);
+	}
+	
+	@FXML
+	private void zoomOut() {
+		formulaView.zoomByFactor(0.8);
+		formulaPane.setHvalue(formulaPane.getHvalue() * 0.8);
+		formulaPane.setVvalue(formulaPane.getVvalue() * 0.8);
 	}
 	
 }

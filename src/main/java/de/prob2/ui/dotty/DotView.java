@@ -231,10 +231,10 @@ public class DotView extends Stage {
 		Platform.runLater(() -> {
 			String content = "";
 			try {
-			/*
-			 * FIXME: Fix rendering problem in JavaFX WebView
-			 */
-			content = new String(Files.readAllBytes(FILE.toPath())).replaceAll("font-size=\"12.00\"", "font-size=\"10.00\"");
+				/*
+				 * FIXME: Fix rendering problem in JavaFX WebView
+				 */
+				content = new String(Files.readAllBytes(FILE.toPath())).replaceAll("font-size=\"12.00\"", "font-size=\"10.00\"");
 			} catch (Exception e) {
 				LOGGER.error("Reading dot file failed", e);
 				return;
