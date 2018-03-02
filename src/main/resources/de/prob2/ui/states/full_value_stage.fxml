@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.internal.Spacer?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <?import org.fxmisc.richtext.StyleClassedTextArea?>
@@ -33,7 +39,7 @@
 							<Insets top="10.0" left="15.0" right="15.0"/>
 						</padding>
 						<CheckBox fx:id="prettifyCheckBox" text="%states.fullValue.prettify" alignment="CENTER_LEFT" HBox.hgrow="NEVER" onAction="#updateTabs"/>
-						<Region minWidth="-Infinity" maxWidth="Infinity" minHeight="-Infinity" maxHeight="Infinity" HBox.hgrow="ALWAYS" />
+						<Spacer/>
 						<Button fx:id="saveAsButton" text="%states.fullValue.saveAs" alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#saveAs" />
 					</HBox>
 				</bottom>

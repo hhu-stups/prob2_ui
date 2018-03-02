@@ -3,6 +3,7 @@
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.internal.NavigationButtons?>
+<?import de.prob2.ui.internal.Spacer?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -12,7 +13,6 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.Region?>
 <fx:root stylesheets="@/prob.css" type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -23,7 +23,7 @@
 			<HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="8.0"
 				AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="0.0" alignment="CENTER_LEFT">
 				<NavigationButtons/>
-				<Region minWidth="0" minHeight="0" maxWidth="Infinity" maxHeight="Infinity" HBox.hgrow="ALWAYS"/>
+				<Spacer/>
 				<Button fx:id="saveTraceButton" mnemonicParsing="false" onAction="#saveTrace">
 					<graphic>
 						<FontAwesomeIconView styleClass="icon-dark"
