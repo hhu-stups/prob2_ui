@@ -49,9 +49,7 @@ public final class NavigationButtons extends HBox {
 	@FXML
 	private void handleFastBackButton() {
 		if (currentTrace.exists()) {
-			while(currentTrace.canGoBack()) {
-				currentTrace.set(currentTrace.back());
-			}
+			currentTrace.set(currentTrace.get().gotoPosition(-1));
 		}
 	}
 
@@ -65,9 +63,7 @@ public final class NavigationButtons extends HBox {
 	@FXML
 	private void handleFastForwardButton() {
 		if (currentTrace.exists()) {
-			while(currentTrace.canGoForward()) {
-				currentTrace.set(currentTrace.forward());
-			}
+			currentTrace.set(currentTrace.get().gotoPosition(currentTrace.get().size()-1));
 		}
 	}
 
