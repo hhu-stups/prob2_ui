@@ -2,14 +2,18 @@
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.internal.NavigationButtons?>
+<?import de.prob2.ui.internal.Spacer?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-
-<fx:root stylesheets="@/prob.css" type="AnchorPane"
-	xmlns:fx="http://javafx.com/fxml/1">
+<fx:root stylesheets="@/prob.css" type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
@@ -17,72 +21,19 @@
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="15.0" spacing="10.0">
 		<AnchorPane>
 			<HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="8.0"
-				AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="0.0">
-				<HBox HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
-						<Button fx:id="fastBackButton" mnemonicParsing="false"
-							onAction="#handleFastBackButton">
-							<graphic>
-								<FontAwesomeIconView styleClass="icon-dark"
-									glyphName="ANGLE_DOUBLE_LEFT" glyphSize="${fontSize.fontSize * 1.5 + 2}" />
-							</graphic>
-							<tooltip>
-								<Tooltip text="%history.buttons.fastBack.tooltip" />
-							</tooltip>
-						</Button>
-						<Button fx:id="backButton" mnemonicParsing="false"
-							onAction="#handleBackButton">
-							<graphic>
-								<FontAwesomeIconView styleClass="icon-dark"
-									glyphName="CHEVRON_LEFT" glyphSize="${fontSize.fontSize + 2}" />
-							</graphic>
-							<tooltip>
-								<Tooltip text="%history.buttons.back.tooltip" />
-							</tooltip>
-						</Button>
-						<Button fx:id="forwardButton" mnemonicParsing="false"
-							onAction="#handleForwardButton">
-							<graphic>
-								<FontAwesomeIconView styleClass="icon-dark"
-									glyphName="CHEVRON_RIGHT" glyphSize="${fontSize.fontSize + 2}" />
-							</graphic>
-							<tooltip>
-								<Tooltip text="%history.buttons.fastForward.tooltip" />
-							</tooltip>
-						</Button>
-						<Button fx:id="fastForwardButton" mnemonicParsing="false"
-							onAction="#handleFastForwardButton">
-							<graphic>
-								<FontAwesomeIconView styleClass="icon-dark"
-									glyphName="ANGLE_DOUBLE_RIGHT" glyphSize="${fontSize.fontSize * 1.5 + 2}" />
-							</graphic>
-							<tooltip>
-								<Tooltip text="%history.buttons.forward.tooltip" />
-							</tooltip>
-						</Button>
-					</HBox>
-				<HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
-					<Button fx:id="saveTraceButton" mnemonicParsing="false"
-						onAction="#saveTrace">
-						<graphic>
-							<FontAwesomeIconView styleClass="icon-dark"
-								glyphName="SAVE" glyphSize="${fontSize.fontSize + 2}" />
-						</graphic>
-						<tooltip>
-							<Tooltip text="%history.buttons.saveTrace.tooltip" />
-						</tooltip>
-					</Button>
-					<Button fx:id="reloadButton" mnemonicParsing="false"
-							onAction="#handleReloadButton">
-							<graphic>
-								<FontAwesomeIconView styleClass="icon-dark"
-									glyphName="UNDO" glyphSize="${fontSize.fontSize + 2}" />
-							</graphic>
-							<tooltip>
-								<Tooltip text="%operations.reload.tooltip" />
-							</tooltip>
-						</Button>
-					<HelpButton fx:id="helpButton" />
-				</HBox>
+				AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="0.0" alignment="CENTER_LEFT">
+				<NavigationButtons/>
+				<Spacer/>
+				<Button fx:id="saveTraceButton" mnemonicParsing="false" onAction="#saveTrace">
+					<graphic>
+						<FontAwesomeIconView styleClass="icon-dark"
+							glyphName="SAVE" glyphSize="${fontSize.fontSize + 2}" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%history.buttons.saveTrace.tooltip" />
+					</tooltip>
+				</Button>
+				<HelpButton fx:id="helpButton" />
 			</HBox>
 		</AnchorPane>
 		<AnchorPane VBox.vgrow="ALWAYS">

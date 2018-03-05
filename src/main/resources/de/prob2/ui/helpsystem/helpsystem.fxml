@@ -4,9 +4,15 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.web.WebView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+
 <fx:root type="HelpSystem" xmlns:fx="http://javafx.com/fxml/1">
 	<SplitPane dividerPositions="0.3">
-		<TreeView fx:id="treeView"/>
+		<VBox>
+			<Button fx:id="external" text="%helpsystem.button.external"/>
+			<TreeView fx:id="treeView" VBox.vgrow="ALWAYS"/>
+		</VBox>
 		<WebView fx:id="webView"/>
 	</SplitPane>
 </fx:root>

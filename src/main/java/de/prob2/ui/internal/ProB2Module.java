@@ -23,6 +23,7 @@ import de.prob2.ui.menu.FileMenu;
 import de.prob2.ui.menu.HelpMenu;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
+import de.prob2.ui.menu.ViewCodeStage;
 import de.prob2.ui.menu.ViewMenu;
 import de.prob2.ui.menu.VisualisationMenu;
 import de.prob2.ui.menu.WindowMenu;
@@ -96,6 +97,7 @@ public class ProB2Module extends AbstractModule {
 		bind(WindowMenu.class);
 		bind(MachineTableView.class);
 		bind(ModelcheckingView.class);
+		bind(NavigationButtons.class);
 		bind(OperationsView.class);
 		bind(PreferencesTab.class);
 		bind(PreferencesView.class);
@@ -108,6 +110,7 @@ public class ProB2Module extends AbstractModule {
 		bind(TraceReplayView.class);
 		bind(VerificationsView.class);
 		bind(VerificationsTab.class);
+		bind(ViewCodeStage.class);
 		bind(VisualisationView.class);
 		bind(StateVisualisationView.class);
 		bind(SymbolicCheckingView.class);

@@ -1,11 +1,8 @@
 package de.prob2.ui.formula;
 
-import java.util.ResourceBundle;
-
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.input.MouseButton;
 import javafx.scene.transform.Scale;
 
 public class FormulaView extends Group {
@@ -15,7 +12,7 @@ public class FormulaView extends Group {
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.84;
 	
-	public FormulaView(FormulaGraph data, ResourceBundle bundle) {
+	public FormulaView(FormulaGraph data) {
 		graph = data;
 		setEventListeners();
 		this.getChildren().add(graph);
@@ -36,23 +33,11 @@ public class FormulaView extends Group {
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
 		});
-		graph.setOnMouseClicked(e -> {
-			ScrollPane parent = (ScrollPane) this.getParent().getParent().getParent();
-			if (e.getClickCount() < 2) {
-				return;
-			}
-
-			if (e.getButton() == MouseButton.PRIMARY) {
-				graph.getTransforms().add(new Scale(1.3, 1.3));
-				dragFactor *= 1.3;
-			} else if (e.getButton() == MouseButton.SECONDARY) {
-				graph.getTransforms().add(new Scale(0.8, 0.8));
-				dragFactor *= 0.8;
-			}
-			this.getChildren().clear();
-			this.getChildren().add(graph);
-			parent.setHvalue(e.getX() / graph.getWidth());
-			parent.setVvalue(e.getY() / graph.getHeight());
-		});
 	}
+	
+	public void zoomByFactor(double factor) {
+		graph.getTransforms().add(new Scale(factor, factor));
+		dragFactor *= factor;
+	}
+		
 }

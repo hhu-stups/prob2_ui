@@ -21,6 +21,8 @@ public class FileChooserManager {
 		if (containsValidInitialDirectory(kind)) {
 			fileChooser.setInitialDirectory(getInitialDirectory(kind));
 		}
+		File fileHelper = new File(fileChooser.getInitialDirectory().getPath());
+		fileChooser.setInitialDirectory(fileHelper);
 		final File file = fileChooser.showOpenDialog(window);
 		if(file != null) {
 			setInitialDirectory(kind, file.getParentFile());

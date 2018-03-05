@@ -137,7 +137,7 @@ public class ProBPluginManager {
 				try {
 					Files.deleteIfExists(plugin.toPath());
 				} catch (IOException ex) {
-					LOGGER.warn("Could not delete file " + pluginFileName + ".");
+					LOGGER.warn("Could not delete file {}.", pluginFileName);
 				}
 			}
 		}
@@ -266,7 +266,7 @@ public class ProBPluginManager {
 				try {
 					Files.deleteIfExists(destination.toPath());
 				} catch (IOException ex) {
-					LOGGER.warn("Could not delete file " + destination.getName() + ".");
+					LOGGER.warn("Could not delete file {}.", destination.getName());
 					showWarningAlert("plugins.error.delete", destination.getName());
 					return false;
 				}
@@ -285,7 +285,7 @@ public class ProBPluginManager {
 	private boolean checkLoadedPlugin(String loadedPluginId, String pluginFileName) throws PluginException {
 		if (loadedPluginId == null) {
 			// error while loading the plugin
-			throw new PluginException("Could not load the plugin '" + pluginFileName + "'.");
+			throw new PluginException("Could not load the plugin '{}'.", pluginFileName);
 		} else {
 			PluginWrapper pluginWrapper = pluginManager.getPlugin(loadedPluginId);
 			if (pluginWrapper.getPlugin() instanceof InvalidPlugin) {

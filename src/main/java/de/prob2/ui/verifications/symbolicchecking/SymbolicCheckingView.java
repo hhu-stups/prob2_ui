@@ -136,7 +136,7 @@ public class SymbolicCheckingView extends ScrollPane {
 		shouldExecuteColumn.setMaxWidth(this.getPrefWidth());
 		tvFormula.setOnMouseClicked(e-> {
 			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 &&  item != null && currentTrace.exists()) {
+			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
 				symbolicCheckHandler.handleItem(item);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
 			}

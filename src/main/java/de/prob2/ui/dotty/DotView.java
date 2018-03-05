@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import com.google.inject.Inject;
 
@@ -23,14 +24,16 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -62,6 +65,7 @@ public class DotView extends Stage {
 		}
 	}
 	
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
 	
 	private static final File FILE = new File(Main.getProBDirectory()
@@ -91,10 +95,11 @@ public class DotView extends Stage {
 	@FXML
 	private ScrollPane pane;
 	
+	private DotCommandItem currentItem;
+	
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.83;
-	private boolean stateChanged = false;
 	
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
@@ -102,6 +107,10 @@ public class DotView extends Stage {
 	private final ResourceBundle bundle;
 	
 	private Thread currentThread;
+	
+	private Thread loadedThread;
+	
+	private boolean loaded;
 	
 	
 	@Inject
@@ -117,7 +126,6 @@ public class DotView extends Stage {
 	@FXML
 	public void initialize() {
 		initializeZooming();
-		
 		lvChoice.getSelectionModel().selectFirst();
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to == null) {
@@ -132,21 +140,20 @@ public class DotView extends Stage {
 			enterFormulaBox.setVisible(needFormula);
 			lbDescription.setText(to.getDescription());
 			String currentFormula = taFormula.getText();
-			if((!needFormula || !currentFormula.isEmpty()) && (!stateChanged || cbContinuous.isSelected())) {
+			if((!needFormula || !currentFormula.isEmpty()) && (currentItem == null || !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
 				dotView.getEngine().loadContent("");
 				visualize(to);
-				stateChanged = !stateChanged;
+				currentItem = to;
 			}
 		});
 		fillCommands();
-		currentTrace.currentStateProperty().addListener((observable, from, to) ->  {
+		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
 			int index = lvChoice.getSelectionModel().getSelectedIndex();
 			fillCommands();
 			if(index == -1) {
 				return;
 			}
 			lvChoice.getSelectionModel().select(index);
-			stateChanged = true;
 		});
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
@@ -156,14 +163,17 @@ public class DotView extends Stage {
 		
 		taFormula.setOnKeyPressed(e -> {
 			if(e.getCode().equals(KeyCode.ENTER)) {
-				DotCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
-				if(item == null) {
-					return;
+				if(!e.isShiftDown()) {
+					DotCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
+					if(item == null) {
+						return;
+					}
+					visualize(item);
+				} else {
+					taFormula.insertText(taFormula.getCaretPosition(), "\n");
 				}
-				visualize(item);
 			}
 		});
-		
 		lvChoice.setCellFactory(item -> new DotCommandCell());
 	}
 	
@@ -178,24 +188,6 @@ public class DotView extends Stage {
 			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
-		});
-
-		dotView.setOnMouseClicked(e-> {
-			if(e.getClickCount() < 2) {
-				return;
-			}
-			
-			if(e.getButton() == MouseButton.SECONDARY) {
-				dotView.setZoom(dotView.getZoom() * 0.9);
-				dragFactor *= 0.9;
-			} else {
-				dotView.setZoom(dotView.getZoom() * 1.1);
-				dragFactor *= 1.1;
-			}
-			
-			double x = e.getX()/(2*dragFactor);
-			double y = e.getY()/(2*dragFactor);
-			dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
 		});
 	}
 	
@@ -218,9 +210,8 @@ public class DotView extends Stage {
 			return;
 		}
 		ArrayList<IEvalElement> formulas = new ArrayList<>();
-		if(currentThread != null) {
-			currentThread.interrupt();
-		}
+		interrupt();
+		loaded = false;
 		currentThread = new Thread(() -> {
 			try {
 				if(item.getArity() > 0) {
@@ -232,26 +223,99 @@ public class DotView extends Stage {
 				loadGraph();
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Graph visualization failed", e);
-				Platform.runLater(() -> stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show());
+				Platform.runLater(() -> {
+					stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
+					dotView.getEngine().loadContent("");
+				});
 			}
 		}, "Graph Visualizer");
 		currentThread.start();
+		
+		loadedThread = new Thread(() -> {
+			try {
+				Thread.sleep(500);
+				if(!loaded) {
+					Platform.runLater(() -> dotView.getEngine().loadContent("<center><h1>"+ bundle.getString("dotview.loading") +"</h1></center>"));
+				}
+			} catch (InterruptedException e) {
+				LOGGER.debug("DotView loading interrupted (this is not an error)", e);
+				Thread.currentThread().interrupt();
+			}
+		});
+		loadedThread.start();
 	}
 	
 	private void loadGraph() {
 		Platform.runLater(() -> {
 			String content = "";
 			try {
-			/*
-			 * FIXME: Fix rendering problem in JavaFX WebView
-			 */
-			content = new String(Files.readAllBytes(FILE.toPath())).replaceAll("font-size=\"12.00\"", "font-size=\"10.00\"");
+				/*
+				 * FIXME: Fix rendering problem in JavaFX WebView
+				 */
+				content = new String(Files.readAllBytes(FILE.toPath())).replaceAll("font-size=\"12.00\"", "font-size=\"10.00\"");
 			} catch (Exception e) {
 				LOGGER.error("Reading dot file failed", e);
 				return;
 			}
 			dotView.getEngine().loadContent("<center>" + content + "</center>");
+			loaded = true;
 		});
+	}
+	
+	@FXML
+	private void cancel() {
+		interrupt();
+		if(!loaded) {
+			dotView.getEngine().loadContent("");
+		}
+	}
+	
+	@FXML
+	private void zoomIn() {
+		zoomByFactor(1.15);
+		adjustScroll();
+	}
+	
+	@FXML
+	private void zoomOut() {
+		zoomByFactor(0.85);
+		adjustScroll();
+	}
+	
+	@FXML
+	private void handleClose() {
+		this.close();
+	}
+	
+	private void interrupt() {
+		if(currentThread != null) {
+			currentThread.interrupt();
+		}
+		if(loadedThread != null) {
+			loadedThread.interrupt();
+		}
+	}
+	
+	private void zoomByFactor(double factor) {
+		dotView.setZoom(dotView.getZoom() * factor);
+		dragFactor *= factor;
+	}
+	
+	private void adjustScroll() {
+		Set<Node> nodes = pane.lookupAll(".scroll-bar");
+		double x = 0.0;
+		double y = 0.0;
+		for (final Node node : nodes) {
+			if (node instanceof ScrollBar) {
+				ScrollBar sb = (ScrollBar) node;
+				if (sb.getOrientation() == Orientation.VERTICAL) {
+					x = sb.getPrefHeight()/2;
+				} else {
+					y = sb.getPrefWidth()/2;
+				}
+			}
+		}
+		dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
 	}
 
 }

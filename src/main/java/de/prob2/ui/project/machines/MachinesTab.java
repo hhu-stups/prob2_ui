@@ -151,6 +151,11 @@ public class MachinesTab extends Tab {
 				this.setContextMenu(contextMenu);
 			}
 		}
+
+		private void showMachineView(final Machine machine) {
+			closeMachineView();
+			splitPane.getItems().add(0, new MachineView(machine, stageManager, injector));
+		}
 	}
 	
 	@FXML private ListView<Machine> machinesList;
@@ -221,11 +226,6 @@ public class MachinesTab extends Tab {
 			i++;
 		}
 		currentProject.addMachine(new Machine(name, "", relative));
-	}
-
-	private void showMachineView(final Machine machine) {
-		closeMachineView();
-		splitPane.getItems().add(0, new MachineView(machine, stageManager, injector));
 	}
 
 	void closeMachineView() {

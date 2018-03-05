@@ -1,8 +1,8 @@
 package de.prob2.ui.helpsystem;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -21,8 +21,11 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.Main;
 
 import de.prob2.ui.ProB2;
@@ -32,6 +35,7 @@ import de.prob2.ui.persistence.UIState;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.StackPane;
@@ -42,20 +46,23 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class HelpSystem extends StackPane {
+	@FXML private Button external;
 	@FXML private TreeView<String> treeView;
 	@FXML private WebView webView;
 	WebEngine webEngine;
 	URI helpURI;
 	UIState uiState;
+	Injector injector;
 	String helpSubdirectoryString = "help_en";
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
 	// this needs to be updated if new translations of help are added
 	private String[] languages = {"de", "en"};
 
 	@Inject
-	public HelpSystem(final StageManager stageManager, final UIState uiState) throws URISyntaxException, IOException {
+	public HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
 		stageManager.loadFXML(this, "helpsystem.fxml");
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
+		this.injector = injector;
 		for (String language : languages) {
 			if (isCurrentLanguage(language)) {
 				helpSubdirectoryString = "help_" + language;
@@ -77,27 +84,20 @@ public class HelpSystem extends StackPane {
 		webEngine.setUserStyleSheetLocation(this.getClass().getResource("help.css").toString());
 		webEngine.setJavaScriptEnabled(true);
 		webEngine.getLoadWorker().stateProperty().addListener((obs, oldVal, newVal) -> {
-			String url = webEngine.getLoadWorker().getMessage().trim().replace("Loading ","");
+			/*String url = webEngine.getLoadWorker().getMessage().trim().replace("Loading ","");
 			if (url.contains("http://") || url.contains("https://")) {
 				webEngine.getLoadWorker().cancel();
-				try {
-					// xdg-open opens two(!) tabs, prevention?
-					// Runtime.getRuntime().exec() seems to trigger fatal error in java <- updating java has not fixed this, resorting to Desktop class
-					/*if (Runtime.getRuntime().exec(new String[] { "which", "xdg-open" }).getInputStream().read() != -1) {
-						Runtime.getRuntime().exec(new String[] { "xdg-open", url });
-					} else {*/
-					// FIXME (Unsupported Desktop class seems to be a KDE problem...)
-					// FIXME (Doesn't seem to work on my Gnome Classic or Gnome desktops either although java.awt.Desktop should at least be supported here...)
-						Desktop.getDesktop().browse(new URI(url));
-					//}
-				} catch (IOException | URISyntaxException e) {
-					LoggerFactory.getLogger(HelpSystem.class).error("Can not load URL in external browser", e);
-				}
-			} else if (newVal == Worker.State.SUCCEEDED) {
+				//TODO xdg-open and kde-open with Runtime.getRuntime().exec() seems to trigger fatal error in java <- updating java has not fixed this, resorting to Desktop class
+				//TODO Desktop.getDesktop().browse(new URI(url)); <- either fatal error (but belated showing of url in external browser) or hanging ProB2
+				//TODO injector.getInstance(ProB2.class).getHostServices().showDocument(url); <- fatal error and belated showing of url in external browser, seems to occur only in combination with webview
+			} else*/ if (newVal == Worker.State.SUCCEEDED) {
 				findMatchingTreeViewEntryToSelect();
 			}
 		});
 		webEngine.load(((HelpTreeItem) treeView.getRoot().getChildren().get(0)).getFile().toURI().toString());
+
+		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://www3.hhu.de/stups/prob/index.php/Main_Page"));
+		external.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.EXTERNAL_LINK_SQUARE));
 	}
 
 	private TreeItem<String> createNode(final File file) {

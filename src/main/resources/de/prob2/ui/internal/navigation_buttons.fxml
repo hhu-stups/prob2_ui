@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import de.prob2.ui.internal.NavigationButtons?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<fx:root type="NavigationButtons" stylesheets="@/prob.css" alignment="CENTER_LEFT" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
+	<Button fx:id="fastBackButton" HBox.hgrow="NEVER" onAction="#handleFastBackButton">
+		<graphic>
+			<FontAwesomeIconView styleClass="icon-dark" glyphName="ANGLE_DOUBLE_LEFT" glyphSize="${fontSize.fontSize * 1.5 + 2}"/>
+		</graphic>
+		<tooltip>
+			<Tooltip text="%navigationButtons.fastBack.tooltip"/>
+		</tooltip>
+	</Button>
+	<Button fx:id="backButton" HBox.hgrow="NEVER" onAction="#handleBackButton">
+		<graphic>
+			<FontAwesomeIconView styleClass="icon-dark" glyphName="CHEVRON_LEFT" glyphSize="${fontSize.fontSize + 2}"/>
+		</graphic>
+		<tooltip>
+			<Tooltip text="%navigationButtons.back.tooltip"/>
+		</tooltip>
+	</Button>
+	<Button fx:id="forwardButton" HBox.hgrow="NEVER" onAction="#handleForwardButton">
+		<graphic>
+			<FontAwesomeIconView styleClass="icon-dark" glyphName="CHEVRON_RIGHT" glyphSize="${fontSize.fontSize + 2}"/>
+		</graphic>
+		<tooltip>
+			<Tooltip text="%navigationButtons.fastForward.tooltip"/>
+		</tooltip>
+	</Button>
+	<Button fx:id="fastForwardButton" HBox.hgrow="NEVER" onAction="#handleFastForwardButton">
+		<graphic>
+			<FontAwesomeIconView styleClass="icon-dark" glyphName="ANGLE_DOUBLE_RIGHT" glyphSize="${fontSize.fontSize * 1.5 + 2}"/>
+		</graphic>
+		<tooltip>
+			<Tooltip text="%navigationButtons.forward.tooltip"/>
+		</tooltip>
+	</Button>
+	<Button fx:id="reloadButton" HBox.hgrow="NEVER" onAction="#handleReloadButton">
+		<graphic>
+			<FontAwesomeIconView styleClass="icon-dark" glyphName="UNDO" glyphSize="${fontSize.fontSize + 2}"/>
+		</graphic>
+		<tooltip>
+			<Tooltip text="%navigationButtons.reload.tooltip"/>
+		</tooltip>
+	</Button>
+</fx:root>

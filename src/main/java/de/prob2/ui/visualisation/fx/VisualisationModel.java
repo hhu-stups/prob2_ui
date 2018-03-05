@@ -1,23 +1,35 @@
 package de.prob2.ui.visualisation.fx;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.prob.animator.domainobjects.*;
+
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.translator.types.BObject;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.fx.exception.VisualisationParseException;
+
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 /**
  * @author Christoph Heinzen
@@ -92,7 +104,7 @@ public class VisualisationModel {
 				try {
 					BObject translatedValue = newValue.translate().getValue();
 					valueCache.put(formula, translatedValue);
-				}  catch (BCompoundException e) {
+				} catch (BCompoundException e) {
 					LOGGER.error("Error while translating the value of the formula \"{}\".", formula, e);
 				}
 			} else {
@@ -194,7 +206,7 @@ public class VisualisationModel {
 				randomExecution = true;
 				boolean outgoingTransitions = true;
 				boolean invariantViolated = false;
-				for (int i = 0; i <  number && outgoingTransitions && !invariantViolated && randomExecution; i++) {
+				for (int i = 0; i < number && outgoingTransitions && !invariantViolated && randomExecution; i++) {
 					currentTrace.set(currentTrace.get().randomAnimation(1));
 					outgoingTransitions = !currentTrace.getCurrentState().getOutTransitions().isEmpty();
 					if (stopOnInvariantViolation) {

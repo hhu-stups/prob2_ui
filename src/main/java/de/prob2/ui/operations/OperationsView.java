@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
@@ -36,13 +37,14 @@ import de.prob.model.representation.BEvent;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.menu.FileMenu;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
+
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
@@ -60,6 +62,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+
 import se.sawano.java.text.AlphanumericComparator;
 
 @Singleton
@@ -200,14 +203,6 @@ public final class OperationsView extends AnchorPane {
 	@FXML
 	private ListView<OperationItem> opsListView;
 	@FXML
-	private Button backButton;
-	@FXML
-	private Button fastBackButton;
-	@FXML
-	private Button forwardButton;
-	@FXML
-	private Button fastForwardButton;
-	@FXML
 	private Button sortButton;
 	@FXML
 	private ToggleButton disabledOpsToggle;
@@ -225,8 +220,6 @@ public final class OperationsView extends AnchorPane {
 	private MenuItem tenRandomEvents;
 	@FXML
 	private CustomMenuItem someRandomEvents;
-	@FXML
-	private Button reloadButton;
 	@FXML
 	private HelpButton helpButton;
 
@@ -271,12 +264,7 @@ public final class OperationsView extends AnchorPane {
 			}
 		});
 
-		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
-		fastBackButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
-		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
-		fastForwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 		randomButton.disableProperty().bind(currentTrace.existsProperty().not());
-		reloadButton.disableProperty().bind(currentTrace.existsProperty().not());
 
 		randomText.textProperty().addListener((observable, from, to) -> {
 			if (!NUMBER_OR_EMPTY_PATTERN.matcher(to).matches() && NUMBER_OR_EMPTY_PATTERN.matcher(from).matches()) {
@@ -483,38 +471,6 @@ public final class OperationsView extends AnchorPane {
 	}
 
 	@FXML
-	private void handleBackButton() {
-		if (currentTrace.exists()) {
-			currentTrace.set(currentTrace.back());
-		}
-	}
-	
-	@FXML
-	private void handleFastBackButton() {
-		if (currentTrace.exists()) {
-			while(currentTrace.canGoBack()) {
-				currentTrace.set(currentTrace.back());
-			}
-		}
-	}
-
-	@FXML
-	private void handleForwardButton() {
-		if (currentTrace.exists()) {
-			currentTrace.set(currentTrace.forward());
-		}
-	}
-	
-	@FXML
-	private void handleFastForwardButton() {
-		if (currentTrace.exists()) {
-			while(currentTrace.canGoForward()) {
-				currentTrace.set(currentTrace.forward());
-			}
-		}
-	}
-
-	@FXML
 	private void handleSearchButton() {
 		filter = filterEvents.getText();
 		opsListView.getItems().setAll(applyFilter(filter));
@@ -660,10 +616,5 @@ public final class OperationsView extends AnchorPane {
 
 	public boolean getShowDisabledOps() {
 		return showDisabledOps;
-	}
-	
-	@FXML
-	private void handleReloadButton() {
-		injector.getInstance(FileMenu.class).handleReloadMachine();
 	}
 }

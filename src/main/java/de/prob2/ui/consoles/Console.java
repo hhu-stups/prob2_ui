@@ -29,9 +29,6 @@ public abstract class Console extends StyleClassedTextArea {
 	public static class ConfigData {
 		private List<String> instructions;
 		private String text;
-		private int charCounterInLine;
-		private int currentPosInLine;
-		private int caretPosition;
 		private List<int[]> errorRanges;
 		
 		protected ConfigData() {}
@@ -299,7 +296,7 @@ public abstract class Console extends StyleClassedTextArea {
 		
 	private void handleLeft() {
 		deactivateSearch();
-		if (currentPosInLine > 0 && this.getLength() - this.getCaretPosition()  <= charCounterInLine) {
+		if (currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
 			currentPosInLine--;
 			this.moveTo(this.getCaretPosition() - 1);
 		} else if (currentPosInLine == 0) {
@@ -393,10 +390,9 @@ public abstract class Console extends StyleClassedTextArea {
 	public Console.ConfigData getSettings() {
 		final Console.ConfigData configData = new Console.ConfigData();
 		configData.instructions = instructions.stream().map(ConsoleInstruction::getInstruction).collect(Collectors.toList());
-		configData.text = getText();
-		configData.charCounterInLine = charCounterInLine;
-		configData.currentPosInLine = currentPosInLine;
-		configData.caretPosition = getCaretPosition();
+		// Do not include the last line (prompt and user input) when saving the console text.
+		// Otherwise there are problems when the text is reloaded and the prompt is not the same as the one saved in the text.
+		configData.text = getText(0, 0, this.getParagraphs().size()-1, 0);
 		configData.errorRanges = new ArrayList<>();
 		for (final IndexRange indexRange : errors) {
 			configData.errorRanges.add(new int[] {indexRange.getStart(), indexRange.getEnd()});
@@ -414,10 +410,10 @@ public abstract class Console extends StyleClassedTextArea {
 			instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 		}
 		posInList = instructions.size();
-		this.replaceText(settings.text);
-		charCounterInLine = settings.charCounterInLine;
-		currentPosInLine = settings.currentPosInLine;
-		this.moveTo(settings.caretPosition);
+		this.replaceText(settings.text + this.getPrompt());
+		this.charCounterInLine = 0;
+		this.currentPosInLine = 0;
+		this.moveTo(this.getLength()-1);
 		errors.clear();
 		for (final int[] range : settings.errorRanges) {
 			errors.add(new IndexRange(range[0], range[1]));

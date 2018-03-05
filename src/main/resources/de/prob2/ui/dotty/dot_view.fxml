@@ -1,45 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.web.WebView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import de.prob2.ui.dotty.DotView?>
 <?import javafx.scene.Scene?>
+<?import de.prob2.ui.layout.FontSize?>
 
-<fx:root type="DotView" title="%dotview.header" minWidth="600" minHeight="400" width="1080.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="DotView" title="%dotview.header" minWidth="600" minHeight="400" width="1200.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<AnchorPane>
-				<children>
-					<SplitPane dividerPositions="0.4" AnchorPane.topAnchor="0.0"
-						AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-						AnchorPane.rightAnchor="0.0">
-						<AnchorPane>
-							<children>
-			   					<VBox alignment="TOP_CENTER" spacing="20.0" AnchorPane.topAnchor="0.0"
+			<BorderPane>
+				<top>
+					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+						<Menu text="%menu.view">
+							<MenuItem text="%menu.view.items.zoomIn"
+								accelerator="Alt+Shortcut+'+'" onAction="#zoomIn" />
+							<MenuItem text="%menu.view.items.zoomOut"
+								accelerator="Alt+Shortcut+'-'" onAction="#zoomOut" />
+							<MenuItem text="%menu.file.items.close" 
+								accelerator="Shortcut+W" onAction="#handleClose"/>
+						</Menu>
+						<Menu text="%menu.help">
+							<MenuItem text="%menu.help.items.about"/>
+						</Menu>
+					</MenuBar>
+				</top>
+				<center>
+					<AnchorPane>
+						<SplitPane dividerPositions="0.4" AnchorPane.topAnchor="0.0"
+							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+							AnchorPane.rightAnchor="0.0">
+							<AnchorPane>
+								<VBox alignment="TOP_CENTER" spacing="20.0" AnchorPane.topAnchor="0.0"
 									AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 									AnchorPane.rightAnchor="0.0">
-					   				<ListView fx:id="lvChoice" AnchorPane.bottomAnchor="0.0"
+									<ListView fx:id="lvChoice" AnchorPane.bottomAnchor="0.0"
 										AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 										AnchorPane.topAnchor="0.0"/>
-								     <Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
-									 <Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
-								     <VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
-								     	<Label text="%dotview.enterFormula" HBox.hgrow="NEVER" />
+									<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+										<Button fx:id="cancelButton" onAction="#cancel">
+											<graphic>
+												<FontAwesomeIconView styleClass="icon-dark"
+													glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
+											</graphic>
+										</Button>
+										<Button fx:id="zoomInButton" disable="false"
+											contentDisplay="GRAPHIC_ONLY" onAction="#zoomIn">
+											<graphic>
+												<FontAwesomeIconView styleClass="icon-dark"
+													glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
+											</graphic>
+										</Button>
+										<Button fx:id="zoomOutButton" disable="false"
+											contentDisplay="GRAPHIC_ONLY" onAction="#zoomOut">
+											<graphic>
+												<FontAwesomeIconView styleClass="icon-dark"
+													glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
+											</graphic>
+										</Button>
+									</HBox>
+									<Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
+									<Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
+									<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
+										<Label text="%dotview.enterFormula" HBox.hgrow="NEVER"/>
 										<TextArea fx:id="taFormula" HBox.hgrow="ALWAYS"/>
-								     </VBox>
-								     <CheckBox text="%dotview.continuousUpdate" fx:id="cbContinuous" HBox.hgrow="ALWAYS"/>
-							     </VBox>
-							</children>
-						</AnchorPane>
-						<ScrollPane fx:id ="pane" fitToHeight="true" fitToWidth="true" styleClass="border">
-					   		<content>
+									</VBox>
+									<CheckBox text="%dotview.continuousUpdate" fx:id="cbContinuous" HBox.hgrow="ALWAYS"/>
+								</VBox>
+							</AnchorPane>
+							<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border">
 								<WebView fx:id="dotView" contextMenuEnabled="false"/>
-							</content>
-						</ScrollPane>
-					</SplitPane>
-				</children>
-			</AnchorPane>
+							</ScrollPane>
+						</SplitPane>
+					</AnchorPane>
+				</center>
+			</BorderPane>
 		</Scene>
 	</scene>
 </fx:root>
