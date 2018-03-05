@@ -30,7 +30,7 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 
-import de.prob2.ui.formula.FormulaGenerator;
+import de.prob2.ui.formula.FormulaStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -88,7 +88,6 @@ public final class StatesView extends StackPane {
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
-	private final FormulaGenerator formulaGenerator;
 	private final StatusBar statusBar;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -104,11 +103,10 @@ public final class StatesView extends StackPane {
 
 	@Inject
 	private StatesView(final Injector injector, final CurrentTrace currentTrace,
-			final FormulaGenerator formulaGenerator, final StatusBar statusBar, final StageManager stageManager,
+			final StatusBar statusBar, final StageManager stageManager,
 			final ResourceBundle bundle, final StopActions stopActions) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
-		this.formulaGenerator = formulaGenerator;
 		this.statusBar = statusBar;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -182,7 +180,9 @@ public final class StatesView extends StackPane {
 				.or(currentTrace.currentStateProperty().initializedProperty().not()));
 		visualizeExpressionItem.setOnAction(event -> {
 			try {
-				formulaGenerator.showFormula(((ASTFormula) row.getItem().getContents()).getFormula());
+				FormulaStage formulaStage = injector.getInstance(FormulaStage.class);
+				formulaStage.showFormula((IEvalElement)((ASTFormula) row.getItem().getContents()).getFormula());
+				formulaStage.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
 				stageManager.makeAlert(Alert.AlertType.ERROR,

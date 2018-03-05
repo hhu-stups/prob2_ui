@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 
 
 import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 
 import de.prob2.ui.internal.StageManager;
@@ -51,9 +52,26 @@ public class FormulaStage extends Stage {
 
 	@FXML
 	private void apply() {
+		showFormula(tfFormula.getText());
+	}
+	
+	public void showFormula(String formula) {
 		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
 		try {
-			formulaView = formulaGenerator.parseAndShowFormula(tfFormula.getText());
+			formulaView = formulaGenerator.parseAndShowFormula(formula);
+			formulaPane.setContent(formulaView);
+			tfFormula.getStyleClass().remove("text-field-error");
+		} catch (EvaluationException | ProBError exception) {
+			logger.error("Evaluation of formula failed", exception);
+			tfFormula.getStyleClass().add("text-field-error");
+		}
+	}
+	
+	public void showFormula(final IEvalElement formula) {
+		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
+		try {
+			formulaView = formulaGenerator.showFormula(formula);
+			tfFormula.setText(formula.getCode());
 			formulaPane.setContent(formulaView);
 			tfFormula.getStyleClass().remove("text-field-error");
 		} catch (EvaluationException | ProBError exception) {
