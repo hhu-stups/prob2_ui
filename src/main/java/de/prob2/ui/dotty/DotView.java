@@ -1,6 +1,5 @@
 package de.prob2.ui.dotty;
 
-
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -8,13 +7,16 @@ import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 
 import de.prob.Main;
 import de.prob.animator.command.GetAllDotCommands;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
 import de.prob.animator.domainobjects.ClassicalB;
-import de.prob.animator.domainobjects.DotCommandItem;
+import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
@@ -38,25 +40,22 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class DotView extends Stage {
-	
-	private final class DotCommandCell extends ListCell<DotCommandItem> {
-		
+
+	private final class DotCommandCell extends ListCell<DynamicCommandItem> {
+
 		public DotCommandCell() {
 			super();
 			getStyleClass().add("dot-command-cell");
 		}
-		
+
 		@Override
-		protected void updateItem(DotCommandItem item, boolean empty) {
+		protected void updateItem(DynamicCommandItem item, boolean empty) {
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll(Arrays.asList("dotcommandenabled", "dotcommanddisabled"));
-			if(item != null && !empty) {
+			if (item != null && !empty) {
 				setText(item.getName());
-				if(item.isAvailable()) {
+				if (item.isAvailable()) {
 					getStyleClass().add("dotcommandenabled");
 				} else {
 					getStyleClass().add("dotcommanddisabled");
@@ -64,74 +63,72 @@ public class DotView extends Stage {
 			}
 		}
 	}
-	
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
-	
-	private static final File FILE = new File(Main.getProBDirectory()
-			+ File.separator + "prob2ui" + File.separator + "out.svg");
-	
+
+	private static final File FILE = new File(
+			Main.getProBDirectory() + File.separator + "prob2ui" + File.separator + "out.svg");
+
 	@FXML
 	private WebView dotView;
-	
+
 	@FXML
-	private ListView<DotCommandItem> lvChoice;
-	
+	private ListView<DynamicCommandItem> lvChoice;
+
 	@FXML
 	private TextArea taFormula;
-	
+
 	@FXML
 	private VBox enterFormulaBox;
-	
+
 	@FXML
 	private Label lbDescription;
-	
+
 	@FXML
 	private Label lbAvailable;
-	
+
 	@FXML
 	private CheckBox cbContinuous;
-	
+
 	@FXML
 	private ScrollPane pane;
-	
-	private DotCommandItem currentItem;
-	
+
+	private DynamicCommandItem currentItem;
+
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.83;
-	
+
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final ResourceBundle bundle;
-	
+
 	private Thread currentThread;
-	
+
 	private Thread loadedThread;
-	
+
 	private boolean loaded;
-	
-	
+
 	@Inject
-	public DotView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
-			final ResourceBundle bundle) {
+	public DotView(final StageManager stageManager, final CurrentTrace currentTrace,
+			final CurrentProject currentProject, final ResourceBundle bundle) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "dot_view.fxml");
 	}
-	
+
 	@FXML
 	public void initialize() {
 		initializeZooming();
 		lvChoice.getSelectionModel().selectFirst();
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(to == null) {
+			if (to == null) {
 				return;
 			}
-			if(!to.isAvailable()) {
+			if (!to.isAvailable()) {
 				lbAvailable.setText(String.join("\n", bundle.getString("dotview.notavailable"), to.getAvailable()));
 			} else {
 				lbAvailable.setText("");
@@ -140,7 +137,8 @@ public class DotView extends Stage {
 			enterFormulaBox.setVisible(needFormula);
 			lbDescription.setText(to.getDescription());
 			String currentFormula = taFormula.getText();
-			if((!needFormula || !currentFormula.isEmpty()) && (currentItem == null || !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
+			if ((!needFormula || !currentFormula.isEmpty()) && (currentItem == null
+					|| !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
 				dotView.getEngine().loadContent("");
 				visualize(to);
 				currentItem = to;
@@ -150,7 +148,7 @@ public class DotView extends Stage {
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
 			int index = lvChoice.getSelectionModel().getSelectedIndex();
 			fillCommands();
-			if(index == -1) {
+			if (index == -1) {
 				return;
 			}
 			lvChoice.getSelectionModel().select(index);
@@ -160,12 +158,12 @@ public class DotView extends Stage {
 			fillCommands();
 			dotView.getEngine().loadContent("");
 		});
-		
+
 		taFormula.setOnKeyPressed(e -> {
-			if(e.getCode().equals(KeyCode.ENTER)) {
-				if(!e.isShiftDown()) {
-					DotCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
-					if(item == null) {
+			if (e.getCode().equals(KeyCode.ENTER)) {
+				if (!e.isShiftDown()) {
+					DynamicCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
+					if (item == null) {
 						return;
 					}
 					visualize(item);
@@ -176,37 +174,37 @@ public class DotView extends Stage {
 		});
 		lvChoice.setCellFactory(item -> new DotCommandCell());
 	}
-	
+
 	private void initializeZooming() {
-		dotView.setOnMouseMoved(e-> {
+		dotView.setOnMouseMoved(e -> {
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
 		});
-		
-		dotView.setOnMouseDragged(e-> {
-			pane.setHvalue(pane.getHvalue() + (-e.getSceneX() + oldMousePositionX)/(pane.getWidth() * dragFactor));
-			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY)/(pane.getHeight() * dragFactor));
+
+		dotView.setOnMouseDragged(e -> {
+			pane.setHvalue(pane.getHvalue() + (-e.getSceneX() + oldMousePositionX) / (pane.getWidth() * dragFactor));
+			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY) / (pane.getHeight() * dragFactor));
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
 		});
 	}
-	
+
 	private void fillCommands() {
 		try {
 			lvChoice.getItems().clear();
 			State id = currentTrace.getCurrentState();
 			GetAllDotCommands cmd = new GetAllDotCommands(id);
 			currentTrace.getStateSpace().execute(cmd);
-			for(DotCommandItem item : cmd.getCommands()) {
+			for (DynamicCommandItem item : cmd.getCommands()) {
 				lvChoice.getItems().add(item);
 			}
 		} catch (Exception e) {
 			LOGGER.error("Extract all dot commands failed", e);
 		}
 	}
-	
-	private void visualize(DotCommandItem item) {
-		if(!item.isAvailable()) {
+
+	private void visualize(DynamicCommandItem item) {
+		if (!item.isAvailable()) {
 			return;
 		}
 		ArrayList<IEvalElement> formulas = new ArrayList<>();
@@ -214,7 +212,7 @@ public class DotView extends Stage {
 		loaded = false;
 		currentThread = new Thread(() -> {
 			try {
-				if(item.getArity() > 0) {
+				if (item.getArity() > 0) {
 					formulas.add(new ClassicalB(taFormula.getText()));
 				}
 				State id = currentTrace.getCurrentState();
@@ -230,12 +228,13 @@ public class DotView extends Stage {
 			}
 		}, "Graph Visualizer");
 		currentThread.start();
-		
+
 		loadedThread = new Thread(() -> {
 			try {
 				Thread.sleep(500);
-				if(!loaded) {
-					Platform.runLater(() -> dotView.getEngine().loadContent("<center><h1>"+ bundle.getString("dotview.loading") +"</h1></center>"));
+				if (!loaded) {
+					Platform.runLater(() -> dotView.getEngine()
+							.loadContent("<center><h1>" + bundle.getString("dotview.loading") + "</h1></center>"));
 				}
 			} catch (InterruptedException e) {
 				LOGGER.debug("DotView loading interrupted (this is not an error)", e);
@@ -244,7 +243,7 @@ public class DotView extends Stage {
 		});
 		loadedThread.start();
 	}
-	
+
 	private void loadGraph() {
 		Platform.runLater(() -> {
 			String content = "";
@@ -252,7 +251,8 @@ public class DotView extends Stage {
 				/*
 				 * FIXME: Fix rendering problem in JavaFX WebView
 				 */
-				content = new String(Files.readAllBytes(FILE.toPath())).replaceAll("font-size=\"12.00\"", "font-size=\"10.00\"");
+				content = new String(Files.readAllBytes(FILE.toPath())).replaceAll("font-size=\"12.00\"",
+						"font-size=\"10.00\"");
 			} catch (Exception e) {
 				LOGGER.error("Reading dot file failed", e);
 				return;
@@ -261,46 +261,46 @@ public class DotView extends Stage {
 			loaded = true;
 		});
 	}
-	
+
 	@FXML
 	private void cancel() {
 		interrupt();
-		if(!loaded) {
+		if (!loaded) {
 			dotView.getEngine().loadContent("");
 		}
 	}
-	
+
 	@FXML
 	private void zoomIn() {
 		zoomByFactor(1.15);
 		adjustScroll();
 	}
-	
+
 	@FXML
 	private void zoomOut() {
 		zoomByFactor(0.85);
 		adjustScroll();
 	}
-	
+
 	@FXML
 	private void handleClose() {
 		this.close();
 	}
-	
+
 	private void interrupt() {
-		if(currentThread != null) {
+		if (currentThread != null) {
 			currentThread.interrupt();
 		}
-		if(loadedThread != null) {
+		if (loadedThread != null) {
 			loadedThread.interrupt();
 		}
 	}
-	
+
 	private void zoomByFactor(double factor) {
 		dotView.setZoom(dotView.getZoom() * factor);
 		dragFactor *= factor;
 	}
-	
+
 	private void adjustScroll() {
 		Set<Node> nodes = pane.lookupAll(".scroll-bar");
 		double x = 0.0;
@@ -309,13 +309,13 @@ public class DotView extends Stage {
 			if (node instanceof ScrollBar) {
 				ScrollBar sb = (ScrollBar) node;
 				if (sb.getOrientation() == Orientation.VERTICAL) {
-					x = sb.getPrefHeight()/2;
+					x = sb.getPrefHeight() / 2;
 				} else {
-					y = sb.getPrefWidth()/2;
+					y = sb.getPrefWidth() / 2;
 				}
 			}
 		}
-		dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y +")");
+		dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y + ")");
 	}
 
 }
