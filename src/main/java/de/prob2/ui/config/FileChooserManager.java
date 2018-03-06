@@ -21,28 +21,24 @@ public class FileChooserManager {
 		if (containsValidInitialDirectory(kind)) {
 			fileChooser.setInitialDirectory(getInitialDirectory(kind));
 		}
-		File fileHelper = new File(fileChooser.getInitialDirectory().getPath());
-		fileChooser.setInitialDirectory(fileHelper);
 		final File file = fileChooser.showOpenDialog(window);
-		if(file != null) {
+		if (file != null) {
 			setInitialDirectory(kind, file.getParentFile());
 		}
 		return file;
 	}
-	
+
 	public File showSaveDialog(final FileChooser fileChooser, final Kind kind, final Window window) {
 		if (containsValidInitialDirectory(kind)) {
 			fileChooser.setInitialDirectory(getInitialDirectory(kind));
 		}
 		final File file = fileChooser.showSaveDialog(window);
-		if(file != null) {
+		if (file != null) {
 			setInitialDirectory(kind, file.getParentFile());
 		}
 		return file;
 	}
-	
-	
-	
+
 	public boolean containsValidInitialDirectory(Kind kind) {
 		return initialDirectories.containsKey(kind) && initialDirectories.get(kind).exists();
 	}
@@ -50,7 +46,7 @@ public class FileChooserManager {
 	public File getInitialDirectory(Kind kind) {
 		return this.initialDirectories.get(kind);
 	}
-	
+
 	public void setInitialDirectory(Kind kind, File dir) {
 		if (dir != null && dir.exists()) {
 			initialDirectories.put(kind, dir);

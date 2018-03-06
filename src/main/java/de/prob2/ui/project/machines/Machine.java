@@ -287,6 +287,9 @@ public class Machine {
 	}
 	
 	public void addTraceFile(File traceFile) {
+		//Note, if the traceFile does already exist and has to be updated,
+		//we must remove the traceFile first in order to trigger the SetChangeListener!
+		this.traces.remove(traceFile);
 		this.traces.add(traceFile);
 		this.setChanged(true);
 	}

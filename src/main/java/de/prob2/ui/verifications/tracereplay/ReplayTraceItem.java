@@ -17,7 +17,7 @@ public class ReplayTraceItem {
 	private final ReplayTrace trace;
 
 	public ReplayTraceItem(ReplayTrace trace, File traceFile) {
-		this.name = traceFile.getName();
+		this.name = traceFile.getAbsolutePath();
 		this.location = traceFile;
 		this.trace = trace;
 		this.statusIcon = new SimpleObjectProperty<>();
