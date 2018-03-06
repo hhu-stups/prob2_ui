@@ -16,23 +16,15 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import ro.fortsoft.pf4j.PluginState;
-import ro.fortsoft.pf4j.PluginStateListener;
-import ro.fortsoft.pf4j.PluginWrapper;
+import org.pf4j.PluginState;
+import org.pf4j.PluginStateListener;
+import org.pf4j.PluginWrapper;
 
 /**
  * Created by Christoph Heinzen on 03.08.17.

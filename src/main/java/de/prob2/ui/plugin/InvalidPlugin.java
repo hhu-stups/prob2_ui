@@ -1,6 +1,7 @@
 package de.prob2.ui.plugin;
 
-import ro.fortsoft.pf4j.PluginWrapper;
+
+import org.pf4j.PluginWrapper;
 
 /**
  * @author Christoph Heinzen

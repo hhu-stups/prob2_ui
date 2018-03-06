@@ -28,24 +28,17 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import org.apache.commons.lang.StringUtils;
+import org.pf4j.*;
+import org.pf4j.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.zafarkhaja.semver.Version;
-import ro.fortsoft.pf4j.JarPluginManager;
-import ro.fortsoft.pf4j.PluginDependency;
-import ro.fortsoft.pf4j.PluginDescriptor;
-import ro.fortsoft.pf4j.PluginException;
-import ro.fortsoft.pf4j.PluginFactory;
-import ro.fortsoft.pf4j.PluginState;
-import ro.fortsoft.pf4j.PluginWrapper;
-import ro.fortsoft.pf4j.RuntimeMode;
-import ro.fortsoft.pf4j.util.FileUtils;
-import ro.fortsoft.pf4j.util.StringUtils;
 
 /**
  * The {@link ProBPluginManager} is a wrapper for the {@link ProBJarPluginManager} which is an
- * implementation of the PF4J {@link JarPluginManager}.
+ * implementation of the PF4J {@link org.pf4j.DefaultPluginManager}.
  *
  * {@link ProBPluginManager} has methods to start the plugin manager, to reload the plugins and
  * to add plugins using a {@link FileChooser}.
@@ -331,7 +324,7 @@ public class ProBPluginManager {
 			File inactivePlugins = getInactivePluginsFile();
 			if (inactivePlugins.exists()) {
 				//if we already have a incative plugins file, read it
-				inactivePluginIds = FileUtils.readLines(inactivePlugins, true);
+				inactivePluginIds = FileUtils.readLines(inactivePlugins.toPath(), true);
 			} else {
 				//if not, try to create an empty file
 				if (!createPluginDirectory() || !inactivePlugins.createNewFile() ) {
@@ -399,7 +392,7 @@ public class ProBPluginManager {
 	}
 
 	/**
-	 * Slightly changed version of the PF4J-{@link JarPluginManager}
+	 * Slightly changed version of the PF4J-{@link org.pf4j.DefaultPluginManager}
 	 *
 	 * {@inheritDoc}
 	 *
@@ -409,14 +402,13 @@ public class ProBPluginManager {
 	 *
 	 * @author  Christoph Heinzen
 	 * @since   23.08.2017
-	 * @see ro.fortsoft.pf4j.JarPluginManager
-	 * @see ro.fortsoft.pf4j.DefaultPluginManager
-	 * @see ro.fortsoft.pf4j.AbstractPluginManager
+	 * @see org.pf4j.DefaultPluginManager
+	 * @see org.pf4j.AbstractPluginManager
 	 */
-	public class ProBJarPluginManager extends JarPluginManager {
+	public class ProBJarPluginManager extends DefaultPluginManager {
 
 		private ProBJarPluginManager(){
-			setSystemVersion(Version.valueOf(VERSION));
+			setSystemVersion(Version.valueOf(VERSION).toString());
 			setExactVersionAllowed(true);
 		}
 

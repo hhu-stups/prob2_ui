@@ -1,12 +1,12 @@
 package de.prob2.ui.plugin;
 
 import com.google.inject.Injector;
+import org.pf4j.Plugin;
+import org.pf4j.PluginException;
+import org.pf4j.PluginManager;
+import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ro.fortsoft.pf4j.Plugin;
-import ro.fortsoft.pf4j.PluginException;
-import ro.fortsoft.pf4j.PluginManager;
-import ro.fortsoft.pf4j.PluginWrapper;
 
 import java.util.ResourceBundle;
 
@@ -26,9 +26,9 @@ import java.util.ResourceBundle;
  * @author  Christoph Heinzen
  * @version 0.1.0
  * @since   10.08.2017
- * @see ro.fortsoft.pf4j.Plugin
+ * @see org.pf4j.Plugin
  */
-public abstract class ProBPlugin extends Plugin{
+public abstract class ProBPlugin extends Plugin {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPlugin.class);
 
