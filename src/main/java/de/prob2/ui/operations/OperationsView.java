@@ -89,7 +89,14 @@ public final class OperationsView extends AnchorPane {
 				stage.setItem(this.getItem());
 				stage.show();
 			});
-			this.setContextMenu(new ContextMenu(showDetailsItem));
+
+			final MenuItem executeByPredicateItem = new MenuItem(bundle.getString("operations.executeByPredicate"));
+			executeByPredicateItem.setOnAction(event -> {
+				final ExecuteByPredicateStage stage = injector.getInstance(ExecuteByPredicateStage.class);
+				stage.setItem(this.getItem());
+				stage.show();
+			});
+			this.setContextMenu(new ContextMenu(showDetailsItem, executeByPredicateItem));
 		}
 
 		private String getPrettyName(final String name) {

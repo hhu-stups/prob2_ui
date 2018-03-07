@@ -27,6 +27,7 @@ import de.prob2.ui.menu.ViewCodeStage;
 import de.prob2.ui.menu.ViewMenu;
 import de.prob2.ui.menu.VisualisationMenu;
 import de.prob2.ui.menu.WindowMenu;
+import de.prob2.ui.operations.ExecuteByPredicateStage;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.plugin.ProBPluginHelper;
 import de.prob2.ui.plugin.ProBPluginManager;
@@ -81,6 +82,7 @@ public class ProB2Module extends AbstractModule {
 		// Controllers
 		bind(BConsole.class);
 		bind(BConsoleView.class);
+		bind(ExecuteByPredicateStage.class);
 		bind(HistoryView.class);
 		bind(MainController.class);
 		bind(LTLFormulaChecker.class);
