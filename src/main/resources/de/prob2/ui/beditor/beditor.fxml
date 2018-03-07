@@ -1,28 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.beditor.BEditor?>
 <?import de.prob2.ui.beditor.BEditorStage?>
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.Scene?>
-<?import javafx.scene.web.WebView?>
-<fx:root type="BEditorStage" minWidth="240" minHeight="160" width="1280" height="720" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="BEditorStage" minWidth="240" minHeight="160" width="800" height="600" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
-		<Scene stylesheets="@/prob.css">
-			<BorderPane maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity">
+		<Scene>
+			<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 				<top>
-					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
-						<Menu text="%menu.file">
-							<MenuItem onAction="#handleSave" accelerator="Shortcut+S" text="%beditor.menu.file.items.save"/>
-							<MenuItem onAction="#handleSaveAs" text="%beditor.menu.file.items.saveAs"/>
-							<MenuItem onAction="#handleClose" accelerator="Shortcut+W" text="%menu.file.items.close"/>
+					<MenuBar BorderPane.alignment="CENTER">
+						<Menu mnemonicParsing="false" text="%menu.file">
+							<MenuItem onAction="#handleSave" mnemonicParsing="false" accelerator="Shortcut+S" text="%beditor.menu.file.items.save"/>
+							<MenuItem onAction="#handleSaveAs" mnemonicParsing="false" text="%beditor.menu.file.items.saveAs"/>
+							<MenuItem onAction="#handleClose" mnemonicParsing="false" accelerator="Shortcut+W" text="%menu.file.items.close"/>
 						</Menu>
-						<Menu text="%menu.help">
-							<MenuItem text="%menu.help.items.about"/>
+						<Menu mnemonicParsing="false" text="%project.preferences.tab.menu.edit">
+							<MenuItem mnemonicParsing="false" text="%menu.file.items.placeholder"/>
+						</Menu>
+						<Menu mnemonicParsing="false" text="%menu.help">
+							<MenuItem mnemonicParsing="false" text="%menu.help.items.about"/>
 						</Menu>
 					</MenuBar>
 				</top>
 				<center>
-					<WebView fx:id="beditor" BorderPane.alignment="CENTER" />
+					<BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
 				</center>
 			</BorderPane>
 		</Scene>

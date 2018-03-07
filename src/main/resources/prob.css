@@ -430,6 +430,42 @@
 }
 
 /************************************************************************************
+ * BEditor																			*
+ ************************************************************************************/
+
+.editor {
+	-fx-font-weight: bold;
+	-fx-font-family: monospace;
+	-fx-font-size: 15
+}
+
+.editor .editor_identifier {
+	-fx-fill:green;
+}
+
+.editor .editor_assignment_logical {
+	-fx-fill:black;
+	-fx-font-style: normal;
+}
+
+.editor .editor_string {
+	-fx-fill:red;
+}
+
+.editor .editor_comment {
+	-fx-fill:grey;
+	-fx-font-style: italic
+}
+
+.editor .editor_ctrlkeyword {
+	-fx-fill:blue;
+}
+
+.editor .editor_keyword {
+	-fx-fill:blue;
+}
+
+/************************************************************************************
  * TabPane																		  *
  ************************************************************************************/
  

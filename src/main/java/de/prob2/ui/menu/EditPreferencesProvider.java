@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import de.prob2.ui.beditor.BEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,11 +55,7 @@ public class EditPreferencesProvider {
 			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.error.couldNotReadFile"), path, e)).showAndWait();
 			return;
 		}
-		editorStage.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-			if (newState == Worker.State.SUCCEEDED) {
-				editorStage.setTextEditor(text, path);
-			}
-		});
+		editorStage.setEditorText(text, path);
 		editorStage.setTitle(path.getFileName().toString());
 		editorStage.show();
 	}
