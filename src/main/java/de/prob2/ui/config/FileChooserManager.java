@@ -20,9 +20,12 @@ public class FileChooserManager {
 	public File showOpenDialog(final FileChooser fileChooser, final Kind kind, final Window window) {
 		if (containsValidInitialDirectory(kind)) {
 			fileChooser.setInitialDirectory(getInitialDirectory(kind));
+		}else if(fileChooser.getInitialDirectory() != null) {
+			// the if condition avoids a NP exception
+			//TODO what is the intention of the following instructions?
+			File file1 = new File(fileChooser.getInitialDirectory().getPath());
+			fileChooser.setInitialDirectory(file1);
 		}
-		File file1 = new File(fileChooser.getInitialDirectory().getPath());
-		fileChooser.setInitialDirectory(file1);
 		final File file = fileChooser.showOpenDialog(window);
 		if (file != null) {
 			setInitialDirectory(kind, file.getParentFile());
