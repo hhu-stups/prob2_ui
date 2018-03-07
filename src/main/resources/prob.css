@@ -209,6 +209,7 @@
 	-fx-border-color: -prob-grey-75;
 }
 
+
 /************************************************************************************
  * ListView																		  *
  ************************************************************************************/
@@ -239,6 +240,41 @@
 .popup .list-view {
 	-fx-border-color: -prob-grey;
 	-fx-border-width: 0.02em 0.02em 0.02em 0.2em;
+}
+
+/* ================== EXPRESSION TABLE VIEW ================= */
+.expression-table-command-cell {
+	-fx-border-color: transparent;
+	-fx-border-width: 0.0 0.0 0.0 0.3em;
+	-fx-graphic-text-gap: 10;
+	-fx-padding: 0.4em 0.0 0.4em 1.0em;
+}
+
+.expression-table-command-cell.tablecommandenabled {
+	-fx-font-family: ARIAL;
+	-fx-fill: white;
+	-fx-text-fill: -prob-aqua;
+}
+
+.expression-table-command-cell.tablecommandenabled:selected:hover {
+	-fx-text-fill: white;
+}
+
+.expression-table-command-cell.tablecommanddisabled {
+	-fx-font-family: ARIAL;
+	-fx-fill: white;
+	-fx-text-fill: -prob-orange;
+}
+
+.expression-table-command-cell:selected {
+	-fx-background-color: -prob-grey-50;
+	-fx-fill: -prob-grey-50;
+	-fx-text-fill: white;
+}
+
+.expression-table-command-cell:selected:hover {
+	-fx-background-color: -prob-grey;
+	-fx-text-fill: white;
 }
 
 /************************************************************************************
@@ -699,27 +735,6 @@
 	-fx-background-color: -prob-grey;
 	-fx-text-fill: white;
 }
-
-.dotCommandItemBackground {
-	-fx-fill: white;
-	-fx-text-fill: white;
-}
-
-.dotCommandItemBackground:hover {
-	-fx-fill: white;
-	-fx-text-fill: white;
-}
-
-.dotCommandItemBackgroundSelected {
-	-fx-fill: white;
-	-fx-text-fill: white;
-}
-
-.dotCommandItemBackgroundSelected:hover {
-	-fx-fill: white;
-	-fx-text-fill: white;
-}
-
 
 /* ================== FORMULA DIALOG ================= */
 

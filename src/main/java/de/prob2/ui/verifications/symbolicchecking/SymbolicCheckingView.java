@@ -97,8 +97,7 @@ public class SymbolicCheckingView extends ScrollPane {
 		setContextMenu();
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
-				tvFormula.itemsProperty().bind(newValue.symbolicCheckingFormulasProperty());
-				tvFormula.refresh();
+				bindMachine(newValue);
 			} else {
 				tvFormula.getItems().clear();
 				tvFormula.itemsProperty().unbind();
@@ -111,6 +110,12 @@ public class SymbolicCheckingView extends ScrollPane {
 				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
 			}
 		});
+	}
+	
+	public void bindMachine(Machine machine) {
+		tvFormula.itemsProperty().unbind();
+		tvFormula.itemsProperty().bind(machine.symbolicCheckingFormulasProperty());
+		tvFormula.refresh();
 	}
 	
 	private void setBindings() {
