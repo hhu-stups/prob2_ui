@@ -28,6 +28,7 @@ import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.formula.FormulaStage;
@@ -256,15 +257,13 @@ public final class StatesView extends StackPane {
 		return formulas;
 	}
 
-	private void subscribeFormulas(final Collection<? extends IEvalElement> formulas) {
-		this.currentTrace.getStateSpace().subscribe(this, formulas);
+	private void subscribeFormulas(final StateSpace stateSpace, final Collection<? extends IEvalElement> formulas) {
+		stateSpace.subscribe(this, formulas);
 		this.subscribedFormulas.addAll(formulas);
 	}
 
-	private void unsubscribeFormulas(final Collection<? extends IEvalElement> formulas) {
-		if(this.currentTrace != null && this.currentTrace.getStateSpace()!= null) {
-			this.currentTrace.getStateSpace().unsubscribe(this, formulas);
-		}
+	private void unsubscribeFormulas(final StateSpace stateSpace, final Collection<? extends IEvalElement> formulas) {
+		stateSpace.unsubscribe(this, formulas);
 		this.subscribedFormulas.removeAll(formulas);
 	}
 
@@ -283,7 +282,7 @@ public final class StatesView extends StackPane {
 		this.updateRoot(currentTrace.get(), currentTrace.get(), true);
 	}
 
-	private List<PrologASTNode> filterNodes(final List<PrologASTNode> nodes, final String filter) {
+	private static List<PrologASTNode> filterNodes(final List<PrologASTNode> nodes, final String filter) {
 		if (filter.isEmpty()) {
 			return nodes;
 		}
@@ -307,7 +306,7 @@ public final class StatesView extends StackPane {
 		return filteredNodes;
 	}
 
-	private void buildNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
+	private void buildNodes(final Trace trace, final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(nodes);
 
@@ -324,17 +323,17 @@ public final class StatesView extends StackPane {
 			subTreeItem.expandedProperty().addListener((o, from, to) -> {
 				final List<IEvalElement> formulas = getExpandedFormulas(subTreeItem.getChildren());
 				if (to) {
-					this.subscribeFormulas(formulas);
+					this.subscribeFormulas(trace.getStateSpace(), formulas);
 				} else {
-					this.unsubscribeFormulas(formulas);
+					this.unsubscribeFormulas(trace.getStateSpace(), formulas);
 				}
-				this.updateValueMaps(this.currentTrace.get());
+				this.updateValueMaps(trace);
 			});
-			buildNodes(subTreeItem, node.getSubnodes());
+			buildNodes(trace, subTreeItem, node.getSubnodes());
 		}
 	}
 
-	private void updateNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
+	private static void updateNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(nodes);
 
@@ -367,8 +366,8 @@ public final class StatesView extends StackPane {
 		// If the root nodes were reloaded or the filter has changed, update the filtered node list.
 		if (reloadRootNodes || filterChanged) {
 			this.filteredRootNodes = filterNodes(this.rootNodes, this.filter);
-			this.unsubscribeFormulas(this.subscribedFormulas);
-			this.subscribeFormulas(getInitialExpandedFormulas(this.filteredRootNodes));
+			this.unsubscribeFormulas(to.getStateSpace(), this.subscribedFormulas);
+			this.subscribeFormulas(to.getStateSpace(), getInitialExpandedFormulas(this.filteredRootNodes));
 		}
 
 		this.updateValueMaps(to);
@@ -376,7 +375,7 @@ public final class StatesView extends StackPane {
 		Platform.runLater(() -> {
 			if (reloadRootNodes || filterChanged) {
 				this.tvRootItem.getChildren().clear();
-				buildNodes(this.tvRootItem, this.filteredRootNodes);
+				buildNodes(to, this.tvRootItem, this.filteredRootNodes);
 			} else {
 				updateNodes(this.tvRootItem, this.filteredRootNodes);
 			}
