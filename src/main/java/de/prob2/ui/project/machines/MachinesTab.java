@@ -21,7 +21,9 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
-
+import de.prob2.ui.verifications.ltl.LTLView;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -238,6 +240,10 @@ public class MachinesTab extends Tab {
 	private void startMachine(final Machine machine) {
 		if (machine != null) {
 			currentProject.startAnimation(machine, machine.getLastUsed());
+			machine.resetStatus();
+			injector.getInstance(LTLView.class).bindMachine(machine);
+			injector.getInstance(SymbolicCheckingView.class).bindMachine(machine);
+			injector.getInstance(ModelcheckingView.class).bindMachine(machine);
 		}
 	}
 }
