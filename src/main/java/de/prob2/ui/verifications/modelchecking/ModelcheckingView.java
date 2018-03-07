@@ -282,9 +282,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	private void setListeners() {
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
-				tvItems.itemsProperty().unbind();
-				tvItems.itemsProperty().bind(newValue.modelcheckingItemsProperty());
-				resetView();
+				bindMachine(newValue);
 			} else {
 				tvItems.getItems().clear();
 				tvItems.itemsProperty().unbind();
@@ -322,6 +320,13 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 				}
 			}
 		});
+	}
+	
+	public void bindMachine(Machine machine) {
+		tvItems.itemsProperty().unbind();
+		tvItems.itemsProperty().bind(machine.modelcheckingItemsProperty());
+		resetView();
+		tvItems.refresh();
 	}
 	
 	private void setContextMenus() {

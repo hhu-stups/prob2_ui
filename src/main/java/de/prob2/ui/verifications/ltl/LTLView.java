@@ -246,7 +246,7 @@ public class LTLView extends ScrollPane {
 		});
 	}
 	
-	private void bindMachine(Machine machine) {
+	public void bindMachine(Machine machine) {
 		tvFormula.itemsProperty().unbind();
 		tvFormula.itemsProperty().bind(machine.ltlFormulasProperty());
 		tvPattern.itemsProperty().unbind();

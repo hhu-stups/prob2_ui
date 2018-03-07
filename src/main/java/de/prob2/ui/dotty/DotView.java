@@ -4,6 +4,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -207,7 +209,7 @@ public class DotView extends Stage {
 		if (!item.isAvailable()) {
 			return;
 		}
-		ArrayList<IEvalElement> formulas = new ArrayList<>();
+		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		interrupt();
 		loaded = false;
 		currentThread = new Thread(() -> {

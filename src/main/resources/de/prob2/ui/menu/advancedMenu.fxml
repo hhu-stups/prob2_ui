@@ -7,8 +7,6 @@
 <fx:root type="Menu" text="%menu.advanced" xmlns:fx="http://javafx.com/fxml/1">
 	<MenuItem text="%menu.advanced.items.groovy" onAction="#handleGroovyConsole" />
 	<SeparatorMenuItem />
-	<MenuItem text="%menu.advanced.items.reloadPlugin" onAction="#reloadPlugins"/>
-	<MenuItem text="%menu.advanced.items.addPlugin" onAction="#addPlugin" />
 	<MenuItem text="%menu.advanced.items.pluginMenu" onAction="#showPluginMenu"/>
 	<SeparatorMenuItem />
 	<Menu text="%menu.advanced.items.useVisualisation" fx:id="visualisationFxMenu">
