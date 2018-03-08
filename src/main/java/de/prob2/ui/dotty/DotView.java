@@ -3,7 +3,6 @@ package de.prob2.ui.dotty;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -23,6 +22,7 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob2.ui.internal.DynamicCommandItemCell;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -32,7 +32,6 @@ import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
@@ -43,28 +42,6 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 public class DotView extends Stage {
-
-	private final class DotCommandCell extends ListCell<DynamicCommandItem> {
-
-		public DotCommandCell() {
-			super();
-			getStyleClass().add("dot-command-cell");
-		}
-
-		@Override
-		protected void updateItem(DynamicCommandItem item, boolean empty) {
-			super.updateItem(item, empty);
-			this.getStyleClass().removeAll(Arrays.asList("dotcommandenabled", "dotcommanddisabled"));
-			if (item != null && !empty) {
-				setText(item.getName());
-				if (item.isAvailable()) {
-					getStyleClass().add("dotcommandenabled");
-				} else {
-					getStyleClass().add("dotcommanddisabled");
-				}
-			}
-		}
-	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
 
@@ -174,7 +151,7 @@ public class DotView extends Stage {
 				}
 			}
 		});
-		lvChoice.setCellFactory(item -> new DotCommandCell());
+		lvChoice.setCellFactory(item -> new DynamicCommandItemCell("dot-command-cell","dotcommandenabled", "dotcommanddisabled"));
 	}
 
 	private void initializeZooming() {

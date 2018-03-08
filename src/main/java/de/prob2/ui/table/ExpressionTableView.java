@@ -1,7 +1,6 @@
 package de.prob2.ui.table;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -18,12 +17,12 @@ import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.statespace.State;
+import de.prob2.ui.internal.DynamicCommandItemCell;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
@@ -36,28 +35,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class ExpressionTableView extends Stage {
-	
-	private final class ExpressionTableCommandCell extends ListCell<DynamicCommandItem> {
-
-		public ExpressionTableCommandCell() {
-			super();
-			getStyleClass().add("expression-table-command-cell");
-		}
-
-		@Override
-		protected void updateItem(DynamicCommandItem item, boolean empty) {
-			super.updateItem(item, empty);
-			this.getStyleClass().removeAll(Arrays.asList("tablecommandenabled", "tablecommanddisabled"));
-			if (item != null && !empty) {
-				setText(item.getName());
-				if (item.isAvailable()) {
-					getStyleClass().add("tablecommandenabled");
-				} else {
-					getStyleClass().add("tablecommanddisabled");
-				}
-			}
-		}
-	}
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
 	
@@ -88,7 +65,6 @@ public class ExpressionTableView extends Stage {
 	private CurrentTrace currentTrace;
 	
 	private final ResourceBundle bundle;
-	
 	
 	
 	@Inject
@@ -128,7 +104,7 @@ public class ExpressionTableView extends Stage {
 			}
 		});
 		
-		lvChoice.setCellFactory(item -> new ExpressionTableCommandCell());
+		lvChoice.setCellFactory(item -> new DynamicCommandItemCell("expression-table-command-cell","tablecommandenabled","tablecommanddisabled"));
 	}
 	
 	private void fillCommands() {
