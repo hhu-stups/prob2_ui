@@ -4,12 +4,14 @@ import java.io.File;
 import java.util.List;
 
 import com.google.common.base.Joiner;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+
 import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
+import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.formula.PredicateBuilder;
@@ -18,11 +20,12 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob.translator.Translator;
 import de.prob.translator.types.BObject;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.tracereplay.ReplayTrace.Status;
+
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -63,19 +66,20 @@ public class TraceChecker {
 
 	public void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
 		Thread replayThread = new Thread(() -> {
-			replayTrace.setStatus(Status.NOT_CHECKED);
+			replayTrace.setStatus(ReplayTrace.Status.NOT_CHECKED);
 
 			StateSpace stateSpace = currentTrace.getStateSpace();
 
 			Trace trace = new Trace(stateSpace);
 			trace.setExploreStateByDefault(false);
-			boolean traceReplaySuccess = true;
+			ReplayTrace.Status status = ReplayTrace.Status.SUCCESSFUL;
 			for (PersistentTransition persistentTransition : replayTrace.getStoredTrace().getTransitionList()) {
 				Transition trans = replayPersistentTransition(stateSpace, trace, persistentTransition,
 						setCurrentAnimation);
 				if (trans != null) {
 					trace = trace.add(trans);
 				} else {
+					status = ReplayTrace.Status.FAILED;
 					break;
 				}
 
@@ -85,7 +89,7 @@ public class TraceChecker {
 				}
 			}
 
-			replayTrace.setStatus(traceReplaySuccess ? Status.SUCCESSFUL : Status.FAILED);
+			replayTrace.setStatus(status);
 			trace.setExploreStateByDefault(true);
 			if (setCurrentAnimation) {
 				// set the current trace in both cases
@@ -184,7 +188,7 @@ public class TraceChecker {
 
 	public void resetStatus() {
 		cancelReplay();
-		replayTraces.forEach((file, trace) -> trace.setStatus(Status.NOT_CHECKED));
+		replayTraces.forEach((file, trace) -> trace.setStatus(ReplayTrace.Status.NOT_CHECKED));
 	}
 
 	ListProperty<Thread> currentJobThreadsProperty() {
