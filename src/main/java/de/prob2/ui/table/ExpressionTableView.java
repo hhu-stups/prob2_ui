@@ -16,7 +16,6 @@ import de.prob.animator.command.GetTableForVisualizationCommand;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.animator.domainobjects.TableData;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
