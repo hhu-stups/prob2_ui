@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import de.prob.animator.command.GetAllTableCommands;
-import de.prob.animator.command.GetSvgForVisualizationCommand;
 import de.prob.animator.command.GetTableForVisualizationCommand;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.DynamicCommandItem;
@@ -29,7 +28,11 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class ExpressionTableView extends Stage {
@@ -79,9 +82,14 @@ public class ExpressionTableView extends Stage {
 	@FXML
 	private ScrollPane pane;
 	
+	@FXML
+	private GridPane gpVisualisation;
+	
 	private CurrentTrace currentTrace;
 	
 	private final ResourceBundle bundle;
+	
+	
 	
 	@Inject
 	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
@@ -138,14 +146,31 @@ public class ExpressionTableView extends Stage {
 	}
 	
 	private void visualize(DynamicCommandItem item) {
+		gpVisualisation.getChildren().clear();
 		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		formulas.add(new ClassicalB(taFormula.getText()));
 		State id = currentTrace.getCurrentState();
 		GetTableForVisualizationCommand cmd = new GetTableForVisualizationCommand(id, item, formulas);
 		currentTrace.getStateSpace().execute(cmd);
-		for(List data : cmd.getTable().getRows()) {
-			System.out.println(data);
+		fillTable(cmd.getTable());
+	}
+	
+	private void fillTable(TableData data) {
+		List<String> header = data.getHeader();
+		for(int i = 0; i < header.size(); i++) {
+			Text text = new Text(header.get(i));
+			text.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+			gpVisualisation.add(text, i, 0);
+		}
+		
+		List<List<String>> rows = data.getRows();
+		for(int i = 0; i < rows.size(); i++) {
+			for(int j = 0; j < rows.get(i).size(); j++) {
+				gpVisualisation.add(new Label(rows.get(i).get(j)), j, i+1);
+			}
 		}
 	}
+	
+	
 	
 }

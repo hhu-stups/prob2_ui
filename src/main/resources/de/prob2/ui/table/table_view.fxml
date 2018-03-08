@@ -44,7 +44,7 @@
 								</VBox>
 							</AnchorPane>
 							<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border">
-								
+								<GridPane fx:id="gpVisualisation" vgap="20" hgap="20" alignment="CENTER"/>
 							</ScrollPane>
 						</SplitPane>
 					</AnchorPane>
