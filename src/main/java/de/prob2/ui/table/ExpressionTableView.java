@@ -88,7 +88,7 @@ public class ExpressionTableView extends Stage {
 				return;
 			}
 			if (!to.isAvailable()) {
-				lbAvailable.setText(String.join("\n", bundle.getString("dotview.notavailable"), to.getAvailable()));
+				lbAvailable.setText(String.join("\n", bundle.getString("tableview.notavailable"), to.getAvailable()));
 			} else {
 				lbAvailable.setText("");
 			}
@@ -117,6 +117,7 @@ public class ExpressionTableView extends Stage {
 						return;
 					}
 					visualize(item);
+					e.consume();
 				} else {
 					taFormula.insertText(taFormula.getCaretPosition(), "\n");
 				}

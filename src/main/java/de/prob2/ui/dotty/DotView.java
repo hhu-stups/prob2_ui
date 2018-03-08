@@ -146,6 +146,7 @@ public class DotView extends Stage {
 						return;
 					}
 					visualize(item);
+					e.consume();
 				} else {
 					taFormula.insertText(taFormula.getCaretPosition(), "\n");
 				}
