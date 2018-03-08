@@ -144,7 +144,9 @@ public class ExpressionTableView extends Stage {
 	private void visualize(DynamicCommandItem item) {
 		gpVisualisation.getChildren().clear();
 		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
-		formulas.add(new ClassicalB(taFormula.getText()));
+		if(item.getArity() > 0) {
+			formulas.add(new ClassicalB(taFormula.getText()));
+		}
 		State id = currentTrace.getCurrentState();
 		GetTableForVisualizationCommand cmd = new GetTableForVisualizationCommand(id, item, formulas);
 		currentTrace.getStateSpace().execute(cmd);
