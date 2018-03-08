@@ -83,7 +83,7 @@ public class LTLFormulaChecker {
 			currentTrace.getStateSpace().execute(lcc);
 			injector.getInstance(StatsView.class).update(currentTrace.get());
 		} catch (ProBError error) {
-			logger.error("Could not parse LTL formula", error.getMessage());
+			logger.error("Could not parse LTL formula");
 			return error;
 		}
 		return lcc.getValue();

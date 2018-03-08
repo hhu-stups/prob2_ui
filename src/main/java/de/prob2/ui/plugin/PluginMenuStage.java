@@ -139,7 +139,7 @@ public class PluginMenuStage extends Stage {
 			cell.setAlignment(Pos.CENTER);
 			return cell;
 		});
-		versionCol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getDescriptor().getVersion().toString()));
+		versionCol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getDescriptor().getVersion()));
 		versionCol.setSortable(false);
 
 		activeCol.setCellFactory(param -> {

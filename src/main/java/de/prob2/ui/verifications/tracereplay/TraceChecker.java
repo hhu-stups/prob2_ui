@@ -154,9 +154,9 @@ public class TraceChecker {
 										"Can not replay operation '%s'. The value of the ouput parameter '%s' does not match.\n"
 												+ "Value from trace file: %s\nComputed value: %s",
 										operationName, outputParamName, bValue.toString(), paramValueFromTransition);
-								Platform.runLater(() -> {
-									Platform.runLater(() -> getReplayErrorAlert(errorMessage).showAndWait());
-								});
+								Platform.runLater(() ->
+									Platform.runLater(() -> getReplayErrorAlert(errorMessage).showAndWait())
+								);
 							}
 							return false;
 						}

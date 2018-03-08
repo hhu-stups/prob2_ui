@@ -9,7 +9,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import de.prob2.ui.beditor.BEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,6 @@ import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.project.MachineLoader;
-import javafx.concurrent.Worker;
 import javafx.scene.control.Alert;
 
 public class EditPreferencesProvider {

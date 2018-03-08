@@ -12,12 +12,10 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import de.prob.animator.command.GetAllTableCommands;
-import de.prob.animator.command.GetSvgForVisualizationCommand;
 import de.prob.animator.command.GetTableForVisualizationCommand;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.animator.domainobjects.TableData;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
