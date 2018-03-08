@@ -19,6 +19,7 @@ import de.prob.animator.domainobjects.TableData;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.DynamicCommandItemCell;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -62,22 +63,26 @@ public class ExpressionTableView extends Stage {
 	@FXML
 	private GridPane gpVisualisation;
 	
-	private CurrentTrace currentTrace;
+	private final CurrentTrace currentTrace;
+	
+	private final CurrentProject currentProject;
 	
 	private final ResourceBundle bundle;
 	
 	
 	@Inject
-	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
+			final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "table_view.fxml");
 	}
 	
 	@FXML
 	private void initialize() {
-		fillCommands();
 		lvChoice.getSelectionModel().selectFirst();
+		fillCommands();
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if (to == null) {
 				return;
@@ -88,6 +93,20 @@ public class ExpressionTableView extends Stage {
 				lbAvailable.setText("");
 			}
 			lbDescription.setText(to.getDescription());
+		});
+		
+		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
+			int index = lvChoice.getSelectionModel().getSelectedIndex();
+			fillCommands();
+			if (index == -1) {
+				return;
+			}
+			lvChoice.getSelectionModel().select(index);
+		});
+		
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			fillCommands();
+			gpVisualisation.getChildren().clear();
 		});
 		
 		taFormula.setOnKeyPressed(e -> {
