@@ -11,12 +11,12 @@
 	<fx:define>
 		<ContextMenu fx:id="contextMenu">
 			<items>
-				<MenuItem text="%project.machines.tab.menu.machineDescription" onAction="#handleShowDescription"/>
-				<MenuItem text="%project.machines.tab.menu.editMachineConfiguration" onAction="#handleEditConfiguration"/>
-				<MenuItem text="%project.machines.tab.menu.removeMachine" onAction="#handleRemove"/>
 				<MenuItem text="%project.machines.tab.menu.editMachineFile" onAction="#handleEditFile"/>
 				<MenuItem text="%project.machines.tab.menu.editMachineFileInExternalEditor" onAction="#handleEditFileExternal"/>
 				<Menu fx:id="startAnimationMenu" text="%project.machines.tab.menu.startAnimation"/>
+				<MenuItem text="%project.machines.tab.menu.machineDescription" onAction="#handleShowDescription"/>
+				<MenuItem text="%project.machines.tab.menu.editMachineConfiguration" onAction="#handleEditConfiguration"/>
+				<MenuItem text="%project.machines.tab.menu.removeMachine" onAction="#handleRemove"/>
 			</items>
 		</ContextMenu>
 	</fx:define>
