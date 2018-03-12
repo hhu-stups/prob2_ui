@@ -48,17 +48,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	@Override
 	protected void fillCommands() {
-		try {
-			lvChoice.getItems().clear();
-			State id = currentTrace.getCurrentState();
-			GetAllTableCommands cmd = new GetAllTableCommands(id);
-			currentTrace.getStateSpace().execute(cmd);
-			for (DynamicCommandItem item : cmd.getCommands()) {
-				lvChoice.getItems().add(item);
-			}
-		} catch (Exception e) {
-			LOGGER.error("Extract all expression table commands failed", e);
-		}
+		super.fillCommands(new GetAllTableCommands(currentTrace.getCurrentState()));
 	}
 	
 	@Override

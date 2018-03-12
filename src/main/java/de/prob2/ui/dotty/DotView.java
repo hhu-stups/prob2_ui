@@ -59,6 +59,7 @@ public class DotView extends DynamicCommandStage {
 	}
 
 	@FXML
+	@Override
 	public void initialize() {
 		super.initialize();
 		initializeZooming();
@@ -80,17 +81,7 @@ public class DotView extends DynamicCommandStage {
 
 	@Override
 	protected void fillCommands() {
-		try {
-			lvChoice.getItems().clear();
-			State id = currentTrace.getCurrentState();
-			GetAllDotCommands cmd = new GetAllDotCommands(id);
-			currentTrace.getStateSpace().execute(cmd);
-			for (DynamicCommandItem item : cmd.getCommands()) {
-				lvChoice.getItems().add(item);
-			}
-		} catch (Exception e) {
-			LOGGER.error("Extract all dot commands failed", e);
-		}
+		super.fillCommands(new GetAllDotCommands(currentTrace.getCurrentState()));
 	}
 
 	@Override

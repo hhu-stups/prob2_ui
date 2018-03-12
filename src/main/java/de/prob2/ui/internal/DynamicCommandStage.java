@@ -2,7 +2,10 @@ package de.prob2.ui.internal;
 
 import java.util.ResourceBundle;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -17,6 +20,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class DynamicCommandStage extends Stage {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
 	
 	@FXML
 	protected ListView<DynamicCommandItem> lvChoice;
@@ -116,6 +121,18 @@ public class DynamicCommandStage extends Stage {
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell());
 	}
 	
+	protected void fillCommands(AbstractGetDynamicCommands cmd) {
+		try {
+			lvChoice.getItems().clear();
+			currentTrace.getStateSpace().execute(cmd);
+			for (DynamicCommandItem item : cmd.getCommands()) {
+				lvChoice.getItems().add(item);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Extract all expression table commands failed", e);
+		}
+	}
+	
 	@FXML
 	protected void cancel() {
 		interrupt();
@@ -130,12 +147,18 @@ public class DynamicCommandStage extends Stage {
 		if (currentThread != null) {
 			currentThread.interrupt();
 		}
-	};
+	}
 	
-	protected void reset(){}
+	protected void reset(){
+		throw new UnsupportedOperationException();
+	}
 	
-	protected void visualize(DynamicCommandItem item){}
+	protected void visualize(DynamicCommandItem item){
+		throw new UnsupportedOperationException();
+	}
 	
-	protected void fillCommands(){}
+	protected void fillCommands(){
+		throw new UnsupportedOperationException();
+	}
 
 }
