@@ -7,15 +7,18 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <fx:root type="ListCell" stylesheets="@/prob.css" styleClass="machines-item" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<ContextMenu fx:id="contextMenu">
 			<items>
 				<MenuItem text="%project.machines.tab.menu.editMachineFile" onAction="#handleEditFile"/>
 				<MenuItem text="%project.machines.tab.menu.editMachineFileInExternalEditor" onAction="#handleEditFileExternal"/>
+            <SeparatorMenuItem />
 				<Menu fx:id="startAnimationMenu" text="%project.machines.tab.menu.startAnimation"/>
-				<MenuItem text="%project.machines.tab.menu.machineDescription" onAction="#handleShowDescription"/>
+            <SeparatorMenuItem />
 				<MenuItem text="%project.machines.tab.menu.editMachineConfiguration" onAction="#handleEditConfiguration"/>
+				<MenuItem text="%project.machines.tab.menu.machineDescription" onAction="#handleShowDescription"/>
 				<MenuItem text="%project.machines.tab.menu.removeMachine" onAction="#handleRemove"/>
 			</items>
 		</ContextMenu>
