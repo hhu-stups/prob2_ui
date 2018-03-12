@@ -9,7 +9,10 @@ import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -44,6 +47,9 @@ public class DynamicCommandStage extends Stage {
 	@FXML
 	protected ScrollPane pane;
 	
+	@FXML
+	protected Button cancelButton;
+	
 	protected DynamicCommandItem currentItem;
 	
 	protected final CurrentTrace currentTrace;
@@ -54,7 +60,7 @@ public class DynamicCommandStage extends Stage {
 	
 	protected final StageManager stageManager;
 	
-	protected Thread currentThread;
+	protected ObjectProperty<Thread> currentThread;
 	
 	public DynamicCommandStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
 			final ResourceBundle bundle) {
@@ -62,6 +68,7 @@ public class DynamicCommandStage extends Stage {
 		this.currentProject = currentProject;
 		this.bundle = bundle;
 		this.stageManager = stageManager;
+		this.currentThread = new SimpleObjectProperty<>(this, "currentThread", null);
 	}
 	
 	
@@ -119,6 +126,7 @@ public class DynamicCommandStage extends Stage {
 			}
 		});
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell());
+		cancelButton.disableProperty().bind(currentThread.isNull());
 	}
 	
 	protected void fillCommands(AbstractGetDynamicCommands cmd) {
@@ -144,9 +152,12 @@ public class DynamicCommandStage extends Stage {
 	}
 	
 	protected void interrupt(){
-		if (currentThread != null) {
-			currentThread.interrupt();
-		}
+		currentTrace.getStateSpace().sendInterrupt();
+		if (currentThread.get() != null) {
+			currentThread.get().interrupt();
+			currentThread.set(null);
+		}		
+		reset();
 	}
 	
 	protected void reset(){

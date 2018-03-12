@@ -57,11 +57,10 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	@Override
 	protected void visualize(DynamicCommandItem item) {
-		
 		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		interrupt();
 
-		currentThread = new Thread(() -> {
+		Thread thread = new Thread(() -> {
 			Platform.runLater(() -> statusBar.setText("Loading..."));
 			try {
 				if(item.getArity() > 0) {
@@ -75,6 +74,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 					fillTable(cmd.getTable());
 				});
 				Platform.runLater(() -> statusBar.setText(""));
+				currentThread.set(null);
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Table visualization failed", e);
 				Platform.runLater(() -> {
@@ -83,7 +83,8 @@ public class ExpressionTableView extends DynamicCommandStage {
 				});
 			}
 		});
-		currentThread.start();
+		currentThread.set(thread);
+		thread.start();
 	}
 	
 	private void fillTable(TableData data) {

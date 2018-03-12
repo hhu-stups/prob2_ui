@@ -50,8 +50,7 @@ public class DotView extends DynamicCommandStage {
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.83;
-
-	private boolean loaded;
+	
 
 	@Inject
 	public DotView(final StageManager stageManager, final CurrentTrace currentTrace,
@@ -93,9 +92,8 @@ public class DotView extends DynamicCommandStage {
 		}
 		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		interrupt();
-		loaded = false;
 
-		currentThread = new Thread(() -> {
+		Thread thread = new Thread(() -> {
 			Platform.runLater(()-> statusBar.setText("Loading..."));
 			try {
 				if (item.getArity() > 0) {
@@ -105,6 +103,7 @@ public class DotView extends DynamicCommandStage {
 				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, FILE, formulas);
 				currentTrace.getStateSpace().execute(cmd);
 				loadGraph();
+				currentThread.set(null);
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Graph visualization failed", e);
 				Platform.runLater(() -> {
@@ -113,8 +112,8 @@ public class DotView extends DynamicCommandStage {
 				});
 			}
 		}, "Graph Visualizer");
-		currentThread.start();
-
+		currentThread.set(thread);
+		thread.start();
 	}
 
 	private void loadGraph() {
@@ -131,18 +130,8 @@ public class DotView extends DynamicCommandStage {
 				return;
 			}
 			dotView.getEngine().loadContent("<center>" + content + "</center>");
-			loaded = true;
 			statusBar.setText("");
 		});
-	}
-
-	@FXML
-	@Override
-	protected void cancel() {
-		interrupt();
-		if (!loaded) {
-			dotView.getEngine().loadContent("");
-		}
 	}
 
 	@FXML
