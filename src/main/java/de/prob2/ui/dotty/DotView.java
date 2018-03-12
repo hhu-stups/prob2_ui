@@ -190,6 +190,7 @@ public class DotView extends Stage {
 		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		interrupt();
 		loaded = false;
+
 		currentThread = new Thread(() -> {
 			try {
 				if (item.getArity() > 0) {

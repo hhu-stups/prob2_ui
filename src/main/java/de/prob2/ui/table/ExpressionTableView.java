@@ -14,13 +14,16 @@ import de.prob.animator.command.GetAllTableCommands;
 import de.prob.animator.command.GetTableForVisualizationCommand;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.DynamicCommandItem;
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
+import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.DynamicCommandItemCell;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -71,6 +74,10 @@ public class ExpressionTableView extends Stage {
 	
 	private final ResourceBundle bundle;
 	
+	private final StageManager stageManager;
+	
+	private Thread currentThread;
+	
 	
 	@Inject
 	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -78,6 +85,7 @@ public class ExpressionTableView extends Stage {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.bundle = bundle;
+		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "table_view.fxml");
 	}
 	
@@ -90,7 +98,7 @@ public class ExpressionTableView extends Stage {
 				return;
 			}
 			if (!to.isAvailable()) {
-				lbAvailable.setText(String.join("\n", bundle.getString("dotview.notavailable"), to.getAvailable()));
+				lbAvailable.setText(String.join("\n", bundle.getString("tableview.notavailable"), to.getAvailable()));
 			} else {
 				lbAvailable.setText("");
 			}
@@ -155,13 +163,28 @@ public class ExpressionTableView extends Stage {
 	private void visualize(DynamicCommandItem item) {
 		gpVisualisation.getChildren().clear();
 		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
-		if(item.getArity() > 0) {
-			formulas.add(new ClassicalB(taFormula.getText()));
-		}
-		State id = currentTrace.getCurrentState();
-		GetTableForVisualizationCommand cmd = new GetTableForVisualizationCommand(id, item, formulas);
-		currentTrace.getStateSpace().execute(cmd);
-		fillTable(cmd.getTable());
+		interrupt();
+
+		currentThread = new Thread(() -> {
+			try {
+				if(item.getArity() > 0) {
+					formulas.add(new ClassicalB(taFormula.getText()));
+				}
+				State id = currentTrace.getCurrentState();
+				GetTableForVisualizationCommand cmd = new GetTableForVisualizationCommand(id, item, formulas);
+				currentTrace.getStateSpace().execute(cmd);
+				Platform.runLater(() -> {
+					fillTable(cmd.getTable());
+				});
+			} catch (ProBError | EvaluationException e) {
+				LOGGER.error("Table visualization failed", e);
+				Platform.runLater(() -> {
+					stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
+					gpVisualisation.getChildren().clear();
+				});
+			}
+		});
+		currentThread.start();
 	}
 	
 	private void fillTable(TableData data) {
@@ -180,6 +203,20 @@ public class ExpressionTableView extends Stage {
 		}
 	}
 	
+	@FXML
+	private void cancel() {
+		interrupt();
+	}
 	
+	@FXML
+	private void handleClose() {
+		this.close();
+	}
+	
+	private void interrupt() {
+		if (currentThread != null) {
+			currentThread.interrupt();
+		}
+	}	
 	
 }

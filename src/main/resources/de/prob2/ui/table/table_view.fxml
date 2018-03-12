@@ -34,6 +34,14 @@
 									<ListView fx:id="lvChoice" AnchorPane.bottomAnchor="0.0"
 										AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 										AnchorPane.topAnchor="0.0"/>
+									<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+										<Button fx:id="cancelButton" onAction="#cancel">
+											<graphic>
+												<FontAwesomeIconView styleClass="icon-dark"
+													glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
+											</graphic>
+										</Button>
+									</HBox>
 									<Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
 									<Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
 									<VBox fx:id="enterFormulaBox" visible="true" VBox.vgrow="NEVER" alignment="CENTER">
