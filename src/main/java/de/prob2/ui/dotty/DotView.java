@@ -94,7 +94,7 @@ public class DotView extends DynamicCommandStage {
 		interrupt();
 
 		Thread thread = new Thread(() -> {
-			Platform.runLater(()-> statusBar.setText("Loading..."));
+			Platform.runLater(()-> statusBar.setText(bundle.getString("dynamicStatusBar.loading")));
 			try {
 				if (item.getArity() > 0) {
 					formulas.add(new ClassicalB(taFormula.getText()));
