@@ -22,7 +22,6 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
-import de.prob2.ui.internal.DynamicCommandItemCell;
 import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -63,7 +62,6 @@ public class DotView extends DynamicCommandStage {
 	public void initialize() {
 		super.initialize();
 		initializeZooming();
-		lvChoice.setCellFactory(item -> new DynamicCommandItemCell("dot-command-cell","dotcommandenabled", "dotcommanddisabled"));
 	}
 
 	private void initializeZooming() {
@@ -157,7 +155,8 @@ public class DotView extends DynamicCommandStage {
 	}
 
 	@FXML
-	private void cancel() {
+	@Override
+	protected void cancel() {
 		interrupt();
 		if (!loaded) {
 			dotView.getEngine().loadContent("");

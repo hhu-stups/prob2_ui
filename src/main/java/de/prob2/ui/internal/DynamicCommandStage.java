@@ -113,10 +113,11 @@ public class DynamicCommandStage extends Stage {
 				}
 			}
 		});
+		lvChoice.setCellFactory(item -> new DynamicCommandItemCell());
 	}
 	
 	@FXML
-	private void cancel() {
+	protected void cancel() {
 		interrupt();
 	}
 	

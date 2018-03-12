@@ -19,7 +19,6 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
-import de.prob2.ui.internal.DynamicCommandItemCell;
 import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -45,12 +44,6 @@ public class ExpressionTableView extends DynamicCommandStage {
 			final ResourceBundle bundle) {
 		super(stageManager, currentTrace, currentProject, bundle);
 		stageManager.loadFXML(this, "table_view.fxml");
-	}
-	
-	@FXML
-	protected void initialize() {
-		super.initialize();		
-		lvChoice.setCellFactory(item -> new DynamicCommandItemCell("expression-table-command-cell","tablecommandenabled","tablecommanddisabled"));
 	}
 	
 	@Override
