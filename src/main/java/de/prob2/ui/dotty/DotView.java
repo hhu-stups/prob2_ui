@@ -23,6 +23,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.DynamicCommandStage;
+import de.prob2.ui.internal.DynamicCommandStatusBar;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -42,12 +43,13 @@ public class DotView extends DynamicCommandStage {
 
 	@FXML
 	private WebView dotView;
+	
+	@FXML
+	private DynamicCommandStatusBar statusBar;
 
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.83;
-	
-	private Thread loadedThread;
 
 	private boolean loaded;
 
@@ -94,6 +96,7 @@ public class DotView extends DynamicCommandStage {
 		loaded = false;
 
 		currentThread = new Thread(() -> {
+			Platform.runLater(()-> statusBar.setText("Loading..."));
 			try {
 				if (item.getArity() > 0) {
 					formulas.add(new ClassicalB(taFormula.getText()));
@@ -112,19 +115,6 @@ public class DotView extends DynamicCommandStage {
 		}, "Graph Visualizer");
 		currentThread.start();
 
-		loadedThread = new Thread(() -> {
-			try {
-				Thread.sleep(500);
-				if (!loaded) {
-					Platform.runLater(() -> dotView.getEngine()
-							.loadContent("<center><h1>" + bundle.getString("dotview.loading") + "</h1></center>"));
-				}
-			} catch (InterruptedException e) {
-				LOGGER.debug("DotView loading interrupted (this is not an error)", e);
-				Thread.currentThread().interrupt();
-			}
-		});
-		loadedThread.start();
 	}
 
 	private void loadGraph() {
@@ -142,6 +132,7 @@ public class DotView extends DynamicCommandStage {
 			}
 			dotView.getEngine().loadContent("<center>" + content + "</center>");
 			loaded = true;
+			statusBar.setText("");
 		});
 	}
 
@@ -164,14 +155,6 @@ public class DotView extends DynamicCommandStage {
 	private void zoomOut() {
 		zoomByFactor(0.85);
 		adjustScroll();
-	}
-
-	@Override
-	protected void interrupt() {
-		super.interrupt();
-		if (loadedThread != null) {
-			loadedThread.interrupt();
-		}
 	}
 
 	private void zoomByFactor(double factor) {

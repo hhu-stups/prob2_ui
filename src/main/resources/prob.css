@@ -242,41 +242,6 @@
 	-fx-border-width: 0.02em 0.02em 0.02em 0.2em;
 }
 
-/* ================== EXPRESSION TABLE VIEW ================= */
-.expression-table-command-cell {
-	-fx-border-color: transparent;
-	-fx-border-width: 0.0 0.0 0.0 0.3em;
-	-fx-graphic-text-gap: 10;
-	-fx-padding: 0.4em 0.0 0.4em 1.0em;
-}
-
-.expression-table-command-cell.tablecommandenabled {
-	-fx-font-family: ARIAL;
-	-fx-fill: white;
-	-fx-text-fill: -prob-aqua;
-}
-
-.expression-table-command-cell.tablecommandenabled:selected:hover {
-	-fx-text-fill: white;
-}
-
-.expression-table-command-cell.tablecommanddisabled {
-	-fx-font-family: ARIAL;
-	-fx-fill: white;
-	-fx-text-fill: -prob-orange;
-}
-
-.expression-table-command-cell:selected {
-	-fx-background-color: -prob-grey-50;
-	-fx-fill: -prob-grey-50;
-	-fx-text-fill: white;
-}
-
-.expression-table-command-cell:selected:hover {
-	-fx-background-color: -prob-grey;
-	-fx-text-fill: white;
-}
-
 /************************************************************************************
  * Menu, ContextMenu, MenuBar													  *
  ************************************************************************************/
@@ -738,36 +703,36 @@
 }
 
 /* ================== DOTTY VIEW ================= */
-.dot-command-cell {
+.dynamic-command-cell {
 	-fx-border-color: transparent;
 	-fx-border-width: 0.0 0.0 0.0 0.3em;
 	-fx-graphic-text-gap: 10;
 	-fx-padding: 0.4em 0.0 0.4em 1.0em;
 }
 
-.dot-command-cell.dotcommandenabled {
+.dynamic-command-cell.dynamiccommandenabled {
 	-fx-font-family: ARIAL;
 	-fx-fill: white;
 	-fx-text-fill: -prob-aqua;
 }
 
-.dot-command-cell.dotcommandenabled:selected:hover {
+.dynamic-command-celll.dynamiccommandenabled:selected:hover {
 	-fx-text-fill: white;
 }
 
-.dot-command-cell.dotcommanddisabled {
+.dynamic-command-cell.dynamiccommanddisabled {
 	-fx-font-family: ARIAL;
 	-fx-fill: white;
 	-fx-text-fill: -prob-orange;
 }
 
-.dot-command-cell:selected {
+.dynamic-command-cell:selected {
 	-fx-background-color: -prob-grey-50;
 	-fx-fill: -prob-grey-50;
 	-fx-text-fill: white;
 }
 
-.dot-command-cell:selected:hover {
+.dynamic-command-cell-command-cell:selected:hover {
 	-fx-background-color: -prob-grey;
 	-fx-text-fill: white;
 }

@@ -20,6 +20,7 @@ import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.DynamicCommandStage;
+import de.prob2.ui.internal.DynamicCommandStatusBar;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -38,6 +39,9 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@FXML
 	private GridPane gpVisualisation;
 	
+	@FXML
+	private DynamicCommandStatusBar statusBar;
+	
 	
 	@Inject
 	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -53,11 +57,12 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	@Override
 	protected void visualize(DynamicCommandItem item) {
-		gpVisualisation.getChildren().clear();
+		
 		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		interrupt();
 
 		currentThread = new Thread(() -> {
+			Platform.runLater(() -> statusBar.setText("Loading..."));
 			try {
 				if(item.getArity() > 0) {
 					formulas.add(new ClassicalB(taFormula.getText()));
@@ -66,8 +71,10 @@ public class ExpressionTableView extends DynamicCommandStage {
 				GetTableForVisualizationCommand cmd = new GetTableForVisualizationCommand(id, item, formulas);
 				currentTrace.getStateSpace().execute(cmd);
 				Platform.runLater(() -> {
+					gpVisualisation.getChildren().clear();
 					fillTable(cmd.getTable());
 				});
+				Platform.runLater(() -> statusBar.setText(""));
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Table visualization failed", e);
 				Platform.runLater(() -> {

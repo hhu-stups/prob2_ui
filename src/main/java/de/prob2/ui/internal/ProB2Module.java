@@ -82,6 +82,7 @@ public class ProB2Module extends AbstractModule {
 		// Controllers
 		bind(BConsole.class);
 		bind(BConsoleView.class);
+		bind(DynamicCommandStatusBar.class);
 		bind(ExecuteByPredicateStage.class);
 		bind(HistoryView.class);
 		bind(MainController.class);

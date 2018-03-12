@@ -5,6 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import de.prob2.ui.dotty.DotView?>
+<?import de.prob2.ui.internal.DynamicCommandStatusBar?>
 <?import javafx.scene.Scene?>
 <?import de.prob2.ui.layout.FontSize?>
 
@@ -74,11 +75,14 @@
 								</VBox>
 							</AnchorPane>
 							<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border">
-								<WebView fx:id="dotView" contextMenuEnabled="false"/>
+								<WebView fx:id="dotView"/>
 							</ScrollPane>
 						</SplitPane>
 					</AnchorPane>
 				</center>
+				<bottom>
+					<DynamicCommandStatusBar fx:id="statusBar"/>
+				</bottom>
 			</BorderPane>
 		</Scene>
 	</scene>

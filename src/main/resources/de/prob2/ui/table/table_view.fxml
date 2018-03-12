@@ -5,6 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import de.prob2.ui.table.ExpressionTableView?>
+<?import de.prob2.ui.internal.DynamicCommandStatusBar?>
 <?import javafx.scene.Scene?>
 <?import de.prob2.ui.layout.FontSize?>
 
@@ -57,6 +58,9 @@
 						</SplitPane>
 					</AnchorPane>
 				</center>
+				<bottom>
+					<DynamicCommandStatusBar fx:id="statusBar"/>
+				</bottom>
 			</BorderPane>
 		</Scene>
 	</scene>
