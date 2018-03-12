@@ -63,6 +63,8 @@ public class ExpressionTableView extends Stage {
 	@FXML
 	private GridPane gpVisualisation;
 	
+	private DynamicCommandItem currentItem;
+	
 	private final CurrentTrace currentTrace;
 	
 	private final CurrentProject currentProject;
@@ -88,11 +90,20 @@ public class ExpressionTableView extends Stage {
 				return;
 			}
 			if (!to.isAvailable()) {
-				lbAvailable.setText(String.join("\n", bundle.getString("tableview.notavailable"), to.getAvailable()));
+				lbAvailable.setText(String.join("\n", bundle.getString("dotview.notavailable"), to.getAvailable()));
 			} else {
 				lbAvailable.setText("");
 			}
+			boolean needFormula = to.getArity() > 0;
+			enterFormulaBox.setVisible(needFormula);
 			lbDescription.setText(to.getDescription());
+			String currentFormula = taFormula.getText();
+			if ((!needFormula || !currentFormula.isEmpty()) && (currentItem == null
+					|| !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
+				gpVisualisation.getChildren().clear();
+				visualize(to);
+				currentItem = to;
+			}
 		});
 		
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
