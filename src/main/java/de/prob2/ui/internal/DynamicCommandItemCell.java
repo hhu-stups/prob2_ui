@@ -15,13 +15,13 @@ public final class DynamicCommandItemCell extends ListCell<DynamicCommandItem> {
 	@Override
 	protected void updateItem(DynamicCommandItem item, boolean empty) {
 		super.updateItem(item, empty);
-		this.getStyleClass().removeAll(Arrays.asList("dynamiccommandenabled", "dynamiccommandenabled"));
+		this.getStyleClass().removeAll(Arrays.asList("dynamiccommandenabled", "dynamiccommanddisabled"));
 		if (item != null && !empty) {
 			setText(item.getName());
 			if (item.isAvailable()) {
 				getStyleClass().add("dynamiccommandenabled");
 			} else {
-				getStyleClass().add("dynamiccommandenabled");
+				getStyleClass().add("dynamiccommanddisabled");
 			}
 		}
 	}
