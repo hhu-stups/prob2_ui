@@ -20,133 +20,41 @@ import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.DynamicCommandItemCell;
+import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 
-public class ExpressionTableView extends Stage {
+public class ExpressionTableView extends DynamicCommandStage {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
 	
 	@FXML
-	private ListView<DynamicCommandItem> lvChoice;
-
-	@FXML
-	private TextArea taFormula;
-
-	@FXML
-	private VBox enterFormulaBox;
-
-	@FXML
-	private Label lbDescription;
-
-	@FXML
-	private Label lbAvailable;
-
-	@FXML
-	private CheckBox cbContinuous;
-
-	@FXML
-	private ScrollPane pane;
-	
-	@FXML
 	private GridPane gpVisualisation;
-	
-	private DynamicCommandItem currentItem;
-	
-	private final CurrentTrace currentTrace;
-	
-	private final CurrentProject currentProject;
-	
-	private final ResourceBundle bundle;
-	
-	private final StageManager stageManager;
-	
-	private Thread currentThread;
 	
 	
 	@Inject
 	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
 			final ResourceBundle bundle) {
-		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
-		this.bundle = bundle;
-		this.stageManager = stageManager;
+		super(stageManager, currentTrace, currentProject, bundle);
 		stageManager.loadFXML(this, "table_view.fxml");
 	}
 	
 	@FXML
-	private void initialize() {
-		lvChoice.getSelectionModel().selectFirst();
-		fillCommands();
-		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if (to == null) {
-				return;
-			}
-			if (!to.isAvailable()) {
-				lbAvailable.setText(String.join("\n", bundle.getString("tableview.notavailable"), to.getAvailable()));
-			} else {
-				lbAvailable.setText("");
-			}
-			boolean needFormula = to.getArity() > 0;
-			enterFormulaBox.setVisible(needFormula);
-			lbDescription.setText(to.getDescription());
-			String currentFormula = taFormula.getText();
-			if ((!needFormula || !currentFormula.isEmpty()) && (currentItem == null
-					|| !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
-				gpVisualisation.getChildren().clear();
-				visualize(to);
-				currentItem = to;
-			}
-		});
-		
-		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
-			int index = lvChoice.getSelectionModel().getSelectedIndex();
-			fillCommands();
-			if (index == -1) {
-				return;
-			}
-			lvChoice.getSelectionModel().select(index);
-		});
-		
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			fillCommands();
-			gpVisualisation.getChildren().clear();
-		});
-		
-		taFormula.setOnKeyPressed(e -> {
-			if (e.getCode().equals(KeyCode.ENTER)) {
-				if (!e.isShiftDown()) {
-					DynamicCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
-					if (item == null) {
-						return;
-					}
-					visualize(item);
-					e.consume();
-				} else {
-					taFormula.insertText(taFormula.getCaretPosition(), "\n");
-				}
-			}
-		});
-		
+	protected void initialize() {
+		super.initialize();		
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell("expression-table-command-cell","tablecommandenabled","tablecommanddisabled"));
 	}
 	
-	private void fillCommands() {
+	@Override
+	protected void fillCommands() {
 		try {
 			lvChoice.getItems().clear();
 			State id = currentTrace.getCurrentState();
@@ -160,7 +68,8 @@ public class ExpressionTableView extends Stage {
 		}
 	}
 	
-	private void visualize(DynamicCommandItem item) {
+	@Override
+	protected void visualize(DynamicCommandItem item) {
 		gpVisualisation.getChildren().clear();
 		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		interrupt();
@@ -203,20 +112,9 @@ public class ExpressionTableView extends Stage {
 		}
 	}
 	
-	@FXML
-	private void cancel() {
-		interrupt();
+	@Override
+	protected void reset() {
+		gpVisualisation.getChildren().clear();
 	}
-	
-	@FXML
-	private void handleClose() {
-		this.close();
-	}
-	
-	private void interrupt() {
-		if (currentThread != null) {
-			currentThread.interrupt();
-		}
-	}	
 	
 }

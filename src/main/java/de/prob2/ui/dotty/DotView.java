@@ -23,6 +23,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.DynamicCommandItemCell;
+import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -30,18 +31,10 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollBar;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
-import javafx.stage.Stage;
 
-public class DotView extends Stage {
+public class DotView extends DynamicCommandStage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
 
@@ -51,40 +44,10 @@ public class DotView extends Stage {
 	@FXML
 	private WebView dotView;
 
-	@FXML
-	private ListView<DynamicCommandItem> lvChoice;
-
-	@FXML
-	private TextArea taFormula;
-
-	@FXML
-	private VBox enterFormulaBox;
-
-	@FXML
-	private Label lbDescription;
-
-	@FXML
-	private Label lbAvailable;
-
-	@FXML
-	private CheckBox cbContinuous;
-
-	@FXML
-	private ScrollPane pane;
-
-	private DynamicCommandItem currentItem;
-
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
 	private double dragFactor = 0.83;
-
-	private final StageManager stageManager;
-	private final CurrentTrace currentTrace;
-	private final CurrentProject currentProject;
-	private final ResourceBundle bundle;
-
-	private Thread currentThread;
-
+	
 	private Thread loadedThread;
 
 	private boolean loaded;
@@ -92,66 +55,14 @@ public class DotView extends Stage {
 	@Inject
 	public DotView(final StageManager stageManager, final CurrentTrace currentTrace,
 			final CurrentProject currentProject, final ResourceBundle bundle) {
-		this.stageManager = stageManager;
-		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
-		this.bundle = bundle;
+		super(stageManager, currentTrace, currentProject, bundle);
 		stageManager.loadFXML(this, "dot_view.fxml");
 	}
 
 	@FXML
 	public void initialize() {
+		super.initialize();
 		initializeZooming();
-		lvChoice.getSelectionModel().selectFirst();
-		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if (to == null) {
-				return;
-			}
-			if (!to.isAvailable()) {
-				lbAvailable.setText(String.join("\n", bundle.getString("dotview.notavailable"), to.getAvailable()));
-			} else {
-				lbAvailable.setText("");
-			}
-			boolean needFormula = to.getArity() > 0;
-			enterFormulaBox.setVisible(needFormula);
-			lbDescription.setText(to.getDescription());
-			String currentFormula = taFormula.getText();
-			if ((!needFormula || !currentFormula.isEmpty()) && (currentItem == null
-					|| !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
-				dotView.getEngine().loadContent("");
-				visualize(to);
-				currentItem = to;
-			}
-		});
-		fillCommands();
-		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
-			int index = lvChoice.getSelectionModel().getSelectedIndex();
-			fillCommands();
-			if (index == -1) {
-				return;
-			}
-			lvChoice.getSelectionModel().select(index);
-		});
-
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			fillCommands();
-			dotView.getEngine().loadContent("");
-		});
-
-		taFormula.setOnKeyPressed(e -> {
-			if (e.getCode().equals(KeyCode.ENTER)) {
-				if (!e.isShiftDown()) {
-					DynamicCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
-					if (item == null) {
-						return;
-					}
-					visualize(item);
-					e.consume();
-				} else {
-					taFormula.insertText(taFormula.getCaretPosition(), "\n");
-				}
-			}
-		});
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell("dot-command-cell","dotcommandenabled", "dotcommanddisabled"));
 	}
 
@@ -169,7 +80,8 @@ public class DotView extends Stage {
 		});
 	}
 
-	private void fillCommands() {
+	@Override
+	protected void fillCommands() {
 		try {
 			lvChoice.getItems().clear();
 			State id = currentTrace.getCurrentState();
@@ -183,7 +95,8 @@ public class DotView extends Stage {
 		}
 	}
 
-	private void visualize(DynamicCommandItem item) {
+	@Override
+	protected void visualize(DynamicCommandItem item) {
 		if (!item.isAvailable()) {
 			return;
 		}
@@ -263,15 +176,9 @@ public class DotView extends Stage {
 		adjustScroll();
 	}
 
-	@FXML
-	private void handleClose() {
-		this.close();
-	}
-
-	private void interrupt() {
-		if (currentThread != null) {
-			currentThread.interrupt();
-		}
+	@Override
+	protected void interrupt() {
+		super.interrupt();
 		if (loadedThread != null) {
 			loadedThread.interrupt();
 		}
@@ -297,6 +204,11 @@ public class DotView extends Stage {
 			}
 		}
 		dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y + ")");
+	}
+	
+	@Override
+	protected void reset() {
+		dotView.getEngine().loadContent("");
 	}
 
 }
