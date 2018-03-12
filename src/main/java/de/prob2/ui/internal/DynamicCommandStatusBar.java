@@ -14,12 +14,8 @@ public class DynamicCommandStatusBar extends HBox {
 	@Inject
 	public DynamicCommandStatusBar(final StageManager stageManager) {
 		super();
-		System.out.println("test");
 		stageManager.loadFXML(this, "dynamic_command_status_bar.fxml");
 	}
-	
-	@FXML
-	private void initialize() {}
 	
 	public void setText(String text) {
 		statusLabel.setText(text);

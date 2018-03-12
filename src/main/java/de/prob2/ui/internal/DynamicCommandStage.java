@@ -74,8 +74,8 @@ public class DynamicCommandStage extends Stage {
 	
 	@FXML
 	protected void initialize() {
-		lvChoice.getSelectionModel().selectFirst();
 		fillCommands();
+		lvChoice.getSelectionModel().selectFirst();
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if (to == null) {
 				return;
