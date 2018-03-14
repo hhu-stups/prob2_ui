@@ -23,7 +23,6 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.DynamicCommandStage;
-import de.prob2.ui.internal.DynamicCommandStatusBar;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -44,8 +43,6 @@ public class DotView extends DynamicCommandStage {
 	@FXML
 	private WebView dotView;
 	
-	@FXML
-	private DynamicCommandStatusBar statusBar;
 
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
@@ -171,6 +168,7 @@ public class DotView extends DynamicCommandStage {
 	@Override
 	protected void reset() {
 		dotView.getEngine().loadContent("");
+		statusBar.setText("");
 	}
 
 }

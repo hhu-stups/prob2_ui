@@ -50,6 +50,9 @@ public class DynamicCommandStage extends Stage {
 	@FXML
 	protected Button cancelButton;
 	
+	@FXML
+	protected DynamicCommandStatusBar statusBar;
+	
 	protected DynamicCommandItem currentItem;
 	
 	protected final CurrentTrace currentTrace;
