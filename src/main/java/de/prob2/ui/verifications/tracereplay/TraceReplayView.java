@@ -123,16 +123,9 @@ public class TraceReplayView extends ScrollPane {
 			row.setContextMenu(menu);
 
 			row.itemProperty().addListener((o, f, t) -> {
-				if (t == null) {
-					return;
+				if (t != null) {
+					t.getTrace().statusProperty().addListener((observable, from, to) -> showErrorItem.setDisable(to != Status.FAILED));
 				}
-				t.getTrace().statusProperty().addListener((observable, from, to) -> {
-					if (to == Status.FAILED) {
-						showErrorItem.setDisable(false);
-					} else {
-						showErrorItem.setDisable(true);
-					}
-				});
 			});
 
 			row.setOnMouseClicked(event -> {
