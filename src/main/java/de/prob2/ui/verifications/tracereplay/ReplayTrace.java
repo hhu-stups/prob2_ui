@@ -11,18 +11,18 @@ public class ReplayTrace{
 		SUCCESSFUL, FAILED, NOT_CHECKED
 	}
 
-	private ObjectProperty<Status> status;
+	private final ObjectProperty<Status> status;
 	private PersistentTrace persistentTrace;
 	private Exception error;
 
-	public ReplayTrace(Trace trace) {
-		this.persistentTrace = new PersistentTrace(trace);
-		this.setStatus(Status.NOT_CHECKED);
+	public ReplayTrace(PersistentTrace pTrace) {
+		this.status = new SimpleObjectProperty<>(this, "status", Status.NOT_CHECKED);
+		this.persistentTrace = pTrace;
+		this.error = null;
 	}
 
-	public ReplayTrace(PersistentTrace pTrace) {
-		this.persistentTrace = pTrace;
-		this.setStatus(Status.NOT_CHECKED);
+	public ReplayTrace(Trace trace) {
+		this(new PersistentTrace(trace));
 	}
 
 	public PersistentTrace getStoredTrace() {
@@ -30,9 +30,6 @@ public class ReplayTrace{
 	}
 	
 	public void setStatus(Status status) {
-		if(this.status == null) {
-			this.status = new SimpleObjectProperty<>();
-		}
 		if(!status.equals(Status.FAILED)) {
 			this.error = null;
 		}
