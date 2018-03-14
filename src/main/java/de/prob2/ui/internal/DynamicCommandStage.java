@@ -129,6 +129,7 @@ public class DynamicCommandStage extends Stage {
 		});
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell());
 		cancelButton.disableProperty().bind(currentThread.isNull());
+		
 	}
 	
 	protected void fillCommands(AbstractGetDynamicCommands cmd) {
@@ -145,6 +146,7 @@ public class DynamicCommandStage extends Stage {
 	
 	@FXML
 	protected void cancel() {
+		currentTrace.getStateSpace().sendInterrupt();
 		interrupt();
 	}
 	
@@ -154,7 +156,6 @@ public class DynamicCommandStage extends Stage {
 	}
 	
 	protected void interrupt(){
-		currentTrace.getStateSpace().sendInterrupt();
 		if (currentThread.get() != null) {
 			currentThread.get().interrupt();
 			currentThread.set(null);

@@ -30,7 +30,10 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 
 public class DotView extends DynamicCommandStage {
@@ -42,6 +45,18 @@ public class DotView extends DynamicCommandStage {
 
 	@FXML
 	private WebView dotView;
+	
+	@FXML
+	private Button zoomOutButton;
+	
+	@FXML
+	private Button zoomInButton;
+	
+	@FXML
+	private ScrollPane pane;
+	
+	@FXML
+	private HBox zoomBox;
 	
 
 	private double oldMousePositionX = -1;
