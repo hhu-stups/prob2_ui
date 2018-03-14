@@ -93,7 +93,6 @@ public class DynamicCommandStage extends Stage {
 					|| !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
 				reset();
 				visualize(to);
-				currentItem = to;
 			}
 		});
 		

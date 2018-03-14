@@ -1,5 +1,7 @@
 package de.prob2.ui.table;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.ResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.Files;
 import com.google.inject.Inject;
 
 import de.prob.animator.command.GetAllTableCommands;
@@ -25,12 +28,17 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public class ExpressionTableView extends DynamicCommandStage {
 	
@@ -42,12 +50,29 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@FXML
 	private DynamicCommandStatusBar statusBar;
 	
+	@FXML
+	private Button saveButton;
+	
+	private ObjectProperty<TableData> currentTable;
+	
 	
 	@Inject
 	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
 			final ResourceBundle bundle) {
 		super(stageManager, currentTrace, currentProject, bundle);
+		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
 		stageManager.loadFXML(this, "table_view.fxml");
+	}
+	
+	@Override
+	protected void initialize() {
+		super.initialize();
+		currentTable.addListener((observable, from, to) -> {
+			if(to != null) {
+				fillTable(to);
+			}
+		});
+		saveButton.disableProperty().bind(currentTable.isNull());
 	}
 	
 	@Override
@@ -70,8 +95,8 @@ public class ExpressionTableView extends DynamicCommandStage {
 				GetTableForVisualizationCommand cmd = new GetTableForVisualizationCommand(id, item, formulas);
 				currentTrace.getStateSpace().execute(cmd);
 				Platform.runLater(() -> {
-					gpVisualisation.getChildren().clear();
-					fillTable(cmd.getTable());
+					reset();
+					currentTable.set(cmd.getTable());
 				});
 				Platform.runLater(() -> statusBar.setText(""));
 				currentThread.set(null);
@@ -79,7 +104,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 				LOGGER.error("Table visualization failed", e);
 				Platform.runLater(() -> {
 					stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
-					gpVisualisation.getChildren().clear();
+					reset();
 				});
 			}
 		});
@@ -103,9 +128,33 @@ public class ExpressionTableView extends DynamicCommandStage {
 		}
 	}
 	
+	@FXML
+	private void save() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Save to CSV");
+		File file = fileChooser.showSaveDialog(new Stage());
+		if(file == null || currentTable == null) {
+			return;
+		}
+		try {
+			Files.write(toCSV(currentTable.get()).getBytes(), file);
+		} catch (IOException e) {
+			LOGGER.error("Saving as CSV failed", e);
+		}
+	}
+	
+	private String toCSV(TableData data) {
+		String csv = String.join(",", data.getHeader()) + "\n";
+		for(List<String> row : data.getRows()) {
+			csv += String.join(",", row) + "\n";
+		}
+		return csv;
+	}
+	
 	@Override
 	protected void reset() {
 		gpVisualisation.getChildren().clear();
+		currentTable.set(null);
 	}
 	
 }
