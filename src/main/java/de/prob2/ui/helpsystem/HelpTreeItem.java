@@ -7,7 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 
-public class HelpTreeItem extends TreeItem<String>{
+class HelpTreeItem extends TreeItem<String>{
 	private boolean isLeaf;
 	private boolean isFirstTimeChildren = true;
 	private boolean isFirstTimeLeaf = true;

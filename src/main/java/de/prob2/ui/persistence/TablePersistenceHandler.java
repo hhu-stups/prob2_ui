@@ -1,6 +1,7 @@
 package de.prob2.ui.persistence;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -57,18 +58,10 @@ public final class TablePersistenceHandler {
 	public void setColumnsOrder(ObservableList<? extends TableColumnBase<?, ?>> columns) {
 		ObservableList<TableColumnBase<?, ?>> newColumns = FXCollections.observableArrayList();
 		for (final String text : uiState.getStatesViewColumnsOrder()) {
-			for (TableColumnBase<?, ?> column : columns) {
-				if (column.getId().equals(text)) {
-					newColumns.add(column);
-				}
-			}
+			newColumns.addAll(columns.stream().filter(column -> column.getId().equals(text)).collect(Collectors.toList()));
 		}
 
-		for (final TableColumnBase<?, ?> column : columns) {
-			if (!newColumns.contains(column)) {
-				newColumns.add(column);
-			}
-		}
+		columns.stream().filter(column -> !newColumns.contains(column)).forEach(newColumns::add);
 
 		columns.clear();
 		((ObservableList<TableColumnBase<?, ?>>) columns).addAll(newColumns);

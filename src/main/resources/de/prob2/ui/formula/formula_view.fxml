@@ -5,9 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import de.prob2.ui.formula.FormulaStage?>
-<?import javafx.geometry.Insets?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import javafx.scene.layout.BorderPane?>
 
 <fx:root type="FormulaStage" title="%formula.input.title" xmlns="http://javafx.com/javafx/8.0.91"
 		 xmlns:fx="http://javafx.com/fxml/1" minWidth="600" minHeight="400" width="1440.0" height="800.0">

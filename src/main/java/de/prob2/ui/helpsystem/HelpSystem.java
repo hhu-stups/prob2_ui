@@ -49,19 +49,19 @@ public class HelpSystem extends StackPane {
 	@FXML private TreeView<String> treeView;
 	@FXML private WebView webView;
 	WebEngine webEngine;
-	URI helpURI;
-	UIState uiState;
-	Injector injector;
+	private URI helpURI;
+	private UIState uiState;
+	private final Injector injector;
 	String helpSubdirectoryString = "help_en";
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
-	// this needs to be updated if new translations of help are added
-	private String[] languages = {"de", "en"};
 
 	@Inject
 	public HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
 		stageManager.loadFXML(this, "helpsystem.fxml");
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
 		this.injector = injector;
+		// this needs to be updated if new translations of help are added
+		String[] languages = {"de", "en"};
 		for (String language : languages) {
 			if (isCurrentLanguage(language)) {
 				helpSubdirectoryString = "help_" + language;

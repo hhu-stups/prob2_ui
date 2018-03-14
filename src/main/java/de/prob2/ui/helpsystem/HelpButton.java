@@ -18,7 +18,7 @@ import javafx.scene.control.Button;
 import org.slf4j.LoggerFactory;
 
 public class HelpButton extends Button{
-	private Injector injector;
+	private final Injector injector;
 	private File helpContent;
 
 	@Inject
@@ -66,10 +66,8 @@ public class HelpButton extends Button{
 
 	private void setHelp(Class<?> clazz, String main, Map<Class<?>, String> map) {
 		helpContent = new File(main + "ProB2UI.md.html");
-		for (Map.Entry<Class<?>, String> e : map.entrySet()) {
-			if (clazz.equals(e.getKey())) {
-				helpContent = new File(main + e.getValue());
-			}
-		}
+		map.entrySet().stream().filter(e -> clazz.equals(e.getKey())).forEach(e -> {
+			helpContent = new File(main + e.getValue());
+		});
 	}
 }

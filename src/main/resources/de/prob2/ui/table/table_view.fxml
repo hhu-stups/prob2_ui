@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-<?import javafx.scene.web.WebView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import de.prob2.ui.table.ExpressionTableView?>
