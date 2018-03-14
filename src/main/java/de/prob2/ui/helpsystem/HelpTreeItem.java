@@ -13,7 +13,7 @@ class HelpTreeItem extends TreeItem<String>{
 	private boolean isFirstTimeLeaf = true;
 	private File file;
 
-	public HelpTreeItem(final File file) {
+	HelpTreeItem(final File file) {
 		super(file.getName());
 		this.file = file;
 		if (file.isFile()) {
