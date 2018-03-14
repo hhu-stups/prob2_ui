@@ -21,8 +21,8 @@ public class ReplayTraceItem {
 		this.location = traceFile;
 		this.trace = trace;
 		this.statusIcon = new SimpleObjectProperty<>();
-		this.setStatus(trace.getStatus().get());
-		trace.getStatus().addListener((observable, from, to) -> setStatus(to));
+		this.setStatus(trace.getStatus());
+		trace.statusProperty().addListener((observable, from, to) -> setStatus(to));
 	}
 
 	private void setStatus(Status status) {

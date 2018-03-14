@@ -126,7 +126,7 @@ public class TraceReplayView extends ScrollPane {
 				if (t == null) {
 					return;
 				}
-				t.getTrace().getStatus().addListener((observable, from, to) -> {
+				t.getTrace().statusProperty().addListener((observable, from, to) -> {
 					if (to == Status.FAILED) {
 						showErrorItem.setDisable(false);
 					} else {

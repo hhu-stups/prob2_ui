@@ -35,16 +35,20 @@ public class ReplayTrace{
 		return this.persistentTrace;
 	}
 	
+	public ObjectProperty<Status> statusProperty() {
+		return status;
+	}
+	
+	public Status getStatus() {
+		return this.status.get();
+	}
+	
 	public void setStatus(Status status) {
 		this.status.set(status);
 	}
 	
 	public void setError(Exception e) {
 		this.error = e;
-	}
-	
-	public ObjectProperty<Status> getStatus() {
-		return status;
 	}
 	
 	public Exception getError() {
