@@ -19,6 +19,12 @@ public class ReplayTrace{
 		this.status = new SimpleObjectProperty<>(this, "status", Status.NOT_CHECKED);
 		this.persistentTrace = pTrace;
 		this.error = null;
+		
+		this.status.addListener((o, from, to) -> {
+			if (to != Status.FAILED) {
+				this.error = null;
+			}
+		});
 	}
 
 	public ReplayTrace(Trace trace) {
@@ -30,9 +36,6 @@ public class ReplayTrace{
 	}
 	
 	public void setStatus(Status status) {
-		if(!status.equals(Status.FAILED)) {
-			this.error = null;
-		}
 		this.status.set(status);
 	}
 	
