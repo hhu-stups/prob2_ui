@@ -14,9 +14,9 @@
 			<items>
 				<MenuItem text="%project.machines.tab.menu.editMachineFile" onAction="#handleEditFile"/>
 				<MenuItem text="%project.machines.tab.menu.editMachineFileInExternalEditor" onAction="#handleEditFileExternal"/>
-            <SeparatorMenuItem />
+				<SeparatorMenuItem />
 				<Menu fx:id="startAnimationMenu" text="%project.machines.tab.menu.startAnimation"/>
-            <SeparatorMenuItem />
+				<SeparatorMenuItem />
 				<MenuItem text="%project.machines.tab.menu.editMachineConfiguration" onAction="#handleEditConfiguration"/>
 				<MenuItem text="%project.machines.tab.menu.machineDescription" onAction="#handleShowDescription"/>
 				<MenuItem text="%project.machines.tab.menu.removeMachine" onAction="#handleRemove"/>

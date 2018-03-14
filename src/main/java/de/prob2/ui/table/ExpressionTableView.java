@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,6 @@ import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.DynamicCommandStage;
-import de.prob2.ui.internal.DynamicCommandStatusBar;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -40,15 +40,13 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+
 public class ExpressionTableView extends DynamicCommandStage {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
 	
 	@FXML
 	private GridPane gpVisualisation;
-	
-	@FXML
-	private DynamicCommandStatusBar statusBar;
 	
 	@FXML
 	private Button saveButton;
@@ -145,9 +143,10 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	private String toCSV(TableData data) {
 		String csv = String.join(",", data.getHeader()) + "\n";
-		for(List<String> row : data.getRows()) {
-			csv += String.join(",", row) + "\n";
-		}
+		csv += data.getRows()
+				.stream()
+				.map(column -> String.join(",", column))
+				.collect(Collectors.joining("\n"));
 		return csv;
 	}
 	
@@ -155,6 +154,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	protected void reset() {
 		gpVisualisation.getChildren().clear();
 		currentTable.set(null);
+		statusBar.setText("");
 	}
 	
 }
