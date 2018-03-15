@@ -18,13 +18,15 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -40,7 +42,7 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private TableView<ReplayTrace> traceTableView;
 	@FXML
-	private TableColumn<ReplayTrace, FontAwesomeIconView> statusColumn;
+	private TableColumn<ReplayTrace, Node> statusColumn;
 	@FXML
 	private TableColumn<ReplayTrace, String> nameColumn;
 	@FXML
@@ -100,10 +102,16 @@ public class TraceReplayView extends ScrollPane {
 	private void initialize() {
 		helpButton.setHelpContent(this.getClass());
 		statusColumn.setCellValueFactory(features -> {
-			final FontAwesomeIconView iconView = new FontAwesomeIconView();
-			features.getValue().statusProperty().addListener((o, from, to) -> updateStatusIcon(iconView, to));
-			updateStatusIcon(iconView, features.getValue().getStatus());
-			return new SimpleObjectProperty<>(iconView);
+			final ReplayTrace trace = features.getValue();
+			
+			final FontAwesomeIconView statusIcon = new FontAwesomeIconView();
+			trace.statusProperty().addListener((o, from, to) -> updateStatusIcon(statusIcon, to));
+			updateStatusIcon(statusIcon, trace.getStatus());
+			
+			final ProgressIndicator replayProgress = new ProgressBar();
+			replayProgress.progressProperty().bind(trace.progressProperty().divide((double)trace.getStoredTrace().getTransitionList().size()));
+			
+			return Bindings.when(trace.progressProperty().isEqualTo(-1)).<Node>then(statusIcon).otherwise(replayProgress);
 		});
 		nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getLocation().getAbsolutePath()));
 

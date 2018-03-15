@@ -73,9 +73,11 @@ public class TraceChecker {
 			Trace trace = new Trace(stateSpace);
 			trace.setExploreStateByDefault(false);
 			ReplayTrace.Status status = ReplayTrace.Status.SUCCESSFUL;
-			for (PersistentTransition persistentTransition : replayTrace.getStoredTrace().getTransitionList()) {
-				Transition trans = replayPersistentTransition(stateSpace, trace, persistentTransition,
-						setCurrentAnimation);
+			final List<PersistentTransition> transitionList = replayTrace.getStoredTrace().getTransitionList();
+			for (int i = 0; i < transitionList.size(); i++) {
+				final int finalI = i;
+				Platform.runLater(() -> replayTrace.setProgress(finalI));
+				Transition trans = replayPersistentTransition(stateSpace, trace, transitionList.get(i), setCurrentAnimation);
 				if (trans != null) {
 					trace = trace.add(trans);
 				} else {
@@ -89,7 +91,11 @@ public class TraceChecker {
 				}
 			}
 
-			replayTrace.setStatus(status);
+			final ReplayTrace.Status finalStatus = status;
+			Platform.runLater(() -> {
+				replayTrace.setStatus(finalStatus);
+				replayTrace.setProgress(-1);
+			});
 			trace.setExploreStateByDefault(true);
 			if (setCurrentAnimation) {
 				// set the current trace in both cases
