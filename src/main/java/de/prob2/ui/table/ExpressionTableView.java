@@ -36,7 +36,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
@@ -46,9 +45,6 @@ import javafx.stage.Stage;
 public class ExpressionTableView extends DynamicCommandStage {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
-	
-	@FXML
-	private ScrollPane pane;
 	
 	@FXML
 	private Button saveButton;
