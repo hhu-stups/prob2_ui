@@ -551,7 +551,6 @@
 .table-view {
 	-fx-padding: -1.0;
 	-fx-table-cell-border-color: transparent;
-	-fx-accent: transparent;
 }
 .tree-table-view {
 	-fx-padding: -1.0;
