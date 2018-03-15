@@ -16,9 +16,8 @@ import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.verifications.tracereplay.ReplayTrace.Status;
 
-import javafx.collections.ListChangeListener;
+import javafx.beans.binding.Bindings;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -92,12 +91,9 @@ public class TraceReplayView extends ScrollPane {
 
 		initTableRows();
 
-		currentProject.currentMachineProperty()
-				.addListener((observable, from, to) -> loadTraceButton.setDisable(to == null));
-		traceChecker.currentJobThreadsProperty()
-				.addListener((observable, from, to) -> cancelButton.setDisable(to.isEmpty()));
-		traceTableView.itemsProperty().get()
-				.addListener((ListChangeListener<ReplayTraceItem>) c -> checkButton.setDisable(c.getList().isEmpty()));
+		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
+		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
+		checkButton.disableProperty().bind(Bindings.createBooleanBinding(() -> traceTableView.getItems().isEmpty(), traceTableView.getItems()));
 	}
 
 	private void initTableRows() {
@@ -123,8 +119,9 @@ public class TraceReplayView extends ScrollPane {
 			row.setContextMenu(menu);
 
 			row.itemProperty().addListener((o, f, t) -> {
+				showErrorItem.disableProperty().unbind();
 				if (t != null) {
-					t.getTrace().statusProperty().addListener((observable, from, to) -> showErrorItem.setDisable(to != Status.FAILED));
+					showErrorItem.disableProperty().bind(t.getTrace().statusProperty().isNotEqualTo(ReplayTrace.Status.FAILED));
 				}
 			});
 
