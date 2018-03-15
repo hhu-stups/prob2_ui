@@ -7,6 +7,8 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.Scene?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
+
 <fx:root type="BEditorStage" minWidth="240" minHeight="160" width="800" height="600" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
@@ -27,7 +29,11 @@
 					</MenuBar>
 				</top>
 				<center>
-					<BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
+					<VirtualizedScrollPane hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
+						<content>
+							<BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
+						</content>
+					</VirtualizedScrollPane>
 				</center>
 			</BorderPane>
 		</Scene>
