@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +103,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Table visualization failed", e);
 				Platform.runLater(() -> {
-					stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
+					stageManager.makeExceptionAlert(bundle.getString("tableview.error.message"), e).show();
 					reset();
 				});
 			}
@@ -136,7 +137,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@FXML
 	private void save() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Save to CSV");
+		fileChooser.setTitle(bundle.getString("tableview.csv"));
 		File file = fileChooser.showSaveDialog(new Stage());
 		if(file == null || currentTable == null) {
 			return;
@@ -152,8 +153,12 @@ public class ExpressionTableView extends DynamicCommandStage {
 		String csv = String.join(",", data.getHeader()) + "\n";
 		csv += data.getRows()
 				.stream()
-				.map(column -> String.join(",", column))
+				.map(column -> String.join(",", column
+						.stream()
+						.map(str -> StringEscapeUtils.escapeCsv(str))
+						.collect(Collectors.toList())))
 				.collect(Collectors.joining("\n"));
+		
 		return csv;
 	}
 	
