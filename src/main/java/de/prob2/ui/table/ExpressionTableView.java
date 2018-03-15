@@ -151,7 +151,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 				.stream()
 				.map(column -> String.join(",", column
 						.stream()
-						.map(str -> StringEscapeUtils.escapeCsv(str))
+						.map(StringEscapeUtils::escapeCsv)
 						.collect(Collectors.toList())))
 				.collect(Collectors.joining("\n"));
 		

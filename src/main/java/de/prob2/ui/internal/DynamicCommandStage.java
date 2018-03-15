@@ -96,6 +96,7 @@ public class DynamicCommandStage extends Stage {
 					|| !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
 				reset();
 				visualize(to);
+				currentItem = to;
 			}
 		});
 		
@@ -103,9 +104,10 @@ public class DynamicCommandStage extends Stage {
 			int index = lvChoice.getSelectionModel().getSelectedIndex();
 			fillCommands();
 			if (index == -1) {
-				return;
+				lvChoice.getSelectionModel().selectFirst();
+			} else {
+				lvChoice.getSelectionModel().select(index);
 			}
-			lvChoice.getSelectionModel().select(index);
 		});
 		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
