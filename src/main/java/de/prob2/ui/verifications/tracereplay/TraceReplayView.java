@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob2.ui.config.FileChooserManager;
@@ -18,6 +19,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -27,8 +30,8 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -72,11 +75,38 @@ public class TraceReplayView extends ScrollPane {
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
 
+	private static void updateStatusIcon(final FontAwesomeIconView iconView, final ReplayTrace.Status status) {
+		switch (status) {
+			case SUCCESSFUL:
+				iconView.setIcon(FontAwesomeIcon.CHECK);
+				iconView.setFill(Color.GREEN);
+				break;
+			
+			case FAILED:
+				iconView.setIcon(FontAwesomeIcon.REMOVE);
+				iconView.setFill(Color.RED);
+				break;
+			
+			case NOT_CHECKED:
+				iconView.setIcon(FontAwesomeIcon.QUESTION_CIRCLE);
+				iconView.setFill(Color.BLUE);
+				break;
+			
+			default:
+				throw new AssertionError("Unhandled status: " + status);
+		}
+	}
+
 	@FXML
 	private void initialize() {
 		helpButton.setHelpContent(this.getClass());
-		statusColumn.setCellValueFactory(new PropertyValueFactory<>("statusIcon"));
-		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		statusColumn.setCellValueFactory(features -> {
+			final FontAwesomeIconView iconView = new FontAwesomeIconView();
+			features.getValue().getTrace().statusProperty().addListener((o, from, to) -> updateStatusIcon(iconView, to));
+			updateStatusIcon(iconView, features.getValue().getTrace().getStatus());
+			return new SimpleObjectProperty<>(iconView);
+		});
+		nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getLocation().getAbsolutePath()));
 
 		this.traceChecker.getReplayTraces().addListener((MapChangeListener<File, ReplayTrace>) c -> {
 			if (c.wasAdded()) {
