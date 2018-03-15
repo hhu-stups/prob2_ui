@@ -29,14 +29,15 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -46,7 +47,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
 	
 	@FXML
-	private GridPane gpVisualisation;
+	private ScrollPane pane;
 	
 	@FXML
 	private Button saveButton;
@@ -112,19 +113,25 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	private void fillTable(TableData data) {
 		List<String> header = data.getHeader();
-		for(int i = 0; i < header.size(); i++) {
-			Text text = new Text(header.get(i));
-			text.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
-			gpVisualisation.add(text, i, 0);
-		}
-		
-		List<List<String>> rows = data.getRows();
-		for(int i = 0; i < rows.size(); i++) {
-			for(int j = 0; j < rows.get(i).size(); j++) {
-				gpVisualisation.add(new Label(rows.get(i).get(j)), j, i+1);
-			}
-		}
+		TableView<ObservableList<String>> tableView = new TableView<>();
+		tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		for (int i = 0; i < header.size(); i++) {
+        	final int j = i;
+        	final TableColumn<ObservableList<String>, String> column = new TableColumn<>(header.get(i));
+        	column.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().get(j)));
+        	tableView.getColumns().add(column);
+        }
+        tableView.setItems(buildData(data.getRows()));
+        pane.setContent(tableView);
 	}
+	
+    private ObservableList<ObservableList<String>> buildData(List<List<String>> list) {
+    	ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
+    	for (List<String> row : list) {
+    		data.add(FXCollections.observableArrayList(row));
+    	}
+    	return data;
+    }
 	
 	@FXML
 	private void save() {
@@ -152,7 +159,6 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	@Override
 	protected void reset() {
-		gpVisualisation.getChildren().clear();
 		currentTable.set(null);
 		statusBar.setText("");
 	}
