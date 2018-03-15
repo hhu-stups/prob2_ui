@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,11 +38,11 @@ import javafx.stage.FileChooser.ExtensionFilter;
 public class TraceReplayView extends ScrollPane {
 
 	@FXML
-	private TableView<ReplayTraceItem> traceTableView;
+	private TableView<ReplayTrace> traceTableView;
 	@FXML
-	private TableColumn<ReplayTraceItem, FontAwesomeIconView> statusColumn;
+	private TableColumn<ReplayTrace, FontAwesomeIconView> statusColumn;
 	@FXML
-	private TableColumn<ReplayTraceItem, String> nameColumn;
+	private TableColumn<ReplayTrace, String> nameColumn;
 	@FXML
 	private Button checkButton;
 	@FXML
@@ -102,21 +101,15 @@ public class TraceReplayView extends ScrollPane {
 		helpButton.setHelpContent(this.getClass());
 		statusColumn.setCellValueFactory(features -> {
 			final FontAwesomeIconView iconView = new FontAwesomeIconView();
-			features.getValue().getTrace().statusProperty().addListener((o, from, to) -> updateStatusIcon(iconView, to));
-			updateStatusIcon(iconView, features.getValue().getTrace().getStatus());
+			features.getValue().statusProperty().addListener((o, from, to) -> updateStatusIcon(iconView, to));
+			updateStatusIcon(iconView, features.getValue().getStatus());
 			return new SimpleObjectProperty<>(iconView);
 		});
 		nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getLocation().getAbsolutePath()));
 
-		this.traceChecker.getReplayTraces().addListener((MapChangeListener<File, ReplayTrace>) c -> {
-			if (c.wasAdded()) {
-				traceTableView.getItems().add(new ReplayTraceItem(c.getValueAdded(), c.getKey()));
-			}
-			if (c.wasRemoved()) {
-				traceTableView.getItems().setAll(traceTableView.getItems().stream()
-						.filter(traceItem -> !c.getKey().equals(traceItem.getLocation())).collect(Collectors.toList()));
-			}
-		});
+		this.traceChecker.getReplayTraces().addListener((MapChangeListener<File, ReplayTrace>)c ->
+			traceTableView.getItems().setAll(c.getMap().values())
+		);
 
 		initTableRows();
 
@@ -127,7 +120,7 @@ public class TraceReplayView extends ScrollPane {
 
 	private void initTableRows() {
 		this.traceTableView.setRowFactory(param -> {
-			final TableRow<ReplayTraceItem> row = new TableRow<>();
+			final TableRow<ReplayTrace> row = new TableRow<>();
 
 			final MenuItem replayTraceItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.replayTrace"));
@@ -136,7 +129,7 @@ public class TraceReplayView extends ScrollPane {
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.showError"));
 			showErrorItem.setOnAction(
-					event -> stageManager.makeExceptionAlert("", row.getItem().getTrace().getError()).showAndWait());
+					event -> stageManager.makeExceptionAlert("", row.getItem().getError()).showAndWait());
 			showErrorItem.setDisable(true);
 
 			final MenuItem deleteTraceItem = new MenuItem(
@@ -150,7 +143,7 @@ public class TraceReplayView extends ScrollPane {
 			row.itemProperty().addListener((o, f, t) -> {
 				showErrorItem.disableProperty().unbind();
 				if (t != null) {
-					showErrorItem.disableProperty().bind(t.getTrace().statusProperty().isNotEqualTo(ReplayTrace.Status.FAILED));
+					showErrorItem.disableProperty().bind(t.statusProperty().isNotEqualTo(ReplayTrace.Status.FAILED));
 				}
 			});
 
