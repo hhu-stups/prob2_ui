@@ -78,6 +78,9 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	@Override
 	protected void visualize(DynamicCommandItem item) {
+		if(!item.isAvailable()) {
+			return;
+		}
 		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		interrupt();
 
@@ -122,6 +125,10 @@ public class ExpressionTableView extends DynamicCommandStage {
         pane.setContent(tableView);
 	}
 	
+	private void clearTable() {
+		pane.setContent(new TableView<>());
+	}
+	
     private ObservableList<ObservableList<String>> buildData(List<List<String>> list) {
     	ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
     	for (List<String> row : list) {
@@ -161,6 +168,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@Override
 	protected void reset() {
 		currentTable.set(null);
+		clearTable();
 		statusBar.setText("");
 	}
 	

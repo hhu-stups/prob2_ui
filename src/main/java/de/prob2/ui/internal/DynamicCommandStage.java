@@ -11,6 +11,8 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -23,6 +25,21 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class DynamicCommandStage extends Stage {
+	
+	private final class DynamicCommandTraceListener implements ChangeListener<Object> {
+
+		@Override
+		public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+			int index = lvChoice.getSelectionModel().getSelectedIndex();
+			fillCommands();
+			if (index == -1) {
+				lvChoice.getSelectionModel().selectFirst();
+			} else {
+				lvChoice.getSelectionModel().select(index);
+			}
+		}
+		
+	}
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
 	
@@ -100,15 +117,10 @@ public class DynamicCommandStage extends Stage {
 			}
 		});
 		
-		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
-			int index = lvChoice.getSelectionModel().getSelectedIndex();
-			fillCommands();
-			if (index == -1) {
-				lvChoice.getSelectionModel().selectFirst();
-			} else {
-				lvChoice.getSelectionModel().select(index);
-			}
-		});
+		currentTrace.currentStateProperty().addListener(new DynamicCommandTraceListener());
+		currentTrace.addListener(new DynamicCommandTraceListener());
+		currentTrace.stateSpaceProperty().addListener(new DynamicCommandTraceListener());
+		
 		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			fillCommands();
