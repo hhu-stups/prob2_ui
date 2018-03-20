@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.tracereplay;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -113,9 +114,9 @@ public class TraceReplayView extends ScrollPane {
 			
 			return Bindings.when(trace.progressProperty().isEqualTo(-1)).<Node>then(statusIcon).otherwise(replayProgress);
 		});
-		nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getLocation().getAbsolutePath()));
+		nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getLocation().toString()));
 
-		this.traceChecker.getReplayTraces().addListener((MapChangeListener<File, ReplayTrace>)c ->
+		this.traceChecker.getReplayTraces().addListener((MapChangeListener<Path, ReplayTrace>)c ->
 			traceTableView.getItems().setAll(c.getMap().values())
 		);
 
@@ -189,7 +190,7 @@ public class TraceReplayView extends ScrollPane {
 				new ExtensionFilter("Trace (*.json)", "*.json"));
 		File traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
-			currentProject.getCurrentMachine().addTraceFile(traceFile);
+			currentProject.getCurrentMachine().addTraceFile(traceFile.toPath());
 		}
 	}
 }

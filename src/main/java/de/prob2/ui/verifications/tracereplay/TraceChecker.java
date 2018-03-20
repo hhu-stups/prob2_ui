@@ -1,6 +1,6 @@
 package de.prob2.ui.verifications.tracereplay;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import com.google.common.base.Joiner;
@@ -44,7 +44,7 @@ public class TraceChecker {
 	private final StageManager stageManager;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
-	private ObservableMap<File, ReplayTrace> replayTraces = new SimpleMapProperty<>(this, "replayTraces",
+	private ObservableMap<Path, ReplayTrace> replayTraces = new SimpleMapProperty<>(this, "replayTraces",
 			FXCollections.observableHashMap());
 
 	@Inject
@@ -57,10 +57,10 @@ public class TraceChecker {
 	}
 
 	void checkMachine() {
-		replayTraces.forEach((file, trace) -> replayTrace(trace, false));
+		replayTraces.forEach((path, trace) -> replayTrace(trace, false));
 	}
 
-	public void replayTrace(File traceFile, final boolean setCurrentAnimation) {
+	public void replayTrace(Path traceFile, final boolean setCurrentAnimation) {
 		replayTrace(replayTraces.get(traceFile), setCurrentAnimation);
 	}
 
@@ -194,23 +194,23 @@ public class TraceChecker {
 
 	public void resetStatus() {
 		cancelReplay();
-		replayTraces.forEach((file, trace) -> trace.setStatus(ReplayTrace.Status.NOT_CHECKED));
+		replayTraces.forEach((path, trace) -> trace.setStatus(ReplayTrace.Status.NOT_CHECKED));
 	}
 
 	ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
 	}
 
-	private void addTrace(File traceFile) {
+	private void addTrace(Path traceFile) {
 		ReplayTrace trace = traceLoader.loadTrace(traceFile);
 		replayTraces.put(traceFile, trace);
 	}
 
-	private void removeTrace(File traceFile) {
+	private void removeTrace(Path traceFile) {
 		replayTraces.remove(traceFile);
 	}
 
-	ObservableMap<File, ReplayTrace> getReplayTraces() {
+	ObservableMap<Path, ReplayTrace> getReplayTraces() {
 		return replayTraces;
 	}
 
@@ -218,7 +218,7 @@ public class TraceChecker {
 		replayTraces.clear();
 		if (machine != null) {
 			machine.getTraceFiles().forEach(this::addTrace);
-			machine.getTraceFiles().addListener((SetChangeListener<File>) c -> {
+			machine.getTraceFiles().addListener((SetChangeListener<Path>) c -> {
 				if (c.wasAdded()) {
 					addTrace(c.getElementAdded());
 				}

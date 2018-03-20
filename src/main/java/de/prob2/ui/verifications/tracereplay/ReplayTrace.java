@@ -1,6 +1,6 @@
 package de.prob2.ui.verifications.tracereplay;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import de.prob.check.tracereplay.PersistentTrace;
 
@@ -16,11 +16,11 @@ public class ReplayTrace {
 
 	private final ObjectProperty<Status> status;
 	private final IntegerProperty progress;
-	private final File location;
+	private final Path location;
 	private final PersistentTrace persistentTrace;
 	private Exception error;
 
-	public ReplayTrace(File location, PersistentTrace pTrace) {
+	public ReplayTrace(Path location, PersistentTrace pTrace) {
 		this.status = new SimpleObjectProperty<>(this, "status", Status.NOT_CHECKED);
 		this.progress = new SimpleIntegerProperty(this, "progress", -1);
 		this.location = location;
@@ -62,7 +62,7 @@ public class ReplayTrace {
 		this.progressProperty().set(progress);
 	}
 	
-	public File getLocation() {
+	public Path getLocation() {
 		return this.location;
 	}
 	

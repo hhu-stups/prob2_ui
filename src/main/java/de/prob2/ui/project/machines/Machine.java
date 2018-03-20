@@ -1,6 +1,5 @@
 package de.prob2.ui.project.machines;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
@@ -104,7 +103,7 @@ public class Machine {
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
-	private ObservableSet<File> traces;
+	private ObservableSet<Path> traces;
 	private ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
 	private transient BooleanProperty changed;
@@ -282,11 +281,11 @@ public class Machine {
 		this.setChanged(true);
 	}
 	
-	public ObservableSet<File> getTraceFiles() {
+	public ObservableSet<Path> getTraceFiles() {
 		return this.traces;
 	}
 	
-	public void addTraceFile(File traceFile) {
+	public void addTraceFile(Path traceFile) {
 		//Note, if the traceFile does already exist and has to be updated,
 		//we must remove the traceFile first in order to trigger the SetChangeListener!
 		this.traces.remove(traceFile);
@@ -294,7 +293,7 @@ public class Machine {
 		this.setChanged(true);
 	}
 	
-	public void removeTraceFile(File traceFile) {
+	public void removeTraceFile(Path traceFile) {
 		this.traces.remove(traceFile);
 		this.setChanged(true);
 	}

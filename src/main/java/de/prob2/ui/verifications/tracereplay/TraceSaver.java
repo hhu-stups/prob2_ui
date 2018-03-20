@@ -2,11 +2,11 @@ package de.prob2.ui.verifications.tracereplay;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 
 import com.google.gson.Gson;
@@ -51,7 +51,8 @@ public class TraceSaver {
 		File file = fileChooser.showSaveDialog(stageManager.getCurrent());
 		
 		if(file != null) {
-			try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), TRACE_CHARSET)) {
+			final Path path = file.toPath();
+			try (final Writer writer = Files.newBufferedWriter(path, TRACE_CHARSET)) {
 				gson.toJson(trace, writer);
 			} catch (FileNotFoundException exc) {
 				LOGGER.warn("Failed to create trace data file", exc);
@@ -60,7 +61,7 @@ public class TraceSaver {
 				LOGGER.warn("Failed to save trace", exc);
 				return;
 			}
-			machine.addTraceFile(file);
+			machine.addTraceFile(path);
 		}
 	}
 }
