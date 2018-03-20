@@ -1,9 +1,14 @@
 package de.prob2.ui.internal;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonSerializer;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -88,6 +93,17 @@ public class ProB2Module extends AbstractModule {
 		bind(Gson.class).toInstance(FxGson.coreBuilder()
 			.disableHtmlEscaping()
 			.setPrettyPrinting()
+			.registerTypeAdapter(File.class, (JsonSerializer<File>)(src, typeOfSrc, context) -> context.serialize(src.getPath()))
+			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> {
+				if (json.isJsonObject()) {
+					// Handle old configs where a File is serialized as a JSON object containing a "path" string.
+					return new File(json.getAsJsonObject().get("path").getAsJsonPrimitive().getAsString());
+				} else {
+					return new File(json.getAsJsonPrimitive().getAsString());
+				}
+			})
+			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString()))
+			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(json.getAsJsonPrimitive().getAsString()))
 			.create());
 		
 		// Controllers
