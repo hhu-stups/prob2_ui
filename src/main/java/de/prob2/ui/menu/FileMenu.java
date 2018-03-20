@@ -3,6 +3,7 @@ package de.prob2.ui.menu;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -114,11 +115,12 @@ public class FileMenu extends Menu {
 		if (selected == null) {
 			return;
 		}
-		final String ext = StageManager.getExtension(selected.getName());
+		final Path path = selected.toPath();
+		final String ext = StageManager.getExtension(path.getFileName().toString());
 		if ("json".equals(ext)) {
-			this.openProject(selected);
+			this.openProject(path);
 		} else {
-			this.createProjectFromFile(selected);
+			this.createProjectFromFile(path);
 		}
 	}
 	
@@ -127,23 +129,23 @@ public class FileMenu extends Menu {
 		if(this.recentProjects.isEmpty()) {
 			return;
 		}
-		this.openProject(new File(this.recentProjects.get(0)));
+		this.openProject(Paths.get(this.recentProjects.get(0)));
 	}
 
-	private void createProjectFromFile(File file) {
-		final Path projectLocation = file.getParentFile().toPath();
-		final Path absolute = file.toPath();
-		final Path relative = projectLocation.relativize(absolute);
-		final String shortName = file.getName().substring(0, file.getName().lastIndexOf('.'));
-		final String description = String.format(bundle.getString("project.automaticDescription"), absolute);
+	private void createProjectFromFile(Path path) {
+		final Path projectLocation = path.getParent();
+		final Path relative = projectLocation.relativize(path);
+		final String fileName = path.getFileName().toString();
+		final String shortName = fileName.substring(0, fileName.lastIndexOf('.'));
+		final String description = String.format(bundle.getString("project.automaticDescription"), path);
 		final Machine machine = new Machine(shortName, "", relative);
-		currentProject.set(new Project(shortName, description, machine, projectLocation.toFile()), true);
+		currentProject.set(new Project(shortName, description, machine, projectLocation), true);
 
 		currentProject.startAnimation(machine, Preference.DEFAULT);
 	}
 
-	private void openProject(File file) {
-		injector.getInstance(ProjectManager.class).openProject(file);
+	private void openProject(Path path) {
+		injector.getInstance(ProjectManager.class).openProject(path);
 
 		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).resetView());
 	}
@@ -190,9 +192,9 @@ public class FileMenu extends Menu {
 	private List<MenuItem> getRecentProjectItems(SimpleListProperty<String> recentListProperty) {
 		final List<MenuItem> newItems = new ArrayList<>();
 		for (String s : recentListProperty) {
-			File file = new File(s);
-			final MenuItem item = new MenuItem(file.getName());
-			item.setOnAction(event -> this.openProject(file));
+			Path path = Paths.get(s);
+			final MenuItem item = new MenuItem(path.getFileName().toString());
+			item.setOnAction(event -> this.openProject(path));
 			newItems.add(item);
 		}
 		return newItems;

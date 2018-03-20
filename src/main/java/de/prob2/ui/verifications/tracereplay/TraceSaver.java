@@ -45,7 +45,7 @@ public class TraceSaver {
 	public void saveTrace(PersistentTrace trace, Machine machine) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceSaver.dialog.title"));
-		fileChooser.setInitialDirectory(currentProject.getLocation());
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		fileChooser.setInitialFileName(machine.getName() + ".trace");
 		fileChooser.getExtensionFilters().add(new ExtensionFilter("Trace (*.trace)", "*.trace"));
 		File file = fileChooser.showSaveDialog(stageManager.getCurrent());

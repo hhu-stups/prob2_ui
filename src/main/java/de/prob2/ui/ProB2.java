@@ -1,6 +1,7 @@
 package de.prob2.ui;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -121,7 +122,7 @@ public class ProB2 extends Application {
 		uiPersistence.open();
 
 		if (runtimeOptions.getProject() != null) {
-			injector.getInstance(ProjectManager.class).openProject(new File(runtimeOptions.getProject()));
+			injector.getInstance(ProjectManager.class).openProject(Paths.get(runtimeOptions.getProject()));
 		}
 
 		if (runtimeOptions.getMachine() != null) {

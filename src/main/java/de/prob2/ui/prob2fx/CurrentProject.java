@@ -1,6 +1,5 @@
 package de.prob2.ui.prob2fx;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -46,7 +45,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ObjectProperty<Machine> currentMachine;
 	private final ObjectProperty<Preference> currentPreference;
 
-	private final ObjectProperty<File> location;
+	private final ObjectProperty<Path> location;
 	private final BooleanProperty saved;
 	private final BooleanProperty newProject;
 
@@ -261,11 +260,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return this.preferencesProperty().get();
 	}
 
-	public ObjectProperty<File> locationProperty() {
+	public ObjectProperty<Path> locationProperty() {
 		return this.location;
 	}
 
-	public File getLocation() {
+	public Path getLocation() {
 		return this.locationProperty().get();
 	}
 

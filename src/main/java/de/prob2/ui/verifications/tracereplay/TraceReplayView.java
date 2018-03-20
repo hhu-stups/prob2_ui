@@ -179,7 +179,7 @@ public class TraceReplayView extends ScrollPane {
 	private void loadTraceFromFile() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceLoader.dialog.title"));
-		fileChooser.setInitialDirectory(currentProject.getLocation());
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		final List<String> allExts = new ArrayList<>();
 		allExts.add("*.json");
 		allExts.add("*.trace");

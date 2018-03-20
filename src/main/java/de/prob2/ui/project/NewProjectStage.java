@@ -1,6 +1,9 @@
 package de.prob2.ui.project;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -64,8 +67,8 @@ public class NewProjectStage extends Stage {
 
 	@FXML
 	void finish(ActionEvent event) {
-		File dir = new File(locationField.getText());
-		if (!dir.isDirectory()) {
+		Path dir = Paths.get(locationField.getText());
+		if (!Files.isDirectory(dir)) {
 			errorExplanationLabel.setText(bundle.getString("project.newProject.stage.invalidLocationError"));
 			return;
 		}
