@@ -10,7 +10,6 @@ import java.nio.charset.Charset;
 import java.util.ResourceBundle;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import com.google.inject.Inject;
 
@@ -36,11 +35,11 @@ public class TraceSaver {
 	private final ResourceBundle bundle;
 
 	@Inject
-	public TraceSaver(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
+	public TraceSaver(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
+		this.gson = gson;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		this.gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	}
 
 	public void saveTrace(PersistentTrace trace, Machine machine) {

@@ -33,8 +33,6 @@ import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
-import org.hildan.fxgson.FxGson;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +48,9 @@ public class ProjectManager {
 	private final RecentProjects recentProjects;
 
 	@Inject
-	public ProjectManager(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle,
+	public ProjectManager(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle,
 			RecentProjects recentProjects) {
-		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+		this.gson = gson;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;

@@ -24,8 +24,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
-import org.hildan.fxgson.FxGson;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +36,8 @@ public class TraceLoader {
 	private final CurrentProject currentProject;
 
 	@Inject
-	public TraceLoader(StageManager stageManager, CurrentProject currentProject) {
-		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+	public TraceLoader(Gson gson, StageManager stageManager, CurrentProject currentProject) {
+		this.gson = gson;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 	}

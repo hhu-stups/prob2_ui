@@ -96,12 +96,14 @@ public final class Config {
 	}
 
 	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
-	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+	// This Gson instance is for loadBasicConfig only. Everywhere else, injection should be used to get a GSON object.
+	private static final Gson BASIC_GSON = new GsonBuilder().create();
 	private static final File LOCATION = new File(
 			Main.getProBDirectory() + File.separator + "prob2ui" + File.separator + "config.json");
 
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
+	private final Gson gson;
 	private final RecentProjects recentProjects;
 	private final GroovyConsole groovyConsole;
 	private final BConsole bConsole;
@@ -116,6 +118,7 @@ public final class Config {
 
 	@Inject
 	private Config(
+		final Gson gson,
 		final RecentProjects recentProjects,
 		final UIState uiState,
 		final GroovyConsole groovyConsole,
@@ -128,6 +131,7 @@ public final class Config {
 		final ProBPluginManager proBPluginManager,
 		final FileChooserManager fileChooserManager
 	) {
+		this.gson = gson;
 		this.recentProjects = recentProjects;
 		this.uiState = uiState;
 		this.groovyConsole = groovyConsole;
@@ -162,7 +166,7 @@ public final class Config {
 			final InputStream is = new FileInputStream(LOCATION);
 			final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
 		) {
-			final BasicConfigData data = GSON.fromJson(reader, BasicConfigData.class);
+			final BasicConfigData data = BASIC_GSON.fromJson(reader, BasicConfigData.class);
 			if (data == null) {
 				// Config file is empty, use defaults instead.
 				return new BasicConfigData();
@@ -263,7 +267,7 @@ public final class Config {
 				final InputStream is = new FileInputStream(LOCATION);
 				final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
 			) {
-				configData = GSON.fromJson(reader, ConfigData.class);
+				configData = gson.fromJson(reader, ConfigData.class);
 				if (configData == null) {
 					// Config file is empty, use default config.
 					configData = new ConfigData();
@@ -383,7 +387,7 @@ public final class Config {
 			final OutputStream os = new FileOutputStream(LOCATION);
 			final Writer writer = new OutputStreamWriter(os, CONFIG_CHARSET)
 		) {
-			GSON.toJson(configData, writer);
+			gson.toJson(configData, writer);
 		} catch (FileNotFoundException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {
