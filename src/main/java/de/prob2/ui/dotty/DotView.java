@@ -1,18 +1,6 @@
 package de.prob2.ui.dotty;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
-
 import de.prob.Main;
 import de.prob.animator.command.GetAllDotCommands;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
@@ -34,6 +22,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.util.*;
 
 public class DotView extends DynamicCommandStage {
 
@@ -114,6 +108,7 @@ public class DotView extends DynamicCommandStage {
 				currentThread.set(null);
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Graph visualization failed", e);
+				currentThread.set(null);
 				Platform.runLater(() -> {
 					stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
 					dotView.getEngine().loadContent("");

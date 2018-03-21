@@ -1,27 +1,10 @@
 package de.prob2.ui.table;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.io.Files;
 import com.google.inject.Inject;
-
 import de.prob.animator.command.GetAllTableCommands;
 import de.prob.animator.command.GetTableForVisualizationCommand;
-import de.prob.animator.domainobjects.ClassicalB;
-import de.prob.animator.domainobjects.DynamicCommandItem;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.animator.domainobjects.TableData;
+import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.DynamicCommandStage;
@@ -40,6 +23,17 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 
 public class ExpressionTableView extends DynamicCommandStage {
@@ -101,6 +95,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 				currentThread.set(null);
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Table visualization failed", e);
+				currentThread.set(null);
 				Platform.runLater(() -> {
 					stageManager.makeExceptionAlert(bundle.getString("tableview.error.message"), e).show();
 					reset();
