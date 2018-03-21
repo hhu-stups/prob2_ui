@@ -51,7 +51,6 @@ public class HelpSystem extends StackPane {
 	WebEngine webEngine;
 	private URI helpURI;
 	private UIState uiState;
-	private final Injector injector;
 	String helpSubdirectoryString = "help_en";
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
 
@@ -59,7 +58,6 @@ public class HelpSystem extends StackPane {
 	public HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
 		stageManager.loadFXML(this, "helpsystem.fxml");
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
-		this.injector = injector;
 		// this needs to be updated if new translations of help are added
 		String[] languages = {"de", "en"};
 		for (String language : languages) {

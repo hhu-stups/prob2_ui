@@ -66,8 +66,6 @@ public class HelpButton extends Button{
 
 	private void setHelp(Class<?> clazz, String main, Map<Class<?>, String> map) {
 		helpContent = new File(main + "ProB2UI.md.html");
-		map.entrySet().stream().filter(e -> clazz.equals(e.getKey())).forEach(e -> {
-			helpContent = new File(main + e.getValue());
-		});
+		map.entrySet().stream().filter(e -> clazz.equals(e.getKey())).forEach(e -> helpContent = new File(main + e.getValue()));
 	}
 }

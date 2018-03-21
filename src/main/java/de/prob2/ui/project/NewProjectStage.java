@@ -68,7 +68,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	void finish(ActionEvent event) {
 		Path dir = Paths.get(locationField.getText());
-		if (!Files.isDirectory(dir)) {
+		if (!dir.toFile().isDirectory()) {
 			errorExplanationLabel.setText(bundle.getString("project.newProject.stage.invalidLocationError"));
 			return;
 		}
