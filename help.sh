@@ -6,6 +6,7 @@ function conversion {
 		rm -f *.md.html
 		for f in *.md; do
 			pandoc "${f}" -f markdown_github -t html -s | sed "s/\.md/.md.html/g" > "${f}.html"
+			pandoc "${f}" -f markdown_github -t asciidoc -s | sed "s/\.md/.md.adoc/g" > "${f}.adoc"
 		done
 		echo "   done"
 	else

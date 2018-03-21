@@ -89,7 +89,7 @@ public class HelpSystem extends StackPane {
 					webView.getEngine().getHistory().go(-1);
 					injector.getInstance(ProB2.class).getHostServices().showDocument(url);
 				}
-				findMatchingTreeViewEntryToSelect();
+				findMatchingTreeViewEntryToSelect(url);
 			}
 		});
 		webEngine.load(((HelpTreeItem) treeView.getRoot().getChildren().get(0)).getFile().toURI().toString());
@@ -152,11 +152,11 @@ public class HelpSystem extends StackPane {
 		}
 	}
 
-	private void findMatchingTreeViewEntryToSelect() {
+	private void findMatchingTreeViewEntryToSelect(String url) {
 		for (Map.Entry<File,HelpTreeItem> entry : fileMap.entrySet()) {
 			final HelpTreeItem hti = entry.getValue();
 			try {
-				if (entry.getKey().toURI().toURL().sameFile(new URL(webEngine.getLocation()))) {
+				if (entry.getKey().toURI().toURL().sameFile(new URL(url))) {
 					expandTree(hti);
 					Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
 				}

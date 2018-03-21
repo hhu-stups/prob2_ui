@@ -26,8 +26,9 @@ gradle-app.setting
 prob_log.txt
 *.prob
 
-# Help html
+# Help
 src/main/resources/help/**/*.html
+src/main/resources/help/**/*.adoc
 
 # TestFX screenshots
 screenshot*.png
