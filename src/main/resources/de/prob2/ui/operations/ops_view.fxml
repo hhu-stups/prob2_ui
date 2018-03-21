@@ -90,6 +90,11 @@
 							<Tooltip text="%operations.random.tooltip" />
 						</tooltip>
 					</MenuButton>
+					<Button fx:id="cancelButton" onAction="#cancel">
+						<graphic>
+							<FontAwesomeIconView styleClass="icon-dark" glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
+						</graphic>
+					</Button>
 				</HBox>
 			</AnchorPane>
 		</VBox>

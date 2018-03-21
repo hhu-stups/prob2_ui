@@ -1,28 +1,10 @@
 package de.prob2.ui.operations;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
@@ -37,33 +19,32 @@ import de.prob.model.representation.BEvent;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
-
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.CustomMenuItem;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import se.sawano.java.text.AlphanumericComparator;
+
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Singleton
 public final class OperationsView extends AnchorPane {
@@ -204,6 +185,8 @@ public final class OperationsView extends AnchorPane {
 		}
 	}
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(OperationsView.class);
+
 	// Matches empty string or number
 	private static final Pattern NUMBER_OR_EMPTY_PATTERN = Pattern.compile("^$|^\\d+$");
 
@@ -229,6 +212,8 @@ public final class OperationsView extends AnchorPane {
 	private CustomMenuItem someRandomEvents;
 	@FXML
 	private HelpButton helpButton;
+	@FXML
+	private Button cancelButton;
 
 	private AbstractModel currentModel;
 	private List<String> opNames = new ArrayList<>();
@@ -243,6 +228,7 @@ public final class OperationsView extends AnchorPane {
 	private final StatusBar statusBar;
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final ExecutorService updater;
+	private final ObjectProperty<Thread> randomExecutionThread;
 
 	private static final String ICON_DARK = "icon-dark";
 
@@ -256,6 +242,7 @@ public final class OperationsView extends AnchorPane {
 		this.bundle = bundle;
 		this.statusBar = statusBar;
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
+		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
 		stopActions.add(this.updater::shutdownNow);
 
 		stageManager.loadFXML(this, "ops_view.fxml");
@@ -271,7 +258,7 @@ public final class OperationsView extends AnchorPane {
 			}
 		});
 
-		randomButton.disableProperty().bind(currentTrace.existsProperty().not());
+		randomButton.disableProperty().bind(Bindings.or(currentTrace.existsProperty().not(), randomExecutionThread.isNotNull()));
 
 		randomText.textProperty().addListener((observable, from, to) -> {
 			if (!NUMBER_OR_EMPTY_PATTERN.matcher(to).matches() && NUMBER_OR_EMPTY_PATTERN.matcher(from).matches()) {
@@ -281,6 +268,7 @@ public final class OperationsView extends AnchorPane {
 
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
+		cancelButton.disableProperty().bind(randomExecutionThread.isNull());
 	}
 
 	private void executeOperationIfPossible(final OperationItem item) {
@@ -541,18 +529,39 @@ public final class OperationsView extends AnchorPane {
 	@FXML
 	public void random(ActionEvent event) {
 		if (currentTrace.exists()) {
-			if (event.getSource().equals(randomText)) {
-				if (randomText.getText().isEmpty()) {
-					return;
+			Thread executionThread = new Thread(() -> {
+				try {
+					Trace newTrace = null;
+					if (event.getSource().equals(randomText)) {
+						if (randomText.getText().isEmpty()) {
+							return;
+						}
+						newTrace = currentTrace.get().randomAnimation(Integer.parseInt(randomText.getText()));
+					} else if (event.getSource().equals(oneRandomEvent)) {
+						newTrace = currentTrace.get().randomAnimation(1);
+					} else if (event.getSource().equals(fiveRandomEvents)) {
+						newTrace = currentTrace.get().randomAnimation(5);
+					} else if (event.getSource().equals(tenRandomEvents)) {
+						newTrace = currentTrace.get().randomAnimation(10);
+					}
+					currentTrace.set(newTrace);
+					randomExecutionThread.set(null);
+				} catch (Exception e) {
+					LOGGER.error("Invalid input for executing random number of events",e);
+					randomExecutionThread.set(null);
 				}
-				currentTrace.set(currentTrace.get().randomAnimation(Integer.parseInt(randomText.getText())));
-			} else if (event.getSource().equals(oneRandomEvent)) {
-				currentTrace.set(currentTrace.get().randomAnimation(1));
-			} else if (event.getSource().equals(fiveRandomEvents)) {
-				currentTrace.set(currentTrace.get().randomAnimation(5));
-			} else if (event.getSource().equals(tenRandomEvents)) {
-				currentTrace.set(currentTrace.get().randomAnimation(10));
-			}
+			});
+			randomExecutionThread.set(executionThread);
+			executionThread.start();
+		}
+	}
+
+	@FXML
+	private void cancel() {
+		currentTrace.getStateSpace().sendInterrupt();
+		if(randomExecutionThread.get() != null) {
+			randomExecutionThread.get().interrupt();
+			randomExecutionThread.set(null);
 		}
 	}
 

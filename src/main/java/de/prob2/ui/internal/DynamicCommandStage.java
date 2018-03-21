@@ -1,10 +1,5 @@
 package de.prob2.ui.internal;
 
-import java.util.ResourceBundle;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -23,6 +18,10 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ResourceBundle;
 
 public class DynamicCommandStage extends Stage {
 	
@@ -80,7 +79,7 @@ public class DynamicCommandStage extends Stage {
 	
 	protected final StageManager stageManager;
 	
-	protected ObjectProperty<Thread> currentThread;
+	protected final ObjectProperty<Thread> currentThread;
 	
 	public DynamicCommandStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
 			final ResourceBundle bundle) {
