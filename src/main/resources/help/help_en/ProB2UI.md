@@ -15,8 +15,6 @@ By default the main window is split into three vertical panes (see below).
 
 ![ProB2 JavaFX UI Overview](../screenshots/Overview.png)
 
-[Additional information regarding ProB (external site)](https://www3.hhu.de/stups/prob/index.php/Main_Page)
-
 # The ProB2 JavaFX Main Menu Bar
 
 The menu bar contains the various commands to access the features of ProB. It includes the menus

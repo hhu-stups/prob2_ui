@@ -83,13 +83,7 @@ public class HelpSystem extends StackPane {
 		webEngine.setUserStyleSheetLocation(this.getClass().getResource("help.css").toString());
 		webEngine.setJavaScriptEnabled(true);
 		webEngine.getLoadWorker().stateProperty().addListener((obs, oldVal, newVal) -> {
-			/*String url = webEngine.getLoadWorker().getMessage().trim().replace("Loading ","");
-			if (url.contains("http://") || url.contains("https://")) {
-				webEngine.getLoadWorker().cancel();
-				//TODO xdg-open and kde-open with Runtime.getRuntime().exec() seems to trigger fatal error in java <- updating java has not fixed this, resorting to Desktop class
-				//TODO Desktop.getDesktop().browse(new URI(url)); <- either fatal error (but belated showing of url in external browser) or hanging ProB2
-				//TODO injector.getInstance(ProB2.class).getHostServices().showDocument(url); <- fatal error and belated showing of url in external browser, seems to occur only in combination with webview
-			} else*/ if (newVal == Worker.State.SUCCEEDED) {
+			if (newVal == Worker.State.SUCCEEDED) {
 				findMatchingTreeViewEntryToSelect();
 			}
 		});
