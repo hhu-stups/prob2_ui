@@ -15,6 +15,8 @@ In der Voreinstellung ist das Hauptfenster in drei vertikale Felder unterteilt (
 
 ![ProB2 JavaFX UI Übersicht](../screenshots/Overview.png)
 
+[Mehr über ProB](https://www3.hhu.de/stups/prob/index.php/Main_Page)
+
 # Die ProB2 JavaFX Hauptmenüleiste
 
 Die Menüleiste enthält die diversen Kommandos, um auf die Funktionen von ProB zuzugreifen. Sie beinhaltet die Menüs
