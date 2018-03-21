@@ -2,15 +2,14 @@ package de.prob2.ui.verifications.tracereplay;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import com.google.inject.Inject;
 
@@ -36,23 +35,24 @@ public class TraceSaver {
 	private final ResourceBundle bundle;
 
 	@Inject
-	public TraceSaver(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
+	public TraceSaver(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
+		this.gson = gson;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		this.gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	}
 
 	public void saveTrace(PersistentTrace trace, Machine machine) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceSaver.dialog.title"));
-		fileChooser.setInitialDirectory(currentProject.getLocation());
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		fileChooser.setInitialFileName(machine.getName() + ".trace");
 		fileChooser.getExtensionFilters().add(new ExtensionFilter("Trace (*.trace)", "*.trace"));
 		File file = fileChooser.showSaveDialog(stageManager.getCurrent());
 		
 		if(file != null) {
-			try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), TRACE_CHARSET)) {
+			final Path path = file.toPath();
+			try (final Writer writer = Files.newBufferedWriter(path, TRACE_CHARSET)) {
 				gson.toJson(trace, writer);
 			} catch (FileNotFoundException exc) {
 				LOGGER.warn("Failed to create trace data file", exc);
@@ -61,7 +61,7 @@ public class TraceSaver {
 				LOGGER.warn("Failed to save trace", exc);
 				return;
 			}
-			machine.addTraceFile(file);
+			machine.addTraceFile(path);
 		}
 	}
 }

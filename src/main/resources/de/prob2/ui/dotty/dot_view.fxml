@@ -50,20 +50,6 @@
 													glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
 											</graphic>
 										</Button>
-										<Button fx:id="zoomInButton" disable="false"
-											contentDisplay="GRAPHIC_ONLY" onAction="#zoomIn">
-											<graphic>
-												<FontAwesomeIconView styleClass="icon-dark"
-													glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
-											</graphic>
-										</Button>
-										<Button fx:id="zoomOutButton" disable="false"
-											contentDisplay="GRAPHIC_ONLY" onAction="#zoomOut">
-											<graphic>
-												<FontAwesomeIconView styleClass="icon-dark"
-													glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
-											</graphic>
-										</Button>
 									</HBox>
 									<Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
 									<Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
@@ -74,9 +60,27 @@
 									<CheckBox text="%dotview.continuousUpdate" fx:id="cbContinuous" HBox.hgrow="ALWAYS"/>
 								</VBox>
 							</AnchorPane>
-							<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border">
-								<WebView fx:id="dotView"/>
-							</ScrollPane>
+							<VBox>
+								<HBox alignment="TOP_RIGHT" style="-fx-background-color: transparent">
+									<Button fx:id="zoomInButton" disable="false"
+										contentDisplay="GRAPHIC_ONLY" onAction="#zoomIn">
+										<graphic>
+											<FontAwesomeIconView styleClass="icon-dark"
+												glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
+										</graphic>
+									</Button>
+									<Button fx:id="zoomOutButton" disable="false"
+										contentDisplay="GRAPHIC_ONLY" onAction="#zoomOut">
+										<graphic>
+											<FontAwesomeIconView styleClass="icon-dark"
+												glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
+										</graphic>
+									</Button>
+								</HBox>
+								<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+									<WebView fx:id="dotView"/>
+								</ScrollPane>
+							</VBox>
 						</SplitPane>
 					</AnchorPane>
 				</center>

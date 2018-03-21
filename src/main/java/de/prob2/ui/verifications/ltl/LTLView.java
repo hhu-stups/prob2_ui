@@ -244,6 +244,8 @@ public class LTLView extends ScrollPane {
 				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
 			}
 		});
+		
+		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
 	}
 	
 	public void bindMachine(Machine machine) {

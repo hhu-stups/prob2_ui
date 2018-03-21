@@ -89,12 +89,12 @@ public class MachinesTab extends Tab {
 		
 		@FXML
 		private void handleEditFile() {
-			injector.getInstance(EditPreferencesProvider.class).showEditorStage(currentProject.getLocation().toPath().resolve(this.machine.getPath()));
+			injector.getInstance(EditPreferencesProvider.class).showEditorStage(currentProject.getLocation().resolve(this.machine.getPath()));
 		}
 		
 		@FXML
 		private void handleEditFileExternal() {
-			injector.getInstance(EditPreferencesProvider.class).showExternalEditor(currentProject.getLocation().toPath().resolve(this.machine.getPath()));
+			injector.getInstance(EditPreferencesProvider.class).showExternalEditor(currentProject.getLocation().resolve(this.machine.getPath()));
 		}
 		
 		private void refresh() {
@@ -208,7 +208,7 @@ public class MachinesTab extends Tab {
 			return;
 		}
 
-		final Path projectLocation = currentProject.getLocation().toPath();
+		final Path projectLocation = currentProject.getLocation();
 		final Path absolute = selected.toPath();
 		final Path relative = projectLocation.relativize(absolute);
 		if (currentProject.getMachines().contains(new Machine("", "", relative))) {

@@ -1,7 +1,14 @@
 package de.prob2.ui.internal;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonSerializer;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -9,7 +16,9 @@ import com.google.inject.Provides;
 import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob.MainModule;
+
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.consoles.b.BConsole;
@@ -53,7 +62,10 @@ import de.prob2.ui.verifications.tracereplay.TraceReplayView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 import de.prob2.ui.visualisation.fx.VisualisationController;
+
 import javafx.fxml.FXMLLoader;
+
+import org.hildan.fxgson.FxGson;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
@@ -78,6 +90,21 @@ public class ProB2Module extends AbstractModule {
 		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
 		bind(FontSize.class);
+		bind(Gson.class).toInstance(FxGson.coreBuilder()
+			.disableHtmlEscaping()
+			.setPrettyPrinting()
+			.registerTypeAdapter(File.class, (JsonSerializer<File>)(src, typeOfSrc, context) -> context.serialize(src.getPath()))
+			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> {
+				if (json.isJsonObject()) {
+					// Handle old configs where a File is serialized as a JSON object containing a "path" string.
+					return new File(json.getAsJsonObject().get("path").getAsJsonPrimitive().getAsString());
+				} else {
+					return new File(json.getAsJsonPrimitive().getAsString());
+				}
+			})
+			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString()))
+			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(json.getAsJsonPrimitive().getAsString()))
+			.create());
 		
 		// Controllers
 		bind(BConsole.class);

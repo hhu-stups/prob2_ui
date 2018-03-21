@@ -1,6 +1,6 @@
 package de.prob2.ui.project;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,9 +13,9 @@ public class Project {
 	private String description;
 	private List<Machine> machines = new ArrayList<>();
 	private List<Preference> preferences = new ArrayList<>();
-	private transient File location;
+	private transient Path location;
 
-	public Project(String name, String description, List<Machine> machines, List<Preference> preferences, File location) {
+	public Project(String name, String description, List<Machine> machines, List<Preference> preferences, Path location) {
 		this.name = name;
 		this.description = description;
 		this.machines.addAll(machines);
@@ -23,13 +23,13 @@ public class Project {
 		this.location = location;
 	}
 
-	public Project(String name, String description, File location) {
+	public Project(String name, String description, Path location) {
 		this.name = name;
 		this.description = description;
 		this.location = location;
 	}
 
-	public Project(String name, String description, Machine machine, File location) {
+	public Project(String name, String description, Machine machine, Path location) {
 		this.name = name;
 		this.description = description;
 		this.machines.add(machine);
@@ -86,11 +86,11 @@ public class Project {
 		return null;
 	}
 	
-	public File getLocation() {
+	public Path getLocation() {
 		return location;
 	}
 	
-	void setLocation(File location) {
+	void setLocation(Path location) {
 		this.location = location;
 	}
 	

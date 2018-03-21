@@ -1,15 +1,15 @@
 package de.prob2.ui.project;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,8 +33,6 @@ import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
-import org.hildan.fxgson.FxGson;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +48,9 @@ public class ProjectManager {
 	private final RecentProjects recentProjects;
 
 	@Inject
-	public ProjectManager(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle,
+	public ProjectManager(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle,
 			RecentProjects recentProjects) {
-		this.gson = FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+		this.gson = gson;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -89,7 +87,7 @@ public class ProjectManager {
 				return;
 			} else if (result.get().equals(renameBT)) {
 				FileChooser fileChooser = new FileChooser();
-				fileChooser.setInitialDirectory(currentProject.getLocation());
+				fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 				fileChooser.setInitialFileName(project.getName() + ".json");
 				fileChooser.getExtensionFilters().add(new ExtensionFilter("Project (*.json)", "*.json"));
 				location = fileChooser.showSaveDialog(stageManager.getCurrent());
@@ -103,7 +101,7 @@ public class ProjectManager {
 		File savedFile = saveProject(project, location);
 		if (savedFile != null) {
 			currentProject.setNewProject(false);
-			addToRecentProjects(savedFile);
+			addToRecentProjects(savedFile.toPath());
 			currentProject.setSaved(true);
 			for (Machine machine : currentProject.get().getMachines()) {
 				machine.changedProperty().set(false);
@@ -116,20 +114,20 @@ public class ProjectManager {
 
 	}
 
-	private Project loadProject(File file) {
+	private Project loadProject(Path path) {
 		Project project;
-		try (final Reader reader = new InputStreamReader(new FileInputStream(file), PROJECT_CHARSET)) {
+		try (final Reader reader = Files.newBufferedReader(path, PROJECT_CHARSET)) {
 			project = gson.fromJson(reader, Project.class);
-			project.setLocation(file.getParentFile());
+			project.setLocation(path.getParent());
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Project file not found", exc);
 			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
-					String.format(bundle.getString("project.fileNotFound.content"), file), ButtonType.YES,
+					String.format(bundle.getString("project.fileNotFound.content"), path), ButtonType.YES,
 					ButtonType.NO);
 			alert.setHeaderText(bundle.getString("project.fileNotFound.header"));
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-				Platform.runLater(() -> recentProjects.remove(file.getAbsolutePath()));
+				Platform.runLater(() -> recentProjects.remove(path.toAbsolutePath().toString()));
 			}
 			return null;
 		} catch (IOException exc) {
@@ -139,21 +137,22 @@ public class ProjectManager {
 		return project;
 	}
 
-	public void openProject(File file) {
-		Project project = loadProject(file);
+	public void openProject(Path path) {
+		Project project = loadProject(path);
 		if (project != null) {
 			replaceMissingWithDefaults(project);
 			project.getMachines().forEach(Machine::resetStatus);
 			currentProject.set(project, false);
-			addToRecentProjects(file);
+			addToRecentProjects(path);
 		}
 	}
 
-	private void addToRecentProjects(File file) {
+	private void addToRecentProjects(Path path) {
 		Platform.runLater(() -> {
-			if (recentProjects.isEmpty() || !recentProjects.get(0).equals(file.getAbsolutePath())) {
-				this.recentProjects.remove(file.getAbsolutePath());
-				this.recentProjects.add(0, file.getAbsolutePath());
+			final String absolutePath = path.toAbsolutePath().toString();
+			if (recentProjects.isEmpty() || !recentProjects.get(0).equals(absolutePath)) {
+				this.recentProjects.remove(absolutePath);
+				this.recentProjects.add(0, absolutePath);
 			}
 		});
 	}

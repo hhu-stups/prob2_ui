@@ -134,7 +134,7 @@ public class StateVisualisationView extends AnchorPane {
 	}
 
 	private Image getImage(String imageURL) throws FileNotFoundException {
-		final Path projectFolder = Paths.get(currentProject.get().getLocation().getPath());
+		final Path projectFolder = currentProject.get().getLocation();
 		// look in machine folder
 		final Path machineFile = currentProject.getCurrentMachine().getPath();
 		final Path machineFolder = projectFolder.resolve(machineFile).getParent();
