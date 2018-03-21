@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializer;
 
 import com.google.inject.AbstractModule;
@@ -77,6 +78,15 @@ public class ProB2Module extends AbstractModule {
 		this.runtimeOptions = runtimeOptions;
 	}
 
+	private static String pathStringFromJson(final JsonElement json) {
+		if (json.isJsonObject()) {
+			// Handle old configs where a File is serialized as a JSON object containing a "path" string.
+			return json.getAsJsonObject().get("path").getAsJsonPrimitive().getAsString();
+		} else {
+			return json.getAsJsonPrimitive().getAsString();
+		}
+	}
+	
 	@Override
 	protected void configure() {
 		install(new MainModule());
@@ -94,16 +104,9 @@ public class ProB2Module extends AbstractModule {
 			.disableHtmlEscaping()
 			.setPrettyPrinting()
 			.registerTypeAdapter(File.class, (JsonSerializer<File>)(src, typeOfSrc, context) -> context.serialize(src.getPath()))
-			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> {
-				if (json.isJsonObject()) {
-					// Handle old configs where a File is serialized as a JSON object containing a "path" string.
-					return new File(json.getAsJsonObject().get("path").getAsJsonPrimitive().getAsString());
-				} else {
-					return new File(json.getAsJsonPrimitive().getAsString());
-				}
-			})
+			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> new File(pathStringFromJson(json)))
 			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString()))
-			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(json.getAsJsonPrimitive().getAsString()))
+			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(pathStringFromJson(json)))
 			.create());
 		
 		// Controllers
