@@ -10,7 +10,6 @@ import java.nio.file.StandardOpenOption;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
-
 import javafx.fxml.FXML;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;

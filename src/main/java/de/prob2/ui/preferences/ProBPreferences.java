@@ -211,7 +211,6 @@ public final class ProBPreferences {
 			final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
 			this.getStateSpace().execute(cmd2);
 			this.cachedPreferenceValues.putAll(cmd2.getPreferences());
-			
 			this.changedPreferences.clear();
 		}
 	}
