@@ -2,6 +2,8 @@ package de.prob2.ui.table;
 
 import com.google.common.io.Files;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+
 import de.prob.animator.command.GetAllTableCommands;
 import de.prob.animator.command.GetTableForVisualizationCommand;
 import de.prob.animator.domainobjects.ClassicalB;
@@ -52,8 +54,8 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	@Inject
 	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
-			final ResourceBundle bundle) {
-		super(stageManager, currentTrace, currentProject, bundle);
+			final ResourceBundle bundle, final Injector injector) {
+		super(stageManager, currentTrace, currentProject, bundle, injector);
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
 		stageManager.loadFXML(this, "table_view.fxml");
 	}

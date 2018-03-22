@@ -4,10 +4,9 @@ import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -21,24 +20,12 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Injector;
+
 import java.util.ResourceBundle;
 
 public class DynamicCommandStage extends Stage {
-	
-	private final class DynamicCommandTraceListener implements ChangeListener<Object> {
 
-		@Override
-		public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-			int index = lvChoice.getSelectionModel().getSelectedIndex();
-			fillCommands();
-			if (index == -1) {
-				lvChoice.getSelectionModel().selectFirst();
-			} else {
-				lvChoice.getSelectionModel().select(index);
-			}
-		}
-		
-	}
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
 	
@@ -81,10 +68,13 @@ public class DynamicCommandStage extends Stage {
 	
 	protected final ObjectProperty<Thread> currentThread;
 	
+	protected final Injector injector;
+	
 	public DynamicCommandStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
-			final ResourceBundle bundle) {
+			final ResourceBundle bundle, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.injector = injector;
 		this.bundle = bundle;
 		this.stageManager = stageManager;
 		this.currentThread = new SimpleObjectProperty<>(this, "currentThread", null);
@@ -116,9 +106,10 @@ public class DynamicCommandStage extends Stage {
 			}
 		});
 		
-		currentTrace.currentStateProperty().addListener(new DynamicCommandTraceListener());
-		currentTrace.addListener(new DynamicCommandTraceListener());
-		currentTrace.stateSpaceProperty().addListener(new DynamicCommandTraceListener());
+		currentTrace.currentStateProperty().addListener((observable, from, to) -> refresh());
+		currentTrace.addListener((observable, from, to) -> refresh());
+		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> refresh());
+		injector.getInstance(ModelcheckingView.class).resultProperty().addListener((observable, from, to) -> refresh());
 		
 		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
@@ -166,6 +157,16 @@ public class DynamicCommandStage extends Stage {
 	@FXML
 	private void handleClose() {
 		this.close();
+	}
+	
+	private void refresh() {
+		int index = lvChoice.getSelectionModel().getSelectedIndex();
+		fillCommands();
+		if (index == -1) {
+			lvChoice.getSelectionModel().selectFirst();
+		} else {
+			lvChoice.getSelectionModel().select(index);
+		}	
 	}
 	
 	protected void interrupt(){

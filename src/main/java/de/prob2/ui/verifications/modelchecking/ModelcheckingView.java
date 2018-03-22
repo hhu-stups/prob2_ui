@@ -21,7 +21,6 @@ import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.StateSpace;
-
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
@@ -39,7 +38,9 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -223,6 +224,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	private final Map<String, IModelCheckJob> jobs;
 	private final ListProperty<IModelCheckJob> currentJobs;
 	private final ListProperty<Thread> currentJobThreads;
+	private final ObjectProperty<IModelCheckingResult> lastResult;
 	private ModelCheckStats currentStats;
 	private ModelCheckingOptions currentOptions;
 	
@@ -240,6 +242,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		this.bundle = bundle;
 		this.currentJobs = new SimpleListProperty<>(this, "currentJobs", FXCollections.observableArrayList());
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
+		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
 		this.stageController = new ModelcheckingStageController(stageManager);
 		this.jobs = new HashMap<>();
@@ -526,8 +529,13 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			this.stageController.hide();
 			injector.getInstance(OperationsView.class).update(currentTrace.get());
 			injector.getInstance(StatsView.class).update(currentTrace.get());
+			lastResult.set(result);
 			tvItems.refresh();
 		});
+	}
+	
+	public ObjectProperty<IModelCheckingResult> resultProperty() {
+		return lastResult;
 	}
 	
 }

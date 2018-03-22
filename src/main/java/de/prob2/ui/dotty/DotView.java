@@ -1,6 +1,8 @@
 package de.prob2.ui.dotty;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+
 import de.prob.Main;
 import de.prob.animator.command.GetAllDotCommands;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
@@ -61,8 +63,8 @@ public class DotView extends DynamicCommandStage {
 
 	@Inject
 	public DotView(final StageManager stageManager, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final ResourceBundle bundle) {
-		super(stageManager, currentTrace, currentProject, bundle);
+			final CurrentProject currentProject, final ResourceBundle bundle, final Injector injector) {
+		super(stageManager, currentTrace, currentProject, bundle, injector);
 		stageManager.loadFXML(this, "dot_view.fxml");
 	}
 
