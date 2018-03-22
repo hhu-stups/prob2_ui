@@ -33,36 +33,42 @@ public class BEditor extends StyleClassedTextArea {
 
     static {
         addTokens("editor_identifier", TIdentifierLiteral.class);
-        addTokens("editor_assignment_logical", TAssign.class, TOutputParameters.class, TDoubleVerticalBar.class, TAssert.class,
-                TClosure.class, TClosure1.class, TConjunction.class, TDirectProduct.class, TDivision.class, TEmptySet.class, TDoubleColon.class,
-                TDoubleEqual.class, TEqual.class, TElementOf.class, TEquivalence.class, TGreaterEqual.class, TLessEqual.class, TNotEqual.class,
-                TGreater.class, TLess.class, TImplies.class,  TLogicalOr.class, TInterval.class, TUnion.class, TOr.class, TNonInclusion.class,
-                TTotalBijection.class, TTotalFunction.class, TTotalInjection.class, TTotalRelation.class, TTotalSurjection.class,
-                TTotalSurjectionRelation.class, TPartialBijection.class, TPartialFunction.class, TPartialInjection.class, TPartialSurjection.class, TSetRelation.class,
+        addTokens("editor_assignments", TAssign.class, TOutputParameters.class,
+                TDoubleVerticalBar.class, TAssert.class,
+                TClosure.class, TClosure1.class, TDirectProduct.class, TDivision.class,
+                TEmptySet.class, TDoubleColon.class, TImplies.class,  TLogicalOr.class,
+                TInterval.class, TUnion.class, TOr.class, TNonInclusion.class,
+                TTotalBijection.class, TTotalFunction.class, TTotalInjection.class,
+                TTotalRelation.class, TTotalSurjection.class, TFalse.class, TTrue.class,
+                TTotalSurjectionRelation.class, TPartialBijection.class, TPartialFunction.class,
+                TPartialInjection.class, TPartialSurjection.class, TSetRelation.class,
                 TFin.class, TFin1.class, TPerm.class, TSeq.class, TSeq1.class, TIseq.class,
-                TIseq1.class, TBool.class, TNat.class, TNat1.class, TNatural.class, TNatural1.class, TStruct.class,
-                TInteger.class, TInt.class, TString.class, TEither.class);
+                TIseq1.class, TNot.class);
+        addTokens("editor_logical", TConjunction.class, TForAny.class, TExists.class);
+        addTokens("editor_arithmetic", TDoubleEqual.class, TEqual.class,
+                TElementOf.class, TEquivalence.class, TGreaterEqual.class, TLessEqual.class,
+                TNotEqual.class, TGreater.class, TLess.class);
+        addTokens("editor_types", TBool.class, TNat.class, TNat1.class, TNatural.class,
+                TNatural1.class, TStruct.class, TInteger.class, TInt.class, TString.class);
         addTokens("editor_string", TStringLiteral.class);
-        addTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class, TInfix.class, TArity.class,
-                TSubtree.class, TPow.class, TPow1.class,
-                TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class, TPostfix.class, TPrefix.class,
-                TSons.class, TTop.class, TConst.class, TBtree.class);
-
-        addTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class, TVar.class, TIn.class, TAny.class,
-                TWhile.class,
-                TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class,
+        addTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
+                TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
+                TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
+                TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class);
+        addTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class,
+                TVar.class, TIn.class, TAny.class, TWhile.class,
+                TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
                 TCase.class, TSelect.class, TAssert.class, TAssertions.class, TWhen.class, TPre.class, TBegin.class,
                 TChoice.class, TWhere.class, TOf.class, TEnd.class);
-
-        addTokens("editor_keyword", TMachine.class, TRefinement.class, TImplementation.class,
+        addTokens("editor_keyword", TMachine.class, TOperations.class, TRefinement.class, TImplementation.class,
                 TOperations.class, TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
                 TUses.class, TIncludes.class, TImports.class, TRefines.class, TExtends.class, TSystem.class,
-                TModel.class,
-                TInvariant.class, TConcreteVariables.class, TAbstractVariables.class, TVariables.class,
-                TProperties.class,
-                TConstants.class, TAbstractConstants.class, TConcreteConstants.class, TConstraints.class, TSets.class,
-                TDefinitions.class);
-        addTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class, TLineComment.class);
+                TModel.class, TInvariant.class, TConcreteVariables.class,
+                TAbstractVariables.class, TVariables.class, TProperties.class,
+                TConstants.class, TAbstractConstants.class, TConcreteConstants.class,
+                TConstraints.class, TSets.class, TDefinitions.class);
+        addTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class,
+                TLineComment.class);
     }
 
 
