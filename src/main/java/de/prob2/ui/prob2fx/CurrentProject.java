@@ -18,7 +18,9 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.verifications.MachineTableView;
-
+import de.prob2.ui.verifications.ltl.LTLView;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -118,6 +120,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		machineLoader.loadAsync(m, p.getPreferences());
 		this.currentMachine.set(m);
 		this.currentPreference.set(p);
+		m.resetStatus();
+		injector.getInstance(LTLView.class).bindMachine(m);
+		injector.getInstance(SymbolicCheckingView.class).bindMachine(m);
+		injector.getInstance(ModelcheckingView.class).bindMachine(m);
 	}
 
 	public void addMachine(Machine machine) {

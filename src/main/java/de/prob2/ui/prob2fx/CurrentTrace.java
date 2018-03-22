@@ -22,7 +22,9 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.project.machines.Machine;
-
+import de.prob2.ui.verifications.ltl.LTLView;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -386,6 +388,11 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		final Trace newTrace = new Trace(currentMachine.getType().getLoader().load(api, filename, preferences));
 		this.animationSelector.removeTrace(trace);
 		this.animationSelector.addNewAnimation(newTrace);
+		
+		currentMachine.resetStatus();
+		injector.getInstance(LTLView.class).bindMachine(currentMachine);
+		injector.getInstance(SymbolicCheckingView.class).bindMachine(currentMachine);
+		injector.getInstance(ModelcheckingView.class).bindMachine(currentMachine);
 	}
 	
 	/**
