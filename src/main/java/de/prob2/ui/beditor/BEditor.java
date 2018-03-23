@@ -75,7 +75,7 @@ public class BEditor extends StyleClassedTextArea {
     public BEditor() {
         this.richChanges()
                 .filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
-                .successionEnds(Duration.ofMillis(500))
+                .successionEnds(Duration.ofMillis(50))
                 .supplyTask(this::computeHighlightingAsync)
                 .awaitLatest(this.richChanges())
                 .filterMap(t -> {

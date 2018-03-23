@@ -11,7 +11,8 @@
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <Menu mnemonicParsing="false" text="%menu.file">
-                <MenuItem onAction="#handleSave" mnemonicParsing="false" accelerator="Shortcut+S" text="%beditor.menu.file.items.save"/>
+                <!--accelerator="Shortcut+Alt+S"-->
+                <MenuItem onAction="#handleSave" mnemonicParsing="false" text="%beditor.menu.file.items.save"/>
                 <MenuItem onAction="#handleSaveAs" mnemonicParsing="false" text="%beditor.menu.file.items.saveAs"/>
             </Menu>
             <!-- Maybe replace this with Help Button and change font size..etc? -->
