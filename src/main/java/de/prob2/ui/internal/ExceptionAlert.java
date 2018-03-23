@@ -2,7 +2,6 @@ package de.prob2.ui.internal;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -177,6 +176,5 @@ public final class ExceptionAlert extends Alert {
 	
 	private void openLocationInEditor(final ErrorItem.Location location) {
 		// TODO Jump to error location in file
-		editMenu.showEditorStage(Paths.get(location.getFilename()));
 	}
 }

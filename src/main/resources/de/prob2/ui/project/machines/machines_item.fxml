@@ -13,7 +13,7 @@
 		<ContextMenu fx:id="contextMenu">
 			<items>
 				<MenuItem text="%project.machines.tab.menu.editMachineFile" onAction="#handleEditFile"/>
-				<MenuItem text="%project.machines.tab.menu.editMachineFileInExternalEditor" onAction="#handleEditFileExternal"/>
+				<!--<MenuItem text="%project.machines.tab.menu.editMachineFileInExternalEditor" onAction="#handleEditFileExternal"/>-->
 				<SeparatorMenuItem />
 				<Menu fx:id="startAnimationMenu" text="%project.machines.tab.menu.startAnimation"/>
 				<SeparatorMenuItem />

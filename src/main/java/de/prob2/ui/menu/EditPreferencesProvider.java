@@ -2,12 +2,8 @@ package de.prob2.ui.menu;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +13,6 @@ import com.google.inject.Injector;
 
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.beditor.BEditorStage;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
@@ -41,21 +36,6 @@ public class EditPreferencesProvider {
 		this.globalPreferences = globalPreferences;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-	}
-
-	public void showEditorStage(Path path) {
-		final BEditorStage editorStage = injector.getInstance(BEditorStage.class);
-		final String text;
-		try (final Stream<String> lines = Files.lines(path)) {
-			text = lines.collect(Collectors.joining(System.lineSeparator()));
-		} catch (IOException | UncheckedIOException e) {
-			LOGGER.error("Could not read file " + path, e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.error.couldNotReadFile"), path, e)).showAndWait();
-			return;
-		}
-		editorStage.setEditorText(text, path);
-		editorStage.setTitle(path.getFileName().toString());
-		editorStage.show();
 	}
 
 	public void showExternalEditor(Path path) {

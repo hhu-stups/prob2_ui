@@ -1,12 +1,16 @@
 package de.prob2.ui.project.machines;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -14,6 +18,7 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
+import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.EditPreferencesProvider;
@@ -79,14 +84,12 @@ public class MachinesTab extends Tab {
 		private void handleRemove() {
 			stageManager.makeAlert(Alert.AlertType.CONFIRMATION, String.format(bundle.getString("project.machines.removeDialog.message"), this.machine.getName())).showAndWait().ifPresent(buttonType -> {
 				if (buttonType.equals(ButtonType.OK)) {
+					if(this.machine.equals(currentProject.getCurrentMachine())) {
+						injector.getInstance(BEditorView.class).clearEditorText();
+					}
 					currentProject.removeMachine(this.machine);
 				}
 			});
-		}
-		
-		@FXML
-		private void handleEditFile() {
-			injector.getInstance(EditPreferencesProvider.class).showEditorStage(currentProject.getLocation().resolve(this.machine.getPath()));
 		}
 		
 		@FXML
@@ -237,6 +240,16 @@ public class MachinesTab extends Tab {
 	private void startMachine(final Machine machine) {
 		if (machine != null) {
 			currentProject.startAnimation(machine, machine.getLastUsed());
+
+			Path path = currentProject.getLocation().resolve(machine.getPath());
+			final String text;
+			try (final Stream<String> lines = Files.lines(path)) {
+				text = lines.collect(Collectors.joining(System.lineSeparator()));
+			} catch (IOException | UncheckedIOException e) {
+				stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.error.couldNotReadFile"), path, e)).showAndWait();
+				return;
+			}
+			injector.getInstance(BEditorView.class).setEditorText(text, path);
 		}
 	}
 }
