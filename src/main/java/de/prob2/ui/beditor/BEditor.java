@@ -15,8 +15,6 @@ import java.util.concurrent.Executors;
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
-
-import de.be4.eventbalg.core.parser.node.TEvent;
 import javafx.concurrent.Task;
 
 import org.fxmisc.richtext.StyleClassedTextArea;
@@ -87,7 +85,7 @@ public class BEditor extends StyleClassedTextArea {
                         LOGGER.info("Highlighting failed", t.getFailure());
                         return Optional.empty();
                     }
-                }).subscribe(this::applyHighlighting);
+                }).subscribe(this::applyHighlighting);        
     }
 
     public void startHighlighting() {
@@ -110,6 +108,7 @@ public class BEditor extends StyleClassedTextArea {
 
     private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
         this.setStyleSpans(0, highlighting);
+        
     }
 
     private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {

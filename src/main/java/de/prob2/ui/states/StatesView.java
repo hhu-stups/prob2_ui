@@ -37,7 +37,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
-
+import de.prob2.ui.table.ExpressionTableView;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -173,17 +173,35 @@ public final class StatesView extends StackPane {
 			}
 		});
 
-		final MenuItem visualizeExpressionItem = new MenuItem(bundle.getString("states.menu.visualizeExpression"));
+		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(bundle.getString("states.menu.visualizeExpressionGraph"));
 		// Expression can only be shown if the row item contains an ASTFormula
 		// and the current state is initialized.
-		visualizeExpressionItem.disableProperty().bind(Bindings.createBooleanBinding(
+		visualizeExpressionAsGraphItem.disableProperty().bind(Bindings.createBooleanBinding(
 				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
 				.or(currentTrace.currentStateProperty().initializedProperty().not()));
-		visualizeExpressionItem.setOnAction(event -> {
+		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				FormulaStage formulaStage = injector.getInstance(FormulaStage.class);
 				formulaStage.showFormula((IEvalElement)((ASTFormula) row.getItem().getContents()).getFormula());
 				formulaStage.show();
+			} catch (EvaluationException | ProBError e) {
+				LOGGER.error("Could not visualize formula", e);
+				stageManager.makeAlert(Alert.AlertType.ERROR,
+						String.format(bundle.getString("states.error.couldNotVisualize"), e)).showAndWait();
+			}
+		});
+		
+		final MenuItem visualizeExpressionAsTableItem = new MenuItem(bundle.getString("states.menu.visualizeExpressionTable"));
+		// Expression can only be shown if the row item contains an ASTFormula
+		// and the current state is initialized.
+		visualizeExpressionAsTableItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
+				.or(currentTrace.currentStateProperty().initializedProperty().not()));
+		visualizeExpressionAsTableItem.setOnAction(event -> {
+			try {
+				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
+				expressionTableView.visualizeExpression(((ASTFormula) row.getItem().getContents()).getFormula().getCode());
+				expressionTableView.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
 				stageManager.makeAlert(Alert.AlertType.ERROR,
@@ -210,7 +228,7 @@ public final class StatesView extends StackPane {
 		showErrorsItem.setOnAction(event -> this.showError(row.getItem()));
 
 		row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null)
-				.otherwise(new ContextMenu(visualizeExpressionItem, showFullValueItem, showErrorsItem)));
+				.otherwise(new ContextMenu(visualizeExpressionAsGraphItem, visualizeExpressionAsTableItem, showFullValueItem, showErrorsItem)));
 
 		// Double-click on an item triggers "show full value" if allowed.
 		row.setOnMouseClicked(event -> {

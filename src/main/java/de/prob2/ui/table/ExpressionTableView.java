@@ -76,6 +76,12 @@ public class ExpressionTableView extends DynamicCommandStage {
 		super.fillCommands(new GetAllTableCommands(currentTrace.getCurrentState()));
 	}
 	
+	public void visualizeExpression(String expression) {
+		taFormula.setText(expression);
+		lvChoice.getSelectionModel().selectFirst();
+		visualize(lvChoice.getSelectionModel().getSelectedItem());
+	}
+	
 	@Override
 	protected void visualize(DynamicCommandItem item) {
 		if(!item.isAvailable()) {
