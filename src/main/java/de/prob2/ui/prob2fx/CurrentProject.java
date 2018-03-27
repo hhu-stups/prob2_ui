@@ -153,7 +153,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void removeMachine(Machine machine) {
 		if(machine.equals(currentMachine.getValue())) {
-			injector.getInstance(BEditorView.class).clearEditorText();
+			injector.getInstance(BEditorView.class).setHint();
 		}
 		List<Machine> machinesList = this.getMachines();
 		machinesList.remove(machine);

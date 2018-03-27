@@ -16,6 +16,7 @@ import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.ModelTranslationError;
 
+import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -171,6 +172,16 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
+	public void handleMachineFileSave() {
+		injector.getInstance(BEditorView.class).handleSave();
+	}
+
+	@FXML
+	public void handleMachineFileSaveAs() {
+		injector.getInstance(BEditorView.class).handleSaveAs();
+	}
+
+	@FXML
 	public void handleReloadMachine() {
 		try {
 			this.currentTrace.reload(this.currentTrace.get());
@@ -187,6 +198,7 @@ public class FileMenu extends Menu {
 		if (stage != null) {
 			stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
 		}
+		injector.getInstance(BEditorView.class).handleClose();
 	}
 
 	private List<MenuItem> getRecentProjectItems(SimpleListProperty<String> recentListProperty) {

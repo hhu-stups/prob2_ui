@@ -15,6 +15,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ResourceBundle;
 
 @Singleton
 public class BEditorView extends BorderPane {
@@ -25,18 +26,23 @@ public class BEditorView extends BorderPane {
     private BEditor beditor;
 
     private Path path;
+    private ResourceBundle bundle;
 
     @Inject
-    private BEditorView(StageManager stageManager) {
+    private BEditorView(StageManager stageManager, ResourceBundle bundle) {
         stageManager.loadFXML(this, "beditorView.fxml");
+        this.bundle = bundle;
+        setHint();
     }
 
-    public void clearEditorText(){
+    public void setHint(){
         this.path = null;
         beditor.clear();
-        beditor.stopHighlighting();
+        beditor.appendText(bundle.getString("beditor.hint"));
+        beditor.getStyleClass().add("editor");
+        beditor.startHighlighting();
+        beditor.setEditable(false);
     }
-
 
     public void setEditorText(String text, Path path) {
         this.path = path;
@@ -44,25 +50,30 @@ public class BEditorView extends BorderPane {
         beditor.appendText(text);
         beditor.getStyleClass().add("editor");
         beditor.startHighlighting();
+        beditor.setEditable(true);
     }
 
-    @FXML
     public void handleSave() {
         //Maybe add something for the user, that reloads the machine automatically?
         if(path != null) {
             try {
                 Files.write(path, beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException e) {
-                LOGGER.error("File not found", e);
+                LOGGER.error(bundle.getString("beditor.couldNotSaveFile"), e);
             }
         }
     }
 
-    @FXML
+
+    public void handleClose() {
+        this.path = null;
+        beditor.stopHighlighting();
+    }
+
     public void handleSaveAs() {
         if(path != null) {
             FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Select Location");
+            fileChooser.setTitle(bundle.getString("preferences.stage.tabs.general.selectLocation"));
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
             File openFile = fileChooser.showOpenDialog(getScene().getWindow());
             if (openFile != null) {
@@ -75,7 +86,7 @@ public class BEditorView extends BorderPane {
                     Files.write(newFile.toPath(), beditor.getText().getBytes(EDITOR_CHARSET), option);
                     path = newFile.toPath();
                 } catch (IOException e) {
-                    LOGGER.error("File not found", e);
+                    LOGGER.error(bundle.getString("beditor.couldNotSaveFile"), e);
                 }
             }
         }
