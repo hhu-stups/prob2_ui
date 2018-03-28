@@ -59,6 +59,8 @@ public class TraceLoader {
 						currentMachine.removeTraceFile(path);
 					} 
 				});
+			} else {
+				return new ReplayTrace(path, null);
 			}
 			return null;
 		} catch (IOException exc) {
