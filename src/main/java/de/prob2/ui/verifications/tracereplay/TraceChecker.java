@@ -65,6 +65,10 @@ public class TraceChecker {
 	}
 
 	public void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
+		if(replayTrace.getStoredTrace() == null) {
+			return;
+		}
+		
 		Thread replayThread = new Thread(() -> {
 			replayTrace.setStatus(ReplayTrace.Status.NOT_CHECKED);
 

@@ -62,13 +62,8 @@ public class TraceReplayView extends ScrollPane {
 	private final FileChooserManager fileChooserManager;
 
 	@Inject
-	private TraceReplayView(
-		final StageManager stageManager,
-		final CurrentProject currentProject,
-		final TraceChecker traceChecker,
-		final ResourceBundle bundle,
-		final FileChooserManager fileChooserManager
-	) {
+	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
+			final TraceChecker traceChecker, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.traceChecker = traceChecker;
@@ -78,24 +73,25 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	private static void updateStatusIcon(final FontAwesomeIconView iconView, final ReplayTrace.Status status) {
+		iconView.getStyleClass().add("status-icon");
 		switch (status) {
-			case SUCCESSFUL:
-				iconView.setIcon(FontAwesomeIcon.CHECK);
-				iconView.setFill(Color.GREEN);
-				break;
-			
-			case FAILED:
-				iconView.setIcon(FontAwesomeIcon.REMOVE);
-				iconView.setFill(Color.RED);
-				break;
-			
-			case NOT_CHECKED:
-				iconView.setIcon(FontAwesomeIcon.QUESTION_CIRCLE);
-				iconView.setFill(Color.BLUE);
-				break;
-			
-			default:
-				throw new AssertionError("Unhandled status: " + status);
+		case SUCCESSFUL:
+			iconView.setIcon(FontAwesomeIcon.CHECK);
+			iconView.setFill(Color.GREEN);
+			break;
+
+		case FAILED:
+			iconView.setIcon(FontAwesomeIcon.REMOVE);
+			iconView.setFill(Color.RED);
+			break;
+
+		case NOT_CHECKED:
+			iconView.setIcon(FontAwesomeIcon.QUESTION_CIRCLE);
+			iconView.setFill(Color.BLUE);
+			break;
+
+		default:
+			throw new AssertionError("Unhandled status: " + status);
 		}
 	}
 
@@ -104,27 +100,32 @@ public class TraceReplayView extends ScrollPane {
 		helpButton.setHelpContent(this.getClass());
 		statusColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
-			
+
 			final FontAwesomeIconView statusIcon = new FontAwesomeIconView();
 			trace.statusProperty().addListener((o, from, to) -> updateStatusIcon(statusIcon, to));
 			updateStatusIcon(statusIcon, trace.getStatus());
-			
-			final ProgressIndicator replayProgress = new ProgressBar();
-			replayProgress.progressProperty().bind(trace.progressProperty().divide((double)trace.getStoredTrace().getTransitionList().size()));
-			
-			return Bindings.when(trace.progressProperty().isEqualTo(-1)).<Node>then(statusIcon).otherwise(replayProgress);
-		});
-		nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getLocation().toString()));
 
-		this.traceChecker.getReplayTraces().addListener((MapChangeListener<Path, ReplayTrace>)c ->
-			traceTableView.getItems().setAll(c.getMap().values())
-		);
+			final ProgressIndicator replayProgress = new ProgressBar();
+			if (trace.getStoredTrace() != null) {
+				replayProgress.progressProperty().bind(
+						trace.progressProperty().divide((double) trace.getStoredTrace().getTransitionList().size()));
+			}
+
+			return Bindings.when(trace.progressProperty().isEqualTo(-1)).<Node>then(statusIcon)
+					.otherwise(replayProgress);
+		});
+		nameColumn.setCellValueFactory(
+				features -> new SimpleStringProperty(features.getValue().getLocation().toString()));
+
+		this.traceChecker.getReplayTraces().addListener(
+				(MapChangeListener<Path, ReplayTrace>) c -> traceTableView.getItems().setAll(c.getMap().values()));
 
 		initTableRows();
 
 		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
-		checkButton.disableProperty().bind(Bindings.createBooleanBinding(() -> traceTableView.getItems().isEmpty(), traceTableView.getItems()));
+		checkButton.disableProperty().bind(
+				Bindings.createBooleanBinding(() -> traceTableView.getItems().isEmpty(), traceTableView.getItems()));
 	}
 
 	private void initTableRows() {
@@ -137,8 +138,8 @@ public class TraceReplayView extends ScrollPane {
 
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.showError"));
-			showErrorItem.setOnAction(
-					event -> stageManager.makeExceptionAlert("", row.getItem().getError()).showAndWait());
+			showErrorItem
+					.setOnAction(event -> stageManager.makeExceptionAlert("", row.getItem().getError()).showAndWait());
 			showErrorItem.setDisable(true);
 
 			final MenuItem deleteTraceItem = new MenuItem(
@@ -153,6 +154,9 @@ public class TraceReplayView extends ScrollPane {
 				showErrorItem.disableProperty().unbind();
 				if (t != null) {
 					showErrorItem.disableProperty().bind(t.statusProperty().isNotEqualTo(ReplayTrace.Status.FAILED));
+					if (t.getStoredTrace() == null) {
+						row.setDisable(true);
+					}
 				}
 			});
 
@@ -184,10 +188,8 @@ public class TraceReplayView extends ScrollPane {
 		allExts.add("*.json");
 		allExts.add("*.trace");
 		allExts.sort(String::compareTo);
-		fileChooser.getExtensionFilters().addAll(
-				new ExtensionFilter("All supported trace formats", allExts),
-				new ExtensionFilter("Trace (*.trace)", "*.trace"),
-				new ExtensionFilter("Trace (*.json)", "*.json"));
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("All supported trace formats", allExts),
+				new ExtensionFilter("Trace (*.trace)", "*.trace"), new ExtensionFilter("Trace (*.json)", "*.json"));
 		File traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
 			currentProject.getCurrentMachine().addTraceFile(traceFile.toPath());

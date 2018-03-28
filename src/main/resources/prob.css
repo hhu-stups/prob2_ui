@@ -614,6 +614,11 @@
 .table-row-cell:focused .table-cell {
 	-fx-font-weight: bold;
 }
+.table-row-cell:disabled .text,
+.table-row-cell:disabled .status-icon {
+	-fx-fill: -prob-lightgrey;
+}
+
 .tree-table-row-cell:focused .check-box > .box {
 	-fx-border-color: white;
 }
