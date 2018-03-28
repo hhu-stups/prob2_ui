@@ -198,7 +198,6 @@ public class FileMenu extends Menu {
 		if (stage != null) {
 			stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
 		}
-		injector.getInstance(BEditorView.class).handleClose();
 	}
 
 	private List<MenuItem> getRecentProjectItems(SimpleListProperty<String> recentListProperty) {
