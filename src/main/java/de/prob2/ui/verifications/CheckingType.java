@@ -8,7 +8,7 @@ public enum CheckingType {
 	
 	private final String key;
 	
-	private CheckingType(final String key) {
+	CheckingType(final String key) {
 		this.key = key;
 	}
 	

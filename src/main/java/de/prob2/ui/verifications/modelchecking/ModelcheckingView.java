@@ -78,7 +78,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		
 		private final String name;
 		
-		private SearchStrategy(final String name) {
+		SearchStrategy(final String name) {
 			this.name = name;
 		}
 		

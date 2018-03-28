@@ -23,7 +23,7 @@ public enum SymbolicCheckingType {
 	
 	private final SymbolicModelcheckCommand.Algorithm algorithm;
 	
-	private SymbolicCheckingType(final String name, final SymbolicModelcheckCommand.Algorithm algorithm) {
+	SymbolicCheckingType(final String name, final SymbolicModelcheckCommand.Algorithm algorithm) {
 		this.name = name;
 		this.algorithm = algorithm;
 	}

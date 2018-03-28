@@ -28,7 +28,7 @@ public abstract class AbstractResultHandler {
 		
 		private final String key;
 		
-		private ItemType(final String key) {
+		ItemType(final String key) {
 			this.key = key;
 		}
 		

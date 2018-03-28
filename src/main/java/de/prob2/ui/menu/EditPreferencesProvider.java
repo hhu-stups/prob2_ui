@@ -22,16 +22,13 @@ import javafx.scene.control.Alert;
 public class EditPreferencesProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EditPreferencesProvider.class);
 
-	private final Injector injector;
 	private final MachineLoader machineLoader;
 	private final GlobalPreferences globalPreferences;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
 	@Inject
-	private EditPreferencesProvider(final StageManager stageManager, final Injector injector,
-									final MachineLoader machineLoader, final GlobalPreferences globalPreferences, final ResourceBundle bundle) {
-		this.injector = injector;
+	private EditPreferencesProvider(final StageManager stageManager, final MachineLoader machineLoader, final GlobalPreferences globalPreferences, final ResourceBundle bundle) {
 		this.machineLoader = machineLoader;
 		this.globalPreferences = globalPreferences;
 		this.stageManager = stageManager;

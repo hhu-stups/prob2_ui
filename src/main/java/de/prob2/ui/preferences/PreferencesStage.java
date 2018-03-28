@@ -159,7 +159,7 @@ public final class PreferencesStage extends Stage {
 	}
 	
 	@FXML
-	private void selectDefaultLocation(ActionEvent event) {
+	private void selectDefaultLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle(bundle.getString("preferences.stage.tabs.general.selectLocation.title"));
 		File file = dirChooser.showDialog(this.getOwner());
