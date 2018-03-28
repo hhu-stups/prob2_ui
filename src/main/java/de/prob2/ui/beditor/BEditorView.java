@@ -1,14 +1,5 @@
 package de.prob2.ui.beditor;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import de.prob2.ui.internal.StageManager;
-import javafx.fxml.FXML;
-import javafx.scene.layout.BorderPane;
-import javafx.stage.FileChooser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -16,6 +7,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
+
+import javafx.fxml.FXML;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class BEditorView extends BorderPane {
@@ -29,10 +33,11 @@ public class BEditorView extends BorderPane {
     private ResourceBundle bundle;
 
     @Inject
-    private BEditorView(StageManager stageManager, ResourceBundle bundle) {
+    private BEditorView(StageManager stageManager, ResourceBundle bundle, StopActions stopActions) {
         stageManager.loadFXML(this, "beditorView.fxml");
         this.bundle = bundle;
         setHint();
+        stopActions.add(beditor::stopHighlighting);
     }
 
     public void setHint(){
@@ -62,12 +67,6 @@ public class BEditorView extends BorderPane {
                 LOGGER.error(bundle.getString("beditor.couldNotSaveFile"), e);
             }
         }
-    }
-
-
-    public void handleClose() {
-        this.path = null;
-        beditor.stopHighlighting();
     }
 
     public void handleSaveAs() {
