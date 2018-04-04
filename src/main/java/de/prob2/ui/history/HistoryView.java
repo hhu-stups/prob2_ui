@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -108,7 +109,7 @@ public final class HistoryView extends AnchorPane {
 				int currentPos = to.getCurrent().getIndex();
 				historyTableView.getItems()
 						.add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST, -1));
-				List<Transition> transitionList = to.getTransitionList();
+				List<Transition> transitionList = to.getTransitionList(FormulaExpand.TRUNCATE);
 				for (int i = 0; i < transitionList.size(); i++) {
 					HistoryStatus status = getStatus(i, currentPos);
 					historyTableView.getItems().add(new HistoryItem(transitionList.get(i), status, i));
@@ -132,7 +133,7 @@ public final class HistoryView extends AnchorPane {
 		} else {
 			// Evaluate the transition so the pretty rep includes argument list
 			// and result
-			transition.evaluate();
+			transition.evaluate(FormulaExpand.TRUNCATE);
 			return transition.getPrettyRep().replace("<--", "←");
 		}
 	}
