@@ -52,15 +52,17 @@ public class TraceLoader {
 					ButtonType.YES, ButtonType.NO);
 			alert.setHeaderText("Trace File not found.");
 			Optional<ButtonType> result = alert.showAndWait();
-			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-				Platform.runLater(() -> {
-					Machine currentMachine = currentProject.getCurrentMachine();
-					if(currentMachine.getTraceFiles().contains(path)) {
-						currentMachine.removeTraceFile(path);
-					} 
-				});
-			} else {
-				return new ReplayTrace(path, null);
+			if (result.isPresent()) {
+				if (result.get().equals(ButtonType.YES)) {
+					Platform.runLater(() -> {
+						Machine currentMachine = currentProject.getCurrentMachine();
+						if (currentMachine.getTraceFiles().contains(path)) {
+							currentMachine.removeTraceFile(path);
+						}
+					});
+				} else {
+					return new ReplayTrace(path, null);
+				}
 			}
 			return null;
 		} catch (IOException exc) {
