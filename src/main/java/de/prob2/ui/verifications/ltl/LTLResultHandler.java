@@ -57,6 +57,8 @@ public class LTLResultHandler extends AbstractResultHandler {
 			item.setResultItem(resultItem);	
 			if(traces != null && !traces.isEmpty()) {
 				item.setCounterExample(traces.get(0));
+			} else {
+				item.setCounterExample(null);
 			}
 		});
 		if(resultItem != null) {
