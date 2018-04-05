@@ -15,6 +15,7 @@ import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.animator.domainobjects.EventB;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
@@ -74,7 +75,7 @@ public class SymbolicCheckingFormulaHandler {
 	}
 	
 	public void handleDeadlock(String code) {
-		IEvalElement constraint = new EventB(code); 
+		IEvalElement constraint = new EventB(code, FormulaExpand.EXPAND); 
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
 		symbolicChecker.executeCheckingItem(checker, code, SymbolicCheckingType.DEADLOCK);
 	}
@@ -117,7 +118,7 @@ public class SymbolicCheckingFormulaHandler {
 	
 	public void findValidState(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode()), true);
+		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode(), FormulaExpand.EXPAND), true);
 		symbolicChecker.checkItem(item, cmd, stateSpace);
 	}
 	

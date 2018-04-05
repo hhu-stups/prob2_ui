@@ -1,5 +1,13 @@
 package de.prob2.ui.dotty;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -9,13 +17,16 @@ import de.prob.animator.command.GetSvgForVisualizationCommand;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+
 import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
@@ -24,16 +35,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
 
 
 public class DotView extends DynamicCommandStage {
@@ -106,7 +110,7 @@ public class DotView extends DynamicCommandStage {
 			Platform.runLater(()-> statusBar.setText(bundle.getString("dynamicStatusBar.loading")));
 			try {
 				if (item.getArity() > 0) {
-					formulas.add(new ClassicalB(taFormula.getText()));
+					formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
 				}
 				State id = currentTrace.getCurrentState();
 				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, FILE, formulas);

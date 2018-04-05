@@ -1,6 +1,15 @@
 package de.prob2.ui.table;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import com.google.common.io.Files;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -9,14 +18,17 @@ import de.prob.animator.command.GetTableForVisualizationCommand;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+
 import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -29,17 +41,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 import org.apache.commons.lang.StringEscapeUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 
 public class ExpressionTableView extends DynamicCommandStage {
@@ -94,7 +100,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 			Platform.runLater(() -> statusBar.setText(bundle.getString("dynamicStatusBar.loading")));
 			try {
 				if(item.getArity() > 0) {
-					formulas.add(new ClassicalB(taFormula.getText()));
+					formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
 				}
 				State id = currentTrace.getCurrentState();
 				GetTableForVisualizationCommand cmd = new GetTableForVisualizationCommand(id, item, formulas);

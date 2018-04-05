@@ -12,6 +12,7 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
 import de.prob.animator.command.GetOperationByPredicateCommand;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.formula.PredicateBuilder;
@@ -121,7 +122,7 @@ public class TraceChecker {
 	private Transition replayPersistentTransition(StateSpace stateSpace, Trace t,
 			PersistentTransition persistentTransition, boolean setCurrentAnimation) {
 		String predicate = new PredicateBuilder().addMap(persistentTransition.getParameters()).toString();
-		final IEvalElement pred = stateSpace.getModel().parseFormula(predicate);
+		final IEvalElement pred = stateSpace.getModel().parseFormula(predicate, FormulaExpand.EXPAND);
 		final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
 				t.getCurrentState().getId(), persistentTransition.getOperationName(), pred, 1);
 		stateSpace.execute(command);
