@@ -81,7 +81,7 @@ public class SymbolicCheckingFormulaHandler {
 	
 	public void findDeadlock() {
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace());
-		symbolicChecker.executeCheckingItem(checker, "FIND DEADLOCK", SymbolicCheckingType.FIND_DEADLOCK);
+		symbolicChecker.executeCheckingItem(checker, "FIND_DEADLOCK", SymbolicCheckingType.FIND_DEADLOCK);
 	}
 	
 	public void handleSequence(String sequence) {
