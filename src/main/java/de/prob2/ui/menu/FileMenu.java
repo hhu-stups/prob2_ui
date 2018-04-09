@@ -60,6 +60,10 @@ public class FileMenu extends Menu {
 	private MenuItem viewFormattedCodeItem;
 	@FXML
 	private MenuItem reloadMachineItem;
+	@FXML
+	private MenuItem saveItem;
+	@FXML
+	private MenuItem saveAsItem;
 
 	private final RecentProjects recentProjects;
 	private final CurrentProject currentProject;
@@ -98,7 +102,9 @@ public class FileMenu extends Menu {
 		recentProjectsListener.onChanged(null);
 
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
-
+		this.saveItem.disableProperty().bind(currentProject.currentMachineProperty().isNull());
+		this.saveAsItem.disableProperty().bind(currentProject.currentMachineProperty().isNull());
+		
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.existsProperty().not());
 		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not());
 	}
