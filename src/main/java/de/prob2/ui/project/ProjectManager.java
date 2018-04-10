@@ -9,6 +9,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,7 +120,7 @@ public class ProjectManager {
 		try (final Reader reader = Files.newBufferedReader(path, PROJECT_CHARSET)) {
 			project = gson.fromJson(reader, Project.class);
 			project.setLocation(path.getParent());
-		} catch (FileNotFoundException exc) {
+		} catch (FileNotFoundException | NoSuchFileException exc) {
 			LOGGER.warn("Project file not found", exc);
 			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
 					String.format(bundle.getString("project.fileNotFound.content"), path), ButtonType.YES,
