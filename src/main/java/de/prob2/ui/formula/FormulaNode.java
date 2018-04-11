@@ -31,7 +31,7 @@ public class FormulaNode extends Region {
 		}
 		width = text.getLayoutBounds().getWidth();
 		height = text.getLayoutBounds().getHeight();
-		rectangle = new Rectangle(width * 1.24 * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE, height * 2 * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE);
+		rectangle = new Rectangle(width * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE, height * 2 * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE);
 		color = calculateColor(data);
 		if (data.getChildren() == null || data.getChildren().isEmpty()) {
 			return;
@@ -64,7 +64,7 @@ public class FormulaNode extends Region {
 	}
 	
 	public double getRight() {
-		return rectangle.getX() + rectangle.getWidth() * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE;
+		return rectangle.getX() + rectangle.getWidth();
 	}
 	
 	public double getX() {
@@ -72,7 +72,7 @@ public class FormulaNode extends Region {
 	}
 
 	public double getY() {
-		return rectangle.getY() + 0.5 * rectangle.getHeight() * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE;
+		return rectangle.getY() + 0.5 * rectangle.getHeight();
 	}
 	
 	

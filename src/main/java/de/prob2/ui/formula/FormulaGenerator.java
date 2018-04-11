@@ -39,7 +39,7 @@ public final class FormulaGenerator {
 	}
 
 	public FormulaView showFormula(final IEvalElement formula) {
-		return new FormulaView(new FormulaGraph(new FormulaNode(expandFormula(formula), fontSize)));
+		return new FormulaView(new FormulaGraph(new FormulaNode(expandFormula(formula), fontSize), fontSize));
 	}
 
 	public FormulaView parseAndShowFormula(final String formula) {
