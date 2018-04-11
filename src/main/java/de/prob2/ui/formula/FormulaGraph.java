@@ -6,13 +6,18 @@ import javafx.scene.shape.Line;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.prob2.ui.layout.FontSize;
+
 
 public class FormulaGraph extends Region {
 	
 	private FormulaNode root;
 	
-	public FormulaGraph(FormulaNode node) {
-		root = node;
+	private final FontSize fontSize;
+	
+	public FormulaGraph(FormulaNode node, FontSize fontSize) {
+		this.root = node;
+		this.fontSize = fontSize;
 		root.setPosition(25, calculateY()+20);
 		draw(root, 0);
 	}
@@ -28,7 +33,7 @@ public class FormulaGraph extends Region {
 		if (level == depth(root)) {
 			return 40;
 		}
-		return Math.max(1,maxChildren(level)) * calculateHeight(level + 1);
+		return Math.max(1,maxChildren(level)) * calculateHeight(level + 1) * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE;
 	}
 	
 	private void draw(FormulaNode node, int level) {
@@ -62,7 +67,7 @@ public class FormulaGraph extends Region {
 	private double maxWidth(int level) {
 		double result = 0;
 		for (FormulaNode node: getAllNodesOnLevel(level)) {
-			result = Math.max(result, node.getNodeWidth());
+			result = Math.max(result, node.getNodeWidth() * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE);
 		}
 		return result;
 	}
