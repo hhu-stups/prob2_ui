@@ -129,7 +129,8 @@ public class HelpSystem extends StackPane {
 
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
+				if (file.toString().contains(".htm")||file.toString().contains(".png"))
+					Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
 				return FileVisitResult.CONTINUE;
 			}
 		});
