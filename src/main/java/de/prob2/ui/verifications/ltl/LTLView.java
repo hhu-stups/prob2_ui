@@ -180,6 +180,9 @@ public class LTLView extends ScrollPane {
 			row.setOnMouseClicked(e-> {
 				if(e.getButton() == MouseButton.SECONDARY) {
 					LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+					if(item == null) {
+						return;
+					}
 					if(row.emptyProperty().get() || item.getCounterExample() == null) {
 						showCounterExampleItem.setDisable(true);
 					} else {
