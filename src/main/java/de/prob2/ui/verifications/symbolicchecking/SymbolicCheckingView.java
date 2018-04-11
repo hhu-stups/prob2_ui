@@ -181,6 +181,9 @@ public class SymbolicCheckingView extends ScrollPane {
 				
 				if(e.getButton() == MouseButton.SECONDARY) {
 					SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+					if(item == null) {
+						return;
+					}
 					if(row.emptyProperty().get() || item.getCounterExamples().isEmpty()) {
 						showCounterExampleItem.setDisable(true);
 					} else {
