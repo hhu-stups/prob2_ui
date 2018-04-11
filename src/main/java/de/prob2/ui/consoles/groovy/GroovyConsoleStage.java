@@ -1,26 +1,26 @@
 package de.prob2.ui.consoles.groovy;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
-
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
+import javafx.fxml.FXML;
 import javafx.stage.Stage;
 
-import org.fxmisc.flowless.VirtualizedScrollPane;
 
 @Singleton
 public final class GroovyConsoleStage extends Stage {
+	
+	@FXML
+	private GroovyConsole groovyConsole;
+	
 	@Inject
-	private GroovyConsoleStage(StageManager stageManager, GroovyConsole groovyConsole, ResourceBundle bundle) {
-		this.setTitle(bundle.getString("consoles.groovy.title"));
-		// Needs to be wrapped in a Pane subclass (VirtualizedScrollPane is not actually a Pane) for the Mac menu bar to work
-		this.setScene(new Scene(new StackPane(new VirtualizedScrollPane<>(groovyConsole)), 800, 600));
+	private GroovyConsoleStage(StageManager stageManager) {
+		stageManager.loadFXML(this, "groovy_console_view.fxml");
+	}
+	
+	@FXML
+	private void initialize() {
 		this.setOnCloseRequest(e -> groovyConsole.closeObjectStage());
-		stageManager.register(this, this.getClass().getName());
 	}
 }

@@ -2,12 +2,16 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import de.prob2.ui.layout.FontSize?>
 
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import de.prob2.ui.beditor.BEditor?>
 <?import de.prob2.ui.beditor.BEditorView?>
 
 <fx:root type="BEditorView" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
     <center>
         <VirtualizedScrollPane hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
             <content>

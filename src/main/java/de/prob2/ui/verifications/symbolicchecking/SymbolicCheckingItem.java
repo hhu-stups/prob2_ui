@@ -18,7 +18,7 @@ public class SymbolicCheckingItem {
 	}
 	
 	public String toString() {
-		return checkingType.name();
+		return checkingType.getName();
 	}
 	
 	public SymbolicCheckingType getCheckingType() {

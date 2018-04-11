@@ -21,6 +21,7 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 
 import de.prob2.ui.MainController;
+import de.prob2.ui.beditor.BEditor;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.consoles.b.BConsole;
@@ -116,6 +117,7 @@ public class ProB2Module extends AbstractModule {
 		bind(DynamicCommandStatusBar.class);
 		bind(ExecuteByPredicateStage.class);
 		bind(HistoryView.class);
+		bind(BEditor.class);
 		bind(BEditorView.class);
 		bind(MainController.class);
 		bind(LTLFormulaChecker.class);

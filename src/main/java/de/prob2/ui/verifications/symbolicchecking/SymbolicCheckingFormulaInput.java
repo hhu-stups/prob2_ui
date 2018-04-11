@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.symbolicchecking;
 
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -95,7 +94,6 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		btCheck.setOnAction(e -> {
 			SymbolicCheckingType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
 			SymbolicCheckingFormulaItem formulaItem = null;
-			String formula;
 			addFormula(true);
 			switch(checkingType) {
 				case INVARIANT: 
@@ -119,8 +117,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 					symbolicCheckingFormulaHandler.findValidState(formulaItem);
 					break;
 				default:
-					formula = checkingType.getName();
-					formulaItem = new SymbolicCheckingFormulaItem(formula, formula, checkingType);
+					formulaItem = new SymbolicCheckingFormulaItem(checkingType.name(), checkingType.name(), checkingType);
 					switch(checkingType) {
 						case FIND_REDUNDANT_INVARIANTS: 
 							symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem); 
@@ -176,7 +173,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		SymbolicCheckingFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getCheckingType());
 		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
 			SymbolicCheckingType type = choosingStage.getCheckingType();
-			item.setData(formula, type.name(), formula, type);
+			item.setData(formula, type.getName(), formula, type);
 			item.reset();
 			injector.getInstance(SymbolicCheckingView.class).refresh();
 			return true;
@@ -197,14 +194,13 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		}
 	}
 	
-	public List<String> getEvents() {
-		return events;
-	}
-	
 	private void addFormula(boolean checking) {
 		SymbolicCheckingType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
+		if(checkingType == SymbolicCheckingType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
+			injector.getInstance(SymbolicCheckingChoosingStage.class).close();
+			return;
+		}
 		GUIType guiType = injector.getInstance(SymbolicCheckingChoosingStage.class).getGUIType();
-		String formula;
 		switch(guiType) {
 			case CHOICE_BOX:
 				switch(checkingType) {
@@ -225,8 +221,16 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 				symbolicCheckingFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType, checking);
 				break;
 			case NONE:
-				formula = checkingType.getName();
-				symbolicCheckingFormulaHandler.addFormula(formula, formula, checkingType, checking);
+				switch(checkingType) {
+					case CHECK_ALL_OPERATIONS:
+						for(String event : events) {
+							symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicCheckingType.INVARIANT, checking);
+						}
+						break;
+					default:
+						symbolicCheckingFormulaHandler.addFormula(checkingType.name(), checkingType.name(), checkingType, checking);
+						break;
+				}
 				break;
 			default:
 				break;

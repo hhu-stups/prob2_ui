@@ -11,6 +11,7 @@ import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.statespace.State;
@@ -72,7 +73,7 @@ public final class HistoryChartStage extends Stage {
 				textField.getStyleClass().remove("text-field-error");
 				final ClassicalB formula;
 				try {
-					formula = new ClassicalB(textField.getText());
+					formula = new ClassicalB(textField.getText(), FormulaExpand.EXPAND);
 				} catch (EvaluationException e) {
 					LOGGER.debug("Could not parse user-entered formula", e);
 					textField.getStyleClass().add("text-field-error");
@@ -183,7 +184,7 @@ public final class HistoryChartStage extends Stage {
 
 	@FXML
 	private void handleAdd() {
-		this.formulaList.getItems().add(new ClassicalB("0"));
+		this.formulaList.getItems().add(new ClassicalB("0", FormulaExpand.EXPAND));
 		this.formulaList.edit(this.formulaList.getItems().size() - 1);
 	}
 

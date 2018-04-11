@@ -12,6 +12,7 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
 import de.prob.animator.command.GetOperationByPredicateCommand;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.formula.PredicateBuilder;
@@ -65,10 +66,10 @@ public class TraceChecker {
 	}
 
 	public void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		if(replayTrace.getStoredTrace() == null) {
+		if (replayTrace.getStoredTrace() == null) {
 			return;
 		}
-		
+
 		Thread replayThread = new Thread(() -> {
 			replayTrace.setStatus(ReplayTrace.Status.NOT_CHECKED);
 
@@ -81,7 +82,8 @@ public class TraceChecker {
 			for (int i = 0; i < transitionList.size(); i++) {
 				final int finalI = i;
 				Platform.runLater(() -> replayTrace.setProgress(finalI));
-				Transition trans = replayPersistentTransition(stateSpace, trace, transitionList.get(i), setCurrentAnimation);
+				Transition trans = replayPersistentTransition(stateSpace, trace, transitionList.get(i),
+						setCurrentAnimation);
 				if (trans != null) {
 					trace = trace.add(trans);
 				} else {
@@ -119,9 +121,8 @@ public class TraceChecker {
 
 	private Transition replayPersistentTransition(StateSpace stateSpace, Trace t,
 			PersistentTransition persistentTransition, boolean setCurrentAnimation) {
-		String predicate = new PredicateBuilder().addMap(persistentTransition.getParameters())
-				.toString();
-		final IEvalElement pred = stateSpace.getModel().parseFormula(predicate);
+		String predicate = new PredicateBuilder().addMap(persistentTransition.getParameters()).toString();
+		final IEvalElement pred = stateSpace.getModel().parseFormula(predicate, FormulaExpand.EXPAND);
 		final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
 				t.getCurrentState().getId(), persistentTransition.getOperationName(), pred, 1);
 		stateSpace.execute(command);
@@ -168,9 +169,8 @@ public class TraceChecker {
 										"Can not replay operation '%s'. The value of the ouput parameter '%s' does not match.\n"
 												+ "Value from trace file: %s\nComputed value: %s",
 										operationName, outputParamName, bValue.toString(), paramValueFromTransition);
-								Platform.runLater(() ->
-									Platform.runLater(() -> getReplayErrorAlert(errorMessage).showAndWait())
-								);
+								Platform.runLater(
+										() -> Platform.runLater(() -> getReplayErrorAlert(errorMessage).showAndWait()));
 							}
 							return false;
 						}
@@ -207,7 +207,9 @@ public class TraceChecker {
 
 	private void addTrace(Path traceFile) {
 		ReplayTrace trace = traceLoader.loadTrace(traceFile);
-		replayTraces.put(traceFile, trace);
+		if (trace != null) {
+			replayTraces.put(traceFile, trace);
+		}
 	}
 
 	private void removeTrace(Path traceFile) {
