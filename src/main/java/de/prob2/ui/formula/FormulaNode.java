@@ -31,7 +31,7 @@ public class FormulaNode extends Region {
 		}
 		width = text.getLayoutBounds().getWidth();
 		height = text.getLayoutBounds().getHeight();
-		rectangle = new Rectangle(width * 1.24 * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE, height * 2 * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE);
+		rectangle = new Rectangle(width * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE, height * 2 * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE);
 		color = calculateColor(data);
 		if (data.getChildren() == null || data.getChildren().isEmpty()) {
 			return;
