@@ -221,15 +221,12 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 				symbolicCheckingFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType, checking);
 				break;
 			case NONE:
-				switch(checkingType) {
-					case CHECK_ALL_OPERATIONS:
-						for(String event : events) {
-							symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicCheckingType.INVARIANT, checking);
-						}
-						break;
-					default:
-						symbolicCheckingFormulaHandler.addFormula(checkingType.name(), checkingType.name(), checkingType, checking);
-						break;
+				if(checkingType == SymbolicCheckingType.CHECK_ALL_OPERATIONS) {
+					for(String event : events) {
+						symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicCheckingType.INVARIANT, checking);
+					}
+				} else {
+					symbolicCheckingFormulaHandler.addFormula(checkingType.name(), checkingType.name(), checkingType, checking);
 				}
 				break;
 			default:
