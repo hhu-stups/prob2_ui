@@ -70,8 +70,8 @@ public class FormulaStage extends Stage {
 	
 	public void showFormula(String formula) {
 		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
-		try {
-			Thread thread = new Thread(() -> {
+		Thread thread = new Thread(() -> {
+			try {
 				Platform.runLater(() -> statusBar.setText(bundle.getString("statusBar.loading")));
 				formulaView = formulaGenerator.parseAndShowFormula(formula);
 				Platform.runLater(() -> {
@@ -79,19 +79,22 @@ public class FormulaStage extends Stage {
 					tfFormula.getStyleClass().remove("text-field-error");
 					statusBar.setText("");
 				});
-			});
-			currentThread.set(thread);
-			thread.start();
-		} catch (EvaluationException | ProBError exception) {
-			logger.error("Evaluation of formula failed", exception);
-			tfFormula.getStyleClass().add("text-field-error");
-		}
+			} catch (EvaluationException | ProBError exception) {
+				logger.error("Evaluation of formula failed", exception);
+				Platform.runLater(() -> {
+					reset();
+					tfFormula.getStyleClass().add("text-field-error");
+				});
+			}
+		});
+		currentThread.set(thread);
+		thread.start();
 	}
 	
 	public void showFormula(final IEvalElement formula) {
 		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
-		try {
-			Thread thread = new Thread(() -> {
+		Thread thread = new Thread(() -> {
+			try {
 				Platform.runLater(() -> statusBar.setText(bundle.getString("statusBar.loading")));
 				formulaView = formulaGenerator.showFormula(formula);
 				Platform.runLater(() -> {
@@ -100,13 +103,16 @@ public class FormulaStage extends Stage {
 					tfFormula.getStyleClass().remove("text-field-error");
 					statusBar.setText("");
 				});
-			});
-			currentThread.set(thread);
-			thread.start();
-		} catch (EvaluationException | ProBError exception) {
-			logger.error("Evaluation of formula failed", exception);
-			tfFormula.getStyleClass().add("text-field-error");
-		}
+			} catch (EvaluationException | ProBError exception) {
+				logger.error("Evaluation of formula failed", exception);
+				Platform.runLater(() -> {
+					reset();
+					tfFormula.getStyleClass().add("text-field-error");
+				});
+			}
+		});
+		currentThread.set(thread);
+		thread.start();
 	}
 	
 	@FXML
@@ -115,6 +121,10 @@ public class FormulaStage extends Stage {
 			currentThread.get().interrupt();
 			currentThread.set(null);
 		}
+		reset();
+	}
+	
+	private void reset() {
 		if(formulaView != null) {
 			formulaView.getChildren().clear();
 		}
