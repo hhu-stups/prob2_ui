@@ -97,7 +97,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 		interrupt();
 
 		Thread thread = new Thread(() -> {
-			Platform.runLater(() -> statusBar.setText(bundle.getString("dynamicStatusBar.loading")));
+			Platform.runLater(() -> statusBar.setText(bundle.getString("statusBar.loading")));
 			try {
 				if(item.getArity() > 0) {
 					formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));

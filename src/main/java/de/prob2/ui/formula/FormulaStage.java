@@ -8,15 +8,19 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
-
+import de.prob2.ui.internal.DynamicCommandStatusBar;
 import de.prob2.ui.internal.StageManager;
-
+import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
+
+import java.util.ResourceBundle;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +35,23 @@ public class FormulaStage extends Stage {
 	@FXML
 	private ScrollPane formulaPane;
 	
+	@FXML
+	private DynamicCommandStatusBar statusBar;
+	
 	private final Injector injector;
 	
+	private final ResourceBundle bundle;
+	
 	private FormulaView formulaView;
+	
+	private final ObjectProperty<Thread> currentThread;
 
 	@Inject
-	public FormulaStage(StageManager stageManager, Injector injector) {
+	public FormulaStage(final StageManager stageManager, final Injector injector, final ResourceBundle bundle) {
 		this.injector = injector;
+		this.bundle = bundle;
 		stageManager.loadFXML(this, "formula_view.fxml");
+		this.currentThread = new SimpleObjectProperty<>(this, "currentThread", null);
 	}
 
 	@FXML
@@ -58,9 +71,17 @@ public class FormulaStage extends Stage {
 	public void showFormula(String formula) {
 		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
 		try {
-			formulaView = formulaGenerator.parseAndShowFormula(formula);
-			formulaPane.setContent(formulaView);
-			tfFormula.getStyleClass().remove("text-field-error");
+			Thread thread = new Thread(() -> {
+				Platform.runLater(() -> statusBar.setText(bundle.getString("statusBar.loading")));
+				formulaView = formulaGenerator.parseAndShowFormula(formula);
+				Platform.runLater(() -> {
+					formulaPane.setContent(formulaView);
+					tfFormula.getStyleClass().remove("text-field-error");
+					statusBar.setText("");
+				});
+			});
+			currentThread.set(thread);
+			thread.start();
 		} catch (EvaluationException | ProBError exception) {
 			logger.error("Evaluation of formula failed", exception);
 			tfFormula.getStyleClass().add("text-field-error");
@@ -70,14 +91,34 @@ public class FormulaStage extends Stage {
 	public void showFormula(final IEvalElement formula) {
 		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
 		try {
-			formulaView = formulaGenerator.showFormula(formula);
-			tfFormula.setText(formula.getCode());
-			formulaPane.setContent(formulaView);
-			tfFormula.getStyleClass().remove("text-field-error");
+			Thread thread = new Thread(() -> {
+				Platform.runLater(() -> statusBar.setText(bundle.getString("statusBar.loading")));
+				formulaView = formulaGenerator.showFormula(formula);
+				Platform.runLater(() -> {
+					tfFormula.setText(formula.getCode());
+					formulaPane.setContent(formulaView);
+					tfFormula.getStyleClass().remove("text-field-error");
+					statusBar.setText("");
+				});
+			});
+			currentThread.set(thread);
+			thread.start();
 		} catch (EvaluationException | ProBError exception) {
 			logger.error("Evaluation of formula failed", exception);
 			tfFormula.getStyleClass().add("text-field-error");
 		}
+	}
+	
+	@FXML
+	private void cancel() {
+		if (currentThread.get() != null) {
+			currentThread.get().interrupt();
+			currentThread.set(null);
+		}
+		if(formulaView != null) {
+			formulaView.getChildren().clear();
+		}
+		statusBar.setText("");
 	}
 	
 	@FXML
