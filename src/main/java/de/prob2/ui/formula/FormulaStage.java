@@ -14,7 +14,7 @@ import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
-
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -37,6 +37,9 @@ public class FormulaStage extends Stage {
 	
 	@FXML
 	private DynamicCommandStatusBar statusBar;
+	
+	@FXML
+	private Button cancelButton;
 	
 	private final Injector injector;
 	
@@ -61,6 +64,7 @@ public class FormulaStage extends Stage {
 				apply();
 			}
 		});
+		cancelButton.disableProperty().bind(currentThread.isNull());
 	}
 
 	@FXML
@@ -153,6 +157,7 @@ public class FormulaStage extends Stage {
 	
 	@FXML
 	private void handleClose() {
+		currentThread.set(null);
 		this.close();
 	}
 	
