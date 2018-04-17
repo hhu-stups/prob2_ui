@@ -43,6 +43,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 @Singleton
 public class LTLView extends ScrollPane {
@@ -177,25 +178,7 @@ public class LTLView extends ScrollPane {
 			});
 			check.disableProperty().bind(row.emptyProperty().or(currentJobThreads.emptyProperty().not()));
 
-			row.setOnMouseClicked(e-> {
-				if(e.getButton() == MouseButton.SECONDARY) {
-					LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-					if(item == null) {
-						return;
-					}
-					if(row.emptyProperty().get() || item.getCounterExample() == null) {
-						showCounterExampleItem.setDisable(true);
-					} else {
-						showCounterExampleItem.setDisable(false);
-					}
-					
-					if(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked()) {
-						showMessage.setDisable(true);
-					} else {
-						showMessage.setDisable(false);
-					}
-				}
-			});
+			row.setOnMouseClicked(e->rowClicked(e, row, showCounterExampleItem, showMessage));
 			row.setContextMenu(new ContextMenu(openEditor, removeItem, showCounterExampleItem, showMessage, check));
 			return row;
 		});
@@ -213,6 +196,26 @@ public class LTLView extends ScrollPane {
 			row.setContextMenu(new ContextMenu(openEditor, removeItem));
 			return row;
 		});
+	}
+
+	private void rowClicked(MouseEvent e, TableRow<LTLFormulaItem> row, MenuItem showCounterExampleItem, MenuItem showMessage) {
+		if(e.getButton() == MouseButton.SECONDARY) {
+			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+			if(item == null) {
+				return;
+			}
+			if(row.emptyProperty().get() || item.getCounterExample() == null) {
+				showCounterExampleItem.setDisable(true);
+			} else {
+				showCounterExampleItem.setDisable(false);
+			}
+
+			if(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked()) {
+				showMessage.setDisable(true);
+			} else {
+				showMessage.setDisable(false);
+			}
+		}
 	}
 	
 	private void setBindings() {
