@@ -26,7 +26,6 @@ import de.prob2.ui.project.MachineLoader;
 
 import javafx.beans.InvalidationListener;
 import javafx.collections.MapChangeListener;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
