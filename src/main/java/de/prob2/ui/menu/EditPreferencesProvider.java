@@ -43,6 +43,8 @@ public class EditPreferencesProvider {
 		if (ProB2Module.IS_MAC && editor.isDirectory()) {
 			// On Mac, use the open tool to start app bundles
 			cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(), path.toString() };
+		} else if (!editor.isDirectory() && System.getProperty("os.name", "").toLowerCase().contains("linux")) {
+			cmdline = new String[] { "xdg-open", path.toString() };
 		} else {
 			// Run normal executables directly
 			cmdline = new String[] { editor.getAbsolutePath(), path.toString() };
