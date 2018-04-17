@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class FormulaStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(FormulaStage.class);
+	
+	private static final String CSS_ERROR_CLASS = "text-field-error";
 
 	@FXML
 	private TextField tfFormula;
@@ -119,8 +121,8 @@ public class FormulaStage extends Stage {
 		logger.error("Evaluation of formula failed", exception);
 		Platform.runLater(() -> {
 			reset();
-			if(!tfFormula.getStyleClass().contains("text-field-error")) {
-				tfFormula.getStyleClass().add("text-field-error");
+			if(!tfFormula.getStyleClass().contains(CSS_ERROR_CLASS)) {
+				tfFormula.getStyleClass().add(CSS_ERROR_CLASS);
 			}
 		});
 	}
@@ -128,7 +130,7 @@ public class FormulaStage extends Stage {
 	private void updateView(String formula) {
 		Platform.runLater(() -> {
 			formulaPane.setContent(formulaView);
-			tfFormula.getStyleClass().remove("text-field-error");
+			tfFormula.getStyleClass().remove(CSS_ERROR_CLASS);
 			statusBar.setText("");
 			currentThread.set(null);
 			currentFormula = formula;
