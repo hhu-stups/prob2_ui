@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -79,7 +80,7 @@ public final class MachineStatusHandler {
 			default:
 				break;
 		}
-		return null;
+		return Collections.emptyList();
 		
 	}
 }

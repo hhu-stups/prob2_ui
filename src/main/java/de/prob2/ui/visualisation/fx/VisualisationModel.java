@@ -208,7 +208,7 @@ public class VisualisationModel {
 				boolean invariantViolated = false;
 				for (int i = 0; i < number && outgoingTransitions && !invariantViolated && randomExecution; i++) {
 					currentTrace.set(currentTrace.get().randomAnimation(1));
-					outgoingTransitions = !currentTrace.getCurrentState().getOutTransitions(FormulaExpand.TRUNCATE).isEmpty();
+					outgoingTransitions = !currentTrace.getCurrentState().getOutTransitions().isEmpty();
 					if (stopOnInvariantViolation) {
 						invariantViolated = !currentTrace.getCurrentState().isInvariantOk();
 					}

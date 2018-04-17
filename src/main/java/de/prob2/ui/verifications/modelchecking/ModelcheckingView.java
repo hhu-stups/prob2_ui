@@ -307,7 +307,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			}
 		});
 		
-		tvItems.setOnMouseClicked(e->tvItemsClicked(e));
+		tvItems.setOnMouseClicked(this::tvItemsClicked);
 	}
 
 	private void tvItemsClicked(MouseEvent e) {
