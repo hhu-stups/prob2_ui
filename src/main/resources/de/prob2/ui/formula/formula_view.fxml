@@ -6,6 +6,7 @@
 <?import javafx.scene.Scene?>
 <?import de.prob2.ui.formula.FormulaStage?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.internal.DynamicCommandStatusBar?>
 
 <fx:root type="FormulaStage" title="%formula.input.title" xmlns="http://javafx.com/javafx/8.0.91"
 		 xmlns:fx="http://javafx.com/fxml/1" minWidth="600" minHeight="400" width="1440.0" height="800.0">
@@ -57,6 +58,12 @@
 												glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
 										</graphic>
 									</Button>
+									<Button fx:id="cancelButton" onAction="#cancel">
+										<graphic>
+											<FontAwesomeIconView styleClass="icon-dark"
+												glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
+										</graphic>
+									</Button>
 								</HBox>
 								<HBox VBox.vgrow="ALWAYS">
 									<StackPane fx:id="stackPane" HBox.hgrow="ALWAYS">
@@ -69,6 +76,9 @@
 						</children>
 					</AnchorPane>
 				</center>
+				<bottom>
+					<DynamicCommandStatusBar fx:id="statusBar"/>
+				</bottom>
 			</BorderPane>
 		</Scene>
 	</scene>

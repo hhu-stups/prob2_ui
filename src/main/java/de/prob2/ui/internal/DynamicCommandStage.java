@@ -42,9 +42,6 @@ public class DynamicCommandStage extends Stage {
 	protected Label lbDescription;
 
 	@FXML
-	protected Label lbAvailable;
-
-	@FXML
 	protected CheckBox cbContinuous;
 
 	@FXML
@@ -90,13 +87,12 @@ public class DynamicCommandStage extends Stage {
 				return;
 			}
 			if (!to.isAvailable()) {
-				lbAvailable.setText(String.join("\n", bundle.getString("tableview.notavailable"), to.getAvailable()));
+				lbDescription.setText(String.join("\n", to.getDescription(), to.getAvailable()));
 			} else {
-				lbAvailable.setText("");
+				lbDescription.setText(to.getDescription());
 			}
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
-			lbDescription.setText(to.getDescription());
 			String currentFormula = taFormula.getText();
 			if ((!needFormula || !currentFormula.isEmpty()) && (currentItem == null
 					|| !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
@@ -133,7 +129,6 @@ public class DynamicCommandStage extends Stage {
 		});
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell());
 		cancelButton.disableProperty().bind(currentThread.isNull());
-		
 	}
 	
 	protected void fillCommands(AbstractGetDynamicCommands cmd) {

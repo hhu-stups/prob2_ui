@@ -51,8 +51,7 @@
 											</graphic>
 										</Button>
 									</HBox>
-									<Label fx:id="lbDescription" HBox.hgrow="ALWAYS"/>
-									<Label fx:id="lbAvailable" HBox.hgrow="ALWAYS"/>
+									<Label fx:id="lbDescription" VBox.vgrow="NEVER"/>
 									<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 										<Label text="%dotview.enterFormula" HBox.hgrow="NEVER"/>
 										<AnchorPane>
