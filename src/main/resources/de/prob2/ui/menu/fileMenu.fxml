@@ -25,8 +25,8 @@
 	<MenuItem fx:id="reloadMachineItem" text="%menu.file.items.reloadMachine"
 		accelerator="Shortcut+R" onAction="#handleReloadMachine" />
 	<SeparatorMenuItem />
-	<MenuItem onAction="#handleMachineFileSave" accelerator="Alt+Shortcut+M" text="%beditor.menu.file.items.save"/>
-	<MenuItem onAction="#handleMachineFileSaveAs" mnemonicParsing="false" text="%beditor.menu.file.items.saveAs"/>
+	<MenuItem fx:id="saveItem" onAction="#handleMachineFileSave" accelerator="Alt+Shortcut+M" text="%beditor.menu.file.items.save"/>
+	<MenuItem fx:id="saveAsItem" onAction="#handleMachineFileSaveAs" mnemonicParsing="false" text="%beditor.menu.file.items.saveAs"/>
 	<SeparatorMenuItem />
 	<MenuItem fx:id="preferencesItem" text="%menu.file.items.preferences"
 			  accelerator="Alt+Shortcut+S" onAction="#handlePreferences" />

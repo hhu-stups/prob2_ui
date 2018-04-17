@@ -10,7 +10,6 @@ import com.google.inject.Inject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -50,7 +49,7 @@ public class NewProjectStage extends Stage {
 	}
 	
 	@FXML
-	void selectLocation(ActionEvent event) {
+	void selectLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle(bundle.getString("project.newProject.stage.selectLocation.title"));
 		File file = dirChooser.showDialog(this.getOwner());
@@ -60,12 +59,12 @@ public class NewProjectStage extends Stage {
 	}
 
 	@FXML
-	void cancel(ActionEvent event) {
+	void cancel() {
 		this.close();
 	}
 
 	@FXML
-	void finish(ActionEvent event) {
+	void finish() {
 		Path dir = Paths.get(locationField.getText());
 		if (!dir.toFile().isDirectory()) {
 			errorExplanationLabel.setText(bundle.getString("project.newProject.stage.invalidLocationError"));

@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.statespace.StateSpace;
@@ -22,16 +21,13 @@ import javafx.scene.control.Alert;
 public class EditPreferencesProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EditPreferencesProvider.class);
 
-	private final Injector injector;
 	private final MachineLoader machineLoader;
 	private final GlobalPreferences globalPreferences;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
 	@Inject
-	private EditPreferencesProvider(final StageManager stageManager, final Injector injector,
-									final MachineLoader machineLoader, final GlobalPreferences globalPreferences, final ResourceBundle bundle) {
-		this.injector = injector;
+	private EditPreferencesProvider(final StageManager stageManager, final MachineLoader machineLoader, final GlobalPreferences globalPreferences, final ResourceBundle bundle) {
 		this.machineLoader = machineLoader;
 		this.globalPreferences = globalPreferences;
 		this.stageManager = stageManager;
@@ -47,6 +43,8 @@ public class EditPreferencesProvider {
 		if (ProB2Module.IS_MAC && editor.isDirectory()) {
 			// On Mac, use the open tool to start app bundles
 			cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(), path.toString() };
+		} else if (!editor.isDirectory() && System.getProperty("os.name", "").toLowerCase().contains("linux")) {
+			cmdline = new String[] { "xdg-open", path.toString() };
 		} else {
 			// Run normal executables directly
 			cmdline = new String[] { editor.getAbsolutePath(), path.toString() };

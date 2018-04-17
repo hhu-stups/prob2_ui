@@ -30,7 +30,7 @@ public class StatusBar extends HBox {
 		
 		private final String messageKey;
 		
-		private LoadingStatus(final String messageKey) {
+		LoadingStatus(final String messageKey) {
 			this.messageKey = messageKey;
 		}
 		
@@ -40,7 +40,7 @@ public class StatusBar extends HBox {
 	}
 	
 	public enum CheckingStatus {
-		ERROR, SUCCESSFUL;
+		ERROR, SUCCESSFUL
 	}
 	
 	@FXML private Label statusLabel;

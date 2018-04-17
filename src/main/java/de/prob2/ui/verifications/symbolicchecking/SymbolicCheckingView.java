@@ -33,6 +33,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 @Singleton
 public class SymbolicCheckingView extends ScrollPane {
@@ -177,33 +178,7 @@ public class SymbolicCheckingView extends ScrollPane {
 			MenuItem changeItem = new MenuItem(bundle.getString("verifications.symbolic.menu.change"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
 			
-			row.setOnMouseClicked(e-> {
-				
-				if(e.getButton() == MouseButton.SECONDARY) {
-					SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-					if(row.emptyProperty().get() || item.getCounterExamples().isEmpty()) {
-						showCounterExampleItem.setDisable(true);
-					} else {
-						showCounterExampleItem.setDisable(false);
-						showCounterExamples(showCounterExampleItem);
-					}
-					
-					if(item != null && item.getType() == SymbolicCheckingType.FIND_VALID_STATE) {
-						if(row.emptyProperty().get() || item.getExample() == null) {
-							showStateItem.setDisable(true);
-						} else {
-							showStateItem.setDisable(false);
-							showStateItem.setOnAction(event-> currentTrace.set((item.getExample())));
-						}
-					}
-					
-					if(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked()) {
-						showMessage.setDisable(true);
-					} else {
-						showMessage.setDisable(false);
-					}
-				}
-			});
+			row.setOnMouseClicked(e->rowClicked(e, row, showCounterExampleItem, showStateItem, showMessage));
 			
 			row.setContextMenu(new ContextMenu(check, changeItem, showCounterExampleItem, showMessage, showStateItem, removeItem));
 			return row;
@@ -262,6 +237,36 @@ public class SymbolicCheckingView extends ScrollPane {
 	private void openItem(SymbolicCheckingFormulaItem item) {
 		SymbolicCheckingFormulaInput formulaInput = injector.getInstance(SymbolicCheckingFormulaInput.class);
 		formulaInput.changeFormula(item);
+	}
+
+	private void rowClicked(MouseEvent e, TableRow<SymbolicCheckingFormulaItem> row, Menu showCounterExampleItem, MenuItem showStateItem, MenuItem showMessage) {
+		if(e.getButton() == MouseButton.SECONDARY) {
+			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+			if(item == null) {
+				return;
+			}
+			if(row.emptyProperty().get() || item.getCounterExamples().isEmpty()) {
+				showCounterExampleItem.setDisable(true);
+			} else {
+				showCounterExampleItem.setDisable(false);
+				showCounterExamples(showCounterExampleItem);
+			}
+
+			if(item.getType() == SymbolicCheckingType.FIND_VALID_STATE) {
+				if(row.emptyProperty().get() || item.getExample() == null) {
+					showStateItem.setDisable(true);
+				} else {
+					showStateItem.setDisable(false);
+					showStateItem.setOnAction(event-> currentTrace.set((item.getExample())));
+				}
+			}
+
+			if(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked()) {
+				showMessage.setDisable(true);
+			} else {
+				showMessage.setDisable(false);
+			}
+		}
 	}
 		
 }

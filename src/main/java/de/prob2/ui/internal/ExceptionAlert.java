@@ -14,7 +14,6 @@ import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 
-import de.prob2.ui.menu.EditPreferencesProvider;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
@@ -44,7 +43,6 @@ public final class ExceptionAlert extends Alert {
 	
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
-	private final EditPreferencesProvider editMenu;
 	private final String text;
 	private final Throwable exc;
 	
@@ -55,7 +53,6 @@ public final class ExceptionAlert extends Alert {
 		
 		this.stageManager = injector.getInstance(StageManager.class);
 		this.bundle = injector.getInstance(ResourceBundle.class);
-		this.editMenu = injector.getInstance(EditPreferencesProvider.class);
 		this.text = text;
 		this.exc = exc;
 		

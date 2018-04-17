@@ -1,13 +1,32 @@
 package de.prob2.ui.operations;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.model.classicalb.Operation;
@@ -19,12 +38,14 @@ import de.prob.model.representation.BEvent;
 import de.prob.model.representation.Machine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -45,25 +66,11 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.sawano.java.text.AlphanumericComparator;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import se.sawano.java.text.AlphanumericComparator;
 
 @Singleton
 public final class OperationsView extends AnchorPane {
@@ -344,7 +351,7 @@ public final class OperationsView extends AnchorPane {
 		}
 
 		events = new ArrayList<>();
-		final Set<Transition> operations = trace.getNextTransitions(true);
+		final Set<Transition> operations = trace.getNextTransitions(true, FormulaExpand.TRUNCATE);
 		final Set<String> disabled = new HashSet<>(opNames);
 		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		for (Transition transition : operations) {

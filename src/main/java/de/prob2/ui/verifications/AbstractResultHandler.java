@@ -28,7 +28,7 @@ public abstract class AbstractResultHandler {
 		
 		private final String key;
 		
-		private ItemType(final String key) {
+		ItemType(final String key) {
 			this.key = key;
 		}
 		
@@ -99,7 +99,7 @@ public abstract class AbstractResultHandler {
 			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.EXCEPTION, bundle.getString("verifications.result.couldNotParseFormula.message"), bundle.getString("verifications.result.couldNotParseFormula.header"), sw.toString());
 			logger.error("Could not parse {} formula", type, exc);	
 		} else if(interrupted.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.INTERRUPTED, bundle.getString("verifications.interrupted"), bundle.getString("verifications.interrupted"));
+			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.INTERRUPTED, ((IModelCheckingResult) result).getMessage(),  bundle.getString("verifications.interrupted"));
 		}
 		return resultItem;
 	}

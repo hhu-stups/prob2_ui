@@ -62,7 +62,7 @@ public class Machine {
 		private final Machine.Loader loader;
 		private final String[] extensions;
 		
-		private Type(final Machine.Loader loader, final String[] extensions) {
+		Type(final Machine.Loader loader, final String[] extensions) {
 			this.loader = loader;
 			this.extensions = extensions;
 		}

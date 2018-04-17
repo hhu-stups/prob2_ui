@@ -2,10 +2,12 @@ package de.prob2.ui.helpsystem;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -51,7 +53,6 @@ public class HelpSystem extends StackPane {
 	WebEngine webEngine;
 	private URI helpURI;
 	private UIState uiState;
-	private final Injector injector;
 	String helpSubdirectoryString = "help_en";
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
 
@@ -59,7 +60,6 @@ public class HelpSystem extends StackPane {
 	public HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
 		stageManager.loadFXML(this, "helpsystem.fxml");
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
-		this.injector = injector;
 		// this needs to be updated if new translations of help are added
 		String[] languages = {"de", "en"};
 		for (String language : languages) {
@@ -129,7 +129,8 @@ public class HelpSystem extends StackPane {
 
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
+				if (file.toString().contains(".htm")||file.toString().contains(".png"))
+					Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
 				return FileVisitResult.CONTINUE;
 			}
 		});
@@ -156,12 +157,12 @@ public class HelpSystem extends StackPane {
 		for (Map.Entry<File,HelpTreeItem> entry : fileMap.entrySet()) {
 			final HelpTreeItem hti = entry.getValue();
 			try {
-				if (entry.getKey().toURI().toURL().sameFile(new URL(url))) {
+				if (entry.getKey().toURI().toURL().sameFile(new URL(URLDecoder.decode(url,"UTF-8")))) {
 					expandTree(hti);
 					Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
 				}
-			} catch (MalformedURLException e) {
-				LoggerFactory.getLogger(HelpSystem.class).error("Malformed URL", e);
+			} catch (MalformedURLException | UnsupportedEncodingException e) {
+				LoggerFactory.getLogger(HelpSystem.class).error("URL not found", e);
 			}
 		}
 	}

@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
+import de.prob2.ui.layout.FontSize;
 import javafx.concurrent.Task;
 
 import org.fxmisc.richtext.StyleClassedTextArea;
@@ -23,6 +24,8 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.inject.Inject;
 
 public class BEditor extends StyleClassedTextArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
@@ -72,7 +75,8 @@ public class BEditor extends StyleClassedTextArea {
     }
 
 
-    public BEditor() {
+    @Inject
+    private BEditor(final FontSize fontSize) {
         this.richChanges()
                 .filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
                 .successionEnds(Duration.ofMillis(50))
@@ -85,7 +89,10 @@ public class BEditor extends StyleClassedTextArea {
                         LOGGER.info("Highlighting failed", t.getFailure());
                         return Optional.empty();
                     }
-                }).subscribe(this::applyHighlighting);        
+                }).subscribe(this::applyHighlighting);
+        fontSize.fontSizeProperty().addListener((observable, from, to) -> 
+        	this.setStyle(String.format("-fx-font-size: %dpx;", fontSize.fontSizeProperty().get()))
+        );
     }
 
     public void startHighlighting() {

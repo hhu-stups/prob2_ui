@@ -26,7 +26,6 @@ import de.prob2.ui.project.MachineLoader;
 
 import javafx.beans.InvalidationListener;
 import javafx.collections.MapChangeListener;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -159,7 +158,7 @@ public final class PreferencesStage extends Stage {
 	}
 	
 	@FXML
-	private void selectDefaultLocation(ActionEvent event) {
+	private void selectDefaultLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle(bundle.getString("preferences.stage.tabs.general.selectLocation.title"));
 		File file = dirChooser.showDialog(this.getOwner());

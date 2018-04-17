@@ -52,6 +52,11 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
@@ -172,6 +177,33 @@ public final class StatesView extends StackPane {
 				}
 			}
 		});
+		
+		final MenuItem copyItem = new MenuItem(bundle.getString("states.copy"));
+		
+		copyItem.setOnAction(e -> {
+			final Clipboard clipboard = Clipboard.getSystemClipboard();
+			final ClipboardContent content = new ClipboardContent();
+			content.putString(((ASTFormula)row.getItem().getContents()).getFormula().getCode());
+			clipboard.setContent(content);
+		});
+		
+		copyItem.disableProperty().bind(Bindings.createBooleanBinding(
+				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
+				.or(currentTrace.currentStateProperty().initializedProperty().not()));
+		
+		this.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN), () -> {
+			if(tv.getSelectionModel().getSelectedItem() == null) {
+				return;
+			}
+			Object formula = tv.getSelectionModel().getSelectedItem().getValue().getContents();
+			if(formula instanceof ASTFormula) {
+				final Clipboard clipboard = Clipboard.getSystemClipboard();
+				final ClipboardContent content = new ClipboardContent();
+				content.putString(((ASTFormula) formula).getFormula().getCode());
+				clipboard.setContent(content);
+			}
+		});
+		
 
 		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(bundle.getString("states.menu.visualizeExpressionGraph"));
 		// Expression can only be shown if the row item contains an ASTFormula
@@ -200,7 +232,7 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsTableItem.setOnAction(event -> {
 			try {
 				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
-				expressionTableView.visualizeExpression(((ASTFormula) row.getItem().getContents()).getFormula().getCode());
+				expressionTableView.visualizeExpression(getResultValue((ASTFormula) row.getItem().getContents(), this.currentTrace.getCurrentState()));
 				expressionTableView.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -228,7 +260,7 @@ public final class StatesView extends StackPane {
 		showErrorsItem.setOnAction(event -> this.showError(row.getItem()));
 
 		row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null)
-				.otherwise(new ContextMenu(visualizeExpressionAsGraphItem, visualizeExpressionAsTableItem, showFullValueItem, showErrorsItem)));
+				.otherwise(new ContextMenu(copyItem, visualizeExpressionAsGraphItem, visualizeExpressionAsTableItem, showFullValueItem, showErrorsItem)));
 
 		// Double-click on an item triggers "show full value" if allowed.
 		row.setOnMouseClicked(event -> {

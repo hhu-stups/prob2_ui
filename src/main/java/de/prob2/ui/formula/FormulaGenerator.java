@@ -6,17 +6,22 @@ import de.prob.animator.command.ExpandFormulaCommand;
 import de.prob.animator.command.InsertFormulaForVisualizationCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.ExpandedFormula;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 @Singleton
 public final class FormulaGenerator {
 	
 	private final CurrentTrace currentTrace;
+	
+	private final FontSize fontSize;
 
 	@Inject
-	private FormulaGenerator(final CurrentTrace currentTrace) {
+	private FormulaGenerator(final CurrentTrace currentTrace, final FontSize fontSize) {
 		this.currentTrace = currentTrace;
+		this.fontSize = fontSize;
 	}
 
 	private ExpandedFormula expandFormula(final IEvalElement formula) {
@@ -34,10 +39,10 @@ public final class FormulaGenerator {
 	}
 
 	public FormulaView showFormula(final IEvalElement formula) {
-		return new FormulaView(new FormulaGraph(new FormulaNode(expandFormula(formula))));
+		return new FormulaView(new FormulaGraph(new FormulaNode(expandFormula(formula), fontSize), fontSize));
 	}
 
 	public FormulaView parseAndShowFormula(final String formula) {
-		return showFormula(currentTrace.getModel().parseFormula(formula));
+		return showFormula(currentTrace.getModel().parseFormula(formula, FormulaExpand.EXPAND));
 	}
 }

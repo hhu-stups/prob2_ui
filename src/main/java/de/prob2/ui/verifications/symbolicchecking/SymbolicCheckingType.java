@@ -4,13 +4,13 @@ import de.prob.animator.command.SymbolicModelcheckCommand;
 
 public enum SymbolicCheckingType {
 	
-	SEQUENCE("", null),
-	INVARIANT("", null),
-	DEADLOCK("", null),
-	FIND_DEADLOCK("FIND DEADLOCK", null),
-	FIND_VALID_STATE("", null), 
-	CHECK_ALL_OPERATIONS("", null), 
-	FIND_REDUNDANT_INVARIANTS("FIND REDUNDANT INVARIANTS", null), 
+	SEQUENCE("Sequence", null),
+	INVARIANT("Invariant", null),
+	DEADLOCK("Deadlock", null),
+	FIND_DEADLOCK("Find deadlock", null),
+	FIND_VALID_STATE("Find valid state", null), 
+	CHECK_ALL_OPERATIONS("Check all operations", null), 
+	FIND_REDUNDANT_INVARIANTS("Find redundant invariants", null), 
 	CHECK_REFINEMENT("Refinement Checking", null), 
 	CHECK_ASSERTIONS("Assertion Checking", null), 
 	IC3("IC3", SymbolicModelcheckCommand.Algorithm.IC3), 
@@ -23,16 +23,21 @@ public enum SymbolicCheckingType {
 	
 	private final SymbolicModelcheckCommand.Algorithm algorithm;
 	
-	private SymbolicCheckingType(final String name, final SymbolicModelcheckCommand.Algorithm algorithm) {
+	SymbolicCheckingType(final String name, final SymbolicModelcheckCommand.Algorithm algorithm) {
 		this.name = name;
 		this.algorithm = algorithm;
 	}
 	
 	public String getName() {
-		return this.name;
+		return name;
 	}
 	
 	public SymbolicModelcheckCommand.Algorithm getAlgorithm() {
 		return algorithm;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
 	}
 }

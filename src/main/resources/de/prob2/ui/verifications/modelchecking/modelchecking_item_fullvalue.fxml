@@ -9,10 +9,18 @@
 	<scene>
 		<Scene stylesheets="@/prob.css" height="400.0" width="640.0">
 			<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.131" xmlns:fx="http://javafx.com/fxml/1">
-				<Label layoutX="51.0" layoutY="70.0" text="%verifications.modelchecking.stage.fullvalue.searchStrategy"/>
-				<TextField fx:id="tfStrategy" editable="false" layoutX="168.0" layoutY="65.0"/>
-				<Label layoutX="51.0" layoutY="135.0" text="%verifications.modelchecking.stage.fullvalue.description"/>
-				<TextArea fx:id="taDescription" wrapText="true" editable="false" layoutX="51.0" layoutY="157.0" prefHeight="200.0" prefWidth="501.0"/>
+				<VBox spacing="20" AnchorPane.leftAnchor="15"
+						AnchorPane.rightAnchor="15" AnchorPane.topAnchor="20"
+						AnchorPane.bottomAnchor="20" alignment="center_right">
+					<HBox spacing="20" alignment="center_left">
+						<Label text="%verifications.modelchecking.stage.fullvalue.searchStrategy"/>
+						<TextField fx:id="tfStrategy" editable="false" HBox.hgrow="always"/>
+					</HBox>
+					<VBox spacing="10" alignment="center_left">
+						<Label text="%verifications.modelchecking.stage.fullvalue.description"/>
+						<TextArea fx:id="taDescription" wrapText="true" editable="false"/>
+					</VBox>
+				</VBox>
 			</AnchorPane>
 		</Scene>
 	</scene>

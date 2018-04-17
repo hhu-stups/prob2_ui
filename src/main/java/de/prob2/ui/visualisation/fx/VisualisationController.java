@@ -105,7 +105,11 @@ public class VisualisationController {
 			}
 		};
 
-		currentMachine.addListener((observable, oldMachine, newMachine) -> {
+		currentMachine.addListener(getMachineListener());
+	}
+
+	private ChangeListener<Machine> getMachineListener() {
+		return (observable, oldMachine, newMachine) -> {
 			Visualisation visualisation = this.visualisation.get();
 			if (visualisation != null) {
 				if (newMachine == null) {
@@ -125,7 +129,7 @@ public class VisualisationController {
 					}
 				}
 			}
-		});
+		};
 	}
 
 	public ReadOnlyObjectProperty<Machine> currentMachineProperty() {

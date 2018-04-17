@@ -16,7 +16,7 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
 	private transient Trace example;
 
 	public SymbolicCheckingFormulaItem(String name, String code, SymbolicCheckingType type) {
-		super(name, type.name(), code);
+		super(name, type.getName(), code);
 		this.type = type;
 		this.example = null;
 		this.initializeCounterExamples();
