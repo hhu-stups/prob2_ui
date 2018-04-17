@@ -55,6 +55,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -306,23 +307,25 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			}
 		});
 		
-		tvItems.setOnMouseClicked(e-> {
-			ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-			if(item != null) {
-				if(item.getStats() == null) {
-					if(e.getButton() == MouseButton.PRIMARY) {
-						checkItem(item);
-					}
-				} else {
-					showStats(item.getStats());
-					if (e.getClickCount() >= 2 && e.getButton() == MouseButton.PRIMARY &&
-							item.getChecked() == Checked.FAIL && item.getStats().getTrace() != null) {
-						currentTrace.set(item.getStats().getTrace());
-						injector.getInstance(StatsView.class).update(item.getStats().getTrace());
-					}
+		tvItems.setOnMouseClicked(e->tvItemsClicked(e));
+	}
+
+	private void tvItemsClicked(MouseEvent e) {
+		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+		if(item != null) {
+			if(item.getStats() == null) {
+				if(e.getButton() == MouseButton.PRIMARY) {
+					checkItem(item);
+				}
+			} else {
+				showStats(item.getStats());
+				if (e.getClickCount() >= 2 && e.getButton() == MouseButton.PRIMARY &&
+						item.getChecked() == Checked.FAIL && item.getStats().getTrace() != null) {
+					currentTrace.set(item.getStats().getTrace());
+					injector.getInstance(StatsView.class).update(item.getStats().getTrace());
 				}
 			}
-		});
+		}
 	}
 	
 	public void bindMachine(Machine machine) {

@@ -252,7 +252,7 @@ public class SymbolicCheckingView extends ScrollPane {
 				showCounterExamples(showCounterExampleItem);
 			}
 
-			if(item != null && item.getType() == SymbolicCheckingType.FIND_VALID_STATE) {
+			if(item.getType() == SymbolicCheckingType.FIND_VALID_STATE) {
 				if(row.emptyProperty().get() || item.getExample() == null) {
 					showStateItem.setDisable(true);
 				} else {
