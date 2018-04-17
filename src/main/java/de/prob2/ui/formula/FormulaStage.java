@@ -92,59 +92,47 @@ public class FormulaStage extends Stage {
 		showFormula(tfFormula.getText());
 	}
 	
-	public void showFormula(String formula) {
+	public void showFormula(final Object formula) {
 		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
 		Thread thread = new Thread(() -> {
 			try {
 				Platform.runLater(() -> statusBar.setText(bundle.getString("statusBar.loading")));
-				formulaView = formulaGenerator.parseAndShowFormula(formula);
-				Platform.runLater(() -> {
-					formulaPane.setContent(formulaView);
-					tfFormula.getStyleClass().remove("text-field-error");
-					statusBar.setText("");
-					currentThread.set(null);
-					currentFormula = formula;
-				});
+				if(formula instanceof IEvalElement) {
+					formulaView = formulaGenerator.showFormula((IEvalElement) formula);
+					Platform.runLater(() -> {
+						tfFormula.setText(((IEvalElement) formula).getCode());
+						updateView(((IEvalElement)formula).getCode());
+					});
+				} else {
+					formulaView = formulaGenerator.parseAndShowFormula((String) formula);
+					Platform.runLater(() -> updateView((String) formula));
+				}
 			} catch (EvaluationException | ProBError exception) {
-				logger.error("Evaluation of formula failed", exception);
-				Platform.runLater(() -> {
-					reset();
-					if(!tfFormula.getStyleClass().contains("text-field-error")) {
-						tfFormula.getStyleClass().add("text-field-error");
-					}
-				});
+				handleError(exception);
 			}
 		});
 		currentThread.set(thread);
 		thread.start();
 	}
 	
-	public void showFormula(final IEvalElement formula) {
-		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
-		Thread thread = new Thread(() -> {
-			try {
-				Platform.runLater(() -> statusBar.setText(bundle.getString("statusBar.loading")));
-				formulaView = formulaGenerator.showFormula(formula);
-				Platform.runLater(() -> {
-					tfFormula.setText(formula.getCode());
-					formulaPane.setContent(formulaView);
-					tfFormula.getStyleClass().remove("text-field-error");
-					statusBar.setText("");
-					currentThread.set(null);
-					currentFormula = formula.getCode();
-				});
-			} catch (EvaluationException | ProBError exception) {
-				logger.error("Evaluation of formula failed", exception);
-				Platform.runLater(() -> {
-					reset();
-					if(!tfFormula.getStyleClass().contains("text-field-error")) {
-						tfFormula.getStyleClass().add("text-field-error");
-					}
-				});
+	private void handleError(Exception exception) {
+		logger.error("Evaluation of formula failed", exception);
+		Platform.runLater(() -> {
+			reset();
+			if(!tfFormula.getStyleClass().contains("text-field-error")) {
+				tfFormula.getStyleClass().add("text-field-error");
 			}
 		});
-		currentThread.set(thread);
-		thread.start();
+	}
+	
+	private void updateView(String formula) {
+		Platform.runLater(() -> {
+			formulaPane.setContent(formulaView);
+			tfFormula.getStyleClass().remove("text-field-error");
+			statusBar.setText("");
+			currentThread.set(null);
+			currentFormula = formula;
+		});
 	}
 	
 	@FXML
@@ -161,26 +149,26 @@ public class FormulaStage extends Stage {
 			formulaView.getChildren().clear();
 		}
 		statusBar.setText("");
+		currentThread.set(null);
 	}
 	
 	@FXML
 	private void zoomIn() {
-		if(formulaView == null) {
-			return;
-		}
-		formulaView.zoomByFactor(1.3);
-		formulaPane.setHvalue(formulaPane.getHvalue() * 1.3);
-		formulaPane.setVvalue(formulaPane.getVvalue() * 1.3);
+		zoom(1.3);
 	}
 	
 	@FXML
 	private void zoomOut() {
+		zoom(0.8);
+	}
+	
+	private void zoom(double factor) {
 		if(formulaView == null) {
 			return;
 		}
-		formulaView.zoomByFactor(0.8);
-		formulaPane.setHvalue(formulaPane.getHvalue() * 0.8);
-		formulaPane.setVvalue(formulaPane.getVvalue() * 0.8);
+		formulaView.zoomByFactor(factor);
+		formulaPane.setHvalue(formulaPane.getHvalue() * factor);
+		formulaPane.setVvalue(formulaPane.getVvalue() * factor);
 	}
 	
 	@FXML
