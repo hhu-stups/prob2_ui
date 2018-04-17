@@ -92,12 +92,12 @@ public class PluginMenuStage extends Stage {
 
 		FilteredList<PluginWrapper> pluginFilteredList = new FilteredList<>(pluginList, p -> true);
 		pluginSearchTextField.textProperty().addListener((observable, oldValue, newValue) ->
-				pluginFilteredList.setPredicate(plugin -> {
-					if (newValue == null || newValue.isEmpty()) {
-						return true;
-					}
-					return ((ProBPlugin) plugin.getPlugin()).getName().toLowerCase().contains(newValue.toLowerCase());
-				}));
+			pluginFilteredList.setPredicate(
+				plugin -> newValue == null ||
+						newValue.isEmpty() ||
+						((ProBPlugin) plugin.getPlugin()).getName().toLowerCase().contains(newValue.toLowerCase())
+			)
+		);
 
 		pluginTableView.setItems(pluginFilteredList);
 		pluginTableView.setSelectionModel(null);
