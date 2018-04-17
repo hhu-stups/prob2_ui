@@ -8,7 +8,6 @@ import java.util.List;
 
 import de.prob2.ui.layout.FontSize;
 
-
 public class FormulaGraph extends Region {
 	
 	private FormulaNode root;
@@ -33,7 +32,7 @@ public class FormulaGraph extends Region {
 		if (level == depth(root)) {
 			return 40;
 		}
-		return Math.max(1,maxChildren(level)) * calculateHeight(level + 1) * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE;
+		return Math.min(100, Math.max(1,maxChildren(level)) * calculateHeight(level + 1)) * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE;
 	}
 	
 	private void draw(FormulaNode node, int level) {
@@ -67,9 +66,9 @@ public class FormulaGraph extends Region {
 	private double maxWidth(int level) {
 		double result = 0;
 		for (FormulaNode node: getAllNodesOnLevel(level)) {
-			result = Math.max(result, node.getNodeWidth() * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE);
+			result = Math.max(result, node.getNodeWidth());
 		}
-		return result;
+		return result * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE;
 	}
 	
 	private int maxChildren(int level) {

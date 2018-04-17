@@ -10,6 +10,8 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob2.ui.internal.DynamicCommandStatusBar;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -48,13 +50,22 @@ public class FormulaStage extends Stage {
 	private FormulaView formulaView;
 	
 	private final ObjectProperty<Thread> currentThread;
+	
+	private final CurrentProject currentProject;
+	
+	private final FontSize fontSize;
+	
+	private String currentFormula;
 
 	@Inject
-	public FormulaStage(final StageManager stageManager, final Injector injector, final ResourceBundle bundle) {
+	public FormulaStage(final StageManager stageManager, final Injector injector, final ResourceBundle bundle, 
+						final CurrentProject currentProject, final FontSize fontSize) {
 		this.injector = injector;
 		this.bundle = bundle;
-		stageManager.loadFXML(this, "formula_view.fxml");
 		this.currentThread = new SimpleObjectProperty<>(this, "currentThread", null);
+		this.currentProject = currentProject;
+		this.fontSize = fontSize;
+		stageManager.loadFXML(this, "formula_view.fxml");
 	}
 
 	@FXML
@@ -65,6 +76,15 @@ public class FormulaStage extends Stage {
 			}
 		});
 		cancelButton.disableProperty().bind(currentThread.isNull());
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			reset();
+			tfFormula.clear();
+		});
+		fontSize.fontSizeProperty().addListener((observable, from, to) -> {
+			if(currentFormula != null) {
+				showFormula(currentFormula);
+			}
+		});
 	}
 
 	@FXML
@@ -82,12 +102,16 @@ public class FormulaStage extends Stage {
 					formulaPane.setContent(formulaView);
 					tfFormula.getStyleClass().remove("text-field-error");
 					statusBar.setText("");
+					currentThread.set(null);
+					currentFormula = formula;
 				});
 			} catch (EvaluationException | ProBError exception) {
 				logger.error("Evaluation of formula failed", exception);
 				Platform.runLater(() -> {
 					reset();
-					tfFormula.getStyleClass().add("text-field-error");
+					if(!tfFormula.getStyleClass().contains("text-field-error")) {
+						tfFormula.getStyleClass().add("text-field-error");
+					}
 				});
 			}
 		});
@@ -106,12 +130,16 @@ public class FormulaStage extends Stage {
 					formulaPane.setContent(formulaView);
 					tfFormula.getStyleClass().remove("text-field-error");
 					statusBar.setText("");
+					currentThread.set(null);
+					currentFormula = formula.getCode();
 				});
 			} catch (EvaluationException | ProBError exception) {
 				logger.error("Evaluation of formula failed", exception);
 				Platform.runLater(() -> {
 					reset();
-					tfFormula.getStyleClass().add("text-field-error");
+					if(!tfFormula.getStyleClass().contains("text-field-error")) {
+						tfFormula.getStyleClass().add("text-field-error");
+					}
 				});
 			}
 		});
