@@ -19,7 +19,6 @@ import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -54,12 +53,11 @@ public class TraceLoader {
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent()) {
 				if (result.get().equals(ButtonType.YES)) {
-					Platform.runLater(() -> {
-						Machine currentMachine = currentProject.getCurrentMachine();
-						if (currentMachine.getTraceFiles().contains(path)) {
-							currentMachine.removeTraceFile(path);
-						}
-					});
+					Machine currentMachine = currentProject.getCurrentMachine();
+					if (currentMachine.getTraceFiles().contains(path)) {
+						//removing the trace here would cause ConcurrentModificationException
+						return null;
+					}
 				} else {
 					return new ReplayTrace(path, null);
 				}
