@@ -108,9 +108,8 @@ public final class StatesView extends StackPane {
 	private String filter = "";
 
 	@Inject
-	private StatesView(final Injector injector, final CurrentTrace currentTrace,
-			final StatusBar statusBar, final StageManager stageManager,
-			final ResourceBundle bundle, final StopActions stopActions) {
+	private StatesView(final Injector injector, final CurrentTrace currentTrace, final StatusBar statusBar,
+			final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.statusBar = statusBar;
@@ -177,35 +176,35 @@ public final class StatesView extends StackPane {
 				}
 			}
 		});
-		
+
 		final MenuItem copyItem = new MenuItem(bundle.getString("states.copy"));
-		
+
 		copyItem.setOnAction(e -> {
 			final Clipboard clipboard = Clipboard.getSystemClipboard();
 			final ClipboardContent content = new ClipboardContent();
-			content.putString(((ASTFormula)row.getItem().getContents()).getFormula().getCode());
+			content.putString(((ASTFormula) row.getItem().getContents()).getFormula().getCode());
 			clipboard.setContent(content);
 		});
-		
+
 		copyItem.disableProperty().bind(Bindings.createBooleanBinding(
 				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
 				.or(currentTrace.currentStateProperty().initializedProperty().not()));
-		
+
 		this.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN), () -> {
-			if(tv.getSelectionModel().getSelectedItem() == null) {
+			if (tv.getSelectionModel().getSelectedItem() == null) {
 				return;
 			}
 			Object formula = tv.getSelectionModel().getSelectedItem().getValue().getContents();
-			if(formula instanceof ASTFormula) {
+			if (formula instanceof ASTFormula) {
 				final Clipboard clipboard = Clipboard.getSystemClipboard();
 				final ClipboardContent content = new ClipboardContent();
 				content.putString(((ASTFormula) formula).getFormula().getCode());
 				clipboard.setContent(content);
 			}
 		});
-		
 
-		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(bundle.getString("states.menu.visualizeExpressionGraph"));
+		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(
+				bundle.getString("states.menu.visualizeExpressionGraph"));
 		// Expression can only be shown if the row item contains an ASTFormula
 		// and the current state is initialized.
 		visualizeExpressionAsGraphItem.disableProperty().bind(Bindings.createBooleanBinding(
@@ -214,7 +213,7 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				FormulaStage formulaStage = injector.getInstance(FormulaStage.class);
-				formulaStage.showFormula((IEvalElement)((ASTFormula) row.getItem().getContents()).getFormula());
+				formulaStage.showFormula((IEvalElement) ((ASTFormula) row.getItem().getContents()).getFormula());
 				formulaStage.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -222,8 +221,9 @@ public final class StatesView extends StackPane {
 						String.format(bundle.getString("states.error.couldNotVisualize"), e)).showAndWait();
 			}
 		});
-		
-		final MenuItem visualizeExpressionAsTableItem = new MenuItem(bundle.getString("states.menu.visualizeExpressionTable"));
+
+		final MenuItem visualizeExpressionAsTableItem = new MenuItem(
+				bundle.getString("states.menu.visualizeExpressionTable"));
 		// Expression can only be shown if the row item contains an ASTFormula
 		// and the current state is initialized.
 		visualizeExpressionAsTableItem.disableProperty().bind(Bindings.createBooleanBinding(
@@ -232,7 +232,8 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsTableItem.setOnAction(event -> {
 			try {
 				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
-				expressionTableView.visualizeExpression(getResultValue((ASTFormula) row.getItem().getContents(), this.currentTrace.getCurrentState()));
+				expressionTableView.visualizeExpression(
+						getResultValue((ASTFormula) row.getItem().getContents(), this.currentTrace.getCurrentState()));
 				expressionTableView.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -259,8 +260,10 @@ public final class StatesView extends StackPane {
 				row.itemProperty()));
 		showErrorsItem.setOnAction(event -> this.showError(row.getItem()));
 
-		row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null)
-				.otherwise(new ContextMenu(copyItem, visualizeExpressionAsGraphItem, visualizeExpressionAsTableItem, showFullValueItem, showErrorsItem)));
+		row.contextMenuProperty()
+				.bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null)
+						.otherwise(new ContextMenu(copyItem, visualizeExpressionAsGraphItem,
+								visualizeExpressionAsTableItem, showFullValueItem, showErrorsItem)));
 
 		// Double-click on an item triggers "show full value" if allowed.
 		row.setOnMouseClicked(event -> {
@@ -332,22 +335,27 @@ public final class StatesView extends StackPane {
 		this.updateRoot(currentTrace.get(), currentTrace.get(), true);
 	}
 
+	private static boolean matchesFilter(final String filter, final String string) {
+		return string.toLowerCase().contains(filter.toLowerCase());
+	}
+
 	private static List<PrologASTNode> filterNodes(final List<PrologASTNode> nodes, final String filter) {
 		if (filter.isEmpty()) {
 			return nodes;
 		}
-		
+
 		final List<PrologASTNode> filteredNodes = new ArrayList<>();
 		for (final PrologASTNode node : nodes) {
 			if (node instanceof ASTFormula) {
-				if (((ASTFormula)node).getPrettyPrint().contains(filter)) {
+				if (matchesFilter(filter, ((ASTFormula) node).getPrettyPrint())) {
 					filteredNodes.add(node);
 				}
 			} else if (node instanceof ASTCategory) {
 				final List<PrologASTNode> filteredSubnodes = filterNodes(node.getSubnodes(), filter);
 				if (!filteredSubnodes.isEmpty()) {
-					final ASTCategory category = (ASTCategory)node;
-					filteredNodes.add(new ASTCategory(filteredSubnodes, category.getName(), category.isExpanded(), category.isPropagated()));
+					final ASTCategory category = (ASTCategory) node;
+					filteredNodes.add(new ASTCategory(filteredSubnodes, category.getName(), category.isExpanded(),
+							category.isPropagated()));
 				}
 			} else {
 				throw new IllegalArgumentException("Unknown node type: " + node.getClass());
@@ -389,7 +397,7 @@ public final class StatesView extends StackPane {
 		Objects.requireNonNull(nodes);
 
 		assert treeItem.getChildren().size() == nodes.size();
-		
+
 		for (int i = 0; i < nodes.size(); i++) {
 			final TreeItem<StateItem<?>> subTreeItem = treeItem.getChildren().get(i);
 			final PrologASTNode node = nodes.get(i);
@@ -408,13 +416,15 @@ public final class StatesView extends StackPane {
 
 		// If the model has changed or the machine structure hasn't been loaded
 		// yet, update it and rebuild the tree view.
-		final boolean reloadRootNodes = this.rootNodes == null || from == null || !from.getModel().equals(to.getModel());
+		final boolean reloadRootNodes = this.rootNodes == null || from == null
+				|| !from.getModel().equals(to.getModel());
 		if (reloadRootNodes) {
 			final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
 			to.getStateSpace().execute(cmd);
 			this.rootNodes = cmd.getPrologASTList();
 		}
-		// If the root nodes were reloaded or the filter has changed, update the filtered node list.
+		// If the root nodes were reloaded or the filter has changed, update the
+		// filtered node list.
 		if (reloadRootNodes || filterChanged) {
 			this.filteredRootNodes = filterNodes(this.rootNodes, this.filter);
 			this.unsubscribeFormulas(to.getStateSpace(), this.subscribedFormulas);
