@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.tracereplay;
 
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.base.Joiner;
@@ -205,11 +206,13 @@ public class TraceChecker {
 		return currentJobThreads;
 	}
 
-	private void addTrace(Path traceFile) {
+	private boolean addTrace(Path traceFile) {
 		ReplayTrace trace = traceLoader.loadTrace(traceFile);
 		if (trace != null) {
 			replayTraces.put(traceFile, trace);
+			return true;
 		}
+		return false;
 	}
 
 	private void removeTrace(Path traceFile) {
@@ -223,7 +226,11 @@ public class TraceChecker {
 	private void updateReplayTraces(Machine machine) {
 		replayTraces.clear();
 		if (machine != null) {
-			machine.getTraceFiles().forEach(this::addTrace);
+			for(Iterator<Path> iterator = machine.getTraceFiles().iterator(); iterator.hasNext();) {
+				if(!this.addTrace(iterator.next())) {
+					iterator.remove();
+				}
+			}
 			machine.getTraceFiles().addListener((SetChangeListener<Path>) c -> {
 				if (c.wasAdded()) {
 					addTrace(c.getElementAdded());
