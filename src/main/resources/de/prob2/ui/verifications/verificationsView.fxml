@@ -12,27 +12,17 @@
 <fx:root type="VerificationsView" xmlns:fx="http://javafx.com/fxml/1">
 	<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-		<tabs>
-			<Tab fx:id="tabModelchecking" id="modelchecking" text="%verification.tabs.modelchecking.title">
-				<content>
-					<ModelcheckingView />
-				</content>
-			</Tab>
-			<Tab fx:id="tabLTL" id="ltl" text="%verification.tabs.ltl.title">
-				<content>
-					<LTLView />
-				</content>
-			</Tab>
-			<Tab fx:id="tabTraceReplay" text="%verification.tabs.tracereplay.title">
-				<content>
-					<TraceReplayView />
-				</content>
-			</Tab>
-			<Tab fx:id="tabSymbolic" id="symbolic" text="%verification.tabs.symbolic.title">
-				<content>
-					<SymbolicCheckingView />
-				</content>
-			</Tab>
-		</tabs>
+		<Tab fx:id="tabModelchecking" id="modelchecking" text="%verification.tabs.modelchecking.title">
+			<ModelcheckingView />
+		</Tab>
+		<Tab fx:id="tabLTL" id="ltl" text="%verification.tabs.ltl.title">
+			<LTLView />
+		</Tab>
+		<Tab fx:id="tabTraceReplay" text="%verification.tabs.tracereplay.title">
+			<TraceReplayView />
+		</Tab>
+		<Tab fx:id="tabSymbolic" id="symbolic" text="%verification.tabs.symbolic.title">
+			<SymbolicCheckingView />
+		</Tab>
 	</TabPane>
 </fx:root>
