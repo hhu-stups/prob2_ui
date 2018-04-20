@@ -17,17 +17,21 @@ import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
 import de.prob2.ui.layout.FontSize;
 import javafx.concurrent.Task;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 
-import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
-
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
-public class BEditor extends StyleClassedTextArea {
+public class BEditor extends CodeArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
 
     private ExecutorService executor;
@@ -73,26 +77,55 @@ public class BEditor extends StyleClassedTextArea {
         addTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class,
                 TLineComment.class);
     }
+    
+    private FontSize fontSize;
 
 
     @Inject
     private BEditor(final FontSize fontSize) {
+    	this.fontSize = fontSize;
+        initialize();
+    }
+    
+    private void initialize() {
         this.richChanges()
-                .filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
-                .successionEnds(Duration.ofMillis(50))
-                .supplyTask(this::computeHighlightingAsync)
-                .awaitLatest(this.richChanges())
-                .filterMap(t -> {
-                    if (t.isSuccess()) {
-                        return Optional.of(t.get());
-                    } else {
-                        LOGGER.info("Highlighting failed", t.getFailure());
-                        return Optional.empty();
-                    }
-                }).subscribe(this::applyHighlighting);
+	        .filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
+	        .successionEnds(Duration.ofMillis(100))
+	        .supplyTask(this::computeHighlightingAsync)
+	        .awaitLatest(this.richChanges())
+	        .filterMap(t -> {
+	            if (t.isSuccess()) {
+	                return Optional.of(t.get());
+	            } else {
+	                LOGGER.info("Highlighting failed", t.getFailure());
+	                return Optional.empty();
+	            }
+        }).subscribe(this::applyHighlighting);
+
         fontSize.fontSizeProperty().addListener((observable, from, to) -> 
-        	this.setStyle(String.format("-fx-font-size: %dpx;", fontSize.fontSizeProperty().get()))
+    		this.setStyle(String.format("-fx-font-size: %dpx;", fontSize.fontSizeProperty().get()))
         );
+        Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.Z, KeyCombination.CONTROL_DOWN), e-> {
+	        int oldLength = this.getText().length();
+	        int caret = this.getCaretPosition();
+	        this.undo();
+	        int currentLength = this.getText().length();
+	        int diff = (Math.max(oldLength, currentLength) - Math.min(oldLength, currentLength));
+	        if(caret > diff) {
+	        	this.moveTo(caret - diff);
+	        }
+        }));
+        
+        Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.Z, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_ANY), e-> {
+	        int oldLength = this.getText().length();
+	        int caret = this.getCaretPosition();
+	        this.undo();
+	        int currentLength = this.getText().length();
+	        int diff = (Math.max(oldLength, currentLength) - Math.min(oldLength, currentLength));
+	        if(caret > diff) {
+	        	this.moveTo(caret - diff);
+	        }
+        }));
     }
 
     public void startHighlighting() {
@@ -102,8 +135,10 @@ public class BEditor extends StyleClassedTextArea {
     }
 
     public void stopHighlighting() {
-        this.executor.shutdown();
-        this.executor = null;
+    	if(this.executor != null) {
+	        this.executor.shutdown();
+	        this.executor = null;   
+    	}
     }
 
     @SafeVarargs
