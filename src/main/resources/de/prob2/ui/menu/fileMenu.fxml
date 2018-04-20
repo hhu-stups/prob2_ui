@@ -19,7 +19,7 @@
 	<MenuItem text="%menu.file.items.close" accelerator="Shortcut+W"
 			  onAction="#handleClose" />
 	<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject"
-			  accelerator="Shortcut+S" onAction="#saveProject" />
+			  accelerator="Alt+Shortcut+N" onAction="#saveProject" />
 	<SeparatorMenuItem />
 	<MenuItem fx:id="viewFormattedCodeItem" text="%menu.file.items.viewFormattedCode" onAction="#handleViewFormattedCode"/>
 	<MenuItem fx:id="reloadMachineItem" text="%menu.file.items.reloadMachine"

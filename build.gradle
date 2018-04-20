@@ -33,7 +33,7 @@ final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}"]
 
 macAppBundle {
-	dmgName = "ProB-2.0-for-MacOS"
+	dmgName = project.name + "-macos"
 	icon = "prob2.icns"
 	bundleJRE = true
 	javaProperties = ["javafx.preloader": preloaderClassName]
@@ -120,22 +120,8 @@ sonarqube {
 
 task wrapper(type: Wrapper) {
 	distributionType = "ALL"
-	gradleVersion = "4.2.1"
+	gradleVersion = "4.7"
 }
-
-task fatJar(type: Jar) {
-	manifest {
-		attributes(
-			'Main-Class': mainClassName,
-			'JavaFX-Application-Class': mainClassName,
-			'JavaFX-Preloader-Class': preloaderClassName,
-		)
-	}
-	baseName = project.name + '-all'
-	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-	with jar
-}
-
 
 task createHelp(type: Exec) {
 	inputs.dir("src/main/resources/help")
