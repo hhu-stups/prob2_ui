@@ -15,7 +15,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 
@@ -29,8 +28,6 @@ public class BEditorView extends BorderPane {
 
     @FXML
     private BEditor beditor;
-    private Button handleSaveButton;
-    private Button handleSaveAsButton;
 
     private Path path;
     private ResourceBundle bundle;
