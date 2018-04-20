@@ -17,6 +17,7 @@ import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
 import de.prob2.ui.layout.FontSize;
 import javafx.concurrent.Task;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 
@@ -110,20 +111,20 @@ public class BEditor extends CodeArea {
 	        int caret = this.getCaretPosition();
 	        this.undo();
 	        int currentLength = this.getText().length();
-	        int diff = (Math.max(oldLength, currentLength) - Math.min(oldLength, currentLength));
-	        if(caret > diff) {
-	        	this.moveTo(caret - diff);
+	        int diff = currentLength - oldLength;
+	        if(caret + diff >= 0 && caret + diff <= this.getText().length()) {
+	        	this.moveTo(caret + diff);
 	        }
         }));
         
-        Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.Z, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_ANY), e-> {
+        Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.Z, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN), e-> {
 	        int oldLength = this.getText().length();
 	        int caret = this.getCaretPosition();
-	        this.undo();
+	        this.redo();
 	        int currentLength = this.getText().length();
-	        int diff = (Math.max(oldLength, currentLength) - Math.min(oldLength, currentLength));
-	        if(caret > diff) {
-	        	this.moveTo(caret - diff);
+	        int diff = currentLength - oldLength;
+	        if(caret + diff >= 0 && caret + diff <= this.getText().length()) {
+	        	this.moveTo(caret + diff);
 	        }
         }));
     }
