@@ -178,16 +178,6 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	public void handleMachineFileSave() {
-		injector.getInstance(BEditorView.class).handleSave();
-	}
-
-	@FXML
-	public void handleMachineFileSaveAs() {
-		injector.getInstance(BEditorView.class).handleSaveAs();
-	}
-
-	@FXML
 	public void handleReloadMachine() {
 		try {
 			this.currentTrace.reload(this.currentTrace.get());

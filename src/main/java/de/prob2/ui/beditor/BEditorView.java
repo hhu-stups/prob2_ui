@@ -15,6 +15,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 
@@ -28,6 +29,8 @@ public class BEditorView extends BorderPane {
 
     @FXML
     private BEditor beditor;
+    private Button handleSaveButton;
+    private Button handleSaveAsButton;
 
     private Path path;
     private ResourceBundle bundle;
@@ -58,7 +61,8 @@ public class BEditorView extends BorderPane {
         beditor.setEditable(true);
     }
 
-    public void handleSave() {
+    @FXML
+    private void handleSave() {
         //Maybe add something for the user, that reloads the machine automatically?
         if(path != null) {
             try {
@@ -69,7 +73,8 @@ public class BEditorView extends BorderPane {
         }
     }
 
-    public void handleSaveAs() {
+    @FXML
+    private void handleSaveAs() {
         if(path != null) {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle(bundle.getString("preferences.stage.tabs.general.selectLocation"));
