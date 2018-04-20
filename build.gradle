@@ -33,7 +33,7 @@ final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}"]
 
 macAppBundle {
-	dmgName = "ProB-2.0-for-MacOS"
+	dmgName = project.name + "-macos"
 	icon = "prob2.icns"
 	bundleJRE = true
 	javaProperties = ["javafx.preloader": preloaderClassName]
