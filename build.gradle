@@ -123,20 +123,6 @@ task wrapper(type: Wrapper) {
 	gradleVersion = "4.2.1"
 }
 
-task fatJar(type: Jar) {
-	manifest {
-		attributes(
-			'Main-Class': mainClassName,
-			'JavaFX-Application-Class': mainClassName,
-			'JavaFX-Preloader-Class': preloaderClassName,
-		)
-	}
-	baseName = project.name + '-all'
-	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-	with jar
-}
-
-
 task createHelp(type: Exec) {
 	inputs.dir("src/main/resources/help")
 	outputs.dir("src/main/resources/help")
