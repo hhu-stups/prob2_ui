@@ -8,12 +8,39 @@
 <?import de.prob2.ui.beditor.BEditor?>
 <?import de.prob2.ui.beditor.BEditorView?>
 
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <fx:root type="BEditorView" xmlns:fx="http://javafx.com/fxml/1">
-	<fx:define>
-		<FontSize fx:id="fontSize" />
-	</fx:define>
+    <fx:define>
+        <FontSize fx:id="fontSize" />
+    </fx:define>
+    <top>
+        <HBox spacing="10.0">
+            <VBox>
+                <Button fx:id="handleSaveButton" mnemonicParsing="false" onAction="#handleSave">
+                    <graphic>
+                        <FontAwesomeIconView styleClass="icon-dark"
+                                             glyphName="SAVE" glyphSize="${fontSize.fontSize + 4}" />
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="%beditor.menu.file.items.save" />
+                    </tooltip>
+                </Button>
+            </VBox>
+            <VBox>
+                <Button fx:id="handleSaveAsButton" mnemonicParsing="false" onAction="#handleSaveAs">
+                    <graphic>
+                        <FontAwesomeIconView styleClass="icon-dark"
+                                             glyphName="FOLDER" glyphSize="${fontSize.fontSize + 4}" />
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="%beditor.menu.file.items.saveAs" />
+                    </tooltip>
+                </Button>
+            </VBox>
+        </HBox>
+    </top>
     <center>
-        <VirtualizedScrollPane hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
+        <VirtualizedScrollPane styleClass="editor" hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
             <content>
                 <BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
             </content>
