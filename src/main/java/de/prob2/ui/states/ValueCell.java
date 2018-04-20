@@ -37,7 +37,7 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 	protected void updateItem(final StateItem<?> item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		this.getStyleClass().removeAll("false", "true", "errorresult");
+		this.getStyleClass().removeAll("false", "true", "not-initialized", "error");
 		
 		if (item == null || empty) {
 			this.setText(null);
@@ -52,7 +52,7 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 				checkResult(result);
 			} else if (contents instanceof StateError) {
 				this.setText(this.isCurrent ? ((StateError)contents).getShortDescription() : null);
-				this.getStyleClass().add("errorresult");
+				this.getStyleClass().add("error");
 			} else {
 				throw new IllegalArgumentException("Don't know how to show the value of a " + contents.getClass() + " instance");
 			}
@@ -73,16 +73,16 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 			}
 		} else if (result instanceof IdentifierNotInitialised) {
 			this.setText(bundle.getString("states.value.notInitialized"));
-			this.getStyleClass().add("errorresult");
+			this.getStyleClass().add("not-initialized");
 		} else if (result instanceof WDError) {
 			this.setText(bundle.getString("states.value.notWellDefined"));
-			this.getStyleClass().add("errorresult");
+			this.getStyleClass().add("error");
 		} else if (result instanceof EvaluationErrorResult) {
 			this.setText(String.format(bundle.getString("states.value.error"), ((EvaluationErrorResult)result).getResult()));
-			this.getStyleClass().add("errorresult");
+			this.getStyleClass().add("error");
 		} else if (result instanceof EnumerationWarning) {
 			this.setText(bundle.getString("states.value.enumerationWarning"));
-			this.getStyleClass().add("errorresult");
+			this.getStyleClass().add("error");
 		} else {
 			throw new IllegalArgumentException("Don't know how to show the value of a " + result.getClass() + " instance");
 		}

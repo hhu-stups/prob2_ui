@@ -973,7 +973,11 @@
 	-fx-background-color: palegreen;
 }
 
-.tree-table-cell.errorresult {
+.tree-table-cell.not-initialized {
+	-fx-text-fill: -prob-grey-75;
+}
+
+.tree-table-cell.error {
 	-fx-font-weight: bold;
 	-fx-text-fill: -prob-orange;
 }
