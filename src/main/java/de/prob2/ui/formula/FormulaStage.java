@@ -20,6 +20,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -35,6 +36,9 @@ public class FormulaStage extends Stage {
 	private static final String CSS_ERROR_CLASS = "text-field-error";
 
 	@FXML
+	private MenuBar menuBar;
+
+	@FXML
 	private TextField tfFormula;
 
 	@FXML
@@ -45,6 +49,8 @@ public class FormulaStage extends Stage {
 	
 	@FXML
 	private Button cancelButton;
+	
+	private final StageManager stageManager;
 	
 	private final Injector injector;
 	
@@ -63,6 +69,7 @@ public class FormulaStage extends Stage {
 	@Inject
 	public FormulaStage(final StageManager stageManager, final Injector injector, final ResourceBundle bundle, 
 						final CurrentProject currentProject, final FontSize fontSize) {
+		this.stageManager = stageManager;
 		this.injector = injector;
 		this.bundle = bundle;
 		this.currentThread = new SimpleObjectProperty<>(this, "currentThread", null);
@@ -73,6 +80,7 @@ public class FormulaStage extends Stage {
 
 	@FXML
 	public void initialize() {
+		stageManager.setMacMenuBar(this, menuBar);
 		tfFormula.setOnKeyReleased(e -> {
 			if (e.getCode() == KeyCode.ENTER) {
 				apply();
