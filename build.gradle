@@ -65,7 +65,7 @@ dependencies {
 	compile 'de.jensd:fontawesomefx-commons:8.15'
 	compile 'de.jensd:fontawesomefx-fontawesome:4.7.0-5'
 	compile 'org.codehaus.groovy:groovy-all:2.4.7'
-	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '1.0.0-SNAPSHOT', changing: true
+	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.9.0'
 	compile 'org.fxmisc.wellbehaved:wellbehavedfx:0.3.3'
 	compile 'org.hildan.fxgson:fx-gson:3.1.0'
 	compile 'se.sawano.java:alphanumeric-comparator:1.4.1'
