@@ -242,34 +242,37 @@ public final class StatesView extends StackPane {
 			}
 		});
 
-		final MenuItem showFullValueItem = new MenuItem(bundle.getString("states.menu.showFullValue"));
-		// Full value can only be shown if the row item contains an ASTFormula,
-		// and the corresponding value is an EvalResult.
-		showFullValueItem.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula && this.currentValues
-						.get(((ASTFormula) row.getItem().getContents()).getFormula()) instanceof EvalResult),
-				row.itemProperty()));
-		showFullValueItem.setOnAction(event -> this.showFullValue(row.getItem()));
+		final MenuItem showDetailsItem = new MenuItem(bundle.getString("states.menu.showDetails"));
+		// Details can only be shown if the row item contains an ASTFormula,
+		// and the corresponding value is an EvalResult or EvaluationErrorResult.
+		showDetailsItem.disableProperty().bind(Bindings.createBooleanBinding(() -> {
+			if (row.getItem() == null) {
+				return true;
+			}
+			if (row.getItem().getContents() instanceof ASTFormula) {
+				final AbstractEvalResult currentValue = this.currentValues.get(((ASTFormula)row.getItem().getContents()).getFormula());
+				return !(currentValue instanceof EvalResult || currentValue instanceof EvaluationErrorResult);
+			} else {
+				return true;
+			}
+		}, row.itemProperty()));
+		showDetailsItem.setOnAction(event -> this.showDetails(row.getItem()));
 
-		final MenuItem showErrorsItem = new MenuItem(bundle.getString("states.menu.showErrors"));
-		// Errors can only be shown if the row contains an ASTFormula whose
-		// value is an EvaluationErrorResult.
-		showErrorsItem.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula && this.currentValues
-						.get(((ASTFormula) row.getItem().getContents()).getFormula()) instanceof EvaluationErrorResult),
-				row.itemProperty()));
-		showErrorsItem.setOnAction(event -> this.showError(row.getItem()));
-
-		row.contextMenuProperty()
-				.bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null)
-						.otherwise(new ContextMenu(copyItem, visualizeExpressionAsGraphItem,
-								visualizeExpressionAsTableItem, showFullValueItem, showErrorsItem)));
+		row.contextMenuProperty().bind(Bindings.when(row.emptyProperty())
+			.then((ContextMenu) null)
+			.otherwise(new ContextMenu(
+				copyItem,
+				visualizeExpressionAsGraphItem,
+				visualizeExpressionAsTableItem,
+				showDetailsItem
+			))
+		);
 
 		// Double-click on an item triggers "show full value" if allowed.
 		row.setOnMouseClicked(event -> {
-			if (!showFullValueItem.isDisable() && event.getButton() == MouseButton.PRIMARY
+			if (!showDetailsItem.isDisable() && event.getButton() == MouseButton.PRIMARY
 					&& event.getClickCount() == 2) {
-				showFullValueItem.getOnAction().handle(null);
+				this.showDetails(row.getItem());
 			}
 		});
 		return row;
@@ -447,39 +450,27 @@ public final class StatesView extends StackPane {
 		});
 	}
 
-	private void showError(StateItem<?> stateItem) {
-		final FullValueStage stage = injector.getInstance(FullValueStage.class);
-		if (stateItem.getContents() instanceof ASTFormula) {
-			final AbstractEvalResult result = this.currentValues
-					.get(((ASTFormula) stateItem.getContents()).getFormula());
-			if (result instanceof EvaluationErrorResult) {
-				stage.setTitle(stateItem.toString());
-				stage.setCurrentValue(String.join("\n", ((EvaluationErrorResult) result).getErrors()));
-				stage.setFormattingEnabled(false);
-				stage.show();
-			} else {
-				throw new IllegalArgumentException("Row item result is not an error: " + result.getClass());
-			}
+	private static String getResultValue(final ASTFormula element, final State state) {
+		final AbstractEvalResult result = state.eval(element.getFormula(FormulaExpand.EXPAND));
+		if (result instanceof EvalResult) {
+			return ((EvalResult)result).getValue();
+		} else if (result instanceof EvaluationErrorResult) {
+			return String.join("\n", ((EvaluationErrorResult)result).getErrors());
 		} else {
-			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());
+			throw new IllegalArgumentException("Unknown eval result type: " + result.getClass());
 		}
 	}
 
-	private static String getResultValue(final ASTFormula element, final State state) {
-		final AbstractEvalResult result = state.eval(element.getFormula(FormulaExpand.EXPAND));
-		return result instanceof EvalResult ? ((EvalResult) result).getValue() : null;
-	}
-
-	private void showFullValue(StateItem<?> stateItem) {
+	private void showDetails(StateItem<?> stateItem) {
 		final FullValueStage stage = injector.getInstance(FullValueStage.class);
 		if (stateItem.getContents() instanceof ASTFormula) {
 			final ASTFormula element = (ASTFormula) stateItem.getContents();
 			stage.setTitle(element.getFormula().toString());
 			stage.setCurrentValue(getResultValue(element, this.currentTrace.getCurrentState()));
-			stage.setPreviousValue(
-					this.currentTrace.canGoBack() ? getResultValue(element, this.currentTrace.get().getPreviousState())
-							: null);
-			stage.setFormattingEnabled(true);
+			if (this.currentTrace.canGoBack()) {
+				stage.setPreviousValue(getResultValue(element, this.currentTrace.get().getPreviousState()));
+			}
+			stage.show();
 		} else {
 			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());
 		}
