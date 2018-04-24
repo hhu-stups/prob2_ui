@@ -102,7 +102,8 @@ public class MachinesTab extends Tab {
 		private void updatePreferences(final List<Preference> prefs) {
 			startAnimationMenu.getItems().clear();
 			
-			final MenuItem defItem = new MenuItem(Preference.DEFAULT.getName());
+			final MenuItem defItem = new MenuItem();
+			defItem.textProperty().bind(Preference.DEFAULT.nameProperty());
 			defItem.setOnAction(e -> {
 				currentProject.startAnimation(this.machine, Preference.DEFAULT);
 				this.machine.setLastUsed(Preference.DEFAULT);
@@ -110,7 +111,8 @@ public class MachinesTab extends Tab {
 			startAnimationMenu.getItems().add(defItem);
 			
 			for (Preference preference : prefs) {
-				final MenuItem menuItem = new MenuItem(preference.getName());
+				final MenuItem menuItem = new MenuItem();
+				menuItem.textProperty().bind(preference.nameProperty());
 				// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
 				menuItem.setMnemonicParsing(false);
 				menuItem.setOnAction(e -> {
@@ -137,7 +139,7 @@ public class MachinesTab extends Tab {
 				this.refresh();
 				this.nameLabel.textProperty().bind(Bindings.format(
 					"%s : %s",
-					Bindings.createStringBinding(() -> machine.getLastUsed().getName(), machine.lastUsedProperty()),
+					Bindings.selectString(machine.lastUsedProperty(), "name"),
 					machine.nameProperty()
 				));
 				this.runningIcon.setVisible(true);

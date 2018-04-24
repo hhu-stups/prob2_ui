@@ -5,16 +5,18 @@ import java.util.Map;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public class Preference {
 	public static final Preference DEFAULT = new Preference("default", Collections.emptyMap());
 
-	private String name;
+	private final StringProperty name;
 	private Map<String, String> preferences;
 	private transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
 	public Preference(String name, Map<String, String> preferences) {
-		this.name = name;
+		this.name = new SimpleStringProperty(this, "name", name);
 		this.preferences = preferences;
 	}
 	
@@ -22,17 +24,21 @@ public class Preference {
 		return changed;
 	}
 	
+	public StringProperty nameProperty() {
+		return this.name;
+	}
+	
 	public String getName() {
-		return name;
+		return this.nameProperty().get();
+	}
+	
+	public void setName(String name) {
+		this.nameProperty().set(name);
+		this.changed.set(true);
 	}
 	
 	public Map<String, String> getPreferences() {
 		return preferences;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-		this.changed.set(true);
 	}
 	
 	public void setPreferences(Map<String, String> preferences) {
@@ -42,7 +48,7 @@ public class Preference {
 	
 	@Override
 	public String toString() {
-		return this.name;
+		return this.getName();
 	}
 
 	public void replaceMissingWithDefaults() {
