@@ -77,6 +77,7 @@ public class FormulaStage extends Stage {
 				apply();
 			}
 		});
+		
 		cancelButton.disableProperty().bind(currentThread.isNull());
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			reset();

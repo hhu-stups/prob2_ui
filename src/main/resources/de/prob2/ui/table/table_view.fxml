@@ -15,13 +15,6 @@
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<BorderPane>
-				<top>
-					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
-						<Menu text="%menu.help">
-							<MenuItem text="%menu.help.items.about"/>
-						</Menu>
-					</MenuBar>
-				</top>
 				<center>
 					<AnchorPane>
 						<SplitPane dividerPositions="0.4" AnchorPane.topAnchor="0.0"

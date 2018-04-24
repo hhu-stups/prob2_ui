@@ -26,9 +26,6 @@
 							<MenuItem text="%menu.file.items.close" 
 								accelerator="Shortcut+W" onAction="#handleClose"/>
 						</Menu>
-						<Menu text="%menu.help">
-							<MenuItem text="%menu.help.items.about"/>
-						</Menu>
 					</MenuBar>
 				</top>
 				<center>
