@@ -27,8 +27,8 @@
 							text="%detachStage.verifications" />
 						<CheckBox fx:id="detachStats"
 							text="%detachStage.stats" />
-						<CheckBox fx:id="detachProjects"
-							text="%detachStage.projects" />
+						<CheckBox fx:id="detachProject"
+							text="%detachStage.project" />
 					</VBox>
 					<Button fx:id="apply" onAction="#apply"
 						text="%detachStage.apply">
