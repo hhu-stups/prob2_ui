@@ -12,6 +12,7 @@ import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.*;
 import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.concurrent.Task;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -76,12 +77,18 @@ public class BEditor extends CodeArea {
                 TLineComment.class);
     }
     
-    private FontSize fontSize;
+    private final FontSize fontSize;
+    
+    private final CurrentProject currentProject;
+    
+    private final ResourceBundle bundle;
 
 
     @Inject
-    private BEditor(final FontSize fontSize, final ResourceBundle bundle) {
+    private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject) {
     	this.fontSize = fontSize;
+    	this.currentProject = currentProject;
+    	this.bundle = bundle;
         initialize();
         initializeContextMenu(bundle);
     }
@@ -113,6 +120,11 @@ public class BEditor extends CodeArea {
     }
     
     private void initialize() {
+    	currentProject.addListener((observable, from, to) -> {
+    		this.clear(); 
+    		this.appendText(bundle.getString("beditor.hint"));
+    	});
+    	
         this.richChanges()
 	        .filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
 	        .successionEnds(Duration.ofMillis(100))

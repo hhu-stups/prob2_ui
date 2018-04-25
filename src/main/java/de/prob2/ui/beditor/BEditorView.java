@@ -33,7 +33,7 @@ public class BEditorView extends BorderPane {
     private ResourceBundle bundle;
 
     @Inject
-    private BEditorView(StageManager stageManager, ResourceBundle bundle, StopActions stopActions) {
+    private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions) {
         stageManager.loadFXML(this, "beditorView.fxml");
         this.bundle = bundle;
         setHint();
