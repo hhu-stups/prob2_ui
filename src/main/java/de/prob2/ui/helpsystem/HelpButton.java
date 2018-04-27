@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 public class HelpButton extends Button{
 	private final Injector injector;
 	private File helpContent;
+	private String anchor = "";
 
 	@Inject
 	private HelpButton(StageManager stageManager, Injector injector) {
@@ -48,7 +49,7 @@ public class HelpButton extends Button{
 	public void openHelp() {
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
 		if (helpContent!=null) {
-			helpSystemStage.setContent(helpContent);
+			helpSystemStage.setContent(helpContent, anchor);
 		}
 		helpSystemStage.show();
 		helpSystemStage.toFront();
@@ -66,6 +67,15 @@ public class HelpButton extends Button{
 
 	private void setHelp(Class<?> clazz, String main, Map<Class<?>, String> map) {
 		helpContent = new File(main + "ProB2UI.md.html");
-		map.entrySet().stream().filter(e -> clazz.equals(e.getKey())).forEach(e -> helpContent = new File(main + e.getValue()));
+		map.entrySet().stream().filter(e -> clazz.equals(e.getKey())).forEach(e -> {
+			String link = e.getValue();
+			String htmlFile = link;
+			if (link.contains("#")) {
+				int splitIndex = link.indexOf('#');
+				htmlFile = link.substring(0, splitIndex);
+				anchor = link.substring(splitIndex);
+			}
+			helpContent = new File(main + htmlFile);
+		});
 	}
 }
