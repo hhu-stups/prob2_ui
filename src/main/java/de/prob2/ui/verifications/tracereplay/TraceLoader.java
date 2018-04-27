@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonStreamParser;
 import com.google.inject.Inject;
 
 import de.prob.check.tracereplay.PersistentTrace;
@@ -40,8 +42,14 @@ public class TraceLoader {
 
 	public ReplayTrace loadTrace(Path path) {
 		try (final Reader reader = Files.newBufferedReader(path, PROJECT_CHARSET)) {
-			PersistentTrace pTrace = gson.fromJson(reader, PersistentTrace.class);
-			return new ReplayTrace(path, pTrace);
+			JsonStreamParser parser = new JsonStreamParser(reader);
+			JsonElement element = parser.next();
+			if (element.isJsonObject()) {
+				PersistentTrace pTrace = gson.fromJson(element, PersistentTrace.class);
+				return new ReplayTrace(path, pTrace);
+			}
+			LOGGER.warn("Failed to open project file");
+			return null;
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			LOGGER.warn("Trace file not found", exc);
 			Alert alert = stageManager.makeAlert(AlertType.ERROR,
@@ -55,7 +63,7 @@ public class TraceLoader {
 				if (result.get().equals(ButtonType.YES)) {
 					Machine currentMachine = currentProject.getCurrentMachine();
 					if (currentMachine.getTraceFiles().contains(path)) {
-						//removing the trace here would cause ConcurrentModificationException
+						// removing the trace here would cause ConcurrentModificationException
 						return null;
 					}
 				} else {

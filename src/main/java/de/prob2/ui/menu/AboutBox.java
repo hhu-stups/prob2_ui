@@ -26,38 +26,44 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public final class AboutBox extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AboutBox.class);
-	
+
 	private final Api api;
 	private final ResourceBundle bundle;
 	private final Properties buildInfo;
 	private String kernelVersion;
 	private String kernelCommit;
-	
-	@FXML private Label uiInfoLabel;
-	@FXML private Label kernelInfoLabel;
-	@FXML private Label cliInfoLabel;
-	@FXML private Label javaInfoLabel;
-	
+	private String cliVersion;
+
+	@FXML
+	private Label uiInfoLabel;
+	@FXML
+	private Label kernelInfoLabel;
+	@FXML
+	private Label cliInfoLabel;
+	@FXML
+	private Label javaInfoLabel;
+
 	@Inject
 	private AboutBox(final StageManager stageManager, final Api api, final ResourceBundle bundle) {
 		super();
-		
+
 		this.api = api;
 		this.bundle = bundle;
-		
+
 		this.buildInfo = new Properties();
-		try (final InputStreamReader reader = new InputStreamReader(this.getClass().getResourceAsStream("/de/prob2/ui/build.properties"), Charset.forName("UTF-8"))) {
+		try (final InputStreamReader reader = new InputStreamReader(
+				this.getClass().getResourceAsStream("/de/prob2/ui/build.properties"), Charset.forName("UTF-8"))) {
 			this.buildInfo.load(reader);
 		} catch (IOException e) {
 			LOGGER.error("Failed to load build info", e);
 		}
-		
+
 		this.kernelVersion = Main.getVersion();
 		this.kernelCommit = Main.getGitSha();
-		
+
 		stageManager.loadFXML(this, "about_box.fxml");
 	}
-	
+
 	@FXML
 	private void initialize() {
 		this.uiInfoLabel.setText(String.format(
@@ -76,15 +82,15 @@ public final class AboutBox extends Stage {
 		this.cliInfoLabel.setText(String.format(this.bundle.getString("about.cliInfoLoading")));
 		new Thread(() -> {
 			final CliVersionNumber cliVersion = this.api.getVersion();
+			this.cliVersion = 	cliVersion.major + "." + 
+								cliVersion.minor + "." +
+								cliVersion.service + "-" +
+								cliVersion.qualifier;
 			Platform.runLater(() -> {
 				this.cliInfoLabel.setText(String.format(
-					this.bundle.getString("about.cliInfo"),
-					cliVersion.major,
-					cliVersion.minor,
-					cliVersion.service,
-					cliVersion.qualifier,
-					cliVersion.revision
-				));
+						this.bundle.getString("about.cliInfo"),
+						this.cliVersion,					
+						cliVersion.revision));
 				this.sizeToScene();
 			});
 		}, "ProB CLI Version Getter").start();
@@ -97,5 +103,13 @@ public final class AboutBox extends Stage {
 			System.getProperty("java.vm.version"),
 			System.getProperty("java.vm.vendor")
 		));
+	}
+	
+	public String getKernelVersion() {
+		return kernelVersion;
+	}
+	
+	public String getCliVersion() {
+		return cliVersion;
 	}
 }
