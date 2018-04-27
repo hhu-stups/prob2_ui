@@ -12,9 +12,7 @@
 		AnchorPane.topAnchor="0.0">
 		<VBox spacing="10" alignment="CENTER">
 			<ImageView>
-				<image>
-					<Image url="prob_logo.gif" />
-				</image>
+				<Image url="prob_logo.gif" />
 			</ImageView>
 			<Label fx:id="placeholderLabel" text="%common.noModelLoaded"
 				alignment="CENTER" />

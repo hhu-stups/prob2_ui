@@ -4,7 +4,6 @@
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.layout.StackPane?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 

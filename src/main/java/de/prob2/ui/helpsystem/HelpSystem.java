@@ -69,7 +69,6 @@ public class HelpSystem extends StackPane {
 		}
 		File helpSubdirectory = getHelpDirectory();
 
-
 		treeView.setRoot(createNode(helpSubdirectory));
 		treeView.setShowRoot(false);
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {

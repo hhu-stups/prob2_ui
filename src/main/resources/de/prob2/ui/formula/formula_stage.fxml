@@ -32,47 +32,43 @@
 				</top>
 				<center>
 					<AnchorPane>
-						<children>
-							<VBox alignment="TOP_CENTER" prefWidth="Infinity" prefHeight="Infinity" spacing="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="20.0"
-									AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0">
-								<HBox>
-									<VBox spacing="15" HBox.hgrow="ALWAYS" alignment="CENTER">
-										<HBox spacing="10" alignment="CENTER">
-											<Label alignment="CENTER" text="%formula.input.enterFormula" />
-											<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
-											<Button fx:id="btApply" text="Apply" onAction="#apply" styleClass="button-blue"/>
-										</HBox>
-									</VBox>
-									<Button fx:id="zoomInButton" disable="false"
-										contentDisplay="GRAPHIC_ONLY" onAction="#zoomIn">
-										<graphic>
-											<FontAwesomeIconView styleClass="icon-dark"
-												glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
-										</graphic>
-									</Button>
-									<Button fx:id="zoomOutButton" disable="false"
-										contentDisplay="GRAPHIC_ONLY" onAction="#zoomOut">
-										<graphic>
-											<FontAwesomeIconView styleClass="icon-dark"
-												glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
-										</graphic>
-									</Button>
-									<Button fx:id="cancelButton" onAction="#cancel">
-										<graphic>
-											<FontAwesomeIconView styleClass="icon-dark"
-												glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
-										</graphic>
-									</Button>
-								</HBox>
-								<HBox VBox.vgrow="ALWAYS">
-									<StackPane fx:id="stackPane" HBox.hgrow="ALWAYS">
-										<children>
-											<ScrollPane fx:id="formulaPane"/>
-										</children>
-									</StackPane>
-								</HBox>
-							</VBox>
-						</children>
+						<VBox alignment="TOP_CENTER" prefWidth="Infinity" prefHeight="Infinity" spacing="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="20.0"
+								AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0">
+							<HBox>
+								<VBox spacing="15" HBox.hgrow="ALWAYS" alignment="CENTER">
+									<HBox spacing="10" alignment="CENTER">
+										<Label alignment="CENTER" text="%formula.input.enterFormula" />
+										<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
+										<Button fx:id="btApply" text="Apply" onAction="#apply" styleClass="button-blue"/>
+									</HBox>
+								</VBox>
+								<Button fx:id="zoomInButton" disable="false"
+									contentDisplay="GRAPHIC_ONLY" onAction="#zoomIn">
+									<graphic>
+										<FontAwesomeIconView styleClass="icon-dark"
+											glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
+									</graphic>
+								</Button>
+								<Button fx:id="zoomOutButton" disable="false"
+									contentDisplay="GRAPHIC_ONLY" onAction="#zoomOut">
+									<graphic>
+										<FontAwesomeIconView styleClass="icon-dark"
+											glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
+									</graphic>
+								</Button>
+								<Button fx:id="cancelButton" onAction="#cancel">
+									<graphic>
+										<FontAwesomeIconView styleClass="icon-dark"
+											glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+								</Button>
+							</HBox>
+							<HBox VBox.vgrow="ALWAYS">
+								<StackPane fx:id="stackPane" HBox.hgrow="ALWAYS">
+									<ScrollPane fx:id="formulaPane"/>
+								</StackPane>
+							</HBox>
+						</VBox>
 					</AnchorPane>
 				</center>
 				<bottom>

@@ -1,8 +1,8 @@
 de.prob2.ui.history.HistoryView,Verlauf.md.html
 de.prob2.ui.operations.OperationsView,ProB2UI.md.html
-de.prob2.ui.project.ProjectTab,Projekt.md.html
-de.prob2.ui.project.machines.MachinesTab,Projekt.md.html
-de.prob2.ui.project.preferences.PreferencesTab,Projekt.md.html
+de.prob2.ui.project.ProjectTab,Projekt.md.html#Project
+de.prob2.ui.project.machines.MachinesTab,Projekt.md.html#Machines
+de.prob2.ui.project.preferences.PreferencesTab,Projekt.md.html#Preferences
 de.prob2.ui.stats.StatsView,Statistik.md.html
 de.prob2.ui.verifications.ltl.LTLView,Überprüfungen.md.html
 de.prob2.ui.verifications.modelchecking.ModelcheckingView,Überprüfungen.md.html
