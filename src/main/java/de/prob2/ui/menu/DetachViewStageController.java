@@ -47,7 +47,7 @@ public final class DetachViewStageController extends Stage {
 	@FXML private CheckBox detachHistory;
 	@FXML private CheckBox detachVerifications;
 	@FXML private CheckBox detachStats;
-	@FXML private CheckBox detachProjects;
+	@FXML private CheckBox detachProject;
 	
 	private final Injector injector;
 	private final StageManager stageManager;
@@ -75,7 +75,7 @@ public final class DetachViewStageController extends Stage {
 		checkBoxMap.put(HistoryView.class, detachHistory);
 		checkBoxMap.put(VerificationsView.class, detachVerifications);
 		checkBoxMap.put(StatsView.class, detachStats);
-		checkBoxMap.put(ProjectView.class, detachProjects);
+		checkBoxMap.put(ProjectView.class, detachProject);
 	}
 	
 	public void selectForDetach(final String name) {
