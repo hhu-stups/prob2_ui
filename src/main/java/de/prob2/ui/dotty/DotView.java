@@ -123,6 +123,7 @@ public class DotView extends DynamicCommandStage {
 				Platform.runLater(() -> {
 					stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
 					dotView.getEngine().loadContent("");
+					statusBar.setText("");
 				});
 			}
 		}, "Graph Visualizer");
