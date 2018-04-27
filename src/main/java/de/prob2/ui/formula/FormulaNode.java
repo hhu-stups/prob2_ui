@@ -29,8 +29,8 @@ public class FormulaNode extends Region {
 		if (data.getValue() instanceof String) {
 			text.setText(text.getText() + " = " + data.getValue());
 		}
-		width = text.getLayoutBounds().getWidth();
-		height = text.getLayoutBounds().getHeight();
+		width = text.getBoundsInLocal().getWidth();
+		height = text.getBoundsInLocal().getHeight();
 		rectangle = new Rectangle(width * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE, height * 2 * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE);
 		color = calculateColor(data);
 		if (data.getChildren() == null || data.getChildren().isEmpty()) {

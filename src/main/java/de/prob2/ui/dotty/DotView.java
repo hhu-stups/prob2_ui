@@ -148,6 +148,11 @@ public class DotView extends DynamicCommandStage {
 			statusBar.setText("");
 		});
 	}
+	
+	@FXML
+	private void defaultSize() {
+		dotView.setZoom(1);
+	}
 
 	@FXML
 	private void zoomIn() {

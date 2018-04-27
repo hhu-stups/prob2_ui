@@ -108,8 +108,8 @@ public class ExpressionTableView extends DynamicCommandStage {
 				Platform.runLater(() -> {
 					reset();
 					currentTable.set(cmd.getTable());
+					statusBar.setText("");
 				});
-				Platform.runLater(() -> statusBar.setText(""));
 				currentThread.set(null);
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Table visualization failed", e);

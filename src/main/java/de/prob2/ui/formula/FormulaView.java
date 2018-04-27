@@ -40,5 +40,9 @@ public class FormulaView extends Group {
 		graph.getTransforms().add(new Scale(factor, factor));
 		dragFactor *= factor;
 	}
+	
+	public void defaultSize() {
+		graph.getTransforms().clear();
+	}
 		
 }

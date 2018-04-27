@@ -174,6 +174,14 @@ public class FormulaStage extends Stage {
 		zoom(0.8);
 	}
 	
+	@FXML
+	private void defaultSize() {
+		if(formulaView == null) {
+			return;
+		}
+		formulaView.defaultSize();
+	}
+	
 	private void zoom(double factor) {
 		if(formulaView == null) {
 			return;

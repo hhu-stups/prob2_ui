@@ -19,6 +19,8 @@
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
 						<Menu text="%menu.view">
+							<MenuItem text="%menu.view.items.zoomDefault"
+								accelerator="Shortcut+'0'" onAction="#defaultSize" />
 							<MenuItem text="%menu.view.items.zoomIn"
 								accelerator="Shortcut + '+'" onAction="#zoomIn" />
 							<MenuItem text="%menu.view.items.zoomOut"
