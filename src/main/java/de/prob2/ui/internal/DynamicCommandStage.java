@@ -101,6 +101,7 @@ public class DynamicCommandStage extends Stage {
 				currentItem = to;
 			}
 		});
+		lvChoice.disableProperty().bind(currentThread.isNotNull());
 		
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> refresh());
 		currentTrace.addListener((observable, from, to) -> refresh());

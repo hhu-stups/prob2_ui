@@ -30,9 +30,9 @@ public class FormulaGraph extends Region {
 	
 	private double calculateHeight(int level) {
 		if (level == depth(root)) {
-			return 40;
+			return 40 * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE;
 		}
-		return Math.min(100, Math.max(1,maxChildren(level)) * calculateHeight(level + 1)) * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE;
+		return Math.max(1,maxChildren(level)) * calculateHeight(level + 1);
 	}
 	
 	private void draw(FormulaNode node, int level) {
@@ -68,7 +68,8 @@ public class FormulaGraph extends Region {
 		for (FormulaNode node: getAllNodesOnLevel(level)) {
 			result = Math.max(result, node.getNodeWidth());
 		}
-		return result * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE;
+		
+		return result;
 	}
 	
 	private int maxChildren(int level) {

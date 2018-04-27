@@ -31,7 +31,7 @@ public class FormulaNode extends Region {
 		}
 		width = text.getLayoutBounds().getWidth();
 		height = text.getLayoutBounds().getHeight();
-		rectangle = new Rectangle(width * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE, height * 2 * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE);
+		rectangle = new Rectangle(width * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE, height * 2 * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE);
 		color = calculateColor(data);
 		if (data.getChildren() == null || data.getChildren().isEmpty()) {
 			return;
@@ -52,10 +52,10 @@ public class FormulaNode extends Region {
 	
 	
 	public void setPosition(double x, double y) {
-		text.setX(x);
-		text.setY(y + height * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE/2);
-		rectangle.setX(x);
-		rectangle.setY(y - height * fontSize.getFontSize()/FontSize.DEFAULT_FONT_SIZE);
+		text.setX(x + width * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE/2);
+		text.setY(y + height * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE/2);
+		rectangle.setX(x + width * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE/2);
+		rectangle.setY(y - height * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE);
 		draw();
 	}
 	
