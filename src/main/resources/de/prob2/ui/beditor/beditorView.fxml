@@ -5,41 +5,34 @@
 
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import de.prob2.ui.beditor.BEditor?>
-<?import de.prob2.ui.beditor.BEditorView?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-<fx:root type="BEditorView" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml/1">
     <fx:define>
         <FontSize fx:id="fontSize" />
     </fx:define>
     <top>
-        <HBox spacing="10.0">
-            <VBox>
-                <Button fx:id="handleSaveButton" mnemonicParsing="false" onAction="#handleSave">
+        <MenuBar styleClass="menu-bar">
+            <Menu text="%menu.file">
+                <MenuItem fx:id="handleSaveButton" mnemonicParsing="false"
+                          onAction="#handleSave" text="%beditor.menu.file.items.save" accelerator="Shortcut+S">
                     <graphic>
                         <FontAwesomeIconView styleClass="icon-dark"
                                              glyphName="SAVE" glyphSize="${fontSize.fontSize + 4}" />
                     </graphic>
-                    <tooltip>
-                        <Tooltip text="%beditor.menu.file.items.save" />
-                    </tooltip>
-                </Button>
-            </VBox>
-            <VBox>
-                <Button fx:id="handleSaveAsButton" mnemonicParsing="false" onAction="#handleSaveAs">
+                </MenuItem>
+                <MenuItem fx:id="handleSaveAsButton" mnemonicParsing="false"
+                          onAction="#handleSaveAs" text="%beditor.menu.file.items.saveAs">
                     <graphic>
                         <FontAwesomeIconView styleClass="icon-dark"
                                              glyphName="FOLDER" glyphSize="${fontSize.fontSize + 4}" />
                     </graphic>
-                    <tooltip>
-                        <Tooltip text="%beditor.menu.file.items.saveAs" />
-                    </tooltip>
-                </Button>
-            </VBox>
-        </HBox>
+                </MenuItem>
+            </Menu>
+        </MenuBar>
     </top>
     <center>
-        <VirtualizedScrollPane styleClass="editor" hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
+        <VirtualizedScrollPane hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
             <content>
                 <BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
             </content>

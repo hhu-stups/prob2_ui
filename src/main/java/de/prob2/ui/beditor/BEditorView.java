@@ -15,7 +15,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 
@@ -29,14 +28,12 @@ public class BEditorView extends BorderPane {
 
     @FXML
     private BEditor beditor;
-    private Button handleSaveButton;
-    private Button handleSaveAsButton;
 
     private Path path;
     private ResourceBundle bundle;
 
     @Inject
-    private BEditorView(StageManager stageManager, ResourceBundle bundle, StopActions stopActions) {
+    private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions) {
         stageManager.loadFXML(this, "beditorView.fxml");
         this.bundle = bundle;
         setHint();
@@ -79,7 +76,7 @@ public class BEditorView extends BorderPane {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle(bundle.getString("preferences.stage.tabs.general.selectLocation"));
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Classical B Files", "*.mch", "*.ref", "*.imp"));
-            File openFile = fileChooser.showOpenDialog(getScene().getWindow());
+            File openFile = fileChooser.showSaveDialog(getScene().getWindow());
             if (openFile != null) {
                 File newFile = new File(openFile.getAbsolutePath() + (openFile.getName().contains(".") ? "" : ".mch"));
                 StandardOpenOption option = StandardOpenOption.CREATE;

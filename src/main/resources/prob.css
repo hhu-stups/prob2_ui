@@ -402,8 +402,6 @@
 	-fx-font-weight: bold;
 	-fx-font-family: monospace;
 	-fx-font-size: 15;
-	-fx-border-color: -prob-grey;
-	-fx-border-width: 0.1em 0.0 0.0 0.0;
 }
 
 .editor .editor_identifier {
@@ -975,7 +973,11 @@
 	-fx-background-color: palegreen;
 }
 
-.tree-table-cell.errorresult {
+.tree-table-cell.not-initialized {
+	-fx-text-fill: -prob-grey-75;
+}
+
+.tree-table-cell.error {
 	-fx-font-weight: bold;
 	-fx-text-fill: -prob-orange;
 }

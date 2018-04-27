@@ -1,28 +1,30 @@
 package de.prob2.ui.formula;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
+
 import de.prob2.ui.internal.DynamicCommandStatusBar;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
-
-import java.util.ResourceBundle;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,9 @@ public class FormulaStage extends Stage {
 	private static final Logger logger = LoggerFactory.getLogger(FormulaStage.class);
 	
 	private static final String CSS_ERROR_CLASS = "text-field-error";
+
+	@FXML
+	private MenuBar menuBar;
 
 	@FXML
 	private TextField tfFormula;
@@ -44,6 +49,8 @@ public class FormulaStage extends Stage {
 	
 	@FXML
 	private Button cancelButton;
+	
+	private final StageManager stageManager;
 	
 	private final Injector injector;
 	
@@ -62,21 +69,24 @@ public class FormulaStage extends Stage {
 	@Inject
 	public FormulaStage(final StageManager stageManager, final Injector injector, final ResourceBundle bundle, 
 						final CurrentProject currentProject, final FontSize fontSize) {
+		this.stageManager = stageManager;
 		this.injector = injector;
 		this.bundle = bundle;
 		this.currentThread = new SimpleObjectProperty<>(this, "currentThread", null);
 		this.currentProject = currentProject;
 		this.fontSize = fontSize;
-		stageManager.loadFXML(this, "formula_view.fxml");
+		stageManager.loadFXML(this, "formula_stage.fxml");
 	}
 
 	@FXML
 	public void initialize() {
+		stageManager.setMacMenuBar(this, menuBar);
 		tfFormula.setOnKeyReleased(e -> {
 			if (e.getCode() == KeyCode.ENTER) {
 				apply();
 			}
 		});
+		
 		cancelButton.disableProperty().bind(currentThread.isNull());
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			reset();

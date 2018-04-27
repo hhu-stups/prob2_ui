@@ -33,7 +33,7 @@ final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}"]
 
 macAppBundle {
-	dmgName = "ProB-2.0-for-MacOS"
+	dmgName = project.name + "-macos"
 	icon = "prob2.icns"
 	bundleJRE = true
 	javaProperties = ["javafx.preloader": preloaderClassName]
@@ -59,14 +59,14 @@ configurations.all {
 dependencies {
 	compile 'com.google.code.gson:gson:2.8.2'
 	compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
-	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.4'
+	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.6'
 	compile group: 'de.hhu.stups', name: 'de.prob2.kernel', version: '3.2.10-SNAPSHOT', changing: true
 	compile group: 'de.hhu.stups', name: 'ltl-dsl', version: '0.1.1-SNAPSHOT', changing: true
 	compile 'de.jensd:fontawesomefx-commons:8.15'
 	compile 'de.jensd:fontawesomefx-fontawesome:4.7.0-5'
 	compile 'org.codehaus.groovy:groovy-all:2.4.7'
-	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '1.0.0-SNAPSHOT', changing: true
-	compile 'org.fxmisc.wellbehaved:wellbehavedfx:0.3'
+	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.9.0'
+	compile 'org.fxmisc.wellbehaved:wellbehavedfx:0.3.3'
 	compile 'org.hildan.fxgson:fx-gson:3.1.0'
 	compile 'se.sawano.java:alphanumeric-comparator:1.4.1'
 	compile 'org.pf4j:pf4j:2.2.0'
@@ -120,22 +120,8 @@ sonarqube {
 
 task wrapper(type: Wrapper) {
 	distributionType = "ALL"
-	gradleVersion = "4.2.1"
+	gradleVersion = "4.7"
 }
-
-task fatJar(type: Jar) {
-	manifest {
-		attributes(
-			'Main-Class': mainClassName,
-			'JavaFX-Application-Class': mainClassName,
-			'JavaFX-Preloader-Class': preloaderClassName,
-		)
-	}
-	baseName = project.name + '-all'
-	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-	with jar
-}
-
 
 task createHelp(type: Exec) {
 	inputs.dir("src/main/resources/help")
