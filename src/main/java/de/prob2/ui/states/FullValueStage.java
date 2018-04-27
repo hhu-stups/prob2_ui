@@ -226,12 +226,20 @@ public class FullValueStage extends Stage {
 			new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.text"), "*.txt"),
 			new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.all"), "*.*")
 		);
+		final String defaultExtension;
 		if (diffTab.isSelected()) {
 			chooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.diff"), "*.diff"));
-			chooser.setInitialFileName(this.getTitle() + ".diff");
+			defaultExtension = ".diff";
 		} else {
-			chooser.setInitialFileName(this.getTitle() + ".txt");
+			defaultExtension = ".txt";
 		}
+		final String defaultFileName;
+		if (this.getTitle().matches("[\\w\\s]+")) {
+			defaultFileName = this.getTitle();
+		} else {
+			defaultFileName = bundle.getString("states.fullValue.saveAs.defaultFileName");
+		}
+		chooser.setInitialFileName(defaultFileName + defaultExtension);
 		final File selected = chooser.showSaveDialog(this);
 		if (selected == null) {
 			return;
