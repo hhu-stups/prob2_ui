@@ -1,7 +1,6 @@
 package de.prob2.ui.menu;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -12,9 +11,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
-import de.prob.exception.CliError;
-import de.prob.exception.ProBError;
-import de.prob.scripting.ModelTranslationError;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesStage;
@@ -26,7 +22,6 @@ import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
-import de.prob2.ui.verifications.tracereplay.TraceChecker;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
@@ -172,14 +167,8 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	public void handleReloadMachine() {
-		try {
-			this.currentTrace.reload(this.currentTrace.get());
-			injector.getInstance(TraceChecker.class).resetStatus();
-		} catch (CliError | IOException | ModelTranslationError | ProBError e) {
-			LOGGER.error("Model reload failed", e);
-			stageManager.makeExceptionAlert(bundle.getString("menu.file.errors.couldNotReload"), e).showAndWait();
-		}
+	private void handleReloadMachine() {
+		currentProject.reloadCurrentMachine();
 	}
 
 	@FXML

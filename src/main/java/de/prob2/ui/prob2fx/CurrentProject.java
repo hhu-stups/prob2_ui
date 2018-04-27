@@ -133,6 +133,18 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		updateBEditorView();
 	}
 
+	public void reloadCurrentMachine() {
+		final Machine machine = this.getCurrentMachine();
+		final Preference pref = this.getCurrentPreference();
+		if (machine == null) {
+			throw new IllegalStateException("Cannot reload without current machine");
+		}
+		if (pref == null) {
+			throw new IllegalStateException("Cannot reload without current preference");
+		}
+		this.startAnimation(machine, pref);
+	}
+
 	private void updateBEditorView(){
 		Path path = this.getLocation().resolve(currentMachine.getValue().getPath());
 		final String text;

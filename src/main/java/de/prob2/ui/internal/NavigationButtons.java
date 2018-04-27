@@ -1,9 +1,8 @@
 package de.prob2.ui.internal;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
-import de.prob2.ui.menu.FileMenu;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
@@ -17,15 +16,15 @@ public final class NavigationButtons extends HBox {
 	@FXML private Button fastForwardButton;
 	@FXML private Button reloadButton;
 
+	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
-	private final Injector injector;
 
 	@Inject
-	private NavigationButtons(final StageManager stageManager, final CurrentTrace currentTrace, final Injector injector) {
+	private NavigationButtons(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace) {
 		super();
 
+		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.injector = injector;
 
 		stageManager.loadFXML(this, "navigation_buttons.fxml");
 	}
@@ -69,6 +68,6 @@ public final class NavigationButtons extends HBox {
 
 	@FXML
 	private void handleReloadButton() {
-		injector.getInstance(FileMenu.class).handleReloadMachine();
+		currentProject.reloadCurrentMachine();
 	}
 }
