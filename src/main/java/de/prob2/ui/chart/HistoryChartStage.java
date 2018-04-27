@@ -23,6 +23,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -38,6 +40,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -48,16 +51,20 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public final class HistoryChartStage extends Stage {
 	private static final class ClassicalBListCell extends ListCell<ClassicalB> {
+		private final StringProperty code;
+
 		private ClassicalBListCell() {
 			super();
+
+			this.code = new SimpleStringProperty(this, "code", null);
+			this.textProperty().bind(this.code);
 		}
 
 		@Override
 		protected void updateItem(final ClassicalB item, final boolean empty) {
 			super.updateItem(item, empty);
 
-			this.setText(item == null || empty ? null : item.getCode());
-			this.setGraphic(null);
+			this.code.set(item == null || empty ? null : item.getCode());
 		}
 
 		@Override
@@ -81,10 +88,31 @@ public final class HistoryChartStage extends Stage {
 				}
 				this.commitEdit(formula);
 			});
+			textField.setOnKeyPressed(event -> {
+				if (KeyCode.ESCAPE.equals(event.getCode())) {
+					this.cancelEdit();
+				}
+			});
 			textField.textProperty().addListener(observable -> textField.getStyleClass().remove("text-field-error"));
 
+			this.textProperty().unbind();
 			this.setText(null);
 			this.setGraphic(textField);
+			textField.requestFocus();
+		}
+
+		@Override
+		public void commitEdit(final ClassicalB newValue) {
+			super.commitEdit(newValue);
+			this.textProperty().bind(this.code);
+			this.setGraphic(null);
+		}
+
+		@Override
+		public void cancelEdit() {
+			super.cancelEdit();
+			this.textProperty().bind(this.code);
+			this.setGraphic(null);
 		}
 	}
 
