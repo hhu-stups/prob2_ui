@@ -156,6 +156,7 @@ public class TraceReplayView extends ScrollPane {
 					showErrorItem.disableProperty().bind(t.statusProperty().isNotEqualTo(ReplayTrace.Status.FAILED));
 					if (t.getStoredTrace() == null) {
 						row.setDisable(true);
+						traceTableView.refresh();
 					}
 				}
 			});
