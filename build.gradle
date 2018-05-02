@@ -108,7 +108,6 @@ sonarqube {
 	properties {
 		property("sonar.java.binaries", sourceSets.main.java.outputDir.path)
 		
-		property("sonar.organization", "prob2")
 		property("sonar.projectKey", "prob2-ui")
 		property("sonar.projectName", "prob2-ui")
 		

@@ -24,9 +24,7 @@ addons:
     - oracle-java8-installer
     - pandoc
   sonarcloud:
-    branches:
-    - master
-    - develop
+    organization: prob2
 
 env:
   global:
