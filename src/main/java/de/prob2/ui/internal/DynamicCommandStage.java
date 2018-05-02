@@ -92,15 +92,16 @@ public class DynamicCommandStage extends Stage {
 				lbDescription.setText(to.getDescription());
 			}
 			boolean needFormula = to.getArity() > 0;
-			if(needFormula && !currentItem.getCommand().equals(to.getCommand())) {
-				reset();
-			}
 			enterFormulaBox.setVisible(needFormula);
 			String currentFormula = taFormula.getText();
+			if(currentItem != null && !currentItem.getCommand().equals(to.getCommand())) {
+				reset();
+			}
 			if ((!needFormula || !currentFormula.isEmpty()) && (currentItem == null
 					|| !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
-				reset();
 				visualize(to);
+			}
+			if(from != null) {
 				currentItem = to;
 			}
 		});
@@ -172,7 +173,7 @@ public class DynamicCommandStage extends Stage {
 		if (currentThread.get() != null) {
 			currentThread.get().interrupt();
 			currentThread.set(null);
-		}		
+		}
 		reset();
 	}
 	
