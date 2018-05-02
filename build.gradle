@@ -129,6 +129,10 @@ task createHelp(type: Exec) {
 }
 processResources.dependsOn(createHelp)
 
+tasks.withType(JavaCompile) {
+	options.compilerArgs += ["-proc:none"]
+}
+
 allprojects {
 	final probHome = System.getenv("PROB_HOME")
 	if (probHome != null) {
