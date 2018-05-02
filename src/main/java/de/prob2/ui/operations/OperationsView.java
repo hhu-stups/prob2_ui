@@ -398,31 +398,18 @@ public final class OperationsView extends AnchorPane {
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			final boolean skip = transition.getSource().equals(transition.getDestination());
-			OperationInfo machineOperationInfo= null;
+			OperationInfo opInfo;
 			try {
-				machineOperationInfo = trace.getStateSpace().getLoadedMachine()
-						.getMachineOperationInfo(transition.getName());
-				List<String> paramNames;
-				List<String> outputNames;
-				if (machineOperationInfo != null) {
-					paramNames = machineOperationInfo.getParameterNames();
-					outputNames = machineOperationInfo.getOutputParameterNames();
-				} else {
-					paramNames = Collections.emptyList();
-					outputNames = Collections.emptyList();
-				}
-				OperationItem operationItem = new OperationItem(trace, transition.getId(), transition.getName(),
-						paramValues, transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip,
-						paramNames, outputNames, constants, variables);
-				events.add(operationItem);
+				opInfo = trace.getStateSpace().getLoadedMachine().getMachineOperationInfo(transition.getName());
 			} catch (ProBError e) {
 				// fallback solution if getMachineOperationInfo throws a ProBError
-				OperationItem operationItem = new OperationItem(trace, transition.getId(), transition.getName(),
-						paramValues, transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip,
-						Collections.emptyList(), Collections.emptyList(), constants, variables);
-				events.add(operationItem);
+				opInfo = null;
 			}
-
+			final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
+			final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
+			events.add(new OperationItem(trace, transition.getId(), transition.getName(),
+				paramValues, transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip,
+				paramNames, outputNames, constants, variables));
 		}
 		showDisabledAndWithTimeout(trace, disabled, withTimeout);
 
