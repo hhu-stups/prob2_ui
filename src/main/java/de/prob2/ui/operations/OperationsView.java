@@ -124,10 +124,24 @@ public final class OperationsView extends AnchorPane {
 
 			sb.append(getPrettyName(item.getName()));
 
-			final List<String> params = item.getParameterValues();
-			if (!params.isEmpty()) {
+			final List<String> paramValues = item.getParameterValues();
+			if (!paramValues.isEmpty()) {
 				sb.append('(');
-				sb.append(String.join(", ", params));
+				final List<String> paramNames = item.getParameterNames();
+				if (paramNames.isEmpty()) {
+					// Parameter names not available
+					sb.append(String.join(", ", paramValues));
+				} else {
+					assert paramNames.size() == paramValues.size();
+					for (int i = 0; i < paramValues.size(); i++) {
+						if (i > 0) {
+							sb.append(", ");
+						}
+						sb.append(paramNames.get(i));
+						sb.append('=');
+						sb.append(paramValues.get(i));
+					}
+				}
 				sb.append(')');
 			} else {
 				Map<String, String> stateValues = new LinkedHashMap<>();
