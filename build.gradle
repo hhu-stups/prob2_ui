@@ -35,7 +35,7 @@ applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}"]
 macAppBundle {
 	dmgName = project.name + "-macos"
 	icon = "prob2.icns"
-	bundleJRE = true
+	bundleJRE = false
 	javaProperties = ["javafx.preloader": preloaderClassName]
 }
 
