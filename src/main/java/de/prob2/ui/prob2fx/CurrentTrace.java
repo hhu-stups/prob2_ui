@@ -4,11 +4,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractModel;
-import de.prob.scripting.Api;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.State;
@@ -88,9 +86,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		}
 	}
 	
-	private final Injector injector;
 	private final AnimationSelector animationSelector;
-	private final Api api;
 	
 	private final ReadOnlyBooleanProperty exists;
 	private final BooleanProperty animatorBusy;
@@ -106,13 +102,8 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	private final ReadOnlyObjectProperty<Trace> forward;
 
 	@Inject
-	private CurrentTrace(
-		final Injector injector,
-		final AnimationSelector animationSelector,
-		final Api api
-	) {
+	private CurrentTrace(final AnimationSelector animationSelector) {
 		super();
-		this.injector = injector;
 		this.animationSelector = animationSelector;
 		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
 			@Override
@@ -130,7 +121,6 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 				Platform.runLater(() -> CurrentTrace.this.animatorBusy.set(busy));
 			}
 		});
-		this.api = api;
 		
 		this.exists = new ROBoolProp("exists", () -> this.get() != null);
 

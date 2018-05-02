@@ -131,32 +131,29 @@ public final class ExceptionAlert extends Alert {
 			}
 		});
 		
-		this.locationsColumn.setCellFactory(col -> {
-			final TableCell<ErrorItem, ErrorItem> cell = new TableCell<ErrorItem, ErrorItem>() {
-				@Override
-				protected void updateItem(final ErrorItem item, final boolean empty) {
-					super.updateItem(item, empty);
-					
-					if (empty || item == null) {
-						this.setGraphic(null);
-					} else {
-						final VBox vbox = new VBox();
-						for (final ErrorItem.Location location : item.getLocations()) {
-							final Button openLocationButton = new Button(null, new FontAwesomeIconView(FontAwesomeIcon.PENCIL));
-							openLocationButton.setOnAction(event -> openLocationInEditor(location));
-							final Label label = new Label(location.toString());
-							label.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
-							final HBox hbox = new HBox(openLocationButton, label);
-							HBox.setHgrow(openLocationButton, Priority.NEVER);
-							HBox.setHgrow(label, Priority.ALWAYS);
-							hbox.setAlignment(Pos.CENTER_LEFT);
-							vbox.getChildren().add(hbox);
-						}
-						this.setGraphic(vbox);
+		this.locationsColumn.setCellFactory(col -> new TableCell<ErrorItem, ErrorItem>() {
+			@Override
+			protected void updateItem(final ErrorItem item, final boolean empty) {
+				super.updateItem(item, empty);
+				
+				if (empty || item == null) {
+					this.setGraphic(null);
+				} else {
+					final VBox vbox = new VBox();
+					for (final ErrorItem.Location location : item.getLocations()) {
+						final Button openLocationButton = new Button(null, new FontAwesomeIconView(FontAwesomeIcon.PENCIL));
+						openLocationButton.setOnAction(event -> openLocationInEditor(location));
+						final Label label = new Label(location.toString());
+						label.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
+						final HBox hbox = new HBox(openLocationButton, label);
+						HBox.setHgrow(openLocationButton, Priority.NEVER);
+						HBox.setHgrow(label, Priority.ALWAYS);
+						hbox.setAlignment(Pos.CENTER_LEFT);
+						vbox.getChildren().add(hbox);
 					}
+					this.setGraphic(vbox);
 				}
-			};
-			return cell;
+			}
 		});
 		
 		try (final CharArrayWriter caw = new CharArrayWriter(); final PrintWriter pw = new PrintWriter(caw)) {

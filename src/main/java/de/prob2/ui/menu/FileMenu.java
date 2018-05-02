@@ -34,12 +34,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class FileMenu extends Menu {
-	private static final Logger LOGGER = LoggerFactory.getLogger(FileMenu.class);
-
 	@FXML
 	private MenuItem preferencesItem;
 	@FXML
