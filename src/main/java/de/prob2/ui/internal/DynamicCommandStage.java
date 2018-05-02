@@ -92,11 +92,14 @@ public class DynamicCommandStage extends Stage {
 				lbDescription.setText(to.getDescription());
 			}
 			boolean needFormula = to.getArity() > 0;
-			reset();
+			if(needFormula && !currentItem.getCommand().equals(to.getCommand())) {
+				reset();
+			}
 			enterFormulaBox.setVisible(needFormula);
 			String currentFormula = taFormula.getText();
 			if ((!needFormula || !currentFormula.isEmpty()) && (currentItem == null
 					|| !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
+				reset();
 				visualize(to);
 				currentItem = to;
 			}
