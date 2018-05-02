@@ -36,6 +36,7 @@ macAppBundle {
 	dmgName = project.name + "-macos"
 	icon = "prob2.icns"
 	bundleJRE = false
+	jreHome = null
 	javaProperties = ["javafx.preloader": preloaderClassName]
 }
 
