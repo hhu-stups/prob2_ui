@@ -12,10 +12,8 @@ import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.statespace.State;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.TraceElement;
 
 import de.prob2.ui.history.HistoryView;
@@ -331,34 +329,13 @@ public final class HistoryChartStage extends Stage {
 
 		int elementCounter = 0;
 		if (this.currentTrace.exists()) {
-			final StateSpace stateSpace = this.currentTrace.getStateSpace();
-
-			// Workaround for StateSpace.eval only taking exactly a
-			// List<IEvalElement>, and not a List<ClassicalB>
-			final List<IEvalElement> formulas = new ArrayList<>(this.formulaList.getItems());
 			final TraceElement startElement = this.startChoiceBox.getValue();
 
 			TraceElement element = this.currentTrace.get().getCurrent();
 			TraceElement prevElement = element;
 			boolean showErrors = true;
 			while (element != null && prevElement != startElement) {
-				final List<AbstractEvalResult> results = stateSpace.eval(element.getCurrentState(), formulas);
-
-				for (int i = 0; i < results.size(); i++) {
-					final AbstractEvalResult result = results.get(i);
-					if (result instanceof IdentifierNotInitialised) {
-						continue;
-					}
-					final int value;
-					try {
-						value = resultToInt(result, showErrors);
-					} catch (IllegalArgumentException e) {
-						LOGGER.debug("Not convertible to int, ignoring", e);
-						continue;
-					}
-					newDatas.get(i).add(0, new XYChart.Data<>(elementCounter, value));
-				}
-
+				tryEvalFormulas(newDatas, elementCounter, element, showErrors);
 				prevElement = element;
 				element = element.getPrevious();
 				elementCounter++;
@@ -367,22 +344,47 @@ public final class HistoryChartStage extends Stage {
 			}
 		}
 
-		double maxXBound = 1.0;
 		for (int i = 0; i < newDatas.size(); i++) {
 			final List<XYChart.Data<Number, Number>> newData = newDatas.get(i);
+			moveXValues(elementCounter, newData);
+			this.singleChart.getData().get(i).getData().setAll(newData);
+		}
+		updateMaxXBound(newDatas);
+	}
 
-			for (XYChart.Data<Number, Number> newDatum : newData) {
-				newDatum.setXValue(elementCounter - newDatum.getXValue().intValue() - 1);
+	private void tryEvalFormulas(final List<List<XYChart.Data<Number, Number>>> newDatas, final int xPos, final TraceElement element, final boolean showErrors) {
+		final List<AbstractEvalResult> results = this.currentTrace.getStateSpace().eval(element.getCurrentState(), this.formulaList.getItems());
+		for (int i = 0; i < results.size(); i++) {
+			final AbstractEvalResult result = results.get(i);
+			if (result instanceof IdentifierNotInitialised) {
+				continue;
 			}
+			final int value;
+			try {
+				value = resultToInt(result, showErrors);
+			} catch (IllegalArgumentException e) {
+				LOGGER.debug("Not convertible to int, ignoring", e);
+				continue;
+			}
+			newDatas.get(i).add(0, new XYChart.Data<>(xPos, value));
+		}
+	}
 
+	private static void moveXValues(final int offset, final List<XYChart.Data<Number, Number>> newData) {
+		for (final XYChart.Data<Number, Number> newDatum : newData) {
+			newDatum.setXValue(offset - newDatum.getXValue().intValue() - 1);
+		}
+	}
+
+	private void updateMaxXBound(final List<List<XYChart.Data<Number, Number>>> newDatas) {
+		double maxXBound = 1.0;
+		for (final List<XYChart.Data<Number, Number>> newData : newDatas) {
 			if (!newData.isEmpty()) {
 				final double lastX = newData.get(newData.size() - 1).getXValue().doubleValue();
 				if (lastX > maxXBound) {
 					maxXBound = lastX;
 				}
 			}
-
-			this.singleChart.getData().get(i).getData().setAll(newData);
 		}
 		((NumberAxis) this.singleChart.getXAxis()).setUpperBound(maxXBound);
 	}
