@@ -1,7 +1,6 @@
 package de.prob2.ui.preferences;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
@@ -12,16 +11,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ProBPreference;
-import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
-import de.prob.scripting.ModelTranslationError;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.persistence.TabPersistenceHandler;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 
 import javafx.beans.InvalidationListener;
@@ -63,7 +59,6 @@ public final class PreferencesStage extends Stage {
 	@FXML private Label applyWarning;
 	@FXML private TabPane tabPane;
 
-	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final ProBPreferences globalProBPrefs;
 	private final RecentProjects recentProjects;
@@ -75,7 +70,6 @@ public final class PreferencesStage extends Stage {
 
 	@Inject
 	private PreferencesStage(
-		final CurrentTrace currentTrace,
 		final GlobalPreferences globalPreferences,
 		final ProBPreferences globalProBPrefs,
 		final MachineLoader machineLoader,
@@ -85,7 +79,6 @@ public final class PreferencesStage extends Stage {
 		final CurrentProject currentProject,
 		final UIState uiState
 	) {
-		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.globalProBPrefs = globalProBPrefs;
 		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace(this.globalPreferences));
@@ -201,13 +194,8 @@ public final class PreferencesStage extends Stage {
 			}
 		}
 		
-		if (this.currentTrace.exists()) {
-			try {
-				this.currentTrace.reload(this.currentTrace.get(), this.globalPreferences);
-			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
-				LOGGER.error("Failed to reload machine", e);
-				this.stageManager.makeExceptionAlert("Failed to reload machine", e).show();
-			}
+		if (this.currentProject.getCurrentMachine() != null) {
+			this.currentProject.reloadCurrentMachine();
 		}
 	}
 
