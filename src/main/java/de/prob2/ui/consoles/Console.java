@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.scene.control.IndexRange;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -28,8 +27,6 @@ import org.fxmisc.wellbehaved.event.Nodes;
 public abstract class Console extends StyleClassedTextArea {
 	public static class ConfigData {
 		private List<String> instructions;
-		private String text;
-		private List<int[]> errorRanges;
 		
 		protected ConfigData() {}
 	}
@@ -42,7 +39,6 @@ public abstract class Console extends StyleClassedTextArea {
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
 	private final ConsoleSearchHandler searchHandler;
-	private final List<IndexRange> errors;
 	private final Executable interpreter;
 	private final String header;
 	private final StringProperty prompt;
@@ -51,7 +47,6 @@ public abstract class Console extends StyleClassedTextArea {
 		this.bundle = bundle;
 		this.instructions = new ArrayList<>();
 		this.searchHandler = new ConsoleSearchHandler(this, bundle);
-		this.errors = new ArrayList<>();
 		this.interpreter = interpreter;
 		this.header = header;
 		this.prompt = new SimpleStringProperty(this, "prompt", prompt);
@@ -223,7 +218,6 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public void reset() {
-		this.errors.clear();
 		this.replaceText(header + '\n' + prompt.get());
 	}
 		
@@ -254,7 +248,6 @@ public abstract class Console extends StyleClassedTextArea {
 				final int begin = this.getAbsolutePosition(getLineNumber(), 0);
 				final int end = this.getLength();
 				this.setStyle(getLineNumber(), Collections.singletonList("error"));
-				errors.add(new IndexRange(begin, end));
 			}
 		}
 		searchHandler.handleEnter();
@@ -390,13 +383,6 @@ public abstract class Console extends StyleClassedTextArea {
 	public Console.ConfigData getSettings() {
 		final Console.ConfigData configData = new Console.ConfigData();
 		configData.instructions = instructions.stream().map(ConsoleInstruction::getInstruction).collect(Collectors.toList());
-		// Do not include the last line (prompt and user input) when saving the console text.
-		// Otherwise there are problems when the text is reloaded and the prompt is not the same as the one saved in the text.
-		configData.text = getText(0, 0, this.getParagraphs().size()-1, 0);
-		configData.errorRanges = new ArrayList<>();
-		for (final IndexRange indexRange : errors) {
-			configData.errorRanges.add(new int[] {indexRange.getStart(), indexRange.getEnd()});
-		}
 		return configData;
 	}
 	
@@ -410,15 +396,6 @@ public abstract class Console extends StyleClassedTextArea {
 			instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 		}
 		posInList = instructions.size();
-		this.replaceText(settings.text + this.getPrompt());
-		this.charCounterInLine = 0;
-		this.currentPosInLine = 0;
-		this.moveTo(this.getLength()-1);
-		errors.clear();
-		for (final int[] range : settings.errorRanges) {
-			errors.add(new IndexRange(range[0], range[1]));
-			this.setStyleClass(range[0], range[1], "error");
-		}
 	}
 	
 	public int getCurrentPosInLine() {
