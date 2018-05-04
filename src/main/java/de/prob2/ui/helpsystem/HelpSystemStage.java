@@ -15,7 +15,6 @@ import de.prob2.ui.internal.StageManager;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.web.WebEngine;
 import javafx.stage.Stage;
 
 @Singleton
