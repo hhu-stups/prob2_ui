@@ -124,6 +124,7 @@ public class TraceReplayView extends ScrollPane {
 		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
 		checkButton.disableProperty().bind(Bindings.createBooleanBinding(() -> traceTableView.getItems().isEmpty(),
 				currentTrace.stateSpaceProperty().isNull()));
+		traceTableView.disableProperty().bind(currentTrace.stateSpaceProperty().isNull());
 	}
 
 	private void initTableRows() {
