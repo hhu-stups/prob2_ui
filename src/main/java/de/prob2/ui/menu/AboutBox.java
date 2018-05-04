@@ -51,8 +51,11 @@ public final class AboutBox extends Stage {
 			this.versionInfo.getKernelCommit()
 		));
 		
-		// noinspection RedundantStringFormatCall
-		this.cliInfoLabel.setText(String.format(this.bundle.getString("about.cliInfoLoading")));
+		this.cliInfoLabel.setText(String.format(
+			this.bundle.getString("about.cliInfo"),
+			this.bundle.getString("about.cliInfo.loading"),
+			this.bundle.getString("about.cliInfo.loading")
+		));
 		new Thread(() -> {
 			// The CLI version is loaded in the background, because it requires starting a CLI,
 			// which takes a few seconds.
