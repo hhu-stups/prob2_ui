@@ -27,6 +27,7 @@ import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
+import de.prob2.ui.verifications.tracereplay.TraceChecker;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -144,6 +145,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			throw new IllegalStateException("Cannot reload without current preference");
 		}
 		this.startAnimation(machine, pref);
+		injector.getInstance(TraceChecker.class).resetStatus();
 	}
 
 	private void updateBEditorView(){
