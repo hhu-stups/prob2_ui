@@ -120,7 +120,7 @@ public class BEditor extends CodeArea {
     }
     
     private void initialize() {
-    	currentProject.addListener((observable, from, to) -> {
+    	currentProject.currentMachineProperty().addListener((observable, from, to) -> {
     		this.clear(); 
     		this.appendText(bundle.getString("beditor.hint"));
     	});
