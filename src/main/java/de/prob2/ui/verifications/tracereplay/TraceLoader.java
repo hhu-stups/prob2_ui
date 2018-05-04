@@ -40,13 +40,12 @@ public class TraceLoader {
 		this.currentProject = currentProject;
 	}
 
-	public ReplayTrace loadTrace(Path path) {
+	public PersistentTrace loadTrace(Path path) {
 		try (final Reader reader = Files.newBufferedReader(path, PROJECT_CHARSET)) {
 			JsonStreamParser parser = new JsonStreamParser(reader);
 			JsonElement element = parser.next();
 			if (element.isJsonObject()) {
-				PersistentTrace pTrace = gson.fromJson(element, PersistentTrace.class);
-				return new ReplayTrace(path, pTrace);
+				return gson.fromJson(element, PersistentTrace.class);
 			}
 			LOGGER.warn("Failed to open project file");
 			return null;
@@ -67,7 +66,7 @@ public class TraceLoader {
 						return null;
 					}
 				} else {
-					return new ReplayTrace(path, null);
+					return null;
 				}
 			}
 			return null;

@@ -1,20 +1,18 @@
 package de.prob2.ui.verifications.tracereplay;
 
 import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.base.Joiner;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-
 import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.StateSpace;
@@ -22,12 +20,10 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob.translator.Translator;
 import de.prob.translator.types.BObject;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -67,7 +63,9 @@ public class TraceChecker {
 	}
 
 	public void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		if (replayTrace.getStoredTrace() == null) {
+		PersistentTrace persistentTrace = traceLoader.loadTrace(replayTrace.getLocation());
+
+		if (persistentTrace == null) {
 			return;
 		}
 
@@ -79,10 +77,10 @@ public class TraceChecker {
 			Trace trace = new Trace(stateSpace);
 			trace.setExploreStateByDefault(false);
 			ReplayTrace.Status status = ReplayTrace.Status.SUCCESSFUL;
-			final List<PersistentTransition> transitionList = replayTrace.getStoredTrace().getTransitionList();
+			final List<PersistentTransition> transitionList = persistentTrace.getTransitionList();
 			for (int i = 0; i < transitionList.size(); i++) {
 				final int finalI = i;
-				Platform.runLater(() -> replayTrace.setProgress(finalI));
+				Platform.runLater(() -> replayTrace.setProgress((double) finalI / transitionList.size()));
 				Transition trans = replayPersistentTransition(stateSpace, trace, transitionList.get(i),
 						setCurrentAnimation);
 				if (trans != null) {
@@ -206,13 +204,8 @@ public class TraceChecker {
 		return currentJobThreads;
 	}
 
-	private boolean addTrace(Path traceFile) {
-		ReplayTrace trace = traceLoader.loadTrace(traceFile);
-		if (trace != null) {
-			replayTraces.put(traceFile, trace);
-			return true;
-		}
-		return false;
+	private void addTrace(Path traceFile) {
+		replayTraces.put(traceFile, new ReplayTrace(traceFile));
 	}
 
 	private void removeTrace(Path traceFile) {
@@ -226,11 +219,7 @@ public class TraceChecker {
 	private void updateReplayTraces(Machine machine) {
 		replayTraces.clear();
 		if (machine != null) {
-			for(Iterator<Path> iterator = machine.getTraceFiles().iterator(); iterator.hasNext();) {
-				if(!this.addTrace(iterator.next())) {
-					iterator.remove();
-				}
-			}
+			machine.getTraceFiles().forEach(path -> addTrace(path));
 			machine.getTraceFiles().addListener((SetChangeListener<Path>) c -> {
 				if (c.wasAdded()) {
 					addTrace(c.getElementAdded());
