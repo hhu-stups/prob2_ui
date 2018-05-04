@@ -62,8 +62,9 @@ public class TraceReplayView extends ScrollPane {
 	private final FileChooserManager fileChooserManager;
 
 	@Inject
-	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-			final TraceChecker traceChecker, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
+			final CurrentTrace currentTrace, final TraceChecker traceChecker, final ResourceBundle bundle,
+			final FileChooserManager fileChooserManager) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -99,7 +100,6 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private void initialize() {
 		helpButton.setHelpContent(this.getClass());
-		traceTableView.disableProperty().bind(currentTrace.existsProperty().not());
 		statusColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
 
@@ -122,8 +122,8 @@ public class TraceReplayView extends ScrollPane {
 		initTableRows();
 		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
-		checkButton.disableProperty().bind(
-				Bindings.createBooleanBinding(() -> traceTableView.getItems().isEmpty(), traceTableView.getItems()).or(currentTrace.existsProperty().not()));
+		checkButton.disableProperty().bind(Bindings.createBooleanBinding(() -> traceTableView.getItems().isEmpty(),
+				currentTrace.stateSpaceProperty().isNull()));
 	}
 
 	private void initTableRows() {
