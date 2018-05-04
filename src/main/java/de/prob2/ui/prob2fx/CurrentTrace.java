@@ -1,30 +1,18 @@
 package de.prob2.ui.prob2fx;
 
-import java.io.IOException;
-import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetCurrentPreferencesCommand;
-import de.prob.exception.CliError;
-import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractModel;
-import de.prob.scripting.Api;
-import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.ltl.LTLView;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -98,9 +86,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		}
 	}
 	
-	private final Injector injector;
 	private final AnimationSelector animationSelector;
-	private final Api api;
 	
 	private final ReadOnlyBooleanProperty exists;
 	private final BooleanProperty animatorBusy;
@@ -116,13 +102,8 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	private final ReadOnlyObjectProperty<Trace> forward;
 
 	@Inject
-	private CurrentTrace(
-		final Injector injector,
-		final AnimationSelector animationSelector,
-		final Api api
-	) {
+	private CurrentTrace(final AnimationSelector animationSelector) {
 		super();
-		this.injector = injector;
 		this.animationSelector = animationSelector;
 		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
 			@Override
@@ -140,7 +121,6 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 				Platform.runLater(() -> CurrentTrace.this.animatorBusy.set(busy));
 			}
 		});
-		this.api = api;
 		
 		this.exists = new ROBoolProp("exists", () -> this.get() != null);
 
@@ -363,55 +343,5 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	 */
 	public Trace forward() {
 		return this.forwardProperty().get();
-	}
-	
-	/**
-	 * Reload the given trace's model and make the reloaded trace the current one. If the reload fails, the current trace is not changed.
-	 * 
-	 * @param trace the trace to reload
-	 * @param preferences preferences for the reloaded model
-	 * @throws CliError when thrown by the loader method
-	 * @throws IllegalStateException if there is no current trace
-	 * @throws IOException when thrown by the loader method
-	 * @throws ModelTranslationError when thrown by the loader method
-	 * @throws ProBError when thrown by the loader method
-	 */
-	public void reload(final Trace trace, final Map<String, String> preferences) throws IOException, ModelTranslationError {
-		if (!this.exists()) {
-			return;
-		}
-		
-		final CurrentProject currentProject = this.injector.getInstance(CurrentProject.class);
-		final Machine currentMachine = currentProject.getCurrentMachine();
-		assert currentMachine != null;
-		final String filename = trace.getModel().getModelFile().getAbsolutePath();
-		final Trace newTrace = new Trace(currentMachine.getType().getLoader().load(api, filename, preferences));
-		this.animationSelector.removeTrace(trace);
-		this.animationSelector.addNewAnimation(newTrace);
-		
-		currentMachine.resetStatus();
-		injector.getInstance(LTLView.class).bindMachine(currentMachine);
-		injector.getInstance(SymbolicCheckingView.class).bindMachine(currentMachine);
-		injector.getInstance(ModelcheckingView.class).bindMachine(currentMachine);
-	}
-	
-	/**
-	 * Reload the given trace's model and make the reloaded trace the current one. Preferences are maintained from the old model. If the reload fails, the current trace is not changed.
-	 *
-	 * @param trace the trace to reload
-	 * @throws CliError when thrown by the loader method
-	 * @throws IllegalStateException if there is no current trace
-	 * @throws IOException when thrown by the loader method
-	 * @throws ModelTranslationError when thrown by the loader method
-	 * @throws ProBError when thrown by the loader method
-	 */
-	public void reload(final Trace trace) throws IOException, ModelTranslationError {
-		if (!this.exists()) {
-			return;
-		}
-		
-		final GetCurrentPreferencesCommand cmd = new GetCurrentPreferencesCommand();
-		this.getStateSpace().execute(cmd);
-		this.reload(trace, cmd.getPreferences());
 	}
 }

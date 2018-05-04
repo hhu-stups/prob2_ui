@@ -12,10 +12,8 @@ import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.statespace.State;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.TraceElement;
 
 import de.prob2.ui.history.HistoryView;
@@ -23,6 +21,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -38,6 +38,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -48,16 +49,20 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public final class HistoryChartStage extends Stage {
 	private static final class ClassicalBListCell extends ListCell<ClassicalB> {
+		private final StringProperty code;
+
 		private ClassicalBListCell() {
 			super();
+
+			this.code = new SimpleStringProperty(this, "code", null);
+			this.textProperty().bind(this.code);
 		}
 
 		@Override
 		protected void updateItem(final ClassicalB item, final boolean empty) {
 			super.updateItem(item, empty);
 
-			this.setText(item == null || empty ? null : item.getCode());
-			this.setGraphic(null);
+			this.code.set(item == null || empty ? null : item.getCode());
 		}
 
 		@Override
@@ -81,10 +86,31 @@ public final class HistoryChartStage extends Stage {
 				}
 				this.commitEdit(formula);
 			});
+			textField.setOnKeyPressed(event -> {
+				if (KeyCode.ESCAPE.equals(event.getCode())) {
+					this.cancelEdit();
+				}
+			});
 			textField.textProperty().addListener(observable -> textField.getStyleClass().remove("text-field-error"));
 
+			this.textProperty().unbind();
 			this.setText(null);
 			this.setGraphic(textField);
+			textField.requestFocus();
+		}
+
+		@Override
+		public void commitEdit(final ClassicalB newValue) {
+			super.commitEdit(newValue);
+			this.textProperty().bind(this.code);
+			this.setGraphic(null);
+		}
+
+		@Override
+		public void cancelEdit() {
+			super.cancelEdit();
+			this.textProperty().bind(this.code);
+			this.setGraphic(null);
 		}
 	}
 
@@ -303,34 +329,13 @@ public final class HistoryChartStage extends Stage {
 
 		int elementCounter = 0;
 		if (this.currentTrace.exists()) {
-			final StateSpace stateSpace = this.currentTrace.getStateSpace();
-
-			// Workaround for StateSpace.eval only taking exactly a
-			// List<IEvalElement>, and not a List<ClassicalB>
-			final List<IEvalElement> formulas = new ArrayList<>(this.formulaList.getItems());
 			final TraceElement startElement = this.startChoiceBox.getValue();
 
 			TraceElement element = this.currentTrace.get().getCurrent();
 			TraceElement prevElement = element;
 			boolean showErrors = true;
 			while (element != null && prevElement != startElement) {
-				final List<AbstractEvalResult> results = stateSpace.eval(element.getCurrentState(), formulas);
-
-				for (int i = 0; i < results.size(); i++) {
-					final AbstractEvalResult result = results.get(i);
-					if (result instanceof IdentifierNotInitialised) {
-						continue;
-					}
-					final int value;
-					try {
-						value = resultToInt(result, showErrors);
-					} catch (IllegalArgumentException e) {
-						LOGGER.debug("Not convertible to int, ignoring", e);
-						continue;
-					}
-					newDatas.get(i).add(0, new XYChart.Data<>(elementCounter, value));
-				}
-
+				tryEvalFormulas(newDatas, elementCounter, element, showErrors);
 				prevElement = element;
 				element = element.getPrevious();
 				elementCounter++;
@@ -339,22 +344,47 @@ public final class HistoryChartStage extends Stage {
 			}
 		}
 
-		double maxXBound = 1.0;
 		for (int i = 0; i < newDatas.size(); i++) {
 			final List<XYChart.Data<Number, Number>> newData = newDatas.get(i);
+			moveXValues(elementCounter, newData);
+			this.singleChart.getData().get(i).getData().setAll(newData);
+		}
+		updateMaxXBound(newDatas);
+	}
 
-			for (XYChart.Data<Number, Number> newDatum : newData) {
-				newDatum.setXValue(elementCounter - newDatum.getXValue().intValue() - 1);
+	private void tryEvalFormulas(final List<List<XYChart.Data<Number, Number>>> newDatas, final int xPos, final TraceElement element, final boolean showErrors) {
+		final List<AbstractEvalResult> results = this.currentTrace.getStateSpace().eval(element.getCurrentState(), this.formulaList.getItems());
+		for (int i = 0; i < results.size(); i++) {
+			final AbstractEvalResult result = results.get(i);
+			if (result instanceof IdentifierNotInitialised) {
+				continue;
 			}
+			final int value;
+			try {
+				value = resultToInt(result, showErrors);
+			} catch (IllegalArgumentException e) {
+				LOGGER.debug("Not convertible to int, ignoring", e);
+				continue;
+			}
+			newDatas.get(i).add(0, new XYChart.Data<>(xPos, value));
+		}
+	}
 
+	private static void moveXValues(final int offset, final List<XYChart.Data<Number, Number>> newData) {
+		for (final XYChart.Data<Number, Number> newDatum : newData) {
+			newDatum.setXValue(offset - newDatum.getXValue().intValue() - 1);
+		}
+	}
+
+	private void updateMaxXBound(final List<List<XYChart.Data<Number, Number>>> newDatas) {
+		double maxXBound = 1.0;
+		for (final List<XYChart.Data<Number, Number>> newData : newDatas) {
 			if (!newData.isEmpty()) {
 				final double lastX = newData.get(newData.size() - 1).getXValue().doubleValue();
 				if (lastX > maxXBound) {
 					maxXBound = lastX;
 				}
 			}
-
-			this.singleChart.getData().get(i).getData().setAll(newData);
 		}
 		((NumberAxis) this.singleChart.getXAxis()).setUpperBound(maxXBound);
 	}

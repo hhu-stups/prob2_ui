@@ -89,7 +89,7 @@ public class VisualisationLoader {
 
 	public void closeClassloader() {
 		LOGGER.debug("Try to close visualization classloader.");
-		if (visualisationClassloader != null && visualisationClassloader instanceof Closeable) {
+		if (visualisationClassloader instanceof Closeable) {
 			try {
 				LOGGER.debug("Classloader implements closeable, so close it!");
 				((Closeable) visualisationClassloader).close();

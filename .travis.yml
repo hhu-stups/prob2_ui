@@ -24,9 +24,7 @@ addons:
     - oracle-java8-installer
     - pandoc
   sonarcloud:
-    branches:
-    - master
-    - develop
+    organization: prob2
 
 env:
   global:
@@ -60,7 +58,7 @@ before_script:
   fi
 
 script:
-- ./gradlew assemble --refresh-dependencies
+- ./gradlew assemble --refresh-dependencies --stacktrace --warning-mode=all
 # NOTE: When uncommenting this, remember to re-enable the precise and xcode8.2 environments above!
 ##- ./gradlew -Pheadless=true check
 
@@ -75,5 +73,5 @@ cache:
 
 after_success:
 - git fetch --unshallow
-- ./gradlew sonarqube --info --stacktrace
+- ./gradlew sonarqube --info --stacktrace --warning-mode=all
 - travis-custom-deploy sftp build/distributions/*.zip
