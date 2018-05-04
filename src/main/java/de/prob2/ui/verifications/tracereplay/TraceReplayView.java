@@ -62,8 +62,9 @@ public class TraceReplayView extends ScrollPane {
 	private final FileChooserManager fileChooserManager;
 
 	@Inject
-	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, 
-			final TraceChecker traceChecker, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
+			final CurrentTrace currentTrace, final TraceChecker traceChecker, final ResourceBundle bundle,
+			final FileChooserManager fileChooserManager) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -119,11 +120,10 @@ public class TraceReplayView extends ScrollPane {
 				(MapChangeListener<Path, ReplayTrace>) c -> traceTableView.getItems().setAll(c.getMap().values()));
 
 		initTableRows();
-
 		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
-		checkButton.disableProperty().bind(
-				Bindings.createBooleanBinding(() -> traceTableView.getItems().isEmpty(), currentTrace.stateSpaceProperty().isNull()));
+		checkButton.disableProperty().bind(Bindings.createBooleanBinding(() -> traceTableView.getItems().isEmpty(),
+				currentTrace.stateSpaceProperty().isNull()));
 	}
 
 	private void initTableRows() {
