@@ -280,7 +280,7 @@ public abstract class Console extends StyleClassedTextArea {
 		}
 		if (posInList == instructions.size() - 1) {
 			String lastinstruction = instructions.get(instructions.size()-1).getInstruction();
-			if (!lastinstruction.equals(this.getInput()) && posInList == instructions.size() - 1) {
+			if (!lastinstruction.equals(this.getInput())) {
 				if (instructions.get(posInList).getOption() == ConsoleInstructionOption.UP) {
 					instructions.set(instructions.size() - 1, new ConsoleInstruction(this.getInput(), ConsoleInstructionOption.UP));
 				} else {
