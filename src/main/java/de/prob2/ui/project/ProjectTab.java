@@ -2,6 +2,7 @@ package de.prob2.ui.project;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -9,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 
 @Singleton
@@ -23,7 +25,7 @@ public class ProjectTab extends Tab {
 	@FXML
 	TextArea projectDescriptionTextArea;
 	@FXML
-	private Button applyButton;
+	private AnchorPane projectDescriptionPane;
 	@FXML
 	private HelpButton helpButton;
 	@FXML
@@ -40,8 +42,6 @@ public class ProjectTab extends Tab {
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent(this.getClass());
-		applyButton.managedProperty().bind(projectDescriptionTextArea.managedProperty());
-		applyButton.visibleProperty().bind(projectDescriptionTextArea.visibleProperty());
 		projectDescriptionText.visibleProperty().bind(projectDescriptionTextArea.visibleProperty().not());
 		projectDescriptionText.managedProperty().bind(projectDescriptionTextArea.managedProperty().not());
 		projectNameLabel.visibleProperty().bind(projectNameTextField.visibleProperty().not());
@@ -85,7 +85,7 @@ public class ProjectTab extends Tab {
 
 	private void initDescription() {
 		projectDescriptionText.textProperty().bind(currentProject.descriptionProperty());
-		projectDescriptionText.setOnMouseClicked(event -> {
+		projectDescriptionPane.setOnMouseClicked(event -> {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 				editDescription();
 			}
@@ -98,10 +98,16 @@ public class ProjectTab extends Tab {
 		projectDescriptionTextArea.setText(projectDescriptionText.getText());
 		projectDescriptionTextArea.requestFocus();
 		projectDescriptionTextArea.positionCaret(projectDescriptionTextArea.getText().length());
-		applyButton.setOnMouseClicked(mouseEvent -> {
-			currentProject.changeDescription(projectDescriptionTextArea.getText());
-			projectDescriptionTextArea.setManaged(false);
-			projectDescriptionTextArea.setVisible(false);
+		projectDescriptionTextArea.setOnKeyPressed(e -> {
+			if (e.getCode().equals(KeyCode.ENTER)) {
+				if (!e.isShiftDown()) {
+					currentProject.changeDescription(projectDescriptionTextArea.getText());
+					projectDescriptionTextArea.setManaged(false);
+					projectDescriptionTextArea.setVisible(false);
+				} else {
+					projectDescriptionTextArea.insertText(projectDescriptionTextArea.getCaretPosition(), "\n");
+				}
+			}
 		});
 		projectDescriptionTextArea.focusedProperty().addListener((observable, from, to) -> {
 			if (!to) {
