@@ -17,7 +17,7 @@ import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.MapChangeListener;
@@ -57,15 +57,17 @@ public class TraceReplayView extends ScrollPane {
 
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
+	private final CurrentTrace currentTrace;
 	private final TraceChecker traceChecker;
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
 
 	@Inject
-	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
+	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 			final TraceChecker traceChecker, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
 		this.traceChecker = traceChecker;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
@@ -98,6 +100,7 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private void initialize() {
 		helpButton.setHelpContent(this.getClass());
+		traceTableView.disableProperty().bind(currentTrace.existsProperty().not());
 		statusColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
 
@@ -121,11 +124,10 @@ public class TraceReplayView extends ScrollPane {
 				(MapChangeListener<Path, ReplayTrace>) c -> traceTableView.getItems().setAll(c.getMap().values()));
 
 		initTableRows();
-
 		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
 		checkButton.disableProperty().bind(
-				Bindings.createBooleanBinding(() -> traceTableView.getItems().isEmpty(), traceTableView.getItems()));
+				Bindings.createBooleanBinding(() -> traceTableView.getItems().isEmpty(), traceTableView.getItems()).or(currentTrace.existsProperty().not()));
 	}
 
 	private void initTableRows() {
