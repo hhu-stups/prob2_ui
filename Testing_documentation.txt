@@ -1,0 +1,677 @@
+Testing stuff:
+
+1. Open recent Project
+
+Voraussetzung: ProB2-UI ist geöffnet, über File wird bei Recent project ein Projekt ausgewählt
+
+Testfälle:
+
+1.
+
+Projekt ist gültig
+
+Erwartetes Ergebnis: Projekt wird geladen
+
+Tatsächliches Ergebnis: Projekt wird geladen
+
+
+2.
+
+Projekt befindet sich nicht im angegebenen Pfad
+
+Erwartetes Ergebnis: Fehlermeldung erscheint
+
+Tatsächliches Ergebnis: Fehlermeldung erscheint
+
+
+3.
+
+Projekt Datei enthält fehlendene Informationen (Machine Name und Description fehlt)
+
+Erwartetes Ergebnis: Projekt kann trotzdem geladen werden
+
+Tatsächliches Ergebnis: Projekt kann trotzdem geladen werden, JSON Dateiname wird angepasst
+
+
+4.
+
+Format der Projekt Datei ist fehlerhaft
+
+Erwartetes Ergebnis: 
+
+Tatsächliches Ergebnis: com.google.gson.stream.MalformedJsonException
+
+
+
+
+2. View Current Machine Formatted
+
+
+
+
+
+
+
+
+
+Vorraussetzung: ProB2-UI ist geöffnet, über File wird entsprechendes Item ausgewählt
+
+Testfälle:
+
+1. Machine ist gültig
+
+Erwartetes Ergebnis: Machine wird korrekt formattiert angezeigt
+
+Tatsächliches Ergebnis: Machine wird korrekt formattiert angezeigt
+
+
+
+2. Machine ist ungültig
+
+Erwartetes Ergebnis: Zuerst wird Parsefehler geworfen, entsprechendes Item wird deaktiviert
+
+Tatsächliches Ergebnis: Zuerst wird Parsefehler geworfen, entsprechendes Item wird deaktiviert
+
+
+3. Save As..
+
+Erwartetes Ergebnis: Save Dialog wird angezeigt mit mch als Endung
+
+Tatsächliches Ergebnis: Save Dialog wird angezeigt mit txt als Endung
+
+
+
+
+
+
+
+
+
+3. Reload Current Machine
+
+
+
+
+
+Vorraussetzung: ProB2-UI ist geöffnet, über File wird entsprechendes Item ausgewählt
+
+Testfälle
+
+1. Machine ist gültig
+
+Erwartetes Ergebnis: Machine wird korrekt neu geladen
+
+Tatsächliches Ergebnis: Machine wird korrekt neu geladen
+
+
+2. Machine ist ungültig
+
+
+Erwartetes Ergebnis: Zuerst wird Parsefehler geworfen, entsprechendes Item wird deaktiviert
+
+Tatsächliches Ergebnis: Zuerst wird Parsefehler geworfen, entsprechendes Item wird deaktiviert
+
+
+
+
+
+
+4. Zoomen
+
+Voraussetzung: ProB2-UI ist geöffnet, über View werden entsprechende Items bzw. Tastenkombinationen getestet
+
+Testfälle
+
+1. Reinzoomen
+
+Erwartestes Ergebnis: Es wird reingezoomt und eine obere Grenze ist vorhanden
+
+Tatsächliches Ergebnis: Es wird reingezoomt, es ist keine obere Grenze vorhanden
+
+2. Rauszoomen
+
+Erwartetes Ergebnis: Es wird rausgezoomt und eine untere Grenze ist vorhanden
+
+Tatsächliches Ergebnis: Es wird rausgezoomt und eine untere Grenze ist vorhanden
+
+3. Default Größe
+
+Erwartetes Ergebnis: Default Größe wird gesetzt
+
+Tatsächliches Ergebnis: Default Größe wird gesetzt
+
+Bemerkung: Default Größe ist zu klein
+
+4. Enter Full Screen
+
+Erwartetes Ergebnis: Full Screen Modus wird angeschaltet, Item Name wird verändert
+
+Tatsächliches Ergebnis: Full Screen Modus wird angeschaltet Item Name wird verändert
+
+Analog für Exit Full Screen
+
+
+
+
+
+
+
+
+5. Open Help Window
+
+Vorrausetzung: ProB2-UI wird geöffnet, über Help wird entsprechendes Item ausgewählt
+
+Erwartetes Ergebnis: Hilfsfenster öffnet sich mit entsprechenden Inhalten
+
+Tatsächliches Ergebnis: Hilfsfenster öffnet sich mit entsprechenden Inhalten
+
+Auch in der .jar Version testen!
+
+
+
+
+
+
+6. About ProB2
+
+Vorraussetzung: ProB2-UI wird geöffnet, über Help wird entsprechendes Item ausgewählt
+
+Erwartetes Ergebnis: Hilfsfenster öffnet sich mit Informationen über ProB2-UI, ProB2-Kernel und ProB CLI sowie Java
+
+Tatsächliches Ergebnis: Hilfsfenster öffnet sich mit Informationen über ProB2-UI, ProB2-Kernel und ProB CLI sowie Java
+
+Auch in der .jar Version testen!
+
+
+
+
+
+
+7. Report A Bug
+
+Vorraussetzung: ProB2-UI wird geöffnet, über Help wird entsprechendes Item ausgewählt
+
+Erwartetes Ergebnis: Fenster öffnet sich, wo man sofort einen Bug melden kann
+
+Tatsächliches Ergebnis: Fenster öffnet sich wo man sofort einen Bug melden kann
+
+Auch in der .jar Version testen!
+
+
+8. Commands von der UI in den Kernel migrieren?
+
+
+9. Cancel Button in allen File Dialogs testen:
+-File/Open
+-File/New Project
+-State View/Edit/Save Machine As
+-File/View Current Machine Formatted/Save As
+-Preferences/General/Select Location
+-Project View/Open
+-Project View/New Project
+
+
+10. Graph Visualization -> Help Button?
+11. Table Visualization -> Help Button?
+12. Formula Visualization -> Help Button?
+
+
+
+
+13. Perspektive auswählen
+
+Es wird über Windows/Perspective eine Perspektive ausgewählt
+
+Testfälle:
+
+1.
+
+Es wird eine default Perspektive ausgewählt
+
+Erwartetes Ergebnis: Für alle Perspektiven wird diese korrekt geladen und dargestellt
+
+Tatsächliches Ergebnis: Für alle Perspektiven wird diese korrekt geladen und dargestellt
+
+
+2.
+
+
+Es wird eine Perspektive als FXML geladen. Die FXML ist gültig
+
+Erwartetes Ergebnis: Die Perspektive wird korrekt geladen und dargestellt
+
+Tatsächliches Ergebnis: Die Perspektive wird korrekt geladen und dargestellt
+
+
+3.
+
+Es wird eine Perspektive als FXML geladen. Hierbei ist die FXML ungültig
+
+Erwartetes Ergebnis: Fehlermeldung, ProB2-UI stürzt nicht ab
+
+Tatsächliches Ergebnis: Fehlermeldung, ProB2-UI stürzt nicht ab
+
+Bemerkung: Anleitung für das Erstellen einzelner Sichten?
+
+
+
+
+
+14. Detachen von Komponenten
+
+Es werden Kombinationen von Komponenten detacht. Hierbei wird getestet ob die einzelnen Komponenten noch funktionsfähig sind. Ebenso sollen die
+detachten Komponenten wieder geschlossen werden umzu überprüfen ob diese wieder in der Main Stage auftauchen.
+
+Erwartetes Ergebnis: Komponenten werden detacht und sind funktionsfähig. Beim Schließen tauchen diese wieder in der Main Stage auf.
+
+Tatsächliches Ergebnis: Komponenten werden detacht und sind funktionsfähig. Beim Schließen tauchen diese wieder in der Main Stage auf.
+
+Bemerkung: Beim Schließen wird die Reihenfolge im Vergleich zur ursprünglichen View vertauscht
+
+
+
+15. User erhält nicht immer Feedback wenn probcli abgestürzt ist -> UI lässt sich nicht mehr bedienen
+
+
+16. UI Persistence enthält Bugs insbesondere beim Detachen von Views und wenn fehlerhafte FXML Dateien als View gesetzt werden
+ -> NullPointerException unter Umständen wenn man versucht die View zurückzusetzen
+
+
+
+17. OperationsView
+
+Testfälle:
+
+1.
+
+Suchfunktion wird mit Lowercase und Uppercase getestet (sowohl mit Enter im Suchfeld als auch mit dem Suchbutton)
+
+Erwartetes Ergebnis: Entsprechende Einträge werden angezeigt
+
+Tatsächliches Ergebnis: Entsprechende Einträge werden angezeigt
+
+
+2.
+
+Hilfebutton 
+
+Erwartetes Ergebnis: Hilfe Fenster wird geöffnet und zum entsprechenden Eintrag weitergeleitet
+
+Tatsächliches Ergebnis: Hilfe Fenster wird geöffnet, entsprechender Eintrag für die OperationsView nicht vorhanden
+
+
+3. Initialzustand enthält keine Operationen????? Siehe Screenshot
+
+4. Sortieren -> funktioniert
+
+5. Im Trace nach vorne/zurück gehen -> funktioniert
+
+6. Disabled operations anzeigen -> funktioniert
+
+7. Execute random events + abbrechen
+-Bei einer NumberFormatException (u.a. auch wenn eine Zahl zu groß ist) wird der Nutzer nicht benachrichtigt
+-> funktioniert ansonsten
+-> allerdings interrupt problematisch? wird nicht immer ausgeführt? (abbrechen)
+
+8. Reload -> funktioniert
+
+9. Show Details? - Sollen nur die Parameter angezeigt werden oder alle Änderungen die durch Ausführen der Operation auftreten?
+
+10. Execute By Predicate -> funktioniert
+
+
+
+
+
+18. HistoryView
+
+Testfälle:
+
+1. Vor/Zurückspulen -> funktioniert
+
+2. Position im Trace auswählen -> funktionert
+
+3. Reload -> funktioniert
+
+4.
+
+Hilfebutton 
+
+Erwartetes Ergebnis: Hilfe Fenster wird geöffnet und zum entsprechenden Eintrag weitergeleitet
+
+Tatsächliches Ergebnis: Hilfe Fenster wird geöffnet, wird nicht zum entsprechenden Eintrag weitergeleitet
+
+
+5. Trace abspeichern -> funktioniert außer bei CSP
+
+
+
+19. Verifications - Trace Replay
+
+Testfälle:
+
+1. Trace Replay über rechte Maustaste -> funktioniert
+
+2. Trace Replay über Button -> prüft den Trace, spielt den aber nicht direkt nach (?)
+
+
+
+
+
+
+20. Neues Projekt erstellen
+
+Testfälle:
+
+1. Ungültige Location 
+
+Erwartetes Ergebnis: Fehlermeldung
+
+Tatsächliches Ergebnis: Fehlermeldung
+
+2. Gültige Location
+
+Erwartetes Ergebnis: Leeres Projekt wird erstellt
+
+Tatsächliches Ergebnis: Leeres Projekt wird erstellt
+
+
+
+21. Formula Visualisierung
+
+Testfälle: 
+
+1. Gültige Formel wird eingegeben und auf apply gedrückt
+
+Erwartetes Ergebnis: Formel wird als Baum in der FormulaView dargestellt
+
+Tatsächliches Ergebnis: Formel wird als Baum in der FormulaView dargestellt
+
+
+2. Ungültige Formel wird eingegeben und auf apply gedrückt
+
+Erwartetes Ergebnis: View wird zurückgesetzt, Eingabefeld wird rot umrandet
+
+Tatsächliches Ergebnis: View wird zurückgesetzt, Eingabefeld wird rot umrandet 
+
+
+
+3. Reinzoomen per Button und per Shortcut (falls Eingabefeld den Fokus hat, soll dort nichts eingegeben werden) -> funktioniert
+
+4. Rauszoomen per Button und per Shortcut (falls Eingabefeld den Fokus hat, soll dort nichts eingegeben werden) -> funktioniert
+
+5. Abbrechen der Visualisierung von Formeln -> funktioniert 
+
+6. Draging in der View -> funktioniert
+
+7. Testen komplizierterer Formeln im Bezug auf die Darstellung
+
+Erwartetes Ergebnis: Baum wird korrekt dargestellt mit Abständen zwischen den einzelnen Knoten (keine Überlappung)
+
+Tatsächliches Ergebnis: Baum wird korrekt dargestellt mit Abständen zwischen den einzelnen Knoten (keine Überlappung)
+
+
+Bemerkung: Überlappung der Schrift über dem Hintergrund bei Windows möglich
+
+
+
+
+
+
+22. Graph Visualisierung
+
+1. Ausgewählte Darstellung verfügbar
+
+Erwartetes Ergebnis: Darstellung wird angezeigt
+
+Tatsächliches Ergebnis: Darstellung wird angezeigt
+
+
+
+2. Ausgewählte Darstellung nicht verfügbar
+
+Erwartetes Ergebnis: Darstellung wird nicht angezeigt, Nutzer wird informiert, dass die Darstellung nicht verfügbar ist
+
+Tatsächliches Ergebnis: Darstellung wird nicht angezeigt, Nutzer wird informiert, dass die Darstellung nicht verfügbar ist
+
+Bemerkung: Visualisierung wird zurückgesetzt
+
+
+
+
+3. Ausgewählte Darstellung verfügbar mit Continuous Update
+
+Erwartetes Ergebnis: Darstellung wird angezeigt, beim Ausführen einer Operation wird Darstellung aktualisiert
+
+Tatsächliches Ergebnis: Darstellung wird angezeigt, beim Ausführen einer Operation wird Darstellung aktualisiert
+
+
+
+
+4. Ausgewählte Darstellung nicht verfügbar mit Continuous Update
+
+Erwartetes Ergebnis: Darstellung wird nicht angezeigt, Nutzer wird informiert, dass die Darstellung nicht verfügbar ist
+
+Tatsächliches Ergebnis: Darstellung wird nicht angezeigt, Nutzer wird informiert, dass die Darstellung nicht verfügbar ist
+
+Bemerkung: Visualisierung wird zurückgesetzt
+
+
+
+
+5. Ausgewählte Darstellung verfügbar mit Formel
+
+Erwartetes Ergebnis: Darstellung wird angezeigt, wenn im Formelfeld Enter gedrückt wurde
+
+Tatsächliches Ergebnis: Darstellung wird angezeigt, wenn im Formelfeld Enter gedrückt wurde
+
+
+Bemerkung: Bei der Auswahl einer Darstellung mit Formel wird die Darstellung zurückgesetzt
+
+
+
+6. Ausgewählte Darstellung nicht verfügbar mit Formel
+
+Erwartetes Ergebnis: Darstellung wird nicht angezeigt, Nutzer wird informiert, dass die Darstellung nicht verfügbar ist
+
+Tatsächliches Ergebnis: Darstellung wird nicht angezeigt, Nutzer wird informiert, dass die Darstellung nicht verfügbar ist
+
+Bemerkung: Visualisierung wird zurückgesetzt
+
+
+
+7. Ausgewählte Darstellung verfügbar mit Formel mit Continuous Update
+
+Erwartetes Ergebnis: Darstellung wird angezeigt, beim Ausführen einer Operation wird Darstellung aktualisiert
+
+Tatsächliches Ergebnis: Darstellung wird angezeigt, beim Ausführen einer Operation wird Darstellung aktualisiert
+
+
+
+8. Ausgewählte Darstellung nicht verfügbar mit Formel ohne Continuous Update
+
+Erwartetes Ergebnis: Darstellung wird nicht angezeigt, Nutzer wird informiert, dass die Darstellung nicht verfügbar ist
+
+Tatsächliches Ergebnis: Darstellung wird nicht angezeigt, Nutzer wird informiert, dass die Darstellung nicht verfügbar ist
+
+Bemerkung: Visualisierung wird zurückgesetzt
+
+
+
+9. Visualisierung abbrechen
+
+Interrupt?
+
+10. Reinzoomen per Button und per Shortcut (falls Eingabefeld den Fokus hat, soll dort nichts eingegeben werden) -> funktioniert
+
+11. Rauszoomen per Button und per Shortcut (falls Eingabefeld den Fokus hat, soll dort nichts eingegeben werden) -> funktioniert
+
+12. Draging in der View -> funktioniert
+
+Cursor?
+
+13. Enter/Shift Enter im Eingabefeld für Formeln -> funktioniert
+
+
+Bemerkung: Renderingfehler in der HTML View
+
+
+
+23. Tabellen Visualisierung
+
+1. Ausgewählte Darstellung verfügbar
+
+Erwartetes Ergebnis: Tabelle wird dargestellt
+
+Tatsächliches Ergebnis: Tabelle wird dargestellt
+
+
+
+2. Ausgewählte Darstellung nicht verfügbar
+
+Erwartetes Ergebnis: Tabelle wird nicht dargestellt; Nutzer wird benachrichtigt, dass die Darstellung nicht verfügbar ist.
+
+Tatsächliches Ergebnis: Tabelle wird nicht dargestellt; Nutzer wird benachrichtigt, dass die Darstellung nicht verfügbar ist.
+
+Bemerkung: Visualisierung wird zurückgesetzt
+
+
+
+3. Ausgewählte Darstellung verfügbar mit Continuous Update
+
+Erwartetes Ergebnis: Tabelle wird dargestellt; Falls sich der State Space ändern wird die Tabelle dementsprechend aktualisiert
+
+Tatsächliches Ergebnis: Tabelle wird dargestellt; Falls sich der State Space ändern wird die Tabelle dementsprechend aktualisiert
+
+
+
+4. Ausgewählte Darstellung nicht verfügbar mit Continuous Update
+
+Erwartetes Ergebnis: Tabelle wird nicht dargestellt; Nutzer wird benachrichtigt, dass die Darstellung nicht verfügbar ist.
+
+Tatsächliches Ergebnis: Tabelle wird nicht dargestellt; Nutzer wird benachrichtigt, dass die Darstellung nicht verfügbar ist.
+
+
+
+
+5. Ausgewählte Darstellung verfügbar mit Formel
+
+Erwartetes Ergebnis: Tabelle wird dargestellt
+
+Tatsächliches Ergebnis: Tabelle wird dargestellt
+
+Bemerkung: Bei Auswahl einer Darstellung mit Formel wird die Visualisierung zurückgesetzt
+
+
+
+6. Ausgewählte Darstellung nicht verfügbar mit Formel
+
+Erwartetes Ergebnis: Tabelle wird nicht dargestellt; Nutzer wird benachrichtigt, dass die Darstellung nicht verfügbar ist.
+
+Tatsächliches Ergebnis: Tabelle wird nicht dargestellt; Nutzer wird benachrichtigt, dass die Darstellung nicht verfügbar ist.
+
+Bemerkung: Visualisierung wird zurückgesetzt
+
+
+7. Ausgewählte Darstellung verfügbar mit Formel mit Continuous Update
+
+Erwartetes Ergebnis: Tabelle wird dargestellt; Falls sich der State Space ändern wird die Tabelle dementsprechend aktualisiert
+
+Tatsächliches Ergebnis: Tabelle wird dargestellt; Falls sich der State Space ändern wird die Tabelle dementsprechend aktualisiert
+
+Bemerkung: Visualisierung wird zurückgesetzt
+
+
+
+
+8. Ausgewählte Darstellung nicht verfügbar mit Formel ohne Continuous Update
+
+Erwartetes Ergebnis: Tabelle wird nicht dargestellt; Nutzer wird benachrichtigt, dass die Darstellung nicht verfügbar ist.
+
+Tatsächliches Ergebnis: Tabelle wird nicht dargestellt; Nutzer wird benachrichtigt, dass die Darstellung nicht verfügbar ist.
+
+Bemerkung: Visualisierung wird zurückgesetzt
+
+
+
+9. Visualisierung abbrechen -> funktioniert
+
+10. Enter/Shift Enter im Eingabefeld für Formeln
+
+Erwartetes Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenumbruch in der Formeleingabe hinzugefügt, bei Shift Enter wird nur ein Zeilenumbruch hinzugefügt
+
+Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenumbruch in der Formeleingabe hinzugefügt, bei Shift Enter wird nur ein Zeilenumbruch hinzugefügt
+
+
+
+
+
+
+24. BEditor
+
+1. Undo -> funktioniert, Cursor muss sich an der richtigen Stelle befinden
+2. Redo -> funktioniert, Cursor muss sich an der richtigen Stelle befinden
+3. Cut -> funktioniert
+4. Copy -> funktioniert
+5. Paste -> funktioniert
+6. Delete -> funktioniert
+7. Select all -> funktioniert
+8. Save Machine File -> funktioniert
+9. Save Machine File as
+
+Erwartetes Ergebnis: Es wird eine neue Datei mit dem entsprechenden Namen angelegt oder eine Datei überschrieben. Dabei wird der Pfad der aktuellen Maschine neu gesetzt/hinzugefügt (?)
+
+Tatsächliches Ergebnis: Es wird eine neue Datei mit dem entsprechenden Namen angelegt oder eine Datei überschrieben.
+
+10. Highlighting -> funktioniert
+
+
+
+25. Save Project -> funktioniert
+
+-Inkonsistentes Verhalten, da Save Project as fehlt?
+-Im BEditor ist Save Machine as.. vorhanden -> überflüssig?
+
+
+
+26. Project View
+
+1. Load machine -> funktioniert
+
+2. Load machine with error
+
+3. Edit machine file in external editor -> funktioniert
+
+4. Start animation -> funktioniert
+
+5. Edit machine configuration
+
+6. Show machine description
+
+7. Remove machine -> funktioniert
+
+8. Add machine
+
+9. Help Buttons
+
+10. Status
+
+11. Add Preference
+
+12. Edit Preference
+
+13. Remove Preference
+
+14. Edit Project -> funktioniert
+
+15. Edit Description -> funktioniert
+
+
+
+
+Noch zu testen:
+-Advanced
+-History Chart
+-Statistics
+-Verifications
+-State View/State Errors/State Visualization
