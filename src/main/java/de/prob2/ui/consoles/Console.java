@@ -245,8 +245,6 @@ public abstract class Console extends StyleClassedTextArea {
 			}
 			this.appendText("\n" + execResult);
 			if (execResult.getResultType() == ConsoleExecResultType.ERROR) {
-				final int begin = this.getAbsolutePosition(getLineNumber(), 0);
-				final int end = this.getLength();
 				this.setStyle(getLineNumber(), Collections.singletonList("error"));
 			}
 		}

@@ -55,7 +55,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
 		Platform.runLater(() -> {
 			item.setResultItem(resultItem);	
-			if(traces != null && !traces.isEmpty()) {
+			if(!traces.isEmpty()) {
 				item.setCounterExample(traces.get(0));
 			} else {
 				item.setCounterExample(null);
