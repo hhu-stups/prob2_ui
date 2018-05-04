@@ -11,7 +11,6 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -109,10 +108,7 @@ public class TraceReplayView extends ScrollPane {
 			updateStatusIcon(statusIcon, trace.getStatus());
 
 			final ProgressIndicator replayProgress = new ProgressBar();
-			if (trace.getStoredTrace() != null) {
-				replayProgress.progressProperty().bind(
-						trace.progressProperty().divide((double) trace.getStoredTrace().getTransitionList().size()));
-			}
+			replayProgress.progressProperty().bind(trace.progressProperty());
 
 			return Bindings.when(trace.progressProperty().isEqualTo(-1)).<Node>then(statusIcon)
 					.otherwise(replayProgress);
@@ -156,10 +152,10 @@ public class TraceReplayView extends ScrollPane {
 				showErrorItem.disableProperty().unbind();
 				if (t != null) {
 					showErrorItem.disableProperty().bind(t.statusProperty().isNotEqualTo(ReplayTrace.Status.FAILED));
-					if (t.getStoredTrace() == null) {
-						row.setDisable(true);
-						traceTableView.refresh();
-					}
+					// if (t.getStoredTrace() == null) {
+					// row.setDisable(true);
+					// traceTableView.refresh();
+					// }
 				}
 			});
 

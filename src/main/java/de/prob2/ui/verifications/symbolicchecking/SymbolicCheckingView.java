@@ -261,11 +261,7 @@ public class SymbolicCheckingView extends ScrollPane {
 				}
 			}
 
-			if(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked()) {
-				showMessage.setDisable(true);
-			} else {
-				showMessage.setDisable(false);
-			}
+			showMessage.setDisable(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked());
 		}
 	}
 		

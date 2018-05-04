@@ -2,11 +2,9 @@ package de.prob2.ui.verifications.tracereplay;
 
 import java.nio.file.Path;
 
-import de.prob.check.tracereplay.PersistentTrace;
-
-import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class ReplayTrace {
@@ -15,16 +13,14 @@ public class ReplayTrace {
 	}
 
 	private final ObjectProperty<Status> status;
-	private final IntegerProperty progress;
+	private final DoubleProperty progress;
 	private final Path location;
-	private final PersistentTrace persistentTrace;
 	private Exception error;
 
-	public ReplayTrace(Path location, PersistentTrace pTrace) {
+	public ReplayTrace(Path location) {
 		this.status = new SimpleObjectProperty<>(this, "status", Status.NOT_CHECKED);
-		this.progress = new SimpleIntegerProperty(this, "progress", -1);
+		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.location = location;
-		this.persistentTrace = pTrace;
 		this.error = null;
 		
 		this.status.addListener((o, from, to) -> {
@@ -34,10 +30,6 @@ public class ReplayTrace {
 		});
 	}
 
-	public PersistentTrace getStoredTrace() {
-		return this.persistentTrace;
-	}
-	
 	public ObjectProperty<Status> statusProperty() {
 		return status;
 	}
@@ -50,16 +42,17 @@ public class ReplayTrace {
 		this.status.set(status);
 	}
 	
-	public IntegerProperty progressProperty() {
+	public DoubleProperty progressProperty() {
 		return this.progress;
 	}
 	
-	public int getProgress() {
+	public double getProgress() {
 		return this.progressProperty().get();
 	}
 	
-	public void setProgress(final int progress) {
+	public void setProgress(final double progress) {
 		this.progressProperty().set(progress);
+		System.out.println(progress);
 	}
 	
 	public Path getLocation() {
