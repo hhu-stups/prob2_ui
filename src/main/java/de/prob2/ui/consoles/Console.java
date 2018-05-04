@@ -266,7 +266,7 @@ public abstract class Console extends StyleClassedTextArea {
 		
 	private void handleDown() {
 		deactivateSearch();
-		if (posInList == instructions.size() - 1) {
+		if (instructions.isEmpty() || posInList == instructions.size() - 1) {
 			return;
 		}
 		posInList = Math.min(posInList+1, instructions.size() - 1);
@@ -275,7 +275,7 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	private void handleUp() {
 		deactivateSearch();
-		if (posInList == -1) {
+		if (instructions.isEmpty() || posInList == -1) {
 			return;
 		}
 		if (posInList == instructions.size() - 1) {
