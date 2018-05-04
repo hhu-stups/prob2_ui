@@ -87,6 +87,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
 		this.newProject = new SimpleBooleanProperty(this, "newProject", false);
 
+
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
 				clearProperties();
@@ -235,6 +236,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.set(project);
 		this.setSaved(!newProject);
 		this.setNewProject(newProject);
+		this.currentMachine.set(null);
 	}
 
 	public void update(Project project) {

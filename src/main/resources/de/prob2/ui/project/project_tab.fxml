@@ -21,7 +21,7 @@
 				</HBox>
 			</HBox>
 		</AnchorPane>
-		<AnchorPane VBox.vgrow="ALWAYS">
+		<AnchorPane fx:id="projectDescriptionPane" VBox.vgrow="ALWAYS">
 			<ScrollPane hbarPolicy="NEVER" AnchorPane.leftAnchor="0"
 				AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"
 				AnchorPane.bottomAnchor="0" fitToHeight="true" fitToWidth="true">
@@ -35,9 +35,6 @@
 						visible="false" />
 				</AnchorPane>
 			</ScrollPane>
-			<Button fx:id="applyButton" text="%common.apply"
-				AnchorPane.rightAnchor="16" AnchorPane.bottomAnchor="6" styleClass="button-blue"
-				managed="false" visible="false" />
 		</AnchorPane>
 		<Label fx:id="locationLabel" id="project-location">
 			<tooltip>
