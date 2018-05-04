@@ -1,38 +1,22 @@
 package de.prob2.ui.menu;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.util.Properties;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.Main;
-import de.prob.cli.CliVersionNumber;
-import de.prob.scripting.Api;
-
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Singleton
 public final class AboutBox extends Stage {
-	private static final Logger LOGGER = LoggerFactory.getLogger(AboutBox.class);
-
-	private final Api api;
 	private final ResourceBundle bundle;
-	private final Properties buildInfo;
-	private String kernelVersion;
-	private String kernelCommit;
-	private String cliVersion;
+	private final VersionInfo versionInfo;
 
 	@FXML
 	private Label uiInfoLabel;
@@ -44,22 +28,11 @@ public final class AboutBox extends Stage {
 	private Label javaInfoLabel;
 
 	@Inject
-	private AboutBox(final StageManager stageManager, final Api api, final ResourceBundle bundle) {
+	private AboutBox(final StageManager stageManager, final ResourceBundle bundle, final VersionInfo versionInfo) {
 		super();
 
-		this.api = api;
 		this.bundle = bundle;
-
-		this.buildInfo = new Properties();
-		try (final InputStreamReader reader = new InputStreamReader(
-				this.getClass().getResourceAsStream("/de/prob2/ui/build.properties"), Charset.forName("UTF-8"))) {
-			this.buildInfo.load(reader);
-		} catch (IOException e) {
-			LOGGER.error("Failed to load build info", e);
-		}
-
-		this.kernelVersion = Main.getVersion();
-		this.kernelCommit = Main.getGitSha();
+		this.versionInfo = versionInfo;
 
 		stageManager.loadFXML(this, "about_box.fxml");
 	}
@@ -68,29 +41,29 @@ public final class AboutBox extends Stage {
 	private void initialize() {
 		this.uiInfoLabel.setText(String.format(
 			this.bundle.getString("about.uiInfo"),
-			this.buildInfo.getProperty("buildTime"),
-			this.buildInfo.getProperty("commit")
+			this.versionInfo.getUIBuildTime(),
+			this.versionInfo.getUICommit()
 		));
 		
 		this.kernelInfoLabel.setText(String.format(
 			this.bundle.getString("about.kernelInfo"),
-			this.kernelVersion,
-			this.kernelCommit
+			this.versionInfo.getKernelVersion(),
+			this.versionInfo.getKernelCommit()
 		));
 		
 		// noinspection RedundantStringFormatCall
 		this.cliInfoLabel.setText(String.format(this.bundle.getString("about.cliInfoLoading")));
 		new Thread(() -> {
-			final CliVersionNumber cliVersion = this.api.getVersion();
-			this.cliVersion = 	cliVersion.major + "." + 
-								cliVersion.minor + "." +
-								cliVersion.service + "-" +
-								cliVersion.qualifier;
+			// The CLI version is loaded in the background, because it requires starting a CLI,
+			// which takes a few seconds.
+			final String formattedCliVersion = this.versionInfo.getFormattedCliVersion();
+			final String revision = this.versionInfo.getCliVersion().revision;
 			Platform.runLater(() -> {
-				this.cliInfoLabel.setText(String.format(
-						this.bundle.getString("about.cliInfo"),
-						this.cliVersion,					
-						cliVersion.revision));
+				this.cliInfoLabel.setText(
+					String.format(this.bundle.getString("about.cliInfo"),
+					formattedCliVersion,
+					revision
+				));
 				this.sizeToScene();
 			});
 		}, "ProB CLI Version Getter").start();
@@ -103,13 +76,5 @@ public final class AboutBox extends Stage {
 			System.getProperty("java.vm.version"),
 			System.getProperty("java.vm.vendor")
 		));
-	}
-	
-	public String getKernelVersion() {
-		return kernelVersion;
-	}
-	
-	public String getCliVersion() {
-		return cliVersion;
 	}
 }

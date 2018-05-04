@@ -11,20 +11,23 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+
 import com.google.inject.Inject;
 
 import de.prob.check.tracereplay.PersistentTrace;
+
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.AboutBox;
+import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TraceSaver {
 	private static final Charset TRACE_CHARSET = Charset.forName("UTF-8");
@@ -34,15 +37,15 @@ public class TraceSaver {
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
-	private final AboutBox about;
+	private final VersionInfo versionInfo;
 
 	@Inject
-	public TraceSaver(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, AboutBox about) {
+	public TraceSaver(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, VersionInfo versionInfo) {
 		this.gson = gson;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		this.about = about;
+		this.versionInfo = versionInfo;
 	}
 
 	public void saveTrace(PersistentTrace trace, Machine machine) {
@@ -60,8 +63,8 @@ public class TraceSaver {
 				
 				JsonObject metadata = new JsonObject();
 				metadata.addProperty("Creation Date", ZonedDateTime.now().format(DateTimeFormatter.ofPattern("d MMM yyyy hh:mm:ssa O")));
-				metadata.addProperty("ProB 2.0 kernel Version", about.getKernelVersion());
-				metadata.addProperty("ProB CLI Version", about.getCliVersion());
+				metadata.addProperty("ProB 2.0 kernel Version", versionInfo.getKernelVersion());
+				metadata.addProperty("ProB CLI Version", versionInfo.getFormattedCliVersion());
 				metadata.addProperty("Model", currentProject.getCurrentMachine().getName());
 				gson.toJson(metadata, writer);
 			} catch (FileNotFoundException exc) {
