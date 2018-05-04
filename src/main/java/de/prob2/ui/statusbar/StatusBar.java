@@ -167,25 +167,7 @@ public class StatusBar extends HBox {
 		if (this.isOperationsViewUpdating() || this.isStatesViewUpdating()) {
 			statusLabel.setText(resourceBundle.getString("statusbar.updatingViews"));
 		} else if (this.currentTrace.exists()) {
-			final List<String> errorMessages = new ArrayList<>();
-			if (!this.currentTrace.getCurrentState().isInvariantOk()) {
-				errorMessages.add(resourceBundle.getString("statusbar.errors.invariantNotOK"));
-			}
-			if (!this.currentTrace.getCurrentState().getStateErrors().isEmpty()) {
-				errorMessages.add(resourceBundle.getString("statusbar.errors.stateErrors"));
-			}
-			if (this.getLtlStatus() == StatusBar.CheckingStatus.ERROR) {
-				errorMessages.add(resourceBundle.getString("statusbar.errors.ltlError"));
-			}
-			
-			if (this.getSymbolicStatus() == StatusBar.CheckingStatus.ERROR) {
-				errorMessages.add(resourceBundle.getString("statusbar.errors.symbolicError"));
-			}
-			
-			if (this.getModelcheckingStatus() == StatusBar.CheckingStatus.ERROR) {
-				errorMessages.add(resourceBundle.getString("statusbar.errors.modelcheckError"));
-			}
-			
+			final List<String> errorMessages = getErrorMessages();
 			if (errorMessages.isEmpty()) {
 				statusLabel.getStyleClass().add("noErrors");
 				statusLabel.setText(resourceBundle.getString("statusbar.noErrors"));
@@ -197,7 +179,29 @@ public class StatusBar extends HBox {
 			statusLabel.setText(this.resourceBundle.getString(this.getLoadingStatus().getMessageKey()));
 		}
 	}
-	
+
+	private List<String> getErrorMessages() {
+		final List<String> errorMessages = new ArrayList<>();
+		if (!this.currentTrace.getCurrentState().isInvariantOk()) {
+			errorMessages.add(resourceBundle.getString("statusbar.errors.invariantNotOK"));
+		}
+		if (!this.currentTrace.getCurrentState().getStateErrors().isEmpty()) {
+			errorMessages.add(resourceBundle.getString("statusbar.errors.stateErrors"));
+		}
+		if (this.getLtlStatus() == StatusBar.CheckingStatus.ERROR) {
+			errorMessages.add(resourceBundle.getString("statusbar.errors.ltlError"));
+		}
+
+		if (this.getSymbolicStatus() == StatusBar.CheckingStatus.ERROR) {
+			errorMessages.add(resourceBundle.getString("statusbar.errors.symbolicError"));
+		}
+
+		if (this.getModelcheckingStatus() == StatusBar.CheckingStatus.ERROR) {
+			errorMessages.add(resourceBundle.getString("statusbar.errors.modelcheckError"));
+		}
+		return errorMessages;
+	}
+
 	public void reset() {
 		setModelcheckingStatus(CheckingStatus.SUCCESSFUL);
 		setLtlStatus(CheckingStatus.SUCCESSFUL);
