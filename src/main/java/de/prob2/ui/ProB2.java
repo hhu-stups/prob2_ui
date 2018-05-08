@@ -242,9 +242,10 @@ public class ProB2 extends Application {
 
 	@Override
 	public void stop() {
+		// Please don't add any cleanup code for other classes here.
+		// Instead, inject the StopActions singleton and use it to add the cleanup code for your class.
+		// This helps with keeping all code of the class in one place.
 		if (injector != null) {
-			ProBPluginManager proBPluginManager = injector.getInstance(ProBPluginManager.class);
-			proBPluginManager.getPluginManager().stopPlugins();
 			injector.getInstance(StopActions.class).run();
 		}
 	}

@@ -13,13 +13,17 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import com.github.zafarkhaja.semver.Version;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
+
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -29,12 +33,19 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import org.apache.commons.lang.StringUtils;
-import org.pf4j.*;
+
+import org.pf4j.DefaultPluginManager;
+import org.pf4j.PluginDependency;
+import org.pf4j.PluginDescriptor;
+import org.pf4j.PluginException;
+import org.pf4j.PluginFactory;
+import org.pf4j.PluginState;
+import org.pf4j.PluginWrapper;
+import org.pf4j.RuntimeMode;
 import org.pf4j.util.FileUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.github.zafarkhaja.semver.Version;
 
 /**
  * The {@link ProBPluginManager} is a wrapper for the {@link ProBJarPluginManager} which is an
@@ -74,13 +85,15 @@ public class ProBPluginManager {
 	 * @param bundle {@link ResourceBundle} used in the prob2-ui application
 	 */
 	@Inject
-	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
 		this.proBPluginHelper = proBPluginHelper;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.pluginManager = new ProBJarPluginManager();
 		createPluginDirectory();
 		this.fileChooserManager = fileChooserManager;
+		// Do not convert this to a method reference! Otherwise it won't work correctly if the plugin manager changes.
+		stopActions.add(() -> this.getPluginManager().stopPlugins());
 	}
 
 	/**
