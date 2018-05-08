@@ -1,15 +1,10 @@
 package de.prob2.ui.prob2fx;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -17,7 +12,6 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.AnimationSelector;
 
-import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
@@ -28,6 +22,7 @@ import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.verifications.tracereplay.TraceChecker;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -132,7 +127,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		injector.getInstance(LTLView.class).bindMachine(m);
 		injector.getInstance(SymbolicCheckingView.class).bindMachine(m);
 		injector.getInstance(ModelcheckingView.class).bindMachine(m);
-		updateBEditorView();
 	}
 
 	public void reloadCurrentMachine() {
@@ -148,18 +142,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		injector.getInstance(TraceChecker.class).resetStatus();
 	}
 
-	private void updateBEditorView(){
-		Path path = this.getLocation().resolve(currentMachine.getValue().getPath());
-		final String text;
-		try (final Stream<String> lines = Files.lines(path)) {
-			text = lines.collect(Collectors.joining(System.lineSeparator()));
-		} catch (IOException | UncheckedIOException e) {
-			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.error.couldNotReadFile"), path, e)).showAndWait();
-			return;
-		}
-		injector.getInstance(BEditorView.class).setEditorText(text, path);
-	}
-
 	public void addMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.add(machine);
@@ -167,9 +149,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public void removeMachine(Machine machine) {
-		if(machine.equals(currentMachine.getValue())) {
-			injector.getInstance(BEditorView.class).setHint();
-		}
 		List<Machine> machinesList = this.getMachines();
 		machinesList.remove(machine);
 		if(machine.equals(currentMachine.get())) {
