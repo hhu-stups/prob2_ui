@@ -11,14 +11,14 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 
 import de.prob.Main;
+import de.prob.animator.command.ExecuteRightClickCommand;
+import de.prob.animator.command.GetImagesForMachineCommand;
+import de.prob.animator.command.GetImagesForStateCommand;
+import de.prob.animator.command.GetRightClickOptionsForStateVisualizationCommand;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
-import de.prob2.ui.commands.ExecuteRightClickCommand;
-import de.prob2.ui.commands.GetImagesForMachineCommand;
-import de.prob2.ui.commands.GetImagesForStateCommand;
-import de.prob2.ui.commands.GetRightClickOptionsForStateVisualizationCommand;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
