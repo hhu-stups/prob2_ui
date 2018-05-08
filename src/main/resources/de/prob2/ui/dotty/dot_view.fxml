@@ -8,6 +8,7 @@
 <?import de.prob2.ui.internal.DynamicCommandStatusBar?>
 <?import javafx.scene.Scene?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 
 <fx:root type="DotView" title="%dotview.header" minWidth="600" minHeight="400" width="1200.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -49,6 +50,7 @@
 													glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
 											</graphic>
 										</Button>
+										<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 									</HBox>
 									<Label fx:id="lbDescription" VBox.vgrow="NEVER"/>
 									<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">

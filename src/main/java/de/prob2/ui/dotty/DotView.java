@@ -21,7 +21,7 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
-
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -30,6 +30,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollBar;
@@ -59,6 +60,9 @@ public class DotView extends DynamicCommandStage {
 	@FXML
 	private HBox zoomBox;
 	
+	@FXML
+	private HelpButton helpButton;
+	
 
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
@@ -76,6 +80,7 @@ public class DotView extends DynamicCommandStage {
 	@Override
 	public void initialize() {
 		super.initialize();
+		helpButton.setHelpContent(this.getClass());
 		initializeZooming();
 	}
 
@@ -91,6 +96,10 @@ public class DotView extends DynamicCommandStage {
 			oldMousePositionX = e.getSceneX();
 			oldMousePositionY = e.getSceneY();
 		});
+
+		dotView.setOnMouseMoved(e -> dotView.setCursor(Cursor.HAND));
+		dotView.setOnMouseDragged(e -> dotView.setCursor(Cursor.MOVE));
+		
 	}
 
 	@Override

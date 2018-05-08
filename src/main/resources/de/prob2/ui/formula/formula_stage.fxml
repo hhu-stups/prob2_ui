@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
@@ -62,6 +63,7 @@
 											glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
+								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
 							<HBox VBox.vgrow="ALWAYS">
 								<StackPane fx:id="stackPane" HBox.hgrow="ALWAYS">

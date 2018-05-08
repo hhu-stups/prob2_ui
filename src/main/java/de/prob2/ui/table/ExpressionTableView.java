@@ -23,7 +23,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
-
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -55,6 +55,9 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@FXML
 	private Button saveButton;
 	
+	@FXML
+	private HelpButton helpButton;
+	
 	private ObjectProperty<TableData> currentTable;
 	
 	
@@ -69,6 +72,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@Override
 	protected void initialize() {
 		super.initialize();
+		helpButton.setHelpContent(this.getClass());
 		currentTable.addListener((observable, from, to) -> {
 			if(to != null) {
 				fillTable(to);

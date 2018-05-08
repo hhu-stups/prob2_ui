@@ -9,7 +9,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
-
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DynamicCommandStatusBar;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -50,6 +50,9 @@ public class FormulaStage extends Stage {
 	@FXML
 	private Button cancelButton;
 	
+	@FXML
+	private HelpButton helpButton;
+	
 	private final StageManager stageManager;
 	
 	private final Injector injector;
@@ -81,6 +84,8 @@ public class FormulaStage extends Stage {
 	@FXML
 	public void initialize() {
 		stageManager.setMacMenuBar(this, menuBar);
+		helpButton.setHelpContent(this.getClass());
+		
 		tfFormula.setOnKeyReleased(e -> {
 			if (e.getCode() == KeyCode.ENTER) {
 				apply();
