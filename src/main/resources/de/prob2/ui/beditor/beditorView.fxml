@@ -1,42 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import de.prob2.ui.layout.FontSize?>
-
-<?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import de.prob2.ui.beditor.BEditor?>
-
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import de.prob2.ui.beditor.BEditor?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.BorderPane?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml/1">
-    <fx:define>
-        <FontSize fx:id="fontSize" />
-    </fx:define>
-    <top>
-        <MenuBar styleClass="menu-bar">
-            <Menu text="%menu.file">
-                <MenuItem fx:id="handleSaveButton" mnemonicParsing="false"
-                          onAction="#handleSave" text="%beditor.menu.file.items.save" accelerator="Shortcut+S">
-                    <graphic>
-                        <FontAwesomeIconView styleClass="icon-dark"
-                                             glyphName="SAVE" glyphSize="${fontSize.fontSize + 4}" />
-                    </graphic>
-                </MenuItem>
-                <MenuItem fx:id="handleSaveAsButton" mnemonicParsing="false"
-                          onAction="#handleSaveAs" text="%beditor.menu.file.items.saveAs">
-                    <graphic>
-                        <FontAwesomeIconView styleClass="icon-dark"
-                                             glyphName="FOLDER" glyphSize="${fontSize.fontSize + 4}" />
-                    </graphic>
-                </MenuItem>
-            </Menu>
-        </MenuBar>
-    </top>
-    <center>
-        <VirtualizedScrollPane hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
-            <content>
-                <BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
-            </content>
-        </VirtualizedScrollPane>
-    </center>
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
+	<top>
+		<MenuBar styleClass="menu-bar">
+			<Menu text="%menu.file">
+				<MenuItem fx:id="handleSaveButton" mnemonicParsing="false" 
+					onAction="#handleSave" text="%beditor.menu.file.items.save" accelerator="Shortcut+S">
+					<graphic>
+						<FontAwesomeIconView styleClass="icon-dark" glyphName="SAVE" glyphSize="${fontSize.fontSize + 4}" />
+					</graphic>
+				</MenuItem>
+				<MenuItem fx:id="handleSaveAsButton" mnemonicParsing="false" onAction="#handleSaveAs" text="%beditor.menu.file.items.saveAs">
+					<graphic>
+						<FontAwesomeIconView styleClass="icon-dark" glyphName="FOLDER" glyphSize="${fontSize.fontSize + 4}" />
+					</graphic>
+				</MenuItem>
+			</Menu>
+		</MenuBar>
+	</top>
+	<center>
+		<VirtualizedScrollPane hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
+			<content>
+				<BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
+			</content>
+		</VirtualizedScrollPane>
+	</center>
 </fx:root>
