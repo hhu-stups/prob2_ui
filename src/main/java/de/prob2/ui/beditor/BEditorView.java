@@ -89,12 +89,8 @@ public class BEditorView extends BorderPane {
 		this.pathProperty().set(path);
 	}
 
-	public void setHint(){
-		this.setPath(null);
-		beditor.clear();
-		beditor.appendText(bundle.getString("beditor.hint"));
-		beditor.getStyleClass().add("editor");
-		beditor.startHighlighting();
+	public void setHint() {
+		this.setEditorText(bundle.getString("beditor.hint"), null);
 		beditor.setEditable(false);
 	}
 
