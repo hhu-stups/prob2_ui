@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import de.prob2.ui.consoles.b.BConsoleView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.states.StatesView?>
@@ -14,7 +15,7 @@
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import de.prob2.ui.consoles.b.BConsoleView?>
+<?import javafx.scene.control.TitledPane?>
 <fx:root type="StatesView" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
@@ -48,6 +49,8 @@
 				<TreeItem fx:id="tvRootItem" expanded="true" />
 			</TreeTableView>
 		</VBox>
-		<BConsoleView/>
+		<TitledPane text="%consoles.b.title" expanded="false">
+			<BConsoleView/>
+		</TitledPane>
 	</SplitPane>
 </fx:root>
