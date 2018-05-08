@@ -20,7 +20,9 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractElement;
+import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
@@ -141,7 +143,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			Thread currentJobThread = new Thread(() -> {
 				synchronized(lock) {
 					updateCurrentValues(getOptions(), currentTrace.getStateSpace(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
-					startModelchecking();
+					startModelchecking(false);
 				}
 			}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
 			currentJobThreads.add(currentJobThread);
@@ -315,7 +317,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		if(item != null) {
 			if(item.getStats() == null) {
 				if(e.getButton() == MouseButton.PRIMARY) {
-					checkItem(item);
+					checkItem(item, true);
 				}
 			} else {
 				showStats(item.getStats());
@@ -351,11 +353,11 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			});
 			showTraceToErrorItem.disableProperty().bind(disableErrorItemsBinding);
 			
-			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.checkSeparately"));
+			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.check"));
 			checkItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 				item.setOptions(item.getOptions().recheckExisting(true));
-				checkItem(item);
+				checkItem(item, false);
 			});
 			checkItem.disableProperty().bind(row.emptyProperty());
 			
@@ -372,7 +374,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			searchForNewErrorsItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 				item.setOptions(item.getOptions().recheckExisting(false));
-				checkItem(item);
+				checkItem(item, false);
 			});
 			searchForNewErrorsItem.disableProperty().bind(disableErrorItemsBinding);
 			
@@ -406,7 +408,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	public void checkMachine() {
 		currentProject.currentMachineProperty().get().getModelcheckingItems().forEach(item -> {
 			item.setOptions(item.getOptions().recheckExisting(true));
-			checkItem(item);
+			checkItem(item, true);
 		});
 	}
 	
@@ -416,14 +418,14 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		currentJobThreads.forEach(Thread::interrupt);
 	}
 	
-	private void checkItem(ModelCheckingItem item) {
+	private void checkItem(ModelCheckingItem item, boolean checkAll) {
 		if(!item.shouldExecute()) {
 			return;
 		}
 		Thread currentJobThread = new Thread(() -> {
 			synchronized(lock) {
 				updateCurrentValues(item.getOptions(), currentTrace.getStateSpace(), item);
-				startModelchecking();
+				startModelchecking(checkAll);
 				tvItems.getSelectionModel().select(item);
 			}
 		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
@@ -492,7 +494,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		}
 	}
 	
-	private void startModelchecking() {
+	private void startModelchecking(boolean checkAll) {
 		stageController.setDisableStart(true);
 		int size = currentJobs.size();
 		IModelCheckJob job = currentJobs.get(size - 1);
@@ -517,6 +519,11 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		// anything - on the first call, the checker was removed from
 		// the jobs map, so the second call returns right away.
 		isFinished(job.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
+		if(!checkAll) {
+			StateSpace s = job.getStateSpace();
+			Trace trace = ((ITraceDescription) result).getTrace(s);
+			injector.getInstance(CurrentTrace.class).set(trace);
+		}
 		currentJobs.remove(size - 1);
 	}
 

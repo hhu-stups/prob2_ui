@@ -7,7 +7,6 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
@@ -144,9 +143,7 @@ public final class ModelCheckStats extends AnchorPane {
 		}
 		
 		if (result instanceof ITraceDescription) {
-			StateSpace s = modelChecker.getStateSpace();
-			trace = ((ITraceDescription) result).getTrace(s);
-			injector.getInstance(CurrentTrace.class).set(trace);
+			trace = ((ITraceDescription) result).getTrace(stateSpace);
 			injector.getInstance(StatsView.class).update(trace);
 		}
 		showResult(message);

@@ -159,7 +159,7 @@ public class LTLView extends ScrollPane {
 			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 
-			MenuItem check = new MenuItem(bundle.getString("verifications.ltl.formula.menu.checkSeparately"));
+			MenuItem check = new MenuItem(bundle.getString("verifications.ltl.formula.menu.check"));
 			check.setOnAction(e-> {
 				Thread checkingThread = new Thread(() -> {
 					Machine machine = currentProject.getCurrentMachine();

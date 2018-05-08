@@ -155,7 +155,7 @@ public class SymbolicCheckingView extends ScrollPane {
 			
 			final TableRow<SymbolicCheckingFormulaItem> row = new TableRow<>();
 			
-			MenuItem check = new MenuItem(bundle.getString("verifications.symbolic.menu.checkSeparately"));
+			MenuItem check = new MenuItem(bundle.getString("verifications.symbolic.menu.check"));
 			check.setOnAction(e-> {
 				symbolicCheckHandler.handleItem(row.getItem());
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
