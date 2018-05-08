@@ -22,7 +22,7 @@
  ************************************************************************************/
 .accordion {
 	-fx-background-color: -prob-grey;
-	-fx-padding: 1.0em 0.0em 0.0em 0.0em;
+	-fx-padding: 0.25em 0.0em 0.0em 0.0em;
 }
 
 /************************************************************************************
@@ -552,7 +552,7 @@
 }
 .titled-pane > .title {
 	-fx-background-color: -prob-grey;
-	-fx-padding: 1.0em;
+	-fx-padding: 0.75em;
 }
 .titled-pane > .title:hover {
 	-fx-background-color: -prob-aqua;
