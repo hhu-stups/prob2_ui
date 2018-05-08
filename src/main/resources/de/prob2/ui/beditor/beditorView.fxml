@@ -3,31 +3,26 @@
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.beditor.BEditor?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<top>
-		<MenuBar styleClass="menu-bar">
-			<Menu text="%menu.file">
-				<MenuItem fx:id="handleSaveButton" mnemonicParsing="false" 
-					onAction="#handleSave" text="%beditor.menu.file.items.save" accelerator="Shortcut+S">
-					<graphic>
-						<FontAwesomeIconView styleClass="icon-dark" glyphName="SAVE" glyphSize="${fontSize.fontSize + 4}" />
-					</graphic>
-				</MenuItem>
-				<MenuItem fx:id="handleSaveAsButton" mnemonicParsing="false" onAction="#handleSaveAs" text="%beditor.menu.file.items.saveAs">
-					<graphic>
-						<FontAwesomeIconView styleClass="icon-dark" glyphName="FOLDER" glyphSize="${fontSize.fontSize + 4}" />
-					</graphic>
-				</MenuItem>
-			</Menu>
-		</MenuBar>
+		<HBox alignment="CENTER_LEFT">
+			<Button fx:id="saveButton" onAction="#handleSave">
+				<graphic>
+					<FontAwesomeIconView styleClass="icon-dark" glyphName="SAVE" glyphSize="${fontSize.fontSize + 4}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%menu.file.items.saveMachine"/>
+				</tooltip>
+			</Button>
+		</HBox>
 	</top>
 	<center>
 		<VirtualizedScrollPane hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">

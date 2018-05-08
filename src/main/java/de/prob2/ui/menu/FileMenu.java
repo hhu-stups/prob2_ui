@@ -12,6 +12,7 @@ import com.google.inject.Injector;
 
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 
+import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -44,6 +45,8 @@ public class FileMenu extends Menu {
 	@FXML
 	private MenuItem clearRecentProjects;
 	@FXML
+	private MenuItem saveMachineItem;
+	@FXML
 	private MenuItem saveProjectItem;
 	@FXML
 	private MenuItem viewFormattedCodeItem;
@@ -54,16 +57,18 @@ public class FileMenu extends Menu {
 	private final RecentProjects recentProjects;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final BEditorView bEditorView;
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
 	@Inject
 	private FileMenu(final StageManager stageManager, final RecentProjects recentProjects,
-			final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector, final ResourceBundle bundle) {
+			final CurrentProject currentProject, final CurrentTrace currentTrace, final BEditorView bEditorView, final Injector injector, final ResourceBundle bundle) {
 		this.recentProjects = recentProjects;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.bEditorView = bEditorView;
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -87,6 +92,7 @@ public class FileMenu extends Menu {
 		this.recentProjects.addListener(recentProjectsListener);
 		recentProjectsListener.onChanged(null);
 
+		this.saveMachineItem.disableProperty().bind(bEditorView.pathProperty().isNull());
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
 		
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.existsProperty().not());
@@ -144,6 +150,11 @@ public class FileMenu extends Menu {
 	@FXML
 	private void handleClearRecentProjects() {
 		this.recentProjects.clear();
+	}
+
+	@FXML
+	private void saveMachine() {
+		this.bEditorView.handleSave();
 	}
 
 	@FXML
