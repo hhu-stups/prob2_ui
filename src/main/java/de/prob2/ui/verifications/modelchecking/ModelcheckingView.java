@@ -498,6 +498,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		stageController.setDisableStart(true);
 		int size = currentJobs.size();
 		IModelCheckJob job = currentJobs.get(size - 1);
+		
 		jobs.put(job.getJobId(), job);
 		currentStats.startJob();
 		Platform.runLater(() -> showStats(currentStats));
@@ -519,7 +520,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		// anything - on the first call, the checker was removed from
 		// the jobs map, so the second call returns right away.
 		isFinished(job.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
-		if(!checkAll) {
+		if(!checkAll && result instanceof ITraceDescription) {
 			StateSpace s = job.getStateSpace();
 			Trace trace = ((ITraceDescription) result).getTrace(s);
 			injector.getInstance(CurrentTrace.class).set(trace);

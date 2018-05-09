@@ -82,6 +82,7 @@ public class ModelCheckingItem implements IExecutableItem {
 		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.status.setFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
+		this.stats = null;
 	}
 	
 	public FontAwesomeIconView getStatus() {
