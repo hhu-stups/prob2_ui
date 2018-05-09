@@ -16,8 +16,9 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
-
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -41,6 +42,8 @@ public class BEditorView extends BorderPane {
 	private final StopActions stopActions;
 
 	private final ObjectProperty<Path> path;
+	
+	private final BooleanProperty saved;
 
 	@Inject
 	private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final StopActions stopActions) {
@@ -49,13 +52,20 @@ public class BEditorView extends BorderPane {
 		this.currentProject = currentProject;
 		this.stopActions = stopActions;
 		this.path = new SimpleObjectProperty<>(this, "path", null);
+		this.saved = new SimpleBooleanProperty(true);
 		stageManager.loadFXML(this, "beditorView.fxml");
 	}
 
 	@FXML
 	private void initialize() {
-		this.saveButton.disableProperty().bind(this.pathProperty().isNull());
+		saveButton.disableProperty().bind(this.pathProperty().isNull().or(saved));
+		beditor.setOnKeyTyped(e -> {
+			if(!e.isShortcutDown()) {
+				saved.set(false);
+			}
+		});		
 		setHint();
+		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (to == null) {
 				this.setHint();
@@ -88,6 +98,10 @@ public class BEditorView extends BorderPane {
 	public void setPath(final Path path) {
 		this.pathProperty().set(path);
 	}
+	
+	public BooleanProperty savedProperty() {
+		return saved;
+	}
 
 	private void setHint() {
 		this.setEditorText(bundle.getString("beditor.hint"), null);
@@ -112,5 +126,6 @@ public class BEditorView extends BorderPane {
 		} catch (IOException e) {
 			LOGGER.error(bundle.getString("beditor.couldNotSaveFile"), e);
 		}
+		saved.set(true);
 	}
 }

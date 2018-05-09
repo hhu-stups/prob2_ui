@@ -92,7 +92,7 @@ public class FileMenu extends Menu {
 		this.recentProjects.addListener(recentProjectsListener);
 		recentProjectsListener.onChanged(null);
 
-		this.saveMachineItem.disableProperty().bind(bEditorView.pathProperty().isNull());
+		this.saveMachineItem.disableProperty().bind(bEditorView.pathProperty().isNull().or(bEditorView.savedProperty()));
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
 		
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.existsProperty().not());
