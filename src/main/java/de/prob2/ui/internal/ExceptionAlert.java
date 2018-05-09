@@ -81,7 +81,11 @@ public final class ExceptionAlert extends Alert {
 		} else {
 			message = this.exc.getMessage();
 		}
-		this.label.setText(this.text + ":\n" + message);
+		this.label.setText(this.text + ":\n");
+		
+		if(message != null) {
+			this.label.setText(this.label.getText() + message);
+		}
 		
 		final Callback<TableColumn.CellDataFeatures<ErrorItem, ErrorItem>, ObservableValue<ErrorItem>> cellValueFactory = features -> Bindings.createObjectBinding(features::getValue);
 		this.typeColumn.setCellValueFactory(cellValueFactory);

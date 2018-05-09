@@ -638,21 +638,21 @@ Tatsächliches Ergebnis: Es wird eine neue Datei mit dem entsprechenden Namen an
 
 1. Load machine -> funktioniert
 
-2. Load machine with error
+2. Load machine with error -> Fehlermeldung kommt -> funktioniert
 
 3. Edit machine file in external editor -> funktioniert
 
 4. Start animation -> funktioniert
 
-5. Edit machine configuration
+5. Edit machine configuration -> funktioniert
 
-6. Show machine description
+6. Show machine description -> funktioniert
 
 7. Remove machine -> funktioniert
 
-8. Add machine
+8. Add machine -> funktioniert
 
-9. Help Buttons
+9. Help Buttons -> funktionieren, springen allerdings noch nicht an die richtige Stelle
 
 10. Status
 
