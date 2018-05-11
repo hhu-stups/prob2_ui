@@ -422,6 +422,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		if(!item.shouldExecute()) {
 			return;
 		}
+		
 		Thread currentJobThread = new Thread(() -> {
 			synchronized(lock) {
 				updateCurrentValues(item.getOptions(), currentTrace.getStateSpace(), item);
@@ -457,7 +458,10 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		int size = currentJobs.size();
 		IModelCheckJob job = currentJobs.get(size - 1);
 		AbstractElement main = job.getStateSpace().getMainComponent();
-		List<String> optsList = options.getPrologOptions().stream().map(ModelCheckingOptions.Options::getDescription).collect(Collectors.toList());
+		List<String> optsList = options.getPrologOptions().stream()
+				.map(ModelCheckingOptions.Options::getDescription)
+				.collect(Collectors.toList());
+		
 		String name = main == null ? bundle.getString("verifications.modelchecking.machineNamePlaceholder") : main.toString();
 		if (optsList.isEmpty()) {
 			return name;
@@ -498,7 +502,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		stageController.setDisableStart(true);
 		int size = currentJobs.size();
 		IModelCheckJob job = currentJobs.get(size - 1);
-		
+
 		jobs.put(job.getJobId(), job);
 		currentStats.startJob();
 		Platform.runLater(() -> showStats(currentStats));
@@ -535,8 +539,9 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			// isFinished was already called for this job
 			return;
 		}
+		currentStats.isFinished(job, timeElapsed, result);
 		Platform.runLater(() -> {
-			currentStats.isFinished(job, timeElapsed, result);
+			
 			this.stageController.hide();
 			injector.getInstance(OperationsView.class).update(currentTrace.get());
 			injector.getInstance(StatsView.class).update(currentTrace.get());

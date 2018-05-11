@@ -107,7 +107,7 @@ public final class ModelCheckStats extends AnchorPane {
 	public void isFinished(final IModelCheckJob modelChecker, final long timeElapsed, final IModelCheckingResult result) {
 		Objects.requireNonNull(modelChecker, "modelChecker");
 		Objects.requireNonNull(result, "result");
-		
+
 		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
 		
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
@@ -120,10 +120,13 @@ public final class ModelCheckStats extends AnchorPane {
 			item.setTimeout();
 			item.setChecked(Checked.TIMEOUT);
 		}
+
 		item.setStats(this);
-		Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
 		
+		Platform.runLater(() -> {
+			Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+			injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
+		});
 		String message = result.getMessage();
 
 		final StateSpace stateSpace = modelChecker.getStateSpace();
