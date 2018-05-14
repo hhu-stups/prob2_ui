@@ -15,17 +15,17 @@ public class ReplayTrace {
 	private final ObjectProperty<Status> status;
 	private final DoubleProperty progress;
 	private final Path location;
-	private Exception error;
+	private String errorMessage;
 
 	public ReplayTrace(Path location) {
 		this.status = new SimpleObjectProperty<>(this, "status", Status.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.location = location;
-		this.error = null;
+		this.errorMessage = null;
 		
 		this.status.addListener((o, from, to) -> {
 			if (to != Status.FAILED) {
-				this.error = null;
+				this.errorMessage = null;
 			}
 		});
 	}
@@ -59,11 +59,11 @@ public class ReplayTrace {
 		return this.location;
 	}
 	
-	public void setError(Exception e) {
-		this.error = e;
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
 	}
 	
-	public Exception getError() {
-		return error;
+	public String getErrorMessage() {
+		return errorMessage;
 	}
 }

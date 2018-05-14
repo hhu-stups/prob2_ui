@@ -81,7 +81,7 @@ public class TraceChecker {
 			for (int i = 0; i < transitionList.size(); i++) {
 				final int finalI = i;
 				Platform.runLater(() -> replayTrace.setProgress((double) finalI / transitionList.size()));
-				Transition trans = replayPersistentTransition(stateSpace, trace, transitionList.get(i),
+				Transition trans = replayPersistentTransition(replayTrace, trace, transitionList.get(i),
 						setCurrentAnimation);
 				if (trans != null) {
 					trace = trace.add(trans);
@@ -107,8 +107,8 @@ public class TraceChecker {
 				trace.getCurrentState().explore();
 				currentTrace.set(trace);
 
-				if (replayTrace.getError() != null) {
-					Platform.runLater(() -> stageManager.makeExceptionAlert("", replayTrace.getError()).showAndWait());
+				if (replayTrace.getErrorMessage() != null) {
+					Platform.runLater(() -> getReplayErrorAlert(replayTrace.getErrorMessage()).showAndWait());
 				}
 
 			}
@@ -118,8 +118,9 @@ public class TraceChecker {
 		replayThread.start();
 	}
 
-	private Transition replayPersistentTransition(StateSpace stateSpace, Trace t,
+	private Transition replayPersistentTransition(ReplayTrace replayTrace, Trace t,
 			PersistentTransition persistentTransition, boolean setCurrentAnimation) {
+		StateSpace stateSpace = t.getStateSpace();
 		String predicate = new PredicateBuilder().addMap(persistentTransition.getParameters()).toString();
 		final IEvalElement pred = stateSpace.getModel().parseFormula(predicate, FormulaExpand.EXPAND);
 		final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
@@ -128,6 +129,7 @@ public class TraceChecker {
 		if (command.hasErrors()) {
 			String errorMessage = "Executing operation " + persistentTransition.getOperationName() + " with predicate "
 					+ predicate + " produced errors: " + Joiner.on(", ").join(command.getErrors());
+			replayTrace.setErrorMessage(errorMessage);
 			Platform.runLater(() -> getReplayErrorAlert(errorMessage).showAndWait());
 			return null;
 		}
@@ -135,6 +137,7 @@ public class TraceChecker {
 		if (possibleTransitions.isEmpty()) {
 			String errorMessage = "Executing operation " + persistentTransition.getOperationName() + " with predicate "
 					+ predicate + " produced errors: Operation not possible.";
+			replayTrace.setErrorMessage(errorMessage);
 			Platform.runLater(() -> getReplayErrorAlert(errorMessage).showAndWait());
 			return null;
 		}
