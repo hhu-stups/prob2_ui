@@ -135,7 +135,7 @@ public class TraceReplayView extends ScrollPane {
 
 			final MenuItem replayTraceItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.replayTrace"));
-			replayTraceItem.setOnAction(event -> this.traceChecker.replayTrace(row.getItem().getLocation(), true));
+			replayTraceItem.setOnAction(event -> this.traceChecker.replayTrace(row.getItem(), true));
 
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.showError"));
@@ -167,7 +167,7 @@ public class TraceReplayView extends ScrollPane {
 
 			row.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					this.traceChecker.replayTrace(row.getItem().getLocation(), true);
+					this.traceChecker.replayTrace(row.getItem(), true);
 				}
 			});
 			return row;

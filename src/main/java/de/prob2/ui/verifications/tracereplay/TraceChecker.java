@@ -58,10 +58,6 @@ public class TraceChecker {
 		replayTraces.forEach((path, trace) -> replayTrace(trace, false));
 	}
 
-	public void replayTrace(Path traceFile, final boolean setCurrentAnimation) {
-		replayTrace(replayTraces.get(traceFile), setCurrentAnimation);
-	}
-
 	public void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
 		PersistentTrace persistentTrace = traceLoader.loadTrace(replayTrace.getLocation());
 
