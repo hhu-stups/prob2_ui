@@ -2,6 +2,7 @@ package de.prob2.ui.verifications.tracereplay;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
@@ -40,6 +41,7 @@ public class TraceChecker {
 	private final TraceLoader traceLoader;
 	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
 	private ObservableMap<Path, ReplayTrace> replayTraces = new SimpleMapProperty<>(this, "replayTraces",
@@ -47,10 +49,11 @@ public class TraceChecker {
 
 	@Inject
 	private TraceChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
-			final TraceLoader traceLoader, final StageManager stageManager) {
+			final TraceLoader traceLoader, final StageManager stageManager, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
 		this.traceLoader = traceLoader;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateReplayTraces(to));
 	}
 
@@ -123,31 +126,29 @@ public class TraceChecker {
 				t.getCurrentState().getId(), persistentTransition.getOperationName(), pred, 1);
 		stateSpace.execute(command);
 		if (command.hasErrors()) {
-			String errorMessage = "Executing operation " + persistentTransition.getOperationName() + " with predicate "
-					+ predicate + " produced errors: " + Joiner.on(", ").join(command.getErrors());
+			String errorMessage = String.format(bundle.getString("verifications.tracereplay.errorMessage"),
+					persistentTransition.getOperationName(), predicate, Joiner.on(", ").join(command.getErrors()));
 			replayTrace.setErrorMessage(errorMessage);
-			Platform.runLater(() -> getReplayErrorAlert(errorMessage).showAndWait());
 			return null;
 		}
 		List<Transition> possibleTransitions = command.getNewTransitions();
 		if (possibleTransitions.isEmpty()) {
-			String errorMessage = "Executing operation " + persistentTransition.getOperationName() + " with predicate "
-					+ predicate + " produced errors: Operation not possible.";
+			String errorMessage = String.format(bundle.getString("verifications.tracereplay.errorMessage.operationNotPossible"),
+					persistentTransition.getOperationName(), predicate);
 			replayTrace.setErrorMessage(errorMessage);
-			Platform.runLater(() -> getReplayErrorAlert(errorMessage).showAndWait());
 			return null;
 		}
 		Transition trans = possibleTransitions.get(0);
-		if (!checkOutputParams(stateSpace, trans, persistentTransition, setCurrentAnimation)) {
+		if (!checkOutputParams(replayTrace, trans, persistentTransition, setCurrentAnimation)) {
 			return null;
 		}
 		return trans;
 	}
 
-	private boolean checkOutputParams(StateSpace stateSpace, Transition trans,
+	private boolean checkOutputParams(ReplayTrace replayTrace, Transition trans,
 			PersistentTransition persistentTransition, boolean setCurrentAnimation) {
 		String operationName = trans.getName();
-		OperationInfo machineOperationInfo = stateSpace.getLoadedMachine().getMachineOperationInfo(operationName);
+		OperationInfo machineOperationInfo = trans.stateSpace.getLoadedMachine().getMachineOperationInfo(operationName);
 		if (machineOperationInfo != null) {
 			List<String> outputParameterNames = machineOperationInfo.getOutputParameterNames();
 			try {
@@ -163,12 +164,9 @@ public class TraceChecker {
 							// because the value translator does not
 							// support enum values properly
 							if (setCurrentAnimation) {
-								String errorMessage = String.format(
-										"Can not replay operation '%s'. The value of the ouput parameter '%s' does not match.\n"
-												+ "Value from trace file: %s\nComputed value: %s",
+								String errorMessage = String.format(bundle.getString("verifications.tracereplay.errorMessage.mismatchingOutputValues"),
 										operationName, outputParamName, bValue.toString(), paramValueFromTransition);
-								Platform.runLater(
-										() -> Platform.runLater(() -> getReplayErrorAlert(errorMessage).showAndWait()));
+								replayTrace.setErrorMessage(errorMessage);
 							}
 							return false;
 						}
