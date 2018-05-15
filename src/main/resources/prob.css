@@ -649,9 +649,6 @@
 /************************************************************************************
  * Specific Styles																  *
  ************************************************************************************/
-.center {
-	-fx-alignment: center;
-}
 .left, .left .label {
 	-fx-alignment: center-left;
 	-fx-padding: 0.0 0.0 0.0 0.5em;
@@ -766,12 +763,6 @@
 	-fx-text-fill: white;
 }
 
-/* ================== FORMULA DIALOG ================= */
-
-#formula-dialog-header {
-	-fx-font-size: 1.6em;
-}
-
 /* ================= FULL VALUE STAGE ================ */
 
 .difftextarea .coords {
@@ -844,24 +835,6 @@
 .gridViewRow {
 	-fx-border-color: transparent transparent -prob-grey transparent;
 	-fx-border-width: 0.5;
-}
-
-.historyItemBackground {
-	-fx-background-color: -prob-grey-50;
-}
-
-.historyItemBackground:hover {
-	-fx-background-color: -prob-grey-75;
-}
-
-.historyItemBackgroundSelected {
-	-fx-background-color: -prob-grey-50;
-	-fx-border-color: -prob-grey;
-}
-
-.historyItemBackgroundSelected:hover {
-	-fx-background-color: -prob-grey-75;
-	-fx-border-color: -prob-grey;
 }
 
 /* ================= OPERATIONS VIEW ================= */
