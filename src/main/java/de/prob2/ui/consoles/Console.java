@@ -251,7 +251,7 @@ public abstract class Console extends StyleClassedTextArea {
 		}
 		searchHandler.handleEnter();
 		this.appendText('\n' + prompt.get());
-		this.setStyle(getLineNumber(), Collections.singletonList("current"));
+		this.setStyle(getLineNumber(), Collections.emptyList());
 		this.scrollYToPixel(Double.MAX_VALUE);
 		goToLastPos();
 	}
