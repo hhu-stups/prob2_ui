@@ -15,7 +15,7 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.statespace.State;
 import de.prob.statespace.TraceElement;
-
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -142,6 +142,8 @@ public final class HistoryChartStage extends Stage {
 	@FXML
 	private Button removeButton;
 	@FXML
+	private HelpButton helpButton;
+	@FXML
 	private CheckBox separateChartsCheckBox;
 	@FXML
 	private ChoiceBox<TraceElement> startChoiceBox;
@@ -167,6 +169,7 @@ public final class HistoryChartStage extends Stage {
 
 	@FXML
 	private void initialize() {
+		helpButton.setHelpContent(this.getClass());
 		this.formulaList.setCellFactory(view -> new ClassicalBListCell());
 		this.formulaList.getItems().addListener((ListChangeListener<ClassicalB>) change -> {
 			while (change.next()) {

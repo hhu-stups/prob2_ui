@@ -617,20 +617,15 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 6. Delete -> funktioniert
 7. Select all -> funktioniert
 8. Save Machine File -> funktioniert
-9. Save Machine File as
+9. Highlighting -> funktioniert
 
-Erwartetes Ergebnis: Es wird eine neue Datei mit dem entsprechenden Namen angelegt oder eine Datei überschrieben. Dabei wird der Pfad der aktuellen Maschine neu gesetzt/hinzugefügt (?)
+Bemerkung:
 
-Tatsächliches Ergebnis: Es wird eine neue Datei mit dem entsprechenden Namen angelegt oder eine Datei überschrieben.
-
-10. Highlighting -> funktioniert
+Hilfe Button beim BEditor?
 
 
 
 25. Save Project -> funktioniert
-
--Inkonsistentes Verhalten, da Save Project as fehlt?
--Im BEditor ist Save Machine as.. vorhanden -> überflüssig?
 
 
 
@@ -654,13 +649,19 @@ Tatsächliches Ergebnis: Es wird eine neue Datei mit dem entsprechenden Namen an
 
 9. Help Buttons -> funktionieren, springen allerdings noch nicht an die richtige Stelle
 
-10. Status
+10. Status 
 
-11. Add Preference
+Erwartetes Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, beim Neuladen der Maschine wird es zurückgesetzt. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
 
-12. Edit Preference
+Tatsächliches Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, beim Neuladen der Maschine wird es zurückgesetzt. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
 
-13. Remove Preference
+
+
+11. Add Preference -> funktioniert
+
+12. Edit Preference -> funktioniert
+
+13. Remove Preference -> funktioniert
 
 14. Edit Project -> funktioniert
 
@@ -668,10 +669,60 @@ Tatsächliches Ergebnis: Es wird eine neue Datei mit dem entsprechenden Namen an
 
 
 
+27. History Chart
+
+1. Es wird auf das '+' geklickt und eine valide Formel eingegeben
+
+Erwartetes Ergebnis: Eingegebene Formel wird in der Grafik dargestellt
+
+Tatsächliches Ergebnis: Eingegebene Formel wird in der Grafik dargestellt
+
+
+2. Es wird auf das '+' geklickt und eine invalide Formel eingegeben
+
+Erwartetes Ergebnis: Fehlermeldung erscheint
+
+Tatsächliches Ergebnis: Fehlermeldung erscheint
+
+
+3. Es wird eine Formel ausgewählt und auf das '-' geklickt
+
+Erwartetes Ergebnis: Formel wird gelöscht
+
+Tatsächliches Ergebnis: Formel wird gelöscht
+
+4. Start at Position wird geändert
+
+Erwartetes Ergebnis: Es wird nur der entsprechende Abschnitt des Graphen angezeigt
+
+Tatsächliches Ergebnis: Es wird nur der entsprechende Abschnitt des Graphen angezeigt
+
+5. Separate Charts wird ausgewählt
+
+Erwartetes Ergebnis: Graphen werden in einer einzigen Abbildung dargestellt
+
+Tatsächliches Ergebnis: Graphegn werden in einer einzigen Abbildung dargestellt
+
+6. Separate Charts wird nicht ausgewählt
+
+Erwartetes Ergebnis: Pro Formel gibt es einen Graphen
+
+Tatsächliches Ergebnis: Pro Formel gibt es einen Graphen
+
+
+
+Bemerkungen:
+
+1. Eingaben persistieren?
+
+2. Farben sind nicht ganz korrekt, wenn man Separate Charts auswählt, eine Formel eingibt und dann Separate Charts ausschaltet
+
+3. Hilfebutton wurde hinzugefügt, springt noch nicht an die richtige Stelle
+
+
 
 Noch zu testen:
 -Advanced
--History Chart
 -Statistics
 -Verifications
 -State View/State Errors/State Visualization

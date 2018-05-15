@@ -2,6 +2,7 @@
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
@@ -36,15 +37,16 @@
 								<Button fx:id="addButton" onAction="#handleAdd"
 									alignment="CENTER" contentDisplay="GRAPHIC_ONLY">
 									<graphic>
-										<FontAwesomeIconView glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 1.2}"/>
+										<FontAwesomeIconView glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
 								<Button fx:id="removeButton" onAction="#handleRemove"
 									alignment="CENTER" contentDisplay="GRAPHIC_ONLY">
 									<graphic>
-										<FontAwesomeIconView glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 1.2}"/>
+										<FontAwesomeIconView glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
+								<HelpButton fx:id="helpButton"/>
 							</ToolBar>
 						</top>
 						<center>
