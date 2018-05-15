@@ -720,9 +720,44 @@ Bemerkungen:
 3. Hilfebutton wurde hinzugefügt, springt noch nicht an die richtige Stelle
 
 
+Statistics:
+
+1. HelpButton -> springt noch nicht an die richtige Stelle
+
+2. Show Extended Stats -> funktioniert
+
+3. View updatet sich beim Animieren, beim Modelchecking und beim Trace Replay
+
+
+
+
+
+StateView:
+
+1. View updatet sich wenn sich der Trace ändert -> funktioniert
+
+2. HelpButton springt noch nicht an die richtige Stelle
+
+3. Suchfunktion wird mit Lowercase und Uppercase getestet (sowohl mit Enter im Suchfeld als auch mit dem Suchbutton)
+
+Erwartetes Ergebnis: Entsprechende Einträge werden angezeigt
+
+Tatsächliches Ergebnis: Entsprechende Einträge werden angezeigt
+
+4. Copy u.a. mit CTRL+V -> funktioniert
+
+5. Visualize as Graph -> funktioniert
+
+6. Visualize as Table -> funktioniert
+
+7. Show Details -> funktioniert
+
+
+
+
+
 
 Noch zu testen:
 -Advanced
--Statistics
 -Verifications
--State View/State Errors/State Visualization
+-State Errors/State Visualization

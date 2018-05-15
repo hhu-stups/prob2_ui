@@ -70,10 +70,10 @@ public final class ViewCodeStage extends Stage {
 	private void saveAs() {
 		final FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().setAll(
-			new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.text"), "*.txt"),
+			new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), "*.mch"),
 			new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.all"), "*.*")
 		);
-		chooser.setInitialFileName(this.getTitle() + ".txt");
+		chooser.setInitialFileName(this.getTitle() + ".mch");
 		final File selected = chooser.showSaveDialog(this);
 		if (selected == null) {
 			return;
