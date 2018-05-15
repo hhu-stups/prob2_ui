@@ -20,7 +20,7 @@
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
-	<SplitPane orientation="VERTICAL" dividerPositions="0.9">
+	<SplitPane fx:id="splitPane" orientation="VERTICAL" dividerPositions="0.8">
 		<VBox minWidth="240" minHeight="240">
 			<HBox spacing="10.0" alignment="CENTER">
 				<padding>
@@ -49,7 +49,7 @@
 				<TreeItem fx:id="tvRootItem" expanded="true" />
 			</TreeTableView>
 		</VBox>
-		<TitledPane text="%consoles.b.title" expanded="false">
+		<TitledPane fx:id ="consolePane" text="%consoles.b.title" expanded="false" animated="false">
 			<BConsoleView/>
 		</TitledPane>
 	</SplitPane>

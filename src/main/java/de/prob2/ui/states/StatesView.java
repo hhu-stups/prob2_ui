@@ -47,7 +47,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
@@ -91,6 +93,12 @@ public final class StatesView extends StackPane {
 	private TreeTableColumn<StateItem<?>, StateItem<?>> tvPreviousValue;
 	@FXML
 	private TreeItem<StateItem<?>> tvRootItem;
+	
+	@FXML
+	private TitledPane consolePane;
+	
+	@FXML
+	private SplitPane splitPane;
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
@@ -130,6 +138,17 @@ public final class StatesView extends StackPane {
 	@FXML
 	private void initialize() {
 		helpButton.setHelpContent(this.getClass());
+		
+		consolePane.expandedProperty().addListener((observable, from, to) -> {
+			if(to) {
+				splitPane.setDividerPositions(0.5);
+			} else {
+				splitPane.setDividerPositions(0.8);
+			}
+		});
+		
+		
+		
 		tv.setRowFactory(view -> initTableRow());
 
 		this.tvName.setCellFactory(col -> new NameCell());
