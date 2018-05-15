@@ -237,7 +237,7 @@ public final class OperationsView extends AnchorPane {
 	@FXML
 	private ToggleButton disabledOpsToggle;
 	@FXML
-	private TextField filterEvents;
+	private TextField searchBar;
 	@FXML
 	private TextField randomText;
 	@FXML
@@ -260,7 +260,6 @@ public final class OperationsView extends AnchorPane {
 	private Map<String, List<String>> opToParams = new HashMap<>();
 	private List<OperationItem> events = new ArrayList<>();
 	private boolean showDisabledOps = true;
-	private String filter = "";
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
@@ -297,6 +296,7 @@ public final class OperationsView extends AnchorPane {
 				executeOperationIfPossible(opsListView.getSelectionModel().getSelectedItem());
 			}
 		});
+		searchBar.textProperty().addListener((o, from, to) -> opsListView.getItems().setAll(applyFilter(to)));
 
 		randomButton.disableProperty().bind(Bindings.or(currentTrace.existsProperty().not(), randomExecutionThread.isNotNull()));
 
@@ -420,7 +420,7 @@ public final class OperationsView extends AnchorPane {
 					OperationItem.Status.MAX_REACHED));
 		}
 
-		final List<OperationItem> filtered = applyFilter(filter);
+		final List<OperationItem> filtered = applyFilter(searchBar.getText());
 
 		Platform.runLater(() -> {
 			opsListView.getItems().setAll(filtered);
@@ -492,12 +492,6 @@ public final class OperationsView extends AnchorPane {
 		((FontAwesomeIconView)disabledOpsToggle.getGraphic()).setIcon(icon);
 	}
 
-	@FXML
-	private void handleSearchButton() {
-		filter = filterEvents.getText();
-		opsListView.getItems().setAll(applyFilter(filter));
-	}
-
 	private List<OperationItem> applyFilter(final String filter) {
 		return events.stream().filter(op -> op.getName().toLowerCase().contains(filter.toLowerCase()))
 				.collect(Collectors.toList());
@@ -549,7 +543,7 @@ public final class OperationsView extends AnchorPane {
 		}
 
 		doSort();
-		opsListView.getItems().setAll(applyFilter(filter));
+		opsListView.getItems().setAll(applyFilter(searchBar.getText()));
 		((FontAwesomeIconView)sortButton.getGraphic()).setIcon(icon);
 	}
 

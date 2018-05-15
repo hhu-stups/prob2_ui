@@ -28,16 +28,7 @@
 				<HBox spacing="10.0" AnchorPane.leftAnchor="10.0"
 					AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0"
 					AnchorPane.bottomAnchor="10.0" alignment="CENTER">
-					<Button styleClass="button-dark" alignment="CENTER"
-						contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
-						onAction="#handleSearchButton" HBox.hgrow="NEVER" prefHeight="${searchButton.width}">
-						<graphic>
-							<FontAwesomeIconView glyphName="SEARCH"
-								styleClass="icon-basic" glyphSize="${fontSize.fontSize}" />
-						</graphic>
-					</Button>
-					<TextField fx:id="filterEvents" onAction="#handleSearchButton"
-						promptText="%operations.search.prompt" HBox.hgrow="ALWAYS" />
+					<TextField fx:id="searchBar" promptText="%operations.search.prompt" HBox.hgrow="ALWAYS"/>
 					<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 				</HBox>
 			</AnchorPane>
