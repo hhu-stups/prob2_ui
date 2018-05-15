@@ -239,13 +239,14 @@ public abstract class Console extends StyleClassedTextArea {
 			posInList = instructions.size() - 1;
 			ConsoleInstruction instruction = instructions.get(posInList);
 			ConsoleExecResult execResult = interpreter.exec(instruction);
+			int from = this.getLength();
 			if (execResult.getResultType() == ConsoleExecResultType.CLEAR) {
 				reset();
 				return;
 			}
 			this.appendText("\n" + execResult);
 			if (execResult.getResultType() == ConsoleExecResultType.ERROR) {
-				this.setStyle(getLineNumber(), Collections.singletonList("error"));
+				this.setStyle(from, from + execResult.toString().length() + 1, Collections.singletonList("error"));
 			}
 		}
 		searchHandler.handleEnter();

@@ -732,7 +732,7 @@ Statistics:
 
 
 
-StateView:
+28. StateView:
 
 1. View updatet sich wenn sich der Trace ändert -> funktioniert
 
@@ -754,10 +754,18 @@ Tatsächliches Ergebnis: Entsprechende Einträge werden angezeigt
 
 
 
+29. State Visualization -> funktioniert
+
+Bemerkungen:
+
+Besser Lazy auswerten?
+
+
+
+30. State Errors -> funktioniert
 
 
 
 Noch zu testen:
 -Advanced
 -Verifications
--State Errors/State Visualization
