@@ -16,10 +16,15 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
+
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -42,7 +47,7 @@ public class BEditorView extends BorderPane {
 	private final StopActions stopActions;
 
 	private final ObjectProperty<Path> path;
-	
+	private final StringProperty lastSavedText;
 	private final BooleanProperty saved;
 
 	@Inject
@@ -52,18 +57,19 @@ public class BEditorView extends BorderPane {
 		this.currentProject = currentProject;
 		this.stopActions = stopActions;
 		this.path = new SimpleObjectProperty<>(this, "path", null);
+		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
 		this.saved = new SimpleBooleanProperty(true);
 		stageManager.loadFXML(this, "beditorView.fxml");
 	}
 
 	@FXML
 	private void initialize() {
+		// We can't use Bindings.equal here, because beditor.textProperty() is not an ObservableObjectValue.
+		saved.bind(Bindings.createBooleanBinding(
+			() -> Objects.equals(lastSavedText.get(), beditor.getText()),
+			lastSavedText, beditor.textProperty()
+		));
 		saveButton.disableProperty().bind(this.pathProperty().isNull().or(saved));
-		beditor.setOnKeyTyped(e -> {
-			if(!e.isShortcutDown()) {
-				saved.set(false);
-			}
-		});		
 		setHint();
 		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
@@ -99,7 +105,7 @@ public class BEditorView extends BorderPane {
 		this.pathProperty().set(path);
 	}
 	
-	public BooleanProperty savedProperty() {
+	public ReadOnlyBooleanProperty savedProperty() {
 		return saved;
 	}
 
@@ -110,6 +116,7 @@ public class BEditorView extends BorderPane {
 
 	private void setEditorText(String text, Path path) {
 		this.setPath(path);
+		this.lastSavedText.set(text);
 		beditor.clear();
 		beditor.appendText(text);
 		beditor.getStyleClass().add("editor");
@@ -119,6 +126,7 @@ public class BEditorView extends BorderPane {
 
 	@FXML
 	public void handleSave() {
+		lastSavedText.set(beditor.getText());
 		assert this.getPath() != null;
 		// Maybe add something for the user, that reloads the machine automatically?
 		try {
@@ -126,6 +134,5 @@ public class BEditorView extends BorderPane {
 		} catch (IOException e) {
 			LOGGER.error(bundle.getString("beditor.couldNotSaveFile"), e);
 		}
-		saved.set(true);
 	}
 }
