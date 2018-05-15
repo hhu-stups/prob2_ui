@@ -678,6 +678,11 @@
 	-fx-font-size: 1.5em; /* 18 */
 }
 
+.label.warning {
+	-fx-text-fill: -prob-orange;
+	-fx-font-weight: bold;
+}
+
 /* ===================== DIALOG ====================== */
 .dialog > .label {
 	-fx-text-fill: -prob-grey;

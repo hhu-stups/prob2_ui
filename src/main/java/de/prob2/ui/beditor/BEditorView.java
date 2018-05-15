@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +17,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -28,6 +30,7 @@ import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 
 import org.slf4j.Logger;
@@ -39,26 +42,31 @@ public class BEditorView extends BorderPane {
 	private static final Charset EDITOR_CHARSET = Charset.forName("UTF-8");
 
 	@FXML private Button saveButton;
+	@FXML private Label warningLabel;
 	@FXML private BEditor beditor;
 
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
+	private final CurrentTrace currentTrace;
 	private final StopActions stopActions;
 
 	private final ObjectProperty<Path> path;
 	private final StringProperty lastSavedText;
 	private final BooleanProperty saved;
+	private final BooleanProperty reloaded;
 
 	@Inject
-	private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final StopActions stopActions) {
+	private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final StopActions stopActions) {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
 		this.stopActions = stopActions;
 		this.path = new SimpleObjectProperty<>(this, "path", null);
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
-		this.saved = new SimpleBooleanProperty(true);
+		this.saved = new SimpleBooleanProperty(this, "saved", true);
+		this.reloaded = new SimpleBooleanProperty(this, "reloaded", true);
 		stageManager.loadFXML(this, "beditorView.fxml");
 	}
 
@@ -69,7 +77,15 @@ public class BEditorView extends BorderPane {
 			() -> Objects.equals(lastSavedText.get(), beditor.getText()),
 			lastSavedText, beditor.textProperty()
 		));
+		currentTrace.stateSpaceProperty().addListener((o, from, to) -> reloaded.set(true));
 		saveButton.disableProperty().bind(this.pathProperty().isNull().or(saved));
+		warningLabel.textProperty().bind(Bindings.when(saved)
+			.then(Bindings.when(reloaded)
+				.then("")
+				.otherwise(bundle.getString("beditor.reloadWarning"))
+			)
+			.otherwise(bundle.getString("beditor.unsavedWarning"))
+		);
 		setHint();
 		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
@@ -127,6 +143,7 @@ public class BEditorView extends BorderPane {
 	@FXML
 	public void handleSave() {
 		lastSavedText.set(beditor.getText());
+		reloaded.set(false);
 		assert this.getPath() != null;
 		// Maybe add something for the user, that reloads the machine automatically?
 		try {

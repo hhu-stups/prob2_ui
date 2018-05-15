@@ -49,7 +49,7 @@
 									</padding>
 									<Button fx:id="undoButton" text="%preferences.stage.tabs.globalPreferences.undo" disable="true" HBox.hgrow="NEVER" onAction="#handleUndoChanges" />
 									<Button fx:id="resetButton" text="%preferences.stage.tabs.globalPreferences.reset" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults" />
-									<Label fx:id="applyWarning" text="%preferences.stage.tabs.globalPreferences.notAppliedWarning" visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" style="-fx-text-fill: -prob-orange; -fx-font-weight: bold;" alignment="CENTER" />
+									<Label fx:id="applyWarning" text="%preferences.stage.tabs.globalPreferences.notAppliedWarning" styleClass="warning" visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
 									<Button fx:id="applyButton" text="%common.apply" disable="true" HBox.hgrow="NEVER" onAction="#handleApply" />
 								</HBox>
 							</bottom>
