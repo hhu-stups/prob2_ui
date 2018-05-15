@@ -13,7 +13,7 @@
 					<VBox spacing="5" AnchorPane.topAnchor="14"
 						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-10"
 						AnchorPane.rightAnchor="-10">
-						<Label text="%project.preferences.dialog.title" id="title">
+						<Label text="%project.preferences.dialog.title" styleClass="title">
 							<VBox.margin>
 								<Insets left="10" right="10" />
 							</VBox.margin>

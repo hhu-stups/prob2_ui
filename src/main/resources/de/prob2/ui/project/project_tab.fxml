@@ -12,7 +12,7 @@
 			<HBox alignment="CENTER_RIGHT" AnchorPane.leftAnchor="6"
 				AnchorPane.rightAnchor="6" AnchorPane.topAnchor="10">
 				<HBox HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
-					<Label fx:id="projectNameLabel" HBox.hgrow="ALWAYS" id="title" />
+					<Label fx:id="projectNameLabel" HBox.hgrow="ALWAYS" styleClass="title" />
 					<TextField fx:id="projectNameTextField" managed="false"
 						visible="false" />
 				</HBox>
@@ -36,7 +36,7 @@
 				</AnchorPane>
 			</ScrollPane>
 		</AnchorPane>
-		<Label fx:id="locationLabel" id="project-location">
+		<Label fx:id="locationLabel" styleClass="project-location">
 			<tooltip>
 				<Tooltip />
 			</tooltip>

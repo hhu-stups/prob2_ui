@@ -25,12 +25,12 @@
 		<FlowPane alignment="CENTER" hgap="20" vgap="20">
 			<VBox spacing="5" alignment="CENTER">
 				<Label text="%visualisation.currentState.title" alignment="CENTER"
-					id="title" />
+					styleClass="title" />
 				<StateVisualisationView fx:id="currentStateVisualisation" />
 			</VBox>
 			<VBox fx:id="previousStateVBox" spacing="5" alignment="CENTER">
 				<Label text="%visualisation.previousState.title" alignment="CENTER"
-					id="title" />
+					styleClass="title" />
 				<StateVisualisationView fx:id="previousStateVisualisation" />
 			</VBox>
 		</FlowPane>

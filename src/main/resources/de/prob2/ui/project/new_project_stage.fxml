@@ -13,7 +13,7 @@
 				<VBox spacing="5" AnchorPane.topAnchor="25"
 					AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0"
 					AnchorPane.rightAnchor="0">
-					<Label text="%project.newProject.stage.title" id="title">
+					<Label text="%project.newProject.stage.title" styleClass="title">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>

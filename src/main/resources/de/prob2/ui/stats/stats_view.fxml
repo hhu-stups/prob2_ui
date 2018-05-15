@@ -27,7 +27,7 @@
 			AnchorPane.topAnchor="25.0" fx:id="statsBox">
 			<VBox spacing="8.0" styleClass="border">
 				<HBox spacing="7.0">
-					<Label text="%stats.processedStates" HBox.hgrow="ALWAYS" id="bold" />
+					<Label text="%stats.processedStates" HBox.hgrow="ALWAYS" styleClass="bold" />
 					<Label fx:id="processedStates" />
 					<Label text="/" />
 					<Label fx:id="totalStates" />
@@ -38,7 +38,7 @@
 					</VBox.margin>
 				</HBox>
 				<HBox spacing="7.0">
-					<Label text="%stats.totalTransitions" HBox.hgrow="ALWAYS" id="bold" />
+					<Label text="%stats.totalTransitions" HBox.hgrow="ALWAYS" styleClass="bold" />
 					<Label fx:id="totalTransitions" />
 					<VBox.margin>
 						<Insets bottom="15.0" left="10.0" right="10.0" top="0.0" />
@@ -67,7 +67,7 @@
 						<AnchorPane>
 							<Label alignment="CENTER" text="%stats.stateStats"
 								AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-								AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0" id="stats-titel" />
+								AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0" styleClass="stats-titel" />
 						</AnchorPane>
 						<VBox>
 							<GridPane fx:id="stateStatsHeader">
@@ -78,14 +78,14 @@
 								<AnchorPane
 									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
 									<Label text="%stats.stateStats.status"
-										AnchorPane.leftAnchor="10.0" id="stats-header" />
+										AnchorPane.leftAnchor="10.0" styleClass="stats-header" />
 								</AnchorPane>
 								<AnchorPane fx:id="numberOfStatesAnchorPane"
 									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
 									GridPane.columnIndex="1">
 									<Label text="%stats.stateStats.numberOfStates"
 										AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0"
-										id="stats-header" />
+										styleClass="stats-header" />
 								</AnchorPane>
 							</GridPane>
 							<GridPane fx:id="stateStats">
@@ -99,7 +99,7 @@
 							<Label alignment="CENTER" prefHeight="16.0"
 								text="%stats.transitionStats" AnchorPane.bottomAnchor="0.0"
 								AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-								AnchorPane.topAnchor="20.0" id="stats-titel" />
+								AnchorPane.topAnchor="20.0" styleClass="stats-titel" />
 						</AnchorPane>
 						<VBox>
 							<GridPane fx:id="transStatsHeader">
@@ -110,14 +110,14 @@
 								<AnchorPane
 									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
 									<Label text="%stats.transitionStats.name"
-										AnchorPane.leftAnchor="10.0" id="stats-header" />
+										AnchorPane.leftAnchor="10.0" styleClass="stats-header" />
 								</AnchorPane>
 								<AnchorPane fx:id="numberOfTransitionsAnchorPane"
 									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
 									GridPane.columnIndex="1">
 									<Label text="%stats.transitionStats.numberOfTransitions"
 										AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0"
-										id="stats-header" />
+										styleClass="stats-header" />
 								</AnchorPane>
 							</GridPane>
 							<GridPane fx:id="transStats">

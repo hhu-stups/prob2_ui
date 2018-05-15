@@ -9,7 +9,7 @@
 		<DialogPane stylesheets="@/prob.css">
 			<header>
 				<AnchorPane>
-					<Label text="%verifications.ltl.dialog.formula.title" id="title"
+					<Label text="%verifications.ltl.dialog.formula.title" styleClass="title"
 						AnchorPane.topAnchor="14" AnchorPane.bottomAnchor="5"
 						AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" />
 				</AnchorPane>

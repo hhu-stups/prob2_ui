@@ -668,13 +668,13 @@
 	-fx-border-width: 0 0 0 0;
 }
 
-#bold {
+.bold {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: bold;
 	-fx-font-size: 1.04em;
 }
 
-#title {
+.title {
 	-fx-font-size: 1.5em; /* 18 */
 }
 
@@ -924,7 +924,7 @@
 /* =================== PROJECT VIEW ================== */
 
 /* Machines Tab, Preferences Tab */
-#details-title {
+.details-title {
 	-fx-font-size: 1.2em; 
 }
 .machines-item .name {
@@ -945,7 +945,7 @@
 	-glyph-name: "SPINNER";
 	-fx-fill: limegreen;
 }
-#project-location {
+.project-location {
 	-fx-font-family: ARIAL;
 	-fx-font-style: italic;
 	-fx-font-size: 1em;
@@ -989,11 +989,11 @@
 
 /* ==================== STATS VIEW =================== */
 
-#stats-titel {
+.stats-titel {
 	-fx-font-family: ARIAL;
 	-fx-font-size: 1.3em;
 }
-#stats-header {
+.stats-header {
 	-fx-font-family: ARIAL;
 	-fx-font-size: 1.1em;
 }
