@@ -745,7 +745,7 @@
 	-fx-text-fill: -prob-aqua;
 }
 
-.dynamic-command-celll.dynamiccommandenabled:selected:hover {
+.dynamic-command-cell.dynamiccommandenabled:selected:hover {
 	-fx-text-fill: white;
 }
 
@@ -761,7 +761,7 @@
 	-fx-text-fill: white;
 }
 
-.dynamic-command-cell-command-cell:selected:hover {
+.dynamic-command-cell:selected:hover {
 	-fx-background-color: -prob-grey;
 	-fx-text-fill: white;
 }
