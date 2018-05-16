@@ -125,15 +125,8 @@ public class LTLView extends ScrollPane {
 	private void setOnItemClicked() {
 		tvFormula.setOnMouseClicked(e-> {
 			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
-				showCurrentItemDialog(item);
-			}
-		});
-		
-		tvPattern.setOnMouseClicked(e-> {
-			LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
-				showCurrentItemDialog(item);
+			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.exists()) {
+				checkItem(item);
 			}
 		});
 	}
@@ -160,22 +153,7 @@ public class LTLView extends ScrollPane {
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 
 			MenuItem check = new MenuItem(bundle.getString("verifications.ltl.formula.menu.check"));
-			check.setOnAction(e-> {
-				Thread checkingThread = new Thread(() -> {
-					Machine machine = currentProject.getCurrentMachine();
-					LTLFormulaItem item = row.getItem();
-					Checked result = checkFormula(item, machine);
-					item.setChecked(result);
-					Thread currentThread = Thread.currentThread();
-					Platform.runLater(() -> {
-						injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-						tvFormula.refresh();
-						currentJobThreads.remove(currentThread);
-					});
-				}, "LTL Checking Thread");
-				currentJobThreads.add(checkingThread);
-				checkingThread.start();
-			});
+			check.setOnAction(e-> checkItem(row.getItem()));
 			check.disableProperty().bind(row.emptyProperty().or(currentJobThreads.emptyProperty().not()));
 
 			row.setOnMouseClicked(e->rowClicked(e, row, showCounterExampleItem, showMessage));
@@ -381,6 +359,22 @@ public class LTLView extends ScrollPane {
 		Machine machine = currentProject.getCurrentMachine();
 		Thread checkingThread = new Thread(() -> {
 			checker.checkMachine(machine);
+			Thread currentThread = Thread.currentThread();
+			Platform.runLater(() -> {
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+				tvFormula.refresh();
+				currentJobThreads.remove(currentThread);
+			});
+		}, "LTL Checking Thread");
+		currentJobThreads.add(checkingThread);
+		checkingThread.start();
+	}
+	
+	private void checkItem(LTLFormulaItem item) {
+		Thread checkingThread = new Thread(() -> {
+			Machine machine = currentProject.getCurrentMachine();
+			Checked result = checkFormula(item, machine);
+			item.setChecked(result);
 			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);

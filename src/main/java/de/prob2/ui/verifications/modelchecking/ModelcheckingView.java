@@ -308,25 +308,12 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 				this.resetView();
 			}
 		});
-		
-		tvItems.setOnMouseClicked(this::tvItemsClicked);
 	}
 
 	private void tvItemsClicked(MouseEvent e) {
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-		if(item != null) {
-			if(item.getStats() == null) {
-				if(e.getButton() == MouseButton.PRIMARY) {
-					checkItem(item, true);
-				}
-			} else {
-				showStats(item.getStats());
-				if (e.getClickCount() >= 2 && e.getButton() == MouseButton.PRIMARY &&
-						item.getChecked() == Checked.FAIL && item.getStats().getTrace() != null) {
-					currentTrace.set(item.getStats().getTrace());
-					injector.getInstance(StatsView.class).update(item.getStats().getTrace());
-				}
-			}
+		if(item != null && item.getStats() == null && e.getClickCount() >= 2 && e.getButton() == MouseButton.PRIMARY) {
+			checkItem(item, false);
 		}
 	}
 	
@@ -340,7 +327,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	private void setContextMenus() {
 		tvItems.setRowFactory(table -> {
 			final TableRow<ModelCheckingItem> row = new TableRow<>();
-			
+			row.setOnMouseClicked(this::tvItemsClicked);
 			final BooleanBinding disableErrorItemsBinding = Bindings.createBooleanBinding(
 				() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || row.getItem().getStats().getTrace() == null,
 				row.emptyProperty(), row.itemProperty());
@@ -361,14 +348,14 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			});
 			checkItem.disableProperty().bind(row.emptyProperty());
 			
-			MenuItem showFullValueItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.showDetails"));
-			showFullValueItem.setOnAction(e-> {
+			MenuItem showDetailsItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.showDetails"));
+			showDetailsItem.setOnAction(e-> {
 				ModelcheckingItemDetailsStage fullValueStage = injector.getInstance(ModelcheckingItemDetailsStage.class);
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 				fullValueStage.setValues(item.getStrategy(), item.getDescription());
 				fullValueStage.show();
 			});
-			showFullValueItem.disableProperty().bind(row.emptyProperty());
+			showDetailsItem.disableProperty().bind(row.emptyProperty());
 			
 			MenuItem searchForNewErrorsItem = new MenuItem(bundle.getString("verifications.modelchecking.stage.options.searchForNewErrors"));
 			searchForNewErrorsItem.setOnAction(e-> {
@@ -385,7 +372,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu)null)
-				.otherwise(new ContextMenu(showTraceToErrorItem, checkItem, showFullValueItem, searchForNewErrorsItem, removeItem))
+				.otherwise(new ContextMenu(showTraceToErrorItem, checkItem, showDetailsItem, searchForNewErrorsItem, removeItem))
 			);
 			return row;
 		});

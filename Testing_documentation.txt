@@ -804,7 +804,32 @@ Bemerkung: Show Error kann nur bei einem Fehler ausgewählt werden
 7. Show Error -> funktioniert
 
 
+Bemerkung: Trace Replay in Project Status ergänzen?
 
+
+32. Modelchecking
+
+1. Alle Checks überprüfen
+
+2. Check abbrechen
+
+3. Neue Strategie überprüfen mit erfolgreichem Check
+
+4. Neue Strategie überprüfen mit fehlgeschlagenem Check
+
+5. Eine vorhandene Strategie überprüfen mit erfolgreichem Check
+
+6. Eine vorhandene Strategie überprüfen mit fehlgeschlagenem Check
+
+7. Show Error State
+
+8. Show Details
+
+9. Search for new errors
+
+10. Remove item
+
+11. Hilfebutton
 
 
 
@@ -813,4 +838,4 @@ Bemerkung: Show Error kann nur bei einem Fehler ausgewählt werden
 
 Noch zu testen:
 -Advanced
--Verifications (Modelchecking, LTL, Trace Replay, Symbolic)
+-Verifications (LTL, Symbolic)

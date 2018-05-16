@@ -26,7 +26,7 @@ public final class MachineStatusHandler {
 			if(!item.shouldExecute()) {
 				continue;
 			}
-			if(item.getChecked() == Checked.FAIL || item.getChecked() == Checked.EXCEPTION) {
+			if(item.getChecked() == Checked.FAIL) {
 				refreshMachineStatus(machine, type, Machine.CheckingStatus.FAILED);
 				updateStatusBar(type, StatusBar.CheckingStatus.ERROR);
 				return;

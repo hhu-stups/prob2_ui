@@ -50,7 +50,7 @@ public class LTLFormulaChecker {
 		failed.add(false);
 		for (LTLFormulaItem item : machine.getLTLFormulas()) {
 			Checked result = this.checkFormula(item, machine);
-			if(result == Checked.FAIL || result == Checked.EXCEPTION) {
+			if(result == Checked.FAIL) {
 				failed.set(0, true);
 				machine.setLtlStatus(Machine.CheckingStatus.FAILED);
 			}
@@ -83,7 +83,7 @@ public class LTLFormulaChecker {
 			currentTrace.getStateSpace().execute(lcc);
 			injector.getInstance(StatsView.class).update(currentTrace.get());
 		} catch (ProBError error) {
-			logger.error("Could not parse LTL formula");
+			logger.error("Could not parse LTL formula: ", error);
 			return error;
 		}
 		return lcc.getValue();

@@ -68,16 +68,6 @@ public abstract class AbstractResultHandler {
 		alert.setTitle(item.getName());
 		alert.setHeaderText(resultItem.getHeader());
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-		if(resultItem.getChecked() == Checked.EXCEPTION) {
-			alert.getDialogPane().getStylesheets().add(getClass().getResource("/prob.css").toExternalForm());
-			TextArea exceptionText = new TextArea(resultItem.getExceptionText());
-			exceptionText.setEditable(false);
-			exceptionText.getStyleClass().add("text-area-error");
-			StackPane pane = new StackPane(exceptionText);
-			pane.setPrefSize(320, 120);
-			alert.getDialogPane().setExpandableContent(pane);
-			alert.getDialogPane().setExpanded(true);
-		}
 		alert.showAndWait();
 	}
 	
@@ -91,13 +81,7 @@ public abstract class AbstractResultHandler {
 		} else if(error.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.FAIL, ((IModelCheckingResult) result).getMessage(), bundle.getString("verifications.result.error"));
 		} else if(exception.contains(result.getClass())) {
-			final Throwable exc = (Throwable) result;
-			StringWriter sw = new StringWriter();
-			try (PrintWriter pw = new PrintWriter(sw)) {
-				exc.printStackTrace(pw);
-			}
-			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.EXCEPTION, bundle.getString("verifications.result.couldNotParseFormula.message"), bundle.getString("verifications.result.couldNotParseFormula.header"), sw.toString());
-			logger.error("Could not parse {} formula", type, exc);	
+			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.FAIL, bundle.getString("verifications.result.couldNotParseFormula.message") + " " + result, bundle.getString("verifications.result.couldNotParseFormula.header"));
 		} else if(interrupted.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.INTERRUPTED, ((IModelCheckingResult) result).getMessage(),  bundle.getString("verifications.interrupted"));
 		}
@@ -119,7 +103,7 @@ public abstract class AbstractResultHandler {
 		item.setChecked(checked);
 		if(checked == Checked.SUCCESS) {
 			item.setCheckedSuccessful();
-		} else if(checked == Checked.FAIL || checked == Checked.EXCEPTION) {
+		} else if(checked == Checked.FAIL) {
 			item.setCheckedFailed();
 		} else if(checked == Checked.INTERRUPTED) {
 			item.setCheckInterrupted();
