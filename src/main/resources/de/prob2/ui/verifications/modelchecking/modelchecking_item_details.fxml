@@ -5,19 +5,19 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 
-<fx:root type="Stage" title="%verifications.modelchecking.stage.fullvalue.title" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" title="%verifications.modelchecking.stage.details.title" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css" height="400.0" width="640.0">
-			<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.131" xmlns:fx="http://javafx.com/fxml/1">
+			<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
 				<VBox spacing="20" AnchorPane.leftAnchor="15"
 						AnchorPane.rightAnchor="15" AnchorPane.topAnchor="20"
 						AnchorPane.bottomAnchor="20" alignment="center_right">
 					<HBox spacing="20" alignment="center_left">
-						<Label text="%verifications.modelchecking.stage.fullvalue.searchStrategy"/>
+						<Label text="%verifications.modelchecking.stage.details.searchStrategy"/>
 						<TextField fx:id="tfStrategy" editable="false" HBox.hgrow="always"/>
 					</HBox>
 					<VBox spacing="10" alignment="center_left">
-						<Label text="%verifications.modelchecking.stage.fullvalue.description"/>
+						<Label text="%verifications.modelchecking.stage.details.description"/>
 						<TextArea fx:id="taDescription" wrapText="true" editable="false"/>
 					</VBox>
 				</VBox>

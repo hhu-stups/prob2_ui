@@ -361,9 +361,9 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			});
 			checkItem.disableProperty().bind(row.emptyProperty());
 			
-			MenuItem showFullValueItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.showFullValue"));
+			MenuItem showFullValueItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.showDetails"));
 			showFullValueItem.setOnAction(e-> {
-				ModelcheckingItemFullValueStage fullValueStage = injector.getInstance(ModelcheckingItemFullValueStage.class);
+				ModelcheckingItemDetailsStage fullValueStage = injector.getInstance(ModelcheckingItemDetailsStage.class);
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 				fullValueStage.setValues(item.getStrategy(), item.getDescription());
 				fullValueStage.show();

@@ -8,7 +8,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public class ModelcheckingItemFullValueStage extends Stage {
+public class ModelcheckingItemDetailsStage extends Stage {
 	
 	@FXML
 	private TextField tfStrategy;
@@ -17,8 +17,8 @@ public class ModelcheckingItemFullValueStage extends Stage {
 	private TextArea taDescription;
 	
 	@Inject
-	private ModelcheckingItemFullValueStage(StageManager stageManager) {
-		stageManager.loadFXML(this, "modelchecking_item_fullvalue.fxml");
+	private ModelcheckingItemDetailsStage(StageManager stageManager) {
+		stageManager.loadFXML(this, "modelchecking_item_details.fxml");
 	}
 	
 	public void setValues(String strategy, String description) {

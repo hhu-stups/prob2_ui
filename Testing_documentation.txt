@@ -764,8 +764,53 @@ Besser Lazy auswerten?
 
 30. State Errors -> funktioniert
 
+31. Trace Replay
+
+1. Alle Traces checken -> funktioniert
+
+Erwartetes Ergebnis: Alle Traces werden überprüft, es wird am Ende kein currentTrace neu gesetzt
+
+Tatsächliches Ergebnis: Alle Traces werden überprüft, es wird am Ende kein currentTrace neu gesetzt
+
+
+
+2. Check abbrechen -> funktioniert
+
+
+3. Nur ein Trace checken -> dieser Trace kann erfolgreich nachgespielt werden
+
+Erwartetes Ergebnis: Ausgewählter Trace wird überprüft, es wird am Ende der currentTrace neugesetzt
+
+Tatsächliches Ergebnis: Ausgewählter Trace wird überprüft, es wird am Ende der currentTrace neugesetzt
+
+
+
+4. Nur ein Trace checken -> dieser Trace kann nicht nachgespielt werden
+
+Erwartetes Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die über Show Error angezeigt werden kann
+
+Tatsächliches Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die über Show Error angezeigt werden kann
+
+Bemerkung: Show Error kann nur bei einem Fehler ausgewählt werden
+
+
+
+5. Trace entfernen -> funktioniert
+
+
+6. Hilfebutton -> springt nicht an die richtige Stelle
+
+
+7. Show Error -> funktioniert
+
+
+
+
+
+
+
 
 
 Noch zu testen:
 -Advanced
--Verifications
+-Verifications (Modelchecking, LTL, Trace Replay, Symbolic)
