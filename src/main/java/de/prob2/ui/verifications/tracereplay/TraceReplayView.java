@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.tracereplay;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -17,9 +18,10 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.MapChangeListener;
+import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -118,8 +120,7 @@ public class TraceReplayView extends ScrollPane {
 		nameColumn.setCellValueFactory(
 				features -> new SimpleStringProperty(features.getValue().getLocation().toString()));
 
-		this.traceChecker.getReplayTraces().addListener(
-				(MapChangeListener<Path, ReplayTrace>) c -> traceTableView.getItems().setAll(c.getMap().values()));
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateTraceTableView(to));
 
 		initTableRows();
 		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
@@ -135,7 +136,7 @@ public class TraceReplayView extends ScrollPane {
 
 			final MenuItem replayTraceItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.replayTrace"));
-			replayTraceItem.setOnAction(event -> this.traceChecker.replayTrace(row.getItem(), true));
+			replayTraceItem.setOnAction(event -> this.traceChecker.check(row.getItem(), true));
 
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.showError"));
@@ -167,7 +168,7 @@ public class TraceReplayView extends ScrollPane {
 
 			row.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					this.traceChecker.replayTrace(row.getItem(), true);
+					this.traceChecker.check(row.getItem(), true);
 				}
 			});
 			return row;
@@ -176,7 +177,7 @@ public class TraceReplayView extends ScrollPane {
 
 	@FXML
 	private void checkMachine() {
-		traceChecker.checkMachine();
+		traceChecker.checkAll(traceTableView.getItems());
 	}
 
 	@FXML
@@ -198,6 +199,31 @@ public class TraceReplayView extends ScrollPane {
 		File traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
 			currentProject.getCurrentMachine().addTraceFile(traceFile.toPath());
+		}
+	}
+	
+	public void resetStatus() {
+		traceChecker.cancelReplay();
+		traceTableView.getItems().forEach(trace -> trace.setStatus(ReplayTrace.Status.NOT_CHECKED));
+	}
+	
+	private void updateTraceTableView(Machine machine) {
+		traceTableView.getItems().clear();
+		if (machine != null) {
+			machine.getTraceFiles().forEach(tracePath -> traceTableView.getItems().add(new ReplayTrace(tracePath)));
+			machine.getTraceFiles().addListener((SetChangeListener<Path>) c -> {
+				if (c.wasAdded()) {
+					traceTableView.getItems().add(new ReplayTrace(c.getElementAdded()));
+				}
+				if (c.wasRemoved()) {
+					for(Iterator<ReplayTrace> iterator = traceTableView.getItems().iterator(); iterator.hasNext(); ) {
+						ReplayTrace trace = iterator.next();
+						if(trace.getLocation().equals(c.getElementRemoved())) {
+							iterator.remove();
+						}
+					}
+				}
+			});
 		}
 	}
 }

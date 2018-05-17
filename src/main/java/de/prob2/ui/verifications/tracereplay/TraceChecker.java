@@ -1,8 +1,15 @@
 package de.prob2.ui.verifications.tracereplay;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
@@ -28,43 +35,73 @@ import de.prob2.ui.project.machines.Machine;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleMapProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableMap;
-import javafx.collections.SetChangeListener;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 
 @Singleton
 public class TraceChecker {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(TraceChecker.class);
+
 	private final TraceLoader traceLoader;
 	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
-	private ObservableMap<Path, ReplayTrace> replayTraces = new SimpleMapProperty<>(this, "replayTraces",
-			FXCollections.observableHashMap());
+	private final Map<ReplayTrace, Exception> failedTraceReplays = new HashMap<>();
 
 	@Inject
 	private TraceChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
 			final TraceLoader traceLoader, final StageManager stageManager, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.traceLoader = traceLoader;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateReplayTraces(to));
 	}
 
-	void checkMachine() {
-		replayTraces.forEach((path, trace) -> replayTrace(trace, false));
+	void checkAll(List<ReplayTrace> replayTraces) {
+		replayTraces.forEach(trace -> replayTrace(trace, false));
+		handleFailedTraceReplays();
 	}
 
-	public void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		PersistentTrace persistentTrace = traceLoader.loadTrace(replayTrace.getLocation());
+	void check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
+		this.replayTrace(replayTrace, setCurrentAnimation);
+		handleFailedTraceReplays();
+	}
 
-		if (persistentTrace == null) {
+	private void handleFailedTraceReplays() {
+		failedTraceReplays.forEach((trace, exception) -> {
+			Path path = trace.getLocation();
+			Alert alert = stageManager.makeAlert(AlertType.ERROR,
+								"The trace file " + path + " could not be loaded.\n\n"
+								+ "Would you like to remove this trace from the project?",
+								ButtonType.YES, ButtonType.NO);
+			alert.setHeaderText("Trace Replaz Error");
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.isPresent()) {
+				if (result.get().equals(ButtonType.YES)) {
+					Machine currentMachine = currentProject.getCurrentMachine();
+					if (currentMachine.getTraceFiles().contains(path)) {
+						currentMachine.removeTraceFile(path);
+					}
+				}
+			}
+		});
+		failedTraceReplays.clear();
+	}
+
+	private void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
+		PersistentTrace persistentTrace;
+		try {
+			persistentTrace = traceLoader.loadTrace(replayTrace.getLocation());
+		} catch (IOException e) {
+			LOGGER.warn("Failed to open project file", e);
+			failedTraceReplays.put(replayTrace, e);
 			return;
 		}
 
@@ -133,7 +170,8 @@ public class TraceChecker {
 		}
 		List<Transition> possibleTransitions = command.getNewTransitions();
 		if (possibleTransitions.isEmpty()) {
-			String errorMessage = String.format(bundle.getString("verifications.tracereplay.errorMessage.operationNotPossible"),
+			String errorMessage = String.format(
+					bundle.getString("verifications.tracereplay.errorMessage.operationNotPossible"),
 					persistentTransition.getOperationName(), predicate);
 			replayTrace.setErrorMessage(errorMessage);
 			return null;
@@ -164,7 +202,9 @@ public class TraceChecker {
 							// because the value translator does not
 							// support enum values properly
 							if (setCurrentAnimation) {
-								String errorMessage = String.format(bundle.getString("verifications.tracereplay.errorMessage.mismatchingOutputValues"),
+								String errorMessage = String.format(
+										bundle.getString(
+												"verifications.tracereplay.errorMessage.mismatchingOutputValues"),
 										operationName, outputParamName, bValue.toString(), paramValueFromTransition);
 								replayTrace.setErrorMessage(errorMessage);
 							}
@@ -192,39 +232,7 @@ public class TraceChecker {
 		currentJobThreads.clear();
 	}
 
-	public void resetStatus() {
-		cancelReplay();
-		replayTraces.forEach((path, trace) -> trace.setStatus(ReplayTrace.Status.NOT_CHECKED));
-	}
-
 	ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
-	}
-
-	private void addTrace(Path traceFile) {
-		replayTraces.put(traceFile, new ReplayTrace(traceFile));
-	}
-
-	private void removeTrace(Path traceFile) {
-		replayTraces.remove(traceFile);
-	}
-
-	ObservableMap<Path, ReplayTrace> getReplayTraces() {
-		return replayTraces;
-	}
-
-	private void updateReplayTraces(Machine machine) {
-		replayTraces.clear();
-		if (machine != null) {
-			machine.getTraceFiles().forEach(this::addTrace);
-			machine.getTraceFiles().addListener((SetChangeListener<Path>) c -> {
-				if (c.wasAdded()) {
-					addTrace(c.getElementAdded());
-				}
-				if (c.wasRemoved()) {
-					removeTrace(c.getElementRemoved());
-				}
-			});
-		}
 	}
 }
