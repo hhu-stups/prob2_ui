@@ -1,6 +1,8 @@
 package de.prob2.ui.verifications.tracereplay;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -77,10 +79,19 @@ public class TraceChecker {
 	private void handleFailedTraceReplays() {
 		failedTraceReplays.forEach((trace, exception) -> {
 			Path path = trace.getLocation();
-			Alert alert = stageManager.makeAlert(AlertType.ERROR,
-								"The trace file " + path + " could not be loaded.\n\n"
+			Alert alert;
+			if (exception instanceof NoSuchFileException || exception instanceof FileNotFoundException) {
+				alert = stageManager.makeAlert(AlertType.ERROR,
+						"The trace file " + path + " could not be found.\n"
+								+ "The file was probably moved, renamed or deleted.\n\n"
 								+ "Would you like to remove this trace from the project?",
-								ButtonType.YES, ButtonType.NO);
+						ButtonType.YES, ButtonType.NO);
+			} else {
+				alert = stageManager.makeAlert(AlertType.ERROR,
+						"The trace file " + path + " could not be loaded.\n\n"
+								+ "Would you like to remove this trace from the project?",
+						ButtonType.YES, ButtonType.NO);
+			}
 			alert.setHeaderText("Trace Replay Error");
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent()) {
@@ -99,6 +110,10 @@ public class TraceChecker {
 		PersistentTrace persistentTrace;
 		try {
 			persistentTrace = traceLoader.loadTrace(replayTrace.getLocation());
+		} catch (FileNotFoundException | NoSuchFileException e) {
+			LOGGER.warn("Trace file not found", e);
+			failedTraceReplays.put(replayTrace, e);
+			return;
 		} catch (IOException e) {
 			LOGGER.warn("Failed to open trace file", e);
 			failedTraceReplays.put(replayTrace, e);
