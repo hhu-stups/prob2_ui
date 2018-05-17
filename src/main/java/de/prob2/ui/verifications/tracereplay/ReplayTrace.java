@@ -52,7 +52,6 @@ public class ReplayTrace {
 	
 	public void setProgress(final double progress) {
 		this.progressProperty().set(progress);
-		System.out.println(progress);
 	}
 	
 	public Path getLocation() {
