@@ -100,7 +100,7 @@ public class TraceChecker {
 		try {
 			persistentTrace = traceLoader.loadTrace(replayTrace.getLocation());
 		} catch (IOException e) {
-			LOGGER.warn("Failed to open project file", e);
+			LOGGER.warn("Failed to open trace file", e);
 			failedTraceReplays.put(replayTrace, e);
 			return;
 		}
