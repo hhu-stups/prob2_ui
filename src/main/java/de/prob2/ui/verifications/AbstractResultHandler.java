@@ -1,23 +1,18 @@
 package de.prob2.ui.verifications;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.prob.check.IModelCheckingResult;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.StageManager;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextArea;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class AbstractResultHandler {
 	
