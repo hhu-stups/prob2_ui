@@ -81,7 +81,7 @@ public class TraceChecker {
 								"The trace file " + path + " could not be loaded.\n\n"
 								+ "Would you like to remove this trace from the project?",
 								ButtonType.YES, ButtonType.NO);
-			alert.setHeaderText("Trace Replaz Error");
+			alert.setHeaderText("Trace Replay Error");
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent()) {
 				if (result.get().equals(ButtonType.YES)) {
