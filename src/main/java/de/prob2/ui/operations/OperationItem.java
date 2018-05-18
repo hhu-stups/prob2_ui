@@ -1,7 +1,6 @@
 package de.prob2.ui.operations;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -12,7 +11,7 @@ import de.prob.statespace.Trace;
 
 public class OperationItem {
 	public enum Status {
-		DISABLED, ENABLED, TIMEOUT, MAX_REACHED
+		DISABLED, ENABLED, TIMEOUT
 	}
 
 	private final Trace trace;
@@ -50,18 +49,6 @@ public class OperationItem {
 		this.constants = Objects.requireNonNull(constants);
 		this.variables = Objects.requireNonNull(variables);
 	}
-
-	public OperationItem(
-			final Trace trace,
-			final String id,
-			final String name,
-			final OperationItem.Status status
-		) {
-		this(trace, id, name, Collections.emptyList(),
-				Collections.emptyList(), status, false, false, false,
-				Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
-		
-		}
 
 	public Trace getTrace() {
 		return this.trace;

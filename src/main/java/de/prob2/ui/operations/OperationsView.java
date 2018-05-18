@@ -56,6 +56,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuButton;
@@ -167,8 +168,7 @@ public final class OperationsView extends AnchorPane {
 		@Override
 		protected void updateItem(OperationItem item, boolean empty) {
 			super.updateItem(item, empty);
-			getStyleClass().removeAll("enabled", "timeout", "unexplored", "errored", "skip", "normal", "disabled",
-					"max-reached");
+			getStyleClass().removeAll("enabled", "timeout", "unexplored", "errored", "skip", "normal", "disabled");
 			if (item != null && !empty) {
 				setText(formatOperationItem(item));
 				setDisable(true);
@@ -205,12 +205,6 @@ public final class OperationsView extends AnchorPane {
 					setTooltip(null);
 					break;
 
-				case MAX_REACHED:
-					icon = new FontAwesomeIconView(FontAwesomeIcon.ELLIPSIS_H);
-					getStyleClass().add("max-reached");
-					setTooltip(null);
-					break;
-
 				default:
 					throw new IllegalStateException("Unhandled status: " + item.getStatus());
 				}
@@ -232,6 +226,8 @@ public final class OperationsView extends AnchorPane {
 
 	@FXML
 	private ListView<OperationItem> opsListView;
+	@FXML
+	private Label maxOperationsWarning;
 	@FXML
 	private Button sortButton;
 	@FXML
@@ -415,10 +411,7 @@ public final class OperationsView extends AnchorPane {
 
 		doSort();
 
-		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
-			events.add(new OperationItem(trace, "-", bundle.getString("operations.maxReached"),
-					OperationItem.Status.MAX_REACHED));
-		}
+		maxOperationsWarning.setVisible(trace.getCurrentState().isMaxTransitionsCalculated());
 
 		final List<OperationItem> filtered = applyFilter(searchBar.getText());
 

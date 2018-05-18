@@ -886,10 +886,6 @@
 	-fx-fill: red;
 }
 
-.operations-cell.max-reached .glyph-icon {
-	-fx-fill: orange;
-}
-
 /* =================== PROJECT VIEW ================== */
 
 /* Machines Tab, Preferences Tab */
