@@ -29,13 +29,8 @@ import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
-import de.prob.model.classicalb.Operation;
-import de.prob.model.eventb.Event;
-import de.prob.model.eventb.EventParameter;
-import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
-import de.prob.model.representation.BEvent;
-import de.prob.model.representation.Machine;
+import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
@@ -579,29 +574,22 @@ public final class OperationsView extends AnchorPane {
 		}
 	}
 
+
 	private void updateModel(final Trace trace) {
 		currentModel = trace.getModel();
-		AbstractElement mainComponent = trace.getStateSpace().getMainComponent();
 		opNames = new ArrayList<>();
 		opToParams = new HashMap<>();
-		if (mainComponent instanceof Machine) {
-			for (BEvent e : mainComponent.getChildrenOfType(BEvent.class)) {
-				opNames.add(e.getName());
-				opToParams.put(e.getName(), getParams(e));
-			}
-		}
-	}
+		LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
+		System.out.println("operations");
+		for (String opName : loadedMachine.getOperationNames()) {
+			OperationInfo machineOperationInfo = loadedMachine.getMachineOperationInfo(opName);
+			System.out.println(opName);
+			opNames.add(opName);
+			opToParams.put(opName, machineOperationInfo.getParameterNames());
 
-	private List<String> getParams(BEvent e) {
-		List<String> paramList = new ArrayList<>();
-		if (e instanceof Event) {
-			paramList.addAll(
-					((Event) e).getParameters().stream().map(EventParameter::getName).collect(Collectors.toList()));
-		} else if (e instanceof Operation) {
-			paramList.addAll(((Operation) e).getParameters());
 		}
-		return paramList;
 	}
+	
 
 	public void setSortMode(OperationsView.SortMode mode) {
 		sortMode = mode;
