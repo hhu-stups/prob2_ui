@@ -96,7 +96,7 @@ public class FileMenu extends Menu {
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
 		
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.existsProperty().not());
-		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not());
+		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not().or(currentProject.currentMachineProperty().isNull()));
 	}
 
 	@FXML
