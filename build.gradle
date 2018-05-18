@@ -42,11 +42,6 @@ macAppBundle {
 
 macAppBundle.mainClassName = mainClassName
 
-if (hasProperty("macAppJRE")) {
-	// Used to set a custom JRE to bundle at the command line: -PmacAppJRE=/path/to/the/jre
-	macAppBundle.jreHome = macAppJRE
-}
-
 sourceSets.test.java.srcDirs = []
 
 tasks.withType(JavaCompile) {
