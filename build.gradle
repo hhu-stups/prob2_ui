@@ -134,11 +134,10 @@ tasks.withType(JavaCompile) {
 	options.compilerArgs += ["-proc:none"]
 }
 
-allprojects {
-	final probHome = System.getenv("PROB_HOME")
-	if (probHome != null) {
+if (project.hasProperty("probHome")) {
+	allprojects {
 		tasks.withType(JavaExec) {
-			systemProperties["prob.home"] = probHome
+			systemProperties["prob.home"] = project.probHome
 		}
 	}
 }
