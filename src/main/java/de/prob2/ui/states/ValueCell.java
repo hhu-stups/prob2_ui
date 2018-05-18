@@ -19,6 +19,8 @@ import javafx.scene.control.TreeTableCell;
 
 final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 	
+	private static final String ERROR = "error";
+	
 	private final ResourceBundle bundle;
 	private final Map<IEvalElement, AbstractEvalResult> values;
 	private final boolean isCurrent;
@@ -37,7 +39,7 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 	protected void updateItem(final StateItem<?> item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		this.getStyleClass().removeAll("false", "true", "not-initialized", "error");
+		this.getStyleClass().removeAll("false", "true", "not-initialized", ERROR);
 		
 		if (item == null || empty) {
 			this.setText(null);
@@ -52,7 +54,7 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 				checkResult(result);
 			} else if (contents instanceof StateError) {
 				this.setText(this.isCurrent ? ((StateError)contents).getShortDescription() : null);
-				this.getStyleClass().add("error");
+				this.getStyleClass().add(ERROR);
 			} else {
 				throw new IllegalArgumentException("Don't know how to show the value of a " + contents.getClass() + " instance");
 			}
@@ -76,13 +78,13 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 			this.getStyleClass().add("not-initialized");
 		} else if (result instanceof WDError) {
 			this.setText(bundle.getString("states.value.notWellDefined"));
-			this.getStyleClass().add("error");
+			this.getStyleClass().add(ERROR);
 		} else if (result instanceof EvaluationErrorResult) {
 			this.setText(String.format(bundle.getString("states.value.error"), ((EvaluationErrorResult)result).getResult()));
-			this.getStyleClass().add("error");
+			this.getStyleClass().add(ERROR);
 		} else if (result instanceof EnumerationWarning) {
 			this.setText(bundle.getString("states.value.enumerationWarning"));
-			this.getStyleClass().add("error");
+			this.getStyleClass().add(ERROR);
 		} else {
 			throw new IllegalArgumentException("Don't know how to show the value of a " + result.getClass() + " instance");
 		}
