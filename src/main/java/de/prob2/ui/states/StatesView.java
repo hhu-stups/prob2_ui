@@ -163,7 +163,7 @@ public final class StatesView extends StackPane {
 
 		this.tv.getRoot().setValue(new StateItem<>("Machine (this root item should be invisible)", false));
 
-		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> this.updater.execute(() -> {
 			if (to == null) {
 				this.rootNodes = null;
 				this.filteredRootNodes = null;
@@ -171,9 +171,9 @@ public final class StatesView extends StackPane {
 				this.previousValues.clear();
 				this.tv.getRoot().getChildren().clear();
 			} else {
-				this.updater.execute(() -> this.updateRoot(from, to, false));
+				this.updateRoot(from, to, false);
 			}
-		};
+		});
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
 	}
@@ -455,12 +455,16 @@ public final class StatesView extends StackPane {
 
 		this.updateValueMaps(to);
 
+		// The nodes are stored in a local variable to avoid a race condition
+		// where another updateRoot call reassigns the filteredRootNodes field
+		// before the Platform.runLater block runs.
+		final List<PrologASTNode> nodes = this.filteredRootNodes;
 		Platform.runLater(() -> {
 			if (reloadRootNodes || filterChanged) {
 				this.tvRootItem.getChildren().clear();
-				buildNodes(this.tvRootItem, this.filteredRootNodes);
+				buildNodes(this.tvRootItem, nodes);
 			} else {
-				updateNodes(this.tvRootItem, this.filteredRootNodes);
+				updateNodes(this.tvRootItem, nodes);
 			}
 			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
