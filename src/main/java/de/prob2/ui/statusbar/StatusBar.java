@@ -7,6 +7,8 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.statespace.Trace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -166,26 +168,29 @@ public class StatusBar extends HBox {
 		statusLabel.getStyleClass().removeAll("noErrors", "someErrors");
 		if (this.isOperationsViewUpdating() || this.isStatesViewUpdating()) {
 			statusLabel.setText(resourceBundle.getString("statusbar.updatingViews"));
-		} else if (this.currentTrace.exists()) {
-			final List<String> errorMessages = getErrorMessages();
-			if (errorMessages.isEmpty()) {
-				statusLabel.getStyleClass().add("noErrors");
-				statusLabel.setText(resourceBundle.getString("statusbar.noErrors"));
-			} else {
-				statusLabel.getStyleClass().add("someErrors");
-				statusLabel.setText(String.format(resourceBundle.getString("statusbar.someErrors"), String.join(", ", errorMessages)));
-			}
 		} else {
-			statusLabel.setText(this.resourceBundle.getString(this.getLoadingStatus().getMessageKey()));
+			final Trace trace = this.currentTrace.get();
+			if (trace != null) {
+				final List<String> errorMessages = getErrorMessages(trace);
+				if (errorMessages.isEmpty()) {
+					statusLabel.getStyleClass().add("noErrors");
+					statusLabel.setText(resourceBundle.getString("statusbar.noErrors"));
+				} else {
+					statusLabel.getStyleClass().add("someErrors");
+					statusLabel.setText(String.format(resourceBundle.getString("statusbar.someErrors"), String.join(", ", errorMessages)));
+				}
+			} else {
+				statusLabel.setText(this.resourceBundle.getString(this.getLoadingStatus().getMessageKey()));
+			}
 		}
 	}
 
-	private List<String> getErrorMessages() {
+	private List<String> getErrorMessages(final Trace trace) {
 		final List<String> errorMessages = new ArrayList<>();
-		if (!this.currentTrace.getCurrentState().isInvariantOk()) {
+		if (!trace.getCurrentState().isInvariantOk()) {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.invariantNotOK"));
 		}
-		if (!this.currentTrace.getCurrentState().getStateErrors().isEmpty()) {
+		if (!trace.getCurrentState().getStateErrors().isEmpty()) {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.stateErrors"));
 		}
 		if (this.getLtlStatus() == StatusBar.CheckingStatus.ERROR) {
