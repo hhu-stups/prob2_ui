@@ -212,14 +212,18 @@ public class TraceReplayView extends ScrollPane {
 					traceTableView.getItems().add(new ReplayTrace(c.getElementAdded()));
 				}
 				if (c.wasRemoved()) {
-					for(Iterator<ReplayTrace> iterator = traceTableView.getItems().iterator(); iterator.hasNext(); ) {
-						ReplayTrace trace = iterator.next();
-						if(trace.getLocation().equals(c.getElementRemoved())) {
-							iterator.remove();
-						}
-					}
+					removeFromTraceTableView(c.getElementRemoved());
 				}
 			});
+		}
+	}
+
+	private void removeFromTraceTableView(Path tracePath) {
+		for(Iterator<ReplayTrace> iterator = traceTableView.getItems().iterator(); iterator.hasNext(); ) {
+			ReplayTrace trace = iterator.next();
+			if(trace.getLocation().equals(tracePath)) {
+				iterator.remove();
+			}
 		}
 	}
 }

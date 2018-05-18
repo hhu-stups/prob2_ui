@@ -94,12 +94,10 @@ public class TraceChecker {
 			}
 			alert.setHeaderText("Trace Replay Error");
 			Optional<ButtonType> result = alert.showAndWait();
-			if (result.isPresent()) {
-				if (result.get().equals(ButtonType.YES)) {
-					Machine currentMachine = currentProject.getCurrentMachine();
-					if (currentMachine.getTraceFiles().contains(path)) {
-						currentMachine.removeTraceFile(path);
-					}
+			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
+				Machine currentMachine = currentProject.getCurrentMachine();
+				if (currentMachine.getTraceFiles().contains(path)) {
+					currentMachine.removeTraceFile(path);
 				}
 			}
 		});
@@ -107,24 +105,15 @@ public class TraceChecker {
 	}
 
 	private void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		PersistentTrace persistentTrace;
-		try {
-			persistentTrace = traceLoader.loadTrace(replayTrace.getLocation());
-		} catch (FileNotFoundException | NoSuchFileException e) {
-			LOGGER.warn("Trace file not found", e);
-			failedTraceReplays.put(replayTrace, e);
-			return;
-		} catch (IOException e) {
-			LOGGER.warn("Failed to open trace file", e);
-			failedTraceReplays.put(replayTrace, e);
+		PersistentTrace persistentTrace = getPersistentTrace(replayTrace);
+		
+		if(persistentTrace == null) {
 			return;
 		}
 
 		Thread replayThread = new Thread(() -> {
 			replayTrace.setStatus(ReplayTrace.Status.NOT_CHECKED);
-
 			StateSpace stateSpace = currentTrace.getStateSpace();
-
 			Trace trace = new Trace(stateSpace);
 			trace.setExploreStateByDefault(false);
 			ReplayTrace.Status status = ReplayTrace.Status.SUCCESSFUL;
@@ -167,6 +156,20 @@ public class TraceChecker {
 		}, "Trace Replay Thread");
 		currentJobThreads.add(replayThread);
 		replayThread.start();
+	}
+
+	private PersistentTrace getPersistentTrace(ReplayTrace replayTrace) {
+		try {
+			return traceLoader.loadTrace(replayTrace.getLocation());
+		} catch (FileNotFoundException | NoSuchFileException e) {
+			LOGGER.warn("Trace file not found", e);
+			failedTraceReplays.put(replayTrace, e);
+			return null;
+		} catch (IOException e) {
+			LOGGER.warn("Failed to open trace file", e);
+			failedTraceReplays.put(replayTrace, e);
+			return null;
+		}
 	}
 
 	private Transition replayPersistentTransition(ReplayTrace replayTrace, Trace t,
