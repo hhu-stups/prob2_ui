@@ -200,7 +200,7 @@ public class SymbolicCheckingView extends ScrollPane {
 	}
 	
 	@FXML
-	public synchronized void cancel() {
+	public void cancel() {
 		symbolicChecker.interrupt();
 	}
 	

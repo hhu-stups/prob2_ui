@@ -260,7 +260,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	private void setBindings() {
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
 		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
-		cancelButton.disableProperty().bind(currentJobs.emptyProperty());
+		cancelButton.disableProperty().bind(currentJobThreads.emptyProperty());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -309,9 +309,23 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 
 	private void tvItemsClicked(MouseEvent e) {
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-		if(item != null && item.getStats() == null && e.getClickCount() >= 2 && e.getButton() == MouseButton.PRIMARY) {
-			checkItem(item, false);
+		if(item != null) {
+			if(item.getStats() == null) {
+				if(e.getButton() == MouseButton.PRIMARY) {
+					if(e.getClickCount() == 1) {
+						resetView();
+					} else if(e.getClickCount() >= 2) {
+						checkItem(item, false);
+					}
+				}
+			} else {
+				if(e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 1) {
+					currentStats = item.getStats();
+					statsPane.getChildren().setAll(currentStats);
+				}
+			}
 		}
+
 	}
 	
 	public void bindMachine(Machine machine) {
@@ -397,9 +411,9 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	}
 	
 	@FXML
-	public synchronized void cancelModelcheck() {
-		currentJobs.forEach(job -> job.getStateSpace().sendInterrupt());
+	public void cancelModelcheck() {
 		currentJobThreads.forEach(Thread::interrupt);
+		currentJobs.forEach(job -> job.getStateSpace().sendInterrupt());
 	}
 	
 	private void checkItem(ModelCheckingItem item, boolean checkAll) {

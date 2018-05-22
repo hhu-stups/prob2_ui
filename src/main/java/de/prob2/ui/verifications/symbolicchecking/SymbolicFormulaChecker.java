@@ -83,6 +83,7 @@ public class SymbolicFormulaChecker {
 				updateMachine(currentProject.getCurrentMachine());
 				currentJobThreads.remove(currentThread);
 			});
+			
 		}, "Symbolic Formula Checking Thread");
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();
@@ -105,9 +106,9 @@ public class SymbolicFormulaChecker {
 				resultHandler.handleFormulaResult(item, result.get(0), stateid);
 				updateMachine(currentProject.getCurrentMachine());
 				injector.getInstance(StatsView.class).update(currentTrace.get());
-				currentJobs.remove(checker);
-				currentJobThreads.remove(currentThread);
 			});
+			currentJobs.remove(checker);
+			currentJobThreads.remove(currentThread);
 		}, "Symbolic Formula Checking Thread");
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();

@@ -17,6 +17,8 @@ public class ModelCheckingItem implements IExecutableItem {
 	private transient FontAwesomeIconView status;
 	private Checked checked;
 	
+	private long timeElapsed;
+	
 	private String strategy;
 	
 	private String description;
@@ -117,4 +119,7 @@ public class ModelCheckingItem implements IExecutableItem {
 		return checked;
 	}	
 	
+	public void setTimeElapsed(long timeElapsed) {
+		this.timeElapsed = timeElapsed;
+	}
 }
