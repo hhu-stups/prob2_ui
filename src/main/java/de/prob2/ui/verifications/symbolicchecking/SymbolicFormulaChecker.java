@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
@@ -83,7 +84,6 @@ public class SymbolicFormulaChecker {
 				updateMachine(currentProject.getCurrentMachine());
 				currentJobThreads.remove(currentThread);
 			});
-			
 		}, "Symbolic Formula Checking Thread");
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();
@@ -101,14 +101,13 @@ public class SymbolicFormulaChecker {
 				LOGGER.error("Could not check CBC Deadlock", e);
 				result.set(0, new SymbolicCheckingParseError(String.format(bundle.getString("verifications.symbolic.couldNotCheckDeadlock"), e.getMessage())));
 			}
-			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
 				resultHandler.handleFormulaResult(item, result.get(0), stateid);
 				updateMachine(currentProject.getCurrentMachine());
 				injector.getInstance(StatsView.class).update(currentTrace.get());
 			});
 			currentJobs.remove(checker);
-			currentJobThreads.remove(currentThread);
+			currentJobThreads.remove(Thread.currentThread());
 		}, "Symbolic Formula Checking Thread");
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();
@@ -130,8 +129,18 @@ public class SymbolicFormulaChecker {
 	}
 	
 	public void interrupt() {
-		currentJobThreads.forEach(Thread::interrupt);
-		currentJobs.forEach(job -> job.getStateSpace().sendInterrupt());
+		for(Iterator<Thread> iterator = currentJobThreads.iterator(); iterator.hasNext();) {
+			Thread thread = iterator.next();
+			thread.interrupt();
+			iterator.remove();
+			currentJobThreads.remove(thread);
+		}
+		for(Iterator<IModelCheckJob> iterator = currentJobs.iterator(); iterator.hasNext();) {
+			IModelCheckJob job = iterator.next();
+			job.getStateSpace().sendInterrupt();
+			iterator.remove();
+			currentJobs.remove(job);
+		}
 	}
 	
 	public ListProperty<Thread> currentJobThreadsProperty() {

@@ -26,6 +26,7 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -103,7 +104,7 @@ public class Machine {
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
-	private ObservableSet<Path> traces;
+	private SetProperty<Path> traces;
 	private ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
 	private transient BooleanProperty changed;
@@ -316,6 +317,9 @@ public class Machine {
 		Platform.runLater(() -> this.setChanged(true));
 	}
 	
+	public SetProperty<Path> tracesProperty() {
+		return traces;
+	}
 		
 	public void replaceMissingWithDefaults() {
 		if (ltlStatus == null) {

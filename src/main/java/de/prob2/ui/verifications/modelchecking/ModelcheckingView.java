@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -278,7 +279,6 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		shouldExecuteColumn.setGraphic(selectAll);
 		shouldExecuteColumn.setMaxWidth(this.getPrefWidth());
 		
-		
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
 	}
 	
@@ -412,8 +412,18 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	
 	@FXML
 	public void cancelModelcheck() {
-		currentJobThreads.forEach(Thread::interrupt);
-		currentJobs.forEach(job -> job.getStateSpace().sendInterrupt());
+		for(Iterator<Thread> iterator = currentJobThreads.iterator(); iterator.hasNext();) {
+			Thread thread = iterator.next();
+			thread.interrupt();
+			iterator.remove();
+			currentJobThreads.remove(thread);
+		}
+		for(Iterator<IModelCheckJob> iterator = currentJobs.iterator(); iterator.hasNext();) {
+			IModelCheckJob job = iterator.next();
+			job.getStateSpace().sendInterrupt();
+			iterator.remove();
+			currentJobs.remove(job);
+		}
 	}
 	
 	private void checkItem(ModelCheckingItem item, boolean checkAll) {
@@ -513,7 +523,6 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("verifications.modelchecking.exceptionWhileRunningJob"), e)).show());
 			return;
 		} finally {
-			currentJobThreads.remove(size - 1);
 			stageController.setDisableStart(false);
 		}
 		// The consistency checker sometimes doesn't call isFinished, so
@@ -527,7 +536,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			Trace trace = ((ITraceDescription) result).getTrace(s);
 			injector.getInstance(CurrentTrace.class).set(trace);
 		}
-		currentJobs.remove(size - 1);
+		currentJobs.remove(job);
 	}
 
 	@Override

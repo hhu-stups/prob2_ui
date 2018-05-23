@@ -825,25 +825,38 @@ Tatsächliches Ergebnis: Alle laufenden Checks werden abgebrochen und dementspre
 
 
 
-3. Neue Strategie überprüfen mit erfolgreichem Check
+3. Neue Strategie überprüfen mit erfolgreichem Check -> funktioniert
 
-4. Neue Strategie überprüfen mit fehlgeschlagenem Check
+4. Neue Strategie überprüfen mit fehlgeschlagenem Check -> funktioniert
 
-5. Eine vorhandene Strategie überprüfen mit erfolgreichem Check
+5. Eine vorhandene Strategie überprüfen mit erfolgreichem Check -> funktioniert
 
-6. Eine vorhandene Strategie überprüfen mit fehlgeschlagenem Check
+6. Eine vorhandene Strategie überprüfen mit fehlgeschlagenem Check -> funktioniert
 
 7. Show Error State
 
-8. Show Details
+Erwartetes Ergebnis: Item ist nur verfügbar, wenn ein Fehler aufgetreten ist oder ein Timeout stattgefunden hat; Fehlerzustand wird angezeigt
+
+Tatsächliches Ergebnis: Item ist nur verfügbar, wenn ein Fehler aufgetreten ist oder ein Timeout stattgefunden hat; Fehlerzustand wird angezeigt
+
+
+
+8. Show Details -> funktioniert
 
 9. Search for new errors
+
+Erwartetes Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird angezeigt
+
+Tatsächliches Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird angezeigt
+
+
 
 10. Remove item -> funktioniert
 
 11. Hilfebutton -> funktioniert, springt noch nicht an die richtige Stelle
 
 
+Bemerkung: Exceptions fliegen, wenn während des Modelcheckings eine neue Maschine geladen wird
 
 
 
