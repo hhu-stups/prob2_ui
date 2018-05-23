@@ -36,7 +36,6 @@ public abstract class AbstractResultHandler {
 	protected ArrayList<Class<?>> success;
 	protected ArrayList<Class<?>> counterExample;
 	protected ArrayList<Class<?>> error;
-	protected ArrayList<Class<?>> exception;
 	protected ArrayList<Class<?>> interrupted;
 	
 	protected AbstractResultHandler(final StageManager stageManager, final ResourceBundle bundle) {
@@ -45,7 +44,6 @@ public abstract class AbstractResultHandler {
 		success = new ArrayList<>();
 		counterExample = new ArrayList<>();
 		error = new ArrayList<>();
-		exception = new ArrayList<>();
 		interrupted = new ArrayList<>();
 	}
 	
@@ -70,7 +68,7 @@ public abstract class AbstractResultHandler {
 			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.FAIL, String.format(bundle.getString("verifications.result.counterExampleFound"), bundle.getString(type.getKey())), "Counter Example Found");
 		} else if(error.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.FAIL, ((IModelCheckingResult) result).getMessage(), bundle.getString("verifications.result.error"));
-		} else if(exception.contains(result.getClass())) {
+		} else if(result instanceof Throwable) {
 			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.FAIL, bundle.getString("verifications.result.couldNotParseFormula.message") + " " + result, bundle.getString("verifications.result.couldNotParseFormula.header"));
 		} else if(interrupted.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.INTERRUPTED, ((IModelCheckingResult) result).getMessage(),  bundle.getString("verifications.interrupted"));

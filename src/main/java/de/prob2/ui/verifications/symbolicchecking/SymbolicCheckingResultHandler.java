@@ -48,7 +48,6 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
 												RefinementCheckCounterExample.class));
 		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
-		this.exception.addAll(Arrays.asList(SymbolicCheckingParseError.class));
 		this.interrupted.addAll(Arrays.asList(NotYetFinished.class));
 	}
 	
@@ -56,7 +55,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			handleItem(item, Checked.SUCCESS);
-		} else if(error.contains(clazz) || counterExample.contains(clazz) || exception.contains(clazz)) {
+		} else if(error.contains(clazz) || counterExample.contains(clazz) || result instanceof Throwable) {
 			handleItem(item, Checked.FAIL);
 		} else {
 			handleItem(item, Checked.INTERRUPTED);

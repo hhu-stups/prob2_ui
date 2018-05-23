@@ -13,7 +13,6 @@ import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
 import de.prob.check.LTLOk;
-import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 
@@ -24,7 +23,7 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.formula.LTLParseError;
+
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
@@ -38,7 +37,6 @@ public class LTLResultHandler extends AbstractResultHandler {
 		this.success.addAll(Arrays.asList(LTLOk.class));
 		this.counterExample.addAll(Arrays.asList(LTLCounterExample.class));
 		this.error.addAll(Arrays.asList(LTLError.class));
-		this.exception.addAll(Arrays.asList(LTLParseError.class, ProBError.class));
 		this.interrupted.addAll(Arrays.asList(LTLNotYetFinished.class));
 	}
 	
@@ -46,7 +44,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			handleItem(item, Checked.SUCCESS);
-		} else if(error.contains(clazz) || counterExample.contains(clazz) || exception.contains(clazz)) {
+		} else if(error.contains(clazz) || counterExample.contains(clazz) || result instanceof Throwable) {
 			handleItem(item, Checked.FAIL);
 		} else {
 			handleItem(item, Checked.INTERRUPTED);

@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 
@@ -72,15 +71,22 @@ public class SymbolicFormulaChecker {
 	public void checkItem(SymbolicCheckingFormulaItem item, AbstractCommand cmd, final StateSpace stateSpace) {
 		final SymbolicCheckingFormulaItem currentItem = getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
+			RuntimeException exception = null;
 			try {
 				stateSpace.execute(cmd);
-			} catch (Exception e){
-				LOGGER.error(e.getMessage());
+			} catch (RuntimeException e) {
+				LOGGER.error("Exception during symbolic checking", e);
+				exception = e;
 			}
+			injector.getInstance(StatsView.class).update(currentTrace.get());
 			Thread currentThread = Thread.currentThread();
+			final RuntimeException finalException = exception;
 			Platform.runLater(() -> {
-				injector.getInstance(StatsView.class).update(currentTrace.get());
-				resultHandler.handleFormulaResult(currentItem, cmd);
+				if (finalException == null) {
+					resultHandler.handleFormulaResult(currentItem, cmd);
+				} else {
+					resultHandler.handleFormulaResult(currentItem, finalException, null);
+				}
 				updateMachine(currentProject.getCurrentMachine());
 				currentJobThreads.remove(currentThread);
 			});
@@ -92,19 +98,19 @@ public class SymbolicFormulaChecker {
 	public void checkItem(IModelCheckJob checker, SymbolicCheckingFormulaItem item) {
 		Thread checkingThread = new Thread(() -> {
 			State stateid = currentTrace.getCurrentState();
-			ArrayList<Object> result = new ArrayList<>();
-			result.add(null);
 			currentJobs.add(checker);
+			Object result;
 			try {
-				result.set(0, checker.call());
+				result = checker.call();
 			} catch (Exception e) {
 				LOGGER.error("Could not check CBC Deadlock", e);
-				result.set(0, new SymbolicCheckingParseError(String.format(bundle.getString("verifications.symbolic.couldNotCheckDeadlock"), e.getMessage())));
+				result = e;
 			}
+			injector.getInstance(StatsView.class).update(currentTrace.get());
+			final Object finalResult = result;
 			Platform.runLater(() -> {
-				resultHandler.handleFormulaResult(item, result.get(0), stateid);
+				resultHandler.handleFormulaResult(item, finalResult, stateid);
 				updateMachine(currentProject.getCurrentMachine());
-				injector.getInstance(StatsView.class).update(currentTrace.get());
 			});
 			currentJobs.remove(checker);
 			currentJobThreads.remove(Thread.currentThread());
