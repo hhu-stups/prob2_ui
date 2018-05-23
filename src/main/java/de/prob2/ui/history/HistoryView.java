@@ -109,7 +109,7 @@ public final class HistoryView extends AnchorPane {
 				int currentPos = to.getCurrent().getIndex();
 				historyTableView.getItems()
 						.add(new HistoryItem(currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST, -1));
-				List<Transition> transitionList = to.getTransitionList(FormulaExpand.TRUNCATE);
+				List<Transition> transitionList = to.getTransitionList();
 				for (int i = 0; i < transitionList.size(); i++) {
 					HistoryStatus status = getStatus(i, currentPos);
 					historyTableView.getItems().add(new HistoryItem(transitionList.get(i), status, i));
