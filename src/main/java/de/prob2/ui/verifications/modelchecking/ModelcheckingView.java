@@ -8,14 +8,12 @@ import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
@@ -26,6 +24,7 @@ import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
@@ -37,6 +36,7 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -63,6 +63,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class ModelcheckingView extends ScrollPane implements IModelCheckListener {
@@ -142,6 +145,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 				synchronized(lock) {
 					updateCurrentValues(getOptions(), currentTrace.getStateSpace(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
 					startModelchecking(false);
+					currentJobThreads.remove(Thread.currentThread());
 				}
 			}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
 			currentJobThreads.add(currentJobThread);
@@ -416,13 +420,11 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			Thread thread = iterator.next();
 			thread.interrupt();
 			iterator.remove();
-			currentJobThreads.remove(thread);
 		}
 		for(Iterator<IModelCheckJob> iterator = currentJobs.iterator(); iterator.hasNext();) {
 			IModelCheckJob job = iterator.next();
 			job.getStateSpace().sendInterrupt();
 			iterator.remove();
-			currentJobs.remove(job);
 		}
 	}
 	
@@ -435,7 +437,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			synchronized(lock) {
 				updateCurrentValues(item.getOptions(), currentTrace.getStateSpace(), item);
 				startModelchecking(checkAll);
-				tvItems.getSelectionModel().select(item);
+				currentJobThreads.remove(Thread.currentThread());
 			}
 		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
 		currentJobThreads.add(currentJobThread);
