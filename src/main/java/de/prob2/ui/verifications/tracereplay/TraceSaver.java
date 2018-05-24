@@ -57,8 +57,11 @@ public class TraceSaver {
 		File file = fileChooser.showSaveDialog(stageManager.getCurrent());
 		
 		if(file != null) {
-			final Path path = file.toPath();
-			try (final Writer writer = Files.newBufferedWriter(path, TRACE_CHARSET)) {
+			final Path projectLocation = currentProject.getLocation();
+			final Path absolute = file.toPath();
+			final Path relative = projectLocation.relativize(absolute);
+			
+			try (final Writer writer = Files.newBufferedWriter(absolute, TRACE_CHARSET)) {
 				gson.toJson(trace, writer);
 				
 				JsonObject metadata = new JsonObject();
@@ -74,7 +77,7 @@ public class TraceSaver {
 				LOGGER.warn("Failed to save trace", exc);
 				return;
 			}
-			machine.addTraceFile(path);
+			machine.addTraceFile(relative);
 		}
 	}
 }

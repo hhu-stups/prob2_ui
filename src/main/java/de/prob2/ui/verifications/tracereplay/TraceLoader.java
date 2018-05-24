@@ -12,18 +12,22 @@ import com.google.gson.JsonStreamParser;
 import com.google.inject.Inject;
 
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob2.ui.prob2fx.CurrentProject;
 
 public class TraceLoader {
 	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
 
 	private final Gson gson;
+	private final CurrentProject currentProject;
 
 	@Inject
-	public TraceLoader(Gson gson) {
+	public TraceLoader(Gson gson, CurrentProject currentProject) {
 		this.gson = gson;
+		this.currentProject = currentProject;
 	}
 
 	public PersistentTrace loadTrace(Path path) throws IOException {
+		path = currentProject.get().getLocation().resolve(path);
 		final Reader reader = Files.newBufferedReader(path, PROJECT_CHARSET);
 		JsonStreamParser parser = new JsonStreamParser(reader);
 		JsonElement element = parser.next();
