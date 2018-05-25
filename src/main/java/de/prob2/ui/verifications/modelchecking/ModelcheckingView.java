@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -227,8 +228,8 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	private final ResourceBundle bundle;
 
 	private final Map<String, IModelCheckJob> jobs;
-	private final ListProperty<IModelCheckJob> currentJobs;
 	private final ListProperty<Thread> currentJobThreads;
+	private final List<IModelCheckJob> currentJobs;
 	private final ObjectProperty<IModelCheckingResult> lastResult;
 	private ModelCheckStats currentStats;
 	private ModelCheckingOptions currentOptions;
@@ -245,8 +246,8 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		this.stageManager = stageManager;
 		this.injector = injector;
 		this.bundle = bundle;
-		this.currentJobs = new SimpleListProperty<>(this, "currentJobs", FXCollections.observableArrayList());
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
+		this.currentJobs = new ArrayList<>();
 		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
 		this.stageController = new ModelcheckingStageController(stageManager);
@@ -263,8 +264,8 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	}
 	
 	private void setBindings() {
-		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
+		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
 		cancelButton.disableProperty().bind(currentJobThreads.emptyProperty());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
@@ -283,7 +284,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		shouldExecuteColumn.setGraphic(selectAll);
 		shouldExecuteColumn.setMaxWidth(this.getPrefWidth());
 		
-		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
+		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
 	}
 	
 	private void setListeners() {
@@ -298,9 +299,9 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty().or(currentJobs.emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty().or(currentJobThreads.emptyProperty().not()));
 			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobs.emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
 			}
 		});
 		
@@ -413,16 +414,20 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	
 	@FXML
 	public void cancelModelcheck() {
+		List<Thread> removedThreads = new ArrayList<>();
 		for(Iterator<Thread> iterator = currentJobThreads.iterator(); iterator.hasNext();) {
 			Thread thread = iterator.next();
 			thread.interrupt();
-			iterator.remove();
+			removedThreads.add(thread);
 		}
+		List<IModelCheckJob> removedJobs = new ArrayList<>();
 		for(Iterator<IModelCheckJob> iterator = currentJobs.iterator(); iterator.hasNext();) {
 			IModelCheckJob job = iterator.next();
-			job.getStateSpace().sendInterrupt();
-			iterator.remove();
+			removedJobs.add(job);
 		}
+		currentTrace.getStateSpace().sendInterrupt();
+		currentJobThreads.removeAll(removedThreads);
+		currentJobs.removeAll(removedJobs);
 	}
 	
 	private void checkItem(ModelCheckingItem item, boolean checkAll) {
@@ -434,8 +439,8 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			synchronized(lock) {
 				updateCurrentValues(item.getOptions(), currentTrace.getStateSpace(), item);
 				startModelchecking(checkAll);
-				currentJobThreads.remove(Thread.currentThread());
 			}
+			currentJobThreads.remove(Thread.currentThread());
 		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
 		currentJobThreads.add(currentJobThread);
 		currentJobThread.start();
