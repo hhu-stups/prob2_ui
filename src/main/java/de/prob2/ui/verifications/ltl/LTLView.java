@@ -157,7 +157,7 @@ public class LTLView extends ScrollPane {
 			check.disableProperty().bind(row.emptyProperty().or(currentJobThreads.emptyProperty().not()));
 
 			row.setOnMouseClicked(e->rowClicked(e, row, showCounterExampleItem, showMessage));
-			row.setContextMenu(new ContextMenu(openEditor, removeItem, showCounterExampleItem, showMessage, check));
+			row.setContextMenu(new ContextMenu(check, openEditor, removeItem, showCounterExampleItem, showMessage));
 			return row;
 		});
 		
@@ -170,8 +170,20 @@ public class LTLView extends ScrollPane {
 			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.pattern.menu.openInEditor"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			openEditor.disableProperty().bind(row.emptyProperty());
+			
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
+			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
+			
+			row.setOnMouseClicked(e -> {
+				LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
+				if(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked()) {
+					showMessage.setDisable(true);
+				} else {
+					showMessage.setDisable(false);
+				}
+			});
 
-			row.setContextMenu(new ContextMenu(openEditor, removeItem));
+			row.setContextMenu(new ContextMenu(openEditor, removeItem, showMessage));
 			return row;
 		});
 	}
@@ -285,7 +297,7 @@ public class LTLView extends ScrollPane {
 		if(!machine.getLTLPatterns().contains(item)) {
 			machine.addLTLPattern(item);
 			updateProject();
-			patternParser.parsePattern(item, machine, false);
+			patternParser.parsePattern(item, machine);
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
 		}
@@ -343,7 +355,7 @@ public class LTLView extends ScrollPane {
 			Machine machine = currentProject.getCurrentMachine();
 			machine.getPatternManager().removePattern(machine.getPatternManager().getUserPattern(item.getName()));
 			item.setData(result.getName(), result.getDescription(), result.getCode());
-			patternParser.parsePattern(item, machine, false);
+			patternParser.parsePattern(item, machine);
 			currentProject.setSaved(false);
 			tvPattern.refresh();
 		}

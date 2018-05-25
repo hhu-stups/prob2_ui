@@ -21,11 +21,11 @@ public class LTLPatternParser {
 		this.resultHandler = resultHandler;
 	}
 		
-	public void parsePattern(LTLPatternItem item, Machine machine, boolean byInit) {
+	public void parsePattern(LTLPatternItem item, Machine machine) {
 		logger.trace("Parse ltl pattern");
 		Pattern pattern = itemToPattern(item);
 		machine.getPatternManager().getPatterns().add(pattern);
-		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item, byInit);
+		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item);
 	}
 	
 	private LTLParseListener checkDefinition(Pattern pattern, Machine machine) {
@@ -60,7 +60,7 @@ public class LTLPatternParser {
 	}
 	
 	public void parseMachine(Machine machine) {
-		machine.getLTLPatterns().forEach(item-> this.parsePattern(item, machine, true));
+		machine.getLTLPatterns().forEach(item-> this.parsePattern(item, machine));
 	}
 	
 }
