@@ -93,7 +93,7 @@ public abstract class AbstractResultHandler {
 			item.setCheckedSuccessful();
 		} else if(checked == Checked.FAIL) {
 			item.setCheckedFailed();
-		} else if(checked == Checked.INTERRUPTED) {
+		} else if(checked == Checked.INTERRUPTED || checked == Checked.TIMEOUT) {
 			item.setCheckInterrupted();
 		}
 	}

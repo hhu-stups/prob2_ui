@@ -552,7 +552,6 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		}
 		currentStats.isFinished(job, timeElapsed, result);
 		Platform.runLater(() -> {
-			
 			this.stageController.hide();
 			injector.getInstance(OperationsView.class).update(currentTrace.get());
 			injector.getInstance(StatsView.class).update(currentTrace.get());

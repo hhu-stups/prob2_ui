@@ -1,7 +1,8 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.ResourceBundle;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -41,21 +42,18 @@ public class SymbolicFormulaChecker {
 	
 	private final SymbolicCheckingResultHandler resultHandler;
 	
-	private final ResourceBundle bundle;
-	
-	private final ListProperty<IModelCheckJob> currentJobs;
+	private final List<IModelCheckJob> currentJobs;
 	
 	private final ListProperty<Thread> currentJobThreads;
 	
 	@Inject
 	public SymbolicFormulaChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
-							final SymbolicCheckingResultHandler resultHandler, final Injector injector, final ResourceBundle bundle) {
+							final SymbolicCheckingResultHandler resultHandler, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
 		this.injector = injector;
-		this.bundle = bundle;
-		this.currentJobs = new SimpleListProperty<>(this, "currentJobs", FXCollections.observableArrayList());
+		this.currentJobs = new ArrayList<>();
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 	}
 	
@@ -135,18 +133,20 @@ public class SymbolicFormulaChecker {
 	}
 	
 	public void interrupt() {
+		List<Thread> removedThreads = new ArrayList<>();
 		for(Iterator<Thread> iterator = currentJobThreads.iterator(); iterator.hasNext();) {
 			Thread thread = iterator.next();
 			thread.interrupt();
-			iterator.remove();
-			currentJobThreads.remove(thread);
+			removedThreads.add(thread);
 		}
+		List<IModelCheckJob> removedJobs = new ArrayList<>();
 		for(Iterator<IModelCheckJob> iterator = currentJobs.iterator(); iterator.hasNext();) {
 			IModelCheckJob job = iterator.next();
-			job.getStateSpace().sendInterrupt();
-			iterator.remove();
-			currentJobs.remove(job);
+			removedJobs.add(job);
 		}
+		currentTrace.getStateSpace().sendInterrupt();
+		currentJobThreads.removeAll(removedThreads);
+		currentJobs.removeAll(removedJobs);
 	}
 	
 	public ListProperty<Thread> currentJobThreadsProperty() {
