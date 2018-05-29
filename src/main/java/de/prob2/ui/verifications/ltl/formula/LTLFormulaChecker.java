@@ -55,6 +55,9 @@ public class LTLFormulaChecker {
 				machine.setLtlStatus(Machine.CheckingStatus.FAILED);
 			}
 			item.setChecked(result);
+			if(Thread.currentThread().isInterrupted()) {
+				return;
+			}
 		}
 		Platform.runLater(() -> injector.getInstance(StatusBar.class).setLtlStatus(failed.get(0) ? StatusBar.CheckingStatus.ERROR : StatusBar.CheckingStatus.SUCCESSFUL));
 	

@@ -251,6 +251,11 @@ public class LTLView extends ScrollPane {
 		tvPattern.itemsProperty().bind(machine.ltlPatternsProperty());
 		tvFormula.refresh();
 		tvPattern.refresh();
+		for(LTLFormulaItem formula : machine.getLTLFormulas()) {
+			formula.setCounterExample(null);
+			formula.setResultItem(null);
+			
+		}
 		if(currentTrace.existsProperty().get()) {
 			checkMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
 		}
