@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.tracereplay;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -65,4 +66,25 @@ public class ReplayTrace {
 	public String getErrorMessage() {
 		return errorMessage;
 	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(location);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == this) {
+			return true;
+		}
+		if(!(obj instanceof ReplayTrace)) {
+			return false;
+		}
+		if(location.equals(((ReplayTrace) obj).getLocation())) {
+			return true;
+		}
+		return false;
+	}
+	
+	
 }

@@ -861,6 +861,52 @@ Bemerkung: Exceptions fliegen, wenn während des Modelcheckings eine neue Maschi
 
 
 
+
+33. Trace Replay
+
+1. Replay all
+
+Erwartetes Ergebnis: Es werden alle Traces nachgespielt und geprüft ob diese nach gespielt werden können; es wird nicht auf einen Trace gewechselt
+
+Tatsächliches Ergebnis: Es werden alle Traces nachgespielt und geprüft ob diese nach gespielt werden können; es wird nicht auf einen Trace gewechselt
+
+
+2. Interrupt
+
+Erwartetes Ergebnis: Trace Replay wird unterbrochen, der Ladebalken wird gestoppt
+
+Tatsächliches Ergebnis: Trace Replay wird unterbrochen, der Ladebalken wird gestoppt
+
+
+
+3. Replay Trace
+
+Erwartetes Ergebnis: Trace wird nachgespielt; für den Fall dass er nachgespielt werden kann, wird der currentTrace auf diesen Trace gewechselt
+
+Tatsächliches Ergebnis: Trace wird nachgespielt; für den Fall dass er nachgespielt werden kann, wird der currentTrace auf diesen Trace gewechselt
+
+
+4. Show Error -> funktioniert
+
+5. Delete trace -> funktioniert
+
+6. Trace ohne Syntaxfehler laden
+
+7. Trace mit Syntaxfehler laden
+
+8. Hilfebutton -> springt noch nicht an die richtige Stelle
+
+
+
+
+
+
+
+
+Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
+
+
+
 Noch zu testen:
 -Advanced
 -Verifications (LTL, Symbolic)
