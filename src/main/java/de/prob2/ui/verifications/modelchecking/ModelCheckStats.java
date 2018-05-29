@@ -113,7 +113,6 @@ public final class ModelCheckStats extends AnchorPane {
 	public void isFinished(final IModelCheckJob modelChecker, final long timeElapsed, final IModelCheckingResult result) {
 		Objects.requireNonNull(modelChecker, "modelChecker");
 		Objects.requireNonNull(result, "result");
-		item.setTimeElapsed(timeElapsed);
 		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
 		
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {

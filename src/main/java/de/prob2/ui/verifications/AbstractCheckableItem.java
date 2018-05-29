@@ -101,9 +101,8 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		this.checked = checked;
 	}
 	
+	@Override
 	public Checked getChecked() {
 		return checked;
 	}
-		
-	
 }

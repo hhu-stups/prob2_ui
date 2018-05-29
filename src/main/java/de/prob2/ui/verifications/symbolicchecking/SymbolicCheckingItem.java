@@ -12,11 +12,12 @@ public class SymbolicCheckingItem {
 	
 	private GUIType guiType;
 	
-	public SymbolicCheckingItem(@NamedArg("checkingType") SymbolicCheckingType name, @NamedArg("guiType") GUIType guiType) {
-		this.checkingType = name;
+	public SymbolicCheckingItem(@NamedArg("checkingType") SymbolicCheckingType checkingType, @NamedArg("guiType") GUIType guiType) {
+		this.checkingType = checkingType;
 		this.guiType = guiType;
 	}
 	
+	@Override
 	public String toString() {
 		return checkingType.getName();
 	}
