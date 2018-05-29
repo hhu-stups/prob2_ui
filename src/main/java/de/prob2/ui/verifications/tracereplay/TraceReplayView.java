@@ -18,7 +18,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.SetChangeListener;
@@ -120,7 +120,24 @@ public class TraceReplayView extends ScrollPane {
 		nameColumn.setCellValueFactory(
 				features -> new SimpleStringProperty(features.getValue().getLocation().toString()));
 
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateTraceTableView(to));
+		final SetChangeListener<Path> listener = c -> {
+			if (c.wasAdded()) {
+				traceTableView.getItems().add(new ReplayTrace(c.getElementAdded()));
+			}
+			if (c.wasRemoved()) {
+				removeFromTraceTableView(c.getElementRemoved());
+			}
+		};
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			if (from != null) {
+				from.getTraceFiles().removeListener(listener);
+			}
+			traceTableView.getItems().clear();
+			if (to != null) {
+				to.getTraceFiles().forEach(tracePath -> traceTableView.getItems().add(new ReplayTrace(tracePath)));
+				to.getTraceFiles().addListener(listener);
+			}
+		});
 
 		initTableRows();
 		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
@@ -208,21 +225,6 @@ public class TraceReplayView extends ScrollPane {
 		traceTableView.getItems().forEach(trace -> trace.setStatus(ReplayTrace.Status.NOT_CHECKED));
 	}
 	
-	private void updateTraceTableView(Machine machine) {
-		traceTableView.getItems().clear();
-		if (machine != null) {
-			machine.getTraceFiles().forEach(tracePath -> traceTableView.getItems().add(new ReplayTrace(tracePath)));
-			machine.getTraceFiles().addListener((SetChangeListener<Path>) c -> {
-				if (c.wasAdded()) {
-					traceTableView.getItems().add(new ReplayTrace(c.getElementAdded()));
-				}
-				if (c.wasRemoved()) {
-					removeFromTraceTableView(c.getElementRemoved());
-				}
-			});
-		}
-	}
-
 	private void removeFromTraceTableView(Path tracePath) {
 		for(Iterator<ReplayTrace> iterator = traceTableView.getItems().iterator(); iterator.hasNext(); ) {
 			ReplayTrace trace = iterator.next();
