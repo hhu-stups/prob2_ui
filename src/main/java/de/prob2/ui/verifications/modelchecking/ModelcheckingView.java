@@ -314,18 +314,16 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 
 	private void tvItemsClicked(MouseEvent e) {
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-		if (item != null) {
-			if (e.getButton() == MouseButton.PRIMARY) {
-				if (item.getStats() == null) {
-					if (e.getClickCount() == 1) {
-						resetView();
-					} else if (e.getClickCount() >= 2) {
-						checkItem(item, false);
-					}
-				} else {
-					currentStats = item.getStats();
-					statsPane.getChildren().setAll(currentStats);
+		if (item != null && e.getButton() == MouseButton.PRIMARY) {
+			if (item.getStats() == null) {
+				if (e.getClickCount() == 1) {
+					resetView();
+				} else if (e.getClickCount() >= 2) {
+					checkItem(item, false);
 				}
+			} else {
+				currentStats = item.getStats();
+				statsPane.getChildren().setAll(currentStats);
 			}
 		}
 	}

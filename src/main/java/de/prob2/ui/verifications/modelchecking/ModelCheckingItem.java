@@ -1,13 +1,16 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.Objects;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.check.ModelCheckingOptions;
+
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
-import javafx.scene.paint.Color;
 
-import java.util.Objects;
+import javafx.scene.paint.Color;
 
 public class ModelCheckingItem implements IExecutableItem {
 
@@ -16,8 +19,6 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	private transient FontAwesomeIconView status;
 	private Checked checked;
-	
-	private long timeElapsed;
 	
 	private String strategy;
 	
@@ -115,11 +116,8 @@ public class ModelCheckingItem implements IExecutableItem {
 		this.checked = checked;
 	}
 	
+	@Override
 	public Checked getChecked() {
 		return checked;
-	}	
-	
-	public void setTimeElapsed(long timeElapsed) {
-		this.timeElapsed = timeElapsed;
 	}
 }

@@ -580,10 +580,8 @@ public final class OperationsView extends AnchorPane {
 		opNames = new ArrayList<>();
 		opToParams = new HashMap<>();
 		LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
-		System.out.println("operations");
 		for (String opName : loadedMachine.getOperationNames()) {
 			OperationInfo machineOperationInfo = loadedMachine.getMachineOperationInfo(opName);
-			System.out.println(opName);
 			opNames.add(opName);
 			opToParams.put(opName, machineOperationInfo.getParameterNames());
 
