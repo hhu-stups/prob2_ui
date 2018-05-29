@@ -80,10 +80,7 @@ public class ReplayTrace {
 		if(!(obj instanceof ReplayTrace)) {
 			return false;
 		}
-		if(location.equals(((ReplayTrace) obj).getLocation())) {
-			return true;
-		}
-		return false;
+		return location.equals(((ReplayTrace) obj).getLocation());
 	}
 	
 	
