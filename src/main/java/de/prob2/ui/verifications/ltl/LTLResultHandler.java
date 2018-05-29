@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.EvaluationCommand;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
@@ -41,6 +42,14 @@ public class LTLResultHandler extends AbstractResultHandler {
 	}
 	
 	public Checked handleFormulaResult(LTLFormulaItem item, Object result, State stateid) {
+		if(result instanceof EvaluationCommand)  {
+			if (((EvaluationCommand) result).isInterrupted()) {
+				handleItem(item, Checked.INTERRUPTED);
+				return Checked.INTERRUPTED;
+			} else {
+				result = ((EvaluationCommand) result).getValue();
+			}
+		}
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			handleItem(item, Checked.SUCCESS);

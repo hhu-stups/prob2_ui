@@ -86,7 +86,7 @@ public class LTLFormulaChecker {
 			logger.error("Could not parse LTL formula: ", error);
 			return error;
 		}
-		return lcc.getValue();
+		return lcc;
 	}
 	
 	private Object getFailedResult(LTLParseListener parseListener) {

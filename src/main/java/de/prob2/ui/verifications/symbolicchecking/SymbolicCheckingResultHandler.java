@@ -182,7 +182,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 	
 	public void handleSymbolicChecking(SymbolicCheckingFormulaItem item, SymbolicModelcheckCommand cmd) {
 		SymbolicModelcheckCommand.ResultType result = cmd.getResult();
-		if(result == null) {
+		if(cmd.isInterrupted()) {
 			showCheckingResult(item, bundle.getString("verifications.symbolic.symbolicChecking.result.interrupted"), Checked.INTERRUPTED);
 			return;
 		}

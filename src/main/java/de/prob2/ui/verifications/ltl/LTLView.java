@@ -371,36 +371,35 @@ public class LTLView extends ScrollPane {
 		Machine machine = currentProject.getCurrentMachine();
 		Thread checkingThread = new Thread(() -> {
 			checker.checkMachine(machine);
-			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
 				tvFormula.refresh();
-				currentJobThreads.remove(currentThread);
 			});
+			currentJobThreads.remove(Thread.currentThread());
 		}, "LTL Checking Thread");
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}
 	
 	private void checkItem(LTLFormulaItem item) {
+		Machine machine = currentProject.getCurrentMachine();
 		Thread checkingThread = new Thread(() -> {
-			Machine machine = currentProject.getCurrentMachine();
 			Checked result = checkFormula(item, machine);
 			item.setChecked(result);
-			Thread currentThread = Thread.currentThread();
 			Platform.runLater(() -> {
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
 				tvFormula.refresh();
-				currentJobThreads.remove(currentThread);
 			});
+			currentJobThreads.remove(Thread.currentThread());
 		}, "LTL Checking Thread");
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}
 	
 	@FXML
-	public synchronized void cancel() {
+	public void cancel() {
 		currentJobThreads.forEach(Thread::interrupt);
+		currentTrace.getStateSpace().sendInterrupt();
 	}
 	
 	private void parseMachine(Machine machine) {
