@@ -139,7 +139,6 @@ public class SymbolicCheckingView extends ScrollPane {
 			}
 		});
 		shouldExecuteColumn.setGraphic(selectAll);
-		shouldExecuteColumn.setMaxWidth(this.getPrefWidth());
 		tvFormula.setOnMouseClicked(e-> {
 			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {

@@ -890,16 +890,17 @@ Tatsächliches Ergebnis: Trace wird nachgespielt; für den Fall dass er nachgesp
 
 5. Delete trace -> funktioniert
 
-6. Trace ohne Syntaxfehler laden
+6. Trace ohne Syntaxfehler laden und überprüfen -> funktioniert
 
-7. Trace mit Syntaxfehler laden
+7. Trace mit Syntaxfehler laden -> funktioniert
 
 8. Hilfebutton -> springt noch nicht an die richtige Stelle
 
 
+Bemerkungen: 
 
-
-
+-Zurücksetzen wenn Maschine neu geladen wird bzw. andere Maschine geladen wird?
+-Durch Wechseln der Maschinen ist es möglich, dass nach dem Checken der Status von Erfolgreich/Nicht erfolgreich auf Nicht gecheckt gesetzt wird
 
 
 
@@ -907,6 +908,42 @@ Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
 
 
 
+
+
+
+34. LTL
+
+1. Überprüfen einer erfolgreichen LTL Formel
+
+2. Überprüfen einer LTL Formel mit Gegenbeispiel
+
+3. Überprüfen einer falschen LTL Formel
+
+4. Hinzufügen von LTL Formeln
+
+5. Hinzufügen von LTL Pattern
+
+6. Ändern von LTL Formel
+
+7. Ändern von LTL Pattern
+
+8. Fehlernachricht anzeigen bei LTL Formel
+
+9. Fehlernachricht anzeigen bei LTL Pattern
+
+10. Gegenbeispiel anzeigen bei LTL Formel
+
+11. LTL Formel löschen
+
+12. LTL Pattern löschen
+
+13. Alle Formel ausführen
+
+14. Checking abbrechen
+
+15. Hilfebutton
+
+
 Noch zu testen:
 -Advanced
--Verifications (LTL, Symbolic)
+-Verifications (Symbolic)

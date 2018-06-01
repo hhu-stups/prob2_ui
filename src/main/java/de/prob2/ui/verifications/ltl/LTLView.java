@@ -228,7 +228,6 @@ public class LTLView extends ScrollPane {
 			}
 		});
 		shouldExecuteColumn.setGraphic(selectAll);
-		shouldExecuteColumn.setMaxWidth(this.getPrefWidth());
 		
 		addMenuButton.disableProperty().bind(currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(currentJobThreads.emptyProperty());
