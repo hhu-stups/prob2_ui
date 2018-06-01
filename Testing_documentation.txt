@@ -913,9 +913,15 @@ Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
 
 34. LTL
 
-1. Überprüfen einer erfolgreichen LTL Formel
+1. Überprüfen einer erfolgreichen LTL Formel -> funktioniert
 
 2. Überprüfen einer LTL Formel mit Gegenbeispiel
+
+Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gewonnen; es wird direkt zum Gegenbeispiel gewechselt
+
+Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gewonnen; es wird direkt zum Gegenbeispiel gewechselt
+
+
 
 3. Überprüfen einer falschen LTL Formel
 
@@ -923,15 +929,15 @@ Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
 
 5. Hinzufügen von LTL Pattern
 
-6. Ändern von LTL Formel
+6. Ändern von LTL Formel -> funktioniert
 
 7. Ändern von LTL Pattern
 
-8. Fehlernachricht anzeigen bei LTL Formel
+8. Fehlernachricht anzeigen bei LTL Formel -> funktioniert
 
 9. Fehlernachricht anzeigen bei LTL Pattern
 
-10. Gegenbeispiel anzeigen bei LTL Formel
+10. Gegenbeispiel anzeigen bei LTL Formel -> funktioniert
 
 11. LTL Formel löschen
 
@@ -939,9 +945,14 @@ Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
 
 13. Alle Formel ausführen
 
+Erwartetes Ergebnis: Alle Formeln werden überprüft und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
+
+Tatsächliches Ergebnis: Alle Formeln werden überprüft und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
+
+
 14. Checking abbrechen
 
-15. Hilfebutton
+15. Hilfebutton -> springt noch nicht an die richtige Stelle
 
 
 Noch zu testen:

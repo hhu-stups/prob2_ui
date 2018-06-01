@@ -282,7 +282,6 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			}
 		});
 		shouldExecuteColumn.setGraphic(selectAll);
-		shouldExecuteColumn.setMaxWidth(this.getPrefWidth());
 		
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
 	}

@@ -60,14 +60,13 @@ public class LTLResultHandler extends AbstractResultHandler {
 		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
-		Platform.runLater(() -> {
-			item.setResultItem(resultItem);	
-			if(!traces.isEmpty()) {
-				item.setCounterExample(traces.get(0));
-			} else {
-				item.setCounterExample(null);
-			}
-		});
+
+		item.setResultItem(resultItem);	
+		if(!traces.isEmpty()) {
+			item.setCounterExample(traces.get(0));
+		} else {
+			item.setCounterExample(null);
+		}
 		if(resultItem != null) {
 			return resultItem.getChecked();
 		}

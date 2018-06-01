@@ -394,6 +394,9 @@ public class LTLView extends ScrollPane {
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
 				tvFormula.refresh();
 			});
+			if(item.getCounterExample() != null) {
+				currentTrace.set(item.getCounterExample());
+			}
 			currentJobThreads.remove(Thread.currentThread());
 		}, "LTL Checking Thread");
 		currentJobThreads.add(checkingThread);
