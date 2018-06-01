@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.ltl;
 
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -253,7 +254,6 @@ public class LTLView extends ScrollPane {
 		for(LTLFormulaItem formula : machine.getLTLFormulas()) {
 			formula.setCounterExample(null);
 			formula.setResultItem(null);
-			
 		}
 		if(currentTrace.existsProperty().get()) {
 			checkMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
@@ -329,11 +329,18 @@ public class LTLView extends ScrollPane {
 	}
 	
 	private void changeFormula(LTLFormulaItem item, LTLFormulaItem result) {
-		if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) ||
-			!item.getCode().equals(result.getCode())) {
+		Machine machine = currentProject.getCurrentMachine();
+		if(!machine.getLTLFormulas().stream()
+				.filter(formula -> !formula.equals(item))
+				.collect(Collectors.toList())
+				.contains(result)) {
 			item.setData(result.getName(), result.getDescription(), result.getCode());
+			item.setCounterExample(null);
+			item.setResultItem(null);
 			currentProject.setSaved(false);
 			tvFormula.refresh();
+		} else {
+			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
 	}
 	
@@ -354,14 +361,18 @@ public class LTLView extends ScrollPane {
 	}
 	
 	private void changePattern(LTLPatternItem item, LTLPatternItem result) {
-		if(!item.getName().equals(result.getName()) || !item.getDescription().equals(result.getDescription()) ||
-				!item.getCode().equals(result.getCode())) {
-			Machine machine = currentProject.getCurrentMachine();
+		Machine machine = currentProject.getCurrentMachine();
+		if(!machine.getLTLPatterns().stream()
+				.filter(pattern -> !pattern.equals(item))
+				.collect(Collectors.toList())
+				.contains(result)) {
 			machine.getPatternManager().removePattern(machine.getPatternManager().getUserPattern(item.getName()));
 			item.setData(result.getName(), result.getDescription(), result.getCode());
 			patternParser.parsePattern(item, machine);
 			currentProject.setSaved(false);
 			tvPattern.refresh();
+		} else {
+			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
 		}
 	}
 	

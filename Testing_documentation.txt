@@ -896,16 +896,17 @@ Tatsächliches Ergebnis: Trace wird nachgespielt; für den Fall dass er nachgesp
 
 8. Hilfebutton -> springt noch nicht an die richtige Stelle
 
+9. Hinzufügen von bereits vorhandenen Traces
+
+Erwartetes Ergebnis: Trace wird nicht hinzugefügt
+
+Tatsächliches Ergebnis: Trace wird nicht hinzugefügt
+
 
 Bemerkungen: 
 
 -Zurücksetzen wenn Maschine neu geladen wird bzw. andere Maschine geladen wird?
 -Durch Wechseln der Maschinen ist es möglich, dass nach dem Checken der Status von Erfolgreich/Nicht erfolgreich auf Nicht gecheckt gesetzt wird
-
-
-
-Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
-
 
 
 
@@ -915,6 +916,8 @@ Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
 
 1. Überprüfen einer erfolgreichen LTL Formel -> funktioniert
 
+
+
 2. Überprüfen einer LTL Formel mit Gegenbeispiel
 
 Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gewonnen; es wird direkt zum Gegenbeispiel gewechselt
@@ -923,36 +926,118 @@ Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gewonnen;
 
 
 
-3. Überprüfen einer falschen LTL Formel
 
-4. Hinzufügen von LTL Formeln
+3. Überprüfen einer LTL Formel mit Syntaxfehler
 
-5. Hinzufügen von LTL Pattern
+Erwartetes Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt
+
+Tatsächliches Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt
+
+
+
+
+4. Hinzufügen von LTL Formeln -> funktioniert
+
+5. Hinzufügen von LTL Pattern -> funktioniert
 
 6. Ändern von LTL Formel -> funktioniert
 
-7. Ändern von LTL Pattern
+Erwartetes Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten sowie Fehlertraces zurückgesetzt
 
-8. Fehlernachricht anzeigen bei LTL Formel -> funktioniert
+Tatsächliches Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten sowie Fehlertraces zurückgesetzt
 
-9. Fehlernachricht anzeigen bei LTL Pattern
 
-10. Gegenbeispiel anzeigen bei LTL Formel -> funktioniert
 
-11. LTL Formel löschen
 
-12. LTL Pattern löschen
+7. Ändern von LTL Pattern zu einem gültigen Pattern -> funktioniert
 
-13. Alle Formel ausführen
+Erwartetes Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten zurückgesetzt
+
+Tatsächliches Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten zurückgesetzt
+
+
+
+
+8. Ändern von LTL Pattern zu einem ungültigen Pattern -> funktioniert
+
+Erwartetes Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten zurückgesetzt und die neue angezeigt
+
+Tatsächliches Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten zurückgesetzt und die neue angezeigt
+
+
+
+
+9. Ändern von LTL Pattern zu einem bereits vorhandenen Pattern
+
+Erwartetes Ergebnis: Meldung erscheint, dass das Pattern bereits vorhanden ist
+
+Tatsächliches Ergebnis: Meldung erscheint, dass das Pattern bereits vorhanden ist
+
+
+
+
+
+10. Ändern von LTL Formel zu einer bereits vorhandenen Formel
+
+Erwartetes Ergebnis: Meldung erscheint, dass die Formel bereits vorhanden ist
+
+Tatsächliches Ergebnis: Meldung erscheint, dass die Formel bereits vorhanden ist
+
+
+
+11. Fehlernachricht anzeigen bei LTL Formel -> funktioniert
+
+12. Fehlernachricht anzeigen bei LTL Pattern -> funktioniert
+
+13. Gegenbeispiel anzeigen bei LTL Formel -> funktioniert
+
+14. LTL Formel löschen -> funktioniert
+
+15. LTL Pattern löschen -> funktioniert
+
+
+
+16. Alle Formel ausführen
 
 Erwartetes Ergebnis: Alle Formeln werden überprüft und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
 
 Tatsächliches Ergebnis: Alle Formeln werden überprüft und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
 
 
-14. Checking abbrechen
 
-15. Hilfebutton -> springt noch nicht an die richtige Stelle
+17. Checking abbrechen -> funktioniert
+
+18. Hilfebutton -> springt noch nicht an die richtige Stelle
+
+
+19. Aufruf von gültigen Patterns innerhalb Patterns -> funktioniert
+
+20. Aufruf von ungültigen Patterns innerhalb Patterns -> funktioniert
+
+21. Aufruf von gültigen Patterns innerhalb Formeln -> funktioniert
+
+22. Aufruf von ungültigen Patterns innerhalb Formeln -> funktioniert
+
+
+
+23. Redundante Definition von Pattern
+
+Erwartetes Ergebnis: Es wird keine zusätzliche Formel hinzugefügt
+
+Tatsächliches ergebnis: Es wird keine zusätzliche Formel hinzugefügt
+
+
+
+24. Redundante Definition von Formeln 
+
+Erwartetes Ergebnis: Es wird keine zusätzliche Formel hinzugefügt
+
+Tatsächliches ergebnis: Es wird keine zusätzliche Formel hinzugefügt
+
+
+
+
+Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
 
 
 Noch zu testen:
