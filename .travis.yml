@@ -35,7 +35,7 @@ env:
   - secure: oaBvSWCDGimkM3H238VHCP07ZIn9kS1R8Y8F79YyWe7x8nhqH4zV2jX2EkRPQdqJrDBSsvAOzVP2Vmbrg8tOxpx622sjfOAODqLmDwWEvcMfBIzZinOZTt3/LX7V9y6TwqMkRKjDfSIRvGHegrsWhnNh1sLZkBdjFVZMtUgVqxfsn3MCABQCnbkxY2DW8LxmLJAdGiqrZKzMKDbNwsq5X6/7ekVYZKIti6QSQi0paxgplK7tWxhKVIxNCNQaImOde+xGHdTdXu0sBn1IN3hND4ok8s9YcbrPtN654BKT77/bhuQ77rYkx5pxuj1Z8MgzfwFX5ynn8Wpq+qxbi49ICAms/ZBw9MxMwpYpD/B4cOXlLU5Zn4AkwNJmGZm7KFcX9HHu9qjPGswlRqx8xx8XfxWNE60FQqh0SzAGjpg/ZSFN/Jhl0QrInx8PG+Mol6XtAY/LkzLDNQds2T54ABfBexWXNiliEc0Hp9SorlXW7N5y2HwqwK4ed4nD4h5gHLglK8HS/0lZWh6TL7upI4NHQXlypSeZTR1WFeOxwPTm6rPQ+ExJv90LHe4/QXRWPw9DKDcHLd6xfxaB7OSnYgc00mZ3dX5yB6xw2T9NxjYY5xmkrv1R+n8lO7GgWuUZO7xScAyjMFvB4q2/rZAJrOqavWkfAFUn3Xbw+Qlw96NsR3g=
 
 install:
-- rvm install 2.0.0
+- rvm install 2.2.6
 - gem install travis-custom-deploy
 - |
   if [[ "${TRAVIS_OS_NAME}" == osx ]]
