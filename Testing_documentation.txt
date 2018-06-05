@@ -855,6 +855,14 @@ Tatsächliches Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird 
 
 11. Hilfebutton -> funktioniert, springt noch nicht an die richtige Stelle
 
+12. Deaktivierung eines Modelchecking Items -> funktioniert
+
+13. Überprüfen mit deaktivierten Items
+
+Erwartetes Ergebnis: Beim Überprüfen aller Items, werden deaktivierte Items nicht ausgeführt; das MenuItem für Check ist hierbei für dieses Item deaktiviert
+
+Tatsächliches Ergebnis: Beim Überprüfen aller Items, werden deaktivierte Items nicht ausgeführt; das MenuItem für Check ist hierbei für dieses Item deaktiviert
+
 
 Bemerkung: Exceptions fliegen, wenn während des Modelcheckings eine neue Maschine geladen wird
 
@@ -907,6 +915,7 @@ Bemerkungen:
 
 -Zurücksetzen wenn Maschine neu geladen wird bzw. andere Maschine geladen wird?
 -Durch Wechseln der Maschinen ist es möglich, dass nach dem Checken der Status von Erfolgreich/Nicht erfolgreich auf Nicht gecheckt gesetzt wird
+-Deaktivierung von Traces ermöglichen?
 
 
 
@@ -1035,11 +1044,57 @@ Erwartetes Ergebnis: Es wird keine zusätzliche Formel hinzugefügt
 Tatsächliches ergebnis: Es wird keine zusätzliche Formel hinzugefügt
 
 
+25. Deaktivierung einer Formel
+
+26. Überprüfen mit deaktivierten Formel
 
 
-Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
+
+
+35. Symbolic Model Checking
+
+1. Überprüfen einer erfolgreichen Formel -> funktioniert
+
+2. Überprüfen einer Formel mit Syntaxfehler
+
+Erwartetes Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt
+
+Tatsächliches Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt
+
+
+
+3. Überprüfen ohne Formel
+
+4. Alle Formel überprüfen
+
+5. Überprüfen einer Formel mit Gegenbeispiel
+
+6. Überprüfen ohne Formel mit Gegenbeispiel
+
+7. Hilfebutton
+
+8. Hinzufügen einer Formel
+
+9. Überprüfen aller Strategien (Sequence, Invariant, Deadlock, Find deadlock, Find redundant invariants, check refinement, check assertions, find valid state, check all operations, IC3, TINDUCTION, KINDUCTION, BMC)
+
+10. Hinzufügen bereits vorhandener Formel
+
+11. Überprüfen bereits vorhandener Formeln über Hinzufügen-Button
+
+12. Abbrechen der Überprüfungen
+
+13. Deaktivierung einer Formel
+
+14. Überprüfung mit deaktivierter Formel
+
+
+Bemerkung: Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
+
+
+
+
+
 
 
 Noch zu testen:
 -Advanced
--Verifications (Symbolic)

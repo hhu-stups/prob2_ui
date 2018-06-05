@@ -28,6 +28,7 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -153,12 +154,12 @@ public class LTLView extends ScrollPane {
 			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 
-			MenuItem check = new MenuItem(bundle.getString("verifications.ltl.formula.menu.check"));
-			check.setOnAction(e-> checkItem(row.getItem()));
-			check.disableProperty().bind(row.emptyProperty().or(currentJobThreads.emptyProperty().not()));
+			MenuItem checkItem = new MenuItem(bundle.getString("verifications.ltl.formula.menu.check"));
+			checkItem.setOnAction(e-> checkItem(row.getItem()));
+			checkItem.disableProperty().bind(row.emptyProperty().or(currentJobThreads.emptyProperty().not()));
 
 			row.setOnMouseClicked(e->rowClicked(e, row, showCounterExampleItem, showMessage));
-			row.setContextMenu(new ContextMenu(check, openEditor, removeItem, showCounterExampleItem, showMessage));
+			row.setContextMenu(new ContextMenu(checkItem, openEditor, removeItem, showCounterExampleItem, showMessage));
 			return row;
 		});
 		
