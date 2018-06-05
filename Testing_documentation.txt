@@ -929,9 +929,9 @@ Bemerkungen:
 
 2. Überprüfen einer LTL Formel mit Gegenbeispiel
 
-Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gewonnen; es wird direkt zum Gegenbeispiel gewechselt
+Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird direkt zum Gegenbeispiel gewechselt
 
-Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gewonnen; es wird direkt zum Gegenbeispiel gewechselt
+Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird direkt zum Gegenbeispiel gewechselt
 
 
 
@@ -1062,34 +1062,80 @@ Erwartetes Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehlerna
 Tatsächliches Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt
 
 
+3. Überprüfen ohne Formel -> funktioniert
 
-3. Überprüfen ohne Formel
+
 
 4. Alle Formel überprüfen
 
+Erwartetes Ergebnis: Alle Formeln werden überprüft und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
+
+Tatsächliches Ergebnis: Alle Formeln werden überprüft und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
+
+
+
+
 5. Überprüfen einer Formel mit Gegenbeispiel
+
+Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird nicht direkt zum Gegenbeispiel gewechselt
+
+Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird nicht direkt zum Gegenbeispiel gewechselt
+
+
 
 6. Überprüfen ohne Formel mit Gegenbeispiel
 
-7. Hilfebutton
+Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird nicht direkt zum Gegenbeispiel gewechselt
 
-8. Hinzufügen einer Formel
-
-9. Überprüfen aller Strategien (Sequence, Invariant, Deadlock, Find deadlock, Find redundant invariants, check refinement, check assertions, find valid state, check all operations, IC3, TINDUCTION, KINDUCTION, BMC)
-
-10. Hinzufügen bereits vorhandener Formel
-
-11. Überprüfen bereits vorhandener Formeln über Hinzufügen-Button
-
-12. Abbrechen der Überprüfungen
-
-13. Deaktivierung einer Formel
-
-14. Überprüfung mit deaktivierter Formel
+Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird nicht direkt zum Gegenbeispiel gewechselt
 
 
-Bemerkung: Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
 
+
+7. Hilfebutton -> springt noch nicht an die richtige Stelle
+
+
+
+8. Hinzufügen einer Formel -> funktioniert
+
+9. Hinzufügen und überprüfen einer Formel -> funktioniert
+
+
+
+10. Überprüfen aller Strategien (Sequence, Invariant, Deadlock, Find deadlock, Find redundant invariants, check refinement, check assertions, find valid state, check all operations, IC3, TINDUCTION, KINDUCTION, BMC) -> funktioniert
+
+
+
+11. Hinzufügen bereits vorhandener Formel
+
+Erwartetes Ergebnis: Es wird keine zusätzliche Formel hinzugefügt und der Nutzer benachrichtigt
+
+Tatsächliches ergebnis: Es wird keine zusätzliche Formel hinzugefügt und der Nutzer benachrichtigt
+
+
+
+
+12. Überprüfen bereits vorhandener Formeln über Hinzufügen-Button
+
+Erwartetes Ergebnis: Vorhandene Formel wird nochmal überprüft
+
+Tatsächliches Ergebnis: Vorhandene Formel wird nochmal überprüft
+
+
+
+
+
+13. Abbrechen der Überprüfungen -> Interrupt funktioniert nicht
+
+
+14. Deaktivierung einer Formel
+
+15. Überprüfung mit deaktivierter Formel
+
+
+Bemerkungen: 
+-Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
+-Können mehrere Gegenbeispiel gefunden werden?
 
 
 
