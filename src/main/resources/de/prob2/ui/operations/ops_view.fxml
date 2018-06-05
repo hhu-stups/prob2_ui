@@ -91,6 +91,6 @@
 			</AnchorPane>
 		</VBox>
 		<ListView fx:id="opsListView" VBox.vgrow="always" />
-		<Label fx:id="maxOperationsWarning" text="%operations.maxReached" visible="false" styleClass="warning"/>
+		<Label fx:id="warningLabel" styleClass="warning"/>
 	</VBox>
 </fx:root>

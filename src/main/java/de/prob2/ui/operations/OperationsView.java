@@ -222,7 +222,7 @@ public final class OperationsView extends AnchorPane {
 	@FXML
 	private ListView<OperationItem> opsListView;
 	@FXML
-	private Label maxOperationsWarning;
+	private Label warningLabel;
 	@FXML
 	private Button sortButton;
 	@FXML
@@ -406,7 +406,15 @@ public final class OperationsView extends AnchorPane {
 
 		doSort();
 
-		maxOperationsWarning.setVisible(trace.getCurrentState().isMaxTransitionsCalculated());
+		final String text;
+		if (!trace.getCurrentState().isInitialised() && operations.isEmpty()) {
+			text = bundle.getString("operations.noSetupConstantsOrInit");
+		} else if (trace.getCurrentState().isMaxTransitionsCalculated()) {
+			text = bundle.getString("operations.maxReached");
+		} else {
+			text = "";
+		}
+		Platform.runLater(() -> warningLabel.setText(text));
 
 		final List<OperationItem> filtered = applyFilter(searchBar.getText());
 
