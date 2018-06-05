@@ -13,6 +13,8 @@ import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 
+import de.prob2.ui.internal.StageManager;
+
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -20,6 +22,9 @@ import javafx.beans.property.ReadOnlyBooleanPropertyBase;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A singleton read-only property that represents the current {@link Trace}. It
@@ -86,6 +91,8 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		}
 	}
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CurrentTrace.class);
+	
 	private final AnimationSelector animationSelector;
 	
 	private final ReadOnlyBooleanProperty exists;
@@ -102,18 +109,28 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	private final ReadOnlyObjectProperty<Trace> forward;
 
 	@Inject
-	private CurrentTrace(final AnimationSelector animationSelector) {
+	private CurrentTrace(final AnimationSelector animationSelector, final StageManager stageManager) {
 		super();
 		this.animationSelector = animationSelector;
 		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
 			@Override
 			public void traceChange(final Trace currentTrace, final boolean currentAnimationChanged) {
-				if (currentTrace != null && !currentTrace.getCurrentState().isExplored()) {
-					currentTrace.getCurrentState().explore();
+				try {
+					if (currentTrace != null && !currentTrace.getCurrentState().isExplored()) {
+						try {
+							currentTrace.getCurrentState().explore();
+						} catch (RuntimeException e) {
+							LOGGER.error("Exception while exploring new state");
+							Platform.runLater(() -> stageManager.makeExceptionAlert("Exception while exploring new state", e).show());
+						}
+					}
+					// Has to be a lambda. For some reason, using a method reference here causes an IllegalAccessError at runtime.
+					// noinspection Convert2MethodRef
+					Platform.runLater(() -> CurrentTrace.this.fireValueChangedEvent());
+				} catch (RuntimeException e) {
+					LOGGER.error("Exception during trace change");
+					Platform.runLater(() -> stageManager.makeExceptionAlert("Exception during trace change", e).show());
 				}
-				// Has to be a lambda. For some reason, using a method reference here causes an IllegalAccessError at runtime.
-				// noinspection Convert2MethodRef
-				Platform.runLater(() -> CurrentTrace.this.fireValueChangedEvent());
 			}
 
 			@Override
