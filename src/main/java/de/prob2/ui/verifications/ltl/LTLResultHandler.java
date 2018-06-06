@@ -25,7 +25,6 @@ import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
 @Singleton
