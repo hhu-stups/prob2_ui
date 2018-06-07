@@ -196,7 +196,7 @@ public final class StatesView extends StackPane {
 			}
 		});
 
-		final MenuItem copyItem = new MenuItem(bundle.getString("states.copy"));
+		final MenuItem copyItem = new MenuItem(bundle.getString("common.contextMenu.copy"));
 
 		copyItem.setOnAction(e -> {
 			final Clipboard clipboard = Clipboard.getSystemClipboard();

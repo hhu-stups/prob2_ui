@@ -33,7 +33,7 @@
 								glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
 						</graphic>
 						<tooltip>
-							<Tooltip text="%verifications.cancel" />
+							<Tooltip text="%common.cancel" />
 						</tooltip>
 					</Button>
 					<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">

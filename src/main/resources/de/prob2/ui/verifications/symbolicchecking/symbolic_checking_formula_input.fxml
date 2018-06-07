@@ -24,7 +24,7 @@
 		<HBox alignment="CENTER" prefHeight="47.0" prefWidth="400.0" spacing="60">
 			<Button fx:id="btAdd" text="%verifications.symbolic.add" styleClass="button-blue"/>
 			<Button fx:id="btCheck" text="%verifications.symbolic.check" styleClass="button-blue"/>
-			<Button fx:id="btCancel" onAction="#cancel" text="%verifications.symbolic.cancel" styleClass="button-blue"/>
+			<Button fx:id="btCancel" onAction="#cancel" text="%common.cancel" styleClass="button-blue"/>
 		</HBox>
 	</VBox>
 </fx:root>
