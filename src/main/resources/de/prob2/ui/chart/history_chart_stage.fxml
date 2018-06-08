@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%chart.historychart.title"
+<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%chart.historyChart.stage.title"
 	minWidth="320" minHeight="240">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
@@ -57,9 +57,9 @@
 								<padding>
 									<Insets top="12.0" bottom="12.0" right="10.0" left="10.0" />
 								</padding>
-								<CheckBox fx:id="separateChartsCheckBox" text="%chart.historychart.separateCharts" />
+								<CheckBox fx:id="separateChartsCheckBox" text="%chart.historyChart.separateCharts" />
 								<VBox spacing="5.0">
-									<Label text="%chart.historychart.startPosition">
+									<Label text="%chart.historyChart.startPosition">
 										<labelFor>
 											<ChoiceBox fx:id="startChoiceBox" />
 										</labelFor>
