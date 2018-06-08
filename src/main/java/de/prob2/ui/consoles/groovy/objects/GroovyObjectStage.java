@@ -15,7 +15,6 @@ import javafx.stage.Stage;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import java.util.List;
 import java.util.Map;
 
 @Singleton
@@ -57,7 +56,7 @@ public final class GroovyObjectStage extends Stage {
 			if (entry == null || entry.getKey() == null || entry.getValue() == null) {
 				continue;
 			}
-			GroovyClassStage stage = new GroovyClassStage(stageManager, uiState, entry.getKey());
+			GroovyClassStage stage = new GroovyClassStage(stageManager, uiState);
 			items.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), stage, uiState));
 		}
 	}
@@ -78,8 +77,5 @@ public final class GroovyObjectStage extends Stage {
 			tvObjects.getSelectionModel().clearSelection();
 		});
 	}
-	
-	public List<GroovyObjectItem> getItems() {
-		return items;
-	}
+
 }

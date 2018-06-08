@@ -62,10 +62,10 @@ public class GroovyClassStage extends Stage {
 	private int index;
 
 	
-	public GroovyClassStage(StageManager stageManager, UIState uiState, String name) {
+	public GroovyClassStage(StageManager stageManager, UIState uiState) {
 		this.index = 0;
 		this.uiState = uiState;
-		stageManager.loadFXML(this, "groovy_class_stage.fxml", "#GroovyObjectId:" + name);
+		stageManager.loadFXML(this, "groovy_class_stage.fxml");
 	}
 	
 	public void setClass(Class<?> clazz) {

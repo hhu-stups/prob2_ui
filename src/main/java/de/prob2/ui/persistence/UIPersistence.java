@@ -107,19 +107,6 @@ public final class UIPersistence {
 			windowMenu.loadPreset(uiState.getGuiState());
 		}
 		
-		
-		List<GroovyObjectItem> groovyObjects = injector.getInstance(GroovyObjectStage.class).getItems();
-		int j = 0;
-		for (GroovyObjectItem groovyObject : groovyObjects) {
-			if (uiState.getSavedStageBoxes().containsKey("#GroovyObjectId:" + groovyObject.getName())) {
-				List<String> initialObjects = Arrays.asList("animations", "api", "inConsole", "engine");
-				if(initialObjects.contains(groovyObject.getName())) {
-					groovyObject.show(GroovyObjectItem.ShowEnum.PERSISTENCE, j);
-					j++;
-				}
-			}
-		}
-		
 		main.getAccordions().forEach(acc ->
 			acc.getPanes().stream().filter(tp -> uiState.getExpandedTitledPanes().contains(tp.getId())).forEach(acc::setExpandedPane)
 		);
