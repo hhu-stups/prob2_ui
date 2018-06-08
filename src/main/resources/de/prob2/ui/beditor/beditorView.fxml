@@ -20,7 +20,7 @@
 					<FontAwesomeIconView styleClass="icon-dark" glyphName="SAVE" glyphSize="${fontSize.fontSize + 4}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%menu.file.items.saveMachine"/>
+					<Tooltip text="%common.menu.file.items.saveMachine"/>
 				</tooltip>
 			</Button>
 			<Label fx:id="warningLabel" styleClass="warning" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
