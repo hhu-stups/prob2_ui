@@ -79,10 +79,10 @@ public class ProB2 extends Application {
 				LOGGER.error("Uncaught exception on thread {}", thread, exc);
 				Platform.runLater(() -> {
 					final String message = String.format(
-							"An internal exception occurred and was not caught. This is probably a bug.%nThread: %s",
+							bundle.getString("common.alerts.internalException.message"),
 							thread);
 					final Alert alert = stageManager.makeExceptionAlert(message, exc);
-					alert.setHeaderText("Uncaught internal exception");
+					alert.setHeaderText(bundle.getString("common.alerts.internalException.header"));
 					alert.show();
 				});
 			});
@@ -138,12 +138,12 @@ public class ProB2 extends Application {
 			if (foundMachine == null) {
 				stageManager.makeAlert(
 					Alert.AlertType.ERROR,
-					String.format("There is no machine %s in project %s.", runtimeOptions.getMachine(), currentProject.getName())
+					String.format(bundle.getString("common.alerts.noMachine.message"), runtimeOptions.getMachine(), currentProject.getName())
 				).show();
 			} else if (foundPreference == null) {
 				stageManager.makeAlert(
 					Alert.AlertType.ERROR,
-					String.format("There is no preference %s in project %s.", runtimeOptions.getPreference(), currentProject.getName())
+					String.format(bundle.getString("common.alerts.noPreference.message"), runtimeOptions.getPreference(), currentProject.getName())
 				).show();
 			} else {
 				currentProject.startAnimation(foundMachine, foundPreference);
@@ -256,7 +256,7 @@ public class ProB2 extends Application {
 			ButtonType doNotSave = new ButtonType(bundle.getString("common.doNotSave"), ButtonBar.ButtonData.NO);
 			Alert alert = stageManager.makeAlert(
 				Alert.AlertType.CONFIRMATION,
-				String.format(bundle.getString("common.unsavedProjectChanges.message"), currentProject.getName()),
+				String.format(bundle.getString("common.alerts.unsavedProjectChanges.message"), currentProject.getName()),
 				save, ButtonType.CANCEL, doNotSave);
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
