@@ -1,8 +1,6 @@
 package de.prob2.ui.persistence;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +13,6 @@ import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.ConsoleInstructionOption;
 import de.prob2.ui.consoles.groovy.GroovyInterpreter;
-import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
-import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.WindowMenu;
 import de.prob2.ui.operations.OperationsView;
