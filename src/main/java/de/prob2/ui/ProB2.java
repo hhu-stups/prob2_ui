@@ -136,15 +136,19 @@ public class ProB2 extends Application {
 			}
 
 			if (foundMachine == null) {
-				stageManager.makeAlert(
+				Alert alert = stageManager.makeAlert(
 					Alert.AlertType.ERROR,
 					String.format(bundle.getString("common.alerts.noMachine.message"), runtimeOptions.getMachine(), currentProject.getName())
-				).show();
+				);
+				alert.setHeaderText(bundle.getString("common.alerts.noMachine.header"));
+				alert.show();
 			} else if (foundPreference == null) {
-				stageManager.makeAlert(
+				Alert alert = stageManager.makeAlert(
 					Alert.AlertType.ERROR,
 					String.format(bundle.getString("common.alerts.noPreference.message"), runtimeOptions.getPreference(), currentProject.getName())
-				).show();
+				);
+				alert.setHeaderText(bundle.getString("common.alerts.noPreference.header"));
+				alert.show();
 			} else {
 				currentProject.startAnimation(foundMachine, foundPreference);
 			}
@@ -258,6 +262,7 @@ public class ProB2 extends Application {
 				Alert.AlertType.CONFIRMATION,
 				String.format(bundle.getString("common.alerts.unsavedProjectChanges.message"), currentProject.getName()),
 				save, ButtonType.CANCEL, doNotSave);
+			alert.setHeaderText(bundle.getString("common.alerts.unsavedProjectChanges.header"));
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
 				event.consume();
