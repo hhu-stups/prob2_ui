@@ -26,6 +26,12 @@ repositories {
 		name "sonatype release"
 		url "https://oss.sonatype.org/content/repositories/releases"
 	}
+	maven {
+		// For the FontAwesomeFX fork that is compatible with Java 8 and 9:
+		// https://github.com/xzel23/fontawesomefx
+		name "dua3 Bintray"
+		url "https://dl.bintray.com/dua3/public"
+	}
 }
 
 mainClassName = "de.prob2.ui.ProB2"
@@ -58,7 +64,8 @@ dependencies {
 	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.6'
 	compile group: 'de.hhu.stups', name: 'de.prob2.kernel', version: '3.2.10-SNAPSHOT', changing: true
 	compile group: 'de.hhu.stups', name: 'ltl-dsl', version: '0.1.1-SNAPSHOT', changing: true
-	compile 'de.jensd:fontawesomefx-commons:8.15'
+	compile 'de.jensd:fontawesomefx-commons:9.1.2-jpms'
+	// Cannot update to the next higher version (4.7.0-9), because its class files are compiled for Java 9.
 	compile 'de.jensd:fontawesomefx-fontawesome:4.7.0-5'
 	compile 'org.codehaus.groovy:groovy-all:2.4.7'
 	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.9.0'

@@ -67,102 +67,102 @@ public class SymbolicCheckingFormulaHandler {
 		}
 	}
 	
-	public void handleInvariant(String code) {
+	public void handleInvariant(String code, boolean checkAll) {
 		ArrayList<String> event = new ArrayList<>();
 		event.add(code);
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
-		symbolicChecker.executeCheckingItem(checker, code, SymbolicCheckingType.INVARIANT);
+		symbolicChecker.executeCheckingItem(checker, code, SymbolicCheckingType.INVARIANT, checkAll);
 	}
 	
-	public void handleDeadlock(String code) {
+	public void handleDeadlock(String code, boolean checkAll) {
 		IEvalElement constraint = new EventB(code, FormulaExpand.EXPAND); 
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
-		symbolicChecker.executeCheckingItem(checker, code, SymbolicCheckingType.DEADLOCK);
+		symbolicChecker.executeCheckingItem(checker, code, SymbolicCheckingType.DEADLOCK, checkAll);
 	}
 	
-	public void findDeadlock() {
+	public void findDeadlock(boolean checkAll) {
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace());
-		symbolicChecker.executeCheckingItem(checker, "FIND_DEADLOCK", SymbolicCheckingType.FIND_DEADLOCK);
+		symbolicChecker.executeCheckingItem(checker, "FIND_DEADLOCK", SymbolicCheckingType.FIND_DEADLOCK, checkAll);
 	}
 	
-	public void handleSequence(String sequence) {
+	public void handleSequence(String sequence, boolean checkAll) {
 		List<String> events = Arrays.asList(sequence.replaceAll(" ", "").split(";"));
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
-		symbolicChecker.executeCheckingItem(checker, sequence, SymbolicCheckingType.SEQUENCE);
+		symbolicChecker.executeCheckingItem(checker, sequence, SymbolicCheckingType.SEQUENCE, checkAll);
 	}
 	
-	public void findRedundantInvariants(SymbolicCheckingFormulaItem item) {
+	public void findRedundantInvariants(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
-		symbolicChecker.checkItem(item, cmd, stateSpace);
+		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 		
-	public void handleRefinement(SymbolicCheckingFormulaItem item) {
+	public void handleRefinement(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedRefinementCheckCommand cmd = new ConstraintBasedRefinementCheckCommand();
-		symbolicChecker.checkItem(item, cmd, stateSpace);
+		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 	
-	public void handleAssertions(SymbolicCheckingFormulaItem item) {
+	public void handleAssertions(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(stateSpace);
-		symbolicChecker.checkItem(item, cmd, stateSpace);
+		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 	
-	public void handleSymbolic(SymbolicCheckingFormulaItem item, SymbolicModelcheckCommand.Algorithm algorithm) {
+	public void handleSymbolic(SymbolicCheckingFormulaItem item, SymbolicModelcheckCommand.Algorithm algorithm, boolean checkAll) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		SymbolicModelcheckCommand cmd = new SymbolicModelcheckCommand(algorithm);
-		symbolicChecker.checkItem(item, cmd, stateSpace);
+		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 		
 	}
 	
-	public void findValidState(SymbolicCheckingFormulaItem item) {
+	public void findValidState(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode(), FormulaExpand.EXPAND), true);
-		symbolicChecker.checkItem(item, cmd, stateSpace);
+		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 	
-	public void handleItem(SymbolicCheckingFormulaItem item) {
+	public void handleItem(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		if(!item.shouldExecute()) {
 			return;
 		}
 		SymbolicCheckingType type = item.getType();
 		switch(type) {
 			case INVARIANT:
-				handleInvariant(item.getCode());
+				handleInvariant(item.getCode(), checkAll);
 				break;
 			case DEADLOCK:
-				handleDeadlock(item.getCode());
+				handleDeadlock(item.getCode(), checkAll);
 				break;
 			case SEQUENCE:
-				handleSequence(item.getCode());
+				handleSequence(item.getCode(), checkAll);
 				break;
 			case FIND_VALID_STATE:
-				findValidState(item);
+				findValidState(item, checkAll);
 				break;
 			case FIND_DEADLOCK:
-				findDeadlock();
+				findDeadlock(checkAll);
 				break;
 			case CHECK_REFINEMENT:
-				handleRefinement(item);
+				handleRefinement(item, checkAll);
 				break;
 			case CHECK_ASSERTIONS:
-				handleAssertions(item);
+				handleAssertions(item, checkAll);
 				break;
 			case FIND_REDUNDANT_INVARIANTS:
-				findRedundantInvariants(item);
+				findRedundantInvariants(item, checkAll);
 				break;
 			default:
 				SymbolicModelcheckCommand.Algorithm algorithm = type.getAlgorithm();
 				if(algorithm != null) {
-					handleSymbolic(item, algorithm);
+					handleSymbolic(item, algorithm, checkAll);
 					break;
 				}
 		}
 	}
 	
 	public void handleMachine(Machine machine) {
-		machine.getSymbolicCheckingFormulas().forEach(this::handleItem);
+		machine.getSymbolicCheckingFormulas().forEach(item -> handleItem(item, true));
 	}
 		
 }
