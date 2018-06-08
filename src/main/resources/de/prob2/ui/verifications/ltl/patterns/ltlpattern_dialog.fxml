@@ -34,9 +34,9 @@
 					</VBox>
 				</AnchorPane>
 			</content>
-			<ButtonType buttonData="CANCEL_CLOSE" text="%common.cancel" />
+			<ButtonType buttonData="CANCEL_CLOSE" text="%common.buttons.cancel" />
 			<ButtonType fx:id="okButtonType" buttonData="OK_DONE"
-				text="%common.apply" />
+				text="%common.buttons.apply" />
 		</DialogPane>
 	</dialogPane>
 </fx:root>

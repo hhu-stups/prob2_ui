@@ -256,8 +256,8 @@ public class ProB2 extends Application {
 
 	private void handleCloseRequest(Event event, CurrentProject currentProject, StageManager stageManager) {
 		if (!currentProject.isSaved()) {
-			ButtonType save = new ButtonType(bundle.getString("common.save"), ButtonBar.ButtonData.YES);
-			ButtonType doNotSave = new ButtonType(bundle.getString("common.doNotSave"), ButtonBar.ButtonData.NO);
+			ButtonType save = new ButtonType(bundle.getString("common.buttons.save"), ButtonBar.ButtonData.YES);
+			ButtonType doNotSave = new ButtonType(bundle.getString("common.buttons.doNotSave"), ButtonBar.ButtonData.NO);
 			Alert alert = stageManager.makeAlert(
 				Alert.AlertType.CONFIRMATION,
 				String.format(bundle.getString("common.alerts.unsavedProjectChanges.message"), currentProject.getName()),

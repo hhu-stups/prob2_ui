@@ -45,9 +45,9 @@
 					</AnchorPane>
 					<ButtonBar styleClass="dialog">
 						<buttons>
-							<Button text="%common.cancel" cancelButton="true"
+							<Button text="%common.buttons.cancel" cancelButton="true"
 								onAction="#cancel" />
-							<Button fx:id="finishButton" text="%common.finish"
+							<Button fx:id="finishButton" text="%common.buttons.finish"
 								onAction="#finish" />
 						</buttons>
 						<VBox.margin>

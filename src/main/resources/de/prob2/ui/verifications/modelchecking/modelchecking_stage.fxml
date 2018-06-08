@@ -63,7 +63,7 @@
 									text="%verifications.modelchecking.stage.start"
 									AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
 							</AnchorPane>
-							<Button onAction="#cancel" text="%common.cancel" />
+							<Button onAction="#cancel" text="%common.buttons.cancel" />
 						</HBox>
 					</AnchorPane>
 				</VBox>

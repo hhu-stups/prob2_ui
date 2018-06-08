@@ -77,12 +77,12 @@ public class ProjectManager {
 		File location = new File(project.getLocation() + File.separator + project.getName() + ".json");
 
 		if (currentProject.isNewProject() && location.exists()) {
-			ButtonType renameBT = new ButtonType((bundle.getString("common.rename")));
+			ButtonType renameBT = new ButtonType((bundle.getString("common.buttons.rename")));
 			Optional<ButtonType> result = stageManager
 					.makeAlert(AlertType.WARNING,
 							String.format(bundle.getString("project.projectManager.fileAlreadyExistsWarning"),
 									location),
-							new ButtonType((bundle.getString("common.replace"))), renameBT, ButtonType.CANCEL)
+							new ButtonType((bundle.getString("common.buttons.replace"))), renameBT, ButtonType.CANCEL)
 					.showAndWait();
 			if (!result.isPresent() || result.get() == ButtonType.CANCEL) {
 				return;
