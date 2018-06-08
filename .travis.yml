@@ -7,6 +7,10 @@ matrix:
     - os: linux
       dist: trusty
       jdk: oraclejdk8
+      env: DO_AFTER_SUCCESS=true
+    - os: linux
+      dist: trusty
+      jdk: oraclejdk9
     ##- os: osx
     ##  osx_image: xcode8.2
     ##  env: _JAVA_OPTIONS="-Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw -Dprism.text=t2k -Dtestfx.setup.timeout=2500"
@@ -72,6 +76,10 @@ cache:
   - $HOME/.gradle/wrapper/
 
 after_success:
-- git fetch --unshallow
-- ./gradlew sonarqube --info --stacktrace --warning-mode=all
-- travis-custom-deploy sftp build/distributions/*.zip
+- |
+  if [[ "${DO_AFTER_SUCCESS}" == "true" ]]
+  then
+    git fetch --unshallow
+    ./gradlew sonarqube --info --stacktrace --warning-mode=all
+    travis-custom-deploy sftp build/distributions/*.zip
+  fi
