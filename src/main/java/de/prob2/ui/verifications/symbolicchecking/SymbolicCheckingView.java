@@ -142,7 +142,7 @@ public class SymbolicCheckingView extends ScrollPane {
 		tvFormula.setOnMouseClicked(e-> {
 			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
-				symbolicCheckHandler.handleItem(item);
+				symbolicCheckHandler.handleItem(item, false);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
 			}
 		});
@@ -154,12 +154,12 @@ public class SymbolicCheckingView extends ScrollPane {
 			
 			final TableRow<SymbolicCheckingFormulaItem> row = new TableRow<>();
 			
-			MenuItem check = new MenuItem(bundle.getString("verifications.symbolic.menu.check"));
-			check.setOnAction(e-> {
-				symbolicCheckHandler.handleItem(row.getItem());
+			MenuItem checkItem = new MenuItem(bundle.getString("verifications.symbolic.menu.check"));
+			checkItem.setOnAction(e-> {
+				symbolicCheckHandler.handleItem(row.getItem(), false);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
 			});
-			check.disableProperty().bind(row.emptyProperty());
+			checkItem.disableProperty().bind(row.emptyProperty());
 			
 			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolic.menu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);
@@ -179,7 +179,7 @@ public class SymbolicCheckingView extends ScrollPane {
 			
 			row.setOnMouseClicked(e->rowClicked(e, row, showCounterExampleItem, showStateItem, showMessage));
 			
-			row.setContextMenu(new ContextMenu(check, changeItem, showCounterExampleItem, showMessage, showStateItem, removeItem));
+			row.setContextMenu(new ContextMenu(checkItem, changeItem, showCounterExampleItem, showMessage, showStateItem, removeItem));
 			return row;
 		});
 	}

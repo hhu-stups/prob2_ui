@@ -13,7 +13,7 @@ import de.prob.animator.command.AbstractCommand;
 import de.prob.check.IModelCheckJob;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
-
+import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -57,16 +57,16 @@ public class SymbolicFormulaChecker {
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 	}
 	
-	public void executeCheckingItem(IModelCheckJob checker, String code, SymbolicCheckingType type) {
+	public void executeCheckingItem(IModelCheckJob checker, String code, SymbolicCheckingType type, boolean checkAll) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		currentMachine.getSymbolicCheckingFormulas()
 			.stream()
 			.filter(current -> current.getCode().equals(code) && current.getType().equals(type))
 			.findFirst()
-			.ifPresent(item -> checkItem(checker, item));
+			.ifPresent(item -> checkItem(checker, item, checkAll));
 	}
 	
-	public void checkItem(SymbolicCheckingFormulaItem item, AbstractCommand cmd, final StateSpace stateSpace) {
+	public void checkItem(SymbolicCheckingFormulaItem item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
 		final SymbolicCheckingFormulaItem currentItem = getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
 			RuntimeException exception = null;
@@ -87,13 +87,19 @@ public class SymbolicFormulaChecker {
 				}
 				updateMachine(currentProject.getCurrentMachine());
 				currentJobThreads.remove(currentThread);
+				if(!checkAll) {
+					List<Trace> counterExamples = item.getCounterExamples();
+					if(!counterExamples.isEmpty()) {
+						currentTrace.set(counterExamples.get(0));
+					}
+				}
 			});
 		}, "Symbolic Formula Checking Thread");
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}
 	
-	public void checkItem(IModelCheckJob checker, SymbolicCheckingFormulaItem item) {
+	public void checkItem(IModelCheckJob checker, SymbolicCheckingFormulaItem item, boolean checkAll) {
 		Thread checkingThread = new Thread(() -> {
 			State stateid = currentTrace.getCurrentState();
 			currentJobs.add(checker);
@@ -109,6 +115,12 @@ public class SymbolicFormulaChecker {
 			Platform.runLater(() -> {
 				resultHandler.handleFormulaResult(item, finalResult, stateid);
 				updateMachine(currentProject.getCurrentMachine());
+				if(!checkAll) {
+					List<Trace> counterExamples = item.getCounterExamples();
+					if(!counterExamples.isEmpty()) {
+						currentTrace.set(counterExamples.get(0));
+					}
+				}
 			});
 			currentJobs.remove(checker);
 			currentJobThreads.remove(Thread.currentThread());

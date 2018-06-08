@@ -1243,17 +1243,70 @@ Tatsächliches Ergebnis: es wird in der Konsole der Pfad der Datei hinter der Po
 13. History durchgehen (Pfeiltaste nach oben) -> funktioniert
 
 
-14. Recursive search ohne Eingabe (STRG + R)
+14. Recursive search mit Eingabe (STRG + R)
 
-Erwartetes Ergebnis: es wird die History rückwärts durchgegangen
+Erwartetes Ergebnis: es wird anhand der Eingabe rückwärts die History durchgegangen und Vorschläge angezeigt, wo Eingabe und Substring von dem jeweiligen Eintrag in der History ist
 
-Tatsächliches Ergebnis: es wird die History rückwärts durchgegangen
-
-
+Tatsächliches Ergebnis: es wird anhand der Eingabe rückwärts die History durchgegangen und Vorschläge angezeigt, wo Eingabe und Substring von dem jeweiligen Eintrag in der History ist
 
 
 
-15. Recursive search mit Eingabe (STRG + R)
+
+15. Recursive search mit fehlgeschlagener Suche
+
+Erwartetes Ergebnis: es wird angezeigt, dass zu der Eingabe kein Eintrag in der History passt
+
+Tatsächliches Ergebnis: es wird angezeigt, dass zu der Eingabe kein Eintrag in der History passt
+
+
+
+
+16. STRG + A, STRG + E 
+
+Erwartetes Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, bei STRG + E wird ans Ende der Zeile gesprungen
+
+Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, bei STRG + E wird ans Ende der Zeile gesprungen
+
+
+17. Clear mit Eingabe von "clear" -> funktioniert
+
+Bemerkung:
+-bei mehrzeiliger Eingabe ist die Fehlermeldung fehlerhaft
+
+
+
+
+
+37. B Konsole
+
+1. Ausführung von Befehlen -> funktioniert
+
+
+
+2. Eingabe in der Konsole 
+
+Erwartetes Ergebnis: Bei der Eingabe in der Konsole wird immer ans Ende hinzugefügt wenn man sich nicht in der letzten Zeile befindet, ansonsten wird an der aktuellen Position hinzugefügt
+
+Tatsächliches Ergebnis: Bei der Eingabe in der Konsole wird immer ans Ende hinzugefügt wenn man sich nicht in der letzten Zeile befindet, ansonsten wird an der aktuellen Position hinzugefügt
+
+
+3. Copy -> funktioniert
+
+4. Paste -> funktioniert
+
+
+
+5. Drag and Drop mit Dateien
+
+Erwartetes Ergebnis: es wird in der Konsole der Pfad der Datei hinter der Position des Cursors hinzugefügt
+
+Tatsächliches Ergebnis: es wird in der Konsole der Pfad der Datei hinter der Position des Cursors hinzugefügt
+
+
+6. History durchgehen (Pfeiltaste nach oben) -> funktioniert
+
+
+7. Recursive search mit Eingabe (STRG + R)
 
 Erwartetes Ergebnis: es wird anhand der Eingabe rückwärts die History durchgegangen und Vorschläge angezeigt, wo Eingabe und Substring von dem jeweiligen Eintrag in der History ist
 
@@ -1263,7 +1316,7 @@ Tatsächliches Ergebnis: es wird anhand der Eingabe rückwärts die History durc
 
 
 
-16. Recursive search mit fehlgeschlagener Suche
+8. Recursive search mit fehlgeschlagener Suche
 
 Erwartetes Ergebnis: es wird angezeigt, dass zu der Eingabe kein Eintrag in der History passt
 
@@ -1272,23 +1325,30 @@ Tatsächliches Ergebnis: es wird angezeigt, dass zu der Eingabe kein Eintrag in 
 
 
 
-17. STRG + A, STRG + E 
+9. STRG + A, STRG + E 
 
 Erwartetes Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, bei STRG + E wird ans Ende der Zeile gesprungen
 
 Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, bei STRG + E wird ans Ende der Zeile gesprungen
 
 
+10. Anzeige der Sprache der aktuellen Maschine -> nicht immer richtig?
 
+
+11. Clear mit Button -> funktioniert
+
+12. Clear mit Eingabe von ":clear" -> funktioniert
 
 Bemerkung:
--Konsoleneigenschaften nochmal für die B Konsole testen
+-bei mehrzeiliger Eingabe taucht eine StringIndexOutOfBoundsException auf
 
 
 
 
 
-37. Plugin Mechanismus
+
+
+38. Plugin Mechanismus
 -Momentan kann man mit Plugins Features ohne Einschränkungen erstellen
 -Plugins müssen geändert werden, wenn sich die API in der ProB2-UI ändert -> schwierig ohne Release?
 -Exceptions in der ProB2-UI können aufgrund fehlerhafter Implementierung von Plugins auftreten

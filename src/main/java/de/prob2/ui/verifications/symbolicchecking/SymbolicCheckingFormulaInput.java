@@ -81,7 +81,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		
 		btCheck.setOnAction(e-> {
 			if(updateFormula(item)) {
-				symbolicCheckingFormulaHandler.handleItem(item);
+				symbolicCheckingFormulaHandler.handleItem(item, false);
 			} else {
 				injector.getInstance(SymbolicCheckingResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 			}
@@ -97,41 +97,41 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 			addFormula(true);
 			switch(checkingType) {
 				case INVARIANT: 
-					symbolicCheckingFormulaHandler.handleInvariant(cbOperations.getSelectionModel().getSelectedItem());
+					symbolicCheckingFormulaHandler.handleInvariant(cbOperations.getSelectionModel().getSelectedItem(), false);
 					break;
 				case DEADLOCK: 
-					symbolicCheckingFormulaHandler.handleDeadlock(tfFormula.getText()); 
+					symbolicCheckingFormulaHandler.handleDeadlock(tfFormula.getText(), false); 
 					break;
 				case SEQUENCE: 
-					symbolicCheckingFormulaHandler.handleSequence(tfFormula.getText()); 
+					symbolicCheckingFormulaHandler.handleSequence(tfFormula.getText(), false); 
 					break;
 				case CHECK_ALL_OPERATIONS:
-					events.forEach(symbolicCheckingFormulaHandler::handleInvariant);
+					events.forEach(event -> symbolicCheckingFormulaHandler.handleInvariant(event, true));
 					break;
 				case FIND_DEADLOCK: 
-					symbolicCheckingFormulaHandler.findDeadlock(); 
+					symbolicCheckingFormulaHandler.findDeadlock(false); 
 					break;
 				case FIND_VALID_STATE:
 					formulaItem = new SymbolicCheckingFormulaItem(tfFormula.getText(), tfFormula.getText(), 
 							SymbolicCheckingType.FIND_VALID_STATE);
-					symbolicCheckingFormulaHandler.findValidState(formulaItem);
+					symbolicCheckingFormulaHandler.findValidState(formulaItem, false);
 					break;
 				default:
 					formulaItem = new SymbolicCheckingFormulaItem(checkingType.name(), checkingType.name(), checkingType);
 					switch(checkingType) {
 						case FIND_REDUNDANT_INVARIANTS: 
-							symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem); 
+							symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem, false); 
 							break;
 						case CHECK_ASSERTIONS: 
-							symbolicCheckingFormulaHandler.handleAssertions(formulaItem); 
+							symbolicCheckingFormulaHandler.handleAssertions(formulaItem, false);
 							break;
 						case CHECK_REFINEMENT: 
-							symbolicCheckingFormulaHandler.handleRefinement(formulaItem); 
+							symbolicCheckingFormulaHandler.handleRefinement(formulaItem, false); 
 							break;
 						default:
 							SymbolicModelcheckCommand.Algorithm algorithm = checkingType.getAlgorithm();
 							if(algorithm != null) {
-								symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, algorithm);
+								symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, algorithm, false);
 							}
 							break;
 				}
