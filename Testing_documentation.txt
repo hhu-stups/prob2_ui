@@ -669,6 +669,9 @@ Tatsächliches Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Succ
 
 
 
+
+
+
 27. History Chart
 
 1. Es wird auf das '+' geklickt und eine valide Formel eingegeben
@@ -791,7 +794,8 @@ Erwartetes Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die über S
 
 Tatsächliches Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die über Show Error angezeigt werden kann
 
-Bemerkung: Show Error kann nur bei einem Fehler ausgewählt werden
+Bemerkung: 
+-Show Error kann nur bei einem Fehler ausgewählt werden
 
 
 
@@ -805,6 +809,11 @@ Bemerkung: Show Error kann nur bei einem Fehler ausgewählt werden
 
 
 Bemerkung: Trace Replay in Project Status ergänzen?
+
+
+
+
+
 
 
 32. Modelchecking
@@ -1142,9 +1151,19 @@ Bemerkungen:
 
 
 
-36. Groovy Console
+36. Groovy Konsole
 
 1. Inspect groovy objects
+
+Es wird inspect in der Konsole eingegeben
+
+Erwartetes Ergebnis: es werden alle vorhandenen Objekte in der Groovy Engine angezeigt
+
+Tatsächliches Ergebnis: es werden alle vorhandenen Objekte in der Groovy Engine angezeigt
+
+
+
+
 
 2. Code Completion hinter dem Punkt
 
@@ -1162,13 +1181,45 @@ Tatsächliches Ergebnis: Der rechte Teilstring wird an den linken bereits eingeg
 
 
 
-4. Code Completion Vorschläge
+4. Code Completion vor dem Punkt
 
-5. Ausführung von Befehlen -> funktioniert
+Erwartetes Ergebnis: es werden alle Objekte angezeigt
+
+Tatsächliches Ergebnis: es werden alle Objekte angezeigt
 
 
 
-6. Eingabe in der Konsole 
+
+
+5. Code Completion hinter dem Punkt
+
+Erwartetes Ergebnis: es werden zu dem Objekt vor dem Punkt alle Felder und Methoden angezeigt
+
+Tatsächliches Ergebnis: es werden zu dem Objekt vor dem Punkt alle Felder und Methoden angezeigt
+
+
+6. STRG + Leertaste mit möglichen Vorschlägen
+
+Erwartetes Ergebnis: es wird die Code Completion mit allen möglichen Vorschlägen angezeigt
+
+Tatsächliches Ergebnis: es wird die Code Completion mit allen möglichen Vorschlägen angezeigt
+
+
+
+7. STRG + Leertaste ohne mögliche Vorschläge
+
+
+Erwartetes Ergebnis: es wird nicht die Code Completion angezeigt
+
+Tatsächliches Ergebnis: es wird nicht die Code Completion angezeigt
+
+
+
+8. Ausführung von Befehlen -> funktioniert
+
+
+
+9. Eingabe in der Konsole 
 
 Erwartetes Ergebnis: Bei der Eingabe in der Konsole wird immer ans Ende hinzugefügt wenn man sich nicht in der letzten Zeile befindet, ansonsten wird an der aktuellen Position hinzugefügt
 
@@ -1176,13 +1227,62 @@ Tatsächliches Ergebnis: Bei der Eingabe in der Konsole wird immer ans Ende hinz
 
 
 
-7. Copy, Paste, etc
+10. Copy -> funktioniert
+
+11. Paste -> funktioniert
 
 
 
-Können Methoden für die CodeCompletion doppelt auftauchen?
-ArrayIndexOutOfBounds in Groovy Objects
+12. Drag and Drop mit Dateien
 
+Erwartetes Ergebnis: es wird in der Konsole der Pfad der Datei hinter der Position des Cursors hinzugefügt
+
+Tatsächliches Ergebnis: es wird in der Konsole der Pfad der Datei hinter der Position des Cursors hinzugefügt
+
+
+13. History durchgehen (Pfeiltaste nach oben) -> funktioniert
+
+
+14. Recursive search ohne Eingabe (STRG + R)
+
+Erwartetes Ergebnis: es wird die History rückwärts durchgegangen
+
+Tatsächliches Ergebnis: es wird die History rückwärts durchgegangen
+
+
+
+
+
+15. Recursive search mit Eingabe (STRG + R)
+
+Erwartetes Ergebnis: es wird anhand der Eingabe rückwärts die History durchgegangen und Vorschläge angezeigt, wo Eingabe und Substring von dem jeweiligen Eintrag in der History ist
+
+Tatsächliches Ergebnis: es wird anhand der Eingabe rückwärts die History durchgegangen und Vorschläge angezeigt, wo Eingabe und Substring von dem jeweiligen Eintrag in der History ist
+
+
+
+
+
+16. Recursive search mit fehlgeschlagener Suche
+
+Erwartetes Ergebnis: es wird angezeigt, dass zu der Eingabe kein Eintrag in der History passt
+
+Tatsächliches Ergebnis: es wird angezeigt, dass zu der Eingabe kein Eintrag in der History passt
+
+
+
+
+17. STRG + A, STRG + E 
+
+Erwartetes Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, bei STRG + E wird ans Ende der Zeile gesprungen
+
+Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, bei STRG + E wird ans Ende der Zeile gesprungen
+
+
+
+
+Bemerkung:
+-Konsoleneigenschaften nochmal für die B Konsole testen
 
 
 
