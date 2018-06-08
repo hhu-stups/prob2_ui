@@ -11,6 +11,9 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -18,7 +21,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -28,13 +30,9 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class BEditorView extends BorderPane {
@@ -97,10 +95,8 @@ public class BEditorView extends BorderPane {
 				try (final Stream<String> lines = Files.lines(machinePath)) {
 					text = lines.collect(Collectors.joining(System.lineSeparator()));
 				} catch (IOException | UncheckedIOException e) {
-					stageManager.makeAlert(
-						Alert.AlertType.ERROR,
-						String.format(bundle.getString("project.machines.error.couldNotReadFile"), machinePath, e)
-					).showAndWait();
+					stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotReadFile.message"), machinePath), e).showAndWait();
+					LOGGER.error(String.format("Could not read file: %s", machinePath), e);
 					return;
 				}
 				this.setEditorText(text, machinePath);
@@ -147,9 +143,11 @@ public class BEditorView extends BorderPane {
 		assert this.getPath() != null;
 		// Maybe add something for the user, that reloads the machine automatically?
 		try {
-			Files.write(this.getPath(), beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
+			Path path = this.getPath();
+			Files.write(path, beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
-			LOGGER.error(bundle.getString("beditor.couldNotSaveFile"), e);
+			stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotSaveFile.message"), path), e).showAndWait();
+			LOGGER.error(String.format("Could not save file: %s", path), e);
 		}
 	}
 }
