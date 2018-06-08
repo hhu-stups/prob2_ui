@@ -1293,3 +1293,8 @@ Bemerkung:
 -Plugins müssen geändert werden, wenn sich die API in der ProB2-UI ändert -> schwierig ohne Release?
 -Exceptions in der ProB2-UI können aufgrund fehlerhafter Implementierung von Plugins auftreten
 -momentan noch schwierig zu testen?
+
+
+
+Noch zu testen:
+-UI Persistenz
