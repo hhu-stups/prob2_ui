@@ -4,7 +4,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class GroovyAbstractItem {
-	private final StringProperty name;
+	protected final StringProperty name;
 	
 	public GroovyAbstractItem(String name) {
 		this.name = new SimpleStringProperty(this, "name", name);

@@ -16,6 +16,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class GroovyClassPropertyItem extends GroovyAbstractItem {
 	private static final Logger logger = LoggerFactory.getLogger(GroovyClassPropertyItem.class);
@@ -180,6 +181,27 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 	public String getNameAndParams() {
 		final String parameters = isMethod ? "(" + getParams() + ")" : "";
 		return getName() + parameters;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, isMethod, params, type, declarer);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(this == obj) {
+			return true;
+		}
+		if(!(obj instanceof GroovyClassPropertyItem)) {
+			return false;
+		}
+		GroovyClassPropertyItem other = (GroovyClassPropertyItem) obj;
+		if(other.name.get().equals(name.get()) && other.isMethod == this.isMethod && other.params.get().equals(params.get()) &&
+				other.type.get().equals(this.type.get()) && other.declarer.get().equals(this.declarer.get())) {
+			return true;
+		}
+		return false;
 	}
 	
 	@Override

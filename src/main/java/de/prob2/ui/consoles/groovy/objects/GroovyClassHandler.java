@@ -68,12 +68,18 @@ public final class GroovyClassHandler {
 	
 	public static void handleMethods(Class<?> clazz, Collection<? super GroovyClassPropertyItem> methods, GroovyMethodOption option) {
 		for (Method m : clazz.getMethods()) {
-			methods.add(new GroovyClassPropertyItem(m));
+			GroovyClassPropertyItem newItem = new GroovyClassPropertyItem(m);
+			if(!methods.contains(newItem)) {
+				methods.add(new GroovyClassPropertyItem(m));
+			}
 		}
 		
 		for (MetaMethod m : DefaultGroovyMethods.getMetaClass(clazz).getMetaMethods()) {
 			if ((option == GroovyMethodOption.ALL) || (option == GroovyMethodOption.NONSTATIC && !m.isStatic()) || (option == GroovyMethodOption.STATIC && !m.isStatic())) {
-				methods.add(new GroovyClassPropertyItem(m));
+				GroovyClassPropertyItem newItem = new GroovyClassPropertyItem(m);
+				if(!methods.contains(newItem)) {
+					methods.add(new GroovyClassPropertyItem(m));
+				}
 			}
 		}
 	
