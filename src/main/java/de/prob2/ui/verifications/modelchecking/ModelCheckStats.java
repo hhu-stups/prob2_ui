@@ -82,7 +82,7 @@ public final class ModelCheckStats extends AnchorPane {
 	public void updateStats(final IModelCheckJob modelChecker, final long timeElapsed, final StateSpaceStats stats) {
 		Objects.requireNonNull(modelChecker, "modelChecker");
 		
-		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
+		Platform.runLater(() -> elapsedTime.setText(String.format("%.1f",timeElapsed/1000.0) + " sec"));
 
 		if (stats != null) {
 			int nrProcessedNodes = stats.getNrProcessedNodes();
@@ -113,7 +113,7 @@ public final class ModelCheckStats extends AnchorPane {
 	public void isFinished(final IModelCheckJob modelChecker, final long timeElapsed, final IModelCheckingResult result) {
 		Objects.requireNonNull(modelChecker, "modelChecker");
 		Objects.requireNonNull(result, "result");
-		Platform.runLater(() -> elapsedTime.setText(String.valueOf(timeElapsed)));
+		Platform.runLater(() -> elapsedTime.setText(String.format("%.3f",timeElapsed/1000.0) + " sec"));
 		
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
 			item.setCheckedSuccessful();
