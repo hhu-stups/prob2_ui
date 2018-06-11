@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.input.Clipboard;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -126,9 +127,18 @@ public abstract class Console extends StyleClassedTextArea {
 		if (this.getLength() - 1 - this.getCaretPosition() >= charCounterInLine) {
 			goToLastPos();
 		}
-		final int oldLength = this.getLength();
-		super.paste();
-		final int diff = this.getLength() - oldLength;
+
+		String[] pastedLines = Clipboard.getSystemClipboard().getString().split("\n");
+		int diff = 0;
+		for(int i = 0; i < pastedLines.length; i++) {
+			final int oldLength = this.getLength();
+			this.appendText(pastedLines[i]);
+			if(i < pastedLines.length - 1) {
+				this.handleEnter();
+			} else {
+				diff = this.getLength() - oldLength;
+			}
+		}
 		charCounterInLine += diff;
 		currentPosInLine += diff;
 	}
