@@ -30,6 +30,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob.translator.Translator;
 import de.prob.translator.types.BObject;
+import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -85,6 +86,12 @@ public class TraceChecker {
 						"The trace file " + path + " could not be found.\n"
 								+ "The file was probably moved, renamed or deleted.\n\n"
 								+ "Would you like to remove this trace from the project?",
+						ButtonType.YES, ButtonType.NO);
+			} else if (exception instanceof InvalidFileFormatException) {
+				alert = stageManager.makeAlert(AlertType.ERROR,
+						"The file " + path + " does not contain a valid trace file.\n"
+								+ "Every trace must contain a (possibly empty) transition list.\n\n"
+								+ "Would you like to remove this file from the project?",
 						ButtonType.YES, ButtonType.NO);
 			} else {
 				alert = stageManager.makeAlert(AlertType.ERROR,
@@ -165,11 +172,15 @@ public class TraceChecker {
 			LOGGER.warn("Trace file not found", e);
 			failedTraceReplays.put(replayTrace, e);
 			return null;
+		} catch (InvalidFileFormatException e) {
+			LOGGER.warn("Invalid trace file", e);
+			failedTraceReplays.put(replayTrace, e);
+			return null;
 		} catch (IOException e) {
 			LOGGER.warn("Failed to open trace file", e);
 			failedTraceReplays.put(replayTrace, e);
 			return null;
-		}
+		} 
 	}
 
 	private Transition replayPersistentTransition(ReplayTrace replayTrace, Trace t,

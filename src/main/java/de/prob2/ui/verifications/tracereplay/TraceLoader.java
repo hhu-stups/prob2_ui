@@ -12,6 +12,7 @@ import com.google.gson.JsonStreamParser;
 import com.google.inject.Inject;
 
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.prob2fx.CurrentProject;
 
 public class TraceLoader {
@@ -26,14 +27,21 @@ public class TraceLoader {
 		this.currentProject = currentProject;
 	}
 
-	public PersistentTrace loadTrace(Path path) throws IOException {
+	public PersistentTrace loadTrace(Path path) throws InvalidFileFormatException, IOException {
 		path = currentProject.get().getLocation().resolve(path);
 		final Reader reader = Files.newBufferedReader(path, PROJECT_CHARSET);
 		JsonStreamParser parser = new JsonStreamParser(reader);
 		JsonElement element = parser.next();
 		if (element.isJsonObject()) {
-			return gson.fromJson(element, PersistentTrace.class);
+			PersistentTrace trace = gson.fromJson(element, PersistentTrace.class);
+			if(isValidTrace(trace)) {
+				return trace;
+			}
 		}
-		throw new IOException("The file does not contain a valid trace.");
+		throw new InvalidFileFormatException("The file does not contain a valid trace.");
+	}
+
+	private boolean isValidTrace(PersistentTrace trace) {
+		return trace.getTransitionList() != null;
 	}
 }
