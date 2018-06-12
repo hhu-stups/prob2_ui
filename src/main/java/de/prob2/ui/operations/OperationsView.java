@@ -407,10 +407,10 @@ public final class OperationsView extends AnchorPane {
 		doSort();
 
 		final String text;
-		if (!trace.getCurrentState().isInitialised() && operations.isEmpty()) {
-			text = bundle.getString("operations.noSetupConstantsOrInit");
-		} else if (trace.getCurrentState().isMaxTransitionsCalculated()) {
+		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
 			text = bundle.getString("operations.maxReached");
+		} else if (!trace.getCurrentState().isInitialised() && operations.isEmpty()) {
+			text = bundle.getString("operations.noSetupConstantsOrInit");
 		} else {
 			text = "";
 		}
