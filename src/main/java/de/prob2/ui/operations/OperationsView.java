@@ -23,7 +23,7 @@ import com.google.inject.Singleton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
-import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
+import de.prob.statespace.OperationInfo;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.FormulaExpand;

@@ -10,31 +10,32 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Joiner;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
+
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.formula.PredicateBuilder;
+import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob.translator.Translator;
 import de.prob.translator.types.BObject;
+
 import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -42,6 +43,9 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class TraceChecker {
