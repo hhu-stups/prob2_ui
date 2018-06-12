@@ -4,15 +4,15 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 
-<fx:root type="Menu" text="%menu.view" xmlns:fx="http://javafx.com/fxml/1">
-	<MenuItem fx:id="viewMenu_default" text="%menu.view.items.zoomDefault"
+<fx:root type="Menu" text="%common.menu.view" xmlns:fx="http://javafx.com/fxml/1">
+	<MenuItem fx:id="viewMenu_default" text="%common.menu.view.items.zoomDefault"
 		onAction="#handleDefaultFontSize" accelerator="Shortcut+'0'" />
-	<MenuItem fx:id="viewMenu_bigger" text="%menu.view.items.zoomIn"
+	<MenuItem fx:id="viewMenu_bigger" text="%common.menu.view.items.zoomIn"
 		accelerator="Shortcut + '+'" onAction="#handleIncreaseFontSize" />
-	<MenuItem fx:id="viewMenu_smaller" text="%menu.view.items.zoomOut"
+	<MenuItem fx:id="viewMenu_smaller" text="%common.menu.view.items.zoomOut"
 		accelerator="Shortcut + '-'" onAction="#handleDecreaseFontSize" />
 	<SeparatorMenuItem />
-	<MenuItem fx:id="fullScreenMenuItem" text="%menu.view.items.enterFullScreen"
+	<MenuItem fx:id="fullScreenMenuItem" text="%common.menu.view.items.enterFullScreen"
 		onAction="#handleFullScreen" accelerator="Shortcut+Ctrl+F" />
 </fx:root>
 

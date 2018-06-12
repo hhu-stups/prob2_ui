@@ -7,7 +7,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 
-<fx:root type="Stage" maxWidth="Infinity" title="%consoles.groovy.title"
+<fx:root type="Stage" maxWidth="Infinity" title="%consoles.groovy.stage.title"
 	maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1" height="600.0" width="800.0">
 	<fx:define>
 		<FontSize fx:id="fontSize" />

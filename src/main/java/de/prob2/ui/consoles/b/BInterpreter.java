@@ -152,20 +152,20 @@ public class BInterpreter implements Executable {
 			sb.append(((EvalResult)result).getValue());
 		} else if (result instanceof EvaluationErrorResult) {
 			if (result instanceof IdentifierNotInitialised) {
-				sb.append(bundle.getString("consoles.b.result.notInitialized"));
+				sb.append(bundle.getString("consoles.b.interpreter.result.notInitialized"));
 			} else if (result instanceof WDError) {
-				sb.append(bundle.getString("consoles.b.result.notWellDefined"));
+				sb.append(bundle.getString("consoles.b.interpreter.result.notWellDefined"));
 			} else {
-				sb.append(bundle.getString("consoles.b.result.evaluationError"));
+				sb.append(bundle.getString("consoles.b.interpreter.result.evaluationError"));
 			}
 			for (final String s : ((EvaluationErrorResult)result).getErrors()) {
 				sb.append('\n');
 				sb.append(s);
 			}
 		} else if (result instanceof EnumerationWarning) {
-			sb.append(bundle.getString("consoles.b.result.enumerationWarning"));
+			sb.append(bundle.getString("consoles.b.interpreter.result.enumerationWarning"));
 		} else if (result instanceof ComputationNotCompletedResult) {
-			sb.append(bundle.getString("consoles.b.result.computationNotCompleted"));
+			sb.append(bundle.getString("consoles.b.interpreter.result.computationNotCompleted"));
 			final String reason = ((ComputationNotCompletedResult)result).getReason();
 			if (!reason.isEmpty()) {
 				sb.append('\n');

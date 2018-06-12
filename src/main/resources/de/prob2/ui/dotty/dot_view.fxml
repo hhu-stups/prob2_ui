@@ -10,7 +10,7 @@
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 
-<fx:root type="DotView" title="%dotview.header" minWidth="600" minHeight="400" width="1200.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="DotView" title="%dotty.stage.title" minWidth="600" minHeight="400" width="1200.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
@@ -19,14 +19,14 @@
 			<BorderPane>
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
-						<Menu text="%menu.view">
-							<MenuItem text="%menu.view.items.zoomDefault"
+						<Menu text="%common.menu.view">
+							<MenuItem text="%common.menu.view.items.zoomDefault"
 								accelerator="Shortcut+'0'" onAction="#defaultSize" />
-							<MenuItem text="%menu.view.items.zoomIn"
+							<MenuItem text="%common.menu.view.items.zoomIn"
 								accelerator="Shortcut + '+'" onAction="#zoomIn" />
-							<MenuItem text="%menu.view.items.zoomOut"
+							<MenuItem text="%common.menu.view.items.zoomOut"
 								accelerator="Shortcut + '-'" onAction="#zoomOut" />
-							<MenuItem text="%menu.file.items.close" 
+							<MenuItem text="%common.menu.file.items.close" 
 								accelerator="Shortcut+W" onAction="#handleClose"/>
 						</Menu>
 					</MenuBar>
@@ -54,14 +54,14 @@
 									</HBox>
 									<Label fx:id="lbDescription" VBox.vgrow="NEVER"/>
 									<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
-										<Label text="%dotview.enterFormula" HBox.hgrow="NEVER"/>
+										<Label text="%dotty.enterFormula" HBox.hgrow="NEVER"/>
 										<AnchorPane>
 											<TextArea fx:id="taFormula" HBox.hgrow="ALWAYS" style="-fx-control-inner-background:#e8e8e8"
 												AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0"
 												AnchorPane.topAnchor="0.0"/>
 										</AnchorPane>
 									</VBox>
-									<CheckBox text="%dotview.continuousUpdate" fx:id="cbContinuous" HBox.hgrow="ALWAYS"/>
+									<CheckBox text="%dotty.continuousUpdate" fx:id="cbContinuous" HBox.hgrow="ALWAYS"/>
 								</VBox>
 							</AnchorPane>
 							<VBox>

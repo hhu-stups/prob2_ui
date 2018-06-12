@@ -116,7 +116,7 @@ public class DotView extends DynamicCommandStage {
 		interrupt();
 
 		Thread thread = new Thread(() -> {
-			Platform.runLater(()-> statusBar.setText(bundle.getString("statusBar.loading")));
+			Platform.runLater(()-> statusBar.setText(bundle.getString("common.statusbar.loading")));
 			try {
 				if (item.getArity() > 0) {
 					formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
@@ -130,7 +130,7 @@ public class DotView extends DynamicCommandStage {
 				LOGGER.error("Graph visualization failed", e);
 				currentThread.set(null);
 				Platform.runLater(() -> {
-					stageManager.makeExceptionAlert(bundle.getString("dotview.error.message"), e).show();
+					stageManager.makeExceptionAlert(bundle.getString("dotty.alerts.visualisationError.message"), e).show();
 					dotView.getEngine().loadContent("");
 					statusBar.setText("");
 				});

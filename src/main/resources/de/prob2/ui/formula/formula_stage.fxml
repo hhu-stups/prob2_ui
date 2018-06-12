@@ -19,14 +19,14 @@
 			<BorderPane>
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
-						<Menu text="%menu.view">
-							<MenuItem text="%menu.view.items.zoomDefault"
+						<Menu text="%common.menu.view">
+							<MenuItem text="%common.menu.view.items.zoomDefault"
 								accelerator="Shortcut+'0'" onAction="#defaultSize" />
-							<MenuItem text="%menu.view.items.zoomIn"
+							<MenuItem text="%common.menu.view.items.zoomIn"
 								accelerator="Shortcut + '+'" onAction="#zoomIn" />
-							<MenuItem text="%menu.view.items.zoomOut"
+							<MenuItem text="%common.menu.view.items.zoomOut"
 								accelerator="Shortcut + '-'" onAction="#zoomOut" />
-							<MenuItem text="%menu.file.items.close" 
+							<MenuItem text="%common.menu.file.items.close" 
 								accelerator="Shortcut+W" onAction="#handleClose"/>
 						</Menu>
 					</MenuBar>
