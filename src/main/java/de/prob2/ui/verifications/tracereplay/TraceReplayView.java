@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -19,11 +18,9 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -73,19 +70,17 @@ public class TraceReplayView extends ScrollPane {
 	private final TraceChecker traceChecker;
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
-	private final Injector injector;
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
 			final CurrentTrace currentTrace, final TraceChecker traceChecker, final ResourceBundle bundle,
-			final FileChooserManager fileChooserManager, final Injector injector) {
+			final FileChooserManager fileChooserManager) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.traceChecker = traceChecker;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
-		this.injector = injector;
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
 
