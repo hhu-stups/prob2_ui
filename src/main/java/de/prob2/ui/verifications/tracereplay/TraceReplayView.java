@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -18,7 +19,12 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingType;
+import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.MachineStatusHandler;
+import de.prob2.ui.verifications.ShouldExecuteValueFactory;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.SetChangeListener;
@@ -27,6 +33,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
@@ -57,6 +64,8 @@ public class TraceReplayView extends ScrollPane {
 	private Button loadTraceButton;
 	@FXML
 	private HelpButton helpButton;
+	@FXML
+	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
 
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
@@ -64,29 +73,31 @@ public class TraceReplayView extends ScrollPane {
 	private final TraceChecker traceChecker;
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
+	private final Injector injector;
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
 			final CurrentTrace currentTrace, final TraceChecker traceChecker, final ResourceBundle bundle,
-			final FileChooserManager fileChooserManager) {
+			final FileChooserManager fileChooserManager, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.traceChecker = traceChecker;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
+		this.injector = injector;
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
 
-	private static void updateStatusIcon(final FontAwesomeIconView iconView, final ReplayTrace.Status status) {
+	private static void updateStatusIcon(final FontAwesomeIconView iconView, final Checked status) {
 		iconView.getStyleClass().add("status-icon");
 		switch (status) {
-		case SUCCESSFUL:
+		case SUCCESS:
 			iconView.setIcon(FontAwesomeIcon.CHECK);
 			iconView.setFill(Color.GREEN);
 			break;
 
-		case FAILED:
+		case FAIL:
 			iconView.setIcon(FontAwesomeIcon.REMOVE);
 			iconView.setFill(Color.RED);
 			break;
@@ -104,12 +115,13 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private void initialize() {
 		helpButton.setHelpContent(this.getClass());
+		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.REPLAY));
 		statusColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
 
 			final FontAwesomeIconView statusIcon = new FontAwesomeIconView();
 			trace.statusProperty().addListener((o, from, to) -> updateStatusIcon(statusIcon, to));
-			updateStatusIcon(statusIcon, trace.getStatus());
+			updateStatusIcon(statusIcon, trace.getChecked());
 
 			final ProgressIndicator replayProgress = new ProgressBar();
 			replayProgress.progressProperty().bind(trace.progressProperty());
@@ -128,6 +140,17 @@ public class TraceReplayView extends ScrollPane {
 				removeFromTraceTableView(c.getElementRemoved());
 			}
 		};
+		
+		CheckBox selectAll = new CheckBox();
+		selectAll.setSelected(true);
+		selectAll.selectedProperty().addListener((observable, from, to) -> {
+			for(ReplayTrace item : traceTableView.getItems()) {
+				item.setShouldExecute(to);
+				traceTableView.refresh();
+			}
+		});
+		shouldExecuteColumn.setGraphic(selectAll);
+		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (from != null) {
 				from.getTraceFiles().removeListener(listener);
@@ -180,7 +203,7 @@ public class TraceReplayView extends ScrollPane {
 			row.itemProperty().addListener((o, f, t) -> {
 				showErrorItem.disableProperty().unbind();
 				if (t != null) {
-					showErrorItem.disableProperty().bind(t.statusProperty().isNotEqualTo(ReplayTrace.Status.FAILED));
+					showErrorItem.disableProperty().bind(t.statusProperty().isNotEqualTo(Checked.FAIL));
 				}
 			});
 
@@ -222,7 +245,7 @@ public class TraceReplayView extends ScrollPane {
 	
 	public void resetStatus() {
 		traceChecker.cancelReplay();
-		traceTableView.getItems().forEach(trace -> trace.setStatus(ReplayTrace.Status.NOT_CHECKED));
+		traceTableView.getItems().forEach(trace -> trace.setChecked(Checked.NOT_CHECKED));
 	}
 	
 	private void removeFromTraceTableView(Path tracePath) {

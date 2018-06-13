@@ -3,43 +3,45 @@ package de.prob2.ui.verifications.tracereplay;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IExecutableItem;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class ReplayTrace {
-	enum Status {
-		SUCCESSFUL, FAILED, NOT_CHECKED
-	}
+public class ReplayTrace implements IExecutableItem {
 
-	private final ObjectProperty<Status> status;
+	private final ObjectProperty<Checked> status;
 	private final DoubleProperty progress;
 	private final Path location;
 	private String errorMessage;
+	private boolean shouldExecute;
 
 	public ReplayTrace(Path location) {
-		this.status = new SimpleObjectProperty<>(this, "status", Status.NOT_CHECKED);
+		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.location = location;
 		this.errorMessage = null;
+		this.shouldExecute = true;
 		
 		this.status.addListener((o, from, to) -> {
-			if (to != Status.FAILED) {
+			if (to != Checked.FAIL) {
 				this.errorMessage = null;
 			}
 		});
 	}
 
-	public ObjectProperty<Status> statusProperty() {
+	public ObjectProperty<Checked> statusProperty() {
 		return status;
 	}
 	
-	public Status getStatus() {
+	@Override
+	public Checked getChecked() {
 		return this.status.get();
 	}
 	
-	public void setStatus(Status status) {
+	public void setChecked(Checked status) {
 		this.status.set(status);
 	}
 	
@@ -65,6 +67,14 @@ public class ReplayTrace {
 	
 	public String getErrorMessage() {
 		return errorMessage;
+	}
+	
+	public void setShouldExecute(boolean shouldExecute) {
+		this.shouldExecute = shouldExecute;
+	}
+	
+	public boolean shouldExecute() {
+		return shouldExecute;
 	}
 	
 	@Override

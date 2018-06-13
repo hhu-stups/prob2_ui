@@ -35,7 +35,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-
+import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -116,18 +116,20 @@ public class TraceChecker {
 	}
 
 	private void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
+		if(!replayTrace.shouldExecute()) {
+			return;
+		}
 		PersistentTrace persistentTrace = getPersistentTrace(replayTrace);
-		
 		if(persistentTrace == null) {
 			return;
 		}
 
 		Thread replayThread = new Thread(() -> {
-			replayTrace.setStatus(ReplayTrace.Status.NOT_CHECKED);
+			replayTrace.setChecked(Checked.NOT_CHECKED);
 			StateSpace stateSpace = currentTrace.getStateSpace();
 			Trace trace = new Trace(stateSpace);
 			trace.setExploreStateByDefault(false);
-			ReplayTrace.Status status = ReplayTrace.Status.SUCCESSFUL;
+			Checked status = Checked.SUCCESS;
 			final List<PersistentTransition> transitionList = persistentTrace.getTransitionList();
 			for (int i = 0; i < transitionList.size(); i++) {
 				final int finalI = i;
@@ -137,7 +139,7 @@ public class TraceChecker {
 				if (trans != null) {
 					trace = trace.add(trans);
 				} else {
-					status = ReplayTrace.Status.FAILED;
+					status = Checked.FAIL;
 					break;
 				}
 
@@ -147,9 +149,9 @@ public class TraceChecker {
 				}
 			}
 
-			final ReplayTrace.Status finalStatus = status;
+			final Checked finalStatus = status;
 			Platform.runLater(() -> {
-				replayTrace.setStatus(finalStatus);
+				replayTrace.setChecked(finalStatus);
 				replayTrace.setProgress(-1);
 			});
 			trace.setExploreStateByDefault(true);
