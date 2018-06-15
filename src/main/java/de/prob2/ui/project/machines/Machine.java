@@ -87,6 +87,10 @@ public class Machine {
 		public String[] getExtensions() {
 			return this.extensions.clone();
 		}
+		
+		public String getExtensionsAsString() {
+			return String.join(", ", this.extensions);
+		}
 	}
 	
 	public enum CheckingStatus {

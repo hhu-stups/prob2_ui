@@ -16,6 +16,9 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -25,7 +28,6 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.machines.Machine;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
@@ -47,9 +49,6 @@ import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W
@@ -313,22 +312,22 @@ public final class StageManager {
 		
 		final List<String> allExts = new ArrayList<>();
 		if (projects) {
-			allExts.add("*.json");
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*.json"));
+			allExts.add("*.pb2project");
+			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*.pb2project"));
 		}
 		
 		if (machines) {
 			allExts.addAll(Machine.Type.getExtensionToTypeMap().keySet());
 			fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.classicalB"), Machine.Type.B.getExtensions()),
-				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.eventB"), Machine.Type.EVENTB.getExtensions()),
-				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.csp"), Machine.Type.CSP.getExtensions()),
-				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.tla"), Machine.Type.TLA.getExtensions())
+				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.classicalB"), Machine.Type.B.getExtensionsAsString()), Machine.Type.B.getExtensions()),
+				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.eventB"), Machine.Type.EVENTB.getExtensionsAsString()), Machine.Type.EVENTB.getExtensions()),
+				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.csp"), Machine.Type.CSP.getExtensionsAsString()), Machine.Type.CSP.getExtensions()),
+				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.tla"), Machine.Type.TLA.getExtensionsAsString()), Machine.Type.TLA.getExtensions())
 			);
 		}
 		
 		allExts.sort(String::compareTo);
-		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
+		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.allProB"), String.join(", ", allExts)), allExts));
 		return fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 	

@@ -74,7 +74,7 @@ public class ProjectManager {
 	public void saveCurrentProject() {
 		Project project = currentProject.get();
 		String name = project.getName();
-		File location = new File(project.getLocation() + File.separator + project.getName() + ".json");
+		File location = new File(project.getLocation() + File.separator + project.getName() + ".pb2project");
 
 		if (currentProject.isNewProject() && location.exists()) {
 			ButtonType renameBT = new ButtonType((bundle.getString("common.buttons.rename")));
@@ -89,8 +89,8 @@ public class ProjectManager {
 			} else if (result.get().equals(renameBT)) {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-				fileChooser.setInitialFileName(project.getName() + ".json");
-				fileChooser.getExtensionFilters().add(new ExtensionFilter("Project (*.json)", "*.json"));
+				fileChooser.setInitialFileName(project.getName() + ".pb2project");
+				fileChooser.getExtensionFilters().add(new ExtensionFilter("ProB2 Project (*.pb2project)", "*.pb2project"));
 				location = fileChooser.showSaveDialog(stageManager.getCurrent());
 				name = location.getName().substring(0, location.getName().lastIndexOf('.'));
 			}
@@ -140,6 +140,9 @@ public class ProjectManager {
 
 	public void openProject(Path path) {
 		Project project = loadProject(path);
+		if(!path.toString().endsWith(".pb2project")) {
+			stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 projectfiles should be '.pb2project': %s", path)).showAndWait();
+		}
 		if (project != null) {
 			replaceMissingWithDefaults(project);
 			project.getMachines().forEach(Machine::resetStatus);

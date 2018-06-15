@@ -114,7 +114,7 @@ public class FileMenu extends Menu {
 		}
 		final Path path = selected.toPath();
 		final String ext = StageManager.getExtension(path.getFileName().toString());
-		if ("json".equals(ext)) {
+		if ("pb2project".equals(ext)) {
 			this.openProject(path);
 		} else {
 			this.createProjectFromFile(path);
