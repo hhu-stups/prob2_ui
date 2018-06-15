@@ -1,6 +1,8 @@
 package de.prob2.ui.project.machines;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -36,6 +38,9 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachinesTab extends Tab {
@@ -154,6 +159,8 @@ public class MachinesTab extends Tab {
 		}
 	}
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(MachinesTab.class);
+	
 	@FXML private ListView<Machine> machinesList;
 	@FXML private SplitPane splitPane;
 	@FXML private HelpButton helpButton;
@@ -196,25 +203,52 @@ public class MachinesTab extends Tab {
 	}
 
 	@FXML
+	private void createMachine() {
+		final File selected = stageManager.showSaveMachineChooser(this.getContent().getScene().getWindow());
+		if (selected == null) {
+			return;
+		}
+		
+		try {
+			Files.createFile(selected.toPath());
+		} catch (IOException e) {
+			LOGGER.error("Could not create machine file", e);
+			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.tab.couldNotCreateMachine"), e));
+			return;
+		}
+		final Path relative = currentProject.getLocation().relativize(selected.toPath());
+		final Set<String> machineNamesSet = currentProject.getMachines().stream()
+			.map(Machine::getName)
+			.collect(Collectors.toSet());
+		String[] n = relative.getFileName().toString().split("\\.");
+		String name = n[0];
+		int i = 1;
+		while (machineNamesSet.contains(name)) {
+			name = String.format(bundle.getString("project.machines.nameSuffix"), n[0], i);
+			i++;
+		}
+		currentProject.addMachine(new Machine(name, "", relative));
+	}
+
+	@FXML
 	void addMachine() {
 		final File selected = stageManager.showOpenMachineChooser(this.getContent().getScene().getWindow());
 		if (selected == null) {
 			return;
 		}
 
-		final Path projectLocation = currentProject.getLocation();
-		final Path absolute = selected.toPath();
-		final Path relative = projectLocation.relativize(absolute);
+		final Path relative = currentProject.getLocation().relativize(selected.toPath());
 		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
-			stageManager
-					.makeAlert(Alert.AlertType.ERROR,
-							String.format(bundle.getString("project.machines.error.machineAlreadyExists"), relative))
-					.showAndWait();
+			stageManager.makeAlert(
+				Alert.AlertType.ERROR,
+				String.format(bundle.getString("project.machines.error.machineAlreadyExists"), relative)
+			).showAndWait();
 			return;
 		}
-		final Set<String> machineNamesSet = currentProject.getMachines().stream().map(Machine::getName)
-				.collect(Collectors.toSet());
-		String[] n = relative.toFile().getName().split("\\.");
+		final Set<String> machineNamesSet = currentProject.getMachines().stream()
+			.map(Machine::getName)
+			.collect(Collectors.toSet());
+		String[] n = relative.getFileName().toString().split("\\.");
 		String name = n[0];
 		int i = 1;
 		while (machineNamesSet.contains(name)) {
