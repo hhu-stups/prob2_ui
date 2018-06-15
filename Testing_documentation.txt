@@ -1139,7 +1139,19 @@ Tatsächliches Ergebnis: Vorhandene Formel wird nochmal überprüft
 
 14. Deaktivierung einer Formel
 
+Erwartetes Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Status und die Status Bar für die Fehler sich an
+
+Tatsächliches Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Status und die Status Bar für die Fehler sich an
+
+
 15. Überprüfung mit deaktivierter Formel
+
+Erwartetes Ergebnis: Deaktivierte Formel werden nicht überprüft
+
+Tatsächliches Ergebnis: Deaktivierte Formel werden nicht überprüft
+
+
+
 
 
 Bemerkungen: 
@@ -1270,8 +1282,6 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 17. Clear mit Eingabe von "clear" -> funktioniert
 
-Bemerkung:
--bei mehrzeiliger Eingabe ist die Fehlermeldung fehlerhaft
 
 
 
@@ -1338,10 +1348,6 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 11. Clear mit Button -> funktioniert
 
 12. Clear mit Eingabe von ":clear" -> funktioniert
-
-Bemerkung:
--bei mehrzeiliger Eingabe taucht eine StringIndexOutOfBoundsException auf
-
 
 
 

@@ -23,7 +23,6 @@ import com.google.inject.Singleton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
-import de.prob.animator.command.GetMachineOperationInfos.OperationInfo;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.FormulaExpand;
@@ -31,6 +30,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.LoadedMachine;
+import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
@@ -116,39 +116,29 @@ public final class OperationsView extends AnchorPane {
 		}
 
 		private String formatOperationItem(final OperationItem item) {
-			StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder(getPrettyName(item.getName()));
 
-			sb.append(getPrettyName(item.getName()));
+			final List<String> args = new ArrayList<>();
 
+			final List<String> paramNames = item.getParameterNames();
 			final List<String> paramValues = item.getParameterValues();
-			if (!paramValues.isEmpty()) {
-				sb.append('(');
-				final List<String> paramNames = item.getParameterNames();
-				if (paramNames.isEmpty()) {
-					// Parameter names not available
-					sb.append(String.join(", ", paramValues));
-				} else {
-					assert paramNames.size() == paramValues.size();
-					for (int i = 0; i < paramValues.size(); i++) {
-						if (i > 0) {
-							sb.append(", ");
-						}
-						sb.append(paramNames.get(i));
-						sb.append('=');
-						sb.append(paramValues.get(i));
-					}
-				}
-				sb.append(')');
+			if (paramNames.isEmpty()) {
+				// Parameter names not available
+				args.addAll(paramValues);
 			} else {
-				Map<String, String> stateValues = new LinkedHashMap<>();
-				stateValues.putAll(item.getConstants());
-				stateValues.putAll(item.getVariables());
-				if (!stateValues.isEmpty()) {
-					sb.append('(');
-					sb.append(stateValues.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
-							.collect(Collectors.joining(", ")));
-					sb.append(')');
+				assert paramNames.size() == paramValues.size();
+				for (int i = 0; i < paramValues.size(); i++) {
+					args.add(paramNames.get(i) + '=' + paramValues.get(i));
 				}
+			}
+
+			item.getConstants().forEach((key, value) -> args.add(key + ":=" + value));
+			item.getVariables().forEach((key, value) -> args.add(key + ":=" + value));
+
+			if (!args.isEmpty()) {
+				sb.append('(');
+				sb.append(String.join(", ", args));
+				sb.append(')');
 			}
 
 			final List<String> returnValues = item.getReturnValues();
@@ -362,40 +352,46 @@ public final class OperationsView extends AnchorPane {
 		for (Transition transition : operations) {
 			disabled.remove(transition.getName());
 
+			final LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
+			OperationInfo opInfo;
+			try {
+				opInfo = loadedMachine.getMachineOperationInfo(transition.getName());
+			} catch (ProBError e) {
+				// fallback solution if getMachineOperationInfo throws a ProBError
+				opInfo = null;
+			}
+
 			final List<String> paramValues;
 			final Map<String, String> constants;
 			final Map<String, String> variables;
 			switch (transition.getName()) {
 			case "$setup_constants":
 				paramValues = Collections.emptyList();
-				constants = this.getNextStateValues(transition,
-						trace.getStateSpace().getLoadedMachine().getConstantEvalElements());
+				constants = this.getNextStateValues(transition, loadedMachine.getConstantEvalElements());
 				variables = Collections.emptyMap();
 				break;
 
 			case "$initialise_machine":
 				paramValues = Collections.emptyList();
-				variables = this.getNextStateValues(transition,
-						trace.getStateSpace().getLoadedMachine().getVariableEvalElements());
+				variables = this.getNextStateValues(transition, loadedMachine.getVariableEvalElements());
 				constants = Collections.emptyMap();
 				break;
 
 			default:
 				paramValues = transition.getParameterValues();
 				constants = Collections.emptyMap();
-				variables = Collections.emptyMap();
+				if (opInfo == null) {
+					variables = null;
+				} else {
+					variables = this.getNextStateValues(transition, opInfo.getNonDetWrittenVariables().stream()
+						.map(var -> trace.getStateSpace().getModel().parseFormula(var, FormulaExpand.TRUNCATE))
+						.collect(Collectors.toList()));
+				}
 			}
 
 			final boolean explored = transition.getDestination().isExplored();
 			final boolean errored = explored && !transition.getDestination().isInvariantOk();
 			final boolean skip = transition.getSource().equals(transition.getDestination());
-			OperationInfo opInfo;
-			try {
-				opInfo = trace.getStateSpace().getLoadedMachine().getMachineOperationInfo(transition.getName());
-			} catch (ProBError e) {
-				// fallback solution if getMachineOperationInfo throws a ProBError
-				opInfo = null;
-			}
 			final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
 			final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
 			events.add(new OperationItem(trace, transition.getId(), transition.getName(),

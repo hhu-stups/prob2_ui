@@ -16,6 +16,11 @@ public class ShouldExecuteValueFactory implements Callback<TableColumn.CellDataF
 	
 	private final Injector injector;
 	
+	public ShouldExecuteValueFactory(CheckingType type) {
+		this.type = type;
+		this.injector = null;
+	}
+	
 	public ShouldExecuteValueFactory(CheckingType type, final Injector injector) {
 		this.injector = injector;
 		this.type = type;
@@ -28,8 +33,10 @@ public class ShouldExecuteValueFactory implements Callback<TableColumn.CellDataF
 		checkBox.selectedProperty().setValue(item.shouldExecute());
 		checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			item.setShouldExecute(newValue);
-			Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-			injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, type);
+			if(type != CheckingType.REPLAY) {
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, type);
+			}
 		});
 		return new SimpleObjectProperty<>(checkBox);
 	}
