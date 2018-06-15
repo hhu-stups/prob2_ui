@@ -41,7 +41,7 @@ public final class MenuController extends MenuBar {
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "menu.fxml");
 
-		if (menuToolkit != null) {
+		if (this.menuToolkit != null) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
 

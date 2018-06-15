@@ -26,6 +26,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class WindowMenu extends Menu {
 	private static final Logger logger = LoggerFactory.getLogger(WindowMenu.class);
@@ -48,6 +50,14 @@ public class WindowMenu extends Menu {
 		stageManager.loadFXML(this, "windowMenu.fxml");
 	}
 
+	@FXML
+	private void handleCloseWindow() {
+		final Stage stage = this.stageManager.getCurrent();
+		if (stage != null) {
+			stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+		}
+	}
+	
 	@FXML
 	private void handleLoadDefault() {
 		reset();

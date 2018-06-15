@@ -11,7 +11,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
-
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesStage;
@@ -23,7 +22,6 @@ import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
-
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -33,7 +31,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 public class FileMenu extends Menu {
 	@FXML
@@ -175,14 +172,6 @@ public class FileMenu extends Menu {
 	@FXML
 	private void handleReloadMachine() {
 		currentProject.reloadCurrentMachine();
-	}
-
-	@FXML
-	private void handleClose() {
-		final Stage stage = this.stageManager.getCurrent();
-		if (stage != null) {
-			stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-		}
 	}
 
 	private List<MenuItem> getRecentProjectItems(SimpleListProperty<String> recentListProperty) {

@@ -13,8 +13,12 @@
 		<MenuItem text="%menu.window.items.perspectives.preset.separated2"
 			onAction="#handleLoadSeparated2" />
 		<SeparatorMenuItem />
-		<MenuItem text="%menu.window.items.perspectives.load" onAction="#handleLoadPerspective" />
+		<MenuItem text="%menu.window.items.perspectives.load"
+			onAction="#handleLoadPerspective" />
 	</Menu>
 	<MenuItem text="%menu.window.items.detach" onAction="#handleLoadDetached" />
+	<SeparatorMenuItem />
+	<MenuItem text="%menu.window.items.closeWindow" accelerator="Shortcut+W"
+		onAction="#handleCloseWindow" />
 </fx:root>
 

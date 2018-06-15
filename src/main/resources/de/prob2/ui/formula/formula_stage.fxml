@@ -26,7 +26,7 @@
 								accelerator="Shortcut + '+'" onAction="#zoomIn" />
 							<MenuItem text="%common.menu.view.items.zoomOut"
 								accelerator="Shortcut + '-'" onAction="#zoomOut" />
-							<MenuItem text="%common.menu.file.items.close" 
+							<MenuItem text="%menu.window.items.closeWindow" 
 								accelerator="Shortcut+W" onAction="#handleClose"/>
 						</Menu>
 					</MenuBar>
