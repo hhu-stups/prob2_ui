@@ -132,8 +132,8 @@ public final class OperationsView extends AnchorPane {
 				}
 			}
 
-			item.getConstants().forEach((key, value) -> args.add(key + '=' + value));
-			item.getVariables().forEach((key, value) -> args.add(key + '=' + value));
+			item.getConstants().forEach((key, value) -> args.add(key + ":=" + value));
+			item.getVariables().forEach((key, value) -> args.add(key + ":=" + value));
 
 			if (!args.isEmpty()) {
 				sb.append('(');
