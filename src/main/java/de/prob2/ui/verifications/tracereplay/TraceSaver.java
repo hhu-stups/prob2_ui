@@ -52,8 +52,8 @@ public class TraceSaver {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceSaver.dialog.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		fileChooser.setInitialFileName(machine.getName() + ".trace");
-		fileChooser.getExtensionFilters().add(new ExtensionFilter("Trace (*.trace)", "*.trace"));
+		fileChooser.setInitialFileName(machine.getName() + ".pb2trace");
+		fileChooser.getExtensionFilters().add(new ExtensionFilter("ProB2 Trace (*.pb2trace)", "*.pb2trace"));
 		File file = fileChooser.showSaveDialog(stageManager.getCurrent());
 		
 		if(file != null) {

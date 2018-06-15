@@ -2,9 +2,7 @@ package de.prob2.ui.verifications.tracereplay;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -18,7 +16,6 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.SetChangeListener;
@@ -134,7 +131,12 @@ public class TraceReplayView extends ScrollPane {
 			}
 			traceTableView.getItems().clear();
 			if (to != null) {
-				to.getTraceFiles().forEach(tracePath -> traceTableView.getItems().add(new ReplayTrace(tracePath)));
+				to.getTraceFiles().forEach(tracePath -> {
+					traceTableView.getItems().add(new ReplayTrace(tracePath));
+					if(!tracePath.toString().endsWith(".pb2trace")) {
+						stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 tracefiles should be '.pb2trace': %s", tracePath)).showAndWait();
+					}
+				});
 				to.getTraceFiles().addListener(listener);
 			}
 		});
@@ -143,10 +145,11 @@ public class TraceReplayView extends ScrollPane {
 		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			if(to != null) {
-				checkButton.disableProperty().bind(currentTrace.stateSpaceProperty().isNull()
-						.or(traceChecker.currentJobThreadsProperty().emptyProperty().not())
-						.or(to.tracesProperty().emptyProperty()));
+			if (to != null) {
+				checkButton.disableProperty()
+						.bind(currentTrace.stateSpaceProperty().isNull()
+								.or(traceChecker.currentJobThreadsProperty().emptyProperty().not())
+								.or(to.tracesProperty().emptyProperty()));
 			}
 		});
 		traceTableView.disableProperty().bind(currentTrace.stateSpaceProperty().isNull());
@@ -208,27 +211,22 @@ public class TraceReplayView extends ScrollPane {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceLoader.dialog.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		final List<String> allExts = new ArrayList<>();
-		allExts.add("*.json");
-		allExts.add("*.trace");
-		allExts.sort(String::compareTo);
-		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("All supported trace formats", allExts),
-				new ExtensionFilter("Trace (*.trace)", "*.trace"), new ExtensionFilter("Trace (*.json)", "*.json"));
+		fileChooser.getExtensionFilters().add(new ExtensionFilter("ProB2 Trace (*.pb2trace)", "*.pb2trace"));
 		File traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
 			currentProject.getCurrentMachine().addTraceFile(traceFile.toPath());
 		}
 	}
-	
+
 	public void resetStatus() {
 		traceChecker.cancelReplay();
 		traceTableView.getItems().forEach(trace -> trace.setStatus(ReplayTrace.Status.NOT_CHECKED));
 	}
-	
+
 	private void removeFromTraceTableView(Path tracePath) {
-		for(Iterator<ReplayTrace> iterator = traceTableView.getItems().iterator(); iterator.hasNext(); ) {
+		for (Iterator<ReplayTrace> iterator = traceTableView.getItems().iterator(); iterator.hasNext();) {
 			ReplayTrace trace = iterator.next();
-			if(trace.getLocation().equals(tracePath)) {
+			if (trace.getLocation().equals(tracePath)) {
 				iterator.remove();
 			}
 		}
