@@ -11,16 +11,16 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.menu.EditPreferencesProvider;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -34,12 +34,16 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public class BEditorView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditorView.class);
 	private static final Charset EDITOR_CHARSET = Charset.forName("UTF-8");
 
 	@FXML private Button saveButton;
+	@FXML private Button openExternalButton;
 	@FXML private Label warningLabel;
 	@FXML private BEditor beditor;
 
@@ -48,6 +52,7 @@ public class BEditorView extends BorderPane {
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final StopActions stopActions;
+	private final Injector injector;
 
 	private final ObjectProperty<Path> path;
 	private final StringProperty lastSavedText;
@@ -55,12 +60,13 @@ public class BEditorView extends BorderPane {
 	private final BooleanProperty reloaded;
 
 	@Inject
-	private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final StopActions stopActions) {
+	private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final StopActions stopActions, final Injector injector) {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.stopActions = stopActions;
+		this.injector = injector;
 		this.path = new SimpleObjectProperty<>(this, "path", null);
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
@@ -77,6 +83,7 @@ public class BEditorView extends BorderPane {
 		));
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> reloaded.set(true));
 		saveButton.disableProperty().bind(this.pathProperty().isNull().or(saved));
+		openExternalButton.disableProperty().bind(this.pathProperty().isNull());
 		warningLabel.textProperty().bind(Bindings.when(saved)
 			.then(Bindings.when(reloaded)
 				.then("")
@@ -149,5 +156,10 @@ public class BEditorView extends BorderPane {
 			stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotSaveFile.message"), path), e).showAndWait();
 			LOGGER.error(String.format("Could not save file: %s", path), e);
 		}
+	}
+
+	@FXML
+	private void handleOpenExternal() {
+		injector.getInstance(EditPreferencesProvider.class).showExternalEditor(this.getPath());
 	}
 }
