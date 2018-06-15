@@ -394,10 +394,13 @@
  * BEditor																			*
  ************************************************************************************/
 
-.editor {
+.editor .text {
 	-fx-font-weight: bold;
-	-fx-font-family: monospace;
 	-fx-font-size: 15;
+}
+
+.editor .context-menu {
+	-fx-font-family: initial;
 }
 
 .editor .editor_identifier {
