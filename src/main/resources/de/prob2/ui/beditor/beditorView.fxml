@@ -23,6 +23,14 @@
 					<Tooltip text="%common.menu.file.items.saveMachine"/>
 				</tooltip>
 			</Button>
+			<Button fx:id="openExternalButton" onAction="#handleOpenExternal">
+				<graphic>
+					<FontAwesomeIconView styleClass="icon-dark" glyphName="EXTERNAL_LINK" glyphSize="${fontSize.fontSize + 4}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%common.menu.file.items.saveMachine"/>
+				</tooltip>
+			</Button>
 			<Label fx:id="warningLabel" styleClass="warning" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
 		</HBox>
 	</top>
