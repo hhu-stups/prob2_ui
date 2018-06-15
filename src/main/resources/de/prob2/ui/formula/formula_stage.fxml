@@ -9,7 +9,7 @@
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.internal.DynamicCommandStatusBar?>
 
-<fx:root type="FormulaStage" title="%formula.input.title" xmlns="http://javafx.com/javafx/8.0.91"
+<fx:root type="FormulaStage" title="%formula.stage.title" xmlns="http://javafx.com/javafx/8.0.91"
 		 xmlns:fx="http://javafx.com/fxml/1" minWidth="600" minHeight="400" width="1440.0" height="800.0">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -38,9 +38,9 @@
 							<HBox>
 								<VBox spacing="15" HBox.hgrow="ALWAYS" alignment="CENTER">
 									<HBox spacing="10" alignment="CENTER">
-										<Label alignment="CENTER" text="%formula.input.enterFormula" />
+										<Label alignment="CENTER" text="%formula.stage.label.enterFormula" />
 										<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
-										<Button fx:id="btApply" text="Apply" onAction="#apply" styleClass="button-blue"/>
+										<Button fx:id="btApply" text="%common.buttons.apply" onAction="#apply" styleClass="button-blue"/>
 									</HBox>
 								</VBox>
 								<Button fx:id="zoomInButton" disable="false"
