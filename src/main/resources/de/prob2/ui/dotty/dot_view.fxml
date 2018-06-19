@@ -19,16 +19,8 @@
 			<BorderPane>
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
-						<Menu text="%common.menu.view">
-							<MenuItem text="%common.menu.view.items.zoomDefault"
-								accelerator="Shortcut+'0'" onAction="#defaultSize" />
-							<MenuItem text="%common.menu.view.items.zoomIn"
-								accelerator="Shortcut + '+'" onAction="#zoomIn" />
-							<MenuItem text="%common.menu.view.items.zoomOut"
-								accelerator="Shortcut + '-'" onAction="#zoomOut" />
-							<MenuItem text="%menu.window.items.closeWindow" 
-								accelerator="Shortcut+W" onAction="#handleClose"/>
-						</Menu>
+						<ViewMenu fx:id="viewMenu" />
+						<WindowMenu fx:id="windowMenu" />
 					</MenuBar>
 				</top>
 				<center>

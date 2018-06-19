@@ -5,7 +5,8 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 
 <fx:root type="Menu" text="%menu.window" xmlns:fx="http://javafx.com/fxml/1">
-	<Menu text="%menu.window.items.perspectives" fx:id="presetPerspectivesMenu">
+	<Menu text="%menu.window.items.perspectives" fx:id="presetPerspectivesMenu"
+		disable="true" visible="false">
 		<MenuItem text="%menu.window.items.perspectives.preset.default"
 			onAction="#handleLoadDefault" />
 		<MenuItem text="%menu.window.items.perspectives.preset.separated"
@@ -16,7 +17,8 @@
 		<MenuItem text="%menu.window.items.perspectives.load"
 			onAction="#handleLoadPerspective" />
 	</Menu>
-	<MenuItem text="%menu.window.items.detach" onAction="#handleLoadDetached" />
+	<MenuItem text="%menu.window.items.detach" fx:id="detatchedMenuItem"
+		onAction="#handleLoadDetached" disable="true" visible="false" />
 	<SeparatorMenuItem />
 	<MenuItem text="%menu.window.items.closeWindow" accelerator="Shortcut+W"
 		onAction="#handleCloseWindow" />

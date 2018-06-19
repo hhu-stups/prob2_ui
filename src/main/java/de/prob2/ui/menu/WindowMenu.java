@@ -2,6 +2,7 @@ package de.prob2.ui.menu;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import org.slf4j.Logger;
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.codecentric.centerdevice.MenuToolkit;
+import de.codecentric.centerdevice.util.StageUtils;
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.history.HistoryView;
@@ -25,6 +28,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -38,16 +42,37 @@ public class WindowMenu extends Menu {
 	private final FileChooserManager fileChooserManager;
 
 	@FXML
-	private MenuItem fullScreenMenuItem;
+	private Menu presetPerspectivesMenu;
+	@FXML
+	private MenuItem detatchedMenuItem;
 
 	@Inject
 	private WindowMenu(final StageManager stageManager, final Injector injector, final ResourceBundle bundle,
-			final FileChooserManager fileChooserManager) {
+			final FileChooserManager fileChooserManager, MenuToolkit menuToolkit) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
 		stageManager.loadFXML(this, "windowMenu.fxml");
+
+		if (menuToolkit != null) {
+			MenuItem zoomMenuItem = menuToolkit.createZoomMenuItem();
+			zoomMenuItem.setOnAction(
+					event -> StageUtils.getFocusedStage().ifPresent(stage -> {
+						if(!stage.isMaximized()) {
+							stage.setMaximized(true);
+						} else {
+							stage.sizeToScene();
+							stage.setMaximized(false);
+							stage.centerOnScreen();
+						}
+					}));
+
+			this.getItems().addAll(0, Arrays.asList(menuToolkit.createMinimizeMenuItem(), zoomMenuItem,
+					menuToolkit.createCycleWindowsItem(), new SeparatorMenuItem()));
+			this.getItems().addAll(new SeparatorMenuItem(), menuToolkit.createBringAllToFrontItem(),
+					new SeparatorMenuItem());
+		}
 	}
 
 	@FXML
@@ -57,7 +82,7 @@ public class WindowMenu extends Menu {
 			stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
 		}
 	}
-	
+
 	@FXML
 	private void handleLoadDefault() {
 		reset();
@@ -130,5 +155,12 @@ public class WindowMenu extends Menu {
 		injector.getInstance(MenuController.class).setMacMenu();
 
 		return root;
+	}
+
+	public void enablePerspectivesAndDetatched() {
+		presetPerspectivesMenu.setDisable(false);
+		presetPerspectivesMenu.setVisible(true);
+		detatchedMenuItem.setDisable(false);
+		detatchedMenuItem.setVisible(true);
 	}
 }

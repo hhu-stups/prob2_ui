@@ -1,6 +1,5 @@
 package de.prob2.ui.menu;
 
-import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import javax.annotation.Nullable;
@@ -9,10 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
-import de.codecentric.centerdevice.util.StageUtils;
-
 import de.prob2.ui.internal.StageManager;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -30,7 +26,7 @@ public final class MenuController extends MenuBar {
 	@FXML
 	private FileMenu fileMenu;
 	@FXML
-	private Menu windowMenu;
+	private WindowMenu windowMenu;
 	@FXML
 	private HelpMenu helpMenu;
 
@@ -41,6 +37,8 @@ public final class MenuController extends MenuBar {
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "menu.fxml");
 
+		windowMenu.enablePerspectivesAndDetatched();
+		
 		if (this.menuToolkit != null) {
 			// Mac-specific menu stuff
 			this.setUseSystemMenuBar(true);
@@ -69,15 +67,6 @@ public final class MenuController extends MenuBar {
 					new SeparatorMenuItem(), menuToolkit.createHideMenuItem(bundle.getString("common.prob2")),
 					menuToolkit.createHideOthersMenuItem(), menuToolkit.createUnhideAllMenuItem(),
 					new SeparatorMenuItem(), quit);
-
-			MenuItem zoomMenuItem = menuToolkit.createZoomMenuItem();
-			zoomMenuItem.setOnAction(event -> StageUtils.getFocusedStage().ifPresent(stage -> stage.setMaximized(!stage.isMaximized())));
-
-			// Add Mac-style items to Window menu
-			windowMenu.getItems().addAll(0, Arrays.asList(menuToolkit.createMinimizeMenuItem(), zoomMenuItem,
-					menuToolkit.createCycleWindowsItem(), new SeparatorMenuItem()));
-			windowMenu.getItems().addAll(new SeparatorMenuItem(), menuToolkit.createBringAllToFrontItem(), new SeparatorMenuItem());
-			menuToolkit.autoAddWindowMenuItems(windowMenu);
 
 			// Make this the global menu bar
 			stageManager.setGlobalMacMenuBar(this);

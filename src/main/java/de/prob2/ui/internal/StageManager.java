@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+ package de.prob2.ui.internal;
 
 import java.io.File;
 import java.io.IOException;

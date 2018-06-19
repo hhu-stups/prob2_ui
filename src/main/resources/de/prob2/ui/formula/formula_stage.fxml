@@ -8,9 +8,11 @@
 <?import de.prob2.ui.formula.FormulaStage?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.internal.DynamicCommandStatusBar?>
+<?import de.prob2.ui.menu.*?>
 
-<fx:root type="FormulaStage" title="%formula.stage.title" xmlns="http://javafx.com/javafx/8.0.91"
-		 xmlns:fx="http://javafx.com/fxml/1" minWidth="600" minHeight="400" width="1440.0" height="800.0">
+<fx:root type="FormulaStage" title="%formula.stage.title"
+	xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1"
+	minWidth="600" minHeight="400" width="1440.0" height="800.0">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
@@ -19,28 +21,22 @@
 			<BorderPane>
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
-						<Menu text="%common.menu.view">
-							<MenuItem text="%common.menu.view.items.zoomDefault"
-								accelerator="Shortcut+'0'" onAction="#defaultSize" />
-							<MenuItem text="%common.menu.view.items.zoomIn"
-								accelerator="Shortcut + '+'" onAction="#zoomIn" />
-							<MenuItem text="%common.menu.view.items.zoomOut"
-								accelerator="Shortcut + '-'" onAction="#zoomOut" />
-							<MenuItem text="%menu.window.items.closeWindow" 
-								accelerator="Shortcut+W" onAction="#handleClose"/>
-						</Menu>
+						<ViewMenu fx:id="viewMenu" />
+						<WindowMenu fx:id="windowMenu" />
 					</MenuBar>
 				</top>
 				<center>
 					<AnchorPane>
-						<VBox alignment="TOP_CENTER" prefWidth="Infinity" prefHeight="Infinity" spacing="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="20.0"
-								AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0">
+						<VBox alignment="TOP_CENTER" prefWidth="Infinity" prefHeight="Infinity"
+							spacing="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="20.0"
+							AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0">
 							<HBox>
 								<VBox spacing="15" HBox.hgrow="ALWAYS" alignment="CENTER">
 									<HBox spacing="10" alignment="CENTER">
 										<Label alignment="CENTER" text="%formula.stage.label.enterFormula" />
-										<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
-										<Button fx:id="btApply" text="%common.buttons.apply" onAction="#apply" styleClass="button-blue"/>
+										<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS" />
+										<Button fx:id="btApply" text="%common.buttons.apply"
+											onAction="#apply" styleClass="button-blue" />
 									</HBox>
 								</VBox>
 								<Button fx:id="zoomInButton" disable="false"
@@ -60,21 +56,21 @@
 								<Button fx:id="cancelButton" onAction="#cancel">
 									<graphic>
 										<FontAwesomeIconView styleClass="icon-dark"
-											glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
+											glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
 									</graphic>
 								</Button>
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
 							<HBox VBox.vgrow="ALWAYS">
 								<StackPane fx:id="stackPane" HBox.hgrow="ALWAYS">
-									<ScrollPane fx:id="formulaPane"/>
+									<ScrollPane fx:id="formulaPane" />
 								</StackPane>
 							</HBox>
 						</VBox>
 					</AnchorPane>
 				</center>
 				<bottom>
-					<DynamicCommandStatusBar fx:id="statusBar"/>
+					<DynamicCommandStatusBar fx:id="statusBar" />
 				</bottom>
 			</BorderPane>
 		</Scene>
