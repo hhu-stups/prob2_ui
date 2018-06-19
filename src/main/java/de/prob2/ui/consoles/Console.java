@@ -34,6 +34,8 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
 	
+	private static final String EMPTY_PROMPT = "> ";
+	
 	private final ResourceBundle bundle;
 	private final List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
@@ -129,17 +131,11 @@ public abstract class Console extends StyleClassedTextArea {
 			goToLastPos();
 		}
 
-		String[] pastedLines = Clipboard.getSystemClipboard().getString().split("\n");
-		int diff = 0;
-		for(int i = 0; i < pastedLines.length; i++) {
-			final int oldLength = this.getLength();
-			this.appendText(pastedLines[i]);
-			if(i < pastedLines.length - 1) {
-				this.handleEnter();
-			} else {
-				diff = this.getLength() - oldLength;
-			}
-		}
+		final int oldLength = this.getLength();
+		String pastedString = Clipboard.getSystemClipboard().getString().replaceAll("\n", "");
+		this.appendText(pastedString);
+		final int diff = this.getLength() - oldLength;
+
 		charCounterInLine += diff;
 		currentPosInLine += diff;
 	}
@@ -214,7 +210,7 @@ public abstract class Console extends StyleClassedTextArea {
 		if (searchHandler.isActive()) {
 			String searchResult = searchHandler.getCurrentSearchResult();
 			this.deleteText(getLineNumber(), 0, getLineNumber(), this.getParagraphLength(getLineNumber()));
-			this.appendText((instructionLengthInLine > 1 ? "> " : prompt.get()) + searchResult);
+			this.appendText((instructionLengthInLine > 1 ? EMPTY_PROMPT : prompt.get()) + searchResult);
 			this.moveTo(this.getLength());
 			charCounterInLine = searchResult.length();
 			currentPosInLine = charCounterInLine;
@@ -253,7 +249,7 @@ public abstract class Console extends StyleClassedTextArea {
 			}
 			if(endsWithNewline) {
 				instructionLengthInLine++;
-				this.appendText("\n> ");
+				this.appendText("\n" + EMPTY_PROMPT);
 				return;
 			}
 			
@@ -399,12 +395,12 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public int getInputStart() {
-		int length = instructionLengthInLine > 1 ? 2 : this.getPrompt().length();
+		int length = instructionLengthInLine > 1 ? EMPTY_PROMPT.length() : this.getPrompt().length();
 		return this.getLineStart() + length;
 	}
 	
 	public String getInput() {
-		int length = instructionLengthInLine > 1 ? 2 : this.getPrompt().length();
+		int length = instructionLengthInLine > 1 ? EMPTY_PROMPT.length() : this.getPrompt().length();
 		return this.getLine().substring(length);
 	}
 	
