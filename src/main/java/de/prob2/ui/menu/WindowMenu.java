@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +50,7 @@ public class WindowMenu extends Menu {
 
 	@Inject
 	private WindowMenu(final StageManager stageManager, final Injector injector, final ResourceBundle bundle,
-			final FileChooserManager fileChooserManager, MenuToolkit menuToolkit) {
+			final FileChooserManager fileChooserManager, @Nullable MenuToolkit menuToolkit) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
