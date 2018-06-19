@@ -16,18 +16,17 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
@@ -49,6 +48,9 @@ import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W
@@ -359,6 +361,29 @@ public final class StageManager {
 	 */
 	public File showOpenProjectOrMachineChooser(final Window window) {
 		return showOpenFileChooser(window, true, true);
+	}
+	
+	/**
+	 * Show a {@link FileChooser} to ask the user to save a machine file.
+	 *
+	 * @param window the {@link Window} on which to show the {@link FileChooser}
+	 * @return the selected {@link File}, or {@code null} if none was selected
+	 */
+	public File showSaveMachineChooser(final Window window) {
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
+		
+		final List<String> allExts = new ArrayList<>(Machine.Type.getExtensionToTypeMap().keySet());
+		fileChooser.getExtensionFilters().addAll(
+			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.classicalB"), Machine.Type.B.getExtensionsAsString()), Machine.Type.B.getExtensions()),
+			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.eventB"), Machine.Type.EVENTB.getExtensionsAsString()), Machine.Type.EVENTB.getExtensions()),
+			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.csp"), Machine.Type.CSP.getExtensionsAsString()), Machine.Type.CSP.getExtensions()),
+			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.tla"), Machine.Type.TLA.getExtensionsAsString()), Machine.Type.TLA.getExtensions())
+		);
+		
+		allExts.sort(String::compareTo);
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.allProB"), String.join(", ", allExts)), allExts));
+		return fileChooserManager.showSaveDialog(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 	
 	/**
