@@ -1,8 +1,4 @@
-import org.gradle.plugins.ide.eclipse.model.AccessRule
-
-import java.text.DateFormat
-import java.time.ZoneId
-import java.time.ZoneOffset
+import org.gradle.plugins.ide.eclipse.model.AccessRule 
 
 buildscript {
 	repositories {
@@ -98,9 +94,7 @@ processResources {
 	doFirst {
 		def f = file("src/main/resources/de/prob2/ui/build.properties")
 		f.delete()
-		def dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.ROOT)
-		dateFormat.timeZone = TimeZone.getTimeZone(ZoneId.from(ZoneOffset.UTC))
-		f.append("buildTime=${dateFormat.format(new Date())}\n")
+		f.append("version=${project.version}\n")
 		def proc = new ProcessBuilder("git", "rev-parse", "HEAD").directory(buildDir).start()
 		def exitCode = proc.waitFor()
 		if (exitCode != 0) {

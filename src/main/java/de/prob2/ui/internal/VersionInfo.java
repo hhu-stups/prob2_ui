@@ -46,8 +46,8 @@ public final class VersionInfo {
 		this.lock = new Object();
 	}
 	
-	public String getUIBuildTime() {
-		return this.buildInfo.getProperty("buildTime");
+	public String getUIVersion() {
+		return this.buildInfo.getProperty("version");
 	}
 	
 	public String getUICommit() {

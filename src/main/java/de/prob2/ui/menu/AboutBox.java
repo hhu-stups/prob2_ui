@@ -41,7 +41,7 @@ public final class AboutBox extends Stage {
 	private void initialize() {
 		this.uiInfoLabel.setText(String.format(
 			this.bundle.getString("menu.aboutBox.uiInfo"),
-			this.versionInfo.getUIBuildTime(),
+			this.versionInfo.getUIVersion(),
 			this.versionInfo.getUICommit()
 		));
 		
