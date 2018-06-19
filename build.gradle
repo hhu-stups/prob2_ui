@@ -124,9 +124,14 @@ processResources {
 
 jfx {
 	mainClass = project.mainClassName
+	jfxMainAppJarName = project.name + "-jfx.jar"
 	preLoader = preloaderClassName
 	identifier = project.group + "." + project.name
 	vendor = project.group
+	nativeReleaseVersion = project.version
+	appName = project.name
+	skipNativeVersionNumberSanitizing = true
+	skipMainClassScanning = true
 }
 
 sonarqube {
