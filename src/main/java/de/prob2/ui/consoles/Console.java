@@ -34,11 +34,14 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
 	
+	private static final String EMPTY_PROMPT = "> ";
+	
 	private final ResourceBundle bundle;
 	private final List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
+	protected int instructionLengthInLine = 1;
 	private final ConsoleSearchHandler searchHandler;
 	private final Executable interpreter;
 	private final String header;
@@ -128,17 +131,11 @@ public abstract class Console extends StyleClassedTextArea {
 			goToLastPos();
 		}
 
-		String[] pastedLines = Clipboard.getSystemClipboard().getString().split("\n");
-		int diff = 0;
-		for(int i = 0; i < pastedLines.length; i++) {
-			final int oldLength = this.getLength();
-			this.appendText(pastedLines[i]);
-			if(i < pastedLines.length - 1) {
-				this.handleEnter();
-			} else {
-				diff = this.getLength() - oldLength;
-			}
-		}
+		final int oldLength = this.getLength();
+		String pastedString = Clipboard.getSystemClipboard().getString().replaceAll("\n", "");
+		this.appendText(pastedString);
+		final int diff = this.getLength() - oldLength;
+
 		charCounterInLine += diff;
 		currentPosInLine += diff;
 	}
@@ -213,7 +210,7 @@ public abstract class Console extends StyleClassedTextArea {
 		if (searchHandler.isActive()) {
 			String searchResult = searchHandler.getCurrentSearchResult();
 			this.deleteText(getLineNumber(), 0, getLineNumber(), this.getParagraphLength(getLineNumber()));
-			this.appendText(prompt.get() + searchResult);
+			this.appendText((instructionLengthInLine > 1 ? EMPTY_PROMPT : prompt.get()) + searchResult);
 			this.moveTo(this.getLength());
 			charCounterInLine = searchResult.length();
 			currentPosInLine = charCounterInLine;
@@ -234,18 +231,33 @@ public abstract class Console extends StyleClassedTextArea {
 	protected void handleEnter() {
 		charCounterInLine = 0;
 		currentPosInLine = 0;
-		final String currentLine;
+		String currentLine;
 		if (searchHandler.isActive()) {
 			currentLine = searchHandler.getCurrentSearchResult();
 		} else {
 			currentLine = this.getInput();
 		}
 		if (!currentLine.isEmpty()) {
+			boolean endsWithNewline = currentLine.endsWith("\\");
+			if(endsWithNewline) {
+				currentLine = currentLine.substring(0, currentLine.length() - 1);
+			}
 			if (!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
 				instructions.set(instructions.size() - 1, new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
 			} else {
 				instructions.add(new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
 			}
+			if(endsWithNewline) {
+				instructionLengthInLine++;
+				this.appendText("\n" + EMPTY_PROMPT);
+				return;
+			}
+			
+			for(int i = 0; i < instructionLengthInLine; i++) {
+				ConsoleInstruction instruction = instructions.get(instructions.size() - instructionLengthInLine + i);
+				interpreter.exec(instruction);
+			}
+			
 			posInList = instructions.size() - 1;
 			ConsoleInstruction instruction = instructions.get(posInList);
 			ConsoleExecResult execResult = interpreter.exec(instruction);
@@ -259,6 +271,7 @@ public abstract class Console extends StyleClassedTextArea {
 				this.setStyle(from, from + execResult.toString().length() + 1, Collections.singletonList("error"));
 			}
 		}
+		instructionLengthInLine = 1;
 		searchHandler.handleEnter();
 		this.appendText('\n' + prompt.get());
 		this.setStyle(getLineNumber(), Collections.emptyList());
@@ -382,11 +395,13 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public int getInputStart() {
-		return this.getLineStart() + this.getPrompt().length();
+		int length = instructionLengthInLine > 1 ? EMPTY_PROMPT.length() : this.getPrompt().length();
+		return this.getLineStart() + length;
 	}
 	
 	public String getInput() {
-		return this.getLine().substring(this.getPrompt().length());
+		int length = instructionLengthInLine > 1 ? EMPTY_PROMPT.length() : this.getPrompt().length();
+		return this.getLine().substring(length);
 	}
 	
 	public Console.ConfigData getSettings() {
