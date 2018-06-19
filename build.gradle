@@ -16,7 +16,6 @@ buildscript {
 }
 
 plugins {
-	id "edu.sc.seis.macAppBundle" version "2.2.1"
 	id "org.sonarqube" version "2.6.2"
 }
 
@@ -52,16 +51,6 @@ repositories {
 mainClassName = "de.prob2.ui.ProB2"
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}"]
-
-macAppBundle {
-	dmgName = project.name + "-macos"
-	icon = "src/main/deploy/package/macosx/prob2-ui.icns"
-	bundleJRE = false
-	jreHome = null
-	javaProperties = ["javafx.preloader": preloaderClassName]
-}
-
-macAppBundle.mainClassName = mainClassName
 
 sourceSets.test.java.srcDirs = []
 
