@@ -75,7 +75,7 @@ public final class ExceptionAlert extends Alert {
 		}
 		final String message;
 		if (cliError != null) {
-			message = bundle.getString("exceptionAlert.cliErrorExplanation") + '\n';
+			message = bundle.getString("internal.exceptionAlert.cliErrorExplanation");
 		} else if (proBError != null) {
 			message = proBError.getOriginalMessage();
 		} else {
@@ -103,15 +103,15 @@ public final class ExceptionAlert extends Alert {
 					final String typeName;
 					switch (item.getType()) {
 						case WARNING:
-							typeName = bundle.getString("exceptionAlert.proBErrorTable.type.warning");
+							typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.warning");
 							break;
 						
 						case ERROR:
-							typeName = bundle.getString("exceptionAlert.proBErrorTable.type.error");
+							typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.error");
 							break;
 						
 						case INTERNAL_ERROR:
-							typeName = bundle.getString("exceptionAlert.proBErrorTable.type.internalError");
+							typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.internalError");
 							break;
 						
 						default:

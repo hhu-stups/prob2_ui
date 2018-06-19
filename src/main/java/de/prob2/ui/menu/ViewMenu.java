@@ -32,8 +32,8 @@ public class ViewMenu extends Menu {
 		stageManager.currentProperty().addListener((observable, from, to) -> {
 			if (to != null) {
 				to.fullScreenProperty().addListener((observable1, from1, to1) -> 
-					fullScreenMenuItem.setText(to1 ? bundle.getString("common.menu.view.items.exitFullScreen")
-							: bundle.getString("common.menu.view.items.enterFullScreen"))
+					fullScreenMenuItem.setText(to1 ? bundle.getString("menu.view.items.exitFullScreen")
+							: bundle.getString("menu.view.items.enterFullScreen"))
 				);
 			}
 		});

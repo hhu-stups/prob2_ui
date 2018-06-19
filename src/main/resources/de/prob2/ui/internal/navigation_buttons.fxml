@@ -15,7 +15,7 @@
 			<FontAwesomeIconView styleClass="icon-dark" glyphName="ANGLE_DOUBLE_LEFT" glyphSize="${fontSize.fontSize * 1.5 + 2}"/>
 		</graphic>
 		<tooltip>
-			<Tooltip text="%navigationButtons.fastBack.tooltip"/>
+			<Tooltip text="%internal.navigationButtons.fastBack.tooltip"/>
 		</tooltip>
 	</Button>
 	<Button fx:id="backButton" HBox.hgrow="NEVER" onAction="#handleBackButton">
@@ -23,7 +23,7 @@
 			<FontAwesomeIconView styleClass="icon-dark" glyphName="CHEVRON_LEFT" glyphSize="${fontSize.fontSize + 2}"/>
 		</graphic>
 		<tooltip>
-			<Tooltip text="%navigationButtons.back.tooltip"/>
+			<Tooltip text="%internal.navigationButtons.back.tooltip"/>
 		</tooltip>
 	</Button>
 	<Button fx:id="forwardButton" HBox.hgrow="NEVER" onAction="#handleForwardButton">
@@ -31,7 +31,7 @@
 			<FontAwesomeIconView styleClass="icon-dark" glyphName="CHEVRON_RIGHT" glyphSize="${fontSize.fontSize + 2}"/>
 		</graphic>
 		<tooltip>
-			<Tooltip text="%navigationButtons.fastForward.tooltip"/>
+			<Tooltip text="%internal.navigationButtons.fastForward.tooltip"/>
 		</tooltip>
 	</Button>
 	<Button fx:id="fastForwardButton" HBox.hgrow="NEVER" onAction="#handleFastForwardButton">
@@ -39,7 +39,7 @@
 			<FontAwesomeIconView styleClass="icon-dark" glyphName="ANGLE_DOUBLE_RIGHT" glyphSize="${fontSize.fontSize * 1.5 + 2}"/>
 		</graphic>
 		<tooltip>
-			<Tooltip text="%navigationButtons.forward.tooltip"/>
+			<Tooltip text="%internal.navigationButtons.forward.tooltip"/>
 		</tooltip>
 	</Button>
 	<Button fx:id="reloadButton" HBox.hgrow="NEVER" onAction="#handleReloadButton">
@@ -47,7 +47,7 @@
 			<FontAwesomeIconView styleClass="icon-dark" glyphName="UNDO" glyphSize="${fontSize.fontSize + 2}"/>
 		</graphic>
 		<tooltip>
-			<Tooltip text="%navigationButtons.reload.tooltip"/>
+			<Tooltip text="%internal.navigationButtons.reload.tooltip"/>
 		</tooltip>
 	</Button>
 </fx:root>

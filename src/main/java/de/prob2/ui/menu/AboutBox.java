@@ -34,27 +34,28 @@ public final class AboutBox extends Stage {
 		this.bundle = bundle;
 		this.versionInfo = versionInfo;
 
-		stageManager.loadFXML(this, "about_box.fxml");
+		stageManager.loadFXML(this, ""
+				+ "_box.fxml");
 	}
 
 	@FXML
 	private void initialize() {
 		this.uiInfoLabel.setText(String.format(
-			this.bundle.getString("about.uiInfo"),
+			this.bundle.getString("menu.aboutBox.uiInfo"),
 			this.versionInfo.getUIBuildTime(),
 			this.versionInfo.getUICommit()
 		));
 		
 		this.kernelInfoLabel.setText(String.format(
-			this.bundle.getString("about.kernelInfo"),
+			this.bundle.getString("menu.aboutBox.kernelInfo"),
 			this.versionInfo.getKernelVersion(),
 			this.versionInfo.getKernelCommit()
 		));
 		
 		this.cliInfoLabel.setText(String.format(
-			this.bundle.getString("about.cliInfo"),
-			this.bundle.getString("about.cliInfo.loading"),
-			this.bundle.getString("about.cliInfo.loading")
+			this.bundle.getString("menu.aboutBox.cliInfo"),
+			this.bundle.getString("menu.aboutBox.cliInfo.loading"),
+			this.bundle.getString("menu.aboutBox.cliInfo.loading")
 		));
 		new Thread(() -> {
 			// The CLI version is loaded in the background, because it requires starting a CLI,
@@ -63,7 +64,7 @@ public final class AboutBox extends Stage {
 			final String revision = this.versionInfo.getCliVersion().revision;
 			Platform.runLater(() -> {
 				this.cliInfoLabel.setText(
-					String.format(this.bundle.getString("about.cliInfo"),
+					String.format(this.bundle.getString("menu.aboutBox.cliInfo"),
 					formattedCliVersion,
 					revision
 				));
@@ -72,7 +73,7 @@ public final class AboutBox extends Stage {
 		}, "ProB CLI Version Getter").start();
 		
 		this.javaInfoLabel.setText(String.format(
-			this.bundle.getString("about.javaInfo"),
+			this.bundle.getString("menu.aboutBox.javaInfo"),
 			System.getProperty("java.version"),
 			System.getProperty("java.vendor"),
 			System.getProperty("java.vm.name"),
