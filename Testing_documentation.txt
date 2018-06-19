@@ -767,6 +767,10 @@ Besser Lazy auswerten?
 
 30. State Errors -> funktioniert
 
+
+
+
+
 31. Trace Replay
 
 1. Alle Traces checken -> funktioniert
@@ -777,7 +781,11 @@ Tatsächliches Ergebnis: Alle Traces werden überprüft, es wird am Ende kein cu
 
 
 
-2. Check abbrechen -> funktioniert
+2. Interrupt
+
+Erwartetes Ergebnis: Trace Replay wird unterbrochen, der Ladebalken wird gestoppt
+
+Tatsächliches Ergebnis: Trace Replay wird unterbrochen, der Ladebalken wird gestoppt
 
 
 3. Nur ein Trace checken -> dieser Trace kann erfolgreich nachgespielt werden
@@ -808,7 +816,29 @@ Bemerkung:
 7. Show Error -> funktioniert
 
 
-Bemerkung: Trace Replay in Project Status ergänzen?
+8. Hilfebutton -> springt noch nicht an die richtige Stelle
+
+9. Hinzufügen von bereits vorhandenen Traces
+
+Erwartetes Ergebnis: Trace wird nicht hinzugefügt
+
+Tatsächliches Ergebnis: Trace wird nicht hinzugefügt
+
+
+
+10. Trace ohne Syntaxfehler laden und überprüfen -> funktioniert
+
+11. Trace mit Syntaxfehler laden -> funktioniert
+
+
+12. Deaktivierung eines Traces -> funktioniert
+
+
+13. Überprüfen mit deaktivierten Traces
+
+Erwartetes Ergebnis: Deaktivierte Traces werden nicht überprüft
+
+Tatsächliches Ergebnis: Deaktivierte Traces werden nicht überprüft
 
 
 
@@ -866,11 +896,18 @@ Tatsächliches Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird 
 
 12. Deaktivierung eines Modelchecking Items -> funktioniert
 
+
+Erwartetes Ergebnis: Bei Deaktivierung eines Items passt sich der Machine Status und die Status Bar für die Fehler sich an
+
+Tatsächliches Ergebnis: Bei Deaktivierung eines Items passt sich der Machine Status und die Status Bar für die Fehler sich an
+
+
+
 13. Überprüfen mit deaktivierten Items
 
 Erwartetes Ergebnis: Beim Überprüfen aller Items, werden deaktivierte Items nicht ausgeführt; das MenuItem für Check ist hierbei für dieses Item deaktiviert
 
-Tatsächliches Ergebnis: Beim Überprüfen aller Items, werden deaktivierte Items nicht ausgeführt; das MenuItem für Check ist hierbei für dieses Item deaktiviert
+Tatsächliches Ergebnis: Beim Überprüfen aller Items, werden deaktivierte Items nicht ausgeführt
 
 
 Bemerkung: Exceptions fliegen, wenn während des Modelcheckings eine neue Maschine geladen wird
@@ -879,58 +916,9 @@ Bemerkung: Exceptions fliegen, wenn während des Modelcheckings eine neue Maschi
 
 
 
-33. Trace Replay
-
-1. Replay all
-
-Erwartetes Ergebnis: Es werden alle Traces nachgespielt und geprüft ob diese nach gespielt werden können; es wird nicht auf einen Trace gewechselt
-
-Tatsächliches Ergebnis: Es werden alle Traces nachgespielt und geprüft ob diese nach gespielt werden können; es wird nicht auf einen Trace gewechselt
 
 
-2. Interrupt
-
-Erwartetes Ergebnis: Trace Replay wird unterbrochen, der Ladebalken wird gestoppt
-
-Tatsächliches Ergebnis: Trace Replay wird unterbrochen, der Ladebalken wird gestoppt
-
-
-
-3. Replay Trace
-
-Erwartetes Ergebnis: Trace wird nachgespielt; für den Fall dass er nachgespielt werden kann, wird der currentTrace auf diesen Trace gewechselt
-
-Tatsächliches Ergebnis: Trace wird nachgespielt; für den Fall dass er nachgespielt werden kann, wird der currentTrace auf diesen Trace gewechselt
-
-
-4. Show Error -> funktioniert
-
-5. Delete trace -> funktioniert
-
-6. Trace ohne Syntaxfehler laden und überprüfen -> funktioniert
-
-7. Trace mit Syntaxfehler laden -> funktioniert
-
-8. Hilfebutton -> springt noch nicht an die richtige Stelle
-
-9. Hinzufügen von bereits vorhandenen Traces
-
-Erwartetes Ergebnis: Trace wird nicht hinzugefügt
-
-Tatsächliches Ergebnis: Trace wird nicht hinzugefügt
-
-
-Bemerkungen: 
-
--Zurücksetzen wenn Maschine neu geladen wird bzw. andere Maschine geladen wird?
--Durch Wechseln der Maschinen ist es möglich, dass nach dem Checken der Status von Erfolgreich/Nicht erfolgreich auf Nicht gecheckt gesetzt wird
--Deaktivierung von Traces ermöglichen?
-
-
-
-
-
-34. LTL
+33. LTL
 
 1. Überprüfen einer erfolgreichen LTL Formel -> funktioniert
 
@@ -1055,12 +1043,25 @@ Tatsächliches ergebnis: Es wird keine zusätzliche Formel hinzugefügt
 
 25. Deaktivierung einer Formel
 
+Erwartetes Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Status und die Status Bar für die Fehler sich an
+
+Tatsächliches Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Status und die Status Bar für die Fehler sich an
+
+
+
 26. Überprüfen mit deaktivierten Formel
 
+Erwartetes Ergebnis: Deaktivierte Formel werden nicht überprüft
+
+Tatsächliches Ergebnis: Deaktivierte Formel werden nicht überprüft
 
 
 
-35. Symbolic Model Checking
+
+
+
+
+34. Symbolic Model Checking
 
 1. Überprüfen einer erfolgreichen Formel -> funktioniert
 
@@ -1163,7 +1164,7 @@ Bemerkungen:
 
 
 
-36. Groovy Konsole
+35. Groovy Konsole
 
 1. Inspect groovy objects
 
@@ -1287,7 +1288,7 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 
 
-37. B Konsole
+36. B Konsole
 
 1. Ausführung von Befehlen -> funktioniert
 
@@ -1354,7 +1355,7 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 
 
-38. Plugin Mechanismus
+37. Plugin Mechanismus
 -Momentan kann man mit Plugins Features ohne Einschränkungen erstellen
 -Plugins müssen geändert werden, wenn sich die API in der ProB2-UI ändert -> schwierig ohne Release?
 -Exceptions in der ProB2-UI können aufgrund fehlerhafter Implementierung von Plugins auftreten
