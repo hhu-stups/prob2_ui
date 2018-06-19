@@ -34,8 +34,7 @@ public final class AboutBox extends Stage {
 		this.bundle = bundle;
 		this.versionInfo = versionInfo;
 
-		stageManager.loadFXML(this, ""
-				+ "_box.fxml");
+		stageManager.loadFXML(this, "about_box.fxml");
 	}
 
 	@FXML
