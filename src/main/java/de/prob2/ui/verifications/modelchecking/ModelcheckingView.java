@@ -37,7 +37,6 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -446,8 +445,12 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
 		updateCurrentValues(options, stateSpace);
 		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy), toPrettyString(currentOptions));
+		if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
+			currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
+		} else {
+			modelcheckingItem = getItemIfAlreadyExists(modelcheckingItem);
+		}
 		currentStats.updateItem(modelcheckingItem);
-		currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
 		tvItems.getSelectionModel().selectLast();
 	}
 	
@@ -461,6 +464,15 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, ModelCheckingItem item) {
 		updateCurrentValues(options, stateSpace);
 		currentStats.updateItem(item);
+	}
+	
+	private ModelCheckingItem getItemIfAlreadyExists(ModelCheckingItem item) {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		int index = currentMachine.getModelcheckingItems().indexOf(item);
+		if(index > -1) {
+			item = currentMachine.getModelcheckingItems().get(index);
+		}
+		return item;
 	}
 
 	private String toPrettyString(ModelCheckingOptions options) {

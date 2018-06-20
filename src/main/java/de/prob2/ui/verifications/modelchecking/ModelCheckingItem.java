@@ -120,4 +120,27 @@ public class ModelCheckingItem implements IExecutableItem {
 	public Checked getChecked() {
 		return checked;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == this) {
+			return true;
+		}
+		if(!(obj instanceof ModelCheckingItem)) {
+			return false;
+		}
+		ModelCheckingItem other = (ModelCheckingItem) obj;
+		return strategy.equals(other.getStrategy()) && description.equals(other.getDescription());
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(strategy, description);
+	}
+	
+	@Override
+	public String toString() {
+		return strategy + ": " + description;
+	}
+	
 }
