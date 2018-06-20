@@ -283,6 +283,19 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		shouldExecuteColumn.setGraphic(selectAll);
 		
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
+		tvItems.getFocusModel().focusedItemProperty().addListener((observable, from, to) -> {
+			ModelCheckingItem item = tvItems.getFocusModel().getFocusedItem();
+			Platform.runLater(() -> {
+				if (item != null) {
+					if (item.getStats() == null) {
+						resetView();
+					} else {
+						currentStats = item.getStats();
+						statsPane.getChildren().setAll(currentStats);
+					}
+				}	
+			});
+		});
 	}
 	
 	private void setListeners() {
@@ -312,17 +325,8 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 
 	private void tvItemsClicked(MouseEvent e) {
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-		if (item != null && e.getButton() == MouseButton.PRIMARY) {
-			if (item.getStats() == null) {
-				if (e.getClickCount() == 1) {
-					resetView();
-				} else if (e.getClickCount() >= 2) {
-					checkItem(item, false);
-				}
-			} else {
-				currentStats = item.getStats();
-				statsPane.getChildren().setAll(currentStats);
-			}
+		if (item != null && e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
+			checkItem(item, false);
 		}
 	}
 	
