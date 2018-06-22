@@ -37,7 +37,7 @@ Tatsächliches Ergebnis: Projekt kann trotzdem geladen werden, JSON Dateiname wi
 
 Format der Projekt Datei ist fehlerhaft
 
-Erwartetes Ergebnis: 
+Erwartetes Ergebnis: com.google.gson.stream.MalformedJsonException
 
 Tatsächliches Ergebnis: com.google.gson.stream.MalformedJsonException
 
@@ -48,21 +48,15 @@ Tatsächliches Ergebnis: com.google.gson.stream.MalformedJsonException
 
 
 
-
-
-
-
-
-
 Vorraussetzung: ProB2-UI ist geöffnet, über File wird entsprechendes Item ausgewählt
 
 Testfälle:
 
 1. Machine ist gültig
 
-Erwartetes Ergebnis: Machine wird korrekt formattiert angezeigt
+Erwartetes Ergebnis: Machine wird korrekt formatiert angezeigt
 
-Tatsächliches Ergebnis: Machine wird korrekt formattiert angezeigt
+Tatsächliches Ergebnis: Machine wird korrekt formatiert angezeigt
 
 
 
@@ -77,7 +71,7 @@ Tatsächliches Ergebnis: Zuerst wird Parsefehler geworfen, entsprechendes Item w
 
 Erwartetes Ergebnis: Save Dialog wird angezeigt mit mch als Endung
 
-Tatsächliches Ergebnis: Save Dialog wird angezeigt mit txt als Endung
+Tatsächliches Ergebnis: Save Dialog wird angezeigt mit mch als Endung
 
 
 
@@ -198,6 +192,7 @@ Tatsächliches Ergebnis: Fenster öffnet sich wo man sofort einen Bug melden kan
 Auch in der .jar Version testen!
 
 
+
 8. Cancel Button in allen File Dialogs testen:
 -File/Open
 -File/New Project
@@ -297,9 +292,7 @@ Tatsächliches Ergebnis: Hilfe Fenster wird geöffnet, entsprechender Eintrag f�
 
 5. Disabled operations anzeigen -> funktioniert
 
-6. Execute random events + abbrechen
--Bei einer NumberFormatException (u.a. auch wenn eine Zahl zu groß ist) wird der Nutzer nicht benachrichtigt
-
+6. Execute random events + abbrechen -> funktioniert
 
 7. Reload -> funktioniert
 
@@ -660,11 +653,15 @@ Erwartetes Ergebnis: Eingegebene Formel wird in der Grafik dargestellt
 Tatsächliches Ergebnis: Eingegebene Formel wird in der Grafik dargestellt
 
 
+
+
 2. Es wird auf das '+' geklickt und eine invalide Formel eingegeben
 
 Erwartetes Ergebnis: Fehlermeldung erscheint
 
 Tatsächliches Ergebnis: Fehlermeldung erscheint
+
+
 
 
 3. Es wird eine Formel ausgewählt und auf das '-' geklickt
@@ -673,11 +670,15 @@ Erwartetes Ergebnis: Formel wird gelöscht
 
 Tatsächliches Ergebnis: Formel wird gelöscht
 
+
+
 4. Start at Position wird geändert
 
 Erwartetes Ergebnis: Es wird nur der entsprechende Abschnitt des Graphen angezeigt
 
 Tatsächliches Ergebnis: Es wird nur der entsprechende Abschnitt des Graphen angezeigt
+
+
 
 5. Separate Charts wird ausgewählt
 
@@ -685,11 +686,15 @@ Erwartetes Ergebnis: Graphen werden in einer einzigen Abbildung dargestellt
 
 Tatsächliches Ergebnis: Graphegn werden in einer einzigen Abbildung dargestellt
 
+
+
 6. Separate Charts wird nicht ausgewählt
 
 Erwartetes Ergebnis: Pro Formel gibt es einen Graphen
 
 Tatsächliches Ergebnis: Pro Formel gibt es einen Graphen
+
+
 
 7. Hilfebutton -> springt noch nicht an die richtige Stelle
 
@@ -704,7 +709,7 @@ Bemerkungen:
 
 
 
-23.Statistics:
+23. Statistics:
 
 1. HelpButton -> springt noch nicht an die richtige Stelle
 

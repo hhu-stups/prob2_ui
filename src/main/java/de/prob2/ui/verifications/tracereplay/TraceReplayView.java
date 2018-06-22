@@ -16,7 +16,6 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
