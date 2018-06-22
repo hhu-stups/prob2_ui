@@ -44,6 +44,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 @Singleton
 public class TraceReplayView extends ScrollPane {
+	private static final String TRACE_FILE_ENDING = ".prob2trace";
 
 	@FXML
 	private TableView<ReplayTrace> traceTableView;
@@ -152,8 +153,8 @@ public class TraceReplayView extends ScrollPane {
 			if (to != null) {
 				to.getTraceFiles().forEach(tracePath -> {
 					traceTableView.getItems().add(new ReplayTrace(tracePath));
-					if(!tracePath.toString().endsWith(".pb2trace")) {
-						stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 tracefiles should be '.pb2trace': %s", tracePath)).showAndWait();
+					if(!tracePath.toString().endsWith(TRACE_FILE_ENDING)) {
+						stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 tracefiles should be '" + TRACE_FILE_ENDING + "': %s", tracePath)).showAndWait();
 					}
 				});
 				to.getTraceFiles().addListener(listener);
@@ -230,7 +231,7 @@ public class TraceReplayView extends ScrollPane {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceLoader.dialog.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		fileChooser.getExtensionFilters().add(new ExtensionFilter("ProB2 Trace (*.pb2trace)", "*.pb2trace"));
+		fileChooser.getExtensionFilters().add(new ExtensionFilter("ProB2 Trace (*" + TRACE_FILE_ENDING + ")", "*" + TRACE_FILE_ENDING));
 		File traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
 			currentProject.getCurrentMachine().addTraceFile(traceFile.toPath());
