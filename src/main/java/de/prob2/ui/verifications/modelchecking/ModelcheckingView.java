@@ -37,7 +37,6 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -284,6 +283,19 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		shouldExecuteColumn.setGraphic(selectAll);
 		
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
+		tvItems.getFocusModel().focusedItemProperty().addListener((observable, from, to) -> {
+			ModelCheckingItem item = tvItems.getFocusModel().getFocusedItem();
+			Platform.runLater(() -> {
+				if (item != null) {
+					if (item.getStats() == null) {
+						resetView();
+					} else {
+						currentStats = item.getStats();
+						statsPane.getChildren().setAll(currentStats);
+					}
+				}	
+			});
+		});
 	}
 	
 	private void setListeners() {
@@ -313,17 +325,8 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 
 	private void tvItemsClicked(MouseEvent e) {
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-		if (item != null && e.getButton() == MouseButton.PRIMARY) {
-			if (item.getStats() == null) {
-				if (e.getClickCount() == 1) {
-					resetView();
-				} else if (e.getClickCount() >= 2) {
-					checkItem(item, false);
-				}
-			} else {
-				currentStats = item.getStats();
-				statsPane.getChildren().setAll(currentStats);
-			}
+		if (item != null && e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
+			checkItem(item, false);
 		}
 	}
 	
@@ -446,8 +449,12 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
 		updateCurrentValues(options, stateSpace);
 		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy), toPrettyString(currentOptions));
+		if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
+			currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
+		} else {
+			modelcheckingItem = getItemIfAlreadyExists(modelcheckingItem);
+		}
 		currentStats.updateItem(modelcheckingItem);
-		currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
 		tvItems.getSelectionModel().selectLast();
 	}
 	
@@ -461,6 +468,15 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, ModelCheckingItem item) {
 		updateCurrentValues(options, stateSpace);
 		currentStats.updateItem(item);
+	}
+	
+	private ModelCheckingItem getItemIfAlreadyExists(ModelCheckingItem item) {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		int index = currentMachine.getModelcheckingItems().indexOf(item);
+		if(index > -1) {
+			item = currentMachine.getModelcheckingItems().get(index);
+		}
+		return item;
 	}
 
 	private String toPrettyString(ModelCheckingOptions options) {
@@ -561,4 +577,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		return lastResult;
 	}
 	
+	public ListProperty<Thread> currentJobThreadsProperty() {
+		return currentJobThreads;
+	}
 }

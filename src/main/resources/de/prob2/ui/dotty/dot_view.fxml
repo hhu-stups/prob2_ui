@@ -9,6 +9,8 @@
 <?import javafx.scene.Scene?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.menu.ViewMenu?>
+<?import de.prob2.ui.menu.WindowMenu?>
 
 <fx:root type="DotView" title="%dotty.stage.title" minWidth="600" minHeight="400" width="1200.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>

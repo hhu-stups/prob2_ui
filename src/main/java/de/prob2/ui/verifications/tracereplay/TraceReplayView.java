@@ -22,6 +22,8 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -237,10 +239,14 @@ public class TraceReplayView extends ScrollPane {
 			currentProject.getCurrentMachine().addTraceFile(traceFile.toPath());
 		}
 	}
-
-	public void resetStatus() {
+	
+	public void refresh() {
+		ObservableList<ReplayTrace> traces = FXCollections.observableArrayList(traceTableView.getItems());
+		traceTableView.getItems().clear();
 		traceChecker.cancelReplay();
-		traceTableView.getItems().forEach(trace -> trace.setChecked(Checked.NOT_CHECKED));
+		traces.forEach(trace -> trace.setChecked(Checked.NOT_CHECKED));
+		traceTableView.setItems(traces);
+		traceTableView.refresh();
 	}
 
 	private void removeFromTraceTableView(Path tracePath) {

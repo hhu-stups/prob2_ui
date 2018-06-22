@@ -48,6 +48,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
@@ -246,6 +247,7 @@ public final class OperationsView extends AnchorPane {
 	private final Injector injector;
 	private final ResourceBundle bundle;
 	private final StatusBar statusBar;
+	private final StageManager stageManager;
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final ExecutorService updater;
 	private final ObjectProperty<Thread> randomExecutionThread;
@@ -261,6 +263,7 @@ public final class OperationsView extends AnchorPane {
 		this.injector = injector;
 		this.bundle = bundle;
 		this.statusBar = statusBar;
+		this.stageManager = stageManager;
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
 		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
 		stopActions.add(this.updater::shutdownNow);
@@ -561,6 +564,11 @@ public final class OperationsView extends AnchorPane {
 					randomExecutionThread.set(null);
 				} catch (Exception e) {
 					LOGGER.error("Invalid input for executing random number of events",e);
+					Platform.runLater(() -> {
+						Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, e.getMessage());
+						alert.setHeaderText(bundle.getString("operations.random.error"));
+						alert.showAndWait();
+					});
 					randomExecutionThread.set(null);
 				}
 			});

@@ -13,6 +13,7 @@ import com.google.gson.JsonSerializer;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.util.Providers;
 
@@ -67,6 +68,8 @@ import de.prob2.ui.visualisation.VisualisationView;
 import de.prob2.ui.visualisation.fx.VisualisationController;
 
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.JavaFXBuilderFactory;
+import javafx.util.BuilderFactory;
 
 import org.hildan.fxgson.FxGson;
 
@@ -74,10 +77,12 @@ public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 	
 	private final RuntimeOptions runtimeOptions;
+	private final BuilderFactory javafxDefaultBuilderFactory;
 	
 	public ProB2Module(final RuntimeOptions runtimeOptions) {
 		super();
 		this.runtimeOptions = runtimeOptions;
+		this.javafxDefaultBuilderFactory = new JavaFXBuilderFactory();
 	}
 
 	private static String pathStringFromJson(final JsonElement json) {
@@ -162,9 +167,15 @@ public class ProB2Module extends AbstractModule {
 	}
 
 	@Provides
-	public FXMLLoader provideLoader(final Injector injector, GuiceBuilderFactory builderFactory, ResourceBundle bundle) { 
+	public FXMLLoader provideLoader(final Injector injector, ResourceBundle bundle) { 
 		FXMLLoader fxmlLoader = new FXMLLoader();
-		fxmlLoader.setBuilderFactory(builderFactory);
+		fxmlLoader.setBuilderFactory(type -> {
+			if (injector.getExistingBinding(Key.get(type)) != null) {
+				return () -> injector.getInstance(type);
+			} else {
+				return javafxDefaultBuilderFactory.getBuilder(type);
+			}
+		});
 		fxmlLoader.setControllerFactory(injector::getInstance);
 		fxmlLoader.setResources(bundle);
 		return fxmlLoader;

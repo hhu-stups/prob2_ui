@@ -37,7 +37,7 @@ Tatsächliches Ergebnis: Projekt kann trotzdem geladen werden, JSON Dateiname wi
 
 Format der Projekt Datei ist fehlerhaft
 
-Erwartetes Ergebnis: 
+Erwartetes Ergebnis: com.google.gson.stream.MalformedJsonException
 
 Tatsächliches Ergebnis: com.google.gson.stream.MalformedJsonException
 
@@ -48,21 +48,15 @@ Tatsächliches Ergebnis: com.google.gson.stream.MalformedJsonException
 
 
 
-
-
-
-
-
-
 Vorraussetzung: ProB2-UI ist geöffnet, über File wird entsprechendes Item ausgewählt
 
 Testfälle:
 
 1. Machine ist gültig
 
-Erwartetes Ergebnis: Machine wird korrekt formattiert angezeigt
+Erwartetes Ergebnis: Machine wird korrekt formatiert angezeigt
 
-Tatsächliches Ergebnis: Machine wird korrekt formattiert angezeigt
+Tatsächliches Ergebnis: Machine wird korrekt formatiert angezeigt
 
 
 
@@ -77,7 +71,7 @@ Tatsächliches Ergebnis: Zuerst wird Parsefehler geworfen, entsprechendes Item w
 
 Erwartetes Ergebnis: Save Dialog wird angezeigt mit mch als Endung
 
-Tatsächliches Ergebnis: Save Dialog wird angezeigt mit txt als Endung
+Tatsächliches Ergebnis: Save Dialog wird angezeigt mit mch als Endung
 
 
 
@@ -198,10 +192,8 @@ Tatsächliches Ergebnis: Fenster öffnet sich wo man sofort einen Bug melden kan
 Auch in der .jar Version testen!
 
 
-8. Commands von der UI in den Kernel migrieren?
 
-
-9. Cancel Button in allen File Dialogs testen:
+8. Cancel Button in allen File Dialogs testen:
 -File/Open
 -File/New Project
 -State View/Edit/Save Machine As
@@ -211,14 +203,9 @@ Auch in der .jar Version testen!
 -Project View/New Project
 
 
-10. Graph Visualization -> Help Button?
-11. Table Visualization -> Help Button?
-12. Formula Visualization -> Help Button?
 
 
-
-
-13. Perspektive auswählen
+9. Perspektive auswählen
 
 Es wird über Windows/Perspective eine Perspektive ausgewählt
 
@@ -251,13 +238,13 @@ Erwartetes Ergebnis: Fehlermeldung, ProB2-UI stürzt nicht ab
 
 Tatsächliches Ergebnis: Fehlermeldung, ProB2-UI stürzt nicht ab
 
-Bemerkung: Anleitung für das Erstellen einzelner Sichten?
+Bemerkung: Anleitung für das Erstellen einzelner Sichten
 
 
 
 
 
-14. Detachen von Komponenten
+10. Detachen von Komponenten
 
 Es werden Kombinationen von Komponenten detacht. Hierbei wird getestet ob die einzelnen Komponenten noch funktionsfähig sind. Ebenso sollen die
 detachten Komponenten wieder geschlossen werden umzu überprüfen ob diese wieder in der Main Stage auftauchen.
@@ -266,19 +253,18 @@ Erwartetes Ergebnis: Komponenten werden detacht und sind funktionsfähig. Beim S
 
 Tatsächliches Ergebnis: Komponenten werden detacht und sind funktionsfähig. Beim Schließen tauchen diese wieder in der Main Stage auf.
 
-Bemerkung: Beim Schließen wird die Reihenfolge im Vergleich zur ursprünglichen View vertauscht
 
 
 
-15. User erhält nicht immer Feedback wenn probcli abgestürzt ist -> UI lässt sich nicht mehr bedienen
+11. User erhält nicht immer Feedback wenn probcli abgestürzt ist -> UI lässt sich nicht mehr bedienen
 
 
-16. UI Persistence enthält Bugs insbesondere beim Detachen von Views und wenn fehlerhafte FXML Dateien als View gesetzt werden
+12. UI Persistence enthält Bugs insbesondere beim Detachen von Views und wenn fehlerhafte FXML Dateien als View gesetzt werden
  -> NullPointerException unter Umständen wenn man versucht die View zurückzusetzen
 
 
 
-17. OperationsView
+13. OperationsView
 
 Testfälle:
 
@@ -300,30 +286,25 @@ Erwartetes Ergebnis: Hilfe Fenster wird geöffnet und zum entsprechenden Eintrag
 Tatsächliches Ergebnis: Hilfe Fenster wird geöffnet, entsprechender Eintrag für die OperationsView nicht vorhanden
 
 
-3. Initialzustand enthält keine Operationen????? Siehe Screenshot
+3. Sortieren -> funktioniert
 
-4. Sortieren -> funktioniert
+4. Im Trace nach vorne/zurück gehen -> funktioniert
 
-5. Im Trace nach vorne/zurück gehen -> funktioniert
+5. Disabled operations anzeigen -> funktioniert
 
-6. Disabled operations anzeigen -> funktioniert
+6. Execute random events + abbrechen -> funktioniert
 
-7. Execute random events + abbrechen
--Bei einer NumberFormatException (u.a. auch wenn eine Zahl zu groß ist) wird der Nutzer nicht benachrichtigt
--> funktioniert ansonsten
--> allerdings interrupt problematisch? wird nicht immer ausgeführt? (abbrechen)
+7. Reload -> funktioniert
 
-8. Reload -> funktioniert
+8. Show Details? - Sollen nur die Parameter angezeigt werden oder alle Änderungen die durch Ausführen der Operation auftreten?
 
-9. Show Details? - Sollen nur die Parameter angezeigt werden oder alle Änderungen die durch Ausführen der Operation auftreten?
-
-10. Execute By Predicate -> funktioniert
+9. Execute By Predicate -> funktioniert
 
 
 
 
 
-18. HistoryView
+14. HistoryView
 
 Testfälle:
 
@@ -333,9 +314,7 @@ Testfälle:
 
 3. Reload -> funktioniert
 
-4.
-
-Hilfebutton 
+4. Hilfebutton 
 
 Erwartetes Ergebnis: Hilfe Fenster wird geöffnet und zum entsprechenden Eintrag weitergeleitet
 
@@ -346,20 +325,10 @@ Tatsächliches Ergebnis: Hilfe Fenster wird geöffnet, wird nicht zum entspreche
 
 
 
-19. Verifications - Trace Replay
-
-Testfälle:
-
-1. Trace Replay über rechte Maustaste -> funktioniert
-
-2. Trace Replay über Button -> prüft den Trace, spielt den aber nicht direkt nach (?)
 
 
 
-
-
-
-20. Neues Projekt erstellen
+15. Neues Projekt erstellen
 
 Testfälle:
 
@@ -377,7 +346,8 @@ Tatsächliches Ergebnis: Leeres Projekt wird erstellt
 
 
 
-21. Formula Visualisierung
+
+16. Formula Visualisierung
 
 Testfälle: 
 
@@ -410,6 +380,8 @@ Erwartetes Ergebnis: Baum wird korrekt dargestellt mit Abständen zwischen den e
 
 Tatsächliches Ergebnis: Baum wird korrekt dargestellt mit Abständen zwischen den einzelnen Knoten (keine Überlappung)
 
+8. Hilfe Button -> springt noch nicht an die richtige Stelle
+
 
 Bemerkung: Überlappung der Schrift über dem Hintergrund bei Windows möglich
 
@@ -418,7 +390,7 @@ Bemerkung: Überlappung der Schrift über dem Hintergrund bei Windows möglich
 
 
 
-22. Graph Visualisierung
+17. Graph Visualisierung
 
 1. Ausgewählte Darstellung verfügbar
 
@@ -512,12 +484,14 @@ Cursor?
 
 13. Enter/Shift Enter im Eingabefeld für Formeln -> funktioniert
 
+14. Hilfe Button -> springt noch nicht an die richtige Stelle
+
 
 Bemerkung: Renderingfehler in der HTML View
 
 
 
-23. Tabellen Visualisierung
+18. Tabellen Visualisierung
 
 1. Ausgewählte Darstellung verfügbar
 
@@ -603,11 +577,11 @@ Erwartetes Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenumbruc
 Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenumbruch in der Formeleingabe hinzugefügt, bei Shift Enter wird nur ein Zeilenumbruch hinzugefügt
 
 
+11. Hilfe Button -> springt noch nicht an die richtige Stelle
 
 
 
-
-24. BEditor
+19. BEditor
 
 1. Undo -> funktioniert, Cursor muss sich an der richtigen Stelle befinden
 2. Redo -> funktioniert, Cursor muss sich an der richtigen Stelle befinden
@@ -618,18 +592,16 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 7. Select all -> funktioniert
 8. Save Machine File -> funktioniert
 9. Highlighting -> funktioniert
-
-Bemerkung:
-
-Hilfe Button beim BEditor?
+10. Help Button -> springt noch nicht an die richtige Stelle
 
 
 
-25. Save Project -> funktioniert
+
+20. Save Project -> funktioniert
 
 
 
-26. Project View
+21. Project View
 
 1. Load machine -> funktioniert
 
@@ -672,13 +644,15 @@ Tatsächliches Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Succ
 
 
 
-27. History Chart
+22. History Chart
 
 1. Es wird auf das '+' geklickt und eine valide Formel eingegeben
 
 Erwartetes Ergebnis: Eingegebene Formel wird in der Grafik dargestellt
 
 Tatsächliches Ergebnis: Eingegebene Formel wird in der Grafik dargestellt
+
+
 
 
 2. Es wird auf das '+' geklickt und eine invalide Formel eingegeben
@@ -688,11 +662,15 @@ Erwartetes Ergebnis: Fehlermeldung erscheint
 Tatsächliches Ergebnis: Fehlermeldung erscheint
 
 
+
+
 3. Es wird eine Formel ausgewählt und auf das '-' geklickt
 
 Erwartetes Ergebnis: Formel wird gelöscht
 
 Tatsächliches Ergebnis: Formel wird gelöscht
+
+
 
 4. Start at Position wird geändert
 
@@ -700,11 +678,15 @@ Erwartetes Ergebnis: Es wird nur der entsprechende Abschnitt des Graphen angezei
 
 Tatsächliches Ergebnis: Es wird nur der entsprechende Abschnitt des Graphen angezeigt
 
+
+
 5. Separate Charts wird ausgewählt
 
 Erwartetes Ergebnis: Graphen werden in einer einzigen Abbildung dargestellt
 
 Tatsächliches Ergebnis: Graphegn werden in einer einzigen Abbildung dargestellt
+
+
 
 6. Separate Charts wird nicht ausgewählt
 
@@ -714,28 +696,32 @@ Tatsächliches Ergebnis: Pro Formel gibt es einen Graphen
 
 
 
+7. Hilfebutton -> springt noch nicht an die richtige Stelle
+
+
+
 Bemerkungen:
 
 1. Eingaben persistieren?
 
 2. Farben sind nicht ganz korrekt, wenn man Separate Charts auswählt, eine Formel eingibt und dann Separate Charts ausschaltet
 
-3. Hilfebutton wurde hinzugefügt, springt noch nicht an die richtige Stelle
 
 
-Statistics:
+
+23. Statistics:
 
 1. HelpButton -> springt noch nicht an die richtige Stelle
 
 2. Show Extended Stats -> funktioniert
 
-3. View updatet sich beim Animieren, beim Modelchecking und beim Trace Replay
+3. View updatet sich beim Animieren, beim Modelchecking und beim Trace Replay -> funktioniert
 
 
 
 
 
-28. StateView:
+24. StateView:
 
 1. View updatet sich wenn sich der Trace ändert -> funktioniert
 
@@ -757,7 +743,7 @@ Tatsächliches Ergebnis: Entsprechende Einträge werden angezeigt
 
 
 
-29. State Visualization -> funktioniert
+25. State Visualization -> funktioniert
 
 Bemerkungen:
 
@@ -765,13 +751,13 @@ Besser Lazy auswerten?
 
 
 
-30. State Errors -> funktioniert
+26. State Errors -> funktioniert
 
 
 
 
 
-31. Trace Replay
+27. Trace Replay
 
 1. Alle Traces checken -> funktioniert
 
@@ -804,6 +790,7 @@ Tatsächliches Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die üb
 
 Bemerkung: 
 -Show Error kann nur bei einem Fehler ausgewählt werden
+
 
 
 
@@ -846,7 +833,7 @@ Tatsächliches Ergebnis: Deaktivierte Traces werden nicht überprüft
 
 
 
-32. Modelchecking
+28. Modelchecking
 
 1. Alle Checks überprüfen
 
@@ -910,15 +897,10 @@ Erwartetes Ergebnis: Beim Überprüfen aller Items, werden deaktivierte Items ni
 Tatsächliches Ergebnis: Beim Überprüfen aller Items, werden deaktivierte Items nicht ausgeführt
 
 
-Bemerkung: Exceptions fliegen, wenn während des Modelcheckings eine neue Maschine geladen wird
 
 
 
-
-
-
-
-33. LTL
+29. LTL
 
 1. Überprüfen einer erfolgreichen LTL Formel -> funktioniert
 
@@ -1061,7 +1043,7 @@ Tatsächliches Ergebnis: Deaktivierte Formel werden nicht überprüft
 
 
 
-34. Symbolic Model Checking
+30. Symbolic Model Checking
 
 1. Überprüfen einer erfolgreichen Formel -> funktioniert
 
@@ -1164,7 +1146,7 @@ Bemerkungen:
 
 
 
-35. Groovy Konsole
+31. Groovy Konsole
 
 1. Inspect groovy objects
 
@@ -1283,12 +1265,15 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 17. Clear mit Eingabe von "clear" -> funktioniert
 
+Bemerkung:
+-hat noch keinen HelpButton
 
 
 
 
 
-36. B Konsole
+
+32. B Konsole
 
 1. Ausführung von Befehlen -> funktioniert
 
@@ -1350,12 +1335,15 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 12. Clear mit Eingabe von ":clear" -> funktioniert
 
+Bemerkung:
+-hat noch keinen HelpButton
 
 
 
 
 
-37. Plugin Mechanismus
+
+33. Plugin Mechanismus
 -Momentan kann man mit Plugins Features ohne Einschränkungen erstellen
 -Plugins müssen geändert werden, wenn sich die API in der ProB2-UI ändert -> schwierig ohne Release?
 -Exceptions in der ProB2-UI können aufgrund fehlerhafter Implementierung von Plugins auftreten

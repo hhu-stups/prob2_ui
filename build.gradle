@@ -1,8 +1,4 @@
-import org.gradle.plugins.ide.eclipse.model.AccessRule
-
-import java.text.DateFormat
-import java.time.ZoneId
-import java.time.ZoneOffset
+import org.gradle.plugins.ide.eclipse.model.AccessRule 
 
 buildscript {
 	repositories {
@@ -16,7 +12,6 @@ buildscript {
 }
 
 plugins {
-	id "edu.sc.seis.macAppBundle" version "2.2.1"
 	id "org.sonarqube" version "2.6.2"
 }
 
@@ -52,16 +47,6 @@ repositories {
 mainClassName = "de.prob2.ui.ProB2"
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}"]
-
-macAppBundle {
-	dmgName = project.name + "-macos"
-	icon = "src/main/deploy/package/macosx/prob2-ui.icns"
-	bundleJRE = false
-	jreHome = null
-	javaProperties = ["javafx.preloader": preloaderClassName]
-}
-
-macAppBundle.mainClassName = mainClassName
 
 sourceSets.test.java.srcDirs = []
 
@@ -109,9 +94,7 @@ processResources {
 	doFirst {
 		def f = file("src/main/resources/de/prob2/ui/build.properties")
 		f.delete()
-		def dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.ROOT)
-		dateFormat.timeZone = TimeZone.getTimeZone(ZoneId.from(ZoneOffset.UTC))
-		f.append("buildTime=${dateFormat.format(new Date())}\n")
+		f.append("version=${project.version}\n")
 		def proc = new ProcessBuilder("git", "rev-parse", "HEAD").directory(buildDir).start()
 		def exitCode = proc.waitFor()
 		if (exitCode != 0) {
@@ -124,9 +107,14 @@ processResources {
 
 jfx {
 	mainClass = project.mainClassName
+	jfxMainAppJarName = project.name + "-jfx.jar"
 	preLoader = preloaderClassName
 	identifier = project.group + "." + project.name
 	vendor = project.group
+	nativeReleaseVersion = project.version
+	appName = project.name
+	skipNativeVersionNumberSanitizing = true
+	skipMainClassScanning = true
 }
 
 sonarqube {
