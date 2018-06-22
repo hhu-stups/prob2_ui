@@ -125,6 +125,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		injector.getInstance(LTLView.class).bindMachine(m);
 		injector.getInstance(SymbolicCheckingView.class).bindMachine(m);
 		injector.getInstance(ModelcheckingView.class).bindMachine(m);
+		injector.getInstance(TraceReplayView.class).bindMachine(m);
 	}
 
 	public void reloadCurrentMachine() {
@@ -137,7 +138,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			throw new IllegalStateException("Cannot reload without current preference");
 		}
 		this.startAnimation(machine, pref);
-		injector.getInstance(TraceReplayView.class).resetStatus();
 	}
 
 	public void addMachine(Machine machine) {
