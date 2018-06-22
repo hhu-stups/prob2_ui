@@ -16,7 +16,6 @@ import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.project.MachineLoader;
-import javafx.scene.control.Alert;
 
 public class EditPreferencesProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EditPreferencesProvider.class);
@@ -54,7 +53,7 @@ public class EditPreferencesProvider {
 			processBuilder.start();
 		} catch (IOException e) {
 			LOGGER.error("Failed to start external editor", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.error.couldNotStartEditor"), e)).showAndWait();
+			stageManager.makeExceptionAlert(bundle.getString("menu.editPreferencesProvider.alerts.couldNotStartEditor.message"), e).showAndWait();
 		}
 	}
 }

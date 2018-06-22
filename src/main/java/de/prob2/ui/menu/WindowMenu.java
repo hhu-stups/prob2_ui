@@ -27,7 +27,6 @@ import de.prob2.ui.verifications.VerificationsView;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -132,8 +131,7 @@ public class WindowMenu extends Menu {
 			} catch (IOException e) {
 				logger.error("Loading fxml failed", e);
 				stageManager
-						.makeAlert(Alert.AlertType.ERROR,
-								String.format(bundle.getString("menu.window.alert.couldNotOpenFile"), e))
+						.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotOpenFile.message"), selectedFile), e)
 						.showAndWait();
 			}
 		}

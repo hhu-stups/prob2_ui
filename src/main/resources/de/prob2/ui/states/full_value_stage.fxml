@@ -40,7 +40,7 @@
 						</padding>
 						<CheckBox fx:id="prettifyCheckBox" text="%states.fullValue.prettify" alignment="CENTER_LEFT" HBox.hgrow="NEVER" onAction="#updateTabs"/>
 						<Spacer/>
-						<Button fx:id="saveAsButton" text="%states.fullValue.saveAs" alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#saveAs" />
+						<Button fx:id="saveAsButton" text="%common.buttons.saveAs" alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#saveAs" />
 					</HBox>
 				</bottom>
 			</BorderPane>

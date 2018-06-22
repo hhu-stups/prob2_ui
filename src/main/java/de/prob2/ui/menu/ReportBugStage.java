@@ -14,7 +14,7 @@ public class ReportBugStage extends Stage {
 		WebView webView = new WebView();
 		String script = getClass().getResource("bugreportbutton.html").toExternalForm();
 		webView.getEngine().load(script);
-		this.setTitle(bundle.getString("reportBug.title"));
+		this.setTitle(bundle.getString("menu.reportBug.stage.title"));
 		this.setScene(new Scene(webView));
 		stageManager.register(this, this.getClass().getName());
 	}
