@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 public class ProjectManager {
 	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
+	private static final String PROJECT_FILE_ENDING = ".prob2project";
 
 	private final Gson gson;
 	private final CurrentProject currentProject;
@@ -74,7 +75,7 @@ public class ProjectManager {
 	public void saveCurrentProject() {
 		Project project = currentProject.get();
 		String name = project.getName();
-		File location = new File(project.getLocation() + File.separator + project.getName() + ".pb2project");
+		File location = new File(project.getLocation() + File.separator + project.getName() + PROJECT_FILE_ENDING);
 
 		if (currentProject.isNewProject() && location.exists()) {
 			ButtonType renameBT = new ButtonType((bundle.getString("common.buttons.rename")));
@@ -89,8 +90,8 @@ public class ProjectManager {
 			} else if (result.get().equals(renameBT)) {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-				fileChooser.setInitialFileName(project.getName() + ".pb2project");
-				fileChooser.getExtensionFilters().add(new ExtensionFilter("ProB2 Project (*.pb2project)", "*.pb2project"));
+				fileChooser.setInitialFileName(project.getName() + PROJECT_FILE_ENDING);
+				fileChooser.getExtensionFilters().add(new ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*" + PROJECT_FILE_ENDING));
 				location = fileChooser.showSaveDialog(stageManager.getCurrent());
 				name = location.getName().substring(0, location.getName().lastIndexOf('.'));
 			}
@@ -140,8 +141,8 @@ public class ProjectManager {
 
 	public void openProject(Path path) {
 		Project project = loadProject(path);
-		if(!path.toString().endsWith(".pb2project")) {
-			stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 projectfiles should be '.pb2project': %s", path)).showAndWait();
+		if(!path.toString().endsWith(PROJECT_FILE_ENDING)) {
+			stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 projectfiles should be '" + PROJECT_FILE_ENDING + "': %s", path)).showAndWait();
 		}
 		if (project != null) {
 			replaceMissingWithDefaults(project);

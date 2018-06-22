@@ -16,17 +16,18 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.machines.Machine;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
@@ -49,9 +50,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W
  * shortcut. Also provides some convenience methods for creating {@link Stage}s
@@ -66,6 +64,7 @@ public final class StageManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StageManager.class);
 	private static final String STYLESHEET = "prob.css";
 	private static final Image ICON = new Image("prob_128.png");
+	private static final String PROJECT_FILE_ENDING = ".prob2project";
 
 	private final Injector injector;
 	private final MenuToolkit menuToolkit;
@@ -314,8 +313,8 @@ public final class StageManager {
 		
 		final List<String> allExts = new ArrayList<>();
 		if (projects) {
-			allExts.add("*.pb2project");
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*.pb2project"));
+			allExts.add("*" + PROJECT_FILE_ENDING);
+			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*" + PROJECT_FILE_ENDING));
 		}
 		
 		if (machines) {
