@@ -424,5 +424,8 @@ public class LTLView extends ScrollPane {
 		patternParser.parseMachine(machine);
 	}		
 
+	public ListProperty<Thread> currentJobThreadsProperty() {
+		return currentJobThreads;
+	}
 
 }

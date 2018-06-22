@@ -23,6 +23,9 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
+import de.prob2.ui.verifications.ltl.LTLView;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -194,6 +197,10 @@ public class MachinesTab extends Tab {
 				startMachine(machinesList.getSelectionModel().getSelectedItem());
 			}
 		});
+		machinesList.disableProperty().bind(
+				injector.getInstance(LTLView.class).currentJobThreadsProperty().emptyProperty().not()
+					.or(injector.getInstance(ModelcheckingView.class).currentJobThreadsProperty().emptyProperty().not())
+					.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not()));
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
 			if (node instanceof MachineView && !to.contains(((MachineView) node).getMachine())) {

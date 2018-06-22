@@ -577,4 +577,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		return lastResult;
 	}
 	
+	public ListProperty<Thread> currentJobThreadsProperty() {
+		return currentJobThreads;
+	}
 }
