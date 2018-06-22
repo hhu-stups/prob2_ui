@@ -9,6 +9,8 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
+
 <fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -31,6 +33,7 @@
 					<Tooltip text="%common.menu.file.items.openMachine"/>
 				</tooltip>
 			</Button>
+			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 			<Label fx:id="warningLabel" styleClass="warning" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
 		</HBox>
 	</top>

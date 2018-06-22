@@ -125,7 +125,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		injector.getInstance(LTLView.class).bindMachine(m);
 		injector.getInstance(SymbolicCheckingView.class).bindMachine(m);
 		injector.getInstance(ModelcheckingView.class).bindMachine(m);
-		injector.getInstance(TraceReplayView.class).bindMachine(m);
+		injector.getInstance(TraceReplayView.class).refresh();
 	}
 
 	public void reloadCurrentMachine() {

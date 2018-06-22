@@ -240,7 +240,7 @@ public class TraceReplayView extends ScrollPane {
 		}
 	}
 	
-	public void bindMachine(Machine machine) {
+	public void refresh() {
 		ObservableList<ReplayTrace> traces = FXCollections.observableArrayList(traceTableView.getItems());
 		traceTableView.getItems().clear();
 		traceChecker.cancelReplay();
