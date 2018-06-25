@@ -93,30 +93,39 @@ public class StateVisualisationView extends AnchorPane {
 	}
 
 	private ContextMenu getContextMenu(State state, int row, int column) {
-		StateSpace stateSpace = state.getStateSpace();
 		ContextMenu contextMenu = new ContextMenu();
-		GetRightClickOptionsForStateVisualizationCommand getOptionsCommand = new GetRightClickOptionsForStateVisualizationCommand(
-				state.getId(), row, column);
-		stateSpace.execute(getOptionsCommand);
-		List<String> options = getOptionsCommand.getOptions();
-		for (String opt : options) {
-			final MenuItem item = new MenuItem(opt);
-			Trace trace = getTraceToState(currentTrace.get(), state);
-			if (trace == null) {
-				item.setDisable(true);
-			}
-			item.setOnAction(e -> {
-				ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(state.getId(), row, column, opt);
-				stateSpace.execute(executeCommand);
-				String transitionId = executeCommand.getTransitionID();
-				currentTrace.set(trace.add(transitionId));
-			});
-			contextMenu.getItems().add(item);
-		}
-		if (options.isEmpty()) {
-			final MenuItem item = new MenuItem(bundle.getString("visualisation.noRightClickOptions"));
+	    if (row>9 || column>9) {
+	       // hack: in case there are many images
+	       // todo: better improve the performance of ExecuteRightClickCommand or do it on demand
+			final MenuItem item = new MenuItem("Menu disabled for performance reasons");
 			item.setDisable(true);
 			contextMenu.getItems().add(item);
+	    } else
+	    {
+			StateSpace stateSpace = state.getStateSpace();
+			GetRightClickOptionsForStateVisualizationCommand getOptionsCommand = new GetRightClickOptionsForStateVisualizationCommand(
+					state.getId(), row, column);
+			stateSpace.execute(getOptionsCommand);
+			List<String> options = getOptionsCommand.getOptions(); // does this call getOptions in Prolog for every image?
+			for (String opt : options) {
+				final MenuItem item = new MenuItem(opt);
+				Trace trace = getTraceToState(currentTrace.get(), state);
+				if (trace == null) {
+					item.setDisable(true);
+				}
+				item.setOnAction(e -> {
+					ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(state.getId(), row, column, opt);
+					stateSpace.execute(executeCommand);
+					String transitionId = executeCommand.getTransitionID();
+					currentTrace.set(trace.add(transitionId));
+				});
+				contextMenu.getItems().add(item);
+			}
+			if (options.isEmpty()) {
+				final MenuItem item = new MenuItem(bundle.getString("visualisation.noRightClickOptions"));
+				item.setDisable(true);
+				contextMenu.getItems().add(item);
+			}
 		}
 		return contextMenu;
 	}
