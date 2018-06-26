@@ -144,7 +144,7 @@ public final class OperationsView extends AnchorPane {
 				sb.append(')');
 			}
 
-			final List<String> returnValues = item.getReturnValues();
+			final List<String> returnValues = item.getReturnParameterValues();
 			if (!returnValues.isEmpty()) {
 				sb.append(" → ");
 				sb.append(String.join(", ", returnValues));
@@ -427,9 +427,11 @@ public final class OperationsView extends AnchorPane {
 
 			final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
 			final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
-			events.add(new OperationItem(trace, transition, transition.getName(),
-				paramValues, transition.getReturnValues(), OperationItem.Status.ENABLED,
-				paramNames, outputNames, constants, variables));
+			events.add(new OperationItem(
+				trace, transition, transition.getName(), OperationItem.Status.ENABLED,
+				paramNames, paramValues, outputNames, transition.getReturnValues(),
+				constants, variables
+			));
 		}
 		showDisabledAndWithTimeout(trace, disabled, withTimeout);
 
@@ -459,18 +461,20 @@ public final class OperationsView extends AnchorPane {
 		if (this.getShowDisabledOps()) {
 			for (String s : notEnabled) {
 				if (!"$initialise_machine".equals(s)) {
-					events.add(new OperationItem(trace, null, s, opToParams.get(s), Collections.emptyList(),
-							withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
-						Collections.emptyList(), Collections.emptyList(),
-							Collections.emptyMap(), Collections.emptyMap()));
+					events.add(new OperationItem(
+						trace, null, s, withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
+						Collections.emptyList(), opToParams.get(s), Collections.emptyList(), Collections.emptyList(),
+						Collections.emptyMap(), Collections.emptyMap()
+					));
 				}
 			}
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
-				events.add(new OperationItem(trace, null, s, Collections.emptyList(), Collections.emptyList(),
-						OperationItem.Status.TIMEOUT, Collections.emptyList(),
-						Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap()));
+				events.add(new OperationItem(trace, null, s, OperationItem.Status.TIMEOUT,
+					Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
+					Collections.emptyMap(), Collections.emptyMap()
+				));
 			}
 		}
 	}
