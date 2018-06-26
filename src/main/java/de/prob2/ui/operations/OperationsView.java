@@ -301,7 +301,7 @@ public final class OperationsView extends AnchorPane {
 			&& item.getStatus() == OperationItem.Status.ENABLED
 			&& item.getTrace().equals(currentTrace.get())
 		) {
-			currentTrace.set(currentTrace.get().add(item.getId()));
+			currentTrace.set(currentTrace.get().add(item.getTransition().getId()));
 		}
 	}
 
@@ -392,13 +392,10 @@ public final class OperationsView extends AnchorPane {
 				}
 			}
 
-			final boolean explored = transition.getDestination().isExplored();
-			final boolean errored = explored && !transition.getDestination().isInvariantOk();
-			final boolean skip = transition.getSource().equals(transition.getDestination());
 			final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
 			final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
-			events.add(new OperationItem(trace, transition.getId(), transition.getName(),
-				paramValues, transition.getReturnValues(), OperationItem.Status.ENABLED, explored, errored, skip,
+			events.add(new OperationItem(trace, transition, transition.getName(),
+				paramValues, transition.getReturnValues(), OperationItem.Status.ENABLED,
 				paramNames, outputNames, constants, variables));
 		}
 		showDisabledAndWithTimeout(trace, disabled, withTimeout);
@@ -429,17 +426,17 @@ public final class OperationsView extends AnchorPane {
 		if (showDisabledOps) {
 			for (String s : notEnabled) {
 				if (!"$initialise_machine".equals(s)) {
-					events.add(new OperationItem(trace, s, s, opToParams.get(s), Collections.emptyList(),
+					events.add(new OperationItem(trace, null, s, opToParams.get(s), Collections.emptyList(),
 							withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
-							false, false, false, Collections.emptyList(), Collections.emptyList(),
+						Collections.emptyList(), Collections.emptyList(),
 							Collections.emptyMap(), Collections.emptyMap()));
 				}
 			}
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
-				events.add(new OperationItem(trace, s, s, Collections.emptyList(), Collections.emptyList(),
-						OperationItem.Status.TIMEOUT, false, false, false, Collections.emptyList(),
+				events.add(new OperationItem(trace, null, s, Collections.emptyList(), Collections.emptyList(),
+						OperationItem.Status.TIMEOUT, Collections.emptyList(),
 						Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap()));
 			}
 		}

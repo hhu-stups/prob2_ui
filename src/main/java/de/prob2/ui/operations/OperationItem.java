@@ -8,6 +8,7 @@ import java.util.Objects;
 import com.google.common.base.MoreObjects;
 
 import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
 
 public class OperationItem {
 	public enum Status {
@@ -15,35 +16,34 @@ public class OperationItem {
 	}
 
 	private final Trace trace;
-	private final String id;
+	private final Transition transition;
 	private final String name;
 	private final List<String> parameterNames;
 	private final List<String> parameterValues;
 	private final List<String> returnValues;
 	private final List<String> outputParameterNames;
 	private final OperationItem.Status status;
-	private final boolean explored;
-	private final boolean errored;
-	private final boolean skip;
 	private final Map<String, String> constants;
 	private final Map<String, String> variables;
 
-
-	
-	public OperationItem(final Trace trace, final String id, final String name, final List<String> params,
-			final List<String> returnValues, final OperationItem.Status status, final boolean explored,
-			final boolean errored, final boolean skip, final List<String> parameterNames,
-			final List<String> returnParameterNames, final Map<String, String> constants,
-			final Map<String, String> variables) {
+	public OperationItem(
+		final Trace trace,
+		final Transition transition,
+		final String name,
+		final List<String> params,
+		final List<String> returnValues,
+		final OperationItem.Status status,
+		final List<String> parameterNames,
+		final List<String> returnParameterNames,
+		final Map<String, String> constants,
+		final Map<String, String> variables
+	) {
 		this.trace = Objects.requireNonNull(trace);
-		this.id = Objects.requireNonNull(id);
+		this.transition = transition;
 		this.name = Objects.requireNonNull(name);
 		this.parameterValues = Objects.requireNonNull(params);
 		this.returnValues = Objects.requireNonNull(returnValues);
 		this.status = Objects.requireNonNull(status);
-		this.explored = explored;
-		this.errored = errored;
-		this.skip = skip;
 		this.parameterNames = Objects.requireNonNull(parameterNames);
 		this.outputParameterNames = Objects.requireNonNull(returnParameterNames);
 		this.constants = Objects.requireNonNull(constants);
@@ -52,6 +52,10 @@ public class OperationItem {
 
 	public Trace getTrace() {
 		return this.trace;
+	}
+
+	public Transition getTransition() {
+		return this.transition;
 	}
 
 	public String getName() {
@@ -74,10 +78,6 @@ public class OperationItem {
 		return new ArrayList<>(parameterValues);
 	}
 
-	public String getId() {
-		return id;
-	}
-
 	public OperationItem.Status getStatus() {
 		return status;
 	}
@@ -91,21 +91,30 @@ public class OperationItem {
 	}
 
 	public boolean isExplored() {
-		return explored;
+		return this.getTransition() != null && this.getTransition().getDestination().isExplored();
 	}
 
 	public boolean isErrored() {
-		return errored;
+		return this.isExplored() && !this.getTransition().getDestination().isInvariantOk();
 	}
 
 	public boolean isSkip() {
-		return skip;
+		return this.getTransition() != null && this.getTransition().getSource().equals(this.getTransition().getDestination());
 	}
 
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("trace", trace).add("id", id).add("name", name)
-				.add("params", parameterValues).add("returnValues", returnValues).add("status", status)
-				.add("explored", explored).add("errored", errored).add("skip", skip).toString();
+		return MoreObjects.toStringHelper(this)
+			.add("trace", this.getTrace())
+			.add("transition", this.getTransition())
+			.add("name", this.getName())
+			.add("parameterNames", this.getParameterNames())
+			.add("parameterValues", this.getParameterValues())
+			.add("returnValues", this.getReturnValues())
+			.add("outputParameterNames", this.getOutputParameterNames())
+			.add("status", this.getStatus())
+			.add("constants", this.getConstants())
+			.add("variables", this.getVariables())
+			.toString();
 	}
 }
