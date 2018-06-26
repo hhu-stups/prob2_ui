@@ -1,12 +1,22 @@
 package de.prob2.ui.operations;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
 
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.exception.ProBError;
+import de.prob.statespace.LoadedMachine;
+import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
@@ -48,6 +58,83 @@ public class OperationItem {
 		this.returnParameterValues = Objects.requireNonNull(returnParameterValues);
 		this.constants = Objects.requireNonNull(constants);
 		this.variables = Objects.requireNonNull(variables);
+	}
+
+	private static LinkedHashMap<String, String> getNextStateValues(Transition transition, List<IEvalElement> formulas) {
+		// It seems that there is no way to easily find out the
+		// constant/variable values which a specific $setup_constants or
+		// $initialise_machine transition would set.
+		// So we look at the values of all constants/variables in the
+		// transition's destination state.
+		final LinkedHashMap<String, String> values = new LinkedHashMap<>();
+		final List<AbstractEvalResult> results = transition.getDestination().eval(formulas);
+		for (int i = 0; i < formulas.size(); i++) {
+			final AbstractEvalResult value = results.get(i);
+			final String valueString;
+			if (value instanceof EvalResult) {
+				valueString = ((EvalResult) value).getValue();
+			} else {
+				// noinspection ObjectToString
+				valueString = value.toString();
+			}
+			values.put(formulas.get(i).getCode(), valueString);
+		}
+
+		return values;
+	}
+
+	public static OperationItem forTransition(final Trace trace, final Transition transition) {
+		final LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
+		OperationInfo opInfo;
+		try {
+			opInfo = loadedMachine.getMachineOperationInfo(transition.getName());
+		} catch (ProBError e) {
+			// fallback solution if getMachineOperationInfo throws a ProBError
+			opInfo = null;
+		}
+		
+		final Map<String, String> constants;
+		final Map<String, String> variables;
+		switch (transition.getName()) {
+			case "$setup_constants":
+				constants = getNextStateValues(transition, loadedMachine.getConstantEvalElements());
+				variables = Collections.emptyMap();
+				break;
+			
+			case "$initialise_machine":
+				variables = getNextStateValues(transition, loadedMachine.getVariableEvalElements());
+				constants = Collections.emptyMap();
+				break;
+			
+			default:
+				constants = Collections.emptyMap();
+				if (opInfo == null) {
+					variables = null;
+				} else {
+					variables = getNextStateValues(transition, opInfo.getNonDetWrittenVariables().stream()
+						.map(var -> trace.getStateSpace().getModel().parseFormula(var, FormulaExpand.TRUNCATE))
+						.collect(Collectors.toList()));
+				}
+		}
+		
+		final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
+		final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
+		
+		return new OperationItem(
+			trace, transition, transition.getName(), Status.ENABLED,
+			paramNames, transition.getParameterValues(),
+			outputNames, transition.getReturnValues(),
+			constants, variables
+		);
+	}
+
+	public static OperationItem forDisabled(final Trace trace, final String name, final Status status, final List<String> parameters) {
+		return new OperationItem(
+			trace, null, name, status,
+			Collections.emptyList(), parameters,
+			Collections.emptyList(), Collections.emptyList(),
+			Collections.emptyMap(), Collections.emptyMap()
+		);
 	}
 
 	public Trace getTrace() {

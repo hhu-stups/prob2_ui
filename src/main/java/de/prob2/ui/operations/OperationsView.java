@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -23,11 +22,7 @@ import com.google.inject.Singleton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
-import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.exception.ProBError;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
@@ -337,29 +332,6 @@ public final class OperationsView extends AnchorPane {
 		}
 	}
 
-	private LinkedHashMap<String, String> getNextStateValues(Transition transition, List<IEvalElement> formulas) {
-		// It seems that there is no way to easily find out the
-		// constant/variable values which a specific $setup_constants or
-		// $initialise_machine transition would set.
-		// So we look at the values of all constants/variables in the
-		// transition's destination state.
-		final LinkedHashMap<String, String> values = new LinkedHashMap<>();
-		final List<AbstractEvalResult> results = transition.getDestination().eval(formulas);
-		for (int i = 0; i < formulas.size(); i++) {
-			final AbstractEvalResult value = results.get(i);
-			final String valueString;
-			if (value instanceof EvalResult) {
-				valueString = ((EvalResult) value).getValue();
-			} else {
-				// noinspection ObjectToString
-				valueString = value.toString();
-			}
-			values.put(formulas.get(i).getCode(), valueString);
-		}
-
-		return values;
-	}
-
 	public void update(final Trace trace) {
 		if (trace == null) {
 			currentModel = null;
@@ -387,51 +359,7 @@ public final class OperationsView extends AnchorPane {
 		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		for (Transition transition : operations) {
 			disabled.remove(transition.getName());
-
-			final LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
-			OperationInfo opInfo;
-			try {
-				opInfo = loadedMachine.getMachineOperationInfo(transition.getName());
-			} catch (ProBError e) {
-				// fallback solution if getMachineOperationInfo throws a ProBError
-				opInfo = null;
-			}
-
-			final List<String> paramValues;
-			final Map<String, String> constants;
-			final Map<String, String> variables;
-			switch (transition.getName()) {
-			case "$setup_constants":
-				paramValues = Collections.emptyList();
-				constants = this.getNextStateValues(transition, loadedMachine.getConstantEvalElements());
-				variables = Collections.emptyMap();
-				break;
-
-			case "$initialise_machine":
-				paramValues = Collections.emptyList();
-				variables = this.getNextStateValues(transition, loadedMachine.getVariableEvalElements());
-				constants = Collections.emptyMap();
-				break;
-
-			default:
-				paramValues = transition.getParameterValues();
-				constants = Collections.emptyMap();
-				if (opInfo == null) {
-					variables = null;
-				} else {
-					variables = this.getNextStateValues(transition, opInfo.getNonDetWrittenVariables().stream()
-						.map(var -> trace.getStateSpace().getModel().parseFormula(var, FormulaExpand.TRUNCATE))
-						.collect(Collectors.toList()));
-				}
-			}
-
-			final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
-			final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
-			events.add(new OperationItem(
-				trace, transition, transition.getName(), OperationItem.Status.ENABLED,
-				paramNames, paramValues, outputNames, transition.getReturnValues(),
-				constants, variables
-			));
+			events.add(OperationItem.forTransition(trace, transition));
 		}
 		showDisabledAndWithTimeout(trace, disabled, withTimeout);
 
@@ -461,20 +389,15 @@ public final class OperationsView extends AnchorPane {
 		if (this.getShowDisabledOps()) {
 			for (String s : notEnabled) {
 				if (!"$initialise_machine".equals(s)) {
-					events.add(new OperationItem(
-						trace, null, s, withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
-						Collections.emptyList(), opToParams.get(s), Collections.emptyList(), Collections.emptyList(),
-						Collections.emptyMap(), Collections.emptyMap()
+					events.add(OperationItem.forDisabled(
+						trace, s, withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED, opToParams.get(s)
 					));
 				}
 			}
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
-				events.add(new OperationItem(trace, null, s, OperationItem.Status.TIMEOUT,
-					Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
-					Collections.emptyMap(), Collections.emptyMap()
-				));
+				events.add(OperationItem.forDisabled(trace, s, OperationItem.Status.TIMEOUT, Collections.emptyList()));
 			}
 		}
 	}
