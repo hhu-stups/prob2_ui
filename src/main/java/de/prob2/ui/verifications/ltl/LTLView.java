@@ -154,9 +154,17 @@ public class LTLView extends ScrollPane {
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.ltl.formula.menu.check"));
+			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> checkItem(row.getItem()));
-			checkItem.disableProperty().bind(row.emptyProperty().or(currentJobThreads.emptyProperty().not()));
-
+			
+			row.itemProperty().addListener((observable, from, to) -> {
+				if(to != null) {
+					checkItem.disableProperty().bind(row.emptyProperty()
+							.or(currentJobThreads.emptyProperty().not())
+							.or(row.getItem().shouldExecuteProperty().not()));
+				}
+			});
+			
 			row.setOnMouseClicked(e->rowClicked(e, row, showCounterExampleItem, showMessage));
 			row.setContextMenu(new ContextMenu(checkItem, openEditor, removeItem, showCounterExampleItem, showMessage));
 			return row;

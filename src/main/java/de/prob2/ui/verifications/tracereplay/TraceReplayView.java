@@ -184,6 +184,15 @@ public class TraceReplayView extends ScrollPane {
 			final MenuItem replayTraceItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.replayTrace"));
 			replayTraceItem.setOnAction(event -> this.traceChecker.check(row.getItem(), true));
+			replayTraceItem.setDisable(true);
+			
+			row.itemProperty().addListener((observable, from, to) -> {
+				if(to != null) {
+					replayTraceItem.disableProperty().bind(row.emptyProperty()
+							.or(traceChecker.currentJobThreadsProperty().emptyProperty().not())
+							.or(row.getItem().shouldExecuteProperty().not()));
+				}
+			});
 
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("verifications.tracereplay.contextMenu.showError"));

@@ -354,12 +354,20 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 			showTraceToErrorItem.disableProperty().bind(disableErrorItemsBinding);
 			
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.check"));
+			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 				item.setOptions(item.getOptions().recheckExisting(true));
 				checkItem(item, false);
 			});
-			checkItem.disableProperty().bind(row.emptyProperty());
+			
+			row.itemProperty().addListener((observable, from, to) -> {
+				if(to != null) {
+					checkItem.disableProperty().bind(row.emptyProperty()
+							.or(currentJobThreads.emptyProperty().not())
+							.or(row.getItem().shouldExecuteProperty().not()));
+				}
+			});
 			
 			MenuItem showDetailsItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.showDetails"));
 			showDetailsItem.setOnAction(e-> {

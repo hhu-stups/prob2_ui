@@ -9,7 +9,8 @@ import de.prob.check.ModelCheckingOptions;
 
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
-
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.paint.Color;
 
 public class ModelCheckingItem implements IExecutableItem {
@@ -24,7 +25,7 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	private String description;
 	
-	private boolean shouldExecute;
+	private BooleanProperty shouldExecute;
 
 	public ModelCheckingItem(ModelCheckingOptions options, ModelCheckStats stats, String strategy,
 							 String description) {
@@ -36,7 +37,7 @@ public class ModelCheckingItem implements IExecutableItem {
 		this.stats = stats;
 		this.strategy = strategy;
 		this.description = description;
-		this.shouldExecute = true;
+		this.shouldExecute = new SimpleBooleanProperty(true);
 	}
 	
 	public void setOptions(ModelCheckingOptions options) {
@@ -73,11 +74,16 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	@Override
 	public void setShouldExecute(boolean shouldExecute) {
-		this.shouldExecute = shouldExecute;
+		this.shouldExecute.set(shouldExecute);
 	}
 	
 	@Override
 	public boolean shouldExecute() {
+		return shouldExecute.get();
+	}
+	
+	@Override
+	public BooleanProperty shouldExecuteProperty() {
 		return shouldExecute;
 	}
 	

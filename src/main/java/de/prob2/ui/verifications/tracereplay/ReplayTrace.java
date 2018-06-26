@@ -5,8 +5,10 @@ import java.util.Objects;
 
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -16,14 +18,14 @@ public class ReplayTrace implements IExecutableItem {
 	private final DoubleProperty progress;
 	private final Path location;
 	private String errorMessage;
-	private boolean shouldExecute;
+	private BooleanProperty shouldExecute;
 
 	public ReplayTrace(Path location) {
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.location = location;
 		this.errorMessage = null;
-		this.shouldExecute = true;
+		this.shouldExecute = new SimpleBooleanProperty(true);
 		
 		this.status.addListener((o, from, to) -> {
 			if (to != Checked.FAIL) {
@@ -69,11 +71,18 @@ public class ReplayTrace implements IExecutableItem {
 		return errorMessage;
 	}
 	
+	@Override
 	public void setShouldExecute(boolean shouldExecute) {
-		this.shouldExecute = shouldExecute;
+		this.shouldExecute.set(shouldExecute);
 	}
 	
+	@Override
 	public boolean shouldExecute() {
+		return shouldExecute.get();
+	}
+	
+	@Override
+	public BooleanProperty shouldExecuteProperty() {
 		return shouldExecute;
 	}
 	

@@ -267,7 +267,7 @@ public class TraceChecker {
 		currentJobThreads.clear();
 	}
 
-	ListProperty<Thread> currentJobThreadsProperty() {
+	public ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
 	}
 }

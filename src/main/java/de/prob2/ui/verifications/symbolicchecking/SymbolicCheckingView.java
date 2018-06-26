@@ -155,11 +155,19 @@ public class SymbolicCheckingView extends ScrollPane {
 			final TableRow<SymbolicCheckingFormulaItem> row = new TableRow<>();
 			
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.symbolic.menu.check"));
+			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> {
 				symbolicCheckHandler.handleItem(row.getItem(), false);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
 			});
-			checkItem.disableProperty().bind(row.emptyProperty());
+
+			row.itemProperty().addListener((observable, from, to) -> {
+				if(to != null) {
+					checkItem.disableProperty().bind(row.emptyProperty()
+							.or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not())
+							.or(row.getItem().shouldExecuteProperty().not()));
+				}
+			});
 			
 			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolic.menu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);

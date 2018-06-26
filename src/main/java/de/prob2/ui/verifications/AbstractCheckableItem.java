@@ -2,6 +2,8 @@ package de.prob2.ui.verifications;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.paint.Color;
 
 public abstract class AbstractCheckableItem implements IExecutableItem {
@@ -11,7 +13,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	protected String name;
 	protected String description;
 	protected String code;
-	protected boolean shouldExecute;
+	protected BooleanProperty shouldExecute;
 	protected transient CheckingResultItem resultItem;
 	
 	public AbstractCheckableItem(String name, String description, String code) {
@@ -19,7 +21,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		this.name = name;
 		this.description = description;
 		this.code = code;
-		this.shouldExecute = true;
+		this.shouldExecute = new SimpleBooleanProperty(true);
 		this.resultItem = null;
 	}	
 	
@@ -46,11 +48,15 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	
 	@Override
 	public void setShouldExecute(boolean shouldExecute) {
-		this.shouldExecute = shouldExecute;
+		this.shouldExecute.set(shouldExecute);
 	}
 	
 	@Override
 	public boolean shouldExecute() {
+		return shouldExecute.get();
+	}
+	
+	public BooleanProperty shouldExecuteProperty() {
 		return shouldExecute;
 	}
 

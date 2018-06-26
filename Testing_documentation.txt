@@ -889,7 +889,7 @@ Tatsächliches Ergebnis: Bei Deaktivierung eines Items passt sich der Machine St
 
 Erwartetes Ergebnis: Beim Überprüfen aller Items, werden deaktivierte Items nicht ausgeführt; das MenuItem für Check ist hierbei für dieses Item deaktiviert
 
-Tatsächliches Ergebnis: Beim Überprüfen aller Items, werden deaktivierte Items nicht ausgeführt
+Tatsächliches Ergebnis: Beim Überprüfen aller Items, werden deaktivierte Items nicht ausgeführt; das MenuItem für Check ist hierbei für dieses Item deaktiviert
 
 
 
