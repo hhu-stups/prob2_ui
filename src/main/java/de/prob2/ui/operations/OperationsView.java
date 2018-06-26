@@ -254,8 +254,6 @@ public final class OperationsView extends AnchorPane {
 	private final ExecutorService updater;
 	private final ObjectProperty<Thread> randomExecutionThread;
 
-	private static final String ICON_DARK = "icon-dark";
-
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
 						   final Injector injector, final ResourceBundle bundle, final StatusBar statusBar,
