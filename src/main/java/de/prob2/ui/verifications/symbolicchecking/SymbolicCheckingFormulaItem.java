@@ -41,7 +41,6 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
 	public void reset() {
 		this.initializeStatus();
 		this.counterExamples.clear();
-		this.resultItem = null;
 		this.example = null;
 	}
 	

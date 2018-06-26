@@ -36,6 +36,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.status.setFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
+		this.resultItem = null;
 	}
 	
 	public FontAwesomeIconView getStatus() {

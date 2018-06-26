@@ -682,7 +682,7 @@ Tatsächliches Ergebnis: Es wird nur der entsprechende Abschnitt des Graphen ang
 
 Erwartetes Ergebnis: Graphen werden in einer einzigen Abbildung dargestellt
 
-Tatsächliches Ergebnis: Graphegn werden in einer einzigen Abbildung dargestellt
+Tatsächliches Ergebnis: Graphen werden in einer einzigen Abbildung dargestellt
 
 
 
