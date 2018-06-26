@@ -43,7 +43,9 @@ import de.prob2.ui.statusbar.StatusBar;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
@@ -142,7 +144,7 @@ public final class OperationsView extends AnchorPane {
 				sb.append(')');
 			}
 
-			final List<String> returnValues = item.getReturnValues();
+			final List<String> returnValues = item.getReturnParameterValues();
 			if (!returnValues.isEmpty()) {
 				sb.append(" → ");
 				sb.append(String.join(", ", returnValues));
@@ -238,11 +240,11 @@ public final class OperationsView extends AnchorPane {
 	private Button cancelButton;
 
 	private AbstractModel currentModel;
-	private List<String> opNames = new ArrayList<>();
-	private Map<String, List<String>> opToParams = new HashMap<>();
-	private List<OperationItem> events = new ArrayList<>();
-	private boolean showDisabledOps = true;
-	private SortMode sortMode = SortMode.MODEL_ORDER;
+	private final List<String> opNames = new ArrayList<>();
+	private final Map<String, List<String>> opToParams = new HashMap<>();
+	private final List<OperationItem> events = new ArrayList<>();
+	private final BooleanProperty showDisabledOps;
+	private final ObjectProperty<OperationsView.SortMode> sortMode;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final ResourceBundle bundle;
@@ -252,12 +254,12 @@ public final class OperationsView extends AnchorPane {
 	private final ExecutorService updater;
 	private final ObjectProperty<Thread> randomExecutionThread;
 
-	private static final String ICON_DARK = "icon-dark";
-
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
 						   final Injector injector, final ResourceBundle bundle, final StatusBar statusBar,
 						   final StopActions stopActions) {
+		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
+		this.sortMode = new SimpleObjectProperty<>(this, "sortMode", OperationsView.SortMode.MODEL_ORDER);
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
@@ -293,6 +295,36 @@ public final class OperationsView extends AnchorPane {
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
 		cancelButton.disableProperty().bind(randomExecutionThread.isNull());
+
+		showDisabledOps.addListener((o, from, to) -> {
+			((FontAwesomeIconView)disabledOpsToggle.getGraphic()).setIcon(to ? FontAwesomeIcon.EYE : FontAwesomeIcon.EYE_SLASH);
+			disabledOpsToggle.setSelected(to);
+			update(currentTrace.get());
+		});
+
+		sortMode.addListener((o, from, to) -> {
+			final FontAwesomeIcon icon;
+			switch (to) {
+				case A_TO_Z:
+					icon = FontAwesomeIcon.SORT_ALPHA_ASC;
+					break;
+				
+				case Z_TO_A:
+					icon = FontAwesomeIcon.SORT_ALPHA_DESC;
+					break;
+				
+				case MODEL_ORDER:
+					icon = FontAwesomeIcon.SORT;
+					break;
+				
+				default:
+					throw new IllegalStateException("Unhandled sort mode: " + to);
+			}
+			((FontAwesomeIconView)sortButton.getGraphic()).setIcon(icon);
+			
+			doSort();
+			opsListView.getItems().setAll(applyFilter(searchBar.getText()));
+		});
 	}
 
 	private void executeOperationIfPossible(final OperationItem item) {
@@ -331,7 +363,8 @@ public final class OperationsView extends AnchorPane {
 	public void update(final Trace trace) {
 		if (trace == null) {
 			currentModel = null;
-			opNames = new ArrayList<>();
+			opNames.clear();
+			opToParams.clear();
 			opsListView.getItems().clear();
 		} else {
 			this.updater.execute(() -> this.updateBG(trace));
@@ -348,7 +381,7 @@ public final class OperationsView extends AnchorPane {
 			updateModel(trace);
 		}
 
-		events = new ArrayList<>();
+		events.clear();
 		final Set<Transition> operations = trace.getNextTransitions(true, FormulaExpand.TRUNCATE);
 		final Set<String> disabled = new HashSet<>(opNames);
 		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
@@ -394,9 +427,11 @@ public final class OperationsView extends AnchorPane {
 
 			final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
 			final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
-			events.add(new OperationItem(trace, transition, transition.getName(),
-				paramValues, transition.getReturnValues(), OperationItem.Status.ENABLED,
-				paramNames, outputNames, constants, variables));
+			events.add(new OperationItem(
+				trace, transition, transition.getName(), OperationItem.Status.ENABLED,
+				paramNames, paramValues, outputNames, transition.getReturnValues(),
+				constants, variables
+			));
 		}
 		showDisabledAndWithTimeout(trace, disabled, withTimeout);
 
@@ -423,21 +458,23 @@ public final class OperationsView extends AnchorPane {
 
 	private void showDisabledAndWithTimeout(final Trace trace, final Set<String> notEnabled,
 			final Set<String> withTimeout) {
-		if (showDisabledOps) {
+		if (this.getShowDisabledOps()) {
 			for (String s : notEnabled) {
 				if (!"$initialise_machine".equals(s)) {
-					events.add(new OperationItem(trace, null, s, opToParams.get(s), Collections.emptyList(),
-							withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
-						Collections.emptyList(), Collections.emptyList(),
-							Collections.emptyMap(), Collections.emptyMap()));
+					events.add(new OperationItem(
+						trace, null, s, withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED,
+						Collections.emptyList(), opToParams.get(s), Collections.emptyList(), Collections.emptyList(),
+						Collections.emptyMap(), Collections.emptyMap()
+					));
 				}
 			}
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
-				events.add(new OperationItem(trace, null, s, Collections.emptyList(), Collections.emptyList(),
-						OperationItem.Status.TIMEOUT, Collections.emptyList(),
-						Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap()));
+				events.add(new OperationItem(trace, null, s, OperationItem.Status.TIMEOUT,
+					Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
+					Collections.emptyMap(), Collections.emptyMap()
+				));
 			}
 		}
 	}
@@ -478,10 +515,7 @@ public final class OperationsView extends AnchorPane {
 
 	@FXML
 	private void handleDisabledOpsToggle() {
-		showDisabledOps = disabledOpsToggle.isSelected();
-		final FontAwesomeIcon icon = showDisabledOps ? FontAwesomeIcon.EYE : FontAwesomeIcon.EYE_SLASH;
-		update(currentTrace.get());
-		((FontAwesomeIconView)disabledOpsToggle.getGraphic()).setIcon(icon);
+		this.setShowDisabledOps(disabledOpsToggle.isSelected());
 	}
 
 	private List<OperationItem> applyFilter(final String filter) {
@@ -491,7 +525,7 @@ public final class OperationsView extends AnchorPane {
 
 	private void doSort() {
 		final Comparator<OperationItem> comparator;
-		switch (sortMode) {
+		switch (this.getSortMode()) {
 		case MODEL_ORDER:
 			comparator = this::compareModelOrder;
 			break;
@@ -505,7 +539,7 @@ public final class OperationsView extends AnchorPane {
 			break;
 
 		default:
-			throw new IllegalStateException("Unhandled sort mode: " + sortMode);
+			throw new IllegalStateException("Unhandled sort mode: " + this.getSortMode());
 		}
 
 		events.sort(comparator);
@@ -513,30 +547,22 @@ public final class OperationsView extends AnchorPane {
 
 	@FXML
 	private void handleSortButton() {
-		final FontAwesomeIcon icon;
-		switch (sortMode) {
+		switch (this.getSortMode()) {
 		case MODEL_ORDER:
-			sortMode = SortMode.A_TO_Z;
-			icon = FontAwesomeIcon.SORT_ALPHA_ASC;
+			this.setSortMode(OperationsView.SortMode.A_TO_Z);
 			break;
 
 		case A_TO_Z:
-			sortMode = SortMode.Z_TO_A;
-			icon = FontAwesomeIcon.SORT_ALPHA_DESC;
+			this.setSortMode(OperationsView.SortMode.Z_TO_A);
 			break;
 
 		case Z_TO_A:
-			sortMode = SortMode.MODEL_ORDER;
-			icon = FontAwesomeIcon.SORT;
+			this.setSortMode(OperationsView.SortMode.MODEL_ORDER);
 			break;
 
 		default:
-			throw new IllegalStateException("Unhandled sort mode: " + sortMode);
+			throw new IllegalStateException("Unhandled sort mode: " + this.getSortMode());
 		}
-
-		doSort();
-		opsListView.getItems().setAll(applyFilter(searchBar.getText()));
-		((FontAwesomeIconView)sortButton.getGraphic()).setIcon(icon);
 	}
 
 	@FXML
@@ -586,8 +612,8 @@ public final class OperationsView extends AnchorPane {
 
 	private void updateModel(final Trace trace) {
 		currentModel = trace.getModel();
-		opNames = new ArrayList<>();
-		opToParams = new HashMap<>();
+		opNames.clear();
+		opToParams.clear();
 		LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
 		for (String opName : loadedMachine.getOperationNames()) {
 			OperationInfo machineOperationInfo = loadedMachine.getMachineOperationInfo(opName);
@@ -598,48 +624,19 @@ public final class OperationsView extends AnchorPane {
 	}
 	
 
-	public void setSortMode(OperationsView.SortMode mode) {
-		sortMode = mode;
-		FontAwesomeIconView icon;
-		switch (sortMode) {
-		case A_TO_Z:
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_ASC);
-			break;
-
-		case Z_TO_A:
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT_ALPHA_DESC);
-			break;
-
-		case MODEL_ORDER:
-			icon = new FontAwesomeIconView(FontAwesomeIcon.SORT);
-			break;
-
-		default:
-			throw new IllegalStateException("Unhandled sort mode: " + sortMode);
-		}
-		icon.setSize("15");
-		icon.setStyleClass(ICON_DARK);
-		sortButton.setGraphic(icon);
+	public OperationsView.SortMode getSortMode() {
+		return this.sortMode.get();
 	}
 
-	public SortMode getSortMode() {
-		return sortMode;
+	public void setSortMode(final OperationsView.SortMode sortMode) {
+		this.sortMode.set(sortMode);
+	}
+	
+	public boolean getShowDisabledOps() {
+		return this.showDisabledOps.get();
 	}
 
 	public void setShowDisabledOps(boolean showDisabledOps) {
-		this.showDisabledOps = showDisabledOps;
-		final FontAwesomeIcon icon;
-		if (showDisabledOps) {
-			icon = FontAwesomeIcon.EYE;
-			disabledOpsToggle.setSelected(true);
-		} else {
-			icon = FontAwesomeIcon.EYE_SLASH;
-			disabledOpsToggle.setSelected(false);
-		}
-		((FontAwesomeIconView)disabledOpsToggle.getGraphic()).setIcon(icon);
-	}
-
-	public boolean getShowDisabledOps() {
-		return showDisabledOps;
+		this.showDisabledOps.set(showDisabledOps);
 	}
 }

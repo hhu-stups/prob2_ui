@@ -100,10 +100,10 @@ class OperationDetailsStage extends Stage {
 					this.parametersItem.getChildren().add(new TreeItem<>(new ValueItem(name, param)));
 				}
 				
-				final List<String> outputParamNames = to.getOutputParameterNames();
-				final List<String> returnValues = to.getReturnValues();
+				final List<String> returnNames = to.getReturnParameterNames();
+				final List<String> returnValues = to.getReturnParameterValues();
 				for (int i = 0; i < returnValues.size(); i++) {
-					final String name = i < outputParamNames.size() ? outputParamNames.get(i) : "#" + (i + 1);
+					final String name = i < returnNames.size() ? returnNames.get(i) : "#" + (i + 1);
 					final String retval = returnValues.get(i);
 					this.returnValuesItem.getChildren().add(new TreeItem<>(new ValueItem(name, retval)));
 				}

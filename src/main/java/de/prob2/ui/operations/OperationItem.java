@@ -18,11 +18,11 @@ public class OperationItem {
 	private final Trace trace;
 	private final Transition transition;
 	private final String name;
+	private final OperationItem.Status status;
 	private final List<String> parameterNames;
 	private final List<String> parameterValues;
-	private final List<String> returnValues;
-	private final List<String> outputParameterNames;
-	private final OperationItem.Status status;
+	private final List<String> returnParameterNames;
+	private final List<String> returnParameterValues;
 	private final Map<String, String> constants;
 	private final Map<String, String> variables;
 
@@ -30,22 +30,22 @@ public class OperationItem {
 		final Trace trace,
 		final Transition transition,
 		final String name,
-		final List<String> params,
-		final List<String> returnValues,
-		final OperationItem.Status status,
+		final Status status,
 		final List<String> parameterNames,
+		final List<String> parameterValues,
 		final List<String> returnParameterNames,
+		final List<String> returnParameterValues,
 		final Map<String, String> constants,
 		final Map<String, String> variables
 	) {
 		this.trace = Objects.requireNonNull(trace);
 		this.transition = transition;
 		this.name = Objects.requireNonNull(name);
-		this.parameterValues = Objects.requireNonNull(params);
-		this.returnValues = Objects.requireNonNull(returnValues);
 		this.status = Objects.requireNonNull(status);
 		this.parameterNames = Objects.requireNonNull(parameterNames);
-		this.outputParameterNames = Objects.requireNonNull(returnParameterNames);
+		this.returnParameterNames = Objects.requireNonNull(returnParameterNames);
+		this.parameterValues = Objects.requireNonNull(parameterValues);
+		this.returnParameterValues = Objects.requireNonNull(returnParameterValues);
 		this.constants = Objects.requireNonNull(constants);
 		this.variables = Objects.requireNonNull(variables);
 	}
@@ -62,8 +62,24 @@ public class OperationItem {
 		return name;
 	}
 
+	public OperationItem.Status getStatus() {
+		return status;
+	}
+
 	public List<String> getParameterNames() {
 		return new ArrayList<>(parameterNames);
+	}
+
+	public List<String> getParameterValues() {
+		return new ArrayList<>(parameterValues);
+	}
+
+	public List<String> getReturnParameterNames() {
+		return new ArrayList<>(returnParameterNames);
+	}
+
+	public List<String> getReturnParameterValues() {
+		return new ArrayList<>(returnParameterValues);
 	}
 
 	public Map<String, String> getConstants() {
@@ -72,22 +88,6 @@ public class OperationItem {
 
 	public Map<String, String> getVariables() {
 		return this.variables;
-	}
-
-	public List<String> getParameterValues() {
-		return new ArrayList<>(parameterValues);
-	}
-
-	public OperationItem.Status getStatus() {
-		return status;
-	}
-
-	public List<String> getOutputParameterNames() {
-		return new ArrayList<>(outputParameterNames);
-	}
-
-	public List<String> getReturnValues() {
-		return new ArrayList<>(returnValues);
 	}
 
 	public boolean isExplored() {
@@ -108,11 +108,11 @@ public class OperationItem {
 			.add("trace", this.getTrace())
 			.add("transition", this.getTransition())
 			.add("name", this.getName())
+			.add("status", this.getStatus())
 			.add("parameterNames", this.getParameterNames())
 			.add("parameterValues", this.getParameterValues())
-			.add("returnValues", this.getReturnValues())
-			.add("outputParameterNames", this.getOutputParameterNames())
-			.add("status", this.getStatus())
+			.add("returnParameterNames", this.getReturnParameterNames())
+			.add("returnParameterValues", this.getReturnParameterValues())
 			.add("constants", this.getConstants())
 			.add("variables", this.getVariables())
 			.toString();
