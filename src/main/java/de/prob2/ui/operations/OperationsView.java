@@ -238,9 +238,9 @@ public final class OperationsView extends AnchorPane {
 	private Button cancelButton;
 
 	private AbstractModel currentModel;
-	private List<String> opNames = new ArrayList<>();
-	private Map<String, List<String>> opToParams = new HashMap<>();
-	private List<OperationItem> events = new ArrayList<>();
+	private final List<String> opNames = new ArrayList<>();
+	private final Map<String, List<String>> opToParams = new HashMap<>();
+	private final List<OperationItem> events = new ArrayList<>();
 	private boolean showDisabledOps = true;
 	private SortMode sortMode = SortMode.MODEL_ORDER;
 	private final CurrentTrace currentTrace;
@@ -331,7 +331,8 @@ public final class OperationsView extends AnchorPane {
 	public void update(final Trace trace) {
 		if (trace == null) {
 			currentModel = null;
-			opNames = new ArrayList<>();
+			opNames.clear();
+			opToParams.clear();
 			opsListView.getItems().clear();
 		} else {
 			this.updater.execute(() -> this.updateBG(trace));
@@ -348,7 +349,7 @@ public final class OperationsView extends AnchorPane {
 			updateModel(trace);
 		}
 
-		events = new ArrayList<>();
+		events.clear();
 		final Set<Transition> operations = trace.getNextTransitions(true, FormulaExpand.TRUNCATE);
 		final Set<String> disabled = new HashSet<>(opNames);
 		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
@@ -586,8 +587,8 @@ public final class OperationsView extends AnchorPane {
 
 	private void updateModel(final Trace trace) {
 		currentModel = trace.getModel();
-		opNames = new ArrayList<>();
-		opToParams = new HashMap<>();
+		opNames.clear();
+		opToParams.clear();
 		LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
 		for (String opName : loadedMachine.getOperationNames()) {
 			OperationInfo machineOperationInfo = loadedMachine.getMachineOperationInfo(opName);
