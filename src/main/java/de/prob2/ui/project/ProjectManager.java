@@ -142,7 +142,7 @@ public class ProjectManager {
 	public void openProject(Path path) {
 		Project project = loadProject(path);
 		if(!path.toString().endsWith(PROJECT_FILE_ENDING)) {
-			stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 projectfiles should be '" + PROJECT_FILE_ENDING + "': %s", path)).showAndWait();
+			stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 projectfiles should be '%s': %s", PROJECT_FILE_ENDING, path)).showAndWait();
 		}
 		if (project != null) {
 			replaceMissingWithDefaults(project);

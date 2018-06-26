@@ -156,7 +156,7 @@ public class TraceReplayView extends ScrollPane {
 				to.getTraceFiles().forEach(tracePath -> {
 					traceTableView.getItems().add(new ReplayTrace(tracePath));
 					if(!tracePath.toString().endsWith(TRACE_FILE_ENDING)) {
-						stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 tracefiles should be '" + TRACE_FILE_ENDING + "': %s", tracePath)).showAndWait();
+						stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 tracefiles should be '%s': %s", TRACE_FILE_ENDING, tracePath)).showAndWait();
 					}
 				});
 				to.getTraceFiles().addListener(listener);
