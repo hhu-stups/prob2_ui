@@ -8,14 +8,10 @@ public class HistoryItem {
 	private final Transition transition;
 	private final int index;
 	
-	public HistoryItem(HistoryStatus status, int i) {
-		this(null, status, i);
-	}
-
-	public HistoryItem(Transition transition, HistoryStatus status, int i) {
+	public HistoryItem(Transition transition, HistoryStatus status, int index) {
 		this.transition = transition;
 		this.status = status;
-		this.index = i;
+		this.index = index;
 	}
 	
 	public int getIndex() {
