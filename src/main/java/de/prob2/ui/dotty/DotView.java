@@ -124,8 +124,9 @@ public class DotView extends DynamicCommandStage {
 				State id = currentTrace.getCurrentState();
 				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, FILE, formulas);
 				currentTrace.getStateSpace().execute(cmd);
-				loadGraph();
-				currentThread.set(null);
+				if(!Thread.currentThread().isInterrupted()) {
+					loadGraph();
+				}
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Graph visualization failed", e);
 				currentThread.set(null);
@@ -141,20 +142,26 @@ public class DotView extends DynamicCommandStage {
 	}
 
 	private void loadGraph() {
+		Thread thread = Thread.currentThread();
 		Platform.runLater(() -> {
 			String content = "";
 			try {
 				/*
 				 * FIXME: Fix rendering problem in JavaFX WebView
 				 */
-				content = new String(Files.readAllBytes(FILE.toPath())).replaceAll("font-size=\"12.00\"",
-						"font-size=\"10.00\"");
+				if(!thread.isInterrupted()) {
+					content = new String(Files.readAllBytes(FILE.toPath())).replaceAll("font-size=\"12.00\"",
+							"font-size=\"10.00\"");
+				}
 			} catch (Exception e) {
 				LOGGER.error("Reading dot file failed", e);
 				return;
 			}
-			dotView.getEngine().loadContent("<center>" + content + "</center>");
-			statusBar.setText("");
+			if(!thread.isInterrupted()) {
+				dotView.getEngine().loadContent("<center>" + content + "</center>");
+				statusBar.setText("");
+			}
+			currentThread.set(null);
 		});
 	}
 	

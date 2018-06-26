@@ -296,7 +296,7 @@ Tatsächliches Ergebnis: Hilfe Fenster wird geöffnet, entsprechender Eintrag f�
 
 7. Reload -> funktioniert
 
-8. Show Details? - Sollen nur die Parameter angezeigt werden oder alle Änderungen die durch Ausführen der Operation auftreten?
+8. Show Details -> funktioniert
 
 9. Execute By Predicate -> funktioniert
 
@@ -470,9 +470,7 @@ Bemerkung: Visualisierung wird zurückgesetzt
 
 
 
-9. Visualisierung abbrechen
-
-Interrupt?
+9. Visualisierung abbrechen -> funktioniert
 
 10. Reinzoomen per Button und per Shortcut (falls Eingabefeld den Fokus hat, soll dort nichts eingegeben werden) -> funktioniert
 
@@ -776,20 +774,17 @@ Tatsächliches Ergebnis: Trace Replay wird unterbrochen, der Ladebalken wird ges
 
 3. Nur ein Trace checken -> dieser Trace kann erfolgreich nachgespielt werden
 
-Erwartetes Ergebnis: Ausgewählter Trace wird überprüft, es wird am Ende der currentTrace neugesetzt
+Erwartetes Ergebnis: Ausgewählter Trace wird überprüft, es wird am Ende der currentTrace neugesetzt; Show Error ist disabled
 
-Tatsächliches Ergebnis: Ausgewählter Trace wird überprüft, es wird am Ende der currentTrace neugesetzt
+Tatsächliches Ergebnis: Ausgewählter Trace wird überprüft, es wird am Ende der currentTrace neugesetzt; Show Error ist disabled
 
 
 
 4. Nur ein Trace checken -> dieser Trace kann nicht nachgespielt werden
 
-Erwartetes Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die über Show Error angezeigt werden kann
+Erwartetes Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die über Show Error angezeigt werden kann; Show Error ist enabled
 
-Tatsächliches Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die über Show Error angezeigt werden kann
-
-Bemerkung: 
--Show Error kann nur bei einem Fehler ausgewählt werden
+Tatsächliches Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die über Show Error angezeigt werden kann; Show Error ist enabled
 
 
 
