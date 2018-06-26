@@ -21,7 +21,7 @@
 		<SplitPane fx:id="horizontalSP" dividerPositions="0.1,0.9">
 			<Accordion fx:id="leftAccordion" expandedPane="$operationsTP">
 				<panes>
-					<TitledPane text="%tptitles.operations" id="operationsTP" fx:id="operationsTP" collapsible="false">
+					<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP" collapsible="false">
 						<OperationsView/>
 					</TitledPane>
 				</panes>
@@ -32,13 +32,13 @@
 			<SplitPane fx:id="verticalSP2" dividerPositions="0.5" orientation="VERTICAL">
 				<Accordion fx:id="rightAccordion1" expandedPane="$statsTP">
 					<panes>
-						<TitledPane text="%tptitles.stats" id="statsTP" fx:id="statsTP">
+						<TitledPane text="%common.views.stats" id="statsTP" fx:id="statsTP">
 							<StatsView/>
 						</TitledPane>
-						<TitledPane text="%tptitles.verifications" id="verificationsTP" fx:id="verificationsTP">
+						<TitledPane text="%common.views.verifications" id="verificationsTP" fx:id="verificationsTP">
 							<VerificationsView/>
 						</TitledPane>
-						<TitledPane text="%tptitles.project" id="projectTP" fx:id="projectTP">
+						<TitledPane text="%common.views.project" id="projectTP" fx:id="projectTP">
 							<ProjectView fx:id="projectView"/>
 						</TitledPane>
 					</panes>
@@ -46,7 +46,7 @@
 				<Accordion fx:id="rightAccordion2" expandedPane="$historyTP">
 					<panes>
 						<!-- Note: The title text of historyTP is changed in MainController.initialize to include the history size. -->
-						<TitledPane text="%tptitles.history" id="historyTP" fx:id="historyTP" collapsible="false">
+						<TitledPane text="%common.views.history" id="historyTP" fx:id="historyTP" collapsible="false">
 							<HistoryView fx:id="historyView"/>
 						</TitledPane>
 					</panes>

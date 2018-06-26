@@ -16,7 +16,7 @@
 			text="%menu.file.items.openRecentProject.items.clear" onAction="#handleClearRecentProjects" />
 	</Menu>
 	<SeparatorMenuItem />
-	<MenuItem fx:id="saveMachineItem" text="%common.menu.file.items.saveMachine" accelerator="Shortcut+S" onAction="#saveMachine"/>
+	<MenuItem fx:id="saveMachineItem" text="%menu.file.items.saveMachine" accelerator="Shortcut+S" onAction="#saveMachine"/>
 	<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject"
 			  accelerator="Alt+Shortcut+S" onAction="#saveProject" />
 	<SeparatorMenuItem />

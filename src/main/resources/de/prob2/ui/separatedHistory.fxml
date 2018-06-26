@@ -19,16 +19,16 @@
 		<SplitPane fx:id="horizontalSP" dividerPositions="0.1,0.9">
 			<Accordion fx:id="leftAccordion">
 				<panes>
-					<TitledPane text="%tptitles.operations" fx:id="operationsTP">
+					<TitledPane text="%common.views.operations" fx:id="operationsTP">
 						<OperationsView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.verifications" fx:id="verificationsTP">
+					<TitledPane text="%common.views.verifications" fx:id="verificationsTP">
 						<VerificationsView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.stats" fx:id="statsTP">
+					<TitledPane text="%common.views.stats" fx:id="statsTP">
 						<StatsView/>
 					</TitledPane>
-					<TitledPane text="%tptitles.project" fx:id="projectTP">
+					<TitledPane text="%common.views.project" fx:id="projectTP">
 						<ProjectView fx:id="projectView"/>
 					</TitledPane>
 				</panes>
@@ -36,7 +36,7 @@
 			<MainView/>
 			<Accordion fx:id="rightAccordion" expandedPane="$historyTP">
 				<panes>
-					<TitledPane text="%tptitles.history" fx:id="historyTP" collapsible="false">
+					<TitledPane text="%common.views.history" fx:id="historyTP" collapsible="false">
 						<HistoryView fx:id="historyView"/>
 					</TitledPane>
 				</panes>

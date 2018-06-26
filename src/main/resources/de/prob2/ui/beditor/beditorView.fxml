@@ -22,7 +22,7 @@
 					<FontAwesomeIconView styleClass="icon-dark" glyphName="SAVE" glyphSize="${fontSize.fontSize + 4}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%common.menu.file.items.saveMachine"/>
+					<Tooltip text="%menu.file.items.saveMachine"/>
 				</tooltip>
 			</Button>
 			<Button fx:id="openExternalButton" onAction="#handleOpenExternal">
@@ -30,7 +30,7 @@
 					<FontAwesomeIconView styleClass="icon-dark" glyphName="EXTERNAL_LINK" glyphSize="${fontSize.fontSize + 4}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%common.menu.file.items.openMachine"/>
+					<Tooltip text="%beditor.tooltips.openMachine"/>
 				</tooltip>
 			</Button>
 			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />

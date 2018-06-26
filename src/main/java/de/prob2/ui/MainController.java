@@ -67,7 +67,7 @@ public class MainController extends BorderPane {
 		final ObservableIntegerValue size = historyView.getObservableHistorySize();
 		final ObservableValue<Number> current = historyView.getCurrentHistoryPositionProperty();
 		this.historyTP.textProperty()
-				.bind(Bindings.format(this.resourceBundle.getString("tptitles.historyWithSize"), current, size));
+				.bind(Bindings.format(this.resourceBundle.getString("common.views.historyWithState"), current, size));
 
 		Platform.runLater(() -> injector.getInstance(CurrentProject.class).addListener((observable, from, to) -> {
 			if (to != null) {
