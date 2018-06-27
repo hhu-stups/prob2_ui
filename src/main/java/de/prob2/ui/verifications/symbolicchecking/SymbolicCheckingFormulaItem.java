@@ -2,46 +2,64 @@ package de.prob2.ui.verifications.symbolicchecking;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
 		
 	private SymbolicCheckingType type;
 	
-	private transient List<Trace> counterExamples;
+	private transient ListProperty<Trace> counterExamples;
 	
-	private transient Trace example;
+	private transient ObjectProperty<Trace> example;
 
 	public SymbolicCheckingFormulaItem(String name, String code, SymbolicCheckingType type) {
 		super(name, type.getName(), code);
 		this.type = type;
-		this.example = null;
+		this.example = new SimpleObjectProperty<>(null);
 		this.initializeCounterExamples();
 	}
 		
 	public void initializeCounterExamples() {
-		this.counterExamples = new ArrayList<>();
+		this.counterExamples = new SimpleListProperty<>(FXCollections.observableArrayList());
 	}
 	
-	public List<Trace> getCounterExamples() {
+	public ObservableList<Trace> getCounterExamples() {
+		return counterExamples.get();
+	}
+	
+	public ListProperty<Trace> counterExamplesProperty() {
 		return counterExamples;
 	}
 	
+	@Override
+	public void initializeStatus() {
+		super.initializeStatus();
+		this.example = new SimpleObjectProperty<>(null);
+	}
+	
 	public void setExample(Trace example) {
-		this.example = example;
+		this.example.set(example);
 	}
 	
 	public Trace getExample() {
+		return example.get();
+	}
+	
+	public ObjectProperty<Trace> exampleProperty() {
 		return example;
 	}
 	
 	public void reset() {
 		this.initializeStatus();
 		this.counterExamples.clear();
-		this.example = null;
+		this.example = new SimpleObjectProperty<>(null);
 	}
 	
 	@Override

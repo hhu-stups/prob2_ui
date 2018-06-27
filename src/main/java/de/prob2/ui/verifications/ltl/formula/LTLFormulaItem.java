@@ -15,12 +15,14 @@ public class LTLFormulaItem extends AbstractCheckableItem {
 		super(name, description, code);
 		this.counterExample = new SimpleObjectProperty<>(null);
 	}
+	
+	@Override
+	public void initializeStatus() {
+		super.initializeStatus();
+		this.counterExample = new SimpleObjectProperty<>(null);
+	}
 			
 	public void setCounterExample(Trace counterExample) {
-		if(counterExample == null) {
-			this.counterExample = new SimpleObjectProperty<>(counterExample);
-			return;
-		}
 		this.counterExample.set(counterExample);
 	}
 

@@ -17,6 +17,7 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.verifications.MachineTableView;
+import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
@@ -126,6 +127,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		injector.getInstance(SymbolicCheckingView.class).bindMachine(m);
 		injector.getInstance(ModelcheckingView.class).bindMachine(m);
 		injector.getInstance(TraceReplayView.class).refresh();
+		injector.getInstance(StatusBar.class).reset();
 	}
 
 	public void reloadCurrentMachine() {

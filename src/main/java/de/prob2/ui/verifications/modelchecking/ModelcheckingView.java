@@ -365,7 +365,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 				if(to != null) {
 					checkItem.disableProperty().bind(row.emptyProperty()
 							.or(currentJobThreads.emptyProperty().not())
-							.or(row.getItem().shouldExecuteProperty().not()));
+							.or(to.shouldExecuteProperty().not()));
 				}
 			});
 			

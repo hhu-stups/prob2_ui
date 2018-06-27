@@ -33,8 +33,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 
 @Singleton
 public class SymbolicCheckingView extends ScrollPane {
@@ -170,18 +168,28 @@ public class SymbolicCheckingView extends ScrollPane {
 			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(SymbolicCheckingResultHandler.class).showResult(row.getItem()));
 			
+			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.symbolic.menu.showFoundState"));
+			showStateItem.setDisable(true);
+			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
 					checkItem.disableProperty().bind(row.emptyProperty()
 							.or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not())
-							.or(row.getItem().shouldExecuteProperty().not()));
-					showMessage.disableProperty().bind(row.getItem().resultItemProperty().isNull()
-							.or(Bindings.createBooleanBinding(() -> row.getItem().getResultItem() != null ? Checked.SUCCESS == row.getItem().getResultItem().getChecked() : false, row.getItem().resultItemProperty())));
+							.or(to.shouldExecuteProperty().not()));
+					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
+							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null ? Checked.SUCCESS == to.getResultItem().getChecked() : false, to.resultItemProperty())));
+					showCounterExampleItem.disableProperty().bind(row.emptyProperty()
+							.or(to.counterExamplesProperty().emptyProperty()));
+					showCounterExamples(to, showCounterExampleItem);
+					
+					showStateItem.disableProperty().bind(row.emptyProperty()
+							.or(to.exampleProperty().isNull()));
+					if(to.getExample() != null) {
+						showStateItem.setOnAction(event-> currentTrace.set(to.getExample()));
+					}
 				}
 			});
-			
-			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.symbolic.menu.showFoundState"));
-			showStateItem.setDisable(true);
+
 			
 			MenuItem removeItem = new MenuItem(bundle.getString("verifications.symbolic.menu.remove"));
 			removeItem.setOnAction(e -> removeFormula());
@@ -189,8 +197,6 @@ public class SymbolicCheckingView extends ScrollPane {
 			
 			MenuItem changeItem = new MenuItem(bundle.getString("verifications.symbolic.menu.change"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
-			
-			row.setOnMouseClicked(e->rowClicked(e, row, showCounterExampleItem, showStateItem, showMessage));
 			
 			row.setContextMenu(new ContextMenu(checkItem, changeItem, showCounterExampleItem, showMessage, showStateItem, removeItem));
 			return row;
@@ -233,10 +239,9 @@ public class SymbolicCheckingView extends ScrollPane {
 		tvFormula.refresh();
 	}
 	
-	private void showCounterExamples(Menu counterExampleItem) {
+	private void showCounterExamples(SymbolicCheckingFormulaItem item, Menu counterExampleItem) {
 		counterExampleItem.getItems().clear();
-		SymbolicCheckingFormulaItem currentItem = tvFormula.getSelectionModel().getSelectedItem();
-		List<Trace> counterExamples = currentItem.getCounterExamples();
+		List<Trace> counterExamples = item.getCounterExamples();
 		for(int i = 0; i < counterExamples.size(); i++) {
 			MenuItem traceItem = new MenuItem(String.format(bundle.getString("verifications.symbolic.menu.showCounterExample.counterExample"), i + 1));
 			final int index = i;
@@ -249,30 +254,6 @@ public class SymbolicCheckingView extends ScrollPane {
 	private void openItem(SymbolicCheckingFormulaItem item) {
 		SymbolicCheckingFormulaInput formulaInput = injector.getInstance(SymbolicCheckingFormulaInput.class);
 		formulaInput.changeFormula(item);
-	}
-
-	private void rowClicked(MouseEvent e, TableRow<SymbolicCheckingFormulaItem> row, Menu showCounterExampleItem, MenuItem showStateItem, MenuItem showMessage) {
-		if(e.getButton() == MouseButton.SECONDARY) {
-			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-			if(item == null) {
-				return;
-			}
-			if(row.emptyProperty().get() || item.getCounterExamples().isEmpty()) {
-				showCounterExampleItem.setDisable(true);
-			} else {
-				showCounterExampleItem.setDisable(false);
-				showCounterExamples(showCounterExampleItem);
-			}
-
-			if(item.getType() == SymbolicCheckingType.FIND_VALID_STATE) {
-				if(row.emptyProperty().get() || item.getExample() == null) {
-					showStateItem.setDisable(true);
-				} else {
-					showStateItem.setDisable(false);
-					showStateItem.setOnAction(event-> currentTrace.set((item.getExample())));
-				}
-			}
-		}
 	}
 		
 }

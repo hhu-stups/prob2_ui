@@ -161,11 +161,11 @@ public class LTLView extends ScrollPane {
 				if(to != null) {
 					checkItem.disableProperty().bind(row.emptyProperty()
 							.or(currentJobThreads.emptyProperty().not())
-							.or(row.getItem().shouldExecuteProperty().not()));
-					showMessage.disableProperty().bind(row.getItem().resultItemProperty().isNull()
-							.or(Bindings.createBooleanBinding(() -> row.getItem().getResultItem() != null ? Checked.SUCCESS == row.getItem().getResultItem().getChecked() : false, row.getItem().resultItemProperty())));
+							.or(to.shouldExecuteProperty().not()));
+					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
+							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null ? Checked.SUCCESS == to.getResultItem().getChecked() : false, to.resultItemProperty())));
 					showCounterExampleItem.disableProperty().bind(row.emptyProperty()
-							.or(row.getItem().counterExampleProperty().isNull()));
+							.or(to.counterExampleProperty().isNull()));
 				}
 			});
 			row.setContextMenu(new ContextMenu(checkItem, openEditor, removeItem, showCounterExampleItem, showMessage));
@@ -187,8 +187,8 @@ public class LTLView extends ScrollPane {
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					showMessage.disableProperty().bind(row.getItem().resultItemProperty().isNull()
-							.or(Bindings.createBooleanBinding(() -> row.getItem().getResultItem() != null ? Checked.SUCCESS == row.getItem().getResultItem().getChecked() : false, row.getItem().resultItemProperty())));
+					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
+							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null ? Checked.SUCCESS == to.getResultItem().getChecked() : false, to.resultItemProperty())));
 				}
 			});
 			row.setContextMenu(new ContextMenu(openEditor, showMessage, removeItem));
