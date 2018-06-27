@@ -177,7 +177,7 @@ public class SymbolicCheckingView extends ScrollPane {
 							.or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not())
 							.or(to.shouldExecuteProperty().not()));
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
-							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null ? Checked.SUCCESS == to.getResultItem().getChecked() : false, to.resultItemProperty())));
+							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
 					showCounterExampleItem.disableProperty().bind(row.emptyProperty()
 							.or(to.counterExamplesProperty().emptyProperty()));
 					showCounterExamples(to, showCounterExampleItem);
