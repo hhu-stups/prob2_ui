@@ -21,6 +21,7 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -161,19 +162,23 @@ public class SymbolicCheckingView extends ScrollPane {
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
 			});
 
-			row.itemProperty().addListener((observable, from, to) -> {
-				if(to != null) {
-					checkItem.disableProperty().bind(row.emptyProperty()
-							.or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not())
-							.or(row.getItem().shouldExecuteProperty().not()));
-				}
-			});
+
 			
 			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolic.menu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);
 			
 			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(SymbolicCheckingResultHandler.class).showResult(row.getItem()));
+			
+			row.itemProperty().addListener((observable, from, to) -> {
+				if(to != null) {
+					checkItem.disableProperty().bind(row.emptyProperty()
+							.or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not())
+							.or(row.getItem().shouldExecuteProperty().not()));
+					showMessage.disableProperty().bind(row.getItem().resultItemProperty().isNull()
+							.or(Bindings.createBooleanBinding(() -> row.getItem().getResultItem() != null ? Checked.SUCCESS == row.getItem().getResultItem().getChecked() : false, row.getItem().resultItemProperty())));
+				}
+			});
 			
 			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.symbolic.menu.showFoundState"));
 			showStateItem.setDisable(true);
@@ -267,8 +272,6 @@ public class SymbolicCheckingView extends ScrollPane {
 					showStateItem.setOnAction(event-> currentTrace.set((item.getExample())));
 				}
 			}
-
-			showMessage.setDisable(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked());
 		}
 	}
 		

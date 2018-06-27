@@ -28,6 +28,7 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -44,7 +45,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 
 @Singleton
 public class LTLView extends ScrollPane {
@@ -162,10 +162,12 @@ public class LTLView extends ScrollPane {
 					checkItem.disableProperty().bind(row.emptyProperty()
 							.or(currentJobThreads.emptyProperty().not())
 							.or(row.getItem().shouldExecuteProperty().not()));
+					showMessage.disableProperty().bind(row.getItem().resultItemProperty().isNull()
+							.or(Bindings.createBooleanBinding(() -> row.getItem().getResultItem() != null ? Checked.SUCCESS == row.getItem().getResultItem().getChecked() : false, row.getItem().resultItemProperty())));
+					showCounterExampleItem.disableProperty().bind(row.emptyProperty()
+							.or(row.getItem().counterExampleProperty().isNull()));
 				}
 			});
-			
-			row.setOnMouseClicked(e->rowClicked(e, row, showCounterExampleItem, showMessage));
 			row.setContextMenu(new ContextMenu(checkItem, openEditor, removeItem, showCounterExampleItem, showMessage));
 			return row;
 		});
@@ -183,40 +185,17 @@ public class LTLView extends ScrollPane {
 			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 			
-			row.setOnMouseClicked(e -> {
-				LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
-				if(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked()) {
-					showMessage.setDisable(true);
-				} else {
-					showMessage.setDisable(false);
+			row.itemProperty().addListener((observable, from, to) -> {
+				if(to != null) {
+					showMessage.disableProperty().bind(row.getItem().resultItemProperty().isNull()
+							.or(Bindings.createBooleanBinding(() -> row.getItem().getResultItem() != null ? Checked.SUCCESS == row.getItem().getResultItem().getChecked() : false, row.getItem().resultItemProperty())));
 				}
 			});
-
-			row.setContextMenu(new ContextMenu(openEditor, removeItem, showMessage));
+			row.setContextMenu(new ContextMenu(openEditor, showMessage, removeItem));
 			return row;
 		});
 	}
 
-	private void rowClicked(MouseEvent e, TableRow<LTLFormulaItem> row, MenuItem showCounterExampleItem, MenuItem showMessage) {
-		if(e.getButton() == MouseButton.SECONDARY) {
-			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-			if(item == null) {
-				return;
-			}
-			if(row.emptyProperty().get() || item.getCounterExample() == null) {
-				showCounterExampleItem.setDisable(true);
-			} else {
-				showCounterExampleItem.setDisable(false);
-			}
-
-			if(item.getResultItem() == null || Checked.SUCCESS == item.getResultItem().getChecked()) {
-				showMessage.setDisable(true);
-			} else {
-				showMessage.setDisable(false);
-			}
-		}
-	}
-	
 	private void setBindings() {
 		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		patternNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));

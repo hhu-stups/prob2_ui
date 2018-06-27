@@ -2,23 +2,33 @@ package de.prob2.ui.verifications.ltl.formula;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 import java.util.Objects;
 
 public class LTLFormulaItem extends AbstractCheckableItem {
 
-	private transient Trace counterExample;
+	private transient ObjectProperty<Trace> counterExample;
 
 	public LTLFormulaItem(String name, String description, String code) {
 		super(name, description, code);
-		this.counterExample = null;
+		this.counterExample = new SimpleObjectProperty<>(null);
 	}
 			
 	public void setCounterExample(Trace counterExample) {
-		this.counterExample = counterExample;
+		if(counterExample == null) {
+			this.counterExample = new SimpleObjectProperty<>(counterExample);
+			return;
+		}
+		this.counterExample.set(counterExample);
 	}
 
 	public Trace getCounterExample() {
+		return counterExample.get();
+	}
+	
+	public ObjectProperty<Trace> counterExampleProperty() {
 		return counterExample;
 	}
 	

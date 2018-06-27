@@ -3,7 +3,9 @@ package de.prob2.ui.verifications;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
 public abstract class AbstractCheckableItem implements IExecutableItem {
@@ -14,7 +16,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	protected String description;
 	protected String code;
 	protected BooleanProperty shouldExecute;
-	protected transient CheckingResultItem resultItem;
+	protected transient ObjectProperty<CheckingResultItem> resultItem;
 	
 	public AbstractCheckableItem(String name, String description, String code) {
 		initializeStatus();
@@ -22,7 +24,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		this.description = description;
 		this.code = code;
 		this.shouldExecute = new SimpleBooleanProperty(true);
-		this.resultItem = null;
+		this.resultItem = new SimpleObjectProperty<>(null);
 	}	
 	
 	public void setData(String name, String description, String code) {
@@ -36,7 +38,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.status.setFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
-		this.resultItem = null;
+		this.resultItem = new SimpleObjectProperty<>(null);
 	}
 	
 	public FontAwesomeIconView getStatus() {
@@ -82,10 +84,18 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	}
 	
 	public void setResultItem(CheckingResultItem resultItem) {
-		this.resultItem = resultItem;
+		if(resultItem == null) {
+			this.resultItem = new SimpleObjectProperty<>(resultItem);
+			return;
+		}
+		this.resultItem.set(resultItem);
 	}
 	
 	public CheckingResultItem getResultItem() {
+		return resultItem.get();
+	}
+	
+	public ObjectProperty<CheckingResultItem> resultItemProperty() {
 		return resultItem;
 	}
 	
