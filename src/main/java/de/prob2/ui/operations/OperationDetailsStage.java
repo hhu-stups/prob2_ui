@@ -75,10 +75,10 @@ class OperationDetailsStage extends Stage {
 		this.valueColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getValue().getValue()));
 		
 		this.rootItem.setValue(new ValueItem("Values (this root item should be invisible)", ""));
-		this.parametersItem.setValue(new ValueItem(bundle.getString("operationDetails.groups.parameters"), ""));
-		this.returnValuesItem.setValue(new ValueItem(bundle.getString("operationDetails.groups.returnValues"), ""));
-		this.constantsItem.setValue(new ValueItem(bundle.getString("operationDetails.groups.constants"), ""));
-		this.variablesItem.setValue(new ValueItem(bundle.getString("operationDetails.groups.variables"), ""));
+		this.parametersItem.setValue(new ValueItem(bundle.getString("operations.operationDetails.groups.parameters"), ""));
+		this.returnValuesItem.setValue(new ValueItem(bundle.getString("operations.operationDetails.groups.returnValues"), ""));
+		this.constantsItem.setValue(new ValueItem(bundle.getString("operations.operationDetails.groups.constants"), ""));
+		this.variablesItem.setValue(new ValueItem(bundle.getString("operations.operationDetails.groups.variables"), ""));
 		
 		this.item.addListener((observable, from, to) -> {
 			this.rootItem.getChildren().clear();
@@ -88,9 +88,9 @@ class OperationDetailsStage extends Stage {
 			this.rootItem.getChildren().add(this.variablesItem);
 			this.rootItem.getChildren().forEach(ti -> ti.getChildren().clear());
 			if (to == null) {
-				this.setTitle(bundle.getString("operationDetails.title"));
+				this.setTitle(bundle.getString("operations.operationDetails.title"));
 			} else {
-				this.setTitle(String.format(bundle.getString("operationDetails.titleWithName"), to.getName()));
+				this.setTitle(String.format(bundle.getString("operations.operationDetails.titleWithName"), to.getName()));
 				
 				final List<String> paramNames = to.getParameterNames();
 				final List<String> paramValues = to.getParameterValues();

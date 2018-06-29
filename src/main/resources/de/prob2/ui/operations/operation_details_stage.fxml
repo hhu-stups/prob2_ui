@@ -8,7 +8,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <?import javafx.scene.control.TreeTableColumn?>
-<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="Operation Details">
+<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%operations.operationDetails.title">
 	<scene>
 		<Scene>
 			<StackPane>
@@ -18,8 +18,8 @@
 							<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 						</columnResizePolicy>
 						<columns>
-							<TreeTableColumn fx:id="nameColumn" minWidth="80.0" text="%operationDetails.columns.name"/>
-							<TreeTableColumn fx:id="valueColumn" minWidth="80.0" text="%operationDetails.columns.value"/>
+							<TreeTableColumn fx:id="nameColumn" minWidth="80.0" text="%operations.operationDetails.columns.name"/>
+							<TreeTableColumn fx:id="valueColumn" minWidth="80.0" text="%operations.operationDetails.columns.value"/>
 						</columns>
 						<TreeItem fx:id="rootItem" expanded="true">
 							<children>

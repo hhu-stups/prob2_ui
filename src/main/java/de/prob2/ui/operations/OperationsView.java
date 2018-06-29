@@ -84,14 +84,14 @@ public final class OperationsView extends AnchorPane {
 				}
 			});
 
-			final MenuItem showDetailsItem = new MenuItem(bundle.getString("operations.showDetails"));
+			final MenuItem showDetailsItem = new MenuItem(bundle.getString("operations.operationsView.contextMenu.items.showDetails"));
 			showDetailsItem.setOnAction(event -> {
 				final OperationDetailsStage stage = injector.getInstance(OperationDetailsStage.class);
 				stage.setItem(this.getItem());
 				stage.show();
 			});
 
-			final MenuItem executeByPredicateItem = new MenuItem(bundle.getString("operations.executeByPredicate"));
+			final MenuItem executeByPredicateItem = new MenuItem(bundle.getString("operations.operationsView.contextMenu.items.executeByPredicate"));
 			executeByPredicateItem.setOnAction(event -> {
 				final ExecuteByPredicateStage stage = injector.getInstance(ExecuteByPredicateStage.class);
 				stage.setItem(this.getItem());
@@ -160,7 +160,7 @@ public final class OperationsView extends AnchorPane {
 				case TIMEOUT:
 					icon = new FontAwesomeIconView(FontAwesomeIcon.CLOCK_ALT);
 					getStyleClass().add("timeout");
-					setTooltip(new Tooltip(bundle.getString("operations.tooltip.timeout")));
+					setTooltip(new Tooltip(bundle.getString("operations.operationsView.tooltips.timeout")));
 					break;
 
 				case ENABLED:
@@ -169,13 +169,13 @@ public final class OperationsView extends AnchorPane {
 					getStyleClass().add("enabled");
 					if (!item.isExplored()) {
 						getStyleClass().add("unexplored");
-						setTooltip(new Tooltip(bundle.getString("operations.tooltip.reachesUnexplored")));
+						setTooltip(new Tooltip(bundle.getString("operations.operationsView.tooltips.reachesUnexplored")));
 					} else if (item.isErrored()) {
 						getStyleClass().add("errored");
-						setTooltip(new Tooltip(bundle.getString("operations.tooltip.reachesErrored")));
+						setTooltip(new Tooltip(bundle.getString("operations.operationsView.tooltips.reachesErrored")));
 					} else if (item.isSkip()) {
 						getStyleClass().add("skip");
-						setTooltip(new Tooltip(bundle.getString("operations.tooltip.reachesSame")));
+						setTooltip(new Tooltip(bundle.getString("operations.operationsView.tooltips.reachesSame")));
 					} else {
 						getStyleClass().add("normal");
 						setTooltip(null);
@@ -367,9 +367,9 @@ public final class OperationsView extends AnchorPane {
 
 		final String text;
 		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
-			text = bundle.getString("operations.maxReached");
+			text = bundle.getString("operations.operationsView.warningLabel.maxReached");
 		} else if (!trace.getCurrentState().isInitialised() && operations.isEmpty()) {
-			text = bundle.getString("operations.noSetupConstantsOrInit");
+			text = bundle.getString("operations.operationsView.warningLabel.noSetupConstantsOrInit");
 		} else {
 			text = "";
 		}
@@ -492,13 +492,14 @@ public final class OperationsView extends AnchorPane {
 	public void random(ActionEvent event) {
 		if (currentTrace.exists()) {
 			Thread executionThread = new Thread(() -> {
+				String randomInput = randomText.getText();
 				try {
 					Trace newTrace = null;
 					if (event.getSource().equals(randomText)) {
-						if (randomText.getText().isEmpty()) {
+						if (randomInput.isEmpty()) {
 							return;
 						}
-						newTrace = currentTrace.get().randomAnimation(Integer.parseInt(randomText.getText()));
+						newTrace = currentTrace.get().randomAnimation(Integer.parseInt(randomInput));
 					} else if (event.getSource().equals(oneRandomEvent)) {
 						newTrace = currentTrace.get().randomAnimation(1);
 					} else if (event.getSource().equals(fiveRandomEvents)) {
@@ -508,11 +509,11 @@ public final class OperationsView extends AnchorPane {
 					}
 					currentTrace.set(newTrace);
 					randomExecutionThread.set(null);
-				} catch (Exception e) {
+				} catch (NumberFormatException e) {
 					LOGGER.error("Invalid input for executing random number of events",e);
 					Platform.runLater(() -> {
-						Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, e.getMessage());
-						alert.setHeaderText(bundle.getString("operations.random.error"));
+						Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, String.format(bundle.getString("operations.operationsView.alerts.invalidNumberOfOparations.message"), randomInput));
+						alert.setHeaderText(bundle.getString("operations.operationsView.alerts.invalidNumberOfOparations.header"));
 						alert.showAndWait();
 					});
 					randomExecutionThread.set(null);

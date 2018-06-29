@@ -9,7 +9,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.geometry.Insets?>
-<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate">
+<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
 	<scene>
 		<Scene>
 			<StackPane>
@@ -22,7 +22,7 @@
 					<GridPane fx:id="paramsGrid" hgap="5.0" vgap="5.0"/>
 					<Label text="%operations.executeByPredicate.additionalPredicate"/>
 					<TextField fx:id="predicateTextField" text="1 = 1" onAction="#handleExecute"/>
-					<Button fx:id="executeButton" styleClass="button-blue" text="%operations.executeByPredicate.execute" onAction="#handleExecute"/>
+					<Button fx:id="executeButton" styleClass="button-blue" text="%operations.executeByPredicate.buttons.execute" onAction="#handleExecute"/>
 				</VBox>
 			</StackPane>
 		</Scene>

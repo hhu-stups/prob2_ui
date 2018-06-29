@@ -126,7 +126,7 @@ public final class ExecuteByPredicateStage extends Stage {
 			);
 		} catch (IllegalArgumentException | ProBError e) {
 			LOGGER.info("Execute by predicate failed", e);
-			stageManager.makeExceptionAlert(bundle.getString("operations.executeByPredicate.error"), e).show();
+			stageManager.makeExceptionAlert(bundle.getString("operations.executeByPredicate.alerts.message"), e).show();
 			return;
 		}
 		assert transitions.size() == 1;

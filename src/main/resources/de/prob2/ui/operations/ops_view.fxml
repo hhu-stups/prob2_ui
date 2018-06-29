@@ -29,7 +29,7 @@
 				<HBox spacing="10.0" AnchorPane.leftAnchor="10.0"
 					AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0"
 					AnchorPane.bottomAnchor="10.0" alignment="CENTER">
-					<TextField fx:id="searchBar" promptText="%operations.search.prompt" HBox.hgrow="ALWAYS"/>
+					<TextField fx:id="searchBar" promptText="%operations.operationsView.search.prompt" HBox.hgrow="ALWAYS"/>
 					<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 				</HBox>
 			</AnchorPane>
@@ -45,7 +45,7 @@
 								glyphName="SORT" glyphSize="${fontSize.fontSize + 2}" />
 						</graphic>
 						<tooltip>
-							<Tooltip text="%operations.sort.tooltip" />
+							<Tooltip text="%operations.operationsView.tooltips.sort" />
 						</tooltip>
 					</Button>
 					<ToggleButton fx:id="disabledOpsToggle"
@@ -59,17 +59,17 @@
 					<MenuButton fx:id="randomButton" mnemonicParsing="false">
 						<items>
 							<MenuItem fx:id="oneRandomEvent" mnemonicParsing="false"
-								onAction="#random" text="%operations.random.one" />
+								onAction="#random" text="%operations.operationsView.random.one" />
 							<MenuItem fx:id="fiveRandomEvents" mnemonicParsing="false"
-								onAction="#random" text="%operations.random.five" />
+								onAction="#random" text="%operations.operationsView.random.five" />
 							<MenuItem fx:id="tenRandomEvents" mnemonicParsing="false"
-								onAction="#random" text="%operations.random.ten" />
+								onAction="#random" text="%operations.operationsView.random.ten" />
 							<CustomMenuItem fx:id="someRandomEvents"
 								mnemonicParsing="false">
 								<content>
 									<AnchorPane>
 										<TextField fx:id="randomText" onAction="#random"
-											promptText="%operations.random.some.prompt" />
+											promptText="%operations.operationsView.random.some.prompt" />
 									</AnchorPane>
 								</content>
 							</CustomMenuItem>
@@ -79,7 +79,7 @@
 								glyphName="RANDOM" glyphSize="${fontSize.fontSize + 2}" />
 						</graphic>
 						<tooltip>
-							<Tooltip text="%operations.random.tooltip" />
+							<Tooltip text="%operations.operationsView.tooltips.random" />
 						</tooltip>
 					</MenuButton>
 					<Button fx:id="cancelButton" onAction="#cancel">
