@@ -573,7 +573,6 @@
  ************************************************************************************/
 .table-view {
 	-fx-padding: -1.0;
-	-fx-table-cell-border-color: transparent;
 }
 .tree-table-view {
 	-fx-padding: -1.0;
