@@ -79,7 +79,7 @@ public final class OperationsView extends AnchorPane {
 			getStyleClass().add("operations-cell");
 
 			this.setOnMouseClicked(event -> {
-				if (event.getButton() == MouseButton.PRIMARY) {
+				if (event.getButton() == MouseButton.PRIMARY && !event.isControlDown()) {
 					executeOperationIfPossible(this.getItem());
 				}
 			});
