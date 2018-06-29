@@ -52,18 +52,13 @@ public final class HistoryView extends AnchorPane {
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll(Arrays.asList("past", "present", "future"));
 			if (!empty && item != null) {
-				switch (item.getStatus()) {
-				case PAST:
+				final int currentIndex = currentTrace.get().getCurrent().getIndex();
+				if (item.getIndex() < currentIndex) {
 					this.getStyleClass().add("past");
-					break;
-
-				case FUTURE:
+				} else if (item.getIndex() > currentIndex) {
 					this.getStyleClass().add("future");
-					break;
-
-				default:
+				} else {
 					this.getStyleClass().add("present");
-					break;
 				}
 			}
 		}
@@ -106,12 +101,10 @@ public final class HistoryView extends AnchorPane {
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			historyTableView.getItems().clear();
 			if (to != null) {
-				int currentPos = to.getCurrent().getIndex();
-				historyTableView.getItems().add(new HistoryItem(null, currentPos == -1 ? HistoryStatus.PRESENT : HistoryStatus.PAST, -1));
+				historyTableView.getItems().add(new HistoryItem(null, -1));
 				List<Transition> transitionList = to.getTransitionList();
 				for (int i = 0; i < transitionList.size(); i++) {
-					HistoryStatus status = getStatus(i, currentPos);
-					historyTableView.getItems().add(new HistoryItem(transitionList.get(i), status, i));
+					historyTableView.getItems().add(new HistoryItem(transitionList.get(i), i));
 				}
 				historyTableView.sort();
 			}
@@ -145,16 +138,6 @@ public final class HistoryView extends AnchorPane {
 	public ObservableIntegerValue getObservableHistorySize() {
 		return Bindings.createIntegerBinding(() -> Math.max(this.historyTableView.itemsProperty().get().size() - 1, 0),
 				historyTableView.itemsProperty().get());
-	}
-
-	private HistoryStatus getStatus(int i, int currentPos) {
-		if (i < currentPos) {
-			return HistoryStatus.PAST;
-		} else if (i > currentPos) {
-			return HistoryStatus.FUTURE;
-		} else {
-			return HistoryStatus.PRESENT;
-		}
 	}
 
 	@FXML
