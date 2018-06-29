@@ -1,16 +1,13 @@
 package de.prob2.ui.history;
 
 import java.util.Arrays;
-import java.util.List;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
 
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
@@ -95,17 +92,12 @@ public final class HistoryView extends AnchorPane {
 		historyTableView.setRowFactory(item -> new TransitionRow());
 		historyTableView.getSelectionModel().setCellSelectionEnabled(true);
 		positionColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue().getIndex() + 1));
-		transitionColumn.setCellValueFactory(
-				cellData -> new SimpleStringProperty(transitionToString(cellData.getValue().getTransition())));
+		transitionColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().toPrettyString()));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			historyTableView.getItems().clear();
 			if (to != null) {
-				historyTableView.getItems().add(new HistoryItem(null, -1));
-				List<Transition> transitionList = to.getTransitionList();
-				for (int i = 0; i < transitionList.size(); i++) {
-					historyTableView.getItems().add(new HistoryItem(transitionList.get(i), i));
-				}
+				historyTableView.getItems().addAll(HistoryItem.itemsForTrace(to));
 				historyTableView.sort();
 			}
 		};
@@ -116,18 +108,6 @@ public final class HistoryView extends AnchorPane {
 
 		saveTraceButton.disableProperty()
 				.bind(currentProject.existsProperty().and(currentTrace.existsProperty()).not());
-	}
-
-	public static String transitionToString(final Transition transition) {
-		if (transition == null) {
-			// Root item has no transition
-			return "---root---";
-		} else {
-			// Evaluate the transition so the pretty rep includes argument list
-			// and result
-			transition.evaluate(FormulaExpand.TRUNCATE);
-			return transition.getPrettyRep().replace("<--", "←");
-		}
 	}
 
 	public NumberBinding getCurrentHistoryPositionProperty() {

@@ -13,10 +13,9 @@ import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
-import de.prob.statespace.State;
 import de.prob.statespace.TraceElement;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.history.HistoryView;
+import de.prob2.ui.history.HistoryItem;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -114,20 +113,19 @@ public final class HistoryChartStage extends Stage {
 		}
 	}
 
-	private class TraceElementStringConverter extends StringConverter<TraceElement> {
+	private class HistoryItemStringConverter extends StringConverter<HistoryItem> {
 		@Override
-		public String toString(final TraceElement object) {
-			return object == DUMMY_TRACE_ELEMENT ? bundle.getString("common.noModelLoaded") : HistoryView.transitionToString(object.getTransition());
+		public String toString(final HistoryItem object) {
+			return object == null ? bundle.getString("common.noModelLoaded") : object.toPrettyString();
 		}
 
 		@Override
-		public TraceElement fromString(final String string) {
-			throw new UnsupportedOperationException("Cannot convert from string to TraceElement");
+		public HistoryItem fromString(final String string) {
+			throw new UnsupportedOperationException("Cannot convert from string to HistoryItem");
 		}
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HistoryChartStage.class);
-	private static final TraceElement DUMMY_TRACE_ELEMENT = new TraceElement(new State("Dummy state", null));
 
 	@FXML
 	private ScrollPane chartsScrollPane;
@@ -146,7 +144,7 @@ public final class HistoryChartStage extends Stage {
 	@FXML
 	private CheckBox separateChartsCheckBox;
 	@FXML
-	private ChoiceBox<TraceElement> startChoiceBox;
+	private ChoiceBox<HistoryItem> startChoiceBox;
 
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
@@ -196,7 +194,7 @@ public final class HistoryChartStage extends Stage {
 		});
 		this.separateChartsCheckBox.setSelected(true);
 
-		this.startChoiceBox.setConverter(new HistoryChartStage.TraceElementStringConverter());
+		this.startChoiceBox.setConverter(new HistoryItemStringConverter());
 		this.startChoiceBox.valueProperty().addListener((observable, from, to) -> this.updateCharts());
 
 		this.singleChart.prefWidthProperty().bind(this.chartsScrollPane.widthProperty().subtract(5));
@@ -299,22 +297,13 @@ public final class HistoryChartStage extends Stage {
 		}
 		
 		if (this.currentTrace.exists()) {
-			final TraceElement startElement = this.startChoiceBox.getValue();
-			this.startChoiceBox.getItems().clear();
-
-			TraceElement element = currentTrace.get().getCurrent();
-			TraceElement prevElement = element;
-			while (element != null) {
-				this.startChoiceBox.getItems().add(element);
-				prevElement = element;
-				element = element.getPrevious();
-			}
-
-			this.startChoiceBox
-					.setValue(startElement == null || startElement == DUMMY_TRACE_ELEMENT ? prevElement : startElement);
+			final HistoryItem startItem = this.startChoiceBox.getValue();
+			final List<HistoryItem> items = HistoryItem.itemsForTrace(currentTrace.get());
+			this.startChoiceBox.getItems().setAll(items);
+			this.startChoiceBox.setValue(startItem == null ? items.get(items.size()-1) : startItem);
 		} else {
-			this.startChoiceBox.getItems().setAll(DUMMY_TRACE_ELEMENT);
-			this.startChoiceBox.setValue(DUMMY_TRACE_ELEMENT);
+			this.startChoiceBox.getItems().setAll((HistoryItem)null);
+			this.startChoiceBox.setValue(null);
 		}
 
 		this.updateCharts();
@@ -332,7 +321,7 @@ public final class HistoryChartStage extends Stage {
 
 		int elementCounter = 0;
 		if (this.currentTrace.exists()) {
-			final TraceElement startElement = this.startChoiceBox.getValue();
+			final TraceElement startElement = this.startChoiceBox.getValue().getTrace().getCurrent();
 
 			TraceElement element = this.currentTrace.get().getCurrent();
 			TraceElement prevElement = element;
