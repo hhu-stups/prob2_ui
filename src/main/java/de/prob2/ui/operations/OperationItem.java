@@ -204,4 +204,52 @@ public class OperationItem {
 			.add("variables", this.getVariables())
 			.toString();
 	}
+
+	private static String getPrettyName(final String name) {
+		switch (name) {
+			case "$setup_constants":
+				return "SETUP_CONSTANTS";
+	
+			case "$initialise_machine":
+				return "INITIALISATION";
+	
+			default:
+				return name;
+		}
+	}
+
+	public String toPrettyString() {
+		StringBuilder sb = new StringBuilder(getPrettyName(this.getName()));
+		
+		final List<String> args = new ArrayList<>();
+		
+		final List<String> paramNames = this.getParameterNames();
+		final List<String> paramValues = this.getParameterValues();
+		if (paramNames.isEmpty()) {
+			// Parameter names not available
+			args.addAll(paramValues);
+		} else {
+			assert paramNames.size() == paramValues.size();
+			for (int i = 0; i < paramValues.size(); i++) {
+				args.add(paramNames.get(i) + '=' + paramValues.get(i));
+			}
+		}
+		
+		this.getConstants().forEach((key, value) -> args.add(key + ":=" + value));
+		this.getVariables().forEach((key, value) -> args.add(key + ":=" + value));
+		
+		if (!args.isEmpty()) {
+			sb.append('(');
+			sb.append(String.join(", ", args));
+			sb.append(')');
+		}
+		
+		final List<String> returnValues = this.getReturnParameterValues();
+		if (!returnValues.isEmpty()) {
+			sb.append(" → ");
+			sb.append(String.join(", ", returnValues));
+		}
+		
+		return sb.toString();
+	}
 }

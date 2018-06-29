@@ -100,60 +100,12 @@ public final class OperationsView extends AnchorPane {
 			this.setContextMenu(new ContextMenu(showDetailsItem, executeByPredicateItem));
 		}
 
-		private String getPrettyName(final String name) {
-			switch (name) {
-			case "$setup_constants":
-				return "SETUP_CONSTANTS";
-
-			case "$initialise_machine":
-				return "INITIALISATION";
-
-			default:
-				return name;
-			}
-		}
-
-		private String formatOperationItem(final OperationItem item) {
-			StringBuilder sb = new StringBuilder(getPrettyName(item.getName()));
-
-			final List<String> args = new ArrayList<>();
-
-			final List<String> paramNames = item.getParameterNames();
-			final List<String> paramValues = item.getParameterValues();
-			if (paramNames.isEmpty()) {
-				// Parameter names not available
-				args.addAll(paramValues);
-			} else {
-				assert paramNames.size() == paramValues.size();
-				for (int i = 0; i < paramValues.size(); i++) {
-					args.add(paramNames.get(i) + '=' + paramValues.get(i));
-				}
-			}
-
-			item.getConstants().forEach((key, value) -> args.add(key + ":=" + value));
-			item.getVariables().forEach((key, value) -> args.add(key + ":=" + value));
-
-			if (!args.isEmpty()) {
-				sb.append('(');
-				sb.append(String.join(", ", args));
-				sb.append(')');
-			}
-
-			final List<String> returnValues = item.getReturnParameterValues();
-			if (!returnValues.isEmpty()) {
-				sb.append(" → ");
-				sb.append(String.join(", ", returnValues));
-			}
-
-			return sb.toString();
-		}
-
 		@Override
 		protected void updateItem(OperationItem item, boolean empty) {
 			super.updateItem(item, empty);
 			getStyleClass().removeAll("enabled", "timeout", "unexplored", "errored", "skip", "normal", "disabled");
 			if (item != null && !empty) {
-				setText(formatOperationItem(item));
+				setText(item.toPrettyString());
 				setDisable(true);
 				final FontAwesomeIconView icon;
 				switch (item.getStatus()) {
