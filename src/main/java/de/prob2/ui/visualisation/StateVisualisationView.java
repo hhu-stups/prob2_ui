@@ -18,9 +18,11 @@ import de.prob.animator.command.GetRightClickOptionsForStateVisualizationCommand
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -83,9 +85,10 @@ public class StateVisualisationView extends AnchorPane {
 					String imageURL = images.get(imageId);
 					Image image = getImage(imageURL);
 					ImageView imageView = new ImageView(image);
-					ContextMenu contextMenu = getContextMenu(state, r, c);
-					imageView.setOnContextMenuRequested(
-							e -> contextMenu.show(imageView, e.getScreenX(), e.getScreenY()));
+					final int finalRow = r;
+					final int finalColumn = c;
+					imageView.setOnContextMenuRequested(e -> getContextMenu(state, finalRow, finalColumn)
+						.show(imageView, e.getScreenX(), e.getScreenY()));
 					visualisationGridPane.add(imageView, c, r);
 				}
 			}
@@ -94,38 +97,29 @@ public class StateVisualisationView extends AnchorPane {
 
 	private ContextMenu getContextMenu(State state, int row, int column) {
 		ContextMenu contextMenu = new ContextMenu();
-	    if (row>9 || column>9) {
-	       // hack: in case there are many images
-	       // todo: better improve the performance of ExecuteRightClickCommand or do it on demand
-			final MenuItem item = new MenuItem("Menu disabled for performance reasons");
+		StateSpace stateSpace = state.getStateSpace();
+		GetRightClickOptionsForStateVisualizationCommand getOptionsCommand = new GetRightClickOptionsForStateVisualizationCommand(
+				state.getId(), row, column);
+		stateSpace.execute(getOptionsCommand);
+		List<String> options = getOptionsCommand.getOptions();
+		for (String opt : options) {
+			final MenuItem item = new MenuItem(opt);
+			Trace trace = getTraceToState(currentTrace.get(), state);
+			if (trace == null) {
+				item.setDisable(true);
+			}
+			item.setOnAction(e -> {
+				ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(state.getId(), row, column, opt);
+				stateSpace.execute(executeCommand);
+				String transitionId = executeCommand.getTransitionID();
+				currentTrace.set(trace.add(transitionId));
+			});
+			contextMenu.getItems().add(item);
+		}
+		if (options.isEmpty()) {
+			final MenuItem item = new MenuItem(bundle.getString("visualisation.noRightClickOptions"));
 			item.setDisable(true);
 			contextMenu.getItems().add(item);
-	    } else
-	    {
-			StateSpace stateSpace = state.getStateSpace();
-			GetRightClickOptionsForStateVisualizationCommand getOptionsCommand = new GetRightClickOptionsForStateVisualizationCommand(
-					state.getId(), row, column);
-			stateSpace.execute(getOptionsCommand);
-			List<String> options = getOptionsCommand.getOptions(); // does this call getOptions in Prolog for every image?
-			for (String opt : options) {
-				final MenuItem item = new MenuItem(opt);
-				Trace trace = getTraceToState(currentTrace.get(), state);
-				if (trace == null) {
-					item.setDisable(true);
-				}
-				item.setOnAction(e -> {
-					ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(state.getId(), row, column, opt);
-					stateSpace.execute(executeCommand);
-					String transitionId = executeCommand.getTransitionID();
-					currentTrace.set(trace.add(transitionId));
-				});
-				contextMenu.getItems().add(item);
-			}
-			if (options.isEmpty()) {
-				final MenuItem item = new MenuItem(bundle.getString("visualisation.noRightClickOptions"));
-				item.setDisable(true);
-				contextMenu.getItems().add(item);
-			}
 		}
 		return contextMenu;
 	}
