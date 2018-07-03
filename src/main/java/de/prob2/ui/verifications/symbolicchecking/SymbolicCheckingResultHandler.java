@@ -17,6 +17,7 @@ import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
+import de.prob.check.CheckInterrupted;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
 import de.prob.check.RefinementCheckCounterExample;
@@ -48,7 +49,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
 												RefinementCheckCounterExample.class));
 		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
-		this.interrupted.addAll(Arrays.asList(NotYetFinished.class));
+		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class));
 	}
 	
 	public void handleFormulaResult(SymbolicCheckingFormulaItem item, Object result, State stateid) {

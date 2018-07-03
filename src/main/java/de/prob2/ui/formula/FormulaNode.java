@@ -2,37 +2,28 @@ package de.prob2.ui.formula;
 
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob2.ui.layout.FontSize;
-import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
+import javafx.beans.binding.DoubleExpression;
+import javafx.scene.control.Label;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class FormulaNode extends Region {
-		
-	private Rectangle rectangle;
-	private Text text;
-	private Color color;
+public class FormulaNode extends Label {
+	
 	List<FormulaNode> next;
-	private double width;
-	private double height;
 	private final FontSize fontSize;
 	
 	public FormulaNode(ExpandedFormula data, FontSize fontSize) {
 		this.fontSize = fontSize;
-		next = new ArrayList<>();
-		text = new Text(data.getLabel());
+		this.next = new ArrayList<>();
+		String text = data.getLabel();
 		if (data.getValue() instanceof String) {
-			text.setText(text.getText() + " = " + data.getValue());
+			text = text + " = " + data.getValue();
 		}
-		width = text.getBoundsInLocal().getWidth();
-		height = text.getBoundsInLocal().getHeight();
-		rectangle = new Rectangle(width * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE, height * 2 * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE);
-		color = calculateColor(data);
+		this.setText(text);
+		calculateColor(data);
 		if (data.getChildren() == null || data.getChildren().isEmpty()) {
 			return;
 		}
@@ -40,70 +31,42 @@ public class FormulaNode extends Region {
 			next.add(new FormulaNode(data.getChildren().get(i), fontSize));
 		}
 	}
-		
-	
-	public double getNodeWidth() {
-		return width;
-	}
-	
-	public double getNodeHeight() {
-		return height;
-	}
 	
 	
 	public void setPosition(double x, double y) {
-		text.setX(x + width * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE/2);
-		text.setY(y + height * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE/2);
-		rectangle.setX(x + width * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE/2);
-		rectangle.setY(y - height * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE);
-		draw();
+		this.setLayoutX(x + getWidth() * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE/2);
+		this.setLayoutY(y - getHeight() * ((double) fontSize.getFontSize())/FontSize.DEFAULT_FONT_SIZE);
 	}
 	
-	public double getLeft() {
-		return rectangle.getX();
+	public DoubleExpression leftProperty() {
+		return this.layoutXProperty();
 	}
 	
-	public double getRight() {
-		return rectangle.getX() + rectangle.getWidth();
+	public DoubleExpression rightProperty() {
+		return this.layoutXProperty().add(this.widthProperty());
 	}
 	
-	public double getX() {
-		return getLeft();
+	public DoubleExpression xProperty() {
+		return this.leftProperty();
 	}
-
-	public double getY() {
-		return rectangle.getY() + 0.5 * rectangle.getHeight();
+	
+	public DoubleExpression yProperty() {
+		return this.layoutYProperty().add(this.heightProperty().multiply(0.5));
 	}
 	
 	
-	private void draw() {
-		text.setFill(Color.BLACK);
-		if (color.equals(Color.GRAY)) {
-			text.setFill(Color.WHITE);
-		}
-		rectangle.setStroke(Color.BLACK);
-		setFill(color);
-		this.getChildren().add(rectangle);
-		this.getChildren().add(text);
-	}
-	
-	private Color calculateColor(ExpandedFormula data) {
+	private void calculateColor(ExpandedFormula data) {
 		if (data.getValue() instanceof String) {
-			return Color.GRAY;
+			this.setStyle("-fx-background-color: gray; -fx-text-fill: white; -fx-padding: 10px;");
 		} else if (!(Boolean)data.getValue()) {
-			return Color.ORANGERED;
+			this.setStyle("-fx-background-color: orangered; -fx-text-fill: black; -fx-padding: 10px;");
 		} else {
-			return Color.LIME;
+			this.setStyle("-fx-background-color: lime; -fx-text-fill: black; -fx-padding: 10px;");
 		}
-	}
-	
-	
-	private void setFill(Paint value) {
-		rectangle.setFill(value);
 	}
 	
 	@Override
 	public String toString() {
-		return text.getText();
+		return this.getText();
 	}
 }

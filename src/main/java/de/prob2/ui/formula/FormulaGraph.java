@@ -1,5 +1,7 @@
 package de.prob2.ui.formula;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleExpression;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Line;
 
@@ -41,9 +43,20 @@ public class FormulaGraph extends Region {
 			for (int i = 0; i < node.next.size(); i++) {
 				double median = (node.next.size()-1)/2.0;
 				FormulaNode children = node.next.get(i);
-				children.setPosition(node.getRight() + 25 + maxWidth(level + 1) - children.getNodeWidth(), node.getY() + (i - median) * calculateHeight(level+1));
-				Line edge1 = new Line(node.getRight(), node.getY(), node.getRight() + 25, children.getY());
-				Line edge2 = new Line(node.getRight() + 25, children.getY(), children.getLeft(), children.getY());
+				children.layoutXProperty().bind(node.rightProperty().add(25).add(maxWidthProperty(level + 1)).subtract(children.prefWidthProperty()));
+				children.layoutYProperty().bind(node.layoutYProperty().add((i - median) * calculateHeight(level+1)));
+				Line edge1 = new Line();
+				Line edge2 = new Line();
+				edge1.startXProperty().bind(node.rightProperty());
+				edge1.startYProperty().bind(node.yProperty());
+				edge1.endXProperty().bind(node.rightProperty().add(25));
+				edge1.endYProperty().bind(children.yProperty());
+				
+				edge2.startXProperty().bind(node.rightProperty().add(25));
+				edge2.startYProperty().bind(children.yProperty());
+				edge2.endXProperty().bind(children.leftProperty());
+				edge2.endYProperty().bind(children.yProperty());
+
 				this.getChildren().add(edge1);
 				this.getChildren().add(edge2);
 				draw(children, level + 1);
@@ -63,13 +76,11 @@ public class FormulaGraph extends Region {
 		return max + 1;
 	}
 	
-	private double maxWidth(int level) {
-		double result = 0;
-		for (FormulaNode node: getAllNodesOnLevel(level)) {
-			result = Math.max(result, node.getNodeWidth());
-		}
-		
-		return result;
+	public DoubleExpression maxWidthProperty(int level) {
+		return getAllNodesOnLevel(level).stream()
+			.map(node -> (DoubleExpression) node.prefWidthProperty())
+			.reduce((a,e) -> (DoubleExpression) Bindings.max(a,e))
+			.get();
 	}
 	
 	private int maxChildren(int level) {
