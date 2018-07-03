@@ -11,6 +11,8 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.AnimationSelector;
+import de.prob.statespace.Trace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
@@ -22,6 +24,7 @@ import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.verifications.tracereplay.TraceReplayView;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -155,7 +158,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			this.saved.set(false);
 			this.currentMachine.set(null);
 			this.currentPreference.set(null);
-			animations.removeTrace(currentTrace.get());
+			final Trace trace = currentTrace.get();
+			if (trace != null) {
+				animations.removeTrace(trace);
+			}
 		}
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
 	}
