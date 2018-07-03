@@ -1,10 +1,16 @@
 package de.prob2.ui.internal;
 
+import java.util.ResourceBundle;
+
+import com.google.inject.Injector;
+
 import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.domainobjects.DynamicCommandItem;
+
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -17,12 +23,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.inject.Injector;
-
-import java.util.ResourceBundle;
 
 public class DynamicCommandStage extends Stage {
 
@@ -80,6 +83,7 @@ public class DynamicCommandStage extends Stage {
 	
 	@FXML
 	protected void initialize() {
+		lbDescription.setWrapText(true);
 		fillCommands();
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if (to == null) {
