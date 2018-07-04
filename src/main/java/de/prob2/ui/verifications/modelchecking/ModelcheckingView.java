@@ -37,6 +37,7 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+import de.prob2.ui.verifications.modelchecking.ModelcheckingStage.SearchStrategy;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -49,7 +50,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
@@ -60,8 +60,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 import org.slf4j.Logger;
@@ -69,124 +67,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class ModelcheckingView extends ScrollPane implements IModelCheckListener {
-	private enum SearchStrategy {
-		MIXED_BF_DF("verifications.modelchecking.stage.strategy.items.mixedBfDf"),
-		BREADTH_FIRST("verifications.modelchecking.stage.strategy.items.breadthFirst"),
-		DEPTH_FIRST("verifications.modelchecking.stage.strategy.items.depthFirst"),
-		//HEURISTIC_FUNCTION("verifications.modelchecking.stage.strategy.items.heuristicFunction"),
-		//HASH_RANDOM("verifications.modelchecking.stage.strategy.items.hashRandom"),
-		//RANDOM("verifications.modelchecking.stage.strategy.items.random"),
-		//OUT_DEGREE("verifications.modelchecking.stage.strategy.items.outDegree"),
-		//DISABLED_TRANSITIONS("verifications.modelchecking.stage.strategy.items.disabledTransitions"),
-		;
-		
-		private final String name;
-		
-		SearchStrategy(final String name) {
-			this.name = name;
-		}
-		
-		public String getName() {
-			return this.name;
-		}
-	}
-	
-	private final class ModelcheckingStageController extends Stage {
-		@FXML
-		private Button startButton;
-		@FXML
-		private ChoiceBox<SearchStrategy> selectSearchStrategy;
-		@FXML
-		private CheckBox findDeadlocks;
-		@FXML
-		private CheckBox findInvViolations;
-		@FXML
-		private CheckBox findBAViolations;
-		@FXML
-		private CheckBox findGoal;
-		@FXML
-		private CheckBox stopAtFullCoverage;
 
-		private ModelcheckingStageController(final StageManager stageManager) {
-			stageManager.loadFXML(this, "modelchecking_stage.fxml");
-		}
-
-		@FXML
-		private void initialize() {
-			this.initModality(Modality.APPLICATION_MODAL);
-			this.selectSearchStrategy.getItems().setAll(SearchStrategy.values());
-			this.selectSearchStrategy.setValue(SearchStrategy.MIXED_BF_DF);
-			this.selectSearchStrategy.setConverter(new StringConverter<SearchStrategy>() {
-				@Override
-				public String toString(final SearchStrategy object) {
-					return bundle.getString(object.getName());
-				}
-				
-				@Override
-				public SearchStrategy fromString(final String string) {
-					throw new UnsupportedOperationException("Conversion from String to SearchStrategy not supported");
-				}
-			});
-		}
-
-		@FXML
-		private void startModelCheck() {
-			if (currentTrace.exists()) {
-				checkItem();
-			} else {
-				stageManager.makeAlert(Alert.AlertType.ERROR, bundle.getString("verifications.modelchecking.stage.noMachineLoaded"))
-						.showAndWait();
-				this.hide();
-			}
-		}
-		
-		private void checkItem() {
-			Thread currentJobThread = new Thread(() -> {
-				synchronized(lock) {
-					updateCurrentValues(getOptions(), currentTrace.getStateSpace(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
-					startModelchecking(false);
-					currentJobThreads.remove(Thread.currentThread());
-				}
-			}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
-			currentJobThreads.add(currentJobThread);
-			currentJobThread.start();
-		}
-		
-		private ModelCheckingOptions getOptions() {
-			ModelCheckingOptions options = new ModelCheckingOptions();
-			
-			switch (selectSearchStrategy.getValue()) {
-				case MIXED_BF_DF:
-					break;
-				case BREADTH_FIRST:
-					options = options.breadthFirst(true);
-					break;
-				case DEPTH_FIRST:
-					options = options.depthFirst(true);
-					break;
-				default:
-					throw new IllegalArgumentException("Unhandled search strategy: " + selectSearchStrategy.getValue());
-			}
-			
-			options = options.checkDeadlocks(findDeadlocks.isSelected());
-			options = options.checkInvariantViolations(findInvViolations.isSelected());
-			options = options.checkAssertions(findBAViolations.isSelected());
-			options = options.checkGoal(findGoal.isSelected());
-			options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
-			options = options.recheckExisting(true);
-			return options;
-		}
-
-		@FXML
-		private void cancel() {
-			cancelModelcheck();
-			this.hide();
-		}
-
-		private void setDisableStart(final boolean disableStart) {
-			Platform.runLater(() -> this.startButton.setDisable(disableStart));
-		}
-	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingView.class);
 	private static final AtomicInteger threadCounter = new AtomicInteger(0);
@@ -221,7 +102,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final StatsView statsView;
-	private final ModelcheckingStageController stageController;
+	private final ModelcheckingStage stageController;
 	private final StageManager stageManager;
 	private final Injector injector;
 	private final ResourceBundle bundle;
@@ -238,7 +119,8 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 	@Inject
 	private ModelcheckingView(final CurrentTrace currentTrace,
 			final CurrentProject currentProject, final StageManager stageManager, 
-			final StatsView statsView, final Injector injector, final ResourceBundle bundle) {
+			final StatsView statsView, final Injector injector, final ResourceBundle bundle,
+			final ModelcheckingStage stageController) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.statsView = statsView;
@@ -249,7 +131,7 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 		this.currentJobs = new ArrayList<>();
 		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
-		this.stageController = new ModelcheckingStageController(stageManager);
+		this.stageController = stageController;
 		this.jobs = new HashMap<>();
 	}
 
@@ -449,6 +331,18 @@ public final class ModelcheckingView extends ScrollPane implements IModelCheckLi
 				startModelchecking(checkAll);
 			}
 			currentJobThreads.remove(Thread.currentThread());
+		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
+		currentJobThreads.add(currentJobThread);
+		currentJobThread.start();
+	}
+	
+	public void checkItem(ModelCheckingOptions options, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
+		Thread currentJobThread = new Thread(() -> {
+			synchronized(lock) {
+				updateCurrentValues(options, currentTrace.getStateSpace(), converter, strategy);
+				startModelchecking(false);
+				currentJobThreads.remove(Thread.currentThread());
+			}
 		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
 		currentJobThreads.add(currentJobThread);
 		currentJobThread.start();
