@@ -24,7 +24,7 @@ import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
 import de.prob2.ui.verifications.ltl.LTLView;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
+import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
@@ -199,7 +199,7 @@ public class MachinesTab extends Tab {
 		});
 		machinesList.disableProperty().bind(
 				injector.getInstance(LTLView.class).currentJobThreadsProperty().emptyProperty().not()
-					.or(injector.getInstance(ModelcheckingView.class).currentJobThreadsProperty().emptyProperty().not())
+					.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
 					.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not()));
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);

@@ -22,7 +22,7 @@ import javafx.util.StringConverter;
 @Singleton
 public class ModelcheckingStage extends Stage {
 	
-	public static enum SearchStrategy {
+	public enum SearchStrategy {
 		MIXED_BF_DF("verifications.modelchecking.stage.strategy.items.mixedBfDf"),
 		BREADTH_FIRST("verifications.modelchecking.stage.strategy.items.breadthFirst"),
 		DEPTH_FIRST("verifications.modelchecking.stage.strategy.items.depthFirst"),
@@ -98,7 +98,7 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private void startModelCheck() {
 		if (currentTrace.exists()) {
-			injector.getInstance(ModelcheckingView.class).checkItem(getOptions(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
+			injector.getInstance(Modelchecker.class).checkItem(getOptions(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
 		} else {
 			stageManager.makeAlert(Alert.AlertType.ERROR, bundle.getString("verifications.modelchecking.stage.noMachineLoaded"))
 					.showAndWait();
