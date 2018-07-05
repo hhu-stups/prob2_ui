@@ -91,7 +91,7 @@ public class ProjectManager {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 				fileChooser.setInitialFileName(project.getName() + PROJECT_FILE_ENDING);
-				fileChooser.getExtensionFilters().add(new ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*" + PROJECT_FILE_ENDING));
+				fileChooser.getExtensionFilters().add(new ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*" + PROJECT_FILE_ENDING), "*" + PROJECT_FILE_ENDING));
 				location = fileChooser.showSaveDialog(stageManager.getCurrent());
 				name = location.getName().substring(0, location.getName().lastIndexOf('.'));
 			}

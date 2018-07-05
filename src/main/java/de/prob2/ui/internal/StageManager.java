@@ -64,7 +64,7 @@ public final class StageManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StageManager.class);
 	private static final String STYLESHEET = "prob.css";
 	private static final Image ICON = new Image("prob_128.png");
-	private static final String PROJECT_FILE_ENDING = ".prob2project";
+	private static final String PROJECT_FILE_ENDING = "*.prob2project";
 
 	private final Injector injector;
 	private final MenuToolkit menuToolkit;
@@ -313,8 +313,8 @@ public final class StageManager {
 		
 		final List<String> allExts = new ArrayList<>();
 		if (projects) {
-			allExts.add("*" + PROJECT_FILE_ENDING);
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*" + PROJECT_FILE_ENDING));
+			allExts.add(PROJECT_FILE_ENDING);
+			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), PROJECT_FILE_ENDING), PROJECT_FILE_ENDING));
 		}
 		
 		if (machines) {

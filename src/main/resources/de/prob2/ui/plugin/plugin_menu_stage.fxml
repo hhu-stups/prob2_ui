@@ -7,7 +7,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Text?>
-<fx:root type="PluginMenuStage" title="Plugin Menu" minWidth="600" minHeight="500" width="600" height="500"
+<fx:root type="PluginMenuStage" title="plugin.pluginMenu.stage.title" minWidth="600" minHeight="500" width="600" height="500"
 		 xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -16,9 +16,9 @@
 							AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
 					<top>
 						<HBox spacing="10.0" alignment="CENTER">
-							<Text HBox.hgrow="NEVER" text="%pluginsmenu.search"/>
+							<Text HBox.hgrow="NEVER" text="%plugin.pluginMenu.search"/>
 							<TextField fx:id="pluginSearchTextField"
-									   promptText="%pluginsmenu.search.prompt" HBox.hgrow="ALWAYS"/>
+									   promptText="%plugin.pluginMenu.search.prompt" HBox.hgrow="ALWAYS"/>
 							<padding>
 								<Insets bottom="10.0"/>
 							</padding>
@@ -32,17 +32,17 @@
 									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 								</columnResizePolicy>
 								<columns>
-									<TableColumn fx:id="nameCol" text="%pluginsmenu.columns.name" editable="false"/>
-									<TableColumn fx:id="versionCol" text="%pluginsmenu.columns.version"
+									<TableColumn fx:id="nameCol" text="%plugin.pluginMenu.table.columns.name" editable="false"/>
+									<TableColumn fx:id="versionCol" text="%plugin.pluginMenu.table.columns.version"
 												 maxWidth="100" minWidth="100" sortable="false" editable="false"/>
-									<TableColumn fx:id="activeCol" text="%pluginsmenu.columns.active"  maxWidth="100" minWidth="100"/>
+									<TableColumn fx:id="activeCol" text="%plugin.pluginMenu.table.columns.active"  maxWidth="100" minWidth="100"/>
 								</columns>
 								<placeholder>
-									<Label text="%pluginsmenu.table.noPluginsLoaded"/>
+									<Label text="%plugin.pluginMenu.table.noPluginsLoaded"/>
 								</placeholder>
 							</TableView>
 							<HBox VBox.vgrow="NEVER" spacing="10.0" alignment="CENTER">
-								<Text HBox.hgrow="NEVER" text="%pluginsmenu.path"/>
+								<Text HBox.hgrow="NEVER" text="%plugin.pluginMenu.path"/>
 								<TextField fx:id="pathTextField" HBox.hgrow="ALWAYS" editable="false"/>
 								<padding>
 									<Insets top="10.0"/>
@@ -52,12 +52,12 @@
 					</center>
 					<bottom>
 						<HBox>
-							<Button text="%pluginsmenu.changepath" onAction="#changePath"
+							<Button text="%plugin.pluginMenu.buttons.changePath" onAction="#changePath"
 									styleClass="button-blue"/>
 							<HBox spacing="10.0" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-								<Button text="%menu.advanced.items.addPlugin" onAction="#addPlugin"
+								<Button text="%plugin.pluginMenu.buttons.addPlugin" onAction="#addPlugin"
 									styleClass="button-blue"/>
-								<Button text="%menu.advanced.items.reloadPlugin" onAction="#reloadPlugins"
+								<Button text="%plugin.pluginMenu.buttons.reloadPlugin" onAction="#reloadPlugins"
 									styleClass="button-blue"/>
 
 							</HBox>

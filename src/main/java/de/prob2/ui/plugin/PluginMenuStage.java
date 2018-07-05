@@ -182,7 +182,7 @@ public class PluginMenuStage extends Stage {
 		String pluginName = plugin.getName();
 
 		MenuItem restartItem = new MenuItem(
-				getFormattedString("pluginsmenu.table.contextmenu.restart", pluginName));
+				getFormattedString("plugin.pluginMenu.table.contextmenu.restart", pluginName));
 		restartItem.setOnAction(event -> {
 			if (PluginState.STOPPED == getProBJarPluginManager().stopPlugin(pluginId)) {
 				getProBJarPluginManager().startPlugin(pluginId);
@@ -190,13 +190,13 @@ public class PluginMenuStage extends Stage {
 		});
 
 		MenuItem removeMenuItem = new MenuItem(
-				getFormattedString("pluginsmenu.table.contextmenu.remove", pluginName));
+				getFormattedString("plugin.pluginMenu.table.contextmenu.remove", pluginName));
 		removeMenuItem.setOnAction(event -> {
 			Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-					getFormattedString("pluginsmenu.table.dialog.remove.question", pluginName),
+					getFormattedString("plugin.pluginMenu.dialog.removePlugin.content", pluginName),
 					ButtonType.NO, ButtonType.YES);
 			dialog.initOwner(this);
-			dialog.setTitle(bundle.getString("pluginsmenu.table.dialog.title"));
+			dialog.setTitle(bundle.getString("plugin.pluginMenu.dialog.removePlugin.title"));
 			dialog.showAndWait().ifPresent(response -> {
 				if (response == ButtonType.YES) {
 					getProBJarPluginManager().deletePlugin(pluginId);

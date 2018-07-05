@@ -73,7 +73,7 @@ public abstract class ProBPlugin extends Plugin {
 				LOGGER.warn("Exception while starting the plug-in " + getName(), ex);
 				getProBPluginHelper().getStageManager().makeExceptionAlert(
 						String.format(
-								getInjector().getInstance(ResourceBundle.class).getString("plugins.error.start"),
+								getInjector().getInstance(ResourceBundle.class).getString("plugin.alerts.couldNotStartPlugin.message"),
 								getName()),
 						ex).show();
 			}
@@ -90,7 +90,7 @@ public abstract class ProBPlugin extends Plugin {
 				LOGGER.warn("Exception while stopping the plug-in " + getName(), ex);
 				getProBPluginHelper().getStageManager().makeExceptionAlert(
 						String.format(
-								getInjector().getInstance(ResourceBundle.class).getString("plugins.error.stop"),
+								getInjector().getInstance(ResourceBundle.class).getString("plugin.alerts.couldNotStopPlugin.message"),
 								getName()),
 						ex).show();
 			}

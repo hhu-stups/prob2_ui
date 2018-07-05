@@ -134,7 +134,7 @@ public class ProBPluginManager {
 				}
 			} catch (Exception e) {
 				LOGGER.warn("Tried to copy and load/start the plugin {}.\nThis exception was thrown: ", pluginFileName, e);
-				showWarningAlert("plugins.error.load", pluginFileName);
+				showWarningAlert("plugin.alerts.couldNotLocateInactive.message", pluginFileName);
 				//if an error occurred, delete the plugin file
 				PluginWrapper wrapper = pluginManager.getPlugin(plugin.toPath());
 				if (wrapper != null) {
@@ -164,7 +164,7 @@ public class ProBPluginManager {
 				}
 			}
 		} else {
-			showWarningAlert("plugins.error.inactive", getPluginDirectory());
+			showWarningAlert("plugin.alerts.couldNotLocateInactive.message", getPluginDirectory());
 		}
 	}
 
@@ -189,7 +189,7 @@ public class ProBPluginManager {
 	 */
 	List<PluginWrapper> changePluginDirectory() {
 		DirectoryChooser chooser = new DirectoryChooser();
-		chooser.setTitle(bundle.getString("pluginsmenu.changepath"));
+		chooser.setTitle(bundle.getString("plugin.pluginMenu.directoryChooser.changePath.title"));
 		chooser.setInitialDirectory(getPluginDirectory());
 		File newPath = chooser.showDialog(stageManager.getCurrent());
 		if (newPath != null) {
@@ -253,7 +253,7 @@ public class ProBPluginManager {
 			if (wrapper != null) {
 				//if there is a corresponding plugin, ask the user if he wants to overwrite it
 				Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-						String.format(bundle.getString("plugins.confirmation.copy"),
+						String.format(bundle.getString("plugin.dialog.overwriteExistingFile.content"),
 								destination.getName(),
 								((ProBPlugin) wrapper.getPlugin()).getName(),
 								wrapper.getDescriptor().getVersion()),
@@ -273,7 +273,7 @@ public class ProBPluginManager {
 					Files.deleteIfExists(destination.toPath());
 				} catch (IOException ex) {
 					LOGGER.warn("Could not delete file {}.", destination.getName());
-					showWarningAlert("plugins.error.delete", destination.getName());
+					showWarningAlert("plugin.alerts.couldNotDeleteJar.message", destination.getName());
 					return false;
 				}
 			}
@@ -283,7 +283,7 @@ public class ProBPluginManager {
 			Files.copy(source.toPath(), destination.toPath());
 			return true;
 		} catch (IOException e) {
-			showWarningAlert("plugins.error.copy", destination.getName());
+			showWarningAlert("plugin.alerts.couldNotCopyToPluginDirectory.message", destination.getName());
 		}
 		return false;
 	}
@@ -309,7 +309,7 @@ public class ProBPluginManager {
 			//because we don't use the enabled/disabled.txt of PF4J, the only reason for a
 			//plugin to be disabled is, when it has the wrong version
 			if (pluginWrapper.getPluginState() == PluginState.DISABLED) {
-				showWarningAlert("plugins.error.version",
+				showWarningAlert("plugin.alerts.wrongUIversion.message",
 						pluginWrapper.getPluginPath().getFileName(),
 						pluginWrapper.getDescriptor().getRequires(),
 						pluginManager.getSystemVersion());
@@ -322,9 +322,10 @@ public class ProBPluginManager {
 
 	private File showFileChooser(@Nonnull final Stage stage) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("menu.advanced.items.addPlugin"));
+		fileChooser.setTitle(bundle.getString("plugin.fileChooser.addPlugin.title"));
+		String proB2PluginFileExtension = "*.jar";
 		fileChooser.getExtensionFilters()
-				.addAll(new FileChooser.ExtensionFilter("ProB2 Plugins", "*.jar"));
+				.addAll(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Plugin"), proB2PluginFileExtension), proB2PluginFileExtension));
 		return fileChooserManager.showOpenDialog(fileChooser, Kind.PLUGINS, stage);
 	}
 
@@ -450,7 +451,7 @@ public class ProBPluginManager {
 				} catch (ClassNotFoundException e) {
 					LOGGER.error(e.getMessage(), e);
 					return new InvalidPlugin(pluginWrapper,
-							String.format(bundle.getString("plugin.load.error.find"), pluginClassName),
+							String.format(bundle.getString("plugin.invalidPlugin.message.couldNotFindPluginClass"), pluginClassName),
 							e);
 				}
 
@@ -461,7 +462,7 @@ public class ProBPluginManager {
 						|| (!ProBPlugin.class.isAssignableFrom(pluginClass))) {
 					LOGGER.error("The plugin clazz '{}' is not a valid ProBPlugin", pluginClassName);
 					return new InvalidPlugin(pluginWrapper,
-							String.format(bundle.getString("plugin.load.error.modifier"), pluginClassName));
+							String.format(bundle.getString("plugin.invalidPlugin.message.notAValidPluginClass"), pluginClassName));
 				}
 
 				// create the ProBPlugin instance
@@ -472,7 +473,7 @@ public class ProBPluginManager {
 				} catch (Exception e) {
 					LOGGER.error(e.getMessage(), e);
 					return new InvalidPlugin(pluginWrapper,
-							String.format(bundle.getString("plugin.load.error.create"), pluginClassName),
+							String.format(bundle.getString("plugin.invalidPlugin.message.couldNotCreateInstance"), pluginClassName),
 							e);
 
 				}

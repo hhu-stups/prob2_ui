@@ -12,7 +12,7 @@
 	<Menu text="%menu.advanced.items.useVisualisation" fx:id="visualisationFxMenu">
 		<MenuItem fx:id="openVisualisationItem" text="%menu.advanced.items.useVisualisation.select" onAction="#openVisualisation"/>
 		<MenuItem fx:id="stopVisualisationItem" text="%menu.advanced.items.useVisualisation.stop" onAction="#stopVisualisation"/>
-		<MenuItem fx:id="detachVisualisationItem" text="%menu.advanced.useVisualisation.detach" onAction="#detachVisualisation"/>
+		<MenuItem fx:id="detachVisualisationItem" text="%menu.advanced.items.useVisualisation.detach" onAction="#detachVisualisation"/>
 	</Menu>
 </fx:root>
 
