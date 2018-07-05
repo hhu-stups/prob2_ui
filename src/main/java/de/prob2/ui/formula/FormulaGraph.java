@@ -7,6 +7,7 @@ import javafx.scene.shape.Line;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import de.prob2.ui.layout.FontSize;
 
@@ -77,10 +78,10 @@ public class FormulaGraph extends Region {
 	}
 	
 	public DoubleExpression maxWidthProperty(int level) {
-		return getAllNodesOnLevel(level).stream()
+		Optional<DoubleExpression> result = getAllNodesOnLevel(level).stream()
 			.map(node -> (DoubleExpression) node.prefWidthProperty())
-			.reduce((a,e) -> (DoubleExpression) Bindings.max(a,e))
-			.get();
+			.reduce((a,e) -> (DoubleExpression) Bindings.max(a,e));
+		return result.isPresent() ? result.get() : null;
 	}
 	
 	private int maxChildren(int level) {

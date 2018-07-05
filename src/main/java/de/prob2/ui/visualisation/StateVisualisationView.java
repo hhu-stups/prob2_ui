@@ -12,8 +12,8 @@ import com.google.inject.Inject;
 
 import de.prob.Main;
 import de.prob.animator.command.ExecuteRightClickCommand;
+import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetImagesForMachineCommand;
-import de.prob.animator.command.GetImagesForStateCommand;
 import de.prob.animator.command.GetRightClickOptionsForStateVisualizationCommand;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
@@ -26,7 +26,9 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -61,7 +63,7 @@ public class StateVisualisationView extends AnchorPane {
 		stateSpace.execute(getImagesForMachineCommand);
 		Map<Integer, String> images = getImagesForMachineCommand.getImages();
 		if (!images.isEmpty()) {
-			showImages(state, images);
+			showMatrix(state, images);
 			visualisationPossible.set(true);
 		}
 
@@ -71,25 +73,32 @@ public class StateVisualisationView extends AnchorPane {
 		return visualisationPossible;
 	}
 
-	private void showImages(State state, Map<Integer, String> images) throws FileNotFoundException {
-		GetImagesForStateCommand getImagesForStateCommand = new GetImagesForStateCommand(state.getId());
-		state.getStateSpace().execute(getImagesForStateCommand);
-		Integer[][] imageMatrix = getImagesForStateCommand.getMatrix();
-		int rowNr = getImagesForStateCommand.getRows();
-		int columnNr = getImagesForStateCommand.getColumns();
+	private void showMatrix(State state, Map<Integer, String> images) throws FileNotFoundException {
+		final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
+		state.getStateSpace().execute(cmd);
+		final List<List<Object>> matrix = cmd.getMatrix();
 
-		for (int r = 0; r < rowNr; r++) {
-			for (int c = 0; c < columnNr; c++) {
-				Integer imageId = imageMatrix[r][c];
-				if (imageId != null) {
-					String imageURL = images.get(imageId);
-					Image image = getImage(imageURL);
-					ImageView imageView = new ImageView(image);
+		for (int r = 0; r < matrix.size(); r++) {
+			final List<Object> row = matrix.get(r);
+			for (int c = 0; c < row.size(); c++) {
+				final Object entry = row.get(c);
+				final Node view;
+				if (entry == null) {
+					view = null;
+				} else if (entry instanceof Integer) {
+					view = new ImageView(getImage(images.get(entry)));
+				} else if (entry instanceof String) {
+					view = new Label((String)entry);
+				} else {
+					throw new AssertionError("Unhandled animation matrix entry type: " + entry.getClass());
+				}
+
+				if (view != null) {
 					final int finalRow = r;
 					final int finalColumn = c;
-					imageView.setOnContextMenuRequested(e -> getContextMenu(state, finalRow, finalColumn)
-						.show(imageView, e.getScreenX(), e.getScreenY()));
-					visualisationGridPane.add(imageView, c, r);
+					view.setOnContextMenuRequested(e -> getContextMenu(state, finalRow, finalColumn)
+						.show(view, e.getScreenX(), e.getScreenY()));
+					visualisationGridPane.add(view, c, r);
 				}
 			}
 		}

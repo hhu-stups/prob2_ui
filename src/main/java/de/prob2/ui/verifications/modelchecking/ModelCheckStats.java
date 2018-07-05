@@ -45,27 +45,22 @@ public final class ModelCheckStats extends AnchorPane {
 	@FXML private Label totalStates;
 	@FXML private Label totalTransitions;
 
-	private ModelcheckingView modelcheckingController;
 	private Trace trace;
-	
-	private final StatsView statsView;
+
 	
 	private ModelCheckingItem item;
 	
 	private final Injector injector;
 	
 	@Inject
-	public ModelCheckStats(final StageManager stageManager, final ModelcheckingView modelcheckingController, final StatsView statsView,
-							final Injector injector) {
-		this.modelcheckingController = modelcheckingController;
-		this.statsView = statsView;
+	public ModelCheckStats(final StageManager stageManager, final Injector injector) {
 		this.injector = injector;
 		stageManager.loadFXML(this, "modelchecking_stats.fxml");
 	}
 
 	@FXML
 	private void initialize() {
-		this.modelcheckingController.widthProperty().addListener((observableValue, oldValue, newValue) -> {
+		injector.getInstance(ModelcheckingView.class).widthProperty().addListener((observableValue, oldValue, newValue) -> {
 			if (newValue == null) {
 				resultText.setWrappingWidth(0);
 				return;
@@ -106,7 +101,7 @@ public final class ModelCheckStats extends AnchorPane {
 		final ComputeCoverageCommand.ComputeCoverageResult coverage = cmd.getResult();
 		
 		if (coverage != null) {
-			Platform.runLater(() -> statsView.updateExtendedStats(coverage));
+			Platform.runLater(() -> injector.getInstance(StatsView.class).updateExtendedStats(coverage));
 		}
 	}
 
@@ -144,7 +139,7 @@ public final class ModelCheckStats extends AnchorPane {
 			Number numTrans = coverage.getTotalNumberOfTransitions();
 
 			Platform.runLater(() -> {
-				statsView.updateExtendedStats(coverage);
+				injector.getInstance(StatsView.class).updateExtendedStats(coverage);
 				totalStates.setText(String.valueOf(numNodes));
 				totalTransitions.setText(String.valueOf(numTrans));
 			});
@@ -162,7 +157,7 @@ public final class ModelCheckStats extends AnchorPane {
 	private void showResult(String message) {
 		resultBackground.setVisible(true);
 		resultText.setText(message);
-		resultText.setWrappingWidth(this.modelcheckingController.widthProperty().doubleValue() - 60);
+		resultText.setWrappingWidth(injector.getInstance(ModelcheckingView.class).widthProperty().doubleValue() - 60);
 		switch (item.getChecked()) {
 			case SUCCESS:
 				resultBackground.getStyleClass().setAll("mcheckSuccess");

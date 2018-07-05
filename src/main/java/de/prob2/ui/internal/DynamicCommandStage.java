@@ -9,7 +9,7 @@ import de.prob.animator.domainobjects.DynamicCommandItem;
 
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
+import de.prob2.ui.verifications.modelchecking.Modelchecker;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -113,7 +113,7 @@ public class DynamicCommandStage extends Stage {
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> refresh());
 		currentTrace.addListener((observable, from, to) -> refresh());
 		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> refresh());
-		injector.getInstance(ModelcheckingView.class).resultProperty().addListener((observable, from, to) -> refresh());
+		injector.getInstance(Modelchecker.class).resultProperty().addListener((observable, from, to) -> refresh());
 		
 		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
