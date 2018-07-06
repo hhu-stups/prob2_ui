@@ -280,8 +280,8 @@ public class BEditor extends CodeArea {
 				}
 		}).subscribe(this::applyHighlighting);
 
-		fontSize.fontSizeProperty().addListener((observable, from, to) -> 
-			this.setStyle(String.format("-fx-font-size: %dpx;", fontSize.fontSizeProperty().get()))
+		fontSize.fontSizeProperty().addListener((observable, from, to) ->
+			this.setStyle(String.format("-fx-font-size: %dpx;", to.intValue()))
 		);
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.Z, KeyCombination.CONTROL_DOWN), e-> {
 			int oldLength = this.getText().length();

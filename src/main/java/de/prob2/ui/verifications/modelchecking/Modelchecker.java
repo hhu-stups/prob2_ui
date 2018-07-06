@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,6 @@ import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
-import de.prob.model.representation.AbstractElement;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -112,7 +110,7 @@ public class Modelchecker implements IModelCheckListener {
 	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
 		updateCurrentValues(options, stateSpace);
-		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy), toPrettyString(currentOptions));
+		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy));
 		if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
 			currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
 		} else {
@@ -124,7 +122,7 @@ public class Modelchecker implements IModelCheckListener {
 	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
 		currentOptions = options;
-		currentStats = new ModelCheckStats(stageManager, injector);
+		currentStats = new ModelCheckStats(injector.getInstance(ModelcheckingView.class), stageManager, injector);
 		IModelCheckJob job = new ConsistencyChecker(stateSpace, options, null, this);
 		currentJobs.add(job);
 	}
@@ -223,22 +221,6 @@ public class Modelchecker implements IModelCheckListener {
 		currentTrace.getStateSpace().sendInterrupt();
 		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);
-	}
-	
-	private String toPrettyString(ModelCheckingOptions options) {
-		int size = currentJobs.size();
-		IModelCheckJob job = currentJobs.get(size - 1);
-		AbstractElement main = job.getStateSpace().getMainComponent();
-		List<String> optsList = options.getPrologOptions().stream()
-				.map(ModelCheckingOptions.Options::getDescription)
-				.collect(Collectors.toList());
-		
-		String name = main == null ? bundle.getString("verifications.modelchecking.machineNamePlaceholder") : main.toString();
-		if (optsList.isEmpty()) {
-			return name;
-		} else {
-			return String.format(bundle.getString("verifications.modelchecking.prettyStringWithOptions"), name, String.join(", ", optsList));
-		}
 	}
 	
 	private ModelCheckingItem getItemIfAlreadyExists(ModelCheckingItem item) {

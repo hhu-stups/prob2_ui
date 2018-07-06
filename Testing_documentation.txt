@@ -383,11 +383,6 @@ Tatsächliches Ergebnis: Baum wird korrekt dargestellt mit Abständen zwischen d
 8. Hilfe Button -> springt noch nicht an die richtige Stelle
 
 
-Bemerkung: Überlappung der Schrift über dem Hintergrund bei Windows möglich
-
-
-
-
 
 
 17. Graph Visualisierung
@@ -876,7 +871,7 @@ Tatsächliches Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird 
 
 11. Hilfebutton -> funktioniert, springt noch nicht an die richtige Stelle
 
-12. Deaktivierung eines Modelchecking Items -> funktioniert
+12. Deaktivierung eines Modelchecking Items
 
 
 Erwartetes Ergebnis: Bei Deaktivierung eines Items passt sich der Machine Status und die Status Bar für die Fehler sich an
@@ -1330,10 +1325,6 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 12. Clear mit Eingabe von ":clear" -> funktioniert
 
-Bemerkung:
--hat noch keinen HelpButton
-
-
 
 
 
@@ -1346,5 +1337,42 @@ Bemerkung:
 
 
 
-Noch zu testen:
--UI Persistenz
+
+
+34. UI Persistenz
+
+1. Geöffnete Stages beim Schließen öffnen sich beim Starten -> funktioniert
+
+2. Geöffnete Stages nach Detachen beim Schließen öffnen sich beim Starten
+
+3. Größe und Positionen der Fenster werden persistiert
+
+4. Größe und Positionen der detachten Fenster werden persistiert
+
+5. History der Groovy Konsole -> funktioniert
+
+6. History der B Konsole -> funktioniert
+
+7. Ausgewählte Perspektive
+
+8. Recent Projects -> funktioniert
+
+9. Schriftgröße -> funktioniert
+
+10. Maximale Anzahl Recent Projects
+
+11. Expanded Titled Panes -> funktioniert (außer bei der B Konsole)
+
+12. Current Preference
+
+13. Global Preferences
+
+14. Default Project Location
+
+15. OperationsView (Sort mode und Show disabled)
+
+16. Plugin Ordner
+
+17. eingestellte Sprache -> funktioniert
+
+

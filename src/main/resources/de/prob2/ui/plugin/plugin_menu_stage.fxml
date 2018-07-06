@@ -7,7 +7,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Text?>
-<fx:root type="PluginMenuStage" title="plugin.pluginMenu.stage.title" minWidth="600" minHeight="500" width="600" height="500"
+<fx:root type="PluginMenuStage" title="%plugin.pluginMenu.stage.title" minWidth="600" minHeight="500" width="600" height="500"
 		 xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
