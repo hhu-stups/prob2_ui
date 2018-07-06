@@ -10,17 +10,17 @@
 			<padding>
 				<Insets top="10.0" bottom="10.0" left="10.0" right="10.0" />
 			</padding>
-			<TextField fx:id="prefSearchField" promptText="Search" HBox.hgrow="ALWAYS" />
+			<TextField fx:id="prefSearchField" promptText="%preferences.preferencesView.search.prompt" HBox.hgrow="ALWAYS" />
 		</HBox>
 	</top>
 	<center>
 		<TreeTableView fx:id="tv" prefHeight="400.0" prefWidth="600.0" editable="true" showRoot="false" styleClass="with-border">
 			<columns>
-				<TreeTableColumn fx:id="tvName" editable="false" minWidth="80.0" prefWidth="320.0" text="%preferences.view.columns.name" />
-				<TreeTableColumn fx:id="tvChanged" editable="false" resizable="false" prefWidth="20.0" text="%preferences.view.columns.changed" />
-				<TreeTableColumn fx:id="tvValue" editable="true" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferences.view.columns.value" />
-				<TreeTableColumn fx:id="tvDefaultValue" editable="false" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferences.view.columns.defaultValue" />
-				<TreeTableColumn fx:id="tvDescription" editable="false" styleClass="left" minWidth="80.0" prefWidth="900.0" sortable="false" text="%preferences.view.columns.description" />
+				<TreeTableColumn fx:id="tvName" editable="false" minWidth="80.0" prefWidth="320.0" text="%preferences.preferencesView.table.columns.name" />
+				<TreeTableColumn fx:id="tvChanged" editable="false" resizable="false" prefWidth="20.0" text="%preferences.preferencesView.table.columns.changed" />
+				<TreeTableColumn fx:id="tvValue" editable="true" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferences.preferencesView.table.columns.value" />
+				<TreeTableColumn fx:id="tvDefaultValue" editable="false" minWidth="40.0" prefWidth="120.0" sortable="false" text="%preferences.preferencesView.table.columns.defaultValue" />
+				<TreeTableColumn fx:id="tvDescription" editable="false" styleClass="left" minWidth="80.0" prefWidth="900.0" sortable="false" text="%preferences.preferencesView.table.columns.description" />
 			</columns>
 			<placeholder>
 				<Label text="%common.noModelLoaded" />

@@ -157,7 +157,7 @@ public final class PreferencesStage extends Stage {
 	@FXML
 	private void selectDefaultLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
-		dirChooser.setTitle(bundle.getString("preferences.stage.tabs.general.selectLocation.title"));
+		dirChooser.setTitle(bundle.getString("preferences.stage.tabs.general.directoryChooser.selectLocation.title"));
 		File file = dirChooser.showDialog(this.getOwner());
 		if (file != null) {
 			defaultLocationField.setText(file.getAbsolutePath());
@@ -186,7 +186,7 @@ public final class PreferencesStage extends Stage {
 			this.globalProBPrefs.apply();
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
-			stageManager.makeExceptionAlert("Failed to apply preference changes", e).show();
+			stageManager.makeExceptionAlert(bundle.getString("preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.message"), e).show();
 		}
 		
 		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();
