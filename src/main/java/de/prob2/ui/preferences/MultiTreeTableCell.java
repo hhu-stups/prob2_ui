@@ -110,44 +110,47 @@ public class MultiTreeTableCell extends TreeTableCell<PrefTreeItem, String> {
 		this.setGraphic(comboBox);
 	}
 	
+	private void changeToItem(final PrefTreeItem pti) {
+		if (pti.getValueType() == null) {
+			// If there is no value type (for categories for example), just display the value text.
+			changeToText();
+		} else {
+			final String type = pti.getValueType().getType();
+			if ("bool".equals(type)) {
+				// Booleans get a CheckBox.
+				changeToCheckBox(pti);
+			} else if ("int".equals(type)) {
+				// Integers get a spinner.
+				changeToSpinner(Integer.MIN_VALUE, Integer.MAX_VALUE, pti.getValue());
+			} else if ("nat".equals(type)) {
+				// Nonnegative integers get a spinner.
+				changeToSpinner(0, Integer.MAX_VALUE, pti.getValue());
+			} else if ("nat1".equals(type)) {
+				// Positive integers get a spinner.
+				changeToSpinner(1, Integer.MAX_VALUE, pti.getValue());
+			} else if ("neg".equals(type)) {
+				// Nonpositive integers get a spinner.
+				changeToSpinner(Integer.MIN_VALUE, 0, pti.getValue());
+			} else if ("rgb_color".equals(type)) {
+				// Colors get a ColorPicker.
+				changeToColorPicker(pti);
+			} else if ("[]".equals(type) || PrefConstants.VALID_TYPE_VALUES.containsKey(type)) {
+				// Lists get a ComboBox.
+				changeToComboBox(pti, type);
+			} else {
+				// Default to a simple text field if type is unknown.
+				changeToTextField(pti);
+			}
+		}
+	}
+	
 	@Override
 	public void updateItem(final String item, final boolean empty) {
 		super.updateItem(item, empty);
 		
 		if (this.getTreeTableRow() != null && this.getTreeTableRow().getItem() != null) {
 			// Item is available, which means we can do fancy stuff!
-			final PrefTreeItem pti = this.getTreeTableRow().getItem();
-			if (pti.getValueType() == null) {
-				// If there is no value type (for categories for example), just display the value text.
-				changeToText();
-			} else {
-				final String type = pti.getValueType().getType();
-				if ("bool".equals(type)) {
-					// Booleans get a CheckBox.
-					changeToCheckBox(pti);
-				} else if ("int".equals(type)) {
-					// Integers get a spinner.
-					changeToSpinner(Integer.MIN_VALUE, Integer.MAX_VALUE, pti.getValue());
-				} else if ("nat".equals(type)) {
-					// Nonnegative integers get a spinner.
-					changeToSpinner(0, Integer.MAX_VALUE, pti.getValue());
-				} else if ("nat1".equals(type)) {
-					// Positive integers get a spinner.
-					changeToSpinner(1, Integer.MAX_VALUE, pti.getValue());
-				} else if ("neg".equals(type)) {
-					// Nonpositive integers get a spinner.
-					changeToSpinner(Integer.MIN_VALUE, 0, pti.getValue());
-				} else if ("rgb_color".equals(type)) {
-					// Colors get a ColorPicker.
-					changeToColorPicker(pti);
-				} else if ("[]".equals(type) || PrefConstants.VALID_TYPE_VALUES.containsKey(type)) {
-					// Lists get a ComboBox.
-					changeToComboBox(pti, type);
-				} else {
-					// Default to a simple text field if type is unknown.
-					changeToTextField(pti);
-				}
-			}
+			changeToItem(this.getTreeTableRow().getItem());
 		} else {
 			// Row or item is null, so display the item text as is.
 			this.setGraphic(null);

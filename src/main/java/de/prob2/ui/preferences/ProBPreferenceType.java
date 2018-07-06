@@ -3,6 +3,9 @@ package de.prob2.ui.preferences;
 import java.util.Arrays;
 import java.util.Objects;
 
+import de.prob.animator.domainobjects.ProBPreference;
+import de.prob.prolog.term.ListPrologTerm;
+
 public class ProBPreferenceType {
 	private final String type;
 	private final String[] values;
@@ -23,6 +26,19 @@ public class ProBPreferenceType {
 		
 		this.type = "[]";
 		this.values = values.clone();
+	}
+	
+	static ProBPreferenceType fromProBPreference(ProBPreference pref) {
+		if (pref.type instanceof ListPrologTerm) {
+			final ListPrologTerm values = (ListPrologTerm) pref.type;
+			final String[] arr = new String[values.size()];
+			for (int i = 0; i < values.size(); i++) {
+				arr[i] = values.get(i).getFunctor();
+			}
+			return new ProBPreferenceType(arr);
+		} else {
+			return new ProBPreferenceType(pref.type.getFunctor());
+		}
 	}
 	
 	public String getType() {

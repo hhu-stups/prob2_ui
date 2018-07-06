@@ -33,6 +33,76 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 public final class ExceptionAlert extends Alert {
+	private class ErrorTypeCell extends TableCell<ErrorItem, ErrorItem> {
+		@Override
+		protected void updateItem(final ErrorItem item, final boolean empty) {
+			super.updateItem(item, empty);
+			
+			if (empty || item == null) {
+				this.setText(null);
+			} else {
+				final String typeName;
+				switch (item.getType()) {
+					case WARNING:
+						typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.warning");
+						break;
+					
+					case ERROR:
+						typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.error");
+						break;
+					
+					case INTERNAL_ERROR:
+						typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.internalError");
+						break;
+					
+					default:
+						typeName = item.getType().name();
+				}
+				this.setText(typeName);
+			}
+		}
+	}
+	
+	private static class ErrorMessageCell extends TableCell<ErrorItem, ErrorItem> {
+		@Override
+		protected void updateItem(final ErrorItem item, final boolean empty) {
+			super.updateItem(item, empty);
+			
+			if (empty || item == null) {
+				this.setText(null);
+			} else {
+				this.setText(item.getMessage());
+			}
+		}
+	}
+	
+	private static class ErrorLocationsCell extends TableCell<ErrorItem, ErrorItem> {
+		@Override
+		protected void updateItem(final ErrorItem item, final boolean empty) {
+			super.updateItem(item, empty);
+			
+			if (empty || item == null) {
+				this.setGraphic(null);
+			} else {
+				final VBox vbox = new VBox();
+				for (final ErrorItem.Location location : item.getLocations()) {
+					final Button openLocationButton = new Button(null, new FontAwesomeIconView(FontAwesomeIcon.PENCIL));
+					openLocationButton.setOnAction(event -> {
+						// TODO Jump to error location in file
+					});
+					final Label label = new Label(location.toString());
+					label.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
+					final HBox hbox = new HBox(openLocationButton, label);
+					HBox.setHgrow(openLocationButton, Priority.NEVER);
+					HBox.setHgrow(label, Priority.ALWAYS);
+					hbox.setAlignment(Pos.CENTER_LEFT);
+					vbox.getChildren().add(hbox);
+				}
+				this.setGraphic(vbox);
+			}
+		}
+	}
+	
 	@FXML private VBox contentVBox;
 	@FXML private Label label;
 	@FXML private TableView<ErrorItem> proBErrorTable;
@@ -92,73 +162,9 @@ public final class ExceptionAlert extends Alert {
 		this.messageColumn.setCellValueFactory(cellValueFactory);
 		this.locationsColumn.setCellValueFactory(cellValueFactory);
 		
-		this.typeColumn.setCellFactory(col -> new TableCell<ErrorItem, ErrorItem>() {
-			@Override
-			protected void updateItem(final ErrorItem item, final boolean empty) {
-				super.updateItem(item, empty);
-				
-				if (empty || item == null) {
-					this.setText(null);
-				} else {
-					final String typeName;
-					switch (item.getType()) {
-						case WARNING:
-							typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.warning");
-							break;
-						
-						case ERROR:
-							typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.error");
-							break;
-						
-						case INTERNAL_ERROR:
-							typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.internalError");
-							break;
-						
-						default:
-							typeName = item.getType().name();
-					}
-					this.setText(typeName);
-				}
-			}
-		});
-		
-		this.messageColumn.setCellFactory(col -> new TableCell<ErrorItem, ErrorItem>() {
-			@Override
-			protected void updateItem(final ErrorItem item, final boolean empty) {
-				super.updateItem(item, empty);
-				
-				if (empty || item == null) {
-					this.setText(null);
-				} else {
-					this.setText(item.getMessage());
-				}
-			}
-		});
-		
-		this.locationsColumn.setCellFactory(col -> new TableCell<ErrorItem, ErrorItem>() {
-			@Override
-			protected void updateItem(final ErrorItem item, final boolean empty) {
-				super.updateItem(item, empty);
-				
-				if (empty || item == null) {
-					this.setGraphic(null);
-				} else {
-					final VBox vbox = new VBox();
-					for (final ErrorItem.Location location : item.getLocations()) {
-						final Button openLocationButton = new Button(null, new FontAwesomeIconView(FontAwesomeIcon.PENCIL));
-						openLocationButton.setOnAction(event -> openLocationInEditor(location));
-						final Label label = new Label(location.toString());
-						label.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
-						final HBox hbox = new HBox(openLocationButton, label);
-						HBox.setHgrow(openLocationButton, Priority.NEVER);
-						HBox.setHgrow(label, Priority.ALWAYS);
-						hbox.setAlignment(Pos.CENTER_LEFT);
-						vbox.getChildren().add(hbox);
-					}
-					this.setGraphic(vbox);
-				}
-			}
-		});
+		this.typeColumn.setCellFactory(col -> new ErrorTypeCell());
+		this.messageColumn.setCellFactory(col -> new ErrorMessageCell());
+		this.locationsColumn.setCellFactory(col -> new ErrorLocationsCell());
 		
 		try (final CharArrayWriter caw = new CharArrayWriter(); final PrintWriter pw = new PrintWriter(caw)) {
 			exc.printStackTrace(pw);
@@ -170,9 +176,5 @@ public final class ExceptionAlert extends Alert {
 		} else {
 			this.contentVBox.getChildren().remove(this.proBErrorTable);
 		}
-	}
-	
-	private void openLocationInEditor(final ErrorItem.Location location) {
-		// TODO Jump to error location in file
 	}
 }

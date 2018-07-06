@@ -6,6 +6,8 @@ import com.google.inject.Injector;
 
 import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.domainobjects.DynamicCommandItem;
+import de.prob.exception.CliError;
+import de.prob.exception.ProBError;
 
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -27,9 +29,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DynamicCommandStage extends Stage {
-
-	
+public abstract class DynamicCommandStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
 	
 	@FXML
@@ -141,12 +141,9 @@ public class DynamicCommandStage extends Stage {
 	
 	protected void fillCommands(AbstractGetDynamicCommands cmd) {
 		try {
-			lvChoice.getItems().clear();
 			currentTrace.getStateSpace().execute(cmd);
-			for (DynamicCommandItem item : cmd.getCommands()) {
-				lvChoice.getItems().add(item);
-			}
-		} catch (Exception e) {
+			lvChoice.getItems().setAll(cmd.getCommands());
+		} catch (ProBError | CliError e) {
 			LOGGER.error("Extract all expression table commands failed", e);
 		}
 	}
@@ -169,7 +166,7 @@ public class DynamicCommandStage extends Stage {
 			lvChoice.getSelectionModel().selectFirst();
 		} else {
 			lvChoice.getSelectionModel().select(index);
-		}	
+		}
 	}
 	
 	protected void interrupt(){
@@ -180,16 +177,10 @@ public class DynamicCommandStage extends Stage {
 		reset();
 	}
 	
-	protected void reset(){
-		throw new UnsupportedOperationException();
-	}
+	protected abstract void reset();
 	
-	protected void visualize(DynamicCommandItem item){
-		throw new UnsupportedOperationException();
-	}
+	protected abstract void visualize(DynamicCommandItem item);
 	
-	protected void fillCommands(){
-		throw new UnsupportedOperationException();
-	}
+	protected abstract void fillCommands();
 
 }

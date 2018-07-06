@@ -8,9 +8,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -23,6 +20,7 @@ import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -30,6 +28,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingStage.SearchStrategy;
+
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -39,9 +38,12 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.util.StringConverter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Modelchecker implements IModelCheckListener {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingView.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Modelchecker.class);
 	private static final AtomicInteger threadCounter = new AtomicInteger(0);
 	
 	private final Map<String, IModelCheckJob> jobs;

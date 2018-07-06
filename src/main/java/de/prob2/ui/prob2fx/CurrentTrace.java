@@ -33,6 +33,35 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
+	private final class AnimationChangeListener implements IAnimationChangeListener {
+		private AnimationChangeListener() {}
+		
+		@Override
+		public void traceChange(final Trace currentTrace, final boolean currentAnimationChanged) {
+			try {
+				if (currentTrace != null && !currentTrace.getCurrentState().isExplored()) {
+					try {
+						currentTrace.getCurrentState().explore();
+					} catch (RuntimeException e) {
+						LOGGER.error("Exception while exploring new state");
+						Platform.runLater(() -> stageManager.makeExceptionAlert("Exception while exploring new state", e).show());
+					}
+				}
+				// Has to be a lambda. For some reason, using a method reference here causes an IllegalAccessError at runtime.
+				// noinspection Convert2MethodRef
+				Platform.runLater(() -> CurrentTrace.this.fireValueChangedEvent());
+			} catch (RuntimeException e) {
+				LOGGER.error("Exception during trace change");
+				Platform.runLater(() -> stageManager.makeExceptionAlert("Exception during trace change", e).show());
+			}
+		}
+		
+		@Override
+		public void animatorStatus(final boolean busy) {
+			Platform.runLater(() -> CurrentTrace.this.animatorBusy.set(busy));
+		}
+	}
+	
 	private final class ROBoolProp extends ReadOnlyBooleanPropertyBase {
 		private final String name;
 		private final BooleanSupplier getter;
@@ -94,6 +123,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CurrentTrace.class);
 	
 	private final AnimationSelector animationSelector;
+	private final StageManager stageManager;
 	
 	private final ReadOnlyBooleanProperty exists;
 	private final BooleanProperty animatorBusy;
@@ -112,32 +142,8 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	private CurrentTrace(final AnimationSelector animationSelector, final StageManager stageManager) {
 		super();
 		this.animationSelector = animationSelector;
-		this.animationSelector.registerAnimationChangeListener(new IAnimationChangeListener() {
-			@Override
-			public void traceChange(final Trace currentTrace, final boolean currentAnimationChanged) {
-				try {
-					if (currentTrace != null && !currentTrace.getCurrentState().isExplored()) {
-						try {
-							currentTrace.getCurrentState().explore();
-						} catch (RuntimeException e) {
-							LOGGER.error("Exception while exploring new state");
-							Platform.runLater(() -> stageManager.makeExceptionAlert("Exception while exploring new state", e).show());
-						}
-					}
-					// Has to be a lambda. For some reason, using a method reference here causes an IllegalAccessError at runtime.
-					// noinspection Convert2MethodRef
-					Platform.runLater(() -> CurrentTrace.this.fireValueChangedEvent());
-				} catch (RuntimeException e) {
-					LOGGER.error("Exception during trace change");
-					Platform.runLater(() -> stageManager.makeExceptionAlert("Exception during trace change", e).show());
-				}
-			}
-
-			@Override
-			public void animatorStatus(final boolean busy) {
-				Platform.runLater(() -> CurrentTrace.this.animatorBusy.set(busy));
-			}
-		});
+		this.stageManager = stageManager;
+		this.animationSelector.registerAnimationChangeListener(new AnimationChangeListener());
 		
 		this.exists = new ROBoolProp("exists", () -> this.get() != null);
 

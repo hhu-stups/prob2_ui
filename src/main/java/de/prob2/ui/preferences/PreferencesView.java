@@ -8,7 +8,6 @@ import java.util.regex.PatternSyntaxException;
 import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.ProBPreference;
-import de.prob.prolog.term.ListPrologTerm;
 
 import de.prob2.ui.internal.StageManager;
 
@@ -161,54 +160,34 @@ public final class PreferencesView extends BorderPane {
 				continue;
 			}
 
-			TreeItem<PrefTreeItem> category = null;
-			for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
-				if (ti.getValue().getName().equals(pref.category)) {
-					category = ti;
-				}
-			}
-			if (category == null) {
-				category = new TreeItem<>(new CategoryPrefTreeItem(pref.category));
-				this.tv.getRoot().getChildren().add(category);
-				category.setExpanded(true);
-			}
+			final TreeItem<PrefTreeItem> category = this.tv.getRoot().getChildren().stream()
+				.filter(ti -> ti.getValue().getName().equals(pref.category))
+				.findAny()
+				.orElseGet(() -> {
+					final TreeItem<PrefTreeItem> ti = new TreeItem<>(new CategoryPrefTreeItem(pref.category));
+					this.tv.getRoot().getChildren().add(ti);
+					ti.setExpanded(true);
+					return ti;
+				});
 
-			TreeItem<PrefTreeItem> item = null;
-			for (TreeItem<PrefTreeItem> ti : category.getChildren()) {
-				if (ti.getValue().getName().equals(pref.name)) {
-					item = ti;
-				}
-			}
-
-			final ProBPreferenceType type = createType(pref);
+			final TreeItem<PrefTreeItem> item = category.getChildren().stream()
+				.filter(ti -> ti.getValue().getName().equals(pref.name))
+				.findAny()
+				.orElseGet(() -> {
+					final TreeItem<PrefTreeItem> ti = new TreeItem<>();
+					category.getChildren().add(ti);
+					return ti;
+				});
 
 			final String value = this.getPreferences().getPreferenceValue(pref.name);
-
-			if (item == null) {
-				item = new TreeItem<>();
-				category.getChildren().add(item);
-			}
 			item.setValue(new RealPrefTreeItem(
 				pref.name,
 				value.equals(pref.defaultValue) ? "" : "*",
 				value,
-				type,
+				ProBPreferenceType.fromProBPreference(pref),
 				pref.defaultValue,
 				pref.description
 			));
-		}
-	}
-	
-	private ProBPreferenceType createType(ProBPreference pref) {
-		if (pref.type instanceof ListPrologTerm) {
-			final ListPrologTerm values = (ListPrologTerm) pref.type;
-			final String[] arr = new String[values.size()];
-			for (int i = 0; i < values.size(); i++) {
-				arr[i] = values.get(i).getFunctor();
-			}
-			return new ProBPreferenceType(arr);
-		} else {
-			return new ProBPreferenceType(pref.type.getFunctor());
 		}
 	}
 }
