@@ -93,7 +93,7 @@ public final class ModelcheckingView extends ScrollPane {
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent(this.getClass());
-		showStats(new ModelCheckStats(stageManager, injector));
+		showStats(new ModelCheckStats(this, stageManager, injector));
 		setBindings();
 		setListeners();
 		setContextMenus();
@@ -208,10 +208,9 @@ public final class ModelcheckingView extends ScrollPane {
 			
 			MenuItem showDetailsItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.showDetails"));
 			showDetailsItem.setOnAction(e-> {
-				ModelcheckingItemDetailsStage fullValueStage = injector.getInstance(ModelcheckingItemDetailsStage.class);
+				ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				fullValueStage.setValues(item.getStrategy(), item.getDescription());
-				fullValueStage.show();
+				modelcheckingStage.show(item.getOptions());
 			});
 			showDetailsItem.disableProperty().bind(row.emptyProperty());
 			
@@ -239,6 +238,7 @@ public final class ModelcheckingView extends ScrollPane {
 	@FXML
 	public void addModelCheck() {
 		ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
+		stageController.setDisableModelcheck(false);
 		if (!stageController.isShowing()) {
 			stageController.showAndWait();
 		}
@@ -272,7 +272,7 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 
 	public void resetView() {
-		showStats(new ModelCheckStats(stageManager, injector));
+		showStats(new ModelCheckStats(this, stageManager, injector));
 	}
 	
 	public void refresh() {

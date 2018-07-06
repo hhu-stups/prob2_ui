@@ -2,8 +2,6 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.util.Objects;
 
-import javax.inject.Inject;
-
 import com.google.inject.Injector;
 
 import de.prob.animator.command.ComputeCoverageCommand;
@@ -52,15 +50,18 @@ public final class ModelCheckStats extends AnchorPane {
 	
 	private final Injector injector;
 	
-	@Inject
-	public ModelCheckStats(final StageManager stageManager, final Injector injector) {
+	private final ModelcheckingView modelcheckingView;
+	
+	
+	public ModelCheckStats(final ModelcheckingView modelcheckingView, final StageManager stageManager, final Injector injector) {
+		this.modelcheckingView = modelcheckingView;
 		this.injector = injector;
 		stageManager.loadFXML(this, "modelchecking_stats.fxml");
 	}
 
 	@FXML
 	private void initialize() {
-		injector.getInstance(ModelcheckingView.class).widthProperty().addListener((observableValue, oldValue, newValue) -> {
+		modelcheckingView.widthProperty().addListener((observableValue, oldValue, newValue) -> {
 			if (newValue == null) {
 				resultText.setWrappingWidth(0);
 				return;
@@ -157,7 +158,7 @@ public final class ModelCheckStats extends AnchorPane {
 	private void showResult(String message) {
 		resultBackground.setVisible(true);
 		resultText.setText(message);
-		resultText.setWrappingWidth(injector.getInstance(ModelcheckingView.class).widthProperty().doubleValue() - 60);
+		resultText.setWrappingWidth(modelcheckingView.widthProperty().doubleValue() - 60);
 		switch (item.getChecked()) {
 			case SUCCESS:
 				resultBackground.getStyleClass().setAll("mcheckSuccess");

@@ -7,6 +7,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.check.ModelCheckingOptions;
+import de.prob.check.ModelCheckingOptions.Options;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
@@ -141,5 +142,66 @@ public class ModelcheckingStage extends Stage {
 
 	public void setDisableStart(final boolean disableStart) {
 		Platform.runLater(() -> this.startButton.setDisable(disableStart));
+	}
+	
+	public void show(ModelCheckingOptions options) {
+		reset();
+		setDisableModelcheck(true);
+		if(!options.getPrologOptions().contains(Options.BREADTH_FIRST_SEARCH) && 
+				!options.getPrologOptions().contains(Options.DEPTH_FIRST_SEARCH)) {
+			selectSearchStrategy.getSelectionModel().select(SearchStrategy.MIXED_BF_DF);
+		}
+		for(Options option : options.getPrologOptions()) {
+			switch(option) {
+				case BREADTH_FIRST_SEARCH:
+					selectSearchStrategy.getSelectionModel().select(SearchStrategy.BREADTH_FIRST);
+					break;
+				case DEPTH_FIRST_SEARCH:
+					selectSearchStrategy.getSelectionModel().select(SearchStrategy.DEPTH_FIRST);
+					break;
+				case FIND_DEADLOCKS:
+					findDeadlocks.setSelected(true);
+					break;
+				case FIND_INVARIANT_VIOLATIONS:
+					findInvViolations.setSelected(true);
+					break;
+				case FIND_ASSERTION_VIOLATIONS:
+					findBAViolations.setSelected(true);
+					break;
+				case INSPECT_EXISTING_NODES:
+					break;
+				case STOP_AT_FULL_COVERAGE:
+					stopAtFullCoverage.setSelected(true);
+					break;
+				case PARTIAL_ORDER_REDUCTION:
+					break;
+				case PARTIAL_GUARD_EVALUATION:
+					break;
+				case FIND_GOAL:
+					findGoal.setSelected(true);
+					break;
+				default:
+					break;
+			}
+		}
+		this.show();
+	}
+	
+	private void reset() {
+		findDeadlocks.setSelected(false);
+		findInvViolations.setSelected(false);
+		findBAViolations.setSelected(false);
+		findGoal.setSelected(false);
+		stopAtFullCoverage.setSelected(false);
+	}
+	
+	public void setDisableModelcheck(boolean disable) {
+		startButton.setDisable(disable);
+		selectSearchStrategy.setDisable(disable);
+		findDeadlocks.setDisable(disable);
+		findInvViolations.setDisable(disable);
+		findBAViolations.setDisable(disable);
+		findGoal.setDisable(disable);
+		stopAtFullCoverage.setDisable(disable);
 	}
 }

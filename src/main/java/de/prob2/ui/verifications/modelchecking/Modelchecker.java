@@ -124,7 +124,7 @@ public class Modelchecker implements IModelCheckListener {
 	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
 		currentOptions = options;
-		currentStats = new ModelCheckStats(stageManager, injector);
+		currentStats = new ModelCheckStats(injector.getInstance(ModelcheckingView.class), stageManager, injector);
 		IModelCheckJob job = new ConsistencyChecker(stateSpace, options, null, this);
 		currentJobs.add(job);
 	}
