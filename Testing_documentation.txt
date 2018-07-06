@@ -1341,27 +1341,27 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 34. UI Persistenz
 
-1. Geöffnete Stages beim Schließen öffnen sich beim Starten
+1. Geöffnete Stages beim Schließen öffnen sich beim Starten -> funktioniert
 
 2. Geöffnete Stages nach Detachen beim Schließen öffnen sich beim Starten
 
-3. Größe der Fenster werden persistiert
+3. Größe und Positionen der Fenster werden persistiert
 
-4. Größe der detachten Fenster werden persistiert
+4. Größe und Positionen der detachten Fenster werden persistiert
 
-5. History der Groovy Konsole
+5. History der Groovy Konsole -> funktioniert
 
-6. History der B Konsole
+6. History der B Konsole -> funktioniert
 
 7. Ausgewählte Perspektive
 
-8. Recent Project
+8. Recent Projects -> funktioniert
 
-9. Schriftgröße
+9. Schriftgröße -> funktioniert
 
 10. Maximale Anzahl Recent Projects
 
-11. Expanded Titled Panes
+11. Expanded Titled Panes -> funktioniert (außer bei der B Konsole)
 
 12. Current Preference
 
@@ -1373,6 +1373,6 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 16. Plugin Ordner
 
-17. eingestellte Sprache
+17. eingestellte Sprache -> funktioniert
 
 
