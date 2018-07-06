@@ -23,12 +23,9 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	private String strategy;
 	
-	private String description;
-	
 	private BooleanProperty shouldExecute;
 
-	public ModelCheckingItem(ModelCheckingOptions options, ModelCheckStats stats, String strategy,
-							 String description) {
+	public ModelCheckingItem(ModelCheckingOptions options, ModelCheckStats stats, String strategy) {
 		initializeStatus();
 		Objects.requireNonNull(options);
 		Objects.requireNonNull(stats);
@@ -36,7 +33,6 @@ public class ModelCheckingItem implements IExecutableItem {
 		this.options = options;
 		this.stats = stats;
 		this.strategy = strategy;
-		this.description = description;
 		this.shouldExecute = new SimpleBooleanProperty(true);
 	}
 	
@@ -62,14 +58,6 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	public String getStrategy() {
 		return strategy;
-	}
-	
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	
-	public String getDescription() {
-		return description;
 	}
 	
 	@Override
@@ -136,17 +124,17 @@ public class ModelCheckingItem implements IExecutableItem {
 			return false;
 		}
 		ModelCheckingItem other = (ModelCheckingItem) obj;
-		return strategy.equals(other.getStrategy()) && description.equals(other.getDescription());
+		return options.equals(other.options);
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(strategy, description);
+		return Objects.hash(options);
 	}
 	
 	@Override
 	public String toString() {
-		return strategy + ": " + description;
+		return options.toString();
 	}
 	
 }
