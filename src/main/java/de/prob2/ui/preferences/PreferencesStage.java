@@ -102,9 +102,9 @@ public final class PreferencesStage extends Stage {
 		this.recentProjects.maximumProperty().addListener((observable, from, to) -> valueFactory.setValue((Integer)to));
 		valueFactory.valueProperty().addListener((observable, from, to) -> this.recentProjects.setMaximum(to));
 		valueFactory.setValue(this.recentProjects.getMaximum());
-		
+
 		this.recentProjectsCountSpinner.setValueFactory(valueFactory);
-		
+
 		defaultLocationField.setText(this.currentProject.getDefaultLocation().toString());
 		defaultLocationField.textProperty().addListener((observable, from, to) -> this.currentProject.setDefaultLocation(Paths.get(to)));
 
@@ -114,7 +114,7 @@ public final class PreferencesStage extends Stage {
 			public String toString(Locale object) {
 				return object == null ? "System Default" : object.getDisplayName(object);
 			}
-			
+
 			@Override
 			public Locale fromString(String string) {
 				throw new UnsupportedOperationException("Conversion from String to Locale not supported");
@@ -123,33 +123,37 @@ public final class PreferencesStage extends Stage {
 		localeOverrideBox.getItems().setAll(SUPPORTED_LOCALES);
 
 		// Global Preferences
-		
+
 		this.globalPrefsView.setPreferences(this.globalProBPrefs);
-		
-		this.globalPreferences.addListener((InvalidationListener)observable -> {
+
+		this.globalPreferences.addListener((InvalidationListener) observable -> {
 			for (final Map.Entry<String, String> entry : this.globalPreferences.entrySet()) {
 				this.globalProBPrefs.setPreferenceValue(entry.getKey(), entry.getValue());
 			}
-			
+
 			try {
 				this.globalProBPrefs.apply();
 			} catch (final ProBError e) {
 				LOGGER.warn("Ignoring global preference changes because of exception", e);
 			}
 		});
-		this.globalPreferences.addListener((MapChangeListener<String, String>)change -> {
+		this.globalPreferences.addListener((MapChangeListener<String, String>) change -> {
 			if (change.wasRemoved() && !change.wasAdded()) {
 				this.globalProBPrefs.setPreferenceValue(change.getKey(), this.globalProBPrefs.getPreferences().get(change.getKey()).defaultValue);
 				this.globalProBPrefs.apply();
 			}
 		});
-		
+
 		this.undoButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
 		this.applyWarning.visibleProperty().bind(this.globalProBPrefs.changesAppliedProperty().not());
 		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
 		
+		// prevent text on buttons from being abbreviated
+		undoButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
+		applyButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
+		resetButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
 	}
-	
+
 	@FXML
 	private void selectDefaultLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
@@ -159,13 +163,13 @@ public final class PreferencesStage extends Stage {
 			defaultLocationField.setText(file.getAbsolutePath());
 		}
 	}
-	
+
 	@FXML
 	private void handleUndoChanges() {
 		this.globalProBPrefs.rollback();
 		this.globalPrefsView.refresh();
 	}
-	
+
 	@FXML
 	private void handleRestoreDefaults() {
 		for (ProBPreference pref : this.globalProBPrefs.getPreferences().values()) {
@@ -193,7 +197,7 @@ public final class PreferencesStage extends Stage {
 				this.globalPreferences.put(entry.getKey(), entry.getValue());
 			}
 		}
-		
+
 		if (this.currentProject.getCurrentMachine() != null) {
 			this.currentProject.reloadCurrentMachine();
 		}
@@ -204,9 +208,9 @@ public final class PreferencesStage extends Stage {
 		this.globalProBPrefs.rollback();
 		this.hide();
 	}
-	
+
 	public TabPersistenceHandler getTabPersistenceHandler() {
 		return tabPersistenceHandler;
 	}
-	
+
 }
