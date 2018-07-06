@@ -59,11 +59,11 @@
 						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 					</columnResizePolicy>
 					<columns>
-						<TableColumn fx:id="showDetailsColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 6}"/>
+						<TableColumn fx:id="showDetailsColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
 						<TableColumn fx:id="shouldExecuteColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="" />
 						<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.columns.status" />
-						<TableColumn fx:id="strategyColumn" minWidth="340.0"
-							maxWidth="400.0" prefWidth="340.0" text="%verifications.columns.strategy" />
+						<TableColumn fx:id="strategyColumn" minWidth="240.0"
+							maxWidth="300.0" prefWidth="240.0" text="%verifications.columns.strategy" />
 					</columns>
 					<placeholder>
 						<Label text="%verifications.modelchecking.stats.placeholder" />

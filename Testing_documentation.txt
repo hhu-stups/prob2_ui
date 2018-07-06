@@ -383,11 +383,6 @@ Tatsächliches Ergebnis: Baum wird korrekt dargestellt mit Abständen zwischen d
 8. Hilfe Button -> springt noch nicht an die richtige Stelle
 
 
-Bemerkung: Überlappung der Schrift über dem Hintergrund bei Windows möglich
-
-
-
-
 
 
 17. Graph Visualisierung
@@ -876,7 +871,7 @@ Tatsächliches Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird 
 
 11. Hilfebutton -> funktioniert, springt noch nicht an die richtige Stelle
 
-12. Deaktivierung eines Modelchecking Items -> funktioniert
+12. Deaktivierung eines Modelchecking Items
 
 
 Erwartetes Ergebnis: Bei Deaktivierung eines Items passt sich der Machine Status und die Status Bar für die Fehler sich an
@@ -1329,10 +1324,6 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 11. Clear mit Button -> funktioniert
 
 12. Clear mit Eingabe von ":clear" -> funktioniert
-
-Bemerkung:
--hat noch keinen HelpButton
-
 
 
 
