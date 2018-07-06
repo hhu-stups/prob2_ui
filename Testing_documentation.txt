@@ -1337,5 +1337,42 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 
 
-Noch zu testen:
--UI Persistenz
+
+
+34. UI Persistenz
+
+1. Geöffnete Stages beim Schließen öffnen sich beim Starten
+
+2. Geöffnete Stages nach Detachen beim Schließen öffnen sich beim Starten
+
+3. Größe der Fenster werden persistiert
+
+4. Größe der detachten Fenster werden persistiert
+
+5. History der Groovy Konsole
+
+6. History der B Konsole
+
+7. Ausgewählte Perspektive
+
+8. Recent Project
+
+9. Schriftgröße
+
+10. Maximale Anzahl Recent Projects
+
+11. Expanded Titled Panes
+
+12. Current Preference
+
+13. Global Preferences
+
+14. Default Project Location
+
+15. OperationsView (Sort mode und Show disabled)
+
+16. Plugin Ordner
+
+17. eingestellte Sprache
+
+
