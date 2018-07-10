@@ -109,7 +109,7 @@ public class OperationItem {
 			default:
 				constants = Collections.emptyMap();
 				if (opInfo == null) {
-					variables = null;
+					variables = Collections.emptyMap();
 				} else {
 					variables = getNextStateValues(transition, opInfo.getNonDetWrittenVariables().stream()
 						.map(var -> trace.getStateSpace().getModel().parseFormula(var, FormulaExpand.TRUNCATE))

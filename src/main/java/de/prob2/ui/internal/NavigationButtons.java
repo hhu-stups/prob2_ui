@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.MachineLoader;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -18,13 +19,15 @@ public final class NavigationButtons extends HBox {
 
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final MachineLoader machineLoader;
 
 	@Inject
-	private NavigationButtons(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace) {
+	private NavigationButtons(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final MachineLoader machineLoader) {
 		super();
 
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.machineLoader = machineLoader;
 
 		stageManager.loadFXML(this, "navigation_buttons.fxml");
 	}
@@ -35,7 +38,7 @@ public final class NavigationButtons extends HBox {
 		fastBackButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 		fastForwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
-		reloadButton.disableProperty().bind(currentTrace.existsProperty().not());
+		reloadButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()));
 	}
 
 	@FXML

@@ -18,7 +18,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.EditPreferencesProvider;
+import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
@@ -94,7 +94,7 @@ public class MachinesTab extends Tab {
 		
 		@FXML
 		private void handleEditFileExternal() {
-			injector.getInstance(EditPreferencesProvider.class).showExternalEditor(currentProject.getLocation().resolve(this.machine.getPath()));
+			injector.getInstance(ExternalEditor.class).open(currentProject.getLocation().resolve(this.machine.getPath()));
 		}
 		
 		private void refresh() {

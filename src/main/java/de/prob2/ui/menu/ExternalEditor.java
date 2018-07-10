@@ -1,8 +1,12 @@
 package de.prob2.ui.menu;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -17,36 +21,45 @@ import de.prob2.ui.project.MachineLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EditPreferencesProvider {
-	private static final Logger LOGGER = LoggerFactory.getLogger(EditPreferencesProvider.class);
+public final class ExternalEditor {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExternalEditor.class);
 
 	private final MachineLoader machineLoader;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
 	@Inject
-	private EditPreferencesProvider(final StageManager stageManager, final MachineLoader machineLoader, final ResourceBundle bundle) {
+	private ExternalEditor(final StageManager stageManager, final MachineLoader machineLoader, final ResourceBundle bundle) {
 		this.machineLoader = machineLoader;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 	}
 
-	public void showExternalEditor(Path path) {
+	private Path getExternalEditorPath() {
 		final StateSpace stateSpace = machineLoader.getEmptyStateSpace();
 		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
 		stateSpace.execute(cmd);
-		final File editor = new File(cmd.getValue());
-		final String[] cmdline;
-		if (ProB2Module.IS_MAC && editor.isDirectory()) {
+		return Paths.get(cmd.getValue());
+	}
+
+	private static List<String> getCommandLine(final Path executable, final List<String> args) {
+		final List<String> commandLine = new ArrayList<>();
+		if (ProB2Module.IS_MAC && Files.isDirectory(executable)) {
 			// On Mac, use the open tool to start app bundles
-			cmdline = new String[] { "/usr/bin/open", "-a", editor.getAbsolutePath(), path.toString() };
-		} else if (!editor.isDirectory() && System.getProperty("os.name", "").toLowerCase().contains("linux")) {
-			cmdline = new String[] { "xdg-open", path.toString() };
-		} else {
-			// Run normal executables directly
-			cmdline = new String[] { editor.getAbsolutePath(), path.toString() };
+			commandLine.add("/usr/bin/open");
+			commandLine.add("-a");
 		}
-		final ProcessBuilder processBuilder = new ProcessBuilder(cmdline);
+		commandLine.add(executable.toString());
+		commandLine.addAll(args);
+		return commandLine;
+	}
+
+	private static List<String> getCommandLine(final Path executable, final String... args) {
+		return getCommandLine(executable, Arrays.asList(args));
+	}
+
+	public void open(Path path) {
+		final ProcessBuilder processBuilder = new ProcessBuilder(getCommandLine(this.getExternalEditorPath().toAbsolutePath(), path.toString()));
 		try {
 			processBuilder.start();
 		} catch (IOException e) {

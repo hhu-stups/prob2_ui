@@ -11,7 +11,12 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.node.*;
+import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
+import de.be4.classicalb.core.parser.node.AMachineHeader;
+import de.be4.classicalb.core.parser.node.AMachineMachineVariant;
+import de.be4.classicalb.core.parser.node.EOF;
+import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
@@ -29,6 +34,8 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
 
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 
@@ -59,6 +66,7 @@ public class MachineLoader {
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final StatusBar statusBar;
+	private final ReadOnlyBooleanWrapper loading;
 	private StateSpace emptyStateSpace;
 
 	@Inject
@@ -75,7 +83,16 @@ public class MachineLoader {
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.statusBar = statusBar;
+		this.loading = new ReadOnlyBooleanWrapper(this, "loading", false);
 		this.emptyStateSpace = null;
+	}
+
+	public ReadOnlyBooleanProperty loadingProperty() {
+		return loading.getReadOnlyProperty();
+	}
+
+	public boolean isLoading() {
+		return this.loadingProperty().get();
 	}
 
 	public StateSpace getEmptyStateSpace() {
@@ -111,7 +128,10 @@ public class MachineLoader {
 	}
 
 	private void setLoadingStatus(final StatusBar.LoadingStatus loadingStatus) {
-		Platform.runLater(() -> this.statusBar.setLoadingStatus(loadingStatus));
+		Platform.runLater(() -> {
+			this.loading.set(loadingStatus != StatusBar.LoadingStatus.NOT_LOADING);
+			this.statusBar.setLoadingStatus(loadingStatus);
+		});
 	}
 
 	private void load(Machine machine, Map<String, String> prefs) throws IOException, ModelTranslationError {
