@@ -21,15 +21,15 @@ import de.prob2.ui.project.MachineLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EditPreferencesProvider {
-	private static final Logger LOGGER = LoggerFactory.getLogger(EditPreferencesProvider.class);
+public final class ExternalEditor {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExternalEditor.class);
 
 	private final MachineLoader machineLoader;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
 	@Inject
-	private EditPreferencesProvider(final StageManager stageManager, final MachineLoader machineLoader, final ResourceBundle bundle) {
+	private ExternalEditor(final StageManager stageManager, final MachineLoader machineLoader, final ResourceBundle bundle) {
 		this.machineLoader = machineLoader;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -58,7 +58,7 @@ public class EditPreferencesProvider {
 		return getCommandLine(executable, Arrays.asList(args));
 	}
 
-	public void showExternalEditor(Path path) {
+	public void open(Path path) {
 		final ProcessBuilder processBuilder = new ProcessBuilder(getCommandLine(this.getExternalEditorPath().toAbsolutePath(), path.toString()));
 		try {
 			processBuilder.start();
