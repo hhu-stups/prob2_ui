@@ -31,7 +31,6 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.AdvancedMenu;
-import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.FileMenu;
 import de.prob2.ui.menu.HelpMenu;
 import de.prob2.ui.menu.MainView;
@@ -133,7 +132,6 @@ public class ProB2Module extends AbstractModule {
 		bind(MainView.class);
 		bind(MenuController.class);
 		bind(FileMenu.class);
-		bind(ExternalEditor.class);
 		bind(ViewMenu.class);
 		bind(HelpMenu.class);
 		bind(VisualisationMenu.class);
