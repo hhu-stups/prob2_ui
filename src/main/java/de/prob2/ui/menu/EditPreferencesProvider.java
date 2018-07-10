@@ -5,36 +5,34 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.project.MachineLoader;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EditPreferencesProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EditPreferencesProvider.class);
 
 	private final MachineLoader machineLoader;
-	private final GlobalPreferences globalPreferences;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
 	@Inject
-	private EditPreferencesProvider(final StageManager stageManager, final MachineLoader machineLoader, final GlobalPreferences globalPreferences, final ResourceBundle bundle) {
+	private EditPreferencesProvider(final StageManager stageManager, final MachineLoader machineLoader, final ResourceBundle bundle) {
 		this.machineLoader = machineLoader;
-		this.globalPreferences = globalPreferences;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 	}
 
 	public void showExternalEditor(Path path) {
-		final StateSpace stateSpace = machineLoader.getEmptyStateSpace(globalPreferences);
+		final StateSpace stateSpace = machineLoader.getEmptyStateSpace();
 		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
 		stateSpace.execute(cmd);
 		final File editor = new File(cmd.getValue());

@@ -81,7 +81,7 @@ public final class PreferencesStage extends Stage {
 	) {
 		this.globalPreferences = globalPreferences;
 		this.globalProBPrefs = globalProBPrefs;
-		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace(this.globalPreferences));
+		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace());
 		this.recentProjects = recentProjects;
 		this.stageManager = stageManager;
 		this.bundle = bundle;

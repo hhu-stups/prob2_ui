@@ -59,6 +59,7 @@ public class MachineLoader {
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final StatusBar statusBar;
+	private StateSpace emptyStateSpace;
 
 	@Inject
 	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager,
@@ -74,14 +75,20 @@ public class MachineLoader {
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.statusBar = statusBar;
+		this.emptyStateSpace = null;
 	}
 
-	public StateSpace getEmptyStateSpace(final Map<String, String> prefs) {
-		try {
-			return api.b_load(EMPTY_MACHINE_AST, prefs);
-		} catch (CliError | IOException | ModelTranslationError | ProBError e) {
-			throw new IllegalStateException("Failed to load empty machine, this should never happen!", e);
+	public StateSpace getEmptyStateSpace() {
+		synchronized (this) {
+			if (this.emptyStateSpace == null) {
+				try {
+					this.emptyStateSpace = api.b_load(EMPTY_MACHINE_AST, this.globalPreferences);
+				} catch (CliError | IOException | ModelTranslationError | ProBError e) {
+					throw new IllegalStateException("Failed to load empty machine, this should never happen!", e);
+				}
+			}
 		}
+		return this.emptyStateSpace;
 	}
 
 	public void loadAsync(Machine machine, Map<String, String> pref) {

@@ -1,6 +1,5 @@
 package de.prob2.ui.consoles.b;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -79,7 +78,7 @@ public class BInterpreter implements Executable {
 	public BInterpreter(final MachineLoader machineLoader, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
-		this.defaultTrace = new Trace(machineLoader.getEmptyStateSpace(Collections.emptyMap()));
+		this.defaultTrace = new Trace(machineLoader.getEmptyStateSpace());
 	}
 	
 	// The exceptions thrown while parsing are not standardized in any way.

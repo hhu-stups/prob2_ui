@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -42,14 +41,14 @@ public class PreferencesDialog extends Dialog<Preference> {
 	private Set<String> preferencesNamesSet;
 
 	@Inject
-	private PreferencesDialog(final StageManager stageManager, final ResourceBundle bundle, final MachineLoader machineLoader, final ProBPreferences prefs, final GlobalPreferences globalPreferences, CurrentProject currentProject) {
+	private PreferencesDialog(final StageManager stageManager, final ResourceBundle bundle, final MachineLoader machineLoader, final ProBPreferences prefs, CurrentProject currentProject) {
 		super();
 
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 
 		this.prefs = prefs;
-		this.prefs.setStateSpace(machineLoader.getEmptyStateSpace(globalPreferences));
+		this.prefs.setStateSpace(machineLoader.getEmptyStateSpace());
 
 		this.setResultConverter(type -> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
