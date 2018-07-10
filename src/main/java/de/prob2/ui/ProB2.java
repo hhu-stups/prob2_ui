@@ -11,7 +11,6 @@ import com.google.inject.Injector;
 
 import de.prob.Main;
 import de.prob.cli.ProBInstanceProvider;
-import de.prob.scripting.Api;
 
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.RuntimeOptions;
@@ -86,7 +85,6 @@ public class ProB2 extends Application {
 					alert.show();
 				});
 			});
-			LOGGER.info("probcli version: {}", injector.getInstance(Api.class).getVersion());
 
 			System.setProperty("prob.stdlib", Main.getProBDirectory() + File.separator + "stdlib");
 
