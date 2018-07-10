@@ -35,6 +35,7 @@ import de.prob2.ui.formula.FormulaStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.table.ExpressionTableView;
@@ -140,10 +141,15 @@ public final class StatesView extends StackPane {
 		helpButton.setHelpContent(this.getClass());
 		
 		consolePane.expandedProperty().addListener((observable, from, to) -> {
+			List<String> expanded = injector.getInstance(UIState.class).getExpandedTitledPanes();
 			if(to) {
 				splitPane.setDividerPositions(0.5);
+				if(!expanded.contains("bconsole")) {
+					expanded.add("bconsole");
+				}
 			} else {
 				splitPane.setDividerPositions(0.8);
+				injector.getInstance(UIState.class).getExpandedTitledPanes().remove("bconsole");
 			}
 		});
 		
@@ -502,5 +508,9 @@ public final class StatesView extends StackPane {
 
 	public TreeTableView<StateItem<?>> getTable() {
 		return tv;
+	}
+	
+	public void expandConsole(boolean expanded) {
+		consolePane.setExpanded(expanded);
 	}
 }

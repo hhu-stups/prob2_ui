@@ -103,6 +103,8 @@ public final class UIPersistence {
 		);
 		
 		final StatesView statesView = injector.getInstance(StatesView.class);
+		statesView.expandConsole(uiState.getExpandedTitledPanes().contains("bconsole"));
+		
 		final TablePersistenceHandler tablePersistenceHandler = injector.getInstance(TablePersistenceHandler.class);
 		main.setHorizontalDividerPositions(uiState.getHorizontalDividerPositions());
 		main.setVerticalDividerPositions(uiState.getVerticalDividerPositions());

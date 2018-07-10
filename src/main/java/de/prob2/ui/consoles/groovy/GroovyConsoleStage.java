@@ -16,7 +16,7 @@ public final class GroovyConsoleStage extends Stage {
 	
 	@Inject
 	private GroovyConsoleStage(StageManager stageManager) {
-		stageManager.loadFXML(this, "groovy_console_view.fxml");
+		stageManager.loadFXML(this, "groovy_console_view.fxml", this.getClass().getName());
 	}
 	
 	@FXML

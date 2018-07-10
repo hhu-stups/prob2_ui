@@ -1345,7 +1345,7 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 2. Geöffnete Stages nach Detachen beim Schließen öffnen sich beim Starten
 
-3. Größe und Positionen der Fenster werden persistiert
+3. Größe und Positionen der Fenster werden persistiert -> funktioniert
 
 4. Größe und Positionen der detachten Fenster werden persistiert
 
@@ -1353,7 +1353,7 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 6. History der B Konsole -> funktioniert
 
-7. Ausgewählte Perspektive
+7. Ausgewählte Perspektive -> funktioniert
 
 8. Recent Projects -> funktioniert
 
@@ -1361,7 +1361,7 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 10. Maximale Anzahl Recent Projects
 
-11. Expanded Titled Panes -> funktioniert (außer bei der B Konsole)
+11. Expanded Titled Panes -> funktioniert
 
 12. Current Preference
 

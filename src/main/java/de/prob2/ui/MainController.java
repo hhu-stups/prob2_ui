@@ -53,14 +53,13 @@ public class MainController extends BorderPane {
 		accordions.forEach(
 				acc -> acc.getPanes().stream().filter(tp -> tp != null && tp.getContent() != null).forEach(tp -> {
 					tp.getContent().setVisible(true);
-					tp.setOnMouseClicked(event -> {
-						if (tp.isExpanded()) {
+					
+					tp.expandedProperty().addListener((observable, from, to) -> {
+						if (to) {
 							for (TitledPane pane : acc.getPanes()) {
 								uiState.getExpandedTitledPanes().remove(pane.getId());
 							}
 							uiState.getExpandedTitledPanes().add(tp.getId());
-						} else {
-							uiState.getExpandedTitledPanes().remove(tp.getId());
 						}
 					});
 				}));

@@ -24,7 +24,7 @@ import javafx.stage.Stage;
 
 @Singleton
 public class UIState {
-	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList("History", "Operations", "Model Check", "Statistics", "Animations"));
+	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList("History", "Operations", "Verifications", "Statistics", "Project"));
 	
 	private final ObjectProperty<Locale> localeOverride;
 	private String guiState;
