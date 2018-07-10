@@ -16,6 +16,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.ProjectManager;
@@ -55,17 +56,27 @@ public class FileMenu extends Menu {
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final BEditorView bEditorView;
+	private final MachineLoader machineLoader;
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
 	@Inject
-	private FileMenu(final StageManager stageManager, final RecentProjects recentProjects,
-			final CurrentProject currentProject, final CurrentTrace currentTrace, final BEditorView bEditorView, final Injector injector, final ResourceBundle bundle) {
+	private FileMenu(
+		final StageManager stageManager,
+		final RecentProjects recentProjects,
+		final CurrentProject currentProject,
+		final CurrentTrace currentTrace,
+		final BEditorView bEditorView,
+		final MachineLoader machineLoader,
+		final Injector injector,
+		final ResourceBundle bundle
+	) {
 		this.recentProjects = recentProjects;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.bEditorView = bEditorView;
+		this.machineLoader = machineLoader;
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -93,7 +104,7 @@ public class FileMenu extends Menu {
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
 		
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.existsProperty().not());
-		this.reloadMachineItem.disableProperty().bind(currentTrace.existsProperty().not().or(currentProject.currentMachineProperty().isNull()));
+		this.reloadMachineItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()));
 	}
 
 	@FXML
