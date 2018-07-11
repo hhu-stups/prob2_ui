@@ -186,7 +186,7 @@ public final class PreferencesStage extends Stage {
 			this.globalProBPrefs.apply();
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
-			stageManager.makeExceptionAlert(bundle.getString("preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.message"), e).show();
+			stageManager.makeExceptionAlert(bundle.getString("preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content"), e).show();
 		}
 		
 		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();

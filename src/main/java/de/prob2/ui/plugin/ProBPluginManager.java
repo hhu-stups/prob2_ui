@@ -134,7 +134,7 @@ public class ProBPluginManager {
 				}
 			} catch (Exception e) {
 				LOGGER.warn("Tried to copy and load/start the plugin {}.\nThis exception was thrown: ", pluginFileName, e);
-				showWarningAlert("plugin.alerts.couldNotLocateInactive.message", pluginFileName);
+				showWarningAlert("plugin.alerts.couldNotLocateInactive.content", pluginFileName);
 				//if an error occurred, delete the plugin file
 				PluginWrapper wrapper = pluginManager.getPlugin(plugin.toPath());
 				if (wrapper != null) {
@@ -164,7 +164,7 @@ public class ProBPluginManager {
 				}
 			}
 		} else {
-			showWarningAlert("plugin.alerts.couldNotLocateInactive.message", getPluginDirectory());
+			showWarningAlert("plugin.alerts.couldNotLocateInactive.content", getPluginDirectory());
 		}
 	}
 
@@ -253,7 +253,7 @@ public class ProBPluginManager {
 			if (wrapper != null) {
 				//if there is a corresponding plugin, ask the user if he wants to overwrite it
 				Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-						String.format(bundle.getString("plugin.dialog.overwriteExistingFile.content"),
+						String.format(bundle.getString("plugin.alerts.confirmOverwriteExistingFile.content"),
 								destination.getName(),
 								((ProBPlugin) wrapper.getPlugin()).getName(),
 								wrapper.getDescriptor().getVersion()),
@@ -273,7 +273,7 @@ public class ProBPluginManager {
 					Files.deleteIfExists(destination.toPath());
 				} catch (IOException ex) {
 					LOGGER.warn("Could not delete file {}.", destination.getName());
-					showWarningAlert("plugin.alerts.couldNotDeleteJar.message", destination.getName());
+					showWarningAlert("plugin.alerts.couldNotDeleteJar.content", destination.getName());
 					return false;
 				}
 			}
@@ -283,7 +283,7 @@ public class ProBPluginManager {
 			Files.copy(source.toPath(), destination.toPath());
 			return true;
 		} catch (IOException e) {
-			showWarningAlert("plugin.alerts.couldNotCopyToPluginDirectory.message", destination.getName());
+			showWarningAlert("plugin.alerts.couldNotCopyToPluginDirectory.content", destination.getName());
 		}
 		return false;
 	}
@@ -309,7 +309,7 @@ public class ProBPluginManager {
 			//because we don't use the enabled/disabled.txt of PF4J, the only reason for a
 			//plugin to be disabled is, when it has the wrong version
 			if (pluginWrapper.getPluginState() == PluginState.DISABLED) {
-				showWarningAlert("plugin.alerts.wrongUIversion.message",
+				showWarningAlert("plugin.alerts.wrongUIversion.content",
 						pluginWrapper.getPluginPath().getFileName(),
 						pluginWrapper.getDescriptor().getRequires(),
 						pluginManager.getSystemVersion());

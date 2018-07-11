@@ -131,7 +131,7 @@ public class WindowMenu extends Menu {
 			} catch (IOException e) {
 				logger.error("Loading fxml failed", e);
 				stageManager
-						.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotOpenFile.message"), selectedFile), e)
+						.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotOpenFile.content"), selectedFile), e)
 						.showAndWait();
 			}
 		}

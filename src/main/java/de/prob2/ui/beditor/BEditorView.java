@@ -102,7 +102,7 @@ public class BEditorView extends BorderPane {
 				try (final Stream<String> lines = Files.lines(machinePath)) {
 					text = lines.collect(Collectors.joining(System.lineSeparator()));
 				} catch (IOException | UncheckedIOException e) {
-					stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotReadFile.message"), machinePath), e).showAndWait();
+					stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotReadFile.content"), machinePath), e).showAndWait();
 					LOGGER.error(String.format("Could not read file: %s", machinePath), e);
 					return;
 				}
@@ -153,7 +153,7 @@ public class BEditorView extends BorderPane {
 			Path path = this.getPath();
 			Files.write(path, beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
-			stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotSaveFile.message"), path), e).showAndWait();
+			stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotSaveFile.content"), path), e).showAndWait();
 			LOGGER.error(String.format("Could not save file: %s", path), e);
 		}
 	}

@@ -393,7 +393,7 @@ public final class HistoryChartStage extends Stage {
 					return Integer.parseInt(value);
 				} catch (NumberFormatException e) {
 					if (showErrors) {
-						Alert alert = stageManager.makeExceptionAlert(bundle.getString("chart.historyChart.alerts.formulaEvalError.invalidInteger.message"), e);
+						Alert alert = stageManager.makeExceptionAlert(bundle.getString("chart.historyChart.alerts.formulaEvalError.invalidInteger.content"), e);
 						alert.setHeaderText(bundle.getString("chart.historyChart.alerts.formulaEvalError.header"));
 						alert.show();
 					}
@@ -402,7 +402,7 @@ public final class HistoryChartStage extends Stage {
 			}
 		} else {
 			if (showErrors) {
-				Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("chart.historyChart.alerts.formulaEvalError.notAnEvalResult.message"), aer));
+				Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("chart.historyChart.alerts.formulaEvalError.notAnEvalResult.content"), aer));
 				alert.setHeaderText(bundle.getString("chart.historyChart.alerts.formulaEvalError.header"));
 				alert.show();
 			}

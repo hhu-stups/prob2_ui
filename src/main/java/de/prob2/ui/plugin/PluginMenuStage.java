@@ -193,10 +193,10 @@ public class PluginMenuStage extends Stage {
 				getFormattedString("plugin.pluginMenu.table.contextmenu.remove", pluginName));
 		removeMenuItem.setOnAction(event -> {
 			Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-					getFormattedString("plugin.pluginMenu.dialog.removePlugin.content", pluginName),
+					getFormattedString("plugin.pluginMenu.alerts.confirmRemovingPlugin.content", pluginName),
 					ButtonType.NO, ButtonType.YES);
 			dialog.initOwner(this);
-			dialog.setTitle(bundle.getString("plugin.pluginMenu.dialog.removePlugin.title"));
+			dialog.setTitle(bundle.getString("plugin.pluginMenu.alerts.confirmRemovingPlugin.title"));
 			dialog.showAndWait().ifPresent(response -> {
 				if (response == ButtonType.YES) {
 					getProBJarPluginManager().deletePlugin(pluginId);

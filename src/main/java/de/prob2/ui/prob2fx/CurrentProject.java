@@ -335,9 +335,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	private boolean confirmReplacingProject() {
 		if (exists()) {
-			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION);
-			alert.setHeaderText(bundle.getString("project.confirmReplacingProject.header"));
-			alert.setContentText(bundle.getString("project.confirmReplacingProject.content"));
+			final Alert alert = stageManager.makeAlert(
+					Alert.AlertType.CONFIRMATION, 
+					bundle.getString("prob2fx.currentProject.alerts.confirmReplacingProject.content"));
+			alert.setHeaderText(bundle.getString("prob2fx.currentProject.alerts.confirmReplacingProject.header"));
 			Optional<ButtonType> result = alert.showAndWait();
 			return result.isPresent() && ButtonType.OK.equals(result.get());
 		} else {

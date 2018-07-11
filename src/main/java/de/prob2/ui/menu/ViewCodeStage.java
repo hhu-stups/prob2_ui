@@ -85,10 +85,10 @@ public final class ViewCodeStage extends Stage {
 			out.write(this.getCode());
 		} catch (FileNotFoundException e) {
 			LOGGER.error("Could not open file for writing", e);
-			stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotWriteFile.message"), selected), e).showAndWait();
+			stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotWriteFile.content"), selected), e).showAndWait();
 		} catch (IOException e) {
 			LOGGER.error("Failed to save value to file", e);
-			stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotSaveFile.message"), selected), e).showAndWait();
+			stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotSaveFile.content"), selected), e).showAndWait();
 		}
 	}
 }

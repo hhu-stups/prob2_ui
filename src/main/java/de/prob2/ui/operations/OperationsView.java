@@ -464,7 +464,7 @@ public final class OperationsView extends AnchorPane {
 				} catch (NumberFormatException e) {
 					LOGGER.error("Invalid input for executing random number of events",e);
 					Platform.runLater(() -> {
-						Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, String.format(bundle.getString("operations.operationsView.alerts.invalidNumberOfOparations.message"), randomInput));
+						Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, String.format(bundle.getString("operations.operationsView.alerts.invalidNumberOfOparations.content"), randomInput));
 						alert.setHeaderText(bundle.getString("operations.operationsView.alerts.invalidNumberOfOparations.header"));
 						alert.showAndWait();
 					});
