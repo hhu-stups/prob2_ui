@@ -64,7 +64,7 @@ public final class ExternalEditor {
 			processBuilder.start();
 		} catch (IOException e) {
 			LOGGER.error("Failed to start external editor", e);
-			stageManager.makeExceptionAlert(bundle.getString("menu.editPreferencesProvider.alerts.couldNotStartEditor.message"), e).showAndWait();
+			stageManager.makeExceptionAlert(bundle.getString("menu.externalEditor.alerts.couldNotStartEditor.content"), e).showAndWait();
 		}
 	}
 }

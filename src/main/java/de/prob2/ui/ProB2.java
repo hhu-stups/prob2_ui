@@ -78,7 +78,7 @@ public class ProB2 extends Application {
 				LOGGER.error("Uncaught exception on thread {}", thread, exc);
 				Platform.runLater(() -> {
 					final String message = String.format(
-							bundle.getString("common.alerts.internalException.message"),
+							bundle.getString("common.alerts.internalException.content"),
 							thread);
 					final Alert alert = stageManager.makeExceptionAlert(message, exc);
 					alert.setHeaderText(bundle.getString("common.alerts.internalException.header"));
@@ -136,14 +136,14 @@ public class ProB2 extends Application {
 			if (foundMachine == null) {
 				Alert alert = stageManager.makeAlert(
 					Alert.AlertType.ERROR,
-					String.format(bundle.getString("common.alerts.noMachine.message"), runtimeOptions.getMachine(), currentProject.getName())
+					String.format(bundle.getString("common.alerts.noMachine.content"), runtimeOptions.getMachine(), currentProject.getName())
 				);
 				alert.setHeaderText(bundle.getString("common.alerts.noMachine.header"));
 				alert.show();
 			} else if (foundPreference == null) {
 				Alert alert = stageManager.makeAlert(
 					Alert.AlertType.ERROR,
-					String.format(bundle.getString("common.alerts.noPreference.message"), runtimeOptions.getPreference(), currentProject.getName())
+					String.format(bundle.getString("common.alerts.noPreference.content"), runtimeOptions.getPreference(), currentProject.getName())
 				);
 				alert.setHeaderText(bundle.getString("common.alerts.noPreference.header"));
 				alert.show();
@@ -258,7 +258,7 @@ public class ProB2 extends Application {
 			ButtonType doNotSave = new ButtonType(bundle.getString("common.buttons.doNotSave"), ButtonBar.ButtonData.NO);
 			Alert alert = stageManager.makeAlert(
 				Alert.AlertType.CONFIRMATION,
-				String.format(bundle.getString("common.alerts.unsavedProjectChanges.message"), currentProject.getName()),
+				String.format(bundle.getString("common.alerts.unsavedProjectChanges.content"), currentProject.getName()),
 				save, ButtonType.CANCEL, doNotSave);
 			alert.setHeaderText(bundle.getString("common.alerts.unsavedProjectChanges.header"));
 			Optional<ButtonType> result = alert.showAndWait();
