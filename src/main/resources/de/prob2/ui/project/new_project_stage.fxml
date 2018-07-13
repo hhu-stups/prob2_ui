@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" title="%project.newProject.stage.stageTitle"
+<fx:root type="Stage" title="%project.newProjectStage.title"
 		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -13,7 +13,7 @@
 				<VBox spacing="5" AnchorPane.topAnchor="25"
 					AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0"
 					AnchorPane.rightAnchor="0">
-					<Label text="%project.newProject.stage.title" styleClass="title">
+					<Label text="%project.newProjectStage.label.title" styleClass="title">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>
@@ -22,20 +22,20 @@
 						<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
 							AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" alignment="center_right">
 							<HBox spacing="20" alignment="center_left">
-								<Label text="%project.newProject.stage.name" />
+								<Label text="%project.newProjectStage.label.name" />
 								<TextField fx:id="projectNameField" HBox.hgrow="always" />
 							</HBox>
 							<HBox spacing="20" alignment="center_left">
-								<Label text="%project.newProject.stage.location" />
+								<Label text="%project.newProjectStage.label.location" />
 								<TextField fx:id="locationField" HBox.hgrow="always" />
-								<Button styleClass="button-dark2" text="%project.newProject.stage.selectLocation"
+								<Button styleClass="button-dark2" text="%project.newProjectStage.buttons.selectLocation"
 									onAction="#selectLocation" />
 								<VBox.margin>
 									<Insets top="10" />
 								</VBox.margin>
 							</HBox>
 							<VBox spacing="5" alignment="center_left">
-								<Label text="%project.newProject.stage.description" />
+								<Label text="%project.newProjectStage.label.description" />
 								<TextArea fx:id="projectDescriptionTextArea" styleClass="text-area-with-border" />
 								<VBox.margin>
 									<Insets top="20" />

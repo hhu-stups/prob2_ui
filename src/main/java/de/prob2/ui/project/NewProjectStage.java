@@ -51,7 +51,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	void selectLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
-		dirChooser.setTitle(bundle.getString("project.newProject.stage.selectLocation.title"));
+		dirChooser.setTitle(bundle.getString("project.newProjectStage.directoryChooser.selectLocation.title"));
 		File file = dirChooser.showDialog(this.getOwner());
 		if (file != null) {
 			locationField.setText(file.getAbsolutePath());
@@ -67,7 +67,7 @@ public class NewProjectStage extends Stage {
 	void finish() {
 		Path dir = Paths.get(locationField.getText());
 		if (!dir.toFile().isDirectory()) {
-			errorExplanationLabel.setText(bundle.getString("project.newProject.stage.invalidLocationError"));
+			errorExplanationLabel.setText(bundle.getString("project.newProjectStage.invalidLocationError"));
 			return;
 		}
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), dir);

@@ -81,7 +81,7 @@ public class ProjectManager {
 			ButtonType renameBT = new ButtonType((bundle.getString("common.buttons.rename")));
 			Optional<ButtonType> result = stageManager
 					.makeAlert(AlertType.WARNING,
-							String.format(bundle.getString("project.projectManager.fileAlreadyExistsWarning"),
+							String.format(bundle.getString("project.projectManager.alerts.fileAlreadyExistsWarning.content"),
 									location),
 							new ButtonType((bundle.getString("common.buttons.replace"))), renameBT, ButtonType.CANCEL)
 					.showAndWait();
@@ -124,9 +124,9 @@ public class ProjectManager {
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			LOGGER.warn("Project file not found", exc);
 			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
-					String.format(bundle.getString("project.fileNotFound.content"), path), ButtonType.YES,
+					String.format(bundle.getString("project.projectManager.alerts.fileNotFound.content"), path), ButtonType.YES,
 					ButtonType.NO);
-			alert.setHeaderText(bundle.getString("project.fileNotFound.header"));
+			alert.setHeaderText(bundle.getString("project.projectManager.alerts.fileNotFound.header"));
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 				Platform.runLater(() -> recentProjects.remove(path.toAbsolutePath().toString()));
@@ -142,7 +142,9 @@ public class ProjectManager {
 	public void openProject(Path path) {
 		Project project = loadProject(path);
 		if(!path.toString().endsWith(PROJECT_FILE_ENDING)) {
-			stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 projectfiles should be '%s': %s", PROJECT_FILE_ENDING, path)).showAndWait();
+			stageManager.makeAlert(AlertType.WARNING, 
+					String.format(bundle.getString("project.projectManager.alerts.wrongProjectFileExtensionWarning.content"), 
+							PROJECT_FILE_ENDING, path)).showAndWait();
 		}
 		if (project != null) {
 			replaceMissingWithDefaults(project);

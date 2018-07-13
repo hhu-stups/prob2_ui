@@ -40,11 +40,12 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		public void traceChange(final Trace currentTrace, final boolean currentAnimationChanged) {
 			try {
 				if (currentTrace != null && !currentTrace.getCurrentState().isExplored()) {
+					State currentState = currentTrace.getCurrentState();
 					try {
-						currentTrace.getCurrentState().explore();
+						currentState.explore();
 					} catch (RuntimeException e) {
 						LOGGER.error("Exception while exploring new state");
-						Platform.runLater(() -> stageManager.makeExceptionAlert("Exception while exploring new state", e).show());
+						Platform.runLater(() -> stageManager.makeExceptionAlert(e, "prob2fx.currentTrace.alerts.exceptionWhileExploringNewState.content", currentState.getId()).show());
 					}
 				}
 				// Has to be a lambda. For some reason, using a method reference here causes an IllegalAccessError at runtime.
@@ -52,7 +53,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 				Platform.runLater(() -> CurrentTrace.this.fireValueChangedEvent());
 			} catch (RuntimeException e) {
 				LOGGER.error("Exception during trace change");
-				Platform.runLater(() -> stageManager.makeExceptionAlert("Exception during trace change", e).show());
+				Platform.runLater(() -> stageManager.makeExceptionAlert(e, "prob2fx.currentTrace.alerts.exceptionDuringTraceChange.content").show());
 			}
 		}
 		

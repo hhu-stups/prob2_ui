@@ -115,14 +115,14 @@ public class MachineLoader {
 			} catch (FileNotFoundException e) {
 				LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
 				Platform.runLater(() -> {
-					Alert alert = stageManager.makeAlert(AlertType.ERROR, String.format(bundle.getString("machineLoader.fileNotFound.content"), getPathToMachine(machine)));
-					alert.setHeaderText(bundle.getString("machineLoader.fileNotFound.header"));
+					Alert alert = stageManager.makeAlert(AlertType.ERROR, String.format(bundle.getString("project.machineLoader.alerts.fileNotFound.content"), getPathToMachine(machine)));
+					alert.setHeaderText(bundle.getString("project.machineLoader.alerts.fileNotFound.header"));
 					alert.showAndWait();
 				});
 			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 				LOGGER.error("Loading machine \"{}\" failed", machine.getName(), e);
 				Platform.runLater(() -> stageManager.makeExceptionAlert(
-					String.format(bundle.getString("machineLoader.couldNotOpen"), machine.getName()), e).showAndWait());
+					String.format(bundle.getString("project.machineLoader.alerts.couldNotOpen.content"), machine.getName()), e).showAndWait());
 			}
 		} , "Machine Loader").start();
 	}
