@@ -8,15 +8,15 @@
 <fx:root type="Tab" text="%project.projectTab.title" closable="false"
 		 xmlns:fx="http://javafx.com/fxml/1">
 	<VBox stylesheets="@/prob.css" spacing="0">
-		<AnchorPane styleClass="border">
+		<AnchorPane fx:id="projectNamePane" styleClass="border">
 			<HBox alignment="CENTER_RIGHT" AnchorPane.leftAnchor="6"
 				AnchorPane.rightAnchor="6" AnchorPane.topAnchor="10">
 				<HBox HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
 					<Label fx:id="projectNameLabel" HBox.hgrow="ALWAYS" styleClass="title" />
 					<TextField fx:id="projectNameTextField" managed="false"
-						visible="false" />
+						HBox.hgrow="ALWAYS" visible="false"/>
 				</HBox>
-				<HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
+				<HBox alignment="CENTER_RIGHT">
 					<HelpButton fx:id="helpButton" />
 				</HBox>
 			</HBox>

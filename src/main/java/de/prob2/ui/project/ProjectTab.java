@@ -1,5 +1,7 @@
 package de.prob2.ui.project;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -8,6 +10,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
@@ -27,15 +30,23 @@ public class ProjectTab extends Tab {
 	@FXML
 	private AnchorPane projectDescriptionPane;
 	@FXML
+	private AnchorPane projectNamePane;
+	@FXML
 	private HelpButton helpButton;
 	@FXML
 	private Label locationLabel;
 
 	private final CurrentProject currentProject;
+	
+	private final StageManager stageManager;
+	
+	private final ResourceBundle bundle;
 
 	@Inject
-	private ProjectTab(final StageManager stageManager, final CurrentProject currentProject) {
+	private ProjectTab(final StageManager stageManager, final CurrentProject currentProject, final ResourceBundle bundle) {
 		this.currentProject = currentProject;
+		this.stageManager = stageManager;
+		this.bundle = bundle;
 		stageManager.loadFXML(this, "project_tab.fxml");
 	}
 
@@ -56,7 +67,7 @@ public class ProjectTab extends Tab {
 
 	private void initName() {
 		projectNameLabel.textProperty().bind(currentProject.nameProperty());
-		projectNameLabel.setOnMouseClicked(event -> {
+		projectNamePane.setOnMouseClicked(event -> {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 				editName();
 			}
@@ -70,7 +81,14 @@ public class ProjectTab extends Tab {
 		projectNameTextField.requestFocus();
 		projectNameTextField.setOnKeyPressed(keyEvent -> {
 			if (keyEvent.getCode().equals(KeyCode.ENTER)) {
-				currentProject.changeName(projectNameTextField.getText());
+				String name = projectNameTextField.getText();
+				if(name.replaceAll(" ", "").length() == 0) {
+					Alert alert = stageManager.makeAlert(AlertType.WARNING, bundle.getString("project.projectTab.alerts.emptyNameWarning.content"));
+					alert.setHeaderText(bundle.getString("project.projectTab.alerts.emptyNameWarning.header"));
+					alert.showAndWait();
+					return;
+				}
+				currentProject.changeName(name);
 				projectNameTextField.setManaged(false);
 				projectNameTextField.setVisible(false);
 			}

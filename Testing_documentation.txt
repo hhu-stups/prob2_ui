@@ -1343,11 +1343,11 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 1. Geöffnete Stages beim Schließen öffnen sich beim Starten -> funktioniert
 
-2. Geöffnete Stages nach Detachen beim Schließen öffnen sich beim Starten
+2. Geöffnete Stages nach Detachen beim Schließen öffnen sich beim Starten -> funktioniert
 
 3. Größe und Positionen der Fenster werden persistiert -> funktioniert
 
-4. Größe und Positionen der detachten Fenster werden persistiert
+4. Größe und Positionen der detachten Fenster werden persistiert -> funktioniert
 
 5. History der Groovy Konsole -> funktioniert
 
@@ -1359,20 +1359,22 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 9. Schriftgröße -> funktioniert
 
-10. Maximale Anzahl Recent Projects
+10. Maximale Anzahl Recent Projects -> funktioniert
 
 11. Expanded Titled Panes -> funktioniert
 
-12. Current Preference
+12. Global Preferences -> funktioniert
 
-13. Global Preferences
+13. Default Project Location -> funktioniert
 
-14. Default Project Location
+14. OperationsView (Sort mode und Show disabled) -> funktioniert
 
-15. OperationsView (Sort mode und Show disabled)
+15. Plugin Ordner -> funktioniert
 
-16. Plugin Ordner
+16. eingestellte Sprache -> funktioniert
 
-17. eingestellte Sprache -> funktioniert
+17. Selbstgeschriebenes Layout -> funktioniert
+
+18. Selbstgeschriebenes Layout mit Detachen -> funktioniert
 
 

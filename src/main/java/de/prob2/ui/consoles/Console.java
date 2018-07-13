@@ -132,8 +132,12 @@ public abstract class Console extends StyleClassedTextArea {
 		}
 
 		final int oldLength = this.getLength();
-		String pastedString = Clipboard.getSystemClipboard().getString().replaceAll("\n", "");
-		this.appendText(pastedString);
+		String[] pastedLines = Clipboard.getSystemClipboard().getString().split("\n");
+		for(int i = 0; i < pastedLines.length - 1; i++) {
+			this.appendText(pastedLines[i] + "\\");
+			handleEnter();
+		}
+		this.appendText(pastedLines[pastedLines.length - 1]);
 		final int diff = this.getLength() - oldLength;
 
 		charCounterInLine += diff;
@@ -237,39 +241,37 @@ public abstract class Console extends StyleClassedTextArea {
 		} else {
 			currentLine = this.getInput();
 		}
-		if (!currentLine.isEmpty()) {
-			boolean endsWithNewline = currentLine.endsWith("\\");
-			if(endsWithNewline) {
-				currentLine = currentLine.substring(0, currentLine.length() - 1);
-			}
-			if (!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
-				instructions.set(instructions.size() - 1, new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
-			} else {
-				instructions.add(new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
-			}
-			if(endsWithNewline) {
-				instructionLengthInLine++;
-				this.appendText("\n" + EMPTY_PROMPT);
-				return;
-			}
+		boolean endsWithNewline = currentLine.endsWith("\\");
+		if(endsWithNewline) {
+			currentLine = currentLine.substring(0, currentLine.length() - 1);
+		}
+		if (!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
+			instructions.set(instructions.size() - 1, new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
+		} else {
+			instructions.add(new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
+		}
+		if(endsWithNewline) {
+			instructionLengthInLine++;
+			this.appendText("\n" + EMPTY_PROMPT);
+			return;
+		}
 			
-			for(int i = 0; i < instructionLengthInLine; i++) {
-				ConsoleInstruction instruction = instructions.get(instructions.size() - instructionLengthInLine + i);
-				interpreter.exec(instruction);
-			}
+		for(int i = 0; i < instructionLengthInLine; i++) {
+			ConsoleInstruction instruction = instructions.get(instructions.size() - instructionLengthInLine + i);
+			interpreter.exec(instruction);
+		}
 			
-			posInList = instructions.size() - 1;
-			ConsoleInstruction instruction = instructions.get(posInList);
-			ConsoleExecResult execResult = interpreter.exec(instruction);
-			int from = this.getLength();
-			if (execResult.getResultType() == ConsoleExecResultType.CLEAR) {
-				reset();
-				return;
-			}
-			this.appendText("\n" + execResult);
-			if (execResult.getResultType() == ConsoleExecResultType.ERROR) {
-				this.setStyle(from, from + execResult.toString().length() + 1, Collections.singletonList("error"));
-			}
+		posInList = instructions.size() - 1;
+		ConsoleInstruction instruction = instructions.get(posInList);
+		ConsoleExecResult execResult = interpreter.exec(instruction);
+		int from = this.getLength();
+		if (execResult.getResultType() == ConsoleExecResultType.CLEAR) {
+			reset();
+			return;
+		}
+		this.appendText("\n" + execResult);
+		if (execResult.getResultType() == ConsoleExecResultType.ERROR) {
+			this.setStyle(from, from + execResult.toString().length() + 1, Collections.singletonList("error"));
 		}
 		instructionLengthInLine = 1;
 		searchHandler.handleEnter();
