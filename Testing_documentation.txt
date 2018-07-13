@@ -1359,7 +1359,7 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 9. Schriftgröße -> funktioniert
 
-10. Maximale Anzahl Recent Projects
+10. Maximale Anzahl Recent Projects -> funktioniert
 
 11. Expanded Titled Panes -> funktioniert
 
@@ -1367,11 +1367,11 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 13. Global Preferences
 
-14. Default Project Location
+14. Default Project Location -> funktioniert
 
-15. OperationsView (Sort mode und Show disabled)
+15. OperationsView (Sort mode und Show disabled) -> funktioniert
 
-16. Plugin Ordner
+16. Plugin Ordner -> funktioniert
 
 17. eingestellte Sprache -> funktioniert
 

@@ -88,7 +88,7 @@ public final class PreferencesStage extends Stage {
 		this.currentProject = currentProject;
 		this.uiState = uiState;
 
-		stageManager.loadFXML(this, "preferences_stage.fxml", this.getClass().getName());
+		stageManager.loadFXML(this, "preferences_stage.fxml");
 		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 	}
 
@@ -158,7 +158,9 @@ public final class PreferencesStage extends Stage {
 	private void selectDefaultLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle(bundle.getString("preferences.stage.tabs.general.directoryChooser.selectLocation.title"));
+		dirChooser.setInitialDirectory(new File(defaultLocationField.getText()));
 		File file = dirChooser.showDialog(this.getOwner());
+		
 		if (file != null) {
 			defaultLocationField.setText(file.getAbsolutePath());
 		}
