@@ -1,6 +1,5 @@
 package de.prob2.ui.project;
 
-import java.nio.BufferUnderflowException;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
