@@ -62,11 +62,7 @@ public class StateVisualisationView extends AnchorPane {
 		GetImagesForMachineCommand getImagesForMachineCommand = new GetImagesForMachineCommand();
 		stateSpace.execute(getImagesForMachineCommand);
 		Map<Integer, String> images = getImagesForMachineCommand.getImages();
-		if (!images.isEmpty()) {
-			showMatrix(state, images);
-			visualisationPossible.set(true);
-		}
-
+		showMatrix(state, images);
 	}
 
 	public BooleanProperty visualisationPossibleProperty() {
@@ -77,6 +73,12 @@ public class StateVisualisationView extends AnchorPane {
 		final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
 		state.getStateSpace().execute(cmd);
 		final List<List<Object>> matrix = cmd.getMatrix();
+		if (matrix.isEmpty()) {
+			visualisationPossible.set(false);
+			return;
+		} else {
+			visualisationPossible.set(true);
+		}
 
 		for (int r = 0; r < matrix.size(); r++) {
 			final List<Object> row = matrix.get(r);
