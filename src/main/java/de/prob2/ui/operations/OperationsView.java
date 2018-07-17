@@ -59,7 +59,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
 import se.sawano.java.text.AlphanumericComparator;
 
 @Singleton
-public final class OperationsView extends AnchorPane {
+public final class OperationsView extends VBox {
 	public enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}

@@ -28,10 +28,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 
 @Singleton
-public final class HistoryView extends AnchorPane {
+public final class HistoryView extends VBox {
 	private final class TransitionRow extends TableRow<HistoryItem> {
 		private TransitionRow() {
 			super();

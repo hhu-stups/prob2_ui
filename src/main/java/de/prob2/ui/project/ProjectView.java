@@ -7,16 +7,17 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.FileMenu;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.MachinesTab;
+
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 
 @Singleton
-public final class ProjectView extends AnchorPane {
+public final class ProjectView extends StackPane {
 	@FXML
 	private TabPane projectTabPane;
 	@FXML
@@ -47,7 +48,6 @@ public final class ProjectView extends AnchorPane {
 		recentProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 		openProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 		
-		projectTab.projectDescriptionTextArea.maxWidthProperty().bind(this.projectTabPane.widthProperty().subtract(50));
 		this.projectTabPane.widthProperty().addListener((observableValue, oldValue, newValue) -> {
 			if (newValue == null) {
 				projectTab.projectDescriptionText.setWrappingWidth(0);

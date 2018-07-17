@@ -20,7 +20,7 @@
 	</Button>
 	<Button fx:id="backButton" HBox.hgrow="NEVER" onAction="#handleBackButton">
 		<graphic>
-			<FontAwesomeIconView styleClass="icon-dark" glyphName="CHEVRON_LEFT" glyphSize="${fontSize.fontSize + 2}"/>
+			<FontAwesomeIconView styleClass="icon-dark" glyphName="ANGLE_LEFT" glyphSize="${fontSize.fontSize * 1.5 + 2}"/>
 		</graphic>
 		<tooltip>
 			<Tooltip text="%internal.navigationButtons.back.tooltip"/>
@@ -28,7 +28,7 @@
 	</Button>
 	<Button fx:id="forwardButton" HBox.hgrow="NEVER" onAction="#handleForwardButton">
 		<graphic>
-			<FontAwesomeIconView styleClass="icon-dark" glyphName="CHEVRON_RIGHT" glyphSize="${fontSize.fontSize + 2}"/>
+			<FontAwesomeIconView styleClass="icon-dark" glyphName="ANGLE_RIGHT" glyphSize="${fontSize.fontSize * 1.5 + 2}"/>
 		</graphic>
 		<tooltip>
 			<Tooltip text="%internal.navigationButtons.fastForward.tooltip"/>

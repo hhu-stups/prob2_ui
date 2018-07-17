@@ -3,26 +3,22 @@
 <?import de.prob2.ui.project.machines.MachinesTab?>
 <?import de.prob2.ui.project.preferences.PreferencesTab?>
 <?import de.prob2.ui.project.ProjectTab?>
+<?import de.prob2.ui.project.ProjectView?>
 <?import de.prob2.ui.project.verifications.VerificationsTab?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
-<fx:root minHeight="70.0" minWidth="200" stylesheets="@/prob.css"
-	type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
-	<StackPane AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
-		AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-		<VBox spacing = "5" alignment="CENTER">
-			<Button fx:id="newProjectButton" text="%menu.file.items.newProject"
-				onAction="#createNewProject" styleClass="button-blue" />
-			<Button fx:id="openProjectButton" text="%menu.file.items.open"
-				onAction="#openProject" styleClass="button-blue" />
-			<MenuButton fx:id="recentProjectButton" text="%menu.file.items.openRecentProject"
-				styleClass="button-blue" />
-		</VBox>
-	</StackPane>
-	<TabPane fx:id="projectTabPane" AnchorPane.topAnchor="0"
-		AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
-		AnchorPane.rightAnchor="0" minWidth="300">
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.VBox?>
+<fx:root type="ProjectView" minHeight="70.0" minWidth="200" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
+	<VBox spacing="5.0" alignment="CENTER">
+		<Button fx:id="newProjectButton" text="%menu.file.items.newProject"
+			onAction="#createNewProject" styleClass="button-blue" />
+		<Button fx:id="openProjectButton" text="%menu.file.items.open"
+			onAction="#openProject" styleClass="button-blue" />
+		<MenuButton fx:id="recentProjectButton" text="%menu.file.items.openRecentProject"
+			styleClass="button-blue" />
+	</VBox>
+	<TabPane fx:id="projectTabPane" minWidth="300">
 		<MachinesTab fx:id="machinesTab" />
 		<VerificationsTab fx:id="verificationsTab" />
 		<PreferencesTab fx:id="preferencesTab" />

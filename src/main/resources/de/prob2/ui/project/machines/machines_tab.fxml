@@ -8,33 +8,30 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.MenuItem?>
 <fx:root type="MachinesTab" text="%project.machines.tab.title" closable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
 	<VBox stylesheets="@/prob.css">
-		<AnchorPane HBox.hgrow="ALWAYS">
-			<HBox AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-				<Spacer/>
-				<MenuButton contentDisplay="GRAPHIC_ONLY">
-					<items>
-						<MenuItem text="%project.machines.tab.add.createNewMachine" onAction="#createMachine"/>
-						<MenuItem text="%project.machines.tab.add.addExistingMachine" onAction="#addMachine"/>
-					</items>
-					<graphic>
-						<FontAwesomeIconView styleClass="icon-dark" glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
-					</graphic>
-				</MenuButton>
-				<HelpButton fx:id="helpButton" />
-			</HBox>
-		</AnchorPane>
-		<SplitPane fx:id="splitPane" VBox.vgrow="always">
-			<ListView fx:id="machinesList">
+		<HBox styleClass="border" VBox.vgrow="NEVER">
+			<Spacer/>
+			<MenuButton contentDisplay="GRAPHIC_ONLY">
+				<items>
+					<MenuItem text="%project.machines.tab.add.createNewMachine" onAction="#createMachine"/>
+					<MenuItem text="%project.machines.tab.add.addExistingMachine" onAction="#addMachine"/>
+				</items>
+				<graphic>
+					<FontAwesomeIconView styleClass="icon-dark" glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
+				</graphic>
+			</MenuButton>
+			<HelpButton fx:id="helpButton" />
+		</HBox>
+		<SplitPane fx:id="splitPane" VBox.vgrow="ALWAYS">
+			<ListView fx:id="machinesList" styleClass="no-border">
 				<placeholder>
 					<Label text="%project.machines.tab.noMachines" />
 				</placeholder>
