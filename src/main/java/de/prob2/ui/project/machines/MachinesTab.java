@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -215,9 +216,12 @@ public class MachinesTab extends Tab {
 		if (selected == null) {
 			return;
 		}
+		final Path path = selected.toPath();
+		final String[] split = path.getFileName().toString().split("\\.");
+		final String machineName = split[0];
 		
 		try {
-			Files.createFile(selected.toPath());
+			Files.write(path, Arrays.asList("MACHINE " + machineName, "END"));
 		} catch (IOException e) {
 			LOGGER.error("Could not create machine file", e);
 			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.tab.couldNotCreateMachine"), e));
@@ -227,14 +231,13 @@ public class MachinesTab extends Tab {
 		final Set<String> machineNamesSet = currentProject.getMachines().stream()
 			.map(Machine::getName)
 			.collect(Collectors.toSet());
-		String[] n = relative.getFileName().toString().split("\\.");
-		String name = n[0];
 		int i = 1;
-		while (machineNamesSet.contains(name)) {
-			name = String.format(bundle.getString("project.machines.nameSuffix"), n[0], i);
+		String nameInProject = machineName;
+		while (machineNamesSet.contains(nameInProject)) {
+			nameInProject = String.format(bundle.getString("project.machines.nameSuffix"), machineName, i);
 			i++;
 		}
-		currentProject.addMachine(new Machine(name, "", relative));
+		currentProject.addMachine(new Machine(nameInProject, "", relative));
 	}
 
 	@FXML
