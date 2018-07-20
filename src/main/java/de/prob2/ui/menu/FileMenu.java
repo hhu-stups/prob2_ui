@@ -142,7 +142,7 @@ public class FileMenu extends Menu {
 		final Path relative = projectLocation.relativize(path);
 		final String fileName = path.getFileName().toString();
 		final String shortName = fileName.substring(0, fileName.lastIndexOf('.'));
-		final String description = String.format(bundle.getString("project.automaticDescription"), path);
+		final String description = String.format(bundle.getString("menu.file.automaticProjectDescription"), path);
 		final Machine machine = new Machine(shortName, "", relative);
 		currentProject.set(new Project(shortName, description, machine, projectLocation), true);
 
