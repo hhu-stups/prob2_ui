@@ -39,7 +39,8 @@ public final class ExecuteByPredicateStage extends Stage {
 	private final ResourceBundle bundle;
 	private final CurrentTrace currentTrace;
 	private final ObjectProperty<OperationItem> item;
-	private final List<TextField> paramTextFields;
+	private final List<String> identifiers;
+	private final List<TextField> valueTextFields;
 	
 	@Inject
 	private ExecuteByPredicateStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
@@ -49,7 +50,8 @@ public final class ExecuteByPredicateStage extends Stage {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.item = new SimpleObjectProperty<>(this, "item", null);
-		this.paramTextFields = new ArrayList<>();
+		this.identifiers = new ArrayList<>();
+		this.valueTextFields = new ArrayList<>();
 		
 		this.initModality(Modality.APPLICATION_MODAL);
 		this.stageManager.loadFXML(this, "execute_by_predicate_stage.fxml");
@@ -59,24 +61,41 @@ public final class ExecuteByPredicateStage extends Stage {
 	private void initialize() {
 		this.itemProperty().addListener((o, from, to) -> {
 			this.paramsGrid.getChildren().clear();
-			this.paramTextFields.clear();
+			this.identifiers.clear();
+			this.valueTextFields.clear();
 			if (to == null) {
 				this.operationLabel.setText(null);
 			} else {
 				this.operationLabel.setText(String.format(bundle.getString("operations.executeByPredicate.operation"), this.getItem().getName()));
+				
 				assert to.getParameterNames().size() == to.getParameterValues().size();
 				for (int i = 0; i < to.getParameterNames().size(); i++) {
-					final Label label = new Label(to.getParameterNames().get(i));
+					this.identifiers.add(to.getParameterNames().get(i));
+					this.valueTextFields.add(new TextField(to.getParameterValues().get(i)));
+				}
+				
+				to.getConstants().forEach((name, value) -> {
+					this.identifiers.add(name);
+					this.valueTextFields.add(new TextField(value));
+				});
+				
+				to.getVariables().forEach((name, value) -> {
+					this.identifiers.add(name);
+					this.valueTextFields.add(new TextField(value));
+				});
+				
+				assert this.identifiers.size() == this.valueTextFields.size();
+				for (int i = 0; i < this.identifiers.size(); i++) {
+					final Label label = new Label(this.identifiers.get(i));
 					GridPane.setRowIndex(label, i);
 					GridPane.setColumnIndex(label, 0);
 					GridPane.setHgrow(label, Priority.NEVER);
 					
-					final TextField textField = new TextField(to.getParameterValues().get(i));
+					final TextField textField = this.valueTextFields.get(i);
 					label.setLabelFor(textField);
 					GridPane.setRowIndex(textField, i);
 					GridPane.setColumnIndex(textField, 1);
 					GridPane.setHgrow(textField, Priority.ALWAYS);
-					this.paramTextFields.add(textField);
 					
 					this.paramsGrid.getChildren().addAll(label, textField);
 				}
@@ -103,13 +122,12 @@ public final class ExecuteByPredicateStage extends Stage {
 	
 	@FXML
 	private void handleExecute() {
-		final List<String> paramNames = this.getItem().getParameterNames();
 		final StringBuilder predicate = new StringBuilder();
-		assert paramNames.size() == this.paramTextFields.size();
-		for (int i = 0; i < paramNames.size(); i++) {
-			predicate.append(paramNames.get(i));
+		assert this.identifiers.size() == this.valueTextFields.size();
+		for (int i = 0; i < this.identifiers.size(); i++) {
+			predicate.append(this.identifiers.get(i));
 			predicate.append(" = (");
-			predicate.append(this.paramTextFields.get(i).getText());
+			predicate.append(this.valueTextFields.get(i).getText());
 			predicate.append(") & ");
 		}
 		predicate.append('(');
