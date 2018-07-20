@@ -1,11 +1,11 @@
-de.prob2.ui.history.HistoryView,History.md.html
-de.prob2.ui.operations.OperationsView,ProB2UI.md.html
-de.prob2.ui.project.ProjectTab,Project.md.html#Project
-de.prob2.ui.project.machines.MachinesTab,Project.md.html#Machines
-de.prob2.ui.project.preferences.PreferencesTab,Project.md.html#Preferences
-de.prob2.ui.stats.StatsView,Statistics.md.html
-de.prob2.ui.verifications.ltl.LTLView,Verification.md.html
-de.prob2.ui.verifications.modelchecking.ModelcheckingView,Verification.md.html
-de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView,Verification.md.html
-de.prob2.ui.verifications.tracereplay.TraceReplayView,Verification.md.html
-de.prob2.ui.states.StatesView,Main View/State.md.html
+de.prob2.ui.history.HistoryView,History.html
+de.prob2.ui.operations.OperationsView,ProB2UI.html
+de.prob2.ui.project.ProjectTab,Project.html#Project
+de.prob2.ui.project.machines.MachinesTab,Project.html#Machines
+de.prob2.ui.project.preferences.PreferencesTab,Project.html#Preferences
+de.prob2.ui.stats.StatsView,Statistics.html
+de.prob2.ui.verifications.ltl.LTLView,Verification.html
+de.prob2.ui.verifications.modelchecking.ModelcheckingView,Verification.html
+de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView,Verification.html
+de.prob2.ui.verifications.tracereplay.TraceReplayView,Verification.html
+de.prob2.ui.states.StatesView,Main View/State.html

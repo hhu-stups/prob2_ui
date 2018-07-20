@@ -17,7 +17,7 @@ class HelpTreeItem extends TreeItem<String>{
 		super(file.getName());
 		this.file = file;
 		if (file.isFile()) {
-			this.setValue(file.getName().replace(".md.html",""));
+			this.setValue(file.getName().replace(".html",""));
 		} else {
 			this.setValue(this.getValue().replace(File.separator,""));
 		}
@@ -46,7 +46,7 @@ class HelpTreeItem extends TreeItem<String>{
 		if (f != null && f.isDirectory()) {
 			ObservableList<TreeItem<String>> children = FXCollections.observableArrayList();
 			for (File child : f.listFiles()) {
-				if ((child.isDirectory() && !child.getName().contains("screenshots"))||child.getName().contains(".md.html")) {
+				if ((child.isDirectory() && !child.getName().contains("screenshots"))||child.getName().contains(".html")) {
 					children.add(createNode(child));
 				}
 			}
