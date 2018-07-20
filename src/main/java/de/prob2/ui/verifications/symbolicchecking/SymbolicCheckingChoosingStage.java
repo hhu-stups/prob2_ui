@@ -61,7 +61,7 @@ public class SymbolicCheckingChoosingStage extends Stage {
 	
 	public void select(SymbolicCheckingFormulaItem item) {
 		cbChoice.getItems().forEach(choice -> {
-			if(item.getDescription().equalsIgnoreCase(choice.getCheckingType().name())) {
+			if(item.getType().equals(choice.getCheckingType())) {
 				cbChoice.getSelectionModel().select(choice);
 			}
 		});

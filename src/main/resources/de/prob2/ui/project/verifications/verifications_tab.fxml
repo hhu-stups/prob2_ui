@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.layout.*?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.project.verifications.MachineTableView?>
-
-<fx:root type="Tab" text="%project.verifications.tab.title"
-		 closable="false" xmlns:fx="http://javafx.com/fxml/1">
-	<VBox stylesheets="@/prob.css" spacing="0">
-		<HBox alignment="CENTER_RIGHT">
-			<AnchorPane styleClass="border" HBox.hgrow="ALWAYS">
-				<HelpButton fx:id="helpButton" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" />
-			</AnchorPane>
+<?import de.prob2.ui.project.verifications.VerificationsTab?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<fx:root type="VerificationsTab" text="%project.verifications.tab.title" closable="false" xmlns:fx="http://javafx.com/fxml/1">
+	<VBox stylesheets="@/prob.css">
+		<HBox styleClass="border" alignment="CENTER_RIGHT">
+			<HelpButton fx:id="helpButton"/>
 		</HBox>
-		<MachineTableView fx:id="verificationsListView" VBox.vgrow="always"/>
+		<MachineTableView fx:id="verificationsListView" VBox.vgrow="ALWAYS"/>
 	</VBox>
 </fx:root>

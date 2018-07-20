@@ -16,23 +16,23 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Node;
@@ -49,6 +49,9 @@ import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W
@@ -504,14 +507,17 @@ public final class StageManager {
 		if (scene != null) {
 			final Parent root = scene.getRoot();
 			if (root instanceof Pane) {
+				final ObservableList<Menu> globalMenus = this.globalMacMenuBar.getMenus();
 				if (menuBar != null) {
 					// Temporary placeholder for the application menu, is later replaced with the
 					// global application menu
 					menuBar.getMenus().add(0, new Menu("Invisible Application Menu"));
+					// Add the Window and Help menus from the global menu bar
+					menuBar.getMenus().addAll(globalMenus.subList(globalMenus.size()-2, globalMenus.size()));
 				}
 				this.menuToolkit.setMenuBar((Pane) root, menuBar == null ? this.globalMacMenuBar : menuBar);
 				// Put the application menu from the global menu bar back
-				menuToolkit.setApplicationMenu(this.globalMacMenuBar.getMenus().get(0));
+				menuToolkit.setApplicationMenu(globalMenus.get(0));
 			}
 		}
 	}

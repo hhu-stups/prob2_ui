@@ -8,12 +8,17 @@ import com.google.inject.Singleton;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 
 @Singleton
@@ -28,9 +33,7 @@ public class ProjectTab extends Tab {
 	@FXML
 	TextArea projectDescriptionTextArea;
 	@FXML
-	private AnchorPane projectDescriptionPane;
-	@FXML
-	private AnchorPane projectNamePane;
+	private StackPane projectDescriptionPane;
 	@FXML
 	private HelpButton helpButton;
 	@FXML
@@ -59,7 +62,6 @@ public class ProjectTab extends Tab {
 		projectNameLabel.managedProperty().bind(projectNameTextField.managedProperty().not());
 		
 		locationLabel.textProperty().bind(currentProject.locationProperty().asString());
-		locationLabel.getTooltip().textProperty().bind(locationLabel.textProperty());
 		
 		initName();
 		initDescription();
@@ -67,7 +69,7 @@ public class ProjectTab extends Tab {
 
 	private void initName() {
 		projectNameLabel.textProperty().bind(currentProject.nameProperty());
-		projectNamePane.setOnMouseClicked(event -> {
+		projectNameLabel.setOnMouseClicked(event -> {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 				editName();
 			}

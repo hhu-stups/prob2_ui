@@ -5,6 +5,8 @@
 <?import de.prob2.ui.internal.NavigationButtons?>
 <?import de.prob2.ui.internal.Spacer?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.operations.OperationsView?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CustomMenuItem?>
 <?import javafx.scene.control.Label?>
@@ -17,80 +19,71 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<fx:root type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65"
-	xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="OperationsView" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
-	<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
-		<VBox spacing="5.0">
-			<AnchorPane>
-				<HBox spacing="10.0" AnchorPane.leftAnchor="10.0"
-					AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0"
-					AnchorPane.bottomAnchor="10.0" alignment="CENTER">
-					<TextField fx:id="searchBar" promptText="%operations.operationsView.search.prompt" HBox.hgrow="ALWAYS"/>
-					<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
-				</HBox>
-			</AnchorPane>
-			<AnchorPane>
-				<HBox AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="10.0"
-					AnchorPane.topAnchor="2.0" AnchorPane.rightAnchor="5.0" alignment="CENTER_LEFT">
-					<NavigationButtons/>
-					<Spacer/>
-					<Button fx:id="sortButton" mnemonicParsing="false"
-						onAction="#handleSortButton">
-						<graphic>
-							<FontAwesomeIconView styleClass="icon-dark"
-								glyphName="SORT" glyphSize="${fontSize.fontSize + 2}" />
-						</graphic>
-						<tooltip>
-							<Tooltip text="%operations.operationsView.tooltips.sort" />
-						</tooltip>
-					</Button>
-					<ToggleButton fx:id="disabledOpsToggle"
-						mnemonicParsing="false" onAction="#handleDisabledOpsToggle"
-						selected="true">
-						<graphic>
-							<FontAwesomeIconView styleClass="icon-dark"
-								glyphName="EYE" glyphSize="${fontSize.fontSize + 2}" />
-						</graphic>
-					</ToggleButton>
-					<MenuButton fx:id="randomButton" mnemonicParsing="false">
-						<items>
-							<MenuItem fx:id="oneRandomEvent" mnemonicParsing="false"
-								onAction="#random" text="%operations.operationsView.random.one" />
-							<MenuItem fx:id="fiveRandomEvents" mnemonicParsing="false"
-								onAction="#random" text="%operations.operationsView.random.five" />
-							<MenuItem fx:id="tenRandomEvents" mnemonicParsing="false"
-								onAction="#random" text="%operations.operationsView.random.ten" />
-							<CustomMenuItem fx:id="someRandomEvents"
-								mnemonicParsing="false">
-								<content>
-									<AnchorPane>
-										<TextField fx:id="randomText" onAction="#random"
-											promptText="%operations.operationsView.random.some.prompt" />
-									</AnchorPane>
-								</content>
-							</CustomMenuItem>
-						</items>
-						<graphic>
-							<FontAwesomeIconView styleClass="icon-dark"
-								glyphName="RANDOM" glyphSize="${fontSize.fontSize + 2}" />
-						</graphic>
-						<tooltip>
-							<Tooltip text="%operations.operationsView.tooltips.random" />
-						</tooltip>
-					</MenuButton>
-					<Button fx:id="cancelButton" onAction="#cancel">
-						<graphic>
-							<FontAwesomeIconView styleClass="icon-dark" glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
-						</graphic>
-					</Button>
-				</HBox>
-			</AnchorPane>
-		</VBox>
-		<ListView fx:id="opsListView" VBox.vgrow="always" />
-		<Label fx:id="warningLabel" styleClass="warning"/>
+	<VBox>
+		<padding>
+			<Insets top="5.0"/>
+		</padding>
+		<HBox alignment="CENTER">
+			<padding>
+				<Insets left="10.0"/>
+			</padding>
+			<TextField fx:id="searchBar" promptText="%operations.operationsView.search.prompt" HBox.hgrow="ALWAYS"/>
+			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
+		</HBox>
+		<HBox alignment="CENTER_LEFT">
+			<padding>
+				<Insets left="5.0"/>
+			</padding>
+			<NavigationButtons/>
+			<Spacer/>
+			<Button fx:id="sortButton" onAction="#handleSortButton">
+				<graphic>
+					<FontAwesomeIconView styleClass="icon-dark"
+						glyphName="SORT" glyphSize="${fontSize.fontSize + 2}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%operations.operationsView.tooltips.sort" />
+				</tooltip>
+			</Button>
+			<ToggleButton fx:id="disabledOpsToggle" onAction="#handleDisabledOpsToggle" selected="true">
+				<graphic>
+					<FontAwesomeIconView styleClass="icon-dark"
+						glyphName="EYE" glyphSize="${fontSize.fontSize + 2}" />
+				</graphic>
+			</ToggleButton>
+			<MenuButton fx:id="randomButton">
+				<items>
+					<MenuItem fx:id="oneRandomEvent" onAction="#random" text="%operations.operationsView.random.one" />
+					<MenuItem fx:id="fiveRandomEvents" onAction="#random" text="%operations.operationsView.random.five" />
+					<MenuItem fx:id="tenRandomEvents" onAction="#random" text="%operations.operationsView.random.ten" />
+					<CustomMenuItem fx:id="someRandomEvents">
+						<content>
+							<AnchorPane>
+								<TextField fx:id="randomText" onAction="#random"
+									promptText="%operations.operationsView.random.some.prompt" />
+							</AnchorPane>
+						</content>
+					</CustomMenuItem>
+				</items>
+				<graphic>
+					<FontAwesomeIconView styleClass="icon-dark"
+						glyphName="RANDOM" glyphSize="${fontSize.fontSize + 2}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%operations.operationsView.tooltips.random" />
+				</tooltip>
+			</MenuButton>
+			<Button fx:id="cancelButton" onAction="#cancel">
+				<graphic>
+					<FontAwesomeIconView styleClass="icon-dark" glyphName="STOP" glyphSize="${fontSize.fontSize + 2}"/>
+				</graphic>
+			</Button>
+		</HBox>
 	</VBox>
+	<ListView fx:id="opsListView" VBox.vgrow="always" />
+	<Label fx:id="warningLabel" styleClass="warning"/>
 </fx:root>

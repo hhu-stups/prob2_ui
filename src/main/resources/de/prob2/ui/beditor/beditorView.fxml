@@ -16,7 +16,7 @@
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<top>
-		<HBox alignment="CENTER_LEFT">
+		<HBox styleClass="border" alignment="CENTER_LEFT">
 			<Button fx:id="saveButton" onAction="#handleSave">
 				<graphic>
 					<FontAwesomeIconView styleClass="icon-dark" glyphName="SAVE" glyphSize="${fontSize.fontSize + 4}" />

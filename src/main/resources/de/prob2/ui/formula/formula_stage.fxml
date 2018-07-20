@@ -22,7 +22,6 @@
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
 						<ViewMenu fx:id="viewMenu" />
-						<WindowMenu fx:id="windowMenu" />
 					</MenuBar>
 				</top>
 				<center>
