@@ -3,10 +3,11 @@ function conversion {
 	count=`ls -1 *.md 2>/dev/null | wc -l`
 	if [ $count != 0 ]; then
 		echo "   Found .md file. Converting..."
-		rm -f *.md.html
+		rm -f *.html
+		rm -f *.adoc
 		for f in *.md; do
-			pandoc "${f}" -f markdown_github -t html -s | sed "s/\.md/.md.html/g" > "${f}.html"
-			pandoc "${f}" -f markdown_github -t asciidoc -s | sed "s/\.md/.md.adoc/g" > "${f}.adoc"
+			pandoc "${f}" -f markdown_github -t html -s | sed "s/\.md/.html/g" > "${f%.md}.html"
+			pandoc "${f}" -f markdown_github -t asciidoc -s | sed "s/\.md/.adoc/g" > "${f%.md}.adoc"
 		done
 		echo "   done"
 	else
