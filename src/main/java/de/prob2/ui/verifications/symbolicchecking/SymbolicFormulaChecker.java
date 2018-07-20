@@ -89,8 +89,11 @@ public class SymbolicFormulaChecker {
 				currentJobThreads.remove(currentThread);
 				if(!checkAll) {
 					List<Trace> counterExamples = item.getCounterExamples();
+					Trace example = item.getExample();
 					if(!counterExamples.isEmpty()) {
 						currentTrace.set(counterExamples.get(0));
+					} else if(example != null) {
+						currentTrace.set(example);
 					}
 				}
 			});
@@ -117,8 +120,11 @@ public class SymbolicFormulaChecker {
 				updateMachine(currentProject.getCurrentMachine());
 				if(!checkAll) {
 					List<Trace> counterExamples = item.getCounterExamples();
+					Trace example = item.getExample();
 					if(!counterExamples.isEmpty()) {
 						currentTrace.set(counterExamples.get(0));
+					} else if(example != null) {
+						currentTrace.set(example);
 					}
 				}
 			});
