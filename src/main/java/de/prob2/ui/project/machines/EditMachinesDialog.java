@@ -50,11 +50,11 @@ public class EditMachinesDialog extends Dialog<Machine> {
 				return machine;
 			}
 		});
-		stageManager.loadFXML(this, "machines_dialog.fxml");
+		stageManager.loadFXML(this, "edit_machines_dialog.fxml");
 	}
 
 	public Optional<Machine> editAndShow(Machine machine) {
-		this.setTitle("Edit " + machine.getName());
+		this.setTitle(String.format(bundle.getString("project.machines.editMachinesDialog.title"), machine.getName()));
 		this.machine = machine;
 
 		List<Machine> machinesList = currentProject.getMachines();
@@ -66,7 +66,7 @@ public class EditMachinesDialog extends Dialog<Machine> {
 			Button okButton = (Button) this.getDialogPane().lookupButton(okButtonType);
 			if (machineNamesSet.contains(to)) {
 				okButton.setDisable(true);
-				errorExplanationLabel.setText(String.format(bundle.getString("project.machines.error.machineAlreadyExists"), to));
+				errorExplanationLabel.setText(String.format(bundle.getString("project.machines.editMachinesDialog.machineAlreadyExistsError"), to));
 			} else if (to.isEmpty()) {
 				okButton.setDisable(true);
 				errorExplanationLabel.setText("");

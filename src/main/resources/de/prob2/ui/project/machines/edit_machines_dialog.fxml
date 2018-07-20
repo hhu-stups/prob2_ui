@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root type="Dialog" title="%project.machines.dialog.dialogTitle"
+<fx:root type="Dialog" title=""
 		 xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane stylesheets="@/prob.css">
@@ -13,7 +13,7 @@
 					<VBox spacing="5" AnchorPane.topAnchor="14"
 						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-10"
 						AnchorPane.rightAnchor="-10">
-						<Label text="%project.machines.dialog.title" styleClass="title">
+						<Label text="%project.machines.editMachinesDialog.label.title" styleClass="title">
 							<VBox.margin>
 								<Insets left="10" right="10" />
 							</VBox.margin>
@@ -23,7 +23,7 @@
 								AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
 								alignment="center_right">
 								<HBox spacing="20" alignment="center_left">
-									<Label text="%project.machines.dialog.name" />
+									<Label text="%project.machines.editMachinesDialog.label.name" />
 									<TextField fx:id="nameField" HBox.hgrow="always" />
 								</HBox>
 								<Label fx:id="errorExplanationLabel" textFill="#B77300">
@@ -32,7 +32,7 @@
 									</VBox.margin>
 								</Label>
 								<VBox spacing="20" alignment="center_left">
-									<Label text="%project.machines.dialog.description" />
+									<Label text="%project.machines.editMachinesDialog.label.description" />
 									<TextArea fx:id="descriptionTextArea" styleClass="text-area-with-border" />
 									<VBox.margin>
 										<Insets top="20" />

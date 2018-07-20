@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.MenuItem?>
-<fx:root type="MachinesTab" text="%project.machines.tab.title" closable="false" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="MachinesTab" text="%project.machines.machinesTab.title" closable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
@@ -23,8 +23,8 @@
 				<Spacer/>
 				<MenuButton contentDisplay="GRAPHIC_ONLY">
 					<items>
-						<MenuItem text="%project.machines.tab.add.createNewMachine" onAction="#createMachine"/>
-						<MenuItem text="%project.machines.tab.add.addExistingMachine" onAction="#addMachine"/>
+						<MenuItem text="%project.machines.machinesTab.buttons.add.createNewMachine" onAction="#createMachine"/>
+						<MenuItem text="%project.machines.machinesTab.buttons.add.addExistingMachine" onAction="#addMachine"/>
 					</items>
 					<graphic>
 						<FontAwesomeIconView styleClass="icon-dark" glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
@@ -36,7 +36,7 @@
 		<SplitPane fx:id="splitPane" VBox.vgrow="always">
 			<ListView fx:id="machinesList">
 				<placeholder>
-					<Label text="%project.machines.tab.noMachines" />
+					<Label text="%project.machines.machinesTab.noMachines" />
 				</placeholder>
 			</ListView>
 		</SplitPane>
