@@ -73,11 +73,11 @@ public class PreferencesTab extends Tab {
 			}
 		};
 
-		final MenuItem removePreferenceMenuItem = new MenuItem(bundle.getString("project.preferences.tab.menu.remove"));
+		final MenuItem removePreferenceMenuItem = new MenuItem(bundle.getString("project.preferences.preferencesTab.contextMenu.items.remove"));
 		removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
 		removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
 
-		final MenuItem editMenuItem = new MenuItem(bundle.getString("project.preferences.tab.menu.edit"));
+		final MenuItem editMenuItem = new MenuItem(bundle.getString("project.preferences.preferencesTab.contextMenu.items.edit"));
 		editMenuItem.setOnAction(event -> {
 			PreferencesDialog prefDialog = injector.getInstance(PreferencesDialog.class);
 			Preference pref = cell.getItem();
