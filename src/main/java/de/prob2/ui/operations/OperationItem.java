@@ -235,8 +235,11 @@ public class OperationItem {
 			}
 		}
 		
-		this.getConstants().forEach((key, value) -> args.add(key + ":=" + value));
-		this.getVariables().forEach((key, value) -> args.add(key + ":=" + value));
+		if(this.name.equals("$setup_constants") || this.name.equals("$initialise_machine")) {
+			this.getConstants().forEach((key, value) -> args.add(key + ":=" + value));
+			this.getVariables().forEach((key, value) -> args.add(key + ":=" + value));
+		}
+
 		
 		if (!args.isEmpty()) {
 			sb.append('(');
