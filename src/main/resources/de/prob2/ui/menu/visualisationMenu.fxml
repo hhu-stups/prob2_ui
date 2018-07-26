@@ -7,8 +7,8 @@
 <fx:root type="Menu" text="%menu.visualisation" xmlns:fx="http://javafx.com/fxml/1">
 	<MenuItem fx:id="enterFormulaForVisualization"
 			  text="%menu.visualisation.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />	
-	<MenuItem fx:id="graphVisualisationItem" text="%menu.visualisation.items.graph" onAction="#openGraphVisualisation"/>
-	<MenuItem fx:id="tableVisualisationItem" text="%menu.visualisation.items.table" onAction="#openTableVisualisation"/>
+	<MenuItem text="%menu.visualisation.items.graph" onAction="#openGraphVisualisation"/>
+	<MenuItem text="%menu.visualisation.items.table" onAction="#openTableVisualisation"/>
 	<SeparatorMenuItem />
 	<MenuItem text="%menu.visualisation.items.showHistoryChart"
 			  onAction="#handleHistoryChart" />

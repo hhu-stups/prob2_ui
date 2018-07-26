@@ -36,7 +36,11 @@
 									AnchorPane.rightAnchor="0.0">
 									<ListView fx:id="lvChoice" AnchorPane.bottomAnchor="0.0"
 										AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-										AnchorPane.topAnchor="0.0"/>
+										AnchorPane.topAnchor="0.0">
+										<placeholder>
+											<Label text="%common.noModelLoaded"/>
+										</placeholder>
+									</ListView>
 									<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
 										<Button fx:id="cancelButton" onAction="#cancel">
 											<graphic>
