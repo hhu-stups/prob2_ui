@@ -21,6 +21,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
@@ -32,6 +33,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class DynamicCommandStage extends Stage {
+	private static final class DynamicCommandItemCell extends ListCell<DynamicCommandItem> {
+		private DynamicCommandItemCell() {
+			super();
+			getStyleClass().add("dynamic-command-cell");
+		}
+		
+		@Override
+		protected void updateItem(final DynamicCommandItem item, final boolean empty) {
+			super.updateItem(item, empty);
+			this.getStyleClass().removeAll("dynamiccommandenabled", "dynamiccommanddisabled");
+			if (item != null && !empty) {
+				setText(item.getName());
+				if (item.isAvailable()) {
+					getStyleClass().add("dynamiccommandenabled");
+				} else {
+					getStyleClass().add("dynamiccommanddisabled");
+				}
+			}
+		}
+	}
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
 	
 	@FXML
@@ -187,5 +209,4 @@ public abstract class DynamicCommandStage extends Stage {
 	protected abstract void visualize(DynamicCommandItem item);
 	
 	protected abstract void fillCommands();
-
 }
