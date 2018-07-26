@@ -229,7 +229,7 @@ public final class StatesView extends StackPane {
 		});
 
 		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(
-				bundle.getString("states.menu.visualizeExpressionGraph"));
+				bundle.getString("states.statesView.contextMenu.items.visualizeExpressionGraph"));
 		// Expression can only be shown if the row item contains an ASTFormula
 		// and the current state is initialized.
 		visualizeExpressionAsGraphItem.disableProperty().bind(Bindings.createBooleanBinding(
@@ -242,13 +242,12 @@ public final class StatesView extends StackPane {
 				formulaStage.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
-				stageManager.makeAlert(Alert.AlertType.ERROR,
-						String.format(bundle.getString("states.error.couldNotVisualize"), e)).showAndWait();
+				stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content").showAndWait();
 			}
 		});
 
 		final MenuItem visualizeExpressionAsTableItem = new MenuItem(
-				bundle.getString("states.menu.visualizeExpressionTable"));
+				bundle.getString("states.statesView.contextMenu.items.visualizeExpressionTable"));
 		// Expression can only be shown if the row item contains an ASTFormula
 		// and the current state is initialized.
 		visualizeExpressionAsTableItem.disableProperty().bind(Bindings.createBooleanBinding(
@@ -262,12 +261,11 @@ public final class StatesView extends StackPane {
 				expressionTableView.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
-				stageManager.makeAlert(Alert.AlertType.ERROR,
-						String.format(bundle.getString("states.error.couldNotVisualize"), e)).showAndWait();
-			}
+				stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content").showAndWait();
+				}
 		});
 
-		final MenuItem showDetailsItem = new MenuItem(bundle.getString("states.menu.showDetails"));
+		final MenuItem showDetailsItem = new MenuItem(bundle.getString("states.statesView.contextMenu.items.showDetails"));
 		// Details can only be shown if the row item contains an ASTFormula,
 		// and the corresponding value is an EvalResult or EvaluationErrorResult.
 		showDetailsItem.disableProperty().bind(Bindings.createBooleanBinding(() -> {

@@ -6,7 +6,7 @@
 <fx:root type="AnchorPane" minWidth="240" minHeight="70" xmlns:fx="http://javafx.com/fxml/1">
 	<ListView fx:id="lv" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
 		<placeholder>
-			<Label text="%stateErrors.noErrors"/>
+			<Label text="%states.stateErrorsView.noErrors"/>
 		</placeholder>
 	</ListView>
 </fx:root>

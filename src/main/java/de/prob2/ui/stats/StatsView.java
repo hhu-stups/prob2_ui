@@ -110,10 +110,10 @@ public class StatsView extends ScrollPane {
 			this.update(currentTrace.get());
 
 			icon = FontAwesomeIcon.CLOSE;
-			text = bundle.getString("stats.hideExtendedStats");
+			text = bundle.getString("stats.statsView.hideExtendedStats");
 		} else {
 			icon = FontAwesomeIcon.PLUS_CIRCLE;
-			text = bundle.getString("stats.showExtendedStats");
+			text = bundle.getString("stats.statsView.showExtendedStats");
 		}
 		((FontAwesomeIconView)extendedStatsToggle.getGraphic()).setIcon(icon);
 		extendedStatsToggle.setText(text);

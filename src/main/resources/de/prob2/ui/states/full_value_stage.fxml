@@ -22,13 +22,13 @@
 				</padding>
 				<center>
 					<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
-						<Tab fx:id="currentValueTab" text="%states.fullValue.tabs.current">
+						<Tab fx:id="currentValueTab" text="%states.fullValueStage.tabs.current">
 							<TextArea fx:id="currentValueTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
 						</Tab>
-						<Tab fx:id="previousValueTab" text="%states.fullValue.tabs.previous">
+						<Tab fx:id="previousValueTab" text="%states.fullValueStage.tabs.previous">
 							<TextArea fx:id="previousValueTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
 						</Tab>
-						<Tab fx:id="diffTab" text="%states.fullValue.tabs.diff">
+						<Tab fx:id="diffTab" text="%states.fullValueStage.tabs.diff">
 							<StyleClassedTextArea fx:id="diffTextarea" editable="false" wrapText="true" styleClass="difftextarea" maxWidth="Infinity" maxHeight="Infinity" />
 						</Tab>
 					</TabPane>
@@ -38,7 +38,7 @@
 						<padding>
 							<Insets top="10.0" left="15.0" right="15.0"/>
 						</padding>
-						<CheckBox fx:id="prettifyCheckBox" text="%states.fullValue.prettify" alignment="CENTER_LEFT" HBox.hgrow="NEVER" onAction="#updateTabs"/>
+						<CheckBox fx:id="prettifyCheckBox" text="%states.fullValueStage.prettify" alignment="CENTER_LEFT" HBox.hgrow="NEVER" onAction="#updateTabs"/>
 						<Spacer/>
 						<Button fx:id="saveAsButton" text="%common.buttons.saveAs" alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#saveAs" />
 					</HBox>

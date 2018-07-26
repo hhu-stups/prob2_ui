@@ -34,7 +34,7 @@
 						<FontAwesomeIconView glyphName="SEARCH" styleClass="icon-basic" glyphSize="${fontSize.fontSize}"/>
 					</graphic>
 				</Button>
-				<TextField fx:id="filterState" onAction="#handleSearchButton" promptText="%states.search.prompt" HBox.hgrow="ALWAYS" />
+				<TextField fx:id="filterState" onAction="#handleSearchButton" promptText="%states.statesView.search.prompt" HBox.hgrow="ALWAYS" />
 				<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
 			</HBox>
 			<TreeTableView fx:id="tv" VBox.vgrow="ALWAYS" showRoot="false">
@@ -42,9 +42,9 @@
 					<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 				</columnResizePolicy>
 				<columns>
-					<TreeTableColumn fx:id="tvName" id="name" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.columns.name" />
-					<TreeTableColumn fx:id="tvValue" id="value" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.columns.value" />
-					<TreeTableColumn fx:id="tvPreviousValue" id="previousValue" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.columns.previousValue" />
+					<TreeTableColumn fx:id="tvName" id="name" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.statesView.columns.name" />
+					<TreeTableColumn fx:id="tvValue" id="value" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.statesView.columns.value" />
+					<TreeTableColumn fx:id="tvPreviousValue" id="previousValue" editable="false" minWidth="80.0" prefWidth="240" sortable="false" text="%states.statesView.columns.previousValue" />
 				</columns>
 				<placeholder>
 					<Label text="%common.noModelLoaded"/>
@@ -52,7 +52,7 @@
 				<TreeItem fx:id="tvRootItem" expanded="true" />
 			</TreeTableView>
 		</VBox>
-		<TitledPane id="bconsole" fx:id="consolePane" text="%states.interactiveConsole.titledPane.title" expanded="false" animated="false">
+		<TitledPane id="bconsole" fx:id="consolePane" text="%states.statesView.interactiveConsole.titledPane.title" expanded="false" animated="false">
 			<BConsoleView/>
 		</TitledPane>
 	</SplitPane>

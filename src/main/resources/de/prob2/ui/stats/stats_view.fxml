@@ -27,7 +27,7 @@
 			AnchorPane.topAnchor="25.0" fx:id="statsBox">
 			<VBox spacing="8.0" styleClass="border">
 				<HBox spacing="7.0">
-					<Label text="%stats.processedStates" HBox.hgrow="ALWAYS" styleClass="bold" />
+					<Label text="%stats.statsView.label.processedStates" HBox.hgrow="ALWAYS" styleClass="bold" />
 					<Label fx:id="processedStates" />
 					<Label text="/" />
 					<Label fx:id="totalStates" />
@@ -38,7 +38,7 @@
 					</VBox.margin>
 				</HBox>
 				<HBox spacing="7.0">
-					<Label text="%stats.totalTransitions" HBox.hgrow="ALWAYS" styleClass="bold" />
+					<Label text="%stats.statsView.label.totalTransitions" HBox.hgrow="ALWAYS" styleClass="bold" />
 					<Label fx:id="totalTransitions" />
 					<VBox.margin>
 						<Insets bottom="15.0" left="10.0" right="10.0" top="0.0" />
@@ -48,12 +48,12 @@
 			<VBox>
 				<HBox alignment="CENTER_LEFT">
 					<ToggleButton onAction="#handleExtendedStatsToggle"
-						fx:id="extendedStatsToggle" text="%stats.showExtendedStats">
+						fx:id="extendedStatsToggle" text="%stats.statsView.showExtendedStats">
 						<graphic>
 							<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 1.2}" />
 						</graphic>
 						<tooltip>
-							<Tooltip text="%stats.showExtendedStats" />
+							<Tooltip text="%stats.statsView.showExtendedStats" />
 						</tooltip>
 					</ToggleButton>
 					<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
@@ -65,7 +65,7 @@
 						AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
 						AnchorPane.bottomAnchor="5.0" visible="false" spacing="10.0">
 						<AnchorPane>
-							<Label alignment="CENTER" text="%stats.stateStats"
+							<Label alignment="CENTER" text="%stats.statsView.extendedStats.stateStats"
 								AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 								AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0" styleClass="stats-titel" />
 						</AnchorPane>
@@ -77,13 +77,13 @@
 								</columnConstraints>
 								<AnchorPane
 									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
-									<Label text="%stats.stateStats.status"
+									<Label text="%stats.statsView.extendedStats.stateStats.status"
 										AnchorPane.leftAnchor="10.0" styleClass="stats-header" />
 								</AnchorPane>
 								<AnchorPane fx:id="numberOfStatesAnchorPane"
 									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
 									GridPane.columnIndex="1">
-									<Label text="%stats.stateStats.numberOfStates"
+									<Label text="%stats.statsView.extendedStats.stateStats.numberOfStates"
 										AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0"
 										styleClass="stats-header" />
 								</AnchorPane>
@@ -97,7 +97,7 @@
 						</VBox>
 						<AnchorPane>
 							<Label alignment="CENTER" prefHeight="16.0"
-								text="%stats.transitionStats" AnchorPane.bottomAnchor="0.0"
+								text="%stats.statsView.extendedStats.transitionStats" AnchorPane.bottomAnchor="0.0"
 								AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 								AnchorPane.topAnchor="20.0" styleClass="stats-titel" />
 						</AnchorPane>
@@ -109,13 +109,13 @@
 								</columnConstraints>
 								<AnchorPane
 									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;">
-									<Label text="%stats.transitionStats.name"
+									<Label text="%stats.statsView.extendedStats.transitionStats.name"
 										AnchorPane.leftAnchor="10.0" styleClass="stats-header" />
 								</AnchorPane>
 								<AnchorPane fx:id="numberOfTransitionsAnchorPane"
 									style="-fx-border-color: transparent transparent grey transparent; -fx-border-width: 2;"
 									GridPane.columnIndex="1">
-									<Label text="%stats.transitionStats.numberOfTransitions"
+									<Label text="%stats.statsView.extendedStats.transitionStats.numberOfTransitions"
 										AnchorPane.rightAnchor="10.0" AnchorPane.leftAnchor="10.0"
 										styleClass="stats-header" />
 								</AnchorPane>
