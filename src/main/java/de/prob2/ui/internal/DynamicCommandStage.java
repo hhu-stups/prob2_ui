@@ -8,6 +8,7 @@ import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
+import de.prob.statespace.Trace;
 
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -138,11 +139,16 @@ public abstract class DynamicCommandStage extends Stage {
 	}
 	
 	protected void fillCommands(AbstractGetDynamicCommands cmd) {
-		try {
-			currentTrace.getStateSpace().execute(cmd);
-			lvChoice.getItems().setAll(cmd.getCommands());
-		} catch (ProBError | CliError e) {
-			LOGGER.error("Extract all expression table commands failed", e);
+		final Trace trace = currentTrace.get();
+		if (trace == null) {
+			lvChoice.getItems().clear();
+		} else {
+			try {
+				currentTrace.getStateSpace().execute(cmd);
+				lvChoice.getItems().setAll(cmd.getCommands());
+			} catch (ProBError | CliError e) {
+				LOGGER.error("Extract all expression table commands failed", e);
+			}
 		}
 	}
 	
