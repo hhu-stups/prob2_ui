@@ -1,5 +1,6 @@
 package de.prob2.ui.internal;
 
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 import com.google.inject.Injector;
@@ -57,7 +58,7 @@ public abstract class DynamicCommandStage extends Stage {
 	@FXML
 	protected DynamicCommandStatusBar statusBar;
 	
-	protected DynamicCommandItem currentItem;
+	protected DynamicCommandItem lastItem;
 	
 	protected final CurrentTrace currentTrace;
 	
@@ -71,7 +72,7 @@ public abstract class DynamicCommandStage extends Stage {
 	
 	protected final Injector injector;
 	
-	public DynamicCommandStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
+	protected DynamicCommandStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
 			final ResourceBundle bundle, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
@@ -86,36 +87,36 @@ public abstract class DynamicCommandStage extends Stage {
 	protected void initialize() {
 		lbDescription.setWrapText(true);
 		fillCommands();
-		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+		lvChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if (to == null) {
-				return;
-			}
-			if (!to.isAvailable()) {
-				lbDescription.setText(String.join("\n", to.getDescription(), to.getAvailable()));
-			} else {
-				lbDescription.setText(to.getDescription());
-			}
-			boolean needFormula = to.getArity() > 0;
-			enterFormulaBox.setVisible(needFormula);
-			String currentFormula = taFormula.getText();
-			if(currentItem != null && !currentItem.getCommand().equals(to.getCommand())) {
+				if (from != null) {
+					lastItem = from;
+				}
 				reset();
-			}
-			if ((!needFormula || !currentFormula.isEmpty()) && (currentItem == null
-					|| !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
-				visualize(to);
-			}
-			if(from != null) {
-				currentItem = to;
+				lbDescription.setText("");
+			} else {
+				if (to.isAvailable()) {
+					lbDescription.setText(to.getDescription());
+				} else {
+					lbDescription.setText(to.getDescription() + '\n' + to.getAvailable());
+				}
+				boolean needFormula = to.getArity() > 0;
+				enterFormulaBox.setVisible(needFormula);
+				String currentFormula = taFormula.getText();
+				if (!Objects.equals(from, to) || cbContinuous.isSelected()) {
+					reset();
+					if (!needFormula || !currentFormula.isEmpty()) {
+						visualize(to);
+					}
+				}
 			}
 		});
 		lvChoice.disableProperty().bind(currentThread.isNotNull());
 		
 		currentTrace.addListener((observable, from, to) -> refresh());
-		injector.getInstance(Modelchecker.class).resultProperty().addListener((observable, from, to) -> refresh());
+		injector.getInstance(Modelchecker.class).resultProperty().addListener((o, from, to) -> refresh());
 		
-		
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+		currentProject.currentMachineProperty().addListener((o, from, to) -> {
 			fillCommands();
 			reset();
 		});
@@ -167,13 +168,13 @@ public abstract class DynamicCommandStage extends Stage {
 		int index = lvChoice.getSelectionModel().getSelectedIndex();
 		fillCommands();
 		if (index == -1) {
-			lvChoice.getSelectionModel().selectFirst();
+			lvChoice.getSelectionModel().select(this.lastItem);
 		} else {
 			lvChoice.getSelectionModel().select(index);
 		}
 	}
 	
-	protected void interrupt(){
+	protected void interrupt() {
 		if (currentThread.get() != null) {
 			currentThread.get().interrupt();
 			currentThread.set(null);
