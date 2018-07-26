@@ -110,9 +110,7 @@ public abstract class DynamicCommandStage extends Stage {
 		});
 		lvChoice.disableProperty().bind(currentThread.isNotNull());
 		
-		currentTrace.currentStateProperty().addListener((observable, from, to) -> refresh());
 		currentTrace.addListener((observable, from, to) -> refresh());
-		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> refresh());
 		injector.getInstance(Modelchecker.class).resultProperty().addListener((observable, from, to) -> refresh());
 		
 		
