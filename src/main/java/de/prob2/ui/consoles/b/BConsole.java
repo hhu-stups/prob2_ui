@@ -24,7 +24,10 @@ public final class BConsole extends Console {
 				final String name = modelFile == null ? to.getMainComponent().toString() : modelFile.getName();
 				message = String.format(bundle.getString("consoles.b.message.modelLoaded"), name);
 			}
-			this.insertText(this.getLineNumber(), 0, message + '\n');
+			final int oldCaretPos = this.getCaretPosition();
+			final String line = message + '\n';
+			this.insertText(this.getLineNumber(), 0, line);
+			this.moveTo(oldCaretPos + line.length());
 			this.requestFollowCaret();
 		});
 	}
