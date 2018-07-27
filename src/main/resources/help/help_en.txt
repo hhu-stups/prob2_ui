@@ -9,3 +9,5 @@ de.prob2.ui.verifications.modelchecking.ModelcheckingView,Verification.html
 de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView,Verification.html
 de.prob2.ui.verifications.tracereplay.TraceReplayView,Verification.html
 de.prob2.ui.states.StatesView,Main View/State.html
+de.prob2.ui.beditor.BEditorView,Main View/Editor.html
+de.prob2.ui.table.ExpressionTableView,Main View/Expression Table.html

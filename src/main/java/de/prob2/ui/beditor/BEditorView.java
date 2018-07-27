@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.menu.ExternalEditor;
@@ -46,6 +47,7 @@ public class BEditorView extends BorderPane {
 	@FXML private Button openExternalButton;
 	@FXML private Label warningLabel;
 	@FXML private BEditor beditor;
+	@FXML private HelpButton helpButton;
 
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -110,6 +112,7 @@ public class BEditorView extends BorderPane {
 			}
 		});
 		this.stopActions.add(beditor::stopHighlighting);
+		helpButton.setHelpContent(this.getClass());
 	}
 
 	public ObjectProperty<Path> pathProperty() {
