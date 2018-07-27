@@ -45,7 +45,7 @@ Dieses Untermenü stellt eine Groovy-Konsole zur Verfügung und erlaubt es Plugi
 
 ![Fenster-Menü](../screenshots/Menu/Window.png)
 
-Das Fensteruntermenü erlaubt es Perspektiven zu ändern und Komponenten abzutrennen. Dieses UI bringt 3 verschiedene voreingestellte Perspektiven. Es ist erlaubt eigene Perspektiven zu nutzen, indem man eine FXML-Datei, die die Ansichten enthält, zur Verfügung stellt, aber man sollte sich dabei bewusst sein, dass das die Fähigkeit Komponenten abzutrennen zerstören kann.
+Das Fensteruntermenü erlaubt es Perspektiven zu ändern und Komponenten abzutrennen. Dieses UI bringt 3 verschiedene voreingestellte Perspektiven. Es ist erlaubt eigene Perspektiven zu nutzen, indem man eine FXML-Datei, die die Ansichten enthält, zur Verfügung stellt, aber man sollte sich dabei bewusst sein, dass das die Fähigkeit Komponenten abzutrennen zerstören kann. [Erstellung von eigenen FXML-Dateien](Perspektiven.md)
 
 ![Hilfemenü](../screenshots/Menu/Help.png)
 
