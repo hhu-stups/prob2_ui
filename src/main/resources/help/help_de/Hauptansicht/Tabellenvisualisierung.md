@@ -1,1 +1,0 @@
-# Visualisierung als Tabelle 

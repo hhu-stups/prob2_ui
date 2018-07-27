@@ -10,5 +10,6 @@ de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView,Überprüfungen.
 de.prob2.ui.verifications.tracereplay.TraceReplayView,Überprüfungen.html
 de.prob2.ui.states.StatesView,Hauptansicht/Zustandsansicht.html
 de.prob2.ui.beditor.BEditorView,Hauptansicht/Editor.html
-de.prob2.ui.table.ExpressionTableView,Hauptansicht/Tabellenvisualisierung.html
-de.prob2.ui.formula.FormulaStage,Hauptansicht/Graphvisualisierung.html
+de.prob2.ui.table.ExpressionTableView,Hauptansicht/Tabellenvisualisierung einer Formel.html
+de.prob2.ui.formula.FormulaStage,Hauptansicht/Graphvisualisierung einer Formel.html
+de.prob2.ui.dotty.DotView,Graphvisualisierung.html
