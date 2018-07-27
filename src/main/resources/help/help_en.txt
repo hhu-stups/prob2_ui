@@ -1,5 +1,5 @@
 de.prob2.ui.history.HistoryView,History.html
-de.prob2.ui.operations.OperationsView,ProB2UI.html
+de.prob2.ui.operations.OperationsView,Operations.html
 de.prob2.ui.project.ProjectTab,Project.html#Project
 de.prob2.ui.project.machines.MachinesTab,Project.html#Machines
 de.prob2.ui.project.preferences.PreferencesTab,Project.html#Preferences
