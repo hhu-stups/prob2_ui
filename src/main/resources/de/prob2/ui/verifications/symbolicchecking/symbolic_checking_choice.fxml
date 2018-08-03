@@ -24,9 +24,9 @@
 							<FXCollections fx:factory="observableArrayList">
 								<SymbolicCheckingItem checkingType="SEQUENCE" guiType="TEXT_FIELD"/>
 								<SymbolicCheckingItem checkingType="INVARIANT" guiType="CHOICE_BOX"/>
-								<SymbolicCheckingItem checkingType="DEADLOCK" guiType="TEXT_FIELD"/>
+								<SymbolicCheckingItem checkingType="DEADLOCK" guiType="PREDICATE"/>
 								<SymbolicCheckingItem checkingType="FIND_DEADLOCK" guiType="NONE"/>
-								<SymbolicCheckingItem checkingType="FIND_VALID_STATE" guiType="TEXT_FIELD"/>
+								<SymbolicCheckingItem checkingType="FIND_VALID_STATE" guiType="PREDICATE"/>
 								<SymbolicCheckingItem checkingType="CHECK_ALL_OPERATIONS" guiType="NONE"/>
 								<SymbolicCheckingItem checkingType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
 								<SymbolicCheckingItem checkingType="CHECK_REFINEMENT" guiType="NONE"/>
