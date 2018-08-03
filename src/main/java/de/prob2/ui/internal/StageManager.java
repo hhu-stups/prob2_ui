@@ -120,7 +120,7 @@ public final class StageManager {
 			try {
 				loader.setLocation(new URL(filename.replace("custom ", "")));
 			} catch (MalformedURLException e) {
-				LOGGER.error("Loading fxml failed", e);
+				throw new IllegalArgumentException(e);
 			}
 		}
 		loader.setRoot(controller);
@@ -128,7 +128,7 @@ public final class StageManager {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			LOGGER.error("Loading fxml failed", e);
+			throw new IllegalArgumentException(e);
 		}
 
 		final FontSize fontSize = injector.getInstance(FontSize.class);

@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog?>
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.web.WebView?>
-<fx:root type="Dialog" title="%verifications.ltl.dialog.pattern.title"
-		 xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.geometry.Insets?>
+<fx:root type="LTLPatternDialog" title="%verifications.ltl.dialog.pattern.title" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane stylesheets="@/prob.css">
 			<header>
@@ -15,24 +22,19 @@
 				</AnchorPane>
 			</header>
 			<content>
-				<AnchorPane styleClass="border">
-					<VBox spacing="20" AnchorPane.leftAnchor="15"
-						AnchorPane.rightAnchor="15" AnchorPane.topAnchor="20"
-						AnchorPane.bottomAnchor="20" alignment="center_right">
-						<HBox spacing="20" alignment="center_left">
-							<Label text="%verifications.ltl.dialog.enterPattern" />
-							<TextField fx:id="tfName" HBox.hgrow="always"/>
-						</HBox>
-						<VBox spacing="10" alignment="center_left">
-							<Label text="%verifications.ltl.dialog.pattern" />
-							<WebView fx:id="taCode"/>
-						</VBox>
-						<VBox spacing="10" alignment="center_left">
-							<Label text="%verifications.ltl.dialog.description" />
-							<TextArea fx:id="taDescription" styleClass="text-area-with-border" maxHeight="15"/>
-						</VBox>
-					</VBox>
-				</AnchorPane>
+				<VBox styleClass="border" spacing="10.0" alignment="CENTER_LEFT">
+					<padding>
+						<Insets topRightBottomLeft="15.0"/>
+					</padding>
+					<HBox spacing="10.0" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
+						<Label text="%verifications.ltl.dialog.enterPattern" HBox.hgrow="NEVER"/>
+						<TextField fx:id="tfName" HBox.hgrow="ALWAYS"/>
+					</HBox>
+					<Label text="%verifications.ltl.dialog.pattern" VBox.vgrow="NEVER"/>
+					<WebView fx:id="taCode" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
+					<Label text="%verifications.ltl.dialog.description" VBox.vgrow="NEVER"/>
+					<TextArea fx:id="taDescription" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
+				</VBox>
 			</content>
 			<ButtonType buttonData="CANCEL_CLOSE" text="%common.buttons.cancel" />
 			<ButtonType fx:id="okButtonType" buttonData="OK_DONE"

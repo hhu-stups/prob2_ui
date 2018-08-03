@@ -2,11 +2,11 @@
 
 In der Voreinstellung ist das Hauptfenster in drei vertikale Felder unterteilt (siehe unten).
 
-* Auf der linken Seite, die Operationen-Ansicht, welche die Operationen anzeigt, deren Vor- und Schutzbedingungen in diesem Zustand wahr sind (Die Ansicht benutzt einen blauen Kreispfeil für den Fall, dass eine Operation den Zustand nicht ändert);
+* Auf der linken Seite, die [Operationen-Ansicht](Operationen.md), welche die Operationen anzeigt, deren Vor- und Schutzbedingungen in diesem Zustand wahr sind (Die Ansicht benutzt einen blauen Kreispfeil für den Fall, dass eine Operation den Zustand nicht ändert);
 * In der Mitte
 	* die [Zustandsansicht](Hauptansicht/Zustandsansicht.md), die den aktuellen Zustand der B-Maschine anzeigt und beispielsweise auflistet, welche Werte die Maschienvariablen derzeit haben,
 	* die [Zustandsfehleransicht](Hauptansicht/Zustandsfehler.md), welche wohlmöglich auftretende Zustandsfehler anzeigt und 
-	* die [Visualisierungsansicht](Hauptansicht/Visualisierung.md), die eine Visualisierung der Zustände anzeigt, falls vom Benutzer zur Verfügung gestellt;
+	* die [Zustandsvisualisierungsansicht](Hauptansicht/Zustandsvisualisierung.md), die eine Visualisierung der Zustände anzeigt, falls vom Benutzer zur Verfügung gestellt;
 * Im rechten Feld sind einige Unteransichten enthalten, die aktiviert werden können:
 	* [Der Verlauf der Operationen, die zu diesem Zustand geführt haben (Verlauf)](Verlauf.md)
 	* [Die Projektansicht](Projekt.md)

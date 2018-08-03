@@ -14,7 +14,7 @@
 		</HBox>
 	</top>
 	<center>
-		<TreeTableView fx:id="tv" prefHeight="400.0" prefWidth="600.0" editable="true" showRoot="false" styleClass="with-border">
+		<TreeTableView fx:id="tv" prefHeight="400.0" prefWidth="600.0" editable="true" showRoot="false">
 			<columns>
 				<TreeTableColumn fx:id="tvName" editable="false" minWidth="80.0" prefWidth="320.0" text="%preferences.preferencesView.table.columns.name" />
 				<TreeTableColumn fx:id="tvChanged" editable="false" resizable="false" prefWidth="20.0" text="%preferences.preferencesView.table.columns.changed" />

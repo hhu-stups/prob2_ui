@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.internal.PredicateBuilderView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+<fx:root type="PredicateBuilderView" stylesheets="@/prob.css" spacing="5.0" xmlns:fx="http://javafx.com/fxml/1">
+	<TableView fx:id="table" minHeight="80.0" prefHeight="160.0" VBox.vgrow="ALWAYS">
+		<columns>
+			<TableColumn fx:id="nameColumn" text="%internal.predicateBuilderView.columns.name"/>
+			<TableColumn fx:id="valueColumn" text="%internal.predicateBuilderView.columns.value"/>
+		</columns>
+		<columnResizePolicy>
+			<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+		</columnResizePolicy>
+	</TableView>
+	<Label text="%internal.predicateBuilderView.additionalPredicate" labelFor="$predicateField" VBox.vgrow="NEVER"/>
+	<TextField fx:id="predicateField" VBox.vgrow="NEVER"/>
+</fx:root>

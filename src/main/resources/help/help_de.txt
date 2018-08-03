@@ -1,11 +1,15 @@
 de.prob2.ui.history.HistoryView,Verlauf.html
-de.prob2.ui.operations.OperationsView,ProB2UI.html
+de.prob2.ui.operations.OperationsView,Operationen.html
 de.prob2.ui.project.ProjectTab,Projekt.html#Project
 de.prob2.ui.project.machines.MachinesTab,Projekt.html#Machines
 de.prob2.ui.project.preferences.PreferencesTab,Projekt.html#Preferences
 de.prob2.ui.stats.StatsView,Statistik.html
-de.prob2.ui.verifications.ltl.LTLView,Überprüfungen.html
-de.prob2.ui.verifications.modelchecking.ModelcheckingView,Überprüfungen.html
-de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView,Überprüfungen.html
-de.prob2.ui.verifications.tracereplay.TraceReplayView,Überprüfungen.html
+de.prob2.ui.verifications.ltl.LTLView,Überprüfungen.html#LTL
+de.prob2.ui.verifications.modelchecking.ModelcheckingView,Überprüfungen.html#Model
+de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView,Überprüfungen.html#Symbolic
+de.prob2.ui.verifications.tracereplay.TraceReplayView,Überprüfungen.html#Trace
 de.prob2.ui.states.StatesView,Hauptansicht/Zustandsansicht.html
+de.prob2.ui.beditor.BEditorView,Hauptansicht/Editor.html
+de.prob2.ui.table.ExpressionTableView,Hauptansicht/Tabellenvisualisierung einer Formel.html
+de.prob2.ui.formula.FormulaStage,Hauptansicht/Graphvisualisierung einer Formel.html
+de.prob2.ui.dotty.DotView,Graphvisualisierung.html

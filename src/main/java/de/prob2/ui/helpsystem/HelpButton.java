@@ -49,6 +49,7 @@ public class HelpButton extends Button{
 	@FXML
 	public void openHelp() {
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
+		helpSystemStage.help.isHelpButton = true;
 		if (helpContent!=null) {
 			helpSystemStage.setContent(helpContent, anchor);
 		}

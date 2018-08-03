@@ -137,6 +137,7 @@ public class ProB2Module extends AbstractModule {
 		bind(ModelcheckingStage.class);
 		bind(NavigationButtons.class);
 		bind(OperationsView.class);
+		bind(PredicateBuilderView.class);
 		bind(PreferencesTab.class);
 		bind(PreferencesView.class);
 		bind(ProjectView.class);
