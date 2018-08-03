@@ -53,6 +53,7 @@ public class HelpSystem extends StackPane {
 	WebEngine webEngine;
 	private URI helpURI;
 	boolean isJar;
+	boolean isHelpButton;
 	private UIState uiState;
 	String helpSubdirectoryString = "help_en";
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
@@ -62,6 +63,7 @@ public class HelpSystem extends StackPane {
 		stageManager.loadFXML(this, "helpsystem.fxml");
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
 		isJar = helpURI.toString().startsWith("jar:");
+		isHelpButton = false;
 		// this needs to be updated if new translations of help are added
 		String[] languages = {"de", "en"};
 		for (String language : languages) {
@@ -76,7 +78,11 @@ public class HelpSystem extends StackPane {
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal!=null && newVal.isLeaf()){
 				File f = ((HelpTreeItem) newVal).getFile();
-				webEngine.load(f.toURI().toString());
+				if (!isHelpButton) {
+					webEngine.load(f.toURI().toString());
+				} else {
+					isHelpButton = false;
+				}
 			}
 		});
 
