@@ -585,9 +585,6 @@
 	-fx-border-color: -prob-grey;
 	-fx-border-width: 0.0 1.0 0.0 1.0;
 }
-.with-border .column-header {
-	/*-fx-border-width: 0.0 0.0 2.0 0.2;*/
-}
 .table-view > .virtual-flow > .corner,
 .tree-table-view > .virtual-flow > .corner {
 	-fx-background-color: white;
