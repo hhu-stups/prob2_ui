@@ -1,29 +1,20 @@
 package de.prob2.ui.internal;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializer;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.util.Providers;
-
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob.MainModule;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.beditor.BEditor;
 import de.prob2.ui.beditor.BEditorView;
+import de.prob2.ui.benchmarks.BenchmarksStage;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.b.BConsoleView;
@@ -66,12 +57,16 @@ import de.prob2.ui.verifications.tracereplay.TraceReplayView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 import de.prob2.ui.visualisation.fx.VisualisationController;
-
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.BuilderFactory;
-
 import org.hildan.fxgson.FxGson;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
@@ -117,6 +112,7 @@ public class ProB2Module extends AbstractModule {
 			.create());
 		
 		// Controllers
+		bind(BenchmarksStage.class);
 		bind(BConsole.class);
 		bind(BConsoleView.class);
 		bind(DynamicCommandStatusBar.class);

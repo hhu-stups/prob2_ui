@@ -1,18 +1,11 @@
 package de.prob2.ui.prob2fx;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.Trace;
-
+import de.prob2.ui.benchmarks.BenchmarksStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
@@ -24,7 +17,6 @@ import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.verifications.tracereplay.TraceReplayView;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -40,6 +32,12 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -131,6 +129,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		injector.getInstance(ModelcheckingView.class).bindMachine(m);
 		injector.getInstance(TraceReplayView.class).refresh();
 		injector.getInstance(StatusBar.class).reset();
+		injector.getInstance(BenchmarksStage.class).reset();
 	}
 
 	public void reloadCurrentMachine() {

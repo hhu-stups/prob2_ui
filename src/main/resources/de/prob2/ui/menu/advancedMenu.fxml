@@ -5,6 +5,8 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 
 <fx:root type="Menu" text="%menu.advanced" xmlns:fx="http://javafx.com/fxml/1">
+	<MenuItem text="%menu.advanced.items.benchmarks" onAction="#handleBenchmarks" />
+	<SeparatorMenuItem />
 	<MenuItem text="%menu.advanced.items.groovy" onAction="#handleGroovyConsole" />
 	<SeparatorMenuItem />
 	<MenuItem text="%menu.advanced.items.pluginMenu" onAction="#showPluginMenu"/>
