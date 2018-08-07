@@ -7,5 +7,5 @@ de.prob2.ui.stats.StatsView,Statistics.md.html
 de.prob2.ui.verifications.ltl.LTLView,Verification.md.html
 de.prob2.ui.verifications.modelchecking.ModelcheckingView,Verification.md.html
 de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView,Verification.md.html
-de.prob2.ui.verifications.tracereplay.TraceReplayView,Verification.md.html
+de.prob2.ui.animation.tracereplay.TraceReplayView,Verification.md.html
 de.prob2.ui.states.StatesView,Main View/State.md.html
