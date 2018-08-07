@@ -113,7 +113,7 @@ public class FormulaStage extends Stage {
 		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
 		Thread thread = new Thread(() -> {
 			try {
-				Platform.runLater(() -> statusBar.setText(bundle.getString("common.statusbar.loading")));
+				Platform.runLater(() -> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
 				if(formula instanceof IEvalElement) {
 					formulaView = formulaGenerator.showFormula((IEvalElement) formula);
 					Platform.runLater(() -> {

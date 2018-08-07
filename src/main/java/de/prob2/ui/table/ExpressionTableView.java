@@ -101,7 +101,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 		interrupt();
 
 		Thread thread = new Thread(() -> {
-			Platform.runLater(() -> statusBar.setText(bundle.getString("common.statusbar.loading")));
+			Platform.runLater(() -> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
 			try {
 				if(item.getArity() > 0) {
 					formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
@@ -119,7 +119,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 				LOGGER.error("Table visualization failed", e);
 				currentThread.set(null);
 				Platform.runLater(() -> {
-					stageManager.makeExceptionAlert(bundle.getString("tableview.error.message"), e).show();
+					stageManager.makeExceptionAlert(bundle.getString("table.expressionTableView.alerts.visualisationNotPossible.message"), e).show();
 					reset();
 				});
 			}
@@ -157,7 +157,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@FXML
 	private void save() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("tableview.csv"));
+		fileChooser.setTitle(bundle.getString("table.expressionTableView.fileChooser.saveAsCSV.title"));
 		File file = fileChooser.showSaveDialog(new Stage());
 		if(file == null || currentTable == null) {
 			return;
