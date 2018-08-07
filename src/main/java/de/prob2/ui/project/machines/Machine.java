@@ -14,7 +14,7 @@ import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
-
+import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -108,6 +108,7 @@ public class Machine {
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
+	private ListProperty<SymbolicAnimationFormulaItem> symbolicAnimationFormulas;
 	private SetProperty<Path> traces;
 	private ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
@@ -166,6 +167,9 @@ public class Machine {
 		if (symbolicCheckingFormulas != null) {
 			symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeStatus);
 			symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeCounterExamples);
+		}
+		if (symbolicAnimationFormulas != null) {
+			symbolicAnimationFormulas.forEach(SymbolicAnimationFormulaItem::initializeStatus);
 		}
 		if (modelcheckingItems != null) {
 			modelcheckingItems.forEach(ModelCheckingItem::initializeStatus);
@@ -286,6 +290,24 @@ public class Machine {
 		this.setChanged(true);
 	}
 	
+	public ListProperty<SymbolicAnimationFormulaItem> symbolicAnimationFormulasProperty() {
+		return symbolicAnimationFormulas;
+	}
+	
+	public List<SymbolicAnimationFormulaItem> getSymbolicAnimationFormulas() {
+		return symbolicAnimationFormulas.get();
+	}
+	
+	public void addSymbolicAnimationFormula(SymbolicAnimationFormulaItem formula) {
+		symbolicAnimationFormulas.add(formula);
+		this.setChanged(true);
+	}
+	
+	public void removeSymbolicAnimationFormula(SymbolicAnimationFormulaItem formula) {
+		symbolicAnimationFormulas.remove(formula);
+		this.setChanged(true);
+	}
+	
 	public ObservableSet<Path> getTraceFiles() {
 		return this.traces;
 	}
@@ -346,6 +368,9 @@ public class Machine {
 		}
 		if(symbolicCheckingFormulas == null) {
 			this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
+		}
+		if(symbolicAnimationFormulas == null) {
+			this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
 		}
 		if(traces == null) {
 			this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());

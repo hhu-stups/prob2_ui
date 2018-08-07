@@ -22,6 +22,11 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 
 import de.prob2.ui.MainController;
+import de.prob2.ui.animation.AnimationView;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaInput;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationView;
+import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.animation.tracereplay.TraceReplayView;
 import de.prob2.ui.beditor.BEditor;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.RuntimeOptions;
@@ -61,8 +66,6 @@ import de.prob2.ui.verifications.modelchecking.ModelcheckingStage;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaInput;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
-import de.prob2.ui.verifications.tracereplay.TraceChecker;
-import de.prob2.ui.verifications.tracereplay.TraceReplayView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 import de.prob2.ui.visualisation.fx.VisualisationController;
@@ -117,6 +120,7 @@ public class ProB2Module extends AbstractModule {
 			.create());
 		
 		// Controllers
+		bind(AnimationView.class);
 		bind(BConsole.class);
 		bind(BConsoleView.class);
 		bind(DynamicCommandStatusBar.class);
@@ -157,7 +161,8 @@ public class ProB2Module extends AbstractModule {
 		bind(StateVisualisationView.class);
 		bind(SymbolicCheckingView.class);
 		bind(SymbolicCheckingFormulaInput.class);
-
+		bind(SymbolicAnimationView.class);
+		bind(SymbolicAnimationFormulaInput.class);
 		bind(ProBPluginHelper.class);
 		bind(ProBPluginManager.class);
 		bind(VisualisationController.class);

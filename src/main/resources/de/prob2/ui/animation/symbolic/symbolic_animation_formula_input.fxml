@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaInput?>
+
+
+<fx:root type="SymbolicAnimationFormulaInput" xmlns:fx="http://javafx.com/fxml/1">
+	<VBox spacing="10">
+		<HBox alignment="CENTER" prefHeight="47.0" prefWidth="400.0">
+			<VBox.margin>
+				<Insets top="30"/>
+			</VBox.margin>
+			<VBox spacing="20" prefWidth="400.0">
+				<StackPane>
+					<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
+					<HBox alignment="CENTER" prefHeight="47.0" prefWidth="400.0" spacing="60">
+						<ChoiceBox fx:id="cbOperations" prefWidth="150.0"/>
+					</HBox>
+				</StackPane>
+			</VBox>
+		</HBox>
+		<HBox alignment="CENTER" prefHeight="47.0" prefWidth="400.0" spacing="60">
+			<Button fx:id="btAdd" text="%verifications.symbolic.add" styleClass="button-blue"/>
+			<Button fx:id="btCheck" text="%verifications.symbolic.check" styleClass="button-blue"/>
+			<Button fx:id="btCancel" onAction="#cancel" text="%common.buttons.cancel" styleClass="button-blue"/>
+		</HBox>
+	</VBox>
+</fx:root>

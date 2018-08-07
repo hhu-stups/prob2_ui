@@ -1,6 +1,6 @@
-package de.prob2.ui.verifications.symbolicchecking;
+package de.prob2.ui.animation.symbolic;
 
-import java.util.List;
+
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
@@ -9,7 +9,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -26,7 +25,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
@@ -35,23 +33,23 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 @Singleton
-public class SymbolicCheckingView extends ScrollPane {
+public class SymbolicAnimationView extends ScrollPane {
 	
 	
 	@FXML
 	private HelpButton helpButton;
 		
 	@FXML
-	private TableView<SymbolicCheckingFormulaItem> tvFormula;
+	private TableView<SymbolicAnimationFormulaItem> tvFormula;
 	
 	@FXML
-	private TableColumn<SymbolicCheckingFormulaItem, FontAwesomeIconView> formulaStatusColumn;
+	private TableColumn<SymbolicAnimationFormulaItem, FontAwesomeIconView> formulaStatusColumn;
 	
 	@FXML
-	private TableColumn<SymbolicCheckingFormulaItem, String> formulaNameColumn;
+	private TableColumn<SymbolicAnimationFormulaItem, String> formulaNameColumn;
 	
 	@FXML
-	private TableColumn<SymbolicCheckingFormulaItem, String> formulaDescriptionColumn;
+	private TableColumn<SymbolicAnimationFormulaItem, String> formulaDescriptionColumn;
 	
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
@@ -73,21 +71,21 @@ public class SymbolicCheckingView extends ScrollPane {
 
 	private final Injector injector;
 	
-	private final SymbolicCheckingFormulaHandler symbolicCheckHandler;
+	private final SymbolicAnimationFormulaHandler symbolicCheckHandler;
 	
-	private final SymbolicFormulaChecker symbolicChecker;
+	private final SymbolicAnimationChecker symbolicChecker;
 
 	@Inject
-	public SymbolicCheckingView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
-					final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler, 
-					final SymbolicFormulaChecker symbolicChecker, final Injector injector) {
+	public SymbolicAnimationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
+					final CurrentProject currentProject, final SymbolicAnimationFormulaHandler symbolicCheckHandler, 
+					final SymbolicAnimationChecker symbolicChecker, final Injector injector) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.symbolicCheckHandler = symbolicCheckHandler;
 		this.symbolicChecker = symbolicChecker;
 		this.injector = injector;
-		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
+		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
 	
 	@FXML
@@ -114,7 +112,7 @@ public class SymbolicCheckingView extends ScrollPane {
 	
 	public void bindMachine(Machine machine) {
 		tvFormula.itemsProperty().unbind();
-		tvFormula.itemsProperty().bind(machine.symbolicCheckingFormulasProperty());
+		tvFormula.itemsProperty().bind(machine.symbolicAnimationFormulasProperty());
 		tvFormula.refresh();
 	}
 	
@@ -139,7 +137,7 @@ public class SymbolicCheckingView extends ScrollPane {
 		});
 		shouldExecuteColumn.setGraphic(selectAll);
 		tvFormula.setOnMouseClicked(e-> {
-			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+			SymbolicAnimationFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
 				symbolicCheckHandler.handleItem(item, false);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
@@ -151,7 +149,7 @@ public class SymbolicCheckingView extends ScrollPane {
 	private void setContextMenu() {
 		tvFormula.setRowFactory(table -> {
 			
-			final TableRow<SymbolicCheckingFormulaItem> row = new TableRow<>();
+			final TableRow<SymbolicAnimationFormulaItem> row = new TableRow<>();
 			
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.symbolic.menu.check"));
 			checkItem.setDisable(true);
@@ -159,14 +157,12 @@ public class SymbolicCheckingView extends ScrollPane {
 				symbolicCheckHandler.handleItem(row.getItem(), false);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
 			});
-
-
-			
-			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolic.menu.showCounterExample"));
-			showCounterExampleItem.setDisable(true);
 			
 			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
-			showMessage.setOnAction(e -> injector.getInstance(SymbolicCheckingResultHandler.class).showResult(row.getItem()));
+			showMessage.setOnAction(e -> injector.getInstance(SymbolicAnimationResultHandler.class).showResult(row.getItem()));
+			
+			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.symbolic.menu.showFoundState"));
+			showStateItem.setDisable(true);
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
@@ -175,9 +171,12 @@ public class SymbolicCheckingView extends ScrollPane {
 							.or(to.shouldExecuteProperty().not()));
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
-					showCounterExampleItem.disableProperty().bind(row.emptyProperty()
-							.or(to.counterExamplesProperty().emptyProperty()));
-					showCounterExamples(to, showCounterExampleItem);
+					
+					showStateItem.disableProperty().bind(row.emptyProperty()
+							.or(to.exampleProperty().isNull()));
+					if(to.getExample() != null) {
+						showStateItem.setOnAction(event-> currentTrace.set(to.getExample()));
+					}
 				}
 			});
 
@@ -189,15 +188,15 @@ public class SymbolicCheckingView extends ScrollPane {
 			MenuItem changeItem = new MenuItem(bundle.getString("verifications.symbolic.menu.change"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
 			
-			row.setContextMenu(new ContextMenu(checkItem, changeItem, showCounterExampleItem, showMessage, removeItem));
+			row.setContextMenu(new ContextMenu(checkItem, changeItem, showMessage, showStateItem, removeItem));
 			return row;
 		});
 	}
 	
 	@FXML
 	public void addFormula() {
-		injector.getInstance(SymbolicCheckingChoosingStage.class).reset();
-		injector.getInstance(SymbolicCheckingChoosingStage.class).showAndWait();
+		injector.getInstance(SymbolicAnimationChoosingStage.class).reset();
+		injector.getInstance(SymbolicAnimationChoosingStage.class).showAndWait();
 	}
 	
 	@FXML
@@ -215,8 +214,8 @@ public class SymbolicCheckingView extends ScrollPane {
 	
 	private void removeFormula() {
 		Machine machine = currentProject.getCurrentMachine();
-		SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-		machine.removeSymbolicCheckingFormula(item);
+		SymbolicAnimationFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+		machine.removeSymbolicAnimationFormula(item);
 		updateProject();
 	}
 	
@@ -229,21 +228,10 @@ public class SymbolicCheckingView extends ScrollPane {
 	public void refresh() {
 		tvFormula.refresh();
 	}
-	
-	private void showCounterExamples(SymbolicCheckingFormulaItem item, Menu counterExampleItem) {
-		counterExampleItem.getItems().clear();
-		List<Trace> counterExamples = item.getCounterExamples();
-		for(int i = 0; i < counterExamples.size(); i++) {
-			MenuItem traceItem = new MenuItem(String.format(bundle.getString("verifications.symbolic.menu.showCounterExample.counterExample"), i + 1));
-			final int index = i;
-			traceItem.setOnAction(e-> currentTrace.set((counterExamples.get(index))));
-			counterExampleItem.getItems().add(traceItem);
-		}
 
-	}
 	
-	private void openItem(SymbolicCheckingFormulaItem item) {
-		SymbolicCheckingFormulaInput formulaInput = injector.getInstance(SymbolicCheckingFormulaInput.class);
+	private void openItem(SymbolicAnimationFormulaItem item) {
+		SymbolicAnimationFormulaInput formulaInput = injector.getInstance(SymbolicAnimationFormulaInput.class);
 		formulaInput.changeFormula(item);
 	}
 		
