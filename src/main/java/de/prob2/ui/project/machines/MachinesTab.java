@@ -86,7 +86,7 @@ public class MachinesTab extends Tab {
 		
 		@FXML
 		private void handleRemove() {
-			stageManager.makeAlert(Alert.AlertType.CONFIRMATION, String.format(bundle.getString("project.machines.removeDialog.message"), this.machine.getName())).showAndWait().ifPresent(buttonType -> {
+			stageManager.makeAlert(Alert.AlertType.CONFIRMATION, String.format(bundle.getString("project.machines.machinesTab.alerts.removeMachineConfirmation.content"), this.machine.getName())).showAndWait().ifPresent(buttonType -> {
 				if (buttonType.equals(ButtonType.OK)) {
 					currentProject.removeMachine(this.machine);
 				}
@@ -159,7 +159,7 @@ public class MachinesTab extends Tab {
 
 		private void showMachineView(final Machine machine) {
 			closeMachineView();
-			splitPane.getItems().add(0, new MachineView(machine, stageManager, injector));
+			splitPane.getItems().add(0, new MachineDescriptionView(machine, stageManager, injector));
 		}
 	}
 	
@@ -204,7 +204,7 @@ public class MachinesTab extends Tab {
 					.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not()));
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
-			if (node instanceof MachineView && !to.contains(((MachineView) node).getMachine())) {
+			if (node instanceof MachineDescriptionView && !to.contains(((MachineDescriptionView) node).getMachine())) {
 				closeMachineView();
 			}
 		});
@@ -224,7 +224,7 @@ public class MachinesTab extends Tab {
 			Files.write(path, Arrays.asList("MACHINE " + machineName, "END"));
 		} catch (IOException e) {
 			LOGGER.error("Could not create machine file", e);
-			stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("project.machines.tab.couldNotCreateMachine"), e));
+			stageManager.makeExceptionAlert(bundle.getString("project.machines.machinesTab.alerts.couldNotCreateMachine.content"), e);
 			return;
 		}
 		final Path relative = currentProject.getLocation().relativize(selected.toPath());
@@ -234,7 +234,7 @@ public class MachinesTab extends Tab {
 		int i = 1;
 		String nameInProject = machineName;
 		while (machineNamesSet.contains(nameInProject)) {
-			nameInProject = String.format(bundle.getString("project.machines.nameSuffix"), machineName, i);
+			nameInProject = String.format("%s (%d)", machineName, i);
 			i++;
 		}
 		currentProject.addMachine(new Machine(nameInProject, "", relative));
@@ -251,7 +251,7 @@ public class MachinesTab extends Tab {
 		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
 			stageManager.makeAlert(
 				Alert.AlertType.ERROR,
-				String.format(bundle.getString("project.machines.error.machineAlreadyExists"), relative)
+				String.format(bundle.getString("project.machines.machinesTab.alerts.machineAlreadyExists.content"), relative)
 			).showAndWait();
 			return;
 		}
@@ -269,7 +269,7 @@ public class MachinesTab extends Tab {
 	}
 
 	void closeMachineView() {
-		if (splitPane.getItems().get(0) instanceof MachineView) {
+		if (splitPane.getItems().get(0) instanceof MachineDescriptionView) {
 			splitPane.getItems().remove(0);
 			machinesList.getSelectionModel().clearSelection();
 		}

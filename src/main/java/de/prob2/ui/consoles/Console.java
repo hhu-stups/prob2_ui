@@ -62,7 +62,19 @@ public abstract class Console extends StyleClassedTextArea {
 		this.setWrapText(true);
 		this.getStyleClass().add("console");
 		
-		this.promptProperty().addListener((o, from, to) -> this.replace(this.getLineNumber(), 0, this.getLineNumber(), from.length(), to, this.getStyleAtPosition(this.getLineNumber(), 0)));
+		this.promptProperty().addListener((o, from, to) -> {
+			// If the cursor is in the input, remember its position relative to the end of the prompt, and place it there again after the prompt is updated.
+			final int caretPositionInInput;
+			if (this.getCaretPosition() >= this.getLineStart()) {
+				caretPositionInInput = Math.max(this.getCaretColumn() - from.length(), 0);
+			} else {
+				caretPositionInInput = -1;
+			}
+			this.replace(this.getLineNumber(), 0, this.getLineNumber(), from.length(), to, this.getStyleAtPosition(this.getLineNumber(), 0));
+			if (caretPositionInInput != -1) {
+				this.moveTo(this.getLineNumber(), caretPositionInInput + to.length());
+			}
+		});
 	}
 	
 	public void setEvents() {

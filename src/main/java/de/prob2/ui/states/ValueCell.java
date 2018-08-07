@@ -74,16 +74,16 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 				this.getStyleClass().add("true");
 			}
 		} else if (result instanceof IdentifierNotInitialised) {
-			this.setText(bundle.getString("states.value.notInitialized"));
+			this.setText(bundle.getString("states.valueCell.notInitialized"));
 			this.getStyleClass().add("not-initialized");
 		} else if (result instanceof WDError) {
-			this.setText(bundle.getString("states.value.notWellDefined"));
+			this.setText(bundle.getString("states.valueCell.notWellDefined"));
 			this.getStyleClass().add(ERROR);
 		} else if (result instanceof EvaluationErrorResult) {
-			this.setText(String.format(bundle.getString("states.value.error"), ((EvaluationErrorResult)result).getResult()));
+			this.setText(String.format(bundle.getString("states.valueCell.error"), ((EvaluationErrorResult)result).getResult()));
 			this.getStyleClass().add(ERROR);
 		} else if (result instanceof EnumerationWarning) {
-			this.setText(bundle.getString("states.value.enumerationWarning"));
+			this.setText(bundle.getString("states.valueCell.enumerationWarning"));
 			this.getStyleClass().add(ERROR);
 		} else {
 			throw new IllegalArgumentException("Don't know how to show the value of a " + result.getClass() + " instance");

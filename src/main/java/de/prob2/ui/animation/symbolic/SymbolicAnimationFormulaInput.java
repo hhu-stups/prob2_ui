@@ -1,6 +1,8 @@
 package de.prob2.ui.animation.symbolic;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -9,20 +11,24 @@ import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.BEvent;
+import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem.GUIType;
+import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 @Singleton
-public class SymbolicAnimationFormulaInput extends StackPane {
+public class SymbolicAnimationFormulaInput extends VBox {
 	
 	
 	private final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler;
@@ -40,6 +46,12 @@ public class SymbolicAnimationFormulaInput extends StackPane {
 	
 	@FXML
 	private ChoiceBox<String> cbOperations;
+	
+	@FXML
+	private StackPane optionsPane;
+	
+	@FXML
+	private PredicateBuilderView predicateBuilderView;
 	
 	private final Injector injector;
 	
@@ -98,7 +110,7 @@ public class SymbolicAnimationFormulaInput extends StackPane {
 				case DEADLOCK: 
 					symbolicAnimationFormulaHandler.handleDeadlock(tfFormula.getText(), false); 
 					break;
-				case SEQUENCE: 
+				case SEQUENCE:
 					symbolicAnimationFormulaHandler.handleSequence(tfFormula.getText(), false); 
 					break;
 				case FIND_DEADLOCK: 
@@ -115,6 +127,8 @@ public class SymbolicAnimationFormulaInput extends StackPane {
 						case FIND_REDUNDANT_INVARIANTS: 
 							symbolicAnimationFormulaHandler.findRedundantInvariants(formulaItem, false); 
 							break;
+					default:
+						break;
 				}
 			}
 			injector.getInstance(SymbolicAnimationChoosingStage.class).close();
@@ -164,15 +178,17 @@ public class SymbolicAnimationFormulaInput extends StackPane {
 	
 	private void update() {
 		events.clear();
+		final Map<String, String> items = new LinkedHashMap<>();
 		if (currentTrace.get() != null) {
-			AbstractElement mainComponent = currentTrace.getStateSpace().getMainComponent();
-			if (mainComponent instanceof de.prob.model.representation.Machine) {
-				for (BEvent e : mainComponent.getChildrenOfType(BEvent.class)) {
-					events.add(e.getName());
-				}
+			final LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
+			if (loadedMachine != null) {
+				events.addAll(loadedMachine.getOperationNames());
+				loadedMachine.getConstantNames().forEach(s -> items.put(s, ""));
+				loadedMachine.getVariableNames().forEach(s -> items.put(s, ""));
 			}
-			cbOperations.getItems().setAll(events);
 		}
+		cbOperations.getItems().setAll(events);
+		predicateBuilderView.setItems(items);
 	}
 	
 	private void addFormula(boolean checking) {
@@ -181,6 +197,10 @@ public class SymbolicAnimationFormulaInput extends StackPane {
 		switch(guiType) {
 			case TEXT_FIELD:
 				symbolicAnimationFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType, checking);
+				break;
+			case PREDICATE:
+				final String predicate = predicateBuilderView.getPredicate();
+				symbolicAnimationFormulaHandler.addFormula(predicate, predicate, checkingType, checking);
 				break;
 			case NONE:
 				symbolicAnimationFormulaHandler.addFormula(checkingType.name(), checkingType.name(), checkingType, checking);
@@ -196,23 +216,6 @@ public class SymbolicAnimationFormulaInput extends StackPane {
 		injector.getInstance(SymbolicAnimationChoosingStage.class).close();
 	}
 	
-	public void showTextField() {
-		tfFormula.setVisible(true);
-		tfFormula.toFront();
-		cbOperations.setVisible(false);
-	}
-	
-	public void showChoiceBox() {
-		tfFormula.setVisible(false);
-		cbOperations.setVisible(true);
-		cbOperations.toFront();
-	}
-	
-	public void showNone() {
-		tfFormula.setVisible(false);
-		cbOperations.setVisible(false);
-	}
-	
 	public void reset() {
 		btAdd.setText(bundle.getString("verifications.symbolic.add"));
 		btCheck.setText(bundle.getString("verifications.symbolic.check"));
@@ -220,4 +223,30 @@ public class SymbolicAnimationFormulaInput extends StackPane {
 		tfFormula.clear();
 		cbOperations.getSelectionModel().clearSelection();
 	}
+	
+	private void show(final Node node) {
+		optionsPane.getChildren().forEach(c -> c.setVisible(false));
+		if (node != null) {
+			node.setVisible(true);
+			node.toFront();
+		}
+	}
+	
+	public void showNone() {
+		show(null);
+	}
+	
+	public void showTextField() {
+		show(tfFormula);
+	}
+	
+	public void showChoiceBox() {
+		show(cbOperations);
+	}
+	
+	public void showPredicate() {
+		show(predicateBuilderView);
+	}
+	
+	
 }

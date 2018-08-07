@@ -54,7 +54,7 @@ public class SymbolicAnimationFormulaHandler {
 	public void addFormula(SymbolicAnimationFormulaItem formula, boolean checking) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
-			if(!currentMachine.getSymbolicCheckingFormulas().contains(formula)) {
+			if(!currentMachine.getSymbolicAnimationFormulas().contains(formula)) {
 				currentMachine.addSymbolicAnimationFormula(formula);
 				injector.getInstance(SymbolicAnimationView.class).updateProject();
 			} else if(!checking) {

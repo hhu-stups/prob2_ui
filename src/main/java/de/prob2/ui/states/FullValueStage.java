@@ -236,7 +236,7 @@ public class FullValueStage extends Stage {
 		if (this.getTitle().matches("[\\w\\s]+")) {
 			defaultFileName = this.getTitle();
 		} else {
-			defaultFileName = bundle.getString("states.fullValue.saveAs.defaultFileName");
+			defaultFileName = bundle.getString("states.fullValueStage.saveAs.defaultFileName");
 		}
 		chooser.setInitialFileName(defaultFileName + defaultExtension);
 		final File selected = chooser.showSaveDialog(this);

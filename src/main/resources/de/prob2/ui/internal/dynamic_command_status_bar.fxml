@@ -4,6 +4,6 @@
 <?import javafx.scene.layout.HBox?>
 
 <fx:root type="HBox" xmlns:fx="http://javafx.com/fxml/1" styleClass="statusbar" maxWidth="Infinity" >
-	<Label fx:id="statusLabel" styleClass="statusLabel" text="" HBox.hgrow="NEVER"/>
+	<Label fx:id="statusLabel" styleClass="statusLabel"/>
 </fx:root>
 

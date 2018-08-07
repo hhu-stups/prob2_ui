@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.Scene?>
-<?import javafx.stage.Stage?>
-<?import javafx.collections.*?>
+
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingChoosingStage?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaInput?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingItem?>
-
-<fx:root type="Stage" fx:id="cbcChoice" title="%verifications.symbolic.choice.title"
-		 resizable="false" xmlns:fx="http://javafx.com/fxml/1" width="600">
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.Scene?>
+<?import javafx.geometry.Insets?>
+<fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolic.choice.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
 			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
@@ -30,14 +31,12 @@
 						<ChoiceBox fx:id="cbChoice" prefWidth="250.0">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicCheckingItem checkingType="SEQUENCE" guiType="TEXT_FIELD"/>
 									<SymbolicCheckingItem checkingType="INVARIANT" guiType="CHOICE_BOX"/>
-									<SymbolicCheckingItem checkingType="DEADLOCK" guiType="PREDICATE"/>
 									<SymbolicCheckingItem checkingType="CHECK_ALL_OPERATIONS" guiType="NONE"/>
 									<SymbolicCheckingItem checkingType="CHECK_REFINEMENT" guiType="NONE"/>
 									<SymbolicCheckingItem checkingType="CHECK_ASSERTIONS" guiType="NONE"/>
 									<SymbolicCheckingItem checkingType="IC3" guiType="NONE"/>
-									<SymbolicCheckingItem checkingType="KINDUCTION" guiType=""NONE""/>
+									<SymbolicCheckingItem checkingType="KINDUCTION" guiType="NONE"/>
 									<SymbolicCheckingItem checkingType="TINDUCTION" guiType="NONE"/>
 									<SymbolicCheckingItem checkingType="BMC" guiType="NONE"/>
 								</FXCollections>

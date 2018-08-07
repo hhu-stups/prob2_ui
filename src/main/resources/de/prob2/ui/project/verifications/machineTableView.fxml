@@ -10,15 +10,15 @@
 	</columnResizePolicy>
 	<columns>
 		<TableColumn fx:id="machineNameColumn" minWidth="120.0"
-			prefWidth="120.0" text="%project.machines.dialog.title" />
+			prefWidth="120.0" text="%project.verifications.machineTableView.columns.machine" />
 		<TableColumn fx:id="machineModelcheckColumn" minWidth="120.0"
-			maxWidth="120.0" prefWidth="120.0" text="%verifications.columns.modelcheckstatus" />
+			maxWidth="120.0" prefWidth="120.0" text="%project.verifications.machineTableView.columns.modelChecking" />
 		<TableColumn fx:id="machineLTLColumn" minWidth="60.0"
-			maxWidth="60.0" prefWidth="60.0" text="%verifications.columns.ltlstatus" />
+			maxWidth="60.0" prefWidth="60.0" text="%project.verifications.machineTableView.columns.ltl" />
 		<TableColumn fx:id="machineSymbolicColumn" minWidth="150.0"
-			maxWidth="150.0" prefWidth="150.0" text="%verifications.columns.symbolicstatus" />
+			maxWidth="150.0" prefWidth="150.0" text="%project.verifications.machineTableView.columns.symbolic" />
 	</columns>
 	<placeholder>
-		<Label text="%project.machines.tab.noMachines" />
+		<Label text="%project.verifications.machineTableView.noMachines" />
 	</placeholder>
 </fx:root>	

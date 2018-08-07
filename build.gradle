@@ -62,7 +62,7 @@ dependencies {
 	compile 'com.google.code.gson:gson:2.8.2'
 	compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
 	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.6'
-	compile group: 'de.hhu.stups', name: 'de.prob2.kernel', version: '3.2.10-SNAPSHOT', changing: true
+	compile group: 'de.hhu.stups', name: 'de.prob2.kernel', version: '3.2.11-SNAPSHOT', changing: true
 	compile group: 'de.hhu.stups', name: 'ltl-dsl', version: '0.1.1-SNAPSHOT', changing: true
 	compile 'de.jensd:fontawesomefx-commons:9.1.2-jpms'
 	// Cannot update to the next higher version (4.7.0-9), because its class files are compiled for Java 9.
@@ -131,7 +131,7 @@ sonarqube {
 }
 
 wrapper {
-	gradleVersion = "4.8.1"
+	gradleVersion = "4.9"
 	distributionType = Wrapper.DistributionType.ALL
 }
 

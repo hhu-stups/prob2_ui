@@ -1,17 +1,19 @@
 package de.prob2.ui.dotty;
 
-import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import de.prob.Main;
 import de.prob.animator.command.GetAllDotCommands;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
 import de.prob.animator.domainobjects.ClassicalB;
@@ -21,6 +23,7 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
@@ -44,9 +47,6 @@ import org.slf4j.LoggerFactory;
 public class DotView extends DynamicCommandStage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
-
-	private static final File FILE = new File(
-			Main.getProBDirectory() + File.separator + "prob2ui" + File.separator + "out.svg");
 
 	@FXML
 	private WebView dotView;
@@ -122,12 +122,18 @@ public class DotView extends DynamicCommandStage {
 					formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
 				}
 				State id = currentTrace.getCurrentState();
-				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, FILE, formulas);
+				final Path path = Files.createTempFile("prob2-ui-dot", ".svg");
+				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, path.toFile(), formulas);
 				currentTrace.getStateSpace().execute(cmd);
-				if(!Thread.currentThread().isInterrupted()) {
-					loadGraph();
+				final String text;
+				try (final Stream<String> lines = Files.lines(path)) {
+					text = lines.collect(Collectors.joining("\n"));
 				}
-			} catch (ProBError | EvaluationException e) {
+				Files.delete(path);
+				if(!Thread.currentThread().isInterrupted()) {
+					loadGraph(text);
+				}
+			} catch (IOException | ProBError | EvaluationException e) {
 				LOGGER.error("Graph visualization failed", e);
 				currentThread.set(null);
 				Platform.runLater(() -> {
@@ -141,24 +147,14 @@ public class DotView extends DynamicCommandStage {
 		thread.start();
 	}
 
-	private void loadGraph() {
+	private void loadGraph(final String svg) {
 		Thread thread = Thread.currentThread();
 		Platform.runLater(() -> {
-			String content = "";
-			try {
+			if (!thread.isInterrupted()) {
 				/*
 				 * FIXME: Fix rendering problem in JavaFX WebView
 				 */
-				if(!thread.isInterrupted()) {
-					content = new String(Files.readAllBytes(FILE.toPath())).replaceAll("font-size=\"12.00\"",
-							"font-size=\"10.00\"");
-				}
-			} catch (Exception e) {
-				LOGGER.error("Reading dot file failed", e);
-				return;
-			}
-			if(!thread.isInterrupted()) {
-				dotView.getEngine().loadContent("<center>" + content + "</center>");
+				dotView.getEngine().loadContent("<center>" + svg.replaceAll("font-size=\"12.00\"", "font-size=\"10.00\"") + "</center>");
 				statusBar.setText("");
 			}
 			currentThread.set(null);

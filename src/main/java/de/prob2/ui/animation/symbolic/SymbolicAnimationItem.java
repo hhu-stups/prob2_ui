@@ -5,7 +5,7 @@ import javafx.beans.NamedArg;
 public class SymbolicAnimationItem {
 	
 	public enum GUIType {
-		NONE, TEXT_FIELD, CHOICE_BOX
+		NONE, TEXT_FIELD, CHOICE_BOX, PREDICATE
 	}
 	
 	private SymbolicAnimationType animationType;

@@ -76,13 +76,13 @@ public class PreferencesDialog extends Dialog<Preference> {
 		nameField.textProperty().addListener((observable, from, to) -> {
 			if (preferencesNamesSet.contains(to)) {
 				okButton.setDisable(true);
-				errorExplanationLabel.setText(String.format(bundle.getString("project.preferences.dialog.error.preferenceAlreadyExists"), to));
+				errorExplanationLabel.setText(String.format(bundle.getString("project.preferences.preferencesDialog.errorLabel.preferenceAlreadyExists"), to));
 			} else if ("default".equals(to)) {
 				okButton.setDisable(true);
-				errorExplanationLabel.setText(bundle.getString("project.preferences.dialog.error.nameCannotBeDefault"));
+				errorExplanationLabel.setText(bundle.getString("project.preferences.preferencesDialog.errorLabel.nameCannotBeDefault"));
 			} else if (to.isEmpty()) {
 				okButton.setDisable(true);
-				errorExplanationLabel.setText(bundle.getString("project.preferences.dialog.error.nameCannotBeEmpty"));
+				errorExplanationLabel.setText(bundle.getString("project.preferences.preferencesDialog.errorLabel.nameCannotBeEmpty"));
 			} else {
 				okButton.setDisable(false);
 				errorExplanationLabel.setText("");
@@ -91,6 +91,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 	}
 
 	void setPreference(Preference preference) {
+		this.setTitle(String.format(bundle.getString("project.preferences.preferencesDialog.editPreferenceTitle"), preference.getName()));
 		this.preference = preference;
 		preferencesNamesSet.remove(preference.getName());
 		this.nameField.setText(preference.getName());

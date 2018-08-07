@@ -11,6 +11,7 @@ import com.google.inject.Injector;
 
 import de.prob.Main;
 
+import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
@@ -48,6 +49,7 @@ public class HelpButton extends Button{
 	@FXML
 	public void openHelp() {
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
+		helpSystemStage.help.isHelpButton = true;
 		if (helpContent!=null) {
 			helpSystemStage.setContent(helpContent, anchor);
 		}
@@ -56,17 +58,24 @@ public class HelpButton extends Button{
 	}
 
 	public void setHelpContent(Class<?> clazz) {
-		String helpSubdirectory = injector.getInstance(HelpSystemStage.class).help.helpSubdirectoryString;
-		setHelp(clazz,
-				Main.getProBDirectory() +
-						"prob2ui" + File.separator +
-						"help" + File.separator +
-						helpSubdirectory + File.separator,
-				prepareMap(this.getClass().getClassLoader().getResourceAsStream("help/"+helpSubdirectory+".txt")));
+		HelpSystem help = injector.getInstance(HelpSystemStage.class).help;
+		String helpSubdirectory = help.helpSubdirectoryString;
+		String main;
+		if (help.isJar) {
+			main = Main.getProBDirectory() +
+					"prob2ui" + File.separator +
+					"help" + File.separator +
+					helpSubdirectory + File.separator;
+		} else {
+			main = ProB2.class.getClassLoader().getResource(
+					"help" + File.separator +
+					helpSubdirectory + File.separator).toString();
+		}
+		setHelp(clazz, main, prepareMap(this.getClass().getClassLoader().getResourceAsStream("help/"+helpSubdirectory+".txt")));
 	}
 
 	private void setHelp(Class<?> clazz, String main, Map<Class<?>, String> map) {
-		helpContent = new File(main + "ProB2UI.md.html");
+		helpContent = new File(main + "ProB2UI.html");
 		map.entrySet().stream().filter(e -> clazz.equals(e.getKey())).forEach(e -> {
 			String link = e.getValue();
 			String htmlFile = link;

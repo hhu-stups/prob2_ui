@@ -2,29 +2,21 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.*?>
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaInput?>
+<?import de.prob2.ui.internal.PredicateBuilderView?>
 
 
-<fx:root type="SymbolicAnimationFormulaInput" xmlns:fx="http://javafx.com/fxml/1">
-	<VBox spacing="10">
-		<HBox alignment="CENTER" prefHeight="47.0" prefWidth="400.0">
-			<VBox.margin>
-				<Insets top="30"/>
-			</VBox.margin>
-			<VBox spacing="20" prefWidth="400.0">
-				<StackPane>
-					<TextField fx:id="tfFormula" HBox.hgrow="ALWAYS"/>
-					<HBox alignment="CENTER" prefHeight="47.0" prefWidth="400.0" spacing="60">
-						<ChoiceBox fx:id="cbOperations" prefWidth="150.0"/>
-					</HBox>
-				</StackPane>
-			</VBox>
-		</HBox>
-		<HBox alignment="CENTER" prefHeight="47.0" prefWidth="400.0" spacing="60">
-			<Button fx:id="btAdd" text="%verifications.symbolic.add" styleClass="button-blue"/>
-			<Button fx:id="btCheck" text="%verifications.symbolic.check" styleClass="button-blue"/>
-			<Button fx:id="btCancel" onAction="#cancel" text="%common.buttons.cancel" styleClass="button-blue"/>
-		</HBox>
-	</VBox>
+<fx:root type="SymbolicAnimationFormulaInput" spacing="10.0" xmlns:fx="http://javafx.com/fxml/1">
+	<StackPane fx:id="optionsPane" VBox.vgrow="ALWAYS">
+		<TextField fx:id="tfFormula"/>
+		<ChoiceBox fx:id="cbOperations"/>
+		<PredicateBuilderView fx:id="predicateBuilderView"/>
+	</StackPane>
+	<HBox alignment="CENTER" spacing="10.0" VBox.vgrow="NEVER">
+		<Button fx:id="btAdd" text="%verifications.symbolic.add" styleClass="button-blue"/>
+		<Button fx:id="btCheck" text="%verifications.symbolic.check" styleClass="button-blue"/>
+		<Button fx:id="btCancel" onAction="#cancel" text="%common.buttons.cancel" styleClass="button-blue"/>
+	</HBox>
 </fx:root>

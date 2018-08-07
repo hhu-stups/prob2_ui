@@ -1,16 +1,16 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
-import com.google.inject.Singleton;
+import javax.inject.Inject;
 
+import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingItem.GUIType;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import javax.inject.Inject;
 
 @Singleton
 public class SymbolicCheckingChoosingStage extends Stage {
@@ -30,25 +30,27 @@ public class SymbolicCheckingChoosingStage extends Stage {
 	@FXML
 	public void initialize() {
 		formulaInput.visibleProperty().bind(cbChoice.getSelectionModel().selectedItemProperty().isNotNull());
-		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if(newValue == null) {
+		cbChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
+			if(to == null) {
 				return;
 			}
-			switch(newValue.getGUIType()) {
+			switch(to.getGUIType()) {
+				case NONE:
+					formulaInput.showNone();
+					break;
 				case TEXT_FIELD:
 					formulaInput.showTextField();
 					break;
 				case CHOICE_BOX:
 					formulaInput.showChoiceBox();
 					break;
-				case NONE:
-					formulaInput.showNone();
+				case PREDICATE:
+					formulaInput.showPredicate();
 					break;
 				default:
-					break;
+					throw new AssertionError("Unhandled GUI type: " + to.getGUIType());
 			}
 		});
-		
 	}
 	
 	public GUIType getGUIType() {

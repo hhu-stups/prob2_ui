@@ -34,14 +34,17 @@ public class SymbolicAnimationChoosingStage extends Stage {
 				return;
 			}
 			switch(newValue.getGUIType()) {
+				case NONE:
+					formulaInput.showNone();
+					break;
 				case TEXT_FIELD:
 					formulaInput.showTextField();
 					break;
 				case CHOICE_BOX:
 					formulaInput.showChoiceBox();
 					break;
-				case NONE:
-					formulaInput.showNone();
+				case PREDICATE:
+					formulaInput.showPredicate();
 					break;
 				default:
 					break;

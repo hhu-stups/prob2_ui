@@ -11,6 +11,7 @@ import com.google.inject.Singleton;
 
 import de.prob.Main;
 
+import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.application.Platform;
@@ -27,10 +28,18 @@ public class HelpSystemStage extends Stage {
 		help = new HelpSystem(stageManager, injector);
 		this.setScene(new Scene(help));
 		stageManager.register(this, this.getClass().getName());
-		setContent(new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + help.helpSubdirectoryString + File.separator+ "ProB2UI.md.html"),"");
+		String defaultDir;
+		if (help.isJar)
+			defaultDir = Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + help.helpSubdirectoryString + File.separator;
+		else
+			defaultDir = ProB2.class.getClassLoader().getResource("help" + File.separator + help.helpSubdirectoryString + File.separator).toString();
+		File defaultPage = new File(defaultDir + "ProB2UI.html");
+		setContent(defaultPage,"");
 	}
 
 	public void setContent(File file, String anchor) {
-		Platform.runLater(() ->	((HelpSystem) this.getScene().getRoot()).webEngine.load(file.toURI().toString() + anchor));
+		String uri = file.toURI().toString();
+		int lastIndex = uri.lastIndexOf("file:/");
+		Platform.runLater(() ->	((HelpSystem) this.getScene().getRoot()).webEngine.load(uri.substring(lastIndex).replace("%25","%") + anchor));
 	}
 }

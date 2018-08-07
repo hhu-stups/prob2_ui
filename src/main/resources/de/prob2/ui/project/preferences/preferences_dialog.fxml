@@ -4,7 +4,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<fx:root type="Dialog" title="%project.preferences.dialog.dialogTitle"
+<fx:root type="Dialog" title="%project.preferences.preferencesDialog.addPreferenceTitle"
 		 xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane stylesheets="@/prob.css">
@@ -13,7 +13,7 @@
 					<VBox spacing="5" AnchorPane.topAnchor="14"
 						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-10"
 						AnchorPane.rightAnchor="-10">
-						<Label text="%project.preferences.dialog.title" styleClass="title">
+						<Label text="%project.preferences.preferencesDialog.label.title" styleClass="title">
 							<VBox.margin>
 								<Insets left="10" right="10" />
 							</VBox.margin>
@@ -23,7 +23,7 @@
 								AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
 								alignment="center_right">
 								<HBox spacing="20" alignment="center_left">
-									<Label text="%project.preferences.dialog.name" />
+									<Label text="%project.preferences.preferencesDialog.label.name" />
 									<TextField fx:id="nameField" promptText="Name"
 										HBox.hgrow="always" />
 								</HBox>
@@ -34,7 +34,7 @@
 									</VBox.margin>
 								</Label>
 								<VBox alignment="center_left">
-									<Label text="%project.preferences.dialog.preferences">
+									<Label text="%project.preferences.preferencesDialog.label.preferences">
 										<VBox.margin>
 											<Insets top="10" />
 										</VBox.margin>

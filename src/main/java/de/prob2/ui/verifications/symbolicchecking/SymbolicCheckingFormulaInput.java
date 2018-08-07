@@ -2,6 +2,8 @@ package de.prob2.ui.verifications.symbolicchecking;
 
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -9,22 +11,25 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
-import de.prob.model.representation.AbstractElement;
-import de.prob.model.representation.BEvent;
+import de.prob.statespace.LoadedMachine;
+import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingItem.GUIType;
+
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 @Singleton
-public class SymbolicCheckingFormulaInput extends StackPane {
+public class SymbolicCheckingFormulaInput extends VBox {
 	
 	private final SymbolicCheckingFormulaHandler symbolicCheckingFormulaHandler;
 	
@@ -37,10 +42,16 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	private Button btCheck;
 	
 	@FXML
+	private StackPane optionsPane;
+	
+	@FXML
 	private TextField tfFormula;
 	
 	@FXML
 	private ChoiceBox<String> cbOperations;
+	
+	@FXML
+	private PredicateBuilderView predicateBuilderView;
 	
 	private final Injector injector;
 	
@@ -99,29 +110,12 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 				case INVARIANT: 
 					symbolicCheckingFormulaHandler.handleInvariant(cbOperations.getSelectionModel().getSelectedItem(), false);
 					break;
-				case DEADLOCK: 
-					symbolicCheckingFormulaHandler.handleDeadlock(tfFormula.getText(), false); 
-					break;
-				case SEQUENCE: 
-					symbolicCheckingFormulaHandler.handleSequence(tfFormula.getText(), false); 
-					break;
 				case CHECK_ALL_OPERATIONS:
 					events.forEach(event -> symbolicCheckingFormulaHandler.handleInvariant(event, true));
-					break;
-				case FIND_DEADLOCK: 
-					symbolicCheckingFormulaHandler.findDeadlock(false); 
-					break;
-				case FIND_VALID_STATE:
-					formulaItem = new SymbolicCheckingFormulaItem(tfFormula.getText(), tfFormula.getText(), 
-							SymbolicCheckingType.FIND_VALID_STATE);
-					symbolicCheckingFormulaHandler.findValidState(formulaItem, false);
 					break;
 				default:
 					formulaItem = new SymbolicCheckingFormulaItem(checkingType.name(), checkingType.name(), checkingType);
 					switch(checkingType) {
-						case FIND_REDUNDANT_INVARIANTS: 
-							symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem, false); 
-							break;
 						case CHECK_ASSERTIONS: 
 							symbolicCheckingFormulaHandler.handleAssertions(formulaItem, false);
 							break;
@@ -183,15 +177,17 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 	
 	private void update() {
 		events.clear();
+		final Map<String, String> items = new LinkedHashMap<>();
 		if (currentTrace.get() != null) {
-			AbstractElement mainComponent = currentTrace.getStateSpace().getMainComponent();
-			if (mainComponent instanceof de.prob.model.representation.Machine) {
-				for (BEvent e : mainComponent.getChildrenOfType(BEvent.class)) {
-					events.add(e.getName());
-				}
+			final LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
+			if (loadedMachine != null) {
+				events.addAll(loadedMachine.getOperationNames());
+				loadedMachine.getConstantNames().forEach(s -> items.put(s, ""));
+				loadedMachine.getVariableNames().forEach(s -> items.put(s, ""));
 			}
-			cbOperations.getItems().setAll(events);
 		}
+		cbOperations.getItems().setAll(events);
+		predicateBuilderView.setItems(items);
 	}
 	
 	private void addFormula(boolean checking) {
@@ -214,11 +210,15 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 						}
 						break;
 					default:
-						break;
+						throw new AssertionError("Unhandled checking type: " + checkingType);
 				}
 				break;
 			case TEXT_FIELD:
 				symbolicCheckingFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType, checking);
+				break;
+			case PREDICATE:
+				final String predicate = predicateBuilderView.getPredicate();
+				symbolicCheckingFormulaHandler.addFormula(predicate, predicate, checkingType, checking);
 				break;
 			case NONE:
 				if(checkingType == SymbolicCheckingType.CHECK_ALL_OPERATIONS) {
@@ -230,7 +230,7 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 				}
 				break;
 			default:
-				break;
+				throw new AssertionError("Unhandled GUI type: " + guiType);
 		}
 		injector.getInstance(SymbolicCheckingChoosingStage.class).close();
 	}
@@ -240,21 +240,28 @@ public class SymbolicCheckingFormulaInput extends StackPane {
 		injector.getInstance(SymbolicCheckingChoosingStage.class).close();
 	}
 	
-	public void showTextField() {
-		tfFormula.setVisible(true);
-		tfFormula.toFront();
-		cbOperations.setVisible(false);
-	}
-	
-	public void showChoiceBox() {
-		tfFormula.setVisible(false);
-		cbOperations.setVisible(true);
-		cbOperations.toFront();
+	private void show(final Node node) {
+		optionsPane.getChildren().forEach(c -> c.setVisible(false));
+		if (node != null) {
+			node.setVisible(true);
+			node.toFront();
+		}
 	}
 	
 	public void showNone() {
-		tfFormula.setVisible(false);
-		cbOperations.setVisible(false);
+		show(null);
+	}
+	
+	public void showTextField() {
+		show(tfFormula);
+	}
+	
+	public void showChoiceBox() {
+		show(cbOperations);
+	}
+	
+	public void showPredicate() {
+		show(predicateBuilderView);
 	}
 	
 	public void reset() {

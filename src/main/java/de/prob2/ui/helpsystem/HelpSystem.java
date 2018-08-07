@@ -52,6 +52,8 @@ public class HelpSystem extends StackPane {
 	@FXML private WebView webView;
 	WebEngine webEngine;
 	private URI helpURI;
+	boolean isJar;
+	boolean isHelpButton;
 	private UIState uiState;
 	String helpSubdirectoryString = "help_en";
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
@@ -60,6 +62,8 @@ public class HelpSystem extends StackPane {
 	public HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
 		stageManager.loadFXML(this, "helpsystem.fxml");
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
+		isJar = helpURI.toString().startsWith("jar:");
+		isHelpButton = false;
 		// this needs to be updated if new translations of help are added
 		String[] languages = {"de", "en"};
 		for (String language : languages) {
@@ -74,7 +78,11 @@ public class HelpSystem extends StackPane {
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal!=null && newVal.isLeaf()){
 				File f = ((HelpTreeItem) newVal).getFile();
-				webEngine.load(f.toURI().toString());
+				if (!isHelpButton) {
+					webEngine.load(f.toURI().toString());
+				} else {
+					isHelpButton = false;
+				}
 			}
 		});
 
@@ -136,7 +144,7 @@ public class HelpSystem extends StackPane {
 	}
 
 	private File getHelpDirectory() throws IOException, URISyntaxException {
-		if (helpURI.toString().startsWith("jar:")) {
+		if (isJar) {
 			Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
 			Map<String, String> env = new HashMap<>();
 			env.put("create", "true");
@@ -156,7 +164,8 @@ public class HelpSystem extends StackPane {
 		for (Map.Entry<File,HelpTreeItem> entry : fileMap.entrySet()) {
 			final HelpTreeItem hti = entry.getValue();
 			try {
-				if (entry.getKey().toURI().toURL().sameFile(new URL(URLDecoder.decode(url,"UTF-8")))) {
+				if (entry.getKey().toURI().toURL().sameFile(new URL(URLDecoder.decode(url,"UTF-8"))) ||
+						URLDecoder.decode(url,"UTF-8").contains(entry.getKey().toString())) {
 					expandTree(hti);
 					Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
 				}

@@ -1,14 +1,16 @@
 package de.prob2.ui.operations;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
 import de.prob.exception.ProBError;
 import de.prob.statespace.Transition;
-
+import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -18,8 +20,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -31,7 +31,7 @@ public final class ExecuteByPredicateStage extends Stage {
 	
 	@FXML private Label operationLabel;
 	@FXML private Label paramsLabel;
-	@FXML private GridPane paramsGrid;
+	@FXML private PredicateBuilderView predicateBuilderView;
 	@FXML private TextField predicateTextField;
 	@FXML private Button executeButton;
 	
@@ -39,7 +39,6 @@ public final class ExecuteByPredicateStage extends Stage {
 	private final ResourceBundle bundle;
 	private final CurrentTrace currentTrace;
 	private final ObjectProperty<OperationItem> item;
-	private final List<TextField> paramTextFields;
 	
 	@Inject
 	private ExecuteByPredicateStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
@@ -49,7 +48,6 @@ public final class ExecuteByPredicateStage extends Stage {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.item = new SimpleObjectProperty<>(this, "item", null);
-		this.paramTextFields = new ArrayList<>();
 		
 		this.initModality(Modality.APPLICATION_MODAL);
 		this.stageManager.loadFXML(this, "execute_by_predicate_stage.fxml");
@@ -57,34 +55,22 @@ public final class ExecuteByPredicateStage extends Stage {
 	
 	@FXML
 	private void initialize() {
+		this.predicateBuilderView.setPlaceholder(new Label(bundle.getString("operations.executeByPredicate.noParameters")));
 		this.itemProperty().addListener((o, from, to) -> {
-			this.paramsGrid.getChildren().clear();
-			this.paramTextFields.clear();
 			if (to == null) {
 				this.operationLabel.setText(null);
+				this.predicateBuilderView.setItems(Collections.emptyMap());
 			} else {
 				this.operationLabel.setText(String.format(bundle.getString("operations.executeByPredicate.operation"), this.getItem().getName()));
+				
+				final Map<String, String> items = new LinkedHashMap<>();
 				assert to.getParameterNames().size() == to.getParameterValues().size();
 				for (int i = 0; i < to.getParameterNames().size(); i++) {
-					final Label label = new Label(to.getParameterNames().get(i));
-					GridPane.setRowIndex(label, i);
-					GridPane.setColumnIndex(label, 0);
-					GridPane.setHgrow(label, Priority.NEVER);
-					
-					final TextField textField = new TextField(to.getParameterValues().get(i));
-					label.setLabelFor(textField);
-					GridPane.setRowIndex(textField, i);
-					GridPane.setColumnIndex(textField, 1);
-					GridPane.setHgrow(textField, Priority.ALWAYS);
-					this.paramTextFields.add(textField);
-					
-					this.paramsGrid.getChildren().addAll(label, textField);
+					items.put(to.getParameterNames().get(i), to.getParameterValues().get(i));
 				}
-			}
-			if (this.paramsGrid.getChildren().isEmpty()) {
-				this.paramsLabel.setText(bundle.getString("operations.executeByPredicate.noParameters"));
-			} else {
-				this.paramsLabel.setText(bundle.getString("operations.executeByPredicate.parameters"));
+				items.putAll(to.getConstants());
+				items.putAll(to.getVariables());
+				this.predicateBuilderView.setItems(items);
 			}
 		});
 	}
@@ -103,25 +89,12 @@ public final class ExecuteByPredicateStage extends Stage {
 	
 	@FXML
 	private void handleExecute() {
-		final List<String> paramNames = this.getItem().getParameterNames();
-		final StringBuilder predicate = new StringBuilder();
-		assert paramNames.size() == this.paramTextFields.size();
-		for (int i = 0; i < paramNames.size(); i++) {
-			predicate.append(paramNames.get(i));
-			predicate.append(" = (");
-			predicate.append(this.paramTextFields.get(i).getText());
-			predicate.append(") & ");
-		}
-		predicate.append('(');
-		predicate.append(this.predicateTextField.getText());
-		predicate.append(')');
-		
 		final List<Transition> transitions;
 		try {
 			transitions = this.currentTrace.getStateSpace().transitionFromPredicate(
 				this.currentTrace.getCurrentState(),
 				this.getItem().getName(),
-				predicate.toString(),
+				this.predicateBuilderView.getPredicate(),
 				1
 			);
 		} catch (IllegalArgumentException | ProBError e) {

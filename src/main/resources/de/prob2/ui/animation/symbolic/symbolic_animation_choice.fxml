@@ -10,7 +10,7 @@
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationItem?>
 
 <fx:root type="Stage" fx:id="cbcChoice" title="%verifications.symbolic.choice.title"
-		 resizable="false" xmlns:fx="http://javafx.com/fxml/1" width="600">
+		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
 			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
@@ -29,11 +29,11 @@
 						<ChoiceBox fx:id="cbChoice" prefWidth="250.0">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicAnimationItem checkingType="SEQUENCE" guiType="TEXT_FIELD"/>
-									<SymbolicAnimationItem checkingType="DEADLOCK" guiType="TEXT_FIELD"/>
-									<SymbolicAnimationItem checkingType="FIND_DEADLOCK" guiType="NONE"/>
-									<SymbolicAnimationItem checkingType="FIND_VALID_STATE" guiType="TEXT_FIELD"/>
-									<SymbolicAnimationItem checkingType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
+									<SymbolicAnimationItem animationType="SEQUENCE" guiType="TEXT_FIELD"/>
+									<SymbolicAnimationItem animationType="DEADLOCK" guiType="PREDICATE"/>
+									<SymbolicAnimationItem animationType="FIND_DEADLOCK" guiType="NONE"/>
+									<SymbolicAnimationItem animationType="FIND_VALID_STATE" guiType="PREDICATE"/>
+									<SymbolicAnimationItem animationType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>

@@ -1,5 +1,6 @@
 package de.prob2.ui.internal;
 
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 import com.google.inject.Injector;
@@ -8,6 +9,7 @@ import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
+import de.prob.statespace.Trace;
 
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -19,6 +21,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
@@ -30,6 +33,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class DynamicCommandStage extends Stage {
+	private static final class DynamicCommandItemCell extends ListCell<DynamicCommandItem> {
+		private DynamicCommandItemCell() {
+			super();
+			getStyleClass().add("dynamic-command-cell");
+		}
+		
+		@Override
+		protected void updateItem(final DynamicCommandItem item, final boolean empty) {
+			super.updateItem(item, empty);
+			this.getStyleClass().removeAll("dynamiccommandenabled", "dynamiccommanddisabled");
+			if (item != null && !empty) {
+				setText(item.getName());
+				if (item.isAvailable()) {
+					getStyleClass().add("dynamiccommandenabled");
+				} else {
+					getStyleClass().add("dynamiccommanddisabled");
+				}
+			}
+		}
+	}
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
 	
 	@FXML
@@ -56,7 +80,7 @@ public abstract class DynamicCommandStage extends Stage {
 	@FXML
 	protected DynamicCommandStatusBar statusBar;
 	
-	protected DynamicCommandItem currentItem;
+	protected DynamicCommandItem lastItem;
 	
 	protected final CurrentTrace currentTrace;
 	
@@ -70,7 +94,7 @@ public abstract class DynamicCommandStage extends Stage {
 	
 	protected final Injector injector;
 	
-	public DynamicCommandStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
+	protected DynamicCommandStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
 			final ResourceBundle bundle, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
@@ -85,38 +109,36 @@ public abstract class DynamicCommandStage extends Stage {
 	protected void initialize() {
 		lbDescription.setWrapText(true);
 		fillCommands();
-		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+		lvChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if (to == null) {
-				return;
-			}
-			if (!to.isAvailable()) {
-				lbDescription.setText(String.join("\n", to.getDescription(), to.getAvailable()));
-			} else {
-				lbDescription.setText(to.getDescription());
-			}
-			boolean needFormula = to.getArity() > 0;
-			enterFormulaBox.setVisible(needFormula);
-			String currentFormula = taFormula.getText();
-			if(currentItem != null && !currentItem.getCommand().equals(to.getCommand())) {
+				if (from != null) {
+					lastItem = from;
+				}
 				reset();
-			}
-			if ((!needFormula || !currentFormula.isEmpty()) && (currentItem == null
-					|| !currentItem.getCommand().equals(to.getCommand()) || cbContinuous.isSelected())) {
-				visualize(to);
-			}
-			if(from != null) {
-				currentItem = to;
+				lbDescription.setText("");
+			} else {
+				if (to.isAvailable()) {
+					lbDescription.setText(to.getDescription());
+				} else {
+					lbDescription.setText(to.getDescription() + '\n' + to.getAvailable());
+				}
+				boolean needFormula = to.getArity() > 0;
+				enterFormulaBox.setVisible(needFormula);
+				String currentFormula = taFormula.getText();
+				if (!Objects.equals(from, to) || cbContinuous.isSelected()) {
+					reset();
+					if (!needFormula || !currentFormula.isEmpty()) {
+						visualize(to);
+					}
+				}
 			}
 		});
 		lvChoice.disableProperty().bind(currentThread.isNotNull());
 		
-		currentTrace.currentStateProperty().addListener((observable, from, to) -> refresh());
 		currentTrace.addListener((observable, from, to) -> refresh());
-		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> refresh());
-		injector.getInstance(Modelchecker.class).resultProperty().addListener((observable, from, to) -> refresh());
+		injector.getInstance(Modelchecker.class).resultProperty().addListener((o, from, to) -> refresh());
 		
-		
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+		currentProject.currentMachineProperty().addListener((o, from, to) -> {
 			fillCommands();
 			reset();
 		});
@@ -140,11 +162,16 @@ public abstract class DynamicCommandStage extends Stage {
 	}
 	
 	protected void fillCommands(AbstractGetDynamicCommands cmd) {
-		try {
-			currentTrace.getStateSpace().execute(cmd);
-			lvChoice.getItems().setAll(cmd.getCommands());
-		} catch (ProBError | CliError e) {
-			LOGGER.error("Extract all expression table commands failed", e);
+		final Trace trace = currentTrace.get();
+		if (trace == null) {
+			lvChoice.getItems().clear();
+		} else {
+			try {
+				currentTrace.getStateSpace().execute(cmd);
+				lvChoice.getItems().setAll(cmd.getCommands());
+			} catch (ProBError | CliError e) {
+				LOGGER.error("Extract all expression table commands failed", e);
+			}
 		}
 	}
 	
@@ -163,13 +190,13 @@ public abstract class DynamicCommandStage extends Stage {
 		int index = lvChoice.getSelectionModel().getSelectedIndex();
 		fillCommands();
 		if (index == -1) {
-			lvChoice.getSelectionModel().selectFirst();
+			lvChoice.getSelectionModel().select(this.lastItem);
 		} else {
 			lvChoice.getSelectionModel().select(index);
 		}
 	}
 	
-	protected void interrupt(){
+	protected void interrupt() {
 		if (currentThread.get() != null) {
 			currentThread.get().interrupt();
 			currentThread.set(null);
@@ -182,5 +209,4 @@ public abstract class DynamicCommandStage extends Stage {
 	protected abstract void visualize(DynamicCommandItem item);
 	
 	protected abstract void fillCommands();
-
 }

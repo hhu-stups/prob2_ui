@@ -222,15 +222,16 @@ public class TraceChecker {
 			PersistentTransition persistentTransition, boolean setCurrentAnimation) {
 		String operationName = trans.getName();
 		OperationInfo machineOperationInfo = trans.stateSpace.getLoadedMachine().getMachineOperationInfo(operationName);
-		if (machineOperationInfo != null) {
+		final Map<String, String> ouputParameters = persistentTransition.getOuputParameters();
+		if (machineOperationInfo != null && ouputParameters != null) {
 			List<String> outputParameterNames = machineOperationInfo.getOutputParameterNames();
 			try {
 				List<BObject> translatedReturnValues = trans.getTranslatedReturnValues();
 				for (int i = 0; i < outputParameterNames.size(); i++) {
 					String outputParamName = outputParameterNames.get(i);
 					BObject paramValueFromTransition = translatedReturnValues.get(i);
-					if (persistentTransition.getOuputParameters().containsKey(outputParamName)) {
-						String stringValue = persistentTransition.getOuputParameters().get(outputParamName);
+					if (ouputParameters.containsKey(outputParamName)) {
+						String stringValue = ouputParameters.get(outputParamName);
 						BObject bValue = Translator.translate(stringValue);
 						if (!bValue.equals(paramValueFromTransition)) {
 							// do we need further checks here?

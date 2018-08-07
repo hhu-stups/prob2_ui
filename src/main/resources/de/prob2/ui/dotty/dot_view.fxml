@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-<?import javafx.scene.web.WebView?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import de.prob2.ui.dotty.DotView?>
-<?import de.prob2.ui.internal.DynamicCommandStatusBar?>
-<?import javafx.scene.Scene?>
-<?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.internal.DynamicCommandStatusBar?>
+<?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.menu.ViewMenu?>
 <?import de.prob2.ui.menu.WindowMenu?>
-
-<fx:root type="DotView" title="%dotty.stage.title" minWidth="600" minHeight="400" width="1200.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.web.WebView?>
+<fx:root type="DotView" title="%dotty.stage.title" minWidth="600" minHeight="400" width="800.0" height="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
@@ -26,61 +35,51 @@
 					</MenuBar>
 				</top>
 				<center>
-					<AnchorPane>
-						<SplitPane dividerPositions="0.4" AnchorPane.topAnchor="0.0"
-							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-							AnchorPane.rightAnchor="0.0">
-							<AnchorPane>
-								<VBox alignment="TOP_CENTER" spacing="20.0" AnchorPane.topAnchor="0.0"
-									AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-									AnchorPane.rightAnchor="0.0">
-									<ListView fx:id="lvChoice" AnchorPane.bottomAnchor="0.0"
-										AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-										AnchorPane.topAnchor="0.0"/>
-									<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-										<Button fx:id="cancelButton" onAction="#cancel">
-											<graphic>
-												<FontAwesomeIconView styleClass="icon-dark"
-													glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
-											</graphic>
-										</Button>
-										<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
-									</HBox>
-									<Label fx:id="lbDescription" VBox.vgrow="NEVER"/>
-									<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
-										<Label text="%dotty.enterFormula" HBox.hgrow="NEVER"/>
-										<AnchorPane>
-											<TextArea fx:id="taFormula" HBox.hgrow="ALWAYS" style="-fx-control-inner-background:#e8e8e8"
-												AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0"
-												AnchorPane.topAnchor="0.0"/>
-										</AnchorPane>
-									</VBox>
-									<CheckBox text="%dotty.continuousUpdate" fx:id="cbContinuous" HBox.hgrow="ALWAYS"/>
+					<SplitPane dividerPositions="0.4">
+						<VBox>
+							<ListView fx:id="lvChoice" VBox.vgrow="ALWAYS">
+								<placeholder>
+									<Label text="%common.noModelLoaded"/>
+								</placeholder>
+							</ListView>
+							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
+								<Button fx:id="cancelButton" onAction="#cancel" HBox.hgrow="NEVER">
+									<graphic>
+										<FontAwesomeIconView styleClass="icon-dark" glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+								</Button>
+								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
+							</HBox>
+							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
+								<padding>
+									<Insets topRightBottomLeft="10.0"/>
+								</padding>
+								<Label fx:id="lbDescription" wrapText="true" VBox.vgrow="ALWAYS"/>
+								<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="ALWAYS" alignment="CENTER">
+									<Label text="%dotty.enterFormula" VBox.vgrow="NEVER"/>
+									<TextArea fx:id="taFormula" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #e8e8e8;"/>
 								</VBox>
-							</AnchorPane>
-							<VBox>
-								<HBox alignment="TOP_RIGHT" style="-fx-background-color: transparent">
-									<Button fx:id="zoomInButton" disable="false"
-										contentDisplay="GRAPHIC_ONLY" onAction="#zoomIn">
-										<graphic>
-											<FontAwesomeIconView styleClass="icon-dark"
-												glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
-										</graphic>
-									</Button>
-									<Button fx:id="zoomOutButton" disable="false"
-										contentDisplay="GRAPHIC_ONLY" onAction="#zoomOut">
-										<graphic>
-											<FontAwesomeIconView styleClass="icon-dark"
-												glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
-										</graphic>
-									</Button>
-								</HBox>
-								<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
-									<WebView fx:id="dotView"/>
-								</ScrollPane>
+								<CheckBox text="%dotty.continuousUpdate" fx:id="cbContinuous" VBox.vgrow="NEVER"/>
 							</VBox>
-						</SplitPane>
-					</AnchorPane>
+						</VBox>
+						<VBox>
+							<HBox alignment="TOP_RIGHT" style="-fx-background-color: transparent;">
+								<Button fx:id="zoomInButton" onAction="#zoomIn">
+									<graphic>
+										<FontAwesomeIconView styleClass="icon-dark" glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+								</Button>
+								<Button fx:id="zoomOutButton" onAction="#zoomOut">
+									<graphic>
+										<FontAwesomeIconView styleClass="icon-dark" glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+								</Button>
+							</HBox>
+							<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+								<WebView fx:id="dotView"/>
+							</ScrollPane>
+						</VBox>
+					</SplitPane>
 				</center>
 				<bottom>
 					<DynamicCommandStatusBar fx:id="statusBar"/>
