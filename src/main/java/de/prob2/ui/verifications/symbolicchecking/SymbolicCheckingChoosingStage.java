@@ -31,25 +31,8 @@ public class SymbolicCheckingChoosingStage extends Stage {
 	public void initialize() {
 		formulaInput.visibleProperty().bind(cbChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		cbChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
-			if(to == null) {
-				return;
-			}
-			switch(to.getGUIType()) {
-				case NONE:
-					formulaInput.showNone();
-					break;
-				case TEXT_FIELD:
-					formulaInput.showTextField();
-					break;
-				case CHOICE_BOX:
-					formulaInput.showChoiceBox();
-					break;
-				case PREDICATE:
-					formulaInput.showPredicate();
-					break;
-				default:
-					throw new AssertionError("Unhandled GUI type: " + to.getGUIType());
-			}
+			formulaInput.changeGUIType(to == null ? null : to.getGUIType());
+			this.sizeToScene();
 		});
 	}
 	
