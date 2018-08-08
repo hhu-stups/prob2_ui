@@ -2,13 +2,12 @@ package de.prob2.ui.table;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
-
-import com.google.common.io.Files;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -43,7 +42,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import org.apache.commons.lang.StringEscapeUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,22 +161,19 @@ public class ExpressionTableView extends DynamicCommandStage {
 			return;
 		}
 		try {
-			Files.write(toCSV(currentTable.get()).getBytes(), file);
+			Files.write(file.toPath(), toCSV(currentTable.get()));
 		} catch (IOException e) {
 			LOGGER.error("Saving as CSV failed", e);
 		}
 	}
 	
-	private String toCSV(TableData data) {
-		String csv = String.join(",", data.getHeader()) + "\n";
-		csv += data.getRows()
-				.stream()
-				.map(column -> String.join(",", column
-						.stream()
-						.map(StringEscapeUtils::escapeCsv)
-						.collect(Collectors.toList())))
-				.collect(Collectors.joining("\n"));
-		
+	private static List<String> toCSV(TableData data) {
+		final List<String> csv = new ArrayList<>();
+		csv.add(String.join(",", data.getHeader()));
+		data.getRows()
+			.stream()
+			.map(column -> column.stream().map(StringEscapeUtils::escapeCsv).collect(Collectors.joining(",")))
+			.collect(Collectors.toCollection(() -> csv));
 		return csv;
 	}
 	
