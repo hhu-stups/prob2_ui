@@ -38,6 +38,7 @@ import javafx.stage.Stage;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -191,7 +192,9 @@ public class ProB2 extends Application {
 	}
 
 	private static IllegalStateException die(final String message, final int exitCode) {
-		System.err.println(message);
+		if (message != null) {
+			System.err.println(message);
+		}
 		Platform.exit();
 		System.exit(exitCode);
 		return new IllegalStateException(message);
@@ -202,6 +205,7 @@ public class ProB2 extends Application {
 
 		final Options options = new Options();
 
+		options.addOption(null, "help", false, "Show this help text.");
 		options.addOption(null, "project", true, "Open the specified project on startup.");
 		options.addOption(null, "machine", true, "Load the specified machine from the project on startup. Requires --project.");
 		options.addOption(null, "preference", true, "Use the specified preference set from the project when loading the machine. Requires --project and --machine.");
@@ -217,6 +221,12 @@ public class ProB2 extends Application {
 			throw die(e.getLocalizedMessage(), 2);
 		}
 		LOGGER.info("Parsed command line: args {}, options {}", cl.getArgs(), cl.getOptions());
+
+		if (cl.hasOption("help")) {
+			final HelpFormatter hf = new HelpFormatter();
+			hf.printHelp("prob2-ui", options, true);
+			throw die(null, 2);
+		}
 
 		if (!cl.getArgList().isEmpty()) {
 			throw die("Positional arguments are not allowed: " + cl.getArgList(), 2);
