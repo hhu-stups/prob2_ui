@@ -138,22 +138,22 @@ public class LTLView extends ScrollPane {
 	private void setContextMenus() {
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.formula.menu.remove"));
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.removeFormula"));
 			removeItem.setOnAction(e -> removeFormula());
 			removeItem.disableProperty().bind(row.emptyProperty());
 						
-			MenuItem showCounterExampleItem = new MenuItem(bundle.getString("verifications.ltl.formula.menu.showCounterExample"));
+			MenuItem showCounterExampleItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showCounterExample"));
 			showCounterExampleItem.setOnAction(e-> currentTrace.set(tvFormula.getSelectionModel().getSelectedItem().getCounterExample()));
 			showCounterExampleItem.setDisable(true);
 
-			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.formula.menu.openInEditor"));
+			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
 			openEditor.disableProperty().bind(row.emptyProperty());
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 
-			MenuItem checkItem = new MenuItem(bundle.getString("verifications.ltl.formula.menu.check"));
+			MenuItem checkItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.check"));
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> checkItem(row.getItem()));
 			
@@ -174,15 +174,15 @@ public class LTLView extends ScrollPane {
 		
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.pattern.menu.remove"));
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.remove"));
 			removeItem.setOnAction(e -> removePattern());
 			removeItem.disableProperty().bind(row.emptyProperty());
 
-			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.pattern.menu.openInEditor"));
+			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			openEditor.disableProperty().bind(row.emptyProperty());
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 			
 			row.itemProperty().addListener((observable, from, to) -> {

@@ -165,7 +165,7 @@ public class SymbolicCheckingView extends ScrollPane {
 			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolic.menu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("verifications.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.symbolicchecking.symbolicCheckingView.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(SymbolicCheckingResultHandler.class).showResult(row.getItem()));
 			
 			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.symbolic.menu.showFoundState"));

@@ -27,7 +27,7 @@
 						glyphName="CHECK_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%verifications.checkMachine" />
+					<Tooltip text="%verifications.common.checkMachine" />
 				</tooltip>
 			</Button>
 			<Button fx:id="cancelButton" onAction="#cancel">
@@ -43,16 +43,16 @@
 			<MenuButton fx:id="addMenuButton">
 				<items>
 					<MenuItem fx:id="addFormulaButton" onAction="#addFormula"
-						text="%verifications.ltl.formula.add" />
+						text="%verifications.ltl.ltlView.addFormula" />
 					<MenuItem fx:id="addPatternButton" onAction="#addPattern"
-						text="%verifications.ltl.pattern.add" />
+						text="%verifications.ltl.ltlView.addPattern" />
 				</items>
 				<graphic>
 					<FontAwesomeIconView styleClass="icon-dark"
 						glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%verifications.ltl.add.tooltip" />
+					<Tooltip text="%verifications.ltl.ltlView.tooltips.addFormulaOrPattern" />
 				</tooltip>
 			</MenuButton>
 			<HelpButton fx:id="helpButton" />
@@ -63,12 +63,12 @@
 			</columnResizePolicy>
 			<columns>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
-				<TableColumn fx:id="formulaStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.columns.status" />
-				<TableColumn fx:id="formulaNameColumn" minWidth="120.0" text="%verifications.formula.columns.name" />
-				<TableColumn fx:id="formulaDescriptionColumn" minWidth="120.0" text="%verifications.columns.description" />
+				<TableColumn fx:id="formulaStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.status" />
+				<TableColumn fx:id="formulaNameColumn" minWidth="120.0" text="%verifications.common.columns.formula" />
+				<TableColumn fx:id="formulaDescriptionColumn" minWidth="120.0" text="%verifications.common.columns.description" />
 			</columns>
 			<placeholder>
-				<Label text="%verifications.ltl.formula.noFormulas" />
+				<Label text="%verifications.ltl.ltlView.noFormulas" />
 			</placeholder>
 		</TableView>
 		<TableView fx:id="tvPattern" minHeight="150">
@@ -76,13 +76,13 @@
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
 			<columns>
-				<TableColumn fx:id="patternStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.columns.status" />
+				<TableColumn fx:id="patternStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.status" />
 				<TableColumn fx:id="patternNameColumn" minWidth="140.0"
-					maxWidth="270.0" prefWidth="270.0" text="%verifications.ltl.pattern.columns.name" />
-				<TableColumn fx:id="patternDescriptionColumn" minWidth="120.0" text="%verifications.columns.description" />
+					maxWidth="270.0" prefWidth="270.0" text="%verifications.common.columns.pattern" />
+				<TableColumn fx:id="patternDescriptionColumn" minWidth="120.0" text="%verifications.common.columns.description" />
 			</columns>
 			<placeholder>
-				<Label text="%verifications.ltl.pattern.noPattern" />
+				<Label text="%verifications.ltl.ltlView.noPattern" />
 			</placeholder>
 		</TableView>
 	</VBox>

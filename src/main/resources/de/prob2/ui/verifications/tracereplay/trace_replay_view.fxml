@@ -24,7 +24,7 @@
 					<FontAwesomeIconView styleClass="icon-dark" glyphName="CHECK_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%verifications.checkMachine" />
+					<Tooltip text="%verifications.common.checkMachine" />
 				</tooltip>
 			</Button>
 			<Button fx:id="cancelButton" onAction="#cancel" disable="true">
@@ -52,8 +52,8 @@
 			</columnResizePolicy>
 			<columns>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
-				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.columns.status" />
-				<TableColumn fx:id="nameColumn" text="%verifications.columns.name" />
+				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.status" />
+				<TableColumn fx:id="nameColumn" text="%verifications.common.columns.name" />
 			</columns>
 			<placeholder>
 				<Label text="%verifications.tracereplay.placeholder" />
