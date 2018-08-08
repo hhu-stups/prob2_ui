@@ -9,13 +9,14 @@ import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Region;
 
 public abstract class AbstractResultHandler {
 	
 	public enum ItemType {
-		FORMULA("verifications.itemType.formula"),
-		PATTERN("verifications.itemType.pattern"),
+		FORMULA("verifications.abstractResultHandler.itemType.formula"),
+		PATTERN("verifications.abstractResultHandler.itemType.pattern"),
 		;
 		
 		private final String key;
@@ -52,7 +53,9 @@ public abstract class AbstractResultHandler {
 		if(resultItem == null || item.getChecked() == Checked.SUCCESS) {
 			return;
 		}
-		Alert alert = new Alert(resultItem.getType(), resultItem.getMessage());
+		Alert alert = new Alert(
+				resultItem.getChecked().equals(Checked.SUCCESS) ? AlertType.INFORMATION : AlertType.ERROR,
+				resultItem.getMessage());
 		alert.setTitle(item.getName());
 		alert.setHeaderText(resultItem.getHeader());
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
@@ -62,16 +65,16 @@ public abstract class AbstractResultHandler {
 	public CheckingResultItem handleFormulaResult(Object result, State stateid, List<Trace> traces) {
 		CheckingResultItem resultItem = null;
 		if(success.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Alert.AlertType.INFORMATION, Checked.SUCCESS, String.format(bundle.getString("verifications.result.succeeded"), bundle.getString(type.getKey())), "Success");
+			resultItem = new CheckingResultItem(Checked.SUCCESS, String.format(bundle.getString("verifications.result.succeeded"), bundle.getString(type.getKey())), "Success");
 		} else if(counterExample.contains(result.getClass())) {
 			traces.addAll(handleCounterExample(result, stateid));
-			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.FAIL, String.format(bundle.getString("verifications.result.counterExampleFound"), bundle.getString(type.getKey())), "Counter Example Found");
+			resultItem = new CheckingResultItem(Checked.FAIL, String.format(bundle.getString("verifications.result.counterExampleFound"), bundle.getString(type.getKey())), "Counter Example Found");
 		} else if(error.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.FAIL, ((IModelCheckingResult) result).getMessage(), bundle.getString("verifications.result.error"));
+			resultItem = new CheckingResultItem(Checked.FAIL, ((IModelCheckingResult) result).getMessage(), bundle.getString("verifications.result.error"));
 		} else if(result instanceof Throwable) {
-			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.FAIL, bundle.getString("verifications.result.couldNotParseFormula.message") + " " + result, bundle.getString("verifications.result.couldNotParseFormula.header"));
+			resultItem = new CheckingResultItem(Checked.FAIL, bundle.getString("verifications.result.couldNotParseFormula.message") + " " + result, bundle.getString("verifications.result.couldNotParseFormula.header"));
 		} else if(interrupted.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.INTERRUPTED, ((IModelCheckingResult) result).getMessage(),  bundle.getString("verifications.interrupted"));
+			resultItem = new CheckingResultItem(Checked.INTERRUPTED, ((IModelCheckingResult) result).getMessage(),  bundle.getString("verifications.interrupted"));
 		}
 		return resultItem;
 	}
@@ -80,10 +83,12 @@ public abstract class AbstractResultHandler {
 	
 	
 	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle(String.format("%s already exists", bundle.getString(itemType.getKey())));
-		alert.setHeaderText(String.format("%s already exists", bundle.getString(itemType.getKey())));
-		alert.setContentText(String.format("Declared %s already exists", bundle.getString(itemType.getKey())));
+		Alert alert = stageManager.makeAlert(AlertType.INFORMATION,
+				String.format(bundle.getString("verifications.abstractResultHandler.alerts.alreadyExists.content"),
+						bundle.getString(itemType.getKey())));
+		alert.setHeaderText(
+				String.format(bundle.getString("verifications.abstractResultHandler.alerts.alreadyExists.header"),
+						bundle.getString(itemType.getKey())));
 		alert.showAndWait();
 	}
 	

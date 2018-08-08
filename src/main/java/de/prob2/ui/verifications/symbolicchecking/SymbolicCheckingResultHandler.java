@@ -24,15 +24,12 @@ import de.prob.check.RefinementCheckCounterExample;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
-
-import javafx.scene.control.Alert;
 
 @Singleton
 public class SymbolicCheckingResultHandler extends AbstractResultHandler {
@@ -206,9 +203,8 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 	}
 		
 	private void showCheckingResult(SymbolicCheckingFormulaItem item, String msg, String header, Checked checked) {
-		Alert.AlertType alertType = checked == Checked.SUCCESS ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR;
 		ArrayList<Trace> traces = new ArrayList<>();
-		item.setResultItem(new CheckingResultItem(alertType , checked, msg, header));
+		item.setResultItem(new CheckingResultItem(checked, msg, header));
 		item.getCounterExamples().clear();
 		for(Trace trace: traces) {
 			item.getCounterExamples().add(trace);
