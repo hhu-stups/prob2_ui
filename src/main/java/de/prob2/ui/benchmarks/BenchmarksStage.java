@@ -2,13 +2,13 @@ package de.prob2.ui.benchmarks;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -35,6 +35,7 @@ import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -222,16 +223,16 @@ public class BenchmarksStage extends Stage {
 			return;
 		}
 		try {
-			Files.write(toCSV(benchmarksTableView.getItems()).getBytes(), file);
+			Files.write(file.toPath(), toCSV(benchmarksTableView.getItems()));
 		} catch (IOException e) {
 			LOGGER.error("Saving as CSV failed", e);
 		}
 	}
 
-	private String toCSV(List<BenchmarkItem> benchmarks) {
-		return String.join("\n", benchmarks.stream()
-				.map(item -> item.getPosition() + "," + item.getName() + "," + item.getTime())
-				.collect(Collectors.toList()));
+	private static List<String> toCSV(List<BenchmarkItem> benchmarks) {
+		return benchmarks.stream()
+			.map(item -> item.getPosition() + "," + StringEscapeUtils.escapeCsv(item.getName()) + "," + StringEscapeUtils.escapeCsv(item.getTime()))
+			.collect(Collectors.toList());
 	}
 
 	public void reset() {
