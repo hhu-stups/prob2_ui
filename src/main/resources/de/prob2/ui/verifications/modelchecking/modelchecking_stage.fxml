@@ -6,7 +6,7 @@
 <?import javafx.stage.Stage?>
 
 <fx:root type="Stage" fx:id="mcheckStage"
-		 title="%verifications.modelchecking.stage.title" xmlns:fx="http://javafx.com/fxml/1">
+		 title="%verifications.modelchecking.modelcheckingStage.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
 			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
@@ -16,12 +16,12 @@
 					<AnchorPane>
 						<HBox AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0"
 							alignment="CENTER_LEFT">
-							<Label text="%verifications.modelchecking.stage.strategyLabel"
+							<Label text="%verifications.modelchecking.modelcheckingStage.searchStrategy"
 								textAlignment="LEFT" />
 							<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
 								<ChoiceBox fx:id="selectSearchStrategy">
 									<tooltip>
-										<Tooltip text="%verifications.modelchecking.stage.strategy.tooltip" />
+										<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.searchStrategy" />
 									</tooltip>
 								</ChoiceBox>
 							</HBox>
@@ -31,27 +31,27 @@
 						alignment="CENTER_LEFT">
 						<AnchorPane VBox.vgrow="ALWAYS">
 							<CheckBox fx:id="findDeadlocks" selected="true"
-								text="%verifications.modelchecking.stage.options.findDeadlocks"
+								text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks"
 								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
 						</AnchorPane>
 						<AnchorPane VBox.vgrow="ALWAYS">
 							<CheckBox fx:id="findInvViolations" selected="true"
-								text="%verifications.modelchecking.stage.options.findInvViolations"
+								text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations"
 								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
 						</AnchorPane>
 						<AnchorPane VBox.vgrow="ALWAYS">
 							<CheckBox fx:id="findBAViolations"
-								text="%verifications.modelchecking.stage.options.findBAViolations"
+								text="%verifications.modelchecking.modelcheckingStage.options.findBAViolations"
 								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
 						</AnchorPane>
 						<AnchorPane VBox.vgrow="ALWAYS">
 							<CheckBox fx:id="findGoal"
-								text="%verifications.modelchecking.stage.options.findGoal"
+								text="%verifications.modelchecking.modelcheckingStage.options.findGoal"
 								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
 						</AnchorPane>
 						<AnchorPane VBox.vgrow="ALWAYS">
 							<CheckBox fx:id="stopAtFullCoverage"
-								text="%verifications.modelchecking.stage.options.stopAtFullCoverage"
+								text="%verifications.modelchecking.modelcheckingStage.options.stopAtFullCoverage"
 								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
 						</AnchorPane>
 					</VBox>
@@ -60,7 +60,7 @@
 							AnchorPane.bottomAnchor="15.0" spacing="10.0">
 							<AnchorPane HBox.hgrow="ALWAYS">
 								<Button fx:id="startButton" onAction="#startModelCheck"
-									text="%verifications.modelchecking.stage.start"
+									text="%verifications.modelchecking.modelcheckingStage.buttons.start"
 									AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
 							</AnchorPane>
 							<Button onAction="#cancel" text="%common.buttons.cancel" />
