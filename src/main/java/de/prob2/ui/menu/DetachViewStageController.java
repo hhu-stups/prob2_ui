@@ -12,6 +12,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.MainController;
+import de.prob2.ui.animation.AnimationView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
@@ -44,6 +45,7 @@ public final class DetachViewStageController extends Stage {
 	
 	@FXML private Button apply;
 	@FXML private CheckBox detachOperations;
+	@FXML private CheckBox detachAnimation;
 	@FXML private CheckBox detachHistory;
 	@FXML private CheckBox detachVerifications;
 	@FXML private CheckBox detachStats;
@@ -72,6 +74,7 @@ public final class DetachViewStageController extends Stage {
 	@FXML
 	public void initialize() {
 		checkBoxMap.put(OperationsView.class, detachOperations);
+		checkBoxMap.put(AnimationView.class, detachAnimation);
 		checkBoxMap.put(HistoryView.class, detachHistory);
 		checkBoxMap.put(VerificationsView.class, detachVerifications);
 		checkBoxMap.put(StatsView.class, detachStats);
