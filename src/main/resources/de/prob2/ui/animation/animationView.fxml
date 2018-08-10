@@ -10,10 +10,10 @@
 <fx:root type="AnimationView" xmlns:fx="http://javafx.com/fxml/1">
 	<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-		<Tab fx:id="tabTraceReplay" text="%verification.tabs.tracereplay.title">
+		<Tab fx:id="tabTraceReplay" text="%verifications.verificationsView.tabs.tracereplay">
 			<TraceReplayView />
 		</Tab>
-		<Tab fx:id="tabSymbolic" id="symbolic" text="%verification.tabs.symbolic.title">
+		<Tab fx:id="tabSymbolic" id="symbolic" text="%verifications.verificationsView.tabs.symbolic">
 			<SymbolicAnimationView />
 		</Tab>
 	</TabPane>

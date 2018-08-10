@@ -27,7 +27,7 @@
 						glyphName="CHECK_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%verifications.checkMachine" />
+					<Tooltip text="%verifications.common.checkMachine" />
 				</tooltip>
 			</Button>
 			<Button fx:id="cancelButton" onAction="#cancelModelcheck">
@@ -48,7 +48,7 @@
 				</graphic>
 				<tooltip>
 					<Tooltip
-						text="%verifications.modelchecking.stats.addModelCheck.tooltip" />
+						text="%verifications.modelchecking.modelcheckingView.tooltips.addModelCheck" />
 				</tooltip>
 			</Button>
 			<HelpButton fx:id="helpButton" />
@@ -60,12 +60,11 @@
 			<columns>
 				<TableColumn fx:id="showDetailsColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
-				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.columns.status" />
-				<TableColumn fx:id="strategyColumn" minWidth="260.0"
-					prefWidth="260.0" text="%verifications.columns.strategy" />
+				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.status" />
+				<TableColumn fx:id="strategyColumn" minWidth="260.0" maxWidth="320.0" prefWidth="260.0" text="%verifications.common.columns.strategy" />
 			</columns>
 			<placeholder>
-				<Label text="%verifications.modelchecking.stats.placeholder" />
+				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
 			</placeholder>
 		</TableView>
 		<AnchorPane fx:id="statsPane">

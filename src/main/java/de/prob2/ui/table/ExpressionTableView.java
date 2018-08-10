@@ -2,13 +2,12 @@ package de.prob2.ui.table;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
-
-import com.google.common.io.Files;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -43,7 +42,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import org.apache.commons.lang.StringEscapeUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +99,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 		interrupt();
 
 		Thread thread = new Thread(() -> {
-			Platform.runLater(() -> statusBar.setText(bundle.getString("common.statusbar.loading")));
+			Platform.runLater(() -> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
 			try {
 				if(item.getArity() > 0) {
 					formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
@@ -119,7 +117,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 				LOGGER.error("Table visualization failed", e);
 				currentThread.set(null);
 				Platform.runLater(() -> {
-					stageManager.makeExceptionAlert(bundle.getString("tableview.error.message"), e).show();
+					stageManager.makeExceptionAlert(bundle.getString("table.expressionTableView.alerts.visualisationNotPossible.message"), e).show();
 					reset();
 				});
 			}
@@ -157,28 +155,25 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@FXML
 	private void save() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("tableview.csv"));
+		fileChooser.setTitle(bundle.getString("table.expressionTableView.fileChooser.saveAsCSV.title"));
 		File file = fileChooser.showSaveDialog(new Stage());
 		if(file == null || currentTable == null) {
 			return;
 		}
 		try {
-			Files.write(toCSV(currentTable.get()).getBytes(), file);
+			Files.write(file.toPath(), toCSV(currentTable.get()));
 		} catch (IOException e) {
 			LOGGER.error("Saving as CSV failed", e);
 		}
 	}
 	
-	private String toCSV(TableData data) {
-		String csv = String.join(",", data.getHeader()) + "\n";
-		csv += data.getRows()
-				.stream()
-				.map(column -> String.join(",", column
-						.stream()
-						.map(StringEscapeUtils::escapeCsv)
-						.collect(Collectors.toList())))
-				.collect(Collectors.joining("\n"));
-		
+	private static List<String> toCSV(TableData data) {
+		final List<String> csv = new ArrayList<>();
+		csv.add(String.join(",", data.getHeader()));
+		data.getRows()
+			.stream()
+			.map(column -> column.stream().map(StringEscapeUtils::escapeCsv).collect(Collectors.joining(",")))
+			.collect(Collectors.toCollection(() -> csv));
 		return csv;
 	}
 	

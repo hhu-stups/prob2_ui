@@ -25,6 +25,7 @@ import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Region;
 
 @Singleton
@@ -79,8 +80,7 @@ public class SymbolicAnimationResultHandler {
 	}
 	
 	private void showCheckingResult(SymbolicAnimationFormulaItem item, String msg, String header, Checked checked) {
-		Alert.AlertType alertType = checked == Checked.SUCCESS ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR;
-		item.setResultItem(new CheckingResultItem(alertType , checked, msg, header));
+		item.setResultItem(new CheckingResultItem(checked, msg, header));
 		handleItem(item, checked);
 	}
 	
@@ -115,13 +115,13 @@ public class SymbolicAnimationResultHandler {
 	public CheckingResultItem handleFormulaResult(Object result, State stateid) {
 		CheckingResultItem resultItem = null;
 		if(success.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Alert.AlertType.INFORMATION, Checked.SUCCESS, String.format(bundle.getString("verifications.result.succeeded"), bundle.getString("verifications.itemType.formula")), "Success");
+			resultItem = new CheckingResultItem(Checked.SUCCESS, String.format(bundle.getString("verifications.result.succeeded"), bundle.getString("verifications.abstractResultHandler.itemType.formula")), "Success");
 		} else if(error.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.FAIL, ((IModelCheckingResult) result).getMessage(), bundle.getString("verifications.result.error"));
+			resultItem = new CheckingResultItem(Checked.FAIL, ((IModelCheckingResult) result).getMessage(), bundle.getString("verifications.result.error"));
 		} else if(result instanceof Throwable) {
-			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.FAIL, bundle.getString("verifications.result.couldNotParseFormula.message") + " " + result, bundle.getString("verifications.result.couldNotParseFormula.header"));
+			resultItem = new CheckingResultItem(Checked.FAIL, bundle.getString("verifications.result.couldNotParseFormula.message") + " " + result, bundle.getString("verifications.result.couldNotParseFormula.header"));
 		} else if(interrupted.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.INTERRUPTED, ((IModelCheckingResult) result).getMessage(),  bundle.getString("verifications.interrupted"));
+			resultItem = new CheckingResultItem(Checked.INTERRUPTED, ((IModelCheckingResult) result).getMessage(),  bundle.getString("verifications.interrupted"));
 		}
 		return resultItem;
 	}
@@ -148,7 +148,9 @@ public class SymbolicAnimationResultHandler {
 		if(resultItem == null || item.getChecked() == Checked.SUCCESS) {
 			return;
 		}
-		Alert alert = new Alert(resultItem.getType(), resultItem.getMessage());
+		Alert alert = new Alert(
+				resultItem.getChecked().equals(Checked.SUCCESS) ? AlertType.INFORMATION : AlertType.ERROR,
+				resultItem.getMessage());
 		alert.setTitle(item.getName());
 		alert.setHeaderText(resultItem.getHeader());
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);

@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -20,7 +23,6 @@ import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -28,18 +30,13 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingStage.SearchStrategy;
-
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.scene.control.Alert;
 import javafx.util.StringConverter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Modelchecker implements IModelCheckListener {
 	
@@ -146,7 +143,10 @@ public class Modelchecker implements IModelCheckListener {
 		} catch (RuntimeException e) {
 			LOGGER.error("Exception in updateStats", e);
 			Platform.runLater(
-					() -> stageManager.makeAlert(Alert.AlertType.ERROR, "Exception in updateStats:\n" + e).show());
+					() -> stageManager
+							.makeExceptionAlert(bundle.getString(
+									"verifications.modelchecking.modelchecker.alerts.updatingStatsError.content"), e)
+							.show());
 		}
 	}
 	
@@ -189,7 +189,7 @@ public class Modelchecker implements IModelCheckListener {
 			result = job.call();
 		} catch (Exception e) {
 			LOGGER.error("Exception while running model check job", e);
-			Platform.runLater(() -> stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("verifications.modelchecking.exceptionWhileRunningJob"), e)).show());
+			Platform.runLater(() -> stageManager.makeExceptionAlert(bundle.getString("verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content"), e).show());
 			return;
 		} finally {
 			modelcheckingStage.setDisableStart(false);

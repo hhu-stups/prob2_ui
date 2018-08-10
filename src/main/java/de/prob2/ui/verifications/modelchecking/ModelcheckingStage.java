@@ -24,14 +24,14 @@ import javafx.util.StringConverter;
 public class ModelcheckingStage extends Stage {
 	
 	public enum SearchStrategy {
-		MIXED_BF_DF("verifications.modelchecking.stage.strategy.items.mixedBfDf"),
-		BREADTH_FIRST("verifications.modelchecking.stage.strategy.items.breadthFirst"),
-		DEPTH_FIRST("verifications.modelchecking.stage.strategy.items.depthFirst"),
-		//HEURISTIC_FUNCTION("verifications.modelchecking.stage.strategy.items.heuristicFunction"),
-		//HASH_RANDOM("verifications.modelchecking.stage.strategy.items.hashRandom"),
-		//RANDOM("verifications.modelchecking.stage.strategy.items.random"),
-		//OUT_DEGREE("verifications.modelchecking.stage.strategy.items.outDegree"),
-		//DISABLED_TRANSITIONS("verifications.modelchecking.stage.strategy.items.disabledTransitions"),
+		MIXED_BF_DF("verifications.modelchecking.modelcheckingStage.strategy.mixedBfDf"),
+		BREADTH_FIRST("verifications.modelchecking.modelcheckingStage.strategy.breadthFirst"),
+		DEPTH_FIRST("verifications.modelchecking.modelcheckingStage.strategy.depthFirst"),
+		//HEURISTIC_FUNCTION("verifications.modelchecking.modelcheckingStage.strategy.heuristicFunction"),
+		//HASH_RANDOM("verifications.modelchecking.modelcheckingStage.strategy.hashRandom"),
+		//RANDOM("verifications.modelchecking.modelcheckingStage.strategy.random"),
+		//OUT_DEGREE("verifications.modelchecking.modelcheckingStage.strategy.outDegree"),
+		//DISABLED_TRANSITIONS("verifications.modelchecking.modelcheckingStage.strategy.disabledTransitions"),
 		;
 		
 		private final String name;
@@ -101,7 +101,7 @@ public class ModelcheckingStage extends Stage {
 		if (currentTrace.exists()) {
 			injector.getInstance(Modelchecker.class).checkItem(getOptions(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
 		} else {
-			stageManager.makeAlert(Alert.AlertType.ERROR, bundle.getString("verifications.modelchecking.stage.noMachineLoaded"))
+			stageManager.makeAlert(Alert.AlertType.ERROR, bundle.getString("verifications.modelchecking.modelcheckingStage.alerts.noMachineLoaded.content"))
 					.showAndWait();
 			this.hide();
 		}

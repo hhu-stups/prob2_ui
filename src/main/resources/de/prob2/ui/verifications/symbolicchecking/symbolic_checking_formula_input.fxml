@@ -6,14 +6,13 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <fx:root type="SymbolicCheckingFormulaInput" spacing="10.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1">
-	<StackPane fx:id="optionsPane" VBox.vgrow="ALWAYS">
-		<TextField fx:id="tfFormula"/>
-		<ChoiceBox fx:id="cbOperations"/>
-		<PredicateBuilderView fx:id="predicateBuilderView"/>
-	</StackPane>
+	<fx:define>
+		<TextField fx:id="tfFormula" VBox.vgrow="NEVER"/>
+		<ChoiceBox fx:id="cbOperations" VBox.vgrow="NEVER"/>
+		<PredicateBuilderView fx:id="predicateBuilderView" VBox.vgrow="NEVER"/>
+	</fx:define>
 	<HBox alignment="CENTER" spacing="10.0" VBox.vgrow="NEVER">
 		<Button fx:id="btAdd" text="%verifications.symbolic.add" styleClass="button-blue"/>
 		<Button fx:id="btCheck" text="%verifications.symbolic.check" styleClass="button-blue"/>

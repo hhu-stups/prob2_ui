@@ -16,7 +16,6 @@ import de.prob.check.LTLNotYetFinished;
 import de.prob.check.LTLOk;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
@@ -24,8 +23,6 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-
-import javafx.scene.control.Alert;
 
 @Singleton
 public class LTLResultHandler extends AbstractResultHandler {
@@ -78,7 +75,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 			item.setCheckedSuccessful();
 		} else {
 			final String msg = parseListener.getErrorMarkers().stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
-			resultItem = new CheckingResultItem(Alert.AlertType.ERROR, Checked.FAIL, msg, bundle.getString("verifications.result.couldNotParsePattern.header"));
+			resultItem = new CheckingResultItem(Checked.FAIL, msg, bundle.getString("verifications.result.couldNotParsePattern.header"));
 			item.setCheckedFailed();
 		}
 		item.setResultItem(resultItem);

@@ -204,7 +204,7 @@ public final class ModelcheckingView extends ScrollPane {
 				() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || row.getItem().getStats().getTrace() == null,
 				row.emptyProperty(), row.itemProperty());
 			
-			MenuItem showTraceToErrorItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.showTraceToError"));
+			MenuItem showTraceToErrorItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.showTraceToError"));
 			showTraceToErrorItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 				currentTrace.set(item.getStats().getTrace());
@@ -212,7 +212,7 @@ public final class ModelcheckingView extends ScrollPane {
 			});
 			showTraceToErrorItem.disableProperty().bind(disableErrorItemsBinding);
 			
-			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.check"));
+			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
@@ -228,7 +228,7 @@ public final class ModelcheckingView extends ScrollPane {
 				}
 			});
 			
-			MenuItem showDetailsItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.showDetails"));
+			MenuItem showDetailsItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.showDetails"));
 			showDetailsItem.setOnAction(e-> {
 				ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
@@ -236,7 +236,7 @@ public final class ModelcheckingView extends ScrollPane {
 			});
 			showDetailsItem.disableProperty().bind(row.emptyProperty());
 			
-			MenuItem searchForNewErrorsItem = new MenuItem(bundle.getString("verifications.modelchecking.stage.options.searchForNewErrors"));
+			MenuItem searchForNewErrorsItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors"));
 			searchForNewErrorsItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 				item.setOptions(item.getOptions().recheckExisting(false));
@@ -244,7 +244,7 @@ public final class ModelcheckingView extends ScrollPane {
 			});
 			searchForNewErrorsItem.disableProperty().bind(disableErrorItemsBinding);
 			
-			MenuItem removeItem = new MenuItem(bundle.getString("verifications.modelchecking.menu.remove"));
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
 			removeItem.setOnAction(e -> removeItem());
 			removeItem.disableProperty().bind(row.emptyProperty());
 			
