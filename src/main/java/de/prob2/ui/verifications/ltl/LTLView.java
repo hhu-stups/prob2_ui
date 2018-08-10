@@ -174,7 +174,7 @@ public class LTLView extends ScrollPane {
 		
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.remove"));
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.removePattern"));
 			removeItem.setOnAction(e -> removePattern());
 			removeItem.disableProperty().bind(row.emptyProperty());
 

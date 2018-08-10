@@ -105,29 +105,12 @@ public class SymbolicCheckingFormulaInput extends VBox {
 				case INVARIANT: 
 					symbolicCheckingFormulaHandler.handleInvariant(cbOperations.getSelectionModel().getSelectedItem(), false);
 					break;
-				case DEADLOCK: 
-					symbolicCheckingFormulaHandler.handleDeadlock(tfFormula.getText(), false); 
-					break;
-				case SEQUENCE: 
-					symbolicCheckingFormulaHandler.handleSequence(tfFormula.getText(), false); 
-					break;
 				case CHECK_ALL_OPERATIONS:
 					events.forEach(event -> symbolicCheckingFormulaHandler.handleInvariant(event, true));
-					break;
-				case FIND_DEADLOCK: 
-					symbolicCheckingFormulaHandler.findDeadlock(false); 
-					break;
-				case FIND_VALID_STATE:
-					formulaItem = new SymbolicCheckingFormulaItem(tfFormula.getText(), tfFormula.getText(), 
-							SymbolicCheckingType.FIND_VALID_STATE);
-					symbolicCheckingFormulaHandler.findValidState(formulaItem, false);
 					break;
 				default:
 					formulaItem = new SymbolicCheckingFormulaItem(checkingType.name(), checkingType.name(), checkingType);
 					switch(checkingType) {
-						case FIND_REDUNDANT_INVARIANTS: 
-							symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem, false); 
-							break;
 						case CHECK_ASSERTIONS: 
 							symbolicCheckingFormulaHandler.handleAssertions(formulaItem, false);
 							break;

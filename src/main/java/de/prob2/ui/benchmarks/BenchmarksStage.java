@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -80,6 +81,9 @@ public class BenchmarksStage extends Stage {
 	@FXML
 	private TextField tfExecFrequency;
 
+	@FXML
+	private HelpButton helpButton;
+
 	private final List<String> identifiers;
 
 	private final List<TextField> valueTextFields;
@@ -102,6 +106,7 @@ public class BenchmarksStage extends Stage {
 
 	@FXML
 	private void initialize() {
+		helpButton.setHelpContent(this.getClass());
 		choicePositionColumn.setCellValueFactory(new PropertyValueFactory<>("position"));
 		choiceOperationColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		positionColumn.setCellValueFactory(new PropertyValueFactory<>("position"));

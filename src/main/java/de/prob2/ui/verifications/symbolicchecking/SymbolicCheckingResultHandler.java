@@ -11,7 +11,6 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
-import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.check.CBCDeadlockFound;
@@ -69,9 +68,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 	
 	public void handleFormulaResult(SymbolicCheckingFormulaItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		if(item.getType() == SymbolicCheckingType.FIND_VALID_STATE) {
-			handleFindValidState(item, (FindStateCommand) cmd, stateSpace);
-		} else if(item.getType() == SymbolicCheckingType.TINDUCTION || item.getType() == SymbolicCheckingType.KINDUCTION ||
+		if(item.getType() == SymbolicCheckingType.TINDUCTION || item.getType() == SymbolicCheckingType.KINDUCTION ||
 					item.getType() == SymbolicCheckingType.BMC || item.getType() == SymbolicCheckingType.IC3) {
 			handleSymbolicChecking(item, (SymbolicModelcheckCommand) cmd);
 		} else if(item.getType() == SymbolicCheckingType.CHECK_ASSERTIONS) {
@@ -113,22 +110,6 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		ArrayList<Trace> counterExamples = new ArrayList<>();
 		counterExamples.add(((RefinementCheckCounterExample) result).getTrace(stateid.getStateSpace()));
 		return counterExamples;
-	}
-	
-	public void handleFindValidState(SymbolicCheckingFormulaItem item, FindStateCommand cmd, StateSpace stateSpace) {
-		FindStateCommand.ResultType result = cmd.getResult();
-		item.setExample(null);
-		// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
-		if (result == FindStateCommand.ResultType.STATE_FOUND) {
-			showCheckingResult(item, bundle.getString("verifications.symbolicchecking.resultHandler.findValidState.result.found"), Checked.SUCCESS);
-			item.setExample(cmd.getTrace(stateSpace));
-		} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
-			showCheckingResult(item, bundle.getString("verifications.symbolicchecking.resultHandler.findValidState.result.notFound"), Checked.FAIL);
-		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
-			showCheckingResult(item, bundle.getString("verifications.symbolicchecking.resultHandler.findValidState.result.interrupted"), Checked.INTERRUPTED);
-		} else {
-			showCheckingResult(item, bundle.getString("verifications.symbolicchecking.resultHandler.findValidState.result.error"), Checked.FAIL);
-		}
 	}
 	
 	public void handleFindRedundantInvariants(SymbolicCheckingFormulaItem item, GetRedundantInvariantsCommand cmd) {

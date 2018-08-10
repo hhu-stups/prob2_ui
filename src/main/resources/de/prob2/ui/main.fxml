@@ -9,6 +9,7 @@
 <?import de.prob2.ui.stats.StatsView?>
 <?import de.prob2.ui.statusbar.StatusBar?>
 <?import de.prob2.ui.verifications.VerificationsView?>
+<?import de.prob2.ui.animation.AnimationView?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
@@ -23,6 +24,9 @@
 				<panes>
 					<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP" collapsible="false">
 						<OperationsView/>
+					</TitledPane>
+					<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP" collapsible="false">
+						<AnimationView/>
 					</TitledPane>
 				</panes>
 			</Accordion>

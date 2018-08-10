@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.tracereplay;
+package de.prob2.ui.animation.tracereplay;
 
 import java.util.List;
 
