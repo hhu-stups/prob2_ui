@@ -13,3 +13,4 @@ de.prob2.ui.beditor.BEditorView,Hauptansicht/Editor.html
 de.prob2.ui.table.ExpressionTableView,Hauptansicht/Tabellenvisualisierung einer Formel.html
 de.prob2.ui.formula.FormulaStage,Hauptansicht/Graphvisualisierung einer Formel.html
 de.prob2.ui.dotty.DotView,Graphvisualisierung.html
+de.prob2.ui.benchmarks.BenchmarksStage,Benchmarks.html
