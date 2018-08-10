@@ -158,7 +158,7 @@ public class SymbolicAnimationView extends ScrollPane {
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
 			});
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("verifications.symbolicchecking.symbolicCheckingView.contextMenu.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(SymbolicAnimationResultHandler.class).showResult(row.getItem()));
 			
 			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.showFoundState"));
