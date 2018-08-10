@@ -64,13 +64,7 @@ public class HelpSystem extends StackPane {
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
 		isJar = helpURI.toString().startsWith("jar:");
 		isHelpButton = false;
-		// this needs to be updated if new translations of help are added
-		String[] languages = {"de", "en"};
-		for (String language : languages) {
-			if (isCurrentLanguage(language)) {
-				helpSubdirectoryString = "help_" + language;
-			}
-		}
+		setHelpSubdirectoryString();
 		File helpSubdirectory = getHelpDirectory();
 
 		treeView.setRoot(createNode(helpSubdirectory));
@@ -180,6 +174,16 @@ public class HelpSystem extends StackPane {
 			return uiState.getLocaleOverride().toString().startsWith(language);
 		} catch (NullPointerException e) {
 			return Locale.getDefault().toString().startsWith(language);
+		}
+	}
+
+	private void setHelpSubdirectoryString() {
+		// this needs to be updated if new translations of help are added
+		String[] languages = {"de", "en"};
+		for (String language : languages) {
+			if (isCurrentLanguage(language)) {
+				helpSubdirectoryString = "help_" + language;
+			}
 		}
 	}
 }
