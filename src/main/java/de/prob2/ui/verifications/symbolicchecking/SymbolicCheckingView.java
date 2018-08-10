@@ -153,7 +153,7 @@ public class SymbolicCheckingView extends ScrollPane {
 			
 			final TableRow<SymbolicCheckingFormulaItem> row = new TableRow<>();
 			
-			MenuItem checkItem = new MenuItem(bundle.getString("verifications.symbolic.menu.check"));
+			MenuItem checkItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.check"));
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> {
 				symbolicCheckHandler.handleItem(row.getItem(), false);
@@ -162,10 +162,10 @@ public class SymbolicCheckingView extends ScrollPane {
 
 
 			
-			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolic.menu.showCounterExample"));
+			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("verifications.symbolicchecking.symbolicCheckingView.contextMenu.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(SymbolicCheckingResultHandler.class).showResult(row.getItem()));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -182,11 +182,11 @@ public class SymbolicCheckingView extends ScrollPane {
 			});
 
 			
-			MenuItem removeItem = new MenuItem(bundle.getString("verifications.symbolic.menu.remove"));
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.remove"));
 			removeItem.setOnAction(e -> removeFormula());
 			removeItem.disableProperty().bind(row.emptyProperty());
 			
-			MenuItem changeItem = new MenuItem(bundle.getString("verifications.symbolic.menu.change"));
+			MenuItem changeItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.change"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
 			
 			row.setContextMenu(new ContextMenu(checkItem, changeItem, showCounterExampleItem, showMessage, removeItem));
@@ -234,7 +234,7 @@ public class SymbolicCheckingView extends ScrollPane {
 		counterExampleItem.getItems().clear();
 		List<Trace> counterExamples = item.getCounterExamples();
 		for(int i = 0; i < counterExamples.size(); i++) {
-			MenuItem traceItem = new MenuItem(String.format(bundle.getString("verifications.symbolic.menu.showCounterExample.counterExample"), i + 1));
+			MenuItem traceItem = new MenuItem(String.format(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCounterExample.counterExample"), i + 1));
 			final int index = i;
 			traceItem.setOnAction(e-> currentTrace.set((counterExamples.get(index))));
 			counterExampleItem.getItems().add(traceItem);

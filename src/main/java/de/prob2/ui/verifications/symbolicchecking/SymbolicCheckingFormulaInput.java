@@ -130,8 +130,8 @@ public class SymbolicCheckingFormulaInput extends VBox {
 	}
 	
 	public void changeFormula(SymbolicCheckingFormulaItem item) {
-		btAdd.setText(bundle.getString("verifications.symbolic.input.change"));
-		btCheck.setText(bundle.getString("verifications.symbolic.input.changeAndCheck"));
+		btAdd.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.change"));
+		btCheck.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.changeAndCheck"));
 		setChangeListeners(item);
 		SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
 		choosingStage.select(item);
@@ -259,8 +259,8 @@ public class SymbolicCheckingFormulaInput extends VBox {
 	}
 	
 	public void reset() {
-		btAdd.setText(bundle.getString("verifications.symbolic.add"));
-		btCheck.setText(bundle.getString("verifications.symbolic.check"));
+		btAdd.setText(bundle.getString("common.buttons.add"));
+		btCheck.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.addAndCheck"));
 		setCheckListeners();
 		tfFormula.clear();
 		cbOperations.getSelectionModel().clearSelection();

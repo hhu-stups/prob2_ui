@@ -9,7 +9,7 @@
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaInput?>
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationItem?>
 
-<fx:root type="Stage" fx:id="cbcChoice" title="%verifications.symbolic.choice.title"
+<fx:root type="Stage" fx:id="cbcChoice" title="%verifications.symbolicchecking.choice.title"
 		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
@@ -17,7 +17,7 @@
 				<VBox spacing="10" AnchorPane.topAnchor="10.0"
 					AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0"
 					AnchorPane.rightAnchor="0.0">
-					<Label text="%verifications.symbolic.choice.text">
+					<Label text="%verifications.symbolicchecking.choice.text">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>

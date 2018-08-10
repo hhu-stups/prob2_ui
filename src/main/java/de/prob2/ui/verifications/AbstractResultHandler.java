@@ -65,16 +65,16 @@ public abstract class AbstractResultHandler {
 	public CheckingResultItem handleFormulaResult(Object result, State stateid, List<Trace> traces) {
 		CheckingResultItem resultItem = null;
 		if(success.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.SUCCESS, String.format(bundle.getString("verifications.result.succeeded"), bundle.getString(type.getKey())), "Success");
+			resultItem = new CheckingResultItem(Checked.SUCCESS, String.format(bundle.getString("verifications.result.succeeded.message"), bundle.getString(type.getKey())), bundle.getString("verifications.result.succeeded.header"));
 		} else if(counterExample.contains(result.getClass())) {
 			traces.addAll(handleCounterExample(result, stateid));
-			resultItem = new CheckingResultItem(Checked.FAIL, String.format(bundle.getString("verifications.result.counterExampleFound"), bundle.getString(type.getKey())), "Counter Example Found");
+			resultItem = new CheckingResultItem(Checked.FAIL, String.format(bundle.getString("verifications.result.counterExampleFound.message"), bundle.getString(type.getKey())), bundle.getString("verifications.result.counterExampleFound.header"));
 		} else if(error.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.FAIL, ((IModelCheckingResult) result).getMessage(), bundle.getString("verifications.result.error"));
+			resultItem = new CheckingResultItem(Checked.FAIL, ((IModelCheckingResult) result).getMessage(), bundle.getString("verifications.result.error.header"));
 		} else if(result instanceof Throwable) {
 			resultItem = new CheckingResultItem(Checked.FAIL, bundle.getString("verifications.result.couldNotParseFormula.message") + " " + result, bundle.getString("verifications.result.couldNotParseFormula.header"));
 		} else if(interrupted.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.INTERRUPTED, ((IModelCheckingResult) result).getMessage(),  bundle.getString("verifications.interrupted"));
+			resultItem = new CheckingResultItem(Checked.INTERRUPTED, ((IModelCheckingResult) result).getMessage(),  bundle.getString("verifications.result.interrupted.header"));
 		}
 		return resultItem;
 	}

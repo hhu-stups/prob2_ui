@@ -50,20 +50,20 @@ public class SymbolicAnimationResultHandler {
 		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
 		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class));
 	}
-
+	
 	public void handleFindValidState(SymbolicAnimationFormulaItem item, FindStateCommand cmd, StateSpace stateSpace) {
 		FindStateCommand.ResultType result = cmd.getResult();
 		item.setExample(null);
 		// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
 		if (result == FindStateCommand.ResultType.STATE_FOUND) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.findValidState.result.found"), Checked.SUCCESS);
+			showCheckingResult(item, bundle.getString("verifications.symbolicchecking.resultHandler.findValidState.result.found"), Checked.SUCCESS);
 			item.setExample(cmd.getTrace(stateSpace));
 		} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.findValidState.result.notFound"), Checked.FAIL);
+			showCheckingResult(item, bundle.getString("verifications.symbolicchecking.resultHandler.findValidState.result.notFound"), Checked.FAIL);
 		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.findValidState.result.interrupted"), Checked.INTERRUPTED);
+			showCheckingResult(item, bundle.getString("verifications.symbolicchecking.resultHandler.findValidState.result.interrupted"), Checked.INTERRUPTED);
 		} else {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.findValidState.result.error"), Checked.FAIL);
+			showCheckingResult(item, bundle.getString("verifications.symbolicchecking.resultHandler.findValidState.result.error"), Checked.FAIL);
 		}
 	}
 	
@@ -72,9 +72,9 @@ public class SymbolicAnimationResultHandler {
 		if(cmd.isInterrupted()) {
 			showCheckingResult(item, bundle.getString("verifications.interrupted"), Checked.INTERRUPTED);
 		} else if (result.isEmpty()) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.findRedundantInvariants.result.notFound"), Checked.SUCCESS);
+			showCheckingResult(item, bundle.getString("verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound"), Checked.SUCCESS);
 		} else {
-			final String header = bundle.getString(cmd.isTimeout() ? "verifications.symbolic.findRedundantInvariants.result.timeout" : "verifications.symbolic.findRedundantInvariants.result.found");
+			final String header = bundle.getString(cmd.isTimeout() ? "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.timeout" : "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found");
 			showCheckingResult(item, String.join("\n", result), header, Checked.FAIL);
 		}
 	}

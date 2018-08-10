@@ -15,8 +15,8 @@
 		<PredicateBuilderView fx:id="predicateBuilderView"/>
 	</StackPane>
 	<HBox alignment="CENTER" spacing="10.0" VBox.vgrow="NEVER">
-		<Button fx:id="btAdd" text="%verifications.symbolic.add" styleClass="button-blue"/>
-		<Button fx:id="btCheck" text="%verifications.symbolic.check" styleClass="button-blue"/>
+		<Button fx:id="btAdd" text="%common.buttons.add" styleClass="button-blue"/>
+		<Button fx:id="btCheck" text="%verifications.symbolicchecking.formulaInput.buttons.addAndCheck" styleClass="button-blue"/>
 		<Button fx:id="btCancel" onAction="#cancel" text="%common.buttons.cancel" styleClass="button-blue"/>
 	</HBox>
 </fx:root>

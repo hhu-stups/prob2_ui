@@ -12,14 +12,14 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.geometry.Insets?>
-<fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolic.choice.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolicchecking.choice.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
 			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
 				<VBox spacing="10" AnchorPane.topAnchor="10.0"
 					AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0"
 					AnchorPane.rightAnchor="0.0">
-					<Label text="%verifications.symbolic.choice.text">
+					<Label text="%verifications.symbolicchecking.choice.text">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>
