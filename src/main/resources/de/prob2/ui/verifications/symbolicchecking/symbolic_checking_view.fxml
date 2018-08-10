@@ -54,13 +54,11 @@
 			<columns>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
 				<TableColumn fx:id="formulaStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.status" />
-				<TableColumn fx:id="formulaNameColumn" minWidth="140.0"
-					prefWidth="240.0" text="%verifications.formula" />
-				<TableColumn fx:id="formulaDescriptionColumn" minWidth="180.0"
-					prefWidth="180.0" text="%verifications.common.columns.description" />
+				<TableColumn fx:id="formulaNameColumn" minWidth="140.0" prefWidth="240.0" text="%verifications.common.columns.formula" />
+				<TableColumn fx:id="formulaDescriptionColumn" minWidth="180.0" prefWidth="180.0" text="%verifications.common.columns.description" />
 			</columns>
 			<placeholder>
-				<Label text="%verifications.symbolic.formula.noFormulas" />
+				<Label text="%verifications.symbolicchecking.view.noSymbolicFormulas" />
 			</placeholder>
 		</TableView>
 	</VBox>

@@ -10,14 +10,14 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.geometry.Insets?>
-<fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolic.choice.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolicchecking.choice.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
 			<VBox styleClass="dialog" spacing="10.0">
 				<padding>
 					<Insets topRightBottomLeft="10.0"/>
 				</padding>
-				<Label text="%verifications.symbolic.choice.text"/>
+				<Label text="%verifications.symbolicchecking.choice.text"/>
 				<HBox alignment="CENTER">
 					<ChoiceBox fx:id="cbChoice">
 						<items>
