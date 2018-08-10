@@ -29,26 +29,9 @@ public class SymbolicAnimationChoosingStage extends Stage {
 	@FXML
 	public void initialize() {
 		formulaInput.visibleProperty().bind(cbChoice.getSelectionModel().selectedItemProperty().isNotNull());
-		cbChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if(newValue == null) {
-				return;
-			}
-			switch(newValue.getGUIType()) {
-				case NONE:
-					formulaInput.showNone();
-					break;
-				case TEXT_FIELD:
-					formulaInput.showTextField();
-					break;
-				case CHOICE_BOX:
-					formulaInput.showChoiceBox();
-					break;
-				case PREDICATE:
-					formulaInput.showPredicate();
-					break;
-				default:
-					break;
-			}
+		cbChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
+			formulaInput.changeGUIType(to == null ? null : to.getGUIType());
+			this.sizeToScene();
 		});
 		
 	}
