@@ -24,12 +24,12 @@
 		fitToWidth="TRUE" fitToHeight="TRUE">
 		<FlowPane alignment="CENTER" hgap="20" vgap="20">
 			<VBox spacing="5" alignment="CENTER">
-				<Label text="%visualisation.currentState.title" alignment="CENTER"
+				<Label text="%visualisation.view.currentState" alignment="CENTER"
 					styleClass="title" />
 				<StateVisualisationView fx:id="currentStateVisualisation" />
 			</VBox>
 			<VBox fx:id="previousStateVBox" spacing="5" alignment="CENTER">
-				<Label text="%visualisation.previousState.title" alignment="CENTER"
+				<Label text="%visualisation.view.previousState" alignment="CENTER"
 					styleClass="title" />
 				<StateVisualisationView fx:id="previousStateVisualisation" />
 			</VBox>
