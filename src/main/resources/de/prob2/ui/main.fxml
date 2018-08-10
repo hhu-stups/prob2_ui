@@ -22,10 +22,10 @@
 		<SplitPane fx:id="horizontalSP" dividerPositions="0.1,0.9">
 			<Accordion fx:id="leftAccordion" expandedPane="$operationsTP">
 				<panes>
-					<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP" collapsible="false">
+					<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP">
 						<OperationsView/>
 					</TitledPane>
-					<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP" collapsible="false">
+					<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP">
 						<AnimationView/>
 					</TitledPane>
 				</panes>
