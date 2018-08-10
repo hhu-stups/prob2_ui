@@ -13,8 +13,8 @@ public class SymbolicAnimationFormulaItem extends AbstractCheckableItem {
 	
 	private transient ObjectProperty<Trace> example;
 
-	public SymbolicAnimationFormulaItem(String name, String code, SymbolicAnimationType type) {
-		super(name, type.getName(), code);
+	public SymbolicAnimationFormulaItem(String name, SymbolicAnimationType type) {
+		super(name, type.getName(), name);
 		this.type = type;
 		this.example = new SimpleObjectProperty<>(null);
 	}

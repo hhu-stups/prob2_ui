@@ -46,8 +46,8 @@ public class SymbolicAnimationFormulaHandler {
 		this.resultHandler = resultHandler;
 	}
 	
-	public void addFormula(String name, String code, SymbolicAnimationType type, boolean checking) {
-		SymbolicAnimationFormulaItem formula = new SymbolicAnimationFormulaItem(name, code, type);
+	public void addFormula(String name, SymbolicAnimationType type, boolean checking) {
+		SymbolicAnimationFormulaItem formula = new SymbolicAnimationFormulaItem(name, type);
 		addFormula(formula,checking);
 	}
 	

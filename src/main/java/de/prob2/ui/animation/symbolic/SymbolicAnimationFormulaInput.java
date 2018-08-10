@@ -9,8 +9,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.model.representation.AbstractElement;
-import de.prob.model.representation.BEvent;
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem.GUIType;
 import de.prob2.ui.internal.PredicateBuilderView;
@@ -108,7 +106,7 @@ public class SymbolicAnimationFormulaInput extends VBox {
 			addFormula(true);
 			switch(animationType) {
 				case DEADLOCK: 
-					symbolicAnimationFormulaHandler.handleDeadlock(tfFormula.getText(), false); 
+					symbolicAnimationFormulaHandler.handleDeadlock(predicateBuilderView.getPredicate(), false); 
 					break;
 				case SEQUENCE:
 					symbolicAnimationFormulaHandler.handleSequence(tfFormula.getText(), false); 
@@ -117,12 +115,11 @@ public class SymbolicAnimationFormulaInput extends VBox {
 					symbolicAnimationFormulaHandler.findDeadlock(false); 
 					break;
 				case FIND_VALID_STATE:
-					formulaItem = new SymbolicAnimationFormulaItem(tfFormula.getText(), tfFormula.getText(), 
-							SymbolicAnimationType.FIND_VALID_STATE);
+					formulaItem = new SymbolicAnimationFormulaItem(predicateBuilderView.getPredicate(), SymbolicAnimationType.FIND_VALID_STATE);
 					symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
 					break;
 				default:
-					formulaItem = new SymbolicAnimationFormulaItem(animationType.name(), animationType.name(), animationType);
+					formulaItem = new SymbolicAnimationFormulaItem(animationType.name(), animationType);
 					switch(animationType) {
 						case FIND_REDUNDANT_INVARIANTS: 
 							symbolicAnimationFormulaHandler.findRedundantInvariants(formulaItem, false); 
@@ -143,6 +140,8 @@ public class SymbolicAnimationFormulaInput extends VBox {
 		choosingStage.select(item);
 		if(choosingStage.getGUIType() == GUIType.TEXT_FIELD) {
 			tfFormula.setText(item.getCode());
+		} else if(choosingStage.getGUIType() == GUIType.PREDICATE) {
+			predicateBuilderView.setItem(item);
 		} else if(choosingStage.getGUIType() == GUIType.CHOICE_BOX) {
 			cbOperations.getItems().forEach(operationItem -> {
 				if(operationItem.equals(item.getCode())) {
@@ -162,11 +161,13 @@ public class SymbolicAnimationFormulaInput extends VBox {
 			formula = tfFormula.getText();
 		} else if(choosingStage.getGUIType() == GUIType.CHOICE_BOX) {
 			formula = cbOperations.getSelectionModel().getSelectedItem();
+		} else if(choosingStage.getGUIType() == GUIType.PREDICATE) {
+			formula = predicateBuilderView.getPredicate();
 		} else {
 			formula = choosingStage.getAnimationType().getName();
 		}
-		SymbolicAnimationFormulaItem newItem = new SymbolicAnimationFormulaItem(formula, formula, choosingStage.getAnimationType());
-		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
+		SymbolicAnimationFormulaItem newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getAnimationType());
+		if(!currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
 			SymbolicAnimationType type = choosingStage.getAnimationType();
 			item.setData(formula, type.getName(), formula, type);
 			item.reset();
@@ -196,14 +197,14 @@ public class SymbolicAnimationFormulaInput extends VBox {
 		GUIType guiType = injector.getInstance(SymbolicAnimationChoosingStage.class).getGUIType();
 		switch(guiType) {
 			case TEXT_FIELD:
-				symbolicAnimationFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType, checking);
+				symbolicAnimationFormulaHandler.addFormula(tfFormula.getText(), checkingType, checking);
 				break;
 			case PREDICATE:
 				final String predicate = predicateBuilderView.getPredicate();
-				symbolicAnimationFormulaHandler.addFormula(predicate, predicate, checkingType, checking);
+				symbolicAnimationFormulaHandler.addFormula(predicate, checkingType, checking);
 				break;
 			case NONE:
-				symbolicAnimationFormulaHandler.addFormula(checkingType.name(), checkingType.name(), checkingType, checking);
+				symbolicAnimationFormulaHandler.addFormula(checkingType.name(), checkingType, checking);
 				break;
 			default:
 				break;
