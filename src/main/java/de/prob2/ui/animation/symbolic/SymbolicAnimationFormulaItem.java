@@ -1,0 +1,83 @@
+package de.prob2.ui.animation.symbolic;
+
+import de.prob.statespace.Trace;
+import de.prob2.ui.verifications.AbstractCheckableItem;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+
+import java.util.Objects;
+
+public class SymbolicAnimationFormulaItem extends AbstractCheckableItem {
+		
+	private SymbolicAnimationType type;
+	
+	private transient ObjectProperty<Trace> example;
+
+	public SymbolicAnimationFormulaItem(String name, SymbolicAnimationType type) {
+		super(name, type.getName(), name);
+		this.type = type;
+		this.example = new SimpleObjectProperty<>(null);
+	}
+
+	@Override
+	public void initializeStatus() {
+		super.initializeStatus();
+		this.example = new SimpleObjectProperty<>(null);
+	}
+	
+	public void setExample(Trace example) {
+		this.example.set(example);
+	}
+	
+	public Trace getExample() {
+		return example.get();
+	}
+	
+	public ObjectProperty<Trace> exampleProperty() {
+		return example;
+	}
+	
+	public void reset() {
+		this.initializeStatus();
+		this.example = new SimpleObjectProperty<>(null);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof SymbolicAnimationFormulaItem)) {
+			return false;
+		}
+		SymbolicAnimationFormulaItem otherItem = (SymbolicAnimationFormulaItem) obj;
+		return otherItem.getName().equals(this.getName()) &&
+				otherItem.getCode().equals(this.getCode()) &&
+				otherItem.getType().equals(this.getType());
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, code, type);
+	}
+	
+	public void setType(SymbolicAnimationType type) {
+		this.type = type;
+	}
+	
+	public SymbolicAnimationType getType() {
+		return type;
+	}
+	
+	@Override
+	public String toString() {
+		return String.join(" ", name, code, type.name());
+	}
+	
+	public void setData(String name, String description, String code, SymbolicAnimationType type) {
+		super.setData(name, description, code);
+		this.type = type;
+	}
+	
+
+}

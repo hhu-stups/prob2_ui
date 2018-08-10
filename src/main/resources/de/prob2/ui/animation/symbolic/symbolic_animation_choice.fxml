@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import javafx.collections.*?>
+<?import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaInput?>
+<?import de.prob2.ui.animation.symbolic.SymbolicAnimationItem?>
+
+<fx:root type="Stage" fx:id="cbcChoice" title="%verifications.symbolic.choice.title"
+		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene fill="TRANSPARENT">
+			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
+				<VBox spacing="10" AnchorPane.topAnchor="10.0"
+					AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0"
+					AnchorPane.rightAnchor="0.0">
+					<Label text="%verifications.symbolic.choice.text">
+						<VBox.margin>
+							<Insets left="10" right="10" />
+						</VBox.margin>
+					</Label>
+					<HBox alignment="CENTER" prefHeight="47.0" prefWidth="200.0">
+						<VBox.margin>
+							<Insets top="30"/>
+						</VBox.margin>
+						<ChoiceBox fx:id="cbChoice" prefWidth="250.0">
+							<items>
+								<FXCollections fx:factory="observableArrayList">
+									<SymbolicAnimationItem animationType="SEQUENCE" guiType="TEXT_FIELD"/>
+									<SymbolicAnimationItem animationType="DEADLOCK" guiType="PREDICATE"/>
+									<SymbolicAnimationItem animationType="FIND_DEADLOCK" guiType="NONE"/>
+									<SymbolicAnimationItem animationType="FIND_VALID_STATE" guiType="PREDICATE"/>
+									<SymbolicAnimationItem animationType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
+								</FXCollections>
+							</items>
+						</ChoiceBox>
+					</HBox>
+					<SymbolicAnimationFormulaInput fx:id="formulaInput"/>
+				</VBox>
+			</AnchorPane>
+		</Scene>
+	</scene>
+</fx:root>

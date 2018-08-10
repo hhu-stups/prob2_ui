@@ -8,6 +8,7 @@
 <?import de.prob2.ui.project.ProjectView?>
 <?import de.prob2.ui.stats.StatsView?>
 <?import de.prob2.ui.verifications.VerificationsView?>
+<?import de.prob2.ui.animation.AnimationView?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
@@ -21,6 +22,9 @@
 				<panes>
 					<TitledPane text="%common.views.operations" fx:id="operationsTP" id="operationsTP">
 						<OperationsView/>
+					</TitledPane>
+					<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP">
+						<AnimationView/>
 					</TitledPane>
 					<TitledPane text="%common.views.verifications" fx:id="verificationsTP" id="verificationsTP">
 						<VerificationsView/>

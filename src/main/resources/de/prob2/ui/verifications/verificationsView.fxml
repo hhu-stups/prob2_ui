@@ -3,7 +3,6 @@
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView?>
 <?import de.prob2.ui.verifications.modelchecking.ModelcheckingView?>
 <?import de.prob2.ui.verifications.ltl.LTLView?>
-<?import de.prob2.ui.verifications.tracereplay.TraceReplayView?>
 <?import de.prob2.ui.verifications.VerificationsView?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -17,9 +16,6 @@
 		</Tab>
 		<Tab fx:id="tabLTL" id="ltl" text="%verifications.verificationsView.tabs.ltl">
 			<LTLView />
-		</Tab>
-		<Tab fx:id="tabTraceReplay" text="%verifications.verificationsView.tabs.tracereplay">
-			<TraceReplayView />
 		</Tab>
 		<Tab fx:id="tabSymbolic" id="symbolic" text="%verifications.verificationsView.tabs.symbolic">
 			<SymbolicCheckingView />

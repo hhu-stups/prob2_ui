@@ -1,10 +1,13 @@
-package de.prob2.ui.verifications.symbolicchecking;
+package de.prob2.ui.animation.symbolic;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -20,19 +23,15 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
-
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Singleton
-public class SymbolicFormulaChecker {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicFormulaChecker.class);
+public class SymbolicAnimationChecker {
+
+private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicAnimationChecker.class);
 	
 	private final CurrentTrace currentTrace;
 	
@@ -40,15 +39,15 @@ public class SymbolicFormulaChecker {
 	
 	private final Injector injector;
 	
-	private final SymbolicCheckingResultHandler resultHandler;
+	private final SymbolicAnimationResultHandler resultHandler;
 	
 	private final List<IModelCheckJob> currentJobs;
 	
 	private final ListProperty<Thread> currentJobThreads;
 	
 	@Inject
-	public SymbolicFormulaChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
-							final SymbolicCheckingResultHandler resultHandler, final Injector injector) {
+	public SymbolicAnimationChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
+							final SymbolicAnimationResultHandler resultHandler, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
@@ -57,17 +56,17 @@ public class SymbolicFormulaChecker {
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 	}
 	
-	public void executeCheckingItem(IModelCheckJob checker, String code, SymbolicCheckingType type, boolean checkAll) {
+	public void executeCheckingItem(IModelCheckJob checker, String code, SymbolicAnimationType type, boolean checkAll) {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		currentMachine.getSymbolicCheckingFormulas()
+		currentMachine.getSymbolicAnimationFormulas()
 			.stream()
 			.filter(current -> current.getCode().equals(code) && current.getType().equals(type))
 			.findFirst()
 			.ifPresent(item -> checkItem(checker, item, checkAll));
 	}
 	
-	public void checkItem(SymbolicCheckingFormulaItem item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
-		final SymbolicCheckingFormulaItem currentItem = getItemIfAlreadyExists(item);
+	public void checkItem(SymbolicAnimationFormulaItem item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
+		final SymbolicAnimationFormulaItem currentItem = getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
 			RuntimeException exception = null;
 			try {
@@ -88,9 +87,9 @@ public class SymbolicFormulaChecker {
 				updateMachine(currentProject.getCurrentMachine());
 				currentJobThreads.remove(currentThread);
 				if(!checkAll) {
-					List<Trace> counterExamples = item.getCounterExamples();
-					if(!counterExamples.isEmpty()) {
-						currentTrace.set(counterExamples.get(0));
+					Trace example = item.getExample();
+					if(example != null) {
+						currentTrace.set(example);
 					}
 				}
 			});
@@ -99,7 +98,7 @@ public class SymbolicFormulaChecker {
 		checkingThread.start();
 	}
 	
-	public void checkItem(IModelCheckJob checker, SymbolicCheckingFormulaItem item, boolean checkAll) {
+	public void checkItem(IModelCheckJob checker, SymbolicAnimationFormulaItem item, boolean checkAll) {
 		Thread checkingThread = new Thread(() -> {
 			State stateid = currentTrace.getCurrentState();
 			currentJobs.add(checker);
@@ -116,9 +115,9 @@ public class SymbolicFormulaChecker {
 				resultHandler.handleFormulaResult(item, finalResult, stateid);
 				updateMachine(currentProject.getCurrentMachine());
 				if(!checkAll) {
-					List<Trace> counterExamples = item.getCounterExamples();
-					if(!counterExamples.isEmpty()) {
-						currentTrace.set(counterExamples.get(0));
+					Trace example = item.getExample();
+					if(example != null) {
+						currentTrace.set(example);
 					}
 				}
 			});
@@ -130,16 +129,16 @@ public class SymbolicFormulaChecker {
 	}
 		
 	public void updateMachine(Machine machine) {
-		final SymbolicCheckingView symbolicCheckingView = injector.getInstance(SymbolicCheckingView.class);
+		final SymbolicAnimationView symbolicAnimationView = injector.getInstance(SymbolicAnimationView.class);
 		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
-		symbolicCheckingView.refresh();
+		symbolicAnimationView.refresh();
 	}
 	
-	private SymbolicCheckingFormulaItem getItemIfAlreadyExists(SymbolicCheckingFormulaItem item) {
+	private SymbolicAnimationFormulaItem getItemIfAlreadyExists(SymbolicAnimationFormulaItem item) {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		int index = currentMachine.getSymbolicCheckingFormulas().indexOf(item);
+		int index = currentMachine.getSymbolicAnimationFormulas().indexOf(item);
 		if(index > -1) {
-			item = currentMachine.getSymbolicCheckingFormulas().get(index);
+			item = currentMachine.getSymbolicAnimationFormulas().get(index);
 		}
 		return item;
 	}
@@ -164,5 +163,5 @@ public class SymbolicFormulaChecker {
 	public ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
 	}
-
+	
 }

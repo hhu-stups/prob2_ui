@@ -8,13 +8,11 @@ import com.google.inject.Singleton;
 
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
-
+import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.tracereplay.TraceSaver;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.SimpleObjectProperty;
