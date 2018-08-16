@@ -101,7 +101,7 @@ public class BenchmarksStage extends Stage {
 		this.bundle = bundle;
 		this.identifiers = new ArrayList<>();
 		this.valueTextFields = new ArrayList<>();
-		stageManager.loadFXML(this, "benchmarks_view.fxml");
+		stageManager.loadFXML(this, "benchmarks_stage.fxml");
 	}
 
 	@FXML
