@@ -100,7 +100,7 @@ public class VisualisationController {
 					updateVisualization();
 				} else {
 					setVisualisationContent(getPlaceHolderContent(
-							format("visualisation.controller.initialized", currentMachine.get().getName())));
+							format("common.notInitialised", currentMachine.get().getName())));
 				}
 			}
 		};
@@ -113,18 +113,24 @@ public class VisualisationController {
 			Visualisation visualisation = this.visualisation.get();
 			if (visualisation != null) {
 				if (newMachine == null) {
-					showAlert(Alert.AlertType.INFORMATION,
-							format("visualisation.machine.null", oldMachine.getName(), visualisation.getName()),
-							ButtonType.OK);
+					Alert alert = stageManager.makeAlert(Alert.AlertType.INFORMATION,
+							format("visualisation.fx.controller.alerts.visualisationStopped.content",
+									visualisation.getName(), oldMachine.getName()));
+					alert.setHeaderText(bundle.getString("visualisation.fx.controller.alerts.visualisationStopped.header"));
+					alert.initOwner(stageManager.getCurrent());
+					alert.show();
 					stopVisualisation();
 				} else if (!newMachine.equals(oldMachine)) {
 					boolean start = checkMachine(visualisation.getMachines());
 					if (start) {
 						initVisualisation(visualisation);
 					} else {
-						showAlert(Alert.AlertType.INFORMATION,
-								format("visualisation.machine.loaded", newMachine.getName(), visualisation.getName()),
-								ButtonType.OK);
+						Alert alert = stageManager.makeAlert(Alert.AlertType.INFORMATION, format(
+								"visualisation.fx.controller.alerts.visualisationStopped.notSupportedByMachine.content",
+								newMachine.getName(), visualisation.getName()));
+						alert.setHeaderText(bundle.getString("visualisation.fx.controller.alerts.visualisationStopped.header"));
+						alert.initOwner(stageManager.getCurrent());
+						alert.show();
 						stopVisualisation();
 					}
 				}
@@ -140,14 +146,15 @@ public class VisualisationController {
 		return visualisation;
 	}
 
-	public SimpleBooleanProperty detachProperty() {return detached;}
+	public SimpleBooleanProperty detachProperty() {
+		return detached;
+	}
 
 	public void openVisualisation() {
 		if (visualisation.isNotNull().get()) {
 			Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-					format("visualisation.controller.replace", visualisation.get().getName()),
+					format("visualisation.fx.controller.alerts.replaceCurrentVisualisation.content", visualisation.get().getName()),
 					ButtonType.YES, ButtonType.NO);
-			alert.setTitle(bundle.getString("menu.visualisation"));
 			alert.initOwner(stageManager.getCurrent());
 			Optional<ButtonType> alertResult = alert.showAndWait();
 			if (alertResult.isPresent() && alertResult.get() == ButtonType.YES) {
@@ -158,10 +165,10 @@ public class VisualisationController {
 		}
 		LOGGER.debug("Show filechooser to select a visualisation.");
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("visualisation.controller.select"));
+		fileChooser.setTitle(bundle.getString("visualisation.fx.controller.fileChooser.selectVisualisation"));
 		fileChooser.getExtensionFilters()
-				.addAll(new FileChooser.ExtensionFilter("Visualisation-JAR", "*.jar"),
-						new FileChooser.ExtensionFilter("Visualisation-Class", "*.java"));
+				.addAll(new FileChooser.ExtensionFilter(bundle.getString("visualisation.fx.controller.fileChooser.fileTypes.visualisationJar"), "*.jar"),
+						new FileChooser.ExtensionFilter(format("visualisation.fx.controller.fileChooser.fileTypes.visualisationClass", "*.java"), "*.java"));
 		File selectedVisualisation = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		
 		
@@ -217,9 +224,11 @@ public class VisualisationController {
 		LOGGER.debug("Starting the visualisation \"{}\"", loadedVisualisation.getName());
 		boolean start = checkMachine(loadedVisualisation.getMachines());
 		if (!start) {
-			showAlert(Alert.AlertType.INFORMATION,
-					format("visualisation.controller.unsuitable", loadedVisualisation.getName(), currentMachine.get().getName()),
+			Alert alert = stageManager.makeAlert(Alert.AlertType.INFORMATION,
+					format("visualisation.fx.controller.alerts.visualisationUnsuitable.content", loadedVisualisation.getName(), currentMachine.get().getName()),
 					ButtonType.OK);
+			alert.initOwner(stageManager.getCurrent());
+			alert.show();
 			visualisationLoader.closeClassloader();
 			return;
 		}
@@ -253,7 +262,7 @@ public class VisualisationController {
 			} catch (Throwable t) {
 				LOGGER.debug("Could not stop visualisation!");
 				Alert alert = stageManager.makeExceptionAlert(
-						format("visualisation.controller.stop.exception", visualisation.get().getName()), t);
+						format("visualisation.fx.controller.alerts.visualisationCouldNotBeStopped.content", visualisation.get().getName()), t);
 				alert.initOwner(stageManager.getCurrent());
 				alert.show();
 			}
@@ -271,7 +280,7 @@ public class VisualisationController {
 		try {
 			setVisualisationContent(visualisation.initialize());
 		} catch (Throwable t) {
-			String msg = format("visualisation.controller.initialize.exception", visualisation.getName());
+			String msg = format("visualisation.fx.controller.alerts.visualisationCouldNotBeInitialised.content", visualisation.getName());
 			Alert alert = stageManager.makeExceptionAlert(msg, t);
 			alert.initOwner(stageManager.getCurrent());
 			alert.show();
@@ -290,7 +299,7 @@ public class VisualisationController {
 			} catch (VisualisationParseException parseEx) {
 				LOGGER.warn("Could not parse formula \"{}\" and stopped update of visualisation.", parseEx.getFormula(), parseEx);
 				Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
-						format("visualisation.controller.parse.exception", parseEx.getFormula()),
+						format("visualisation.fx.controller.alerts.formulaCouldNotBeParsed.content", parseEx.getFormula()),
 						ButtonType.OK);
 				alert.initOwner(stageManager.getCurrent());
 				alert.show();
@@ -322,7 +331,7 @@ public class VisualisationController {
 					listener.variablesChanged(formulaValues);
 				} catch (Throwable e) {
 					Alert alert = stageManager.makeExceptionAlert(
-						format("visualisation.controller.listener.exception", String.join(" ", formulas)), e);
+						format("visualisation.fx.controller.alerts.formulaListenerException.content", String.join(" ", formulas)), e);
 					alert.initOwner(stageManager.getCurrent());
 					alert.show();
 					LOGGER.warn("Exception while calling the formula listener for the formulas:\n\"" +
@@ -339,7 +348,7 @@ public class VisualisationController {
 					eventListenerMap.get(lastEvent).eventExcecuted();
 				} catch (Throwable ex) {
 					Alert alert = stageManager.makeExceptionAlert(
-							format("visualisation.controller.listener.event.exception", lastEvent), ex);
+							format("visualisation.fx.controller.alerts.formulaEventListenerException.content", lastEvent), ex);
 					alert.initOwner(stageManager.getCurrent());
 					alert.show();
 					LOGGER.warn("Exception while calling the event listener for the event \"{}\".", lastEvent, ex);
@@ -350,7 +359,7 @@ public class VisualisationController {
 
 	private void createVisualisationTab() {
 		visualisationTab = new Tab(visualisation.get().getName(), getPlaceHolderContent(
-				format("visualisation.controller.initialized", currentMachine.get().getName())));
+				format("common.notInitialised", currentMachine.get().getName())));
 		visualisationTab.setClosable(false);
 		tabPane.getTabs().add(visualisationTab);
 		tabPane.getSelectionModel().select(visualisationTab);
@@ -381,7 +390,7 @@ public class VisualisationController {
 			visualizationStage = null;
 		});
 		visualizationStage.show();
-		visualisationTab.setContent(getPlaceHolderContent(bundle.getString("visualisation.controller.detached")));
+		visualisationTab.setContent(getPlaceHolderContent(bundle.getString("visualisation.fx.controller.visualisationDetached")));
 		detached.set(true);
 	}
 
@@ -405,13 +414,6 @@ public class VisualisationController {
 			start = Arrays.asList(machines).contains(machineName);
 		}
 		return start;
-	}
-
-	private void showAlert(Alert.AlertType type, String content, ButtonType... buttons) {
-		Alert alert = stageManager.makeAlert(type, content, buttons);
-		alert.setTitle(bundle.getString("menu.visualisation"));
-		alert.initOwner(stageManager.getCurrent());
-		alert.show();
 	}
 
 	private String format(String key, Object... args) {

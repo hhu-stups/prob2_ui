@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -17,19 +19,13 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.translator.types.BObject;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.fx.exception.VisualisationParseException;
-
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Christoph Heinzen
@@ -279,9 +275,9 @@ public class VisualisationModel {
 			}
 			return null;
 		} catch (EvaluationException | VisualisationParseException evalException) {
-			Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
-					String.format(bundle.getString("visualisation.model.eval"), formula, evalException.getMessage()),
-					ButtonType.OK);
+			Alert alert = stageManager.makeExceptionAlert(
+					String.format(bundle.getString("visualisation.fx.model.alerts.evaluationException.content"), formula, evalException.getMessage()),
+					evalException);
 			alert.initOwner(stageManager.getCurrent());
 			alert.show();
 			LOGGER.warn("EvaluationException while evaluating the formula \"" + formula +"\".", evalException);

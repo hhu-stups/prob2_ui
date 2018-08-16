@@ -75,9 +75,9 @@ public class VisualisationView extends AnchorPane {
 			if(to == null) {
 				placeholderLabel.setText(bundle.getString("common.noModelLoaded"));
 			} else if (currentTrace.getCurrentState().isInitialised()) {
-				placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.noAnimationFunction"));
+				placeholderLabel.setText(bundle.getString("visualisation.view.noAnimationFunction"));
 			} else {
-				placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.notInitialised"));
+				placeholderLabel.setText(bundle.getString("common.notInitialised"));
 			}
 		});
 

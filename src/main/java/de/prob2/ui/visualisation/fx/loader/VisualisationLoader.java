@@ -10,6 +10,9 @@ import java.util.ResourceBundle;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.io.Files;
 
 import de.prob2.ui.internal.StageManager;
@@ -17,12 +20,7 @@ import de.prob2.ui.visualisation.fx.Visualisation;
 import de.prob2.ui.visualisation.fx.loader.clazz.InMemoryClassloader;
 import de.prob2.ui.visualisation.fx.loader.clazz.InMemoryCompiler;
 import de.prob2.ui.visualisation.fx.loader.clazz.InMemoryCompilerException;
-
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Christoph Heinzen
@@ -71,18 +69,22 @@ public class VisualisationLoader {
 				return (Visualisation)visualizationClass.getConstructor().newInstance();
 			} else {
 				LOGGER.warn("Class {} does not extend the abstract class Visualisation.", className);
-				showAlert(false, Alert.AlertType.WARNING, "visualisation.loader.no.extend", className);
+				stageManager.makeAlert(Alert.AlertType.WARNING,
+						String.format(
+								bundle.getString("visualisation.fx.loader.alerts.noValidVisualisationClass.content"),
+								className))
+						.showAndWait();
 				return null;
 			}
 		} catch (InMemoryCompilerException e) {
 			LOGGER.warn("Exception while compiling the class \"{}\".", fileName, e);
-			showAlert(true, Alert.AlertType.WARNING, "visualisation.loader.compiler",
-			fileName, e.getCompilerMessage(), ButtonType.OK);
+			stageManager.makeExceptionAlert(
+					String.format(bundle.getString("visualisation.fx.loader.alerts.couldNotCompile.content"), fileName),
+					e).showAndWait();
 			return null;
 		} catch (Exception e) {
 			LOGGER.warn("Exception while loading the visualization:\n{}", fileName, e);
-			showAlert(false, Alert.AlertType.ERROR,
-					"visualisation.loader.exception");
+			stageManager.makeExceptionAlert(bundle.getString("visualisation.fx.loader.alerts.exceptionWhileLoading.content"), e).showAndWait();
 			return null;
 		}
 	}
@@ -127,15 +129,16 @@ public class VisualisationLoader {
 
 			} else {
 				LOGGER.warn("No visualization-class found in jar: {}", fileName);
-				showAlert(false, Alert.AlertType.WARNING,
-						"visualisation.loader.no.class",
-						fileName);
+				stageManager.makeAlert(Alert.AlertType.WARNING,
+						String.format(
+								bundle.getString("visualisation.fx.loader.alerts.noVisualisationClass.content"),
+								className))
+						.showAndWait();
 				return null;
 			}
 		} catch (Exception e) {
 			LOGGER.warn("Exception while loading the visualization:\n{}", fileName, e);
-			showAlert(false, Alert.AlertType.ERROR,
-					"visualisation.loader.exception");
+			stageManager.makeExceptionAlert(bundle.getString("visualisation.fx.loader.alerts.exceptionWhileLoading.content"), e).showAndWait();
 			return null;
 		}
 	}
@@ -144,15 +147,5 @@ public class VisualisationLoader {
 		return visualizationClass != null &&
 				visualizationClass.getSuperclass() != null &&
 				visualizationClass.getSuperclass().equals(Visualisation.class);
-	}
-
-	private void showAlert(boolean resizable, Alert.AlertType type, String key, Object... textParams) {
-		Alert alert = stageManager.makeAlert(type,
-				String.format(bundle.getString(key), textParams),
-				ButtonType.OK);
-		alert.initOwner(stageManager.getCurrent());
-		alert.setTitle(bundle.getString("menu.visualisation"));
-		alert.setResizable(resizable);
-		alert.show();
 	}
 }
