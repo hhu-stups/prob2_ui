@@ -281,20 +281,6 @@ public final class StageManager {
 		this.register(alert);
 		return alert;
 	}
-
-	/**
-	 * Create and register a new alert.
-	 *
-	 * @param alertType
-	 *            the alert type
-	 * @return a new alert
-	 */
-	public Alert makeAlert(final Alert.AlertType alertType) {
-		final Alert alert = new Alert(alertType);
-		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-		this.register(alert);
-		return alert;
-	}
 	
 	public Alert makeExceptionAlert(final Throwable exc, final String contentBundleKey, final Object... contentParams) {
 		return new ExceptionAlert(this.injector, String.format(bundle.getString(contentBundleKey), contentParams), exc);
