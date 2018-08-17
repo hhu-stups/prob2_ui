@@ -155,7 +155,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@FXML
 	private void save() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("table.expressionTableView.fileChooser.saveAsCSV.title"));
+		fileChooser.setTitle(bundle.getString("common.fileChooser.saveAsCSV.title"));
 		File file = fileChooser.showSaveDialog(new Stage());
 		if(file == null || currentTable == null) {
 			return;

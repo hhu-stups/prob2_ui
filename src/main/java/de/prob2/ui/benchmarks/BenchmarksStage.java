@@ -222,7 +222,7 @@ public class BenchmarksStage extends Stage {
 	@FXML
 	private void save() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("benchmarks.stage.fileChooser.saveAsCSV.title"));
+		fileChooser.setTitle(bundle.getString("common.fileChooser.saveAsCSV.title"));
 		File file = fileChooser.showSaveDialog(new Stage());
 		if(file == null) {
 			return;
