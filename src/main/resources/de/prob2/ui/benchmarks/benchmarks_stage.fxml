@@ -42,7 +42,7 @@
 						<Button fx:id="addButton" styleClass="button-blue" text="%common.buttons.add" onAction="#handleAdd"/>
 						<Label fx:id="lbExecFrequency" text="%benchmarks.stage.frequency"/>
 						<TextField fx:id="tfExecFrequency"/>
-						<Button fx:id="executeButton" styleClass="button-blue" text="%commonn.buttons.execute" onAction="#handleExecute"/>
+						<Button fx:id="executeButton" styleClass="button-blue" text="%common.buttons.execute" onAction="#handleExecute"/>
 						<TableView fx:id="benchmarksChoiceTableView" VBox.vgrow="ALWAYS">
 							<columnResizePolicy>
 								<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
