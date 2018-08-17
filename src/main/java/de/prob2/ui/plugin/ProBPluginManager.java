@@ -298,9 +298,9 @@ public class ProBPluginManager {
 				InvalidPlugin invPlug = (InvalidPlugin) pluginWrapper.getPlugin();
 				Alert alert;
 				if (invPlug.getException() != null) {
-					alert = stageManager.makeExceptionAlert(invPlug.getMessage(), invPlug.getException());
+					alert = stageManager.makeExceptionAlert(invPlug.getException(), invPlug.getMessageBundleKey(), invPlug.getPluginClassName());
 				} else {
-					alert = stageManager.makeAlert(Alert.AlertType.WARNING, invPlug.getMessage(), ButtonType.OK);
+					alert = stageManager.makeAlert(Alert.AlertType.WARNING, String.format(bundle.getString(invPlug.getMessageBundleKey()), invPlug.getPluginClassName()), ButtonType.OK);
 				}
 				alert.initOwner(stageManager.getCurrent());
 				alert.initModality(Modality.APPLICATION_MODAL);
@@ -450,9 +450,8 @@ public class ProBPluginManager {
 					pluginClass = pluginWrapper.getPluginClassLoader().loadClass(pluginClassName);
 				} catch (ClassNotFoundException e) {
 					LOGGER.error(e.getMessage(), e);
-					return new InvalidPlugin(pluginWrapper,
-							String.format(bundle.getString("plugin.invalidPlugin.message.couldNotFindPluginClass"), pluginClassName),
-							e);
+					return new InvalidPlugin(pluginWrapper, "plugin.invalidPlugin.message.couldNotFindPluginClass",
+							pluginClassName, e);
 				}
 
 				// once we have the clazz, we can do some checks on it to ensure
@@ -462,7 +461,7 @@ public class ProBPluginManager {
 						|| (!ProBPlugin.class.isAssignableFrom(pluginClass))) {
 					LOGGER.error("The plugin clazz '{}' is not a valid ProBPlugin", pluginClassName);
 					return new InvalidPlugin(pluginWrapper,
-							String.format(bundle.getString("plugin.invalidPlugin.message.notAValidPluginClass"), pluginClassName));
+							"plugin.invalidPlugin.message.notAValidPluginClass", pluginClassName);
 				}
 
 				// create the ProBPlugin instance
@@ -472,9 +471,8 @@ public class ProBPluginManager {
 					return (ProBPlugin) constructor.newInstance(pluginWrapper, ProBPluginManager.this, proBPluginHelper);
 				} catch (Exception e) {
 					LOGGER.error(e.getMessage(), e);
-					return new InvalidPlugin(pluginWrapper,
-							String.format(bundle.getString("plugin.invalidPlugin.message.couldNotCreateInstance"), pluginClassName),
-							e);
+					return new InvalidPlugin(pluginWrapper, "plugin.invalidPlugin.message.couldNotCreateInstance",
+							pluginClassName, e);
 
 				}
 			};

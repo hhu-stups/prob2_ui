@@ -78,10 +78,8 @@ public class ProB2 extends Application {
 			Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
 				LOGGER.error("Uncaught exception on thread {}", thread, exc);
 				Platform.runLater(() -> {
-					final String message = String.format(
-							bundle.getString("common.alerts.internalException.content"),
+					final Alert alert = stageManager.makeExceptionAlert(exc, "common.alerts.internalException.content",
 							thread);
-					final Alert alert = stageManager.makeExceptionAlert(message, exc);
 					alert.setHeaderText(bundle.getString("common.alerts.internalException.header"));
 					alert.show();
 				});

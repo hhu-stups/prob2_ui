@@ -262,10 +262,10 @@ public class FullValueStage extends Stage {
 			out.write(value);
 		} catch (FileNotFoundException e) {
 			LOGGER.error("Could not open file for writing", e);
-			stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotWriteFile.content"), selected), e).showAndWait();
+			stageManager.makeExceptionAlert(e, "common.alerts.couldNotWriteFile.content", selected).showAndWait();
 		} catch (IOException e) {
 			LOGGER.error("Failed to save value to file", e);
-			stageManager.makeExceptionAlert(String.format(bundle.getString("common.alerts.couldNotSaveFile.content"), selected), e).showAndWait();
+			stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", selected).showAndWait();
 		}
 	}
 }

@@ -78,13 +78,12 @@ public class VisualisationLoader {
 			}
 		} catch (InMemoryCompilerException e) {
 			LOGGER.warn("Exception while compiling the class \"{}\".", fileName, e);
-			stageManager.makeExceptionAlert(
-					String.format(bundle.getString("visualisation.fx.loader.alerts.couldNotCompile.content"), fileName),
-					e).showAndWait();
+			stageManager.makeExceptionAlert(e, "visualisation.fx.loader.alerts.couldNotCompile.content", fileName)
+					.showAndWait();
 			return null;
 		} catch (Exception e) {
 			LOGGER.warn("Exception while loading the visualization:\n{}", fileName, e);
-			stageManager.makeExceptionAlert(bundle.getString("visualisation.fx.loader.alerts.exceptionWhileLoading.content"), e).showAndWait();
+			stageManager.makeExceptionAlert(e, "visualisation.fx.loader.alerts.exceptionWhileLoading.content").showAndWait();
 			return null;
 		}
 	}
@@ -138,7 +137,7 @@ public class VisualisationLoader {
 			}
 		} catch (Exception e) {
 			LOGGER.warn("Exception while loading the visualization:\n{}", fileName, e);
-			stageManager.makeExceptionAlert(bundle.getString("visualisation.fx.loader.alerts.exceptionWhileLoading.content"), e).showAndWait();
+			stageManager.makeExceptionAlert(e, "visualisation.fx.loader.alerts.exceptionWhileLoading.content").showAndWait();
 			return null;
 		}
 	}

@@ -1,6 +1,5 @@
 package de.prob2.ui.plugin;
 
-import com.google.inject.Injector;
 import org.pf4j.Plugin;
 import org.pf4j.PluginException;
 import org.pf4j.PluginManager;
@@ -8,7 +7,7 @@ import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ResourceBundle;
+import com.google.inject.Injector;
 
 /**
  * This class will be extended by all plug-ins and
@@ -71,11 +70,8 @@ public abstract class ProBPlugin extends Plugin {
 				started = true;
 			} catch (Exception ex) {
 				LOGGER.warn("Exception while starting the plug-in " + getName(), ex);
-				getProBPluginHelper().getStageManager().makeExceptionAlert(
-						String.format(
-								getInjector().getInstance(ResourceBundle.class).getString("plugin.alerts.couldNotStartPlugin.content"),
-								getName()),
-						ex).show();
+				getProBPluginHelper().getStageManager()
+						.makeExceptionAlert(ex, "plugin.alerts.couldNotStartPlugin.content", getName()).show();
 			}
 		}
 	}
@@ -88,11 +84,8 @@ public abstract class ProBPlugin extends Plugin {
 				started = false;
 			} catch (Exception ex) {
 				LOGGER.warn("Exception while stopping the plug-in " + getName(), ex);
-				getProBPluginHelper().getStageManager().makeExceptionAlert(
-						String.format(
-								getInjector().getInstance(ResourceBundle.class).getString("plugin.alerts.couldNotStopPlugin.content"),
-								getName()),
-						ex).show();
+				getProBPluginHelper().getStageManager()
+						.makeExceptionAlert(ex, "plugin.alerts.couldNotStopPlugin.content", getName()).show();
 			}
 		}
 	}

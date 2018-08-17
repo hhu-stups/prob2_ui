@@ -117,7 +117,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 				LOGGER.error("Table visualization failed", e);
 				currentThread.set(null);
 				Platform.runLater(() -> {
-					stageManager.makeExceptionAlert(bundle.getString("table.expressionTableView.alerts.visualisationNotPossible.message"), e).show();
+					stageManager.makeExceptionAlert(e, "table.expressionTableView.alerts.visualisationNotPossible.message").show();
 					reset();
 				});
 			}

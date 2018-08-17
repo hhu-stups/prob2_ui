@@ -250,7 +250,7 @@ public class TraceChecker {
 
 				}
 			} catch (BCompoundException e) {
-				Platform.runLater(() -> stageManager.makeExceptionAlert("", e.getFirstException()).showAndWait());
+				Platform.runLater(() -> stageManager.makeExceptionAlert(e.getFirstException(), "common.alerts.internalException.content").showAndWait());
 				return false;
 			}
 		}

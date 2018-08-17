@@ -16,17 +16,18 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.machines.Machine;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
@@ -49,9 +50,6 @@ import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W
@@ -296,10 +294,6 @@ public final class StageManager {
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		this.register(alert);
 		return alert;
-	}
-
-	public Alert makeExceptionAlert(final String contentText, final Throwable exc) {
-		return new ExceptionAlert(this.injector, contentText, exc);
 	}
 	
 	public Alert makeExceptionAlert(final Throwable exc, final String contentBundleKey, final Object... contentParams) {

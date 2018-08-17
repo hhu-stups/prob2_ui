@@ -224,7 +224,7 @@ public class MachinesTab extends Tab {
 			Files.write(path, Arrays.asList("MACHINE " + machineName, "END"));
 		} catch (IOException e) {
 			LOGGER.error("Could not create machine file", e);
-			stageManager.makeExceptionAlert(bundle.getString("project.machines.machinesTab.alerts.couldNotCreateMachine.content"), e);
+			stageManager.makeExceptionAlert(e, "project.machines.machinesTab.alerts.couldNotCreateMachine.content");
 			return;
 		}
 		final Path relative = currentProject.getLocation().relativize(selected.toPath());

@@ -64,7 +64,7 @@ public class VisualisationView extends AnchorPane {
 				}
 			} catch (FileNotFoundException e) {
 				LOGGER.warn("Failed to open images for visualisation", e);
-				Alert alert = stageManager.makeExceptionAlert(bundle.getString("visualisation.view.alerts.visualisationNotPossible.content"), e);
+				Alert alert = stageManager.makeExceptionAlert(e,"visualisation.view.alerts.visualisationNotPossible.content");
 				alert.setHeaderText(bundle.getString("visualisation.view.alerts.visualisationNotPossible.header"));
 				alert.showAndWait();
 			}

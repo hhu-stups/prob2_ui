@@ -393,7 +393,7 @@ public final class HistoryChartStage extends Stage {
 					return Integer.parseInt(value);
 				} catch (NumberFormatException e) {
 					if (showErrors) {
-						Alert alert = stageManager.makeExceptionAlert(bundle.getString("chart.historyChart.alerts.formulaEvalError.invalidInteger.content"), e);
+						Alert alert = stageManager.makeExceptionAlert(e, "chart.historyChart.alerts.formulaEvalError.invalidInteger.content");
 						alert.setHeaderText(bundle.getString("chart.historyChart.alerts.formulaEvalError.header"));
 						alert.show();
 					}
