@@ -53,7 +53,7 @@ public abstract class AbstractResultHandler {
 		if(resultItem == null || item.getChecked() == Checked.SUCCESS) {
 			return;
 		}
-		Alert alert = new Alert(
+		Alert alert = stageManager.makeAlert(
 				resultItem.getChecked().equals(Checked.SUCCESS) ? AlertType.INFORMATION : AlertType.ERROR,
 				resultItem.getMessage());
 		alert.setTitle(item.getName());

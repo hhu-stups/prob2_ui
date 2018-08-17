@@ -101,7 +101,7 @@ public class BenchmarksStage extends Stage {
 		this.bundle = bundle;
 		this.identifiers = new ArrayList<>();
 		this.valueTextFields = new ArrayList<>();
-		stageManager.loadFXML(this, "benchmarks_view.fxml");
+		stageManager.loadFXML(this, "benchmarks_stage.fxml");
 	}
 
 	@FXML
@@ -115,7 +115,7 @@ public class BenchmarksStage extends Stage {
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> reset());
 		benchmarksChoiceTableView.setRowFactory(table -> {
 			final TableRow<BenchmarkItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(bundle.getString("benchmarks.remove"));
+			MenuItem removeItem = new MenuItem(bundle.getString("common.contextMenu.delete"));
 			removeItem.setOnAction(e -> {
 				BenchmarkItem currentItem = benchmarksChoiceTableView.getSelectionModel().getSelectedItem();
 				benchmarksChoiceTableView.getItems().remove(currentItem);
@@ -222,7 +222,7 @@ public class BenchmarksStage extends Stage {
 	@FXML
 	private void save() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("benchmarks.csv"));
+		fileChooser.setTitle(bundle.getString("common.fileChooser.saveAsCSV.title"));
 		File file = fileChooser.showSaveDialog(new Stage());
 		if(file == null) {
 			return;
