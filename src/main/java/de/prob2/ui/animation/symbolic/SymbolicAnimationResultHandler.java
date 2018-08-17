@@ -19,6 +19,7 @@ import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
@@ -38,11 +39,14 @@ public class SymbolicAnimationResultHandler {
 	protected ArrayList<Class<?>> success;
 	protected ArrayList<Class<?>> error;
 	protected ArrayList<Class<?>> interrupted;
+
+	private final StageManager stageManager;
 	
 	@Inject
-	public SymbolicAnimationResultHandler(final ResourceBundle bundle, final CurrentTrace currentTrace) {
+	public SymbolicAnimationResultHandler(final ResourceBundle bundle, final CurrentTrace currentTrace, final StageManager stageManager) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
+		this.stageManager = stageManager;
 		this.success = new ArrayList<>();
 		this.error = new ArrayList<>();
 		this.interrupted = new ArrayList<>();
@@ -136,10 +140,9 @@ public class SymbolicAnimationResultHandler {
 	}
 	
 	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		Alert alert = stageManager.makeAlert(AlertType.INFORMATION, String.format("Declared %s already exists", bundle.getString(itemType.getKey())));
 		alert.setTitle(String.format("%s already exists", bundle.getString(itemType.getKey())));
 		alert.setHeaderText(String.format("%s already exists", bundle.getString(itemType.getKey())));
-		alert.setContentText(String.format("Declared %s already exists", bundle.getString(itemType.getKey())));
 		alert.showAndWait();
 	}
 	
@@ -148,7 +151,7 @@ public class SymbolicAnimationResultHandler {
 		if(resultItem == null || item.getChecked() == Checked.SUCCESS) {
 			return;
 		}
-		Alert alert = new Alert(
+		Alert alert = stageManager.makeAlert(
 				resultItem.getChecked().equals(Checked.SUCCESS) ? AlertType.INFORMATION : AlertType.ERROR,
 				resultItem.getMessage());
 		alert.setTitle(item.getName());
