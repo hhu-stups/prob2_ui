@@ -247,7 +247,7 @@ public class TraceChecker {
 
 				}
 			} catch (BCompoundException e) {
-				Platform.runLater(() -> stageManager.makeExceptionAlert(e.getFirstException(), "animation.tracereplay.traceChecker.alerts.traceReplayError.content").showAndWait());
+				Platform.runLater(() -> stageManager.makeExceptionAlert(e.getFirstException(), "animation.tracereplay.traceChecker.alerts.traceReplayError.header", "animation.tracereplay.traceChecker.alerts.traceReplayError.content").showAndWait());
 				return false;
 			}
 		}

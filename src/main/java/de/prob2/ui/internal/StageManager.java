@@ -286,6 +286,12 @@ public final class StageManager {
 		return new ExceptionAlert(this.injector, String.format(bundle.getString(contentBundleKey), contentParams), exc);
 	}
 	
+	public Alert makeExceptionAlert(final Throwable exc, final String headerBundleKey, final String contentBundleKey, final Object... contentParams) {
+		Alert alert = makeExceptionAlert(exc, String.format(bundle.getString(contentBundleKey), contentParams));
+		alert.setHeaderText(bundle.getString(headerBundleKey));
+		return alert;
+	}
+	
 	/**
 	 * Show a {@link FileChooser} to ask the user to select a ProB file.
 	 * 

@@ -12,7 +12,6 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
@@ -64,9 +63,8 @@ public class VisualisationView extends AnchorPane {
 				}
 			} catch (FileNotFoundException e) {
 				LOGGER.warn("Failed to open images for visualisation", e);
-				Alert alert = stageManager.makeExceptionAlert(e,"visualisation.view.alerts.visualisationNotPossible.content");
-				alert.setHeaderText(bundle.getString("visualisation.view.alerts.visualisationNotPossible.header"));
-				alert.showAndWait();
+				stageManager.makeExceptionAlert(e, "visualisation.view.alerts.visualisationNotPossible.header",
+						"visualisation.view.alerts.visualisationNotPossible.content").showAndWait();
 			}
 
 		});
