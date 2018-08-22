@@ -87,23 +87,20 @@ public class TraceChecker {
 			Alert alert;
 			if (exception instanceof NoSuchFileException || exception instanceof FileNotFoundException) {
 				alert = stageManager.makeAlert(AlertType.ERROR,
-						"The trace file " + path + " could not be found.\n"
-								+ "The file was probably moved, renamed or deleted.\n\n"
-								+ "Would you like to remove this trace from the project?",
+						String.format(bundle.getString("animation.tracereplay.traceChecker.alerts.fileNotFound.content"), path),
 						ButtonType.YES, ButtonType.NO);
+				alert.setHeaderText(bundle.getString("animation.tracereplay.traceChecker.alerts.fileNotFound.header"));
 			} else if (exception instanceof InvalidFileFormatException) {
 				alert = stageManager.makeAlert(AlertType.ERROR,
-						"The file " + path + " does not contain a valid trace file.\n"
-								+ "Every trace must contain a (possibly empty) transition list.\n\n"
-								+ "Would you like to remove this file from the project?",
+						String.format(bundle.getString("animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content"), path),
 						ButtonType.YES, ButtonType.NO);
+				alert.setHeaderText(bundle.getString("animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header"));
 			} else {
 				alert = stageManager.makeAlert(AlertType.ERROR,
-						"The trace file " + path + " could not be loaded.\n\n"
-								+ "Would you like to remove this trace from the project?",
+						String.format(bundle.getString("animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content"), path),
 						ButtonType.YES, ButtonType.NO);
+				alert.setHeaderText(bundle.getString("animation.tracereplay.traceChecker.alerts.traceReplayError.header"));
 			}
-			alert.setHeaderText("Trace Replay Error");
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 				Machine currentMachine = currentProject.getCurrentMachine();
@@ -198,7 +195,7 @@ public class TraceChecker {
 				t.getCurrentState().getId(), persistentTransition.getOperationName(), pred, 1);
 		stateSpace.execute(command);
 		if (command.hasErrors()) {
-			String errorMessage = String.format(bundle.getString("verifications.tracereplay.errorMessage"),
+			String errorMessage = String.format(bundle.getString("animation.tracereplay.traceChecker.errorMessage"),
 					persistentTransition.getOperationName(), predicate, Joiner.on(", ").join(command.getErrors()));
 			replayTrace.setErrorMessage(errorMessage);
 			return null;
@@ -206,7 +203,7 @@ public class TraceChecker {
 		List<Transition> possibleTransitions = command.getNewTransitions();
 		if (possibleTransitions.isEmpty()) {
 			String errorMessage = String.format(
-					bundle.getString("verifications.tracereplay.errorMessage.operationNotPossible"),
+					bundle.getString("animation.tracereplay.traceChecker.errorMessage.operationNotPossible"),
 					persistentTransition.getOperationName(), predicate);
 			replayTrace.setErrorMessage(errorMessage);
 			return null;
@@ -240,7 +237,7 @@ public class TraceChecker {
 							if (setCurrentAnimation) {
 								String errorMessage = String.format(
 										bundle.getString(
-												"verifications.tracereplay.errorMessage.mismatchingOutputValues"),
+												"animation.tracereplay.traceChecker.errorMessage.mismatchingOutputValues"),
 										operationName, outputParamName, bValue.toString(), paramValueFromTransition);
 								replayTrace.setErrorMessage(errorMessage);
 							}
@@ -250,7 +247,7 @@ public class TraceChecker {
 
 				}
 			} catch (BCompoundException e) {
-				Platform.runLater(() -> stageManager.makeExceptionAlert(e.getFirstException(), "common.alerts.internalException.content").showAndWait());
+				Platform.runLater(() -> stageManager.makeExceptionAlert(e.getFirstException(), "animation.tracereplay.traceChecker.alerts.traceReplayError.content").showAndWait());
 				return false;
 			}
 		}
@@ -259,7 +256,7 @@ public class TraceChecker {
 
 	private Alert getReplayErrorAlert(String errorMessage) {
 		Alert alert = stageManager.makeAlert(AlertType.ERROR, errorMessage);
-		alert.setHeaderText("Replay Error");
+		alert.setHeaderText("animation.tracereplay.traceChecker.alerts.traceReplayError.header");
 		return alert;
 	}
 
