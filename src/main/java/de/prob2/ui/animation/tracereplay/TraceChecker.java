@@ -99,7 +99,7 @@ public class TraceChecker {
 				alert = stageManager.makeAlert(AlertType.ERROR,
 						String.format(bundle.getString("animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content"), path),
 						ButtonType.YES, ButtonType.NO);
-				alert.setHeaderText(bundle.getString("animation.tracereplay.traceChecker.alerts.traceReplayError.header"));
+				alert.setHeaderText(bundle.getString("animation.tracereplay.alerts.traceReplayError.header"));
 			}
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
@@ -247,7 +247,7 @@ public class TraceChecker {
 
 				}
 			} catch (BCompoundException e) {
-				Platform.runLater(() -> stageManager.makeExceptionAlert(e.getFirstException(), "animation.tracereplay.traceChecker.alerts.traceReplayError.header", "animation.tracereplay.traceChecker.alerts.traceReplayError.content").showAndWait());
+				Platform.runLater(() -> stageManager.makeExceptionAlert(e.getFirstException(), "animation.tracereplay.alerts.traceReplayError.header", "animation.tracereplay.traceChecker.alerts.traceReplayError.content").showAndWait());
 				return false;
 			}
 		}
@@ -256,7 +256,7 @@ public class TraceChecker {
 
 	private Alert getReplayErrorAlert(String errorMessage) {
 		Alert alert = stageManager.makeAlert(AlertType.ERROR, errorMessage);
-		alert.setHeaderText("animation.tracereplay.traceChecker.alerts.traceReplayError.header");
+		alert.setHeaderText("animation.tracereplay.alerts.traceReplayError.header");
 		return alert;
 	}
 

@@ -24,7 +24,7 @@
 					<FontAwesomeIconView styleClass="icon-dark" glyphName="CHECK_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%verifications.common.checkMachine" />
+					<Tooltip text="%animation.tracereplay.view.tooltips.checkMachine" />
 				</tooltip>
 			</Button>
 			<Button fx:id="cancelButton" onAction="#cancel" disable="true">
@@ -41,7 +41,7 @@
 					<FontAwesomeIconView styleClass="icon-dark" glyphName="FOLDER_OPEN" glyphSize="${fontSize.fontSize + 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%verifications.tracereplay.loadTrace" />
+					<Tooltip text="%animation.tracereplay.view.tooltips.loadTrace" />
 				</tooltip>
 			</Button>
 			<HelpButton fx:id="helpButton" />
@@ -52,11 +52,11 @@
 			</columnResizePolicy>
 			<columns>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
-				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.status" />
-				<TableColumn fx:id="nameColumn" text="%verifications.common.columns.name" />
+				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%animation.tracereplay.view.columns.status" />
+				<TableColumn fx:id="nameColumn" text="%animation.tracereplay.view.columns.name" />
 			</columns>
 			<placeholder>
-				<Label text="%verifications.tracereplay.placeholder" />
+				<Label text="%animation.tracereplay.view.placeholder" />
 			</placeholder>
 		</TableView>
 	</VBox>

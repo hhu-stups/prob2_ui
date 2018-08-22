@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public class TraceSaver {
 	private static final Charset TRACE_CHARSET = Charset.forName("UTF-8");
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceSaver.class);
-	private static final String TRACE_FILE_ENDING = ".prob2trace";
+	private static final String TRACE_FILE_ENDING = "*.prob2trace";
 
 	private final Gson gson;
 	private final CurrentProject currentProject;
@@ -51,10 +51,13 @@ public class TraceSaver {
 
 	public void saveTrace(PersistentTrace trace, Machine machine) {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceSaver.dialog.title"));
+		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		fileChooser.setInitialFileName(machine.getName() + TRACE_FILE_ENDING);
-		fileChooser.getExtensionFilters().add(new ExtensionFilter("ProB2 Traces (*" + TRACE_FILE_ENDING + ")", "*" + TRACE_FILE_ENDING));
+		fileChooser.getExtensionFilters()
+				.add(new ExtensionFilter(
+						String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_ENDING),
+						TRACE_FILE_ENDING));
 		File file = fileChooser.showSaveDialog(stageManager.getCurrent());
 		
 		if(file != null) {
