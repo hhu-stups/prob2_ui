@@ -140,9 +140,12 @@ public class SymbolicAnimationResultHandler {
 	}
 	
 	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
-		Alert alert = stageManager.makeAlert(AlertType.INFORMATION, String.format("Declared %s already exists", bundle.getString(itemType.getKey())));
-		alert.setTitle(String.format("%s already exists", bundle.getString(itemType.getKey())));
-		alert.setHeaderText(String.format("%s already exists", bundle.getString(itemType.getKey())));
+		Alert alert = stageManager.makeAlert(AlertType.INFORMATION,
+				String.format(bundle.getString("verifications.abstractResultHandler.alerts.alreadyExists.content"),
+						bundle.getString(itemType.getKey())));
+		alert.setHeaderText(
+				String.format(bundle.getString("verifications.abstractResultHandler.alerts.alreadyExists.header"),
+						bundle.getString(itemType.getKey())));
 		alert.showAndWait();
 	}
 	
