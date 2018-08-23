@@ -16,9 +16,6 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -62,7 +59,6 @@ public final class StageManager {
 		PERSISTENCE_ID, USE_GLOBAL_MAC_MENU_BAR
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(StageManager.class);
 	private static final String STYLESHEET = "prob.css";
 	private static final Image ICON = new Image("prob_128.png");
 	private static final String PROJECT_FILE_ENDING = "*.prob2project";

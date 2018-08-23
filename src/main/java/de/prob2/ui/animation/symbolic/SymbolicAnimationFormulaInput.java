@@ -98,29 +98,27 @@ public class SymbolicAnimationFormulaInput extends VBox {
 			SymbolicAnimationType animationType = injector.getInstance(SymbolicAnimationChoosingStage.class).getAnimationType();
 			SymbolicAnimationFormulaItem formulaItem = null;
 			addFormula(true);
-			switch(animationType) {
-				case DEADLOCK: 
-					symbolicAnimationFormulaHandler.handleDeadlock(predicateBuilderView.getPredicate(), false); 
-					break;
-				case SEQUENCE:
-					symbolicAnimationFormulaHandler.handleSequence(tfFormula.getText(), false); 
-					break;
-				case FIND_DEADLOCK: 
-					symbolicAnimationFormulaHandler.findDeadlock(false); 
-					break;
-				case FIND_VALID_STATE:
-					formulaItem = new SymbolicAnimationFormulaItem(predicateBuilderView.getPredicate(), SymbolicAnimationType.FIND_VALID_STATE);
-					symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
-					break;
-				default:
-					formulaItem = new SymbolicAnimationFormulaItem(animationType.name(), animationType);
-					switch(animationType) {
-						case FIND_REDUNDANT_INVARIANTS: 
-							symbolicAnimationFormulaHandler.findRedundantInvariants(formulaItem, false); 
-							break;
-					default:
-						break;
-				}
+			switch (animationType) {
+			case DEADLOCK:
+				symbolicAnimationFormulaHandler.handleDeadlock(predicateBuilderView.getPredicate(), false);
+				break;
+			case SEQUENCE:
+				symbolicAnimationFormulaHandler.handleSequence(tfFormula.getText(), false);
+				break;
+			case FIND_DEADLOCK:
+				symbolicAnimationFormulaHandler.findDeadlock(false);
+				break;
+			case FIND_VALID_STATE:
+				formulaItem = new SymbolicAnimationFormulaItem(predicateBuilderView.getPredicate(),
+						SymbolicAnimationType.FIND_VALID_STATE);
+				symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
+				break;
+			case FIND_REDUNDANT_INVARIANTS:
+				formulaItem = new SymbolicAnimationFormulaItem(animationType.name(), animationType);
+				symbolicAnimationFormulaHandler.findRedundantInvariants(formulaItem, false);
+				break;
+			default:
+				break;
 			}
 			injector.getInstance(SymbolicAnimationChoosingStage.class).close();
 		});

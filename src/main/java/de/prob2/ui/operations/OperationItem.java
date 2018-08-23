@@ -25,7 +25,10 @@ public class OperationItem {
 	public enum Status {
 		DISABLED, ENABLED, TIMEOUT
 	}
-
+	
+	private final static String SETUP_CONSTANTS = "$setup_constants";
+	private final static String INITIALISE_MACHINE = "$initialise_machine";
+	
 	private final Trace trace;
 	private final Transition transition;
 	private final String name;
@@ -91,12 +94,12 @@ public class OperationItem {
 		final Map<String, String> constants;
 		final Map<String, String> variables;
 		switch (transition.getName()) {
-		case "$setup_constants":
+		case SETUP_CONSTANTS:
 			constants = getNextStateValues(transition, getConstantsAsTruncatedEvalElements(stateSpace));
 			variables = Collections.emptyMap();
 			break;
 
-		case "$initialise_machine":
+		case INITIALISE_MACHINE:
 			variables = getNextStateValues(transition, getVariablesAsTruncatedEvalElements(stateSpace));
 			constants = Collections.emptyMap();
 			break;
@@ -207,10 +210,10 @@ public class OperationItem {
 
 	private static String getPrettyName(final String name) {
 		switch (name) {
-		case "$setup_constants":
+		case SETUP_CONSTANTS:
 			return "SETUP_CONSTANTS";
 
-		case "$initialise_machine":
+		case INITIALISE_MACHINE:
 			return "INITIALISATION";
 
 		default:
@@ -235,7 +238,7 @@ public class OperationItem {
 			}
 		}
 
-		if (this.name.equals("$setup_constants") || this.name.equals("$initialise_machine")) {
+		if (this.name.equals(SETUP_CONSTANTS) || this.name.equals(INITIALISE_MACHINE)) {
 			this.getConstants().forEach((key, value) -> args.add(key + ":=" + value));
 			this.getVariables().forEach((key, value) -> args.add(key + ":=" + value));
 		}

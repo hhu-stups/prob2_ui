@@ -112,11 +112,11 @@ public class SymbolicAnimationResultHandler {
 		} else {
 			handleItem(item, Checked.INTERRUPTED);
 		}
-		CheckingResultItem resultItem = handleFormulaResult(result, stateid);
+		CheckingResultItem resultItem = handleFormulaResult(result);
 		item.setResultItem(resultItem);
 	}
 	
-	public CheckingResultItem handleFormulaResult(Object result, State stateid) {
+	public CheckingResultItem handleFormulaResult(Object result) {
 		CheckingResultItem resultItem = null;
 		if(success.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.SUCCESS, String.format(bundle.getString("verifications.result.succeeded"), bundle.getString("verifications.abstractResultHandler.itemType.formula")), "Success");

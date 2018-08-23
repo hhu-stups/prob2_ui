@@ -259,9 +259,9 @@ public class VisualisationController {
 			}
 			try {
 				visualisation.get().stop();
-			} catch (Throwable t) {
+			} catch (Exception e) {
 				LOGGER.debug("Could not stop visualisation!");
-				Alert alert = stageManager.makeExceptionAlert(t, "visualisation.fx.controller.alerts.visualisationCouldNotBeStopped.content", visualisation.get().getName());
+				Alert alert = stageManager.makeExceptionAlert(e, "visualisation.fx.controller.alerts.visualisationCouldNotBeStopped.content", visualisation.get().getName());
 				alert.initOwner(stageManager.getCurrent());
 				alert.show();
 			}
@@ -278,11 +278,11 @@ public class VisualisationController {
 	public void initVisualisation(Visualisation visualisation) {
 		try {
 			setVisualisationContent(visualisation.initialize());
-		} catch (Throwable t) {
-			Alert alert = stageManager.makeExceptionAlert(t, "visualisation.fx.controller.alerts.visualisationCouldNotBeInitialised.content", visualisation.getName());
+		} catch (Exception e) {
+			Alert alert = stageManager.makeExceptionAlert(e, "visualisation.fx.controller.alerts.visualisationCouldNotBeInitialised.content", visualisation.getName());
 			alert.initOwner(stageManager.getCurrent());
 			alert.show();
-			LOGGER.warn("Exception during the initialisation of the visualisation \"{}\"", visualisation.getName(), t);
+			LOGGER.warn("Exception during the initialisation of the visualisation \"{}\"", visualisation.getName(), e);
 			stopVisualisation();
 		}
 	}
@@ -327,7 +327,7 @@ public class VisualisationController {
 				LOGGER.debug("Call listener for formulas: {}", (Object)formulas);
 				try {
 					listener.variablesChanged(formulaValues);
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					Alert alert = stageManager.makeExceptionAlert(e,
 							"visualisation.fx.controller.alerts.formulaListenerException.content",
 							String.join(" ", formulas));
@@ -345,12 +345,12 @@ public class VisualisationController {
 				LOGGER.info("Last executed event is \"{}\". Call corresponding listener.", lastEvent);
 				try {
 					eventListenerMap.get(lastEvent).eventExcecuted();
-				} catch (Throwable ex) {
-					Alert alert = stageManager.makeExceptionAlert(ex, 
+				} catch (Exception e) {
+					Alert alert = stageManager.makeExceptionAlert(e, 
 							"visualisation.fx.controller.alerts.formulaEventListenerException.content", lastEvent);
 					alert.initOwner(stageManager.getCurrent());
 					alert.show();
-					LOGGER.warn("Exception while calling the event listener for the event \"{}\".", lastEvent, ex);
+					LOGGER.warn("Exception while calling the event listener for the event \"{}\".", lastEvent, e);
 				}
 			}
 		}

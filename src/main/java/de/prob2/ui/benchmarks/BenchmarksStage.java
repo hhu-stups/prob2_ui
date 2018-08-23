@@ -203,7 +203,7 @@ public class BenchmarksStage extends Stage {
 			List<Transition> nextTransitions = currentTrace.getCurrentState().getOutTransitions().stream()
 					.filter(out -> item.getOperation().getTransition().getName().equals(out.getName()))
 					.collect(Collectors.toList());
-			if(nextTransitions.size() > 0) {
+			if(!nextTransitions.isEmpty()) {
 				Transition nextTransition = nextTransitions.get(0);
 				String name = nextTransition.getName();
 				List<String> parameters = nextTransition.getParameterValues();

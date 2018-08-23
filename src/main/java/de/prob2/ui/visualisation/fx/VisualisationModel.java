@@ -241,9 +241,9 @@ public class VisualisationModel {
 			IEvalElement parsedFormula = model.parseFormula(formula, FormulaExpand.EXPAND);
 			parsedFormulas.put(formula, parsedFormula);
 			return parsedFormula;
-		} catch (Throwable t) {
-			LOGGER.warn("Could not parse formula \"{}\".", formula, t);
-			throw new VisualisationParseException(formula, t);
+		} catch (Exception e) {
+			LOGGER.warn("Could not parse formula \"{}\".", formula, e);
+			throw new VisualisationParseException(formula, e);
 		}
 	}
 
