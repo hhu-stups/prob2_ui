@@ -45,7 +45,7 @@ This submenu provides a Groovy console and allows you to manage your plugins and
 
 ![Window Menu](../screenshots/Menu/Window.png)
 
-The Window submenu allows you to change perspectives and detach components. This UI comes with 3 different preset perspectives. It allows you to use your own perspective as well by providing a FXML file containing the views but be aware that this might ruin the ability to detach components. [How to create FXML files](Perspectives.md)
+The Window submenu allows you to change perspectives and [detach components](Detaching of Components.md). This UI comes with 3 different preset perspectives. It allows you to [use your own perspective](Perspectives.md) as well by providing a FXML file containing the views but be aware that this might ruin the ability to detach components.
 
 ![Help Menu](../screenshots/Menu/Help.png)
 
