@@ -26,8 +26,8 @@ public class OperationItem {
 		DISABLED, ENABLED, TIMEOUT
 	}
 	
-	private final static String SETUP_CONSTANTS = "$setup_constants";
-	private final static String INITIALISE_MACHINE = "$initialise_machine";
+	private static final String SETUP_CONSTANTS = "$setup_constants";
+	private static final String INITIALISE_MACHINE = "$initialise_machine";
 	
 	private final Trace trace;
 	private final Transition transition;

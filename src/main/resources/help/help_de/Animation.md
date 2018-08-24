@@ -1,4 +1,5 @@
 # Animationsansicht
 ## <a id="Trace"> Pfad nachspielen </a>
-## <a id="Symbolic"> Symbolic Animation </a>
-
+![Pfad](../screenshots/Animation/Replay.png)
+## <a id="Symbolic"> Symbolische Animation </a>
+![Symbolisch](../screenshots/Animation/Symbolic.png)
