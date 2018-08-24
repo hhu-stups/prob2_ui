@@ -55,9 +55,9 @@ public abstract class AbstractResultHandler {
 		}
 		Alert alert = stageManager.makeAlert(
 				resultItem.getChecked().equals(Checked.SUCCESS) ? AlertType.INFORMATION : AlertType.ERROR,
-				resultItem.getMessage());
+				resultItem.getHeaderBundleKey(),
+				resultItem.getMessageBundleKey(), resultItem.getMessageParams());
 		alert.setTitle(item.getName());
-		alert.setHeaderText(resultItem.getHeader());
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.showAndWait();
 	}
@@ -65,16 +65,21 @@ public abstract class AbstractResultHandler {
 	public CheckingResultItem handleFormulaResult(Object result, State stateid, List<Trace> traces) {
 		CheckingResultItem resultItem = null;
 		if(success.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.SUCCESS, String.format(bundle.getString("verifications.result.succeeded.message"), bundle.getString(type.getKey())), bundle.getString("verifications.result.succeeded.header"));
+			resultItem = new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header",
+					"verifications.result.succeeded.message", bundle.getString(type.getKey()));
 		} else if(counterExample.contains(result.getClass())) {
 			traces.addAll(handleCounterExample(result, stateid));
-			resultItem = new CheckingResultItem(Checked.FAIL, String.format(bundle.getString("verifications.result.counterExampleFound.message"), bundle.getString(type.getKey())), bundle.getString("verifications.result.counterExampleFound.header"));
+			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header",
+					"verifications.result.counterExampleFound.message", bundle.getString(type.getKey()));
 		} else if(error.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.FAIL, ((IModelCheckingResult) result).getMessage(), bundle.getString("verifications.result.error.header"));
+			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.error.header",
+					"verifications.result.message", ((IModelCheckingResult) result).getMessage());
 		} else if(result instanceof Throwable) {
-			resultItem = new CheckingResultItem(Checked.FAIL, bundle.getString("verifications.result.couldNotParseFormula.message") + " " + result, bundle.getString("verifications.result.couldNotParseFormula.header"));
+			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.couldNotParseFormula.header",
+					"verifications.result.message", result);
 		} else if(interrupted.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.INTERRUPTED, ((IModelCheckingResult) result).getMessage(),  bundle.getString("verifications.result.interrupted.header"));
+			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "verifications.result.interrupted.header",
+					"verifications.result.message", ((IModelCheckingResult) result).getMessage());
 		}
 		return resultItem;
 	}
@@ -83,13 +88,10 @@ public abstract class AbstractResultHandler {
 	
 	
 	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
-		Alert alert = stageManager.makeAlert(AlertType.INFORMATION,
-				String.format(bundle.getString("verifications.abstractResultHandler.alerts.alreadyExists.content"),
-						bundle.getString(itemType.getKey())));
-		alert.setHeaderText(
-				String.format(bundle.getString("verifications.abstractResultHandler.alerts.alreadyExists.header"),
-						bundle.getString(itemType.getKey())));
-		alert.showAndWait();
+		stageManager.makeAlert(AlertType.INFORMATION, 
+				"verifications.abstractResultHandler.alerts.alreadyExists.header",
+				"verifications.abstractResultHandler.alerts.alreadyExists.content", bundle.getString(itemType.getKey()))
+				.showAndWait();
 	}
 	
 	protected void handleItem(AbstractCheckableItem item, Checked checked) {

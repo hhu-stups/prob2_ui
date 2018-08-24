@@ -4,19 +4,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
@@ -29,7 +30,6 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob.translator.Translator;
 import de.prob.translator.types.BObject;
-
 import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -44,9 +44,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Singleton
 public class TraceChecker {
 
@@ -56,19 +53,17 @@ public class TraceChecker {
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
 	private final Map<ReplayTrace, Exception> failedTraceReplays = new HashMap<>();
 
 	@Inject
 	private TraceChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
-			final TraceLoader traceLoader, final StageManager stageManager, final ResourceBundle bundle) {
+			final TraceLoader traceLoader, final StageManager stageManager) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.traceLoader = traceLoader;
 		this.stageManager = stageManager;
-		this.bundle = bundle;
 	}
 
 	void checkAll(List<ReplayTrace> replayTraces) {
@@ -85,21 +80,21 @@ public class TraceChecker {
 		failedTraceReplays.forEach((trace, exception) -> {
 			Path path = trace.getLocation();
 			Alert alert;
+			List<ButtonType> buttons = new ArrayList<>();
+			buttons.add(ButtonType.YES);
+			buttons.add(ButtonType.NO);
 			if (exception instanceof NoSuchFileException || exception instanceof FileNotFoundException) {
-				alert = stageManager.makeAlert(AlertType.ERROR,
-						String.format(bundle.getString("animation.tracereplay.traceChecker.alerts.fileNotFound.content"), path),
-						ButtonType.YES, ButtonType.NO);
-				alert.setHeaderText(bundle.getString("animation.tracereplay.traceChecker.alerts.fileNotFound.header"));
+				alert = stageManager.makeAlert(AlertType.ERROR, buttons,
+						"animation.tracereplay.traceChecker.alerts.fileNotFound.header",
+						"animation.tracereplay.traceChecker.alerts.fileNotFound.content", path);
 			} else if (exception instanceof InvalidFileFormatException) {
-				alert = stageManager.makeAlert(AlertType.ERROR,
-						String.format(bundle.getString("animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content"), path),
-						ButtonType.YES, ButtonType.NO);
-				alert.setHeaderText(bundle.getString("animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header"));
+				alert = stageManager.makeAlert(AlertType.ERROR, buttons,
+						"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header",
+						"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content", path);
 			} else {
-				alert = stageManager.makeAlert(AlertType.ERROR,
-						String.format(bundle.getString("animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content"), path),
-						ButtonType.YES, ButtonType.NO);
-				alert.setHeaderText(bundle.getString("animation.tracereplay.alerts.traceReplayError.header"));
+				alert = stageManager.makeAlert(AlertType.ERROR, buttons,
+						"animation.tracereplay.alerts.traceReplayError.header",
+						"animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content", path);
 			}
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
@@ -157,8 +152,11 @@ public class TraceChecker {
 				trace.getCurrentState().explore();
 				currentTrace.set(trace);
 
-				if (replayTrace.getErrorMessage() != null) {
-					Platform.runLater(() -> getReplayErrorAlert(replayTrace.getErrorMessage()).showAndWait());
+				if (replayTrace.getErrorMessageBundleKey() != null) {
+					Platform.runLater(() -> stageManager.makeAlert(AlertType.ERROR, 
+							"animation.tracereplay.alerts.traceReplayError.header",
+							replayTrace.getErrorMessageBundleKey(), replayTrace.getErrorMessageParams())
+							.showAndWait());
 				}
 
 			}
@@ -195,17 +193,14 @@ public class TraceChecker {
 				t.getCurrentState().getId(), persistentTransition.getOperationName(), pred, 1);
 		stateSpace.execute(command);
 		if (command.hasErrors()) {
-			String errorMessage = String.format(bundle.getString("animation.tracereplay.traceChecker.errorMessage"),
-					persistentTransition.getOperationName(), predicate, Joiner.on(", ").join(command.getErrors()));
-			replayTrace.setErrorMessage(errorMessage);
+			replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage");
+			replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicate, Joiner.on(", ").join(command.getErrors()));
 			return null;
 		}
 		List<Transition> possibleTransitions = command.getNewTransitions();
 		if (possibleTransitions.isEmpty()) {
-			String errorMessage = String.format(
-					bundle.getString("animation.tracereplay.traceChecker.errorMessage.operationNotPossible"),
-					persistentTransition.getOperationName(), predicate);
-			replayTrace.setErrorMessage(errorMessage);
+			replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage.operationNotPossible");
+			replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicate);
 			return null;
 		}
 		Transition trans = possibleTransitions.get(0);
@@ -235,11 +230,8 @@ public class TraceChecker {
 							// because the value translator does not
 							// support enum values properly
 							if (setCurrentAnimation) {
-								String errorMessage = String.format(
-										bundle.getString(
-												"animation.tracereplay.traceChecker.errorMessage.mismatchingOutputValues"),
-										operationName, outputParamName, bValue.toString(), paramValueFromTransition);
-								replayTrace.setErrorMessage(errorMessage);
+								replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage.mismatchingOutputValues");
+								replayTrace.setErrorMessageParams(operationName, outputParamName, bValue.toString(), paramValueFromTransition);
 							}
 							return false;
 						}
@@ -247,17 +239,16 @@ public class TraceChecker {
 
 				}
 			} catch (BCompoundException e) {
-				Platform.runLater(() -> stageManager.makeExceptionAlert(e.getFirstException(), "animation.tracereplay.alerts.traceReplayError.header", "animation.tracereplay.traceChecker.alerts.traceReplayError.content").showAndWait());
+				Platform.runLater(
+						() -> stageManager
+								.makeExceptionAlert(e.getFirstException(),
+										"animation.tracereplay.alerts.traceReplayError.header",
+										"animation.tracereplay.traceChecker.alerts.traceReplayError.content")
+								.showAndWait());
 				return false;
 			}
 		}
 		return true;
-	}
-
-	private Alert getReplayErrorAlert(String errorMessage) {
-		Alert alert = stageManager.makeAlert(AlertType.ERROR, errorMessage);
-		alert.setHeaderText("animation.tracereplay.alerts.traceReplayError.header");
-		return alert;
 	}
 
 	void cancelReplay() {

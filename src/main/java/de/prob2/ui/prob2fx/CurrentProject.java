@@ -1,8 +1,14 @@
 package de.prob2.ui.prob2fx;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
@@ -33,12 +39,6 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final BooleanProperty exists;
@@ -55,16 +55,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	private final ObjectProperty<Path> defaultLocation;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
 	private final Injector injector;
 	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 
 	@Inject
-	private CurrentProject(final StageManager stageManager, final ResourceBundle bundle, final Injector injector, final AnimationSelector animations,
+	private CurrentProject(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
 							final CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
-		this.bundle = bundle;
 		this.injector = injector;
 		this.animations = animations;
 		this.currentTrace = currentTrace;
@@ -334,10 +332,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	private boolean confirmReplacingProject() {
 		if (exists()) {
-			final Alert alert = stageManager.makeAlert(
-					Alert.AlertType.CONFIRMATION, 
-					bundle.getString("prob2fx.currentProject.alerts.confirmReplacingProject.content"));
-			alert.setHeaderText(bundle.getString("prob2fx.currentProject.alerts.confirmReplacingProject.header"));
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+					"prob2fx.currentProject.alerts.confirmReplacingProject.header",
+					"prob2fx.currentProject.alerts.confirmReplacingProject.content");
 			Optional<ButtonType> result = alert.showAndWait();
 			return result.isPresent() && ButtonType.OK.equals(result.get());
 		} else {

@@ -79,11 +79,14 @@ public class ProjectManager {
 
 		if (currentProject.isNewProject() && location.exists()) {
 			ButtonType renameBT = new ButtonType((bundle.getString("common.buttons.rename")));
-			Optional<ButtonType> result = stageManager
-					.makeAlert(AlertType.WARNING,
-							String.format(bundle.getString("project.projectManager.alerts.fileAlreadyExistsWarning.content"),
-									location),
-							new ButtonType((bundle.getString("common.buttons.replace"))), renameBT, ButtonType.CANCEL)
+			ButtonType replaceBT = new ButtonType((bundle.getString("common.buttons.replace")));
+			List<ButtonType> buttons = new ArrayList<>();
+			buttons.add(replaceBT);
+			buttons.add(renameBT);
+			buttons.add(ButtonType.CANCEL);
+			Optional<ButtonType> result = stageManager.makeAlert(AlertType.WARNING, buttons,
+					"project.projectManager.alerts.fileAlreadyExistsWarning.header",
+					"project.projectManager.alerts.fileAlreadyExistsWarning.content", location)
 					.showAndWait();
 			if (!result.isPresent() || result.get() == ButtonType.CANCEL) {
 				return;
@@ -123,10 +126,12 @@ public class ProjectManager {
 			project.setLocation(path.getParent());
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			LOGGER.warn("Project file not found", exc);
-			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
-					String.format(bundle.getString("project.projectManager.alerts.fileNotFound.content"), path), ButtonType.YES,
-					ButtonType.NO);
-			alert.setHeaderText(bundle.getString("project.projectManager.alerts.fileNotFound.header"));
+			List<ButtonType> buttons = new ArrayList<>();
+			buttons.add(ButtonType.YES);
+			buttons.add(ButtonType.NO);
+			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
+					"project.projectManager.alerts.fileNotFound.header",
+					"project.projectManager.alerts.fileNotFound.content", path);
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 				Platform.runLater(() -> recentProjects.remove(path.toAbsolutePath().toString()));
@@ -142,9 +147,10 @@ public class ProjectManager {
 	public void openProject(Path path) {
 		Project project = loadProject(path);
 		if(!path.toString().endsWith(PROJECT_FILE_ENDING)) {
-			stageManager.makeAlert(AlertType.WARNING, 
-					String.format(bundle.getString("project.projectManager.alerts.wrongProjectFileExtensionWarning.content"), 
-							PROJECT_FILE_ENDING, path)).showAndWait();
+			stageManager.makeAlert(AlertType.WARNING,
+					"project.projectManager.alerts.wrongProjectFileExtensionWarning.header",
+					"project.projectManager.alerts.wrongProjectFileExtensionWarning.content", PROJECT_FILE_ENDING, path)
+					.showAndWait();
 		}
 		if (project != null) {
 			replaceMissingWithDefaults(project);

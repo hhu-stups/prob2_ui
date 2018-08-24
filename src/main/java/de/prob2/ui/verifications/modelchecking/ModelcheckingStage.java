@@ -101,7 +101,8 @@ public class ModelcheckingStage extends Stage {
 		if (currentTrace.exists()) {
 			injector.getInstance(Modelchecker.class).checkItem(getOptions(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
 		} else {
-			stageManager.makeAlert(Alert.AlertType.ERROR, bundle.getString("verifications.modelchecking.modelcheckingStage.alerts.noMachineLoaded.content"))
+			stageManager.makeAlert(Alert.AlertType.ERROR, "",
+					"verifications.modelchecking.modelcheckingStage.alerts.noMachineLoaded.content")
 					.showAndWait();
 			this.hide();
 		}

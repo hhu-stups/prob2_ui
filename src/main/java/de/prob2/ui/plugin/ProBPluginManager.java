@@ -6,6 +6,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -252,14 +253,14 @@ public class ProBPluginManager {
 			PluginWrapper wrapper = pluginManager.getPlugin(destination.toPath());
 			if (wrapper != null) {
 				//if there is a corresponding plugin, ask the user if he wants to overwrite it
-				Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-						String.format(bundle.getString("plugin.alerts.confirmOverwriteExistingFile.content"),
-								destination.getName(),
-								((ProBPlugin) wrapper.getPlugin()).getName(),
-								wrapper.getDescriptor().getVersion()),
-						ButtonType.YES, ButtonType.NO);
-				dialog.initOwner(stageManager.getCurrent());
-				Optional<ButtonType> result = dialog.showAndWait();
+				List<ButtonType> buttons = new ArrayList<>();
+				buttons.add(ButtonType.YES);
+				buttons.add(ButtonType.NO);
+				Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "",
+						"plugin.alerts.confirmOverwriteExistingFile.content", destination.getName(),
+						((ProBPlugin) wrapper.getPlugin()).getName(), wrapper.getDescriptor().getVersion());
+				alert.initOwner(stageManager.getCurrent());
+				Optional<ButtonType> result = alert.showAndWait();
 				if (result.isPresent() && result.get() == ButtonType.YES) {
 					//if he wants to overwrite, delete the plugin
 					pluginManager.deletePlugin(wrapper.getPluginId());
@@ -300,7 +301,8 @@ public class ProBPluginManager {
 				if (invPlug.getException() != null) {
 					alert = stageManager.makeExceptionAlert(invPlug.getException(), invPlug.getMessageBundleKey(), invPlug.getPluginClassName());
 				} else {
-					alert = stageManager.makeAlert(Alert.AlertType.WARNING, String.format(bundle.getString(invPlug.getMessageBundleKey()), invPlug.getPluginClassName()), ButtonType.OK);
+					alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", invPlug.getMessageBundleKey(),
+							invPlug.getPluginClassName());
 				}
 				alert.initOwner(stageManager.getCurrent());
 				alert.initModality(Modality.APPLICATION_MODAL);
@@ -398,9 +400,7 @@ public class ProBPluginManager {
 	 */
 
 	private void showWarningAlert(String bundleKey, Object... stringParams) {
-		Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
-				String.format(bundle.getString(bundleKey), stringParams),
-				ButtonType.OK);
+		Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", bundleKey, stringParams);
 		alert.initOwner(stageManager.getCurrent());
 		alert.show();
 	}

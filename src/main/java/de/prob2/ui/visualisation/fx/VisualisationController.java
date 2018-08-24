@@ -114,9 +114,9 @@ public class VisualisationController {
 			if (visualisation != null) {
 				if (newMachine == null) {
 					Alert alert = stageManager.makeAlert(Alert.AlertType.INFORMATION,
-							format("visualisation.fx.controller.alerts.visualisationStopped.content",
-									visualisation.getName(), oldMachine.getName()));
-					alert.setHeaderText(bundle.getString("visualisation.fx.controller.alerts.visualisationStopped.header"));
+							"visualisation.fx.controller.alerts.visualisationStopped.header",
+							"visualisation.fx.controller.alerts.visualisationStopped.content", visualisation.getName(),
+							oldMachine.getName());
 					alert.initOwner(stageManager.getCurrent());
 					alert.show();
 					stopVisualisation();
@@ -125,10 +125,10 @@ public class VisualisationController {
 					if (start) {
 						initVisualisation(visualisation);
 					} else {
-						Alert alert = stageManager.makeAlert(Alert.AlertType.INFORMATION, format(
+						Alert alert = stageManager.makeAlert(Alert.AlertType.INFORMATION, 
+								"visualisation.fx.controller.alerts.visualisationStopped.header",
 								"visualisation.fx.controller.alerts.visualisationStopped.notSupportedByMachine.content",
-								newMachine.getName(), visualisation.getName()));
-						alert.setHeaderText(bundle.getString("visualisation.fx.controller.alerts.visualisationStopped.header"));
+								newMachine.getName(), visualisation.getName());
 						alert.initOwner(stageManager.getCurrent());
 						alert.show();
 						stopVisualisation();
@@ -152,9 +152,12 @@ public class VisualisationController {
 
 	public void openVisualisation() {
 		if (visualisation.isNotNull().get()) {
-			Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-					format("visualisation.fx.controller.alerts.replaceCurrentVisualisation.content", visualisation.get().getName()),
-					ButtonType.YES, ButtonType.NO);
+			List<ButtonType> buttons = new ArrayList<>();
+			buttons.add(ButtonType.YES);
+			buttons.add(ButtonType.NO);
+			Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "",
+					"visualisation.fx.controller.alerts.replaceCurrentVisualisation.content",
+					visualisation.get().getName());
 			alert.initOwner(stageManager.getCurrent());
 			Optional<ButtonType> alertResult = alert.showAndWait();
 			if (alertResult.isPresent() && alertResult.get() == ButtonType.YES) {
@@ -175,7 +178,7 @@ public class VisualisationController {
 		if (selectedVisualisation != null) {
 			LOGGER.debug("Try to load visualisation from file {}.", selectedVisualisation.getName());
 			if (visualisationLoader == null) {
-				visualisationLoader = new VisualisationLoader(stageManager, bundle);
+				visualisationLoader = new VisualisationLoader(stageManager);
 			}
 			Visualisation loadedVisualisation = visualisationLoader.loadVisualization(selectedVisualisation);
 			if (loadedVisualisation != null) {
@@ -224,9 +227,9 @@ public class VisualisationController {
 		LOGGER.debug("Starting the visualisation \"{}\"", loadedVisualisation.getName());
 		boolean start = checkMachine(loadedVisualisation.getMachines());
 		if (!start) {
-			Alert alert = stageManager.makeAlert(Alert.AlertType.INFORMATION,
-					format("visualisation.fx.controller.alerts.visualisationUnsuitable.content", loadedVisualisation.getName(), currentMachine.get().getName()),
-					ButtonType.OK);
+			Alert alert = stageManager.makeAlert(Alert.AlertType.INFORMATION, "",
+					"visualisation.fx.controller.alerts.visualisationUnsuitable.content", 
+					loadedVisualisation.getName(), currentMachine.get().getName());
 			alert.initOwner(stageManager.getCurrent());
 			alert.show();
 			visualisationLoader.closeClassloader();
@@ -296,9 +299,8 @@ public class VisualisationController {
 				changedFormulas = visualisationModel.hasChanged(new ArrayList<>(formulaListenerMap.keySet()));
 			} catch (VisualisationParseException parseEx) {
 				LOGGER.warn("Could not parse formula \"{}\" and stopped update of visualisation.", parseEx.getFormula(), parseEx);
-				Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
-						format("visualisation.fx.controller.alerts.formulaCouldNotBeParsed.content", parseEx.getFormula()),
-						ButtonType.OK);
+				Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "",
+						"visualisation.fx.controller.alerts.formulaCouldNotBeParsed.content", parseEx.getFormula());
 				alert.initOwner(stageManager.getCurrent());
 				alert.show();
 				return;

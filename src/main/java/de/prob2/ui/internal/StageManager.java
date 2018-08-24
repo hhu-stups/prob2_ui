@@ -265,24 +265,33 @@ public final class StageManager {
 	}
 
 	/**
-	 * Create and register a new alert. The arguments are the same as with
-	 * {@link Alert#Alert(Alert.AlertType, String, ButtonType...)}.
+	 * Create and register a new alert.
 	 *
 	 * @return a new alert
 	 */
-	@SuppressWarnings("OverloadedVarargsMethod") // OK here, because the overload is shorter than the vararg version
-	public Alert makeAlert(final Alert.AlertType alertType, final String contentText, final ButtonType... buttons) {
-		final Alert alert = new Alert(alertType, contentText, buttons);
+	public Alert makeAlert(final Alert.AlertType alertType, final List<ButtonType> buttons,
+			final String headerBundleKey, final String contentBundleKey, final Object... contentParams) {
+		final Alert alert = new Alert(alertType, String.format(bundle.getString(contentBundleKey), contentParams),
+				buttons.toArray(new ButtonType[buttons.size()]));
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		this.register(alert);
+		if (!headerBundleKey.isEmpty()) {
+			alert.setHeaderText(bundle.getString(headerBundleKey));
+		}
 		return alert;
 	}
 	
+	public Alert makeAlert(final Alert.AlertType alertType, final String headerBundleKey, final String contentBundleKey,
+			final Object... contentParams) {
+		return makeAlert(alertType, new ArrayList<ButtonType>(), headerBundleKey, contentBundleKey, contentParams);
+	}
+
 	public Alert makeExceptionAlert(final Throwable exc, final String contentBundleKey, final Object... contentParams) {
 		return new ExceptionAlert(this.injector, String.format(bundle.getString(contentBundleKey), contentParams), exc);
 	}
-	
-	public Alert makeExceptionAlert(final Throwable exc, final String headerBundleKey, final String contentBundleKey, final Object... contentParams) {
+
+	public Alert makeExceptionAlert(final Throwable exc, final String headerBundleKey, final String contentBundleKey,
+			final Object... contentParams) {
 		Alert alert = makeExceptionAlert(exc, contentBundleKey, contentParams);
 		alert.setHeaderText(bundle.getString(headerBundleKey));
 		return alert;

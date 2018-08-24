@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
-import java.util.ResourceBundle;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -31,13 +30,11 @@ public class VisualisationLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationLoader.class);
 
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
 
 	private ClassLoader visualisationClassloader;
 
-	public VisualisationLoader(StageManager stageManager, ResourceBundle bundle) {
+	public VisualisationLoader(StageManager stageManager) {
 		this.stageManager = stageManager;
-		this.bundle = bundle;
 	}
 
 	public Visualisation loadVisualization(File selectedVisualisation) {
@@ -69,10 +66,9 @@ public class VisualisationLoader {
 				return (Visualisation)visualizationClass.getConstructor().newInstance();
 			} else {
 				LOGGER.warn("Class {} does not extend the abstract class Visualisation.", className);
-				stageManager.makeAlert(Alert.AlertType.WARNING,
-						String.format(
-								bundle.getString("visualisation.fx.loader.alerts.noValidVisualisationClass.content"),
-								className))
+				stageManager
+						.makeAlert(Alert.AlertType.WARNING, "",
+								"visualisation.fx.loader.alerts.noValidVisualisationClass.content", className)
 						.showAndWait();
 				return null;
 			}
@@ -128,11 +124,8 @@ public class VisualisationLoader {
 
 			} else {
 				LOGGER.warn("No visualization-class found in jar: {}", fileName);
-				stageManager.makeAlert(Alert.AlertType.WARNING,
-						String.format(
-								bundle.getString("visualisation.fx.loader.alerts.noVisualisationClass.content"),
-								className))
-						.showAndWait();
+				stageManager.makeAlert(Alert.AlertType.WARNING, "",
+						"visualisation.fx.loader.alerts.noVisualisationClass.content", className).showAndWait();
 				return null;
 			}
 		} catch (Exception e) {

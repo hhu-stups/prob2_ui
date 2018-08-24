@@ -27,7 +27,6 @@ import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -156,10 +155,9 @@ public class TraceReplayView extends ScrollPane {
 				to.getTraceFiles().forEach(tracePath -> {
 					traceTableView.getItems().add(new ReplayTrace(tracePath));
 					if(!tracePath.toString().endsWith(TRACE_FILE_ENDING.replaceAll("'*'", ""))) {
-						stageManager.makeAlert(AlertType.WARNING,
-								String.format(bundle.getString("animation.tracereplay.view.alerts.wrongFileExtensionWarning.content"),
-										TRACE_FILE_ENDING, tracePath))
-								.showAndWait();
+						stageManager.makeAlert(AlertType.WARNING, "",
+								"animation.tracereplay.view.alerts.wrongFileExtensionWarning.content",
+								TRACE_FILE_ENDING, tracePath).showAndWait();
 					}
 				});
 				to.getTraceFiles().addListener(listener);
@@ -200,9 +198,10 @@ public class TraceReplayView extends ScrollPane {
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("animation.tracereplay.view.contextMenu.showError"));
 			showErrorItem.setOnAction(event -> {
-				Alert alert = stageManager.makeAlert(AlertType.ERROR, row.getItem().getErrorMessage());
-				alert.setHeaderText(bundle.getString("animation.tracereplay.alerts.traceReplayError.header"));
-				alert.showAndWait();
+				stageManager.makeAlert(AlertType.ERROR, 
+						"animation.tracereplay.alerts.traceReplayError.header",
+						row.getItem().getErrorMessageBundleKey(), row.getItem().getErrorMessageParams())
+						.showAndWait();
 			});
 			showErrorItem.setDisable(true);
 

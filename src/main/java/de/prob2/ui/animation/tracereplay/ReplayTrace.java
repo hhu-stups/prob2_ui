@@ -17,19 +17,20 @@ public class ReplayTrace implements IExecutableItem {
 	private final ObjectProperty<Checked> status;
 	private final DoubleProperty progress;
 	private final Path location;
-	private String errorMessage;
+	private String errorMessageBundleKey;
 	private BooleanProperty shouldExecute;
+	private Object[] errorMessageParams;
 
 	public ReplayTrace(Path location) {
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.location = location;
-		this.errorMessage = null;
+		this.errorMessageBundleKey = null;
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		
 		this.status.addListener((o, from, to) -> {
 			if (to != Checked.FAIL) {
-				this.errorMessage = null;
+				this.errorMessageBundleKey = null;
 			}
 		});
 	}
@@ -63,12 +64,20 @@ public class ReplayTrace implements IExecutableItem {
 		return this.location;
 	}
 	
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
+	public void setErrorMessageBundleKey(String errorMessageBundleKey) {
+		this.errorMessageBundleKey = errorMessageBundleKey;
 	}
 	
-	public String getErrorMessage() {
-		return errorMessage;
+	public String getErrorMessageBundleKey() {
+		return errorMessageBundleKey;
+	}
+	
+	public void setErrorMessageParams(Object... params) {
+		this.errorMessageParams = params;
+	}
+	
+	public Object[] getErrorMessageParams() {
+		return errorMessageParams;
 	}
 	
 	@Override
@@ -101,6 +110,4 @@ public class ReplayTrace implements IExecutableItem {
 		}
 		return location.equals(((ReplayTrace) obj).getLocation());
 	}
-	
-	
 }

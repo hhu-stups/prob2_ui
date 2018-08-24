@@ -3,24 +3,30 @@ package de.prob2.ui.verifications;
 public class CheckingResultItem {
 	
 	private Checked checked;
-	private String message;
-	private String header;
+	private String headerBundleKey;
+	private String messageBundleKey;
+	private Object[] messageParams;
 	
-	public CheckingResultItem(Checked checked, String message, String header) {
+	public CheckingResultItem(Checked checked, String headerBundleKey, String messageBundleKey, Object... messageParams) {
 		this.checked = checked;
-		this.message = message;
-		this.header = header;
+		this.headerBundleKey = headerBundleKey;
+		this.messageBundleKey = messageBundleKey;
+		this.messageParams = messageParams;
 	}
 	
 	public Checked getChecked() {
 		return checked;
 	}
 	
-	public String getMessage() {
-		return message;
+	public String getHeaderBundleKey() {
+		return headerBundleKey;
 	}
 	
-	public String getHeader() {
-		return header;
+	public String getMessageBundleKey() {
+		return messageBundleKey;
+	}
+	
+	public Object[] getMessageParams() {
+		return messageParams;
 	}
 }
