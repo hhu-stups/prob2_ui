@@ -107,12 +107,10 @@ public class MachineLoader {
 				this.load(machine, pref);
 			} catch (FileNotFoundException e) {
 				LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
-				Platform.runLater(() -> {
-					stageManager.makeAlert(AlertType.ERROR, 
-							"project.machineLoader.alerts.fileNotFound.header",
-							"project.machineLoader.alerts.fileNotFound.content", getPathToMachine(machine))
-							.showAndWait();
-				});
+				Platform.runLater(() -> stageManager
+						.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
+								"project.machineLoader.alerts.fileNotFound.content", getPathToMachine(machine))
+						.showAndWait());
 			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 				LOGGER.error("Loading machine \"{}\" failed", machine.getName(), e);
 				Platform.runLater(() -> stageManager

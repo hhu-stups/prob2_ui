@@ -14,7 +14,6 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.command.AbstractCommand;
 import de.prob.check.IModelCheckJob;
-import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -82,7 +81,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicAnimationCh
 				if (finalException == null) {
 					resultHandler.handleFormulaResult(currentItem, cmd);
 				} else {
-					resultHandler.handleFormulaResult(currentItem, finalException, null);
+					resultHandler.handleFormulaResult(currentItem, finalException);
 				}
 				updateMachine(currentProject.getCurrentMachine());
 				currentJobThreads.remove(currentThread);
@@ -100,7 +99,6 @@ private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicAnimationCh
 	
 	public void checkItem(IModelCheckJob checker, SymbolicAnimationFormulaItem item, boolean checkAll) {
 		Thread checkingThread = new Thread(() -> {
-			State stateid = currentTrace.getCurrentState();
 			currentJobs.add(checker);
 			Object result;
 			try {
@@ -112,7 +110,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicAnimationCh
 			injector.getInstance(StatsView.class).update(currentTrace.get());
 			final Object finalResult = result;
 			Platform.runLater(() -> {
-				resultHandler.handleFormulaResult(item, finalResult, stateid);
+				resultHandler.handleFormulaResult(item, finalResult);
 				updateMachine(currentProject.getCurrentMachine());
 				if(!checkAll) {
 					Trace example = item.getExample();

@@ -17,7 +17,6 @@ import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
-import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -104,7 +103,7 @@ public class SymbolicAnimationResultHandler {
 		}
 	}
 	
-	public void handleFormulaResult(SymbolicAnimationFormulaItem item, Object result, State stateid) {
+	public void handleFormulaResult(SymbolicAnimationFormulaItem item, Object result) {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			handleItem(item, Checked.SUCCESS);

@@ -197,12 +197,10 @@ public class TraceReplayView extends ScrollPane {
 
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("animation.tracereplay.view.contextMenu.showError"));
-			showErrorItem.setOnAction(event -> {
-				stageManager.makeAlert(AlertType.ERROR, 
-						"animation.tracereplay.alerts.traceReplayError.header",
-						row.getItem().getErrorMessageBundleKey(), row.getItem().getErrorMessageParams())
-						.showAndWait();
-			});
+			showErrorItem.setOnAction(event -> stageManager
+					.makeAlert(AlertType.ERROR, "animation.tracereplay.alerts.traceReplayError.header",
+							row.getItem().getErrorMessageBundleKey(), row.getItem().getErrorMessageParams())
+					.showAndWait());
 			showErrorItem.setDisable(true);
 
 			final MenuItem deleteTraceItem = new MenuItem(
