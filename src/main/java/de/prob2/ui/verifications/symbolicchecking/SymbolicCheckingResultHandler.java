@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.AbstractCommand;
@@ -25,21 +26,29 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.symbolic.ISymbolicResultHandler;
+import de.prob2.ui.symbolic.SymbolicExecutionType;
+import de.prob2.ui.symbolic.SymbolicFormulaItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
+import de.prob2.ui.verifications.MachineStatusHandler;
 
 @Singleton
-public class SymbolicCheckingResultHandler extends AbstractResultHandler {
+public class SymbolicCheckingResultHandler extends AbstractResultHandler implements ISymbolicResultHandler {
 	
 	private final CurrentTrace currentTrace;
 	
+	private final Injector injector;
+	
 	@Inject
 	public SymbolicCheckingResultHandler(final StageManager stageManager, final ResourceBundle bundle, 
-										final CurrentTrace currentTrace) {
+										final CurrentTrace currentTrace, final Injector injector) {
 		super(stageManager, bundle);
 		this.currentTrace = currentTrace;
+		this.injector = injector;
 		this.type = CheckingType.SYMBOLIC;
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
@@ -48,7 +57,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class));
 	}
 	
-	public void handleFormulaResult(SymbolicCheckingFormulaItem item, Object result, State stateid) {
+	public void handleFormulaResult(SymbolicFormulaItem item, Object result, State stateid) {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			handleItem(item, Checked.SUCCESS);
@@ -60,23 +69,23 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
 		item.setResultItem(resultItem);
-		item.getCounterExamples().clear();
+		((SymbolicCheckingFormulaItem) item).getCounterExamples().clear();
 		for(Trace trace: traces) {
-			item.getCounterExamples().add(trace);
+			((SymbolicCheckingFormulaItem) item).getCounterExamples().add(trace);
 		}
 	}
 	
-	public void handleFormulaResult(SymbolicCheckingFormulaItem item, AbstractCommand cmd) {
+	public void handleFormulaResult(SymbolicFormulaItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		if(item.getType() == SymbolicCheckingType.TINDUCTION || item.getType() == SymbolicCheckingType.KINDUCTION ||
-					item.getType() == SymbolicCheckingType.BMC || item.getType() == SymbolicCheckingType.IC3) {
-			handleSymbolicChecking(item, (SymbolicModelcheckCommand) cmd);
-		} else if(item.getType() == SymbolicCheckingType.CHECK_ASSERTIONS) {
-			handleAssertionChecking(item, (ConstraintBasedAssertionCheckCommand) cmd, stateSpace);
-		} else if(item.getType() == SymbolicCheckingType.CHECK_REFINEMENT) {
-			handleRefinementChecking(item, (ConstraintBasedRefinementCheckCommand) cmd);
-		} else if(item.getType() == SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS) {
-			handleFindRedundantInvariants(item, (GetRedundantInvariantsCommand) cmd);
+		if(item.getType() == SymbolicExecutionType.TINDUCTION || item.getType() == SymbolicExecutionType.KINDUCTION ||
+					item.getType() == SymbolicExecutionType.BMC || item.getType() == SymbolicExecutionType.IC3) {
+			handleSymbolicChecking((SymbolicCheckingFormulaItem) item, (SymbolicModelcheckCommand) cmd);
+		} else if(item.getType() == SymbolicExecutionType.CHECK_ASSERTIONS) {
+			handleAssertionChecking((SymbolicCheckingFormulaItem) item, (ConstraintBasedAssertionCheckCommand) cmd, stateSpace);
+		} else if(item.getType() == SymbolicExecutionType.CHECK_REFINEMENT) {
+			handleRefinementChecking((SymbolicCheckingFormulaItem) item, (ConstraintBasedRefinementCheckCommand) cmd);
+		} else if(item.getType() == SymbolicExecutionType.FIND_REDUNDANT_INVARIANTS) {
+			handleFindRedundantInvariants((SymbolicCheckingFormulaItem) item, (GetRedundantInvariantsCommand) cmd);
 		}
 	}
 
@@ -195,6 +204,11 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler {
 	
 	private void showCheckingResult(SymbolicCheckingFormulaItem item, String msg, Checked checked) {
 		showCheckingResult(item, msg, msg, checked);
+	}
+	
+	public void updateMachine(Machine machine) {
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
+		injector.getInstance(SymbolicCheckingView.class).refresh();
 	}
 	
 

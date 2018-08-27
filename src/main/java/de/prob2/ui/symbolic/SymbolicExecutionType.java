@@ -1,8 +1,8 @@
-package de.prob2.ui.verifications.symbolicchecking;
+package de.prob2.ui.symbolic;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
 
-public enum SymbolicCheckingType {
+public enum SymbolicExecutionType {
 	
 	SEQUENCE("Sequence", null),
 	INVARIANT("Invariant", null),
@@ -16,14 +16,14 @@ public enum SymbolicCheckingType {
 	IC3("IC3", SymbolicModelcheckCommand.Algorithm.IC3), 
 	TINDUCTION("TINDUCTION", SymbolicModelcheckCommand.Algorithm.TINDUCTION), 
 	KINDUCTION("KINDUCTION", SymbolicModelcheckCommand.Algorithm.KINDUCTION), 
-	BMC("BMC", SymbolicModelcheckCommand.Algorithm.BMC)
+	BMC("BMC", SymbolicModelcheckCommand.Algorithm.BMC),
 	;
 	
 	private final String name;
 	
 	private final SymbolicModelcheckCommand.Algorithm algorithm;
 	
-	SymbolicCheckingType(final String name, final SymbolicModelcheckCommand.Algorithm algorithm) {
+	SymbolicExecutionType(final String name, final SymbolicModelcheckCommand.Algorithm algorithm) {
 		this.name = name;
 		this.algorithm = algorithm;
 	}

@@ -1,21 +1,19 @@
 package de.prob2.ui.animation.symbolic;
 
 import de.prob.statespace.Trace;
-import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.symbolic.SymbolicExecutionType;
+import de.prob2.ui.symbolic.SymbolicFormulaItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 import java.util.Objects;
 
-public class SymbolicAnimationFormulaItem extends AbstractCheckableItem {
-		
-	private SymbolicAnimationType type;
+public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	
 	private transient ObjectProperty<Trace> example;
 
-	public SymbolicAnimationFormulaItem(String name, SymbolicAnimationType type) {
-		super(name, type.getName(), name);
-		this.type = type;
+	public SymbolicAnimationFormulaItem(String name, SymbolicExecutionType type) {
+		super(name, type);
 		this.example = new SimpleObjectProperty<>(null);
 	}
 
@@ -61,20 +59,12 @@ public class SymbolicAnimationFormulaItem extends AbstractCheckableItem {
 		return Objects.hash(name, code, type);
 	}
 	
-	public void setType(SymbolicAnimationType type) {
-		this.type = type;
-	}
-	
-	public SymbolicAnimationType getType() {
-		return type;
-	}
-	
 	@Override
 	public String toString() {
 		return String.join(" ", name, code, type.name());
 	}
 	
-	public void setData(String name, String description, String code, SymbolicAnimationType type) {
+	public void setData(String name, String description, String code, SymbolicExecutionType type) {
 		super.setData(name, description, code);
 		this.type = type;
 	}

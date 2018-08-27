@@ -20,6 +20,9 @@ import de.prob.check.NotYetFinished;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.symbolic.ISymbolicResultHandler;
+import de.prob2.ui.symbolic.SymbolicExecutionType;
+import de.prob2.ui.symbolic.SymbolicFormulaItem;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
@@ -29,7 +32,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Region;
 
 @Singleton
-public class SymbolicAnimationResultHandler {
+public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	
 	private final ResourceBundle bundle;
 	
@@ -99,7 +102,7 @@ public class SymbolicAnimationResultHandler {
 		}
 	}
 	
-	public void handleFormulaResult(SymbolicAnimationFormulaItem item, Object result, State stateid) {
+	public void handleFormulaResult(SymbolicFormulaItem item, Object result, State stateid) {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			handleItem(item, Checked.SUCCESS);
@@ -126,12 +129,12 @@ public class SymbolicAnimationResultHandler {
 		return resultItem;
 	}
 	
-	public void handleFormulaResult(SymbolicAnimationFormulaItem item, AbstractCommand cmd) {
+	public void handleFormulaResult(SymbolicFormulaItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		if(item.getType() == SymbolicAnimationType.FIND_VALID_STATE) {
-			handleFindValidState(item, (FindStateCommand) cmd, stateSpace);
-		} else if(item.getType() == SymbolicAnimationType.FIND_REDUNDANT_INVARIANTS) {
-			handleFindRedundantInvariants(item, (GetRedundantInvariantsCommand) cmd);
+		if(item.getType() == SymbolicExecutionType.FIND_VALID_STATE) {
+			handleFindValidState((SymbolicAnimationFormulaItem) item, (FindStateCommand) cmd, stateSpace);
+		} else if(item.getType() == SymbolicExecutionType.FIND_REDUNDANT_INVARIANTS) {
+			handleFindRedundantInvariants((SymbolicAnimationFormulaItem) item, (GetRedundantInvariantsCommand) cmd);
 		}
 	}
 	

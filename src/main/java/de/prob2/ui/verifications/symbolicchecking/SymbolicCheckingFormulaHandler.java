@@ -23,6 +23,7 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.verifications.AbstractResultHandler;
 
 @Singleton
@@ -50,7 +51,7 @@ public class SymbolicCheckingFormulaHandler {
 		this.resultHandler = resultHandler;
 	}
 	
-	public void addFormula(String name, String code, SymbolicCheckingType type, boolean checking) {
+	public void addFormula(String name, String code, SymbolicExecutionType type, boolean checking) {
 		SymbolicCheckingFormulaItem formula = new SymbolicCheckingFormulaItem(name, code, type);
 		addFormula(formula,checking);
 	}
@@ -71,24 +72,24 @@ public class SymbolicCheckingFormulaHandler {
 		ArrayList<String> event = new ArrayList<>();
 		event.add(code);
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
-		symbolicChecker.executeCheckingItem(checker, code, SymbolicCheckingType.INVARIANT, checkAll);
+		symbolicChecker.executeCheckingItem(checker, code, SymbolicExecutionType.INVARIANT, checkAll);
 	}
 	
 	public void handleDeadlock(String code, boolean checkAll) {
 		IEvalElement constraint = new EventB(code, FormulaExpand.EXPAND); 
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
-		symbolicChecker.executeCheckingItem(checker, code, SymbolicCheckingType.DEADLOCK, checkAll);
+		symbolicChecker.executeCheckingItem(checker, code, SymbolicExecutionType.DEADLOCK, checkAll);
 	}
 	
 	public void findDeadlock(boolean checkAll) {
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace());
-		symbolicChecker.executeCheckingItem(checker, "FIND_DEADLOCK", SymbolicCheckingType.FIND_DEADLOCK, checkAll);
+		symbolicChecker.executeCheckingItem(checker, "FIND_DEADLOCK", SymbolicExecutionType.FIND_DEADLOCK, checkAll);
 	}
 	
 	public void handleSequence(String sequence, boolean checkAll) {
 		List<String> events = Arrays.asList(sequence.replaceAll(" ", "").split(";"));
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
-		symbolicChecker.executeCheckingItem(checker, sequence, SymbolicCheckingType.SEQUENCE, checkAll);
+		symbolicChecker.executeCheckingItem(checker, sequence, SymbolicExecutionType.SEQUENCE, checkAll);
 	}
 	
 	public void findRedundantInvariants(SymbolicCheckingFormulaItem item, boolean checkAll) {
@@ -126,7 +127,7 @@ public class SymbolicCheckingFormulaHandler {
 		if(!item.shouldExecute()) {
 			return;
 		}
-		SymbolicCheckingType type = item.getType();
+		SymbolicExecutionType type = item.getType();
 		switch(type) {
 			case INVARIANT:
 				handleInvariant(item.getCode(), checkAll);

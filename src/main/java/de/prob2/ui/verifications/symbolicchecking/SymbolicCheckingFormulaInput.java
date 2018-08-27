@@ -17,8 +17,9 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.symbolic.SymbolicExecutionType;
+import de.prob2.ui.symbolic.SymbolicGUIType;
 import de.prob2.ui.verifications.AbstractResultHandler;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingItem.GUIType;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -98,7 +99,7 @@ public class SymbolicCheckingFormulaInput extends VBox {
 	private void setCheckListeners() {
 		btAdd.setOnAction(e -> addFormula(false));
 		btCheck.setOnAction(e -> {
-			SymbolicCheckingType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
+			SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
 			SymbolicCheckingFormulaItem formulaItem = null;
 			addFormula(true);
 			switch(checkingType) {
@@ -135,9 +136,9 @@ public class SymbolicCheckingFormulaInput extends VBox {
 		setChangeListeners(item);
 		SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
 		choosingStage.select(item);
-		if(choosingStage.getGUIType() == GUIType.TEXT_FIELD) {
+		if(choosingStage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			tfFormula.setText(item.getCode());
-		} else if(choosingStage.getGUIType() == GUIType.CHOICE_BOX) {
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
 			cbOperations.getItems().forEach(operationItem -> {
 				if(operationItem.equals(item.getCode())) {
 					cbOperations.getSelectionModel().select(operationItem);
@@ -152,16 +153,16 @@ public class SymbolicCheckingFormulaInput extends VBox {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = null;
 		SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
-		if(choosingStage.getGUIType() == GUIType.TEXT_FIELD) {
+		if(choosingStage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			formula = tfFormula.getText();
-		} else if(choosingStage.getGUIType() == GUIType.CHOICE_BOX) {
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
 			formula = cbOperations.getSelectionModel().getSelectedItem();
 		} else {
 			formula = choosingStage.getCheckingType().getName();
 		}
 		SymbolicCheckingFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getCheckingType());
 		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
-			SymbolicCheckingType type = choosingStage.getCheckingType();
+			SymbolicExecutionType type = choosingStage.getCheckingType();
 			item.setData(formula, type.getName(), formula, type);
 			item.reset();
 			injector.getInstance(SymbolicCheckingView.class).refresh();
@@ -186,22 +187,22 @@ public class SymbolicCheckingFormulaInput extends VBox {
 	}
 	
 	private void addFormula(boolean checking) {
-		SymbolicCheckingType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
-		if(checkingType == SymbolicCheckingType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
+		SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
+		if(checkingType == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
 			injector.getInstance(SymbolicCheckingChoosingStage.class).close();
 			return;
 		}
-		GUIType guiType = injector.getInstance(SymbolicCheckingChoosingStage.class).getGUIType();
+		SymbolicGUIType guiType = injector.getInstance(SymbolicCheckingChoosingStage.class).getGUIType();
 		switch(guiType) {
 			case CHOICE_BOX:
 				switch(checkingType) {
 					case INVARIANT:
 						String item = cbOperations.getSelectionModel().getSelectedItem();
-						symbolicCheckingFormulaHandler.addFormula(item, item, SymbolicCheckingType.INVARIANT, checking);
+						symbolicCheckingFormulaHandler.addFormula(item, item, SymbolicExecutionType.INVARIANT, checking);
 						break;
 					case CHECK_ALL_OPERATIONS:
 						for(String event : events) {
-							symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicCheckingType.INVARIANT, checking);
+							symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicExecutionType.INVARIANT, checking);
 						}
 						break;
 					default:
@@ -216,9 +217,9 @@ public class SymbolicCheckingFormulaInput extends VBox {
 				symbolicCheckingFormulaHandler.addFormula(predicate, predicate, checkingType, checking);
 				break;
 			case NONE:
-				if(checkingType == SymbolicCheckingType.CHECK_ALL_OPERATIONS) {
+				if(checkingType == SymbolicExecutionType.CHECK_ALL_OPERATIONS) {
 					for(String event : events) {
-						symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicCheckingType.INVARIANT, checking);
+						symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicExecutionType.INVARIANT, checking);
 					}
 				} else {
 					symbolicCheckingFormulaHandler.addFormula(checkingType.name(), checkingType.name(), checkingType, checking);
@@ -235,7 +236,7 @@ public class SymbolicCheckingFormulaInput extends VBox {
 		injector.getInstance(SymbolicCheckingChoosingStage.class).close();
 	}
 	
-	public void changeGUIType(final GUIType guiType) {
+	public void changeGUIType(final SymbolicGUIType guiType) {
 		this.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView);
 		switch (guiType) {
 			case NONE:

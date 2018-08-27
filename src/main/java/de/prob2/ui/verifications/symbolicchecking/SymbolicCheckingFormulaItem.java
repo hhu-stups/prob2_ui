@@ -1,7 +1,8 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
 import de.prob.statespace.Trace;
-import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.symbolic.SymbolicExecutionType;
+import de.prob2.ui.symbolic.SymbolicFormulaItem;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -9,15 +10,12 @@ import javafx.collections.ObservableList;
 
 import java.util.Objects;
 
-public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
-		
-	private SymbolicCheckingType type;
+public class SymbolicCheckingFormulaItem extends SymbolicFormulaItem {
 	
 	private transient ListProperty<Trace> counterExamples;
 
-	public SymbolicCheckingFormulaItem(String name, String code, SymbolicCheckingType type) {
-		super(name, type.getName(), code);
-		this.type = type;
+	public SymbolicCheckingFormulaItem(String name, String code, SymbolicExecutionType type) {
+		super(name, code, type);
 		this.initializeCounterExamples();
 	}
 		
@@ -63,20 +61,12 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
 		return Objects.hash(name, code, type);
 	}
 	
-	public void setType(SymbolicCheckingType type) {
-		this.type = type;
-	}
-	
-	public SymbolicCheckingType getType() {
-		return type;
-	}
-	
 	@Override
 	public String toString() {
 		return String.join(" ", name, code, type.name());
 	}
 	
-	public void setData(String name, String description, String code, SymbolicCheckingType type) {
+	public void setData(String name, String description, String code, SymbolicExecutionType type) {
 		super.setData(name, description, code);
 		this.type = type;
 	}

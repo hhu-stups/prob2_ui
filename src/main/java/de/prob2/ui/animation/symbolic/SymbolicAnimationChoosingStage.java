@@ -4,8 +4,10 @@ import javax.inject.Inject;
 
 import com.google.inject.Singleton;
 
-import de.prob2.ui.animation.symbolic.SymbolicAnimationItem.GUIType;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.symbolic.SymbolicExecutionItem;
+import de.prob2.ui.symbolic.SymbolicExecutionType;
+import de.prob2.ui.symbolic.SymbolicGUIType;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
@@ -18,7 +20,7 @@ public class SymbolicAnimationChoosingStage extends Stage {
 	private SymbolicAnimationFormulaInput formulaInput;
 	
 	@FXML
-	private ChoiceBox<SymbolicAnimationItem> cbChoice;
+	private ChoiceBox<SymbolicExecutionItem> cbChoice;
 	
 	@Inject
 	private SymbolicAnimationChoosingStage(final StageManager stageManager) {
@@ -53,17 +55,17 @@ public class SymbolicAnimationChoosingStage extends Stage {
 		
 	}
 	
-	public GUIType getGUIType() {
+	public SymbolicGUIType getGUIType() {
 		return cbChoice.getSelectionModel().getSelectedItem().getGUIType();
 	}
 	
-	public SymbolicAnimationType getAnimationType() {
-		return cbChoice.getSelectionModel().getSelectedItem().getAnimationType();
+	public SymbolicExecutionType getAnimationType() {
+		return cbChoice.getSelectionModel().getSelectedItem().getExecutionType();
 	}
 	
 	public void select(SymbolicAnimationFormulaItem item) {
 		cbChoice.getItems().forEach(choice -> {
-			if(item.getType().equals(choice.getAnimationType())) {
+			if(item.getType().equals(choice.getExecutionType())) {
 				cbChoice.getSelectionModel().select(choice);
 			}
 		});
