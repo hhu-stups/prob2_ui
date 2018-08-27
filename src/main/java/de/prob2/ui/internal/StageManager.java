@@ -293,7 +293,9 @@ public final class StageManager {
 	public Alert makeExceptionAlert(final Throwable exc, final String headerBundleKey, final String contentBundleKey,
 			final Object... contentParams) {
 		Alert alert = makeExceptionAlert(exc, contentBundleKey, contentParams);
-		alert.setHeaderText(bundle.getString(headerBundleKey));
+		if (!headerBundleKey.isEmpty()) {
+			alert.setHeaderText(bundle.getString(headerBundleKey));
+		}
 		return alert;
 	}
 	

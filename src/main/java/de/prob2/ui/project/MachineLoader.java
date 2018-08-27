@@ -114,7 +114,7 @@ public class MachineLoader {
 			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 				LOGGER.error("Loading machine \"{}\" failed", machine.getName(), e);
 				Platform.runLater(() -> stageManager
-						.makeExceptionAlert(e, "project.machineLoader.alerts.couldNotOpen.content", machine.getName())
+						.makeExceptionAlert(e, "", "project.machineLoader.alerts.couldNotOpen.content", machine.getName())
 						.showAndWait());
 			}
 		} , "Machine Loader").start();
