@@ -27,7 +27,6 @@ import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -46,7 +45,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 @Singleton
 public class TraceReplayView extends ScrollPane {
-	private static final String TRACE_FILE_ENDING = ".prob2trace";
+	private static final String TRACE_FILE_ENDING = "*.prob2trace";
 
 	@FXML
 	private TableView<ReplayTrace> traceTableView;
@@ -155,8 +154,10 @@ public class TraceReplayView extends ScrollPane {
 			if (to != null) {
 				to.getTraceFiles().forEach(tracePath -> {
 					traceTableView.getItems().add(new ReplayTrace(tracePath));
-					if(!tracePath.toString().endsWith(TRACE_FILE_ENDING)) {
-						stageManager.makeAlert(AlertType.WARNING, String.format("The file extension of ProB2 tracefiles should be '%s': %s", TRACE_FILE_ENDING, tracePath)).showAndWait();
+					if(!tracePath.toString().endsWith(TRACE_FILE_ENDING.replaceAll("'*'", ""))) {
+						stageManager.makeAlert(AlertType.WARNING, "",
+								"animation.tracereplay.view.alerts.wrongFileExtensionWarning.content",
+								TRACE_FILE_ENDING, tracePath).showAndWait();
 					}
 				});
 				to.getTraceFiles().addListener(listener);
@@ -182,7 +183,7 @@ public class TraceReplayView extends ScrollPane {
 			final TableRow<ReplayTrace> row = new TableRow<>();
 
 			final MenuItem replayTraceItem = new MenuItem(
-					bundle.getString("verifications.tracereplay.contextMenu.replayTrace"));
+					bundle.getString("animation.tracereplay.view.contextMenu.replayTrace"));
 			replayTraceItem.setOnAction(event -> this.traceChecker.check(row.getItem(), true));
 			replayTraceItem.setDisable(true);
 			
@@ -195,16 +196,15 @@ public class TraceReplayView extends ScrollPane {
 			});
 
 			final MenuItem showErrorItem = new MenuItem(
-					bundle.getString("verifications.tracereplay.contextMenu.showError"));
-			showErrorItem.setOnAction(event -> {
-				Alert alert = stageManager.makeAlert(AlertType.ERROR, row.getItem().getErrorMessage());
-				alert.setHeaderText("Replay Error");
-				alert.showAndWait();
-			});
+					bundle.getString("animation.tracereplay.view.contextMenu.showError"));
+			showErrorItem.setOnAction(event -> stageManager
+					.makeAlert(AlertType.ERROR, "animation.tracereplay.alerts.traceReplayError.header",
+							row.getItem().getErrorMessageBundleKey(), row.getItem().getErrorMessageParams())
+					.showAndWait());
 			showErrorItem.setDisable(true);
 
 			final MenuItem deleteTraceItem = new MenuItem(
-					bundle.getString("verifications.tracereplay.contextMenu.deleteTrace"));
+					bundle.getString("animation.tracereplay.view.contextMenu.deleteTrace"));
 			deleteTraceItem.setOnAction(
 					event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
 
@@ -240,9 +240,12 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private void loadTraceFromFile() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("verifications.tracereplay.traceLoader.dialog.title"));
+		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.loadTrace.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		fileChooser.getExtensionFilters().add(new ExtensionFilter("ProB2 Trace (*" + TRACE_FILE_ENDING + ")", "*" + TRACE_FILE_ENDING));
+		fileChooser.getExtensionFilters()
+		.add(new ExtensionFilter(
+				String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_ENDING),
+				TRACE_FILE_ENDING));
 		File traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
 			currentProject.getCurrentMachine().addTraceFile(traceFile.toPath());

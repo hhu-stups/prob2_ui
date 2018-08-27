@@ -137,7 +137,7 @@ public class DotView extends DynamicCommandStage {
 				LOGGER.error("Graph visualization failed", e);
 				currentThread.set(null);
 				Platform.runLater(() -> {
-					stageManager.makeExceptionAlert(bundle.getString("dotty.alerts.visualisationError.content"), e).show();
+					stageManager.makeExceptionAlert(e, "dotty.alerts.visualisationError.content").show();
 					dotView.getEngine().loadContent("");
 					statusBar.setText("");
 				});

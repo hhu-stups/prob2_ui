@@ -19,7 +19,7 @@
 					<Label fx:id="operationLabel"/>
 					<Label fx:id="paramsLabel" text="%operations.executeByPredicate.parameters"/>
 					<PredicateBuilderView fx:id="predicateBuilderView"/>
-					<Button fx:id="executeButton" styleClass="button-blue" text="%operations.executeByPredicate.buttons.execute" onAction="#handleExecute"/>
+					<Button fx:id="executeButton" styleClass="button-blue" text="%common.buttons.execute" onAction="#handleExecute"/>
 				</VBox>
 			</StackPane>
 		</Scene>

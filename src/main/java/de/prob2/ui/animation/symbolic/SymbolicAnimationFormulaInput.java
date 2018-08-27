@@ -18,18 +18,15 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicGUIType;
 import de.prob2.ui.verifications.AbstractResultHandler;
+
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 @Singleton
 public class SymbolicAnimationFormulaInput extends VBox {
-	
-	
 	private final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler;
 	
 	private final CurrentProject currentProject;
@@ -45,9 +42,6 @@ public class SymbolicAnimationFormulaInput extends VBox {
 	
 	@FXML
 	private ChoiceBox<String> cbOperations;
-	
-	@FXML
-	private StackPane optionsPane;
 	
 	@FXML
 	private PredicateBuilderView predicateBuilderView;
@@ -105,37 +99,35 @@ public class SymbolicAnimationFormulaInput extends VBox {
 			SymbolicExecutionType animationType = injector.getInstance(SymbolicAnimationChoosingStage.class).getAnimationType();
 			SymbolicAnimationFormulaItem formulaItem = null;
 			addFormula(true);
-			switch(animationType) {
-				case DEADLOCK: 
-					symbolicAnimationFormulaHandler.handleDeadlock(predicateBuilderView.getPredicate(), false); 
-					break;
-				case SEQUENCE:
-					symbolicAnimationFormulaHandler.handleSequence(tfFormula.getText(), false); 
-					break;
-				case FIND_DEADLOCK: 
-					symbolicAnimationFormulaHandler.findDeadlock(false); 
-					break;
-				case FIND_VALID_STATE:
-					formulaItem = new SymbolicAnimationFormulaItem(predicateBuilderView.getPredicate(), SymbolicExecutionType.FIND_VALID_STATE);
-					symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
-					break;
-				default:
-					formulaItem = new SymbolicAnimationFormulaItem(animationType.name(), animationType);
-					switch(animationType) {
-						case FIND_REDUNDANT_INVARIANTS: 
-							symbolicAnimationFormulaHandler.findRedundantInvariants(formulaItem, false); 
-							break;
-					default:
-						break;
-				}
+			switch (animationType) {
+			case DEADLOCK:
+				symbolicAnimationFormulaHandler.handleDeadlock(predicateBuilderView.getPredicate(), false);
+				break;
+			case SEQUENCE:
+				symbolicAnimationFormulaHandler.handleSequence(tfFormula.getText(), false);
+				break;
+			case FIND_DEADLOCK:
+				symbolicAnimationFormulaHandler.findDeadlock(false);
+				break;
+			case FIND_VALID_STATE:
+				formulaItem = new SymbolicAnimationFormulaItem(predicateBuilderView.getPredicate(),
+						SymbolicExecutionType.FIND_VALID_STATE);
+				symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
+				break;
+			case FIND_REDUNDANT_INVARIANTS:
+				formulaItem = new SymbolicAnimationFormulaItem(animationType.name(), animationType);
+				symbolicAnimationFormulaHandler.findRedundantInvariants(formulaItem, false);
+				break;
+			default:
+				break;
 			}
 			injector.getInstance(SymbolicAnimationChoosingStage.class).close();
 		});
 	}
 	
 	public void changeFormula(SymbolicAnimationFormulaItem item) {
-		btAdd.setText(bundle.getString("verifications.symbolic.input.change"));
-		btCheck.setText(bundle.getString("verifications.symbolic.input.changeAndCheck"));
+		btAdd.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.change"));
+		btCheck.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.changeAndCheck"));
 		setChangeListeners(item);
 		SymbolicAnimationChoosingStage choosingStage = injector.getInstance(SymbolicAnimationChoosingStage.class);
 		choosingStage.select(item);
@@ -219,36 +211,33 @@ public class SymbolicAnimationFormulaInput extends VBox {
 	}
 	
 	public void reset() {
-		btAdd.setText(bundle.getString("verifications.symbolic.add"));
-		btCheck.setText(bundle.getString("verifications.symbolic.check"));
+		btAdd.setText(bundle.getString("common.buttons.add"));
+		btCheck.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.addAndCheck"));
 		setCheckListeners();
 		tfFormula.clear();
 		cbOperations.getSelectionModel().clearSelection();
 	}
 	
-	private void show(final Node node) {
-		optionsPane.getChildren().forEach(c -> c.setVisible(false));
-		if (node != null) {
-			node.setVisible(true);
-			node.toFront();
+	public void changeGUIType(final SymbolicGUIType guiType) {
+		this.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView);
+		switch (guiType) {
+			case NONE:
+				break;
+			
+			case TEXT_FIELD:
+				this.getChildren().add(0, tfFormula);
+				break;
+			
+			case CHOICE_BOX:
+				this.getChildren().add(0, cbOperations);
+				break;
+			
+			case PREDICATE:
+				this.getChildren().add(0, predicateBuilderView);
+				break;
+			
+			default:
+				throw new AssertionError("Unhandled GUI type: " + guiType);
 		}
 	}
-	
-	public void showNone() {
-		show(null);
-	}
-	
-	public void showTextField() {
-		show(tfFormula);
-	}
-	
-	public void showChoiceBox() {
-		show(cbOperations);
-	}
-	
-	public void showPredicate() {
-		show(predicateBuilderView);
-	}
-	
-	
 }

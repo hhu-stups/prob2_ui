@@ -128,7 +128,7 @@ public class StateVisualisationView extends AnchorPane {
 			contextMenu.getItems().add(item);
 		}
 		if (options.isEmpty()) {
-			final MenuItem item = new MenuItem(bundle.getString("visualisation.noRightClickOptions"));
+			final MenuItem item = new MenuItem(bundle.getString("visualisation.stateVisualisationView.contextMenu.noRightClickOptions"));
 			item.setDisable(true);
 			contextMenu.getItems().add(item);
 		}
@@ -161,7 +161,7 @@ public class StateVisualisationView extends AnchorPane {
 				imagePath = Paths.get(Main.getProBDirectory()).resolve(imageURL).toFile();
 				final File imageInProbFolder = imagePath;
 				if (!imageInProbFolder.exists()) {
-					throw new FileNotFoundException(String.format(bundle.getString("visualisation.error.imageNotFound"), imagePath.getName(), imageInMachineFolder.getParent(), imageInProjectFolder.getParent(), imageInProbFolder.getParent()));
+					throw new FileNotFoundException(String.format("Image %s not found in machine folder (%s) and project folder (%s) and ProB folder (%s)", imagePath.getName(), imageInMachineFolder.getParent(), imageInProjectFolder.getParent(), imageInProbFolder.getParent()));
 				}
 			}
 		}

@@ -75,7 +75,8 @@ public class LTLResultHandler extends AbstractResultHandler {
 			item.setCheckedSuccessful();
 		} else {
 			final String msg = parseListener.getErrorMarkers().stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
-			resultItem = new CheckingResultItem(Checked.FAIL, msg, bundle.getString("verifications.result.couldNotParsePattern.header"));
+			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.couldNotParsePattern.header", 
+					"verifications.result.message", msg);
 			item.setCheckedFailed();
 		}
 		item.setResultItem(resultItem);

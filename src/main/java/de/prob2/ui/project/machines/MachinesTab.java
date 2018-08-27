@@ -86,11 +86,13 @@ public class MachinesTab extends Tab {
 		
 		@FXML
 		private void handleRemove() {
-			stageManager.makeAlert(Alert.AlertType.CONFIRMATION, String.format(bundle.getString("project.machines.machinesTab.alerts.removeMachineConfirmation.content"), this.machine.getName())).showAndWait().ifPresent(buttonType -> {
-				if (buttonType.equals(ButtonType.OK)) {
-					currentProject.removeMachine(this.machine);
-				}
-			});
+			stageManager.makeAlert(Alert.AlertType.CONFIRMATION, "",
+					"project.machines.machinesTab.alerts.removeMachineConfirmation.content", this.machine.getName())
+					.showAndWait().ifPresent(buttonType -> {
+						if (buttonType.equals(ButtonType.OK)) {
+							currentProject.removeMachine(this.machine);
+						}
+					});
 		}
 		
 		@FXML
@@ -224,7 +226,7 @@ public class MachinesTab extends Tab {
 			Files.write(path, Arrays.asList("MACHINE " + machineName, "END"));
 		} catch (IOException e) {
 			LOGGER.error("Could not create machine file", e);
-			stageManager.makeExceptionAlert(bundle.getString("project.machines.machinesTab.alerts.couldNotCreateMachine.content"), e);
+			stageManager.makeExceptionAlert(e, "project.machines.machinesTab.alerts.couldNotCreateMachine.content");
 			return;
 		}
 		final Path relative = currentProject.getLocation().relativize(selected.toPath());
@@ -249,10 +251,9 @@ public class MachinesTab extends Tab {
 
 		final Path relative = currentProject.getLocation().relativize(selected.toPath());
 		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
-			stageManager.makeAlert(
-				Alert.AlertType.ERROR,
-				String.format(bundle.getString("project.machines.machinesTab.alerts.machineAlreadyExists.content"), relative)
-			).showAndWait();
+			stageManager.makeAlert(Alert.AlertType.ERROR, "",
+					"project.machines.machinesTab.alerts.machineAlreadyExists.content", relative)
+					.showAndWait();
 			return;
 		}
 		final Set<String> machineNamesSet = currentProject.getMachines().stream()

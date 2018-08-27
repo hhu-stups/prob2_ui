@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -17,19 +18,13 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.translator.types.BObject;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.fx.exception.VisualisationParseException;
-
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Christoph Heinzen
@@ -41,7 +36,6 @@ public class VisualisationModel {
 
 	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
 
 	private Trace oldTrace;
 	private Trace newTrace;
@@ -50,10 +44,9 @@ public class VisualisationModel {
 	private boolean randomExecution;
 	private AbstractModel model;
 
-	VisualisationModel(CurrentTrace currentTrace, StageManager stageManager, ResourceBundle bundle) {
+	VisualisationModel(CurrentTrace currentTrace, StageManager stageManager) {
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
-		this.bundle = bundle;
 		this.parsedFormulas = new HashMap<>();
 	}
 
@@ -248,9 +241,9 @@ public class VisualisationModel {
 			IEvalElement parsedFormula = model.parseFormula(formula, FormulaExpand.EXPAND);
 			parsedFormulas.put(formula, parsedFormula);
 			return parsedFormula;
-		} catch (Throwable t) {
-			LOGGER.warn("Could not parse formula \"{}\".", formula, t);
-			throw new VisualisationParseException(formula, t);
+		} catch (Exception e) {
+			LOGGER.warn("Could not parse formula \"{}\".", formula, e);
+			throw new VisualisationParseException(formula, e);
 		}
 	}
 
@@ -279,9 +272,7 @@ public class VisualisationModel {
 			}
 			return null;
 		} catch (EvaluationException | VisualisationParseException evalException) {
-			Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
-					String.format(bundle.getString("visualisation.model.eval"), formula, evalException.getMessage()),
-					ButtonType.OK);
+			Alert alert = stageManager.makeExceptionAlert(evalException, "visualisation.fx.model.alerts.evaluationException.content", formula);
 			alert.initOwner(stageManager.getCurrent());
 			alert.show();
 			LOGGER.warn("EvaluationException while evaluating the formula \"" + formula +"\".", evalException);

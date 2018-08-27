@@ -8,6 +8,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.check.IModelCheckJob;
+
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -46,6 +47,7 @@ public class SymbolicAnimationChecker extends SymbolicExecutor {
 			.ifPresent(item -> checkItem(checker, item, checkAll));
 	}
 	
+
 	@Override
 	protected void updateTrace(SymbolicFormulaItem item) {
 		Trace example = ((SymbolicAnimationFormulaItem) item).getExample();
@@ -53,7 +55,7 @@ public class SymbolicAnimationChecker extends SymbolicExecutor {
 			currentTrace.set(example);
 		}
 	}
-		
+
 	public void updateMachine(Machine machine) {
 		final SymbolicAnimationView symbolicAnimationView = injector.getInstance(SymbolicAnimationView.class);
 		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);

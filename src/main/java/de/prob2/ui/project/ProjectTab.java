@@ -1,16 +1,12 @@
 package de.prob2.ui.project;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -43,13 +39,10 @@ public class ProjectTab extends Tab {
 	
 	private final StageManager stageManager;
 	
-	private final ResourceBundle bundle;
-
 	@Inject
-	private ProjectTab(final StageManager stageManager, final CurrentProject currentProject, final ResourceBundle bundle) {
+	private ProjectTab(final StageManager stageManager, final CurrentProject currentProject) {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
-		this.bundle = bundle;
 		stageManager.loadFXML(this, "project_tab.fxml");
 	}
 
@@ -85,9 +78,10 @@ public class ProjectTab extends Tab {
 			if (keyEvent.getCode().equals(KeyCode.ENTER)) {
 				String name = projectNameTextField.getText();
 				if(name.replaceAll(" ", "").length() == 0) {
-					Alert alert = stageManager.makeAlert(AlertType.WARNING, bundle.getString("project.projectTab.alerts.emptyNameWarning.content"));
-					alert.setHeaderText(bundle.getString("project.projectTab.alerts.emptyNameWarning.header"));
-					alert.showAndWait();
+					stageManager.makeAlert(AlertType.WARNING, 
+							"project.projectTab.alerts.emptyNameWarning.header",
+							"project.projectTab.alerts.emptyNameWarning.content")
+							.showAndWait();
 					return;
 				}
 				currentProject.changeName(name);

@@ -17,8 +17,8 @@ import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
-import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
@@ -41,11 +41,14 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	protected ArrayList<Class<?>> success;
 	protected ArrayList<Class<?>> error;
 	protected ArrayList<Class<?>> interrupted;
+
+	private final StageManager stageManager;
 	
 	@Inject
-	public SymbolicAnimationResultHandler(final ResourceBundle bundle, final CurrentTrace currentTrace) {
+	public SymbolicAnimationResultHandler(final ResourceBundle bundle, final CurrentTrace currentTrace, final StageManager stageManager) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
+		this.stageManager = stageManager;
 		this.success = new ArrayList<>();
 		this.error = new ArrayList<>();
 		this.interrupted = new ArrayList<>();
@@ -53,42 +56,43 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
 		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class));
 	}
-
+	
 	public void handleFindValidState(SymbolicAnimationFormulaItem item, FindStateCommand cmd, StateSpace stateSpace) {
 		FindStateCommand.ResultType result = cmd.getResult();
 		item.setExample(null);
 		// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
 		if (result == FindStateCommand.ResultType.STATE_FOUND) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.findValidState.result.found"), Checked.SUCCESS);
+			showCheckingResult(item, Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.findValidState.result.found");
 			item.setExample(cmd.getTrace(stateSpace));
 		} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.findValidState.result.notFound"), Checked.FAIL);
+			showCheckingResult(item, Checked.FAIL, "verifications.symbolicchecking.resultHandler.findValidState.result.notFound");
 		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.findValidState.result.interrupted"), Checked.INTERRUPTED);
+			showCheckingResult(item, Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.findValidState.result.interrupted");
 		} else {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.findValidState.result.error"), Checked.FAIL);
+			showCheckingResult(item, Checked.FAIL, "verifications.symbolicchecking.resultHandler.findValidState.result.error");
 		}
 	}
 	
 	public void handleFindRedundantInvariants(SymbolicAnimationFormulaItem item, GetRedundantInvariantsCommand cmd) {
 		List<String> result = cmd.getRedundantInvariants();
 		if(cmd.isInterrupted()) {
-			showCheckingResult(item, bundle.getString("verifications.interrupted"), Checked.INTERRUPTED);
+			showCheckingResult(item, Checked.INTERRUPTED, "verifications.interrupted");
 		} else if (result.isEmpty()) {
-			showCheckingResult(item, bundle.getString("verifications.symbolic.findRedundantInvariants.result.notFound"), Checked.SUCCESS);
+			showCheckingResult(item, Checked.SUCCESS, 
+					"verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound");
 		} else {
-			final String header = bundle.getString(cmd.isTimeout() ? "verifications.symbolic.findRedundantInvariants.result.timeout" : "verifications.symbolic.findRedundantInvariants.result.found");
-			showCheckingResult(item, String.join("\n", result), header, Checked.FAIL);
+			final String headerKey = cmd.isTimeout() ? "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.timeout" : "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found";
+			showCheckingResult(item, Checked.FAIL, headerKey, "verifications.result.message", String.join("\n", result));
 		}
 	}
 	
-	private void showCheckingResult(SymbolicAnimationFormulaItem item, String msg, String header, Checked checked) {
-		item.setResultItem(new CheckingResultItem(checked, msg, header));
+	private void showCheckingResult(SymbolicAnimationFormulaItem item, Checked checked, String headerKey, String msgKey, Object... msgParams) {
+		item.setResultItem(new CheckingResultItem(checked, headerKey, msgKey, msgParams ));
 		handleItem(item, checked);
 	}
 	
-	private void showCheckingResult(SymbolicAnimationFormulaItem item, String msg, Checked checked) {
-		showCheckingResult(item, msg, msg, checked);
+	private void showCheckingResult(SymbolicAnimationFormulaItem item, Checked checked, String msgKey) {
+		showCheckingResult(item, checked, msgKey, msgKey);
 	}
 	
 	protected void handleItem(AbstractCheckableItem item, Checked checked) {
@@ -102,7 +106,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		}
 	}
 	
-	public void handleFormulaResult(SymbolicFormulaItem item, Object result, State stateid) {
+	public void handleFormulaResult(SymbolicFormulaItem item, Object result) {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			handleItem(item, Checked.SUCCESS);
@@ -111,20 +115,24 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		} else {
 			handleItem(item, Checked.INTERRUPTED);
 		}
-		CheckingResultItem resultItem = handleFormulaResult(result, stateid);
+		CheckingResultItem resultItem = handleFormulaResult(result);
 		item.setResultItem(resultItem);
 	}
 	
-	public CheckingResultItem handleFormulaResult(Object result, State stateid) {
+	public CheckingResultItem handleFormulaResult(Object result) {
 		CheckingResultItem resultItem = null;
 		if(success.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.SUCCESS, String.format(bundle.getString("verifications.result.succeeded"), bundle.getString("verifications.abstractResultHandler.itemType.formula")), "Success");
+			resultItem = new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.result.succeeded.header",
+					"animation.symbolic.result.succeeded.message");
 		} else if(error.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.FAIL, ((IModelCheckingResult) result).getMessage(), bundle.getString("verifications.result.error"));
+			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.error.header",
+					"verifications.result.message", ((IModelCheckingResult) result).getMessage());
 		} else if(result instanceof Throwable) {
-			resultItem = new CheckingResultItem(Checked.FAIL, bundle.getString("verifications.result.couldNotParseFormula.message") + " " + result, bundle.getString("verifications.result.couldNotParseFormula.header"));
+			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.couldNotParseFormula.header",
+					"verifications.result.message", result);
 		} else if(interrupted.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.INTERRUPTED, ((IModelCheckingResult) result).getMessage(),  bundle.getString("verifications.interrupted"));
+			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "verifications.result.interrupted.header",
+					"verifications.result.message", ((IModelCheckingResult) result).getMessage());
 		}
 		return resultItem;
 	}
@@ -139,11 +147,10 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	}
 	
 	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle(String.format("%s already exists", bundle.getString(itemType.getKey())));
-		alert.setHeaderText(String.format("%s already exists", bundle.getString(itemType.getKey())));
-		alert.setContentText(String.format("Declared %s already exists", bundle.getString(itemType.getKey())));
-		alert.showAndWait();
+		stageManager.makeAlert(AlertType.INFORMATION,
+				"verifications.abstractResultHandler.alerts.alreadyExists.header",
+				"verifications.abstractResultHandler.alerts.alreadyExists.content", bundle.getString(itemType.getKey()))
+				.showAndWait();
 	}
 	
 	public void showResult(SymbolicAnimationFormulaItem item) {
@@ -151,11 +158,11 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		if(resultItem == null || item.getChecked() == Checked.SUCCESS) {
 			return;
 		}
-		Alert alert = new Alert(
+		Alert alert = stageManager.makeAlert(
 				resultItem.getChecked().equals(Checked.SUCCESS) ? AlertType.INFORMATION : AlertType.ERROR,
-				resultItem.getMessage());
+				resultItem.getHeaderBundleKey(),
+				resultItem.getMessageBundleKey(), resultItem.getMessageParams());
 		alert.setTitle(item.getName());
-		alert.setHeaderText(resultItem.getHeader());
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.showAndWait();
 	}

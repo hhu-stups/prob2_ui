@@ -2,16 +2,26 @@ package de.prob2.ui;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import de.prob.Main;
 import de.prob.cli.ProBInstanceProvider;
-
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
@@ -24,7 +34,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.application.Preloader;
@@ -32,19 +41,10 @@ import javafx.event.Event;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ProB2 extends Application {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProB2.class);
@@ -77,14 +77,8 @@ public class ProB2 extends Application {
 			StageManager stageManager = injector.getInstance(StageManager.class);
 			Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
 				LOGGER.error("Uncaught exception on thread {}", thread, exc);
-				Platform.runLater(() -> {
-					final String message = String.format(
-							bundle.getString("common.alerts.internalException.content"),
-							thread);
-					final Alert alert = stageManager.makeExceptionAlert(message, exc);
-					alert.setHeaderText(bundle.getString("common.alerts.internalException.header"));
-					alert.show();
-				});
+				Platform.runLater(() -> stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header",
+						"common.alerts.internalException.content", thread).show());
 			});
 
 			System.setProperty("prob.stdlib", Main.getProBDirectory() + File.separator + "stdlib");
@@ -135,19 +129,13 @@ public class ProB2 extends Application {
 			}
 
 			if (foundMachine == null) {
-				Alert alert = stageManager.makeAlert(
-					Alert.AlertType.ERROR,
-					String.format(bundle.getString("common.alerts.noMachine.content"), runtimeOptions.getMachine(), currentProject.getName())
-				);
-				alert.setHeaderText(bundle.getString("common.alerts.noMachine.header"));
-				alert.show();
+				stageManager.makeAlert(AlertType.ERROR, "common.alerts.noMachine.header",
+						"common.alerts.noMachine.content", runtimeOptions.getMachine(), currentProject.getName())
+						.show();
 			} else if (foundPreference == null) {
-				Alert alert = stageManager.makeAlert(
-					Alert.AlertType.ERROR,
-					String.format(bundle.getString("common.alerts.noPreference.content"), runtimeOptions.getPreference(), currentProject.getName())
-				);
-				alert.setHeaderText(bundle.getString("common.alerts.noPreference.header"));
-				alert.show();
+				stageManager.makeAlert(Alert.AlertType.ERROR, "common.alerts.noPreference.header",
+						"common.alerts.noPreference.content", runtimeOptions.getPreference(), currentProject.getName())
+						.show();
 			} else {
 				currentProject.startAnimation(foundMachine, foundPreference);
 			}
@@ -266,11 +254,13 @@ public class ProB2 extends Application {
 		if (!currentProject.isSaved()) {
 			ButtonType save = new ButtonType(bundle.getString("common.buttons.save"), ButtonBar.ButtonData.YES);
 			ButtonType doNotSave = new ButtonType(bundle.getString("common.buttons.doNotSave"), ButtonBar.ButtonData.NO);
-			Alert alert = stageManager.makeAlert(
-				Alert.AlertType.CONFIRMATION,
-				String.format(bundle.getString("common.alerts.unsavedProjectChanges.content"), currentProject.getName()),
-				save, ButtonType.CANCEL, doNotSave);
-			alert.setHeaderText(bundle.getString("common.alerts.unsavedProjectChanges.header"));
+			List<ButtonType> buttons = new ArrayList<>();
+			buttons.add(save);
+			buttons.add(ButtonType.CANCEL);
+			buttons.add(doNotSave);
+			Alert alert = stageManager.makeAlert(AlertType.CONFIRMATION, buttons,
+					"common.alerts.unsavedProjectChanges.header", "common.alerts.unsavedProjectChanges.content",
+					currentProject.getName());
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
 				event.consume();

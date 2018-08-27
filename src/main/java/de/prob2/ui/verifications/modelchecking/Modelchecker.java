@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
@@ -58,20 +57,17 @@ public class Modelchecker implements IModelCheckListener {
 	
 	private final CurrentProject currentProject;
 	
-	private final ResourceBundle bundle;
-	
 	private final Injector injector;
 	
 	private Object lock = new Object();
 	
 	@Inject
 	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
-						 final ModelcheckingStage modelcheckingStage, final ResourceBundle bundle, final Injector injector) {
+						 final ModelcheckingStage modelcheckingStage, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.modelcheckingStage = modelcheckingStage;
-		this.bundle = bundle;
 		this.injector = injector;
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 		this.currentJobs = new ArrayList<>();
@@ -144,8 +140,8 @@ public class Modelchecker implements IModelCheckListener {
 			LOGGER.error("Exception in updateStats", e);
 			Platform.runLater(
 					() -> stageManager
-							.makeExceptionAlert(bundle.getString(
-									"verifications.modelchecking.modelchecker.alerts.updatingStatsError.content"), e)
+							.makeExceptionAlert(e,
+									"verifications.modelchecking.modelchecker.alerts.updatingStatsError.content")
 							.show());
 		}
 	}
@@ -189,7 +185,7 @@ public class Modelchecker implements IModelCheckListener {
 			result = job.call();
 		} catch (Exception e) {
 			LOGGER.error("Exception while running model check job", e);
-			Platform.runLater(() -> stageManager.makeExceptionAlert(bundle.getString("verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content"), e).show());
+			Platform.runLater(() -> stageManager.makeExceptionAlert(e, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
 			return;
 		} finally {
 			modelcheckingStage.setDisableStart(false);

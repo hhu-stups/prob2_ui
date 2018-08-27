@@ -7,32 +7,28 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ResourceBundle;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.statespace.StateSpace;
-
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class ExternalEditor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExternalEditor.class);
 
 	private final MachineLoader machineLoader;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
 
 	@Inject
-	private ExternalEditor(final StageManager stageManager, final MachineLoader machineLoader, final ResourceBundle bundle) {
+	private ExternalEditor(final StageManager stageManager, final MachineLoader machineLoader) {
 		this.machineLoader = machineLoader;
 		this.stageManager = stageManager;
-		this.bundle = bundle;
 	}
 
 	private Path getExternalEditorPath() {
@@ -64,7 +60,7 @@ public final class ExternalEditor {
 			processBuilder.start();
 		} catch (IOException e) {
 			LOGGER.error("Failed to start external editor", e);
-			stageManager.makeExceptionAlert(bundle.getString("menu.externalEditor.alerts.couldNotStartEditor.content"), e).showAndWait();
+			stageManager.makeExceptionAlert(e, "menu.externalEditor.alerts.couldNotStartEditor.content").showAndWait();
 		}
 	}
 }

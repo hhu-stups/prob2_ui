@@ -21,6 +21,8 @@
 					<VBox spacing="15.0" styleClass="dark">
 						<CheckBox fx:id="detachOperations"
 							text="%common.views.operations" />
+						<CheckBox fx:id="detachAnimation"
+							text="%common.views.animation" />
 						<CheckBox fx:id="detachHistory"
 							text="%common.views.history" />
 						<CheckBox fx:id="detachVerifications"

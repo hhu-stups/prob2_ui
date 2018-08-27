@@ -43,6 +43,7 @@ public class HelpButton extends Button{
 				LoggerFactory.getLogger(HelpButton.class).error("No class with this name found", e);
 			}
 		}
+		scanner.close();
 		return map;
 	}
 

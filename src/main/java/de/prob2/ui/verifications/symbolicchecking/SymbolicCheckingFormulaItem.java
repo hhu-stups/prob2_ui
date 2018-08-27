@@ -31,12 +31,6 @@ public class SymbolicCheckingFormulaItem extends SymbolicFormulaItem {
 		return counterExamples;
 	}
 	
-	@Override
-	public void initializeStatus() {
-		super.initializeStatus();
-	}
-	
-	
 	public void reset() {
 		this.initializeStatus();
 		this.counterExamples.clear();

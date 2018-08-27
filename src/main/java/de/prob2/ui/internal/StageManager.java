@@ -21,12 +21,10 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
-
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.machines.Machine;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
@@ -50,9 +48,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W
  * shortcut. Also provides some convenience methods for creating {@link Stage}s
@@ -64,7 +59,6 @@ public final class StageManager {
 		PERSISTENCE_ID, USE_GLOBAL_MAC_MENU_BAR
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(StageManager.class);
 	private static final String STYLESHEET = "prob.css";
 	private static final Image ICON = new Image("prob_128.png");
 	private static final String PROJECT_FILE_ENDING = "*.prob2project";
@@ -271,39 +265,38 @@ public final class StageManager {
 	}
 
 	/**
-	 * Create and register a new alert. The arguments are the same as with
-	 * {@link Alert#Alert(Alert.AlertType, String, ButtonType...)}.
-	 *
-	 * @return a new alert
-	 */
-	@SuppressWarnings("OverloadedVarargsMethod") // OK here, because the overload is shorter than the vararg version
-	public Alert makeAlert(final Alert.AlertType alertType, final String contentText, final ButtonType... buttons) {
-		final Alert alert = new Alert(alertType, contentText, buttons);
-		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-		this.register(alert);
-		return alert;
-	}
-
-	/**
 	 * Create and register a new alert.
 	 *
-	 * @param alertType
-	 *            the alert type
 	 * @return a new alert
 	 */
-	public Alert makeAlert(final Alert.AlertType alertType) {
-		final Alert alert = new Alert(alertType);
+	public Alert makeAlert(final Alert.AlertType alertType, final List<ButtonType> buttons,
+			final String headerBundleKey, final String contentBundleKey, final Object... contentParams) {
+		final Alert alert = new Alert(alertType, String.format(bundle.getString(contentBundleKey), contentParams),
+				buttons.toArray(new ButtonType[buttons.size()]));
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		this.register(alert);
+		if (!headerBundleKey.isEmpty()) {
+			alert.setHeaderText(bundle.getString(headerBundleKey));
+		}
 		return alert;
 	}
-
-	public Alert makeExceptionAlert(final String contentText, final Throwable exc) {
-		return new ExceptionAlert(this.injector, contentText, exc);
-	}
 	
+	public Alert makeAlert(final Alert.AlertType alertType, final String headerBundleKey, final String contentBundleKey,
+			final Object... contentParams) {
+		return makeAlert(alertType, new ArrayList<ButtonType>(), headerBundleKey, contentBundleKey, contentParams);
+	}
+
 	public Alert makeExceptionAlert(final Throwable exc, final String contentBundleKey, final Object... contentParams) {
 		return new ExceptionAlert(this.injector, String.format(bundle.getString(contentBundleKey), contentParams), exc);
+	}
+
+	public Alert makeExceptionAlert(final Throwable exc, final String headerBundleKey, final String contentBundleKey,
+			final Object... contentParams) {
+		Alert alert = makeExceptionAlert(exc, contentBundleKey, contentParams);
+		if (!headerBundleKey.isEmpty()) {
+			alert.setHeaderText(bundle.getString(headerBundleKey));
+		}
+		return alert;
 	}
 	
 	/**

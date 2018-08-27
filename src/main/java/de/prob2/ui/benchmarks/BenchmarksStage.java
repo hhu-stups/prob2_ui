@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -80,6 +81,9 @@ public class BenchmarksStage extends Stage {
 	@FXML
 	private TextField tfExecFrequency;
 
+	@FXML
+	private HelpButton helpButton;
+
 	private final List<String> identifiers;
 
 	private final List<TextField> valueTextFields;
@@ -97,11 +101,12 @@ public class BenchmarksStage extends Stage {
 		this.bundle = bundle;
 		this.identifiers = new ArrayList<>();
 		this.valueTextFields = new ArrayList<>();
-		stageManager.loadFXML(this, "benchmarks_view.fxml");
+		stageManager.loadFXML(this, "benchmarks_stage.fxml");
 	}
 
 	@FXML
 	private void initialize() {
+		helpButton.setHelpContent(this.getClass());
 		choicePositionColumn.setCellValueFactory(new PropertyValueFactory<>("position"));
 		choiceOperationColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		positionColumn.setCellValueFactory(new PropertyValueFactory<>("position"));
@@ -110,7 +115,7 @@ public class BenchmarksStage extends Stage {
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> reset());
 		benchmarksChoiceTableView.setRowFactory(table -> {
 			final TableRow<BenchmarkItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(bundle.getString("benchmarks.remove"));
+			MenuItem removeItem = new MenuItem(bundle.getString("common.contextMenu.delete"));
 			removeItem.setOnAction(e -> {
 				BenchmarkItem currentItem = benchmarksChoiceTableView.getSelectionModel().getSelectedItem();
 				benchmarksChoiceTableView.getItems().remove(currentItem);
@@ -198,7 +203,7 @@ public class BenchmarksStage extends Stage {
 			List<Transition> nextTransitions = currentTrace.getCurrentState().getOutTransitions().stream()
 					.filter(out -> item.getOperation().getTransition().getName().equals(out.getName()))
 					.collect(Collectors.toList());
-			if(nextTransitions.size() > 0) {
+			if(!nextTransitions.isEmpty()) {
 				Transition nextTransition = nextTransitions.get(0);
 				String name = nextTransition.getName();
 				List<String> parameters = nextTransition.getParameterValues();
@@ -217,7 +222,7 @@ public class BenchmarksStage extends Stage {
 	@FXML
 	private void save() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("benchmarks.csv"));
+		fileChooser.setTitle(bundle.getString("common.fileChooser.saveAsCSV.title"));
 		File file = fileChooser.showSaveDialog(new Stage());
 		if(file == null) {
 			return;

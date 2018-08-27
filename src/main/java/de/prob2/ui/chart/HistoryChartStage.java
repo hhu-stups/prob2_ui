@@ -393,20 +393,22 @@ public final class HistoryChartStage extends Stage {
 					return Integer.parseInt(value);
 				} catch (NumberFormatException e) {
 					if (showErrors) {
-						Alert alert = stageManager.makeExceptionAlert(bundle.getString("chart.historyChart.alerts.formulaEvalError.invalidInteger.content"), e);
-						alert.setHeaderText(bundle.getString("chart.historyChart.alerts.formulaEvalError.header"));
-						alert.show();
+						stageManager.makeExceptionAlert(e, "chart.historyChart.alerts.formulaEvalError.header",
+								"chart.historyChart.alerts.formulaEvalError.invalidInteger.content").show();
 					}
 					throw new IllegalArgumentException("Could not evaluate formula for history chart: Not a valid integer", e);
 				}
 			}
 		} else {
 			if (showErrors) {
-				Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, String.format(bundle.getString("chart.historyChart.alerts.formulaEvalError.notAnEvalResult.content"), aer));
-				alert.setHeaderText(bundle.getString("chart.historyChart.alerts.formulaEvalError.header"));
-				alert.show();
+				stageManager.makeAlert(Alert.AlertType.ERROR, 
+						"chart.historyChart.alerts.formulaEvalError.header",
+						"chart.historyChart.alerts.formulaEvalError.notAnEvalResult.content", aer)
+						.show();
 			}
-			throw new IllegalArgumentException("Could not evaluate formula for history chart: Expected an EvalResult, not " + aer.getClass().getName());
+			throw new IllegalArgumentException(
+					"Could not evaluate formula for history chart: Expected an EvalResult, not "
+							+ aer.getClass().getName());
 		}
 	}
 }

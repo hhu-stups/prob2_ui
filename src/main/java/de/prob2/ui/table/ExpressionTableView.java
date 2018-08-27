@@ -117,7 +117,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 				LOGGER.error("Table visualization failed", e);
 				currentThread.set(null);
 				Platform.runLater(() -> {
-					stageManager.makeExceptionAlert(bundle.getString("table.expressionTableView.alerts.visualisationNotPossible.message"), e).show();
+					stageManager.makeExceptionAlert(e, "table.expressionTableView.alerts.visualisationNotPossible.message").show();
 					reset();
 				});
 			}
@@ -155,7 +155,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@FXML
 	private void save() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("table.expressionTableView.fileChooser.saveAsCSV.title"));
+		fileChooser.setTitle(bundle.getString("common.fileChooser.saveAsCSV.title"));
 		File file = fileChooser.showSaveDialog(new Stage());
 		if(file == null || currentTable == null) {
 			return;

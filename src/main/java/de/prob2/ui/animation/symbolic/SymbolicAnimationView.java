@@ -151,17 +151,17 @@ public class SymbolicAnimationView extends ScrollPane {
 			
 			final TableRow<SymbolicAnimationFormulaItem> row = new TableRow<>();
 			
-			MenuItem checkItem = new MenuItem(bundle.getString("verifications.symbolic.menu.check"));
+			MenuItem checkItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.check"));
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> {
 				symbolicCheckHandler.handleItem(row.getItem(), false);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
 			});
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("verifications.symbolicchecking.symbolicCheckingView.contextMenu.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(SymbolicAnimationResultHandler.class).showResult(row.getItem()));
 			
-			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.symbolic.menu.showFoundState"));
+			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.showFoundState"));
 			showStateItem.setDisable(true);
 			
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -181,11 +181,11 @@ public class SymbolicAnimationView extends ScrollPane {
 			});
 
 			
-			MenuItem removeItem = new MenuItem(bundle.getString("verifications.symbolic.menu.remove"));
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.remove"));
 			removeItem.setOnAction(e -> removeFormula());
 			removeItem.disableProperty().bind(row.emptyProperty());
 			
-			MenuItem changeItem = new MenuItem(bundle.getString("verifications.symbolic.menu.change"));
+			MenuItem changeItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.change"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
 			
 			row.setContextMenu(new ContextMenu(checkItem, changeItem, showMessage, showStateItem, removeItem));

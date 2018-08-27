@@ -1,5 +1,6 @@
 package de.prob2.ui.plugin;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -192,12 +193,14 @@ public class PluginMenuStage extends Stage {
 		MenuItem removeMenuItem = new MenuItem(
 				getFormattedString("plugin.pluginMenu.table.contextmenu.remove", pluginName));
 		removeMenuItem.setOnAction(event -> {
-			Alert dialog = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-					getFormattedString("plugin.pluginMenu.alerts.confirmRemovingPlugin.content", pluginName),
-					ButtonType.NO, ButtonType.YES);
-			dialog.initOwner(this);
-			dialog.setTitle(bundle.getString("plugin.pluginMenu.alerts.confirmRemovingPlugin.title"));
-			dialog.showAndWait().ifPresent(response -> {
+			List<ButtonType> buttons = new ArrayList<>();
+			buttons.add(ButtonType.YES);
+			buttons.add(ButtonType.NO);
+			Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons,
+					"plugin.pluginMenu.alerts.confirmRemovingPlugin.header",
+					"plugin.pluginMenu.alerts.confirmRemovingPlugin.content", pluginName);
+			alert.initOwner(this);
+			alert.showAndWait().ifPresent(response -> {
 				if (response == ButtonType.YES) {
 					getProBJarPluginManager().deletePlugin(pluginId);
 				}

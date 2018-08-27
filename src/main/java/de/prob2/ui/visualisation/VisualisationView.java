@@ -12,7 +12,6 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
@@ -64,9 +63,8 @@ public class VisualisationView extends AnchorPane {
 				}
 			} catch (FileNotFoundException e) {
 				LOGGER.warn("Failed to open images for visualisation", e);
-				Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, e.getMessage());
-				alert.setHeaderText(bundle.getString("visualisation.error.visualisationNotPossible"));
-				alert.showAndWait();
+				stageManager.makeExceptionAlert(e, "visualisation.view.alerts.visualisationNotPossible.header",
+						"visualisation.view.alerts.visualisationNotPossible.content").showAndWait();
 			}
 
 		});
@@ -75,9 +73,9 @@ public class VisualisationView extends AnchorPane {
 			if(to == null) {
 				placeholderLabel.setText(bundle.getString("common.noModelLoaded"));
 			} else if (currentTrace.getCurrentState().isInitialised()) {
-				placeholderLabel.setText(bundle.getString("visualisation.placeholder.noAnimationFunction"));
+				placeholderLabel.setText(bundle.getString("visualisation.view.noAnimationFunction"));
 			} else {
-				placeholderLabel.setText(bundle.getString("visualisation.placeholder.notInitialised"));
+				placeholderLabel.setText(bundle.getString("common.notInitialised"));
 			}
 		});
 
