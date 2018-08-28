@@ -99,6 +99,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		});
 	}
 	
+	@Override
 	protected void setBindings() {
 		super.setBindings();
 		tvFormula.setOnMouseClicked(e-> {
@@ -131,7 +132,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	
 	private void removeFormula() {
 		Machine machine = currentProject.getCurrentMachine();
-		SymbolicCheckingFormulaItem item = (SymbolicCheckingFormulaItem) tvFormula.getSelectionModel().getSelectedItem();
+		SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 		machine.removeSymbolicCheckingFormula(item);
 		updateProject();
 	}

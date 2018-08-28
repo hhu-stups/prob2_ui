@@ -49,6 +49,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 		tvFormula.refresh();
 	}
 	
+	@Override
 	protected void setBindings() {
 		super.setBindings();
 		tvFormula.setOnMouseClicked(e-> {

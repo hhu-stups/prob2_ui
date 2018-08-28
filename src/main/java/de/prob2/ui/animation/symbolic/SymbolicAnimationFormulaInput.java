@@ -33,13 +33,6 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput {
 		stageManager.loadFXML(this, "symbolic_animation_formula_input.fxml");
 	}
 	
-	@FXML
-	public void initialize() {
-		this.update();
-		currentTrace.addListener((observable, from, to) -> update());
-		setCheckListeners();
-	}
-	
 	private void setChangeListeners(SymbolicAnimationFormulaItem item) {
 		btAdd.setOnAction(e -> {
 			if(!updateFormula(item)) {
