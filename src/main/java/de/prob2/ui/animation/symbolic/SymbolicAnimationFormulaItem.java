@@ -69,5 +69,6 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 		this.type = type;
 	}
 	
+	
 
 }

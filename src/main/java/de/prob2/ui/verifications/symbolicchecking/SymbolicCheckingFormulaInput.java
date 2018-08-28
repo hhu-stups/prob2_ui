@@ -1,9 +1,6 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -11,71 +8,31 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
-import de.prob.statespace.LoadedMachine;
-import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
+import de.prob2.ui.symbolic.SymbolicFormulaInput;
 import de.prob2.ui.symbolic.SymbolicGUIType;
 import de.prob2.ui.verifications.AbstractResultHandler;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
+
 
 @Singleton
-public class SymbolicCheckingFormulaInput extends VBox {
+public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput {
 	
 	private final SymbolicCheckingFormulaHandler symbolicCheckingFormulaHandler;
-	
-	private final CurrentProject currentProject;
-	
-	@FXML
-	private Button btAdd;
-	
-	@FXML
-	private Button btCheck;
-	
-	@FXML
-	private TextField tfFormula;
-	
-	@FXML
-	private ChoiceBox<String> cbOperations;
-	
-	@FXML
-	private PredicateBuilderView predicateBuilderView;
-	
-	private final Injector injector;
-	
-	private final ResourceBundle bundle;
-	
-	private final CurrentTrace currentTrace;
-	
-	private ArrayList<String> events;
 	
 	@Inject
 	public SymbolicCheckingFormulaInput(final StageManager stageManager, 
 										final SymbolicCheckingFormulaHandler symbolicCheckingFormulaHandler,
 										final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
 										final CurrentTrace currentTrace) {
+		super(stageManager, currentProject, injector, bundle, currentTrace);
 		this.symbolicCheckingFormulaHandler = symbolicCheckingFormulaHandler;
-		this.currentProject = currentProject;
-		this.currentTrace = currentTrace;
-		this.events = new ArrayList<>();
-		this.injector = injector;
-		this.bundle = bundle;
 		stageManager.loadFXML(this, "symbolic_checking_formula_input.fxml");
-	}
-	
-	@FXML
-	public void initialize() {
-		this.update();
-		currentTrace.addListener((observable, from, to) -> update());
-		setCheckListeners();
 	}
 	
 	private void setChangeListeners(SymbolicCheckingFormulaItem item) {
@@ -96,7 +53,7 @@ public class SymbolicCheckingFormulaInput extends VBox {
 		});
 	}
 	
-	private void setCheckListeners() {
+	protected void setCheckListeners() {
 		btAdd.setOnAction(e -> addFormula(false));
 		btCheck.setOnAction(e -> {
 			SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
@@ -171,21 +128,6 @@ public class SymbolicCheckingFormulaInput extends VBox {
 		return false;
 	}
 	
-	private void update() {
-		events.clear();
-		final Map<String, String> items = new LinkedHashMap<>();
-		if (currentTrace.get() != null) {
-			final LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
-			if (loadedMachine != null) {
-				events.addAll(loadedMachine.getOperationNames());
-				loadedMachine.getConstantNames().forEach(s -> items.put(s, ""));
-				loadedMachine.getVariableNames().forEach(s -> items.put(s, ""));
-			}
-		}
-		cbOperations.getItems().setAll(events);
-		predicateBuilderView.setItems(items);
-	}
-	
 	private void addFormula(boolean checking) {
 		SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
 		if(checkingType == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
@@ -234,37 +176,6 @@ public class SymbolicCheckingFormulaInput extends VBox {
 	@FXML
 	public void cancel() {
 		injector.getInstance(SymbolicCheckingChoosingStage.class).close();
-	}
-	
-	public void changeGUIType(final SymbolicGUIType guiType) {
-		this.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView);
-		switch (guiType) {
-			case NONE:
-				break;
-			
-			case TEXT_FIELD:
-				this.getChildren().add(0, tfFormula);
-				break;
-			
-			case CHOICE_BOX:
-				this.getChildren().add(0, cbOperations);
-				break;
-			
-			case PREDICATE:
-				this.getChildren().add(0, predicateBuilderView);
-				break;
-			
-			default:
-				throw new AssertionError("Unhandled GUI type: " + guiType);
-		}
-	}
-	
-	public void reset() {
-		btAdd.setText(bundle.getString("common.buttons.add"));
-		btCheck.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.addAndCheck"));
-		setCheckListeners();
-		tfFormula.clear();
-		cbOperations.getSelectionModel().clearSelection();
 	}
 
 }
