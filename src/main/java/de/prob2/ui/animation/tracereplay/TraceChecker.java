@@ -49,6 +49,8 @@ public class TraceChecker {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceChecker.class);
 
+	private static final String TRACE_REPLAY_ALERT_HEADER = "animation.tracereplay.alerts.traceReplayError.header";
+	
 	private final TraceLoader traceLoader;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
@@ -93,7 +95,7 @@ public class TraceChecker {
 						"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content", path);
 			} else {
 				alert = stageManager.makeAlert(AlertType.ERROR, buttons,
-						"animation.tracereplay.alerts.traceReplayError.header",
+						TRACE_REPLAY_ALERT_HEADER,
 						"animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content", path);
 			}
 			Optional<ButtonType> result = alert.showAndWait();
@@ -154,7 +156,7 @@ public class TraceChecker {
 
 				if (replayTrace.getErrorMessageBundleKey() != null) {
 					Platform.runLater(() -> stageManager.makeAlert(AlertType.ERROR, 
-							"animation.tracereplay.alerts.traceReplayError.header",
+							TRACE_REPLAY_ALERT_HEADER,
 							replayTrace.getErrorMessageBundleKey(), replayTrace.getErrorMessageParams())
 							.showAndWait());
 				}
@@ -242,7 +244,7 @@ public class TraceChecker {
 				Platform.runLater(
 						() -> stageManager
 								.makeExceptionAlert(e.getFirstException(),
-										"animation.tracereplay.alerts.traceReplayError.header",
+										TRACE_REPLAY_ALERT_HEADER,
 										"animation.tracereplay.traceChecker.alerts.traceReplayError.content")
 								.showAndWait());
 				return false;

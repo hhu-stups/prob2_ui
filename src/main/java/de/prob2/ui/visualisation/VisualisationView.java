@@ -36,14 +36,12 @@ public class VisualisationView extends AnchorPane {
 	private Label placeholderLabel;
 
 	private final CurrentTrace currentTrace;
-	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
 	@Inject
 	public VisualisationView(final CurrentTrace currentTrace, final StageManager stageManager,
 			final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
-		this.stageManager = stageManager;
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "visualisation_view.fxml");
 	}
@@ -56,6 +54,9 @@ public class VisualisationView extends AnchorPane {
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
 
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
+			if(placeholderLabel.getText().equals(bundle.getString("visualisation.view.placeholder.imageNotFound"))) {
+				return;
+			}
 			try {
 				currentStateVisualisation.visualiseState(to);
 				if (to != null && currentTrace.canGoBack()) {
@@ -63,8 +64,7 @@ public class VisualisationView extends AnchorPane {
 				}
 			} catch (FileNotFoundException e) {
 				LOGGER.warn("Failed to open images for visualisation", e);
-				stageManager.makeExceptionAlert(e, "visualisation.view.alerts.visualisationNotPossible.header",
-						"visualisation.view.alerts.visualisationNotPossible.content").showAndWait();
+				placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.imageNotFound"));
 			}
 
 		});
@@ -72,10 +72,10 @@ public class VisualisationView extends AnchorPane {
 		currentTrace.addListener((observable, from, to) -> {
 			if(to == null) {
 				placeholderLabel.setText(bundle.getString("common.noModelLoaded"));
-			} else if (currentTrace.getCurrentState().isInitialised()) {
-				placeholderLabel.setText(bundle.getString("visualisation.view.noAnimationFunction"));
-			} else {
+			} else if (!currentTrace.getCurrentState().isInitialised()) {
 				placeholderLabel.setText(bundle.getString("common.notInitialised"));
+			} else if (!placeholderLabel.getText().equals(bundle.getString("visualisation.view.placeholder.imageNotFound"))) {
+				placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.noAnimationFunction"));
 			}
 		});
 

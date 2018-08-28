@@ -35,6 +35,7 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 		return example;
 	}
 	
+	@Override
 	public void reset() {
 		this.initializeStatus();
 		this.example = new SimpleObjectProperty<>(null);
@@ -64,6 +65,7 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 		return String.join(" ", name, code, type.name());
 	}
 	
+	@Override
 	public void setData(String name, String description, String code, SymbolicExecutionType type) {
 		super.setData(name, description, code);
 		this.type = type;
