@@ -115,17 +115,8 @@ public class SymbolicCheckingFormulaHandler {
 			case INVARIANT:
 				handleInvariant(item.getCode(), checkAll);
 				break;
-			case DEADLOCK:
-				handleDeadlock(item.getCode(), checkAll);
-				break;
-			case SEQUENCE:
-				handleSequence(item.getCode(), checkAll);
-				break;
 			case FIND_VALID_STATE:
 				findValidState(item, checkAll);
-				break;
-			case FIND_DEADLOCK:
-				findDeadlock(checkAll);
 				break;
 			case CHECK_REFINEMENT:
 				handleRefinement(item, checkAll);
