@@ -8,108 +8,42 @@ import javax.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.statespace.Trace;
-import de.prob2.ui.helpsystem.HelpButton;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.symbolic.SymbolicView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
-import de.prob2.ui.verifications.IExecutableItem;
+
 import de.prob2.ui.verifications.MachineStatusHandler;
-import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
+
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableColumn;
+
 import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+
 
 @Singleton
-public class SymbolicCheckingView extends ScrollPane {
-	
-	
-	@FXML
-	private HelpButton helpButton;
-		
-	@FXML
-	private TableView<SymbolicCheckingFormulaItem> tvFormula;
-	
-	@FXML
-	private TableColumn<SymbolicCheckingFormulaItem, FontAwesomeIconView> formulaStatusColumn;
-	
-	@FXML
-	private TableColumn<SymbolicCheckingFormulaItem, String> formulaNameColumn;
-	
-	@FXML
-	private TableColumn<SymbolicCheckingFormulaItem, String> formulaDescriptionColumn;
-	
-	@FXML
-	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
-	
-	@FXML
-	private Button addFormulaButton;
-	
-	@FXML
-	private Button checkMachineButton;
-	
-	@FXML
-	private Button cancelButton;
-					
-	private final ResourceBundle bundle;
-	
-	private final CurrentTrace currentTrace;
-	
-	private final CurrentProject currentProject;
-
-	private final Injector injector;
+public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaItem> {
 	
 	private final SymbolicCheckingFormulaHandler symbolicCheckHandler;
-	
-	private final SymbolicFormulaChecker symbolicChecker;
 
 	@Inject
 	public SymbolicCheckingView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
 					final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler, 
 					final SymbolicFormulaChecker symbolicChecker, final Injector injector) {
-		this.bundle = bundle;
-		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
+		super(stageManager, bundle, currentTrace, currentProject, injector, symbolicChecker);
 		this.symbolicCheckHandler = symbolicCheckHandler;
-		this.symbolicChecker = symbolicChecker;
-		this.injector = injector;
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
-	}
-	
-	@FXML
-	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
-		setBindings();
-		setContextMenu();
-		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
-			if(newValue != null) {
-				bindMachine(newValue);
-			} else {
-				tvFormula.getItems().clear();
-				tvFormula.itemsProperty().unbind();
-			}
-		});
-		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
-			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().symbolicCheckingFormulasProperty().emptyProperty().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
-			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
-			}
-		});
 	}
 	
 	public void bindMachine(Machine machine) {
@@ -118,37 +52,8 @@ public class SymbolicCheckingView extends ScrollPane {
 		tvFormula.refresh();
 	}
 	
-	private void setBindings() {
-		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
-		cancelButton.disableProperty().bind(symbolicChecker.currentJobThreadsProperty().emptyProperty());
-		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
-		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.SYMBOLIC, injector));
-		CheckBox selectAll = new CheckBox();
-		selectAll.setSelected(true);
-		selectAll.selectedProperty().addListener((observable, from, to) -> {
-			for(IExecutableItem item : tvFormula.getItems()) {
-				item.setShouldExecute(to);
-				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
-				tvFormula.refresh();
-			}
-		});
-		shouldExecuteColumn.setGraphic(selectAll);
-		tvFormula.setOnMouseClicked(e-> {
-			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
-				symbolicCheckHandler.handleItem(item, false);
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
-			}
-		});
-	}
 	
-	
-	private void setContextMenu() {
+	protected void setContextMenu() {
 		tvFormula.setRowFactory(table -> {
 			
 			final TableRow<SymbolicCheckingFormulaItem> row = new TableRow<>();
@@ -171,7 +76,7 @@ public class SymbolicCheckingView extends ScrollPane {
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
 					checkItem.disableProperty().bind(row.emptyProperty()
-							.or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not())
+							.or(executor.currentJobThreadsProperty().emptyProperty().not())
 							.or(to.shouldExecuteProperty().not()));
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
@@ -194,6 +99,17 @@ public class SymbolicCheckingView extends ScrollPane {
 		});
 	}
 	
+	protected void setBindings() {
+		super.setBindings();
+		tvFormula.setOnMouseClicked(e-> {
+			SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
+				symbolicCheckHandler.handleItem(item, false);
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
+			}
+		});
+	}
+	
 	@FXML
 	public void addFormula() {
 		injector.getInstance(SymbolicCheckingChoosingStage.class).reset();
@@ -210,12 +126,12 @@ public class SymbolicCheckingView extends ScrollPane {
 	
 	@FXML
 	public void cancel() {
-		symbolicChecker.interrupt();
+		executor.interrupt();
 	}
 	
 	private void removeFormula() {
 		Machine machine = currentProject.getCurrentMachine();
-		SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+		SymbolicCheckingFormulaItem item = (SymbolicCheckingFormulaItem) tvFormula.getSelectionModel().getSelectedItem();
 		machine.removeSymbolicCheckingFormula(item);
 		updateProject();
 	}

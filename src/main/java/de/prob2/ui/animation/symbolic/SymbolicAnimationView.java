@@ -8,68 +8,26 @@ import javax.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.symbolic.SymbolicView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
-import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
-import de.prob2.ui.verifications.ShouldExecuteValueFactory;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
+
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableColumn;
+
 import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+
 
 @Singleton
-public class SymbolicAnimationView extends ScrollPane {
-	
-	
-	@FXML
-	private HelpButton helpButton;
-		
-	@FXML
-	private TableView<SymbolicAnimationFormulaItem> tvFormula;
-	
-	@FXML
-	private TableColumn<SymbolicAnimationFormulaItem, FontAwesomeIconView> formulaStatusColumn;
-	
-	@FXML
-	private TableColumn<SymbolicAnimationFormulaItem, String> formulaNameColumn;
-	
-	@FXML
-	private TableColumn<SymbolicAnimationFormulaItem, String> formulaDescriptionColumn;
-	
-	@FXML
-	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
-	
-	@FXML
-	private Button addFormulaButton;
-	
-	@FXML
-	private Button checkMachineButton;
-	
-	@FXML
-	private Button cancelButton;
-					
-	private final ResourceBundle bundle;
-	
-	private final CurrentTrace currentTrace;
-	
-	private final CurrentProject currentProject;
-
-	private final Injector injector;
+public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormulaItem> {
 	
 	private final SymbolicAnimationFormulaHandler symbolicCheckHandler;
 	
@@ -79,12 +37,9 @@ public class SymbolicAnimationView extends ScrollPane {
 	public SymbolicAnimationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
 					final CurrentProject currentProject, final SymbolicAnimationFormulaHandler symbolicCheckHandler, 
 					final SymbolicAnimationChecker symbolicChecker, final Injector injector) {
-		this.bundle = bundle;
-		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
+		super(stageManager, bundle, currentTrace, currentProject, injector, symbolicChecker);
 		this.symbolicCheckHandler = symbolicCheckHandler;
 		this.symbolicChecker = symbolicChecker;
-		this.injector = injector;
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
 	
@@ -116,26 +71,8 @@ public class SymbolicAnimationView extends ScrollPane {
 		tvFormula.refresh();
 	}
 	
-	private void setBindings() {
-		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
-		cancelButton.disableProperty().bind(symbolicChecker.currentJobThreadsProperty().emptyProperty());
-		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
-		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.SYMBOLIC, injector));
-		CheckBox selectAll = new CheckBox();
-		selectAll.setSelected(true);
-		selectAll.selectedProperty().addListener((observable, from, to) -> {
-			for(IExecutableItem item : tvFormula.getItems()) {
-				item.setShouldExecute(to);
-				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
-				tvFormula.refresh();
-			}
-		});
-		shouldExecuteColumn.setGraphic(selectAll);
+	protected void setBindings() {
+		super.setBindings();
 		tvFormula.setOnMouseClicked(e-> {
 			SymbolicAnimationFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
@@ -146,7 +83,7 @@ public class SymbolicAnimationView extends ScrollPane {
 	}
 	
 	
-	private void setContextMenu() {
+	protected void setContextMenu() {
 		tvFormula.setRowFactory(table -> {
 			
 			final TableRow<SymbolicAnimationFormulaItem> row = new TableRow<>();
