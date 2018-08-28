@@ -31,6 +31,7 @@ public class SymbolicCheckingFormulaItem extends SymbolicFormulaItem {
 		return counterExamples;
 	}
 	
+	@Override
 	public void reset() {
 		this.initializeStatus();
 		this.counterExamples.clear();
@@ -60,6 +61,7 @@ public class SymbolicCheckingFormulaItem extends SymbolicFormulaItem {
 		return String.join(" ", name, code, type.name());
 	}
 	
+	@Override
 	public void setData(String name, String description, String code, SymbolicExecutionType type) {
 		super.setData(name, description, code);
 		this.type = type;

@@ -33,6 +33,8 @@ import javafx.scene.layout.Region;
 
 @Singleton
 public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
+
+	private static final String GENERAL_RESULT_MESSAGE = "verifications.result.message";
 	
 	private final ResourceBundle bundle;
 	
@@ -82,7 +84,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 					"verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound");
 		} else {
 			final String headerKey = cmd.isTimeout() ? "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.timeout" : "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found";
-			showCheckingResult(item, Checked.FAIL, headerKey, "verifications.result.message", String.join("\n", result));
+			showCheckingResult(item, Checked.FAIL, headerKey, GENERAL_RESULT_MESSAGE, String.join("\n", result));
 		}
 	}
 	
@@ -126,13 +128,13 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 					"animation.symbolic.result.succeeded.message");
 		} else if(error.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.error.header",
-					"verifications.result.message", ((IModelCheckingResult) result).getMessage());
+					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
 		} else if(result instanceof Throwable) {
 			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.couldNotParseFormula.header",
-					"verifications.result.message", result);
+					GENERAL_RESULT_MESSAGE, result);
 		} else if(interrupted.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "verifications.result.interrupted.header",
-					"verifications.result.message", ((IModelCheckingResult) result).getMessage());
+					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
 		}
 		return resultItem;
 	}

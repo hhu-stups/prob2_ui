@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +11,6 @@ import com.google.inject.Injector;
 
 import de.prob.animator.command.AbstractCommand;
 import de.prob.check.IModelCheckJob;
-import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;

@@ -16,13 +16,6 @@ public abstract class SymbolicFormulaItem extends AbstractCheckableItem {
 		super(name, type.getName(), name);
 		this.type = type;
 	}
-		
-	
-	@Override
-	public void initializeStatus() {
-		super.initializeStatus();
-	}
-	
 	
 	public void reset() {
 		this.initializeStatus();

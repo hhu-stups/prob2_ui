@@ -12,7 +12,6 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicExecutor;
 import de.prob2.ui.symbolic.SymbolicFormulaItem;
