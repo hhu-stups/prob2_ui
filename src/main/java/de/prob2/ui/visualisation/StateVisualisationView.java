@@ -30,6 +30,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -39,6 +40,7 @@ public class StateVisualisationView extends AnchorPane {
 	@FXML
 	private GridPane visualisationGridPane;
 
+	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
@@ -46,6 +48,7 @@ public class StateVisualisationView extends AnchorPane {
 
 	@Inject
 	public StateVisualisationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace) {
+		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -161,7 +164,17 @@ public class StateVisualisationView extends AnchorPane {
 				imagePath = Paths.get(Main.getProBDirectory()).resolve(imageURL).toFile();
 				final File imageInProbFolder = imagePath;
 				if (!imageInProbFolder.exists()) {
-					throw new FileNotFoundException(String.format("Image %s not found in machine folder (%s) and project folder (%s) and ProB folder (%s)", imagePath.getName(), imageInMachineFolder.getParent(), imageInProjectFolder.getParent(), imageInProbFolder.getParent()));
+					stageManager.makeAlert(AlertType.WARNING,
+									"visualisation.stateVisualisationView.alerts.visualisationNotPossible.header",
+									"visualisation.stateVisualisationView.alerts.visualisationNotPossible.content",
+									imagePath.getName(), imageInMachineFolder.getParent(), imageInProjectFolder.getParent(),
+									imageInProbFolder.getParent())
+							.showAndWait();
+					visualisationPossible.set(false);
+					throw new FileNotFoundException(String.format(
+							"Image %s not found in machine folder (%s) and project folder (%s) and ProB folder (%s)",
+							imagePath.getName(), imageInMachineFolder.getParent(), imageInProjectFolder.getParent(),
+							imageInProbFolder.getParent()));
 				}
 			}
 		}
