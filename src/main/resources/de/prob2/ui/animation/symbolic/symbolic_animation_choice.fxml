@@ -2,21 +2,16 @@
 
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationChoosingStage?>
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaInput?>
-<<<<<<< HEAD
 <?import de.prob2.ui.symbolic.SymbolicExecutionItem?>
-
-<fx:root type="Stage" fx:id="cbcChoice" title="%verifications.symbolic.choice.title"
-=======
-<?import de.prob2.ui.animation.symbolic.SymbolicAnimationItem?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
 <fx:root type="SymbolicAnimationChoosingStage" fx:id="cbcChoice" title="%verifications.symbolicchecking.choice.title"
->>>>>>> 3e53f5c624bc26562225e76c40c0a413cf4143f8
 		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -37,11 +32,11 @@
 						<ChoiceBox fx:id="cbChoice" prefWidth="250.0">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicAnimationItem animationType="SEQUENCE" guiType="TEXT_FIELD"/>
-									<SymbolicAnimationItem animationType="DEADLOCK" guiType="PREDICATE"/>
-									<SymbolicAnimationItem animationType="FIND_DEADLOCK" guiType="NONE"/>
-									<SymbolicAnimationItem animationType="FIND_VALID_STATE" guiType="PREDICATE"/>
-									<SymbolicAnimationItem animationType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
+									<SymbolicExecutionItem executionType="SEQUENCE" guiType="TEXT_FIELD"/>
+									<SymbolicExecutionItem executionType="DEADLOCK" guiType="PREDICATE"/>
+									<SymbolicExecutionItem executionType="FIND_DEADLOCK" guiType="NONE"/>
+									<SymbolicExecutionItem executionType="FIND_VALID_STATE" guiType="PREDICATE"/>
+									<SymbolicExecutionItem executionType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>

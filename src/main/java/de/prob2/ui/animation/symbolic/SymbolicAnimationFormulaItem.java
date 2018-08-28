@@ -56,16 +56,6 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	}
 	
 	@Override
-	public int hashCode() {
-		return Objects.hash(name, code, type);
-	}
-	
-	@Override
-	public String toString() {
-		return String.join(" ", name, code, type.name());
-	}
-	
-	@Override
 	public void setData(String name, String description, String code, SymbolicExecutionType type) {
 		super.setData(name, description, code);
 		this.type = type;

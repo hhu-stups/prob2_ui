@@ -43,28 +43,6 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
 	
-	@FXML
-	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
-		setBindings();
-		setContextMenu();
-		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
-			if(newValue != null) {
-				bindMachine(newValue);
-			} else {
-				tvFormula.getItems().clear();
-				tvFormula.itemsProperty().unbind();
-			}
-		});
-		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
-			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().symbolicCheckingFormulasProperty().emptyProperty().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
-			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(symbolicChecker.currentJobThreadsProperty().emptyProperty().not()));
-			}
-		});
-	}
-	
 	public void bindMachine(Machine machine) {
 		tvFormula.itemsProperty().unbind();
 		tvFormula.itemsProperty().bind(machine.symbolicAnimationFormulasProperty());

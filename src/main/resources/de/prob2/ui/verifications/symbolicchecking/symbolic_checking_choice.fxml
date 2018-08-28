@@ -12,12 +12,8 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.geometry.Insets?>
-<<<<<<< HEAD
 
-<fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolic.choice.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
-=======
-<fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolicchecking.choice.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
->>>>>>> 3e53f5c624bc26562225e76c40c0a413cf4143f8
+<fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolic.choice.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1"
 	<scene>
 		<Scene fill="TRANSPARENT">
 			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">

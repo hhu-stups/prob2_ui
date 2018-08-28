@@ -61,7 +61,7 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput {
 	protected void setCheckListeners() {
 		btAdd.setOnAction(e -> addFormula(false));
 		btCheck.setOnAction(e -> {
-			SymbolicExecutionType animationType = injector.getInstance(SymbolicAnimationChoosingStage.class).getAnimationType();
+			SymbolicExecutionType animationType = injector.getInstance(SymbolicAnimationChoosingStage.class).getExecutionType();
 			SymbolicAnimationFormulaItem formulaItem = null;
 			addFormula(true);
 			switch (animationType) {
@@ -122,11 +122,11 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput {
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
 			formula = predicateBuilderView.getPredicate();
 		} else {
-			formula = choosingStage.getAnimationType().getName();
+			formula = choosingStage.getExecutionType().getName();
 		}
-		SymbolicAnimationFormulaItem newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getAnimationType());
+		SymbolicAnimationFormulaItem newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType());
 		if(!currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
-			SymbolicExecutionType type = choosingStage.getAnimationType();
+			SymbolicExecutionType type = choosingStage.getExecutionType();
 			item.setData(formula, type.getName(), formula, type);
 			item.reset();
 			injector.getInstance(SymbolicAnimationView.class).refresh();
@@ -136,7 +136,7 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput {
 	}
 	
 	private void addFormula(boolean checking) {
-		SymbolicExecutionType checkingType = injector.getInstance(SymbolicAnimationChoosingStage.class).getAnimationType();
+		SymbolicExecutionType checkingType = injector.getInstance(SymbolicAnimationChoosingStage.class).getExecutionType();
 		SymbolicGUIType guiType = injector.getInstance(SymbolicAnimationChoosingStage.class).getGUIType();
 		switch(guiType) {
 			case TEXT_FIELD:

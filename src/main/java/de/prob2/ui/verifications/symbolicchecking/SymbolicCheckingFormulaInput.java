@@ -56,7 +56,7 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput {
 	protected void setCheckListeners() {
 		btAdd.setOnAction(e -> addFormula(false));
 		btCheck.setOnAction(e -> {
-			SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
+			SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getExecutionType();
 			SymbolicCheckingFormulaItem formulaItem = null;
 			addFormula(true);
 			switch(checkingType) {
@@ -115,11 +115,11 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput {
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
 			formula = cbOperations.getSelectionModel().getSelectedItem();
 		} else {
-			formula = choosingStage.getCheckingType().getName();
+			formula = choosingStage.getExecutionType().getName();
 		}
-		SymbolicCheckingFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getCheckingType());
+		SymbolicCheckingFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
 		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
-			SymbolicExecutionType type = choosingStage.getCheckingType();
+			SymbolicExecutionType type = choosingStage.getExecutionType();
 			item.setData(formula, type.getName(), formula, type);
 			item.reset();
 			injector.getInstance(SymbolicCheckingView.class).refresh();
@@ -129,7 +129,7 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput {
 	}
 	
 	private void addFormula(boolean checking) {
-		SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getCheckingType();
+		SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getExecutionType();
 		if(checkingType == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
 			injector.getInstance(SymbolicCheckingChoosingStage.class).close();
 			return;
