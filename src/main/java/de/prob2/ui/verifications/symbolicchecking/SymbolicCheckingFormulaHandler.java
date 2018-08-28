@@ -75,23 +75,6 @@ public class SymbolicCheckingFormulaHandler {
 		symbolicChecker.executeCheckingItem(checker, code, SymbolicExecutionType.INVARIANT, checkAll);
 	}
 	
-	public void handleDeadlock(String code, boolean checkAll) {
-		IEvalElement constraint = new EventB(code, FormulaExpand.EXPAND); 
-		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
-		symbolicChecker.executeCheckingItem(checker, code, SymbolicExecutionType.DEADLOCK, checkAll);
-	}
-	
-	public void findDeadlock(boolean checkAll) {
-		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace());
-		symbolicChecker.executeCheckingItem(checker, "FIND_DEADLOCK", SymbolicExecutionType.FIND_DEADLOCK, checkAll);
-	}
-	
-	public void handleSequence(String sequence, boolean checkAll) {
-		List<String> events = Arrays.asList(sequence.replaceAll(" ", "").split(";"));
-		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
-		symbolicChecker.executeCheckingItem(checker, sequence, SymbolicExecutionType.SEQUENCE, checkAll);
-	}
-	
 	public void findRedundantInvariants(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
