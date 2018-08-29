@@ -154,7 +154,7 @@ public class TraceReplayView extends ScrollPane {
 			if (to != null) {
 				to.getTraceFiles().forEach(tracePath -> {
 					traceTableView.getItems().add(new ReplayTrace(tracePath));
-					if(!tracePath.toString().endsWith(TRACE_FILE_ENDING.replaceAll("'*'", ""))) {
+					if(!tracePath.toString().endsWith(TRACE_FILE_ENDING.substring(1))) {
 						stageManager.makeAlert(AlertType.WARNING, "",
 								"animation.tracereplay.view.alerts.wrongFileExtensionWarning.content",
 								TRACE_FILE_ENDING, tracePath).showAndWait();
