@@ -53,7 +53,7 @@ public class TraceSaver {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		fileChooser.setInitialFileName(machine.getName() + TRACE_FILE_ENDING);
+		fileChooser.setInitialFileName(machine.getName() + TRACE_FILE_ENDING.substring(1));
 		fileChooser.getExtensionFilters()
 				.add(new ExtensionFilter(
 						String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_ENDING),
