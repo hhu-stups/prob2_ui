@@ -1,8 +1,6 @@
 package de.prob2.ui.symbolic;
 
 
-import java.util.Objects;
-
 import de.prob2.ui.verifications.AbstractCheckableItem;
 
 public abstract class SymbolicFormulaItem extends AbstractCheckableItem {
@@ -29,11 +27,6 @@ public abstract class SymbolicFormulaItem extends AbstractCheckableItem {
 	
 	public SymbolicExecutionType getType() {
 		return type;
-	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(name, code, type);
 	}
 	
 	@Override

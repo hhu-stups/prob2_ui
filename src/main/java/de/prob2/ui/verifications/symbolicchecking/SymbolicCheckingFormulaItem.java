@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
+import java.util.Objects;
+
 import de.prob.statespace.Trace;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaItem;
@@ -47,6 +49,11 @@ public class SymbolicCheckingFormulaItem extends SymbolicFormulaItem {
 		return otherItem.getName().equals(this.getName()) &&
 				otherItem.getCode().equals(this.getCode()) &&
 				otherItem.getType().equals(this.getType());
+	}
+	
+	@Override
+	public int hashCode() {
+		 return Objects.hash(name, code, type);
 	}
 	
 	@Override
