@@ -8,8 +8,6 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.Objects;
-
 public class SymbolicCheckingFormulaItem extends SymbolicFormulaItem {
 	
 	private transient ListProperty<Trace> counterExamples;

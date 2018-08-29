@@ -6,8 +6,6 @@ import de.prob2.ui.symbolic.SymbolicFormulaItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.util.Objects;
-
 public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	
 	private transient ObjectProperty<Trace> example;

@@ -1,8 +1,6 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -16,8 +14,6 @@ import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentProject;

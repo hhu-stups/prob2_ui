@@ -1,11 +1,5 @@
 package de.prob2.ui.symbolic;
 
-import javax.inject.Inject;
-
-import com.google.inject.Singleton;
-
-import de.prob2.ui.internal.StageManager;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
