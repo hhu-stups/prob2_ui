@@ -1,6 +1,7 @@
 de.prob2.ui.history.HistoryView,History.html
 de.prob2.ui.operations.OperationsView,Operations.html
 de.prob2.ui.project.ProjectTab,Project.html#Project
+de.prob2.ui.project.verifications.VerificationsTab,Project.html#Verifications
 de.prob2.ui.project.machines.MachinesTab,Project.html#Machines
 de.prob2.ui.project.preferences.PreferencesTab,Project.html#Preferences
 de.prob2.ui.stats.StatsView,Statistics.html
