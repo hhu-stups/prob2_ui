@@ -86,11 +86,9 @@ public abstract class SymbolicFormulaInput extends VBox {
 		switch (guiType) {
 			case NONE:
 				break;
-			
 			case TEXT_FIELD:
 				this.getChildren().add(0, tfFormula);
 				break;
-			
 			case CHOICE_BOX:
 				this.getChildren().add(0, cbOperations);
 				break;
@@ -98,7 +96,6 @@ public abstract class SymbolicFormulaInput extends VBox {
 			case PREDICATE:
 				this.getChildren().add(0, predicateBuilderView);
 				break;
-			
 			default:
 				throw new AssertionError("Unhandled GUI type: " + guiType);
 		}

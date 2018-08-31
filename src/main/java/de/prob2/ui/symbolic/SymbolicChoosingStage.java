@@ -22,7 +22,10 @@ public abstract class SymbolicChoosingStage extends Stage {
 	public void initialize() {
 		formulaInput.visibleProperty().bind(cbChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		cbChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
-			formulaInput.changeGUIType(to == null ? null : to.getGUIType());
+			if(to == null) {
+				return;
+			}
+			formulaInput.changeGUIType(to.getGUIType());
 			this.sizeToScene();
 		});
 	}

@@ -122,4 +122,6 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	
 	protected abstract void setContextMenu();
 	
+	protected abstract void refresh();
+	
 }

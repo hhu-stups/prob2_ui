@@ -17,6 +17,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingResultHandler;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -26,17 +27,19 @@ public abstract class SymbolicExecutor {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicExecutor.class);
 	
-	private final CurrentTrace currentTrace;
+	protected final CurrentTrace currentTrace;
 	
-	private final CurrentProject currentProject;
+	protected final CurrentProject currentProject;
 	
-	private final Injector injector;
+	protected final Injector injector;
 	
 	private final ISymbolicResultHandler resultHandler;
 	
 	private final List<IModelCheckJob> currentJobs;
 	
 	private final ListProperty<Thread> currentJobThreads;
+	
+	protected List<? extends SymbolicFormulaItem> items;
 	
 	public SymbolicExecutor(final CurrentTrace currentTrace, final CurrentProject currentProject,
 							final ISymbolicResultHandler resultHandler, final Injector injector) {
@@ -46,6 +49,13 @@ public abstract class SymbolicExecutor {
 		this.injector = injector;
 		this.currentJobs = new ArrayList<>();
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
+	}
+	
+	public void executeCheckingItem(IModelCheckJob checker, String code, SymbolicExecutionType type, boolean checkAll) {
+		getItems().stream()
+			.filter(current -> current.getCode().equals(code) && current.getType().equals(type))
+			.findFirst()
+			.ifPresent(item -> checkItem(checker, item, checkAll));
 	}
 
 	public void interrupt() {
@@ -128,16 +138,9 @@ public abstract class SymbolicExecutor {
 	protected abstract void updateTrace(SymbolicFormulaItem item);
 	
 	protected abstract void updateMachine(Machine machine);
-
 	
 	private SymbolicFormulaItem getItemIfAlreadyExists(SymbolicFormulaItem item) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		List<? extends SymbolicFormulaItem> formulas;
-		if(item instanceof SymbolicCheckingFormulaItem) {
-			formulas = currentMachine.getSymbolicCheckingFormulas();
-		} else {
-			formulas = currentMachine.getSymbolicAnimationFormulas();
-		}
+		List<? extends SymbolicFormulaItem> formulas = getItems();
 		int index = formulas.indexOf(item);
 		if(index > -1) {
 			item = formulas.get(index);
@@ -145,4 +148,14 @@ public abstract class SymbolicExecutor {
 		return item;
 	}
 	
+	private List<? extends SymbolicFormulaItem> getItems() {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		List<? extends SymbolicFormulaItem> formulas;
+		if(resultHandler instanceof SymbolicCheckingResultHandler) {
+			formulas = currentMachine.getSymbolicCheckingFormulas();
+		} else {
+			formulas = currentMachine.getSymbolicAnimationFormulas();
+		}
+		return formulas;
+	}
 }
