@@ -1,11 +1,10 @@
 # Überprüfungsansicht
 
-Die Überprüfungsansicht liefert 4 verschiedene Methoden eine Maschine zu testen:
+Die Überprüfungsansicht liefert 3 verschiedene Methoden eine Maschine zu testen:
 
 * Model-Checking,
-* LTL-Überprüfung,
-* Symbolic Checking und
-* Pfad nachspielen
+* LTL-Überprüfung und
+* Symbolic Checking
 
 In jedem Tab kann man multiple Tests hizufügen um die derzeitig ausgewählte Mschine zu testen und den Überprüfungsprozess durch Drücken des "Abbrechen"-Buttons unterbrechen.
 
