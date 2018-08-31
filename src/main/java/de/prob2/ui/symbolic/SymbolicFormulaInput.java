@@ -92,7 +92,6 @@ public abstract class SymbolicFormulaInput extends VBox {
 			case CHOICE_BOX:
 				this.getChildren().add(0, cbOperations);
 				break;
-			
 			case PREDICATE:
 				this.getChildren().add(0, predicateBuilderView);
 				break;
