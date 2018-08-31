@@ -1,11 +1,10 @@
 # Verification View
 
-The Verification View provides 4 different methods to test a machine:
+The Verification View provides 3 different methods to test a machine:
 
 * Modelchecking,
-* LTL Verifications,
-* Symbolic Checking and
-* Trace Replay
+* LTL Verifications and
+* Symbolic Checking
 
 In each tab you can add multiple tests to check you currently selected machine and interrupt the checking process by pressing the "Cancel" button.
 
