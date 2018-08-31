@@ -14,6 +14,7 @@ Das Fenster-Submenü erlaubt es Perspektiven zu ändern sowie eigenen Perspektiv
 <?import de.prob2.ui.stats.StatsView?>
 <?import de.prob2.ui.statusbar.StatusBar?>
 <?import de.prob2.ui.verifications.VerificationsView?>
+<?import de.prob2.ui.animation.AnimationView?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
@@ -26,8 +27,11 @@ Das Fenster-Submenü erlaubt es Perspektiven zu ändern sowie eigenen Perspektiv
 		<SplitPane fx:id="horizontalSP" dividerPositions="0.1,0.9">
 			<Accordion fx:id="leftAccordion" expandedPane="$operationsTP">
 				<panes>
-					<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP" collapsible="false">
+					<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP">
 						<OperationsView/>
+					</TitledPane>
+					<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP">
+						<AnimationView/>
 					</TitledPane>
 				</panes>
 			</Accordion>
@@ -92,8 +96,11 @@ Jede der Komponenten kann so eingesetzt werden, wie man es für richtig hält, a
 ...
 			<Accordion fx:id="leftAccordion" expandedPane="$operationsTP">
 				<panes>
-					<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP" collapsible="false">
+					<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP">
 						<OperationsView/>
+					</TitledPane>
+					<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP">
+						<AnimationView/>
 					</TitledPane>
 				</panes>
 			</Accordion>
