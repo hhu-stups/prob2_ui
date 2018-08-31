@@ -16,7 +16,6 @@ import de.prob2.ui.symbolic.SymbolicExecutor;
 import de.prob2.ui.symbolic.SymbolicFormulaItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
-import javafx.fxml.FXML;
 
 @Singleton
 public class SymbolicAnimationChecker extends SymbolicExecutor {
