@@ -54,6 +54,7 @@ public class BInterpreter implements Executable {
 			this.message = message;
 		}
 		
+		@SuppressWarnings("unused")
 		private int getLine() {
 			return this.line;
 		}

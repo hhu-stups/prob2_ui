@@ -110,22 +110,9 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private void initialize() {
 		helpButton.setHelpContent(this.getClass());
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.REPLAY));
-		statusColumn.setCellValueFactory(features -> {
-			final ReplayTrace trace = features.getValue();
-
-			final FontAwesomeIconView statusIcon = new FontAwesomeIconView();
-			trace.statusProperty().addListener((o, from, to) -> updateStatusIcon(statusIcon, to));
-			updateStatusIcon(statusIcon, trace.getChecked());
-
-			final ProgressIndicator replayProgress = new ProgressBar();
-			replayProgress.progressProperty().bind(trace.progressProperty());
-
-			return Bindings.when(trace.progressProperty().isEqualTo(-1)).<Node>then(statusIcon)
-					.otherwise(replayProgress);
-		});
-		nameColumn.setCellValueFactory(
-				features -> new SimpleStringProperty(features.getValue().getLocation().toString()));
+		
+		initTableColumns();
+		initTableRows();
 
 		final SetChangeListener<Path> listener = c -> {
 			if (c.wasAdded()) {
@@ -135,16 +122,6 @@ public class TraceReplayView extends ScrollPane {
 				removeFromTraceTableView(c.getElementRemoved());
 			}
 		};
-		
-		CheckBox selectAll = new CheckBox();
-		selectAll.setSelected(true);
-		selectAll.selectedProperty().addListener((observable, from, to) -> {
-			for(ReplayTrace item : traceTableView.getItems()) {
-				item.setShouldExecute(to);
-				traceTableView.refresh();
-			}
-		});
-		shouldExecuteColumn.setGraphic(selectAll);
 		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (from != null) {
@@ -163,8 +140,7 @@ public class TraceReplayView extends ScrollPane {
 				to.getTraceFiles().addListener(listener);
 			}
 		});
-
-		initTableRows();
+		
 		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
@@ -176,6 +152,36 @@ public class TraceReplayView extends ScrollPane {
 			}
 		});
 		traceTableView.disableProperty().bind(currentTrace.stateSpaceProperty().isNull());
+	}
+
+	private void initTableColumns() {
+		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.REPLAY));
+		CheckBox selectAll = new CheckBox();
+		selectAll.setSelected(true);
+		selectAll.selectedProperty().addListener((observable, from, to) -> {
+			for(ReplayTrace item : traceTableView.getItems()) {
+				item.setShouldExecute(to);
+				traceTableView.refresh();
+			}
+		});
+		shouldExecuteColumn.setGraphic(selectAll);
+		
+		statusColumn.setCellValueFactory(features -> {
+			final ReplayTrace trace = features.getValue();
+
+			final FontAwesomeIconView statusIcon = new FontAwesomeIconView();
+			trace.statusProperty().addListener((o, from, to) -> updateStatusIcon(statusIcon, to));
+			updateStatusIcon(statusIcon, trace.getChecked());
+
+			final ProgressIndicator replayProgress = new ProgressBar();
+			replayProgress.progressProperty().bind(trace.progressProperty());
+
+			return Bindings.when(trace.progressProperty().isEqualTo(-1)).<Node>then(statusIcon)
+					.otherwise(replayProgress);
+		});
+		
+		nameColumn.setCellValueFactory(
+				features -> new SimpleStringProperty(features.getValue().getLocation().toString()));
 	}
 
 	private void initTableRows() {

@@ -56,7 +56,6 @@ public class FileMenu extends Menu {
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final BEditorView bEditorView;
-	private final MachineLoader machineLoader;
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -68,7 +67,6 @@ public class FileMenu extends Menu {
 		final CurrentProject currentProject,
 		final CurrentTrace currentTrace,
 		final BEditorView bEditorView,
-		final MachineLoader machineLoader,
 		final Injector injector,
 		final ResourceBundle bundle
 	) {
@@ -76,7 +74,6 @@ public class FileMenu extends Menu {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.bEditorView = bEditorView;
-		this.machineLoader = machineLoader;
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -104,6 +101,7 @@ public class FileMenu extends Menu {
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
 		
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.existsProperty().not());
+		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		this.reloadMachineItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()));
 	}
 

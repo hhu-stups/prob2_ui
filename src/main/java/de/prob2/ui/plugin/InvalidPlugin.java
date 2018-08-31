@@ -35,10 +35,14 @@ public class InvalidPlugin extends ProBPlugin{
 	}
 
 	@Override
-	public void startPlugin() {}
+	public void startPlugin() {
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
-	public void stopPlugin() {}
+	public void stopPlugin() {
+		throw new UnsupportedOperationException();
+	}
 
 	public Exception getException() {
 		return exception;
