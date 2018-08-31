@@ -5,9 +5,9 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
