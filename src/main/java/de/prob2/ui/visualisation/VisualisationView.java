@@ -52,9 +52,11 @@ public class VisualisationView extends AnchorPane {
 		probLogoStackPane.visibleProperty().bind(currentStateVisualisation.visualisationPossibleProperty().not());
 		previousStateVBox.managedProperty().bind(previousStateVisualisation.visualisationPossibleProperty());
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
+		
+		String imageNotFoundPlaceholder = bundle.getString("visualisation.view.placeholder.imageNotFound");
 
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
-			if(placeholderLabel.getText().equals(bundle.getString("visualisation.view.placeholder.imageNotFound"))) {
+			if(placeholderLabel.getText().equals(imageNotFoundPlaceholder)) {
 				return;
 			}
 			try {
@@ -64,7 +66,7 @@ public class VisualisationView extends AnchorPane {
 				}
 			} catch (FileNotFoundException e) {
 				LOGGER.warn("Failed to open images for visualisation", e);
-				placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.imageNotFound"));
+				placeholderLabel.setText(imageNotFoundPlaceholder);
 			}
 
 		});
@@ -74,7 +76,7 @@ public class VisualisationView extends AnchorPane {
 				placeholderLabel.setText(bundle.getString("common.noModelLoaded"));
 			} else if (!currentTrace.getCurrentState().isInitialised()) {
 				placeholderLabel.setText(bundle.getString("common.notInitialised"));
-			} else if (!placeholderLabel.getText().equals(bundle.getString("visualisation.view.placeholder.imageNotFound"))) {
+			} else if (!placeholderLabel.getText().equals(imageNotFoundPlaceholder)) {
 				placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.noAnimationFunction"));
 			}
 		});

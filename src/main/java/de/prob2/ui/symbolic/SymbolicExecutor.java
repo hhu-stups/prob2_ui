@@ -16,7 +16,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingResultHandler;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
