@@ -1,17 +1,12 @@
 package de.prob2.ui.config;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -22,13 +17,11 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.b.BConsole;
@@ -95,11 +88,9 @@ public final class Config {
 		private ConfigData() {}
 	}
 
-	private static final Charset CONFIG_CHARSET = Charset.forName("UTF-8");
 	// This Gson instance is for loadBasicConfig only. Everywhere else, injection should be used to get a GSON object.
 	private static final Gson BASIC_GSON = new GsonBuilder().create();
-	private static final File LOCATION = new File(
-			Main.getProBDirectory() + File.separator + "prob2ui" + File.separator + "config.json");
+	private static final Path LOCATION = Paths.get(Main.getProBDirectory(), "prob2ui", "config.json");
 
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
@@ -143,8 +134,10 @@ public final class Config {
 		this.proBPluginManager = proBPluginManager;
 		this.fileChooserManager = fileChooserManager;
 
-		if (!LOCATION.getParentFile().exists() && !LOCATION.getParentFile().mkdirs()) {
-			logger.warn("Failed to create the parent directory for the config file {}", LOCATION.getAbsolutePath());
+		try {
+			Files.createDirectories(LOCATION.getParent());
+		} catch (IOException e) {
+			logger.warn("Failed to create the parent directory for the config file {}", LOCATION, e);
 		}
 
 		this.load();
@@ -158,20 +151,16 @@ public final class Config {
 	 * @return basic settings from the config file
 	 */
 	private static BasicConfigData loadBasicConfig() {
-		if(!LOCATION.exists()) {
-			logger.info("Config file not found ('{}'), while loading basic config, loading default settings", LOCATION.getAbsolutePath() );
-			return new BasicConfigData();
-		}
-		try (
-			final InputStream is = new FileInputStream(LOCATION);
-			final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
-		) {
+		try (final Reader reader = Files.newBufferedReader(LOCATION)) {
 			final BasicConfigData data = BASIC_GSON.fromJson(reader, BasicConfigData.class);
 			if (data == null) {
 				// Config file is empty, use defaults instead.
 				return new BasicConfigData();
 			}
 			return data;
+		} catch (FileNotFoundException exc) {
+			logger.info("Config file not found while loading basic config, loading default settings", exc);
+			return new BasicConfigData();
 		} catch (IOException exc) {
 			logger.warn("Failed to open config file while loading basic config", exc);
 			return new BasicConfigData();
@@ -263,10 +252,7 @@ public final class Config {
 	public void load() {
 		ConfigData configData;
 		if (this.runtimeOptions.isLoadConfig()) {
-			try (
-				final InputStream is = new FileInputStream(LOCATION);
-				final Reader reader = new InputStreamReader(is, CONFIG_CHARSET)
-			) {
+			try (final Reader reader = Files.newBufferedReader(LOCATION)) {
 				configData = gson.fromJson(reader, ConfigData.class);
 				if (configData == null) {
 					// Config file is empty, use default config.
@@ -383,10 +369,7 @@ public final class Config {
 		configData.pluginDirectory = proBPluginManager.getPluginDirectory().getAbsolutePath();
 		configData.fileChooserInitialDirectories = new EnumMap<>(fileChooserManager.getInitialDirectories());
 
-		try (
-			final OutputStream os = new FileOutputStream(LOCATION);
-			final Writer writer = new OutputStreamWriter(os, CONFIG_CHARSET)
-		) {
+		try (final Writer writer = Files.newBufferedWriter(LOCATION)) {
 			gson.toJson(configData, writer);
 		} catch (FileNotFoundException exc) {
 			logger.warn("Failed to create config file", exc);
