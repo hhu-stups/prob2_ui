@@ -135,7 +135,7 @@ public class ProBPluginManager {
 				}
 			} catch (Exception e) {
 				LOGGER.warn("Tried to copy and load/start the plugin {}.\nThis exception was thrown: ", pluginFileName, e);
-				showWarningAlert("plugin.alerts.couldNotLocateInactive.content", pluginFileName);
+				showWarningAlert("plugin.alerts.couldNotLoadPlugin.content", pluginFileName);
 				//if an error occurred, delete the plugin file
 				PluginWrapper wrapper = pluginManager.getPlugin(plugin.toPath());
 				if (wrapper != null) {
