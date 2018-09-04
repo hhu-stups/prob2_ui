@@ -59,25 +59,25 @@ configurations.all {
 }
 
 dependencies {
-	compile 'com.google.code.gson:gson:2.8.2'
-	compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
-	compile 'de.codecentric.centerdevice:centerdevice-nsmenufx:2.1.6'
-	compile group: 'de.hhu.stups', name: 'de.prob2.kernel', version: '3.2.11-SNAPSHOT', changing: true
-	compile group: 'de.hhu.stups', name: 'ltl-dsl', version: '0.1.1-SNAPSHOT', changing: true
-	compile 'de.jensd:fontawesomefx-commons:9.1.2-jpms'
+	compile group: "com.google.code.gson", name: "gson", version: "2.8.2"
+	compile group: "com.googlecode.java-diff-utils", name: "diffutils", version: "1.3.0"
+	compile group: "de.codecentric.centerdevice", name: "centerdevice-nsmenufx", version: "2.1.6"
+	compile group: "de.hhu.stups", name: "de.prob2.kernel", version: "3.2.11-SNAPSHOT", changing: true
+	compile group: "de.hhu.stups", name: "ltl-dsl", version: "0.1.1-SNAPSHOT", changing: true
+	compile group: "de.jensd", name: "fontawesomefx-commons", version: "9.1.2-jpms"
 	// Cannot update to the next higher version (4.7.0-9), because its class files are compiled for Java 9.
-	compile 'de.jensd:fontawesomefx-fontawesome:4.7.0-5'
-	compile 'org.codehaus.groovy:groovy-all:2.4.7'
-	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.9.0'
-	compile 'org.fxmisc.wellbehaved:wellbehavedfx:0.3.3'
-	compile 'org.hildan.fxgson:fx-gson:3.1.0'
-	compile 'se.sawano.java:alphanumeric-comparator:1.4.1'
-	compile 'org.pf4j:pf4j:2.2.0'
+	compile group: "de.jensd", name: "fontawesomefx-fontawesome", version: "4.7.0-5"
+	compile group: "org.codehaus.groovy", name: "groovy-all", version: "2.4.7"
+	compile group: "org.fxmisc.richtext", name: "richtextfx", version: "0.9.0"
+	compile group: "org.fxmisc.wellbehaved", name: "wellbehavedfx", version: "0.3.3"
+	compile group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.0"
+	compile group: "org.pf4j", name: "pf4j", version: "2.2.0"
+	compile group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
 
-	testCompile 'org.loadui:testFx:3.1.2'
-	testCompile 'org.testfx:testfx-core:4.0.+'
-	testCompile 'org.testfx:testfx-junit:4.0.+'
-	testRuntime 'org.testfx:openjfx-monocle:1.8.0_20'
+	testCompile group: "org.loadui", name: "testFx", version: "3.1.2"
+	testCompile group: "org.testfx", name: "testfx-core", version: "4.0.+"
+	testCompile group: "org.testfx", name: "testfx-junit", version: "4.0.+"
+	testRuntime group: "org.testfx", name: "openjfx-monocle", version: "1.8.0_20"
 }
 
 eclipse.classpath.file.whenMerged {
