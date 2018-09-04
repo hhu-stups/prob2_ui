@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -157,7 +158,7 @@ public final class Config {
 				return new BasicConfigData();
 			}
 			return data;
-		} catch (FileNotFoundException exc) {
+		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.info("Config file not found while loading basic config, loading default settings", exc);
 			return new BasicConfigData();
 		} catch (IOException exc) {
@@ -257,7 +258,7 @@ public final class Config {
 					// Config file is empty, use default config.
 					configData = new ConfigData();
 				}
-			} catch (FileNotFoundException exc) {
+			} catch (FileNotFoundException | NoSuchFileException exc) {
 				logger.info("Config file not found, loading default settings");
 				configData = new ConfigData();
 			} catch (IOException exc) {
@@ -370,7 +371,7 @@ public final class Config {
 
 		try (final Writer writer = Files.newBufferedWriter(LOCATION)) {
 			gson.toJson(configData, writer);
-		} catch (FileNotFoundException exc) {
+		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {
 			logger.warn("Failed to save config file", exc);
