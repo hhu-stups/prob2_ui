@@ -1,6 +1,5 @@
  package de.prob2.ui.internal;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
@@ -26,6 +25,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
@@ -306,7 +306,7 @@ public final class StageManager {
 	 * @param window the {@link Window} on which to show the {@link FileChooser}
 	 * @param projects whether projects should be selectable
 	 * @param machines whether machines should be selectable
-	 * @return the selected {@link File}, or {@code null} if none was selected
+	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	private Path showOpenFileChooser(final Window window, final boolean projects, final boolean machines) {
 		final FileChooser fileChooser = new FileChooser();
@@ -337,7 +337,7 @@ public final class StageManager {
 	 * Show a {@link FileChooser} to ask the user to select a ProB 2 project.
 	 * 
 	 * @param window the {@link Window} on which to show the {@link FileChooser}
-	 * @return the selected {@link File}, or {@code null} if none was selected
+	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenProjectChooser(final Window window) {
 		return showOpenFileChooser(window, true, false);
@@ -347,7 +347,7 @@ public final class StageManager {
 	 * Show a {@link FileChooser} to ask the user to select a machine file.
 	 *
 	 * @param window the {@link Window} on which to show the {@link FileChooser}
-	 * @return the selected {@link File}, or {@code null} if none was selected
+	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenMachineChooser(final Window window) {
 		return showOpenFileChooser(window, false, true);
@@ -357,7 +357,7 @@ public final class StageManager {
 	 * Show a {@link FileChooser} to ask the user to select a ProB 2 project or a machine file.
 	 *
 	 * @param window the {@link Window} on which to show the {@link FileChooser}
-	 * @return the selected {@link File}, or {@code null} if none was selected
+	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenProjectOrMachineChooser(final Window window) {
 		return showOpenFileChooser(window, true, true);
@@ -367,7 +367,7 @@ public final class StageManager {
 	 * Show a {@link FileChooser} to ask the user to save a machine file.
 	 *
 	 * @param window the {@link Window} on which to show the {@link FileChooser}
-	 * @return the selected {@link File}, or {@code null} if none was selected
+	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showSaveMachineChooser(final Window window) {
 		final FileChooser fileChooser = new FileChooser();
