@@ -1,6 +1,5 @@
 package de.prob2.ui.config;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
@@ -82,7 +81,7 @@ public final class Config {
 		boolean operationsShowNotEnabled;
 		Map<String, String> globalPreferences;
 		private String pluginDirectory;
-		private Map<FileChooserManager.Kind, File> fileChooserInitialDirectories;
+		private Map<FileChooserManager.Kind, Path> fileChooserInitialDirectories;
 		
 		
 		private ConfigData() {}

@@ -1,14 +1,11 @@
 package de.prob2.ui.menu;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import javax.annotation.Nullable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -24,6 +21,7 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -33,6 +31,9 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WindowMenu extends Menu {
 	private static final Logger logger = LoggerFactory.getLogger(WindowMenu.class);
@@ -114,15 +115,15 @@ public class WindowMenu extends Menu {
 		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
 		fileChooser.getExtensionFilters().addAll(
 				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.fxml"), "*.fxml"));
-		File selectedFile = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.PERSPECTIVES,
+		Path selectedFile = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.PERSPECTIVES,
 				stageManager.getMainStage());
 		if (selectedFile != null) {
 			try {
 				MainController main = injector.getInstance(MainController.class);
 				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-				loader.setLocation(selectedFile.toURI().toURL());
+				loader.setLocation(selectedFile.toUri().toURL());
 				injector.getInstance(UIState.class)
-						.setGuiState("custom " + selectedFile.toURI().toURL().toExternalForm());
+						.setGuiState("custom " + selectedFile.toUri().toURL().toExternalForm());
 				reset();
 				loader.setRoot(main);
 				loader.setController(main);

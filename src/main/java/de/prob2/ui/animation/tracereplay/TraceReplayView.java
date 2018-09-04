@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.tracereplay;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.ResourceBundle;
@@ -20,6 +19,7 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -252,9 +252,9 @@ public class TraceReplayView extends ScrollPane {
 		.add(new ExtensionFilter(
 				String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_ENDING),
 				TRACE_FILE_ENDING));
-		File traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
+		Path traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
-			currentProject.getCurrentMachine().addTraceFile(traceFile.toPath());
+			currentProject.getCurrentMachine().addTraceFile(traceFile);
 		}
 	}
 	

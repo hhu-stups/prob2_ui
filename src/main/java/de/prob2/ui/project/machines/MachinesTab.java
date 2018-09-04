@@ -1,6 +1,5 @@
 package de.prob2.ui.project.machines;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,7 +15,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.ExternalEditor;
@@ -27,6 +25,7 @@ import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
+
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -214,22 +213,21 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	private void createMachine() {
-		final File selected = stageManager.showSaveMachineChooser(this.getContent().getScene().getWindow());
+		final Path selected = stageManager.showSaveMachineChooser(this.getContent().getScene().getWindow());
 		if (selected == null) {
 			return;
 		}
-		final Path path = selected.toPath();
-		final String[] split = path.getFileName().toString().split("\\.");
+		final String[] split = selected.getFileName().toString().split("\\.");
 		final String machineName = split[0];
 		
 		try {
-			Files.write(path, Arrays.asList("MACHINE " + machineName, "END"));
+			Files.write(selected, Arrays.asList("MACHINE " + machineName, "END"));
 		} catch (IOException e) {
 			LOGGER.error("Could not create machine file", e);
 			stageManager.makeExceptionAlert(e, "project.machines.machinesTab.alerts.couldNotCreateMachine.content");
 			return;
 		}
-		final Path relative = currentProject.getLocation().relativize(selected.toPath());
+		final Path relative = currentProject.getLocation().relativize(selected);
 		final Set<String> machineNamesSet = currentProject.getMachines().stream()
 			.map(Machine::getName)
 			.collect(Collectors.toSet());
@@ -244,12 +242,12 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	void addMachine() {
-		final File selected = stageManager.showOpenMachineChooser(this.getContent().getScene().getWindow());
+		final Path selected = stageManager.showOpenMachineChooser(this.getContent().getScene().getWindow());
 		if (selected == null) {
 			return;
 		}
 
-		final Path relative = currentProject.getLocation().relativize(selected.toPath());
+		final Path relative = currentProject.getLocation().relativize(selected);
 		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
 			stageManager.makeAlert(Alert.AlertType.ERROR, "",
 					"project.machines.machinesTab.alerts.machineAlreadyExists.content", relative)

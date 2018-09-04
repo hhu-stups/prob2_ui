@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -307,7 +308,7 @@ public final class StageManager {
 	 * @param machines whether machines should be selectable
 	 * @return the selected {@link File}, or {@code null} if none was selected
 	 */
-	private File showOpenFileChooser(final Window window, final boolean projects, final boolean machines) {
+	private Path showOpenFileChooser(final Window window, final boolean projects, final boolean machines) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
 		
@@ -338,7 +339,7 @@ public final class StageManager {
 	 * @param window the {@link Window} on which to show the {@link FileChooser}
 	 * @return the selected {@link File}, or {@code null} if none was selected
 	 */
-	public File showOpenProjectChooser(final Window window) {
+	public Path showOpenProjectChooser(final Window window) {
 		return showOpenFileChooser(window, true, false);
 	}
 	
@@ -348,7 +349,7 @@ public final class StageManager {
 	 * @param window the {@link Window} on which to show the {@link FileChooser}
 	 * @return the selected {@link File}, or {@code null} if none was selected
 	 */
-	public File showOpenMachineChooser(final Window window) {
+	public Path showOpenMachineChooser(final Window window) {
 		return showOpenFileChooser(window, false, true);
 	}
 	
@@ -358,7 +359,7 @@ public final class StageManager {
 	 * @param window the {@link Window} on which to show the {@link FileChooser}
 	 * @return the selected {@link File}, or {@code null} if none was selected
 	 */
-	public File showOpenProjectOrMachineChooser(final Window window) {
+	public Path showOpenProjectOrMachineChooser(final Window window) {
 		return showOpenFileChooser(window, true, true);
 	}
 	
@@ -368,7 +369,7 @@ public final class StageManager {
 	 * @param window the {@link Window} on which to show the {@link FileChooser}
 	 * @return the selected {@link File}, or {@code null} if none was selected
 	 */
-	public File showSaveMachineChooser(final Window window) {
+	public Path showSaveMachineChooser(final Window window) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
 		

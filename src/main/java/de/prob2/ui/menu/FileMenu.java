@@ -1,6 +1,5 @@
 package de.prob2.ui.menu;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -23,6 +22,7 @@ import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -114,16 +114,15 @@ public class FileMenu extends Menu {
 
 	@FXML
 	public void handleOpen() {
-		final File selected = stageManager.showOpenProjectOrMachineChooser(stageManager.getMainStage());
+		final Path selected = stageManager.showOpenProjectOrMachineChooser(stageManager.getMainStage());
 		if (selected == null) {
 			return;
 		}
-		final Path path = selected.toPath();
-		final String ext = StageManager.getExtension(path.getFileName().toString());
+		final String ext = StageManager.getExtension(selected.getFileName().toString());
 		if ("prob2project".equals(ext)) {
-			this.openProject(path);
+			this.openProject(selected);
 		} else {
-			this.createProjectFromFile(path);
+			this.createProjectFromFile(selected);
 		}
 	}
 	
