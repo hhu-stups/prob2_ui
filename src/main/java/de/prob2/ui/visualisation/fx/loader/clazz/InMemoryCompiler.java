@@ -1,7 +1,7 @@
 package de.prob2.ui.visualisation.fx.loader.clazz;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 import javax.tools.DiagnosticCollector;
@@ -16,7 +16,7 @@ import javax.tools.ToolProvider;
  */
 public class InMemoryCompiler {
 
-	public Class<?> compile(String className, File javaClassFile, /*String classpath,*/ InMemoryClassloader classloader)
+	public Class<?> compile(String className, Path javaClassFile, InMemoryClassloader classloader)
 			throws InMemoryCompilerException, IOException, ClassNotFoundException{
 		String classpath = System.getProperty("java.class.path");
 
@@ -26,7 +26,7 @@ public class InMemoryCompiler {
 		try (JavaFileManager inMemoryFileManager = new InMemoryJavaFileManager(compiler, classloader, diagnostics);
 			 StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null)) {
 
-			Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjects(javaClassFile);
+			Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjects(javaClassFile.toFile());
 
 			//create compiler-task
 			JavaCompiler.CompilationTask task = compiler.getTask(null, inMemoryFileManager,

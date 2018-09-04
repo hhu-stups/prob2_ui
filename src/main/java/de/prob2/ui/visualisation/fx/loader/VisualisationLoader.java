@@ -1,16 +1,13 @@
 package de.prob2.ui.visualisation.fx.loader;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
 
@@ -19,7 +16,11 @@ import de.prob2.ui.visualisation.fx.Visualisation;
 import de.prob2.ui.visualisation.fx.loader.clazz.InMemoryClassloader;
 import de.prob2.ui.visualisation.fx.loader.clazz.InMemoryCompiler;
 import de.prob2.ui.visualisation.fx.loader.clazz.InMemoryCompilerException;
+
 import javafx.scene.control.Alert;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Christoph Heinzen
@@ -37,23 +38,23 @@ public class VisualisationLoader {
 		this.stageManager = stageManager;
 	}
 
-	public Visualisation loadVisualization(File selectedVisualisation) {
-		String selectedVisualisationExtension = Files.getFileExtension(selectedVisualisation.getName());
-		if (selectedVisualisationExtension.equals("java")) {
+	public Visualisation loadVisualization(Path selectedVisualisation) {
+		String selectedVisualisationExtension = Files.getFileExtension(selectedVisualisation.getFileName().toString());
+		if ("java".equals(selectedVisualisationExtension)) {
 			LOGGER.debug("Try to open visualization-class {}.", selectedVisualisation);
 			return loadVisualisationClass(selectedVisualisation);
-		} else if (selectedVisualisationExtension.equals("jar")){
+		} else if ("jar".equals(selectedVisualisationExtension)){
 			LOGGER.debug("Try to open visualization-jar {}.", selectedVisualisation);
 			return loadVisualisationJar(selectedVisualisation);
+		} else {
+			throw new IllegalArgumentException("Unknown visualization file extension: " + selectedVisualisationExtension);
 		}
-		return null;
 	}
 
-	private Visualisation loadVisualisationClass(File selectedVisualization) {
-		String fileName = selectedVisualization.getName();
+	private Visualisation loadVisualisationClass(Path selectedVisualization) {
 		try {
-			LOGGER.debug("Try to compile file {}.", fileName);
-			String className = fileName.replace(".java", "");
+			LOGGER.debug("Try to compile file {}.", selectedVisualization);
+			String className = selectedVisualization.getFileName().toString().replace(".java", "");
 
 			InMemoryClassloader classLoader = new InMemoryClassloader(this.getClass().getClassLoader());
 			visualisationClassloader = classLoader;
@@ -73,12 +74,12 @@ public class VisualisationLoader {
 				return null;
 			}
 		} catch (InMemoryCompilerException e) {
-			LOGGER.warn("Exception while compiling the class \"{}\".", fileName, e);
-			stageManager.makeExceptionAlert(e, "visualisation.fx.loader.alerts.couldNotCompile.content", fileName)
+			LOGGER.warn("Exception while compiling the class \"{}\".", selectedVisualization, e);
+			stageManager.makeExceptionAlert(e, "visualisation.fx.loader.alerts.couldNotCompile.content", selectedVisualization)
 					.showAndWait();
 			return null;
 		} catch (Exception e) {
-			LOGGER.warn("Exception while loading the visualization:\n{}", fileName, e);
+			LOGGER.warn("Exception while loading the visualization:\n{}", selectedVisualization, e);
 			stageManager.makeExceptionAlert(e, "visualisation.fx.loader.alerts.exceptionWhileLoading.content").showAndWait();
 			return null;
 		}
@@ -96,9 +97,8 @@ public class VisualisationLoader {
 		}
 	}
 
-	private Visualisation loadVisualisationJar(File selectedVisualization) {
-		String fileName = selectedVisualization.getName();
-		try (JarFile selectedVisualizationJar = new JarFile(selectedVisualization)) {
+	private Visualisation loadVisualisationJar(Path selectedVisualization) {
+		try (JarFile selectedVisualizationJar = new JarFile(selectedVisualization.toFile())) {
 			URL[] urls = {new URL("jar:file:" + selectedVisualizationJar.getName() +"!/")};
 			URLClassLoader classloader = URLClassLoader.newInstance(urls, this.getClass().getClassLoader());
 			visualisationClassloader = classloader;
@@ -119,17 +119,17 @@ public class VisualisationLoader {
 				visualizationClass = null;
 			}
 			if (visualizationClass != null) {
-				LOGGER.debug("Found visualization-class {} in jar: {}", className, fileName);
+				LOGGER.debug("Found visualization-class {} in jar: {}", className, selectedVisualization);
 				return (Visualisation)visualizationClass.getConstructor().newInstance();
 
 			} else {
-				LOGGER.warn("No visualization-class found in jar: {}", fileName);
+				LOGGER.warn("No visualization-class found in jar: {}", selectedVisualization);
 				stageManager.makeAlert(Alert.AlertType.WARNING, "",
 						"visualisation.fx.loader.alerts.noVisualisationClass.content", className).showAndWait();
 				return null;
 			}
 		} catch (Exception e) {
-			LOGGER.warn("Exception while loading the visualization:\n{}", fileName, e);
+			LOGGER.warn("Exception while loading the visualization: {}", selectedVisualization, e);
 			stageManager.makeExceptionAlert(e, "visualisation.fx.loader.alerts.exceptionWhileLoading.content").showAndWait();
 			return null;
 		}

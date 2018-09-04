@@ -1,12 +1,18 @@
 package de.prob2.ui.plugin;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -15,12 +21,10 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import com.github.zafarkhaja.semver.Version;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
-
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.internal.StageManager;
@@ -34,7 +38,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import org.apache.commons.lang.StringUtils;
-
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginDependency;
 import org.pf4j.PluginDescriptor;
@@ -43,8 +46,6 @@ import org.pf4j.PluginFactory;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
 import org.pf4j.RuntimeMode;
-import org.pf4j.util.FileUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,9 +65,7 @@ public class ProBPluginManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginManager.class);
 
 	private static final String VERSION = "0.1.0";
-	private static final File PLUGIN_DIRECTORY = new File(Main.getProBDirectory()
-			+ File.separator + "prob2ui"
-			+ File.separator + "plugins");
+	private static final Path PLUGIN_DIRECTORY = Paths.get(Main.getProBDirectory(), "prob2ui", "plugins");
 
 	private final ProBPluginHelper proBPluginHelper;
 	private final StageManager stageManager;
@@ -74,7 +73,7 @@ public class ProBPluginManager {
 	private final FileChooserManager fileChooserManager;
 
 	private List<String> inactivePluginIds;
-	private File pluginDirectory;
+	private Path pluginDirectory;
 	private ProBJarPluginManager pluginManager;
 
 	/**
@@ -86,7 +85,7 @@ public class ProBPluginManager {
 	 * @param bundle {@link ResourceBundle} used in the prob2-ui application
 	 */
 	@Inject
-	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
+	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) throws IOException {
 		this.proBPluginHelper = proBPluginHelper;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -120,31 +119,32 @@ public class ProBPluginManager {
 	public void addPlugin() {
 		//let the user select a plugin-file
 		Stage stage = stageManager.getCurrent();
-		final File selectedPlugin = showFileChooser(stage);
-		if (selectedPlugin != null && createPluginDirectory()) {
-			String pluginFileName = selectedPlugin.getName();
-			File plugin = new File(getPluginDirectory() + File.separator + pluginFileName);
+		final Path selectedPlugin = showFileChooser(stage);
+		if (selectedPlugin != null) {
+			Path pluginFileName = selectedPlugin.getFileName();
+			Path plugin = getPluginDirectory().resolve(pluginFileName);
 			try {
+				createPluginDirectory();
 				if (copyPluginFile(selectedPlugin, plugin)) {
-					String pluginId = pluginManager.loadPlugin(plugin.toPath());
+					String pluginId = pluginManager.loadPlugin(plugin);
 					if (checkLoadedPlugin(pluginId, pluginFileName)
-							&& getInactivePluginIds() != null
-							&& !getInactivePluginIds().contains(pluginId)) {
+						&& getInactivePluginIds() != null
+						&& !getInactivePluginIds().contains(pluginId)) {
 						pluginManager.startPlugin(pluginId);
 					}
 				}
-			} catch (Exception e) {
-				LOGGER.warn("Tried to copy and load/start the plugin {}.\nThis exception was thrown: ", pluginFileName, e);
+			} catch (IOException | PluginException | RuntimeException e) {
+				LOGGER.warn("Tried to copy and load/start the plugin {}.", pluginFileName, e);
 				showWarningAlert("plugin.alerts.couldNotLoadPlugin.content", pluginFileName);
 				//if an error occurred, delete the plugin file
-				PluginWrapper wrapper = pluginManager.getPlugin(plugin.toPath());
+				PluginWrapper wrapper = pluginManager.getPlugin(plugin);
 				if (wrapper != null) {
 					pluginManager.deletePlugin(wrapper.getPluginId());
 				}
 				try {
-					Files.deleteIfExists(plugin.toPath());
+					Files.deleteIfExists(plugin);
 				} catch (IOException ex) {
-					LOGGER.warn("Could not delete file {}.", pluginFileName);
+					LOGGER.warn("Failed to delete plugin", ex);
 				}
 			}
 		}
@@ -156,16 +156,11 @@ public class ProBPluginManager {
 	 */
 	public void start() {
 		pluginManager.loadPlugins();
-		List<String> inactivePluginIds = getInactivePluginIds();
-		if (inactivePluginIds != null) {
-			for (PluginWrapper plugin : pluginManager.getPlugins()) {
-				String pluginId = plugin.getPluginId();
-				if (!inactivePluginIds.contains(pluginId)) {
-					pluginManager.startPlugin(pluginId);
-				}
+		for (PluginWrapper plugin : pluginManager.getPlugins()) {
+			String pluginId = plugin.getPluginId();
+			if (!getInactivePluginIds().contains(pluginId)) {
+				pluginManager.startPlugin(pluginId);
 			}
-		} else {
-			showWarningAlert("plugin.alerts.couldNotLocateInactive.content", getPluginDirectory());
 		}
 	}
 
@@ -191,7 +186,7 @@ public class ProBPluginManager {
 	List<PluginWrapper> changePluginDirectory() {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle(bundle.getString("plugin.pluginMenu.directoryChooser.changePath.title"));
-		chooser.setInitialDirectory(getPluginDirectory());
+		chooser.setInitialDirectory(getPluginDirectory().toFile());
 		File newPath = chooser.showDialog(stageManager.getCurrent());
 		if (newPath != null) {
 			//unload all plugins
@@ -200,7 +195,7 @@ public class ProBPluginManager {
 				pluginManager.unloadPlugin(plugin.getPluginId());
 			}
 			//set new path
-			pluginDirectory = newPath;
+			pluginDirectory = newPath.toPath();
 			//initialize the PluginManager using the new path
 			pluginManager = new ProBJarPluginManager();
 			//load an start the plugins
@@ -224,40 +219,31 @@ public class ProBPluginManager {
 	 * Saves the ids of every inactive plugin in the {@code inactive.txt} file.
 	 * A plugin is inactive if its state is not {@code PluginState.STARTED}.
 	 */
-	void writeInactivePlugins() {
-		try {
-			if (createPluginDirectory()) {
-				File inactivePlugins = getInactivePluginsFile();
-				if (!inactivePlugins.exists() && !inactivePlugins.createNewFile()) {
-					LOGGER.warn("Could not create file for inactive plugins!");
-					return;
-				}
-				inactivePluginIds = pluginManager.getPlugins().stream()
-						.filter(pluginWrapper -> pluginWrapper.getPluginState() != PluginState.STARTED)
-						.map(PluginWrapper::getPluginId)
-						.collect(Collectors.toList());
-				FileUtils.writeLines(inactivePluginIds, inactivePlugins);
-			}
-		} catch (IOException e) {
-			LOGGER.warn("An error occurred while writing the inactive plugins:", e);
-		}
+	void writeInactivePlugins() throws IOException {
+		createPluginDirectory();
+		Path inactivePlugins = getInactivePluginsFile();
+		inactivePluginIds = pluginManager.getPlugins().stream()
+				.filter(pluginWrapper -> pluginWrapper.getPluginState() != PluginState.STARTED)
+				.map(PluginWrapper::getPluginId)
+				.collect(Collectors.toList());
+		Files.write(inactivePlugins, inactivePluginIds);
 	}
 
 	/*
 	 * private methods used to add a new plugin
 	 */
 
-	private boolean copyPluginFile(File source, File destination) {
-		if (destination.exists()) {
+	private boolean copyPluginFile(Path source, Path destination) {
+		if (Files.exists(destination)) {
 			//if there is already a file with the name, try to find the corresponding plugin
-			PluginWrapper wrapper = pluginManager.getPlugin(destination.toPath());
+			PluginWrapper wrapper = pluginManager.getPlugin(destination);
 			if (wrapper != null) {
 				//if there is a corresponding plugin, ask the user if he wants to overwrite it
 				List<ButtonType> buttons = new ArrayList<>();
 				buttons.add(ButtonType.YES);
 				buttons.add(ButtonType.NO);
-				Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "",
-						"plugin.alerts.confirmOverwriteExistingFile.content", destination.getName(),
+				Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, Arrays.asList(ButtonType.YES, ButtonType.NO), "",
+						"plugin.alerts.confirmOverwriteExistingFile.content", destination.getFileName(),
 						((ProBPlugin) wrapper.getPlugin()).getName(), wrapper.getDescriptor().getVersion());
 				alert.initOwner(stageManager.getCurrent());
 				Optional<ButtonType> result = alert.showAndWait();
@@ -271,25 +257,26 @@ public class ProBPluginManager {
 			} else {
 				//if there is no corresponding plugin, delete the file
 				try {
-					Files.deleteIfExists(destination.toPath());
-				} catch (IOException ex) {
-					LOGGER.warn("Could not delete file {}.", destination.getName());
-					showWarningAlert("plugin.alerts.couldNotDeleteJar.content", destination.getName());
+					Files.deleteIfExists(destination);
+				} catch (IOException e) {
+					LOGGER.warn("Failed to delete existing plugin file", e);
+					showWarningAlert("plugin.alerts.couldNotDeleteJar.content", destination.getFileName());
 					return false;
 				}
 			}
 		}
 		try {
 			//copy the selected file into the plugins directory
-			Files.copy(source.toPath(), destination.toPath());
+			Files.copy(source, destination);
 			return true;
 		} catch (IOException e) {
-			showWarningAlert("plugin.alerts.couldNotCopyToPluginDirectory.content", destination.getName());
+			LOGGER.warn("Failed to copy plugin", e);
+			showWarningAlert("plugin.alerts.couldNotCopyToPluginDirectory.content", destination.getFileName());
 		}
 		return false;
 	}
 
-	private boolean checkLoadedPlugin(String loadedPluginId, String pluginFileName) throws PluginException {
+	private boolean checkLoadedPlugin(String loadedPluginId, Path pluginFileName) throws PluginException {
 		if (loadedPluginId == null) {
 			// error while loading the plugin
 			throw new PluginException("Could not load the plugin '{}'.", pluginFileName);
@@ -322,62 +309,52 @@ public class ProBPluginManager {
 		return true;
 	}
 
-	private File showFileChooser(@Nonnull final Stage stage) {
+	private Path showFileChooser(@Nonnull final Stage stage) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("plugin.fileChooser.addPlugin.title"));
 		String proB2PluginFileExtension = "*.jar";
 		fileChooser.getExtensionFilters()
 				.addAll(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Plugin"), proB2PluginFileExtension), proB2PluginFileExtension));
-		return fileChooserManager.showOpenDialog(fileChooser, Kind.PLUGINS, stage).toFile();
+		return fileChooserManager.showOpenDialog(fileChooser, Kind.PLUGINS, stage);
 	}
 
 	/*
 	 * methods to handle the inactive plugins
 	 */
 
-	private void readInactivePlugins() {
+	private void readInactivePlugins() throws IOException {
 		try {
-			File inactivePlugins = getInactivePluginsFile();
-			if (inactivePlugins.exists()) {
-				//if we already have a incative plugins file, read it
-				inactivePluginIds = FileUtils.readLines(inactivePlugins.toPath(), true);
-			} else {
-				//if not, try to create an empty file
-				if (!createPluginDirectory() || !inactivePlugins.createNewFile() ) {
-					LOGGER.warn("Could not create file for inactive plugins!");
-				}
-				inactivePluginIds = null;
-			}
-		} catch (IOException e) {
-			LOGGER.warn("An error occurred while reading the inactive plugins:", e);
+			inactivePluginIds = Files.readAllLines(getInactivePluginsFile());
+		} catch (FileNotFoundException | NoSuchFileException e) {
+			LOGGER.info("Inactive plugins list not found, all plugins will be loaded");
+			inactivePluginIds = Collections.emptyList();
 		}
 	}
 
 	private List<String> getInactivePluginIds() {
 		if (inactivePluginIds == null) {
-			readInactivePlugins();
+			try {
+				readInactivePlugins();
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
 		}
 		return inactivePluginIds;
 	}
 
-	private File getInactivePluginsFile() {
-		return new File(getPluginDirectory() + File.separator + "inactive.txt");
+	private Path getInactivePluginsFile() {
+		return getPluginDirectory().resolve("inactive.txt");
 	}
 
 	/*
 	 * methods to handle the plugin directory
 	 */
 
-	private boolean createPluginDirectory() {
-		File directory = getPluginDirectory();
-		if (!directory.exists() && !directory.mkdirs()) {
-			LOGGER.warn("Couldn't create the directory for plugins!\n{}", directory.getAbsolutePath());
-			return false;
-		}
-		return true;
+	private void createPluginDirectory() throws IOException {
+		Files.createDirectories(getPluginDirectory());
 	}
 
-	public File getPluginDirectory() {
+	public Path getPluginDirectory() {
 		if (pluginDirectory != null) {
 			return pluginDirectory;
 		}
@@ -387,9 +364,9 @@ public class ProBPluginManager {
 	/**
 	 * Do not call this method.
 	 */
-	public void setPluginDirectory(String path) {
+	public void setPluginDirectory(Path path) {
 		if (path != null) {
-			this.pluginDirectory = new File(path);
+			this.pluginDirectory = path;
 			//initialize with the new PluginDirectory
 			pluginManager = new ProBJarPluginManager();
 		}
@@ -428,14 +405,12 @@ public class ProBPluginManager {
 
 		@Override
 		protected Path createPluginsRoot() {
-			if (pluginDirectory != null) {
-				if (createPluginDirectory()) {
-					return pluginDirectory.toPath();
-				}
-				LOGGER.warn("Couldn't create plugin directory {}. Using the default directory {}.",
-						pluginDirectory, PLUGIN_DIRECTORY);
+			try {
+				createPluginDirectory();
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
 			}
-			return PLUGIN_DIRECTORY.toPath();
+			return getPluginDirectory();
 		}
 
 		@Override

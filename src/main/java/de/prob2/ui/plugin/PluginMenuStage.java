@@ -1,5 +1,6 @@
 package de.prob2.ui.plugin;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -17,21 +18,32 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import org.pf4j.PluginState;
 import org.pf4j.PluginStateListener;
 import org.pf4j.PluginWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Christoph Heinzen on 03.08.17.
  */
 @Singleton
 public class PluginMenuStage extends Stage {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PluginMenuStage.class);
 
 	private final ProBPluginManager proBPluginManager;
 	private final ResourceBundle bundle;
@@ -68,7 +80,7 @@ public class PluginMenuStage extends Stage {
 
 	@FXML
 	private void initialize() {
-		pathTextField.setText(proBPluginManager.getPluginDirectory().getAbsolutePath());
+		pathTextField.setText(proBPluginManager.getPluginDirectory().toString());
 
 		pluginList = FXCollections.observableArrayList();
 
@@ -127,7 +139,7 @@ public class PluginMenuStage extends Stage {
 			pluginList.addAll(plugins);
 			getProBJarPluginManager().addPluginStateListener(stateListener);
 		}
-		pathTextField.setText(proBPluginManager.getPluginDirectory().getAbsolutePath());
+		pathTextField.setText(proBPluginManager.getPluginDirectory().toString());
 	}
 
 	private void configureColumns() {
@@ -157,7 +169,12 @@ public class PluginMenuStage extends Stage {
 				} else {
 					getProBJarPluginManager().stopPlugin(plugin.getPluginId());
 				}
-				proBPluginManager.writeInactivePlugins();
+				try {
+					proBPluginManager.writeInactivePlugins();
+				} catch (IOException e) {
+					LOGGER.error("Failed to write list of inactive plugins", e);
+					stageManager.makeExceptionAlert(e, "plugin.alerts.couldNotWriteInactive.content").show();
+				}
 			});
 			return booleanProp;
 		});

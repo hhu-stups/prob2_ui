@@ -81,7 +81,7 @@ public final class Config {
 		OperationsView.SortMode operationsSortMode;
 		boolean operationsShowNotEnabled;
 		Map<String, String> globalPreferences;
-		private String pluginDirectory;
+		private Path pluginDirectory;
 		private Map<FileChooserManager.Kind, Path> fileChooserInitialDirectories;
 		
 		
@@ -366,7 +366,7 @@ public final class Config {
 		
 		configData.globalPreferences = new HashMap<>(this.globalPreferences);
 
-		configData.pluginDirectory = proBPluginManager.getPluginDirectory().getAbsolutePath();
+		configData.pluginDirectory = proBPluginManager.getPluginDirectory();
 		configData.fileChooserInitialDirectories = new EnumMap<>(fileChooserManager.getInitialDirectories());
 
 		try (final Writer writer = Files.newBufferedWriter(LOCATION)) {

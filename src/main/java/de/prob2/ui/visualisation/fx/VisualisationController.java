@@ -1,6 +1,6 @@
 package de.prob2.ui.visualisation.fx;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
@@ -172,11 +171,11 @@ public class VisualisationController {
 		fileChooser.getExtensionFilters()
 				.addAll(new FileChooser.ExtensionFilter(bundle.getString("visualisation.fx.controller.fileChooser.fileTypes.visualisationJar"), "*.jar"),
 						new FileChooser.ExtensionFilter(format("visualisation.fx.controller.fileChooser.fileTypes.visualisationClass", "*.java"), "*.java"));
-		File selectedVisualisation = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent()).toFile();
+		Path selectedVisualisation = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		
 		
 		if (selectedVisualisation != null) {
-			LOGGER.debug("Try to load visualisation from file {}.", selectedVisualisation.getName());
+			LOGGER.debug("Try to load visualisation from file {}.", selectedVisualisation.getFileName());
 			if (visualisationLoader == null) {
 				visualisationLoader = new VisualisationLoader(stageManager);
 			}
