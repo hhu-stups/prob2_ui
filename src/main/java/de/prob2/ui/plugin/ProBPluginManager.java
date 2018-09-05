@@ -234,7 +234,7 @@ public class ProBPluginManager {
 	 */
 
 	private boolean copyPluginFile(Path source, Path destination) {
-		if (Files.exists(destination)) {
+		if (destination.toFile().exists()) {
 			//if there is already a file with the name, try to find the corresponding plugin
 			PluginWrapper wrapper = pluginManager.getPlugin(destination);
 			if (wrapper != null) {
