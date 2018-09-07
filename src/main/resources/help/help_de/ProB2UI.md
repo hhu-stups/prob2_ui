@@ -37,7 +37,7 @@ Dieses Untermenü erlaubt es die Schrift- und Buttongröße in dem ProB2 JavaFX 
 
 ![Visualisierungsmenü](../screenshots/Menu/Visualisation.png)
 
-Das Visualisierungsuntermenü stellt verschiedene Formen der Visualisierung zur Verfügung. Man kann eine Formel eingeben und als [Graph](Hauptansicht/Graphvisualisierung einer Formel.md) oder [Tabelle](Hauptansicht/Tabellenvisualisierung einer Formel.md) visualisieren lassen, sich das Zeitdiagramm anschauen oder einen Blick auf die [Graphvisualisierung](Graphvisualisierung.md) werfen.
+Das Visualisierungsuntermenü stellt verschiedene Formen der Visualisierung zur Verfügung. Man kann eine Formel eingeben und als [Graph](Hauptansicht/Graphvisualisierung einer Formel.md) oder [Tabelle](Hauptansicht/Tabellenvisualisierung einer Formel.md) visualisieren lassen, sich das [Zeitdiagramm](Zeitdiagramm.md) anschauen oder einen Blick auf die [Graphvisualisierung](Graphvisualisierung.md) werfen.
 
 ![Weitere-Optionen-Menü](../screenshots/Menu/Advanced.png)
 

@@ -16,3 +16,4 @@ de.prob2.ui.table.ExpressionTableView,Hauptansicht/Tabellenvisualisierung einer 
 de.prob2.ui.formula.FormulaStage,Hauptansicht/Graphvisualisierung einer Formel.html
 de.prob2.ui.dotty.DotView,Graphvisualisierung.html
 de.prob2.ui.benchmarks.BenchmarksStage,Benchmarks.html
+de.prob2.ui.chart.HistoryChartStage,Zeitdiagramm.html

@@ -37,7 +37,7 @@ This submenu allows you to adjust font and button size in the ProB2 JavaFX UI or
 
 ![Visualisation Menu](../screenshots/Menu/Visualisation.png)
 
-The Visualisation submenu provides different forms of visualisation. You can enter a formula and visualize it as [graph](Main View/Formula Graph Visualisation.md) or [table](Main View/Formula Table Visualisation.md), view the history chart or take a look at the [graph visualisation](Graph Visualisation.md).
+The Visualisation submenu provides different forms of visualisation. You can enter a formula and visualize it as [graph](Main View/Formula Graph Visualisation.md) or [table](Main View/Formula Table Visualisation.md), view the [history chart](History Chart.md) or take a look at the [graph visualisation](Graph Visualisation.md).
 
 ![Advanced Menu](../screenshots/Menu/Advanced.png)
 
