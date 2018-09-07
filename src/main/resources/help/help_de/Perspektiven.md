@@ -84,6 +84,7 @@ Wie man sehen kann, besteht die voreingestellte Perspektive aus diversen Kompone
 * MainView
 * Entkoppelbare Komponenten:
 	* OperationsView
+	* AnimationView
 	* StatsView
 	* VerificationsView
 	* ProjectView

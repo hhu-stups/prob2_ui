@@ -85,6 +85,7 @@ As you can see, the default perspective consists of several components:
 * MainView
 * Detachable Components:
 	* OperationsView
+	* AnimationView
 	* StatsView
 	* VerificationsView
 	* ProjectView
@@ -92,7 +93,7 @@ As you can see, the default perspective consists of several components:
 * MenuController
 * StatusBar
 
-Every component may be placed as you see fit, but to guarantee certain usability, you need to follow through these rules: Every detachable component needs to be placed in a TitledPane and these TitledPanes need to be put in an Accordion and each of these Accordions need to be registered in a List.
+Every component may be placed as you see fit, but to guarantee certain usability, you need to follow through these rules: Every detachable component needs to be placed in a TitledPane and these TitledPanes need to be put in an Accordion and each of these Accordions need to be registered in a list.
 ```XML
 ...
 			<Accordion fx:id="leftAccordion" expandedPane="$operationsTP">
