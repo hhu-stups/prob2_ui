@@ -261,7 +261,7 @@ public class MachinesTab extends Tab {
 		String name = n[0];
 		int i = 1;
 		while (machineNamesSet.contains(name)) {
-			name = String.format(bundle.getString("project.machines.nameSuffix"), n[0], i);
+			name = String.format("%s (%d)", n[0], i);
 			i++;
 		}
 		currentProject.addMachine(new Machine(name, "", relative));
