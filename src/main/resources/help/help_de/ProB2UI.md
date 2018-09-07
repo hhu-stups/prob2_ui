@@ -29,7 +29,7 @@ Die Menüleiste enthält die diversen Kommandos, um auf die Funktionen von ProB 
 
 ![Dateimenü](../screenshots/Menu/File.png)
 
-Das Dateiuntermenü erlaubt es ein neues Projekt anzulegen, existierende Projekte oder Maschinen zu öffnen, ein Projekt aus der Liste der zuletzt verwendete Projekte zu öffnen und/oder die Liste der zuletzt verwendeten Projekte zu löschen, das ProB2 JavaFX UI zu schließen, das aktuelle Projekt zu speichern, die derzeitig laufende Maschine neu zu laden oder Einstellungen zu editieren.
+Das Dateiuntermenü erlaubt es ein neues [Projekt](Projekt.md) anzulegen, existierende Projekte oder Maschinen zu öffnen, ein Projekt aus der Liste der zuletzt verwendete Projekte zu öffnen und/oder die Liste der zuletzt verwendeten Projekte zu löschen, das aktuelle Projekt oder die aktuelle Maschine zu speichern, die derzeitig laufende Maschine formatiert anzuzeigen oder neu zu laden oder Einstellungen zu editieren.
 
 ![Ansichtsmenü](../screenshots/Menu/View.png)
 
@@ -37,15 +37,15 @@ Dieses Untermenü erlaubt es die Schrift- und Buttongröße in dem ProB2 JavaFX 
 
 ![Visualisierungsmenü](../screenshots/Menu/Visualisation.png)
 
-Das Visualisierungsuntermenü stellt verschiedene Formen der Visualisierung zur Verfügung. Man kann eine Formel eingeben, sich das Zeitdiagramm anschauen oder einen Blick auf die Graphvisualisierung werfen.
+Das Visualisierungsuntermenü stellt verschiedene Formen der Visualisierung zur Verfügung. Man kann eine Formel eingeben und als [Graph](Hauptansicht/Graphvisualisierung einer Formel.md) oder [Tabelle](Hauptansicht/Tabellenvisualisierung einer Formel.md) visualisieren lassen, sich das Zeitdiagramm anschauen oder einen Blick auf die [Graphvisualisierung](Graphvisualisierung.md) werfen.
 
 ![Weitere-Optionen-Menü](../screenshots/Menu/Advanced.png)
 
-Dieses Untermenü stellt eine Groovy-Konsole zur Verfügung und erlaubt es Plugins und eigene Visualisierungen zu verwalten.
+Dieses Untermenü stellt eine Groovy-Konsole zur Verfügung und erlaubt es Plugins und eigene Visualisierungen zu verwalten. Zusätzlich kann man dort [Benchmarks](Benchmarks.md) von Operationen erstellen lassen.
 
 ![Fenster-Menü](../screenshots/Menu/Window.png)
 
-Das Fensteruntermenü erlaubt es Perspektiven zu ändern und [Komponenten abzutrennen](Abtrennen von Komponenten.md). Dieses UI bringt 3 verschiedene voreingestellte Perspektiven. Es ist erlaubt [eigene Perspektiven](Perspektiven.md) zu nutzen, indem man eine FXML-Datei, die die Ansichten enthält, zur Verfügung stellt, aber man sollte sich dabei bewusst sein, dass das die Fähigkeit Komponenten abzutrennen zerstören kann.
+Das Fensteruntermenü erlaubt es Perspektiven zu ändern und [Komponenten abzutrennen](Abtrennen von Komponenten.md). Dieses UI bringt 3 verschiedene voreingestellte Perspektiven. Es ist erlaubt [eigene Perspektiven](Perspektiven.md) zu nutzen, indem man eine FXML-Datei, die die Ansichten enthält, zur Verfügung stellt, aber man sollte sich dabei bewusst sein, dass das die Fähigkeit Komponenten abzutrennen zerstören kann. Dieses Menü erlaubt es auch das ProB2UI zu schließen.
 
 ![Hilfemenü](../screenshots/Menu/Help.png)
 

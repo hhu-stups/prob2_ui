@@ -29,7 +29,7 @@ The menu bar contains the various commands to access the features of ProB. It in
 
 ![File Menu](../screenshots/Menu/File.png)
 
-The File submenu allows you to create a new Project, open an existing project or a machine, open recent projects shown as list and/or clear the list of recent projects, close the ProB2 JavaFX UI, save your project, reload the currently running machine or edit preferences.
+The File submenu allows you to create a new [Project](Project.md), open an existing project or a machine, open recent projects shown as list and/or clear the list of recent projects, save your project or your machine, take a look at the current machine in a formatted manner, reload the currently running machine or edit preferences.
 
 ![View Menu](../screenshots/Menu/View.png)
 
@@ -37,15 +37,15 @@ This submenu allows you to adjust font and button size in the ProB2 JavaFX UI or
 
 ![Visualisation Menu](../screenshots/Menu/Visualisation.png)
 
-The Visualisation submenu provides different forms of visualisation. You can enter a formula, view the history chart or take a look at the graph visualisation.
+The Visualisation submenu provides different forms of visualisation. You can enter a formula and visualize it as [graph](Main View/Formula Graph Visualisation.md) or [table](Main View/Formula Table Visualisation.md), view the history chart or take a look at the [graph visualisation](Graph Visualisation.md).
 
 ![Advanced Menu](../screenshots/Menu/Advanced.png)
 
-This submenu provides a Groovy console and allows you to manage your plugins and own visualisations.
+This submenu provides a Groovy console and allows you to manage your plugins and own visualisations. Additionally you can compute [benchmarks](Benchmarks.md) of operations by using this menu.
 
 ![Window Menu](../screenshots/Menu/Window.png)
 
-The Window submenu allows you to change perspectives and [detach components](Detaching of Components.md). This UI comes with 3 different preset perspectives. It allows you to [use your own perspective](Perspectives.md) as well by providing a FXML file containing the views but be aware that this might ruin the ability to detach components.
+The Window submenu allows you to change perspectives and [detach components](Detaching of Components.md). This UI comes with 3 different preset perspectives. It allows you to [use your own perspective](Perspectives.md) as well by providing a FXML file containing the views but be aware that this might ruin the ability to detach components. This menu allows you to close the ProB2UI too.
 
 ![Help Menu](../screenshots/Menu/Help.png)
 
