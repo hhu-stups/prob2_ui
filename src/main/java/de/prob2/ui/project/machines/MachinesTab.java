@@ -6,9 +6,11 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -25,7 +27,6 @@ import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
-
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -41,9 +42,6 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachinesTab extends Tab {
@@ -172,14 +170,11 @@ public class MachinesTab extends Tab {
 
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
 	private final Injector injector;
 
 	@Inject
-	private MachinesTab(final StageManager stageManager, final ResourceBundle bundle,
-			final CurrentProject currentProject, final Injector injector) {
+	private MachinesTab(final StageManager stageManager, final CurrentProject currentProject, final Injector injector) {
 		this.stageManager = stageManager;
-		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "machines_tab.fxml");
@@ -249,7 +244,7 @@ public class MachinesTab extends Tab {
 
 		final Path relative = currentProject.getLocation().relativize(selected);
 		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "",
+			stageManager.makeAlert(Alert.AlertType.ERROR, "project.machines.machinesTab.alerts.machineAlreadyExists.header",
 					"project.machines.machinesTab.alerts.machineAlreadyExists.content", relative)
 					.showAndWait();
 			return;

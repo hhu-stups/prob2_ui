@@ -399,7 +399,7 @@ public class Machine {
 			return false;
 		}
 		Machine otherMachine = (Machine) other;
-		return otherMachine.location.equals(this.location) && otherMachine.name.equals(this.name);
+		return otherMachine.location.equals(this.location);
 	}
 	
 	@Override
