@@ -120,7 +120,7 @@ public class HelpSystem extends StackPane {
 	}
 
 	private void copyHelp(Path source, Path target) throws IOException {
-		Files.createDirectories(target);
+		Files.createDirectories(target.getParent());
 		Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
