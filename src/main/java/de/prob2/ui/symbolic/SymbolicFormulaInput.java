@@ -9,17 +9,21 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob.statespace.LoadedMachine;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.AbstractResultHandler;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
-public abstract class SymbolicFormulaInput extends VBox {
+public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extends VBox {
 	
 	protected final CurrentProject currentProject;
 	
@@ -36,7 +40,7 @@ public abstract class SymbolicFormulaInput extends VBox {
 	protected ChoiceBox<String> cbOperations;
 	
 	@FXML
-	protected PredicateBuilderView predicateBuilderView;
+	protected PredicateBuilderView<T> predicateBuilderView;
 	
 	protected final Injector injector;
 	
@@ -107,5 +111,73 @@ public abstract class SymbolicFormulaInput extends VBox {
 		tfFormula.clear();
 		cbOperations.getSelectionModel().clearSelection();
 	}
-
+	
+	protected boolean updateFormula(T item, SymbolicView<T> view, SymbolicChoosingStage choosingStage) {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		String formula = null;
+		if(choosingStage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
+			formula = tfFormula.getText();
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
+			formula = cbOperations.getSelectionModel().getSelectedItem();
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
+			formula = predicateBuilderView.getPredicate();
+		} else {
+			formula = choosingStage.getExecutionType().getName();
+		}
+		SymbolicFormulaItem newItem;
+		if(item.getClass() == SymbolicAnimationFormulaItem.class) {
+			newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType());
+		} else {
+			newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
+		}
+		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
+			SymbolicExecutionType type = choosingStage.getExecutionType();
+			item.setData(formula, type.getName(), formula, type);
+			item.reset();
+			view.refresh();
+			return true;
+		}
+		return false;
+	}
+	
+	public void changeFormula(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, 
+			SymbolicFormulaHandler<T> formulaHandler, SymbolicChoosingStage stage) {
+		btAdd.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.change"));
+		btCheck.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.changeAndCheck"));
+		setChangeListeners(item, view, resultHandler, formulaHandler, stage);
+		stage.select(item);
+		if(stage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
+			tfFormula.setText(item.getCode());
+		} else if(stage.getGUIType() == SymbolicGUIType.PREDICATE) {
+			predicateBuilderView.setItem(item);
+		} else if(stage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
+			cbOperations.getItems().forEach(operationItem -> {
+				if(operationItem.equals(item.getCode())) {
+					cbOperations.getSelectionModel().select(operationItem);
+					return;
+				}
+			});
+		}
+		stage.showAndWait();
+	}
+	
+	protected void setChangeListeners(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, 
+									SymbolicFormulaHandler<T> formulaHandler, SymbolicChoosingStage stage) {
+		btAdd.setOnAction(e -> {
+			if(!updateFormula(item, view, stage)) {
+				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+			}
+			stage.close();
+		});
+		
+		btCheck.setOnAction(e-> {
+			if(!updateFormula(item, view, stage)) {
+				formulaHandler.handleItem(item, false);
+			} else {
+				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+			}
+			stage.close();
+		});
+	}
+	
 }

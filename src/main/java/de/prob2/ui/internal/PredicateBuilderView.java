@@ -7,7 +7,7 @@ import java.util.Map;
 import com.google.inject.Inject;
 
 import de.prob.formula.PredicateBuilder;
-import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
+import de.prob2.ui.symbolic.SymbolicFormulaItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -19,7 +19,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
-public final class PredicateBuilderView extends VBox {
+public final class PredicateBuilderView<T extends SymbolicFormulaItem> extends VBox {
 	private final class ValueCell extends TableCell<String, String> {
 		private ValueCell() {
 			super();
@@ -87,7 +87,7 @@ public final class PredicateBuilderView extends VBox {
 		this.table.getItems().setAll(this.items.keySet());
 	}
 	
-	public void setItem(SymbolicAnimationFormulaItem item) {
+	public void setItem(T item) {
 		items.clear();
 		String name = item.getName();
 		String[] predicates = name.split(" & ");
