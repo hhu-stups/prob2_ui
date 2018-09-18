@@ -59,7 +59,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 	public SymbolicAnimationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
 					final CurrentProject currentProject, final SymbolicAnimationFormulaHandler symbolicCheckHandler, 
 					final SymbolicAnimationChecker symbolicChecker, final Injector injector) {
-		super(stageManager, bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler);
+		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler);
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
 	

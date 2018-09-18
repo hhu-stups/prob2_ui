@@ -57,13 +57,25 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			row.getContextMenu().getItems().addAll(showMessage, showCounterExampleItem);
 			return row;
 		}
+		
+		private void showCounterExamples(SymbolicCheckingFormulaItem item, Menu counterExampleItem) {
+			counterExampleItem.getItems().clear();
+			List<Trace> counterExamples = item.getCounterExamples();
+			for(int i = 0; i < counterExamples.size(); i++) {
+				MenuItem traceItem = new MenuItem(String.format(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCounterExample.counterExample"), i + 1));
+				final int index = i;
+				traceItem.setOnAction(e-> currentTrace.set((counterExamples.get(index))));
+				counterExampleItem.getItems().add(traceItem);
+			}
+
+		}
 	}
 
 	@Inject
 	public SymbolicCheckingView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
 					final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler, 
 					final SymbolicFormulaChecker symbolicChecker, final Injector injector) {
-		super(stageManager, bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler);
+		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler);
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
 	
@@ -85,18 +97,6 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	public void addFormula() {
 		injector.getInstance(SymbolicCheckingChoosingStage.class).reset();
 		injector.getInstance(SymbolicCheckingChoosingStage.class).showAndWait();
-	}
-	
-	private void showCounterExamples(SymbolicCheckingFormulaItem item, Menu counterExampleItem) {
-		counterExampleItem.getItems().clear();
-		List<Trace> counterExamples = item.getCounterExamples();
-		for(int i = 0; i < counterExamples.size(); i++) {
-			MenuItem traceItem = new MenuItem(String.format(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCounterExample.counterExample"), i + 1));
-			final int index = i;
-			traceItem.setOnAction(e-> currentTrace.set((counterExamples.get(index))));
-			counterExampleItem.getItems().add(traceItem);
-		}
-
 	}
 	
 	@Override

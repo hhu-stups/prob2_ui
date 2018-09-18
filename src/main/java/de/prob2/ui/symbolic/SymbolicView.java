@@ -2,13 +2,10 @@ package de.prob2.ui.symbolic;
 
 import java.util.ResourceBundle;
 
-import javax.inject.Inject;
-
 import com.google.inject.Injector;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
@@ -102,7 +99,7 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	
 	protected final SymbolicFormulaHandler<T> formulaHandler;
 	
-	public SymbolicView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
+	public SymbolicView(final ResourceBundle bundle, final CurrentTrace currentTrace, 
 					final CurrentProject currentProject, final Injector injector, final SymbolicExecutor executor,
 					final SymbolicFormulaHandler<T> formulaHandler) {
 		this.bundle = bundle;
