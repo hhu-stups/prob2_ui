@@ -8,7 +8,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.symbolic.SymbolicChoosingStage;
 
 @Singleton
-public class SymbolicAnimationChoosingStage extends SymbolicChoosingStage {
+public class SymbolicAnimationChoosingStage extends SymbolicChoosingStage<SymbolicAnimationFormulaItem> {
 	
 	@Inject
 	private SymbolicAnimationChoosingStage(final StageManager stageManager) {

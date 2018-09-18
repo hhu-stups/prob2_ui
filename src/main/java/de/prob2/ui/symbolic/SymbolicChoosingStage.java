@@ -5,10 +5,10 @@ import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public abstract class SymbolicChoosingStage extends Stage {
+public abstract class SymbolicChoosingStage<T extends SymbolicFormulaItem> extends Stage {
 		
 	@FXML
-	private SymbolicFormulaInput formulaInput;
+	private SymbolicFormulaInput<T> formulaInput;
 	
 	@FXML
 	private ChoiceBox<SymbolicExecutionItem> cbChoice;
