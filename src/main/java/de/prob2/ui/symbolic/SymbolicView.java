@@ -21,12 +21,47 @@ import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 public abstract class SymbolicView<T extends SymbolicFormulaItem> extends ScrollPane {
+	
+	public abstract class SymbolicCellFactory {
+
+		public TableRow<T> createRow() {
+			TableRow<T> row = new TableRow<>();
+			
+			MenuItem checkItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.check"));
+			checkItem.setDisable(true);
+			checkItem.setOnAction(e-> {
+				formulaHandler.handleItem(row.getItem(), false);
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
+			});
+			
+			row.itemProperty().addListener((observable, from, to) -> {
+				if(to != null) {
+					checkItem.disableProperty().bind(row.emptyProperty()
+							.or(executor.currentJobThreadsProperty().emptyProperty().not())
+							.or(to.shouldExecuteProperty().not()));
+				}
+			});
+			MenuItem removeItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.remove"));
+			removeItem.setOnAction(e -> removeFormula());
+			removeItem.disableProperty().bind(row.emptyProperty());
+			
+			MenuItem changeItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.change"));
+			changeItem.setOnAction(e->openItem(row.getItem()));
+			
+			row.setContextMenu(new ContextMenu(checkItem, changeItem, removeItem));
+			return row;
+		}
+		
+	}
 
 	@FXML
 	protected HelpButton helpButton;
@@ -67,7 +102,6 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	
 	protected final SymbolicFormulaHandler<T> formulaHandler;
 	
-	@Inject
 	public SymbolicView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
 					final CurrentProject currentProject, final Injector injector, final SymbolicExecutor executor,
 					final SymbolicFormulaHandler<T> formulaHandler) {
@@ -172,5 +206,6 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 		executor.interrupt();
 	}
 
+	protected abstract void openItem(T item);
 	
 }
