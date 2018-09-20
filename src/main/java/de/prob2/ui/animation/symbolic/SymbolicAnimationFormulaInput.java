@@ -44,9 +44,6 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 			case SEQUENCE:
 				symbolicAnimationFormulaHandler.handleSequence(tfFormula.getText(), false);
 				break;
-			case FIND_DEADLOCK:
-				symbolicAnimationFormulaHandler.findDeadlock(false);
-				break;
 			case FIND_VALID_STATE:
 				formulaItem = new SymbolicAnimationFormulaItem(predicateBuilderView.getPredicate(),
 						SymbolicExecutionType.FIND_VALID_STATE);

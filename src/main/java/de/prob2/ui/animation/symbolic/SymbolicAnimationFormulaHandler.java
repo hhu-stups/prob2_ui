@@ -72,11 +72,6 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		symbolicChecker.executeCheckingItem(checker, code, SymbolicExecutionType.DEADLOCK, checkAll);
 	}
 	
-	public void findDeadlock(boolean checkAll) {
-		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace());
-		symbolicChecker.executeCheckingItem(checker, "FIND_DEADLOCK", SymbolicExecutionType.FIND_DEADLOCK, checkAll);
-	}
-	
 	public void handleSequence(String sequence, boolean checkAll) {
 		List<String> events = Arrays.asList(sequence.replaceAll(" ", "").split(";"));
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
@@ -109,9 +104,6 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 				break;
 			case FIND_VALID_STATE:
 				findValidState(item, checkAll);
-				break;
-			case FIND_DEADLOCK:
-				findDeadlock(checkAll);
 				break;
 			case FIND_REDUNDANT_INVARIANTS:
 				findRedundantInvariants(item, checkAll);

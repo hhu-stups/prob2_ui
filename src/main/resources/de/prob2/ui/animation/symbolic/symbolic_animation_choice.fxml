@@ -34,7 +34,6 @@
 								<FXCollections fx:factory="observableArrayList">
 									<SymbolicExecutionItem executionType="SEQUENCE" guiType="TEXT_FIELD"/>
 									<SymbolicExecutionItem executionType="DEADLOCK" guiType="PREDICATE"/>
-									<SymbolicExecutionItem executionType="FIND_DEADLOCK" guiType="NONE"/>
 									<SymbolicExecutionItem executionType="FIND_VALID_STATE" guiType="PREDICATE"/>
 									<SymbolicExecutionItem executionType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
 								</FXCollections>
