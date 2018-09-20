@@ -8,7 +8,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
-import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;

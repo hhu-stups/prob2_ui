@@ -2,7 +2,6 @@ package de.prob2.ui.animation.symbolic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -10,7 +9,6 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.FindStateCommand;
-import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CheckError;
 import de.prob.check.CheckInterrupted;
@@ -75,19 +73,6 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		}
 	}
 	
-	public void handleFindRedundantInvariants(SymbolicAnimationFormulaItem item, GetRedundantInvariantsCommand cmd) {
-		List<String> result = cmd.getRedundantInvariants();
-		if(cmd.isInterrupted()) {
-			showCheckingResult(item, Checked.INTERRUPTED, "verifications.interrupted");
-		} else if (result.isEmpty()) {
-			showCheckingResult(item, Checked.SUCCESS, 
-					"verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound");
-		} else {
-			final String headerKey = cmd.isTimeout() ? "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.timeout" : "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found";
-			showCheckingResult(item, Checked.FAIL, headerKey, GENERAL_RESULT_MESSAGE, String.join("\n", result));
-		}
-	}
-	
 	private void showCheckingResult(SymbolicAnimationFormulaItem item, Checked checked, String headerKey, String msgKey, Object... msgParams) {
 		item.setResultItem(new CheckingResultItem(checked, headerKey, msgKey, msgParams ));
 		handleItem(item, checked);
@@ -143,8 +128,6 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if(item.getType() == SymbolicExecutionType.FIND_VALID_STATE) {
 			handleFindValidState((SymbolicAnimationFormulaItem) item, (FindStateCommand) cmd, stateSpace);
-		} else if(item.getType() == SymbolicExecutionType.FIND_REDUNDANT_INVARIANTS) {
-			handleFindRedundantInvariants((SymbolicAnimationFormulaItem) item, (GetRedundantInvariantsCommand) cmd);
 		}
 	}
 	
