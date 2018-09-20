@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
-<fx:root type="SymbolicAnimationChoosingStage" fx:id="cbcChoice" title="%verifications.symbolicchecking.choice.title"
+<fx:root type="SymbolicAnimationChoosingStage" fx:id="cbcChoice" title="%symbolic.choice.title"
 		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -20,7 +20,7 @@
 					<padding>
 						<Insets topRightBottomLeft="10.0"/>
 					</padding>
-					<Label text="%verifications.symbolicchecking.choice.text">
+					<Label text="%symbolic.choice.text">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>

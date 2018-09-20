@@ -27,7 +27,7 @@
 						glyphName="CHECK_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%verifications.common.checkMachine" />
+					<Tooltip text="%common.checkMachine" />
 				</tooltip>
 			</Button>
 			<Button fx:id="cancelButton" onAction="#cancelModelcheck">
@@ -60,7 +60,7 @@
 			<columns>
 				<TableColumn fx:id="showDetailsColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
-				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.status" />
+				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
 				<TableColumn fx:id="strategyColumn" minWidth="260.0" maxWidth="320.0" prefWidth="260.0" text="%verifications.common.columns.strategy" />
 			</columns>
 			<placeholder>

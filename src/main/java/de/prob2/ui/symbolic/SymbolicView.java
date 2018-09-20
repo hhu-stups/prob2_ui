@@ -33,7 +33,7 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 		public TableRow<T> createRow() {
 			TableRow<T> row = new TableRow<>();
 			
-			MenuItem checkItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.check"));
+			MenuItem checkItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.check"));
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> {
 				formulaHandler.handleItem(row.getItem(), false);
@@ -47,11 +47,11 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 							.or(to.shouldExecuteProperty().not()));
 				}
 			});
-			MenuItem removeItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.remove"));
+			MenuItem removeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.remove"));
 			removeItem.setOnAction(e -> removeFormula());
 			removeItem.disableProperty().bind(row.emptyProperty());
 			
-			MenuItem changeItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.change"));
+			MenuItem changeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.change"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
 			
 			row.setContextMenu(new ContextMenu(checkItem, changeItem, removeItem));

@@ -27,7 +27,7 @@
 						glyphName="CHECK_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%verifications.common.checkMachine" />
+					<Tooltip text="%common.checkMachine" />
 				</tooltip>
 			</Button>
 			<Button fx:id="cancelButton" onAction="#cancel">
@@ -63,9 +63,9 @@
 			</columnResizePolicy>
 			<columns>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
-				<TableColumn fx:id="formulaStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.status" />
-				<TableColumn fx:id="formulaNameColumn" minWidth="120.0" text="%verifications.common.columns.formula" />
-				<TableColumn fx:id="formulaDescriptionColumn" minWidth="120.0" text="%verifications.common.columns.description" />
+				<TableColumn fx:id="formulaStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
+				<TableColumn fx:id="formulaNameColumn" minWidth="120.0" text="%common.columns.formula" />
+				<TableColumn fx:id="formulaDescriptionColumn" minWidth="120.0" text="%common.columns.description" />
 			</columns>
 			<placeholder>
 				<Label text="%verifications.ltl.ltlView.noFormulas" />
@@ -76,10 +76,10 @@
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
 			<columns>
-				<TableColumn fx:id="patternStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.status" />
+				<TableColumn fx:id="patternStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
 				<TableColumn fx:id="patternNameColumn" minWidth="140.0"
 					maxWidth="270.0" prefWidth="270.0" text="%verifications.common.columns.pattern" />
-				<TableColumn fx:id="patternDescriptionColumn" minWidth="120.0" text="%verifications.common.columns.description" />
+				<TableColumn fx:id="patternDescriptionColumn" minWidth="120.0" text="%common.columns.description" />
 			</columns>
 			<placeholder>
 				<Label text="%verifications.ltl.ltlView.noPattern" />

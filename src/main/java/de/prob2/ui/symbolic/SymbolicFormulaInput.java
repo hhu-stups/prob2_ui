@@ -106,13 +106,13 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	
 	public void reset() {
 		btAdd.setText(bundle.getString("common.buttons.add"));
-		btCheck.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.addAndCheck"));
+		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.addAndCheck"));
 		setCheckListeners();
 		tfFormula.clear();
 		cbOperations.getSelectionModel().clearSelection();
 	}
 	
-	protected boolean updateFormula(T item, SymbolicView<T> view, SymbolicChoosingStage choosingStage) {
+	protected boolean updateFormula(T item, SymbolicView<T> view, SymbolicChoosingStage<T> choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = null;
 		if(choosingStage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
@@ -141,9 +141,9 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	}
 	
 	public void changeFormula(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, 
-			SymbolicFormulaHandler<T> formulaHandler, SymbolicChoosingStage stage) {
-		btAdd.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.change"));
-		btCheck.setText(bundle.getString("verifications.symbolicchecking.formulaInput.buttons.changeAndCheck"));
+			SymbolicFormulaHandler<T> formulaHandler, SymbolicChoosingStage<T> stage) {
+		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
+		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.changeAndCheck"));
 		setChangeListeners(item, view, resultHandler, formulaHandler, stage);
 		stage.select(item);
 		if(stage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
@@ -162,7 +162,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	}
 	
 	protected void setChangeListeners(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, 
-									SymbolicFormulaHandler<T> formulaHandler, SymbolicChoosingStage stage) {
+									SymbolicFormulaHandler<T> formulaHandler, SymbolicChoosingStage<T> stage) {
 		btAdd.setOnAction(e -> {
 			if(!updateFormula(item, view, stage)) {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
