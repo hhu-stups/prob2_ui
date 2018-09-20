@@ -62,14 +62,14 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		item.setExample(null);
 		// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
 		if (result == FindStateCommand.ResultType.STATE_FOUND) {
-			showCheckingResult(item, Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.findValidState.result.found");
+			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found");
 			item.setExample(cmd.getTrace(stateSpace));
 		} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
-			showCheckingResult(item, Checked.FAIL, "verifications.symbolicchecking.resultHandler.findValidState.result.notFound");
+			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound");
 		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
-			showCheckingResult(item, Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.findValidState.result.interrupted");
+			showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted");
 		} else {
-			showCheckingResult(item, Checked.FAIL, "verifications.symbolicchecking.resultHandler.findValidState.result.error");
+			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.error");
 		}
 	}
 	
