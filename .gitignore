@@ -1,4 +1,4 @@
-# OS X
+# Mac
 .DS_Store
 
 # Eclipse
@@ -9,28 +9,27 @@
 
 # IntelliJ IDEA
 /.idea/
-/build/
 /classes/
+/out/
 *.iml
 
 # Gradle
 .gradle/
-gradle-app.setting
+/build/
 
 # Build info
 /src/main/resources/de/prob2/ui/build.properties
 
 # ProB
+prob_log.txt
+prob_test_log.txt
 *.log
 *.log.*
-prob_log.txt
 *.prob
 
 # Help
-src/main/resources/help/**/*.html
-src/main/resources/help/**/*.adoc
+/src/main/resources/help/**/*.html
+/src/main/resources/help/**/*.adoc
 
 # TestFX screenshots
 screenshot*.png
-out/*
-prob_test_log.txt
