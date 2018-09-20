@@ -9,11 +9,8 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.FindStateCommand;
-import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -64,24 +61,11 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 			}
 		}
 	}
-
-	
-	public void handleDeadlock(String code, boolean checkAll) {
-		IEvalElement constraint = new EventB(code, FormulaExpand.EXPAND); 
-		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
-		symbolicChecker.executeCheckingItem(checker, code, SymbolicExecutionType.DEADLOCK, checkAll);
-	}
 	
 	public void handleSequence(String sequence, boolean checkAll) {
 		List<String> events = Arrays.asList(sequence.replaceAll(" ", "").split(";"));
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
 		symbolicChecker.executeCheckingItem(checker, sequence, SymbolicExecutionType.SEQUENCE, checkAll);
-	}
-	
-	public void findRedundantInvariants(SymbolicAnimationFormulaItem item, boolean checkAll) {
-		StateSpace stateSpace = currentTrace.getStateSpace();
-		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
-		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 	
 	public void findValidState(SymbolicAnimationFormulaItem item, boolean checkAll) {
@@ -96,17 +80,11 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		}
 		SymbolicExecutionType type = item.getType();
 		switch(type) {
-			case DEADLOCK:
-				handleDeadlock(item.getCode(), checkAll);
-				break;
 			case SEQUENCE:
 				handleSequence(item.getCode(), checkAll);
 				break;
 			case FIND_VALID_STATE:
 				findValidState(item, checkAll);
-				break;
-			case FIND_REDUNDANT_INVARIANTS:
-				findRedundantInvariants(item, checkAll);
 				break;
 			default:
 				break;

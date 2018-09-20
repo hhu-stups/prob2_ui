@@ -38,9 +38,6 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 			SymbolicAnimationFormulaItem formulaItem = null;
 			addFormula(true);
 			switch (animationType) {
-			case DEADLOCK:
-				symbolicAnimationFormulaHandler.handleDeadlock(predicateBuilderView.getPredicate(), false);
-				break;
 			case SEQUENCE:
 				symbolicAnimationFormulaHandler.handleSequence(tfFormula.getText(), false);
 				break;
@@ -48,10 +45,6 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				formulaItem = new SymbolicAnimationFormulaItem(predicateBuilderView.getPredicate(),
 						SymbolicExecutionType.FIND_VALID_STATE);
 				symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
-				break;
-			case FIND_REDUNDANT_INVARIANTS:
-				formulaItem = new SymbolicAnimationFormulaItem(animationType.name(), animationType);
-				symbolicAnimationFormulaHandler.findRedundantInvariants(formulaItem, false);
 				break;
 			default:
 				break;

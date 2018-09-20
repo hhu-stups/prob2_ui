@@ -8,6 +8,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -46,6 +47,9 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 				case CHECK_ALL_OPERATIONS:
 					events.forEach(event -> symbolicCheckingFormulaHandler.handleInvariant(event, true));
 					break;
+				case DEADLOCK:
+					symbolicCheckingFormulaHandler.handleDeadlock(predicateBuilderView.getPredicate(), false);
+					break;
 				default:
 					formulaItem = new SymbolicCheckingFormulaItem(checkingType.name(), checkingType.name(), checkingType);
 					switch(checkingType) {
@@ -54,6 +58,9 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 							break;
 						case CHECK_REFINEMENT: 
 							symbolicCheckingFormulaHandler.handleRefinement(formulaItem, false); 
+							break;
+						case FIND_REDUNDANT_INVARIANTS:
+							symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem, false);
 							break;
 						default:
 							SymbolicModelcheckCommand.Algorithm algorithm = checkingType.getAlgorithm();
