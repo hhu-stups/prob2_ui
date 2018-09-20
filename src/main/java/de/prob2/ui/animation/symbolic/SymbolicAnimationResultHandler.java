@@ -32,7 +32,7 @@ import javafx.scene.layout.Region;
 @Singleton
 public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 
-	private static final String GENERAL_RESULT_MESSAGE = "verifications.result.message";
+	private static final String GENERAL_RESULT_MESSAGE = "common.result.message";
 	
 	private final ResourceBundle bundle;
 	
@@ -112,13 +112,13 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 			resultItem = new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.result.succeeded.header",
 					"animation.symbolic.result.succeeded.message");
 		} else if(error.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.error.header",
+			resultItem = new CheckingResultItem(Checked.FAIL, "common.result.error.header",
 					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
 		} else if(result instanceof Throwable) {
-			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.couldNotParseFormula.header",
+			resultItem = new CheckingResultItem(Checked.FAIL, "common.result.couldNotParseFormula.header",
 					GENERAL_RESULT_MESSAGE, result);
 		} else if(interrupted.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "verifications.result.interrupted.header",
+			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
 					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
 		}
 		return resultItem;

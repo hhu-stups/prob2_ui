@@ -33,10 +33,10 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 		public TableRow<SymbolicAnimationFormulaItem> call(TableView<SymbolicAnimationFormulaItem> param) {
 			TableRow<SymbolicAnimationFormulaItem> row = createRow();
 			
-			MenuItem showStateItem = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.showFoundState"));
+			MenuItem showStateItem = new MenuItem(bundle.getString("animation.symbolic.view.contextMenu.showFoundState"));
 			showStateItem.setDisable(true);
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(bundle.getString("symbolic.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(SymbolicAnimationResultHandler.class).showResult(row.getItem()));
 			
 			row.itemProperty().addListener((observable, from, to) -> {

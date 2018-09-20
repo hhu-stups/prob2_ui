@@ -30,7 +30,7 @@ public abstract class AbstractResultHandler {
 		}
 	}
 	
-	private static final String GENERAL_RESULT_MESSAGE = "verifications.result.message";
+	private static final String GENERAL_RESULT_MESSAGE = "common.result.message";
 	
 	protected final StageManager stageManager;
 	protected final ResourceBundle bundle;
@@ -74,13 +74,13 @@ public abstract class AbstractResultHandler {
 			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header",
 					"verifications.result.counterExampleFound.message", bundle.getString(type.getKey()));
 		} else if(error.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.error.header",
+			resultItem = new CheckingResultItem(Checked.FAIL, "common.result.error.header",
 					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
 		} else if(result instanceof Throwable) {
-			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.couldNotParseFormula.header",
+			resultItem = new CheckingResultItem(Checked.FAIL, "common.result.couldNotParseFormula.header",
 					GENERAL_RESULT_MESSAGE, result);
 		} else if(interrupted.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "verifications.result.interrupted.header",
+			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
 					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
 		}
 		return resultItem;

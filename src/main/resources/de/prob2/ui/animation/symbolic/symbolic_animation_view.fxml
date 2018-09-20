@@ -60,7 +60,7 @@
 					prefWidth="180.0" text="%common.columns.description" />
 			</columns>
 			<placeholder>
-				<Label text="%verifications.symbolicchecking.view.noSymbolicFormulas" />
+				<Label text="%animation.symbolic.view.noSymbolicFormulas" />
 			</placeholder>
 		</TableView>
 	</VBox>
