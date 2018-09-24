@@ -6,6 +6,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -21,7 +25,7 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -100,19 +104,40 @@ public class BEditorView extends BorderPane {
 				this.setHint();
 			} else {
 				final Path machinePath = currentProject.getLocation().resolve(to.getPath());
-				final String text;
-				try (final Stream<String> lines = Files.lines(machinePath)) {
-					text = lines.collect(Collectors.joining(System.lineSeparator()));
-				} catch (IOException | UncheckedIOException e) {
-					stageManager.makeExceptionAlert(e, "common.alerts.couldNotReadFile.content", machinePath).showAndWait();
-					LOGGER.error(String.format("Could not read file: %s", machinePath), e);
-					return;
-				}
-				this.setEditorText(text, machinePath);
+				registerFile(machinePath);
+				setText(machinePath);
 			}
 		});
 		this.stopActions.add(beditor::stopHighlighting);
 		helpButton.setHelpContent(this.getClass());
+	}
+	
+	private void registerFile(Path path) {
+		try {
+			Path directory = path.getParent();
+			WatchService watcher = directory.getFileSystem().newWatchService();
+			directory.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+			Thread thread = new Thread(() -> {
+				while(true) {
+					WatchKey key = null;
+					try {
+						key = watcher.take();
+					} catch (Exception e) {
+						LOGGER.error(String.format("Could not take key: %s", path), e);
+					}
+					for(WatchEvent<?> event : key.pollEvents()) {
+						WatchEvent.Kind<?> kind = event.kind();
+						if(kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+							setText(path);
+						}
+					}
+					key.reset();
+				}
+			});
+			thread.start();
+		} catch(Exception e) {
+			LOGGER.error(String.format("Could not register file: %s", path), e);
+		}
 	}
 
 	public ObjectProperty<Path> pathProperty() {
@@ -144,6 +169,18 @@ public class BEditorView extends BorderPane {
 		beditor.getStyleClass().add("editor");
 		beditor.startHighlighting();
 		beditor.setEditable(true);
+	}
+	
+	private void setText(Path path) {
+		String text;
+		try (final Stream<String> lines = Files.lines(path)) {
+			text = lines.collect(Collectors.joining(System.lineSeparator()));
+		} catch (IOException | UncheckedIOException e) {
+			stageManager.makeExceptionAlert(e, "common.alerts.couldNotReadFile.content", path).showAndWait();
+			LOGGER.error(String.format("Could not read file: %s", path), e);
+			return;
+		}
+		Platform.runLater(() -> this.setEditorText(text, path));
 	}
 
 	@FXML
