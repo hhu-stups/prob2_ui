@@ -37,7 +37,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import org.apache.commons.lang.StringUtils;
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginDependency;
 import org.pf4j.PluginDescriptor;
@@ -463,7 +462,7 @@ public class ProBPluginManager {
 		protected void validatePluginDescriptor(PluginDescriptor descriptor) throws PluginException {
 			//TODO: show what is wrong in an alert
 			super.validatePluginDescriptor(descriptor);
-			if (StringUtils.isEmpty(descriptor.getRequires()) || descriptor.getRequires().equals("*")) {
+			if (descriptor.getRequires() == null || descriptor.getRequires().isEmpty() || descriptor.getRequires().equals("*")) {
 				throw new PluginException("Plugin-Requires has to be specified!");
 			}
 			if (!descriptor.getDependencies().isEmpty()) {

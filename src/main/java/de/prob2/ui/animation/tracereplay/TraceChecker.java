@@ -10,10 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -36,6 +32,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
+
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -43,6 +40,9 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class TraceChecker {
@@ -196,7 +196,7 @@ public class TraceChecker {
 		stateSpace.execute(command);
 		if (command.hasErrors()) {
 			replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage");
-			replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicate, Joiner.on(", ").join(command.getErrors()));
+			replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicate, String.join(", ", command.getErrors()));
 			return null;
 		}
 		List<Transition> possibleTransitions = command.getNewTransitions();

@@ -9,8 +9,6 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import com.google.common.io.Files;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.fx.Visualisation;
 import de.prob2.ui.visualisation.fx.loader.clazz.InMemoryClassloader;
@@ -39,15 +37,15 @@ public class VisualisationLoader {
 	}
 
 	public Visualisation loadVisualization(Path selectedVisualisation) {
-		String selectedVisualisationExtension = Files.getFileExtension(selectedVisualisation.getFileName().toString());
-		if ("java".equals(selectedVisualisationExtension)) {
+		final String fileName = selectedVisualisation.getFileName().toString();
+		if (fileName.endsWith(".java")) {
 			LOGGER.debug("Try to open visualization-class {}.", selectedVisualisation);
 			return loadVisualisationClass(selectedVisualisation);
-		} else if ("jar".equals(selectedVisualisationExtension)){
+		} else if (fileName.endsWith(".jar")) {
 			LOGGER.debug("Try to open visualization-jar {}.", selectedVisualisation);
 			return loadVisualisationJar(selectedVisualisation);
 		} else {
-			throw new IllegalArgumentException("Unknown visualization file extension: " + selectedVisualisationExtension);
+			throw new IllegalArgumentException("Unknown visualization file extension (not a .java or .jar file): " + fileName);
 		}
 	}
 
