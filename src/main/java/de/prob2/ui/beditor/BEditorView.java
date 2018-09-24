@@ -113,31 +113,35 @@ public class BEditorView extends BorderPane {
 	}
 	
 	private void registerFile(Path path) {
+		Path directory = path.getParent();
+		WatchService watcher;
 		try {
-			Path directory = path.getParent();
-			WatchService watcher = directory.getFileSystem().newWatchService();
+			watcher = directory.getFileSystem().newWatchService();
 			directory.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
-			Thread thread = new Thread(() -> {
-				while(true) {
-					WatchKey key = null;
-					try {
-						key = watcher.take();
-					} catch (Exception e) {
-						LOGGER.error(String.format("Could not take key: %s", path), e);
-					}
-					for(WatchEvent<?> event : key.pollEvents()) {
-						WatchEvent.Kind<?> kind = event.kind();
-						if(kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-							setText(path);
-						}
-					}
-					key.reset();
-				}
-			});
-			thread.start();
-		} catch(Exception e) {
+		} catch (IOException e) {
 			LOGGER.error(String.format("Could not register file: %s", path), e);
+			return;
 		}
+		final Thread thread = new Thread(() -> {
+			while (true) {
+				WatchKey key;
+				try {
+					key = watcher.take();
+				} catch (InterruptedException ignored) {
+					Thread.currentThread().interrupt();
+					return;
+				}
+				for (WatchEvent<?> event : key.pollEvents()) {
+					WatchEvent.Kind<?> kind = event.kind();
+					if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+						setText(path);
+					}
+				}
+				key.reset();
+			}
+		}, "BEditor File Change Watcher");
+		injector.getInstance(StopActions.class).add(thread::interrupt);
+		thread.start();
 	}
 
 	public ObjectProperty<Path> pathProperty() {
