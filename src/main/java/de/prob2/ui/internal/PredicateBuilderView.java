@@ -7,7 +7,7 @@ import java.util.Map;
 import com.google.inject.Inject;
 
 import de.prob.formula.PredicateBuilder;
-import de.prob2.ui.symbolic.SymbolicFormulaItem;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -19,7 +19,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
-public final class PredicateBuilderView<T extends SymbolicFormulaItem> extends VBox {
+public final class PredicateBuilderView extends VBox {
 	private final class ValueCell extends TableCell<String, String> {
 		private ValueCell() {
 			super();
@@ -87,15 +87,14 @@ public final class PredicateBuilderView<T extends SymbolicFormulaItem> extends V
 		this.table.getItems().setAll(this.items.keySet());
 	}
 	
-	public void setItem(T item) {
+	public void setFromPredicate(final String predicate) {
 		items.clear();
-		String name = item.getName();
-		String[] predicates = name.split(" & ");
-		for(int i = 0; i < predicates.length-1; i++) {
-			String predicate = predicates[i];
-			String[] assignment = predicate.split("=");
-			String lhs = assignment[0];
-			String rhs = assignment[1];
+		final String[] predicates = predicate.split(" & ");
+		for (int i = 0; i < predicates.length-1; i++) {
+			final String part = predicates[i];
+			final String[] assignment = part.split("=");
+			final String lhs = assignment[0];
+			final String rhs = assignment[1];
 			items.put(lhs, rhs);
 		}
 		this.predicateField.setText(predicates[predicates.length-1]);

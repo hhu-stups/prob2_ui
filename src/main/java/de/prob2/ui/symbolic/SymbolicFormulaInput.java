@@ -40,7 +40,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	protected ChoiceBox<String> cbOperations;
 	
 	@FXML
-	protected PredicateBuilderView<T> predicateBuilderView;
+	protected PredicateBuilderView predicateBuilderView;
 	
 	protected final Injector injector;
 	
@@ -149,7 +149,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		if(stage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			tfFormula.setText(item.getCode());
 		} else if(stage.getGUIType() == SymbolicGUIType.PREDICATE) {
-			predicateBuilderView.setItem(item);
+			predicateBuilderView.setFromPredicate(item.getName());
 		} else if(stage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
 			cbOperations.getItems().forEach(operationItem -> {
 				if(operationItem.equals(item.getCode())) {
