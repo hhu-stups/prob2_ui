@@ -109,34 +109,33 @@ public abstract class DynamicCommandStage extends Stage {
 	protected void initialize() {
 		lbDescription.setWrapText(true);
 		fillCommands();
-		lvChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
+		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if (to == null) {
-				if (from != null) {
-					lastItem = from;
-				}
-				reset();
-				lbDescription.setText("");
-			} else {
-				if (to.isAvailable()) {
-					lbDescription.setText(to.getDescription());
-				} else {
-					lbDescription.setText(to.getDescription() + '\n' + to.getAvailable());
-				}
-				boolean needFormula = to.getArity() > 0;
-				enterFormulaBox.setVisible(needFormula);
-				String currentFormula = taFormula.getText();
-				if (!Objects.equals(from, to) || cbContinuous.isSelected()) {
-					reset();
-					if (!needFormula || !currentFormula.isEmpty()) {
-						visualize(to);
-					}
-				}
+				return;
 			}
+			if (!to.isAvailable()) {
+				lbDescription.setText(String.join("\n", to.getDescription(), to.getAvailable()));
+			} else {
+				lbDescription.setText(to.getDescription());
+			}
+			boolean needFormula = to.getArity() > 0;
+			enterFormulaBox.setVisible(needFormula);
+			String currentFormula = taFormula.getText();
+			if(lastItem != null && !lastItem.getCommand().equals(to.getCommand())) {
+				reset();
+			}
+			if ((!needFormula || !currentFormula.isEmpty()) && (lastItem == null
+					|| !Objects.equals(lastItem.getCommand(), to.getCommand()) || cbContinuous.isSelected())) {
+				visualize(to);
+			}
+			lastItem = to;
 		});
 		lvChoice.disableProperty().bind(currentThread.isNotNull());
 		
+		currentTrace.currentStateProperty().addListener((observable, from, to) -> refresh());
 		currentTrace.addListener((observable, from, to) -> refresh());
-		injector.getInstance(Modelchecker.class).resultProperty().addListener((o, from, to) -> refresh());
+		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> refresh());
+		injector.getInstance(Modelchecker.class).resultProperty().addListener((observable, from, to) -> refresh());
 		
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
 			fillCommands();
@@ -162,16 +161,15 @@ public abstract class DynamicCommandStage extends Stage {
 	}
 	
 	protected void fillCommands(AbstractGetDynamicCommands cmd) {
-		final Trace trace = currentTrace.get();
-		if (trace == null) {
+		if(currentTrace.get() == null) {
+			return;
+		}
+		try {
 			lvChoice.getItems().clear();
-		} else {
-			try {
-				currentTrace.getStateSpace().execute(cmd);
-				lvChoice.getItems().setAll(cmd.getCommands());
-			} catch (ProBError | CliError e) {
-				LOGGER.error("Extract all expression table commands failed", e);
-			}
+			currentTrace.getStateSpace().execute(cmd);
+			lvChoice.getItems().setAll(cmd.getCommands());
+		} catch (ProBError | CliError e) {
+			LOGGER.error("Extract all expression table commands failed", e);
 		}
 	}
 	
