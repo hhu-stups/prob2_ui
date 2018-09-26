@@ -9,7 +9,6 @@ import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
-import de.prob.statespace.Trace;
 
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;

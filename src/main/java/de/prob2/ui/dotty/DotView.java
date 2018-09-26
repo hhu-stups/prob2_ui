@@ -119,7 +119,7 @@ public class DotView extends DynamicCommandStage {
 			Platform.runLater(()-> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
 			try {
 				if(currentTrace.get() == null) {
-					Platform.runLater(() -> reset());
+					Platform.runLater(this::reset);
 					currentThread.set(null);
 					return;
 				}
