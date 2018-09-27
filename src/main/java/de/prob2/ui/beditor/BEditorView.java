@@ -1,12 +1,10 @@
 package de.prob2.ui.beditor;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
@@ -29,6 +27,7 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -141,13 +140,10 @@ public class BEditorView extends BorderPane {
 	}
 	
 	private void switchMachine(String machine) {
-		int start = currentProject.getCurrentMachine().getPath().toString().lastIndexOf(File.separatorChar);
-		String pathString = currentProject.getCurrentMachine().getPath().toString();
-		String prefix = pathString.substring(0, start);
-		String[] separatedString = pathString.substring(start + 1, pathString.length()).split("\\.");
-		String extension = separatedString[separatedString.length - 1];
-		String machinePathAsString = prefix + File.separatorChar + machine + "." + extension;
-		final Path machinePath = currentProject.getLocation().resolve(Paths.get(machinePathAsString));
+		final Path path = currentProject.getCurrentMachine().getPath();
+		final String[] separatedString = path.getFileName().toString().split("\\.");
+		final String extension = separatedString[separatedString.length - 1];
+		final Path machinePath = currentProject.getLocation().resolve(path.resolveSibling(machine + "." + extension));
 		resetWatching();
 		registerFile(machinePath);
 		setText(machinePath);
