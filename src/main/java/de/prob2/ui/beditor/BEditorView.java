@@ -117,7 +117,7 @@ public class BEditorView extends BorderPane {
 		setHint();
 		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			machineChoice.getSelectionModel().clearSelection();
+			machineChoice.getItems().clear();
 			if (to == null) {
 				this.setHint();
 			} else {
@@ -133,26 +133,31 @@ public class BEditorView extends BorderPane {
 			if(to == null) {
 				return;
 			}
-			int start = currentProject.getCurrentMachine().getPath().toString().lastIndexOf(File.separatorChar);
-			String pathString = currentProject.getCurrentMachine().getPath().toString();
-			String prefix = pathString.substring(0, start);
-			String[] separatedString = pathString.substring(start + 1, pathString.length()).split("\\.");
-			String extension = separatedString[separatedString.length - 1];
-			String machinePathAsString = prefix + File.separatorChar + to + "." + extension;
-			final Path machinePath = currentProject.getLocation().resolve(Paths.get(machinePathAsString));
-			resetWatching();
-			registerFile(machinePath);
-			setText(machinePath);
+			switchMachine(to);
 		});
 		
 		this.stopActions.add(beditor::stopHighlighting);
 		helpButton.setHelpContent(this.getClass());
 	}
 	
+	private void switchMachine(String machine) {
+		int start = currentProject.getCurrentMachine().getPath().toString().lastIndexOf(File.separatorChar);
+		String pathString = currentProject.getCurrentMachine().getPath().toString();
+		String prefix = pathString.substring(0, start);
+		String[] separatedString = pathString.substring(start + 1, pathString.length()).split("\\.");
+		String extension = separatedString[separatedString.length - 1];
+		String machinePathAsString = prefix + File.separatorChar + machine + "." + extension;
+		final Path machinePath = currentProject.getLocation().resolve(Paths.get(machinePathAsString));
+		resetWatching();
+		registerFile(machinePath);
+		setText(machinePath);
+	}
+	
 	private void updateIncludedMachines() {
 		GetMachineIdentifiersCommand cmd = new GetMachineIdentifiersCommand(Category.MACHINES);
 		currentTrace.getStateSpace().execute(cmd);
 		machineChoice.getItems().setAll(cmd.getIdentifiers());
+		machineChoice.getSelectionModel().selectFirst();
 	}
 	
 	private void registerFile(Path path) {
