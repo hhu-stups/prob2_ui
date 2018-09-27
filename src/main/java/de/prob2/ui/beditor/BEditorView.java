@@ -157,6 +157,10 @@ public class BEditorView extends BorderPane {
 		GetMachineIdentifiersCommand cmd = new GetMachineIdentifiersCommand(Category.MACHINES);
 		currentTrace.getStateSpace().execute(cmd);
 		machineChoice.getItems().setAll(cmd.getIdentifiers());
+		if(cmd.getIdentifiers().size() == 0) {
+			String fileName = currentProject.getCurrentMachine().getPath().getFileName().toString().split("\\.")[0];
+			machineChoice.getItems().add(fileName);
+		}
 		machineChoice.getSelectionModel().selectFirst();
 	}
 	
