@@ -1,10 +1,12 @@
 package de.prob2.ui.beditor;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
@@ -19,6 +21,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.GetMachineIdentifiersCommand;
+import de.prob.animator.command.GetMachineIdentifiersCommand.Category;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -36,6 +40,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 
@@ -52,6 +57,7 @@ public class BEditorView extends BorderPane {
 	@FXML private Label warningLabel;
 	@FXML private BEditor beditor;
 	@FXML private HelpButton helpButton;
+	@FXML private ChoiceBox<String> machineChoice;
 
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -64,6 +70,9 @@ public class BEditorView extends BorderPane {
 	private final StringProperty lastSavedText;
 	private final BooleanProperty saved;
 	private final BooleanProperty reloaded;
+	
+	private Thread watchThread;
+	private WatchKey key;
 
 	@Inject
 	private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final StopActions stopActions, final Injector injector) {
@@ -77,6 +86,8 @@ public class BEditorView extends BorderPane {
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
 		this.reloaded = new SimpleBooleanProperty(this, "reloaded", true);
+		this.watchThread = null;
+		this.key = null;
 		stageManager.loadFXML(this, "beditorView.fxml");
 	}
 
@@ -86,9 +97,15 @@ public class BEditorView extends BorderPane {
 		saved.bind(Bindings.createBooleanBinding(
 			() -> Objects.equals(lastSavedText.get(), beditor.getText()),
 			lastSavedText, beditor.textProperty()
-		));
-		currentTrace.stateSpaceProperty().addListener((o, from, to) -> reloaded.set(true));
-		saveButton.disableProperty().bind(this.pathProperty().isNull().or(saved));
+		).or(machineChoice.getSelectionModel().selectedItemProperty().isNull()));
+		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
+			if(to == null) {
+				return;
+			}
+			updateIncludedMachines();
+			reloaded.set(true);
+		});
+		saveButton.disableProperty().bind(saved);
 		openExternalButton.disableProperty().bind(this.pathProperty().isNull());
 		warningLabel.textProperty().bind(Bindings.when(saved)
 			.then(Bindings.when(reloaded)
@@ -100,16 +117,42 @@ public class BEditorView extends BorderPane {
 		setHint();
 		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			machineChoice.getSelectionModel().clearSelection();
 			if (to == null) {
 				this.setHint();
 			} else {
 				final Path machinePath = currentProject.getLocation().resolve(to.getPath());
-				registerFile(machinePath);
-				setText(machinePath);
+				if(currentProject.getCurrentMachine().getName().equals(machineChoice.getSelectionModel().getSelectedItem())) {
+					registerFile(machinePath);
+					setText(machinePath);
+				}
 			}
 		});
+		
+		machineChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(to == null) {
+				return;
+			}
+			int start = currentProject.getCurrentMachine().getPath().toString().lastIndexOf(File.separatorChar);
+			String pathString = currentProject.getCurrentMachine().getPath().toString();
+			String prefix = pathString.substring(0, start);
+			String[] separatedString = pathString.substring(start + 1, pathString.length()).split("\\.");
+			String extension = separatedString[separatedString.length - 1];
+			String machinePathAsString = prefix + File.separatorChar + to + "." + extension;
+			final Path machinePath = currentProject.getLocation().resolve(Paths.get(machinePathAsString));
+			resetWatching();
+			registerFile(machinePath);
+			setText(machinePath);
+		});
+		
 		this.stopActions.add(beditor::stopHighlighting);
 		helpButton.setHelpContent(this.getClass());
+	}
+	
+	private void updateIncludedMachines() {
+		GetMachineIdentifiersCommand cmd = new GetMachineIdentifiersCommand(Category.MACHINES);
+		currentTrace.getStateSpace().execute(cmd);
+		machineChoice.getItems().setAll(cmd.getIdentifiers());
 	}
 	
 	private void registerFile(Path path) {
@@ -122,9 +165,8 @@ public class BEditorView extends BorderPane {
 			LOGGER.error(String.format("Could not register file: %s", path), e);
 			return;
 		}
-		final Thread thread = new Thread(() -> {
+		watchThread = new Thread(() -> {
 			while (true) {
-				WatchKey key;
 				try {
 					key = watcher.take();
 				} catch (InterruptedException ignored) {
@@ -140,8 +182,8 @@ public class BEditorView extends BorderPane {
 				key.reset();
 			}
 		}, "BEditor File Change Watcher");
-		injector.getInstance(StopActions.class).add(thread::interrupt);
-		thread.start();
+		injector.getInstance(StopActions.class).add(watchThread::interrupt);
+		watchThread.start();
 	}
 
 	public ObjectProperty<Path> pathProperty() {
@@ -189,15 +231,26 @@ public class BEditorView extends BorderPane {
 
 	@FXML
 	public void handleSave() {
+		resetWatching();
 		lastSavedText.set(beditor.getText());
 		reloaded.set(false);
 		assert this.getPath() != null;
 		// Maybe add something for the user, that reloads the machine automatically?
 		try {
 			Files.write(this.getPath(), beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
+			registerFile(this.getPath());
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path).showAndWait();
 			LOGGER.error(String.format("Could not save file: %s", path), e);
+		}
+	}
+	
+	private void resetWatching() {
+		if(watchThread != null) {
+			watchThread.interrupt();
+		}
+		if(key != null) {
+			key.reset();
 		}
 	}
 
