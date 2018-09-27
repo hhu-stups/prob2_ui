@@ -134,7 +134,7 @@ public class ProjectManager {
 					"project.projectManager.alerts.fileNotFound.content", path);
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-				Platform.runLater(() -> recentProjects.remove(path.toAbsolutePath().toString()));
+				Platform.runLater(() -> recentProjects.remove(path.toString()));
 			}
 			return null;
 		} catch (IOException exc) {
@@ -145,24 +145,25 @@ public class ProjectManager {
 	}
 
 	public void openProject(Path path) {
-		Project project = loadProject(path);
-		if(!path.toString().endsWith(PROJECT_FILE_ENDING)) {
+		final Path absPath = path.toAbsolutePath();
+		Project project = loadProject(absPath);
+		if(!absPath.toString().endsWith(PROJECT_FILE_ENDING)) {
 			stageManager.makeAlert(AlertType.WARNING,
 					"project.projectManager.alerts.wrongProjectFileExtensionWarning.header",
-					"project.projectManager.alerts.wrongProjectFileExtensionWarning.content", PROJECT_FILE_ENDING, path)
+					"project.projectManager.alerts.wrongProjectFileExtensionWarning.content", PROJECT_FILE_ENDING, absPath)
 					.showAndWait();
 		}
 		if (project != null) {
 			replaceMissingWithDefaults(project);
 			project.getMachines().forEach(Machine::resetStatus);
 			currentProject.set(project, false);
-			addToRecentProjects(path);
+			addToRecentProjects(absPath);
 		}
 	}
 
 	private void addToRecentProjects(Path path) {
 		Platform.runLater(() -> {
-			final String absolutePath = path.toAbsolutePath().toString();
+			final String absolutePath = path.toString();
 			if (recentProjects.isEmpty() || !recentProjects.get(0).equals(absolutePath)) {
 				this.recentProjects.remove(absolutePath);
 				this.recentProjects.add(0, absolutePath);
