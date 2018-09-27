@@ -19,8 +19,10 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob.animator.command.GetMachineIdentifiersCommand;
 import de.prob.animator.command.GetMachineIdentifiersCommand.Category;
+import de.prob.model.eventb.EventBModel;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -146,14 +148,22 @@ public class BEditorView extends BorderPane {
 		final Path machinePath = currentProject.getLocation().resolve(path.resolveSibling(machine + "." + extension));
 		resetWatching();
 		registerFile(machinePath);
-		setText(machinePath);
+		
+		if(currentTrace.getModel() instanceof EventBModel) {
+			GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
+			currentTrace.getStateSpace().execute(cmd);
+			this.setEditorText(cmd.getPrettyPrint(), path);
+			beditor.setEditable(false);
+		} else {
+			setText(machinePath);
+		}
 	}
 	
 	private void updateIncludedMachines() {
 		GetMachineIdentifiersCommand cmd = new GetMachineIdentifiersCommand(Category.MACHINES);
 		currentTrace.getStateSpace().execute(cmd);
 		machineChoice.getItems().setAll(cmd.getIdentifiers());
-		if(cmd.getIdentifiers().size() == 0) {
+		if(cmd.getIdentifiers().isEmpty()) {
 			String fileName = currentProject.getCurrentMachine().getPath().getFileName().toString().split("\\.")[0];
 			machineChoice.getItems().add(fileName);
 		}
