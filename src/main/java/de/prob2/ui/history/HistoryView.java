@@ -46,8 +46,9 @@ public final class HistoryView extends VBox {
 		protected void updateItem(HistoryItem item, boolean empty) {
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll(Arrays.asList("past", "present", "future"));
-			if (!empty && item != null) {
-				final int currentIndex = currentTrace.get().getCurrent().getIndex();
+			Trace trace = currentTrace.get();
+			if (!empty && item != null && trace != null) {
+				final int currentIndex = trace.getCurrent().getIndex();
 				if (item.getIndex() < currentIndex) {
 					this.getStyleClass().add("past");
 				} else if (item.getIndex() > currentIndex) {

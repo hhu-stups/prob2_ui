@@ -23,7 +23,7 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
-
+import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
@@ -118,7 +118,8 @@ public class DotView extends DynamicCommandStage {
 		Thread thread = new Thread(() -> {
 			Platform.runLater(()-> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
 			try {
-				if(currentTrace.get() == null) {
+				Trace trace = currentTrace.get();
+				if(trace == null) {
 					Platform.runLater(this::reset);
 					currentThread.set(null);
 					return;
@@ -126,10 +127,10 @@ public class DotView extends DynamicCommandStage {
 				if (item.getArity() > 0) {
 					formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
 				}
-				State id = currentTrace.getCurrentState();
+				State id = trace.getCurrentState();
 				final Path path = Files.createTempFile("prob2-ui-dot", ".svg");
 				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, path.toFile(), formulas);
-				currentTrace.getStateSpace().execute(cmd);
+				trace.getStateSpace().execute(cmd);
 				final String text;
 				try (final Stream<String> lines = Files.lines(path)) {
 					text = lines.collect(Collectors.joining("\n"));
