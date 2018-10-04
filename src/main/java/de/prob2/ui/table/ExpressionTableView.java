@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -41,7 +42,6 @@ import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +49,8 @@ import org.slf4j.LoggerFactory;
 public class ExpressionTableView extends DynamicCommandStage {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
+	
+	private static final Pattern NEEDS_CSV_QUOTE_PATTERN = Pattern.compile("[,\"\n\r]");
 	
 	@FXML
 	private Button saveButton;
@@ -175,12 +177,20 @@ public class ExpressionTableView extends DynamicCommandStage {
 		}
 	}
 	
+	private static String escapeCSV(final String toEscape) {
+		if (NEEDS_CSV_QUOTE_PATTERN.matcher(toEscape).find()) {
+			return '"' + toEscape.replace("\"", "\"\"") + '"';
+		} else {
+			return toEscape;
+		}
+	}
+	
 	private static List<String> toCSV(TableData data) {
 		final List<String> csv = new ArrayList<>();
 		csv.add(String.join(",", data.getHeader()));
 		data.getRows()
 			.stream()
-			.map(column -> column.stream().map(StringEscapeUtils::escapeCsv).collect(Collectors.joining(",")))
+			.map(column -> column.stream().map(ExpressionTableView::escapeCSV).collect(Collectors.joining(",")))
 			.collect(Collectors.toCollection(() -> csv));
 		return csv;
 	}
