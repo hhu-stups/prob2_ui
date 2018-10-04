@@ -1,7 +1,7 @@
 package de.prob2.ui.prob2fx;
 
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -12,7 +12,6 @@ import de.prob.statespace.IAnimationChangeListener;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.StageManager;
 
 import javafx.application.Platform;
@@ -68,20 +67,23 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	
 	private final class ROBoolProp extends ReadOnlyBooleanPropertyBase {
 		private final String name;
-		private final BooleanSupplier getter;
+		private final Predicate<Trace> getter;
+		private final boolean noTraceDefault;
 		
-		private ROBoolProp(final String name, final BooleanSupplier getter) {
+		private ROBoolProp(final String name, final Predicate<Trace> getter, final boolean noTraceDefault) {
 			super();
 			
 			this.name = name;
 			this.getter = getter;
+			this.noTraceDefault = noTraceDefault;
 			
 			CurrentTrace.this.addListener(o -> this.fireValueChangedEvent());
 		}
 		
 		@Override
 		public boolean get() {
-			return this.getter.getAsBoolean();
+			final Trace trace = CurrentTrace.this.get();
+			return trace == null ? this.noTraceDefault : this.getter.test(trace);
 		}
 		
 		@Override
@@ -97,20 +99,23 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	
 	private final class ROObjProp<T> extends ReadOnlyObjectPropertyBase<T> {
 		private final String name;
-		private final Supplier<T> getter;
+		private final Function<Trace, T> getter;
+		private final T noTraceDefault;
 		
-		private ROObjProp(final String name, final Supplier<T> getter) {
+		private ROObjProp(final String name, final Function<Trace, T> getter, final T noTraceDefault) {
 			super();
 			
 			this.name = name;
 			this.getter = getter;
+			this.noTraceDefault = noTraceDefault;
 			
 			CurrentTrace.this.addListener(o -> this.fireValueChangedEvent());
 		}
 		
 		@Override
 		public T get() {
-			return this.getter.get();
+			final Trace trace = CurrentTrace.this.get();
+			return trace == null ? this.noTraceDefault : this.getter.apply(trace);
 		}
 		
 		@Override
@@ -149,25 +154,19 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		this.stageManager = stageManager;
 		this.animationSelector.registerAnimationChangeListener(new AnimationChangeListener());
 		
-		this.exists = new ROBoolProp("exists", () -> this.get() != null);
+		this.exists = new ROBoolProp("exists", trace -> true, false);
 
 		this.animatorBusy = new SimpleBooleanProperty(this, "animatorBusy", false);
 
 		this.currentState = new CurrentState(this);
-		this.stateSpace = new ROObjProp<>("stateSpace", () -> {
-			Trace trace = this.get();
-			if(trace != null) {
-				return trace.getStateSpace();
-			}
-			return null;
-		});
-		this.model = new ROObjProp<>("model", () -> this.exists() ? this.get().getModel() : null);
+		this.stateSpace = new ROObjProp<>("stateSpace", Trace::getStateSpace, null);
+		this.model = new ROObjProp<>("model", Trace::getModel, null);
 
-		this.canGoBack = new ROBoolProp("canGoBack", () -> this.exists() && this.get().canGoBack());
-		this.canGoForward = new ROBoolProp("canGoForward", () -> this.exists() && this.get().canGoForward());
+		this.canGoBack = new ROBoolProp("canGoBack", Trace::canGoBack, false);
+		this.canGoForward = new ROBoolProp("canGoForward", Trace::canGoForward, false);
 
-		this.back = new ROObjProp<>("back", () -> this.exists() ? this.get().back() : null);
-		this.forward = new ROObjProp<>("forward", () -> this.exists() ? this.get().forward() : null);
+		this.back = new ROObjProp<>("back", Trace::back, null);
+		this.forward = new ROObjProp<>("forward", Trace::forward, null);
 	}
 
 	@Override
