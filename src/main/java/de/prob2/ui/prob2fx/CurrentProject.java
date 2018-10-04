@@ -12,7 +12,6 @@ import com.google.inject.Singleton;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
-import de.prob2.ui.benchmarks.BenchmarksStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
@@ -127,7 +126,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		injector.getInstance(ModelcheckingView.class).bindMachine(m);
 		injector.getInstance(TraceReplayView.class).refresh();
 		injector.getInstance(StatusBar.class).reset();
-		injector.getInstance(BenchmarksStage.class).reset();
 	}
 
 	public void reloadCurrentMachine() {

@@ -17,6 +17,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
+
 <fx:root type="ExpressionTableView" title="%table.expressionTableView.stage.title" minWidth="600" minHeight="400" width="800.0" height="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -49,7 +50,7 @@
 								<padding>
 									<Insets topRightBottomLeft="10.0"/>
 								</padding>
-								<Label fx:id="lbDescription" VBox.vgrow="ALWAYS"/>
+								<Label fx:id="lbDescription" prefHeight="200.0" wrapText="true" VBox.vgrow="ALWAYS"/>
 								<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 									<Label text="%table.expressionTableView.enterFormula" VBox.vgrow="NEVER"/>
 									<TextArea fx:id="taFormula" style="-fx-control-inner-background: #e8e8e8;" VBox.vgrow="ALWAYS"/>

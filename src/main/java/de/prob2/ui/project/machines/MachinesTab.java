@@ -21,6 +21,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
@@ -194,8 +195,7 @@ public class MachinesTab extends Tab {
 				startMachine(machinesList.getSelectionModel().getSelectedItem());
 			}
 		});
-		machinesList.disableProperty().bind(
-				injector.getInstance(LTLView.class).currentJobThreadsProperty().emptyProperty().not()
+		machinesList.disableProperty().bind(injector.getInstance(LTLView.class).currentJobThreadsProperty().emptyProperty().not()
 					.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
 					.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not()));
 		currentProject.machinesProperty().addListener((observable, from, to) -> {

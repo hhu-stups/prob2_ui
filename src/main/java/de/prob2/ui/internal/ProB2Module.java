@@ -19,7 +19,6 @@ import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
 import de.prob2.ui.beditor.BEditor;
 import de.prob2.ui.beditor.BEditorView;
-import de.prob2.ui.benchmarks.BenchmarksStage;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.consoles.b.BConsole;
 import de.prob2.ui.consoles.b.BConsoleView;
@@ -116,7 +115,6 @@ public class ProB2Module extends AbstractModule {
 		
 		// Controllers
 		bind(AnimationView.class);
-		bind(BenchmarksStage.class);
 		bind(BConsole.class);
 		bind(BConsoleView.class);
 		bind(DynamicCommandStatusBar.class);

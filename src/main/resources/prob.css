@@ -13,6 +13,7 @@
 	-prob-white-50: #EFEFEF80;
 	-prob-white-75: #EFEFEFBF;
 	-prob-lightblue: #1284F7;
+	-prob-grey-odd: #F8F8F8;
 	-fx-focus-color: -prob-aqua;
 	-fx-accent: -prob-aqua;
 }
@@ -219,8 +220,9 @@
 	-fx-border-width: 0.2em 0.0 0.2em 0.0;
 }
 .list-cell:odd {
-	-fx-background: white;
+	-fx-background: -prob-grey-odd;
 }
+
 .list-cell:selected {
 	-fx-background-color: -prob-aqua;
 	-fx-text-fill: white;
@@ -589,15 +591,24 @@
 .tree-table-view > .virtual-flow > .corner {
 	-fx-background-color: white;
 }
-.table-row-cell,
-.table-row-cell:odd {
+.table-row-cell {
 	-fx-background: white;
 	-fx-border-color: transparent;
 	-fx-border-width: 0.0;
+} 
+
+.tree-table-row-cell:odd {
+	-fx-background: -prob-grey-odd;
 }
+
+.table-row-cell:odd {
+	-fx-background: -prob-grey-odd;
+}
+
 .table-row-cell:empty:hover {
 	-fx-background-color: white;
 }
+
 .table-row-cell:hover {
 	-fx-background-color: -prob-grey-20;
 }
@@ -628,7 +639,7 @@
 	-fx-background-color: white;
 	-fx-border-color: transparent transparent -prob-grey transparent;
 	-fx-border-width: 0.0 0.0 2.0 0.0;
-	-fx-padding: 0.4em;
+	-fx-padding: 0.0;
 }
 .tree-table-view .column-header .label,
 .table-view .column-header .label {

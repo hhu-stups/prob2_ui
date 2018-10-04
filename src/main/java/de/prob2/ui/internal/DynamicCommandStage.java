@@ -106,7 +106,6 @@ public abstract class DynamicCommandStage extends Stage {
 	
 	@FXML
 	protected void initialize() {
-		lbDescription.setWrapText(true);
 		fillCommands();
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if (to == null) {

@@ -154,7 +154,13 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		this.animatorBusy = new SimpleBooleanProperty(this, "animatorBusy", false);
 
 		this.currentState = new CurrentState(this);
-		this.stateSpace = new ROObjProp<>("stateSpace", () -> this.exists() ? this.get().getStateSpace() : null);
+		this.stateSpace = new ROObjProp<>("stateSpace", () -> {
+			Trace trace = this.get();
+			if(trace != null) {
+				return trace.getStateSpace();
+			}
+			return null;
+		});
 		this.model = new ROObjProp<>("model", () -> this.exists() ? this.get().getModel() : null);
 
 		this.canGoBack = new ROBoolProp("canGoBack", () -> this.exists() && this.get().canGoBack());

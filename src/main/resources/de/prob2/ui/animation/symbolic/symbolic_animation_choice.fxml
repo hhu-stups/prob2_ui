@@ -32,7 +32,8 @@
 						<ChoiceBox fx:id="cbChoice" prefWidth="250.0">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicExecutionItem executionType="SEQUENCE" guiType="TEXT_FIELD"/>
+									<!-- TODO -->
+									<!-- <SymbolicExecutionItem executionType="SEQUENCE" guiType="TEXT_FIELD"/> !-->
 									<SymbolicExecutionItem executionType="FIND_VALID_STATE" guiType="PREDICATE"/>
 								</FXCollections>
 							</items>
