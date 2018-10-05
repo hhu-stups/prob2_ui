@@ -552,7 +552,7 @@
 }
 .titled-pane > .title {
 	-fx-background-color: -prob-grey;
-	-fx-padding: 0.5em;
+	-fx-padding: 0.4em;
 }
 .titled-pane > .title:hover {
 	-fx-background-color: -prob-aqua;
