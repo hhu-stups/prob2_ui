@@ -10,7 +10,7 @@ import de.prob2.ui.formula.FormulaStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.table.ExpressionTableView;
-
+import de.prob2.ui.visualisation.magiclayout.MagicLayoutView;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -48,6 +48,11 @@ public class VisualisationMenu extends Menu {
 	@FXML
 	private void openTableVisualisation() {
 		injector.getInstance(ExpressionTableView.class).show();
+	}
+	
+	@FXML
+	private void openMagicLayout() {
+		injector.getInstance(MagicLayoutView.class).show();
 	}
 
 	@FXML

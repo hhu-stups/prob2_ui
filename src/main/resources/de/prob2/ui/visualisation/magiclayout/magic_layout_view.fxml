@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import de.prob2.ui.menu.*?>
+
+<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1"
+	title="%visualisation.magicLayout.view.title">
+	<scene>
+		<Scene stylesheets="@/prob.css">
+			<BorderPane>
+				<top>
+					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+						<Menu text="%menu.file">
+							<MenuItem text="Save Layout..." />
+						</Menu>
+						<ViewMenu fx:id="viewMenu" />
+					</MenuBar>
+				</top>
+				<center>
+					<SplitPane dividerPositions="0.15">
+						<TabPane side="LEFT" prefWidth="200">
+							<Tab text="Nodes" closable="false">
+								<VBox spacing="10" prefHeight="250">
+									<ListView>
+										<Label text="nodes1" />
+										<Label text="nodes2" />
+										<Label text="nodes3" />
+										<Label text="nodes4" />
+										<Label text="nodes5" />
+										<Label text="nodes6" />
+										<Label text="nodes7" />
+										<Label text="nodes8" />
+									</ListView>
+									<TextArea promptText="{x| ...}" />
+									<FlowPane>
+										<Button text="line" />
+										<Button text="shape" />
+										<Button text="color" />
+									</FlowPane>
+									<padding>
+										<Insets bottom="20.0" />
+									</padding>
+								</VBox>
+							</Tab>
+							<Tab text="Edges" closable="false">
+								<VBox spacing="10" prefHeight="250">
+									<ListView>
+										<Label text="edges1" />
+									</ListView>
+									<TextArea promptText="{x,y| ...}" />
+									<FlowPane>
+										<Button text="linetype" />
+										<Button text="thickness" />
+										<Button text="color" />
+										<Button text="font" />
+										<Button text="fontsize" />
+									</FlowPane>
+									<padding>
+										<Insets bottom="20.0" />
+									</padding>
+								</VBox>
+							</Tab>
+						</TabPane>
+						<Label text="MAGIC LAYOUT GRAPH" prefWidth="600" alignment="CENTER" />
+					</SplitPane>
+				</center>
+			</BorderPane>
+		</Scene>
+	</scene>
+</fx:root>
+

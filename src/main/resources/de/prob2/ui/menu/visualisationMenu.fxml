@@ -9,6 +9,7 @@
 			  text="%menu.visualisation.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />	
 	<MenuItem text="%menu.visualisation.items.graph" onAction="#openGraphVisualisation"/>
 	<MenuItem text="%menu.visualisation.items.table" onAction="#openTableVisualisation"/>
+	<MenuItem text="%menu.visualisation.items.magicLayout" onAction="#openMagicLayout"/>
 	<SeparatorMenuItem />
 	<MenuItem text="%menu.visualisation.items.showHistoryChart"
 			  onAction="#handleHistoryChart" />
