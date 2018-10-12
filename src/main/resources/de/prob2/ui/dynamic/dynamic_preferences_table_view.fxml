@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import de.prob2.ui.internal.DynamicPreferencesTableView?>
+<?import de.prob2.ui.dynamic.DynamicPreferencesTableView?>
 
 <fx:root type="DynamicPreferencesTableView" xmlns:fx="http://javafx.com/fxml/1">
 	<columnResizePolicy>

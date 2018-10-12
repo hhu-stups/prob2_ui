@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-<?import de.prob2.ui.dotty.DotView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
-<?import de.prob2.ui.internal.DynamicCommandStatusBar?>
-<?import de.prob2.ui.internal.DynamicPreferencesTableView?>
+<?import de.prob2.ui.dynamic.DynamicCommandStatusBar?>
+<?import de.prob2.ui.dynamic.DynamicPreferencesTableView?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import de.prob2.ui.menu.ViewMenu?>
-<?import de.prob2.ui.menu.WindowMenu?>
+<?import de.prob2.ui.dynamic.table.ExpressionTableView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextArea?>
@@ -21,30 +18,28 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<?import javafx.scene.web.WebView?>
 
-<fx:root type="DotView" title="%dotty.stage.title" minWidth="800" minHeight="600" width="1600.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="ExpressionTableView" title="%table.expressionTableView.stage.title" minWidth="800" minHeight="600" width="1600.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<BorderPane>
-				<top>
-					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
-						<ViewMenu fx:id="viewMenu" />
-						<WindowMenu fx:id="windowMenu" />
-					</MenuBar>
-				</top>
 				<center>
 					<SplitPane dividerPositions="0.4">
 						<VBox>
-							<ListView fx:id="lvChoice" minHeight="200.0" VBox.vgrow="ALWAYS">
+							<ListView fx:id="lvChoice" VBox.vgrow="ALWAYS">
 								<placeholder>
 									<Label text="%common.noModelLoaded"/>
 								</placeholder>
 							</ListView>
 							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
+								<Button fx:id="saveButton" onAction="#save" HBox.hgrow="NEVER">
+									<graphic>
+										<FontAwesomeIconView styleClass="icon-dark" glyphName="SAVE" glyphSize="${fontSize.fontSize + 2}" />
+									</graphic>
+								</Button>
 								<Button fx:id="cancelButton" onAction="#cancel" HBox.hgrow="NEVER">
 									<graphic>
 										<FontAwesomeIconView styleClass="icon-dark" glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
@@ -53,43 +48,27 @@
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
 							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
-								<Label fx:id="lbDescription" prefHeight="100.0" wrapText="true" VBox.vgrow="ALWAYS"/>
+								<Label fx:id="lbDescription" prefHeight="200.0" wrapText="true" VBox.vgrow="ALWAYS"/>
 								<DynamicPreferencesTableView fx:id="preferences" VBox.vgrow="ALWAYS"/>
 								<HBox spacing="10.0">
 									<Button fx:id="undoButton" styleClass="button-blue" text="%preferences.stage.tabs.globalPreferences.buttons.undo" disable="true" HBox.hgrow="NEVER" onAction="#handleUndoChanges" />
 									<Button fx:id="resetButton" styleClass="button-blue" text="%preferences.stage.tabs.globalPreferences.buttons.restoreDefaults" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults" />
 									<Label fx:id="applyWarning" text="%preferences.stage.tabs.globalPreferences.notAppliedWarning" styleClass="warning" visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
-									<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" disable="true" HBox.hgrow="NEVER" onAction="#handleApply" />				
+									<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" disable="true" HBox.hgrow="NEVER" onAction="#handleApply" />					
 								</HBox>
 								<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
-									<Label text="%dotty.enterFormula" VBox.vgrow="NEVER"/>
-									<TextArea fx:id="taFormula" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #e8e8e8;"/>
+									<Label text="%table.expressionTableView.enterFormula" VBox.vgrow="NEVER"/>
+									<TextArea fx:id="taFormula" style="-fx-control-inner-background: #e8e8e8;" VBox.vgrow="ALWAYS"/>
 								</VBox>
 							</VBox>
 							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
 								<padding>
 									<Insets topRightBottomLeft="10.0"/>
 								</padding>
-								<CheckBox text="%dotty.continuousUpdate" fx:id="cbContinuous" VBox.vgrow="NEVER"/>
+								<CheckBox text="%table.expressionTableView.continuousUpdate" fx:id="cbContinuous" VBox.vgrow="NEVER"/>
 							</VBox>
 						</VBox>
-						<VBox>
-							<HBox alignment="TOP_RIGHT" style="-fx-background-color: transparent;">
-								<Button fx:id="zoomInButton" onAction="#zoomIn">
-									<graphic>
-										<FontAwesomeIconView styleClass="icon-dark" glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
-									</graphic>
-								</Button>
-								<Button fx:id="zoomOutButton" onAction="#zoomOut">
-									<graphic>
-										<FontAwesomeIconView styleClass="icon-dark" glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
-									</graphic>
-								</Button>
-							</HBox>
-							<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
-								<WebView fx:id="dotView"/>
-							</ScrollPane>
-						</VBox>
+						<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border"/>
 					</SplitPane>
 				</center>
 				<bottom>

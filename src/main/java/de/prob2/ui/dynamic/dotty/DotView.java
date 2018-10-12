@@ -1,4 +1,4 @@
-package de.prob2.ui.dotty;
+package de.prob2.ui.dynamic.dotty;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,8 +24,9 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.dynamic.DynamicCommandStage;
+import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.ProBPreferences;

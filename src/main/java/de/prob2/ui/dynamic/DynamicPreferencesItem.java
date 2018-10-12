@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.dynamic;
 
 import de.prob2.ui.preferences.ProBPreferenceType;
 

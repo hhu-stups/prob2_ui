@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.dynamic;
 
 
 import javafx.collections.FXCollections;

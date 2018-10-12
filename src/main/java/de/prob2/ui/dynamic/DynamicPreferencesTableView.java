@@ -1,8 +1,9 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.dynamic;
 
 import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.DynamicCommandItem;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.project.MachineLoader;
 import javafx.fxml.FXML;

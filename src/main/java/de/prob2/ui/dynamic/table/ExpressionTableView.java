@@ -1,4 +1,4 @@
-package de.prob2.ui.table;
+package de.prob2.ui.dynamic.table;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +23,9 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob2.ui.dynamic.DynamicCommandStage;
+import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.ProBPreferences;

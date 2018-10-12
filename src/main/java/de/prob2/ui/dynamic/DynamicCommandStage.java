@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.dynamic;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +21,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.ProBPreferenceType;
 import de.prob2.ui.preferences.ProBPreferences;
