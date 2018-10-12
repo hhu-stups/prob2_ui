@@ -44,10 +44,7 @@ public class DynamicPreferencesTableView extends TableView<DynamicPreferencesIte
 	private void initialize() {
 		tvName.setCellValueFactory(new PropertyValueFactory<>("name"));
 		tvChanged.setCellValueFactory(new PropertyValueFactory<>("changed"));
-		tvValue.setCellFactory(col -> {
-			TableCell<DynamicPreferencesItem, String> cell = new DynamicTableCell(proBPreferences);
-			return cell;
-		});
+		tvValue.setCellFactory(col -> new DynamicTableCell(proBPreferences));
 		tvDefaultValue.setCellValueFactory(new PropertyValueFactory<>("prefValue"));
 		tvDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
 	}
