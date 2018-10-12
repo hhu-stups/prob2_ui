@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ProBPreference;
 
@@ -26,6 +27,7 @@ import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public final class PreferencesView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesView.class);
 	private static final Pattern EMPTY_PATTERN = Pattern.compile("", Pattern.CASE_INSENSITIVE);

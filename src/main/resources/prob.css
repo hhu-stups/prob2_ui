@@ -574,7 +574,12 @@
  ************************************************************************************/
 .table-view {
 	-fx-padding: -1.0;
+	-fx-focus-color: transparent;
+	-fx-faint-focus-color: transparent;
+	-fx-border-color: -prob-grey;
+	-fx-border-width: 0.2em 0.0 0.2em 0.0;
 }
+
 .tree-table-view {
 	-fx-padding: -1.0;
 	-fx-border-width: 0.0;

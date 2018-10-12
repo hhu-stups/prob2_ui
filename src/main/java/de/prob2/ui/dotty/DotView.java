@@ -27,9 +27,11 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.GlobalPreferences;
+import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import de.prob2.ui.project.MachineLoader;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
@@ -71,8 +73,10 @@ public class DotView extends DynamicCommandStage {
 
 	@Inject
 	public DotView(final StageManager stageManager, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final ResourceBundle bundle, final Injector injector) {
-		super(stageManager, currentTrace, currentProject, bundle, injector);
+			final CurrentProject currentProject, final GlobalPreferences globalPreferences, 
+			final ProBPreferences globalProBPrefs, final MachineLoader machineLoader, 
+			final ResourceBundle bundle, final Injector injector) {
+		super(stageManager, currentTrace, currentProject, globalPreferences, globalProBPrefs, machineLoader, bundle, injector);
 		stageManager.loadFXML(this, "dot_view.fxml");
 	}
 

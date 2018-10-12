@@ -26,9 +26,11 @@ import de.prob.statespace.State;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.GlobalPreferences;
+import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import de.prob2.ui.project.MachineLoader;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -62,9 +64,11 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	
 	@Inject
-	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
+	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, 
+			final CurrentProject currentProject, final GlobalPreferences globalPreferences, 
+			final ProBPreferences globalProBPrefs, final MachineLoader machineLoader,
 			final ResourceBundle bundle, final Injector injector) {
-		super(stageManager, currentTrace, currentProject, bundle, injector);
+		super(stageManager, currentTrace, currentProject, globalPreferences, globalProBPrefs, machineLoader, bundle, injector);
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
 		stageManager.loadFXML(this, "table_view.fxml");
 	}

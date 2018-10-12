@@ -6,9 +6,9 @@ import java.util.Map;
 
 import javafx.scene.paint.Color;
 
-final class PrefConstants {
+public final class PrefConstants {
 	// Valid values for named list-like types.
-	static final Map<String, String[]> VALID_TYPE_VALUES;
+	public static final Map<String, String[]> VALID_TYPE_VALUES;
 	
 	static {
 		final Map<String, String[]> validTypeValues = new HashMap<>();
@@ -57,7 +57,7 @@ final class PrefConstants {
 	}
 	
 	// Color values for the subset of Tk colors allowed by ProB.
-	static final Map<String, Color> TK_COLORS;
+	public static final Map<String, Color> TK_COLORS;
 	
 	static {
 		final Map<String, Color> tkColors = new HashMap<>();

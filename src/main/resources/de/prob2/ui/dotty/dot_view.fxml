@@ -4,6 +4,7 @@
 <?import de.prob2.ui.dotty.DotView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.internal.DynamicCommandStatusBar?>
+<?import de.prob2.ui.internal.DynamicPreferencesTableView?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.menu.ViewMenu?>
 <?import de.prob2.ui.menu.WindowMenu?>
@@ -22,7 +23,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.scene.web.WebView?>
 
-<fx:root type="DotView" title="%dotty.stage.title" minWidth="600" minHeight="400" width="800.0" height="600.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="DotView" title="%dotty.stage.title" minWidth="800" minHeight="600" width="1600.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
@@ -52,14 +53,23 @@
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
 							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
-								<padding>
-									<Insets topRightBottomLeft="10.0"/>
-								</padding>
-								<Label fx:id="lbDescription" prefHeight="200.0" wrapText="true" VBox.vgrow="ALWAYS"/>
+								<Label fx:id="lbDescription" prefHeight="100.0" wrapText="true" VBox.vgrow="ALWAYS"/>
+								<DynamicPreferencesTableView fx:id="preferences" VBox.vgrow="ALWAYS"/>
+								<HBox spacing="10.0">
+									<Button fx:id="undoButton" styleClass="button-blue" text="%preferences.stage.tabs.globalPreferences.buttons.undo" disable="true" HBox.hgrow="NEVER" onAction="#handleUndoChanges" />
+									<Button fx:id="resetButton" styleClass="button-blue" text="%preferences.stage.tabs.globalPreferences.buttons.restoreDefaults" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults" />
+									<Label fx:id="applyWarning" text="%preferences.stage.tabs.globalPreferences.notAppliedWarning" styleClass="warning" visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
+									<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" disable="true" HBox.hgrow="NEVER" onAction="#handleApply" />				
+								</HBox>
 								<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 									<Label text="%dotty.enterFormula" VBox.vgrow="NEVER"/>
 									<TextArea fx:id="taFormula" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #e8e8e8;"/>
 								</VBox>
+							</VBox>
+							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
+								<padding>
+									<Insets topRightBottomLeft="10.0"/>
+								</padding>
 								<CheckBox text="%dotty.continuousUpdate" fx:id="cbContinuous" VBox.vgrow="NEVER"/>
 							</VBox>
 						</VBox>
