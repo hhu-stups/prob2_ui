@@ -14,11 +14,10 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob2.ui.preferences.PrefConstants;
 import de.prob2.ui.preferences.ProBPreferences;
 
-public class DynamicTableCell extends TableCell<DynamicCommandItem, String> {
+public class DynamicTableCell extends TableCell<DynamicPreferencesItem, String> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicTableCell.class);
 	
 	private final ProBPreferences preferences;

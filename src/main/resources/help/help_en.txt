@@ -12,7 +12,7 @@ de.prob2.ui.animation.tracereplay.TraceReplayView,Animation.html#Trace
 de.prob2.ui.animation.symbolic.SymbolicAnimationView,Animation.html#Symbolic
 de.prob2.ui.states.StatesView,Main View/State.html
 de.prob2.ui.beditor.BEditorView,Main View/Editor.html
-de.prob2.ui.table.ExpressionTableView,Main View/Formula Table Visualisation.html
+de.prob2.ui.dynamic.table.ExpressionTableView,Main View/Formula Table Visualisation.html
 de.prob2.ui.formula.FormulaStage,Main View/Formula Graph Visualisation.html
-de.prob2.ui.dotty.DotView,Graph Visualisation.html
+de.prob2.ui.dynamic.dotty.DotView,Graph Visualisation.html
 de.prob2.ui.chart.HistoryChartStage,History Chart.html

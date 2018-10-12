@@ -15,19 +15,19 @@ import javafx.scene.control.cell.PropertyValueFactory;
 public class DynamicPreferencesTableView extends TableView<DynamicPreferencesItem> {
 	
 	@FXML
-	private TableColumn<DynamicCommandItem, String> tvName;
+	private TableColumn<DynamicPreferencesItem, String> tvName;
 	
 	@FXML
-	private TableColumn<DynamicCommandItem, String> tvChanged;
+	private TableColumn<DynamicPreferencesItem, String> tvChanged;
 	
 	@FXML
-	private TableColumn<DynamicCommandItem, String> tvValue;
+	private TableColumn<DynamicPreferencesItem, String> tvValue;
 	
 	@FXML
-	private TableColumn<DynamicCommandItem, String> tvDefaultValue;
+	private TableColumn<DynamicPreferencesItem, String> tvDefaultValue;
 	
 	@FXML
-	private TableColumn<DynamicCommandItem, String> tvDescription;
+	private TableColumn<DynamicPreferencesItem, String> tvDescription;
 	
 	private final ProBPreferences proBPreferences;
 	
@@ -45,7 +45,7 @@ public class DynamicPreferencesTableView extends TableView<DynamicPreferencesIte
 		tvName.setCellValueFactory(new PropertyValueFactory<>("name"));
 		tvChanged.setCellValueFactory(new PropertyValueFactory<>("changed"));
 		tvValue.setCellFactory(col -> {
-			TableCell<DynamicCommandItem, String> cell = new DynamicTableCell(proBPreferences);
+			TableCell<DynamicPreferencesItem, String> cell = new DynamicTableCell(proBPreferences);
 			return cell;
 		});
 		tvDefaultValue.setCellValueFactory(new PropertyValueFactory<>("prefValue"));
