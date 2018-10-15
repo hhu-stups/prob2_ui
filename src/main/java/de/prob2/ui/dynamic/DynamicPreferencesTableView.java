@@ -2,32 +2,31 @@ package de.prob2.ui.dynamic;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.PrefItem;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.project.MachineLoader;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-public class DynamicPreferencesTableView extends TableView<DynamicPreferencesItem> {
+public class DynamicPreferencesTableView extends TableView<PrefItem> {
 	
 	@FXML
-	private TableColumn<DynamicPreferencesItem, String> tvName;
+	private TableColumn<PrefItem, String> tvName;
 	
 	@FXML
-	private TableColumn<DynamicPreferencesItem, String> tvChanged;
+	private TableColumn<PrefItem, String> tvChanged;
 	
 	@FXML
-	private TableColumn<DynamicPreferencesItem, String> tvValue;
+	private TableColumn<PrefItem, String> tvValue;
 	
 	@FXML
-	private TableColumn<DynamicPreferencesItem, String> tvDefaultValue;
+	private TableColumn<PrefItem, String> tvDefaultValue;
 	
 	@FXML
-	private TableColumn<DynamicPreferencesItem, String> tvDescription;
+	private TableColumn<PrefItem, String> tvDescription;
 	
 	private final ProBPreferences proBPreferences;
 	
@@ -45,7 +44,7 @@ public class DynamicPreferencesTableView extends TableView<DynamicPreferencesIte
 		tvName.setCellValueFactory(new PropertyValueFactory<>("name"));
 		tvChanged.setCellValueFactory(new PropertyValueFactory<>("changed"));
 		tvValue.setCellFactory(col -> new DynamicTableCell(proBPreferences));
-		tvDefaultValue.setCellValueFactory(new PropertyValueFactory<>("prefValue"));
+		tvDefaultValue.setCellValueFactory(new PropertyValueFactory<>("defaultValue"));
 		tvDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
 	}
 

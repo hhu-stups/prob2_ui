@@ -15,9 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.prob2.ui.preferences.PrefConstants;
+import de.prob2.ui.preferences.PrefItem;
 import de.prob2.ui.preferences.ProBPreferences;
 
-public class DynamicTableCell extends TableCell<DynamicPreferencesItem, String> {
+public class DynamicTableCell extends TableCell<PrefItem, String> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicTableCell.class);
 	
 	private final ProBPreferences preferences;
@@ -28,7 +29,7 @@ public class DynamicTableCell extends TableCell<DynamicPreferencesItem, String> 
 	}
 	
 	private void setPreferenceValue(final String newValue) {
-		this.preferences.setPreferenceValue(((DynamicPreferencesItem) this.getTableRow().getItem()).getName(), newValue);
+		this.preferences.setPreferenceValue(((PrefItem) this.getTableRow().getItem()).getName(), newValue);
 	}
 	
 	private void changeToSpinner(final int min, final int max, final String initial) {
@@ -55,7 +56,7 @@ public class DynamicTableCell extends TableCell<DynamicPreferencesItem, String> 
 		this.setGraphic(spinner);
 	}
 	
-	private void changeToTextField(final DynamicPreferencesItem item) {
+	private void changeToTextField(final PrefItem item) {
 		final TextField textField = new TextField(item.getValue());
 		textField.textProperty().addListener((o, from, to) -> this.setPreferenceValue(to));
 		this.setText(null);
@@ -64,10 +65,10 @@ public class DynamicTableCell extends TableCell<DynamicPreferencesItem, String> 
 	
 	private void changeToText() {
 		this.setGraphic(null);
-		this.setText(((DynamicPreferencesItem) this.getTableRow().getItem()).getValue());
+		this.setText(((PrefItem) this.getTableRow().getItem()).getValue());
 	}
 	
-	private void changeToCheckBox(final DynamicPreferencesItem pti) {
+	private void changeToCheckBox(final PrefItem pti) {
 		final CheckBox checkBox = new CheckBox();
 		checkBox.setSelected("true".equals(pti.getValue()));
 		checkBox.setOnAction(event -> this.setPreferenceValue(Boolean.toString(checkBox.isSelected())));
@@ -75,7 +76,7 @@ public class DynamicTableCell extends TableCell<DynamicPreferencesItem, String> 
 		this.setGraphic(checkBox);
 	}
 	
-	private void changeToColorPicker(final DynamicPreferencesItem pti) {
+	private void changeToColorPicker(final PrefItem pti) {
 		Color color;
 		try {
 			color = Color.web(pti.getValue());
@@ -100,7 +101,7 @@ public class DynamicTableCell extends TableCell<DynamicPreferencesItem, String> 
 		this.setGraphic(colorPicker);
 	}
 	
-	private void changeToComboBox(final DynamicPreferencesItem pti, final String type) {
+	private void changeToComboBox(final PrefItem pti, final String type) {
 		final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(
 			"[]".equals(type)
 				? pti.getValueType().getValues()
@@ -112,7 +113,7 @@ public class DynamicTableCell extends TableCell<DynamicPreferencesItem, String> 
 		this.setGraphic(comboBox);
 	}
 	
-	private void changeToItem(final DynamicPreferencesItem pti) {
+	private void changeToItem(final PrefItem pti) {
 		if (pti.getValueType() == null) {
 			// If there is no value type (for categories for example), just display the value text.
 			changeToText();
@@ -152,7 +153,7 @@ public class DynamicTableCell extends TableCell<DynamicPreferencesItem, String> 
 		
 		if (this.getTableRow() != null && this.getTableRow().getItem() != null) {
 			// Item is available, which means we can do fancy stuff!
-			changeToItem((DynamicPreferencesItem) this.getTableRow().getItem());
+			changeToItem((PrefItem) this.getTableRow().getItem());
 		} else {
 			// Row or item is null, so display the item text as is.
 			this.setGraphic(null);

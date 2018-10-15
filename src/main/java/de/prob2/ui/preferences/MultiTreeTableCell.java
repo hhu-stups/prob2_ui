@@ -14,7 +14,7 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MultiTreeTableCell extends TreeTableCell<PrefTreeItem, String> {
+public class MultiTreeTableCell extends TreeTableCell<PrefItem, String> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MultiTreeTableCell.class);
 	
 	private final ReadOnlyObjectProperty<ProBPreferences> preferences;
@@ -53,7 +53,7 @@ public class MultiTreeTableCell extends TreeTableCell<PrefTreeItem, String> {
 		this.setGraphic(spinner);
 	}
 	
-	private void changeToTextField(final PrefTreeItem item) {
+	private void changeToTextField(final PrefItem item) {
 		final TextField textField = new TextField(item.getValue());
 		textField.textProperty().addListener((o, from, to) -> this.setPreferenceValue(to));
 		this.setText(null);
@@ -65,7 +65,7 @@ public class MultiTreeTableCell extends TreeTableCell<PrefTreeItem, String> {
 		this.setText(this.getTreeTableRow().getItem().getValue());
 	}
 	
-	private void changeToCheckBox(final PrefTreeItem pti) {
+	private void changeToCheckBox(final PrefItem pti) {
 		final CheckBox checkBox = new CheckBox();
 		checkBox.setSelected("true".equals(pti.getValue()));
 		checkBox.setOnAction(event -> this.setPreferenceValue(Boolean.toString(checkBox.isSelected())));
@@ -73,7 +73,7 @@ public class MultiTreeTableCell extends TreeTableCell<PrefTreeItem, String> {
 		this.setGraphic(checkBox);
 	}
 	
-	private void changeToColorPicker(final PrefTreeItem pti) {
+	private void changeToColorPicker(final PrefItem pti) {
 		Color color;
 		try {
 			color = Color.web(pti.getValue());
@@ -98,7 +98,7 @@ public class MultiTreeTableCell extends TreeTableCell<PrefTreeItem, String> {
 		this.setGraphic(colorPicker);
 	}
 	
-	private void changeToComboBox(final PrefTreeItem pti, final String type) {
+	private void changeToComboBox(final PrefItem pti, final String type) {
 		final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(
 			"[]".equals(type)
 				? pti.getValueType().getValues()
@@ -110,7 +110,7 @@ public class MultiTreeTableCell extends TreeTableCell<PrefTreeItem, String> {
 		this.setGraphic(comboBox);
 	}
 	
-	private void changeToItem(final PrefTreeItem pti) {
+	private void changeToItem(final PrefItem pti) {
 		if (pti.getValueType() == null) {
 			// If there is no value type (for categories for example), just display the value text.
 			changeToText();

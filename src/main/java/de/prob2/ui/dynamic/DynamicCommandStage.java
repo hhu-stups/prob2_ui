@@ -1,6 +1,7 @@
 package de.prob2.ui.dynamic;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -22,6 +23,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
+import de.prob2.ui.preferences.PrefItem;
 import de.prob2.ui.preferences.ProBPreferenceType;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.preferences.PreferencesView;
@@ -148,21 +150,9 @@ public abstract class DynamicCommandStage extends Stage {
 			if(to == null) {
 				return;
 			}
-			GetCurrentPreferencesCommand cmd = new GetCurrentPreferencesCommand();
-			currentTrace.getStateSpace().execute(cmd);
-			GetDefaultPreferencesCommand cmd2 = new GetDefaultPreferencesCommand();
-			currentTrace.getStateSpace().execute(cmd2);
-			preferences.getItems().addAll(cmd2.getPreferences().stream()
-					.filter(preference -> lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences().contains(preference.name))
-					.map(preference -> new DynamicPreferencesItem(preference.name, preference.defaultValue, preference.description,
-																  ProBPreferenceType.fromProBPreference(preference)))
-					.collect(Collectors.toList()));
-			preferences.getItems().forEach(preference -> {
-				String value = cmd.getPreferences().get(preference.getName());
-				preference.setValue(cmd.getPreferences().get(preference.getName()));
-				preference.setChanged(value.equals(preference.getPrefValue()) ? "" : "*");
-			});
+			updatePreferences(lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences());
 		});
+		
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			preferences.getItems().clear();
 			if (to == null) {
@@ -173,26 +163,7 @@ public abstract class DynamicCommandStage extends Stage {
 			} else {
 				lbDescription.setText(to.getDescription());
 			}
-			GetCurrentPreferencesCommand cmd = new GetCurrentPreferencesCommand();
-			currentTrace.getStateSpace().execute(cmd);
-			GetDefaultPreferencesCommand cmd2 = new GetDefaultPreferencesCommand();
-			currentTrace.getStateSpace().execute(cmd2);
-			preferences.getItems().addAll(cmd2.getPreferences().stream()
-					.filter(preference -> to.getRelevantPreferences().contains(preference.name))
-					.map(preference -> new DynamicPreferencesItem(preference.name, preference.defaultValue, preference.description,
-																  ProBPreferenceType.fromProBPreference(preference)))
-					.collect(Collectors.toList()));
-			preferences.getItems().forEach(preference -> {
-				String value = cmd.getPreferences().get(preference.getName());
-				preference.setValue(cmd.getPreferences().get(preference.getName()));
-				preference.setChanged(value.equals(preference.getPrefValue()) ? "" : "*");
-			});
-			
-			if(preferences.getItems().isEmpty()) {
-				preferences.setVisible(false);
-			} else {
-				preferences.setVisible(true);
-			}
+			updatePreferences(to.getRelevantPreferences());		
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
 			String currentFormula = taFormula.getText();
@@ -242,6 +213,27 @@ public abstract class DynamicCommandStage extends Stage {
 		undoButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
 		applyButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
 		resetButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
+	}
+	
+	private void updatePreferences(List<String> relevantPreferences) {
+		GetCurrentPreferencesCommand cmd = new GetCurrentPreferencesCommand();
+		currentTrace.getStateSpace().execute(cmd);
+		GetDefaultPreferencesCommand cmd2 = new GetDefaultPreferencesCommand();
+		currentTrace.getStateSpace().execute(cmd2);
+		preferences.getItems().addAll(cmd2.getPreferences().stream()
+				.filter(preference -> relevantPreferences.contains(preference.name))
+				.map(preference -> new PrefItem(preference.name, "", preference.defaultValue, ProBPreferenceType.fromProBPreference(preference), preference.defaultValue, preference.description))
+				.collect(Collectors.toList()));
+		preferences.getItems().forEach(preference -> {
+			String value = cmd.getPreferences().get(preference.getName());
+			preference.setValue(cmd.getPreferences().get(preference.getName()));
+			preference.setChanged(value.equals(preference.getDefaultValue()) ? "" : "*");
+		});
+		if(preferences.getItems().isEmpty()) {
+			preferences.setVisible(false);
+		} else {
+			preferences.setVisible(true);
+		}
 	}
 	
 	protected void fillCommands(AbstractGetDynamicCommands cmd) {
