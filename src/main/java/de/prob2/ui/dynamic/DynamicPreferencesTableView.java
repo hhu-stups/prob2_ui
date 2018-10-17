@@ -6,6 +6,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PrefItem;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.project.MachineLoader;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -28,13 +30,13 @@ public class DynamicPreferencesTableView extends TableView<PrefItem> {
 	@FXML
 	private TableColumn<PrefItem, String> tvDescription;
 	
-	private final ProBPreferences proBPreferences;
+	private final ObjectProperty<ProBPreferences> proBPreferences;
 	
 	@Inject
 	public DynamicPreferencesTableView(final StageManager stageManager, final ProBPreferences probPreferences,
 									   final MachineLoader machineLoader) {
 		super();
-		this.proBPreferences = probPreferences;
+		this.proBPreferences = new SimpleObjectProperty<>(this, "preferences", probPreferences);
 		stageManager.loadFXML(this, "dynamic_preferences_table_view.fxml");
 	}
 	
