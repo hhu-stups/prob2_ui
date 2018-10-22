@@ -15,9 +15,10 @@ public class DynamicTableCell extends TableCell<PrefItem, String> {
 	
 	public DynamicTableCell(final ReadOnlyObjectProperty<ProBPreferences> preferences) {
 		super();
-		this.provider = new PreferencesCellProvider<>(this, preferences); //this statt this.getTableRow
+		this.provider = new PreferencesCellProvider<>(this, preferences);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void updateItem(final String item, final boolean empty) {
 		super.updateItem(item, empty);

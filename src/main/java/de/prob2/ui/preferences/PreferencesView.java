@@ -85,8 +85,7 @@ public final class PreferencesView extends BorderPane {
 			return cell;
 		});
 		tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
-		tvValue.setOnEditCommit(event -> this.getPreferences().setPreferenceValue(event.getRowValue().getValue().getName(), event.getNewValue()));
-		
+
 		tvDefaultValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("defaultValue"));
 		
 		tvDescription.setCellValueFactory(new TreeItemPropertyValueFactory<>("description"));

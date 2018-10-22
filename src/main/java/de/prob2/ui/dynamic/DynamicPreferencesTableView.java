@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PrefItem;
+import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.project.MachineLoader;
 import javafx.beans.property.ObjectProperty;
@@ -32,11 +33,14 @@ public class DynamicPreferencesTableView extends TableView<PrefItem> {
 	
 	private final ObjectProperty<ProBPreferences> proBPreferences;
 	
+	private final PreferencesView prefView;
+	
 	@Inject
 	public DynamicPreferencesTableView(final StageManager stageManager, final ProBPreferences probPreferences,
-									   final MachineLoader machineLoader) {
+									   final PreferencesView prefView, final MachineLoader machineLoader) {
 		super();
 		this.proBPreferences = new SimpleObjectProperty<>(this, "preferences", probPreferences);
+		this.prefView = prefView;
 		stageManager.loadFXML(this, "dynamic_preferences_table_view.fxml");
 	}
 	
@@ -46,8 +50,21 @@ public class DynamicPreferencesTableView extends TableView<PrefItem> {
 		tvName.setCellValueFactory(new PropertyValueFactory<>("name"));
 		tvChanged.setCellValueFactory(new PropertyValueFactory<>("changed"));
 		tvValue.setCellFactory(col -> new DynamicTableCell(proBPreferences));
+		tvValue.setCellValueFactory(new PropertyValueFactory<>("value"));
 		tvDefaultValue.setCellValueFactory(new PropertyValueFactory<>("defaultValue"));
 		tvDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
+		tvValue.setOnEditCommit(event -> {
+			proBPreferences.get().setPreferenceValue(event.getRowValue().getValue(), event.getNewValue());
+			this.prefView.refresh();
+		});
+	}
+	
+	@Override
+	public void refresh() {
+		for (PrefItem item : this.getItems()) {
+			String value = proBPreferences.get().getPreferenceValue(item.getName());
+			item.setValue(value);
+		}
 	}
 
 }

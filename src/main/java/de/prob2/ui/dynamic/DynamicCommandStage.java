@@ -1,6 +1,5 @@
 package de.prob2.ui.dynamic;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +12,6 @@ import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
 import de.prob.animator.domainobjects.DynamicCommandItem;
-import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 
@@ -24,11 +22,14 @@ import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PrefItem;
+import de.prob2.ui.preferences.PreferencesHandler;
 import de.prob2.ui.preferences.ProBPreferenceType;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.preferences.PreferencesView;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -125,9 +126,11 @@ public abstract class DynamicCommandStage extends Stage {
 	
 	private final ProBPreferences globalProBPrefs;
 	
+	private final PreferencesHandler preferencesHandler;
+	
 	protected DynamicCommandStage(final StageManager stageManager, final CurrentTrace currentTrace, 
-			final CurrentProject currentProject, final GlobalPreferences globalPreferences, 
-			final ProBPreferences globalProBPrefs, final MachineLoader machineLoader, 
+			final CurrentProject currentProject, final ProBPreferences globalProBPrefs, final GlobalPreferences globalPreferences,
+			final MachineLoader machineLoader, final PreferencesHandler preferencesHandler,
 			final ResourceBundle bundle, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
@@ -136,6 +139,7 @@ public abstract class DynamicCommandStage extends Stage {
 		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace());
 		this.injector = injector;
 		this.bundle = bundle;
+		this.preferencesHandler = preferencesHandler;
 		this.stageManager = stageManager;
 		this.currentThread = new SimpleObjectProperty<>(this, "currentThread", null);
 	}
@@ -147,7 +151,7 @@ public abstract class DynamicCommandStage extends Stage {
 		currentTrace.addListener((observable, from, to) -> {
 			preferences.getItems().clear();
 			injector.getInstance(PreferencesView.class).refresh();
-			if(to == null) {
+			if(to == null || lvChoice.getSelectionModel().getSelectedItem() == null) {
 				return;
 			}
 			updatePreferences(lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences());
@@ -205,6 +209,24 @@ public abstract class DynamicCommandStage extends Stage {
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell());
 		cancelButton.disableProperty().bind(currentThread.isNull());
 		
+		this.globalPreferences.addListener((InvalidationListener) observable -> {
+			for (final Map.Entry<String, String> entry : this.globalPreferences.entrySet()) {
+				this.globalProBPrefs.setPreferenceValue(entry.getKey(), entry.getValue());
+			}
+
+			try {
+				this.globalProBPrefs.apply();
+			} catch (final ProBError e) {
+				LOGGER.warn("Ignoring global preference changes because of exception", e);
+			}
+		});
+		this.globalPreferences.addListener((MapChangeListener<String, String>) change -> {
+			if (change.wasRemoved() && !change.wasAdded()) {
+				this.globalProBPrefs.setPreferenceValue(change.getKey(), this.globalProBPrefs.getPreferences().get(change.getKey()).defaultValue);
+				this.globalProBPrefs.apply();
+			}
+		});
+		
 		this.undoButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
 		this.applyWarning.visibleProperty().bind(this.globalProBPrefs.changesAppliedProperty().not());
 		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
@@ -226,7 +248,7 @@ public abstract class DynamicCommandStage extends Stage {
 				.collect(Collectors.toList()));
 		preferences.getItems().forEach(preference -> {
 			String value = cmd.getPreferences().get(preference.getName());
-			preference.setValue(cmd.getPreferences().get(preference.getName()));
+			preference.setValue(value);
 			preference.setChanged(value.equals(preference.getDefaultValue()) ? "" : "*");
 		});
 		if(preferences.getItems().isEmpty()) {
@@ -255,12 +277,7 @@ public abstract class DynamicCommandStage extends Stage {
 		interrupt();
 	}
 	
-	@FXML
-	private void handleClose() {
-		this.close();
-	}
-	
-	private void refresh() {
+	public void refresh() {
 		int index = lvChoice.getSelectionModel().getSelectedIndex();
 		fillCommands();
 		if (index == -1) {
@@ -268,6 +285,7 @@ public abstract class DynamicCommandStage extends Stage {
 		} else {
 			lvChoice.getSelectionModel().select(index);
 		}
+		preferences.refresh();
 	}
 	
 	protected void interrupt() {
@@ -287,40 +305,21 @@ public abstract class DynamicCommandStage extends Stage {
 	
 	@FXML
 	private void handleUndoChanges() {
-		this.globalProBPrefs.rollback();
-		this.preferences.refresh();
+		preferencesHandler.undo();
 	}
 
 	@FXML
 	private void handleRestoreDefaults() {
-		for (ProBPreference pref : this.globalProBPrefs.getPreferences().values()) {
-			this.globalProBPrefs.setPreferenceValue(pref.name, pref.defaultValue);
-		}
-		this.preferences.refresh();
+		preferencesHandler.restoreDefaults();
 	}
 	
 	@FXML
 	private void handleApply() {
-		final Map<String, String> changed = new HashMap<>(this.globalProBPrefs.getChangedPreferences());
-		
-		try {
-			this.globalProBPrefs.apply();
-		} catch (final ProBError e) {
-			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
-			stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content").show();
-		}
-		
-		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();
-		for (final Map.Entry<String, String> entry : changed.entrySet()) {
-			if (defaults.get(entry.getKey()).defaultValue.equals(entry.getValue())) {
-				this.globalPreferences.remove(entry.getKey());
-			} else {
-				this.globalPreferences.put(entry.getKey(), entry.getValue());
-			}
-		}
-
-		if (this.currentProject.getCurrentMachine() != null) {
-			this.currentProject.reloadCurrentMachine();
-		}
+		preferencesHandler.apply();
+	}
+	
+	@FXML
+	private void handleClose() {
+		this.close();
 	}
 }

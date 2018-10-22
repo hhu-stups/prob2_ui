@@ -2,7 +2,6 @@ package de.prob2.ui.preferences;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -10,7 +9,6 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 
 import de.prob2.ui.internal.StageManager;
@@ -62,10 +60,10 @@ public final class PreferencesStage extends Stage {
 	private final GlobalPreferences globalPreferences;
 	private final ProBPreferences globalProBPrefs;
 	private final RecentProjects recentProjects;
-	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 	private final UIState uiState;
+	private final PreferencesHandler preferencesHandler;
 	private final TabPersistenceHandler tabPersistenceHandler;
 
 	@Inject
@@ -77,25 +75,25 @@ public final class PreferencesStage extends Stage {
 		final StageManager stageManager,
 		final ResourceBundle bundle,
 		final CurrentProject currentProject,
-		final UIState uiState
+		final UIState uiState,
+		final PreferencesHandler preferencesHandler
 	) {
 		this.globalPreferences = globalPreferences;
 		this.globalProBPrefs = globalProBPrefs;
 		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace());
 		this.recentProjects = recentProjects;
-		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.uiState = uiState;
 
 		stageManager.loadFXML(this, "preferences_stage.fxml");
+		this.preferencesHandler = preferencesHandler;
 		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 	}
 
 	@FXML
 	public void initialize() {
-		// General
-		
+		// General	
 		final SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 50);
 		
 		// bindBidirectional doesn't work properly here, don't ask why
@@ -168,46 +166,21 @@ public final class PreferencesStage extends Stage {
 
 	@FXML
 	private void handleUndoChanges() {
-		this.globalProBPrefs.rollback();
-		this.globalPrefsView.refresh();
+		preferencesHandler.undo();
 	}
 
 	@FXML
 	private void handleRestoreDefaults() {
-		for (ProBPreference pref : this.globalProBPrefs.getPreferences().values()) {
-			this.globalProBPrefs.setPreferenceValue(pref.name, pref.defaultValue);
-		}
-		this.globalPrefsView.refresh();
+		preferencesHandler.restoreDefaults();
 	}
 	
 	@FXML
 	private void handleApply() {
-		final Map<String, String> changed = new HashMap<>(this.globalProBPrefs.getChangedPreferences());
-		
-		try {
-			this.globalProBPrefs.apply();
-		} catch (final ProBError e) {
-			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
-			stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content").show();
-		}
-		
-		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();
-		for (final Map.Entry<String, String> entry : changed.entrySet()) {
-			if (defaults.get(entry.getKey()).defaultValue.equals(entry.getValue())) {
-				this.globalPreferences.remove(entry.getKey());
-			} else {
-				this.globalPreferences.put(entry.getKey(), entry.getValue());
-			}
-		}
-
-		if (this.currentProject.getCurrentMachine() != null) {
-			this.currentProject.reloadCurrentMachine();
-		}
+		preferencesHandler.apply();
 	}
 
 	@FXML
 	private void handleClose() {
-		this.globalProBPrefs.rollback();
 		this.hide();
 	}
 

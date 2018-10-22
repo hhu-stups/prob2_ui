@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetAllDotCommands;
 import de.prob.animator.command.GetSvgForVisualizationCommand;
@@ -29,6 +30,7 @@ import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
+import de.prob2.ui.preferences.PreferencesHandler;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -46,7 +48,7 @@ import javafx.scene.web.WebView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+@Singleton
 public class DotView extends DynamicCommandStage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
@@ -74,10 +76,11 @@ public class DotView extends DynamicCommandStage {
 
 	@Inject
 	public DotView(final StageManager stageManager, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final GlobalPreferences globalPreferences, 
-			final ProBPreferences globalProBPrefs, final MachineLoader machineLoader, 
+			final CurrentProject currentProject, final ProBPreferences globalProBPrefs, 
+			final GlobalPreferences globalPreferences,
+			final MachineLoader machineLoader, final PreferencesHandler preferencesHandler,
 			final ResourceBundle bundle, final Injector injector) {
-		super(stageManager, currentTrace, currentProject, globalPreferences, globalProBPrefs, machineLoader, bundle, injector);
+		super(stageManager, currentTrace, currentProject, globalProBPrefs, globalPreferences, machineLoader, preferencesHandler, bundle, injector);
 		stageManager.loadFXML(this, "dot_view.fxml");
 	}
 
