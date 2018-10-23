@@ -5,11 +5,11 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.chart.HistoryChartStage;
-import de.prob2.ui.dotty.DotView;
+import de.prob2.ui.dynamic.dotty.DotView;
+import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.formula.FormulaStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.table.ExpressionTableView;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutView;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;

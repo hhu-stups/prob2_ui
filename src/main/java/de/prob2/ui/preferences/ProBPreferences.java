@@ -1,6 +1,8 @@
 package de.prob2.ui.preferences;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import de.prob.animator.command.ComposedCommand;
 import de.prob.animator.command.GetCurrentPreferencesCommand;
 import de.prob.animator.command.GetDefaultPreferencesCommand;
@@ -14,6 +16,7 @@ import javafx.collections.ObservableMap;
 
 import java.util.*;
 
+@Singleton
 public final class ProBPreferences {
 	
 	private final ObjectProperty<StateSpace> stateSpace;

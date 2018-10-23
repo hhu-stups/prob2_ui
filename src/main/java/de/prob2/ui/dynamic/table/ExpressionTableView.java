@@ -1,4 +1,4 @@
-package de.prob2.ui.table;
+package de.prob2.ui.dynamic.table;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetAllTableCommands;
 import de.prob.animator.command.GetTableForVisualizationCommand;
@@ -23,12 +24,16 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob2.ui.dynamic.DynamicCommandStage;
+import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.DynamicCommandStage;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.GlobalPreferences;
+import de.prob2.ui.preferences.PreferencesHandler;
+import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import de.prob2.ui.project.MachineLoader;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -45,7 +50,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+@Singleton
 public class ExpressionTableView extends DynamicCommandStage {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
@@ -62,9 +67,12 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	
 	@Inject
-	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
+	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, 
+			final CurrentProject currentProject, final ProBPreferences globalProBPrefs,
+			final GlobalPreferences globalPreferences,
+			final MachineLoader machineLoader, final PreferencesHandler preferencesHandler,
 			final ResourceBundle bundle, final Injector injector) {
-		super(stageManager, currentTrace, currentProject, bundle, injector);
+		super(stageManager, currentTrace, currentProject, globalProBPrefs, globalPreferences, machineLoader, preferencesHandler, bundle, injector);
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
 		stageManager.loadFXML(this, "table_view.fxml");
 	}

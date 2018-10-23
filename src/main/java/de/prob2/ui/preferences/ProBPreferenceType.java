@@ -28,7 +28,7 @@ public class ProBPreferenceType {
 		this.values = values.clone();
 	}
 	
-	static ProBPreferenceType fromProBPreference(ProBPreference pref) {
+	public static ProBPreferenceType fromProBPreference(ProBPreference pref) {
 		if (pref.type instanceof ListPrologTerm) {
 			final ListPrologTerm values = (ListPrologTerm) pref.type;
 			final String[] arr = new String[values.size()];

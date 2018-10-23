@@ -9,7 +9,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class PrefTreeItem {
+public class PrefItem {
 	private final StringProperty name;
 	private final StringProperty changed;
 	private final StringProperty value;
@@ -17,7 +17,7 @@ public class PrefTreeItem {
 	private final StringProperty defaultValue;
 	private final StringProperty description;
 	
-	protected PrefTreeItem(
+	public PrefItem(
 		final String name,
 		final String changed,
 		final String value,
@@ -93,4 +93,13 @@ public class PrefTreeItem {
 			.add("description", this.getDescription())
 			.toString();
 	}
+	
+	public void setValue(String value) {
+		this.value.set(value);
+	}
+	
+	public void setChanged(String changed) {
+		this.changed.set(changed);
+	}
+
 }

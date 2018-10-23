@@ -47,7 +47,8 @@ public class Machine {
 		EVENTB(Api::eventb_load, new String[] {"*.eventb", "*.bum", "*.buc"}),
 		CSP(Api::csp_load, new String[] {"*.csp", "*.cspm"}),
 		TLA(Api::tla_load, new String[] {"*.tla"}),
-		BRULES(Api::brules_load, new String[] {"*.rmch"} ),
+		BRULES(Api::brules_load, new String[] {"*.rmch"}),
+		XTL(Api::xtl_load, new String[] {"*.P", "*.pl"}),
 		;
 		
 		private static final Map<String, Machine.Type> extensionToTypeMap;

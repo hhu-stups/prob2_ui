@@ -30,7 +30,7 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
+import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.formula.FormulaStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
@@ -38,7 +38,6 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.table.ExpressionTableView;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
