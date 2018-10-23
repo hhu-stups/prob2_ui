@@ -177,6 +177,12 @@
 	-fx-border-radius: 5.0;
 	-fx-border-color: -prob-grey;
 }
+
+.combo-box > .list-cell {
+    -fx-background-color: white;
+    -fx-background-radius: 5.0 0 0 5.0;
+}
+
 .combo-box:hover {
 	-fx-background-color: -prob-grey-20;
 	-fx-background-radius: 5.0;
