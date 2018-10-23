@@ -1,5 +1,13 @@
 package de.prob2.ui.internal;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import org.hildan.fxgson.FxGson;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -9,6 +17,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.util.Providers;
+
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.MainController;
@@ -61,16 +70,11 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 import de.prob2.ui.visualisation.fx.VisualisationController;
+import de.prob2.ui.visualisation.magiclayout.MagicLayoutEditEdges;
+import de.prob2.ui.visualisation.magiclayout.MagicLayoutEditNodes;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.BuilderFactory;
-import org.hildan.fxgson.FxGson;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
@@ -165,8 +169,9 @@ public class ProB2Module extends AbstractModule {
 		bind(ProBPluginManager.class);
 		bind(VisualisationController.class);
 		bind(AdvancedMenu.class);
-		
 		bind(TraceChecker.class);
+		bind(MagicLayoutEditNodes.class);
+		bind(MagicLayoutEditEdges.class);
 	}
 
 	@Provides

@@ -6,11 +6,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import de.prob2.ui.menu.*?>
-<?import javafx.scene.shape.*?>
+<?import de.prob2.ui.visualisation.magiclayout.*?>
 <?import javafx.collections.*?>
 <?import java.lang.String?>
-<?import javafx.scene.control.ChoiceBox?>
-<?import javafx.scene.control.ComboBox?>
 
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1"
 	title="%visualisation.magicLayout.view.title">
@@ -29,71 +27,10 @@
 					<SplitPane dividerPositions="0.15">
 						<TabPane side="LEFT" prefWidth="200">
 							<Tab text="Nodes" closable="false">
-								<VBox spacing="10">
-									<ListView prefHeight="200" VBox.vgrow="NEVER">
-										<Label text="nodes1" />
-										<Label text="nodes2" />
-										<Label text="nodes3" />
-										<Label text="nodes4" />
-										<Label text="nodes5" />
-										<Label text="nodes6" />
-										<Label text="nodes7" />
-										<Label text="nodes8" />
-									</ListView>
-									<TextArea promptText="{x| ...}" VBox.vgrow="ALWAYS"
-										styleClass="text-area-with-border">
-										<VBox.margin>
-											<Insets left="5.0" right="5.0" />
-										</VBox.margin>
-									</TextArea>
-									<CheckBox text="Cluster">
-										<VBox.margin>
-											<Insets left="10.0" right="5.0" />
-										</VBox.margin>
-									</CheckBox>
-									<FlowPane VBox.vgrow="NEVER">
-										<ComboBox focusTraversable="false" fx:id="lineTypeComboBox">
-											<items>
-												<FXCollections fx:factory="observableArrayList">
-													<String fx:value=""/>
-													<String fx:value="-fx-stroke-dash-array: 12 4 5 4;"/>
-													<String fx:value="-fx-stroke-dash-array: 2 2 2 2;"/>
-												</FXCollections>
-											</items>
-										</ComboBox>
-										<Button text="shape" />
-										<Button text="color" />
-										<VBox.margin>
-											<Insets left="5.0" right="5.0" />
-										</VBox.margin>
-									</FlowPane>
-									<padding>
-										<Insets bottom="20.0" />
-									</padding>
-								</VBox>
+								<MagicLayoutEditNodes />
 							</Tab>
 							<Tab text="Edges" closable="false">
-								<VBox spacing="10">
-									<ListView prefHeight="200" VBox.vgrow="NEVER">
-										<Label text="edges1" />
-									</ListView>
-									<TextArea promptText="{x,y| ...}" VBox.vgrow="ALWAYS"
-										styleClass="text-area-with-border">
-										<VBox.margin>
-											<Insets left="5.0" right="5.0" />
-										</VBox.margin>
-									</TextArea>
-									<FlowPane VBox.vgrow="NEVER">
-										<Button text="linetype" />
-										<Button text="thickness" />
-										<Button text="color" />
-										<Button text="font" />
-										<Button text="fontsize" />
-									</FlowPane>
-									<padding>
-										<Insets bottom="20.0" />
-									</padding>
-								</VBox>
+								<MagicLayoutEditEdges />
 							</Tab>
 						</TabPane>
 						<Label text="MAGIC LAYOUT GRAPH" prefWidth="600" alignment="CENTER" />
