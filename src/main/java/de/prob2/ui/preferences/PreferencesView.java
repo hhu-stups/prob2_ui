@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ProBPreference;
@@ -42,14 +43,15 @@ public final class PreferencesView extends BorderPane {
 	
 	private final ObjectProperty<ProBPreferences> preferences;
 	private final InvalidationListener refreshIL;
+	private final Injector injector;
 	
 	@Inject
-	private PreferencesView(final StageManager stageManager) {
+	private PreferencesView(final StageManager stageManager, final Injector injector) {
 		super();
 		
 		this.preferences = new SimpleObjectProperty<>(this, "preferences", null);
 		this.refreshIL = o -> this.refresh();
-		
+		this.injector = injector;
 		stageManager.loadFXML(this, "preferences_view.fxml");
 	}
 	
@@ -76,7 +78,7 @@ public final class PreferencesView extends BorderPane {
 		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
 		
 		tvValue.setCellFactory(col -> {
-			TreeTableCell<PrefItem, String> cell = new MultiTreeTableCell(this.preferencesProperty());
+			TreeTableCell<PrefItem, String> cell = new MultiTreeTableCell(this.preferencesProperty(), injector);
 			cell.tableRowProperty().addListener((observable, from, to) ->
 				to.treeItemProperty().addListener((observable1, from1, to1) ->
 					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem)
