@@ -282,6 +282,7 @@ public abstract class DynamicCommandStage extends Stage {
 		} else {
 			lvChoice.getSelectionModel().select(index);
 		}
+		preferences.refresh();
 	}
 	
 	protected void interrupt() {
@@ -318,4 +319,5 @@ public abstract class DynamicCommandStage extends Stage {
 	private void handleClose() {
 		this.close();
 	}
+	
 }

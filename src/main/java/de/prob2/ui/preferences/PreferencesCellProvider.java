@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
+import de.prob2.ui.dynamic.DynamicTableCell;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -41,10 +42,10 @@ public class PreferencesCellProvider<T extends Cell<? extends Object>, R extends
 		if(cell.getItem() == null) {
 			return;
 		}
-		boolean refresh = !cell.getItem().equals(newValue);
 		this.preferences.get().setPreferenceValue(row.getItem().getName(), newValue);
-		if(refresh) {
+		if(cell instanceof DynamicTableCell) {
 			injector.getInstance(PreferencesView.class).refresh();
+		} else if(cell instanceof MultiTreeTableCell) {
 			injector.getInstance(DotView.class).refresh();
 			injector.getInstance(ExpressionTableView.class).refresh();
 		}
