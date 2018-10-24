@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
-import de.prob2.ui.dynamic.DynamicPreferencesTableView;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -39,7 +38,10 @@ public class PreferencesCellProvider<T extends Cell<? extends Object>, R extends
 	}
 	
 	private void setPreferenceValue(final String newValue) {
-		boolean refresh = !row.getItem().getValue().equals(newValue);
+		if(cell.getItem() == null) {
+			return;
+		}
+		boolean refresh = !cell.getItem().equals(newValue);
 		this.preferences.get().setPreferenceValue(row.getItem().getName(), newValue);
 		if(refresh) {
 			injector.getInstance(PreferencesView.class).refresh();

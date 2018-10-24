@@ -23,6 +23,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PrefItem;
 import de.prob2.ui.preferences.PreferencesHandler;
+import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferenceType;
 import de.prob2.ui.preferences.ProBPreferences;
 import javafx.beans.InvalidationListener;
@@ -154,6 +155,7 @@ public abstract class DynamicCommandStage extends Stage {
 			}
 			updatePreferences(lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences());
 			preferences.refresh();
+			injector.getInstance(PreferencesView.class).refresh();
 		});
 		
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
