@@ -6,12 +6,14 @@ import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -21,11 +23,15 @@ import javafx.util.Callback;
 public class MagicLayoutEditPane extends VBox {
 
 	@FXML
-	ListView<String> listView;
+	ListView<MagicComponent> listView;
+	@FXML
+	TextArea expressionTextArea;
 	@FXML
 	FlowPane flowPane;
 	@FXML
 	private ComboBox<String> lineTypeComboBox;
+	@FXML
+	private ColorPicker lineColorPicker;
 	@FXML
 	private ComboBox<Double> lineThicknessComboBox;
 
@@ -39,7 +45,7 @@ public class MagicLayoutEditPane extends VBox {
 		lineTypeComboBox.getSelectionModel().selectFirst();
 		initLineTypeComboBox();
 
-		lineThicknessComboBox.getSelectionModel().selectFirst();
+		lineThicknessComboBox.getSelectionModel().select(1);;
 		initLineThicknessComboBox();
 	}
 
@@ -152,5 +158,26 @@ public class MagicLayoutEditPane extends VBox {
 		vbox.getChildren().addAll(label, control);
 		VBox.setMargin(label, new Insets(0, 2, 0, 2));
 		return vbox;
+	}
+	
+	@FXML
+	private void updateValues() {
+		updateValues(listView.getSelectionModel().getSelectedItem());
+	}
+
+	void updateValues(MagicComponent selectedComponent) {
+		listView.getItems().forEach(i -> i.unbindAll());
+		
+		expressionTextArea.setText(selectedComponent.getExpression());
+		selectedComponent.expressionProperty().bind(expressionTextArea.textProperty());
+		
+		lineTypeComboBox.setValue(selectedComponent.getLineType());
+		selectedComponent.lineTypeProperty().bind(lineTypeComboBox.valueProperty());
+		
+		lineColorPicker.setValue(selectedComponent.getLineColor());
+		selectedComponent.lineColorProperty().bind(lineColorPicker.valueProperty());
+		
+		lineThicknessComboBox.setValue(selectedComponent.getLineThickness());
+		selectedComponent.lineThicknessProperty().bind(lineThicknessComboBox.valueProperty());
 	}
 }

@@ -10,6 +10,10 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 
 public class MagicLayoutEditNodes extends MagicLayoutEditPane {
+	
+	private CheckBox clusterCheckBox;
+	private ComboBox<String> shapeComboBox;
+	private ColorPicker nodeColorPicker;
 
 	@Inject
 	public MagicLayoutEditNodes(StageManager stageManager) {
@@ -23,19 +27,37 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		expressionTextArea.setPromptText("{x|...}");
 
 		// add DummyData
-		listView.getItems().addAll("nodes1", "nodes2", "nodes3", "nodes4", "nodes5", "nodes6", "nodes7", "nodes8");
-
+		listView.getItems().addAll(new MagicNode("nodes1", "{x1|...}"), new MagicNode("nodes2", "{x2|...}"),
+				new MagicNode("nodes3", "{x3|...}"), new MagicNode("nodes4", "{x4|...}"),
+				new MagicNode("nodes5", "{x5|...}"), new MagicNode("nodes6", "{x6|...}"),
+				new MagicNode("nodes7", "{x7|...}"), new MagicNode("nodes8", "{x8|...}"));
+		
 		// add Node specific controls
-		CheckBox clusterCheckBox = new CheckBox("Cluster");
+		clusterCheckBox = new CheckBox("Cluster");
 		setMargin(clusterCheckBox, new Insets(0, 5, 0, 10));
 		this.getChildren().add(2, clusterCheckBox);
-		
-		ComboBox<String> shapeComboBox = new ComboBox<>();
+
+		shapeComboBox = new ComboBox<>();
 		shapeComboBox.getItems().addAll("rectangle", "circle", "triangle");
 		shapeComboBox.getSelectionModel().selectFirst();
-		flowPane.getChildren().addAll(wrapInVBox("Shape:", shapeComboBox), wrapInVBox("Color:", new ColorPicker()));
+		nodeColorPicker = new ColorPicker();
+		flowPane.getChildren().addAll(wrapInVBox("Shape:", shapeComboBox), wrapInVBox("Color:", nodeColorPicker));
 	}
-
 	
+	@Override
+	void updateValues(MagicComponent selectedComponent) {
+		super.updateValues(selectedComponent);
+		
+		MagicNode selectedNode = (MagicNode) selectedComponent;
+		
+		clusterCheckBox.setSelected(selectedNode.isCluster());
+		selectedNode.clusterProperty().bind(clusterCheckBox.selectedProperty());
+		
+		shapeComboBox.setValue(selectedNode.getShape());
+		selectedNode.shapeProperty().bind(shapeComboBox.valueProperty());
+		
+		nodeColorPicker.setValue(selectedNode.getNodeColor());
+		selectedNode.nodeColorProperty().bind(nodeColorPicker.valueProperty());
+	}
 
 }

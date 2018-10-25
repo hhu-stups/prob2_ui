@@ -9,6 +9,9 @@ import javafx.scene.control.Spinner;
 
 public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 
+	private ColorPicker textColorPicker;
+	private Spinner<Integer> textSizeSpinner;
+	
 	@Inject
 	public MagicLayoutEditEdges(StageManager stageManager) {
 		super(stageManager);
@@ -21,13 +24,28 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		expressionTextArea.setPromptText("{x,y|...}");
 
 		// add DummyData
-		listView.getItems().addAll("edges1");
+		listView.getItems().addAll(new MagicEdge("edges1", "{x,y|...}"));
 
 		// add Edge specific controls
-		Spinner<Integer> textSizeSpinner = new Spinner<>(2, 30, 12);
+		textColorPicker = new ColorPicker();
+		textSizeSpinner = new Spinner<>(2, 30, 12);
+		textSizeSpinner.setEditable(true);
 		
-		flowPane.getChildren().addAll(wrapInVBox("Textcolor:", new ColorPicker()),
+		flowPane.getChildren().addAll(wrapInVBox("Textcolor:", textColorPicker),
 				wrapInVBox("Textsize:", textSizeSpinner));
+	}
+	
+	@Override
+	void updateValues(MagicComponent selectedComponent) {
+		super.updateValues(selectedComponent);
+		
+		MagicEdge selectedEdge = (MagicEdge) selectedComponent;
+		
+		textColorPicker.setValue(selectedEdge.getTextColor());
+		selectedEdge.textColorProperty().bind(textColorPicker.valueProperty());
+		
+		textSizeSpinner.getValueFactory().setValue(selectedEdge.getTextSize());
+		selectedEdge.textSizeProperty().bind(textSizeSpinner.valueProperty());
 	}
 
 }
