@@ -88,18 +88,21 @@ eclipse.classpath.file.whenMerged {
 		}
 }
 
+def readCurrentGitCommit() {
+	def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
+	def exitCode = proc.waitFor()
+	if (exitCode != 0) {
+		throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
+	}
+	return proc.in.readLines()[0]
+}
+
 processResources {
 	doFirst {
 		def f = file("src/main/resources/de/prob2/ui/build.properties")
 		f.delete()
 		f.append("version=${project.version}\n")
-		def proc = new ProcessBuilder("git", "rev-parse", "HEAD").directory(buildDir).start()
-		def exitCode = proc.waitFor()
-		if (exitCode != 0) {
-			throw new IllegalStateException("Command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
-		}
-		def hash = proc.in.readLines()[0]
-		f.append("commit=${hash}\n")
+		f.append("commit=${readCurrentGitCommit()}\n")
 	}
 }
 
