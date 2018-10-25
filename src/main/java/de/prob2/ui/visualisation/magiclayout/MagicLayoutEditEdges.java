@@ -17,6 +17,8 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 	@FXML
 	public void initialize() {
 		super.initialize();
+		
+		expressionTextArea.setPromptText("{x,y|...}");
 
 		// add DummyData
 		listView.getItems().addAll("edges1");

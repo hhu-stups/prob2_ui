@@ -20,6 +20,8 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 	public void initialize() {
 		super.initialize();
 		
+		expressionTextArea.setPromptText("{x|...}");
+
 		// add DummyData
 		listView.getItems().addAll("nodes1", "nodes2", "nodes3", "nodes4", "nodes5", "nodes6", "nodes7", "nodes8");
 

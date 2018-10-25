@@ -10,7 +10,7 @@
 <fx:root type="VBox" spacing="10"
 	xmlns:fx="http://javafx.com/fxml/1">
 	<ListView fx:id="listView" prefHeight="200" VBox.vgrow="NEVER" />
-	<TextArea promptText="{x| ...}" VBox.vgrow="ALWAYS"
+	<TextArea VBox.vgrow="ALWAYS"
 		styleClass="text-area-with-border">
 		<VBox.margin>
 			<Insets left="5.0" right="5.0" />
