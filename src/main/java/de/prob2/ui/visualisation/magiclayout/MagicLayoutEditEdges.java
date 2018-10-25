@@ -4,7 +4,8 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Spinner;
 
 public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 
@@ -16,11 +17,15 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 	@FXML
 	public void initialize() {
 		super.initialize();
-		
+
 		// add DummyData
 		listView.getItems().addAll("edges1");
+
+		// add Edge specific controls
+		Spinner<Integer> textSizeSpinner = new Spinner<>(2, 30, 12);
 		
-		flowPane.getChildren().addAll(new Button("font"), new Button("fontsize"));
+		flowPane.getChildren().addAll(wrapInVBox("Textcolor:", new ColorPicker()),
+				wrapInVBox("Textsize:", textSizeSpinner));
 	}
 
 }
