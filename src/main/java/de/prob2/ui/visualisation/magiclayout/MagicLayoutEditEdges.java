@@ -1,5 +1,7 @@
 package de.prob2.ui.visualisation.magiclayout;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
@@ -13,8 +15,8 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 	private Spinner<Integer> textSizeSpinner;
 	
 	@Inject
-	public MagicLayoutEditEdges(StageManager stageManager) {
-		super(stageManager);
+	public MagicLayoutEditEdges(final StageManager stageManager, final ResourceBundle bundle) {
+		super(stageManager, bundle);
 	}
 
 	@FXML
@@ -31,8 +33,8 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		textSizeSpinner = new Spinner<>(2, 30, 12);
 		textSizeSpinner.setEditable(true);
 		
-		flowPane.getChildren().addAll(wrapInVBox("Textcolor:", textColorPicker),
-				wrapInVBox("Textsize:", textSizeSpinner));
+		flowPane.getChildren().addAll(wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker),
+				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textsize"), textSizeSpinner));
 	}
 	
 	@Override

@@ -1,5 +1,7 @@
 package de.prob2.ui.visualisation.magiclayout;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
@@ -34,9 +36,12 @@ public class MagicLayoutEditPane extends VBox {
 	private ColorPicker lineColorPicker;
 	@FXML
 	private ComboBox<Double> lineWidthComboBox;
+	
+	final ResourceBundle bundle;
 
 	@Inject
-	public MagicLayoutEditPane(final StageManager stageManager) {
+	public MagicLayoutEditPane(final StageManager stageManager, ResourceBundle bundle) {
+		this.bundle = bundle;
 		stageManager.loadFXML(this, "magic_layout_edit_pane.fxml");
 	}
 
@@ -45,7 +50,7 @@ public class MagicLayoutEditPane extends VBox {
 		lineTypeComboBox.getSelectionModel().selectFirst();
 		initLineTypeComboBox();
 
-		lineWidthComboBox.getSelectionModel().select(1);;
+		lineWidthComboBox.getSelectionModel().select(1.0);;
 		initLineWidthComboBox();
 	}
 

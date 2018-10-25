@@ -18,7 +18,7 @@
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
 						<Menu text="%menu.file">
-							<MenuItem text="Save Layout..." />
+							<MenuItem text="%visualisation.magicLayout.view.menu.file.items.saveLayout" />
 						</Menu>
 						<ViewMenu fx:id="viewMenu" />
 					</MenuBar>
@@ -26,10 +26,10 @@
 				<center>
 					<SplitPane dividerPositions="0.15">
 						<TabPane side="LEFT" prefWidth="200">
-							<Tab text="Nodes" closable="false">
+							<Tab text="%visualisation.magicLayout.view.tabs.nodes" closable="false">
 								<MagicLayoutEditNodes />
 							</Tab>
-							<Tab text="Edges" closable="false">
+							<Tab text="%visualisation.magicLayout.view.tabs.edges" closable="false">
 								<MagicLayoutEditEdges />
 							</Tab>
 						</TabPane>

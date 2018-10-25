@@ -20,7 +20,7 @@
 	<FlowPane fx:id="flowPane" VBox.vgrow="NEVER" hgap="5"
 		vgap="5">
 		<VBox spacing="2">
-			<Label text="Linetype:">
+			<Label text="%visualisation.magicLayout.editPane.labels.linetype">
 				<VBox.margin>
 					<Insets left="2.0" right="2.0" />
 				</VBox.margin>
@@ -37,7 +37,7 @@
 			</ComboBox>
 		</VBox>
 		<VBox spacing="2">
-			<Label text="Linecolor:">
+			<Label text="%visualisation.magicLayout.editPane.labels.linecolor">
 				<VBox.margin>
 					<Insets left="2.0" right="2.0" />
 				</VBox.margin>
@@ -45,7 +45,7 @@
 			<ColorPicker fx:id="lineColorPicker" prefWidth="110" />
 		</VBox>
 		<VBox spacing="2">
-			<Label text="Linewidth:">
+			<Label text="%visualisation.magicLayout.editPane.labels.linewidth">
 				<VBox.margin>
 					<Insets left="2.0" right="2.0" />
 				</VBox.margin>
