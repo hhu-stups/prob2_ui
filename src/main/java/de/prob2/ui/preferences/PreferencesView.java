@@ -10,7 +10,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ProBPreference;
-
 import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.InvalidationListener;
