@@ -172,14 +172,14 @@
  * ComboBox																		  *
  ************************************************************************************/
 .combo-box {
-	-fx-background-color: transparent;
-	-fx-text-fill: -prob-grey;
+	-fx-background-color: transparent;	
 	-fx-border-radius: 5.0;
 	-fx-border-color: -prob-grey;
 }
 
 .combo-box > .list-cell {
     -fx-background-color: white;
+    -fx-text-fill: -prob-grey;
     -fx-background-radius: 5.0 0 0 5.0;
 }
 
