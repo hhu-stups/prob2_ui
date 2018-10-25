@@ -121,9 +121,6 @@ public final class PreferencesStage extends Stage {
 		localeOverrideBox.getItems().setAll(SUPPORTED_LOCALES);
 
 		// Global Preferences
-
-		this.globalPrefsView.setPreferences(this.globalProBPrefs);
-
 		this.globalPreferences.addListener((InvalidationListener) observable -> {
 			for (final Map.Entry<String, String> entry : this.globalPreferences.entrySet()) {
 				this.globalProBPrefs.setPreferenceValue(entry.getKey(), entry.getValue());
@@ -142,6 +139,8 @@ public final class PreferencesStage extends Stage {
 			}
 		});
 
+		this.globalPrefsView.setPreferences(this.globalProBPrefs);
+		
 		this.undoButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
 		this.applyWarning.visibleProperty().bind(this.globalProBPrefs.changesAppliedProperty().not());
 		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());

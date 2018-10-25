@@ -1,10 +1,10 @@
 package de.prob2.ui.dynamic;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PrefItem;
-import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.project.MachineLoader;
 import javafx.beans.property.ObjectProperty;
@@ -33,14 +33,14 @@ public class DynamicPreferencesTableView extends TableView<PrefItem> {
 	
 	private final ObjectProperty<ProBPreferences> proBPreferences;
 	
-	private final PreferencesView prefView;
+	private final Injector injector;
 	
 	@Inject
 	public DynamicPreferencesTableView(final StageManager stageManager, final ProBPreferences probPreferences,
-									   final PreferencesView prefView, final MachineLoader machineLoader) {
+									   final MachineLoader machineLoader, final Injector injector) {
 		super();
 		this.proBPreferences = new SimpleObjectProperty<>(this, "preferences", probPreferences);
-		this.prefView = prefView;
+		this.injector = injector;
 		stageManager.loadFXML(this, "dynamic_preferences_table_view.fxml");
 	}
 	
@@ -49,14 +49,10 @@ public class DynamicPreferencesTableView extends TableView<PrefItem> {
 	private void initialize() {
 		tvName.setCellValueFactory(new PropertyValueFactory<>("name"));
 		tvChanged.setCellValueFactory(new PropertyValueFactory<>("changed"));
-		tvValue.setCellFactory(col -> new DynamicTableCell(proBPreferences));
+		tvValue.setCellFactory(col -> new DynamicTableCell(proBPreferences, injector));
 		tvValue.setCellValueFactory(new PropertyValueFactory<>("value"));
 		tvDefaultValue.setCellValueFactory(new PropertyValueFactory<>("defaultValue"));
 		tvDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
-		tvValue.setOnEditCommit(event -> {
-			proBPreferences.get().setPreferenceValue(event.getRowValue().getValue(), event.getNewValue());
-			this.prefView.refresh();
-		});
 	}
 	
 	@Override
@@ -64,6 +60,7 @@ public class DynamicPreferencesTableView extends TableView<PrefItem> {
 		for (PrefItem item : this.getItems()) {
 			String value = proBPreferences.get().getPreferenceValue(item.getName());
 			item.setValue(value);
+			item.setChanged(value.equals(item.getDefaultValue()) ? "" : "*");
 		}
 	}
 

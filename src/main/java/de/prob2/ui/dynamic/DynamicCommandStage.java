@@ -23,9 +23,9 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PrefItem;
 import de.prob2.ui.preferences.PreferencesHandler;
+import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferenceType;
 import de.prob2.ui.preferences.ProBPreferences;
-import de.prob2.ui.preferences.PreferencesView;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -150,11 +150,12 @@ public abstract class DynamicCommandStage extends Stage {
 		fillCommands();
 		currentTrace.addListener((observable, from, to) -> {
 			preferences.getItems().clear();
-			injector.getInstance(PreferencesView.class).refresh();
 			if(to == null || lvChoice.getSelectionModel().getSelectedItem() == null) {
 				return;
 			}
 			updatePreferences(lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences());
+			preferences.refresh();
+			injector.getInstance(PreferencesView.class).refresh();
 		});
 		
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
@@ -246,11 +247,7 @@ public abstract class DynamicCommandStage extends Stage {
 				.filter(preference -> relevantPreferences.contains(preference.name))
 				.map(preference -> new PrefItem(preference.name, "", preference.defaultValue, ProBPreferenceType.fromProBPreference(preference), preference.defaultValue, preference.description))
 				.collect(Collectors.toList()));
-		preferences.getItems().forEach(preference -> {
-			String value = cmd.getPreferences().get(preference.getName());
-			preference.setValue(value);
-			preference.setChanged(value.equals(preference.getDefaultValue()) ? "" : "*");
-		});
+		preferences.refresh();
 		if(preferences.getItems().isEmpty()) {
 			preferences.setVisible(false);
 		} else {
@@ -322,4 +319,5 @@ public abstract class DynamicCommandStage extends Stage {
 	private void handleClose() {
 		this.close();
 	}
+	
 }
