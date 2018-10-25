@@ -45,12 +45,12 @@
 			<ColorPicker fx:id="lineColorPicker" prefWidth="110" />
 		</VBox>
 		<VBox spacing="2">
-			<Label text="Linethickness:">
+			<Label text="Linewidth:">
 				<VBox.margin>
 					<Insets left="2.0" right="2.0" />
 				</VBox.margin>
 			</Label>
-			<ComboBox fx:id="lineThicknessComboBox"
+			<ComboBox fx:id="lineWidthComboBox"
 				focusTraversable="false" prefWidth="110">
 				<items>
 					<FXCollections fx:factory="observableArrayList">

@@ -15,7 +15,7 @@ public class MagicComponent {
 	
 	private StringProperty lineType = new SimpleStringProperty();
 	private ObjectProperty<Color> lineColor = new SimpleObjectProperty<>();
-	private DoubleProperty lineThickness = new SimpleDoubleProperty();
+	private DoubleProperty lineWidth = new SimpleDoubleProperty();
 	
 	public MagicComponent(String name, String expression) {
 		this.name = name;
@@ -23,7 +23,7 @@ public class MagicComponent {
 		
 		this.lineType.set("");
 		this.lineColor.set(Color.BLACK);
-		this.lineThickness.set(1);
+		this.lineWidth.set(1);
 	}
 	
 	public StringProperty expressionProperty() {
@@ -50,12 +50,12 @@ public class MagicComponent {
 		return lineColor.get();
 	}
 	
-	public DoubleProperty lineThicknessProperty() {
-		return lineThickness;
+	public DoubleProperty lineWidthProperty() {
+		return lineWidth;
 	}
 	
-	public double getLineThickness() {
-		return lineThickness.get();
+	public double getLineWidth() {
+		return lineWidth.get();
 	}
 
 	@Override
@@ -67,6 +67,6 @@ public class MagicComponent {
 		expression.unbind();
 		lineType.unbind();
 		lineColor.unbind();
-		lineThickness.unbind();
+		lineWidth.unbind();
 	}
 }

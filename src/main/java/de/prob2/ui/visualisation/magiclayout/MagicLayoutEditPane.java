@@ -33,7 +33,7 @@ public class MagicLayoutEditPane extends VBox {
 	@FXML
 	private ColorPicker lineColorPicker;
 	@FXML
-	private ComboBox<Double> lineThicknessComboBox;
+	private ComboBox<Double> lineWidthComboBox;
 
 	@Inject
 	public MagicLayoutEditPane(final StageManager stageManager) {
@@ -45,8 +45,8 @@ public class MagicLayoutEditPane extends VBox {
 		lineTypeComboBox.getSelectionModel().selectFirst();
 		initLineTypeComboBox();
 
-		lineThicknessComboBox.getSelectionModel().select(1);;
-		initLineThicknessComboBox();
+		lineWidthComboBox.getSelectionModel().select(1);;
+		initLineWidthComboBox();
 	}
 
 	private void initLineTypeComboBox() {
@@ -100,9 +100,9 @@ public class MagicLayoutEditPane extends VBox {
 		});
 	}
 	
-	private void initLineThicknessComboBox() {
+	private void initLineWidthComboBox() {
 		// show different line thicknesses in ComboBox (not just double values)
-		lineThicknessComboBox.setCellFactory(new Callback<ListView<Double>, ListCell<Double>>() {
+		lineWidthComboBox.setCellFactory(new Callback<ListView<Double>, ListCell<Double>>() {
 			@Override
 			public ListCell<Double> call(ListView<Double> l) {
 				return new ListCell<Double>() {
@@ -128,7 +128,7 @@ public class MagicLayoutEditPane extends VBox {
 				};
 			}
 		});
-		lineThicknessComboBox.setButtonCell(new ListCell<Double>() {
+		lineWidthComboBox.setButtonCell(new ListCell<Double>() {
 			{
 				setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 			}
@@ -177,7 +177,7 @@ public class MagicLayoutEditPane extends VBox {
 		lineColorPicker.setValue(selectedComponent.getLineColor());
 		selectedComponent.lineColorProperty().bind(lineColorPicker.valueProperty());
 		
-		lineThicknessComboBox.setValue(selectedComponent.getLineThickness());
-		selectedComponent.lineThicknessProperty().bind(lineThicknessComboBox.valueProperty());
+		lineWidthComboBox.setValue(selectedComponent.getLineWidth());
+		selectedComponent.lineWidthProperty().bind(lineWidthComboBox.valueProperty());
 	}
 }
