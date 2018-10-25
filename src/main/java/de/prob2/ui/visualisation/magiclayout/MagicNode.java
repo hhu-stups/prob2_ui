@@ -10,9 +10,9 @@ import javafx.scene.paint.Color;
 
 public class MagicNode extends MagicComponent {
 	
-	private BooleanProperty cluster = new SimpleBooleanProperty();
-	private StringProperty shape = new SimpleStringProperty();
-	private ObjectProperty<Color> nodeColor = new SimpleObjectProperty<>();
+	private final BooleanProperty cluster = new SimpleBooleanProperty();
+	private final StringProperty shape = new SimpleStringProperty();
+	private final ObjectProperty<Color> nodeColor = new SimpleObjectProperty<>();
 	
 	public MagicNode(String name, String expression) {
 		super(name, expression);

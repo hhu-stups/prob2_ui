@@ -8,8 +8,8 @@ import javafx.scene.paint.Color;
 
 public class MagicEdge extends MagicComponent {
 	
-	private ObjectProperty<Color> textColor = new SimpleObjectProperty<>();
-	private IntegerProperty textSize = new SimpleIntegerProperty();
+	private final ObjectProperty<Color> textColor = new SimpleObjectProperty<>();
+	private final IntegerProperty textSize = new SimpleIntegerProperty();
 	
 	public MagicEdge(String name, String expression) {
 		super(name, expression);

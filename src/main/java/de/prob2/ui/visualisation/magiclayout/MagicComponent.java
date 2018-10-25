@@ -11,11 +11,11 @@ import javafx.scene.paint.Color;
 public class MagicComponent {
 	
 	private String name;
-	private StringProperty expression = new SimpleStringProperty();
+	private final StringProperty expression = new SimpleStringProperty();
 	
-	private StringProperty lineType = new SimpleStringProperty();
-	private ObjectProperty<Color> lineColor = new SimpleObjectProperty<>();
-	private DoubleProperty lineWidth = new SimpleDoubleProperty();
+	private final StringProperty lineType = new SimpleStringProperty();
+	private final ObjectProperty<Color> lineColor = new SimpleObjectProperty<>();
+	private final DoubleProperty lineWidth = new SimpleDoubleProperty();
 	
 	public MagicComponent(String name, String expression) {
 		this.name = name;

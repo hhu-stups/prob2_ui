@@ -40,7 +40,7 @@ public class MagicLayoutEditPane extends VBox {
 	final ResourceBundle bundle;
 
 	@Inject
-	public MagicLayoutEditPane(final StageManager stageManager, ResourceBundle bundle) {
+	public MagicLayoutEditPane(final StageManager stageManager, final ResourceBundle bundle) {
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "magic_layout_edit_pane.fxml");
 	}
