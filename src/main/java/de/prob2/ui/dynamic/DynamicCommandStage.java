@@ -1,7 +1,6 @@
 package de.prob2.ui.dynamic;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -20,16 +19,15 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.AbstractPreferencesStage;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PrefItem;
 import de.prob2.ui.preferences.PreferencesHandler;
+import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferenceType;
 import de.prob2.ui.preferences.ProBPreferences;
-import de.prob2.ui.preferences.PreferencesView;
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -40,12 +38,11 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DynamicCommandStage extends Stage {
+public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 	private static final class DynamicCommandItemCell extends ListCell<DynamicCommandItem> {
 		private DynamicCommandItemCell() {
 			super();
@@ -122,24 +119,15 @@ public abstract class DynamicCommandStage extends Stage {
 	
 	protected final Injector injector;
 	
-	private final GlobalPreferences globalPreferences;
-	
-	private final ProBPreferences globalProBPrefs;
-	
-	private final PreferencesHandler preferencesHandler;
-	
 	protected DynamicCommandStage(final StageManager stageManager, final CurrentTrace currentTrace, 
 			final CurrentProject currentProject, final ProBPreferences globalProBPrefs, final GlobalPreferences globalPreferences,
 			final MachineLoader machineLoader, final PreferencesHandler preferencesHandler,
 			final ResourceBundle bundle, final Injector injector) {
+		super(globalProBPrefs, globalPreferences, preferencesHandler, machineLoader);
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
-		this.globalPreferences = globalPreferences;
-		this.globalProBPrefs = globalProBPrefs;
-		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace());
+		this.currentProject = currentProject;		
 		this.injector = injector;
 		this.bundle = bundle;
-		this.preferencesHandler = preferencesHandler;
 		this.stageManager = stageManager;
 		this.currentThread = new SimpleObjectProperty<>(this, "currentThread", null);
 	}
@@ -147,14 +135,16 @@ public abstract class DynamicCommandStage extends Stage {
 	
 	@FXML
 	protected void initialize() {
+		super.initialize();
 		fillCommands();
 		currentTrace.addListener((observable, from, to) -> {
 			preferences.getItems().clear();
-			injector.getInstance(PreferencesView.class).refresh();
 			if(to == null || lvChoice.getSelectionModel().getSelectedItem() == null) {
 				return;
 			}
 			updatePreferences(lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences());
+			preferences.refresh();
+			injector.getInstance(PreferencesView.class).refresh();
 		});
 		
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
@@ -208,33 +198,6 @@ public abstract class DynamicCommandStage extends Stage {
 		});
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell());
 		cancelButton.disableProperty().bind(currentThread.isNull());
-		
-		this.globalPreferences.addListener((InvalidationListener) observable -> {
-			for (final Map.Entry<String, String> entry : this.globalPreferences.entrySet()) {
-				this.globalProBPrefs.setPreferenceValue(entry.getKey(), entry.getValue());
-			}
-
-			try {
-				this.globalProBPrefs.apply();
-			} catch (final ProBError e) {
-				LOGGER.warn("Ignoring global preference changes because of exception", e);
-			}
-		});
-		this.globalPreferences.addListener((MapChangeListener<String, String>) change -> {
-			if (change.wasRemoved() && !change.wasAdded()) {
-				this.globalProBPrefs.setPreferenceValue(change.getKey(), this.globalProBPrefs.getPreferences().get(change.getKey()).defaultValue);
-				this.globalProBPrefs.apply();
-			}
-		});
-		
-		this.undoButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
-		this.applyWarning.visibleProperty().bind(this.globalProBPrefs.changesAppliedProperty().not());
-		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
-		
-		// prevent text on buttons from being abbreviated
-		undoButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
-		applyButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
-		resetButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
 	}
 	
 	private void updatePreferences(List<String> relevantPreferences) {
@@ -246,11 +209,7 @@ public abstract class DynamicCommandStage extends Stage {
 				.filter(preference -> relevantPreferences.contains(preference.name))
 				.map(preference -> new PrefItem(preference.name, "", preference.defaultValue, ProBPreferenceType.fromProBPreference(preference), preference.defaultValue, preference.description))
 				.collect(Collectors.toList()));
-		preferences.getItems().forEach(preference -> {
-			String value = cmd.getPreferences().get(preference.getName());
-			preference.setValue(value);
-			preference.setChanged(value.equals(preference.getDefaultValue()) ? "" : "*");
-		});
+		preferences.refresh();
 		if(preferences.getItems().isEmpty()) {
 			preferences.setVisible(false);
 		} else {
@@ -302,24 +261,9 @@ public abstract class DynamicCommandStage extends Stage {
 	
 	protected abstract void fillCommands();
 	
-	
-	@FXML
-	private void handleUndoChanges() {
-		preferencesHandler.undo();
-	}
-
-	@FXML
-	private void handleRestoreDefaults() {
-		preferencesHandler.restoreDefaults();
-	}
-	
-	@FXML
-	private void handleApply() {
-		preferencesHandler.apply();
-	}
-	
 	@FXML
 	private void handleClose() {
 		this.close();
 	}
+	
 }

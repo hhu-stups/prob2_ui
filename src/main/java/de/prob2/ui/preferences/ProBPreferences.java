@@ -37,7 +37,7 @@ public final class ProBPreferences {
 		this.changesApplied.bind(Bindings.createBooleanBinding(this.changedPreferences::isEmpty, this.changedPreferences));
 		
 		this.stateSpace.addListener((observable, from, to) -> {
-			if (this.getStateSpace() == null) {
+			if (to == null) {
 				this.changedPreferences.clear();
 				this.cachedPreferences.clear();
 				this.cachedPreferenceValues.clear();
