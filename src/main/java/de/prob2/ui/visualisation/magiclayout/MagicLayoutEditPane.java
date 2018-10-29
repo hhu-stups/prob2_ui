@@ -159,7 +159,7 @@ public class MagicLayoutEditPane extends VBox {
 	VBox wrapInVBox(String caption, Control control) {
 		VBox vbox = new VBox();
 		Label label = new Label(caption);
-		control.setPrefWidth(110);
+		control.setPrefWidth(115);
 		vbox.getChildren().addAll(label, control);
 		VBox.setMargin(label, new Insets(0, 2, 0, 2));
 		return vbox;

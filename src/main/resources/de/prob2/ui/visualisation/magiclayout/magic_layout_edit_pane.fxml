@@ -26,7 +26,7 @@
 				</VBox.margin>
 			</Label>
 			<ComboBox fx:id="lineTypeComboBox" focusTraversable="false"
-				prefWidth="110">
+				prefWidth="115">
 				<items>
 					<FXCollections fx:factory="observableArrayList">
 						<String fx:value="" />
@@ -42,7 +42,7 @@
 					<Insets left="2.0" right="2.0" />
 				</VBox.margin>
 			</Label>
-			<ColorPicker fx:id="lineColorPicker" prefWidth="110" />
+			<ColorPicker fx:id="lineColorPicker" prefWidth="115" />
 		</VBox>
 		<VBox spacing="2">
 			<Label text="%visualisation.magicLayout.editPane.labels.linewidth">
@@ -51,7 +51,7 @@
 				</VBox.margin>
 			</Label>
 			<ComboBox fx:id="lineWidthComboBox"
-				focusTraversable="false" prefWidth="110">
+				focusTraversable="false" prefWidth="115">
 				<items>
 					<FXCollections fx:factory="observableArrayList">
 						<Double fx:value="0.5" />
