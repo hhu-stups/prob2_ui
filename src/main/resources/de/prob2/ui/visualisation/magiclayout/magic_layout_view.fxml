@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import de.prob2.ui.menu.*?>
-<?import de.prob2.ui.visualisation.magiclayout.*?>
+<?import de.prob2.ui.visualisation.magiclayout.editPane.*?>
 <?import javafx.collections.*?>
 <?import java.lang.String?>
 
@@ -18,12 +18,19 @@
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
 						<Menu text="%menu.file">
-							<Menu text="%visualisation.magicLayout.view.menu.file.items.new" accelerator="Alt+Shortcut+N" >
-								<MenuItem text="%visualisation.magicLayout.view.menu.file.items.new.node" onAction="#newNode" />
-								<MenuItem text="%visualisation.magicLayout.view.menu.file.items.new.edge" onAction="#newEdge"/>
+							<Menu
+								text="%visualisation.magicLayout.view.menu.file.items.new"
+								accelerator="Alt+Shortcut+N">
+								<MenuItem
+									text="%visualisation.magicLayout.view.menu.file.items.new.node"
+									onAction="#newNode" />
+								<MenuItem
+									text="%visualisation.magicLayout.view.menu.file.items.new.edge"
+									onAction="#newEdge" />
 							</Menu>
 							<SeparatorMenuItem />
-							<MenuItem text="%visualisation.magicLayout.view.menu.file.items.saveLayout" />
+							<MenuItem
+								text="%visualisation.magicLayout.view.menu.file.items.saveLayout" />
 						</Menu>
 						<ViewMenu fx:id="viewMenu" />
 					</MenuBar>
@@ -31,14 +38,19 @@
 				<center>
 					<SplitPane dividerPositions="0.15">
 						<TabPane side="LEFT" prefWidth="200">
-							<Tab text="%visualisation.magicLayout.view.tabs.nodes" closable="false">
-								<MagicLayoutEditNodes fx:id="magicLayoutEditNodes" />
+							<Tab text="%visualisation.magicLayout.view.tabs.nodes"
+								closable="false">
+								<MagicLayoutEditNodes
+									fx:id="magicLayoutEditNodes" />
 							</Tab>
-							<Tab text="%visualisation.magicLayout.view.tabs.edges" closable="false">
-								<MagicLayoutEditEdges fx:id="magicLayoutEditEdges"/>
+							<Tab text="%visualisation.magicLayout.view.tabs.edges"
+								closable="false">
+								<MagicLayoutEditEdges
+									fx:id="magicLayoutEditEdges" />
 							</Tab>
 						</TabPane>
-						<Label text="MAGIC LAYOUT GRAPH" prefWidth="600" alignment="CENTER" />
+						<Label text="MAGIC LAYOUT GRAPH" prefWidth="600"
+							alignment="CENTER" />
 					</SplitPane>
 				</center>
 			</BorderPane>
