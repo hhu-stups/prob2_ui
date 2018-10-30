@@ -1,10 +1,12 @@
-package de.prob2.ui.visualisation.magiclayout;
+package de.prob2.ui.visualisation.magiclayout.editPane;
 
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.visualisation.magiclayout.MagicComponent;
+import de.prob2.ui.visualisation.magiclayout.MagicEdge;
 import javafx.fxml.FXML;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Spinner;
