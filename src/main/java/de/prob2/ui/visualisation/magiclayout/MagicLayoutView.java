@@ -13,6 +13,10 @@ public class MagicLayoutView extends Stage {
 
 	@FXML
 	private MenuBar menuBar;
+	@FXML
+	private MagicLayoutEditNodes magicLayoutEditNodes;
+	@FXML
+	private MagicLayoutEditEdges magicLayoutEditEdges;
 
 	private final StageManager stageManager;
 
@@ -25,5 +29,15 @@ public class MagicLayoutView extends Stage {
 	@FXML
 	public void initialize() {
 		stageManager.setMacMenuBar(this, menuBar);
+	}
+	
+	@FXML
+	private void newNode() {
+		//TODO
+	}
+	
+	@FXML
+	private void newEdge() {
+		//TODO
 	}
 }

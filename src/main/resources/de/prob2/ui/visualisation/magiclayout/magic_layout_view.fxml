@@ -18,6 +18,11 @@
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
 						<Menu text="%menu.file">
+							<Menu text="%visualisation.magicLayout.view.menu.file.items.new" accelerator="Alt+Shortcut+N" >
+								<MenuItem text="%visualisation.magicLayout.view.menu.file.items.new.node" onAction="#newNode" />
+								<MenuItem text="%visualisation.magicLayout.view.menu.file.items.new.edge" onAction="#newEdge"/>
+							</Menu>
+							<SeparatorMenuItem />
 							<MenuItem text="%visualisation.magicLayout.view.menu.file.items.saveLayout" />
 						</Menu>
 						<ViewMenu fx:id="viewMenu" />
@@ -27,10 +32,10 @@
 					<SplitPane dividerPositions="0.15">
 						<TabPane side="LEFT" prefWidth="200">
 							<Tab text="%visualisation.magicLayout.view.tabs.nodes" closable="false">
-								<MagicLayoutEditNodes />
+								<MagicLayoutEditNodes fx:id="magicLayoutEditNodes" />
 							</Tab>
 							<Tab text="%visualisation.magicLayout.view.tabs.edges" closable="false">
-								<MagicLayoutEditEdges />
+								<MagicLayoutEditEdges fx:id="magicLayoutEditEdges"/>
 							</Tab>
 						</TabPane>
 						<Label text="MAGIC LAYOUT GRAPH" prefWidth="600" alignment="CENTER" />
