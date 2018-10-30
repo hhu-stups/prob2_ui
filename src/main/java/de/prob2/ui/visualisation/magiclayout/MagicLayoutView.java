@@ -3,6 +3,8 @@ package de.prob2.ui.visualisation.magiclayout;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditEdges;
+import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditNodes;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuBar;
 import javafx.stage.Stage;
