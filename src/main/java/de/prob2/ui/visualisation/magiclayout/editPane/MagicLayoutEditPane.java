@@ -21,7 +21,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.util.Callback;
 
 public class MagicLayoutEditPane extends VBox {
 
@@ -37,7 +36,7 @@ public class MagicLayoutEditPane extends VBox {
 	private ColorPicker lineColorPicker;
 	@FXML
 	private ComboBox<Double> lineWidthComboBox;
-	
+
 	final ResourceBundle bundle;
 
 	@Inject
@@ -51,36 +50,32 @@ public class MagicLayoutEditPane extends VBox {
 		lineTypeComboBox.getSelectionModel().selectFirst();
 		initLineTypeComboBox();
 
-		lineWidthComboBox.getSelectionModel().select(1.0);;
+		lineWidthComboBox.getSelectionModel().select(1.0);
+		;
 		initLineWidthComboBox();
 	}
 
 	private void initLineTypeComboBox() {
 		// show different line types in ComboBox (not just strings)
-		lineTypeComboBox.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+		lineTypeComboBox.setCellFactory((ListView<String> lv) -> new ListCell<String>() {
+			{
+				setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+			}
+
 			@Override
-			public ListCell<String> call(ListView<String> l) {
-				return new ListCell<String>() {
-					{
-						setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-					}
+			protected void updateItem(String style, boolean empty) {
+				super.updateItem(style, empty);
 
-					@Override
-					protected void updateItem(String style, boolean empty) {
-						super.updateItem(style, empty);
-
-						if (style == null || empty) {
-							setGraphic(null);
-						} else {
-							Line line = new Line(0, 15, 50, 15);
-							line.setStyle(style);
-							line.setStroke(Color.WHITE);
-							Group group = new Group();
-							group.getChildren().add(line);
-							setGraphic(group);
-						}
-					}
-				};
+				if (style == null || empty) {
+					setGraphic(null);
+				} else {
+					Line line = new Line(0, 15, 50, 15);
+					line.setStyle(style);
+					line.setStroke(Color.WHITE);
+					Group group = new Group();
+					group.getChildren().add(line);
+					setGraphic(group);
+				}
 			}
 		});
 		lineTypeComboBox.setButtonCell(new ListCell<String>() {
@@ -105,33 +100,28 @@ public class MagicLayoutEditPane extends VBox {
 			}
 		});
 	}
-	
+
 	private void initLineWidthComboBox() {
 		// show different line thicknesses in ComboBox (not just double values)
-		lineWidthComboBox.setCellFactory(new Callback<ListView<Double>, ListCell<Double>>() {
+		lineWidthComboBox.setCellFactory((ListView<Double> lv) -> new ListCell<Double>() {
+			{
+				setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+			}
+
 			@Override
-			public ListCell<Double> call(ListView<Double> l) {
-				return new ListCell<Double>() {
-					{
-						setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-					}
+			protected void updateItem(Double width, boolean empty) {
+				super.updateItem(width, empty);
 
-					@Override
-					protected void updateItem(Double width, boolean empty) {
-						super.updateItem(width, empty);
-
-						if (width == null || empty) {
-							setGraphic(null);
-						} else {
-							Line line = new Line(0, 15, 50, 15);
-							line.setStrokeWidth(width);
-							line.setStroke(Color.WHITE);
-							Group group = new Group();
-							group.getChildren().add(line);
-							setGraphic(group);
-						}
-					}
-				};
+				if (width == null || empty) {
+					setGraphic(null);
+				} else {
+					Line line = new Line(0, 15, 50, 15);
+					line.setStrokeWidth(width);
+					line.setStroke(Color.WHITE);
+					Group group = new Group();
+					group.getChildren().add(line);
+					setGraphic(group);
+				}
 			}
 		});
 		lineWidthComboBox.setButtonCell(new ListCell<Double>() {
@@ -156,7 +146,7 @@ public class MagicLayoutEditPane extends VBox {
 			}
 		});
 	}
-	
+
 	VBox wrapInVBox(String caption, Control control) {
 		VBox vbox = new VBox();
 		Label label = new Label(caption);
@@ -165,7 +155,7 @@ public class MagicLayoutEditPane extends VBox {
 		VBox.setMargin(label, new Insets(0, 2, 0, 2));
 		return vbox;
 	}
-	
+
 	@FXML
 	private void updateValues() {
 		updateValues(listView.getSelectionModel().getSelectedItem());
@@ -173,16 +163,16 @@ public class MagicLayoutEditPane extends VBox {
 
 	void updateValues(MagicComponent selectedComponent) {
 		listView.getItems().forEach(i -> i.unbindAll());
-		
+
 		expressionTextArea.setText(selectedComponent.getExpression());
 		selectedComponent.expressionProperty().bind(expressionTextArea.textProperty());
-		
+
 		lineTypeComboBox.setValue(selectedComponent.getLineType());
 		selectedComponent.lineTypeProperty().bind(lineTypeComboBox.valueProperty());
-		
+
 		lineColorPicker.setValue(selectedComponent.getLineColor());
 		selectedComponent.lineColorProperty().bind(lineColorPicker.valueProperty());
-		
+
 		lineWidthComboBox.setValue(selectedComponent.getLineWidth());
 		selectedComponent.lineWidthProperty().bind(lineWidthComboBox.valueProperty());
 	}
