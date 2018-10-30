@@ -7,16 +7,27 @@ import com.google.inject.Inject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicNode;
+import de.prob2.ui.visualisation.magiclayout.MagicShape;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 
 public class MagicLayoutEditNodes extends MagicLayoutEditPane {
+	
+	private class MagicShapeListCell extends ListCell<MagicShape> {
+		@Override
+		protected void updateItem(MagicShape shape, boolean empty) {
+			super.updateItem(shape, empty);
+			setText((shape == null || empty)? "" : bundle.getString(shape.getBundleKey()));
+		}
+	}
 
 	private CheckBox clusterCheckBox;
-	private ComboBox<String> shapeComboBox;
+	private ComboBox<MagicShape> shapeComboBox;
 	private ColorPicker nodeColorPicker;
 
 	@Inject
@@ -42,10 +53,11 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		this.getChildren().add(2, clusterCheckBox);
 
 		shapeComboBox = new ComboBox<>();
-		shapeComboBox.getItems().addAll(bundle.getString("visualisation.magicLayout.shapes.rectangle"),
-				bundle.getString("visualisation.magicLayout.shapes.circle"),
-				bundle.getString("visualisation.magicLayout.shapes.triangle"));
+		shapeComboBox.getItems().setAll(MagicShape.values());		
+		shapeComboBox.setCellFactory((ListView<MagicShape> lv) -> new MagicShapeListCell());
+		shapeComboBox.setButtonCell(new MagicShapeListCell());
 		shapeComboBox.getSelectionModel().selectFirst();
+		
 		nodeColorPicker = new ColorPicker();
 		flowPane.getChildren().addAll(
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.shape"), shapeComboBox),

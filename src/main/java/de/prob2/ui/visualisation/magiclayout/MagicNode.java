@@ -4,21 +4,19 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.scene.paint.Color;
 
 public class MagicNode extends MagicComponent {
 	
 	private final BooleanProperty cluster = new SimpleBooleanProperty();
-	private final StringProperty shape = new SimpleStringProperty();
+	private final ObjectProperty<MagicShape> shape = new SimpleObjectProperty<>();
 	private final ObjectProperty<Color> nodeColor = new SimpleObjectProperty<>();
 	
 	public MagicNode(String name, String expression) {
 		super(name, expression);
 		
 		this.cluster.set(false);
-		this.shape.set("rectangle");
+		this.shape.set(MagicShape.RECTANGLE);
 		this.nodeColor.set(Color.WHITE);
 	}
 	
@@ -30,11 +28,11 @@ public class MagicNode extends MagicComponent {
 		return cluster.get();
 	}
 	
-	public StringProperty shapeProperty() {
+	public ObjectProperty<MagicShape> shapeProperty() {
 		return shape;
 	}
 	
-	public String getShape() {
+	public MagicShape getShape() {
 		return shape.get();
 	}
 	
