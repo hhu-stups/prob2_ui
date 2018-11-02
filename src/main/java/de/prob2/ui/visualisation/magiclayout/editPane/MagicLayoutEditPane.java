@@ -12,10 +12,12 @@ import javafx.scene.Group;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.FlowPane;
@@ -50,23 +52,35 @@ public class MagicLayoutEditPane extends VBox {
 	@FXML
 	public void initialize() {
 		listView.setEditable(true);
-		listView.setCellFactory(TextFieldListCell.forListView(new StringConverter<MagicComponent>() {
+		listView.setCellFactory(lv -> {
+	        TextFieldListCell<MagicComponent> cell = new TextFieldListCell<>();
+	        
+	        cell.setConverter(new StringConverter<MagicComponent>() {
 
-			MagicComponent component;
+				@Override
+				public String toString(MagicComponent component) {
+					return component.toString();
+				}
 
-			@Override
-			public String toString(MagicComponent component) {
-				this.component = component;
-				return component.toString();
-			}
+				@Override
+				public MagicComponent fromString(String string) {
+					MagicComponent component = cell.getItem();
+					component.nameProperty().set(string);
+					return component;
+				}
 
-			@Override
-			public MagicComponent fromString(String string) {
-				component.nameProperty().set(string);
-				return component;
-			}
-
-		}));
+			});
+	        
+	        final MenuItem editItem = new MenuItem(bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.rename"));
+			editItem.setOnAction(event -> cell.startEdit());
+			
+			final MenuItem deleteItem = new MenuItem(bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.delete"));
+			deleteItem.setOnAction(event -> listView.getItems().remove(cell.getItem()));
+			
+			cell.setContextMenu(new ContextMenu(editItem, deleteItem));
+			
+	        return cell;
+	    });
 
 		listView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateValues());
 
