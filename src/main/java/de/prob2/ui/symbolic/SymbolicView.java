@@ -127,7 +127,8 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 			if(newValue) {
 				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().symbolicCheckingFormulasProperty().emptyProperty().or(executor.currentJobThreadsProperty().emptyProperty().not()));
 			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(executor.currentJobThreadsProperty().emptyProperty().not()));
+				checkMachineButton.disableProperty().unbind();
+				checkMachineButton.setDisable(true);
 			}
 		});
 	}
