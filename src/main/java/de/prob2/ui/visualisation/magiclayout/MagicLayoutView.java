@@ -32,12 +32,12 @@ public class MagicLayoutView extends Stage {
 	}
 	
 	@FXML
-	private void newNode() {
-		magicLayoutEditNodes.addNode();
+	private void newNodeGroup() {
+		magicLayoutEditNodes.addNodes();
 	}
 	
 	@FXML
-	private void newEdge() {
-		magicLayoutEditEdges.addEdge();
+	private void newEdgeGroup() {
+		magicLayoutEditEdges.addEdges();
 	}
 }

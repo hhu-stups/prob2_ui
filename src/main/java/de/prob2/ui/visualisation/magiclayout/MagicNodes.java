@@ -6,13 +6,13 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
-public class MagicNode extends MagicComponent {
+public class MagicNodes extends MagicComponent {
 	
 	private final BooleanProperty cluster = new SimpleBooleanProperty();
 	private final ObjectProperty<MagicShape> shape = new SimpleObjectProperty<>();
 	private final ObjectProperty<Color> nodeColor = new SimpleObjectProperty<>();
 	
-	public MagicNode(String name, String expression) {
+	public MagicNodes(String name, String expression) {
 		super(name, expression);
 		
 		this.cluster.set(false);
@@ -20,7 +20,7 @@ public class MagicNode extends MagicComponent {
 		this.nodeColor.set(Color.WHITE);
 	}
 	
-	public MagicNode(String name) {
+	public MagicNodes(String name) {
 		super(name);
 		
 		this.cluster.set(false);

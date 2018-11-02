@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
-import de.prob2.ui.visualisation.magiclayout.MagicNode;
+import de.prob2.ui.visualisation.magiclayout.MagicNodes;
 import de.prob2.ui.visualisation.magiclayout.MagicShape;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -42,10 +42,10 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		expressionTextArea.setPromptText("{x|...}");
 
 		// add DummyData
-		listView.getItems().addAll(new MagicNode("nodes1", "{x1|...}"), new MagicNode("nodes2", "{x2|...}"),
-				new MagicNode("nodes3", "{x3|...}"), new MagicNode("nodes4", "{x4|...}"),
-				new MagicNode("nodes5", "{x5|...}"), new MagicNode("nodes6", "{x6|...}"),
-				new MagicNode("nodes7", "{x7|...}"), new MagicNode("nodes8", "{x8|...}"));
+		listView.getItems().addAll(new MagicNodes("nodes1", "{x1|...}"), new MagicNodes("nodes2", "{x2|...}"),
+				new MagicNodes("nodes3", "{x3|...}"), new MagicNodes("nodes4", "{x4|...}"),
+				new MagicNodes("nodes5", "{x5|...}"), new MagicNodes("nodes6", "{x6|...}"),
+				new MagicNodes("nodes7", "{x7|...}"), new MagicNodes("nodes8", "{x8|...}"));
 
 		// add Node specific controls
 		clusterCheckBox = new CheckBox(bundle.getString("visualisation.magicLayout.editPane.labels.cluster"));
@@ -68,20 +68,20 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 	void updateValues(MagicComponent selectedComponent) {
 		super.updateValues(selectedComponent);
 
-		MagicNode selectedNode = (MagicNode) selectedComponent;
+		MagicNodes selectedNodes = (MagicNodes) selectedComponent;
 
-		clusterCheckBox.setSelected(selectedNode.isCluster());
-		selectedNode.clusterProperty().bind(clusterCheckBox.selectedProperty());
+		clusterCheckBox.setSelected(selectedNodes.isCluster());
+		selectedNodes.clusterProperty().bind(clusterCheckBox.selectedProperty());
 
-		shapeComboBox.setValue(selectedNode.getShape());
-		selectedNode.shapeProperty().bind(shapeComboBox.valueProperty());
+		shapeComboBox.setValue(selectedNodes.getShape());
+		selectedNodes.shapeProperty().bind(shapeComboBox.valueProperty());
 
-		nodeColorPicker.setValue(selectedNode.getNodeColor());
-		selectedNode.nodeColorProperty().bind(nodeColorPicker.valueProperty());
+		nodeColorPicker.setValue(selectedNodes.getNodeColor());
+		selectedNodes.nodeColorProperty().bind(nodeColorPicker.valueProperty());
 	}
 
-	public void addNode() {
-		MagicNode nodes = new MagicNode("nodes");
+	public void addNodes() {
+		MagicNodes nodes = new MagicNodes("nodes");
 		super.addMagicComponent(nodes);
 	}
 

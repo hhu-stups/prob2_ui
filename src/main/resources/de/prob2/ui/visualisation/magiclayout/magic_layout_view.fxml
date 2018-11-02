@@ -22,11 +22,11 @@
 								text="%visualisation.magicLayout.view.menu.file.items.new"
 								accelerator="Alt+Shortcut+N">
 								<MenuItem
-									text="%visualisation.magicLayout.view.menu.file.items.new.node"
-									onAction="#newNode" />
+									text="%visualisation.magicLayout.view.menu.file.items.new.nodes"
+									onAction="#newNodeGroup" />
 								<MenuItem
-									text="%visualisation.magicLayout.view.menu.file.items.new.edge"
-									onAction="#newEdge" />
+									text="%visualisation.magicLayout.view.menu.file.items.new.edges"
+									onAction="#newEdgeGroup" />
 							</Menu>
 							<SeparatorMenuItem />
 							<MenuItem
