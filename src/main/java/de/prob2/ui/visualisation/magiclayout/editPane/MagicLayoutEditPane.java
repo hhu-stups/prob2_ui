@@ -47,11 +47,12 @@ public class MagicLayoutEditPane extends VBox {
 
 	@FXML
 	public void initialize() {
+		listView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateValues());
+		
 		lineTypeComboBox.getSelectionModel().selectFirst();
 		initLineTypeComboBox();
 
 		lineWidthComboBox.getSelectionModel().select(1.0);
-		;
 		initLineWidthComboBox();
 	}
 

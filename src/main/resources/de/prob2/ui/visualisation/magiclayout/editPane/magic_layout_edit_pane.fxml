@@ -9,8 +9,7 @@
 
 <fx:root type="VBox" spacing="10"
 	xmlns:fx="http://javafx.com/fxml/1">
-	<ListView fx:id="listView" prefHeight="200" VBox.vgrow="NEVER"
-		onMouseClicked="#updateValues" />
+	<ListView fx:id="listView" prefHeight="200" VBox.vgrow="NEVER" />
 	<TextArea fx:id="expressionTextArea" VBox.vgrow="ALWAYS"
 		styleClass="text-area-with-border">
 		<VBox.margin>
@@ -20,7 +19,8 @@
 	<FlowPane fx:id="flowPane" VBox.vgrow="NEVER" hgap="5"
 		vgap="5">
 		<VBox spacing="2">
-			<Label text="%visualisation.magicLayout.editPane.labels.linetype">
+			<Label
+				text="%visualisation.magicLayout.editPane.labels.linetype">
 				<VBox.margin>
 					<Insets left="2.0" right="2.0" />
 				</VBox.margin>
@@ -37,7 +37,8 @@
 			</ComboBox>
 		</VBox>
 		<VBox spacing="2">
-			<Label text="%visualisation.magicLayout.editPane.labels.linecolor">
+			<Label
+				text="%visualisation.magicLayout.editPane.labels.linecolor">
 				<VBox.margin>
 					<Insets left="2.0" right="2.0" />
 				</VBox.margin>
@@ -45,13 +46,14 @@
 			<ColorPicker fx:id="lineColorPicker" prefWidth="115" />
 		</VBox>
 		<VBox spacing="2">
-			<Label text="%visualisation.magicLayout.editPane.labels.linewidth">
+			<Label
+				text="%visualisation.magicLayout.editPane.labels.linewidth">
 				<VBox.margin>
 					<Insets left="2.0" right="2.0" />
 				</VBox.margin>
 			</Label>
-			<ComboBox fx:id="lineWidthComboBox"
-				focusTraversable="false" prefWidth="115">
+			<ComboBox fx:id="lineWidthComboBox" focusTraversable="false"
+				prefWidth="115">
 				<items>
 					<FXCollections fx:factory="observableArrayList">
 						<Double fx:value="0.5" />
