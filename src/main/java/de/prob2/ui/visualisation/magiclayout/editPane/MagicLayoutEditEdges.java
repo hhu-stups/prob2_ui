@@ -15,7 +15,7 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 
 	private ColorPicker textColorPicker;
 	private Spinner<Integer> textSizeSpinner;
-	
+
 	@Inject
 	public MagicLayoutEditEdges(final StageManager stageManager, final ResourceBundle bundle) {
 		super(stageManager, bundle);
@@ -24,7 +24,7 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 	@FXML
 	public void initialize() {
 		super.initialize();
-		
+
 		expressionTextArea.setPromptText("{x,y|...}");
 
 		// add DummyData
@@ -34,22 +34,25 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		textColorPicker = new ColorPicker();
 		textSizeSpinner = new Spinner<>(2, 30, 12);
 		textSizeSpinner.setEditable(true);
-		
-		flowPane.getChildren().addAll(wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker),
+
+		flowPane.getChildren().addAll(
+				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textsize"), textSizeSpinner));
 	}
-	
+
 	@Override
 	void updateValues(MagicComponent selectedComponent) {
 		super.updateValues(selectedComponent);
-		
-		MagicEdges selectedEdges = (MagicEdges) selectedComponent;
-		
-		textColorPicker.setValue(selectedEdges.getTextColor());
-		selectedEdges.textColorProperty().bind(textColorPicker.valueProperty());
-		
-		textSizeSpinner.getValueFactory().setValue(selectedEdges.getTextSize());
-		selectedEdges.textSizeProperty().bind(textSizeSpinner.valueProperty());
+
+		if (selectedComponent != null) {
+			MagicEdges selectedEdges = (MagicEdges) selectedComponent;
+
+			textColorPicker.setValue(selectedEdges.getTextColor());
+			selectedEdges.textColorProperty().bind(textColorPicker.valueProperty());
+
+			textSizeSpinner.getValueFactory().setValue(selectedEdges.getTextSize());
+			selectedEdges.textSizeProperty().bind(textSizeSpinner.valueProperty());
+		}
 	}
 
 	public void addEdges() {

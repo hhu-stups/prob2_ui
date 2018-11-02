@@ -17,10 +17,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.util.StringConverter;
 
 public class MagicLayoutEditPane extends VBox {
 
@@ -47,8 +49,27 @@ public class MagicLayoutEditPane extends VBox {
 
 	@FXML
 	public void initialize() {
+		listView.setEditable(true);
+		listView.setCellFactory(TextFieldListCell.forListView(new StringConverter<MagicComponent>() {
+
+			MagicComponent component;
+
+			@Override
+			public String toString(MagicComponent component) {
+				this.component = component;
+				return component.toString();
+			}
+
+			@Override
+			public MagicComponent fromString(String string) {
+				component.nameProperty().set(string);
+				return component;
+			}
+
+		}));
+
 		listView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateValues());
-		
+
 		lineTypeComboBox.getSelectionModel().selectFirst();
 		initLineTypeComboBox();
 
@@ -165,17 +186,19 @@ public class MagicLayoutEditPane extends VBox {
 	void updateValues(MagicComponent selectedComponent) {
 		listView.getItems().forEach(i -> i.unbindAll());
 
-		expressionTextArea.setText(selectedComponent.getExpression());
-		selectedComponent.expressionProperty().bind(expressionTextArea.textProperty());
+		if (selectedComponent != null) {
+			expressionTextArea.setText(selectedComponent.getExpression());
+			selectedComponent.expressionProperty().bind(expressionTextArea.textProperty());
 
-		lineTypeComboBox.setValue(selectedComponent.getLineType());
-		selectedComponent.lineTypeProperty().bind(lineTypeComboBox.valueProperty());
+			lineTypeComboBox.setValue(selectedComponent.getLineType());
+			selectedComponent.lineTypeProperty().bind(lineTypeComboBox.valueProperty());
 
-		lineColorPicker.setValue(selectedComponent.getLineColor());
-		selectedComponent.lineColorProperty().bind(lineColorPicker.valueProperty());
+			lineColorPicker.setValue(selectedComponent.getLineColor());
+			selectedComponent.lineColorProperty().bind(lineColorPicker.valueProperty());
 
-		lineWidthComboBox.setValue(selectedComponent.getLineWidth());
-		selectedComponent.lineWidthProperty().bind(lineWidthComboBox.valueProperty());
+			lineWidthComboBox.setValue(selectedComponent.getLineWidth());
+			selectedComponent.lineWidthProperty().bind(lineWidthComboBox.valueProperty());
+		}
 	}
 
 	void addMagicComponent(MagicComponent component) {

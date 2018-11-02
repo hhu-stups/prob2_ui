@@ -10,7 +10,7 @@ import javafx.scene.paint.Color;
 
 public class MagicComponent {
 	
-	private String name;
+	private final StringProperty name = new SimpleStringProperty();
 	private final StringProperty expression = new SimpleStringProperty();
 	
 	private final StringProperty lineType = new SimpleStringProperty();
@@ -18,7 +18,7 @@ public class MagicComponent {
 	private final DoubleProperty lineWidth = new SimpleDoubleProperty();
 	
 	public MagicComponent(String name, String expression) {
-		this.name = name;
+		this.name.set(name);
 		this.expression.set(expression);
 		
 		this.lineType.set("");
@@ -27,12 +27,20 @@ public class MagicComponent {
 	}
 	
 	public MagicComponent(String name) {
-		this.name = name;
+		this.name.set(name);
 		this.expression.set("");
 		
 		this.lineType.set("");
 		this.lineColor.set(Color.BLACK);
 		this.lineWidth.set(1);
+	}
+	
+	public StringProperty nameProperty() {
+		return name;
+	}
+	
+	public String getName() {
+		return name.get();
 	}
 	
 	public StringProperty expressionProperty() {
@@ -69,7 +77,7 @@ public class MagicComponent {
 
 	@Override
 	public String toString() {
-		return name;
+		return name.get();
 	}
 
 	public void unbindAll() {
