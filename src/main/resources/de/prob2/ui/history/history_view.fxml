@@ -36,13 +36,10 @@
 		<HelpButton fx:id="helpButton" />
 	</HBox>
 	<TableView fx:id="historyTableView" VBox.vgrow="ALWAYS">
-		<columnResizePolicy>
-			<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-		</columnResizePolicy>
 		<columns>
 			<TableColumn fx:id="positionColumn" minWidth="${fontSize.fontSize * 6}"
 				maxWidth="${fontSize.fontSize * 6}" text="%history.tableView.position" />
-			<TableColumn fx:id="transitionColumn" text="%history.tableView.transition" sortable="false" />
+			<TableColumn fx:id="transitionColumn" text="%history.tableView.transition" sortable="false" prefWidth="${historyTableView.width - positionColumn.width}" />
 		</columns>
 		<sortOrder>
 			<fx:reference source="positionColumn" />
