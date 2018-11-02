@@ -80,4 +80,9 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		selectedNode.nodeColorProperty().bind(nodeColorPicker.valueProperty());
 	}
 
+	public void addNode() {
+		MagicNode nodes = new MagicNode("nodes");
+		super.addMagicComponent(nodes);
+	}
+
 }

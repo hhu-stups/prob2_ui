@@ -176,4 +176,9 @@ public class MagicLayoutEditPane extends VBox {
 		lineWidthComboBox.setValue(selectedComponent.getLineWidth());
 		selectedComponent.lineWidthProperty().bind(lineWidthComboBox.valueProperty());
 	}
+
+	void addMagicComponent(MagicComponent component) {
+		listView.getItems().add(component);
+		listView.getSelectionModel().select(component);
+	}
 }

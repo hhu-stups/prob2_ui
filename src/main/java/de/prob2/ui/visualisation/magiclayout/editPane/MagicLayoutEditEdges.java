@@ -52,4 +52,9 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		selectedEdge.textSizeProperty().bind(textSizeSpinner.valueProperty());
 	}
 
+	public void addEdge() {
+		MagicEdge edges = new MagicEdge("edges");
+		super.addMagicComponent(edges);
+	}
+
 }

@@ -20,6 +20,14 @@ public class MagicNode extends MagicComponent {
 		this.nodeColor.set(Color.WHITE);
 	}
 	
+	public MagicNode(String name) {
+		super(name);
+		
+		this.cluster.set(false);
+		this.shape.set(MagicShape.RECTANGLE);
+		this.nodeColor.set(Color.WHITE);
+	}
+
 	public BooleanProperty clusterProperty() {
 		return cluster;
 	}

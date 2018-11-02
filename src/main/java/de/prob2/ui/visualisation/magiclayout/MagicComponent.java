@@ -26,6 +26,15 @@ public class MagicComponent {
 		this.lineWidth.set(1);
 	}
 	
+	public MagicComponent(String name) {
+		this.name = name;
+		this.expression.set("");
+		
+		this.lineType.set("");
+		this.lineColor.set(Color.BLACK);
+		this.lineWidth.set(1);
+	}
+	
 	public StringProperty expressionProperty() {
 		return expression;
 	}

@@ -7,21 +7,28 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
 public class MagicEdge extends MagicComponent {
-	
+
 	private final ObjectProperty<Color> textColor = new SimpleObjectProperty<>();
 	private final IntegerProperty textSize = new SimpleIntegerProperty();
-	
+
 	public MagicEdge(String name, String expression) {
 		super(name, expression);
-		
+
 		this.textColor.set(Color.BLACK);
 		this.textSize.set(12);
 	}
-	
+
+	public MagicEdge(String name) {
+		super(name);
+
+		this.textColor.set(Color.BLACK);
+		this.textSize.set(12);
+	}
+
 	public ObjectProperty<Color> textColorProperty() {
 		return textColor;
 	}
-	
+
 	public Color getTextColor() {
 		return textColor.get();
 	}
@@ -29,15 +36,15 @@ public class MagicEdge extends MagicComponent {
 	public IntegerProperty textSizeProperty() {
 		return textSize;
 	}
-	
+
 	public int getTextSize() {
 		return textSize.get();
 	}
-		
+
 	@Override
 	public void unbindAll() {
 		super.unbindAll();
-		
+
 		textColor.unbind();
 		textSize.unbind();
 	}
