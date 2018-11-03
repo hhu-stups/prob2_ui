@@ -5,6 +5,7 @@ import java.util.ResourceBundle;
 import com.google.inject.Injector;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob.statespace.FormalismType;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -14,6 +15,9 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -127,7 +131,8 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 			if(newValue) {
 				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().symbolicCheckingFormulasProperty().emptyProperty().or(executor.currentJobThreadsProperty().emptyProperty().not()));
 			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(executor.currentJobThreadsProperty().emptyProperty().not()));
+				checkMachineButton.disableProperty().unbind();
+				checkMachineButton.setDisable(true);
 			}
 		});
 	}
@@ -143,10 +148,13 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	protected abstract void removeFormula(Machine machine, T item);
 	
 	protected void setBindings() {
-		addFormulaButton.disableProperty().bind(currentTrace.existsProperty().not().or(executor.currentJobThreadsProperty().emptyProperty().not()));
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(executor.currentJobThreadsProperty().emptyProperty().not()));
+		final BooleanBinding disableBinding = currentTrace.existsProperty().not()
+			.or(Bindings.createBooleanBinding(() -> currentTrace.getModel() == null || currentTrace.getModel().getFormalismType() != FormalismType.B, currentTrace.modelProperty()))
+			.or(executor.currentJobThreadsProperty().emptyProperty().not());
+		addFormulaButton.disableProperty().bind(disableBinding);
+		checkMachineButton.disableProperty().bind(disableBinding);
 		cancelButton.disableProperty().bind(executor.currentJobThreadsProperty().emptyProperty());
-		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(executor.currentJobThreadsProperty().emptyProperty().not()));
+		tvFormula.disableProperty().bind(disableBinding);
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
