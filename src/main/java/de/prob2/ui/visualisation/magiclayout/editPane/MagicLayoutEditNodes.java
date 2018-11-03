@@ -15,6 +15,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.paint.Color;
 
 public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 
@@ -79,6 +80,10 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 
 			nodeColorPicker.setValue(selectedNodes.getNodeColor());
 			selectedNodes.nodeColorProperty().bind(nodeColorPicker.valueProperty());
+		} else {
+			clusterCheckBox.setSelected(false);
+			shapeComboBox.getSelectionModel().selectFirst();
+			nodeColorPicker.setValue(Color.WHITE);
 		}
 	}
 

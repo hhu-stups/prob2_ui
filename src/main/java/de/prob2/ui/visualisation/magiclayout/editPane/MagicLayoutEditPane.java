@@ -102,6 +102,11 @@ public class MagicLayoutEditPane extends VBox {
 
 			lineWidthComboBox.setValue(selectedComponent.getLineWidth());
 			selectedComponent.lineWidthProperty().bind(lineWidthComboBox.valueProperty());
+		} else {
+			expressionTextArea.setText("");
+			lineTypeComboBox.getSelectionModel().selectFirst();
+			lineColorPicker.setValue(Color.BLACK);
+			lineWidthComboBox.getSelectionModel().selectFirst();
 		}
 	}
 

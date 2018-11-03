@@ -5,11 +5,13 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicEdges;
 import javafx.fxml.FXML;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Spinner;
+import javafx.scene.paint.Color;
 
 public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 
@@ -52,6 +54,9 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 
 			textSizeSpinner.getValueFactory().setValue(selectedEdges.getTextSize());
 			selectedEdges.textSizeProperty().bind(textSizeSpinner.valueProperty());
+		} else {
+			textColorPicker.setValue(Color.BLACK);
+			textSizeSpinner.getValueFactory().setValue(12);
 		}
 	}
 
