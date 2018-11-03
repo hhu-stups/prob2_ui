@@ -29,6 +29,29 @@ import javafx.util.StringConverter;
 
 public class MagicLayoutEditPane extends VBox {
 
+	private abstract class LineListCell<T> extends ListCell<T> {
+		{
+			setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+		}
+
+		@Override
+		protected void updateItem(T t, boolean empty) {
+			super.updateItem(t, empty);
+
+			if (t == null || empty) {
+				setGraphic(null);
+			} else {
+				Line line = new Line(0, 15, 50, 15);
+				defineLineStyle(line, t);
+				Group group = new Group();
+				group.getChildren().add(line);
+				setGraphic(group);
+			}
+		}
+		
+		protected abstract void defineLineStyle(Line line, T t);
+	}
+
 	@FXML
 	ListView<MagicComponent> listView;
 	@FXML
@@ -108,103 +131,51 @@ public class MagicLayoutEditPane extends VBox {
 		});
 		listView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateValues());
 
-		lineTypeComboBox.getSelectionModel().selectFirst();
 		initLineTypeComboBox();
 
-		lineWidthComboBox.getSelectionModel().select(1.0);
 		initLineWidthComboBox();
 	}
 
 	private void initLineTypeComboBox() {
 		// show different line types in ComboBox (not just strings)
-		lineTypeComboBox.setCellFactory((ListView<String> lv) -> new ListCell<String>() {
-			{
-				setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-			}
-
+		lineTypeComboBox.setCellFactory((ListView<String> lv) -> new LineListCell<String>() {
 			@Override
-			protected void updateItem(String style, boolean empty) {
-				super.updateItem(style, empty);
-
-				if (style == null || empty) {
-					setGraphic(null);
-				} else {
-					Line line = new Line(0, 15, 50, 15);
-					line.setStyle(style);
-					line.setStroke(Color.WHITE);
-					Group group = new Group();
-					group.getChildren().add(line);
-					setGraphic(group);
-				}
+			protected void defineLineStyle(Line line, String style) {
+				line.setStyle(style);
+				line.setStroke(Color.WHITE);
 			}
 		});
-		lineTypeComboBox.setButtonCell(new ListCell<String>() {
-			{
-				setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-			}
-
+		
+		lineTypeComboBox.setButtonCell(new LineListCell<String>() {
 			@Override
-			protected void updateItem(String style, boolean empty) {
-				super.updateItem(style, empty);
-
-				if (style == null || empty) {
-					setGraphic(null);
-				} else {
-					Line line = new Line(0, 15, 50, 15);
-					line.setStyle(style);
-					line.setStroke(Color.rgb(55, 55, 60));
-					Group group = new Group();
-					group.getChildren().add(line);
-					setGraphic(group);
-				}
+			protected void defineLineStyle(Line line, String style) {
+				line.setStyle(style);
+				line.setStroke(Color.rgb(55, 55, 60));
 			}
 		});
+		
+		lineTypeComboBox.getSelectionModel().selectFirst();
 	}
 
 	private void initLineWidthComboBox() {
 		// show different line thicknesses in ComboBox (not just double values)
-		lineWidthComboBox.setCellFactory((ListView<Double> lv) -> new ListCell<Double>() {
-			{
-				setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-			}
-
+		lineWidthComboBox.setCellFactory((ListView<Double> lv) -> new LineListCell<Double>() {
 			@Override
-			protected void updateItem(Double width, boolean empty) {
-				super.updateItem(width, empty);
-
-				if (width == null || empty) {
-					setGraphic(null);
-				} else {
-					Line line = new Line(0, 15, 50, 15);
-					line.setStrokeWidth(width);
-					line.setStroke(Color.WHITE);
-					Group group = new Group();
-					group.getChildren().add(line);
-					setGraphic(group);
-				}
+			protected void defineLineStyle(Line line, Double width) {
+				line.setStrokeWidth(width);
+				line.setStroke(Color.WHITE);
 			}
 		});
-		lineWidthComboBox.setButtonCell(new ListCell<Double>() {
-			{
-				setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-			}
-
+		
+		lineWidthComboBox.setButtonCell(new LineListCell<Double>() {
 			@Override
-			protected void updateItem(Double width, boolean empty) {
-				super.updateItem(width, empty);
-
-				if (width == null || empty) {
-					setGraphic(null);
-				} else {
-					Line line = new Line(0, 15, 50, 15);
-					line.setStrokeWidth(width);
-					line.setStroke(Color.rgb(55, 55, 60));
-					Group group = new Group();
-					group.getChildren().add(line);
-					setGraphic(group);
-				}
+			protected void defineLineStyle(Line line, Double width) {
+				line.setStrokeWidth(width);
+				line.setStroke(Color.rgb(55, 55, 60));
 			}
 		});
+		
+		lineWidthComboBox.getSelectionModel().select(1.0);
 	}
 
 	VBox wrapInVBox(String caption, Control control) {
