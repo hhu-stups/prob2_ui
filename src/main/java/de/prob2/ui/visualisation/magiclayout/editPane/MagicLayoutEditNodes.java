@@ -1,10 +1,17 @@
 package de.prob2.ui.visualisation.magiclayout.editPane;
 
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
+import de.prob.animator.command.EvaluateFormulasCommand;
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicNodes;
 import de.prob2.ui.visualisation.magiclayout.MagicShape;
@@ -32,21 +39,16 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 	private ColorPicker nodeColorPicker;
 
 	@Inject
-	public MagicLayoutEditNodes(final StageManager stageManager, final ResourceBundle bundle) {
-		super(stageManager, bundle);
+	public MagicLayoutEditNodes(final StageManager stageManager, final ResourceBundle bundle,
+			final CurrentTrace currentTrace) {
+		super(stageManager, bundle, currentTrace);
 	}
 
 	@FXML
 	public void initialize() {
 		super.initialize();
-		
-		expressionTextArea.setPromptText("{x|...}");
 
-		// add DummyData
-		listView.getItems().addAll(new MagicNodes("nodes1", "{x1|...}"), new MagicNodes("nodes2", "{x2|...}"),
-				new MagicNodes("nodes3", "{x3|...}"), new MagicNodes("nodes4", "{x4|...}"),
-				new MagicNodes("nodes5", "{x5|...}"), new MagicNodes("nodes6", "{x6|...}"),
-				new MagicNodes("nodes7", "{x7|...}"), new MagicNodes("nodes8", "{x8|...}"));
+		expressionTextArea.setPromptText("{x|...}");
 
 		// add Node specific controls
 		clusterCheckBox = new CheckBox(bundle.getString("visualisation.magicLayout.editPane.labels.cluster"));
@@ -63,6 +65,28 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		flowPane.getChildren().addAll(
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.shape"), shapeComboBox),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.color"), nodeColorPicker));
+
+		// add Sets from Machine as Node Groups
+		currentTrace.addListener((observable, from, to) -> {
+			if (to != null && to.getStateSpace() != null) {
+				this.listView.getItems().clear();
+				this.updateValues();
+				
+				StateSpace stateSpace = currentTrace.getStateSpace();
+				
+				List<IEvalElement> setEvalElements = stateSpace.getLoadedMachine().getSetEvalElements();
+				final EvaluateFormulasCommand setEvalCmd = new EvaluateFormulasCommand(setEvalElements,
+						currentTrace.getCurrentState().getId());
+				stateSpace.execute(setEvalCmd);
+				Map<IEvalElement, AbstractEvalResult> setResultMap = setEvalCmd.getResultMap();
+				for(IEvalElement element : setResultMap.keySet()) {
+					MagicNodes magicNodes = new MagicNodes(element.toString(), setResultMap.get(element).toString());
+					listView.getItems().add(magicNodes);
+				}
+			}
+		});
+
+
 	}
 
 	@Override
