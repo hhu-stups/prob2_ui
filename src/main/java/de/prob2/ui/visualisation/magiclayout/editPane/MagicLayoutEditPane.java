@@ -75,6 +75,51 @@ public class MagicLayoutEditPane extends VBox {
 
 	@FXML
 	public void initialize() {
+		initListView();
+
+		initLineTypeComboBox();
+
+		initLineWidthComboBox();
+	}
+
+	@FXML
+	private void updateValues() {
+		updateValues(listView.getSelectionModel().getSelectedItem());
+	}
+
+	void updateValues(MagicComponent selectedComponent) {
+		listView.getItems().forEach(i -> i.unbindAll());
+
+		if (selectedComponent != null) {
+			expressionTextArea.setText(selectedComponent.getExpression());
+			selectedComponent.expressionProperty().bind(expressionTextArea.textProperty());
+
+			lineTypeComboBox.setValue(selectedComponent.getLineType());
+			selectedComponent.lineTypeProperty().bind(lineTypeComboBox.valueProperty());
+
+			lineColorPicker.setValue(selectedComponent.getLineColor());
+			selectedComponent.lineColorProperty().bind(lineColorPicker.valueProperty());
+
+			lineWidthComboBox.setValue(selectedComponent.getLineWidth());
+			selectedComponent.lineWidthProperty().bind(lineWidthComboBox.valueProperty());
+		}
+	}
+
+	void addMagicComponent(MagicComponent component) {
+		listView.getItems().add(component);
+		listView.getSelectionModel().select(component);
+	}
+	
+	VBox wrapInVBox(String caption, Control control) {
+		VBox vbox = new VBox();
+		Label label = new Label(caption);
+		control.setPrefWidth(115);
+		vbox.getChildren().addAll(label, control);
+		VBox.setMargin(label, new Insets(0, 2, 0, 2));
+		return vbox;
+	}
+
+	private void initListView() {
 		listView.setEditable(true);
 		listView.setCellFactory(lv -> {
 			TextFieldListCell<MagicComponent> cell = new TextFieldListCell<>();
@@ -95,6 +140,7 @@ public class MagicLayoutEditPane extends VBox {
 
 			});
 
+			// define ContextMenu for ListCell
 			final MenuItem editItem = new MenuItem(
 					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.rename"));
 			editItem.setOnAction(event -> cell.startEdit());
@@ -130,10 +176,6 @@ public class MagicLayoutEditPane extends VBox {
 			return cell;
 		});
 		listView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateValues());
-
-		initLineTypeComboBox();
-
-		initLineWidthComboBox();
 	}
 
 	private void initLineTypeComboBox() {
@@ -176,42 +218,5 @@ public class MagicLayoutEditPane extends VBox {
 		});
 		
 		lineWidthComboBox.getSelectionModel().select(1.0);
-	}
-
-	VBox wrapInVBox(String caption, Control control) {
-		VBox vbox = new VBox();
-		Label label = new Label(caption);
-		control.setPrefWidth(115);
-		vbox.getChildren().addAll(label, control);
-		VBox.setMargin(label, new Insets(0, 2, 0, 2));
-		return vbox;
-	}
-
-	@FXML
-	private void updateValues() {
-		updateValues(listView.getSelectionModel().getSelectedItem());
-	}
-
-	void updateValues(MagicComponent selectedComponent) {
-		listView.getItems().forEach(i -> i.unbindAll());
-
-		if (selectedComponent != null) {
-			expressionTextArea.setText(selectedComponent.getExpression());
-			selectedComponent.expressionProperty().bind(expressionTextArea.textProperty());
-
-			lineTypeComboBox.setValue(selectedComponent.getLineType());
-			selectedComponent.lineTypeProperty().bind(lineTypeComboBox.valueProperty());
-
-			lineColorPicker.setValue(selectedComponent.getLineColor());
-			selectedComponent.lineColorProperty().bind(lineColorPicker.valueProperty());
-
-			lineWidthComboBox.setValue(selectedComponent.getLineWidth());
-			selectedComponent.lineWidthProperty().bind(lineWidthComboBox.valueProperty());
-		}
-	}
-
-	void addMagicComponent(MagicComponent component) {
-		listView.getItems().add(component);
-		listView.getSelectionModel().select(component);
 	}
 }
