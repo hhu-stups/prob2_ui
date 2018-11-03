@@ -37,13 +37,15 @@
 				</top>
 				<center>
 					<SplitPane dividerPositions="0.15">
-						<TabPane side="LEFT" prefWidth="200">
-							<Tab text="%visualisation.magicLayout.view.tabs.nodes"
+						<TabPane fx:id="editTabPane" side="LEFT" prefWidth="200">
+							<Tab fx:id="editNodesTab"
+								text="%visualisation.magicLayout.view.tabs.nodes"
 								closable="false">
 								<MagicLayoutEditNodes
 									fx:id="magicLayoutEditNodes" />
 							</Tab>
-							<Tab text="%visualisation.magicLayout.view.tabs.edges"
+							<Tab fx:id="editEdgesTab"
+								text="%visualisation.magicLayout.view.tabs.edges"
 								closable="false">
 								<MagicLayoutEditEdges
 									fx:id="magicLayoutEditEdges" />

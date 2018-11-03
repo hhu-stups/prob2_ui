@@ -7,12 +7,20 @@ import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditEdges;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditNodes;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 
 public class MagicLayoutView extends Stage {
 
 	@FXML
 	private MenuBar menuBar;
+	@FXML
+	private TabPane editTabPane;
+	@FXML
+	private Tab editNodesTab;
+	@FXML
+	private Tab editEdgesTab;
 	@FXML
 	private MagicLayoutEditNodes magicLayoutEditNodes;
 	@FXML
@@ -33,11 +41,13 @@ public class MagicLayoutView extends Stage {
 	
 	@FXML
 	private void newNodeGroup() {
+		editTabPane.getSelectionModel().select(editNodesTab);
 		magicLayoutEditNodes.addNodes();
 	}
 	
 	@FXML
 	private void newEdgeGroup() {
+		editTabPane.getSelectionModel().select(editEdgesTab);
 		magicLayoutEditEdges.addEdges();
 	}
 }
