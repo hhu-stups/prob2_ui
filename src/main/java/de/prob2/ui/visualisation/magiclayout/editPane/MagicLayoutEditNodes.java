@@ -38,7 +38,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 	@FXML
 	public void initialize() {
 		super.initialize();
-
+		
 		expressionTextArea.setPromptText("{x|...}");
 
 		// add DummyData

@@ -18,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.FlowPane;
@@ -53,9 +54,9 @@ public class MagicLayoutEditPane extends VBox {
 	public void initialize() {
 		listView.setEditable(true);
 		listView.setCellFactory(lv -> {
-	        TextFieldListCell<MagicComponent> cell = new TextFieldListCell<>();
-	        
-	        cell.setConverter(new StringConverter<MagicComponent>() {
+			TextFieldListCell<MagicComponent> cell = new TextFieldListCell<>();
+
+			cell.setConverter(new StringConverter<MagicComponent>() {
 
 				@Override
 				public String toString(MagicComponent component) {
@@ -70,18 +71,41 @@ public class MagicLayoutEditPane extends VBox {
 				}
 
 			});
-	        
-	        final MenuItem editItem = new MenuItem(bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.rename"));
-			editItem.setOnAction(event -> cell.startEdit());
-			
-			final MenuItem deleteItem = new MenuItem(bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.delete"));
-			deleteItem.setOnAction(event -> listView.getItems().remove(cell.getItem()));
-			
-			cell.setContextMenu(new ContextMenu(editItem, deleteItem));
-			
-	        return cell;
-	    });
 
+			final MenuItem editItem = new MenuItem(
+					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.rename"));
+			editItem.setOnAction(event -> cell.startEdit());
+
+			final MenuItem deleteItem = new MenuItem(
+					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.delete"));
+			deleteItem.setOnAction(event -> listView.getItems().remove(cell.getItem()));
+
+			final MenuItem newNodesItem = new MenuItem(
+					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newNodes"));
+			newNodesItem.setOnAction(event -> ((MagicLayoutEditNodes) this).addNodes());
+
+			final MenuItem newEdgesItem = new MenuItem(
+					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newEdges"));
+			newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addEdges());
+
+			cell.emptyProperty().addListener((observable, from, to) -> {
+				if (to) {
+					cell.setContextMenu((this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem)
+							: new ContextMenu(newEdgesItem));
+				} else {
+					cell.setContextMenu(new ContextMenu(editItem, deleteItem, new SeparatorMenuItem()));
+					cell.getContextMenu().getItems()
+							.add((this instanceof MagicLayoutEditNodes) ? newNodesItem : newEdgesItem);
+
+				}
+			});
+
+			// set ContextMenu for cells, which are empty from the beginning
+			cell.setContextMenu((this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem)
+					: new ContextMenu(newEdgesItem));
+
+			return cell;
+		});
 		listView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateValues());
 
 		lineTypeComboBox.getSelectionModel().selectFirst();
