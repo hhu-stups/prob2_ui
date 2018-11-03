@@ -19,8 +19,9 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 	private Spinner<Integer> textSizeSpinner;
 
 	@Inject
-	public MagicLayoutEditEdges(final StageManager stageManager, final ResourceBundle bundle) {
-		super(stageManager, bundle);
+	public MagicLayoutEditEdges(final StageManager stageManager, final ResourceBundle bundle,
+			final CurrentTrace currentTrace) {
+		super(stageManager, bundle, currentTrace);
 	}
 
 	@FXML

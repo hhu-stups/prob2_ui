@@ -5,6 +5,7 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -48,7 +49,7 @@ public class MagicLayoutEditPane extends VBox {
 				setGraphic(group);
 			}
 		}
-		
+
 		protected abstract void defineLineStyle(Line line, T t);
 	}
 
@@ -66,10 +67,13 @@ public class MagicLayoutEditPane extends VBox {
 	private ComboBox<Double> lineWidthComboBox;
 
 	final ResourceBundle bundle;
+	final CurrentTrace currentTrace;
 
 	@Inject
-	public MagicLayoutEditPane(final StageManager stageManager, final ResourceBundle bundle) {
+	public MagicLayoutEditPane(final StageManager stageManager, final ResourceBundle bundle,
+			final CurrentTrace currentTrace) {
 		this.bundle = bundle;
+		this.currentTrace = currentTrace;
 		stageManager.loadFXML(this, "magic_layout_edit_pane.fxml");
 	}
 
@@ -83,7 +87,7 @@ public class MagicLayoutEditPane extends VBox {
 	}
 
 	@FXML
-	private void updateValues() {
+	void updateValues() {
 		updateValues(listView.getSelectionModel().getSelectedItem());
 	}
 
@@ -114,7 +118,7 @@ public class MagicLayoutEditPane extends VBox {
 		listView.getItems().add(component);
 		listView.getSelectionModel().select(component);
 	}
-	
+
 	VBox wrapInVBox(String caption, Control control) {
 		VBox vbox = new VBox();
 		Label label = new Label(caption);
@@ -192,7 +196,7 @@ public class MagicLayoutEditPane extends VBox {
 				line.setStroke(Color.WHITE);
 			}
 		});
-		
+
 		lineTypeComboBox.setButtonCell(new LineListCell<String>() {
 			@Override
 			protected void defineLineStyle(Line line, String style) {
@@ -200,7 +204,7 @@ public class MagicLayoutEditPane extends VBox {
 				line.setStroke(Color.rgb(55, 55, 60));
 			}
 		});
-		
+
 		lineTypeComboBox.getSelectionModel().selectFirst();
 	}
 
@@ -213,7 +217,7 @@ public class MagicLayoutEditPane extends VBox {
 				line.setStroke(Color.WHITE);
 			}
 		});
-		
+
 		lineWidthComboBox.setButtonCell(new LineListCell<Double>() {
 			@Override
 			protected void defineLineStyle(Line line, Double width) {
@@ -221,7 +225,7 @@ public class MagicLayoutEditPane extends VBox {
 				line.setStroke(Color.rgb(55, 55, 60));
 			}
 		});
-		
+
 		lineWidthComboBox.getSelectionModel().select(1.0);
 	}
 }
