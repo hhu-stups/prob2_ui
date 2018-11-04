@@ -1,15 +1,11 @@
 package de.prob2.ui.visualisation.magiclayout.editPane;
 
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.command.EvaluateFormulasCommand;
-import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
@@ -71,21 +67,12 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 			if (to != null && to.getStateSpace() != null) {
 				this.listView.getItems().clear();
 				this.updateValues();
-				
-				StateSpace stateSpace = currentTrace.getStateSpace();
-				
-				List<IEvalElement> setEvalElements = stateSpace.getLoadedMachine().getSetEvalElements();
-				final EvaluateFormulasCommand setEvalCmd = new EvaluateFormulasCommand(setEvalElements,
-						currentTrace.getCurrentState().getId());
-				stateSpace.execute(setEvalCmd);
-				Map<IEvalElement, AbstractEvalResult> setResultMap = setEvalCmd.getResultMap();
-				for(IEvalElement element : setResultMap.keySet()) {
-					MagicNodes magicNodes = new MagicNodes(element.toString(), setResultMap.get(element).toString());
-					listView.getItems().add(magicNodes);
-				}
+
+				List<IEvalElement> setEvalElements = currentTrace.getStateSpace().getLoadedMachine()
+						.getSetEvalElements();
+				addEvalElementsAsGroups(setEvalElements);
 			}
 		});
-
 
 	}
 

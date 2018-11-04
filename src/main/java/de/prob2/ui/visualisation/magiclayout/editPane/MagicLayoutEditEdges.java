@@ -1,13 +1,10 @@
 package de.prob2.ui.visualisation.magiclayout.editPane;
 
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.command.EvaluateFormulasCommand;
-import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
@@ -54,24 +51,10 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 				StateSpace stateSpace = currentTrace.getStateSpace();
 
 				List<IEvalElement> constantEvalElements = stateSpace.getLoadedMachine().getConstantEvalElements();
-				final EvaluateFormulasCommand constantEvalCmd = new EvaluateFormulasCommand(constantEvalElements,
-						currentTrace.getCurrentState().getId());
-				stateSpace.execute(constantEvalCmd);
-				Map<IEvalElement, AbstractEvalResult> constantResultMap = constantEvalCmd.getResultMap();
-				for (IEvalElement element : constantResultMap.keySet()) {
-					MagicEdges magicEdges = new MagicEdges(element.toString(), constantResultMap.get(element).toString());
-					listView.getItems().add(magicEdges);
-				}
+				addEvalElementsAsGroups(constantEvalElements);
 				
 				List<IEvalElement> variableEvalElements = stateSpace.getLoadedMachine().getVariableEvalElements();
-				final EvaluateFormulasCommand variableEvalCmd = new EvaluateFormulasCommand(variableEvalElements,
-						currentTrace.getCurrentState().getId());
-				stateSpace.execute(variableEvalCmd);
-				Map<IEvalElement, AbstractEvalResult> variableResultMap = variableEvalCmd.getResultMap();
-				for (IEvalElement element : variableResultMap.keySet()) {
-					MagicEdges magicEdges = new MagicEdges(element.toString(), variableResultMap.get(element).toString());
-					listView.getItems().add(magicEdges);
-				}
+				addEvalElementsAsGroups(variableEvalElements);
 			}
 		});
 	}

@@ -1,12 +1,19 @@
 package de.prob2.ui.visualisation.magiclayout.editPane;
 
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
+import de.prob.animator.command.EvaluateFormulasCommand;
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
+import de.prob2.ui.visualisation.magiclayout.MagicEdges;
+import de.prob2.ui.visualisation.magiclayout.MagicNodes;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
@@ -119,6 +126,19 @@ public class MagicLayoutEditPane extends VBox {
 		listView.getSelectionModel().select(component);
 	}
 
+	void addEvalElementsAsGroups(List<IEvalElement> evalElements) {
+		final EvaluateFormulasCommand evalCmd = new EvaluateFormulasCommand(evalElements,
+				currentTrace.getCurrentState().getId());
+		currentTrace.getStateSpace().execute(evalCmd);
+		Map<IEvalElement, AbstractEvalResult> resultMap = evalCmd.getResultMap();
+		for (IEvalElement element : resultMap.keySet()) {
+			MagicComponent magicComponent = (this instanceof MagicLayoutEditNodes)
+					? new MagicNodes(element.toString(), resultMap.get(element).toString())
+					: new MagicEdges(element.toString(), resultMap.get(element).toString());
+			listView.getItems().add(magicComponent);
+		}
+	}
+
 	VBox wrapInVBox(String caption, Control control) {
 		VBox vbox = new VBox();
 		Label label = new Label(caption);
@@ -165,7 +185,7 @@ public class MagicLayoutEditPane extends VBox {
 			final MenuItem newEdgesItem = new MenuItem(
 					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newEdges"));
 			newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addEdges());
-			
+
 			cell.emptyProperty().addListener((observable, from, to) -> {
 				if (to) {
 					cell.setContextMenu((this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem)
@@ -191,9 +211,9 @@ public class MagicLayoutEditPane extends VBox {
 		final MenuItem newEdgesItem = new MenuItem(
 				bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newEdges"));
 		newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addEdges());
-		listView.setContextMenu((this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem) 
-				: new ContextMenu(newEdgesItem));
-		
+		listView.setContextMenu(
+				(this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem) : new ContextMenu(newEdgesItem));
+
 		listView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateValues());
 	}
 
