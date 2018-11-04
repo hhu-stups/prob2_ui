@@ -165,7 +165,7 @@ public class MagicLayoutEditPane extends VBox {
 			final MenuItem newEdgesItem = new MenuItem(
 					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newEdges"));
 			newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addEdges());
-
+			
 			cell.emptyProperty().addListener((observable, from, to) -> {
 				if (to) {
 					cell.setContextMenu((this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem)
@@ -184,6 +184,16 @@ public class MagicLayoutEditPane extends VBox {
 
 			return cell;
 		});
+		// add ContextMenu to empty ListView
+		final MenuItem newNodesItem = new MenuItem(
+				bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newNodes"));
+		newNodesItem.setOnAction(event -> ((MagicLayoutEditNodes) this).addNodes());
+		final MenuItem newEdgesItem = new MenuItem(
+				bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newEdges"));
+		newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addEdges());
+		listView.setContextMenu((this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem) 
+				: new ContextMenu(newEdgesItem));
+		
 		listView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateValues());
 	}
 
