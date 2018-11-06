@@ -6,7 +6,6 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.command.EvaluateFormulasCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob2.ui.internal.StageManager;
@@ -127,10 +126,9 @@ public class MagicLayoutEditPane extends VBox {
 	}
 
 	void addEvalElementsAsGroups(List<IEvalElement> evalElements) {
-		final EvaluateFormulasCommand evalCmd = new EvaluateFormulasCommand(evalElements,
-				currentTrace.getCurrentState().getId());
-		currentTrace.getStateSpace().execute(evalCmd);
-		Map<IEvalElement, AbstractEvalResult> resultMap = evalCmd.getResultMap();
+		
+		Map<IEvalElement, AbstractEvalResult> resultMap = currentTrace.getCurrentState().evalFormulas(evalElements);
+		
 		for (IEvalElement element : resultMap.keySet()) {
 			MagicComponent magicComponent = (this instanceof MagicLayoutEditNodes)
 					? new MagicNodes(element.toString(), resultMap.get(element).toString())
