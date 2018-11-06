@@ -1,5 +1,6 @@
 package de.prob2.ui.beditor;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
@@ -19,9 +20,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.GetAllUsedFilenamesCommand;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
-import de.prob.animator.command.GetMachineIdentifiersCommand;
-import de.prob.animator.command.GetMachineIdentifiersCommand.Category;
+import de.prob.animator.domainobjects.MachineFileInformation;
 import de.prob.model.eventb.EventBModel;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
@@ -30,7 +31,6 @@ import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -58,7 +58,7 @@ public class BEditorView extends BorderPane {
 	@FXML private Label warningLabel;
 	@FXML private BEditor beditor;
 	@FXML private HelpButton helpButton;
-	@FXML private ChoiceBox<String> machineChoice;
+	@FXML private ChoiceBox<MachineFileInformation> machineChoice;
 
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -134,38 +134,44 @@ public class BEditorView extends BorderPane {
 			if(to == null) {
 				return;
 			}
-			switchMachine(to);
+			switchMachine(to.getPath());
 		});
 		
 		this.stopActions.add(beditor::stopHighlighting);
 		helpButton.setHelpContent(this.getClass());
 	}
 	
-	private void switchMachine(String machine) {
-		final Path path = currentProject.getCurrentMachine().getPath();
-		final String[] separatedString = path.getFileName().toString().split("\\.");
-		final String extension = separatedString[separatedString.length - 1];
-		final Path machinePath = currentProject.getLocation().resolve(path.resolveSibling(machine + "." + extension));
+	private void switchMachine(String path) {
+		final Path machinePath = currentProject.getLocation().resolve(path);
 		resetWatching();
 		registerFile(machinePath);
 		
 		if(currentTrace.getModel() instanceof EventBModel) {
 			GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
 			currentTrace.getStateSpace().execute(cmd);
-			this.setEditorText(cmd.getPrettyPrint(), path);
+			this.setEditorText(cmd.getPrettyPrint(), machinePath);
 			beditor.setEditable(false);
 		} else {
+			String extension = path.split("\\.")[1];
 			setText(machinePath);
+			if("def".equals(extension)) {
+				beditor.setEditable(false);
+			}
 		}
 	}
 	
 	private void updateIncludedMachines() {
-		GetMachineIdentifiersCommand cmd = new GetMachineIdentifiersCommand(Category.MACHINES);
+		GetAllUsedFilenamesCommand cmd = new GetAllUsedFilenamesCommand();
 		currentTrace.getStateSpace().execute(cmd);
-		machineChoice.getItems().setAll(cmd.getIdentifiers());
-		if(cmd.getIdentifiers().isEmpty()) {
-			String fileName = currentProject.getCurrentMachine().getPath().getFileName().toString().split("\\.")[0];
-			machineChoice.getItems().add(fileName);
+		if(cmd.getFiles().isEmpty()) {
+			String machinePath = currentProject.getCurrentMachine().getPath().toString();
+			String[] machinePathSeparated = machinePath.split(File.separator);
+			String[] fileSeparated = machinePathSeparated[machinePathSeparated.length - 1].split("\\.");
+			String file = fileSeparated[0];
+			String extension = machinePathSeparated[1];
+			machineChoice.getItems().add(new MachineFileInformation(file, extension, machinePath));
+		} else {
+			machineChoice.getItems().setAll(cmd.getFiles());
 		}
 		machineChoice.getSelectionModel().selectFirst();
 	}
@@ -241,7 +247,7 @@ public class BEditorView extends BorderPane {
 			LOGGER.error(String.format("Could not read file: %s", path), e);
 			return;
 		}
-		Platform.runLater(() -> this.setEditorText(text, path));
+		this.setEditorText(text, path);
 	}
 
 	@FXML
