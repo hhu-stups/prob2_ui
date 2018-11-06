@@ -1,6 +1,7 @@
 package de.prob2.ui.visualisation.magiclayout;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditEdges;
@@ -11,6 +12,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 
+@Singleton
 public class MagicLayoutView extends Stage {
 
 	@FXML

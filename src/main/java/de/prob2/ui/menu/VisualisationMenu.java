@@ -52,7 +52,9 @@ public class VisualisationMenu extends Menu {
 	
 	@FXML
 	private void openMagicLayout() {
-		injector.getInstance(MagicLayoutView.class).show();
+		MagicLayoutView magicLayout = injector.getInstance(MagicLayoutView.class);
+		magicLayout.show();
+		magicLayout.toFront();
 	}
 
 	@FXML
