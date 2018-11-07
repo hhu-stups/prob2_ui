@@ -1,6 +1,7 @@
 package de.prob2.ui.dynamic.dotty;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -135,7 +136,7 @@ public class DotView extends DynamicCommandStage {
 				if(!Thread.currentThread().isInterrupted()) {
 					loadGraph(text);
 				}
-			} catch (IOException | ProBError | EvaluationException e) {
+			} catch (IOException | UncheckedIOException | ProBError | EvaluationException e) {
 				LOGGER.error("Graph visualization failed", e);
 				currentThread.set(null);
 				Platform.runLater(() -> {
