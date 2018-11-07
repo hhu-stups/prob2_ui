@@ -23,10 +23,8 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
-import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.dynamic.DynamicCommandStage;
-import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
@@ -35,6 +33,7 @@ import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
@@ -132,18 +131,7 @@ public class DotView extends DynamicCommandStage {
 					currentThread.set(null);
 					return;
 				}
-				if (item.getArity() > 0) {
-					formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
-				}
-				State id = trace.getCurrentState();
-				final Path path = Files.createTempFile("prob2-ui-dot", ".svg");
-				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, path.toFile(), formulas);
-				trace.getStateSpace().execute(cmd);
-				final String text;
-				try (final Stream<String> lines = Files.lines(path)) {
-					text = lines.collect(Collectors.joining("\n"));
-				}
-				Files.delete(path);
+				final String text = getSvgForDotCommand(trace, item, formulas);
 				if(!Thread.currentThread().isInterrupted()) {
 					loadGraph(text);
 				}
@@ -159,6 +147,21 @@ public class DotView extends DynamicCommandStage {
 		}, "Graph Visualizer");
 		currentThread.set(thread);
 		thread.start();
+	}
+
+	private String getSvgForDotCommand(final Trace trace, final DynamicCommandItem item, final List<IEvalElement> formulas) throws IOException {
+		if (item.getArity() > 0) {
+			formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
+		}
+		final Path path = Files.createTempFile("prob2-ui-dot", ".svg");
+		GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(trace.getCurrentState(), item, path.toFile(), formulas);
+		trace.getStateSpace().execute(cmd);
+		final String text;
+		try (final Stream<String> lines = Files.lines(path)) {
+			text = lines.collect(Collectors.joining("\n"));
+		}
+		Files.delete(path);
+		return text;
 	}
 
 	private void loadGraph(final String svg) {
