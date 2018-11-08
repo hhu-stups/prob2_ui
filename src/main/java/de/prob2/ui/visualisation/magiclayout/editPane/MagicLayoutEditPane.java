@@ -125,14 +125,14 @@ public class MagicLayoutEditPane extends VBox {
 		listView.getItems().add(component);
 		listView.getSelectionModel().select(component);
 	}
-
+	
 	void addEvalElementsAsGroups(List<IEvalElement> evalElements) {
 		
 		Map<IEvalElement, AbstractEvalResult> resultMap = currentTrace.getCurrentState().evalFormulas(evalElements);
 		
 		for (IEvalElement element : resultMap.keySet()) {
 			MagicComponent magicComponent = (this instanceof MagicLayoutEditNodes)
-					? new MagicNodes(element.toString(), resultMap.get(element).toString())
+					? new MagicNodes(element.toString(), resultMap.get(element).toString(), true)
 					: new MagicEdges(element.toString(), resultMap.get(element).toString());
 			listView.getItems().add(magicComponent);
 		}

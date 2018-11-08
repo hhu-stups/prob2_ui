@@ -12,10 +12,10 @@ public class MagicNodes extends MagicComponent {
 	private final ObjectProperty<MagicShape> shape = new SimpleObjectProperty<>();
 	private final ObjectProperty<Color> nodeColor = new SimpleObjectProperty<>();
 	
-	public MagicNodes(String name, String expression) {
+	public MagicNodes(String name, String expression, boolean cluster) {
 		super(name, expression);
 		
-		this.cluster.set(false);
+		this.cluster.set(cluster);
 		this.shape.set(MagicShape.RECTANGLE);
 		this.nodeColor.set(Color.WHITE);
 	}
