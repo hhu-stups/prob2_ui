@@ -78,8 +78,13 @@ public class ProB2 extends Application {
 			StageManager stageManager = injector.getInstance(StageManager.class);
 			Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
 				LOGGER.error("Uncaught exception on thread {}", thread, exc);
-				Platform.runLater(() -> stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header",
-						"common.alerts.internalException.content", thread).show());
+				Platform.runLater(() -> {
+					try {
+						stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread).show();
+					} catch (Throwable t) {
+						LOGGER.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
+					}
+				});
 			});
 
 			System.setProperty("prob.stdlib", Main.getProBDirectory() + File.separator + "stdlib");
