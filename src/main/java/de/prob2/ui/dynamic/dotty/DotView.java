@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.ComposedCommand;
 import de.prob.animator.command.GetAllDotCommands;
 import de.prob.animator.command.GetDotForVisualizationCommand;
 import de.prob.animator.command.GetPreferenceCommand;
@@ -168,11 +169,15 @@ public class DotView extends DynamicCommandStage {
 		try {
 			final GetPreferenceCommand getDotCmd = new GetPreferenceCommand("DOT");
 			final GetPreferenceCommand getDotEngineCmd = new GetPreferenceCommand("DOT_ENGINE");
-			trace.getStateSpace().execute(
+			final ComposedCommand ccmd = new ComposedCommand(
 				getDotCmd,
 				getDotEngineCmd,
 				new GetDotForVisualizationCommand(trace.getCurrentState(), item, dotFilePath.toFile(), formulas)
 			);
+			trace.getStateSpace().execute(ccmd);
+			if (ccmd.isInterrupted()) {
+				throw new InterruptedException("Visualization command execution was interrupted");
+			}
 			final String dot = getDotCmd.getValue();
 			final String dotEngine = item.getAdditionalInfo().stream()
 				.filter(t -> "preferred_dot_type".equals(t.getFunctor()))
