@@ -4,6 +4,7 @@ public enum MagicShape {
 	
 	RECTANGLE("visualisation.magicLayout.shapes.rectangle"),
 	CIRCLE("visualisation.magicLayout.shapes.circle"),
+	ELLIPSE("visualisation.magicLayout.shapes.ellipse"),
 	TRIANGLE("visualisation.magicLayout.shapes.triangle"),
 	;
 
