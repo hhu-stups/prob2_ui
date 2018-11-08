@@ -1,5 +1,6 @@
 package de.prob2.ui.visualisation.magiclayout.editPane;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -101,6 +102,12 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 	public void addNodes() {
 		MagicNodes nodes = new MagicNodes("nodes");
 		super.addMagicComponent(nodes);
+	}
+	
+	public List<MagicNodes> getNodes() {
+		List<MagicNodes> nodesList = new ArrayList<>();
+		listView.getItems().forEach(comp -> nodesList.add((MagicNodes) comp));
+		return nodesList;
 	}
 
 }

@@ -1,5 +1,6 @@
 package de.prob2.ui.visualisation.magiclayout.editPane;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -82,4 +83,9 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		super.addMagicComponent(edges);
 	}
 
+	public List<MagicEdges> getEdges() {
+		List<MagicEdges> edgesList = new ArrayList<>();
+		listView.getItems().forEach(comp -> edgesList.add((MagicEdges) comp));
+		return edgesList;
+	}
 }
