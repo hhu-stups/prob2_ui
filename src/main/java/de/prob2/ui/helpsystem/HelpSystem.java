@@ -28,11 +28,9 @@ import com.google.inject.Singleton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.Main;
-
 import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
 
-import de.prob2.ui.persistence.UIState;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -54,7 +52,6 @@ public class HelpSystem extends StackPane {
 	private URI helpURI;
 	boolean isJar;
 	boolean isHelpButton;
-	private UIState uiState;
 	String helpSubdirectoryString = "help_en";
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
 
@@ -170,12 +167,8 @@ public class HelpSystem extends StackPane {
 		}
 	}
 
-	private boolean isCurrentLanguage(String language) {
-		try {
-			return uiState.getLocaleOverride().toString().startsWith(language);
-		} catch (NullPointerException e) {
-			return Locale.getDefault().toString().startsWith(language);
-		}
+	private static boolean isCurrentLanguage(String language) {
+		return Locale.getDefault().toString().startsWith(language);
 	}
 
 	private void setHelpSubdirectoryString() {
