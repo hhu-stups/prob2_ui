@@ -9,6 +9,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
+import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import de.prob2.ui.visualisation.magiclayout.MagicNodes;
 import de.prob2.ui.visualisation.magiclayout.MagicShape;
 import javafx.fxml.FXML;
@@ -36,8 +37,8 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 
 	@Inject
 	public MagicLayoutEditNodes(final StageManager stageManager, final ResourceBundle bundle,
-			final CurrentTrace currentTrace) {
-		super(stageManager, bundle, currentTrace);
+			final CurrentTrace currentTrace, final MagicGraphI magicGraph) {
+		super(stageManager, bundle, currentTrace, magicGraph);
 	}
 
 	@FXML
@@ -52,7 +53,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		this.getChildren().add(2, clusterCheckBox);
 
 		shapeComboBox = new ComboBox<>();
-		shapeComboBox.getItems().setAll(MagicShape.values());
+		shapeComboBox.getItems().setAll(this.magicGraph.getPossibleShapes());
 		shapeComboBox.setCellFactory((ListView<MagicShape> lv) -> new MagicShapeListCell());
 		shapeComboBox.setButtonCell(new MagicShapeListCell());
 		shapeComboBox.getSelectionModel().selectFirst();
@@ -73,9 +74,8 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 				addEvalElementsAsGroups(setEvalElements);
 			}
 		});
-
 	}
-
+	
 	@Override
 	void updateValues(MagicComponent selectedComponent) {
 		super.updateValues(selectedComponent);

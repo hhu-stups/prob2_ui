@@ -12,6 +12,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicEdges;
+import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import de.prob2.ui.visualisation.magiclayout.MagicNodes;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -74,21 +75,21 @@ public class MagicLayoutEditPane extends VBox {
 
 	final ResourceBundle bundle;
 	final CurrentTrace currentTrace;
+	final MagicGraphI magicGraph;
 
 	@Inject
 	public MagicLayoutEditPane(final StageManager stageManager, final ResourceBundle bundle,
-			final CurrentTrace currentTrace) {
+			final CurrentTrace currentTrace, final MagicGraphI magicGraph) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
+		this.magicGraph = magicGraph;
 		stageManager.loadFXML(this, "magic_layout_edit_pane.fxml");
 	}
 
 	@FXML
 	public void initialize() {
 		initListView();
-
 		initLineTypeComboBox();
-
 		initLineWidthComboBox();
 	}
 
@@ -119,7 +120,7 @@ public class MagicLayoutEditPane extends VBox {
 			lineWidthComboBox.getSelectionModel().selectFirst();
 		}
 	}
-
+	
 	void addMagicComponent(MagicComponent component) {
 		listView.getItems().add(component);
 		listView.getSelectionModel().select(component);

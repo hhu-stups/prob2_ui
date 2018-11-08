@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 @Singleton
@@ -27,18 +28,23 @@ public class MagicLayoutView extends Stage {
 	private MagicLayoutEditNodes magicLayoutEditNodes;
 	@FXML
 	private MagicLayoutEditEdges magicLayoutEditEdges;
+	@FXML
+	private StackPane magicGraphPane;
 
 	private final StageManager stageManager;
+	private final MagicGraphI magicGraph;
 
 	@Inject
-	public MagicLayoutView(final StageManager stageManager) {
+	public MagicLayoutView(final StageManager stageManager, MagicGraphI magicGraph) {
 		this.stageManager = stageManager;
+		this.magicGraph = magicGraph;
 		stageManager.loadFXML(this, "magic_layout_view.fxml");
 	}
 
 	@FXML
 	public void initialize() {
 		stageManager.setMacMenuBar(this, menuBar);
+		magicGraphPane.getChildren().add(magicGraph.generateMagicGraph());
 	}
 	
 	@FXML
