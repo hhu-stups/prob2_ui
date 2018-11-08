@@ -1,6 +1,10 @@
 package de.prob2.ui.dynamic.dotty;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -9,24 +13,24 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetAllDotCommands;
-import de.prob.animator.command.GetSvgForVisualizationCommand;
+import de.prob.animator.command.GetDotForVisualizationCommand;
+import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
-import de.prob.statespace.State;
+import de.prob.parser.BindingGenerator;
+import de.prob.prolog.term.PrologTerm;
 import de.prob.statespace.Trace;
 import de.prob2.ui.dynamic.DynamicCommandStage;
-import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
@@ -35,6 +39,7 @@ import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
@@ -132,22 +137,15 @@ public class DotView extends DynamicCommandStage {
 					currentThread.set(null);
 					return;
 				}
-				if (item.getArity() > 0) {
-					formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
-				}
-				State id = trace.getCurrentState();
-				final Path path = Files.createTempFile("prob2-ui-dot", ".svg");
-				GetSvgForVisualizationCommand cmd = new GetSvgForVisualizationCommand(id, item, path.toFile(), formulas);
-				trace.getStateSpace().execute(cmd);
-				final String text;
-				try (final Stream<String> lines = Files.lines(path)) {
-					text = lines.collect(Collectors.joining("\n"));
-				}
-				Files.delete(path);
+				final String text = getSvgForDotCommand(trace, item, formulas);
 				if(!Thread.currentThread().isInterrupted()) {
 					loadGraph(text);
 				}
-			} catch (IOException | ProBError | EvaluationException e) {
+			} catch (InterruptedException e) {
+				LOGGER.info("Dot visualization interrupted", e);
+				Thread.currentThread().interrupt();
+				Platform.runLater(this::reset);
+			} catch (IOException | UncheckedIOException | ProBError | EvaluationException e) {
 				LOGGER.error("Graph visualization failed", e);
 				currentThread.set(null);
 				Platform.runLater(() -> {
@@ -159,6 +157,68 @@ public class DotView extends DynamicCommandStage {
 		}, "Graph Visualizer");
 		currentThread.set(thread);
 		thread.start();
+	}
+
+	private String getSvgForDotCommand(final Trace trace, final DynamicCommandItem item, final List<IEvalElement> formulas) throws IOException, InterruptedException {
+		if (item.getArity() > 0) {
+			formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
+		}
+		final Path dotFilePath = Files.createTempFile("prob2-ui", ".dot");
+		
+		try {
+			final GetPreferenceCommand getDotCmd = new GetPreferenceCommand("DOT");
+			final GetPreferenceCommand getDotEngineCmd = new GetPreferenceCommand("DOT_ENGINE");
+			trace.getStateSpace().execute(
+				getDotCmd,
+				getDotEngineCmd,
+				new GetDotForVisualizationCommand(trace.getCurrentState(), item, dotFilePath.toFile(), formulas)
+			);
+			final String dot = getDotCmd.getValue();
+			final String dotEngine = item.getAdditionalInfo().stream()
+				.filter(t -> "preferred_dot_type".equals(t.getFunctor()))
+				.peek(t -> BindingGenerator.getCompoundTerm(t, 1))
+				.map(t -> PrologTerm.atomicString(t.getArgument(1)))
+				.findAny()
+				.orElseGet(getDotEngineCmd::getValue);
+			
+			return getSvgForDotFile(dot, dotEngine, dotFilePath);
+		} finally {
+			try {
+				Files.delete(dotFilePath);
+			} catch (IOException e) {
+				LOGGER.error("Failed to delete temporary dot file", e);
+			}
+		}
+	}
+
+	private static String getSvgForDotFile(final String dotCommand, final String dotEngine, final Path dotFilePath) throws IOException, InterruptedException {
+		final ProcessBuilder dotProcessBuilder = new ProcessBuilder(dotCommand, "-K" + dotEngine, "-Tsvg", dotFilePath.toString());
+		LOGGER.debug("Starting dot command: {}", dotProcessBuilder.command());
+		final Process dotProcess = dotProcessBuilder.start();
+		final int exitCode = dotProcess.waitFor();
+		LOGGER.debug("dot exited with status code {}", exitCode);
+		
+		final String errorOutput;
+		try (
+			final Reader reader = new InputStreamReader(dotProcess.getErrorStream());
+			final BufferedReader br = new BufferedReader(reader);
+		) {
+			errorOutput = br.lines().collect(Collectors.joining("\n"));
+		}
+		if (!errorOutput.isEmpty()) {
+			LOGGER.error("Error output from dot:\n{}", errorOutput);
+		}
+		
+		if (exitCode != 0) {
+			throw new ProBError("dot exited with status code " + exitCode + ":\n" + errorOutput);
+		}
+		
+		try (
+			final Reader reader = new InputStreamReader(dotProcess.getInputStream());
+			final BufferedReader br = new BufferedReader(reader);
+		) {
+			return br.lines().collect(Collectors.joining("\n"));
+		}
 	}
 
 	private void loadGraph(final String svg) {

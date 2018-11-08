@@ -88,18 +88,6 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 	protected Button cancelButton;
 	
 	@FXML
-	protected Button applyButton;
-	
-	@FXML
-	protected Button resetButton;
-	
-	@FXML
-	protected Button undoButton;
-	
-	@FXML
-	protected Label applyWarning;
-	
-	@FXML
 	protected DynamicCommandStatusBar statusBar;
 	
 	@FXML
@@ -210,11 +198,7 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 				.map(preference -> new PrefItem(preference.name, "", preference.defaultValue, ProBPreferenceType.fromProBPreference(preference), preference.defaultValue, preference.description))
 				.collect(Collectors.toList()));
 		preferences.refresh();
-		if(preferences.getItems().isEmpty()) {
-			preferences.setVisible(false);
-		} else {
-			preferences.setVisible(true);
-		}
+		preferences.setVisible(!preferences.getItems().isEmpty());
 	}
 	
 	protected void fillCommands(AbstractGetDynamicCommands cmd) {

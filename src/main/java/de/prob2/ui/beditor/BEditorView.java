@@ -30,7 +30,7 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -123,7 +123,8 @@ public class BEditorView extends BorderPane {
 				this.setHint();
 			} else {
 				final Path machinePath = currentProject.getLocation().resolve(to.getPath());
-				if(currentProject.getCurrentMachine().getName().equals(machineChoice.getSelectionModel().getSelectedItem())) {
+				MachineFileInformation fileInformation = machineChoice.getSelectionModel().getSelectedItem();
+				if(fileInformation != null && currentProject.getCurrentMachine().getName().equals(fileInformation.getName())) {
 					registerFile(machinePath);
 					setText(machinePath);
 				}
@@ -152,11 +153,7 @@ public class BEditorView extends BorderPane {
 			this.setEditorText(cmd.getPrettyPrint(), machinePath);
 			beditor.setEditable(false);
 		} else {
-			String extension = path.split("\\.")[1];
 			setText(machinePath);
-			if("def".equals(extension)) {
-				beditor.setEditable(false);
-			}
 		}
 	}
 	
@@ -197,7 +194,7 @@ public class BEditorView extends BorderPane {
 				for (WatchEvent<?> event : key.pollEvents()) {
 					WatchEvent.Kind<?> kind = event.kind();
 					if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-						setText(path);
+						Platform.runLater(() -> setText(path));
 					}
 				}
 				key.reset();
