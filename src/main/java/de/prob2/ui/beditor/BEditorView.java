@@ -155,6 +155,7 @@ public class BEditorView extends BorderPane {
 		} else {
 			setText(machinePath);
 		}
+		beditor.clearHistory();
 	}
 	
 	private void updateIncludedMachines() {
