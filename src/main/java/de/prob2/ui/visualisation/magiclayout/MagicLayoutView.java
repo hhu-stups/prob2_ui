@@ -47,8 +47,12 @@ public class MagicLayoutView extends Stage {
 	@FXML
 	public void initialize() {
 		stageManager.setMacMenuBar(this, menuBar);
-		currentTrace.addListener((observable, from, to) -> magicGraphPane.getChildren().setAll
-				(magicGraph.generateMagicGraph(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges())));
+		magicGraphPane.getChildren().setAll(
+				magicGraph.generateMagicGraph(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges()));
+
+		//update the graph whenever the trace changes
+		currentTrace.addListener((observable, from, to) -> magicGraphPane.getChildren().setAll(
+				magicGraph.generateMagicGraph(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges())));
 	}
 
 	@FXML

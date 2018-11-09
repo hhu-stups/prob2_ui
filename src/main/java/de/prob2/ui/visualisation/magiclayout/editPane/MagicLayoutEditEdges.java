@@ -22,7 +22,7 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 
 	private ColorPicker textColorPicker;
 	private Spinner<Integer> textSizeSpinner;
-	
+
 	MagicGraphI magicGraph;
 
 	@Inject
@@ -47,20 +47,27 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textsize"), textSizeSpinner));
 
 		// add Constants, Variables from Machine as Edge Groups
+		if (currentTrace.getStateSpace() != null) {
+			addMachineElementsAsEdges();
+		}
 		currentTrace.addListener((observable, from, to) -> {
 			if (to != null && to.getStateSpace() != null) {
 				this.listView.getItems().clear();
 				this.updateValues();
 
-				StateSpace stateSpace = currentTrace.getStateSpace();
-
-				List<IEvalElement> constantEvalElements = stateSpace.getLoadedMachine().getConstantEvalElements();
-				addEvalElementsAsGroups(constantEvalElements);
-				
-				List<IEvalElement> variableEvalElements = stateSpace.getLoadedMachine().getVariableEvalElements();
-				addEvalElementsAsGroups(variableEvalElements);
+				addMachineElementsAsEdges();
 			}
 		});
+	}
+
+	private void addMachineElementsAsEdges() {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+
+		List<IEvalElement> constantEvalElements = stateSpace.getLoadedMachine().getConstantEvalElements();
+		addEvalElementsAsGroups(constantEvalElements);
+
+		List<IEvalElement> variableEvalElements = stateSpace.getLoadedMachine().getVariableEvalElements();
+		addEvalElementsAsGroups(variableEvalElements);
 	}
 
 	@Override
