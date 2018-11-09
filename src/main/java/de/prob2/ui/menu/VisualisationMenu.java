@@ -9,6 +9,7 @@ import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.formula.FormulaStage;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
@@ -22,13 +23,17 @@ import javafx.stage.Stage;
 @Singleton
 public class VisualisationMenu extends Menu {
 	@FXML private MenuItem enterFormulaForVisualization;
+	@FXML private MenuItem graphVisualization;
+	@FXML private MenuItem tableVisualization;
 	
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 
 	@Inject
-	public VisualisationMenu(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace) {
+	public VisualisationMenu(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace, final CurrentProject currentProject) {
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "visualisationMenu.fxml");
 	}
@@ -37,6 +42,8 @@ public class VisualisationMenu extends Menu {
 	public void initialize() {
 		this.enterFormulaForVisualization.disableProperty()
 				.bind(currentTrace.currentStateProperty().initializedProperty().not());
+		this.graphVisualization.disableProperty().bind(currentProject.currentMachineProperty().isNull());
+		this.tableVisualization.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 	}
 	
 	@FXML
