@@ -6,13 +6,13 @@ import javafx.scene.layout.Pane;
 public class Graph extends Pane {
 
 	public Graph() {
-		Node cir = new Node(Node.Type.CIRCLE, "I'm a Circle.");
+		Vertex cir = new Vertex(Vertex.Type.CIRCLE, "I'm a Circle.");
 		cir.relocate(50, 50);
 		
-		Node el = new Node(Node.Type.ELLIPSE, "I'm a Ellipse.");
+		Vertex el = new Vertex(Vertex.Type.ELLIPSE, "I'm a Ellipse.");
 		el.relocate(150, 150);
 		
-		this.getChildren().addAll(new Node(Node.Type.RECTANGLE, "I'm a Rectangle."), cir, el);
+		this.getChildren().addAll(new Vertex(Vertex.Type.RECTANGLE, "I'm a Rectangle."), cir, el);
 	}
 
 	@FXML

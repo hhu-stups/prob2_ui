@@ -8,7 +8,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 
-public class Node extends StackPane {
+public class Vertex extends StackPane {
 
 	public enum Type {
 		RECTANGLE, CIRCLE, ELLIPSE
@@ -17,7 +17,7 @@ public class Node extends StackPane {
 	Text txt;
 	Shape shape;
 
-	public Node(Type type, String caption) {
+	public Vertex(Type type, String caption) {
 		this.txt = new Text(caption);
 		Double txtWidth = this.txt.getLayoutBounds().getWidth();
 		Double txtHeight = this.txt.getLayoutBounds().getHeight();
