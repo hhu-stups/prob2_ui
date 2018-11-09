@@ -50,4 +50,12 @@ public class Vertex extends StackPane {
 		
 		this.relocate(Math.random()*500, Math.random()*450);
 	}
+
+	public double getCenterX() {
+		return this.getLayoutX() + shape.getLayoutBounds().getWidth() / 2;
+	}
+	
+	public double getCenterY() {
+		return this.getLayoutY() + shape.getLayoutBounds().getHeight() / 2;
+	}
 }

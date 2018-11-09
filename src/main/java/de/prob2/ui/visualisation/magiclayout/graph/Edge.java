@@ -15,8 +15,8 @@ public class Edge extends Group {
 		this.source = source;
 		this.target = target;
 
-		this.line = new Line(source.getLayoutX(), source.getLayoutY(), target.getLayoutX(),
-				target.getLayoutY());
+		this.line = new Line(source.getCenterX(), source.getCenterY(), target.getCenterX(),
+				target.getCenterY());
 		
 		this.txt = new Text(caption);
 		
