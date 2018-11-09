@@ -36,7 +36,7 @@
 					</MenuBar>
 				</top>
 				<center>
-					<SplitPane dividerPositions="0.15">
+					<SplitPane dividerPositions="0.2">
 						<TabPane fx:id="editTabPane" side="LEFT" prefWidth="200">
 							<Tab fx:id="editNodesTab"
 								text="%visualisation.magicLayout.view.tabs.nodes"
@@ -51,8 +51,7 @@
 									fx:id="magicLayoutEditEdges" />
 							</Tab>
 						</TabPane>
-						<Label text="MAGIC LAYOUT GRAPH" prefWidth="600"
-							alignment="CENTER" />
+						<StackPane fx:id="magicGraphPane" prefWidth="800"/>
 					</SplitPane>
 				</center>
 			</BorderPane>
