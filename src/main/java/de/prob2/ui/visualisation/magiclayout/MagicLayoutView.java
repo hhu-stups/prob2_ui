@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditEdges;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditNodes;
 import javafx.fxml.FXML;
@@ -33,26 +34,29 @@ public class MagicLayoutView extends Stage {
 
 	private final StageManager stageManager;
 	private final MagicGraphI magicGraph;
+	private final CurrentTrace currentTrace;
 
 	@Inject
-	public MagicLayoutView(final StageManager stageManager, MagicGraphI magicGraph) {
+	public MagicLayoutView(final StageManager stageManager, MagicGraphI magicGraph, CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
 		this.magicGraph = magicGraph;
+		this.currentTrace = currentTrace;
 		stageManager.loadFXML(this, "magic_layout_view.fxml");
 	}
 
 	@FXML
 	public void initialize() {
 		stageManager.setMacMenuBar(this, menuBar);
-		magicGraphPane.getChildren().add(magicGraph.generateMagicGraph());
+		currentTrace.addListener((observable, from, to) -> magicGraphPane.getChildren().setAll
+				(magicGraph.generateMagicGraph(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges())));
 	}
-	
+
 	@FXML
 	private void newNodeGroup() {
 		editTabPane.getSelectionModel().select(editNodesTab);
 		magicLayoutEditNodes.addNodes();
 	}
-	
+
 	@FXML
 	private void newEdgeGroup() {
 		editTabPane.getSelectionModel().select(editEdgesTab);

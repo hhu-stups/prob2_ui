@@ -14,28 +14,40 @@ public class Vertex extends StackPane {
 		RECTANGLE, CIRCLE, ELLIPSE
 	}
 
-	Text txt;
-	Shape shape;
+	private Text txt;
+	private Shape shape;
+	
+	public Vertex(String caption) {
+		this(caption, caption);
+	}
+	
+	public Vertex(String id, String caption) {
+		this(id, Type.RECTANGLE, caption);
+	}
 
-	public Vertex(Type type, String caption) {
+	public Vertex(String id, Type type, String caption) {
+		this.setId(id);
+		
 		this.txt = new Text(caption);
 		Double txtWidth = this.txt.getLayoutBounds().getWidth();
 		Double txtHeight = this.txt.getLayoutBounds().getHeight();
 
 		switch (type) {
 		case CIRCLE:
-			this.shape = new Circle(0, 0, (txtWidth + 20) / 2);
+			this.shape = new Circle((txtWidth + 20) / 2);
 			break;
 		case ELLIPSE:
 			this.shape = new Ellipse((txtWidth + 50) / 2, (txtHeight + 50) / 2);
 			break;
 		default:
-			this.shape = new Rectangle(0, 0, txtWidth + 20, txtHeight + 10);
+			this.shape = new Rectangle(txtWidth + 20, txtHeight + 10);
 		}
 
 		this.shape.setFill(Color.WHITE);
 		this.shape.setStroke(Color.BLACK);
 
 		this.getChildren().addAll(shape, txt);
+		
+		this.relocate(Math.random()*500, Math.random()*450);
 	}
 }
