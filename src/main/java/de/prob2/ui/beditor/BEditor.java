@@ -375,4 +375,8 @@ public class BEditor extends CodeArea {
 		}
 		return spansBuilder.create();
 	}
+	
+	public void clearHistory() {
+		this.getUndoManager().forgetHistory();
+	}
 }
