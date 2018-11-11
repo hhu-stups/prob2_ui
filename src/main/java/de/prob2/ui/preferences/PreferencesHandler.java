@@ -1,15 +1,8 @@
 package de.prob2.ui.preferences;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob2.ui.dynamic.dotty.DotView;
@@ -17,6 +10,11 @@ import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Singleton
 public class PreferencesHandler {
@@ -65,10 +63,6 @@ public class PreferencesHandler {
 			} else {
 				this.globalPreferences.put(entry.getKey(), entry.getValue());
 			}
-		}
-
-		if (this.currentProject.getCurrentMachine() != null) {
-			this.currentProject.reloadCurrentMachine();
 		}
 	}
 	

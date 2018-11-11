@@ -83,7 +83,7 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 
 	@FXML
 	protected ScrollPane pane;
-	
+
 	@FXML
 	protected Button cancelButton;
 	
@@ -159,7 +159,16 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 			lastItem = to;
 		});
 		lvChoice.disableProperty().bind(currentThread.isNotNull());
-		
+
+		cbContinuous.selectedProperty().addListener((observable, from, to) -> {
+			if(!from && to) {
+				DynamicCommandItem choice = lvChoice.getSelectionModel().getSelectedItem();
+				if(choice != null) {
+					visualize(choice);
+				}
+			}
+		});
+
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> refresh());
 		currentTrace.addListener((observable, from, to) -> refresh());
 		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> refresh());
@@ -198,7 +207,6 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 				.map(preference -> new PrefItem(preference.name, "", preference.defaultValue, ProBPreferenceType.fromProBPreference(preference), preference.defaultValue, preference.description))
 				.collect(Collectors.toList()));
 		preferences.refresh();
-		preferences.setVisible(!preferences.getItems().isEmpty());
 	}
 	
 	protected void fillCommands(AbstractGetDynamicCommands cmd) {
@@ -249,5 +257,6 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 	private void handleClose() {
 		this.close();
 	}
-	
+
+
 }

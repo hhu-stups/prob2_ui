@@ -15,6 +15,6 @@
 		<TableColumn fx:id="tvDescription" editable="false" minWidth="80.0" prefWidth="200.0" styleClass="left" sortable="false" text="%preferences.preferencesView.table.columns.description" />
 	</columns>
 	<placeholder>
-		<Label text="%common.noModelLoaded" />
+		<Label text="%dynamic.noRelevantPreferences" />
 	</placeholder>
 </fx:root>
