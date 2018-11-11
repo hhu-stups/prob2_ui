@@ -15,13 +15,16 @@ public class Edge extends Group {
 		this.source = source;
 		this.target = target;
 
-		this.line = new Line(source.getCenterX(), source.getCenterY(), target.getCenterX(),
-				target.getCenterY());
-		
+		this.line = new Line(source.getCenterX(), source.getCenterY(), target.getCenterX(), target.getCenterY());
+
 		this.txt = new Text(caption);
-		
+		this.txt.relocate(
+				Math.abs(source.getCenterX() - target.getCenterX()) / 2
+						+ (source.getCenterX() > target.getCenterX() ? target.getCenterX() : source.getCenterX()),
+				Math.abs(source.getCenterY() - target.getCenterY()) / 2
+						+ (source.getCenterY() > target.getCenterY() ? target.getCenterY() : source.getCenterY()));
+
 		this.getChildren().addAll(line, txt);
 	}
-	
-	
+
 }
