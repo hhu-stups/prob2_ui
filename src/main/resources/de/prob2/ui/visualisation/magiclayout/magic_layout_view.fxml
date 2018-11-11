@@ -51,7 +51,8 @@
 									fx:id="magicLayoutEditEdges" />
 							</Tab>
 						</TabPane>
-						<StackPane fx:id="magicGraphPane" prefWidth="800"/>
+						<Label text="MAGIC LAYOUT GRAPH" prefWidth="800"
+							alignment="CENTER" />
 					</SplitPane>
 				</center>
 			</BorderPane>
