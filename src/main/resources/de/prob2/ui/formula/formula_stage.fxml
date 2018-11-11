@@ -7,7 +7,7 @@
 <?import javafx.scene.Scene?>
 <?import de.prob2.ui.formula.FormulaStage?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import de.prob2.ui.internal.DynamicCommandStatusBar?>
+<?import de.prob2.ui.dynamic.DynamicCommandStatusBar?>
 <?import de.prob2.ui.menu.*?>
 
 <fx:root type="FormulaStage" title="%formula.stage.title"
