@@ -8,7 +8,6 @@ import de.prob.exception.ProBError;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +24,6 @@ public class PreferencesHandler {
 	
 	private final ProBPreferences globalProBPrefs;
 	
-	private final CurrentProject currentProject;
-	
 	private final PreferencesView globalPrefsView;
 	
 	private final StageManager stageManager;
@@ -36,11 +33,10 @@ public class PreferencesHandler {
 	@Inject
 	private PreferencesHandler(final StageManager stageManager, final GlobalPreferences globalPreferences, 
 			final ProBPreferences globalProBPrefs, final MachineLoader machineLoader, final PreferencesView globalPrefsView,
-			final CurrentProject currentProject, final Injector injector) {
+			final Injector injector) {
 		this.globalPreferences = globalPreferences;
 		this.globalProBPrefs = globalProBPrefs;
 		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace());
-		this.currentProject = currentProject;
 		this.globalPrefsView = globalPrefsView;
 		this.stageManager = stageManager;
 		this.injector = injector;
