@@ -58,4 +58,20 @@ public class Vertex extends StackPane {
 	public double getCenterY() {
 		return this.getLayoutY() + shape.getLayoutBounds().getHeight() / 2;
 	}
+	
+	public double getLeftX() {
+		return this.getLayoutX();
+	}
+	
+	public double getRightX() {
+		return this.getLayoutX() + shape.getLayoutBounds().getWidth();
+	}
+	
+	public double getTopY() {
+		return this.getLayoutY();
+	}
+	
+	public double getBottomY() {
+		return this.getLayoutY() + shape.getLayoutBounds().getHeight();
+	}
 }
