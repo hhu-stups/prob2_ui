@@ -48,7 +48,7 @@ public class Vertex extends StackPane {
 
 		this.getChildren().addAll(shape, txt);
 		
-		this.relocate(Math.random()*500, Math.random()*450);
+		this.relocate(Math.random()*750, Math.random()*500);
 	}
 
 	public double getCenterX() {
