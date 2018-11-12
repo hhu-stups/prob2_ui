@@ -172,10 +172,15 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@FXML
 	private void save() {
 		FileChooser fileChooser = new FileChooser();
+		FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
+		fileChooser.getExtensionFilters().add(filter);
 		fileChooser.setTitle(bundle.getString("common.fileChooser.saveAsCSV.title"));
 		File file = fileChooser.showSaveDialog(new Stage());
 		if(file == null || currentTable == null) {
 			return;
+		}
+		if(!file.getPath().endsWith(".csv")) {
+			file = new File(file.getPath() + ".csv");
 		}
 		try {
 			Files.write(file.toPath(), toCSV(currentTable.get()));
