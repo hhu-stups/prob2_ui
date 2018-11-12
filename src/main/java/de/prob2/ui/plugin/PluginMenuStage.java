@@ -1,16 +1,8 @@
 package de.prob2.ui.plugin;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.internal.StageManager;
-
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -18,25 +10,23 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
 import org.pf4j.PluginState;
 import org.pf4j.PluginStateListener;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Created by Christoph Heinzen on 03.08.17.
@@ -74,7 +64,7 @@ public class PluginMenuStage extends Stage {
 		this.bundle = bundle;
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "plugin_menu_stage.fxml", this.getClass().getName());
-		initModality(Modality.APPLICATION_MODAL);
+		initModality(Modality.NONE);
 		initOwner(stageManager.getMainStage());
 	}
 
@@ -85,7 +75,7 @@ public class PluginMenuStage extends Stage {
 		pluginList = FXCollections.observableArrayList();
 
 		stateListener = event -> {
-			PluginWrapper plugin = event.getPlugin();
+			final PluginWrapper plugin = event.getPlugin();
 			if (plugin.getPlugin() != null) {
 				if (pluginList.contains(plugin) && !getProBJarPluginManager().getPlugins().contains(plugin)) {
 					// a plugin was removed
@@ -103,7 +93,7 @@ public class PluginMenuStage extends Stage {
 		configureColumns();
 		configureContextMenu();
 
-		FilteredList<PluginWrapper> pluginFilteredList = new FilteredList<>(pluginList, p -> true);
+		final FilteredList<PluginWrapper> pluginFilteredList = new FilteredList<>(pluginList, p -> true);
 		pluginSearchTextField.textProperty().addListener((observable, oldValue, newValue) ->
 			pluginFilteredList.setPredicate(
 				plugin -> newValue == null ||
@@ -133,7 +123,7 @@ public class PluginMenuStage extends Stage {
 
 	@FXML
 	private void changePath() {
-		List<PluginWrapper> plugins = proBPluginManager.changePluginDirectory();
+		final List<PluginWrapper> plugins = proBPluginManager.changePluginDirectory();
 		if (plugins != null) {
 			pluginList.clear();
 			pluginList.addAll(plugins);
@@ -148,7 +138,7 @@ public class PluginMenuStage extends Stage {
 		nameCol.setSortable(false);
 
 		versionCol.setCellFactory(param -> {
-			TextFieldTableCell<PluginWrapper, String> cell = new TextFieldTableCell<>();
+			final TextFieldTableCell<PluginWrapper, String> cell = new TextFieldTableCell<>();
 			cell.setAlignment(Pos.CENTER);
 			return cell;
 		});
@@ -156,13 +146,13 @@ public class PluginMenuStage extends Stage {
 		versionCol.setSortable(false);
 
 		activeCol.setCellFactory(param -> {
-			CheckBoxTableCell<PluginWrapper, Boolean> cell = new CheckBoxTableCell<>();
+			final CheckBoxTableCell<PluginWrapper, Boolean> cell = new CheckBoxTableCell<>();
 			cell.setAlignment(Pos.CENTER);
 			return cell;
 		});
 		activeCol.setCellValueFactory(param -> {
 			final PluginWrapper plugin = param.getValue();
-			SimpleBooleanProperty booleanProp = new SimpleBooleanProperty(plugin.getPluginState() == PluginState.STARTED);
+			final SimpleBooleanProperty booleanProp = new SimpleBooleanProperty(plugin.getPluginState() == PluginState.STARTED);
 			booleanProp.addListener((observable, oldValue, newValue) -> {
 				if (newValue) {
 					getProBJarPluginManager().startPlugin(plugin.getPluginId());
@@ -171,7 +161,7 @@ public class PluginMenuStage extends Stage {
 				}
 				try {
 					proBPluginManager.writeInactivePlugins();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOGGER.error("Failed to write list of inactive plugins", e);
 					stageManager.makeExceptionAlert(e, "plugin.alerts.couldNotWriteInactive.content").show();
 				}
@@ -186,7 +176,7 @@ public class PluginMenuStage extends Stage {
 			final TableRow<PluginWrapper> row = new TableRow<>();
 			row.setOnMouseClicked(clickEvent -> {
 				if(clickEvent.getButton() == MouseButton.SECONDARY && row.getItem() != null) {
-					ContextMenu ctMenu = createContextMenu(row.getItem());
+					final ContextMenu ctMenu = createContextMenu(row.getItem());
 					ctMenu.show(row, clickEvent.getScreenX(), clickEvent.getScreenY());
 				}
 			});
@@ -194,12 +184,12 @@ public class PluginMenuStage extends Stage {
 		});
 	}
 
-	private ContextMenu createContextMenu(PluginWrapper pluginWrapper) {
-		ProBPlugin plugin = (ProBPlugin) pluginWrapper.getPlugin();
-		String pluginId = pluginWrapper.getPluginId();
-		String pluginName = plugin.getName();
+	private ContextMenu createContextMenu(final PluginWrapper pluginWrapper) {
+		final ProBPlugin plugin = (ProBPlugin) pluginWrapper.getPlugin();
+		final String pluginId = pluginWrapper.getPluginId();
+		final String pluginName = plugin.getName();
 
-		MenuItem restartItem = new MenuItem(
+		final MenuItem restartItem = new MenuItem(
 				getFormattedString("plugin.pluginMenu.table.contextmenu.restart", pluginName));
 		restartItem.setOnAction(event -> {
 			if (PluginState.STOPPED == getProBJarPluginManager().stopPlugin(pluginId)) {
@@ -207,13 +197,13 @@ public class PluginMenuStage extends Stage {
 			}
 		});
 
-		MenuItem removeMenuItem = new MenuItem(
+		final MenuItem removeMenuItem = new MenuItem(
 				getFormattedString("plugin.pluginMenu.table.contextmenu.remove", pluginName));
 		removeMenuItem.setOnAction(event -> {
-			List<ButtonType> buttons = new ArrayList<>();
+			final List<ButtonType> buttons = new ArrayList<>();
 			buttons.add(ButtonType.YES);
 			buttons.add(ButtonType.NO);
-			Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons,
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons,
 					"plugin.pluginMenu.alerts.confirmRemovingPlugin.header",
 					"plugin.pluginMenu.alerts.confirmRemovingPlugin.content", pluginName);
 			alert.initOwner(this);
@@ -230,8 +220,8 @@ public class PluginMenuStage extends Stage {
 		return proBPluginManager.getPluginManager();
 	}
 
-	private String getFormattedString(String key, Object... args) {
-		String bundleString = bundle.getString(key);
+	private String getFormattedString(final String key, final Object... args) {
+		final String bundleString = bundle.getString(key);
 		if (args.length == 0) {
 			return bundleString;
 		} else {
