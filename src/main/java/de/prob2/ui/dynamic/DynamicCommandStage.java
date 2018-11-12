@@ -158,7 +158,7 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 			}
 			lastItem = to;
 		});
-		lvChoice.disableProperty().bind(currentThread.isNotNull());
+		lvChoice.disableProperty().bind(currentThread.isNotNull().or(currentTrace.stateSpaceProperty().isNull()));
 
 		cbContinuous.selectedProperty().addListener((observable, from, to) -> {
 			if(!from && to) {
