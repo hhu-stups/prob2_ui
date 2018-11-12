@@ -14,30 +14,49 @@ public class Edge extends Group {
 	public Edge(Vertex source, Vertex target, String caption) {
 		this.source = source;
 		this.target = target;
+		
+		this.line = calculateLine();
 
-		Double distanceX = Math.abs(source.getCenterX() - target.getCenterX());
-		Double distanceY = Math.abs(source.getCenterY() - target.getCenterY());
-
-		if (distanceX > distanceY) {
-			if (source.getCenterX() > target.getCenterX()) {
-				this.line = new Line(source.getLeftX(), source.getCenterY(), target.getRightX(), target.getCenterY());
-			} else {
-				this.line = new Line(source.getRightX(), source.getCenterY(), target.getLeftX(), target.getCenterY());
-			}
-		} else {
-			if (source.getCenterY() > target.getCenterY()) {
-				this.line = new Line(source.getCenterX(), source.getTopY(), target.getCenterX(), target.getBottomY());
-			} else {
-				this.line = new Line(source.getCenterX(), source.getBottomY(), target.getCenterX(), target.getTopY());
-			}
-		}
 		this.txt = new Text(caption);
-		this.txt.relocate(
-				distanceX / 2 + (source.getCenterX() > target.getCenterX() ? target.getCenterX() : source.getCenterX()),
-				distanceY / 2
-						+ (source.getCenterY() > target.getCenterY() ? target.getCenterY() : source.getCenterY()));
+		this.txt.relocate(getCenterX(), getCenterY());
 
 		this.getChildren().addAll(line, txt);
 	}
 
+	public double getDistanceX() {
+		return Math.abs(line.getStartX() - line.getEndX());
+	}
+
+	public double getDistanceY() {
+		return Math.abs(line.getStartY() - line.getEndY());
+	}
+
+	public double getCenterX() {
+		return getDistanceX() / 2 + (line.getStartX() < line.getEndX() ? line.getStartX() : line.getEndX())
+				- txt.getLayoutBounds().getWidth() / 2;
+	}
+
+	public double getCenterY() {
+		return getDistanceY() / 2 + (line.getStartY() < line.getEndY() ? line.getStartY() : line.getEndY())
+				- txt.getLayoutBounds().getHeight() / 2;
+	}
+
+	private Line calculateLine() {
+		Double approxDistanceX = Math.abs(source.getCenterX() - target.getCenterX());
+		Double approxDistanceY = Math.abs(source.getCenterY() - target.getCenterY());
+
+		if (approxDistanceX > approxDistanceY) { // are the vertices rather one below the other or next to each other?
+			if (source.getCenterX() > target.getCenterX()) { // which vertex is closer to the origin of the coordinate system?
+				return new Line(source.getLeftX(), source.getCenterY(), target.getRightX(), target.getCenterY());
+			} else {
+				return new Line(source.getRightX(), source.getCenterY(), target.getLeftX(), target.getCenterY());
+			}
+		} else {
+			if (source.getCenterY() > target.getCenterY()) { // which vertex is closer to the origin of the coordinate system?
+				return new Line(source.getCenterX(), source.getTopY(), target.getCenterX(), target.getBottomY());
+			} else {
+				return new Line(source.getCenterX(), source.getBottomY(), target.getCenterX(), target.getTopY());
+			}
+		}
+	}
 }
