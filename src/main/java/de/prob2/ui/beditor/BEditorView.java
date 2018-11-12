@@ -163,7 +163,7 @@ public class BEditorView extends BorderPane {
 		currentTrace.getStateSpace().execute(cmd);
 		if(cmd.getFiles().isEmpty()) {
 			String machinePath = currentProject.getCurrentMachine().getPath().toString();
-			String[] machinePathSeparated = machinePath.split(File.separator);
+			String[] machinePathSeparated = machinePath.split(System.getProperty("file.separator"));
 			String[] fileSeparated = machinePathSeparated[machinePathSeparated.length - 1].split("\\.");
 			String file = fileSeparated[0];
 			String extension = machinePathSeparated[1];
