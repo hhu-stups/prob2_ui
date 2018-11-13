@@ -44,12 +44,12 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textsize"), textSizeSpinner));
 
 		// add Constants, Variables from Machine as Edge Groups
-		currentTrace.addListener((observable, from, to) -> addEvalElementsAsEdgeGroups());
+		currentTrace.addListener((observable, from, to) -> addMachineElementsAsEdgeGroups());
 
-		addEvalElementsAsEdgeGroups();
+		addMachineElementsAsEdgeGroups();
 	}
 
-	private void addEvalElementsAsEdgeGroups() {
+	private void addMachineElementsAsEdgeGroups() {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 
 		if (stateSpace != null) {

@@ -64,13 +64,13 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.color"), nodeColorPicker));
 
 		// add Sets from Machine as Node Groups
-		currentTrace.addListener((observable, from, to) -> addEvalElementsAsNodeGroups());
+		currentTrace.addListener((observable, from, to) -> addMachineElementsAsNodeGroups());
 
-		addEvalElementsAsNodeGroups();
+		addMachineElementsAsNodeGroups();
 
 	}
 
-	private void addEvalElementsAsNodeGroups() {
+	private void addMachineElementsAsNodeGroups() {
 		if (currentTrace.getStateSpace() != null) {
 			List<IEvalElement> setEvalElements = currentTrace.getStateSpace().getLoadedMachine().getSetEvalElements();
 			addEvalElementsAsGroups(setEvalElements);
