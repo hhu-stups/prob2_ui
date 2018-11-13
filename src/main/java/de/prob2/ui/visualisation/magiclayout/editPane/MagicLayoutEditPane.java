@@ -92,8 +92,10 @@ public class MagicLayoutEditPane extends VBox {
 		initLineWidthComboBox();
 	}
 
-	@FXML
 	void updateValues() {
+		if(!listView.getItems().isEmpty() && listView.getSelectionModel().getSelectedItem() == null) {
+			listView.getSelectionModel().selectFirst();
+		}
 		updateValues(listView.getSelectionModel().getSelectedItem());
 	}
 
