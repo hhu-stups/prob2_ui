@@ -166,6 +166,8 @@ public class DotView extends DynamicCommandStage {
 		}
 		final Path dotFilePath = Files.createTempFile("prob2-ui", ".dot");
 		
+		//System.out.println("Temp file = "+dotFilePath);
+		
 		try {
 			final GetPreferenceCommand getDotCmd = new GetPreferenceCommand("DOT");
 			final GetPreferenceCommand getDotEngineCmd = new GetPreferenceCommand("DOT_ENGINE");
