@@ -8,7 +8,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.paint.Color;
 
-public class MagicComponent {
+public abstract class MagicComponent {
 	
 	private final StringProperty name = new SimpleStringProperty();
 	private final StringProperty expression = new SimpleStringProperty();
