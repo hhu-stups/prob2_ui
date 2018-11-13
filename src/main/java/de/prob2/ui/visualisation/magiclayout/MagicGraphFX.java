@@ -25,8 +25,11 @@ public class MagicGraphFX implements MagicGraphI {
 			nodes.forEach(node -> graph.addVertex(new Vertex(node, style)));
 		});
 		edgegroups.forEach(edgegroup -> {
-			List<String> edges = Arrays.asList(edgegroup.getExpression().replaceAll("[{]|[}]|[(]|[)]", "").split(","));
-			edges.forEach(edge -> graph.addEdge(edge.split("↦")[0], edge.split("↦")[1], edgegroup.getName()));
+			if (!"NOT-INITIALISED: ".equals(edgegroup.getExpression())) {
+				List<String> edges = Arrays
+						.asList(edgegroup.getExpression().replaceAll("[{]|[}]|[(]|[)]", "").split(","));
+				edges.forEach(edge -> graph.addEdge(edge.split("↦")[0], edge.split("↦")[1], edgegroup.getName()));
+			}
 		});
 		return graph;
 	}
