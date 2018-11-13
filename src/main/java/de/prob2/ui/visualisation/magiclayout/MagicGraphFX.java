@@ -20,15 +20,26 @@ public class MagicGraphFX implements MagicGraphI {
 		Graph graph = new Graph();
 		nodegroups.forEach(nodegroup -> {
 			List<String> nodes = Arrays.asList(nodegroup.getExpression().replaceAll("[{]|[}]", "").split(","));
-			nodes.forEach(node -> graph.addVertex(new Vertex(node)));
+			nodes.forEach(node -> graph.addVertex(new Vertex(node, toVertexType(nodegroup.getShape()))));
 		});
 		edgegroups.forEach(edgegroup -> {
 			List<String> edges = Arrays.asList(edgegroup.getExpression().replaceAll("[{]|[}]|[(]|[)]", "").split(","));
-			edges.forEach(edge -> 
-				graph.addEdge(edge.split("↦")[0], edge.split("↦")[1], edgegroup.getName())
-			);
+			edges.forEach(edge -> graph.addEdge(edge.split("↦")[0], edge.split("↦")[1], edgegroup.getName()));
 		});
 		return graph;
+	}
+
+	private Vertex.Type toVertexType(MagicShape shape) {
+		switch (shape) {
+		case CIRCLE:
+			return Vertex.Type.CIRCLE;
+		case ELLIPSE:
+			return Vertex.Type.ELLIPSE;
+		case RECTANGLE:
+			return Vertex.Type.RECTANGLE;
+		default:
+			return Vertex.Type.RECTANGLE;
+		}
 	}
 
 }

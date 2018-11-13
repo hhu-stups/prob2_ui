@@ -18,11 +18,11 @@ public class Vertex extends StackPane {
 	private Shape shape;
 	
 	public Vertex(String caption) {
-		this(caption, caption);
+		this(caption, Type.RECTANGLE, caption);
 	}
 	
-	public Vertex(String id, String caption) {
-		this(id, Type.RECTANGLE, caption);
+	public Vertex(String caption, Type type) {
+		this(caption, type, caption);
 	}
 
 	public Vertex(String id, Type type, String caption) {
@@ -37,7 +37,7 @@ public class Vertex extends StackPane {
 			this.shape = new Circle((txtWidth + 20) / 2);
 			break;
 		case ELLIPSE:
-			this.shape = new Ellipse((txtWidth + 50) / 2, (txtHeight + 50) / 2);
+			this.shape = new Ellipse((txtWidth + 30) / 2, (txtHeight + 20) / 2);
 			break;
 		default:
 			this.shape = new Rectangle(txtWidth + 20, txtHeight + 10);
