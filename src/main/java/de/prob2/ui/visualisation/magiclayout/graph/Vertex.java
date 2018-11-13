@@ -9,6 +9,8 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.text.Text;
 
 public class Vertex extends StackPane {
@@ -65,6 +67,9 @@ public class Vertex extends StackPane {
 		this.shape.setStroke(style.lineColor);
 		this.shape.setStrokeWidth(style.lineWidth);
 		this.shape.getStrokeDashArray().addAll(style.lineType);
+		
+		this.shape.setStrokeLineCap(StrokeLineCap.BUTT);
+		this.shape.setStrokeLineJoin(StrokeLineJoin.ROUND);
 
 		this.getChildren().addAll(shape, txt);
 
