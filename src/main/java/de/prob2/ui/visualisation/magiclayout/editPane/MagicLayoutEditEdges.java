@@ -45,25 +45,25 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 
 		// add Constants, Variables from Machine as Edge Groups
 		currentTrace.addListener((observable, from, to) -> {
-			if (to != null && to.getStateSpace() != null) {
-				this.listView.getItems().clear();
-				this.updateValues();
-
-				addEvalElementsAsEdgeGroups();
-			}
+			this.listView.getItems().clear();
+			addEvalElementsAsEdgeGroups();
 		});
-		
+
 		addEvalElementsAsEdgeGroups();
 	}
 
 	private void addEvalElementsAsEdgeGroups() {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 
-		List<IEvalElement> constantEvalElements = stateSpace.getLoadedMachine().getConstantEvalElements();
-		addEvalElementsAsGroups(constantEvalElements);
-		
-		List<IEvalElement> variableEvalElements = stateSpace.getLoadedMachine().getVariableEvalElements();
-		addEvalElementsAsGroups(variableEvalElements);
+		if (stateSpace != null) {
+			List<IEvalElement> constantEvalElements = stateSpace.getLoadedMachine().getConstantEvalElements();
+			addEvalElementsAsGroups(constantEvalElements);
+
+			List<IEvalElement> variableEvalElements = stateSpace.getLoadedMachine().getVariableEvalElements();
+			addEvalElementsAsGroups(variableEvalElements);
+
+			this.updateValues();
+		}
 	}
 
 	@Override

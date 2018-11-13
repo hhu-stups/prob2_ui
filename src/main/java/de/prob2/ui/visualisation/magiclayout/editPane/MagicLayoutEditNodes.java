@@ -65,20 +65,20 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 
 		// add Sets from Machine as Node Groups
 		currentTrace.addListener((observable, from, to) -> {
-			if (to != null && to.getStateSpace() != null) {
-				this.listView.getItems().clear();
-				this.updateValues();
-
-				addEvalElementsAsNodeGroups();
-			}
+			this.listView.getItems().clear();
+			addEvalElementsAsNodeGroups();
 		});
+
 		addEvalElementsAsNodeGroups();
+
 	}
-	
+
 	private void addEvalElementsAsNodeGroups() {
-		List<IEvalElement> setEvalElements = currentTrace.getStateSpace().getLoadedMachine()
-				.getSetEvalElements();
-		addEvalElementsAsGroups(setEvalElements);
+		if (currentTrace.getStateSpace() != null) {
+			List<IEvalElement> setEvalElements = currentTrace.getStateSpace().getLoadedMachine().getSetEvalElements();
+			addEvalElementsAsGroups(setEvalElements);
+			this.updateValues();
+		}
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		MagicNodes nodes = new MagicNodes("nodes");
 		super.addMagicComponent(nodes);
 	}
-	
+
 	public List<MagicNodes> getNodes() {
 		List<MagicNodes> nodesList = new ArrayList<>();
 		listView.getItems().forEach(comp -> nodesList.add((MagicNodes) comp));
