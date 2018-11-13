@@ -59,7 +59,8 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		shapeComboBox.setButtonCell(new MagicShapeListCell());
 		shapeComboBox.getSelectionModel().selectFirst();
 
-		nodeColorPicker = new ColorPicker();
+		nodeColorPicker = new ColorPicker(Color.WHITE);
+		
 		flowPane.getChildren().addAll(
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.shape"), shapeComboBox),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.color"), nodeColorPicker));

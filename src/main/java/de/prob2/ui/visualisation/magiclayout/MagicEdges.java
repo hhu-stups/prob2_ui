@@ -19,10 +19,7 @@ public class MagicEdges extends MagicComponent {
 	}
 
 	public MagicEdges(String name) {
-		super(name);
-
-		this.textColor.set(Color.BLACK);
-		this.textSize.set(12);
+		super(name, "");
 	}
 
 	public ObjectProperty<Color> textColorProperty() {

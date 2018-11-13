@@ -1,5 +1,7 @@
 package de.prob2.ui.visualisation.magiclayout.editPane;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -66,11 +68,9 @@ public class MagicLayoutEditPane extends VBox {
 	TextArea expressionTextArea;
 	@FXML
 	FlowPane flowPane;
-	@FXML
-	private ComboBox<String> lineTypeComboBox;
-	@FXML
+
+	private ComboBox<List<Double>> lineTypeComboBox;
 	private ColorPicker lineColorPicker;
-	@FXML
 	private ComboBox<Double> lineWidthComboBox;
 
 	final ResourceBundle bundle;
@@ -89,8 +89,24 @@ public class MagicLayoutEditPane extends VBox {
 	@FXML
 	public void initialize() {
 		initListView();
+
+		// add general controls
+		lineTypeComboBox = new ComboBox<>();
+		lineTypeComboBox.getItems().add(new ArrayList<>());
+		lineTypeComboBox.getItems().add(Arrays.asList(new Double[] { 12.0, 4.0, 5.0, 4.0 }));
+		lineTypeComboBox.getItems().add(Arrays.asList(new Double[] { 2.0, 2.0, 2.0, 2.0 }));
 		initLineTypeComboBox();
+
+		lineColorPicker = new ColorPicker(Color.BLACK);
+
+		lineWidthComboBox = new ComboBox<>();
+		lineWidthComboBox.getItems().addAll(0.5, 1.0, 2.0, 5.0);
 		initLineWidthComboBox();
+
+		flowPane.getChildren().addAll(
+				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linetype"), lineTypeComboBox),
+				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linecolor"), lineColorPicker),
+				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linewidth"), lineWidthComboBox));
 	}
 
 	void updateValues() {
@@ -227,19 +243,19 @@ public class MagicLayoutEditPane extends VBox {
 	}
 
 	private void initLineTypeComboBox() {
-		// show different line types in ComboBox (not just strings)
-		lineTypeComboBox.setCellFactory((ListView<String> lv) -> new LineListCell<String>() {
+		// show different line types in ComboBox
+		lineTypeComboBox.setCellFactory((ListView<List<Double>> lv) -> new LineListCell<List<Double>>() {
 			@Override
-			protected void defineLineStyle(Line line, String style) {
-				line.setStyle(style);
+			protected void defineLineStyle(Line line, List<Double> style) {
+				line.getStrokeDashArray().addAll(style);
 				line.setStroke(Color.WHITE);
 			}
 		});
 
-		lineTypeComboBox.setButtonCell(new LineListCell<String>() {
+		lineTypeComboBox.setButtonCell(new LineListCell<List<Double>>() {
 			@Override
-			protected void defineLineStyle(Line line, String style) {
-				line.setStyle(style);
+			protected void defineLineStyle(Line line, List<Double> style) {
+				line.getStrokeDashArray().addAll(style);
 				line.setStroke(Color.rgb(55, 55, 60));
 			}
 		});

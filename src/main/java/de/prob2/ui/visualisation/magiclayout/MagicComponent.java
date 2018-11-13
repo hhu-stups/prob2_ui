@@ -1,5 +1,7 @@
 package de.prob2.ui.visualisation.magiclayout;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import javafx.beans.property.DoubleProperty;
@@ -15,24 +17,19 @@ public abstract class MagicComponent {
 	private final StringProperty name = new SimpleStringProperty();
 	private final StringProperty expression = new SimpleStringProperty();
 	
-	private final StringProperty lineType = new SimpleStringProperty();
+	private final ObjectProperty<List<Double>> lineType = new SimpleObjectProperty<>();
 	private final ObjectProperty<Color> lineColor = new SimpleObjectProperty<>();
 	private final DoubleProperty lineWidth = new SimpleDoubleProperty();
+	
+	public MagicComponent(String name) {
+		this(name, "");
+	}
 	
 	public MagicComponent(String name, String expression) {
 		this.name.set(name);
 		this.expression.set(expression);
 		
-		this.lineType.set("");
-		this.lineColor.set(Color.BLACK);
-		this.lineWidth.set(1);
-	}
-	
-	public MagicComponent(String name) {
-		this.name.set(name);
-		this.expression.set("");
-		
-		this.lineType.set("");
+		this.lineType.set(new ArrayList<>());
 		this.lineColor.set(Color.BLACK);
 		this.lineWidth.set(1);
 	}
@@ -53,11 +50,11 @@ public abstract class MagicComponent {
 		return expression.get();
 	}
 	
-	public StringProperty lineTypeProperty() {
+	public ObjectProperty<List<Double>> lineTypeProperty() {
 		return lineType;
 	}
 	
-	public String getLineType() {
+	public List<Double> getLineType() {
 		return lineType.get();
 	}
 	
