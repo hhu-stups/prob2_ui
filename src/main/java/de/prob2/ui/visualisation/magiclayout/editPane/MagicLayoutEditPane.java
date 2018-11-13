@@ -93,7 +93,7 @@ public class MagicLayoutEditPane extends VBox {
 	}
 
 	void updateValues() {
-		if(!listView.getItems().isEmpty() && listView.getSelectionModel().getSelectedItem() == null) {
+		if (!listView.getItems().isEmpty() && listView.getSelectionModel().getSelectedItem() == null) {
 			listView.getSelectionModel().selectFirst();
 		}
 		updateValues(listView.getSelectionModel().getSelectedItem());
@@ -126,17 +126,25 @@ public class MagicLayoutEditPane extends VBox {
 		listView.getItems().add(component);
 		listView.getSelectionModel().select(component);
 	}
-	
+
 	void addEvalElementsAsGroups(List<IEvalElement> evalElements) {
-		
+
 		Map<IEvalElement, AbstractEvalResult> resultMap = currentTrace.getCurrentState().evalFormulas(evalElements);
-		
+
 		for (IEvalElement element : resultMap.keySet()) {
 			MagicComponent magicComponent = (this instanceof MagicLayoutEditNodes)
 					? new MagicNodes(element.toString(), resultMap.get(element).toString(), true)
 					: new MagicEdges(element.toString(), resultMap.get(element).toString());
-			listView.getItems().add(magicComponent);
+
+			if (listView.getItems().contains(magicComponent)) {
+				MagicComponent existingComponent = listView.getItems().get(listView.getItems().indexOf(magicComponent));
+				existingComponent.expressionProperty().unbind(); // a bound value cannot be set
+				existingComponent.expressionProperty().set(resultMap.get(element).toString());
+			} else {
+				listView.getItems().add(magicComponent);
+			}
 		}
+		this.updateValues();
 	}
 
 	VBox wrapInVBox(String caption, Control control) {
