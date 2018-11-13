@@ -20,7 +20,9 @@ public class MagicGraphFX implements MagicGraphI {
 		Graph graph = new Graph();
 		nodegroups.forEach(nodegroup -> {
 			List<String> nodes = Arrays.asList(nodegroup.getExpression().replaceAll("[{]|[}]", "").split(","));
-			nodes.forEach(node -> graph.addVertex(new Vertex(node, toVertexType(nodegroup.getShape()))));
+			Vertex.Style style = new Vertex.Style(toVertexType(nodegroup.getShape()), nodegroup.getNodeColor(),
+					nodegroup.getLineColor(), nodegroup.getLineWidth(), nodegroup.getLineType());
+			nodes.forEach(node -> graph.addVertex(new Vertex(node, style)));
 		});
 		edgegroups.forEach(edgegroup -> {
 			List<String> edges = Arrays.asList(edgegroup.getExpression().replaceAll("[{]|[}]|[(]|[)]", "").split(","));
