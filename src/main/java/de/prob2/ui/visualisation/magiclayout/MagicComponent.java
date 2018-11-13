@@ -1,5 +1,7 @@
 package de.prob2.ui.visualisation.magiclayout;
 
+import java.util.Objects;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -78,6 +80,23 @@ public abstract class MagicComponent {
 	@Override
 	public String toString() {
 		return name.get();
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other == this) {
+			return true;
+		}
+		if (!(other instanceof MagicComponent)) {
+			return false;
+		}
+		MagicComponent otherComponent = (MagicComponent) other;
+		return otherComponent.name.get().equals(this.name.get());
+	}
+	
+	@Override
+	public int hashCode() {
+		 return Objects.hash(name.get());
 	}
 
 	public void unbindAll() {
