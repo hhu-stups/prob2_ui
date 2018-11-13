@@ -35,7 +35,7 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		expressionTextArea.setPromptText("{x,y|...}");
 
 		// add Edge specific controls
-		textColorPicker = new ColorPicker();
+		textColorPicker = new ColorPicker(Color.BLACK);
 		textSizeSpinner = new Spinner<>(2, 30, 12);
 		textSizeSpinner.setEditable(true);
 
