@@ -49,15 +49,21 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 				this.listView.getItems().clear();
 				this.updateValues();
 
-				StateSpace stateSpace = currentTrace.getStateSpace();
-
-				List<IEvalElement> constantEvalElements = stateSpace.getLoadedMachine().getConstantEvalElements();
-				addEvalElementsAsGroups(constantEvalElements);
-				
-				List<IEvalElement> variableEvalElements = stateSpace.getLoadedMachine().getVariableEvalElements();
-				addEvalElementsAsGroups(variableEvalElements);
+				addEvalElementsAsEdgeGroups();
 			}
 		});
+		
+		addEvalElementsAsEdgeGroups();
+	}
+
+	private void addEvalElementsAsEdgeGroups() {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+
+		List<IEvalElement> constantEvalElements = stateSpace.getLoadedMachine().getConstantEvalElements();
+		addEvalElementsAsGroups(constantEvalElements);
+		
+		List<IEvalElement> variableEvalElements = stateSpace.getLoadedMachine().getVariableEvalElements();
+		addEvalElementsAsGroups(variableEvalElements);
 	}
 
 	@Override

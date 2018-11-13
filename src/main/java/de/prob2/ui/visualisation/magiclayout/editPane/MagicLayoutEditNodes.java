@@ -69,12 +69,16 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 				this.listView.getItems().clear();
 				this.updateValues();
 
-				List<IEvalElement> setEvalElements = currentTrace.getStateSpace().getLoadedMachine()
-						.getSetEvalElements();
-				addEvalElementsAsGroups(setEvalElements);
+				addEvalElementsAsNodeGroups();
 			}
 		});
-
+		addEvalElementsAsNodeGroups();
+	}
+	
+	private void addEvalElementsAsNodeGroups() {
+		List<IEvalElement> setEvalElements = currentTrace.getStateSpace().getLoadedMachine()
+				.getSetEvalElements();
+		addEvalElementsAsGroups(setEvalElements);
 	}
 
 	@Override
