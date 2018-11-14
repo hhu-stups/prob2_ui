@@ -25,16 +25,18 @@ public class Vertex extends StackPane {
 		private Color lineColor = Color.BLACK;
 		private Double lineWidth = 1.0;
 		private List<Double> lineType = new ArrayList<>();
+		private Color textColor = Color.BLACK;
 
 		public Style() {
 		}
 
-		public Style(Type shape, Color color, Color lineColor, Double lineWidth, List<Double> lineType) {
+		public Style(Type shape, Color color, Color lineColor, Double lineWidth, List<Double> lineType, Color textColor) {
 			this.shape = shape;
 			this.color = color;
 			this.lineColor = lineColor;
 			this.lineWidth = lineWidth;
 			this.lineType = lineType;
+			this.textColor = textColor;
 		}
 	}
 
@@ -49,6 +51,8 @@ public class Vertex extends StackPane {
 		this.setId(id);
 
 		this.txt = new Text(caption);
+		this.txt.setFill(style.textColor);
+		
 		Double txtWidth = this.txt.getLayoutBounds().getWidth();
 		Double txtHeight = this.txt.getLayoutBounds().getHeight();
 
