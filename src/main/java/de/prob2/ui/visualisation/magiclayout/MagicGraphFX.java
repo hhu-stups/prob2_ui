@@ -3,6 +3,7 @@ package de.prob2.ui.visualisation.magiclayout;
 import java.util.Arrays;
 import java.util.List;
 
+import de.prob2.ui.visualisation.magiclayout.graph.Edge;
 import de.prob2.ui.visualisation.magiclayout.graph.Graph;
 import de.prob2.ui.visualisation.magiclayout.graph.Vertex;
 import javafx.scene.Node;
@@ -28,7 +29,9 @@ public class MagicGraphFX implements MagicGraphI {
 			if (!"NOT-INITIALISED: ".equals(edgegroup.getExpression())) {
 				List<String> edges = Arrays
 						.asList(edgegroup.getExpression().replaceAll("[{]|[}]|[(]|[)]", "").split(","));
-				edges.forEach(edge -> graph.addEdge(edge.split("↦")[0], edge.split("↦")[1], edgegroup.getName()));
+				Edge.Style style = new Edge.Style(edgegroup.getLineColor(), edgegroup.getLineWidth(),
+						edgegroup.getLineType(), edgegroup.getTextColor(), edgegroup.getTextSize());
+				edges.forEach(edge -> graph.addEdge(edge.split("↦")[0], edge.split("↦")[1], edgegroup.getName(), style));
 			}
 		});
 		return graph;

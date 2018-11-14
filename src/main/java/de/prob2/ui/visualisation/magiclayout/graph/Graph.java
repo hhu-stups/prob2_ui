@@ -39,11 +39,11 @@ public class Graph extends Pane {
 		return false;
 	}
 
-	public void addEdge(String sourceVertexId, String targetVertexId, String caption) {
+	public void addEdge(String sourceVertexId, String targetVertexId, String caption, Edge.Style style) {
 		Vertex source = (Vertex) this.lookup("#" + sourceVertexId);
 		Vertex target = (Vertex) this.lookup("#" + targetVertexId);
 
-		Edge edge = new Edge(source, target, caption);
+		Edge edge = new Edge(source, target, caption, style);
 
 		edges.add(edge);
 		this.getChildren().add(edge);

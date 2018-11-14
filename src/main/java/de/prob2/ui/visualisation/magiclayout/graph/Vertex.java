@@ -67,7 +67,6 @@ public class Vertex extends StackPane {
 		this.shape.setStroke(style.lineColor);
 		this.shape.setStrokeWidth(style.lineWidth);
 		this.shape.getStrokeDashArray().addAll(style.lineType);
-		
 		this.shape.setStrokeLineCap(StrokeLineCap.BUTT);
 		this.shape.setStrokeLineJoin(StrokeLineJoin.ROUND);
 
