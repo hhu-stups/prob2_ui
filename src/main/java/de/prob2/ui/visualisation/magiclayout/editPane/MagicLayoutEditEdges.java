@@ -14,13 +14,10 @@ import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicEdges;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import javafx.fxml.FXML;
-import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Spinner;
-import javafx.scene.paint.Color;
 
 public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 
-	private ColorPicker textColorPicker;
 	private Spinner<Integer> textSizeSpinner;
 
 	MagicGraphI magicGraph;
@@ -38,12 +35,10 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		expressionTextArea.setPromptText("{x,y|...}");
 
 		// add Edge specific controls
-		textColorPicker = new ColorPicker(Color.BLACK);
 		textSizeSpinner = new Spinner<>(2, 30, 12);
 		textSizeSpinner.setEditable(true);
 
-		flowPane.getChildren().addAll(
-				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker),
+		flowPane.getChildren().add(
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textsize"), textSizeSpinner));
 
 		// add Constants, Variables from Machine as Edge Groups
@@ -75,13 +70,9 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		if (selectedComponent != null) {
 			MagicEdges selectedEdges = (MagicEdges) selectedComponent;
 
-			textColorPicker.setValue(selectedEdges.getTextColor());
-			selectedEdges.textColorProperty().bind(textColorPicker.valueProperty());
-
 			textSizeSpinner.getValueFactory().setValue(selectedEdges.getTextSize());
 			selectedEdges.textSizeProperty().bind(textSizeSpinner.valueProperty());
 		} else {
-			textColorPicker.setValue(Color.BLACK);
 			textSizeSpinner.getValueFactory().setValue(12);
 		}
 	}

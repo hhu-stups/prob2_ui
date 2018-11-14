@@ -20,6 +20,7 @@ public abstract class MagicComponent {
 	private final ObjectProperty<List<Double>> lineType = new SimpleObjectProperty<>();
 	private final ObjectProperty<Color> lineColor = new SimpleObjectProperty<>();
 	private final DoubleProperty lineWidth = new SimpleDoubleProperty();
+	private final ObjectProperty<Color> textColor = new SimpleObjectProperty<>();
 	
 	public MagicComponent(String name) {
 		this(name, "");
@@ -32,6 +33,7 @@ public abstract class MagicComponent {
 		this.lineType.set(new ArrayList<>());
 		this.lineColor.set(Color.BLACK);
 		this.lineWidth.set(1);
+		this.textColor.set(Color.BLACK);
 	}
 	
 	public StringProperty nameProperty() {
@@ -74,6 +76,14 @@ public abstract class MagicComponent {
 		return lineWidth.get();
 	}
 
+	public ObjectProperty<Color> textColorProperty() {
+		return textColor;
+	}
+
+	public Color getTextColor() {
+		return textColor.get();
+	}
+
 	@Override
 	public String toString() {
 		return name.get();
@@ -101,5 +111,6 @@ public abstract class MagicComponent {
 		lineType.unbind();
 		lineColor.unbind();
 		lineWidth.unbind();
+		textColor.unbind();
 	}
 }
