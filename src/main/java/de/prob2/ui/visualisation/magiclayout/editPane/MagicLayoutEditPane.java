@@ -71,6 +71,7 @@ public class MagicLayoutEditPane extends VBox {
 	private ComboBox<List<Double>> lineTypeComboBox;
 	private ColorPicker lineColorPicker;
 	private ComboBox<Double> lineWidthComboBox;
+	private ColorPicker textColorPicker;
 
 	final ResourceBundle bundle;
 	final CurrentTrace currentTrace;
@@ -99,11 +100,14 @@ public class MagicLayoutEditPane extends VBox {
 		lineWidthComboBox = new ComboBox<>();
 		lineWidthComboBox.getItems().addAll(0.5, 1.0, 2.0, 5.0);
 		initLineWidthComboBox();
+		
+		textColorPicker = new ColorPicker(Color.BLACK);
 
 		flowPane.getChildren().addAll(
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linetype"), lineTypeComboBox),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linecolor"), lineColorPicker),
-				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linewidth"), lineWidthComboBox));
+				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linewidth"), lineWidthComboBox),
+				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker));
 	}
 
 	void updateValues() {
@@ -128,11 +132,15 @@ public class MagicLayoutEditPane extends VBox {
 
 			lineWidthComboBox.setValue(selectedComponent.getLineWidth());
 			selectedComponent.lineWidthProperty().bind(lineWidthComboBox.valueProperty());
+			
+			textColorPicker.setValue(selectedComponent.getTextColor());
+			selectedComponent.textColorProperty().bind(textColorPicker.valueProperty());
 		} else {
 			expressionTextArea.setText("");
 			lineTypeComboBox.getSelectionModel().selectFirst();
 			lineColorPicker.setValue(Color.BLACK);
 			lineWidthComboBox.getSelectionModel().selectFirst();
+			textColorPicker.setValue(Color.BLACK);
 		}
 	}
 
