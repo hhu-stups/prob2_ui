@@ -3,6 +3,8 @@ package de.prob2.ui.visualisation.magiclayout.graph;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -42,6 +44,13 @@ public class Vertex extends StackPane {
 
 	private Text txt;
 	private Shape shape;
+	
+	private DoubleProperty centerX = new SimpleDoubleProperty();
+	private DoubleProperty centerY = new SimpleDoubleProperty();
+	private DoubleProperty leftX = new SimpleDoubleProperty();
+	private DoubleProperty rightX = new SimpleDoubleProperty();
+	private DoubleProperty topY = new SimpleDoubleProperty();
+	private DoubleProperty bottomY = new SimpleDoubleProperty();
 
 	public Vertex(String caption, Style style) {
 		this(caption, caption, style);
@@ -51,56 +60,96 @@ public class Vertex extends StackPane {
 		this.setId(id);
 
 		this.txt = new Text(caption);
-		this.txt.setFill(style.textColor);
 		
-		Double txtWidth = this.txt.getLayoutBounds().getWidth();
-		Double txtHeight = this.txt.getLayoutBounds().getHeight();
-
-		switch (style.shape) {
-		case CIRCLE:
-			this.shape = new Circle((txtWidth + 20) / 2);
-			break;
-		case ELLIPSE:
-			this.shape = new Ellipse((txtWidth + 30) / 2, (txtHeight + 20) / 2);
-			break;
-		default:
-			this.shape = new Rectangle(txtWidth + 20, txtHeight + 10);
-		}
-
-		this.shape.setFill(style.color);
-		this.shape.setStroke(style.lineColor);
-		this.shape.setStrokeWidth(style.lineWidth);
-		this.shape.getStrokeDashArray().addAll(style.lineType);
-		this.shape.setStrokeLineCap(StrokeLineCap.BUTT);
-		this.shape.setStrokeLineJoin(StrokeLineJoin.ROUND);
-
-		this.getChildren().addAll(shape, txt);
-
-		this.setWidth(shape.getLayoutBounds().getWidth());
-		this.setHeight(shape.getLayoutBounds().getHeight());
+		updateStyle(style);
 	}
 
-	public double getCenterX() {
-		return this.getLayoutX() + shape.getLayoutBounds().getWidth() / 2;
+	public DoubleProperty centerXProperty() {
+		return centerX;
+	}
+	
+ 	public double getCenterX() {
+		return centerX.get();
 	}
 
+ 	public DoubleProperty centerYProperty() {
+		return centerY;
+	}
+ 	
 	public double getCenterY() {
-		return this.getLayoutY() + shape.getLayoutBounds().getHeight() / 2;
+		return centerY.get();
+	}
+	
+	public DoubleProperty leftXProperty() {
+		return leftX;
 	}
 
 	public double getLeftX() {
-		return this.getLayoutX();
+		return leftX.get();
 	}
 
+	public DoubleProperty rightXProperty() {
+		return rightX;
+	}
+	
 	public double getRightX() {
-		return this.getLayoutX() + shape.getLayoutBounds().getWidth();
+		return rightX.get();
+	}
+	
+	public DoubleProperty topYProperty() {
+		return topY;
 	}
 
 	public double getTopY() {
-		return this.getLayoutY();
+		return topY.get();
+	}
+	
+	public DoubleProperty bottomYProperty() {
+		return bottomY;
 	}
 
 	public double getBottomY() {
-		return this.getLayoutY() + shape.getLayoutBounds().getHeight();
+		return bottomY.get();
+	}
+
+	public void updateStyle(Style style) {
+		txt.setFill(style.textColor);
+		
+		Double txtWidth = txt.getLayoutBounds().getWidth();
+		Double txtHeight = txt.getLayoutBounds().getHeight();
+
+		switch (style.shape) {
+		case CIRCLE:
+			shape = new Circle((txtWidth + 20) / 2);
+			break;
+		case ELLIPSE:
+			shape = new Ellipse((txtWidth + 30) / 2, (txtHeight + 20) / 2);
+			break;
+		default:
+			shape = new Rectangle(txtWidth + 20, txtHeight + 10);
+		}
+
+		shape.setFill(style.color);
+		shape.setStroke(style.lineColor);
+		shape.setStrokeWidth(style.lineWidth);
+		shape.getStrokeDashArray().addAll(style.lineType);
+		shape.setStrokeLineCap(StrokeLineCap.BUTT);
+		shape.setStrokeLineJoin(StrokeLineJoin.ROUND);
+		
+		this.setWidth(shape.getLayoutBounds().getWidth());
+		this.setHeight(shape.getLayoutBounds().getHeight());
+		
+		this.getChildren().setAll(shape, txt);
+		
+		updateProperties();
+	}
+
+	private void updateProperties() {
+		centerX.set(getLayoutX() + shape.getLayoutBounds().getWidth() / 2);
+		centerY.set(getLayoutY() + shape.getLayoutBounds().getHeight() / 2);
+		leftX.set(getLayoutX());
+		rightX.set(getLayoutX() + shape.getLayoutBounds().getWidth());
+		topY.set(getLayoutY());
+		bottomY.set(getLayoutY() + shape.getLayoutBounds().getHeight());
 	}
 }

@@ -13,13 +13,14 @@ public class Graph extends Pane {
 	public Graph() {
 	}
 
-	public void addVertex(Vertex vertex) {
+	public void addVertex(String caption, Vertex.Style style) {
+		Vertex vertex = new Vertex(caption, style);
 		vertices.add(vertex);
 		this.getChildren().add(vertex);
 
 		double x = Math.random() * 750;
 		double y = Math.random() * 500;
-		
+
 		while (vertexAt(x, y, vertex.getWidth(), vertex.getHeight())) {
 			x = Math.random() * 750;
 			y = Math.random() * 500;
@@ -27,11 +28,19 @@ public class Graph extends Pane {
 		vertex.relocate(x, y);
 	}
 
+	public void updateVertex(String id, Vertex.Style style) {
+		Vertex vertex = (Vertex) this.lookup("#" + id);
+		if (vertex != null) {
+			vertex.updateStyle(style);
+		} else {
+			addVertex(id, style);
+		}
+		
+	}
+
 	private boolean vertexAt(double x, double y, double offsetX, double offsetY) {
 		for (Vertex vertex : vertices) {
-			if (x > (vertex.getLeftX() - offsetX) 
-					&& x < vertex.getRightX()
-					&& y > (vertex.getTopY() - offsetY) 
+			if (x > (vertex.getLeftX() - offsetX) && x < vertex.getRightX() && y > (vertex.getTopY() - offsetY)
 					&& y < vertex.getBottomY()) {
 				return true;
 			}

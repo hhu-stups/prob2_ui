@@ -8,5 +8,7 @@ public interface MagicGraphI {
 	
 	List<MagicShape> getPossibleShapes();
 	
-	Node generateMagicGraph(List<MagicNodes> nodes, List<MagicEdges> edges);
+	Node generateMagicGraph(List<MagicNodes> nodegroups, List<MagicEdges> edgegroups);
+
+	void updateMagicGraph(Node graphNode, List<MagicNodes> nodegroups, List<MagicEdges> edgegroups);
 }	

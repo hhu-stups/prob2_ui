@@ -50,9 +50,14 @@ public class MagicLayoutView extends Stage {
 		magicGraphPane.getChildren().setAll(
 				magicGraph.generateMagicGraph(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges()));
 
-		//update the graph whenever the trace changes
-		currentTrace.addListener((observable, from, to) -> magicGraphPane.getChildren().setAll(
+		// generate new graph whenever the model changes
+		currentTrace.modelProperty().addListener((observable, from, to) -> magicGraphPane.getChildren().setAll(
 				magicGraph.generateMagicGraph(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges())));
+
+		// update existing graph whenever the trace changes
+		currentTrace
+				.addListener((observable, from, to) -> magicGraph.updateMagicGraph(magicGraphPane.getChildren().get(0),
+						magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges()));
 	}
 
 	@FXML

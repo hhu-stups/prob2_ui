@@ -20,10 +20,10 @@ public class MagicGraphFX implements MagicGraphI {
 	public Node generateMagicGraph(List<MagicNodes> nodegroups, List<MagicEdges> edgegroups) {
 		Graph graph = new Graph();
 		nodegroups.forEach(nodegroup -> {
-			List<String> nodes = Arrays.asList(nodegroup.getExpression().replaceAll("[{]|[}]", "").split(","));
+			List<String> nodecaptions = Arrays.asList(nodegroup.getExpression().replaceAll("[{]|[}]", "").split(","));
 			Vertex.Style style = new Vertex.Style(toVertexType(nodegroup.getShape()), nodegroup.getNodeColor(),
 					nodegroup.getLineColor(), nodegroup.getLineWidth(), nodegroup.getLineType(), nodegroup.getTextColor());
-			nodes.forEach(node -> graph.addVertex(new Vertex(node, style)));
+			nodecaptions.forEach(nodecaption -> graph.addVertex(nodecaption, style));
 		});
 		edgegroups.forEach(edgegroup -> {
 			if (!"NOT-INITIALISED: ".equals(edgegroup.getExpression())) {
@@ -35,6 +35,26 @@ public class MagicGraphFX implements MagicGraphI {
 			}
 		});
 		return graph;
+	}
+
+	@Override
+	public void updateMagicGraph(Node graphNode, List<MagicNodes> nodegroups, List<MagicEdges> edgegroups) {
+		Graph graph = (Graph) graphNode;
+		nodegroups.forEach(nodegroup -> {
+			List<String> nodes = Arrays.asList(nodegroup.getExpression().replaceAll("[{]|[}]", "").split(","));
+			Vertex.Style style = new Vertex.Style(toVertexType(nodegroup.getShape()), nodegroup.getNodeColor(),
+					nodegroup.getLineColor(), nodegroup.getLineWidth(), nodegroup.getLineType(), nodegroup.getTextColor());
+			nodes.forEach(node -> graph.updateVertex(node, style));
+		});
+		edgegroups.forEach(edgegroup -> {
+			if (!"NOT-INITIALISED: ".equals(edgegroup.getExpression())) {
+				List<String> edges = Arrays
+						.asList(edgegroup.getExpression().replaceAll("[{]|[}]|[(]|[)]", "").split(","));
+				Edge.Style style = new Edge.Style(edgegroup.getLineColor(), edgegroup.getLineWidth(),
+						edgegroup.getLineType(), edgegroup.getTextColor(), edgegroup.getTextSize());
+				edges.forEach(edge -> graph.addEdge(edge.split("↦")[0], edge.split("↦")[1], edgegroup.getName(), style));
+			}
+		});
 	}
 
 	private Vertex.Type toVertexType(MagicShape shape) {
@@ -49,5 +69,4 @@ public class MagicGraphFX implements MagicGraphI {
 			return Vertex.Type.RECTANGLE;
 		}
 	}
-
 }
