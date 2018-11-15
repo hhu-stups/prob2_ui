@@ -64,7 +64,7 @@ public class Edge extends Group {
 		centerY.addListener((observable, from, to) -> txt.relocate(centerX.get(), (double) to));
 		
 		// when the line start or end point changes, update the distance and center properties
-		ChangeListener<? super Number> distanceChangeListener = (observable, from, to) -> {
+		ChangeListener<? super Number> lineChangeListener = (observable, from, to) -> {
 			distanceX.set(Math.abs(line.getStartX() - line.getEndX()));
 			distanceY.set(Math.abs(line.getStartY() - line.getEndY()));
 			centerX.set(getDistanceX() / 2 + (line.getStartX() < line.getEndX() ? line.getStartX() : line.getEndX())
@@ -72,10 +72,13 @@ public class Edge extends Group {
 			centerY.set(getDistanceY() / 2 + (line.getStartY() < line.getEndY() ? line.getStartY() : line.getEndY())
 				- txt.getLayoutBounds().getHeight() / 2);
 		};
-		line.startXProperty().addListener(distanceChangeListener);
-		line.startYProperty().addListener(distanceChangeListener);
-		line.endXProperty().addListener(distanceChangeListener);
-		line.endYProperty().addListener(distanceChangeListener);
+		line.startXProperty().addListener(lineChangeListener);
+		line.startYProperty().addListener(lineChangeListener);
+		line.endXProperty().addListener(lineChangeListener);
+		line.endYProperty().addListener(lineChangeListener);
+		
+		distanceX.addListener((observable, from, to) -> calculatePositioning());
+		distanceY.addListener((observable, from, to) -> calculatePositioning());
 		
 		calculatePositioning();
 	}
