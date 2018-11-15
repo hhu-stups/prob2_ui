@@ -5,6 +5,7 @@ import java.util.List;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.scene.Cursor;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -32,7 +33,8 @@ public class Vertex extends StackPane {
 		public Style() {
 		}
 
-		public Style(Type shape, Color color, Color lineColor, Double lineWidth, List<Double> lineType, Color textColor) {
+		public Style(Type shape, Color color, Color lineColor, Double lineWidth, List<Double> lineType,
+				Color textColor) {
 			this.shape = shape;
 			this.color = color;
 			this.lineColor = lineColor;
@@ -44,7 +46,7 @@ public class Vertex extends StackPane {
 
 	private Text txt;
 	private Shape shape;
-	
+
 	private DoubleProperty centerX = new SimpleDoubleProperty();
 	private DoubleProperty centerY = new SimpleDoubleProperty();
 	private DoubleProperty leftX = new SimpleDoubleProperty();
@@ -60,29 +62,35 @@ public class Vertex extends StackPane {
 		this.setId(id);
 
 		this.txt = new Text(caption);
-		
+
 		updateStyle(style);
-		
+
 		this.layoutXProperty().addListener((observable, from, to) -> updateProperties());
 		this.layoutYProperty().addListener((observable, from, to) -> updateProperties());
+
+		this.setCursor(Cursor.HAND);
+		this.setOnMouseDragged(event -> {
+			this.setLayoutX(this.getLayoutX() + event.getX() - this.getWidth() / 2);
+			this.setLayoutY(this.getLayoutY() + event.getY() - this.getHeight() / 2);
+		});
 	}
 
 	public DoubleProperty centerXProperty() {
 		return centerX;
 	}
-	
- 	public double getCenterX() {
+
+	public double getCenterX() {
 		return centerX.get();
 	}
 
- 	public DoubleProperty centerYProperty() {
+	public DoubleProperty centerYProperty() {
 		return centerY;
 	}
- 	
+
 	public double getCenterY() {
 		return centerY.get();
 	}
-	
+
 	public DoubleProperty leftXProperty() {
 		return leftX;
 	}
@@ -94,11 +102,11 @@ public class Vertex extends StackPane {
 	public DoubleProperty rightXProperty() {
 		return rightX;
 	}
-	
+
 	public double getRightX() {
 		return rightX.get();
 	}
-	
+
 	public DoubleProperty topYProperty() {
 		return topY;
 	}
@@ -106,7 +114,7 @@ public class Vertex extends StackPane {
 	public double getTopY() {
 		return topY.get();
 	}
-	
+
 	public DoubleProperty bottomYProperty() {
 		return bottomY;
 	}
@@ -117,7 +125,7 @@ public class Vertex extends StackPane {
 
 	public void updateStyle(Style style) {
 		txt.setFill(style.textColor);
-		
+
 		Double txtWidth = txt.getLayoutBounds().getWidth();
 		Double txtHeight = txt.getLayoutBounds().getHeight();
 
@@ -138,12 +146,12 @@ public class Vertex extends StackPane {
 		shape.getStrokeDashArray().addAll(style.lineType);
 		shape.setStrokeLineCap(StrokeLineCap.BUTT);
 		shape.setStrokeLineJoin(StrokeLineJoin.ROUND);
-		
+
 		this.setWidth(shape.getLayoutBounds().getWidth());
 		this.setHeight(shape.getLayoutBounds().getHeight());
-		
+
 		this.getChildren().setAll(shape, txt);
-		
+
 		updateProperties();
 	}
 
