@@ -62,6 +62,9 @@ public class Vertex extends StackPane {
 		this.txt = new Text(caption);
 		
 		updateStyle(style);
+		
+		this.layoutXProperty().addListener((observable, from, to) -> updateProperties());
+		this.layoutYProperty().addListener((observable, from, to) -> updateProperties());
 	}
 
 	public DoubleProperty centerXProperty() {

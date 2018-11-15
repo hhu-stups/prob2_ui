@@ -15,7 +15,6 @@ public class Graph extends Pane {
 
 	public void addVertex(String caption, Vertex.Style style) {
 		Vertex vertex = new Vertex(caption, style);
-		vertices.add(vertex);
 		this.getChildren().add(vertex);
 
 		double x = Math.random() * 750;
@@ -26,6 +25,7 @@ public class Graph extends Pane {
 			y = Math.random() * 500;
 		}
 		vertex.relocate(x, y);
+		vertices.add(vertex);
 	}
 
 	public void updateVertex(String id, Vertex.Style style) {
@@ -35,12 +35,13 @@ public class Graph extends Pane {
 		} else {
 			addVertex(id, style);
 		}
-		
 	}
 
 	private boolean vertexAt(double x, double y, double offsetX, double offsetY) {
 		for (Vertex vertex : vertices) {
-			if (x > (vertex.getLeftX() - offsetX) && x < vertex.getRightX() && y > (vertex.getTopY() - offsetY)
+			if (x > (vertex.getLeftX() - offsetX) 
+					&& x < vertex.getRightX() 
+					&& y > (vertex.getTopY() - offsetY)
 					&& y < vertex.getBottomY()) {
 				return true;
 			}
