@@ -247,10 +247,7 @@ public class DotView extends DynamicCommandStage {
 		Thread thread = Thread.currentThread();
 		Platform.runLater(() -> {
 			if (!thread.isInterrupted()) {
-				/*
-				 * FIXME: Fix rendering problem in JavaFX WebView
-				 */
-				dotView.getEngine().loadContent("<center>" + svg.replaceAll("font-size=\"12.00\"", "font-size=\"10.00\"") + "</center>");
+				dotView.getEngine().loadContent("<center>" + svg + "</center>");
 				statusBar.setText("");
 			}
 			currentThread.set(null);
