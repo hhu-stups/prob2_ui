@@ -52,7 +52,7 @@ public class HelpSystem extends StackPane {
 	private URI helpURI;
 	boolean isJar;
 	boolean isHelpButton;
-	String helpSubdirectoryString = "help_en";
+	final String helpSubdirectoryString;
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
 
 	@Inject
@@ -61,7 +61,7 @@ public class HelpSystem extends StackPane {
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
 		isJar = helpURI.toString().startsWith("jar:");
 		isHelpButton = false;
-		setHelpSubdirectoryString();
+		helpSubdirectoryString = findHelpSubdirectory();
 		File helpSubdirectory = getHelpDirectory();
 
 		treeView.setRoot(createNode(helpSubdirectory));
@@ -167,17 +167,8 @@ public class HelpSystem extends StackPane {
 		}
 	}
 
-	private static boolean isCurrentLanguage(String language) {
-		return Locale.getDefault().toString().startsWith(language);
-	}
-
-	private void setHelpSubdirectoryString() {
-		// this needs to be updated if new translations of help are added
-		String[] languages = {"de", "en"};
-		for (String language : languages) {
-			if (isCurrentLanguage(language)) {
-				helpSubdirectoryString = "help_" + language;
-			}
-		}
+	private static String findHelpSubdirectory() {
+		final String helpDirName = "help_" + Locale.getDefault().getLanguage();
+		return HelpSystem.class.getResource("/help/" + helpDirName + ".txt") == null ? "help_en" : helpDirName;
 	}
 }
