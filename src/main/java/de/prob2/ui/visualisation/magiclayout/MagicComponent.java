@@ -22,11 +22,13 @@ public abstract class MagicComponent {
 	private final DoubleProperty lineWidth = new SimpleDoubleProperty();
 	private final ObjectProperty<Color> textColor = new SimpleObjectProperty<>();
 	
+	private final boolean editable;
+	
 	public MagicComponent(String name) {
-		this(name, "");
+		this(name, "", true);
 	}
 	
-	public MagicComponent(String name, String expression) {
+	public MagicComponent(String name, String expression, boolean editable) {
 		this.name.set(name);
 		this.expression.set(expression);
 		
@@ -34,6 +36,8 @@ public abstract class MagicComponent {
 		this.lineColor.set(Color.BLACK);
 		this.lineWidth.set(1);
 		this.textColor.set(Color.BLACK);
+		
+		this.editable = editable;
 	}
 	
 	public StringProperty nameProperty() {
@@ -82,6 +86,10 @@ public abstract class MagicComponent {
 
 	public Color getTextColor() {
 		return textColor.get();
+	}
+	
+	public boolean isEditable() {
+		return editable;
 	}
 
 	@Override
