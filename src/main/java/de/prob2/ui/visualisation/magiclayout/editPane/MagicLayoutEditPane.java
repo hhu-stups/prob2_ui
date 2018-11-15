@@ -123,6 +123,7 @@ public class MagicLayoutEditPane extends VBox {
 		if (selectedComponent != null) {
 			expressionTextArea.setText(selectedComponent.getExpression());
 			selectedComponent.expressionProperty().bind(expressionTextArea.textProperty());
+			expressionTextArea.setEditable(selectedComponent.isEditable());
 
 			lineTypeComboBox.setValue(selectedComponent.getLineType());
 			selectedComponent.lineTypeProperty().bind(lineTypeComboBox.valueProperty());
