@@ -9,6 +9,7 @@
 <?import de.prob2.ui.visualisation.magiclayout.editPane.*?>
 <?import javafx.collections.*?>
 <?import java.lang.String?>
+<?import javafx.scene.Group?>
 
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1"
 	title="%visualisation.magicLayout.view.title">
@@ -51,7 +52,15 @@
 									fx:id="magicLayoutEditEdges" />
 							</Tab>
 						</TabPane>
-						<StackPane fx:id="magicGraphPane" prefWidth="800"/>
+						<ScrollPane prefWidth="800" fitToHeight="TRUE"
+							fitToWidth="TRUE">
+							<StackPane> <!-- this stackpane makes sure the group is centered inside the scrollpane -->
+								<Group> <!-- this group makes sure the scrollpane recognizes when it should show 
+										scroll bars -->
+									<StackPane fx:id="magicGraphPane" />
+								</Group>
+							</StackPane>
+						</ScrollPane>
 					</SplitPane>
 				</center>
 			</BorderPane>
