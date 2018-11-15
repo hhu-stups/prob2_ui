@@ -45,6 +45,11 @@
 								</placeholder>
 							</ListView>
 							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
+								<Button fx:id="saveButton" onAction="#save" HBox.hgrow="NEVER">
+									<graphic>
+										<FontAwesomeIconView styleClass="icon-dark" glyphName="SAVE" glyphSize="${fontSize.fontSize + 2}" />
+									</graphic>
+								</Button>
 								<Button fx:id="cancelButton" onAction="#cancel" HBox.hgrow="NEVER">
 									<graphic>
 										<FontAwesomeIconView styleClass="icon-dark" glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
