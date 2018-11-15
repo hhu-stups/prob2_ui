@@ -52,7 +52,7 @@ public class MagicGraphFX implements MagicGraphI {
 						.asList(edgegroup.getExpression().replaceAll("[{]|[}]|[(]|[)]", "").split(","));
 				Edge.Style style = new Edge.Style(edgegroup.getLineColor(), edgegroup.getLineWidth(),
 						edgegroup.getLineType(), edgegroup.getTextColor(), edgegroup.getTextSize());
-				edges.forEach(edge -> graph.addEdge(edge.split("↦")[0], edge.split("↦")[1], edgegroup.getName(), style));
+				edges.forEach(edge -> graph.updateEdge(edge.split("↦")[0], edge.split("↦")[1], edgegroup.getName(), style));
 			}
 		});
 	}

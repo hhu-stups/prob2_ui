@@ -47,20 +47,16 @@ public class Edge extends Group {
 	private DoubleProperty centerY = new SimpleDoubleProperty();
 
 	public Edge(Vertex source, Vertex target, String caption, Style style) {
+		this.setId(source.getId() + "$" + target.getId() + "$" + caption);
+		
 		this.source = source;
 		this.target = target;
 
-		this.line.setStroke(style.lineColor);
-		this.line.setStrokeWidth(style.lineWidth);
-		this.line.getStrokeDashArray().addAll(style.lineType);
-		this.line.setStrokeLineCap(StrokeLineCap.BUTT);
-		this.line.setStrokeLineJoin(StrokeLineJoin.ROUND);
-
 		this.txt = new Text(caption);
-		this.txt.setFill(style.textColor);
-		this.txt.setFont(new Font(style.textSize));
 		
 		this.getChildren().addAll(line, txt);
+		
+		this.updateStyle(style);
 
 		// init Properties
 		// when the line moves, also move the text
@@ -125,5 +121,15 @@ public class Edge extends Group {
 			line.startXProperty().bind(source.centerXProperty());
 			line.endXProperty().bind(target.centerXProperty());
 		}
+	}
+
+	public void updateStyle(Style style) {
+		this.line.setStroke(style.lineColor);
+		this.line.setStrokeWidth(style.lineWidth);
+		this.line.getStrokeDashArray().addAll(style.lineType);
+		this.line.setStrokeLineCap(StrokeLineCap.BUTT);
+		this.line.setStrokeLineJoin(StrokeLineJoin.ROUND);
+		this.txt.setFill(style.textColor);
+		this.txt.setFont(new Font(style.textSize));
 	}
 }

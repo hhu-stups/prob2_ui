@@ -58,4 +58,13 @@ public class Graph extends Pane {
 		edges.add(edge);
 		this.getChildren().add(edge);
 	}
+
+	public void updateEdge(String sourceVertexId, String targetVertexId, String caption, Edge.Style style) {
+		Edge edge = (Edge) this.lookup("#" + sourceVertexId + "$" + targetVertexId + "$" + caption);
+		if(edge != null) {
+			edge.updateStyle(style);
+		} else {
+			addEdge(sourceVertexId, targetVertexId, caption, style);
+		}
+	}
 }
