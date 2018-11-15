@@ -47,6 +47,12 @@ public class MagicLayoutView extends Stage {
 	@FXML
 	public void initialize() {
 		stageManager.setMacMenuBar(this, menuBar);
+
+		magicGraphPane.setOnZoom(event -> {
+			magicGraphPane.setScaleX(magicGraphPane.getScaleX() * event.getZoomFactor());
+			magicGraphPane.setScaleY(magicGraphPane.getScaleY() * event.getZoomFactor());
+		});
+		
 		magicGraphPane.getChildren().setAll(
 				magicGraph.generateMagicGraph(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges()));
 
