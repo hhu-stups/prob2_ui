@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -202,30 +203,44 @@ public class DotView extends DynamicCommandStage {
 		final ProcessBuilder dotProcessBuilder = new ProcessBuilder(dotCommand, "-K" + dotEngine, "-Tsvg", dotFilePath.toString());
 		LOGGER.debug("Starting dot command: {}", dotProcessBuilder.command());
 		final Process dotProcess = dotProcessBuilder.start();
-		final int exitCode = dotProcess.waitFor();
-		LOGGER.debug("dot exited with status code {}", exitCode);
 		
-		final String errorOutput;
-		try (
-			final Reader reader = new InputStreamReader(dotProcess.getErrorStream());
-			final BufferedReader br = new BufferedReader(reader);
-		) {
-			errorOutput = br.lines().collect(Collectors.joining("\n"));
-		}
-		if (!errorOutput.isEmpty()) {
-			LOGGER.error("Error output from dot:\n{}", errorOutput);
-		}
+		// Read stderr in a background thread, to prevent the stream buffer from filling up and blocking dot.
+		// (This is very unlikely to happen, because dot normally doesn't produce a lot of stderr output.)
+		final StringJoiner errorOutput = new StringJoiner("\n");
+		final Thread stderrLogger = new Thread(() -> {
+			try (
+				final Reader reader = new InputStreamReader(dotProcess.getErrorStream());
+				final BufferedReader br = new BufferedReader(reader);
+			) {
+				br.lines().forEach(line -> {
+					errorOutput.add(line);
+					LOGGER.error("Error output from dot: {}", line);
+				});
+			} catch (IOException e) {
+				LOGGER.error("Failed to read dot error output", e);
+			}
+		}, "dot stderr logger");
+		stderrLogger.start();
 		
-		if (exitCode != 0) {
-			throw new ProBError("dot exited with status code " + exitCode + ":\n" + errorOutput);
-		}
-		
+		// Read stdout while dot is running, to prevent the stream buffer from filling up and blocking dot.
+		// (Unlike with stderr, this actually happens in practice, when the generated SVG is large.)
+		final String svg;
 		try (
 			final Reader reader = new InputStreamReader(dotProcess.getInputStream());
 			final BufferedReader br = new BufferedReader(reader);
 		) {
-			return br.lines().collect(Collectors.joining("\n"));
+			svg = br.lines().collect(Collectors.joining("\n"));
 		}
+		
+		final int exitCode = dotProcess.waitFor();
+		LOGGER.debug("dot exited with status code {}", exitCode);
+		
+		if (exitCode != 0) {
+			stderrLogger.join(); // Make sure that all stderr output has been read
+			throw new ProBError("dot exited with status code " + exitCode + ":\n" + errorOutput);
+		}
+		
+		return svg;
 	}
 
 	private void loadGraph(final String svg) {

@@ -103,7 +103,7 @@ public class MagicLayoutEditPane extends VBox {
 		lineWidthComboBox = new ComboBox<>();
 		lineWidthComboBox.getItems().addAll(0.5, 1.0, 2.0, 5.0);
 		initLineWidthComboBox();
-		
+
 		textColorPicker = new ColorPicker(Color.BLACK);
 
 		flowPane.getChildren().addAll(
@@ -126,6 +126,7 @@ public class MagicLayoutEditPane extends VBox {
 		if (selectedComponent != null) {
 			expressionTextArea.setText(selectedComponent.getExpression());
 			selectedComponent.expressionProperty().bind(expressionTextArea.textProperty());
+			expressionTextArea.setEditable(selectedComponent.isEditable());
 
 			lineTypeComboBox.setValue(selectedComponent.getLineType());
 			selectedComponent.lineTypeProperty().bind(lineTypeComboBox.valueProperty());
@@ -135,7 +136,7 @@ public class MagicLayoutEditPane extends VBox {
 
 			lineWidthComboBox.setValue(selectedComponent.getLineWidth());
 			selectedComponent.lineWidthProperty().bind(lineWidthComboBox.valueProperty());
-			
+
 			textColorPicker.setValue(selectedComponent.getTextColor());
 			selectedComponent.textColorProperty().bind(textColorPicker.valueProperty());
 		} else {
@@ -158,8 +159,8 @@ public class MagicLayoutEditPane extends VBox {
 
 		for (IEvalElement element : resultMap.keySet()) {
 			MagicComponent magicComponent = (this instanceof MagicLayoutEditNodes)
-					? new MagicNodes(element.toString(), resultMap.get(element).toString(), true)
-					: new MagicEdges(element.toString(), resultMap.get(element).toString());
+					? new MagicNodes(element.toString(), resultMap.get(element).toString(), false, true)
+					: new MagicEdges(element.toString(), resultMap.get(element).toString(), false);
 
 			if (listView.getItems().contains(magicComponent)) {
 				MagicComponent existingComponent = listView.getItems().get(listView.getItems().indexOf(magicComponent));
@@ -220,15 +221,16 @@ public class MagicLayoutEditPane extends VBox {
 			newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addEdges());
 
 			cell.emptyProperty().addListener((observable, from, to) -> {
-				if (to) {
-					cell.setContextMenu((this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem)
-							: new ContextMenu(newEdgesItem));
-				} else {
-					cell.setContextMenu(new ContextMenu(editItem, deleteItem, new SeparatorMenuItem()));
-					cell.getContextMenu().getItems()
-							.add((this instanceof MagicLayoutEditNodes) ? newNodesItem : newEdgesItem);
+				cell.setContextMenu(new ContextMenu());
+				cell.setEditable(!to && cell.getItem().isEditable());
 
+				if (cell.isEditable()) {
+					cell.getContextMenu().getItems().addAll(editItem, deleteItem, new SeparatorMenuItem());
 				}
+
+				cell.getContextMenu().getItems()
+						.add((this instanceof MagicLayoutEditNodes) ? newNodesItem : newEdgesItem);
+
 			});
 
 			// set ContextMenu for cells, which are empty from the beginning
