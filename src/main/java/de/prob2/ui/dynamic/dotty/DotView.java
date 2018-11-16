@@ -1,10 +1,12 @@
 package de.prob2.ui.dynamic.dotty;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -43,6 +45,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Cursor;
@@ -51,6 +55,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,8 +78,12 @@ public class DotView extends DynamicCommandStage {
 	private HBox zoomBox;
 	
 	@FXML
-	private HelpButton helpButton;
+	private Button saveButton;
 	
+	@FXML
+	private HelpButton helpButton;
+
+	private final StringProperty currentSvg;
 
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
@@ -88,6 +97,7 @@ public class DotView extends DynamicCommandStage {
 			final MachineLoader machineLoader, final PreferencesHandler preferencesHandler,
 			final ResourceBundle bundle, final Injector injector) {
 		super(stageManager, currentTrace, currentProject, globalProBPrefs, globalPreferences, machineLoader, preferencesHandler, bundle, injector);
+		this.currentSvg = new SimpleStringProperty(this, "currentSvg", null);
 		stageManager.loadFXML(this, "dot_view.fxml");
 	}
 
@@ -95,6 +105,7 @@ public class DotView extends DynamicCommandStage {
 	@Override
 	public void initialize() {
 		super.initialize();
+		saveButton.disableProperty().bind(currentSvg.isNull());
 		helpButton.setHelpContent(this.getClass());
 		initializeZooming();
 	}
@@ -246,15 +257,29 @@ public class DotView extends DynamicCommandStage {
 	private void loadGraph(final String svg) {
 		Thread thread = Thread.currentThread();
 		Platform.runLater(() -> {
+			this.currentSvg.set(svg);
 			if (!thread.isInterrupted()) {
-				/*
-				 * FIXME: Fix rendering problem in JavaFX WebView
-				 */
-				dotView.getEngine().loadContent("<center>" + svg.replaceAll("font-size=\"12.00\"", "font-size=\"10.00\"") + "</center>");
+				dotView.getEngine().loadContent("<center>" + svg + "</center>");
 				statusBar.setText("");
 			}
 			currentThread.set(null);
 		});
+	}
+	
+	@FXML
+	private void save() {
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.svg"), "*.svg"));
+		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
+		final File file = fileChooser.showSaveDialog(this.getScene().getWindow());
+		if (file == null) {
+			return;
+		}
+		try {
+			Files.write(file.toPath(), currentSvg.get().getBytes(StandardCharsets.UTF_8));
+		} catch (IOException e) {
+			LOGGER.error("Failed to save SVG", e);
+		}
 	}
 	
 	@FXML
@@ -298,6 +323,7 @@ public class DotView extends DynamicCommandStage {
 	
 	@Override
 	protected void reset() {
+		currentSvg.set(null);
 		dotView.getEngine().loadContent("");
 		statusBar.setText("");
 	}
