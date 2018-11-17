@@ -67,11 +67,6 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		// add Sets from Machine as Node Groups
 		addMachineElementsAsNodeGroups();
 		currentTrace.addListener((observable, from, to) -> addMachineElementsAsNodeGroups());
-		
-		currentTrace.modelProperty().addListener((observable, from, to) -> {
-			this.listView.getItems().clear();
-			this.updateValues();
-		});
 	}
 
 	private void addMachineElementsAsNodeGroups() {

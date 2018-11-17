@@ -41,11 +41,6 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		// add Constants, Variables from Machine as Edge Groups
 		addMachineElementsAsEdgeGroups();
 		currentTrace.addListener((observable, from, to) -> addMachineElementsAsEdgeGroups());
-
-		currentTrace.modelProperty().addListener((observable, from, to) -> {
-			this.listView.getItems().clear();
-			this.updateValues();
-		});
 	}
 
 	private void addMachineElementsAsEdgeGroups() {

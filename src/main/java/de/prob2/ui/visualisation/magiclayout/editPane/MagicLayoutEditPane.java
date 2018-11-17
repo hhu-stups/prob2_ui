@@ -108,6 +108,12 @@ public class MagicLayoutEditPane extends VBox {
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linecolor"), lineColorPicker),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linewidth"), lineWidthComboBox),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker));
+		
+		// clear listview whenn the model changes
+		currentTrace.modelProperty().addListener((observable, from, to) -> {
+			this.listView.getItems().clear();
+			this.updateValues();
+		});
 	}
 
 	void updateValues() {
