@@ -48,6 +48,7 @@ public class MagicLayoutView extends Stage {
 	public void initialize() {
 		stageManager.setMacMenuBar(this, menuBar);
 
+		// make GraphPane zoomable
 		magicGraphPane.setOnZoom(event -> {
 			magicGraphPane.setScaleX(magicGraphPane.getScaleX() * event.getZoomFactor());
 			magicGraphPane.setScaleY(magicGraphPane.getScaleY() * event.getZoomFactor());
