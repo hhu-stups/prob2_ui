@@ -12,7 +12,7 @@ public class MagicGraphFX implements MagicGraphI {
 
 	@Override
 	public List<MagicShape> getPossibleShapes() {
-		MagicShape shapes[] = new MagicShape[] { MagicShape.RECTANGLE, MagicShape.CIRCLE, MagicShape.ELLIPSE };
+		MagicShape shapes[] = new MagicShape[] { MagicShape.RECTANGLE, MagicShape.CIRCLE, MagicShape.ELLIPSE, MagicShape.TRIANGLE };
 		return Arrays.asList(shapes);
 	}
 
@@ -65,6 +65,8 @@ public class MagicGraphFX implements MagicGraphI {
 			return Vertex.Type.ELLIPSE;
 		case RECTANGLE:
 			return Vertex.Type.RECTANGLE;
+		case TRIANGLE:
+			return Vertex.Type.TRIANGLE;
 		default:
 			return Vertex.Type.RECTANGLE;
 		}

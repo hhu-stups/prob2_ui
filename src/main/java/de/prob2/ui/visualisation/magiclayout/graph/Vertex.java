@@ -10,6 +10,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Ellipse;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.shape.StrokeLineCap;
@@ -19,7 +20,7 @@ import javafx.scene.text.Text;
 public class Vertex extends StackPane {
 
 	public enum Type {
-		RECTANGLE, CIRCLE, ELLIPSE
+		RECTANGLE, CIRCLE, ELLIPSE, TRIANGLE
 	}
 
 	public static class Style {
@@ -46,6 +47,8 @@ public class Vertex extends StackPane {
 
 	private Text txt;
 	private Shape shape;
+	
+	private Style style;
 
 	private DoubleProperty centerX = new SimpleDoubleProperty();
 	private DoubleProperty centerY = new SimpleDoubleProperty();
@@ -60,7 +63,6 @@ public class Vertex extends StackPane {
 
 	public Vertex(String id, String caption, Style style) {
 		this.setId(id);
-
 		this.txt = new Text(caption);
 
 		updateStyle(style);
@@ -124,17 +126,24 @@ public class Vertex extends StackPane {
 	}
 
 	public void updateStyle(Style style) {
+		this.style = style;
 		txt.setFill(style.textColor);
 
 		Double txtWidth = txt.getLayoutBounds().getWidth();
 		Double txtHeight = txt.getLayoutBounds().getHeight();
 
 		switch (style.shape) {
+		case RECTANGLE:
+			shape = new Rectangle(txtWidth + 20, txtHeight + 10);
+			break;
 		case CIRCLE:
 			shape = new Circle((txtWidth + 20) / 2);
 			break;
 		case ELLIPSE:
 			shape = new Ellipse((txtWidth + 30) / 2, (txtHeight + 20) / 2);
+			break;
+		case TRIANGLE:
+			shape = new Polygon(0, txtHeight + 20, (txtWidth + 30) * 2, txtHeight + 20, txtWidth + 30, 0);
 			break;
 		default:
 			shape = new Rectangle(txtWidth + 20, txtHeight + 10);
@@ -158,9 +167,15 @@ public class Vertex extends StackPane {
 	private void updateProperties() {
 		centerX.set(getLayoutX() + shape.getLayoutBounds().getWidth() / 2);
 		centerY.set(getLayoutY() + shape.getLayoutBounds().getHeight() / 2);
-		leftX.set(getLayoutX());
-		rightX.set(getLayoutX() + shape.getLayoutBounds().getWidth());
 		topY.set(getLayoutY());
 		bottomY.set(getLayoutY() + shape.getLayoutBounds().getHeight());
+		
+		if(this.style.shape == Type.TRIANGLE) {
+			leftX.set(getLayoutX() + shape.getLayoutBounds().getWidth() / 4);
+			rightX.set(getLayoutX() + shape.getLayoutBounds().getWidth() * 3 / 4);
+		} else {
+			leftX.set(getLayoutX());
+			rightX.set(getLayoutX() + shape.getLayoutBounds().getWidth());
+		}
 	}
 }
