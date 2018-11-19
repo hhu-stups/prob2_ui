@@ -126,7 +126,7 @@ public class BEditorView extends BorderPane {
 				MachineFileInformation fileInformation = machineChoice.getSelectionModel().getSelectedItem();
 				if(fileInformation != null && currentProject.getCurrentMachine().getName().equals(fileInformation.getName())) {
 					registerFile(machinePath);
-					setText(machinePath);
+					loadText(machinePath);
 				}
 			}
 		});
@@ -146,7 +146,11 @@ public class BEditorView extends BorderPane {
 		final Path machinePath = currentProject.getLocation().resolve(path);
 		resetWatching();
 		registerFile(machinePath);
-		
+		loadText(machinePath);
+		beditor.clearHistory();
+	}
+	
+	private void loadText(Path machinePath) {
 		if(currentTrace.getModel() instanceof EventBModel) {
 			GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
 			currentTrace.getStateSpace().execute(cmd);
@@ -155,7 +159,6 @@ public class BEditorView extends BorderPane {
 		} else {
 			setText(machinePath);
 		}
-		beditor.clearHistory();
 	}
 	
 	private void updateIncludedMachines() {
@@ -195,7 +198,7 @@ public class BEditorView extends BorderPane {
 				for (WatchEvent<?> event : key.pollEvents()) {
 					WatchEvent.Kind<?> kind = event.kind();
 					if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-						Platform.runLater(() -> setText(path));
+						Platform.runLater(() -> loadText(path));
 					}
 				}
 				key.reset();
