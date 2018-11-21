@@ -110,7 +110,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 		Thread thread = new Thread(() -> {
 			Platform.runLater(() -> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
 			try {
-				if(currentTrace.get() == null) {
+				if(currentTrace.get() == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
 					Platform.runLater(() -> {
 						reset();
 						statusBar.setText("");

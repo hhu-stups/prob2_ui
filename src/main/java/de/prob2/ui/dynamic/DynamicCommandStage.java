@@ -148,11 +148,13 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 			updatePreferences(to.getRelevantPreferences());		
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
-			String currentFormula = taFormula.getText();
 			if(lastItem != null && !lastItem.getCommand().equals(to.getCommand())) {
 				reset();
 			}
-			if ((!needFormula || !currentFormula.isEmpty()) && (lastItem == null
+			//only visualize if
+			//1. No formula is needed and command is changed or continuous update is selected
+			//2. Formula is needed and command is not changed and continuous update is selected
+			if ((!needFormula || to.equals(lastItem)) && (lastItem == null
 					|| !Objects.equals(lastItem.getCommand(), to.getCommand()) || cbContinuous.isSelected())) {
 				visualize(to);
 			}

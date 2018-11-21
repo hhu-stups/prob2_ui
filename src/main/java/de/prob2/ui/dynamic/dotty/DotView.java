@@ -145,7 +145,7 @@ public class DotView extends DynamicCommandStage {
 			Platform.runLater(()-> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
 			try {
 				Trace trace = currentTrace.get();
-				if(trace == null) {
+				if(trace == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
 					Platform.runLater(this::reset);
 					currentThread.set(null);
 					return;

@@ -66,7 +66,7 @@
 									<Label fx:id="applyWarning" text="%preferences.stage.tabs.globalPreferences.notAppliedWarning" styleClass="warning" visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
 									<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" disable="true" HBox.hgrow="NEVER" onAction="#handleApply" />				
 								</HBox>
-								<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
+								<VBox styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 									<Label text="%dotty.enterFormula" VBox.vgrow="NEVER"/>
 									<TextArea fx:id="taFormula" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #e8e8e8;"/>
 								</VBox>
