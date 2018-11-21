@@ -25,14 +25,11 @@ import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.dynamic.DynamicCommandStage;
+import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.preferences.GlobalPreferences;
-import de.prob2.ui.preferences.PreferencesHandler;
-import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.MachineLoader;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -66,12 +63,9 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	
 	@Inject
-	public ExpressionTableView(final StageManager stageManager, final CurrentTrace currentTrace, 
-			final CurrentProject currentProject, final ProBPreferences globalProBPrefs,
-			final GlobalPreferences globalPreferences,
-			final MachineLoader machineLoader, final PreferencesHandler preferencesHandler,
-			final ResourceBundle bundle, final Injector injector) {
-		super(stageManager, currentTrace, currentProject, globalProBPrefs, globalPreferences, machineLoader, preferencesHandler, bundle, injector);
+	public ExpressionTableView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace, 
+			final CurrentProject currentProject, final ResourceBundle bundle, final Injector injector) {
+		super(stageManager, preferences, currentTrace, currentProject, bundle, injector);
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
 		stageManager.loadFXML(this, "table_view.fxml");
 	}
@@ -212,6 +206,13 @@ public class ExpressionTableView extends DynamicCommandStage {
 		currentTable.set(null);
 		clearTable();
 		statusBar.setText("");
+	}
+	
+	@FXML
+	private void editPreferences() {
+		DynamicCommandItem currentItem = lvChoice.getSelectionModel().getSelectedItem();
+		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
+		preferences.show();
 	}
 	
 }
