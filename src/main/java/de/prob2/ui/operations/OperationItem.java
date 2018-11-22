@@ -238,10 +238,8 @@ public class OperationItem {
 			}
 		}
 
-		if (this.name.equals(SETUP_CONSTANTS) || this.name.equals(INITIALISE_MACHINE)) {
-			this.getConstants().forEach((key, value) -> args.add(key + ":=" + value));
-			this.getVariables().forEach((key, value) -> args.add(key + ":=" + value));
-		}
+		this.getConstants().forEach((key, value) -> args.add(key + ":=" + value));
+		this.getVariables().forEach((key, value) -> args.add(key + ":=" + value));
 
 		if (!args.isEmpty()) {
 			sb.append('(');
