@@ -16,16 +16,11 @@ import de.prob.exception.ProBError;
 
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.preferences.AbstractPreferencesStage;
-import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PrefItem;
-import de.prob2.ui.preferences.PreferencesHandler;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferenceType;
-import de.prob2.ui.preferences.ProBPreferences;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -38,11 +33,12 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DynamicCommandStage extends AbstractPreferencesStage {
+public abstract class DynamicCommandStage extends Stage {
 	private static final class DynamicCommandItemCell extends ListCell<DynamicCommandItem> {
 		private DynamicCommandItemCell() {
 			super();
@@ -71,6 +67,9 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 
 	@FXML
 	protected TextArea taFormula;
+	
+	@FXML
+	protected TextArea taErrors;
 
 	@FXML
 	protected VBox enterFormulaBox;
@@ -88,12 +87,14 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 	protected Button cancelButton;
 	
 	@FXML
-	protected DynamicCommandStatusBar statusBar;
+	protected Button editPreferencesButton;
 	
 	@FXML
-	protected DynamicPreferencesTableView preferences;
+	protected DynamicCommandStatusBar statusBar;
 	
 	protected DynamicCommandItem lastItem;
+	
+	protected final DynamicPreferencesStage preferences;
 	
 	protected final CurrentTrace currentTrace;
 	
@@ -107,11 +108,10 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 	
 	protected final Injector injector;
 	
-	protected DynamicCommandStage(final StageManager stageManager, final CurrentTrace currentTrace, 
-			final CurrentProject currentProject, final ProBPreferences globalProBPrefs, final GlobalPreferences globalPreferences,
-			final MachineLoader machineLoader, final PreferencesHandler preferencesHandler,
-			final ResourceBundle bundle, final Injector injector) {
-		super(globalProBPrefs, globalPreferences, preferencesHandler, machineLoader);
+	protected DynamicCommandStage(final StageManager stageManager, final DynamicPreferencesStage preferences,
+			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, 
+			final Injector injector) {
+		this.preferences = preferences;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;		
 		this.injector = injector;
@@ -123,10 +123,9 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 	
 	@FXML
 	protected void initialize() {
-		super.initialize();
 		fillCommands();
 		currentTrace.addListener((observable, from, to) -> {
-			preferences.getItems().clear();
+			preferences.clear();
 			if(to == null || lvChoice.getSelectionModel().getSelectedItem() == null) {
 				return;
 			}
@@ -136,7 +135,7 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 		});
 		
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			preferences.getItems().clear();
+			preferences.clear();
 			if (to == null) {
 				return;
 			}
@@ -145,14 +144,16 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 			} else {
 				lbDescription.setText(to.getDescription());
 			}
-			updatePreferences(to.getRelevantPreferences());		
+			updatePreferences(to.getRelevantPreferences());
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
-			String currentFormula = taFormula.getText();
 			if(lastItem != null && !lastItem.getCommand().equals(to.getCommand())) {
 				reset();
 			}
-			if ((!needFormula || !currentFormula.isEmpty()) && (lastItem == null
+			//only visualize if
+			//1. No formula is needed and command is changed or continuous update is selected
+			//2. Formula is needed and command is not changed and continuous update is selected
+			if ((!needFormula || to.equals(lastItem)) && (lastItem == null
 					|| !Objects.equals(lastItem.getCommand(), to.getCommand()) || cbContinuous.isSelected())) {
 				visualize(to);
 			}
@@ -195,6 +196,7 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 		});
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell());
 		cancelButton.disableProperty().bind(currentThread.isNull());
+		editPreferencesButton.disableProperty().bind(lvChoice.getSelectionModel().selectedItemProperty().isNull().or(preferences.emptyProperty()));
 	}
 	
 	private void updatePreferences(List<String> relevantPreferences) {
@@ -202,7 +204,7 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 		currentTrace.getStateSpace().execute(cmd);
 		GetDefaultPreferencesCommand cmd2 = new GetDefaultPreferencesCommand();
 		currentTrace.getStateSpace().execute(cmd2);
-		preferences.getItems().addAll(cmd2.getPreferences().stream()
+		preferences.addAll(cmd2.getPreferences().stream()
 				.filter(preference -> relevantPreferences.contains(preference.name))
 				.map(preference -> new PrefItem(preference.name, "", preference.defaultValue, ProBPreferenceType.fromProBPreference(preference), preference.defaultValue, preference.description))
 				.collect(Collectors.toList()));
@@ -252,11 +254,5 @@ public abstract class DynamicCommandStage extends AbstractPreferencesStage {
 	protected abstract void visualize(DynamicCommandItem item);
 	
 	protected abstract void fillCommands();
-	
-	@FXML
-	private void handleClose() {
-		this.close();
-	}
-
 
 }

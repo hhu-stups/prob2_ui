@@ -45,6 +45,7 @@
 								</placeholder>
 							</ListView>
 							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
+								<Button fx:id="editPreferencesButton" styleClass="button-blue" text="%dynamic.editPreferences" onAction="#editPreferences" />
 								<Button fx:id="saveButton" onAction="#save" HBox.hgrow="NEVER">
 									<graphic>
 										<FontAwesomeIconView styleClass="icon-dark" glyphName="SAVE" glyphSize="${fontSize.fontSize + 2}" />
@@ -59,16 +60,15 @@
 							</HBox>
 							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
 								<Label fx:id="lbDescription" prefHeight="100.0" wrapText="true" VBox.vgrow="ALWAYS"/>
-								<DynamicPreferencesTableView fx:id="preferences" VBox.vgrow="ALWAYS"/>
-								<HBox spacing="10.0">
-									<Button fx:id="undoButton" styleClass="button-blue" text="%preferences.stage.tabs.globalPreferences.buttons.undo" disable="true" HBox.hgrow="NEVER" onAction="#handleUndoChanges" />
-									<Button fx:id="resetButton" styleClass="button-blue" text="%preferences.stage.tabs.globalPreferences.buttons.restoreDefaults" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults" />
-									<Label fx:id="applyWarning" text="%preferences.stage.tabs.globalPreferences.notAppliedWarning" styleClass="warning" visible="false" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
-									<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" disable="true" HBox.hgrow="NEVER" onAction="#handleApply" />				
-								</HBox>
-								<VBox fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
-									<Label text="%dotty.enterFormula" VBox.vgrow="NEVER"/>
-									<TextArea fx:id="taFormula" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #e8e8e8;"/>
+								<VBox spacing="20.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
+									<VBox alignment="CENTER">
+										<Label text="%dotty.enterFormula" VBox.vgrow="NEVER"/>
+										<TextArea fx:id="taFormula" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #e8e8e8;"/>
+									</VBox>
+									<VBox alignment="CENTER">
+										<Label text="%dynamic.errors" VBox.vgrow="NEVER"/>
+										<TextArea editable="false" fx:id="taErrors" style="-fx-control-inner-background: #e8e8e8;" VBox.vgrow="ALWAYS"/>
+									</VBox>
 								</VBox>
 							</VBox>
 							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
