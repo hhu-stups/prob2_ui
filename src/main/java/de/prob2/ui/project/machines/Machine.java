@@ -49,6 +49,7 @@ public class Machine {
 		TLA(Api::tla_load, new String[] {"*.tla"}),
 		BRULES(Api::brules_load, new String[] {"*.rmch"}),
 		XTL(Api::xtl_load, new String[] {"*.P", "*.pl"}),
+		ALLOY(Api::alloy_load, new String[] {"*.als"}),
 		;
 		
 		private static final Map<String, Machine.Type> extensionToTypeMap;

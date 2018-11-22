@@ -147,7 +147,6 @@ public class MachineLoader {
 				final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
 				allPrefs.putAll(prefs);
 				final StateSpace stateSpace = machine.getType().getLoader().load(api, path.toString(), allPrefs);
-
 				setLoadingStatus(StatusBar.LoadingStatus.ADDING_ANIMATION);
 				this.animations.addNewAnimation(new Trace(stateSpace));
 			} finally {
