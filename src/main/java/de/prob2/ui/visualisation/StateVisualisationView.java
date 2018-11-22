@@ -15,6 +15,7 @@ import de.prob.animator.command.ExecuteRightClickCommand;
 import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetImagesForMachineCommand;
 import de.prob.animator.command.GetRightClickOptionsForStateVisualizationCommand;
+import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -75,7 +76,7 @@ public class StateVisualisationView extends AnchorPane {
 	private void showMatrix(State state, Map<Integer, String> images) throws FileNotFoundException {
 		final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
 		state.getStateSpace().execute(cmd);
-		final List<List<Object>> matrix = cmd.getMatrix();
+		final List<List<AnimationMatrixEntry>> matrix = cmd.getMatrix();
 		if (matrix.isEmpty()) {
 			visualisationPossible.set(false);
 			return;
@@ -84,24 +85,22 @@ public class StateVisualisationView extends AnchorPane {
 		}
 
 		for (int r = 0; r < matrix.size(); r++) {
-			final List<Object> row = matrix.get(r);
+			final List<AnimationMatrixEntry> row = matrix.get(r);
 			for (int c = 0; c < row.size(); c++) {
-				final Object entry = row.get(c);
+				final AnimationMatrixEntry entry = row.get(c);
 				final Node view;
 				if (entry == null) {
 					view = null;
-				} else if (entry instanceof Integer) {
-					view = new ImageView(getImage(images.get(entry)));
-				} else if (entry instanceof String) {
-					view = new Label((String)entry);
+				} else if (entry instanceof AnimationMatrixEntry.Image) {
+					view = new ImageView(getImage(images.get(((AnimationMatrixEntry.Image)entry).getImageNumber())));
+				} else if (entry instanceof AnimationMatrixEntry.Text) {
+					view = new Label(((AnimationMatrixEntry.Text)entry).getText());
 				} else {
 					throw new AssertionError("Unhandled animation matrix entry type: " + entry.getClass());
 				}
 
 				if (view != null) {
-					final int finalRow = r;
-					final int finalColumn = c;
-					view.setOnContextMenuRequested(e -> getContextMenu(state, finalRow, finalColumn)
+					view.setOnContextMenuRequested(e -> getContextMenu(state, entry)
 						.show(view, e.getScreenX(), e.getScreenY()));
 					visualisationGridPane.add(view, c, r);
 				}
@@ -109,11 +108,11 @@ public class StateVisualisationView extends AnchorPane {
 		}
 	}
 
-	private ContextMenu getContextMenu(State state, int row, int column) {
+	private ContextMenu getContextMenu(State state, AnimationMatrixEntry entry) {
 		ContextMenu contextMenu = new ContextMenu();
 		StateSpace stateSpace = state.getStateSpace();
 		GetRightClickOptionsForStateVisualizationCommand getOptionsCommand = new GetRightClickOptionsForStateVisualizationCommand(
-				state.getId(), row, column);
+				state.getId(), entry.getRow(), entry.getColumn());
 		stateSpace.execute(getOptionsCommand);
 		List<String> options = getOptionsCommand.getOptions();
 		for (String opt : options) {
@@ -123,7 +122,7 @@ public class StateVisualisationView extends AnchorPane {
 				item.setDisable(true);
 			}
 			item.setOnAction(e -> {
-				ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(state.getId(), row, column, opt);
+				ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(state.getId(), entry.getRow(), entry.getColumn(), opt);
 				stateSpace.execute(executeCommand);
 				String transitionId = executeCommand.getTransitionID();
 				currentTrace.set(trace.add(transitionId));
