@@ -9,10 +9,12 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Rotate;
 
 public class Edge extends Group {
 
@@ -48,49 +50,67 @@ public class Edge extends Group {
 
 	public Edge(Vertex source, Vertex target, String caption, Style style) {
 		this.setId(source.getId() + "$" + target.getId() + "$" + caption);
-		
+
 		this.source = source;
 		this.target = target;
 
 		this.txt = new Text(caption);
-		
-		this.getChildren().addAll(line, txt);
-		
+
+		Polygon arrowhead = new Polygon(0, 0, 0, 10, Math.sqrt(3) * 5, 5);
+
+		this.getChildren().addAll(line, arrowhead, txt);
+
 		this.updateStyle(style);
 
 		// init Properties
 		// when the line moves, also move the text
-		centerX.addListener((observable, from, to) -> txt.relocate((double) to, centerY.get())); 
+		centerX.addListener((observable, from, to) -> txt.relocate((double) to, centerY.get()));
 		centerY.addListener((observable, from, to) -> txt.relocate(centerX.get(), (double) to));
-		
+
 		// when the line start or end point changes, update the distance and center properties
 		ChangeListener<? super Number> lineChangeListener = (observable, from, to) -> {
 			distanceX.set(Math.abs(line.getStartX() - line.getEndX()));
 			distanceY.set(Math.abs(line.getStartY() - line.getEndY()));
 			centerX.set(getDistanceX() / 2 + (line.getStartX() < line.getEndX() ? line.getStartX() : line.getEndX())
-				- txt.getLayoutBounds().getWidth() / 2);
+					- txt.getLayoutBounds().getWidth() / 2);
 			centerY.set(getDistanceY() / 2 + (line.getStartY() < line.getEndY() ? line.getStartY() : line.getEndY())
-				- txt.getLayoutBounds().getHeight() / 2);
+					- txt.getLayoutBounds().getHeight() / 2);
+
+			// set arrowPoints depending on line end
+			arrowhead.getPoints().setAll(line.getEndX(), line.getEndY(), line.getEndX(), line.getEndY() + 10,
+					line.getEndX() + Math.sqrt(3) * 5, line.getEndY() + 5);
+			
+			// rotate arrowhead to point to target node
+			Double xDiff = line.getEndX() - line.getStartX();
+			Double yDiff = line.getEndY() - line.getStartY();
+			Double rotationDegrees = Math.acos(yDiff / Math.sqrt(xDiff * xDiff + yDiff * yDiff)) * 360 / (2 * Math.PI);
+			if (xDiff < 0) {
+				rotationDegrees = rotationDegrees - 150 ;
+			} else {
+				rotationDegrees = rotationDegrees * -1 - 150;
+			}
+			Rotate rotation = new Rotate(rotationDegrees, line.getEndX(), line.getEndY());
+			arrowhead.getTransforms().setAll(rotation);
 		};
 		line.startXProperty().addListener(lineChangeListener);
 		line.startYProperty().addListener(lineChangeListener);
 		line.endXProperty().addListener(lineChangeListener);
 		line.endYProperty().addListener(lineChangeListener);
-		
+
 		distanceX.addListener((observable, from, to) -> calculatePositioning());
 		distanceY.addListener((observable, from, to) -> calculatePositioning());
-		
+
 		calculatePositioning();
 	}
 
 	public DoubleProperty distanceXProperty() {
 		return distanceX;
 	}
-	
+
 	public double getDistanceX() {
 		return distanceX.get();
 	}
-	
+
 	public DoubleProperty distanceYProperty() {
 		return distanceY;
 	}
