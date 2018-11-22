@@ -67,6 +67,9 @@ public abstract class DynamicCommandStage extends Stage {
 
 	@FXML
 	protected TextArea taFormula;
+	
+	@FXML
+	protected TextArea taErrors;
 
 	@FXML
 	protected VBox enterFormulaBox;
@@ -193,7 +196,7 @@ public abstract class DynamicCommandStage extends Stage {
 		});
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell());
 		cancelButton.disableProperty().bind(currentThread.isNull());
-		editPreferencesButton.disableProperty().bind(lvChoice.getSelectionModel().selectedItemProperty().isNull());
+		editPreferencesButton.disableProperty().bind(lvChoice.getSelectionModel().selectedItemProperty().isNull().or(preferences.emptyProperty()));
 	}
 	
 	private void updatePreferences(List<String> relevantPreferences) {

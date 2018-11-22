@@ -156,7 +156,7 @@ public class DotView extends DynamicCommandStage {
 				LOGGER.error("Graph visualization failed", e);
 				currentThread.set(null);
 				Platform.runLater(() -> {
-					stageManager.makeExceptionAlert(e, "dotty.alerts.visualisationError.content").show();
+					taErrors.setText(e.getMessage());
 					dotView.getEngine().loadContent("");
 					statusBar.setText("");
 				});
@@ -193,7 +193,6 @@ public class DotView extends DynamicCommandStage {
 				.map(t -> PrologTerm.atomicString(t.getArgument(1)))
 				.findAny()
 				.orElseGet(getDotEngineCmd::getValue);
-			
 			return getSvgForDotFile(dot, dotEngine, dotFilePath);
 		} finally {
 			try {
@@ -255,6 +254,7 @@ public class DotView extends DynamicCommandStage {
 			if (!thread.isInterrupted()) {
 				dotView.getEngine().loadContent("<center>" + svg + "</center>");
 				statusBar.setText("");
+				taErrors.clear();
 			}
 			currentThread.set(null);
 		});

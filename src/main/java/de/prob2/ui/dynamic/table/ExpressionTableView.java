@@ -128,7 +128,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 				LOGGER.error("Table visualization failed", e);
 				currentThread.set(null);
 				Platform.runLater(() -> {
-					stageManager.makeExceptionAlert(e, "table.expressionTableView.alerts.visualisationNotPossible.message").show();
+					taErrors.setText(e.getMessage());
 					reset();
 				});
 			}
@@ -149,6 +149,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 		}
 		tableView.setItems(buildData(data.getRows()));
 		pane.setContent(tableView);
+		taErrors.clear();
 	}
 	
 	private void clearTable() {

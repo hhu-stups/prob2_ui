@@ -49,9 +49,15 @@
 							</HBox>
 							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
 								<Label fx:id="lbDescription" prefHeight="200.0" wrapText="true" VBox.vgrow="ALWAYS"/>
-								<VBox styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
-									<Label text="%table.expressionTableView.enterFormula" VBox.vgrow="NEVER"/>
-									<TextArea fx:id="taFormula" style="-fx-control-inner-background: #e8e8e8;" VBox.vgrow="ALWAYS"/>
+								<VBox spacing="20.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
+									<VBox alignment="CENTER">
+										<Label text="%table.expressionTableView.enterFormula" VBox.vgrow="NEVER"/>
+										<TextArea fx:id="taFormula" style="-fx-control-inner-background: #e8e8e8;" VBox.vgrow="ALWAYS"/>
+									</VBox>
+									<VBox alignment="CENTER">
+										<Label text="%dynamic.errors" VBox.vgrow="NEVER"/>
+										<TextArea editable="false" fx:id="taErrors" style="-fx-control-inner-background: #e8e8e8;" VBox.vgrow="ALWAYS"/>
+									</VBox>
 								</VBox>
 							</VBox>
 							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
