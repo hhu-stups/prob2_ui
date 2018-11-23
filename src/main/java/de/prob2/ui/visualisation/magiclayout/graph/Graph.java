@@ -1,16 +1,13 @@
 package de.prob2.ui.visualisation.magiclayout.graph;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javafx.scene.layout.Pane;
 
 public class Graph extends Pane {
 
-	private List<Vertex> vertices = new ArrayList<>();
-	private List<Edge> edges = new ArrayList<>();
+	private Model model;
 
 	public Graph() {
+		model = new Model();
 	}
 
 	public void addVertex(String caption, Vertex.Style style) {
@@ -25,7 +22,7 @@ public class Graph extends Pane {
 			y = Math.random() * 500;
 		}
 		vertex.relocate(x, y);
-		vertices.add(vertex);
+		model.add(vertex);
 	}
 
 	public void updateVertex(String id, Vertex.Style style) {
@@ -38,7 +35,7 @@ public class Graph extends Pane {
 	}
 
 	private boolean vertexAt(double x, double y, double offsetX, double offsetY) {
-		for (Vertex vertex : vertices) {
+		for (Vertex vertex : model.getVertices()) {
 			if (x > (vertex.getLeftX() - offsetX) 
 					&& x < vertex.getRightX() 
 					&& y > (vertex.getTopY() - offsetY)
@@ -55,7 +52,7 @@ public class Graph extends Pane {
 
 		Edge edge = new Edge(source, target, caption, style);
 
-		edges.add(edge);
+		model.add(edge);
 		this.getChildren().add(edge);
 	}
 
