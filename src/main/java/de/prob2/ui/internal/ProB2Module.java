@@ -1,14 +1,20 @@
 package de.prob2.ui.internal;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.util.Providers;
+
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.MainController;
@@ -61,16 +67,12 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 import de.prob2.ui.visualisation.fx.VisualisationController;
+
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.BuilderFactory;
-import org.hildan.fxgson.FxGson;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import org.hildan.fxgson.FxGson;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
@@ -82,15 +84,6 @@ public class ProB2Module extends AbstractModule {
 		super();
 		this.runtimeOptions = runtimeOptions;
 		this.javafxDefaultBuilderFactory = new JavaFXBuilderFactory();
-	}
-
-	private static String pathStringFromJson(final JsonElement json) {
-		if (json.isJsonObject()) {
-			// Handle old configs where a File is serialized as a JSON object containing a "path" string.
-			return json.getAsJsonObject().get("path").getAsJsonPrimitive().getAsString();
-		} else {
-			return json.getAsJsonPrimitive().getAsString();
-		}
 	}
 	
 	@Override
@@ -110,9 +103,9 @@ public class ProB2Module extends AbstractModule {
 			.disableHtmlEscaping()
 			.setPrettyPrinting()
 			.registerTypeAdapter(File.class, (JsonSerializer<File>)(src, typeOfSrc, context) -> context.serialize(src.getPath()))
-			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> new File(pathStringFromJson(json)))
+			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> new File(json.getAsString()))
 			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString()))
-			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(pathStringFromJson(json)))
+			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(json.getAsString()))
 			.create());
 		
 		// Controllers
