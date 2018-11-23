@@ -131,10 +131,13 @@ sonarqube {
 	}
 }
 
-wrapper {
-	gradleVersion = "4.9"
-	distributionType = Wrapper.DistributionType.ALL
+if( rootProject == project) {
+	wrapper {
+		gradleVersion = "4.9"
+		distributionType = Wrapper.DistributionType.ALL
+	}
 }
+
 
 task createHelp(type: Exec) {
 	inputs.dir("src/main/resources/help")
