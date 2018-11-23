@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob2.ui.beditor.BEditorView;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+@FXMLInjected
 public class FileMenu extends Menu {
 	@FXML
 	private MenuItem preferencesItem;

@@ -12,6 +12,7 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -25,6 +26,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@FXMLInjected
 public final class ViewCodeStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ViewCodeStage.class);
 	

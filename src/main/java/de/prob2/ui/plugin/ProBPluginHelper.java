@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.menu.MenuController;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Heinzen
  * @since 11.08.17
  */
+@FXMLInjected
 @Singleton
 public class ProBPluginHelper {
 

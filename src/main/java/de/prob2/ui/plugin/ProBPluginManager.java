@@ -30,6 +30,7 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 
@@ -61,6 +62,7 @@ import org.slf4j.LoggerFactory;
  * @author  Christoph Heinzen
  * @since   10.08.2017
  */
+@FXMLInjected
 @Singleton
 public class ProBPluginManager {
 

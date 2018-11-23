@@ -8,6 +8,7 @@ import de.prob.animator.domainobjects.LTL;
 import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
 import de.prob.statespace.State;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.ArrayList;
 
+@FXMLInjected
 @Singleton
 public class LTLFormulaChecker {
 	

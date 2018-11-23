@@ -7,6 +7,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
@@ -20,6 +21,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.input.MouseButton;
 
+@FXMLInjected
 @Singleton
 public class PreferencesTab extends Tab {
 

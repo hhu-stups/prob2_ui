@@ -10,8 +10,10 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.consoles.Console;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+@FXMLInjected
 @Singleton
 public final class BConsole extends Console {
 	@Inject

@@ -6,6 +6,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -35,6 +36,7 @@ import javafx.scene.layout.AnchorPane;
 import java.util.ResourceBundle;
 
 
+@FXMLInjected
 @Singleton
 public final class ModelcheckingView extends ScrollPane {
 	

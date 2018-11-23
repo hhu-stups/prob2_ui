@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.fxml.FXML;
@@ -18,6 +19,7 @@ import javafx.stage.Stage;
  * @author Christoph Heinzen
  * @since 21.09.17
  */
+@FXMLInjected
 @Singleton
 public class VisualisationMenu extends Menu {
 	@FXML

@@ -15,6 +15,7 @@ import de.codecentric.centerdevice.util.StageUtils;
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.history.HistoryView;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
@@ -35,6 +36,7 @@ import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@FXMLInjected
 public class WindowMenu extends Menu {
 	private static final Logger logger = LoggerFactory.getLogger(WindowMenu.class);
 

@@ -13,6 +13,7 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.history.HistoryView;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -30,6 +31,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 
+@FXMLInjected
 @Singleton
 public class MainController extends BorderPane {
 	@FXML private TitledPane historyTP;

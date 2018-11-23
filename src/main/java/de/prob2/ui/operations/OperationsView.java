@@ -31,6 +31,7 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
@@ -67,6 +68,7 @@ import org.slf4j.LoggerFactory;
 
 import se.sawano.java.text.AlphanumericComparator;
 
+@FXMLInjected
 @Singleton
 public final class OperationsView extends VBox {
 	public enum SortMode {

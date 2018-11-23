@@ -7,12 +7,14 @@ import com.google.inject.Singleton;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.TabPersistenceHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 
+@FXMLInjected
 @Singleton
 public class MainView extends AnchorPane {
 

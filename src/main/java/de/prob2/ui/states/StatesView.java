@@ -36,6 +36,7 @@ import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.persistence.TableUtils;
@@ -69,6 +70,7 @@ import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@FXMLInjected
 @Singleton
 public final class StatesView extends StackPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StatesView.class);

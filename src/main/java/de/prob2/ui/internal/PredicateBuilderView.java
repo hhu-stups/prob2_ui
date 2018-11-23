@@ -19,6 +19,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
+@FXMLInjected
 public final class PredicateBuilderView extends VBox {
 	private final class ValueCell extends TableCell<String, String> {
 		private ValueCell() {
