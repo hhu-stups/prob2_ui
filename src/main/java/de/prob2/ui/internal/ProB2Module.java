@@ -10,7 +10,6 @@ import org.hildan.fxgson.FxGson;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -80,47 +79,42 @@ import javafx.util.BuilderFactory;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
-	
+
 	private final RuntimeOptions runtimeOptions;
 	private final BuilderFactory javafxDefaultBuilderFactory;
-	
+
 	public ProB2Module(final RuntimeOptions runtimeOptions) {
 		super();
 		this.runtimeOptions = runtimeOptions;
 		this.javafxDefaultBuilderFactory = new JavaFXBuilderFactory();
 	}
 
-	private static String pathStringFromJson(final JsonElement json) {
-		if (json.isJsonObject()) {
-			// Handle old configs where a File is serialized as a JSON object containing a "path" string.
-			return json.getAsJsonObject().get("path").getAsJsonPrimitive().getAsString();
-		} else {
-			return json.getAsJsonPrimitive().getAsString();
-		}
-	}
-	
 	@Override
 	protected void configure() {
 		install(new MainModule());
-		
+
 		// General stuff
 		final Locale locale = Locale.getDefault();
 		bind(Locale.class).toInstance(locale);
 		final ResourceBundle bundle = ResourceBundle.getBundle("de.prob2.ui.prob2", locale);
 		bind(ResourceBundle.class).toInstance(bundle);
-		final MenuToolkit toolkit = IS_MAC && "true".equals(System.getProperty("de.prob2.ui.useMacMenuBar", "true")) ? MenuToolkit.toolkit(locale) : null;
+		final MenuToolkit toolkit = IS_MAC && "true".equals(System.getProperty("de.prob2.ui.useMacMenuBar", "true"))
+				? MenuToolkit.toolkit(locale)
+				: null;
 		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
 		bind(FontSize.class);
-		bind(Gson.class).toInstance(FxGson.coreBuilder()
-			.disableHtmlEscaping()
-			.setPrettyPrinting()
-			.registerTypeAdapter(File.class, (JsonSerializer<File>)(src, typeOfSrc, context) -> context.serialize(src.getPath()))
-			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> new File(pathStringFromJson(json)))
-			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString()))
-			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(pathStringFromJson(json)))
-			.create());
-		
+		bind(Gson.class).toInstance(FxGson.coreBuilder().disableHtmlEscaping().setPrettyPrinting()
+				.registerTypeAdapter(File.class,
+						(JsonSerializer<File>) (src, typeOfSrc, context) -> context.serialize(src.getPath()))
+				.registerTypeAdapter(File.class,
+						(JsonDeserializer<File>) (json, typeOfT, context) -> new File(json.getAsString()))
+				.registerTypeAdapter(Path.class,
+						(JsonSerializer<Path>) (src, typeOfSrc, context) -> context.serialize(src.toString()))
+				.registerTypeAdapter(Path.class,
+						(JsonDeserializer<Path>) (json, typeOfT, context) -> Paths.get(json.getAsString()))
+				.create());
+
 		// Controllers
 		bind(AnimationView.class);
 		bind(BConsole.class);
@@ -178,7 +172,7 @@ public class ProB2Module extends AbstractModule {
 	}
 
 	@Provides
-	public FXMLLoader provideLoader(final Injector injector, ResourceBundle bundle) { 
+	public FXMLLoader provideLoader(final Injector injector, ResourceBundle bundle) {
 		FXMLLoader fxmlLoader = new FXMLLoader();
 		fxmlLoader.setBuilderFactory(type -> {
 			if (injector.getExistingBinding(Key.get(type)) != null) {
