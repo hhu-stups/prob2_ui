@@ -14,6 +14,7 @@
 			<items>
 				<!--<MenuItem text="%project.machines.machinesItem.contextMenu.items.editMachineFile" onAction="#handleEditFile"/>-->
 				<MenuItem text="%project.machines.machinesItem.contextMenu.items.editMachineFileInExternalEditor" onAction="#handleEditFileExternal"/>
+				<MenuItem fx:id="showInternalItem" text="%project.machines.machinesItem.contextMenu.items.showInternalRepresentation" onAction="#handleShowInternal"/>
 				<SeparatorMenuItem />
 				<Menu fx:id="startAnimationMenu" text="%project.machines.machinesItem.contextMenu.items.startAnimation"/>
 				<SeparatorMenuItem />
