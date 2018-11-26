@@ -24,7 +24,6 @@ public class Vertex extends StackPane {
 	}
 
 	public static class Style {
-		private Type shape = Type.RECTANGLE;
 		private Color color = Color.WHITE;
 		private Color lineColor = Color.BLACK;
 		private Double lineWidth = 1.0;
@@ -34,9 +33,8 @@ public class Vertex extends StackPane {
 		public Style() {
 		}
 
-		public Style(Type shape, Color color, Color lineColor, Double lineWidth, List<Double> lineType,
+		public Style(Color color, Color lineColor, Double lineWidth, List<Double> lineType,
 				Color textColor) {
-			this.shape = shape;
 			this.color = color;
 			this.lineColor = lineColor;
 			this.lineWidth = lineWidth;
@@ -48,7 +46,8 @@ public class Vertex extends StackPane {
 	private Text txt;
 	private Shape shape;
 	
-	private Style style;
+	private Type type;
+	private Style style = new Style();
 
 	private DoubleProperty centerX = new SimpleDoubleProperty();
 	private DoubleProperty centerY = new SimpleDoubleProperty();
@@ -57,15 +56,9 @@ public class Vertex extends StackPane {
 	private DoubleProperty topY = new SimpleDoubleProperty();
 	private DoubleProperty bottomY = new SimpleDoubleProperty();
 
-	public Vertex(String caption, Style style) {
-		this(caption, caption, style);
-	}
-
-	public Vertex(String id, String caption, Style style) {
-		this.setId(id);
+	public Vertex(String caption) {
 		this.txt = new Text(caption);
-
-		updateStyle(style);
+		setType(Type.CIRCLE);
 
 		this.layoutXProperty().addListener((observable, from, to) -> updateProperties());
 		this.layoutYProperty().addListener((observable, from, to) -> updateProperties());
@@ -75,6 +68,10 @@ public class Vertex extends StackPane {
 			this.setLayoutX(this.getLayoutX() + event.getX() - this.getWidth() / 2);
 			this.setLayoutY(this.getLayoutY() + event.getY() - this.getHeight() / 2);
 		});
+	}
+	
+	public String getCaption() {
+		return txt.getText();
 	}
 
 	public DoubleProperty centerXProperty() {
@@ -125,14 +122,13 @@ public class Vertex extends StackPane {
 		return bottomY.get();
 	}
 
-	public void updateStyle(Style style) {
-		this.style = style;
-		txt.setFill(style.textColor);
-
+	public void setType(Type type) {
+		this.type = type;
+		
 		Double txtWidth = txt.getLayoutBounds().getWidth();
 		Double txtHeight = txt.getLayoutBounds().getHeight();
-
-		switch (style.shape) {
+		
+		switch (type) {
 		case RECTANGLE:
 			shape = new Rectangle(txtWidth + 20, txtHeight + 10);
 			break;
@@ -146,8 +142,27 @@ public class Vertex extends StackPane {
 			shape = new Polygon(0, txtHeight + 20, (txtWidth + 30) * 2, txtHeight + 20, txtWidth + 30, 0);
 			break;
 		default:
-			shape = new Rectangle(txtWidth + 20, txtHeight + 10);
+			shape = new Circle((txtWidth + 20) / 2);
 		}
+		
+		setStyle(this.style);
+		
+		this.setWidth(shape.getLayoutBounds().getWidth());
+		this.setHeight(shape.getLayoutBounds().getHeight());
+		
+		this.getChildren().setAll(shape, txt);
+		
+		updateProperties();
+	}
+	
+	public Type getType() {
+		return type;
+	}
+	
+	public void setStyle(Style style) {
+		this.style = style;
+		
+		txt.setFill(style.textColor);
 
 		shape.setFill(style.color);
 		shape.setStroke(style.lineColor);
@@ -155,13 +170,6 @@ public class Vertex extends StackPane {
 		shape.getStrokeDashArray().addAll(style.lineType);
 		shape.setStrokeLineCap(StrokeLineCap.BUTT);
 		shape.setStrokeLineJoin(StrokeLineJoin.ROUND);
-
-		this.setWidth(shape.getLayoutBounds().getWidth());
-		this.setHeight(shape.getLayoutBounds().getHeight());
-
-		this.getChildren().setAll(shape, txt);
-
-		updateProperties();
 	}
 
 	private void updateProperties() {
@@ -170,7 +178,7 @@ public class Vertex extends StackPane {
 		topY.set(getLayoutY());
 		bottomY.set(getLayoutY() + shape.getLayoutBounds().getHeight());
 		
-		if(this.style.shape == Type.TRIANGLE) {
+		if(this.type == Type.TRIANGLE) {
 			leftX.set(getLayoutX() + shape.getLayoutBounds().getWidth() / 4);
 			rightX.set(getLayoutX() + shape.getLayoutBounds().getWidth() * 3 / 4);
 		} else {

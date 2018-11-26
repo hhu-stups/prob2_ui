@@ -1,40 +1,44 @@
 package de.prob2.ui.visualisation.magiclayout.graph;
 
+import de.prob2.ui.visualisation.magiclayout.graph.layout.Layout;
 import javafx.scene.layout.Pane;
 
 public class Graph extends Pane {
 
 	private Model model;
+	private Layout layout;
 
-	public Graph() {
-		model = new Model();
+	public Graph(Model model) {
+		this.model = model;
 	}
-
-	public void addVertex(String caption, Vertex.Style style) {
-		Vertex vertex = new Vertex(caption, style);
-		this.getChildren().add(vertex);
-
-		double x = Math.random() * 750;
-		double y = Math.random() * 500;
-
-		while (vertexAt(x, y, vertex.getWidth(), vertex.getHeight())) {
-			x = Math.random() * 750;
-			y = Math.random() * 500;
-		}
-		vertex.relocate(x, y);
-		model.add(vertex);
+	
+	public Model getModel() {
+		return model;
 	}
-
-	public void updateVertex(String id, Vertex.Style style) {
-		Vertex vertex = (Vertex) this.lookup("#" + id);
-		if (vertex != null) {
-			vertex.updateStyle(style);
-		} else {
-			addVertex(id, style);
-		}
+	
+	public void layout(Layout layout) {
+		this.layout =  layout;
+		
+		this.getChildren().clear();
+		model.getVertices().forEach(vertex -> this.getChildren().add(vertex));
+		model.getEdges().forEach(edge -> this.getChildren().add(edge));
+		
+		layout.drawGraph(this);
+		model.finishUpdate();
 	}
-
-	private boolean vertexAt(double x, double y, double offsetX, double offsetY) {
+	
+	public void update() {	
+		model.getRemovedVertices().forEach(vertex -> this.getChildren().remove(vertex));
+		model.getRemovedEdges().forEach(edge -> this.getChildren().remove(edge));
+		
+		model.getAddedVertices().forEach(vertex -> this.getChildren().add(vertex));
+		model.getAddedEdges().forEach(edge -> this.getChildren().add(edge));
+		
+		layout.updateGraph(this);
+		model.finishUpdate();
+	}
+	
+	public boolean vertexAt(double x, double y, double offsetX, double offsetY) {
 		for (Vertex vertex : model.getVertices()) {
 			if (x > (vertex.getLeftX() - offsetX) 
 					&& x < vertex.getRightX() 
@@ -44,24 +48,5 @@ public class Graph extends Pane {
 			}
 		}
 		return false;
-	}
-
-	public void addEdge(String sourceVertexId, String targetVertexId, String caption, Edge.Style style) {
-		Vertex source = (Vertex) this.lookup("#" + sourceVertexId);
-		Vertex target = (Vertex) this.lookup("#" + targetVertexId);
-
-		Edge edge = new Edge(source, target, caption, style);
-
-		model.add(edge);
-		this.getChildren().add(edge);
-	}
-
-	public void updateEdge(String sourceVertexId, String targetVertexId, String caption, Edge.Style style) {
-		Edge edge = (Edge) this.lookup("#" + sourceVertexId + "$" + targetVertexId + "$" + caption);
-		if(edge != null) {
-			edge.updateStyle(style);
-		} else {
-			addEdge(sourceVertexId, targetVertexId, caption, style);
-		}
 	}
 }

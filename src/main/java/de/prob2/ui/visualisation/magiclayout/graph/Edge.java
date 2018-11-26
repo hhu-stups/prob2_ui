@@ -48,9 +48,7 @@ public class Edge extends Group {
 	private DoubleProperty centerX = new SimpleDoubleProperty();
 	private DoubleProperty centerY = new SimpleDoubleProperty();
 
-	public Edge(Vertex source, Vertex target, String caption, Style style) {
-		this.setId(source.getId() + "$" + target.getId() + "$" + caption);
-
+	public Edge(Vertex source, Vertex target, String caption) {
 		this.source = source;
 		this.target = target;
 
@@ -59,8 +57,6 @@ public class Edge extends Group {
 		Polygon arrowhead = new Polygon(0, 0, 0, 10, Math.sqrt(3) * 5, 5);
 
 		this.getChildren().addAll(line, arrowhead, txt);
-
-		this.updateStyle(style);
 
 		// init Properties
 		// when the line moves, also move the text
@@ -101,6 +97,19 @@ public class Edge extends Group {
 		distanceY.addListener((observable, from, to) -> calculatePositioning());
 
 		calculatePositioning();
+		setStyle(new Style());
+	}
+	
+	public String getCaption() {
+		return txt.getText();
+	}
+	
+	public Vertex getSource() {
+		return source;
+	}
+	
+	public Vertex getTarget() {
+		return target;
 	}
 
 	public DoubleProperty distanceXProperty() {
@@ -146,7 +155,7 @@ public class Edge extends Group {
 		}
 	}
 
-	public void updateStyle(Style style) {
+	public void setStyle(Style style) {
 		this.line.setStroke(style.lineColor);
 		this.line.setStrokeWidth(style.lineWidth);
 		this.line.getStrokeDashArray().addAll(style.lineType);
