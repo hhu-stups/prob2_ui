@@ -22,6 +22,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
@@ -40,6 +41,9 @@ public class FormulaStage extends Stage {
 
 	@FXML
 	private TextField tfFormula;
+	
+	@FXML
+	private TextArea taErrors;
 
 	@FXML
 	private ScrollPane formulaPane;
@@ -111,6 +115,7 @@ public class FormulaStage extends Stage {
 	
 	public void showFormula(final Object formula) {
 		FormulaGenerator formulaGenerator = injector.getInstance(FormulaGenerator.class);
+		taErrors.clear();
 		Thread thread = new Thread(() -> {
 			try {
 				Platform.runLater(() -> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
@@ -125,6 +130,7 @@ public class FormulaStage extends Stage {
 					Platform.runLater(() -> updateView((String) formula));
 				}
 			} catch (EvaluationException | ProBError exception) {
+				taErrors.setText(exception.getMessage());
 				handleError(exception);
 			}
 		});
