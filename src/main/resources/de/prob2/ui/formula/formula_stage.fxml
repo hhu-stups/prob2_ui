@@ -60,11 +60,11 @@
 								</Button>
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
-							<HBox VBox.vgrow="ALWAYS">
-								<StackPane fx:id="stackPane" HBox.hgrow="ALWAYS">
-									<ScrollPane fx:id="formulaPane" />
-								</StackPane>
-							</HBox>
+							<StackPane fx:id="stackPane" VBox.vgrow="ALWAYS">
+								<ScrollPane fx:id="formulaPane" />
+							</StackPane>
+							<Label text="%dynamic.errors" VBox.vgrow="NEVER"/>
+							<TextArea editable="false" fx:id="taErrors" style="-fx-control-inner-background: #e8e8e8;"/>
 						</VBox>
 					</AnchorPane>
 				</center>
