@@ -7,6 +7,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditEdges;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditNodes;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -29,7 +30,13 @@ public class MagicLayoutView extends Stage {
 	@FXML
 	private MagicLayoutEditEdges magicLayoutEditEdges;
 	@FXML
+	private StackPane magicGraphStackPane; // The StackPane which contains a group which contains the magicGraphPane
+	@FXML
 	private StackPane magicGraphPane;
+	@FXML
+	private Button zoomInButton;
+	@FXML
+	private Button zoomOutButton;
 
 	private final StageManager stageManager;
 
@@ -44,10 +51,15 @@ public class MagicLayoutView extends Stage {
 		stageManager.setMacMenuBar(this, menuBar);
 
 		// make GraphPane zoomable
-		magicGraphPane.setOnZoom(event -> {
-			magicGraphPane.setScaleX(magicGraphPane.getScaleX() * event.getZoomFactor());
-			magicGraphPane.setScaleY(magicGraphPane.getScaleY() * event.getZoomFactor());
-		});
+		magicGraphPane.setOnZoom(event -> zoom(event.getZoomFactor()));
+		magicGraphStackPane.setOnZoom(event -> zoom(event.getZoomFactor())); // recognize zoom Motion outside the magicGraphPane area
+		zoomInButton.setOnAction(event -> zoom(1.1));
+		zoomOutButton.setOnAction(event -> zoom(0.9));
+	}
+	
+	private void zoom(double zoomFactor) {
+		magicGraphPane.setScaleX(magicGraphPane.getScaleX() * zoomFactor);
+		magicGraphPane.setScaleY(magicGraphPane.getScaleY() * zoomFactor);
 	}
 
 	@FXML
