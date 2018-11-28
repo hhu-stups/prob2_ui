@@ -13,7 +13,6 @@ public class Model {
 	private Set<Edge> addedEdges = new HashSet<>();
 	private Set<Edge> removedEdges = new HashSet<>();
 	
-	
 	public void addVertex(Vertex vertex) {
 		addedVertices.add(vertex);
 		removedVertices.remove(vertex); // vertex should not be in added and removed set
@@ -51,7 +50,7 @@ public class Model {
 	}
 	
 	public Set<Edge> getEdges() {
-		return edges;
+		return Collections.unmodifiableSet(edges);
 	}
 	
 	public Set<Edge> getAddedEdges() {
