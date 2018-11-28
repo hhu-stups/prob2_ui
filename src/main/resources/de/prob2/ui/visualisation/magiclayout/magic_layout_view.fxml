@@ -10,9 +10,14 @@
 <?import javafx.collections.*?>
 <?import java.lang.String?>
 <?import javafx.scene.Group?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1"
 	title="%visualisation.magicLayout.view.title">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<BorderPane>
@@ -52,15 +57,33 @@
 									fx:id="magicLayoutEditEdges" />
 							</Tab>
 						</TabPane>
-						<ScrollPane prefWidth="800" fitToHeight="TRUE"
-							fitToWidth="TRUE">
-							<StackPane> <!-- this stackpane makes sure the group is centered inside the scrollpane -->
-								<Group> <!-- this group makes sure the scrollpane recognizes when it should show 
-										scroll bars -->
-									<StackPane fx:id="magicGraphPane" />
-								</Group>
-							</StackPane>
-						</ScrollPane>
+						<VBox>
+							<HBox alignment="TOP_RIGHT">
+								<Button fx:id="zoomInButton">
+									<graphic>
+										<FontAwesomeIconView
+											styleClass="icon-dark" glyphName="PLUS_CIRCLE"
+											glyphSize="${fontSize.fontSize * 2}" />
+									</graphic>
+								</Button>
+								<Button fx:id="zoomOutButton">
+									<graphic>
+										<FontAwesomeIconView
+											styleClass="icon-dark" glyphName="MINUS_CIRCLE"
+											glyphSize="${fontSize.fontSize * 2}" />
+									</graphic>
+								</Button>
+							</HBox>
+							<ScrollPane prefWidth="800" fitToHeight="TRUE"
+								fitToWidth="TRUE" VBox.vgrow="ALWAYS" styleClass="border">
+								<StackPane fx:id="magicGraphStackPane"> <!-- this stackpane makes sure the group is centered inside the scrollpane -->
+									<Group> <!-- this group makes sure the scrollpane recognizes when it should show 
+											scroll bars -->
+										<StackPane fx:id="magicGraphPane" />
+									</Group>
+								</StackPane>
+							</ScrollPane>
+						</VBox>
 					</SplitPane>
 				</center>
 			</BorderPane>

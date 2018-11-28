@@ -17,10 +17,13 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.ExternalEditor;
+import de.prob2.ui.menu.ViewCodeStage;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
@@ -51,6 +54,7 @@ public class MachinesTab extends Tab {
 		@FXML private Label locationLabel;
 		@FXML private ContextMenu contextMenu;
 		@FXML private Menu startAnimationMenu;
+		@FXML private MenuItem showInternalItem;
 		
 		private Machine machine;
 		
@@ -68,6 +72,7 @@ public class MachinesTab extends Tab {
 			});
 			currentProject.preferencesProperty().addListener((o, from, to) -> updatePreferences(to));
 			this.updatePreferences(currentProject.getPreferences());
+			currentProject.currentMachineProperty().addListener((observable, from, to) -> showInternalItem.setDisable(to != machine));
 		}
 		
 		@FXML
@@ -95,6 +100,16 @@ public class MachinesTab extends Tab {
 		@FXML
 		private void handleEditFileExternal() {
 			injector.getInstance(ExternalEditor.class).open(currentProject.getLocation().resolve(this.machine.getPath()));
+		}
+		
+		@FXML
+		private void handleShowInternal() {
+			final GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
+			currentTrace.getStateSpace().execute(cmd);
+			final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
+			stage.setTitle(currentProject.getCurrentMachine().getName());
+			stage.setCode(cmd.getPrettyPrint());
+			stage.show();
 		}
 		
 		private void refresh() {
@@ -168,13 +183,15 @@ public class MachinesTab extends Tab {
 	@FXML private SplitPane splitPane;
 	@FXML private HelpButton helpButton;
 
+	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final Injector injector;
 
 	@Inject
-	private MachinesTab(final StageManager stageManager, final CurrentProject currentProject, final Injector injector) {
+	private MachinesTab(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector) {
 		this.stageManager = stageManager;
+		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "machines_tab.fxml");
