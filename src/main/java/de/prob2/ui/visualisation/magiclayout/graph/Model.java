@@ -26,6 +26,12 @@ public class Model {
 	}
 	
 	public void addEdge(Edge edge) {
+		if(!vertices.contains(edge.getSource())) {
+			addVertex(edge.getSource());
+		}
+		if(!vertices.contains(edge.getTarget())) {
+			addVertex(edge.getTarget());
+		}
 		addedEdges.add(edge);
 		removedEdges.remove(edge); // edge should not be in added and removed set
 		edges.add(edge);
