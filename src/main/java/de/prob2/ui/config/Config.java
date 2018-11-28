@@ -68,7 +68,6 @@ public final class Config {
 		String guiState;
 		List<String> visibleStages;
 		Map<String, double[]> stageBoxes;
-		List<String> groovyObjectTabs;
 		String currentPreference;
 		String currentMainTab;
 		String currentVerificationTab;
@@ -198,9 +197,6 @@ public final class Config {
 		if (configData.stageBoxes == null) {
 			configData.stageBoxes = new HashMap<>();
 		}
-		if (configData.groovyObjectTabs == null) {
-			configData.groovyObjectTabs = new ArrayList<>();
-		}
 		if (configData.currentPreference == null) {
 			configData.currentPreference = "general";
 		}
@@ -288,8 +284,6 @@ public final class Config {
 			this.uiState.getSavedStageBoxes().put(entry.getKey(), new BoundingBox(v[0], v[1], v[2], v[3]));
 		}
 
-		configData.groovyObjectTabs.forEach(this.uiState::addGroovyObjectTab);
-
 		for (String pane : configData.expandedTitledPanes) {
 			this.uiState.getExpandedTitledPanes().add(pane);
 		}
@@ -337,7 +331,6 @@ public final class Config {
 			configData.stageBoxes.put(entry.getKey(), new double[] { entry.getValue().getMinX(),
 					entry.getValue().getMinY(), entry.getValue().getWidth(), entry.getValue().getHeight(), });
 		}
-		configData.groovyObjectTabs = new ArrayList<>(this.uiState.getGroovyObjectTabs());
 		configData.maxRecentProjects = this.recentProjects.getMaximum();
 		configData.recentProjects = new ArrayList<>(this.recentProjects);
 		configData.fontSize = injector.getInstance(FontSize.class).getFontSize();
