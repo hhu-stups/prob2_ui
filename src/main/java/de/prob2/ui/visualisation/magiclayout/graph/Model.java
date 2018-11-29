@@ -7,29 +7,37 @@ import java.util.Set;
 public class Model {
 	private Set<Vertex> vertices = new HashSet<>();
 	private Set<Edge> edges = new HashSet<>();
-	
+
 	private Set<Vertex> addedVertices = new HashSet<>();
 	private Set<Vertex> removedVertices = new HashSet<>();
 	private Set<Edge> addedEdges = new HashSet<>();
 	private Set<Edge> removedEdges = new HashSet<>();
-	
+
 	public void addVertex(Vertex vertex) {
+		if (vertices.contains(vertex)) {
+			return;
+		}
+		
 		addedVertices.add(vertex);
 		removedVertices.remove(vertex); // vertex should not be in added and removed set
 		vertices.add(vertex);
 	}
-	
+
 	public void removeVertex(Vertex vertex) {
 		removedVertices.add(vertex);
 		addedVertices.remove(vertex); // vertex should not be in added and removed set
 		vertices.remove(vertex);
 	}
-	
+
 	public void addEdge(Edge edge) {
-		if(!vertices.contains(edge.getSource())) {
+		if(edges.contains(edge)) {
+			return;
+		}
+		
+		if (!vertices.contains(edge.getSource())) {
 			addVertex(edge.getSource());
 		}
-		if(!vertices.contains(edge.getTarget())) {
+		if (!vertices.contains(edge.getTarget())) {
 			addVertex(edge.getTarget());
 		}
 		addedEdges.add(edge);
@@ -42,31 +50,31 @@ public class Model {
 		addedEdges.remove(edge); // edge should not be in added and removed set
 		edges.remove(edge);
 	}
-	
+
 	public Set<Vertex> getVertices() {
 		return Collections.unmodifiableSet(vertices);
 	}
-	
+
 	public Set<Vertex> getAddedVertices() {
 		return Collections.unmodifiableSet(addedVertices);
 	}
-	
+
 	public Set<Vertex> getRemovedVertices() {
 		return Collections.unmodifiableSet(removedVertices);
 	}
-	
+
 	public Set<Edge> getEdges() {
 		return Collections.unmodifiableSet(edges);
 	}
-	
+
 	public Set<Edge> getAddedEdges() {
 		return Collections.unmodifiableSet(addedEdges);
 	}
-	
+
 	public Set<Edge> getRemovedEdges() {
 		return Collections.unmodifiableSet(removedEdges);
 	}
-	
+
 	void finishUpdate() {
 		addedVertices.clear();
 		removedVertices.clear();
