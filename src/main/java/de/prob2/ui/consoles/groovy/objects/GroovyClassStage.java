@@ -4,14 +4,11 @@ import java.util.Collection;
 
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.persistence.UIState;
-
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -24,11 +21,7 @@ public class GroovyClassStage extends Stage {
 	@FXML private TableView<GroovyClassItem> tvClass;
 	@FXML private TableView<CollectionDataItem> tvCollectionData;
 	
-	@FXML private TabPane tabPane;
 	@FXML private Tab tabCollectionData;
-	@FXML private Tab tabClass;
-	@FXML private Tab tabFields;
-	@FXML private Tab tabMethods;
 	
 	@FXML private TableColumn<GroovyClassItem, String> cattributes;
 	@FXML private TableColumn<GroovyClassItem, String> cvalues;
@@ -58,13 +51,7 @@ public class GroovyClassStage extends Stage {
 	private ObservableList<GroovyClassItem> attributes = FXCollections.observableArrayList();
 	private ObservableList<CollectionDataItem> collectionData = FXCollections.observableArrayList();
 	
-	private UIState uiState;
-	private int index;
-
-	
-	public GroovyClassStage(StageManager stageManager, UIState uiState) {
-		this.index = 0;
-		this.uiState = uiState;
+	public GroovyClassStage(StageManager stageManager) {
 		stageManager.loadFXML(this, "groovy_class_stage.fxml");
 	}
 	
@@ -98,10 +85,6 @@ public class GroovyClassStage extends Stage {
 		tvFields.setItems(fields);
 		tvClass.setItems(attributes);
 		tvCollectionData.setItems(collectionData);
-
-		tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> uiState.getGroovyObjectTabs().set(index, newValue.getText()));
-		
-		this.setOnCloseRequest(e -> uiState.removeGroovyObjectTab(index));
 	}
 	
 	public void showMethodsAndFields(Object object) {
@@ -125,22 +108,5 @@ public class GroovyClassStage extends Stage {
 		tvFields.refresh();
 		tvCollectionData.refresh();
 		tvClass.refresh();
-	}
-	
-	public void openTab(String tab) {
-		switch(tab) {
-			case "Public Fields and Properties":
-				tabPane.getSelectionModel().select(tabFields);
-				break;
-			case "Methods":
-				tabPane.getSelectionModel().select(tabMethods);
-				break;
-			default:
-				tabPane.getSelectionModel().select(tabClass);
-		}
-	}
-	
-	public void setIndex(int index) {
-		this.index = index;
 	}
 }

@@ -31,7 +31,6 @@ public class UIState {
 	private final Set<String> savedVisibleStages;
 	private final Map<String, BoundingBox> savedStageBoxes;
 	private final Map<String, Reference<Stage>> stages;
-	private final List<String> groovyObjectTabs;
 	private List<String> expandedTitledPanes;
 	private double[] statesViewColumnsWidth;
 	private String[] statesViewColumnsOrder;
@@ -47,7 +46,6 @@ public class UIState {
 		this.savedVisibleStages = new LinkedHashSet<>();
 		this.savedStageBoxes = new LinkedHashMap<>();
 		this.stages = new LinkedHashMap<>();
-		this.groovyObjectTabs = new ArrayList<>();
 		this.expandedTitledPanes = new ArrayList<>();
 		this.statesViewColumnsWidth = new double[3];
 		this.statesViewColumnsOrder = new String[3];
@@ -100,22 +98,6 @@ public class UIState {
 				);
 			}
 		}
-	}
-	
-	public void addGroovyObjectTab(String tab) {
-		groovyObjectTabs.add(tab);
-	}
-	
-	public void addGroovyObjectTab(String tab, int index) {
-		groovyObjectTabs.add(index, tab);
-	}
-	
-	public void removeGroovyObjectTab(int index) {
-		groovyObjectTabs.remove(index);
-	}
-		
-	public List<String> getGroovyObjectTabs() {
-		return groovyObjectTabs;
 	}
 	
 	public void clearDetachedStages() {
