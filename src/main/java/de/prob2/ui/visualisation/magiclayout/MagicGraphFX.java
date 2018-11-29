@@ -29,7 +29,6 @@ public class MagicGraphFX implements MagicGraphI {
 	private StageManager stageManager;
 
 	private Graph graph;
-	// private Model model;
 
 	@Inject
 	public MagicGraphFX(StageManager stageManager) {
@@ -67,15 +66,23 @@ public class MagicGraphFX implements MagicGraphI {
 		// merge temporary model to old model
 		Model model = graph.getModel();
 
-		Set<Vertex> verticesBefore = new HashSet<>(model.getVertices());
-		verticesBefore.removeAll(tempModel.getVertices());
-		verticesBefore.forEach(vertex -> model.removeVertex(vertex));
-		tempModel.getVertices().forEach(vertex -> model.addVertex(vertex));
-
 		Set<Edge> edgesBefore = new HashSet<>(model.getEdges());
-		edgesBefore.removeAll(tempModel.getEdges());
+		tempModel.getEdges().forEach(edge -> {
+			Vertex source = getVertex(edge.getSource().getCaption(), model);
+			Vertex target = getVertex(edge.getTarget().getCaption(), model);
+			edgesBefore.remove(getEdge(source, target, edge.getCaption(), model));
+		});
 		edgesBefore.forEach(edge -> model.removeEdge(edge));
-		tempModel.getEdges().forEach(edge -> model.addEdge(edge));
+		tempModel.getEdges().forEach(edge -> {
+			Vertex source = getVertex(edge.getSource().getCaption(), model);
+			Vertex target = getVertex(edge.getTarget().getCaption(), model);
+			model.addEdge(getEdge(source, target, edge.getCaption(), model));
+		});
+
+		Set<Vertex> verticesBefore = new HashSet<>(model.getVertices());
+		tempModel.getVertices().forEach(vertex -> verticesBefore.remove(getVertex(vertex.getCaption(), model)));
+		verticesBefore.forEach(vertex -> model.removeVertex(vertex));
+		tempModel.getVertices().forEach(vertex -> model.addVertex(getVertex(vertex.getCaption(), model)));
 
 		graph.update();
 	}
@@ -91,6 +98,7 @@ public class MagicGraphFX implements MagicGraphI {
 						node.getLineType(), node.getTextColor());
 
 				modelToStyle.getVertices().forEach(vertex -> {
+					vertex = getVertex(vertex.getCaption(), graph.getModel());
 					vertex.setStyle(style);
 					vertex.setType(toVertexType(node.getShape()));
 				});
@@ -110,7 +118,12 @@ public class MagicGraphFX implements MagicGraphI {
 					Edge.Style style = new Edge.Style(magicEdge.getLineColor(), magicEdge.getLineWidth(),
 							magicEdge.getLineType(), magicEdge.getTextColor(), magicEdge.getTextSize());
 
-					modelToStyle.getEdges().forEach(edge -> edge.setStyle(style));
+					modelToStyle.getEdges().forEach(edge -> {
+						Vertex source = getVertex(edge.getSource().getCaption(), graph.getModel());
+						Vertex target = getVertex(edge.getTarget().getCaption(), graph.getModel());
+						edge = getEdge(source, target, edge.getCaption(), graph.getModel());
+						edge.setStyle(style);
+					});
 				}
 			} catch (BCompoundException e) {
 				stageManager.makeExceptionAlert(e, "",
@@ -155,11 +168,11 @@ public class MagicGraphFX implements MagicGraphI {
 	private Model getModel(String caption, BObject bObject) {
 		Model model = new Model();
 		if (!(bObject instanceof Collection<?>)) {
-			model.addEdge(getEdge(getVertex(caption), getVertex(bObject.toString()), ""));
+			model.addEdge(getEdge(getVertex(caption, model), getVertex(bObject.toString(), model), "", model));
 		} else if (bObject instanceof de.prob.translator.types.Tuple) {
 			de.prob.translator.types.Tuple tuple = (de.prob.translator.types.Tuple) bObject;
-			model.addEdge(
-					getEdge(getVertex(tuple.getFirst().toString()), getVertex(tuple.getSecond().toString()), caption));
+			model.addEdge(getEdge(getVertex(tuple.getFirst().toString(), model),
+					getVertex(tuple.getSecond().toString(), model), caption, model));
 		} else {
 			((Collection<?>) bObject).forEach(element -> combineModel(model, getModel(caption, (BObject) element)));
 		}
@@ -167,13 +180,19 @@ public class MagicGraphFX implements MagicGraphI {
 	}
 
 	private Model combineModel(Model model1, Model model2) {
-		model2.getVertices().forEach(vertex -> model1.addVertex(vertex));
-		model2.getEdges().forEach(edge -> model1.addEdge(edge));
+		model2.getVertices().forEach(vertex -> model1.addVertex(getVertex(vertex.getCaption(), model1)));
+		model2.getEdges().forEach(edge -> {
+			// does model1 already contain the source and/or target vertex?
+			Vertex source = getVertex(edge.getSource().getCaption(), model1);
+			Vertex target = getVertex(edge.getTarget().getCaption(), model1);
+
+			model1.addEdge(getEdge(source, target, edge.getCaption(), model1));
+		});
 		return model1;
 	}
 
-	private Edge getEdge(Vertex source, Vertex target, String caption) {
-		for (Edge edge : graph.getModel().getEdges()) {
+	private Edge getEdge(Vertex source, Vertex target, String caption, Model model) {
+		for (Edge edge : model.getEdges()) {
 			if (edge.getSource().equals(source) && edge.getTarget().equals(target)
 					&& edge.getCaption().equals(caption)) {
 				return edge;
@@ -182,8 +201,8 @@ public class MagicGraphFX implements MagicGraphI {
 		return new Edge(source, target, caption);
 	}
 
-	private Vertex getVertex(String caption) {
-		for (Vertex vertex : graph.getModel().getVertices()) {
+	private Vertex getVertex(String caption, Model model) {
+		for (Vertex vertex : model.getVertices()) {
 			if (vertex.getCaption().equals(caption)) {
 				return vertex;
 			}

@@ -62,25 +62,30 @@ public class MagicLayoutView extends Stage {
 		zoomInButton.setOnAction(event -> zoom(1.1));
 		zoomOutButton.setOnAction(event -> zoom(0.9));
 
-		magicGraphPane.getChildren().setAll(magicGraph.generateMagicGraph(currentTrace.getCurrentState()));
-		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges());
+		layoutGraph();
 
 		// generate new graph whenever the model changes
-		currentTrace.modelProperty().addListener((observable, from, to) -> {
-			magicGraphPane.getChildren().setAll(magicGraph.generateMagicGraph(currentTrace.getCurrentState()));
-			magicGraph.setGraphStyle(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges());
-		});
+		currentTrace.modelProperty().addListener((observable, from, to) -> layoutGraph());
 
 		// update existing graph whenever the trace changes
-		currentTrace.addListener((observable, from, to) -> {
-			magicGraph.updateMagicGraph(currentTrace.getCurrentState());
-			magicGraph.setGraphStyle(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges());
-		});
+		currentTrace.addListener((observable, from, to) -> updateGraph());
 	}
-
+	
 	private void zoom(double zoomFactor) {
 		magicGraphPane.setScaleX(magicGraphPane.getScaleX() * zoomFactor);
 		magicGraphPane.setScaleY(magicGraphPane.getScaleY() * zoomFactor);
+	}
+	
+	@FXML
+	private void layoutGraph() {
+		magicGraphPane.getChildren().setAll(magicGraph.generateMagicGraph(currentTrace.getCurrentState()));
+		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges());
+	}
+	
+	@FXML
+	private void updateGraph() {
+		magicGraph.updateMagicGraph(currentTrace.getCurrentState());
+		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges());
 	}
 
 	@FXML
