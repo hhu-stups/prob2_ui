@@ -42,6 +42,7 @@ public class Edge extends Group {
 
 	private Line line = new Line();
 	private Text txt;
+	private Polygon arrowhead;
 
 	private DoubleProperty distanceX = new SimpleDoubleProperty();
 	private DoubleProperty distanceY = new SimpleDoubleProperty();
@@ -54,7 +55,7 @@ public class Edge extends Group {
 
 		this.txt = new Text(caption);
 
-		Polygon arrowhead = new Polygon(0, 0, 0, 10, Math.sqrt(3) * 5, 5);
+		arrowhead = new Polygon(0, 0, 0, 10, Math.sqrt(3) * 5, 5);
 
 		this.getChildren().addAll(line, arrowhead, txt);
 
@@ -156,12 +157,13 @@ public class Edge extends Group {
 	}
 
 	public void setStyle(Style style) {
-		this.line.setStroke(style.lineColor);
-		this.line.setStrokeWidth(style.lineWidth);
-		this.line.getStrokeDashArray().addAll(style.lineType);
-		this.line.setStrokeLineCap(StrokeLineCap.BUTT);
-		this.line.setStrokeLineJoin(StrokeLineJoin.ROUND);
-		this.txt.setFill(style.textColor);
-		this.txt.setFont(new Font(style.textSize));
+		line.setStroke(style.lineColor);
+		arrowhead.setFill(style.lineColor);
+		line.setStrokeWidth(style.lineWidth);
+		line.getStrokeDashArray().addAll(style.lineType);
+		line.setStrokeLineCap(StrokeLineCap.BUTT);
+		line.setStrokeLineJoin(StrokeLineJoin.ROUND);
+		txt.setFill(style.textColor);
+		txt.setFont(new Font(style.textSize));
 	}
 }
