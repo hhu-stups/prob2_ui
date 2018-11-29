@@ -57,23 +57,27 @@ public class MagicLayoutView extends Stage {
 
 		// make GraphPane zoomable
 		magicGraphPane.setOnZoom(event -> zoom(event.getZoomFactor()));
-		magicGraphStackPane.setOnZoom(event -> zoom(event.getZoomFactor())); // recognize zoom Motion outside the magicGraphPane area
+		magicGraphStackPane.setOnZoom(event -> zoom(event.getZoomFactor())); // recognize zoom Motion outside the
+																				// magicGraphPane area
 		zoomInButton.setOnAction(event -> zoom(1.1));
 		zoomOutButton.setOnAction(event -> zoom(0.9));
-		
-		magicGraphPane.getChildren().setAll(
-				magicGraph.generateMagicGraph(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges()));
+
+		magicGraphPane.getChildren().setAll(magicGraph.generateMagicGraph(currentTrace.getCurrentState()));
+		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges());
 
 		// generate new graph whenever the model changes
-		currentTrace.modelProperty().addListener((observable, from, to) -> magicGraphPane.getChildren().setAll(
-				magicGraph.generateMagicGraph(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges())));
+		currentTrace.modelProperty().addListener((observable, from, to) -> {
+			magicGraphPane.getChildren().setAll(magicGraph.generateMagicGraph(currentTrace.getCurrentState()));
+			magicGraph.setGraphStyle(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges());
+		});
 
 		// update existing graph whenever the trace changes
-		currentTrace
-				.addListener((observable, from, to) -> magicGraph.updateMagicGraph(magicGraphPane.getChildren().get(0),
-						magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges()));
+		currentTrace.addListener((observable, from, to) -> {
+			magicGraph.updateMagicGraph(currentTrace.getCurrentState());
+			magicGraph.setGraphStyle(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges());
+		});
 	}
-	
+
 	private void zoom(double zoomFactor) {
 		magicGraphPane.setScaleX(magicGraphPane.getScaleX() * zoomFactor);
 		magicGraphPane.setScaleY(magicGraphPane.getScaleY() * zoomFactor);
