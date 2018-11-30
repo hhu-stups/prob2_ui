@@ -131,7 +131,7 @@ public class ModelcheckingStage extends Stage {
 		options = options.checkAssertions(findBAViolations.isSelected());
 		options = options.checkGoal(findGoal.isSelected());
 		options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
-		options = options.recheckExisting(true);
+		options = options.recheckExisting(true); // TO DO: set to false if we want new problems; currently seems to have no influence on prob2_interface calls; currently the first call always contains inspect_existing_nodes as an option, e.g., do_modelchecking(500,[find_deadlocks,find_invariant_violations,inspect_existing_nodes],Result,Stats)
 		return options;
 	}
 

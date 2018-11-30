@@ -2,23 +2,22 @@ package de.prob2.ui.persistence;
 
 import java.util.HashSet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.MainController;
-import de.prob2.ui.consoles.ConsoleInstruction;
-import de.prob2.ui.consoles.ConsoleInstructionOption;
-import de.prob2.ui.consoles.groovy.GroovyInterpreter;
+import de.prob2.ui.ProB2;
 import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.WindowMenu;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.states.StatesView;
+
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class UIPersistence {
@@ -47,24 +46,16 @@ public final class UIPersistence {
 			return;
 		}
 		
-		switch (id) {
-			case "de.prob2.ui.ProB2":
-				// The main stage's size is restored in the application start method.
-				return;
-			
-			case "de.prob2.ui.consoles.groovy.objects.GroovyObjectStage":
-				injector.getInstance(GroovyInterpreter.class).exec(new ConsoleInstruction("inspect", ConsoleInstructionOption.ENTER));
-				return;
-			
-			default:
-				LOGGER.info("No special handling for stage identifier {}, will use injection", id);
-		}
-		
 		Class<?> clazz;
 		try {
 			clazz = Class.forName(id);
 		} catch (ClassNotFoundException e) {
 			LOGGER.warn("Class not found, cannot restore window", e);
+			return;
+		}
+		
+		if (ProB2.class.equals(clazz)) {
+			// The main stage's size is restored in the application start method.
 			return;
 		}
 		
