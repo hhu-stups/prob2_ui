@@ -17,7 +17,6 @@ plugins {
 
 apply plugin: 'application'
 apply plugin: 'eclipse'
-apply plugin: 'javafx-gradle-plugin'
 apply plugin: 'idea'
 
 project.group = "de.hhu.stups"
@@ -100,16 +99,19 @@ processResources {
 	}
 }
 
-jfx {
-	mainClass = project.mainClassName
-	jfxMainAppJarName = project.name + "-jfx.jar"
-	preLoader = preloaderClassName
-	identifier = project.group + "." + project.name
-	vendor = project.group
-	nativeReleaseVersion = project.version
-	appName = project.name
-	skipNativeVersionNumberSanitizing = true
-	skipMainClassScanning = true
+if (JavaVersion.current() <= JavaVersion.VERSION_1_9) {
+	apply plugin: 'javafx-gradle-plugin'
+	jfx {
+		mainClass = project.mainClassName
+		jfxMainAppJarName = project.name + "-jfx.jar"
+		preLoader = preloaderClassName
+		identifier = project.group + "." + project.name
+		vendor = project.group
+		nativeReleaseVersion = project.version
+		appName = project.name
+		skipNativeVersionNumberSanitizing = true
+		skipMainClassScanning = true
+	}
 }
 
 sonarqube {
