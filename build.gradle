@@ -48,8 +48,6 @@ mainClassName = "de.prob2.ui.ProB2"
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}"]
 
-sourceSets.test.java.srcDirs = []
-
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
 }
@@ -71,11 +69,6 @@ dependencies {
 	compile group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.0"
 	compile group: "org.pf4j", name: "pf4j", version: "2.2.0"
 	compile group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
-
-	testCompile group: "org.loadui", name: "testFx", version: "3.1.2"
-	testCompile group: "org.testfx", name: "testfx-core", version: "4.0.+"
-	testCompile group: "org.testfx", name: "testfx-junit", version: "4.0.+"
-	testRuntime group: "org.testfx", name: "openjfx-monocle", version: "1.8.0_20"
 }
 
 eclipse.classpath.file.whenMerged {
