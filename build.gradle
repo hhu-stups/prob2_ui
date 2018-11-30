@@ -12,6 +12,8 @@ buildscript {
 }
 
 plugins {
+	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
+	id "org.openjfx.javafxplugin" version "0.0.5" apply false
 	id "org.sonarqube" version "2.6.2"
 }
 
@@ -46,7 +48,7 @@ repositories {
 
 mainClassName = "de.prob2.ui.ProB2"
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
-applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}"]
+applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}".toString()]
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
@@ -69,6 +71,19 @@ dependencies {
 	compile group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.0"
 	compile group: "org.pf4j", name: "pf4j", version: "2.2.0"
 	compile group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
+}
+
+if (JavaVersion.current().java11Compatible) {
+	apply plugin: "org.openjfx.javafxplugin"
+	javafx {
+		modules = [
+			"javafx.base",
+			"javafx.controls",
+			"javafx.fxml",
+			"javafx.graphics",
+			"javafx.web",
+		]
+	}
 }
 
 eclipse.classpath.file.whenMerged {
@@ -129,7 +144,7 @@ sonarqube {
 
 if( rootProject == project) {
 	wrapper {
-		gradleVersion = "4.9"
+		gradleVersion = "5.0"
 		distributionType = Wrapper.DistributionType.ALL
 	}
 }
