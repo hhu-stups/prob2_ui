@@ -30,6 +30,9 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -108,7 +111,7 @@ public class MagicLayoutEditPane extends VBox {
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linecolor"), lineColorPicker),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linewidth"), lineWidthComboBox),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker));
-		
+
 		// clear listview whenn the model changes
 		currentTrace.modelProperty().addListener((observable, from, to) -> {
 			this.listView.getItems().clear();
@@ -239,6 +242,81 @@ public class MagicLayoutEditPane extends VBox {
 			// set ContextMenu for cells, which are empty from the beginning
 			cell.setContextMenu((this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem)
 					: new ContextMenu(newEdgesItem));
+
+			// init drag and drop for reordering list cells
+			cell.setOnDragDetected(event -> {
+				if (cell.getItem() == null) {
+					return;
+				}
+
+				Dragboard dragboard = cell.startDragAndDrop(TransferMode.MOVE);
+
+				ClipboardContent content = new ClipboardContent();
+				content.putString(cell.getItem().getName());
+				dragboard.setContent(content);
+
+				event.consume();
+			});
+
+			cell.setOnDragOver(event -> {
+				if (event.getGestureSource() != cell && event.getDragboard().hasString()) {
+					event.acceptTransferModes(TransferMode.MOVE);
+				}
+
+				event.consume();
+			});
+
+			cell.setOnDragEntered(event -> {
+				if (event.getGestureSource() != cell && event.getDragboard().hasString()) {
+					cell.setTextFill(Color.GREY);
+				}
+				event.consume();
+			});
+
+			cell.setOnDragExited(event -> {
+				cell.setTextFill(Color.BLACK);
+				event.consume();
+			});
+
+			cell.setOnDragDropped(event -> {
+				Dragboard dragboard = event.getDragboard();
+
+				boolean success = false;
+				if (dragboard.hasString() && !cell.isEmpty()) {
+					MagicComponent draggedComponent = null;
+					for (MagicComponent component : listView.getItems()) {
+						if (component.getName().equals(dragboard.getString())) {
+							draggedComponent = component instanceof MagicNodes ? new MagicNodes((MagicNodes) component)
+									: new MagicEdges((MagicEdges) component);
+							break;
+						}
+					}
+					;
+					if (draggedComponent == null) {
+						return;
+					}
+					int targetIndex = cell.getIndex();
+					int sourceIndex = listView.getItems().indexOf(draggedComponent);
+					if (targetIndex > sourceIndex) {
+						// move all items between source and target one up
+						for (int i = sourceIndex; i < targetIndex; i++) {
+							MagicComponent component = listView.getItems().get(i + 1);
+							listView.getItems().set(i, component);
+						}
+					} else {
+						// move all items between source and target one down
+						for (int i = sourceIndex; i > targetIndex; i--) {
+							MagicComponent component = listView.getItems().get(i - 1);
+							listView.getItems().set(i, component);
+						}
+					}
+					listView.getItems().set(targetIndex, draggedComponent);
+					success = true;
+				}
+				event.setDropCompleted(success);
+
+				event.consume();
+			});
 
 			return cell;
 		});
