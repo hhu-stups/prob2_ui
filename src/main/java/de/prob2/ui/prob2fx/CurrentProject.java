@@ -217,7 +217,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (!saved.get() && !confirmReplacingProject()) {
 			return;
 		}
-		this.set(project);
+		if (currentTrace.exists()) {
+			animations.removeTrace(currentTrace.get());
+		}
+		update(project);
+		initializeMachines();
 		this.setSaved(!newProject);
 		this.setNewProject(newProject);
 		this.currentMachine.set(null);
