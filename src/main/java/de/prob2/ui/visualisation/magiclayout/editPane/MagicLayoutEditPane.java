@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -18,6 +19,8 @@ import de.prob2.ui.visualisation.magiclayout.MagicNodes;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
@@ -76,12 +79,14 @@ public class MagicLayoutEditPane extends VBox {
 	private ComboBox<Double> lineWidthComboBox;
 	private ColorPicker textColorPicker;
 
+	final StageManager stageManager;
 	final ResourceBundle bundle;
 	final CurrentTrace currentTrace;
 
 	@Inject
 	public MagicLayoutEditPane(final StageManager stageManager, final ResourceBundle bundle,
 			final CurrentTrace currentTrace) {
+		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		stageManager.loadFXML(this, "magic_layout_edit_pane.fxml");
@@ -216,7 +221,17 @@ public class MagicLayoutEditPane extends VBox {
 
 			final MenuItem deleteItem = new MenuItem(
 					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.delete"));
-			deleteItem.setOnAction(event -> listView.getItems().remove(cell.getItem()));
+			deleteItem.setOnAction(event -> {
+				List<ButtonType> buttons = new ArrayList<>();
+				buttons.add(ButtonType.YES);
+				buttons.add(ButtonType.NO);
+				Optional<ButtonType> result = stageManager.makeAlert(AlertType.CONFIRMATION, buttons, "",
+						"visualisation.magicLayout.editPane.alerts.confirmDeleteComponent.content",
+						cell.getItem().getName()).showAndWait();
+				if (result.isPresent() && result.get().equals(ButtonType.YES)) {
+					listView.getItems().remove(cell.getItem());
+				}
+			});
 
 			final MenuItem newNodesItem = new MenuItem(
 					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newNodes"));
@@ -254,7 +269,7 @@ public class MagicLayoutEditPane extends VBox {
 				ClipboardContent content = new ClipboardContent();
 				content.putString(cell.getItem().getName());
 				dragboard.setContent(content);
-				
+
 				dragboard.setDragView(cell.snapshot(null, null));
 
 				event.consume();
