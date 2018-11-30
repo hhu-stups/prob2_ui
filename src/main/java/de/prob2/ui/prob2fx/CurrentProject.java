@@ -1,14 +1,8 @@
 package de.prob2.ui.prob2fx;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
@@ -37,6 +31,11 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -215,6 +214,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 	
 	public void set(Project project, boolean newProject) {
+		if (!saved.get() && !confirmReplacingProject()) {
+			return;
+		}
 		this.set(project);
 		this.setSaved(!newProject);
 		this.setNewProject(newProject);
