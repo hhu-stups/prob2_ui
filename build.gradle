@@ -18,6 +18,7 @@ plugins {
 apply plugin: 'application'
 apply plugin: 'eclipse'
 apply plugin: 'javafx-gradle-plugin'
+apply plugin: 'idea'
 
 project.group = "de.hhu.stups"
 project.version = "1.0.0-SNAPSHOT"
