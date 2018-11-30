@@ -1,21 +1,8 @@
 package de.prob2.ui.project.machines;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -31,6 +18,8 @@ import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -45,6 +34,17 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class MachinesTab extends Tab {
@@ -56,9 +56,10 @@ public class MachinesTab extends Tab {
 		@FXML private Menu startAnimationMenu;
 		@FXML private MenuItem showInternalItem;
 		
-		private Machine machine;
+		private ObjectProperty<Machine> machineProperty;
 		
 		private MachinesItem() {
+			this.machineProperty = new SimpleObjectProperty<>(this, "machine", null);
 			stageManager.loadFXML(this, "machines_item.fxml");
 		}
 		
@@ -67,39 +68,40 @@ public class MachinesTab extends Tab {
 			currentProject.currentMachineProperty().addListener(o -> this.refresh());
 			this.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					startMachine(this.machine);
+					startMachine(this.machineProperty.get());
 				}
 			});
 			currentProject.preferencesProperty().addListener((o, from, to) -> updatePreferences(to));
 			this.updatePreferences(currentProject.getPreferences());
-			currentProject.currentMachineProperty().addListener((observable, from, to) -> showInternalItem.setDisable(to != machine));
+			currentProject.currentMachineProperty().addListener((observable, from, to) -> showInternalItem.setDisable(to == null || machineProperty.get() != to));
+			machineProperty.addListener((observable, from, to) -> showInternalItem.setDisable(to == null || to != currentProject.getCurrentMachine()));
 		}
 		
 		@FXML
 		private void handleShowDescription() {
-			showMachineView(this.machine);
-			machinesList.getSelectionModel().select(this.machine);
+			showMachineView(this.machineProperty.get());
+			machinesList.getSelectionModel().select(this.machineProperty.get());
 		}
 		
 		@FXML
 		private void handleEditConfiguration() {
-			injector.getInstance(EditMachinesDialog.class).editAndShow(this.machine).ifPresent(result -> showMachineView(this.machine));
+			injector.getInstance(EditMachinesDialog.class).editAndShow(this.machineProperty.get()).ifPresent(result -> showMachineView(this.machineProperty.get()));
 		}
 		
 		@FXML
 		private void handleRemove() {
 			stageManager.makeAlert(Alert.AlertType.CONFIRMATION, "",
-					"project.machines.machinesTab.alerts.removeMachineConfirmation.content", this.machine.getName())
+					"project.machines.machinesTab.alerts.removeMachineConfirmation.content", this.machineProperty.get().getName())
 					.showAndWait().ifPresent(buttonType -> {
 						if (buttonType.equals(ButtonType.OK)) {
-							currentProject.removeMachine(this.machine);
+							currentProject.removeMachine(this.machineProperty.get());
 						}
 					});
 		}
 		
 		@FXML
 		private void handleEditFileExternal() {
-			injector.getInstance(ExternalEditor.class).open(currentProject.getLocation().resolve(this.machine.getPath()));
+			injector.getInstance(ExternalEditor.class).open(currentProject.getLocation().resolve(this.machineProperty.get().getPath()));
 		}
 		
 		@FXML
@@ -113,7 +115,7 @@ public class MachinesTab extends Tab {
 		}
 		
 		private void refresh() {
-			if (Objects.equals(this.machine, currentProject.getCurrentMachine())) {
+			if (Objects.equals(this.machineProperty.get(), currentProject.getCurrentMachine())) {
 				if (!runningIcon.getStyleClass().contains("running")) {
 					runningIcon.getStyleClass().add("running");
 				}
@@ -128,8 +130,8 @@ public class MachinesTab extends Tab {
 			final MenuItem defItem = new MenuItem();
 			defItem.textProperty().bind(Preference.DEFAULT.nameProperty());
 			defItem.setOnAction(e -> {
-				currentProject.startAnimation(this.machine, Preference.DEFAULT);
-				this.machine.setLastUsed(Preference.DEFAULT);
+				currentProject.startAnimation(this.machineProperty.get(), Preference.DEFAULT);
+				this.machineProperty.get().setLastUsed(Preference.DEFAULT);
 			});
 			startAnimationMenu.getItems().add(defItem);
 			
@@ -139,8 +141,8 @@ public class MachinesTab extends Tab {
 				// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
 				menuItem.setMnemonicParsing(false);
 				menuItem.setOnAction(e -> {
-					currentProject.startAnimation(this.machine, preference);
-					this.machine.setLastUsed(preference);
+					currentProject.startAnimation(this.machineProperty.get(), preference);
+					this.machineProperty.get().setLastUsed(preference);
 				});
 				startAnimationMenu.getItems().add(menuItem);
 			}
@@ -151,22 +153,22 @@ public class MachinesTab extends Tab {
 			super.updateItem(item, empty);
 			
 			if (empty || item == null) {
-				this.machine = null;
+				this.machineProperty.set(null);
 				this.nameLabel.textProperty().unbind();
 				this.nameLabel.setText(null);
 				this.runningIcon.setVisible(false);
 				this.locationLabel.setText(null);
 				this.setContextMenu(null);
 			} else {
-				this.machine = item;
+				this.machineProperty.set(item);
 				this.refresh();
 				this.nameLabel.textProperty().bind(Bindings.format(
 					"%s : %s",
-					Bindings.selectString(machine.lastUsedProperty(), "name"),
-					machine.nameProperty()
+					Bindings.selectString(machineProperty.get().lastUsedProperty(), "name"),
+					machineProperty.get().nameProperty()
 				));
 				this.runningIcon.setVisible(true);
-				this.locationLabel.setText(machine.getPath().toString());
+				this.locationLabel.setText(machineProperty.get().getPath().toString());
 				this.setContextMenu(contextMenu);
 			}
 		}
