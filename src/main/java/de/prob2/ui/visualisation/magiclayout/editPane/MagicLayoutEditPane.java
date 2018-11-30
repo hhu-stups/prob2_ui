@@ -254,6 +254,8 @@ public class MagicLayoutEditPane extends VBox {
 				ClipboardContent content = new ClipboardContent();
 				content.putString(cell.getItem().getName());
 				dragboard.setContent(content);
+				
+				dragboard.setDragView(cell.snapshot(null, null));
 
 				event.consume();
 			});
@@ -320,6 +322,7 @@ public class MagicLayoutEditPane extends VBox {
 
 			return cell;
 		});
+
 		// add ContextMenu to empty ListView
 		final MenuItem newNodesItem = new MenuItem(
 				bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newNodes"));
