@@ -249,8 +249,7 @@ public class MagicGraphFX implements MagicGraphI {
 	 */
 	private Edge getEdge(Vertex source, Vertex target, String caption, Model model) {
 		for (Edge edge : model.getEdges()) {
-			if (edge.getSource().equals(source) && edge.getTarget().equals(target)
-					&& edge.getCaption().equals(caption)) {
+			if (edge.getSource().equals(source) && edge.getTarget().equals(target)) {
 				return edge;
 			}
 		}
