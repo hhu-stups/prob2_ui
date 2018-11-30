@@ -16,6 +16,12 @@ public class MagicEdges extends MagicComponent {
 	public MagicEdges(String name) {
 		this(name, "", true);
 	}
+	
+	public MagicEdges(MagicEdges edges) {
+		super(edges);
+		
+		this.textSize.set(edges.getTextSize());
+	}
 
 	public IntegerProperty textSizeProperty() {
 		return textSize;

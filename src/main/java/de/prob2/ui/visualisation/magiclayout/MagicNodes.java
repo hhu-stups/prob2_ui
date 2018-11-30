@@ -23,6 +23,14 @@ public class MagicNodes extends MagicComponent {
 	public MagicNodes(String name) {
 		this(name, "", true, false);
 	}
+	
+	public MagicNodes(MagicNodes nodes) {
+		super(nodes);
+		
+		this.cluster.set(nodes.isCluster());
+		this.shape.set(nodes.getShape());
+		this.nodeColor.set(nodes.getNodeColor());
+	}
 
 	public BooleanProperty clusterProperty() {
 		return cluster;

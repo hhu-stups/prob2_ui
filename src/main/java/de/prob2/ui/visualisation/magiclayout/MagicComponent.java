@@ -40,6 +40,18 @@ public abstract class MagicComponent {
 		this.editable = editable;
 	}
 	
+	public MagicComponent(MagicComponent component) {
+		this.name.set(component.getName());
+		this.expression.set(component.getExpression());
+		
+		this.lineType.set(component.getLineType());
+		this.lineColor.set(component.getLineColor());
+		this.lineWidth.set(component.getLineWidth());
+		this.textColor.set(component.getTextColor());
+		
+		this.editable = component.isEditable();
+	}
+	
 	public StringProperty nameProperty() {
 		return name;
 	}
