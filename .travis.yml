@@ -1,12 +1,8 @@
 matrix:
   include:
-    - os: linux
-      dist: trusty
-      jdk: oraclejdk8
+    - jdk: oraclejdk8
       env: DO_AFTER_SUCCESS=true
-    - os: linux
-      dist: trusty
-      jdk: oraclejdk9
+    - jdk: oraclejdk9
 
 language: java
 
