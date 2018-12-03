@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -19,6 +20,8 @@ import de.prob2.ui.visualisation.magiclayout.MagicNodes;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
@@ -31,6 +34,9 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -74,6 +80,7 @@ public class MagicLayoutEditPane extends VBox {
 	private ComboBox<Double> lineWidthComboBox;
 	private ColorPicker textColorPicker;
 
+	final StageManager stageManager;
 	final ResourceBundle bundle;
 	final CurrentTrace currentTrace;
 	final MagicGraphI magicGraph;
@@ -81,6 +88,7 @@ public class MagicLayoutEditPane extends VBox {
 	@Inject
 	public MagicLayoutEditPane(final StageManager stageManager, final ResourceBundle bundle,
 			final CurrentTrace currentTrace, final MagicGraphI magicGraph) {
+		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.magicGraph = magicGraph;
@@ -111,7 +119,7 @@ public class MagicLayoutEditPane extends VBox {
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linecolor"), lineColorPicker),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linewidth"), lineWidthComboBox),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker));
-		
+
 		// clear listview whenn the model changes
 		currentTrace.modelProperty().addListener((observable, from, to) -> {
 			this.listView.getItems().clear();
@@ -191,7 +199,18 @@ public class MagicLayoutEditPane extends VBox {
 	private void initListView() {
 		listView.setEditable(true);
 		listView.setCellFactory(lv -> {
-			TextFieldListCell<MagicComponent> cell = new TextFieldListCell<>();
+			TextFieldListCell<MagicComponent> cell = new TextFieldListCell<MagicComponent>() {
+
+				@Override
+				public void commitEdit(MagicComponent component) {
+					if (!isEditing()) {
+						return;
+					}
+					if (!listView.getItems().contains(component) || listView.getItems().indexOf(component) == this.getIndex()) {
+						super.commitEdit(component);
+					}
+				}
+			};
 
 			cell.setConverter(new StringConverter<MagicComponent>() {
 
@@ -202,11 +221,12 @@ public class MagicLayoutEditPane extends VBox {
 
 				@Override
 				public MagicComponent fromString(String string) {
-					MagicComponent component = cell.getItem();
+					MagicComponent component = cell.getItem() instanceof MagicNodes
+							? new MagicNodes((MagicNodes) cell.getItem())
+							: new MagicEdges((MagicEdges) cell.getItem());
 					component.nameProperty().set(string);
 					return component;
 				}
-
 			});
 
 			// define ContextMenu for ListCell
@@ -216,15 +236,25 @@ public class MagicLayoutEditPane extends VBox {
 
 			final MenuItem deleteItem = new MenuItem(
 					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.delete"));
-			deleteItem.setOnAction(event -> listView.getItems().remove(cell.getItem()));
+			deleteItem.setOnAction(event -> {
+				List<ButtonType> buttons = new ArrayList<>();
+				buttons.add(ButtonType.YES);
+				buttons.add(ButtonType.NO);
+				Optional<ButtonType> result = stageManager.makeAlert(AlertType.CONFIRMATION, buttons, "",
+						"visualisation.magicLayout.editPane.alerts.confirmDeleteComponent.content",
+						cell.getItem().getName()).showAndWait();
+				if (result.isPresent() && result.get().equals(ButtonType.YES)) {
+					listView.getItems().remove(cell.getItem());
+				}
+			});
 
 			final MenuItem newNodesItem = new MenuItem(
 					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newNodes"));
-			newNodesItem.setOnAction(event -> ((MagicLayoutEditNodes) this).addNodes());
+			newNodesItem.setOnAction(event -> ((MagicLayoutEditNodes) this).addNewNodegroup());
 
 			final MenuItem newEdgesItem = new MenuItem(
 					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newEdges"));
-			newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addEdges());
+			newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addNewEdgegroup());
 
 			cell.emptyProperty().addListener((observable, from, to) -> {
 				cell.setContextMenu(new ContextMenu());
@@ -243,15 +273,93 @@ public class MagicLayoutEditPane extends VBox {
 			cell.setContextMenu((this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem)
 					: new ContextMenu(newEdgesItem));
 
+			// init drag and drop for reordering list cells
+			cell.setOnDragDetected(event -> {
+				if (cell.getItem() == null) {
+					return;
+				}
+
+				Dragboard dragboard = cell.startDragAndDrop(TransferMode.MOVE);
+
+				ClipboardContent content = new ClipboardContent();
+				content.putString(cell.getItem().getName());
+				dragboard.setContent(content);
+
+				dragboard.setDragView(cell.snapshot(null, null));
+
+				event.consume();
+			});
+
+			cell.setOnDragOver(event -> {
+				if (event.getGestureSource() != cell && event.getDragboard().hasString()) {
+					event.acceptTransferModes(TransferMode.MOVE);
+				}
+
+				event.consume();
+			});
+
+			cell.setOnDragEntered(event -> {
+				if (event.getGestureSource() != cell && event.getDragboard().hasString()) {
+					cell.setTextFill(Color.GREY);
+				}
+				event.consume();
+			});
+
+			cell.setOnDragExited(event -> {
+				cell.setTextFill(Color.BLACK);
+				event.consume();
+			});
+
+			cell.setOnDragDropped(event -> {
+				Dragboard dragboard = event.getDragboard();
+
+				boolean success = false;
+				if (dragboard.hasString() && !cell.isEmpty()) {
+					MagicComponent draggedComponent = null;
+					for (MagicComponent component : listView.getItems()) {
+						if (component.getName().equals(dragboard.getString())) {
+							draggedComponent = component instanceof MagicNodes ? new MagicNodes((MagicNodes) component)
+									: new MagicEdges((MagicEdges) component);
+							break;
+						}
+					}
+					;
+					if (draggedComponent == null) {
+						return;
+					}
+					int targetIndex = cell.getIndex();
+					int sourceIndex = listView.getItems().indexOf(draggedComponent);
+					if (targetIndex > sourceIndex) {
+						// move all items between source and target one up
+						for (int i = sourceIndex; i < targetIndex; i++) {
+							MagicComponent component = listView.getItems().get(i + 1);
+							listView.getItems().set(i, component);
+						}
+					} else {
+						// move all items between source and target one down
+						for (int i = sourceIndex; i > targetIndex; i--) {
+							MagicComponent component = listView.getItems().get(i - 1);
+							listView.getItems().set(i, component);
+						}
+					}
+					listView.getItems().set(targetIndex, draggedComponent);
+					success = true;
+				}
+				event.setDropCompleted(success);
+
+				event.consume();
+			});
+
 			return cell;
 		});
+
 		// add ContextMenu to empty ListView
 		final MenuItem newNodesItem = new MenuItem(
 				bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newNodes"));
-		newNodesItem.setOnAction(event -> ((MagicLayoutEditNodes) this).addNodes());
+		newNodesItem.setOnAction(event -> ((MagicLayoutEditNodes) this).addNewNodegroup());
 		final MenuItem newEdgesItem = new MenuItem(
 				bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newEdges"));
-		newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addEdges());
+		newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addNewEdgegroup());
 		listView.setContextMenu(
 				(this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem) : new ContextMenu(newEdgesItem));
 

@@ -12,12 +12,14 @@ buildscript {
 }
 
 plugins {
+	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
+	id "org.openjfx.javafxplugin" version "0.0.5" apply false
 	id "org.sonarqube" version "2.6.2"
 }
 
 apply plugin: 'application'
 apply plugin: 'eclipse'
-apply plugin: 'javafx-gradle-plugin'
+apply plugin: 'idea'
 
 project.group = "de.hhu.stups"
 project.version = "1.0.0-SNAPSHOT"
@@ -46,9 +48,7 @@ repositories {
 
 mainClassName = "de.prob2.ui.ProB2"
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
-applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}"]
-
-sourceSets.test.java.srcDirs = []
+applicationDefaultJvmArgs += ["-Djavafx.preloader=${preloaderClassName}".toString()]
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
@@ -71,11 +71,19 @@ dependencies {
 	compile group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.0"
 	compile group: "org.pf4j", name: "pf4j", version: "2.2.0"
 	compile group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
+}
 
-	testCompile group: "org.loadui", name: "testFx", version: "3.1.2"
-	testCompile group: "org.testfx", name: "testfx-core", version: "4.0.+"
-	testCompile group: "org.testfx", name: "testfx-junit", version: "4.0.+"
-	testRuntime group: "org.testfx", name: "openjfx-monocle", version: "1.8.0_20"
+if (JavaVersion.current().java11Compatible) {
+	apply plugin: "org.openjfx.javafxplugin"
+	javafx {
+		modules = [
+			"javafx.base",
+			"javafx.controls",
+			"javafx.fxml",
+			"javafx.graphics",
+			"javafx.web",
+		]
+	}
 }
 
 eclipse.classpath.file.whenMerged {
@@ -106,16 +114,19 @@ processResources {
 	}
 }
 
-jfx {
-	mainClass = project.mainClassName
-	jfxMainAppJarName = project.name + "-jfx.jar"
-	preLoader = preloaderClassName
-	identifier = project.group + "." + project.name
-	vendor = project.group
-	nativeReleaseVersion = project.version
-	appName = project.name
-	skipNativeVersionNumberSanitizing = true
-	skipMainClassScanning = true
+if (JavaVersion.current() <= JavaVersion.VERSION_1_9) {
+	apply plugin: 'javafx-gradle-plugin'
+	jfx {
+		mainClass = project.mainClassName
+		jfxMainAppJarName = project.name + "-jfx.jar"
+		preLoader = preloaderClassName
+		identifier = project.group + "." + project.name
+		vendor = project.group
+		nativeReleaseVersion = project.version
+		appName = project.name
+		skipNativeVersionNumberSanitizing = true
+		skipMainClassScanning = true
+	}
 }
 
 sonarqube {
@@ -133,7 +144,7 @@ sonarqube {
 
 if( rootProject == project) {
 	wrapper {
-		gradleVersion = "4.9"
+		gradleVersion = "5.0"
 		distributionType = Wrapper.DistributionType.ALL
 	}
 }

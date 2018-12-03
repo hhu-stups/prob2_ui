@@ -1,21 +1,8 @@
 package de.prob2.ui.states;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.GetMachineStructureCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
@@ -30,8 +17,8 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
-import de.prob2.ui.formula.FormulaStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -61,9 +48,20 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Singleton
 public final class StatesView extends StackPane {
@@ -235,8 +233,8 @@ public final class StatesView extends StackPane {
 				.or(currentTrace.currentStateProperty().initializedProperty().not()));
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
-				FormulaStage formulaStage = injector.getInstance(FormulaStage.class);
-				formulaStage.showFormula((IEvalElement) ((ASTFormula) row.getItem().getContents()).getFormula());
+				DotView formulaStage = injector.getInstance(DotView.class);
+				formulaStage.visualizeFormula((IEvalElement) ((ASTFormula) row.getItem().getContents()).getFormula());
 				formulaStage.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);

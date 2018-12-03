@@ -72,8 +72,13 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		}
 	}
 
-	public void addEdges() {
+	public void addNewEdgegroup() {
 		MagicEdges edges = new MagicEdges("edges");
+		int i = 1;
+		while(listView.getItems().contains(edges)) {
+			edges = new MagicEdges("edges" + i);
+			i++;
+		}
 		super.addMagicComponent(edges);
 	}
 

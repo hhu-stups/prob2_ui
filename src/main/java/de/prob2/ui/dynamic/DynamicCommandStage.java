@@ -136,7 +136,7 @@ public abstract class DynamicCommandStage extends Stage {
 		
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			preferences.clear();
-			if (to == null) {
+			if (to == null || currentTrace.get() == null) {
 				return;
 			}
 			if (!to.isAvailable()) {

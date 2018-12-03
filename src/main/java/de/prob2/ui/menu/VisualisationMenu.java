@@ -3,11 +3,9 @@ package de.prob2.ui.menu;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
-import de.prob2.ui.formula.FormulaStage;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -23,7 +21,6 @@ import javafx.stage.Stage;
  */
 @Singleton
 public class VisualisationMenu extends Menu {
-	@FXML private MenuItem enterFormulaForVisualization;
 	@FXML private MenuItem graphVisualization;
 	@FXML private MenuItem tableVisualization;
 	
@@ -41,8 +38,6 @@ public class VisualisationMenu extends Menu {
 
 	@FXML
 	public void initialize() {
-		this.enterFormulaForVisualization.disableProperty()
-				.bind(currentTrace.currentStateProperty().initializedProperty().not());
 		this.graphVisualization.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		this.tableVisualization.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 	}
@@ -64,10 +59,6 @@ public class VisualisationMenu extends Menu {
 		magicLayout.toFront();
 	}
 
-	@FXML
-	private void handleFormulaInput() {
-		injector.getInstance(FormulaStage.class).show();
-	}
 
 	@FXML
 	private void handleHistoryChart() {
