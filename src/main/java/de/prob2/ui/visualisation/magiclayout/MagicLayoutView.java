@@ -65,12 +65,12 @@ public class MagicLayoutView extends Stage {
 	@FXML
 	private void newNodeGroup() {
 		editTabPane.getSelectionModel().select(editNodesTab);
-		magicLayoutEditNodes.addNodes();
+		magicLayoutEditNodes.addNewNodegroup();
 	}
 
 	@FXML
 	private void newEdgeGroup() {
 		editTabPane.getSelectionModel().select(editEdgesTab);
-		magicLayoutEditEdges.addEdges();
+		magicLayoutEditEdges.addNewEdgegroup();
 	}
 }

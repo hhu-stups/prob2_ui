@@ -98,8 +98,13 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		}
 	}
 
-	public void addNodes() {
+	public void addNewNodegroup() {
 		MagicNodes nodes = new MagicNodes("nodes");
+		int i = 1;
+		while(listView.getItems().contains(nodes)) {
+			nodes = new MagicNodes("nodes" + i);
+			i++;
+		}
 		super.addMagicComponent(nodes);
 	}
 
