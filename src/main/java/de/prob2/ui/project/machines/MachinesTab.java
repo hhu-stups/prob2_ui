@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
+import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.ExternalEditor;
@@ -43,6 +44,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -68,6 +70,10 @@ public class MachinesTab extends Tab {
 			currentProject.currentMachineProperty().addListener(o -> this.refresh());
 			this.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					boolean saved = injector.getInstance(BEditorView.class).savedProperty().get();
+					if(!saved && !confirmSave()) {
+						return;
+					}
 					startMachine(this.machineProperty.get());
 				}
 			});
@@ -292,4 +298,13 @@ public class MachinesTab extends Tab {
 			currentProject.startAnimation(machine, machine.getLastUsed());
 		}
 	}
+	
+	private boolean confirmSave() {
+		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+				"common.alerts.unsavedMachineChanges.header",
+				"common.alerts.unsavedMachineChanges.content");
+		Optional<ButtonType> result = alert.showAndWait();
+		return result.isPresent() && ButtonType.OK.equals(result.get());
+	}
+	
 }

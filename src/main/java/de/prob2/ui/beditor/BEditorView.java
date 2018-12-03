@@ -280,4 +280,5 @@ public class BEditorView extends BorderPane {
 	private void handleOpenExternal() {
 		injector.getInstance(ExternalEditor.class).open(this.getPath());
 	}
+	
 }
