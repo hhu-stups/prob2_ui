@@ -196,7 +196,18 @@ public class MagicLayoutEditPane extends VBox {
 	private void initListView() {
 		listView.setEditable(true);
 		listView.setCellFactory(lv -> {
-			TextFieldListCell<MagicComponent> cell = new TextFieldListCell<>();
+			TextFieldListCell<MagicComponent> cell = new TextFieldListCell<MagicComponent>() {
+
+				@Override
+				public void commitEdit(MagicComponent component) {
+					if (!isEditing()) {
+						return;
+					}
+					if (!listView.getItems().contains(component) || listView.getItems().indexOf(component) == this.getIndex()) {
+						super.commitEdit(component);
+					}
+				}
+			};
 
 			cell.setConverter(new StringConverter<MagicComponent>() {
 
@@ -207,11 +218,12 @@ public class MagicLayoutEditPane extends VBox {
 
 				@Override
 				public MagicComponent fromString(String string) {
-					MagicComponent component = cell.getItem();
+					MagicComponent component = cell.getItem() instanceof MagicNodes
+							? new MagicNodes((MagicNodes) cell.getItem())
+							: new MagicEdges((MagicEdges) cell.getItem());
 					component.nameProperty().set(string);
 					return component;
 				}
-
 			});
 
 			// define ContextMenu for ListCell
