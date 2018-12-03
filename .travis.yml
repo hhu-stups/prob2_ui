@@ -1,9 +1,5 @@
-sudo: false
 matrix:
   include:
-    ##- os: linux
-    ##  dist: precise
-    ##  jdk: oraclejdk8
     - os: linux
       dist: trusty
       jdk: oraclejdk8
@@ -11,9 +7,6 @@ matrix:
     - os: linux
       dist: trusty
       jdk: oraclejdk9
-    ##- os: osx
-    ##  osx_image: xcode8.2
-    ##  env: _JAVA_OPTIONS="-Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw -Dprism.text=t2k -Dtestfx.setup.timeout=2500"
 
 language: java
 
@@ -41,30 +34,9 @@ env:
 install:
 - rvm install 2.2.6
 - gem install travis-custom-deploy
-- |
-  if [[ "${TRAVIS_OS_NAME}" == osx ]]
-  then
-    # If logging JVM crashes
-    # brew update
-    # brew upgrade
-
-    brew cask install java
-    brew install gradle # Note: this will call `brew update`
-    brew unlink python # fixes 'run_one_line' is not defined error in backtrace
-  fi
-
-before_script:
-- |
-  if [[ "${TRAVIS_OS_NAME}" == linux ]]
-  then
-    export DISPLAY=:99.0
-    sh -e /etc/init.d/xvfb start
-  fi
 
 script:
 - ./gradlew assemble --refresh-dependencies --stacktrace --warning-mode=all
-# NOTE: When uncommenting this, remember to re-enable the precise and xcode8.2 environments above!
-##- ./gradlew -Pheadless=true check
 
 before_cache:
 - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock

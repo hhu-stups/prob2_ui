@@ -13,6 +13,5 @@ de.prob2.ui.animation.symbolic.SymbolicAnimationView,Animation.html#Symbolic
 de.prob2.ui.states.StatesView,Hauptansicht/Zustandsansicht.html
 de.prob2.ui.beditor.BEditorView,Hauptansicht/Editor.html
 de.prob2.ui.dynamic.table.ExpressionTableView,Hauptansicht/Tabellenvisualisierung einer Formel.html
-de.prob2.ui.formula.FormulaStage,Hauptansicht/Graphvisualisierung einer Formel.html
 de.prob2.ui.dynamic.dotty.DotView,Graphvisualisierung.html
 de.prob2.ui.chart.HistoryChartStage,Zeitdiagramm.html

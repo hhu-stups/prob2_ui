@@ -5,8 +5,6 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 
 <fx:root type="Menu" text="%menu.visualisation" xmlns:fx="http://javafx.com/fxml/1">
-	<MenuItem fx:id="enterFormulaForVisualization"
-			  text="%menu.visualisation.items.enterFormulaForVisualization" onAction="#handleFormulaInput" />	
 	<MenuItem fx:id="graphVisualization" text="%menu.visualisation.items.graph" onAction="#openGraphVisualisation"/>
 	<MenuItem fx:id="tableVisualization" text="%menu.visualisation.items.table" onAction="#openTableVisualisation"/>
 	<MenuItem text="%menu.visualisation.items.magicLayout" onAction="#openMagicLayout"/>

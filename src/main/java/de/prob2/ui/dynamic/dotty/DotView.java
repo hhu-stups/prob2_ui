@@ -329,4 +329,30 @@ public class DotView extends DynamicCommandStage {
 		preferences.show();
 	}
 
+	public void visualizeFormula(final Object formula) {
+		taErrors.clear();
+		Thread thread = new Thread(() -> {
+			try {
+				DynamicCommandItem choice = lvChoice.getItems().stream()
+						.filter(item -> "formula_tree".equals(item.getCommand()))
+						.collect(Collectors.toList())
+						.get(0);
+				Platform.runLater(() -> {
+					statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
+					if(formula instanceof IEvalElement) {
+						taFormula.setText(((IEvalElement) formula).getCode());
+					} else {
+						taFormula.setText((String) formula);
+					}
+					lvChoice.getSelectionModel().select(choice);
+					visualize(choice);
+				});
+			} catch (EvaluationException | ProBError exception) {
+				Platform.runLater(() -> taErrors.setText(exception.getMessage()));
+			}
+		});
+		currentThread.set(thread);
+		thread.start();
+	}
+
 }
