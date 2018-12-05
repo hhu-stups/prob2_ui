@@ -141,6 +141,19 @@ public class LayeredLayout implements Layout {
 		layers.put(vertex, layer + 1);
 	}
 
+	/**
+	 * Implementation based on section "5.4 Crossing Reduction" in 'Drawing Graphs:
+	 * Methods and Models' and uses in particular the "Barycenter Heuristic"
+	 * described on page 103.
+	 * 
+	 * <p>
+	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
+	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
+	 * Wagner, Springer, 2001, p. 101-112.)
+	 *
+	 * Reduces the crossings of edges between the layers.
+	 * 
+	 */
 	private void reduceCrossing(SortedMap<Integer, List<Vertex>> layers, Set<Edge> acyclicEdges) {
 		int fixedLayerNr = 0;
 		int permuteLayerNr = 1;
@@ -163,24 +176,34 @@ public class LayeredLayout implements Layout {
 						edgesToFixedLayer.add(edge);
 					}
 				});
-				
+
 				double bary = calculateBarycenter(vertex, edgesToFixedLayer, fixedLayer);
-				while(baryMap.containsKey(bary)) {
+				while (baryMap.containsKey(bary)) {
 					bary += 0.0001;
 				}
 				baryMap.put(bary, vertex);
 			});
-			
+
 			List<Vertex> permutedLayer = new ArrayList<>();
 			baryMap.values().forEach(vertex -> permutedLayer.add(vertex));
-			
+
 			layers.put(permuteLayerNr, permutedLayer);
-			
+
 			fixedLayerNr++;
 			permuteLayerNr++;
 		}
 	}
 
+	/**
+	 * Calculates the barycenter as described in section "5.4 Crossing Reduction" in
+	 * 'Drawing Graphs: Methods and Models' on page 103.
+	 * 
+	 * <p>
+	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
+	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
+	 * Wagner, Springer, 2001, p. 103.)
+	 * 
+	 */
 	private double calculateBarycenter(Vertex vertex, Set<Edge> edgesToFixedLayer, List<Vertex> fixedLayer) {
 		Set<Vertex> neighbours = getNeighbours(vertex, edgesToFixedLayer);
 
