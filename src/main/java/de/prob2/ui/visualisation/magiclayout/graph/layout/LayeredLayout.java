@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import de.prob2.ui.visualisation.magiclayout.graph.Edge;
 import de.prob2.ui.visualisation.magiclayout.graph.Graph;
@@ -26,8 +29,23 @@ public class LayeredLayout implements Layout {
 	@Override
 	public void drawGraph(Graph graph) {
 		Set<Edge> acyclicEdges = removeCycles(graph.getModel());
-		Map<Integer, List<Vertex>> layers = assignLayers(graph.getModel().getVertices(), acyclicEdges);
+		SortedMap<Integer, List<Vertex>> layers = assignLayers(graph.getModel().getVertices(), acyclicEdges);
 		reduceCrossing(layers, acyclicEdges);
+		
+		double y = 10;
+		for(Entry<Integer, List<Vertex>> layer :  layers.entrySet()) {
+			double x = 10;
+			double maxHeight = 0;
+			for(Vertex vertex: layer.getValue()) {
+				vertex.relocate(x, y);
+				x += vertex.getWidth() + 10;
+				if(vertex.getHeight() > maxHeight) {
+					maxHeight = vertex.getHeight();
+				}
+			}
+			y += maxHeight + 10;
+		}
+		
 //		assignHorizontalCoordinates();
 //		positionEdges();
 	}
@@ -69,7 +87,7 @@ public class LayeredLayout implements Layout {
 		return acyclicEdges;
 	}
 
-	private Map<Integer, List<Vertex>> assignLayers(Set<Vertex> vertices, Set<Edge> acyclicEdges) {
+	private SortedMap<Integer, List<Vertex>> assignLayers(Set<Vertex> vertices, Set<Edge> acyclicEdges) {
 		Map<Vertex, Integer> layers = new HashMap<>();
 
 		vertices.forEach(vertex -> {
@@ -78,7 +96,7 @@ public class LayeredLayout implements Layout {
 			}
 		});
 
-		Map<Integer, List<Vertex>> layerLists = new HashMap<>();
+		SortedMap<Integer, List<Vertex>> layerLists = new TreeMap<>();
 		layers.forEach((vertex, layerNr) -> {
 			if (layerLists.get(layerNr) == null) {
 				layerLists.put(layerNr, new ArrayList<>());
@@ -121,7 +139,7 @@ public class LayeredLayout implements Layout {
 		layers.put(vertex, layer + 1);
 	}
 
-	private void reduceCrossing(Map<Integer, List<Vertex>> layers, Set<Edge> acyclicEdges) {
+	private void reduceCrossing(SortedMap<Integer, List<Vertex>> layers, Set<Edge> acyclicEdges) {
 		int fixedLayerNr = 0;
 		int permuteLayerNr = 1;
 
@@ -129,6 +147,7 @@ public class LayeredLayout implements Layout {
 			List<Vertex> fixedLayer = layers.get(fixedLayerNr);
 			List<Vertex> permuteLayer = layers.get(permuteLayerNr);
 
+			SortedMap<Double, Vertex> baryMap = new TreeMap<>();
 			permuteLayer.forEach(vertex -> {
 				// compute the subset of edges between the specified vertex and the fixed layer
 				Set<Edge> edgesToFixedLayer = new HashSet<>();
@@ -142,8 +161,21 @@ public class LayeredLayout implements Layout {
 						edgesToFixedLayer.add(edge);
 					}
 				});
-				calculateBarycenter(vertex, edgesToFixedLayer, fixedLayer);
+				
+				double bary = calculateBarycenter(vertex, edgesToFixedLayer, fixedLayer);
+				while(baryMap.containsKey(bary)) {
+					bary += 0.0001;
+				}
+				baryMap.put(bary, vertex);
 			});
+			
+			List<Vertex> permutedLayer = new ArrayList<>();
+			baryMap.values().forEach(vertex -> permutedLayer.add(vertex));
+			
+			layers.put(permuteLayerNr, permutedLayer);
+			
+			fixedLayerNr++;
+			permuteLayerNr++;
 		}
 	}
 

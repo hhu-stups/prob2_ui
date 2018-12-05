@@ -21,7 +21,7 @@ import de.prob2.ui.visualisation.magiclayout.graph.Edge;
 import de.prob2.ui.visualisation.magiclayout.graph.Graph;
 import de.prob2.ui.visualisation.magiclayout.graph.Model;
 import de.prob2.ui.visualisation.magiclayout.graph.Vertex;
-import de.prob2.ui.visualisation.magiclayout.graph.layout.RandomLayout;
+import de.prob2.ui.visualisation.magiclayout.graph.layout.LayeredLayout;
 import javafx.scene.Node;
 
 public class MagicGraphFX implements MagicGraphI {
@@ -50,7 +50,7 @@ public class MagicGraphFX implements MagicGraphI {
 		}
 
 		graph = new Graph(model);
-		graph.layout(new RandomLayout());
+		graph.layout(new LayeredLayout());
 		return graph;
 	}
 
