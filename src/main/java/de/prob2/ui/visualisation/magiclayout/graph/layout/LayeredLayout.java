@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -29,23 +30,24 @@ public class LayeredLayout implements Layout {
 	@Override
 	public void drawGraph(Graph graph) {
 		Set<Edge> acyclicEdges = removeCycles(graph.getModel());
-		SortedMap<Integer, List<Vertex>> layers = assignLayers(graph.getModel().getVertices(), acyclicEdges);
+		NavigableMap<Integer, List<Vertex>> layers = assignLayers(graph.getModel().getVertices(), acyclicEdges);
+		// addDummyVertices();
 		reduceCrossing(layers, acyclicEdges);
-		
-		double y = 10;
-		for(Entry<Integer, List<Vertex>> layer :  layers.entrySet()) {
-			double x = 10;
+
+		double y = 0;
+		for (Entry<Integer, List<Vertex>> layer : layers.descendingMap().entrySet()) {
+			double x = 0;
 			double maxHeight = 0;
-			for(Vertex vertex: layer.getValue()) {
+			for (Vertex vertex : layer.getValue()) {
 				vertex.relocate(x, y);
 				x += vertex.getWidth() + 10;
-				if(vertex.getHeight() > maxHeight) {
+				if (vertex.getHeight() > maxHeight) {
 					maxHeight = vertex.getHeight();
 				}
 			}
-			y += maxHeight + 10;
+			y += (maxHeight * 2);
 		}
-		
+
 //		assignHorizontalCoordinates();
 //		positionEdges();
 	}
@@ -87,7 +89,7 @@ public class LayeredLayout implements Layout {
 		return acyclicEdges;
 	}
 
-	private SortedMap<Integer, List<Vertex>> assignLayers(Set<Vertex> vertices, Set<Edge> acyclicEdges) {
+	private NavigableMap<Integer, List<Vertex>> assignLayers(Set<Vertex> vertices, Set<Edge> acyclicEdges) {
 		Map<Vertex, Integer> layers = new HashMap<>();
 
 		vertices.forEach(vertex -> {
@@ -96,7 +98,7 @@ public class LayeredLayout implements Layout {
 			}
 		});
 
-		SortedMap<Integer, List<Vertex>> layerLists = new TreeMap<>();
+		NavigableMap<Integer, List<Vertex>> layerLists = new TreeMap<>();
 		layers.forEach((vertex, layerNr) -> {
 			if (layerLists.get(layerNr) == null) {
 				layerLists.put(layerNr, new ArrayList<>());
