@@ -3,25 +3,18 @@ package de.prob2.ui.persistence;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
-@Singleton
 public final class TablePersistenceHandler {
-	private final UIState uiState;
-
-	@Inject
-	private TablePersistenceHandler(UIState uiState) {
-		this.uiState = uiState;
+	private TablePersistenceHandler() {
+		throw new AssertionError("Utility class");
 	}
 
-	public double[] getColumnsWidth(List<? extends TableColumnBase<?, ?>> columns) {
+	public static double[] getColumnsWidth(List<? extends TableColumnBase<?, ?>> columns) {
 		double[] result = new double[columns.size()];
 		double sum = 0.0;
 		for (int i = 0; i < columns.size(); i++) {
@@ -34,8 +27,7 @@ public final class TablePersistenceHandler {
 		return result;
 	}
 
-	public <S> void setColumnsWidth(TreeTableView<S> tableView, ObservableList<TreeTableColumn<S, ?>> columns) {
-		double[] widths = uiState.getStatesViewColumnsWidth();
+	public static <S> void setColumnsWidth(TreeTableView<S> tableView, ObservableList<TreeTableColumn<S, ?>> columns, double[] widths) {
 		double sum = 0.0;
 		for (final TableColumnBase<?, ?> column : columns) {
 			sum += column.getWidth();
@@ -46,9 +38,9 @@ public final class TablePersistenceHandler {
 		}
 	}
 
-	public <S> void setColumnsOrder(ObservableList<TreeTableColumn<S, ?>> columns) {
+	public static <S> void setColumnsOrder(ObservableList<TreeTableColumn<S, ?>> columns, final String[] order) {
 		ObservableList<TreeTableColumn<S, ?>> newColumns = FXCollections.observableArrayList();
-		for (final String text : uiState.getStatesViewColumnsOrder()) {
+		for (final String text : order) {
 			newColumns.addAll(columns.stream().filter(column -> column.getId().equals(text)).collect(Collectors.toList()));
 		}
 
@@ -56,7 +48,7 @@ public final class TablePersistenceHandler {
 		columns.setAll(newColumns);
 	}
 
-	public String[] getColumnsOrder(List<? extends TableColumnBase<?, ?>> columns) {
+	public static String[] getColumnsOrder(List<? extends TableColumnBase<?, ?>> columns) {
 		String[] order = new String[columns.size()];
 		for (int i = 0; i < columns.size(); i++) {
 			order[i] = columns.get(i).getId();

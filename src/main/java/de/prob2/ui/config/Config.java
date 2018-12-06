@@ -332,11 +332,9 @@ public final class Config {
 		configData.bConsoleSettings = bConsole.getSettings();
 		configData.expandedTitledPanes = new ArrayList<>(this.uiState.getExpandedTitledPanes());
 
-		TablePersistenceHandler tablePersistenceHandler = injector.getInstance(TablePersistenceHandler.class);
-
 		StatesView statesView = injector.getInstance(StatesView.class);
-		configData.statesViewColumnsWidth = tablePersistenceHandler.getColumnsWidth(statesView.getTable().getColumns());
-		configData.statesViewColumnsOrder = tablePersistenceHandler.getColumnsOrder(statesView.getTable().getColumns());
+		configData.statesViewColumnsWidth = TablePersistenceHandler.getColumnsWidth(statesView.getTable().getColumns());
+		configData.statesViewColumnsOrder = TablePersistenceHandler.getColumnsOrder(statesView.getTable().getColumns());
 
 		MainController main = injector.getInstance(MainController.class);
 
