@@ -59,14 +59,12 @@ public abstract class SymbolicExecutor {
 
 	public void interrupt() {
 		List<Thread> removedThreads = new ArrayList<>();
-		for(Iterator<Thread> iterator = currentJobThreads.iterator(); iterator.hasNext();) {
-			Thread thread = iterator.next();
+		for (Thread thread : currentJobThreads) {
 			thread.interrupt();
 			removedThreads.add(thread);
 		}
 		List<IModelCheckJob> removedJobs = new ArrayList<>();
-		for(Iterator<IModelCheckJob> iterator = currentJobs.iterator(); iterator.hasNext();) {
-			IModelCheckJob job = iterator.next();
+		for (IModelCheckJob job : currentJobs) {
 			removedJobs.add(job);
 		}
 		currentTrace.getStateSpace().sendInterrupt();

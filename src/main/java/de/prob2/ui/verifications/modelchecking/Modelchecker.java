@@ -203,24 +203,22 @@ public class Modelchecker implements IModelCheckListener {
 		}
 		currentJobs.remove(job);
 	}
-	
+
 	public void cancelModelcheck() {
 		List<Thread> removedThreads = new ArrayList<>();
-		for(Iterator<Thread> iterator = currentJobThreads.iterator(); iterator.hasNext();) {
-			Thread thread = iterator.next();
+		for (Thread thread : currentJobThreads) {
 			thread.interrupt();
 			removedThreads.add(thread);
 		}
 		List<IModelCheckJob> removedJobs = new ArrayList<>();
-		for(Iterator<IModelCheckJob> iterator = currentJobs.iterator(); iterator.hasNext();) {
-			IModelCheckJob job = iterator.next();
+		for (IModelCheckJob job : currentJobs) {
 			removedJobs.add(job);
 		}
 		currentTrace.getStateSpace().sendInterrupt();
 		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);
 	}
-	
+
 	private ModelCheckingItem getItemIfAlreadyExists(ModelCheckingItem item) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		int index = currentMachine.getModelcheckingItems().indexOf(item);
@@ -229,9 +227,9 @@ public class Modelchecker implements IModelCheckListener {
 		}
 		return item;
 	}
-	
+
 	public void setCurrentStats(ModelCheckStats currentStats) {
 		this.currentStats = currentStats;
 	}
-	
+
 }
