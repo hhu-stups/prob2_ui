@@ -211,9 +211,7 @@ public class Modelchecker implements IModelCheckListener {
 			removedThreads.add(thread);
 		}
 		List<IModelCheckJob> removedJobs = new ArrayList<>();
-		for (IModelCheckJob job : currentJobs) {
-			removedJobs.add(job);
-		}
+		removedJobs.addAll(currentJobs);
 		currentTrace.getStateSpace().sendInterrupt();
 		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);
