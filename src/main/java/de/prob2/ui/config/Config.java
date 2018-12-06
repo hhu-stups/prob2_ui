@@ -281,10 +281,7 @@ public final class Config {
 
 		this.uiState.getSavedStageBoxes().putAll(configData.stageBoxes);
 
-		for (String pane : configData.expandedTitledPanes) {
-			this.uiState.getExpandedTitledPanes().add(pane);
-		}
-		
+		this.uiState.getExpandedTitledPanes().addAll(configData.expandedTitledPanes);
 
 		this.injector.getInstance(PreferencesStage.class).getTabPersistenceHandler().setCurrentTab(configData.currentPreference);
 		this.injector.getInstance(MainView.class).getTabPersistenceHandler().setCurrentTab(configData.currentMainTab);
