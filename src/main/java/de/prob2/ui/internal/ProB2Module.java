@@ -70,6 +70,7 @@ import de.prob2.ui.visualisation.fx.VisualisationController;
 
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
+import javafx.geometry.BoundingBox;
 import javafx.util.BuilderFactory;
 
 import org.hildan.fxgson.FxGson;
@@ -106,6 +107,16 @@ public class ProB2Module extends AbstractModule {
 			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> new File(json.getAsString()))
 			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString()))
 			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(json.getAsString()))
+			.registerTypeAdapter(BoundingBox.class, (JsonSerializer<BoundingBox>)(src, typeOfSrc, context) ->
+				context.serialize(new double[] {src.getMinX(), src.getMinY(), src.getWidth(), src.getHeight()})
+			)
+			.registerTypeAdapter(BoundingBox.class, (JsonDeserializer<BoundingBox>)(json, typeOfT, context) -> {
+				final double[] array = context.deserialize(json, double[].class);
+				if (array.length != 4) {
+					throw new IllegalArgumentException("JSON array representing a BoundingBox must have exactly 4 elements");
+				}
+				return new BoundingBox(array[0], array[1], array[2], array[3]);
+			})
 			.create());
 		
 		// Controllers
