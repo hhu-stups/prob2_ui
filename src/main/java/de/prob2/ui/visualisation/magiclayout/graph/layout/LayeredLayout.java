@@ -24,6 +24,12 @@ import de.prob2.ui.visualisation.magiclayout.graph.Vertex;
  * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
  * Wagner, Springer, 2001, pp. 87–120.
  * 
+ * and in
+ * 
+ * Georg Sander, 'Graph layout for applications in compiler construction'.
+ * Technical Report A/01/96, FB 14 Informatik, Universität des Saarlandes, 1996,
+ * pp. 192-193.
+ * 
  */
 public class LayeredLayout implements Layout {
 
@@ -47,7 +53,7 @@ public class LayeredLayout implements Layout {
 					graph.getChildren().add(vertex);
 				}
 				vertex.relocate(x, y - vertex.getHeight() / 2);
-				x += vertex.getWidth() + 10;
+				x += vertex.getWidth() + 50;
 				if (vertex.getHeight() > maxHeight) {
 					maxHeight = vertex.getHeight();
 				}
@@ -65,8 +71,166 @@ public class LayeredLayout implements Layout {
 			});
 		});
 
-//		assignHorizontalCoordinates();
+		assignHorizontalCoordinates(layers, acyclicEdges);
+
 //		positionEdges();
+	}
+
+	/**
+	 * Implementation based on the rubber band method as described in 'Graph layout
+	 * for applications in compiler construction'.
+	 * 
+	 * <p>
+	 * (Georg Sander, 'Graph layout for applications in compiler construction'.
+	 * Technical Report A/01/96, FB 14 Informatik, Universität des Saarlandes, 1996,
+	 * pp. 192-193.)
+	 * 
+	 * <p>
+	 * Assigns horizontal coordinates to the vertices based on the idea that the
+	 * edges are like rubber bands, which pull their source and target vertices
+	 * towards them.
+	 * 
+	 */
+	private void assignHorizontalCoordinates(NavigableMap<Integer, List<Vertex>> layers, Set<Edge> acyclicEdges) {
+		double deviationBefore = Double.MAX_VALUE;
+		double deviationAfter = calculateDeviationFromOptimum(vertexLayerMap.keySet(), acyclicEdges);
+
+		while (deviationBefore - deviationAfter > 0.5) {
+			layers.values().forEach(layer -> {
+				Set<Set<Vertex>> regions = calculateRegions(layer);
+				regions.forEach(region -> {
+					double force = calculateForce(region, acyclicEdges);
+					region.forEach(vertex -> {
+						if (force < 0) {
+							Vertex leftVertex = null;
+							if (layer.indexOf(vertex) >= 1) {
+								leftVertex = layer.get(layer.indexOf(vertex) - 1);
+							}
+							if (leftVertex != null
+									&& vertex.getLeftX() - leftVertex.getRightX() - 5 < Math.abs(force)) {
+								vertex.relocate(vertex.getLayoutX() - (vertex.getLeftX() - leftVertex.getRightX() - 5),
+										vertex.getLayoutY());
+							} else {
+								vertex.relocate(vertex.getLayoutX() + force, vertex.getLayoutY());
+							}
+						} else {
+							Vertex rightVertex = null;
+							if (layer.indexOf(vertex) < layer.size() - 1) {
+								rightVertex = layer.get(layer.indexOf(vertex) + 1);
+							}
+							if (rightVertex != null && rightVertex.getLeftX() - vertex.getRightX() - 5 < force) {
+								vertex.relocate(vertex.getLayoutX() + (rightVertex.getLeftX() - vertex.getRightX() - 5),
+										vertex.getLayoutY());
+							} else {
+								vertex.relocate(vertex.getLayoutX() + force, vertex.getLayoutY());
+							}
+						}
+					});
+				});
+			});
+
+			deviationBefore = deviationAfter;
+			deviationAfter = calculateDeviationFromOptimum(vertexLayerMap.keySet(), acyclicEdges);
+		}
+	}
+
+	/**
+	 * Calculates the rubber band force of a region as described in 'Graph layout
+	 * for applications in compiler construction'.
+	 * 
+	 * <p>
+	 * (Georg Sander, 'Graph layout for applications in compiler construction'.
+	 * Technical Report A/01/96, FB 14 Informatik, Universität des Saarlandes, 1996,
+	 * p. 193.)
+	 * 
+	 */
+	private double calculateForce(Set<Vertex> region, Set<Edge> acyclicEdges) {
+		double force = 0;
+
+		for (Vertex vertex : region) {
+			force += calculateForce(vertex, acyclicEdges);
+		}
+		force /= region.size();
+
+		return force;
+	}
+
+	/**
+	 * Calculates the rubber band force of a vertex as described in 'Graph layout
+	 * for applications in compiler construction'.
+	 * 
+	 * <p>
+	 * (Georg Sander, 'Graph layout for applications in compiler construction'.
+	 * Technical Report A/01/96, FB 14 Informatik, Universität des Saarlandes, 1996,
+	 * p. 192.)
+	 * 
+	 */
+	private double calculateForce(Vertex vertex, Set<Edge> acyclicEdges) {
+		double force = 0;
+
+		for (Edge edge : getIncomingEdges(vertex, acyclicEdges)) {
+			force += edge.getSource().getCenterX() - vertex.getCenterX();
+		}
+		for (Edge edge : getOutgoingEdges(vertex, acyclicEdges)) {
+			force += edge.getTarget().getCenterX() - vertex.getCenterX();
+		}
+		force /= degree(vertex, acyclicEdges);
+
+		return force;
+	}
+
+	/**
+	 * Calculates vertex regions as defined in 'Graph layout for applications in
+	 * compiler construction'.
+	 * 
+	 * <p>
+	 * (Georg Sander, 'Graph layout for applications in compiler construction'.
+	 * Technical Report A/01/96, FB 14 Informatik, Universität des Saarlandes, 1996,
+	 * pp. 192-193.)
+	 * 
+	 */
+	private Set<Set<Vertex>> calculateRegions(List<Vertex> layer) {
+		Set<Set<Vertex>> regions = new HashSet<>();
+		Set<Vertex> region = new HashSet<>();
+
+		Vertex lastVertex = layer.get(0);
+		region.add(lastVertex);
+		for (int i = 1; i < layer.size(); i++) {
+			Vertex thisVertex = layer.get(i);
+			if (thisVertex.getLeftX() - lastVertex.getRightX() > 5) {
+				regions.add(region);
+				region = new HashSet<>();
+			}
+			region.add(thisVertex);
+		}
+
+		regions.add(region);
+		return regions;
+	}
+
+	/**
+	 * Calculates the derivation from the overall optimum vertex placement as
+	 * described in 'Graph layout for applications in compiler construction'.
+	 * 
+	 * <p>
+	 * (Georg Sander, 'Graph layout for applications in compiler construction'.
+	 * Technical Report A/01/96, FB 14 Informatik, Universität des Saarlandes, 1996,
+	 * p. 192.)
+	 * 
+	 */
+	private double calculateDeviationFromOptimum(Set<Vertex> vertices, Set<Edge> acyclicEdges) {
+		double deviation = 0;
+		for (Vertex vertex : vertices) {
+			double partDeviation = 0;
+			for (Edge edge : getIncomingEdges(vertex, acyclicEdges)) {
+				partDeviation += edge.getSource().getCenterX() - vertex.getCenterX();
+			}
+			for (Edge edge : getOutgoingEdges(vertex, acyclicEdges)) {
+				partDeviation += edge.getTarget().getCenterX() - vertex.getCenterX();
+			}
+			deviation += Math.abs(partDeviation);
+		}
+		return deviation;
 	}
 
 	/**
@@ -194,7 +358,7 @@ public class LayeredLayout implements Layout {
 	 * <p>
 	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
 	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
-	 * Wagner, Springer, 2001, p. 101-112.)
+	 * Wagner, Springer, 2001, pp. 101-112.)
 	 *
 	 * Reduces the crossings of edges between the layers.
 	 * 
@@ -217,6 +381,19 @@ public class LayeredLayout implements Layout {
 		}
 	}
 
+	/**
+	 * Implementation based on section "5.4 Crossing Reduction" in 'Drawing Graphs:
+	 * Methods and Models' and uses in particular the "Barycenter Heuristic"
+	 * described on page 103.
+	 * 
+	 * <p>
+	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
+	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
+	 * Wagner, Springer, 2001, pp. 101-112.)
+	 *
+	 * Reduces the crossings of edges between the layers.
+	 * 
+	 */
 	private void permuteLayer(SortedMap<Integer, List<Vertex>> layers, Set<Edge> acyclicEdges, int fixedLayerNr,
 			int permuteLayerNr) {
 		List<Vertex> fixedLayer = layers.get(fixedLayerNr);
