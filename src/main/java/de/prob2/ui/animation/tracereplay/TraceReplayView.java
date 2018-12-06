@@ -1,7 +1,6 @@
 package de.prob2.ui.animation.tracereplay;
 
 import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
