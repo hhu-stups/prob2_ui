@@ -27,11 +27,15 @@ import de.prob2.ui.visualisation.magiclayout.graph.Vertex;
  */
 public class LayeredLayout implements Layout {
 
+	private Set<Edge> reversedEdges;
+	private Map<Edge, Set<Edge>> splittedEdges;
+	private Map<Vertex, Integer> vertexLayerMap;
+
 	@Override
 	public void drawGraph(Graph graph) {
 		Set<Edge> acyclicEdges = removeCycles(graph.getModel());
 		NavigableMap<Integer, List<Vertex>> layers = assignLayers(graph.getModel().getVertices(), acyclicEdges);
-		// addDummyVertices();
+
 		reduceCrossing(layers, acyclicEdges);
 
 		double y = 0;
@@ -39,7 +43,10 @@ public class LayeredLayout implements Layout {
 			double x = 0;
 			double maxHeight = 0;
 			for (Vertex vertex : layer.getValue()) {
-				vertex.relocate(x, y);
+				if (!graph.getChildren().contains(vertex)) {
+					graph.getChildren().add(vertex);
+				}
+				vertex.relocate(x, y - vertex.getHeight() / 2);
 				x += vertex.getWidth() + 10;
 				if (vertex.getHeight() > maxHeight) {
 					maxHeight = vertex.getHeight();
@@ -47,6 +54,16 @@ public class LayeredLayout implements Layout {
 			}
 			y += (maxHeight * 2);
 		}
+
+		splittedEdges.forEach((edge, partEdges) -> {
+			if (reversedEdges.contains(edge)) {
+				partEdges = reverseEdges(partEdges);
+			}
+			graph.getChildren().remove(edge);
+			partEdges.forEach(partEdge -> {
+				graph.getChildren().add(partEdge);
+			});
+		});
 
 //		assignHorizontalCoordinates();
 //		positionEdges();
@@ -84,28 +101,56 @@ public class LayeredLayout implements Layout {
 			}
 		});
 
-		acyclicEdges.addAll(reverseEdges(removedEdges));
+		reversedEdges = reverseEdges(removedEdges);
+		acyclicEdges.addAll(reversedEdges);
 
 		return acyclicEdges;
 	}
 
 	private NavigableMap<Integer, List<Vertex>> assignLayers(Set<Vertex> vertices, Set<Edge> acyclicEdges) {
-		Map<Vertex, Integer> layers = new HashMap<>();
+		vertexLayerMap = new HashMap<>();
 
 		vertices.forEach(vertex -> {
-			if (!layers.containsKey(vertex)) {
-				calculateLayer(vertex, layers, acyclicEdges);
+			if (!vertexLayerMap.containsKey(vertex)) {
+				calculateLayer(vertex, vertexLayerMap, acyclicEdges);
 			}
 		});
 
+		addDummyVertices(vertexLayerMap, acyclicEdges);
+
 		NavigableMap<Integer, List<Vertex>> layerLists = new TreeMap<>();
-		layers.forEach((vertex, layerNr) -> {
+		vertexLayerMap.forEach((vertex, layerNr) -> {
 			if (layerLists.get(layerNr) == null) {
 				layerLists.put(layerNr, new ArrayList<>());
 			}
 			layerLists.get(layerNr).add(vertex);
 		});
 		return layerLists;
+	}
+
+	private void addDummyVertices(Map<Vertex, Integer> layers, Set<Edge> acyclicEdges) {
+		splittedEdges = new HashMap<>();
+		Set<Edge> newEdges = new HashSet<>();
+		acyclicEdges.forEach(edge -> {
+			int sourceLayer = layers.get(edge.getSource());
+			int targetLayer = layers.get(edge.getTarget());
+			if (sourceLayer - targetLayer > 1) {
+				Set<Edge> partEdges = new HashSet<>();
+				Vertex target = edge.getTarget();
+				for (int l = targetLayer + 1; l < sourceLayer; l++) {
+					Vertex source = new Vertex("");
+					layers.put(source, l);
+					partEdges.add(new Edge(source, target, edge.getCaption()));
+					target = source;
+				}
+				partEdges.add(new Edge(edge.getSource(), target, edge.getCaption()));
+				splittedEdges.put(edge, partEdges);
+				newEdges.addAll(partEdges);
+			}
+		});
+
+		acyclicEdges.removeAll(splittedEdges.keySet());
+		acyclicEdges.addAll(newEdges);
 	}
 
 	/**
@@ -156,42 +201,53 @@ public class LayeredLayout implements Layout {
 	 */
 	private void reduceCrossing(SortedMap<Integer, List<Vertex>> layers, Set<Edge> acyclicEdges) {
 		int fixedLayerNr = 0;
-		int permuteLayerNr = 1;
-
+		int permuteLayerNr = fixedLayerNr + 1;
 		while (layers.containsKey(permuteLayerNr)) {
-			List<Vertex> fixedLayer = layers.get(fixedLayerNr);
-			List<Vertex> permuteLayer = layers.get(permuteLayerNr);
-
-			SortedMap<Double, Vertex> baryMap = new TreeMap<>();
-			permuteLayer.forEach(vertex -> {
-				// compute the subset of edges between the specified vertex and the fixed layer
-				Set<Edge> edgesToFixedLayer = new HashSet<>();
-				getOutgoingEdges(vertex, acyclicEdges).forEach(edge -> {
-					if (fixedLayer.contains(edge.getTarget())) {
-						edgesToFixedLayer.add(edge);
-					}
-				});
-				getIncomingEdges(vertex, acyclicEdges).forEach(edge -> {
-					if (fixedLayer.contains(edge.getSource())) {
-						edgesToFixedLayer.add(edge);
-					}
-				});
-
-				double bary = calculateBarycenter(vertex, edgesToFixedLayer, fixedLayer);
-				while (baryMap.containsKey(bary)) {
-					bary += 0.0001;
-				}
-				baryMap.put(bary, vertex);
-			});
-
-			List<Vertex> permutedLayer = new ArrayList<>();
-			baryMap.values().forEach(vertex -> permutedLayer.add(vertex));
-
-			layers.put(permuteLayerNr, permutedLayer);
-
+			permuteLayer(layers, acyclicEdges, fixedLayerNr, permuteLayerNr);
 			fixedLayerNr++;
 			permuteLayerNr++;
 		}
+
+		fixedLayerNr = layers.lastKey();
+		permuteLayerNr = fixedLayerNr - 1;
+		while (layers.containsKey(permuteLayerNr)) {
+			permuteLayer(layers, acyclicEdges, fixedLayerNr, permuteLayerNr);
+			fixedLayerNr--;
+			permuteLayerNr--;
+		}
+	}
+
+	private void permuteLayer(SortedMap<Integer, List<Vertex>> layers, Set<Edge> acyclicEdges, int fixedLayerNr,
+			int permuteLayerNr) {
+		List<Vertex> fixedLayer = layers.get(fixedLayerNr);
+		List<Vertex> permuteLayer = layers.get(permuteLayerNr);
+
+		SortedMap<Double, Vertex> baryMap = new TreeMap<>();
+		permuteLayer.forEach(vertex -> {
+			// compute the subset of edges between the specified vertex and the fixed layer
+			Set<Edge> edgesToFixedLayer = new HashSet<>();
+			getOutgoingEdges(vertex, acyclicEdges).forEach(edge -> {
+				if (fixedLayer.contains(edge.getTarget())) {
+					edgesToFixedLayer.add(edge);
+				}
+			});
+			getIncomingEdges(vertex, acyclicEdges).forEach(edge -> {
+				if (fixedLayer.contains(edge.getSource())) {
+					edgesToFixedLayer.add(edge);
+				}
+			});
+
+			double bary = calculateBarycenter(vertex, edgesToFixedLayer, fixedLayer);
+			while (baryMap.containsKey(bary)) {
+				bary += 0.0001;
+			}
+			baryMap.put(bary, vertex);
+		});
+
+		List<Vertex> permutedLayer = new ArrayList<>();
+		baryMap.values().forEach(vertex -> permutedLayer.add(vertex));
+
+		layers.put(permuteLayerNr, permutedLayer);
 	}
 
 	/**
@@ -243,7 +299,7 @@ public class LayeredLayout implements Layout {
 		Set<Edge> reversedEdges = new HashSet<>();
 
 		edges.forEach(edge -> {
-			reversedEdges.add(new Edge(edge.getTarget(), edge.getSource(), ""));
+			reversedEdges.add(new Edge(edge.getTarget(), edge.getSource(), edge.getCaption()));
 		});
 
 		return reversedEdges;
