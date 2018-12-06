@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -246,7 +247,7 @@ public class FullValueStage extends Stage {
 		
 		try (
 			final OutputStream os = new FileOutputStream(selected);
-			final Writer out = new OutputStreamWriter(os, Charset.forName("UTF-8"))
+			final Writer out = new OutputStreamWriter(os, StandardCharsets.UTF_8)
 		) {
 			final String value;
 			if (currentValueTab.isSelected()) {

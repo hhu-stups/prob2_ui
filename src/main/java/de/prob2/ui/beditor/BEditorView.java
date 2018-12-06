@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -51,7 +52,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class BEditorView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditorView.class);
-	private static final Charset EDITOR_CHARSET = Charset.forName("UTF-8");
+	private static final Charset EDITOR_CHARSET = StandardCharsets.UTF_8;
 
 	@FXML private Button saveButton;
 	@FXML private Button openExternalButton;

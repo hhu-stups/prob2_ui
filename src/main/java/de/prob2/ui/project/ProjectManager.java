@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class ProjectManager {
-	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
+	private static final Charset PROJECT_CHARSET = StandardCharsets.UTF_8;
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
 	private static final String PROJECT_FILE_ENDING = ".prob2project";
 
