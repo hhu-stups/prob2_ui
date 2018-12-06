@@ -33,8 +33,7 @@ public class Vertex extends StackPane {
 		public Style() {
 		}
 
-		public Style(Color color, Color lineColor, Double lineWidth, List<Double> lineType,
-				Color textColor) {
+		public Style(Color color, Color lineColor, Double lineWidth, List<Double> lineType, Color textColor) {
 			this.color = color;
 			this.lineColor = lineColor;
 			this.lineWidth = lineWidth;
@@ -45,7 +44,7 @@ public class Vertex extends StackPane {
 
 	private Text txt;
 	private Shape shape;
-	
+
 	private Type type;
 	private Style style = new Style();
 
@@ -69,7 +68,7 @@ public class Vertex extends StackPane {
 			this.setLayoutY(this.getLayoutY() + event.getY() - this.getHeight() / 2);
 		});
 	}
-	
+
 	public String getCaption() {
 		return txt.getText();
 	}
@@ -124,10 +123,10 @@ public class Vertex extends StackPane {
 
 	public void setType(Type type) {
 		this.type = type;
-		
+
 		Double txtWidth = txt.getLayoutBounds().getWidth();
 		Double txtHeight = txt.getLayoutBounds().getHeight();
-		
+
 		switch (type) {
 		case RECTANGLE:
 			shape = new Rectangle(txtWidth + 20, txtHeight + 10);
@@ -144,24 +143,26 @@ public class Vertex extends StackPane {
 		default:
 			shape = new Circle((txtWidth + 20) / 2);
 		}
-		
+
 		setStyle(this.style);
-		
+
 		this.setWidth(shape.getLayoutBounds().getWidth());
 		this.setHeight(shape.getLayoutBounds().getHeight());
-		
+
+		// relocate vertex so that its center stays the same
+		this.relocate(getCenterX() - getWidth() / 2, getCenterY() - getHeight() / 2);
+
 		this.getChildren().setAll(shape, txt);
-		
 		updateProperties();
 	}
-	
+
 	public Type getType() {
 		return type;
 	}
-	
+
 	public void setStyle(Style style) {
 		this.style = style;
-		
+
 		txt.setFill(style.textColor);
 
 		shape.setFill(style.color);
@@ -177,8 +178,8 @@ public class Vertex extends StackPane {
 		centerY.set(getLayoutY() + shape.getLayoutBounds().getHeight() / 2);
 		topY.set(getLayoutY());
 		bottomY.set(getLayoutY() + shape.getLayoutBounds().getHeight());
-		
-		if(this.type == Type.TRIANGLE) {
+
+		if (this.type == Type.TRIANGLE) {
 			leftX.set(getLayoutX() + shape.getLayoutBounds().getWidth() / 4);
 			rightX.set(getLayoutX() + shape.getLayoutBounds().getWidth() * 3 / 4);
 		} else {
