@@ -67,7 +67,7 @@ public final class Config {
 		Console.ConfigData bConsoleSettings;
 		String guiState;
 		List<String> visibleStages;
-		Map<String, double[]> stageBoxes;
+		Map<String, BoundingBox> stageBoxes;
 		String currentPreference;
 		String currentMainTab;
 		String currentVerificationTab;
@@ -279,10 +279,7 @@ public final class Config {
 		this.uiState.getSavedVisibleStages().clear();
 		this.uiState.getSavedVisibleStages().addAll(configData.visibleStages);
 
-		for (final Map.Entry<String, double[]> entry : configData.stageBoxes.entrySet()) {
-			final double[] v = entry.getValue();
-			this.uiState.getSavedStageBoxes().put(entry.getKey(), new BoundingBox(v[0], v[1], v[2], v[3]));
-		}
+		this.uiState.getSavedStageBoxes().putAll(configData.stageBoxes);
 
 		for (String pane : configData.expandedTitledPanes) {
 			this.uiState.getExpandedTitledPanes().add(pane);
@@ -326,11 +323,7 @@ public final class Config {
 		configData.localeOverride = this.uiState.getLocaleOverride();
 		configData.guiState = this.uiState.getGuiState();
 		configData.visibleStages = new ArrayList<>(this.uiState.getSavedVisibleStages());
-		configData.stageBoxes = new HashMap<>();
-		for (final Map.Entry<String, BoundingBox> entry : this.uiState.getSavedStageBoxes().entrySet()) {
-			configData.stageBoxes.put(entry.getKey(), new double[] { entry.getValue().getMinX(),
-					entry.getValue().getMinY(), entry.getValue().getWidth(), entry.getValue().getHeight(), });
-		}
+		configData.stageBoxes = new HashMap<>(this.uiState.getSavedStageBoxes());
 		configData.maxRecentProjects = this.recentProjects.getMaximum();
 		configData.recentProjects = new ArrayList<>(this.recentProjects);
 		configData.fontSize = injector.getInstance(FontSize.class).getFontSize();
