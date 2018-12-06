@@ -8,9 +8,7 @@ import com.google.inject.Singleton;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Control;
 import javafx.scene.control.TableColumnBase;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
@@ -36,12 +34,7 @@ public final class TablePersistenceHandler {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void setColumnsWidth(Control control, ObservableList<? extends TableColumnBase<?, ?>> columns) {
-		if (!(control instanceof TreeTableView || control instanceof TableView)) {
-			return;
-		}
-
+	public <S> void setColumnsWidth(TreeTableView<S> tableView, ObservableList<TreeTableColumn<S, ?>> columns) {
 		double[] widths = uiState.getStatesViewColumnsWidth();
 		double sum = 0.0;
 		for (final TableColumnBase<?, ?> column : columns) {
@@ -49,22 +42,18 @@ public final class TablePersistenceHandler {
 		}
 
 		for (int i = 0; i < columns.size() - 1; i++) {
-			((TreeTableView<Object>) control).resizeColumn((TreeTableColumn<Object, ?>) columns.get(i),
-					widths[i] * sum - columns.get(i).getWidth());
+			tableView.resizeColumn(columns.get(i), widths[i] * sum - columns.get(i).getWidth());
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public void setColumnsOrder(ObservableList<? extends TableColumnBase<?, ?>> columns) {
-		ObservableList<TableColumnBase<?, ?>> newColumns = FXCollections.observableArrayList();
+	public <S> void setColumnsOrder(ObservableList<TreeTableColumn<S, ?>> columns) {
+		ObservableList<TreeTableColumn<S, ?>> newColumns = FXCollections.observableArrayList();
 		for (final String text : uiState.getStatesViewColumnsOrder()) {
 			newColumns.addAll(columns.stream().filter(column -> column.getId().equals(text)).collect(Collectors.toList()));
 		}
 
 		columns.stream().filter(column -> !newColumns.contains(column)).forEach(newColumns::add);
-
-		columns.clear();
-		((ObservableList<TableColumnBase<?, ?>>) columns).addAll(newColumns);
+		columns.setAll(newColumns);
 	}
 
 	public String[] getColumnsOrder(List<? extends TableColumnBase<?, ?>> columns) {
