@@ -46,8 +46,6 @@ public class Edge extends Group {
 
 	private DoubleProperty distanceX = new SimpleDoubleProperty();
 	private DoubleProperty distanceY = new SimpleDoubleProperty();
-	private DoubleProperty centerX = new SimpleDoubleProperty();
-	private DoubleProperty centerY = new SimpleDoubleProperty();
 
 	public Edge(Vertex source, Vertex target, String caption) {
 		this.source = source;
@@ -61,24 +59,24 @@ public class Edge extends Group {
 		this.getChildren().addAll(line, arrowhead, txt);
 
 		// init Properties
-		// when the line moves, also move the text
-		txt.layoutXProperty().bind(centerX);
-		txt.layoutYProperty().bind(centerY);
-
-		// when the line start or end point changes, update the distance and center properties
+		// when the line start or end point changes, update the distance, also move the
+		// text
 		ChangeListener<? super Number> lineChangeListener = (observable, from, to) -> {
 			distanceX.set(Math.abs(line.getStartX() - line.getEndX()));
 			distanceY.set(Math.abs(line.getStartY() - line.getEndY()));
-			centerX.set(distanceX.get() / 2 + (line.getStartX() < line.getEndX() ? line.getStartX() : line.getEndX())
-					- txt.getWidth() / 2);
-			centerY.set(distanceY.get() / 2 + (line.getStartY() < line.getEndY() ? line.getStartY() : line.getEndY())
-					- txt.getHeight() / 2);
+
+			// move text to center of line
+			double textLayoutX = (distanceX.get() / 2
+					+ (line.getStartX() < line.getEndX() ? line.getStartX() : line.getEndX()) - txt.getWidth() / 2);
+			double textLayoutY = (distanceY.get() / 2
+					+ (line.getStartY() < line.getEndY() ? line.getStartY() : line.getEndY()) - txt.getHeight() / 2);
+			txt.relocate(textLayoutX, textLayoutY);
 
 			// set arrowPoints depending on line end
 			arrowhead.getPoints().setAll(line.getEndX(), line.getEndY(), line.getEndX(), line.getEndY() + 10,
 					line.getEndX() + Math.sqrt(3) * 5, line.getEndY() + 5);
 
-			// rotate txt and arrowhead to point to target node
+			// rotate text and arrowhead to point to target node
 			Double xDiff = line.getEndX() - line.getStartX();
 			Double yDiff = line.getEndY() - line.getStartY();
 			Double rotationDegrees = Math.acos(yDiff / Math.sqrt(xDiff * xDiff + yDiff * yDiff)) * 360 / (2 * Math.PI);
@@ -93,7 +91,7 @@ public class Edge extends Group {
 			arrowhead.getTransforms().setAll(rotation);
 		};
 
-		// makes sure the txt is repositioned once its width is set
+		// makes sure the text is repositioned once its width is set
 		txt.widthProperty().addListener(lineChangeListener);
 
 		line.startXProperty().addListener(lineChangeListener);
