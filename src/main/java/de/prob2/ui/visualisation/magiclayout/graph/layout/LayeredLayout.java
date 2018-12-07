@@ -41,25 +41,9 @@ public class LayeredLayout implements Layout {
 	public void drawGraph(Graph graph) {
 		Set<Edge> acyclicEdges = removeCycles(graph.getModel());
 		NavigableMap<Integer, List<Vertex>> layers = assignLayers(graph.getModel().getVertices(), acyclicEdges);
-
 		reduceCrossing(layers, acyclicEdges);
-
-		double y = 0;
-		for (Entry<Integer, List<Vertex>> layer : layers.descendingMap().entrySet()) {
-			double x = 0;
-			double maxHeight = 0;
-			for (Vertex vertex : layer.getValue()) {
-				if (!graph.getChildren().contains(vertex)) {
-					graph.getChildren().add(vertex);
-				}
-				vertex.relocate(x, y - vertex.getHeight() / 2);
-				x += vertex.getWidth() + 50;
-				if (vertex.getHeight() > maxHeight) {
-					maxHeight = vertex.getHeight();
-				}
-			}
-			y += (maxHeight * 2);
-		}
+		assignVerticalCoordinates(layers);
+		assignHorizontalCoordinates(layers, acyclicEdges);
 
 		splittedEdges.forEach((edge, partEdges) -> {
 			if (reversedEdges.contains(edge)) {
@@ -70,10 +54,254 @@ public class LayeredLayout implements Layout {
 				graph.getChildren().add(partEdge);
 			});
 		});
-
-		assignHorizontalCoordinates(layers, acyclicEdges);
-
 //		positionEdges();
+	}
+
+	/**
+	 * Implementation based on "Algorithm 8: A Greedy Algorithm" in 'Drawing Graphs:
+	 * Methods and Models'.
+	 * 
+	 * <p>
+	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
+	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
+	 * Wagner, Springer, 2001, p. 91.)
+	 * 
+	 * <p>
+	 * Computes a subset of edges of the specified model, which does not contain any
+	 * cycles. To not loose any information, weather two vertices are connected, the
+	 * edges which would create a cycle are reversed.
+	 * 
+	 */
+	private Set<Edge> removeCycles(Model model) {
+		Set<Edge> removedEdges = new HashSet<>(model.getEdges());
+		Set<Edge> acyclicEdges = new HashSet<>();
+
+		model.getVertices().forEach(vertex -> {
+			Set<Edge> incomingEdges = getIncomingEdges(vertex, model.getEdges());
+			Set<Edge> outgoingEdges = getOutgoingEdges(vertex, model.getEdges());
+
+			if (outgoingEdges.size() >= incomingEdges.size()) {
+				acyclicEdges.addAll(outgoingEdges);
+				removedEdges.removeAll(outgoingEdges);
+			} else {
+				acyclicEdges.addAll(incomingEdges);
+				removedEdges.removeAll(incomingEdges);
+			}
+		});
+
+		reversedEdges = reverseEdges(removedEdges);
+		acyclicEdges.addAll(reversedEdges);
+
+		return acyclicEdges;
+	}
+
+	private NavigableMap<Integer, List<Vertex>> assignLayers(Set<Vertex> vertices, Set<Edge> acyclicEdges) {
+		vertexLayerMap = new HashMap<>();
+
+		vertices.forEach(vertex -> {
+			if (!vertexLayerMap.containsKey(vertex)) {
+				calculateLayer(vertex, acyclicEdges);
+			}
+		});
+
+		addDummyVertices(vertexLayerMap, acyclicEdges);
+
+		NavigableMap<Integer, List<Vertex>> layerLists = new TreeMap<>();
+		vertexLayerMap.forEach((vertex, layerNr) -> {
+			if (layerLists.get(layerNr) == null) {
+				layerLists.put(layerNr, new ArrayList<>());
+			}
+			layerLists.get(layerNr).add(vertex);
+		});
+		return layerLists;
+	}
+
+	private void addDummyVertices(Map<Vertex, Integer> layers, Set<Edge> acyclicEdges) {
+		splittedEdges = new HashMap<>();
+		Set<Edge> newEdges = new HashSet<>();
+		acyclicEdges.forEach(edge -> {
+			int sourceLayer = layers.get(edge.getSource());
+			int targetLayer = layers.get(edge.getTarget());
+			if (sourceLayer - targetLayer > 1) {
+				Set<Edge> partEdges = new HashSet<>();
+				Vertex target = edge.getTarget();
+				for (int l = targetLayer + 1; l < sourceLayer; l++) {
+					Vertex source = new Vertex("");
+					source.setType(Vertex.Type.DUMMY);
+					layers.put(source, l);
+					partEdges.add(new Edge(source, target, edge.getCaption()));
+					target = source;
+				}
+				partEdges.add(new Edge(edge.getSource(), target, edge.getCaption()));
+				splittedEdges.put(edge, partEdges);
+				newEdges.addAll(partEdges);
+			}
+		});
+
+		acyclicEdges.removeAll(splittedEdges.keySet());
+		acyclicEdges.addAll(newEdges);
+	}
+
+	/**
+	 * Implementation based on section "5.3.2 Minimizing the Height" in 'Drawing
+	 * Graphs: Methods and Models'.
+	 * 
+	 * <p>
+	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
+	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
+	 * Wagner, Springer, 2001, p. 98.)
+	 *
+	 * Recursively assigns a layer to each vertex based on its longest path to a
+	 * sink. Sinks are assigned to layer 0. Adds the vertex together with the
+	 * calculated layer to the vertexLayerMap.
+	 * 
+	 */
+	private int calculateLayer(Vertex vertex, Set<Edge> edges) {
+		if (vertexLayerMap.containsKey(vertex)) {
+			return vertexLayerMap.get(vertex);
+		}
+
+		if (isSink(vertex, edges)) {
+			vertexLayerMap.put(vertex, 0);
+			return 0;
+		}
+
+		Integer layer = 0;
+		Set<Vertex> succesors = getSuccessors(vertex, edges);
+		for (Vertex succ : succesors) {
+			int succLayer = calculateLayer(succ, edges);
+
+			if (succLayer > layer) {
+				layer = succLayer;
+			}
+		}
+
+		vertexLayerMap.put(vertex, layer + 1);
+		return layer + 1;
+	}
+
+	/**
+	 * Implementation based on section "5.4 Crossing Reduction" in 'Drawing Graphs:
+	 * Methods and Models' and uses in particular the "Barycenter Heuristic"
+	 * described on page 103.
+	 * 
+	 * <p>
+	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
+	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
+	 * Wagner, Springer, 2001, pp. 101-112.)
+	 *
+	 * Reduces the crossings of edges between the layers.
+	 * 
+	 */
+	private void reduceCrossing(SortedMap<Integer, List<Vertex>> layers, Set<Edge> acyclicEdges) {
+		int fixedLayerNr = 0;
+		int permuteLayerNr = fixedLayerNr + 1;
+		while (layers.containsKey(permuteLayerNr)) {
+			permuteLayer(layers, acyclicEdges, fixedLayerNr, permuteLayerNr);
+			fixedLayerNr++;
+			permuteLayerNr++;
+		}
+
+		fixedLayerNr = layers.lastKey();
+		permuteLayerNr = fixedLayerNr - 1;
+		while (layers.containsKey(permuteLayerNr)) {
+			permuteLayer(layers, acyclicEdges, fixedLayerNr, permuteLayerNr);
+			fixedLayerNr--;
+			permuteLayerNr--;
+		}
+	}
+
+	/**
+	 * Implementation based on section "5.4 Crossing Reduction" in 'Drawing Graphs:
+	 * Methods and Models' and uses in particular the "Barycenter Heuristic"
+	 * described on page 103.
+	 * 
+	 * <p>
+	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
+	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
+	 * Wagner, Springer, 2001, pp. 101-112.)
+	 *
+	 * Reduces the crossings of edges between the layers.
+	 * 
+	 */
+	private void permuteLayer(SortedMap<Integer, List<Vertex>> layers, Set<Edge> acyclicEdges, int fixedLayerNr,
+			int permuteLayerNr) {
+		List<Vertex> fixedLayer = layers.get(fixedLayerNr);
+		List<Vertex> permuteLayer = layers.get(permuteLayerNr);
+
+		SortedMap<Double, Vertex> baryMap = new TreeMap<>();
+		permuteLayer.forEach(vertex -> {
+			// compute the subset of edges between the specified vertex and the fixed layer
+			Set<Edge> edgesToFixedLayer = new HashSet<>();
+			getOutgoingEdges(vertex, acyclicEdges).forEach(edge -> {
+				if (fixedLayer.contains(edge.getTarget())) {
+					edgesToFixedLayer.add(edge);
+				}
+			});
+			getIncomingEdges(vertex, acyclicEdges).forEach(edge -> {
+				if (fixedLayer.contains(edge.getSource())) {
+					edgesToFixedLayer.add(edge);
+				}
+			});
+
+			Double bary = calculateBarycenter(vertex, edgesToFixedLayer, fixedLayer);
+			if (bary.equals(Double.NaN)) {
+				bary = 0.0;
+			}
+			while (baryMap.containsKey(bary)) {
+				bary += 0.0001;
+			}
+			baryMap.put(bary, vertex);
+		});
+
+		List<Vertex> permutedLayer = new ArrayList<>();
+		baryMap.values().forEach(vertex -> permutedLayer.add(vertex));
+
+		layers.put(permuteLayerNr, permutedLayer);
+	}
+
+	/**
+	 * Calculates the barycenter as described in section "5.4 Crossing Reduction" in
+	 * 'Drawing Graphs: Methods and Models' on page 103.
+	 * 
+	 * <p>
+	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
+	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
+	 * Wagner, Springer, 2001, p. 103.)
+	 * 
+	 */
+	private double calculateBarycenter(Vertex vertex, Set<Edge> edgesToFixedLayer, List<Vertex> fixedLayer) {
+		Set<Vertex> neighbours = getNeighbours(vertex, edgesToFixedLayer);
+
+		double bary = 0;
+		for (Vertex neighbour : neighbours) {
+			bary += fixedLayer.indexOf(neighbour);
+		}
+
+		bary /= degree(vertex, edgesToFixedLayer);
+
+		return bary;
+	}
+
+	/**
+	 * Assign y coordinates to all vertices. Also assign initial x coordinates based
+	 * on their order inside the layer and separated by a initial distance of 50.
+	 * 
+	 */
+	private void assignVerticalCoordinates(NavigableMap<Integer, List<Vertex>> layers) {
+		double y = 0;
+		for (Entry<Integer, List<Vertex>> layer : layers.descendingMap().entrySet()) {
+			double x = 0;
+			double maxHeight = 0;
+			for (Vertex vertex : layer.getValue()) {
+				vertex.relocate(x, y - vertex.getHeight() / 2);
+				x += vertex.getWidth() + 50;
+				if (vertex.getHeight() > maxHeight) {
+					maxHeight = vertex.getHeight();
+				}
+			}
+			y += (maxHeight * 2);
+		}
 	}
 
 	/**
@@ -231,223 +459,6 @@ public class LayeredLayout implements Layout {
 			deviation += Math.abs(partDeviation);
 		}
 		return deviation;
-	}
-
-	/**
-	 * Implementation based on "Algorithm 8: A Greedy Algorithm" in 'Drawing Graphs:
-	 * Methods and Models'.
-	 * 
-	 * <p>
-	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
-	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
-	 * Wagner, Springer, 2001, p. 91.)
-	 * 
-	 * <p>
-	 * Computes a subset of edges of the specified model, which does not contain any
-	 * cycles. To not loose any information, weather two vertices are connected, the
-	 * edges which would create a cycle are reversed.
-	 * 
-	 */
-	private Set<Edge> removeCycles(Model model) {
-		Set<Edge> removedEdges = new HashSet<>(model.getEdges());
-		Set<Edge> acyclicEdges = new HashSet<>();
-
-		model.getVertices().forEach(vertex -> {
-			Set<Edge> incomingEdges = getIncomingEdges(vertex, model.getEdges());
-			Set<Edge> outgoingEdges = getOutgoingEdges(vertex, model.getEdges());
-
-			if (outgoingEdges.size() >= incomingEdges.size()) {
-				acyclicEdges.addAll(outgoingEdges);
-				removedEdges.removeAll(outgoingEdges);
-			} else {
-				acyclicEdges.addAll(incomingEdges);
-				removedEdges.removeAll(incomingEdges);
-			}
-		});
-
-		reversedEdges = reverseEdges(removedEdges);
-		acyclicEdges.addAll(reversedEdges);
-
-		return acyclicEdges;
-	}
-
-	private NavigableMap<Integer, List<Vertex>> assignLayers(Set<Vertex> vertices, Set<Edge> acyclicEdges) {
-		vertexLayerMap = new HashMap<>();
-
-		vertices.forEach(vertex -> {
-			if (!vertexLayerMap.containsKey(vertex)) {
-				calculateLayer(vertex, vertexLayerMap, acyclicEdges);
-			}
-		});
-
-		addDummyVertices(vertexLayerMap, acyclicEdges);
-
-		NavigableMap<Integer, List<Vertex>> layerLists = new TreeMap<>();
-		vertexLayerMap.forEach((vertex, layerNr) -> {
-			if (layerLists.get(layerNr) == null) {
-				layerLists.put(layerNr, new ArrayList<>());
-			}
-			layerLists.get(layerNr).add(vertex);
-		});
-		return layerLists;
-	}
-
-	private void addDummyVertices(Map<Vertex, Integer> layers, Set<Edge> acyclicEdges) {
-		splittedEdges = new HashMap<>();
-		Set<Edge> newEdges = new HashSet<>();
-		acyclicEdges.forEach(edge -> {
-			int sourceLayer = layers.get(edge.getSource());
-			int targetLayer = layers.get(edge.getTarget());
-			if (sourceLayer - targetLayer > 1) {
-				Set<Edge> partEdges = new HashSet<>();
-				Vertex target = edge.getTarget();
-				for (int l = targetLayer + 1; l < sourceLayer; l++) {
-					Vertex source = new Vertex("");
-					layers.put(source, l);
-					partEdges.add(new Edge(source, target, edge.getCaption()));
-					target = source;
-				}
-				partEdges.add(new Edge(edge.getSource(), target, edge.getCaption()));
-				splittedEdges.put(edge, partEdges);
-				newEdges.addAll(partEdges);
-			}
-		});
-
-		acyclicEdges.removeAll(splittedEdges.keySet());
-		acyclicEdges.addAll(newEdges);
-	}
-
-	/**
-	 * Implementation based on section "5.3.2 Minimizing the Height" in 'Drawing
-	 * Graphs: Methods and Models'.
-	 * 
-	 * <p>
-	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
-	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
-	 * Wagner, Springer, 2001, p. 98.)
-	 *
-	 * Recursively assigns a layer to each vertex based on its longest path to a
-	 * sink. Sinks are assigned to layer 0.
-	 * 
-	 */
-	private void calculateLayer(Vertex vertex, Map<Vertex, Integer> layers, Set<Edge> acyclicEdges) {
-		if (isSink(vertex, acyclicEdges)) {
-			layers.put(vertex, 0);
-			return;
-		}
-
-		Integer layer = 0;
-		Set<Vertex> succesors = getSuccessors(vertex, acyclicEdges);
-		for (Vertex succ : succesors) {
-			if (!layers.containsKey(succ)) {
-				calculateLayer(succ, layers, acyclicEdges);
-			}
-
-			if (layers.get(succ) > layer) {
-				layer = layers.get(succ);
-			}
-		}
-		layers.put(vertex, layer + 1);
-	}
-
-	/**
-	 * Implementation based on section "5.4 Crossing Reduction" in 'Drawing Graphs:
-	 * Methods and Models' and uses in particular the "Barycenter Heuristic"
-	 * described on page 103.
-	 * 
-	 * <p>
-	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
-	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
-	 * Wagner, Springer, 2001, pp. 101-112.)
-	 *
-	 * Reduces the crossings of edges between the layers.
-	 * 
-	 */
-	private void reduceCrossing(SortedMap<Integer, List<Vertex>> layers, Set<Edge> acyclicEdges) {
-		int fixedLayerNr = 0;
-		int permuteLayerNr = fixedLayerNr + 1;
-		while (layers.containsKey(permuteLayerNr)) {
-			permuteLayer(layers, acyclicEdges, fixedLayerNr, permuteLayerNr);
-			fixedLayerNr++;
-			permuteLayerNr++;
-		}
-
-		fixedLayerNr = layers.lastKey();
-		permuteLayerNr = fixedLayerNr - 1;
-		while (layers.containsKey(permuteLayerNr)) {
-			permuteLayer(layers, acyclicEdges, fixedLayerNr, permuteLayerNr);
-			fixedLayerNr--;
-			permuteLayerNr--;
-		}
-	}
-
-	/**
-	 * Implementation based on section "5.4 Crossing Reduction" in 'Drawing Graphs:
-	 * Methods and Models' and uses in particular the "Barycenter Heuristic"
-	 * described on page 103.
-	 * 
-	 * <p>
-	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
-	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
-	 * Wagner, Springer, 2001, pp. 101-112.)
-	 *
-	 * Reduces the crossings of edges between the layers.
-	 * 
-	 */
-	private void permuteLayer(SortedMap<Integer, List<Vertex>> layers, Set<Edge> acyclicEdges, int fixedLayerNr,
-			int permuteLayerNr) {
-		List<Vertex> fixedLayer = layers.get(fixedLayerNr);
-		List<Vertex> permuteLayer = layers.get(permuteLayerNr);
-
-		SortedMap<Double, Vertex> baryMap = new TreeMap<>();
-		permuteLayer.forEach(vertex -> {
-			// compute the subset of edges between the specified vertex and the fixed layer
-			Set<Edge> edgesToFixedLayer = new HashSet<>();
-			getOutgoingEdges(vertex, acyclicEdges).forEach(edge -> {
-				if (fixedLayer.contains(edge.getTarget())) {
-					edgesToFixedLayer.add(edge);
-				}
-			});
-			getIncomingEdges(vertex, acyclicEdges).forEach(edge -> {
-				if (fixedLayer.contains(edge.getSource())) {
-					edgesToFixedLayer.add(edge);
-				}
-			});
-
-			double bary = calculateBarycenter(vertex, edgesToFixedLayer, fixedLayer);
-			while (baryMap.containsKey(bary)) {
-				bary += 0.0001;
-			}
-			baryMap.put(bary, vertex);
-		});
-
-		List<Vertex> permutedLayer = new ArrayList<>();
-		baryMap.values().forEach(vertex -> permutedLayer.add(vertex));
-
-		layers.put(permuteLayerNr, permutedLayer);
-	}
-
-	/**
-	 * Calculates the barycenter as described in section "5.4 Crossing Reduction" in
-	 * 'Drawing Graphs: Methods and Models' on page 103.
-	 * 
-	 * <p>
-	 * (Oliver Bastert and Christian Matuszewski: “5. Layered Drawings of Digraphs.”
-	 * in 'Drawing Graphs: Methods and Models' by Michael Kaufmann and Dorothea
-	 * Wagner, Springer, 2001, p. 103.)
-	 * 
-	 */
-	private double calculateBarycenter(Vertex vertex, Set<Edge> edgesToFixedLayer, List<Vertex> fixedLayer) {
-		Set<Vertex> neighbours = getNeighbours(vertex, edgesToFixedLayer);
-
-		double bary = 0;
-		for (Vertex neighbour : neighbours) {
-			bary += fixedLayer.indexOf(neighbour);
-		}
-
-		bary /= degree(vertex, edgesToFixedLayer);
-
-		return bary;
 	}
 
 	private int degree(Vertex vertex, Set<Edge> edges) {

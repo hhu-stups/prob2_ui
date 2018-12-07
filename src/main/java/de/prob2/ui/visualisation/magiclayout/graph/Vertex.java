@@ -20,7 +20,7 @@ import javafx.scene.text.Text;
 public class Vertex extends StackPane {
 
 	public enum Type {
-		RECTANGLE, CIRCLE, ELLIPSE, TRIANGLE
+		RECTANGLE, CIRCLE, ELLIPSE, TRIANGLE, DUMMY
 	}
 
 	public static class Style {
@@ -140,6 +140,9 @@ public class Vertex extends StackPane {
 		case TRIANGLE:
 			shape = new Polygon(0, txtHeight + 20, (txtWidth + 30) * 2, txtHeight + 20, txtWidth + 30, 0);
 			break;
+		case DUMMY:
+			shape = new Circle(0);
+			break;
 		default:
 			shape = new Circle((txtWidth + 20) / 2);
 		}
@@ -171,6 +174,10 @@ public class Vertex extends StackPane {
 		shape.getStrokeDashArray().addAll(style.lineType);
 		shape.setStrokeLineCap(StrokeLineCap.BUTT);
 		shape.setStrokeLineJoin(StrokeLineJoin.ROUND);
+		
+		if(type == Type.DUMMY) {
+			shape.setStrokeWidth(0);
+		}
 	}
 
 	private void updateProperties() {

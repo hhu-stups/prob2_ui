@@ -7,15 +7,15 @@ public class RandomLayout implements Layout {
 
 	@Override
 	public void drawGraph(Graph graph) {
-		graph.getModel().getVertices().forEach(vertex -> placeVertex(graph, vertex));
+		graph.getModel().getVertices().forEach(vertex -> placeVertexRandom(graph, vertex));
 	}
 	
 	@Override
 	public void updateGraph(Graph graph) {
-		graph.getModel().getAddedVertices().forEach(vertex -> placeVertex(graph, vertex));
+		graph.getModel().getAddedVertices().forEach(vertex -> placeVertexRandom(graph, vertex));
 	}
 
-	private void placeVertex(Graph graph, Vertex vertex) {
+	private void placeVertexRandom(Graph graph, Vertex vertex) {
 		double x = Math.random() * 750;
 		double y = Math.random() * 500;
 

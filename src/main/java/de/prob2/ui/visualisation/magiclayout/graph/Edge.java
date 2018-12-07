@@ -170,5 +170,9 @@ public class Edge extends Group {
 		line.setStrokeLineJoin(StrokeLineJoin.ROUND);
 		txt.setTextFill(style.textColor);
 		txt.setFont(new Font(style.textSize));
+		
+		if(target.getType() == Vertex.Type.DUMMY) {
+			arrowhead.setFill(Color.TRANSPARENT);
+		}
 	}
 }
