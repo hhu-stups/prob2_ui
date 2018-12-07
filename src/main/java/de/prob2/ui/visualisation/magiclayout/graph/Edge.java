@@ -7,13 +7,13 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 
 public class Edge extends Group {
@@ -41,7 +41,7 @@ public class Edge extends Group {
 	private Vertex target;
 
 	private Line line = new Line();
-	private Text txt;
+	private Label txt;
 	private Polygon arrowhead;
 
 	private DoubleProperty distanceX = new SimpleDoubleProperty();
@@ -53,7 +53,8 @@ public class Edge extends Group {
 		this.source = source;
 		this.target = target;
 
-		this.txt = new Text(caption);
+		txt = new Label(caption);
+		txt.setStyle("-fx-background-color: white;");
 
 		arrowhead = new Polygon(0, 0, 0, 10, Math.sqrt(3) * 5, 5);
 
@@ -61,34 +62,40 @@ public class Edge extends Group {
 
 		// init Properties
 		// when the line moves, also move the text
-		centerX.addListener((observable, from, to) -> txt.relocate((double) to, centerY.get()));
-		centerY.addListener((observable, from, to) -> txt.relocate(centerX.get(), (double) to));
+		txt.layoutXProperty().bind(centerX);
+		txt.layoutYProperty().bind(centerY);
 
 		// when the line start or end point changes, update the distance and center properties
 		ChangeListener<? super Number> lineChangeListener = (observable, from, to) -> {
 			distanceX.set(Math.abs(line.getStartX() - line.getEndX()));
 			distanceY.set(Math.abs(line.getStartY() - line.getEndY()));
-			centerX.set(getDistanceX() / 2 + (line.getStartX() < line.getEndX() ? line.getStartX() : line.getEndX())
-					- txt.getLayoutBounds().getWidth() / 2);
-			centerY.set(getDistanceY() / 2 + (line.getStartY() < line.getEndY() ? line.getStartY() : line.getEndY())
-					- txt.getLayoutBounds().getHeight() / 2);
+			centerX.set(distanceX.get() / 2 + (line.getStartX() < line.getEndX() ? line.getStartX() : line.getEndX())
+					- txt.getWidth() / 2);
+			centerY.set(distanceY.get() / 2 + (line.getStartY() < line.getEndY() ? line.getStartY() : line.getEndY())
+					- txt.getHeight() / 2);
 
 			// set arrowPoints depending on line end
 			arrowhead.getPoints().setAll(line.getEndX(), line.getEndY(), line.getEndX(), line.getEndY() + 10,
 					line.getEndX() + Math.sqrt(3) * 5, line.getEndY() + 5);
-			
-			// rotate arrowhead to point to target node
+
+			// rotate txt and arrowhead to point to target node
 			Double xDiff = line.getEndX() - line.getStartX();
 			Double yDiff = line.getEndY() - line.getStartY();
 			Double rotationDegrees = Math.acos(yDiff / Math.sqrt(xDiff * xDiff + yDiff * yDiff)) * 360 / (2 * Math.PI);
 			if (xDiff < 0) {
-				rotationDegrees = rotationDegrees - 150 ;
+				txt.setRotate(rotationDegrees + 90);
+				rotationDegrees = rotationDegrees - 150;
 			} else {
+				txt.setRotate(rotationDegrees * -1 + 90);
 				rotationDegrees = rotationDegrees * -1 - 150;
 			}
 			Rotate rotation = new Rotate(rotationDegrees, line.getEndX(), line.getEndY());
 			arrowhead.getTransforms().setAll(rotation);
 		};
+
+		// makes sure the txt is repositioned once its width is set
+		txt.widthProperty().addListener(lineChangeListener);
+
 		line.startXProperty().addListener(lineChangeListener);
 		line.startYProperty().addListener(lineChangeListener);
 		line.endXProperty().addListener(lineChangeListener);
@@ -100,15 +107,15 @@ public class Edge extends Group {
 		calculatePositioning();
 		setStyle(new Style());
 	}
-	
+
 	public String getCaption() {
 		return txt.getText();
 	}
-	
+
 	public Vertex getSource() {
 		return source;
 	}
-	
+
 	public Vertex getTarget() {
 		return target;
 	}
@@ -163,7 +170,7 @@ public class Edge extends Group {
 		line.getStrokeDashArray().addAll(style.lineType);
 		line.setStrokeLineCap(StrokeLineCap.BUTT);
 		line.setStrokeLineJoin(StrokeLineJoin.ROUND);
-		txt.setFill(style.textColor);
+		txt.setTextFill(style.textColor);
 		txt.setFont(new Font(style.textSize));
 	}
 }
