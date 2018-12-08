@@ -37,7 +37,7 @@
 							</Menu>
 							<SeparatorMenuItem />
 							<MenuItem
-								text="%visualisation.magicLayout.view.menu.file.items.saveLayout" />
+								text="%visualisation.magicLayout.view.menu.file.items.saveGraphAsImage" onAction="#saveGraphAsImage"/>
 						</Menu>
 						<ViewMenu fx:id="viewMenu" />
 					</MenuBar>

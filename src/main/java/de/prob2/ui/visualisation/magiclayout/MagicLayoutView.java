@@ -1,21 +1,33 @@
 package de.prob2.ui.visualisation.magiclayout;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+
+import javax.imageio.ImageIO;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditEdges;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditNodes;
 import javafx.beans.value.ChangeListener;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.StackPane;
+import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 
 @Singleton
@@ -45,12 +57,15 @@ public class MagicLayoutView extends Stage {
 	private final StageManager stageManager;
 	private final MagicGraphI magicGraph;
 	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 
 	@Inject
-	public MagicLayoutView(final StageManager stageManager, MagicGraphI magicGraph, CurrentTrace currentTrace) {
+	public MagicLayoutView(final StageManager stageManager, MagicGraphI magicGraph, CurrentTrace currentTrace,
+			CurrentProject currentProject) {
 		this.stageManager = stageManager;
 		this.magicGraph = magicGraph;
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		stageManager.loadFXML(this, "magic_layout_view.fxml");
 	}
 
@@ -72,7 +87,7 @@ public class MagicLayoutView extends Stage {
 
 		// only listen to changes when the stage is showing
 		showingProperty().addListener((observable, from, to) -> {
-			if(to) {
+			if (to) {
 				layoutGraph();
 				currentTrace.modelProperty().addListener(modelChangeListener);
 				currentTrace.addListener(traceChangeListener);
@@ -81,20 +96,20 @@ public class MagicLayoutView extends Stage {
 				currentTrace.removeListener(traceChangeListener);
 			}
 		});
-		
+
 	}
-	
+
 	private void zoom(double zoomFactor) {
 		magicGraphPane.setScaleX(magicGraphPane.getScaleX() * zoomFactor);
 		magicGraphPane.setScaleY(magicGraphPane.getScaleY() * zoomFactor);
 	}
-	
+
 	@FXML
 	private void layoutGraph() {
 		magicGraphPane.getChildren().setAll(magicGraph.generateMagicGraph(currentTrace.getCurrentState()));
 		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges());
 	}
-	
+
 	@FXML
 	private void updateGraph() {
 		magicGraph.updateMagicGraph(currentTrace.getCurrentState());
@@ -111,5 +126,45 @@ public class MagicLayoutView extends Stage {
 	private void newEdgeGroup() {
 		editTabPane.getSelectionModel().select(editEdgesTab);
 		magicLayoutEditEdges.addNewEdgegroup();
+	}
+
+	@FXML
+	private void saveGraphAsImage() {
+		// scale image for better and sharper quality
+		WritableImage image = new WritableImage((int) Math.rint(4 * magicGraphPane.getWidth()),
+				(int) Math.rint(4 * magicGraphPane.getHeight()));
+		SnapshotParameters params = new SnapshotParameters();
+		params.setTransform(Transform.scale(4, 4));
+		image = magicGraphPane.snapshot(params, image);
+
+		String name = currentProject.getCurrentMachine().getName();
+		final Path projectFolder = currentProject.get().getLocation();
+
+		// create magic_graph folder if it doesn't exist
+		final Path magicImageFolder = projectFolder.resolve("magic_graph");
+		if (!magicImageFolder.toFile().exists()) {
+			magicImageFolder.toFile().mkdir();
+		}
+
+		File file = magicImageFolder.resolve(name + ".png").toFile();
+
+		int i = 1;
+		while (file.exists()) {
+			file = magicImageFolder.resolve(name + i + ".png").toFile();
+			i++;
+		}
+
+		try {
+			ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+		} catch (IOException e) {
+			stageManager.makeExceptionAlert(e, "visualisation.magicLayout.view.alerts.couldNotSaveGraphAsImage.content");
+		}
+		
+		// try to open image with external viewer
+		try {
+			Desktop.getDesktop().open(file);
+		} catch (IOException e) {
+			stageManager.makeExceptionAlert(e, "visualisation.magicLayout.view.alerts.couldNotOpenImage.content");
+		}
 	}
 }
