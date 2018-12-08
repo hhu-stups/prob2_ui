@@ -3,10 +3,13 @@ package de.prob2.ui.visualisation.magiclayout;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.model.representation.AbstractModel;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditEdges;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditNodes;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
@@ -62,13 +65,23 @@ public class MagicLayoutView extends Stage {
 		zoomInButton.setOnAction(event -> zoom(1.1));
 		zoomOutButton.setOnAction(event -> zoom(0.9));
 
-		layoutGraph();
-
 		// generate new graph whenever the model changes
-		currentTrace.modelProperty().addListener((observable, from, to) -> layoutGraph());
-
+		ChangeListener<? super AbstractModel> modelChangeListener = (observable, from, to) -> layoutGraph();
 		// update existing graph whenever the trace changes
-		currentTrace.addListener((observable, from, to) -> updateGraph());
+		ChangeListener<? super Trace> traceChangeListener = (observable, from, to) -> updateGraph();
+
+		// only listen to changes when the stage is showing
+		showingProperty().addListener((observable, from, to) -> {
+			if(to) {
+				layoutGraph();
+				currentTrace.modelProperty().addListener(modelChangeListener);
+				currentTrace.addListener(traceChangeListener);
+			} else {
+				currentTrace.modelProperty().removeListener(modelChangeListener);
+				currentTrace.removeListener(traceChangeListener);
+			}
+		});
+		
 	}
 	
 	private void zoom(double zoomFactor) {
