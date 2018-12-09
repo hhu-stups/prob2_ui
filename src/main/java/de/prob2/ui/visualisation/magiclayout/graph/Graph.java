@@ -1,5 +1,6 @@
 package de.prob2.ui.visualisation.magiclayout.graph;
 
+import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
 import de.prob2.ui.visualisation.magiclayout.graph.layout.Layout;
 import javafx.scene.layout.Pane;
 

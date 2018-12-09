@@ -14,7 +14,8 @@ import java.util.TreeMap;
 import de.prob2.ui.visualisation.magiclayout.graph.Edge;
 import de.prob2.ui.visualisation.magiclayout.graph.Graph;
 import de.prob2.ui.visualisation.magiclayout.graph.Model;
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex;
+import de.prob2.ui.visualisation.magiclayout.graph.Vertex.DummyVertex;
+import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
 
 /**
  * The implementations of a layered graph layout in this class are based on the
@@ -52,6 +53,9 @@ public class LayeredLayout implements Layout {
 			graph.getChildren().remove(edge);
 			partEdges.forEach(partEdge -> {
 				graph.getChildren().add(partEdge);
+				if (partEdge.getTarget() != edge.getTarget()) {
+					graph.getChildren().add(partEdge.getTarget());
+				}
 			});
 		});
 //		positionEdges();
@@ -126,8 +130,7 @@ public class LayeredLayout implements Layout {
 				Set<Edge> partEdges = new HashSet<>();
 				Vertex target = edge.getTarget();
 				for (int l = targetLayer + 1; l < sourceLayer; l++) {
-					Vertex source = new Vertex("");
-					source.setType(Vertex.Type.DUMMY);
+					Vertex source = new DummyVertex();
 					layers.put(source, l);
 					partEdges.add(new Edge(source, target, edge.getCaption()));
 					target = source;
@@ -296,7 +299,7 @@ public class LayeredLayout implements Layout {
 			for (Vertex vertex : layer.getValue()) {
 				vertex.relocate(x, y - vertex.getHeight() / 2);
 				x += vertex.getWidth() + 50;
-				if (vertex.getWidth() > maxWidth) { 
+				if (vertex.getWidth() > maxWidth) {
 					maxWidth = vertex.getWidth();
 				}
 			}
@@ -531,7 +534,7 @@ public class LayeredLayout implements Layout {
 
 	@Override
 	public void updateGraph(Graph graph) {
-		if(graph.getModel().isChanged()) {
+		if (graph.getModel().isChanged()) {
 			graph.layout(this);
 		}
 	}

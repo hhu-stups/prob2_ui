@@ -3,6 +3,8 @@ package de.prob2.ui.visualisation.magiclayout.graph;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.prob2.ui.visualisation.magiclayout.graph.Vertex.DummyVertex;
+import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
@@ -171,7 +173,7 @@ public class Edge extends Group {
 		txt.setTextFill(style.textColor);
 		txt.setFont(new Font(style.textSize));
 		
-		if(target.getType() == Vertex.Type.DUMMY) {
+		if(target instanceof DummyVertex) {
 			arrowhead.setFill(Color.TRANSPARENT);
 		}
 	}
