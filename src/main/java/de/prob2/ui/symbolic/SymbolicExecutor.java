@@ -1,7 +1,6 @@
 package de.prob2.ui.symbolic;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -59,16 +58,12 @@ public abstract class SymbolicExecutor {
 
 	public void interrupt() {
 		List<Thread> removedThreads = new ArrayList<>();
-		for(Iterator<Thread> iterator = currentJobThreads.iterator(); iterator.hasNext();) {
-			Thread thread = iterator.next();
+		for (Thread thread : currentJobThreads) {
 			thread.interrupt();
 			removedThreads.add(thread);
 		}
 		List<IModelCheckJob> removedJobs = new ArrayList<>();
-		for(Iterator<IModelCheckJob> iterator = currentJobs.iterator(); iterator.hasNext();) {
-			IModelCheckJob job = iterator.next();
-			removedJobs.add(job);
-		}
+		removedJobs.addAll(currentJobs);
 		currentTrace.getStateSpace().sendInterrupt();
 		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);

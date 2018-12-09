@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -203,24 +202,20 @@ public class Modelchecker implements IModelCheckListener {
 		}
 		currentJobs.remove(job);
 	}
-	
+
 	public void cancelModelcheck() {
 		List<Thread> removedThreads = new ArrayList<>();
-		for(Iterator<Thread> iterator = currentJobThreads.iterator(); iterator.hasNext();) {
-			Thread thread = iterator.next();
+		for (Thread thread : currentJobThreads) {
 			thread.interrupt();
 			removedThreads.add(thread);
 		}
 		List<IModelCheckJob> removedJobs = new ArrayList<>();
-		for(Iterator<IModelCheckJob> iterator = currentJobs.iterator(); iterator.hasNext();) {
-			IModelCheckJob job = iterator.next();
-			removedJobs.add(job);
-		}
+		removedJobs.addAll(currentJobs);
 		currentTrace.getStateSpace().sendInterrupt();
 		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);
 	}
-	
+
 	private ModelCheckingItem getItemIfAlreadyExists(ModelCheckingItem item) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		int index = currentMachine.getModelcheckingItems().indexOf(item);
@@ -229,9 +224,9 @@ public class Modelchecker implements IModelCheckListener {
 		}
 		return item;
 	}
-	
+
 	public void setCurrentStats(ModelCheckStats currentStats) {
 		this.currentStats = currentStats;
 	}
-	
+
 }

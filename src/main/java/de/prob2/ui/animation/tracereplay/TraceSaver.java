@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
@@ -30,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TraceSaver {
-	private static final Charset TRACE_CHARSET = Charset.forName("UTF-8");
+	private static final Charset TRACE_CHARSET = StandardCharsets.UTF_8;
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceSaver.class);
 	private static final String TRACE_FILE_ENDING = "*.prob2trace";
 

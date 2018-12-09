@@ -1,7 +1,6 @@
 package de.prob2.ui.animation.tracereplay;
 
 import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -268,11 +267,6 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	private void removeFromTraceTableView(Path tracePath) {
-		for (Iterator<ReplayTrace> iterator = traceTableView.getItems().iterator(); iterator.hasNext();) {
-			ReplayTrace trace = iterator.next();
-			if (trace.getLocation().equals(tracePath)) {
-				iterator.remove();
-			}
-		}
+		traceTableView.getItems().removeIf(trace -> trace.getLocation().equals(tracePath));
 	}
 }
