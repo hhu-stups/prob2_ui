@@ -51,16 +51,18 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		// add Node specific controls
 		clusterCheckBox = new CheckBox(bundle.getString("visualisation.magicLayout.editPane.labels.cluster"));
 		setMargin(clusterCheckBox, new Insets(0, 5, 0, 10));
-		this.getChildren().add(2, clusterCheckBox);
+		if (magicGraph.supportsClustering()) {
+			this.getChildren().add(2, clusterCheckBox);
+		}
 
 		shapeComboBox = new ComboBox<>();
-		shapeComboBox.getItems().setAll(this.magicGraph.getPossibleShapes());
+		shapeComboBox.getItems().setAll(magicGraph.getPossibleShapes());
 		shapeComboBox.setCellFactory((ListView<MagicShape> lv) -> new MagicShapeListCell());
 		shapeComboBox.setButtonCell(new MagicShapeListCell());
 		shapeComboBox.getSelectionModel().selectFirst();
 
 		nodeColorPicker = new ColorPicker(Color.WHITE);
-		
+
 		flowPane.getChildren().addAll(
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.shape"), shapeComboBox),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.color"), nodeColorPicker));
@@ -102,7 +104,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 	public void addNewNodegroup() {
 		MagicNodes nodes = new MagicNodes("nodes");
 		int i = 1;
-		while(listView.getItems().contains(nodes)) {
+		while (listView.getItems().contains(nodes)) {
 			nodes = new MagicNodes("nodes" + i);
 			i++;
 		}

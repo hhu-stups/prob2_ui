@@ -7,6 +7,8 @@ import javafx.scene.Node;
 
 public interface MagicGraphI {
 	
+	Boolean supportsClustering();
+	
 	List<MagicShape> getPossibleShapes();
 	
 	Node generateMagicGraph(State state);

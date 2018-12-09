@@ -41,6 +41,11 @@ public class MagicGraphFX implements MagicGraphI {
 				MagicShape.TRIANGLE };
 		return Arrays.asList(shapes);
 	}
+	
+	@Override
+	public Boolean supportsClustering() {
+		return false;
+	}
 
 	@Override
 	public Node generateMagicGraph(State state) {
