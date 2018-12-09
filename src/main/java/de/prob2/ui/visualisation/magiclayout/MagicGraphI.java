@@ -15,5 +15,5 @@ public interface MagicGraphI {
 
 	void updateMagicGraph(State state);
 
-	void setGraphStyle(List<MagicNodes> nodes, List<MagicEdges> edges);
+	void setGraphStyle(List<MagicNodegroup> nodes, List<MagicEdgegroup> edges);
 }	

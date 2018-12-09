@@ -89,7 +89,7 @@ public class MagicGraphFX implements MagicGraphI {
 	}
 
 	@Override
-	public void setGraphStyle(List<MagicNodes> magicNodes, List<MagicEdges> magicEdges) {
+	public void setGraphStyle(List<MagicNodegroup> magicNodes, List<MagicEdgegroup> magicEdges) {
 		magicNodes.forEach(node -> {
 			try {
 				BObject bObject = Translator.translate(node.getExpression());

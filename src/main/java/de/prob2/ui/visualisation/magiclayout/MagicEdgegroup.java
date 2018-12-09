@@ -3,21 +3,21 @@ package de.prob2.ui.visualisation.magiclayout;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class MagicEdges extends MagicComponent {
+public class MagicEdgegroup extends MagicComponent {
 
 	private final IntegerProperty textSize = new SimpleIntegerProperty();
 
-	public MagicEdges(String name, String expression) {
+	public MagicEdgegroup(String name, String expression) {
 		super(name, expression);
 
 		this.textSize.set(12);
 	}
 
-	public MagicEdges(String name) {
+	public MagicEdgegroup(String name) {
 		this(name, "");
 	}
 	
-	public MagicEdges(MagicEdges edges) {
+	public MagicEdgegroup(MagicEdgegroup edges) {
 		super(edges);
 		
 		this.textSize.set(edges.getTextSize());

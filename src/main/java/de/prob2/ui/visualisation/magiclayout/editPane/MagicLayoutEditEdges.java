@@ -11,7 +11,7 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
-import de.prob2.ui.visualisation.magiclayout.MagicEdges;
+import de.prob2.ui.visualisation.magiclayout.MagicEdgegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
@@ -63,7 +63,7 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		super.updateValues(selectedComponent);
 
 		if (selectedComponent != null) {
-			MagicEdges selectedEdges = (MagicEdges) selectedComponent;
+			MagicEdgegroup selectedEdges = (MagicEdgegroup) selectedComponent;
 
 			textSizeSpinner.getValueFactory().setValue(selectedEdges.getTextSize());
 			selectedEdges.textSizeProperty().bind(textSizeSpinner.valueProperty());
@@ -73,18 +73,18 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 	}
 
 	public void addNewEdgegroup() {
-		MagicEdges edges = new MagicEdges("edges");
+		MagicEdgegroup edges = new MagicEdgegroup("edges");
 		int i = 1;
 		while(listView.getItems().contains(edges)) {
-			edges = new MagicEdges("edges" + i);
+			edges = new MagicEdgegroup("edges" + i);
 			i++;
 		}
 		super.addMagicComponent(edges);
 	}
 
-	public List<MagicEdges> getEdges() {
-		List<MagicEdges> edgesList = new ArrayList<>();
-		listView.getItems().forEach(comp -> edgesList.add((MagicEdges) comp));
+	public List<MagicEdgegroup> getEdges() {
+		List<MagicEdgegroup> edgesList = new ArrayList<>();
+		listView.getItems().forEach(comp -> edgesList.add((MagicEdgegroup) comp));
 		return edgesList;
 	}
 }

@@ -14,9 +14,9 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
-import de.prob2.ui.visualisation.magiclayout.MagicEdges;
+import de.prob2.ui.visualisation.magiclayout.MagicEdgegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
-import de.prob2.ui.visualisation.magiclayout.MagicNodes;
+import de.prob2.ui.visualisation.magiclayout.MagicNodegroup;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
@@ -172,8 +172,8 @@ public class MagicLayoutEditPane extends VBox {
 
 		for (IEvalElement element : resultMap.keySet()) {
 			MagicComponent magicComponent = (this instanceof MagicLayoutEditNodes)
-					? new MagicNodes(element.toString(), resultMap.get(element).toString(), true)
-					: new MagicEdges(element.toString(), resultMap.get(element).toString());
+					? new MagicNodegroup(element.toString(), resultMap.get(element).toString(), true)
+					: new MagicEdgegroup(element.toString(), resultMap.get(element).toString());
 
 			if (listView.getItems().contains(magicComponent)) {
 				MagicComponent existingComponent = listView.getItems().get(listView.getItems().indexOf(magicComponent));
@@ -220,9 +220,9 @@ public class MagicLayoutEditPane extends VBox {
 
 				@Override
 				public MagicComponent fromString(String string) {
-					MagicComponent component = cell.getItem() instanceof MagicNodes
-							? new MagicNodes((MagicNodes) cell.getItem())
-							: new MagicEdges((MagicEdges) cell.getItem());
+					MagicComponent component = cell.getItem() instanceof MagicNodegroup
+							? new MagicNodegroup((MagicNodegroup) cell.getItem())
+							: new MagicEdgegroup((MagicEdgegroup) cell.getItem());
 					component.nameProperty().set(string);
 					return component;
 				}
@@ -317,8 +317,8 @@ public class MagicLayoutEditPane extends VBox {
 					MagicComponent draggedComponent = null;
 					for (MagicComponent component : listView.getItems()) {
 						if (component.getName().equals(dragboard.getString())) {
-							draggedComponent = component instanceof MagicNodes ? new MagicNodes((MagicNodes) component)
-									: new MagicEdges((MagicEdges) component);
+							draggedComponent = component instanceof MagicNodegroup ? new MagicNodegroup((MagicNodegroup) component)
+									: new MagicEdgegroup((MagicEdgegroup) component);
 							break;
 						}
 					}

@@ -11,7 +11,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
-import de.prob2.ui.visualisation.magiclayout.MagicNodes;
+import de.prob2.ui.visualisation.magiclayout.MagicNodegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicShape;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -84,7 +84,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		super.updateValues(selectedComponent);
 
 		if (selectedComponent != null) {
-			MagicNodes selectedNodes = (MagicNodes) selectedComponent;
+			MagicNodegroup selectedNodes = (MagicNodegroup) selectedComponent;
 
 			clusterCheckBox.setSelected(selectedNodes.isCluster());
 			selectedNodes.clusterProperty().bind(clusterCheckBox.selectedProperty());
@@ -102,18 +102,18 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 	}
 
 	public void addNewNodegroup() {
-		MagicNodes nodes = new MagicNodes("nodes");
+		MagicNodegroup nodes = new MagicNodegroup("nodes");
 		int i = 1;
 		while (listView.getItems().contains(nodes)) {
-			nodes = new MagicNodes("nodes" + i);
+			nodes = new MagicNodegroup("nodes" + i);
 			i++;
 		}
 		super.addMagicComponent(nodes);
 	}
 
-	public List<MagicNodes> getNodes() {
-		List<MagicNodes> nodesList = new ArrayList<>();
-		listView.getItems().forEach(comp -> nodesList.add((MagicNodes) comp));
+	public List<MagicNodegroup> getNodes() {
+		List<MagicNodegroup> nodesList = new ArrayList<>();
+		listView.getItems().forEach(comp -> nodesList.add((MagicNodegroup) comp));
 		return nodesList;
 	}
 
