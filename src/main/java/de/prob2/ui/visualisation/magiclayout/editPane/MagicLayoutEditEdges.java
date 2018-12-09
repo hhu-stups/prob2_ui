@@ -12,6 +12,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicEdges;
+import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 
@@ -19,10 +20,12 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 
 	private Spinner<Integer> textSizeSpinner;
 
+	MagicGraphI magicGraph;
+
 	@Inject
 	public MagicLayoutEditEdges(final StageManager stageManager, final ResourceBundle bundle,
-			final CurrentTrace currentTrace) {
-		super(stageManager, bundle, currentTrace);
+			final CurrentTrace currentTrace, final MagicGraphI magicGraph) {
+		super(stageManager, bundle, currentTrace, magicGraph);
 	}
 
 	@FXML

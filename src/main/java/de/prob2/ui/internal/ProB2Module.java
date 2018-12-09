@@ -69,6 +69,8 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import de.prob2.ui.visualisation.StateVisualisationView;
 import de.prob2.ui.visualisation.VisualisationView;
 import de.prob2.ui.visualisation.fx.VisualisationController;
+import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
+import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditEdges;
 import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditNodes;
 import javafx.fxml.FXMLLoader;
@@ -166,6 +168,7 @@ public class ProB2Module extends AbstractModule {
 		bind(TraceChecker.class);
 		bind(MagicLayoutEditNodes.class);
 		bind(MagicLayoutEditEdges.class);
+		bind(MagicGraphI.class).to(MagicGraphFX.class);
 	}
 
 	@Provides
