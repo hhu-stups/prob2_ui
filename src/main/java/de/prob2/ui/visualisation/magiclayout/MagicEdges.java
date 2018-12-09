@@ -7,14 +7,14 @@ public class MagicEdges extends MagicComponent {
 
 	private final IntegerProperty textSize = new SimpleIntegerProperty();
 
-	public MagicEdges(String name, String expression, boolean editable) {
-		super(name, expression, editable);
+	public MagicEdges(String name, String expression) {
+		super(name, expression);
 
 		this.textSize.set(12);
 	}
 
 	public MagicEdges(String name) {
-		this(name, "", true);
+		this(name, "");
 	}
 	
 	public MagicEdges(MagicEdges edges) {

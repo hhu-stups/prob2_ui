@@ -140,7 +140,6 @@ public class MagicLayoutEditPane extends VBox {
 		if (selectedComponent != null) {
 			expressionTextArea.setText(selectedComponent.getExpression());
 			selectedComponent.expressionProperty().bind(expressionTextArea.textProperty());
-			expressionTextArea.setEditable(selectedComponent.isEditable());
 
 			lineTypeComboBox.setValue(selectedComponent.getLineType());
 			selectedComponent.lineTypeProperty().bind(lineTypeComboBox.valueProperty());
@@ -173,8 +172,8 @@ public class MagicLayoutEditPane extends VBox {
 
 		for (IEvalElement element : resultMap.keySet()) {
 			MagicComponent magicComponent = (this instanceof MagicLayoutEditNodes)
-					? new MagicNodes(element.toString(), resultMap.get(element).toString(), false, true)
-					: new MagicEdges(element.toString(), resultMap.get(element).toString(), false);
+					? new MagicNodes(element.toString(), resultMap.get(element).toString(), true)
+					: new MagicEdges(element.toString(), resultMap.get(element).toString());
 
 			if (listView.getItems().contains(magicComponent)) {
 				MagicComponent existingComponent = listView.getItems().get(listView.getItems().indexOf(magicComponent));
@@ -258,7 +257,7 @@ public class MagicLayoutEditPane extends VBox {
 
 			cell.emptyProperty().addListener((observable, from, to) -> {
 				cell.setContextMenu(new ContextMenu());
-				cell.setEditable(!to && cell.getItem().isEditable());
+				cell.setEditable(!to);
 
 				if (cell.isEditable()) {
 					cell.getContextMenu().getItems().addAll(editItem, deleteItem, new SeparatorMenuItem());
