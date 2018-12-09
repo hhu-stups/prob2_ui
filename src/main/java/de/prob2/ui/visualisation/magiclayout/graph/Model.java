@@ -17,7 +17,7 @@ public class Model {
 		if (vertices.contains(vertex)) {
 			return;
 		}
-		
+
 		addedVertices.add(vertex);
 		removedVertices.remove(vertex); // vertex should not be in added and removed set
 		vertices.add(vertex);
@@ -30,10 +30,10 @@ public class Model {
 	}
 
 	public void addEdge(Edge edge) {
-		if(edges.contains(edge)) {
+		if (edges.contains(edge)) {
 			return;
 		}
-		
+
 		if (!vertices.contains(edge.getSource())) {
 			addVertex(edge.getSource());
 		}
@@ -73,6 +73,11 @@ public class Model {
 
 	public Set<Edge> getRemovedEdges() {
 		return Collections.unmodifiableSet(removedEdges);
+	}
+
+	public boolean isChanged() {
+		return addedVertices.size() > 0 || removedVertices.size() > 0 || addedEdges.size() > 0
+				|| removedEdges.size() > 0;
 	}
 
 	void finishUpdate() {

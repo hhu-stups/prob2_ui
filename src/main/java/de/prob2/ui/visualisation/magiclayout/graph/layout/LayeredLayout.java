@@ -292,15 +292,15 @@ public class LayeredLayout implements Layout {
 		double y = 0;
 		for (Entry<Integer, List<Vertex>> layer : layers.descendingMap().entrySet()) {
 			double x = 0;
-			double maxHeight = 0;
+			double maxWidth = 0;
 			for (Vertex vertex : layer.getValue()) {
 				vertex.relocate(x, y - vertex.getHeight() / 2);
 				x += vertex.getWidth() + 50;
-				if (vertex.getHeight() > maxHeight) {
-					maxHeight = vertex.getHeight();
+				if (vertex.getWidth() > maxWidth) { 
+					maxWidth = vertex.getWidth();
 				}
 			}
-			y += (maxHeight * 2);
+			y += (maxWidth * 2);
 		}
 	}
 
@@ -531,8 +531,9 @@ public class LayeredLayout implements Layout {
 
 	@Override
 	public void updateGraph(Graph graph) {
-		// TODO Auto-generated method stub
-
+		if(graph.getModel().isChanged()) {
+			graph.layout(this);
+		}
 	}
 
 }
