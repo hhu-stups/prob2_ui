@@ -2,6 +2,7 @@ package de.prob2.ui.visualisation.magiclayout.editPane;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -76,6 +77,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 			List<IEvalElement> setEvalElements = currentTrace.getStateSpace().getLoadedMachine().getSetEvalElements();
 			setEvalElements.forEach(element -> {
 				MagicNodegroup nodegroup = new MagicNodegroup(element.toString(), element.toString(), true);
+				nodegroup.nodeColorProperty().set(Color.hsb(new Random().nextDouble() * 360, 0.2, 1));
 				listView.getItems().add(nodegroup);
 			});
 		}
