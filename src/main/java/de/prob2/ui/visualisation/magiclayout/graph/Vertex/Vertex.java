@@ -105,7 +105,7 @@ public class Vertex extends AbstractVertex {
 		shape.setFill(style.color);
 		shape.setStroke(style.lineColor);
 		shape.setStrokeWidth(style.lineWidth);
-		shape.getStrokeDashArray().addAll(style.lineType);
+		shape.getStrokeDashArray().setAll(style.lineType);
 		shape.setStrokeLineCap(StrokeLineCap.BUTT);
 		shape.setStrokeLineJoin(StrokeLineJoin.ROUND);
 	}

@@ -167,7 +167,7 @@ public class Edge extends Group {
 		line.setStroke(style.lineColor);
 		arrowhead.setFill(style.lineColor);
 		line.setStrokeWidth(style.lineWidth);
-		line.getStrokeDashArray().addAll(style.lineType);
+		line.getStrokeDashArray().setAll(style.lineType);
 		line.setStrokeLineCap(StrokeLineCap.BUTT);
 		line.setStrokeLineJoin(StrokeLineJoin.ROUND);
 		txt.setTextFill(style.textColor);
