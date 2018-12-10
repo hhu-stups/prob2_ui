@@ -12,6 +12,7 @@ import com.google.inject.Inject;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.State;
 import de.prob.translator.Translator;
@@ -29,6 +30,7 @@ public class MagicGraphFX implements MagicGraphI {
 	private StageManager stageManager;
 
 	private Graph graph;
+	private State state;
 
 	@Inject
 	public MagicGraphFX(StageManager stageManager) {
@@ -49,6 +51,7 @@ public class MagicGraphFX implements MagicGraphI {
 
 	@Override
 	public Node generateMagicGraph(State state) {
+		this.state = state;
 		Model model = new Model();
 		if (state != null) {
 			model = addStateValuesToModel(state);
@@ -61,6 +64,7 @@ public class MagicGraphFX implements MagicGraphI {
 
 	@Override
 	public void updateMagicGraph(State state) {
+		this.state = state;
 		// add state values to a new temporary model
 		Model newModel = new Model();
 		if (state != null) {
@@ -92,7 +96,8 @@ public class MagicGraphFX implements MagicGraphI {
 	public void setGraphStyle(List<MagicNodegroup> magicNodes, List<MagicEdgegroup> magicEdges) {
 		magicNodes.forEach(node -> {
 			try {
-				BObject bObject = Translator.translate(node.getExpression());
+				AbstractEvalResult result = state.eval(node.getExpression(), FormulaExpand.EXPAND);
+				BObject bObject = Translator.translate(result.toString());
 				Model modelToStyle = transformModel(getModel(node.getName(), bObject), graph.getModel());
 
 				Vertex.Style style = new Vertex.Style(node.getNodeColor(), node.getLineColor(), node.getLineWidth(),
@@ -112,7 +117,8 @@ public class MagicGraphFX implements MagicGraphI {
 		magicEdges.forEach(magicEdge -> {
 			try {
 				if (!magicEdge.getExpression().equals("NOT-INITIALISED: ")) {
-					BObject bObject = Translator.translate(magicEdge.getExpression());
+					AbstractEvalResult result = state.eval(magicEdge.getExpression(), FormulaExpand.EXPAND);
+					BObject bObject = Translator.translate(result.toString());
 					Model modelToStyle = transformModel(getModel(magicEdge.getName(), bObject), graph.getModel());
 
 					Edge.Style style = new Edge.Style(magicEdge.getLineColor(), magicEdge.getLineWidth(),
