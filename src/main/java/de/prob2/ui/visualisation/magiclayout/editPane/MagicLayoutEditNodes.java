@@ -68,16 +68,18 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.shape"), shapeComboBox),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.color"), nodeColorPicker));
 
-		// add Sets from Machine as Node Groups
-		addMachineElementsAsNodeGroups();
-		currentTrace.addListener((observable, from, to) -> addMachineElementsAsNodeGroups());
+		addMachineElements();
 	}
 
-	private void addMachineElementsAsNodeGroups() {
+	void addMachineElements() {
 		if (currentTrace.getStateSpace() != null) {
 			List<IEvalElement> setEvalElements = currentTrace.getStateSpace().getLoadedMachine().getSetEvalElements();
-			addEvalElementsAsGroups(setEvalElements);
+			setEvalElements.forEach(element -> {
+				MagicNodegroup nodegroup = new MagicNodegroup(element.toString(), element.toString(), true);
+				listView.getItems().add(nodegroup);
+			});
 		}
+		updateValues();
 	}
 
 	@Override
@@ -116,11 +118,6 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 		List<MagicNodegroup> nodesList = new ArrayList<>();
 		listView.getItems().forEach(comp -> nodesList.add((MagicNodegroup) comp));
 		return nodesList;
-	}
-
-	@Override
-	MagicNodegroup getInstance(String name, String expression) {
-		return new MagicNodegroup(name, expression, true);
 	}
 
 	@Override

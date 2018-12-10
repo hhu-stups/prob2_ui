@@ -3,14 +3,11 @@ package de.prob2.ui.visualisation.magiclayout.editPane;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.IEvalElement;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
@@ -119,9 +116,10 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linewidth"), lineWidthComboBox),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker));
 
-		// clear listview when the model changes
+		// clear listview when the model changes and add machine elements
 		currentTrace.modelProperty().addListener((observable, from, to) -> {
 			listView.getItems().clear();
+			addMachineElements();
 			updateValues();
 		});
 	}
@@ -163,24 +161,6 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 	void addMagicComponent(T component) {
 		listView.getItems().add(component);
 		listView.getSelectionModel().select(component);
-	}
-
-	void addEvalElementsAsGroups(List<IEvalElement> evalElements) {
-
-		Map<IEvalElement, AbstractEvalResult> resultMap = currentTrace.getCurrentState().evalFormulas(evalElements);
-
-		for (IEvalElement element : resultMap.keySet()) {
-			T magicComponent = getInstance(element.toString(), resultMap.get(element).toString());
-
-			if (listView.getItems().contains(magicComponent)) {
-				MagicComponent existingComponent = listView.getItems().get(listView.getItems().indexOf(magicComponent));
-				existingComponent.expressionProperty().unbind(); // a bound value cannot be set
-				existingComponent.expressionProperty().set(resultMap.get(element).toString());
-			} else {
-				listView.getItems().add(magicComponent);
-			}
-		}
-		this.updateValues();
 	}
 
 	VBox wrapInVBox(String caption, Control control) {
@@ -402,8 +382,8 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 		lineWidthComboBox.getSelectionModel().select(1.0);
 	}
 	
-	abstract T getInstance(String name, String expression);
 	protected abstract T getInstance(T component);
 
+	abstract void addMachineElements();
 	public abstract void openLayoutSettings(MagicLayoutSettings layoutSettings);
 }

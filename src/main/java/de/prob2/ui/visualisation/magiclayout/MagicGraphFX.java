@@ -43,7 +43,7 @@ public class MagicGraphFX implements MagicGraphI {
 				MagicShape.TRIANGLE };
 		return Arrays.asList(shapes);
 	}
-	
+
 	@Override
 	public Boolean supportsClustering() {
 		return false;
@@ -116,8 +116,8 @@ public class MagicGraphFX implements MagicGraphI {
 
 		magicEdges.forEach(magicEdge -> {
 			try {
-				if (!magicEdge.getExpression().equals("NOT-INITIALISED: ")) {
-					AbstractEvalResult result = state.eval(magicEdge.getExpression(), FormulaExpand.EXPAND);
+				AbstractEvalResult result = state.eval(magicEdge.getExpression(), FormulaExpand.EXPAND);
+				if (!result.toString().equals("NOT-INITIALISED: ")) {
 					BObject bObject = Translator.translate(result.toString());
 					Model modelToStyle = transformModel(getModel(magicEdge.getName(), bObject), graph.getModel());
 

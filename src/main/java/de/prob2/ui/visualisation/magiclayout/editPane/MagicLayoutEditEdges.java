@@ -41,22 +41,25 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 
 		flowPane.getChildren().add(
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textsize"), textSizeSpinner));
-
-		// add Constants, Variables from Machine as Edge Groups
-		addMachineElementsAsEdgeGroups();
-		currentTrace.addListener((observable, from, to) -> addMachineElementsAsEdgeGroups());
+	
+		addMachineElements();
 	}
-
-	private void addMachineElementsAsEdgeGroups() {
+	
+	void addMachineElements() {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-
 		if (stateSpace != null) {
 			List<IEvalElement> constantEvalElements = stateSpace.getLoadedMachine().getConstantEvalElements();
-			addEvalElementsAsGroups(constantEvalElements);
-
+			constantEvalElements.forEach(element -> {
+				MagicEdgegroup edgegroup = new MagicEdgegroup(element.toString(), element.toString());
+				listView.getItems().add(edgegroup);
+			});
 			List<IEvalElement> variableEvalElements = stateSpace.getLoadedMachine().getVariableEvalElements();
-			addEvalElementsAsGroups(variableEvalElements);
+			variableEvalElements.forEach(element -> {
+				MagicEdgegroup edgegroup = new MagicEdgegroup(element.toString(), element.toString());
+				listView.getItems().add(edgegroup);
+			});
 		}
+		updateValues();
 	}
 
 	@Override
@@ -87,11 +90,6 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 		List<MagicEdgegroup> edgesList = new ArrayList<>();
 		listView.getItems().forEach(comp -> edgesList.add((MagicEdgegroup) comp));
 		return edgesList;
-	}
-
-	@Override
-	MagicEdgegroup getInstance(String name, String expression) {
-		return new MagicEdgegroup(name, expression);
 	}
 
 	@Override
