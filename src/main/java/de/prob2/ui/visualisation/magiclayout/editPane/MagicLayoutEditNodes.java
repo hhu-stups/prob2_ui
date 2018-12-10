@@ -22,7 +22,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.paint.Color;
 
-public class MagicLayoutEditNodes extends MagicLayoutEditPane {
+public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 
 	private class MagicShapeListCell extends ListCell<MagicShape> {
 		@Override
@@ -111,10 +111,20 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane {
 		super.addMagicComponent(nodes);
 	}
 
-	public List<MagicNodegroup> getNodes() {
+	public List<MagicNodegroup> getNodegroups() {
 		List<MagicNodegroup> nodesList = new ArrayList<>();
 		listView.getItems().forEach(comp -> nodesList.add((MagicNodegroup) comp));
 		return nodesList;
+	}
+
+	@Override
+	MagicNodegroup getInstance(String name, String expression) {
+		return new MagicNodegroup(name, expression, true);
+	}
+
+	@Override
+	protected MagicNodegroup getInstance(MagicNodegroup nodes) {
+		return new MagicNodegroup(nodes);
 	}
 
 }

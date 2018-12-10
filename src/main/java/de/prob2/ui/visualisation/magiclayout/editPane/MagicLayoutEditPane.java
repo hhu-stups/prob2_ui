@@ -14,9 +14,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
-import de.prob2.ui.visualisation.magiclayout.MagicEdgegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
-import de.prob2.ui.visualisation.magiclayout.MagicNodegroup;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
@@ -43,33 +41,33 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.util.StringConverter;
 
-public class MagicLayoutEditPane extends VBox {
+public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox {
 
-	private abstract class LineListCell<T> extends ListCell<T> {
+	private abstract class LineListCell<S> extends ListCell<S> {
 		{
 			setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		}
 
 		@Override
-		protected void updateItem(T t, boolean empty) {
-			super.updateItem(t, empty);
+		protected void updateItem(S s, boolean empty) {
+			super.updateItem(s, empty);
 
-			if (t == null || empty) {
+			if (s == null || empty) {
 				setGraphic(null);
 			} else {
 				Line line = new Line(0, 15, 50, 15);
-				defineLineStyle(line, t);
+				defineLineStyle(line, s);
 				Group group = new Group();
 				group.getChildren().add(line);
 				setGraphic(group);
 			}
 		}
 
-		protected abstract void defineLineStyle(Line line, T t);
+		protected abstract void defineLineStyle(Line line, S t);
 	}
 
 	@FXML
-	ListView<MagicComponent> listView;
+	ListView<T> listView;
 	@FXML
 	TextArea expressionTextArea;
 	@FXML
@@ -120,10 +118,10 @@ public class MagicLayoutEditPane extends VBox {
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linewidth"), lineWidthComboBox),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker));
 
-		// clear listview whenn the model changes
+		// clear listview when the model changes
 		currentTrace.modelProperty().addListener((observable, from, to) -> {
-			this.listView.getItems().clear();
-			this.updateValues();
+			listView.getItems().clear();
+			updateValues();
 		});
 	}
 
@@ -160,8 +158,8 @@ public class MagicLayoutEditPane extends VBox {
 			textColorPicker.setValue(Color.BLACK);
 		}
 	}
-	
-	void addMagicComponent(MagicComponent component) {
+
+	void addMagicComponent(T component) {
 		listView.getItems().add(component);
 		listView.getSelectionModel().select(component);
 	}
@@ -171,9 +169,7 @@ public class MagicLayoutEditPane extends VBox {
 		Map<IEvalElement, AbstractEvalResult> resultMap = currentTrace.getCurrentState().evalFormulas(evalElements);
 
 		for (IEvalElement element : resultMap.keySet()) {
-			MagicComponent magicComponent = (this instanceof MagicLayoutEditNodes)
-					? new MagicNodegroup(element.toString(), resultMap.get(element).toString(), true)
-					: new MagicEdgegroup(element.toString(), resultMap.get(element).toString());
+			T magicComponent = getInstance(element.toString(), resultMap.get(element).toString());
 
 			if (listView.getItems().contains(magicComponent)) {
 				MagicComponent existingComponent = listView.getItems().get(listView.getItems().indexOf(magicComponent));
@@ -198,20 +194,21 @@ public class MagicLayoutEditPane extends VBox {
 	private void initListView() {
 		listView.setEditable(true);
 		listView.setCellFactory(lv -> {
-			TextFieldListCell<MagicComponent> cell = new TextFieldListCell<MagicComponent>() {
+			TextFieldListCell<T> cell = new TextFieldListCell<T>() {
 
 				@Override
-				public void commitEdit(MagicComponent component) {
+				public void commitEdit(T component) {
 					if (!isEditing()) {
 						return;
 					}
-					if (!listView.getItems().contains(component) || listView.getItems().indexOf(component) == this.getIndex()) {
+					if (!listView.getItems().contains(component)
+							|| listView.getItems().indexOf(component) == this.getIndex()) {
 						super.commitEdit(component);
 					}
 				}
 			};
 
-			cell.setConverter(new StringConverter<MagicComponent>() {
+			cell.setConverter(new StringConverter<T>() {
 
 				@Override
 				public String toString(MagicComponent component) {
@@ -219,10 +216,8 @@ public class MagicLayoutEditPane extends VBox {
 				}
 
 				@Override
-				public MagicComponent fromString(String string) {
-					MagicComponent component = cell.getItem() instanceof MagicNodegroup
-							? new MagicNodegroup((MagicNodegroup) cell.getItem())
-							: new MagicEdgegroup((MagicEdgegroup) cell.getItem());
+				public T fromString(String string) {
+					T component = getInstance(cell.getItem());
 					component.nameProperty().set(string);
 					return component;
 				}
@@ -314,11 +309,10 @@ public class MagicLayoutEditPane extends VBox {
 
 				boolean success = false;
 				if (dragboard.hasString() && !cell.isEmpty()) {
-					MagicComponent draggedComponent = null;
-					for (MagicComponent component : listView.getItems()) {
+					T draggedComponent = null;
+					for (T component : listView.getItems()) {
 						if (component.getName().equals(dragboard.getString())) {
-							draggedComponent = component instanceof MagicNodegroup ? new MagicNodegroup((MagicNodegroup) component)
-									: new MagicEdgegroup((MagicEdgegroup) component);
+							draggedComponent = getInstance(component);
 							break;
 						}
 					}
@@ -331,13 +325,13 @@ public class MagicLayoutEditPane extends VBox {
 					if (targetIndex > sourceIndex) {
 						// move all items between source and target one up
 						for (int i = sourceIndex; i < targetIndex; i++) {
-							MagicComponent component = listView.getItems().get(i + 1);
+							T component = listView.getItems().get(i + 1);
 							listView.getItems().set(i, component);
 						}
 					} else {
 						// move all items between source and target one down
 						for (int i = sourceIndex; i > targetIndex; i--) {
-							MagicComponent component = listView.getItems().get(i - 1);
+							T component = listView.getItems().get(i - 1);
 							listView.getItems().set(i, component);
 						}
 					}
@@ -406,4 +400,7 @@ public class MagicLayoutEditPane extends VBox {
 
 		lineWidthComboBox.getSelectionModel().select(1.0);
 	}
+	
+	abstract T getInstance(String name, String expression);
+	protected abstract T getInstance(T component);
 }

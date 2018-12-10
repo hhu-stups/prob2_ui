@@ -16,8 +16,8 @@ import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 
-public class MagicLayoutEditEdges extends MagicLayoutEditPane {
-
+public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
+	
 	private Spinner<Integer> textSizeSpinner;
 
 	MagicGraphI magicGraph;
@@ -82,9 +82,19 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane {
 		super.addMagicComponent(edges);
 	}
 
-	public List<MagicEdgegroup> getEdges() {
+	public List<MagicEdgegroup> getEdgegroups() {
 		List<MagicEdgegroup> edgesList = new ArrayList<>();
 		listView.getItems().forEach(comp -> edgesList.add((MagicEdgegroup) comp));
 		return edgesList;
+	}
+
+	@Override
+	MagicEdgegroup getInstance(String name, String expression) {
+		return new MagicEdgegroup(name, expression);
+	}
+
+	@Override
+	protected MagicEdgegroup getInstance(MagicEdgegroup edges) {
+		return new MagicEdgegroup(edges);
 	}
 }

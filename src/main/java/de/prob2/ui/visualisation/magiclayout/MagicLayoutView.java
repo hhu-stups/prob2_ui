@@ -58,14 +58,16 @@ public class MagicLayoutView extends Stage {
 	private final MagicGraphI magicGraph;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
+	private final MagicLayoutSettingsManager settingsManager;
 
 	@Inject
-	public MagicLayoutView(final StageManager stageManager, MagicGraphI magicGraph, CurrentTrace currentTrace,
-			CurrentProject currentProject) {
+	public MagicLayoutView(final StageManager stageManager, final MagicGraphI magicGraph, final CurrentTrace currentTrace,
+			final CurrentProject currentProject, final MagicLayoutSettingsManager settingsManager) {
 		this.stageManager = stageManager;
 		this.magicGraph = magicGraph;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.settingsManager = settingsManager;
 		stageManager.loadFXML(this, "magic_layout_view.fxml");
 	}
 
@@ -96,7 +98,6 @@ public class MagicLayoutView extends Stage {
 				currentTrace.removeListener(traceChangeListener);
 			}
 		});
-
 	}
 
 	private void zoom(double zoomFactor) {
@@ -107,13 +108,13 @@ public class MagicLayoutView extends Stage {
 	@FXML
 	private void layoutGraph() {
 		magicGraphPane.getChildren().setAll(magicGraph.generateMagicGraph(currentTrace.getCurrentState()));
-		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges());
+		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodegroups(), magicLayoutEditEdges.getEdgegroups());
 	}
 
 	@FXML
 	private void updateGraph() {
 		magicGraph.updateMagicGraph(currentTrace.getCurrentState());
-		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodes(), magicLayoutEditEdges.getEdges());
+		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodegroups(), magicLayoutEditEdges.getEdgegroups());
 	}
 
 	@FXML
@@ -128,6 +129,12 @@ public class MagicLayoutView extends Stage {
 		magicLayoutEditEdges.addNewEdgegroup();
 	}
 
+	@FXML
+	private void saveLayoutSettings() {
+		MagicLayoutSettings layoutSettings = new MagicLayoutSettings(currentProject.getCurrentMachine().getName(), magicLayoutEditNodes.getNodegroups(), magicLayoutEditEdges.getEdgegroups());
+		settingsManager.save(layoutSettings);
+	}
+	
 	@FXML
 	private void saveGraphAsImage() {
 		// scale image for better and sharper quality

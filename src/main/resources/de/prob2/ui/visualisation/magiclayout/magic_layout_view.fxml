@@ -37,7 +37,11 @@
 							</Menu>
 							<SeparatorMenuItem />
 							<MenuItem
-								text="%visualisation.magicLayout.view.menu.file.items.saveGraphAsImage" onAction="#saveGraphAsImage"/>
+								text="%visualisation.magicLayout.view.menu.file.items.saveLayoutSettings"
+								onAction="#saveLayoutSettings" />
+							<MenuItem
+								text="%visualisation.magicLayout.view.menu.file.items.saveGraphAsImage"
+								onAction="#saveGraphAsImage" />
 						</Menu>
 						<ViewMenu fx:id="viewMenu" />
 					</MenuBar>
@@ -62,10 +66,12 @@
 							<HBox>
 								<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS"
 									spacing="5">
-									<Button text="%visualisation.magicLayout.view.buttons.update" onAction="#updateGraph"
-										styleClass="button-blue" />
-									<Button text="%visualisation.magicLayout.view.buttons.layout" onAction="#layoutGraph"
-										styleClass="button-blue" />
+									<Button
+										text="%visualisation.magicLayout.view.buttons.update"
+										onAction="#updateGraph" styleClass="button-blue" />
+									<Button
+										text="%visualisation.magicLayout.view.buttons.layout"
+										onAction="#layoutGraph" styleClass="button-blue" />
 								</HBox>
 								<HBox alignment="CENTER_RIGHT">
 									<Button fx:id="zoomInButton">
