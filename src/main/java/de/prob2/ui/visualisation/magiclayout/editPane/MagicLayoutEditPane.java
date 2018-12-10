@@ -15,6 +15,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
+import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
@@ -63,7 +64,7 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 			}
 		}
 
-		protected abstract void defineLineStyle(Line line, S t);
+		protected abstract void defineLineStyle(Line line, S s);
 	}
 
 	@FXML
@@ -403,4 +404,6 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 	
 	abstract T getInstance(String name, String expression);
 	protected abstract T getInstance(T component);
+
+	public abstract void openLayoutSettings(MagicLayoutSettings layoutSettings);
 }

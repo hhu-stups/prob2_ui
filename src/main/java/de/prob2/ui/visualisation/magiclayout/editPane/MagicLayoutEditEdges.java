@@ -13,6 +13,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicEdgegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
+import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 
@@ -96,5 +97,10 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 	@Override
 	protected MagicEdgegroup getInstance(MagicEdgegroup edges) {
 		return new MagicEdgegroup(edges);
+	}
+
+	@Override
+	public void openLayoutSettings(MagicLayoutSettings layoutSettings) {
+		listView.getItems().setAll(layoutSettings.getEdgegroups());
 	}
 }

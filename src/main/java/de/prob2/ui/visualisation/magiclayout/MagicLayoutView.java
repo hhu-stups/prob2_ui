@@ -136,6 +136,16 @@ public class MagicLayoutView extends Stage {
 	}
 	
 	@FXML
+	private void loadLayoutSettings() {
+		MagicLayoutSettings layoutSettings = settingsManager.load();
+		
+		if(layoutSettings != null) {
+			magicLayoutEditNodes.openLayoutSettings(layoutSettings);
+			magicLayoutEditEdges.openLayoutSettings(layoutSettings);
+		}
+	}
+	
+	@FXML
 	private void saveGraphAsImage() {
 		// scale image for better and sharper quality
 		WritableImage image = new WritableImage((int) Math.rint(4 * magicGraphPane.getWidth()),

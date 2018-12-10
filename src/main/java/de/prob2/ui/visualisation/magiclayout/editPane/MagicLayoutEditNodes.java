@@ -11,6 +11,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
+import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
 import de.prob2.ui.visualisation.magiclayout.MagicNodegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicShape;
 import javafx.fxml.FXML;
@@ -125,6 +126,11 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 	@Override
 	protected MagicNodegroup getInstance(MagicNodegroup nodes) {
 		return new MagicNodegroup(nodes);
+	}
+
+	@Override
+	public void openLayoutSettings(MagicLayoutSettings layoutSettings) {
+		listView.getItems().setAll(layoutSettings.getNodegroups());
 	}
 
 }

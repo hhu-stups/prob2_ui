@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.hildan.fxgson.FxGson;
+import org.hildan.fxgson.adapters.extras.ColorTypeAdapter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
@@ -76,6 +77,7 @@ import de.prob2.ui.visualisation.magiclayout.editPane.MagicLayoutEditNodes;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.BoundingBox;
+import javafx.scene.paint.Color;
 import javafx.util.BuilderFactory;
 
 public class ProB2Module extends AbstractModule {
@@ -122,6 +124,7 @@ public class ProB2Module extends AbstractModule {
 				}
 				return new BoundingBox(array[0], array[1], array[2], array[3]);
 			})
+			.registerTypeAdapter(Color.class, new ColorTypeAdapter())
 			.create());
 		
 		// Controllers

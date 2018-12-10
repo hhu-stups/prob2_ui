@@ -40,6 +40,10 @@
 								text="%visualisation.magicLayout.view.menu.file.items.saveLayoutSettings"
 								onAction="#saveLayoutSettings" />
 							<MenuItem
+								text="%visualisation.magicLayout.view.menu.file.items.loadLayoutSettings"
+								onAction="#loadLayoutSettings" />
+							<SeparatorMenuItem />
+							<MenuItem
 								text="%visualisation.magicLayout.view.menu.file.items.saveGraphAsImage"
 								onAction="#saveGraphAsImage" />
 						</Menu>

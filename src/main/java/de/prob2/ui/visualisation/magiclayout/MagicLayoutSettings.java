@@ -13,4 +13,16 @@ public class MagicLayoutSettings {
 		this.nodegroups = nodegroups;
 		this.edgegroups = edgegroups;
 	}
+	
+	public String getMachineName() {
+		return machineName;
+	}
+	
+	public List<MagicNodegroup> getNodegroups() {
+		return nodegroups;
+	}
+	
+	public List<MagicEdgegroup> getEdgegroups() {
+		return edgegroups;
+	}
 }
