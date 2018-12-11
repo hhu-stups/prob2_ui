@@ -77,20 +77,23 @@ public class LayeredLayout implements Layout {
 	 * 
 	 */
 	private Set<Edge> removeCycles(Model model) {
-		Set<Edge> removedEdges = new HashSet<>(model.getEdges());
+		Set<Edge> tempEdges = new HashSet<>(model.getEdges());
+		Set<Edge> removedEdges = new HashSet<>();
 		Set<Edge> acyclicEdges = new HashSet<>();
 
 		model.getVertices().forEach(vertex -> {
-			Set<Edge> incomingEdges = getIncomingEdges(vertex, model.getEdges());
-			Set<Edge> outgoingEdges = getOutgoingEdges(vertex, model.getEdges());
+			Set<Edge> incomingEdges = getIncomingEdges(vertex, tempEdges);
+			Set<Edge> outgoingEdges = getOutgoingEdges(vertex, tempEdges);
 
 			if (outgoingEdges.size() >= incomingEdges.size()) {
 				acyclicEdges.addAll(outgoingEdges);
-				removedEdges.removeAll(outgoingEdges);
+				removedEdges.addAll(incomingEdges);
 			} else {
 				acyclicEdges.addAll(incomingEdges);
-				removedEdges.removeAll(incomingEdges);
+				removedEdges.addAll(outgoingEdges);
 			}
+			tempEdges.removeAll(outgoingEdges);
+			tempEdges.removeAll(incomingEdges);
 		});
 
 		reversedEdges = reverseEdges(removedEdges);
