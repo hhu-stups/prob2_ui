@@ -298,15 +298,11 @@ public class LayeredLayout implements Layout {
 		double y = 0;
 		for (Entry<Integer, List<Vertex>> layer : layers.descendingMap().entrySet()) {
 			double x = 0;
-			double maxWidth = 0;
 			for (Vertex vertex : layer.getValue()) {
 				vertex.relocate(x, y - vertex.getHeight() / 2);
 				x += vertex.getWidth() + 50;
-				if (vertex.getWidth() > maxWidth) {
-					maxWidth = vertex.getWidth();
-				}
 			}
-			y += (maxWidth * 2);
+			y += 200;
 		}
 	}
 
