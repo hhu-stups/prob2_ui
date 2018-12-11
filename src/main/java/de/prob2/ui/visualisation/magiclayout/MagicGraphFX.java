@@ -40,7 +40,8 @@ public class MagicGraphFX implements MagicGraphI {
 	@Override
 	public List<MagicShape> getPossibleShapes() {
 		MagicShape shapes[] = new MagicShape[] { MagicShape.RECTANGLE, MagicShape.CIRCLE, MagicShape.ELLIPSE,
-				MagicShape.TRIANGLE };
+//				MagicShape.TRIANGLE 
+		};
 		return Arrays.asList(shapes);
 	}
 

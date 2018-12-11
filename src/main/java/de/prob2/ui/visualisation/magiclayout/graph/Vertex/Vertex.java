@@ -71,7 +71,7 @@ public class Vertex extends AbstractVertex {
 			shape = new Circle((txtWidth + 20) / 2);
 			break;
 		case ELLIPSE:
-			shape = new Ellipse((txtWidth + 30) / 2, (txtHeight + 20) / 2);
+			shape = new Ellipse((txtWidth + 20) / 2, (txtHeight + 20) / 2);
 			break;
 		case TRIANGLE:
 			shape = new Polygon(0, txtHeight + 20, (txtWidth + 30) * 2, txtHeight + 20, txtWidth + 30, 0);
