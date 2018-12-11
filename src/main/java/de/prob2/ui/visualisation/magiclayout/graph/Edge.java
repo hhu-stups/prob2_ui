@@ -6,7 +6,9 @@ import java.util.List;
 import de.prob2.ui.visualisation.magiclayout.graph.Vertex.DummyVertex;
 import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
@@ -46,6 +48,7 @@ public class Edge extends Group {
 	private Label txt;
 	private Polygon arrowhead;
 
+	private ObjectProperty<Style> style = new SimpleObjectProperty<>();
 	private DoubleProperty distanceX = new SimpleDoubleProperty();
 	private DoubleProperty distanceY = new SimpleDoubleProperty();
 
@@ -119,6 +122,10 @@ public class Edge extends Group {
 	public Vertex getTarget() {
 		return target;
 	}
+	
+	public ObjectProperty<Style> edgeStyleProperty() {
+		return style;
+	}
 
 	public DoubleProperty distanceXProperty() {
 		return distanceX;
@@ -164,6 +171,8 @@ public class Edge extends Group {
 	}
 
 	public void setStyle(Style style) {
+		this.style.set(style);
+		
 		line.setStroke(style.lineColor);
 		arrowhead.setFill(style.lineColor);
 		line.setStrokeWidth(style.lineWidth);

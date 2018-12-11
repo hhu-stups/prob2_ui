@@ -58,6 +58,14 @@ public class LayeredLayout implements Layout {
 				}
 			});
 		});
+		
+		// update Style of part edges when style of edge changes
+		splittedEdges.keySet().forEach(edge -> {
+			edge.edgeStyleProperty().addListener((observable, from, to) -> {
+				splittedEdges.get(edge).forEach(partEdge -> partEdge.setStyle(to));
+			});
+		});
+		
 //		positionEdges();
 	}
 
