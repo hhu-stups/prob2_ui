@@ -116,7 +116,7 @@ public class MagicGraphFX implements MagicGraphI {
 			try {
 				AbstractEvalResult result = state.eval(node.getExpression(), FormulaExpand.EXPAND);
 				BObject bObject = Translator.translate(result.toString());
-				Model modelToStyle = transformModel(getModel(node.getName(), bObject), graph.getModel());
+				Model modelToStyle = transformModel(getModel(node.getExpression(), bObject), graph.getModel());
 
 				Vertex.Style style = new Vertex.Style(node.getNodeColor(), node.getLineColor(), node.getLineWidth().getWidth(),
 						node.getLineType().getDashArrayList(), node.getTextColor());
