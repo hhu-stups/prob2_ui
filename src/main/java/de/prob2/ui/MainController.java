@@ -84,13 +84,19 @@ public class MainController extends BorderPane {
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
-				// Divider positions are restored in UIPersistence.open()
+				if (configData.horizontalDividerPositions != null) {
+					horizontalSP.setDividerPositions(configData.horizontalDividerPositions);
+				}
+				
+				if (configData.verticalDividerPositions != null) {
+					verticalSP.setDividerPositions(configData.verticalDividerPositions);
+				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.horizontalDividerPositions = getHorizontalDividerPositions();
-				configData.verticalDividerPositions = getVerticalDividerPositions();
+				configData.horizontalDividerPositions = horizontalSP.getDividerPositions();
+				configData.verticalDividerPositions = verticalSP.getDividerPositions();
 			}
 		});
 	}
@@ -101,32 +107,6 @@ public class MainController extends BorderPane {
 			guiState = uiState.getGuiState();
 		}
 		stageManager.loadFXML(this, guiState);
-	}
-
-	public double[] getHorizontalDividerPositions() {
-		if (horizontalSP != null) {
-			return horizontalSP.getDividerPositions();
-		}
-		return new double[] {};
-	}
-
-	public double[] getVerticalDividerPositions() {
-		if (verticalSP != null) {
-			return verticalSP.getDividerPositions();
-		}
-		return new double[] {};
-	}
-
-	public void setHorizontalDividerPositions(double[] pos) {
-		if (horizontalSP != null) {
-			horizontalSP.setDividerPositions(pos);
-		}
-	}
-
-	public void setVerticalDividerPositions(double[] pos) {
-		if (verticalSP != null) {
-			verticalSP.setDividerPositions(pos);
-		}
 	}
 
 	public List<Accordion> getAccordions() {

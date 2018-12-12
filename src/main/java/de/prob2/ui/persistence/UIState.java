@@ -37,9 +37,7 @@ public class UIState {
 	private List<String> expandedTitledPanes;
 	private double[] statesViewColumnsWidth;
 	private String[] statesViewColumnsOrder;
-	private double[] horizontalDividerPositions;
-	private double[] verticalDividerPositions;
-		
+	
 	@Inject
 	public UIState(final Config config) {
 		this.localeOverride = new SimpleObjectProperty<>(this, "localeOverride", null);
@@ -78,14 +76,6 @@ public class UIState {
 				
 				if (configData.statesViewColumnsOrder != null) {
 					setStatesViewColumnsOrder(configData.statesViewColumnsOrder);
-				}
-				
-				if (configData.horizontalDividerPositions != null) {
-					setHorizontalDividerPositions(configData.horizontalDividerPositions);
-				}
-				
-				if (configData.verticalDividerPositions != null) {
-					setVerticalDividerPositions(configData.verticalDividerPositions);
 				}
 			}
 			
@@ -180,21 +170,4 @@ public class UIState {
 	public String[] getStatesViewColumnsOrder() {
 		return statesViewColumnsOrder;
 	}
-	
-	public void setHorizontalDividerPositions(double[] pos) {
-		this.horizontalDividerPositions = pos;
-	}
-	
-	public double[] getHorizontalDividerPositions() {
-		return horizontalDividerPositions;
-	}
-	
-	public void setVerticalDividerPositions(double[] pos) {
-		this.verticalDividerPositions = pos;
-	}
-	
-	public double[] getVerticalDividerPositions() {
-		return verticalDividerPositions;
-	}
-	
 }
