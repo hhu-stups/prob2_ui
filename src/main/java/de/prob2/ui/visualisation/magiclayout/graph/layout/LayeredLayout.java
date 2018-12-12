@@ -53,7 +53,7 @@ public class LayeredLayout implements Layout {
 			graph.getChildren().remove(edge);
 			partEdges.forEach(partEdge -> {
 				graph.getChildren().add(partEdge);
-				if (partEdge.getTarget() != edge.getTarget()) {
+				if (!graph.getChildren().contains(partEdge.getTarget())) {
 					graph.getChildren().add(partEdge.getTarget());
 				}
 			});
