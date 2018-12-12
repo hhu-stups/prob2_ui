@@ -197,6 +197,8 @@ public final class StatesView extends StackPane {
 				}
 				
 				if (configData.statesViewColumnsWidth != null) {
+					// The table columns cannot be resized until the table view is shown on screen (before then, the resizing always fails).
+					// So we can't restore the column widths yet - that is done later using the restoreColumnWidths() method, which is called by the UI startup code once the main stage is visible.
 					columnWidthsToRestore = configData.statesViewColumnsWidth;
 				}
 			}
