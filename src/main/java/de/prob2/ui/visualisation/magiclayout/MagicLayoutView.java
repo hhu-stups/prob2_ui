@@ -166,6 +166,9 @@ public class MagicLayoutView extends Stage {
 
 	@FXML
 	private void saveGraphAsImage() {
+		double zoomFactor = magicGraphPane.getScaleX();
+		zoom(1.0/zoomFactor);
+		
 		// scale image for better and sharper quality
 		WritableImage image = new WritableImage((int) Math.rint(4 * magicGraphPane.getWidth()),
 				(int) Math.rint(4 * magicGraphPane.getHeight()));
@@ -203,5 +206,7 @@ public class MagicLayoutView extends Stage {
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "visualisation.magicLayout.view.alerts.couldNotOpenImage.content");
 		}
+		
+		zoom(zoomFactor);
 	}
 }
