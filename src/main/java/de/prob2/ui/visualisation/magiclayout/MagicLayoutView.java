@@ -99,6 +99,7 @@ public class MagicLayoutView extends Stage {
 		showingProperty().addListener((observable, from, to) -> {
 			if (to) {
 				layoutGraph();
+				disableButtons(currentTrace.getModel() == null);
 				currentTrace.modelProperty().addListener(modelChangeListener);
 				currentTrace.addListener(traceChangeListener);
 			} else {
