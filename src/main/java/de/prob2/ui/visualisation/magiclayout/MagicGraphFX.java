@@ -113,42 +113,48 @@ public class MagicGraphFX implements MagicGraphI {
 		graph.getModel().getEdges().forEach(edge -> edge.setStyle(new Edge.Style()));
 
 		magicNodes.forEach(node -> {
-			try {
-				AbstractEvalResult result = state.eval(node.getExpression(), FormulaExpand.EXPAND);
-				BObject bObject = Translator.translate(result.toString());
-				Model modelToStyle = transformModel(getModel(node.getExpression(), bObject), graph.getModel());
+			if (!node.getExpression().isEmpty()) {
+				try {
+					AbstractEvalResult result = state.eval(node.getExpression(), FormulaExpand.EXPAND);
+					BObject bObject = Translator.translate(result.toString());
+					Model modelToStyle = transformModel(getModel(node.getExpression(), bObject), graph.getModel());
 
-				Vertex.Style style = new Vertex.Style(node.getNodeColor(), node.getLineColor(), node.getLineWidth().getWidth(),
-						node.getLineType().getDashArrayList(), node.getTextColor());
+					Vertex.Style style = new Vertex.Style(node.getNodeColor(), node.getLineColor(),
+							node.getLineWidth().getWidth(), node.getLineType().getDashArrayList(), node.getTextColor());
 
-				modelToStyle.getVertices().forEach(vertex -> {
-					vertex.setStyle(style);
-					vertex.setType(toVertexType(node.getShape()));
-				});
-			} catch (BCompoundException e) {
-				stageManager.makeExceptionAlert(e, "",
-						"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content", node.getName(),
-						node.getExpression()).showAndWait();
+					modelToStyle.getVertices().forEach(vertex -> {
+						vertex.setStyle(style);
+						vertex.setType(toVertexType(node.getShape()));
+					});
+				} catch (BCompoundException e) {
+					stageManager.makeExceptionAlert(e, "",
+							"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content", node.getName(),
+							node.getExpression()).showAndWait();
+				}
 			}
 		});
 
 		magicEdges.forEach(magicEdge -> {
-			try {
-				AbstractEvalResult result = state.eval(magicEdge.getExpression(), FormulaExpand.EXPAND);
-				if (!result.toString().equals("NOT-INITIALISED: ")) {
-					BObject bObject = Translator.translate(result.toString());
-					Model modelToStyle = transformModel(getModel(magicEdge.getExpression(), bObject), graph.getModel());
+			if (!magicEdge.getExpression().isEmpty()) {
+				try {
+					AbstractEvalResult result = state.eval(magicEdge.getExpression(), FormulaExpand.EXPAND);
+					System.out.println("blub2 " + magicEdge.getName());
+					if (!result.toString().equals("NOT-INITIALISED: ")) {
+						BObject bObject = Translator.translate(result.toString());
+						Model modelToStyle = transformModel(getModel(magicEdge.getExpression(), bObject),
+								graph.getModel());
 
-					Edge.Style style = new Edge.Style(magicEdge.getLineColor(), magicEdge.getLineWidth().getWidth(),
-							magicEdge.getLineType().getDashArrayList(), magicEdge.getTextColor(),
-							magicEdge.getTextSize());
+						Edge.Style style = new Edge.Style(magicEdge.getLineColor(), magicEdge.getLineWidth().getWidth(),
+								magicEdge.getLineType().getDashArrayList(), magicEdge.getTextColor(),
+								magicEdge.getTextSize());
 
-					modelToStyle.getEdges().forEach(edge -> edge.setStyle(style));
+						modelToStyle.getEdges().forEach(edge -> edge.setStyle(style));
+					}
+				} catch (BCompoundException e) {
+					stageManager.makeExceptionAlert(e, "",
+							"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content",
+							magicEdge.getName(), magicEdge.getExpression()).showAndWait();
 				}
-			} catch (BCompoundException e) {
-				stageManager.makeExceptionAlert(e, "",
-						"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content", magicEdge.getName(),
-						magicEdge.getExpression()).showAndWait();
 			}
 		});
 	}
