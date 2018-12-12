@@ -137,7 +137,7 @@ public class MagicGraphFX implements MagicGraphI {
 				AbstractEvalResult result = state.eval(magicEdge.getExpression(), FormulaExpand.EXPAND);
 				if (!result.toString().equals("NOT-INITIALISED: ")) {
 					BObject bObject = Translator.translate(result.toString());
-					Model modelToStyle = transformModel(getModel(magicEdge.getName(), bObject), graph.getModel());
+					Model modelToStyle = transformModel(getModel(magicEdge.getExpression(), bObject), graph.getModel());
 
 					Edge.Style style = new Edge.Style(magicEdge.getLineColor(), magicEdge.getLineWidth().getWidth(),
 							magicEdge.getLineType().getDashArrayList(), magicEdge.getTextColor(),
