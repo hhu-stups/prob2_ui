@@ -336,7 +336,18 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 		listView.setContextMenu(
 				(this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem) : new ContextMenu(newEdgesItem));
 
-		listView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateValues());
+		listView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			updateValues();
+			disableControls(to == null);
+		});
+	}
+
+	void disableControls(boolean disable) {
+		expressionTextArea.setDisable(disable);
+		lineTypeComboBox.setDisable(disable);
+		lineColorPicker.setDisable(disable);
+		lineWidthComboBox.setDisable(disable);
+		textColorPicker.setDisable(disable);
 	}
 
 	private void initLineTypeComboBox() {
@@ -380,9 +391,10 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 
 		lineWidthComboBox.getSelectionModel().select(MagicLineWidth.DEFAULT);
 	}
-	
+
 	protected abstract T getInstance(T component);
 
 	abstract void addMachineElements();
+
 	public abstract void openLayoutSettings(MagicLayoutSettings layoutSettings);
 }

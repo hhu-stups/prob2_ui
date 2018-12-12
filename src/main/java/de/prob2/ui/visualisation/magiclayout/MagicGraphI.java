@@ -13,7 +13,7 @@ public interface MagicGraphI {
 	
 	List<MagicLineType> getSupportedLineTypes();
 	
-	List<MagicLineWidth> getSupportedLineWidths();
+	List<MagicLineWidth> getSupportedLineWidths(); 
 	
 	Node generateMagicGraph(State state);
 

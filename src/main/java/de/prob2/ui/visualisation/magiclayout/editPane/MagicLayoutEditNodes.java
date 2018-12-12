@@ -69,6 +69,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.shape"), shapeComboBox),
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.color"), nodeColorPicker));
 
+		disableControls(true);
 		addMachineElements();
 	}
 
@@ -104,6 +105,14 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 			shapeComboBox.getSelectionModel().selectFirst();
 			nodeColorPicker.setValue(Color.WHITE);
 		}
+	}
+	
+	@Override
+	void disableControls(boolean disable) {
+		super.disableControls(disable);
+		clusterCheckBox.setDisable(disable);
+		shapeComboBox.setDisable(disable);
+		nodeColorPicker.setDisable(disable);
 	}
 
 	public void addNewNodegroup() {

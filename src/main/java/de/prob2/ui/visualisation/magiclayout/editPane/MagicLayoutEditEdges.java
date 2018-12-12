@@ -44,6 +44,7 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 		flowPane.getChildren().add(
 				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textsize"), textSizeSpinner));
 
+		disableControls(true);
 		addMachineElements();
 	}
 
@@ -79,6 +80,12 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 		} else {
 			textSizeSpinner.getValueFactory().setValue(12);
 		}
+	}
+	
+	@Override
+	void disableControls(boolean disable) {
+		super.disableControls(disable);
+		textSizeSpinner.setDisable(disable);
 	}
 
 	public void addNewEdgegroup() {

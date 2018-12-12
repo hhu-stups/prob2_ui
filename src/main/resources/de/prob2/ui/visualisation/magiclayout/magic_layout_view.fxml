@@ -70,10 +70,10 @@
 							<HBox>
 								<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS"
 									spacing="5">
-									<Button
+									<Button fx:id="updateButton"
 										text="%visualisation.magicLayout.view.buttons.update"
 										onAction="#updateGraph" styleClass="button-blue" />
-									<Button
+									<Button fx:id="layoutButton"
 										text="%visualisation.magicLayout.view.buttons.layout"
 										onAction="#layoutGraph" styleClass="button-blue" />
 								</HBox>

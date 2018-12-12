@@ -53,6 +53,10 @@ public class MagicLayoutView extends Stage {
 	private Button zoomInButton;
 	@FXML
 	private Button zoomOutButton;
+	@FXML
+	private Button updateButton;
+	@FXML
+	private Button layoutButton;
 
 	private final StageManager stageManager;
 	private final MagicGraphI magicGraph;
@@ -61,8 +65,9 @@ public class MagicLayoutView extends Stage {
 	private final MagicLayoutSettingsManager settingsManager;
 
 	@Inject
-	public MagicLayoutView(final StageManager stageManager, final MagicGraphI magicGraph, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final MagicLayoutSettingsManager settingsManager) {
+	public MagicLayoutView(final StageManager stageManager, final MagicGraphI magicGraph,
+			final CurrentTrace currentTrace, final CurrentProject currentProject,
+			final MagicLayoutSettingsManager settingsManager) {
 		this.stageManager = stageManager;
 		this.magicGraph = magicGraph;
 		this.currentTrace = currentTrace;
@@ -83,7 +88,10 @@ public class MagicLayoutView extends Stage {
 		zoomOutButton.setOnAction(event -> zoom(0.9));
 
 		// generate new graph whenever the model changes
-		ChangeListener<? super AbstractModel> modelChangeListener = (observable, from, to) -> layoutGraph();
+		ChangeListener<? super AbstractModel> modelChangeListener = (observable, from, to) -> {
+			layoutGraph();
+			disableButtons(to == null);
+		};
 		// update existing graph whenever the trace changes
 		ChangeListener<? super Trace> traceChangeListener = (observable, from, to) -> updateGraph();
 
@@ -98,6 +106,15 @@ public class MagicLayoutView extends Stage {
 				currentTrace.removeListener(traceChangeListener);
 			}
 		});
+		
+		disableButtons(true);
+	}
+
+	private void disableButtons(boolean disable) {
+		zoomInButton.setDisable(disable);
+		zoomOutButton.setDisable(disable);
+		updateButton.setDisable(disable);
+		layoutButton.setDisable(disable);
 	}
 
 	private void zoom(double zoomFactor) {
@@ -131,20 +148,21 @@ public class MagicLayoutView extends Stage {
 
 	@FXML
 	private void saveLayoutSettings() {
-		MagicLayoutSettings layoutSettings = new MagicLayoutSettings(currentProject.getCurrentMachine().getName(), magicLayoutEditNodes.getNodegroups(), magicLayoutEditEdges.getEdgegroups());
+		MagicLayoutSettings layoutSettings = new MagicLayoutSettings(currentProject.getCurrentMachine().getName(),
+				magicLayoutEditNodes.getNodegroups(), magicLayoutEditEdges.getEdgegroups());
 		settingsManager.save(layoutSettings);
 	}
-	
+
 	@FXML
 	private void loadLayoutSettings() {
 		MagicLayoutSettings layoutSettings = settingsManager.load();
-		
-		if(layoutSettings != null) {
+
+		if (layoutSettings != null) {
 			magicLayoutEditNodes.openLayoutSettings(layoutSettings);
 			magicLayoutEditEdges.openLayoutSettings(layoutSettings);
 		}
 	}
-	
+
 	@FXML
 	private void saveGraphAsImage() {
 		// scale image for better and sharper quality
@@ -174,9 +192,10 @@ public class MagicLayoutView extends Stage {
 		try {
 			ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
 		} catch (IOException e) {
-			stageManager.makeExceptionAlert(e, "visualisation.magicLayout.view.alerts.couldNotSaveGraphAsImage.content");
+			stageManager.makeExceptionAlert(e,
+					"visualisation.magicLayout.view.alerts.couldNotSaveGraphAsImage.content");
 		}
-		
+
 		// try to open image with external viewer
 		try {
 			Desktop.getDesktop().open(file);
