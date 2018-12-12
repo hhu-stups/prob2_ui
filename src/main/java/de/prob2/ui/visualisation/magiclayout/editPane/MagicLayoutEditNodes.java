@@ -58,7 +58,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 		}
 
 		shapeComboBox = new ComboBox<>();
-		shapeComboBox.getItems().setAll(magicGraph.getPossibleShapes());
+		shapeComboBox.getItems().setAll(magicGraph.getSupportedShapes());
 		shapeComboBox.setCellFactory((ListView<MagicShape> lv) -> new MagicShapeListCell());
 		shapeComboBox.setButtonCell(new MagicShapeListCell());
 		shapeComboBox.getSelectionModel().selectFirst();

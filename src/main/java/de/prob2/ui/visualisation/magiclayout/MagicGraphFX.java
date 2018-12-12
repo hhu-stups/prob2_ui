@@ -38,11 +38,25 @@ public class MagicGraphFX implements MagicGraphI {
 	}
 
 	@Override
-	public List<MagicShape> getPossibleShapes() {
+	public List<MagicShape> getSupportedShapes() {
 		MagicShape shapes[] = new MagicShape[] { MagicShape.RECTANGLE, MagicShape.CIRCLE, MagicShape.ELLIPSE,
 //				MagicShape.TRIANGLE 
 		};
 		return Arrays.asList(shapes);
+	}
+
+	@Override
+	public List<MagicLineType> getSupportedLineTypes() {
+		MagicLineType lineTypes[] = new MagicLineType[] { MagicLineType.CONTINUOUS, MagicLineType.DASHED,
+				MagicLineType.DOTTED };
+		return Arrays.asList(lineTypes);
+	}
+
+	@Override
+	public List<MagicLineWidth> getSupportedLineWidths() {
+		MagicLineWidth lineWidths[] = new MagicLineWidth[] { MagicLineWidth.NARROW, MagicLineWidth.DEFAULT,
+				MagicLineWidth.WIDE, MagicLineWidth.EXTRA_WIDE };
+		return Arrays.asList(lineWidths);
 	}
 
 	@Override
@@ -97,15 +111,15 @@ public class MagicGraphFX implements MagicGraphI {
 	public void setGraphStyle(List<MagicNodegroup> magicNodes, List<MagicEdgegroup> magicEdges) {
 		graph.getModel().getVertices().forEach(vertex -> vertex.setStyle(new Vertex.Style()));
 		graph.getModel().getEdges().forEach(edge -> edge.setStyle(new Edge.Style()));
-		
+
 		magicNodes.forEach(node -> {
 			try {
 				AbstractEvalResult result = state.eval(node.getExpression(), FormulaExpand.EXPAND);
 				BObject bObject = Translator.translate(result.toString());
 				Model modelToStyle = transformModel(getModel(node.getName(), bObject), graph.getModel());
 
-				Vertex.Style style = new Vertex.Style(node.getNodeColor(), node.getLineColor(), node.getLineWidth(),
-						node.getLineType(), node.getTextColor());
+				Vertex.Style style = new Vertex.Style(node.getNodeColor(), node.getLineColor(), node.getLineWidth().getWidth(),
+						node.getLineType().getDashArrayList(), node.getTextColor());
 
 				modelToStyle.getVertices().forEach(vertex -> {
 					vertex.setStyle(style);
@@ -125,8 +139,9 @@ public class MagicGraphFX implements MagicGraphI {
 					BObject bObject = Translator.translate(result.toString());
 					Model modelToStyle = transformModel(getModel(magicEdge.getName(), bObject), graph.getModel());
 
-					Edge.Style style = new Edge.Style(magicEdge.getLineColor(), magicEdge.getLineWidth(),
-							magicEdge.getLineType(), magicEdge.getTextColor(), magicEdge.getTextSize());
+					Edge.Style style = new Edge.Style(magicEdge.getLineColor(), magicEdge.getLineWidth().getWidth(),
+							magicEdge.getLineType().getDashArrayList(), magicEdge.getTextColor(),
+							magicEdge.getTextSize());
 
 					modelToStyle.getEdges().forEach(edge -> edge.setStyle(style));
 				}

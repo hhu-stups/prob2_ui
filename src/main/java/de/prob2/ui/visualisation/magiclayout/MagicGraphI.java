@@ -9,11 +9,16 @@ public interface MagicGraphI {
 	
 	Boolean supportsClustering();
 	
-	List<MagicShape> getPossibleShapes();
+	List<MagicShape> getSupportedShapes();
+	
+	List<MagicLineType> getSupportedLineTypes();
+	
+	List<MagicLineWidth> getSupportedLineWidths();
 	
 	Node generateMagicGraph(State state);
 
 	void updateMagicGraph(State state);
 
 	void setGraphStyle(List<MagicNodegroup> nodes, List<MagicEdgegroup> edges);
-}	
+
+}

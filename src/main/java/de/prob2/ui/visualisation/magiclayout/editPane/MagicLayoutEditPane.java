@@ -1,7 +1,6 @@
 package de.prob2.ui.visualisation.magiclayout.editPane;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -13,6 +12,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
+import de.prob2.ui.visualisation.magiclayout.MagicLineType;
+import de.prob2.ui.visualisation.magiclayout.MagicLineWidth;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
@@ -71,9 +72,9 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 	@FXML
 	FlowPane flowPane;
 
-	private ComboBox<List<Double>> lineTypeComboBox;
+	private ComboBox<MagicLineType> lineTypeComboBox;
 	private ColorPicker lineColorPicker;
-	private ComboBox<Double> lineWidthComboBox;
+	private ComboBox<MagicLineWidth> lineWidthComboBox;
 	private ColorPicker textColorPicker;
 
 	final StageManager stageManager;
@@ -97,15 +98,13 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 
 		// add general controls
 		lineTypeComboBox = new ComboBox<>();
-		lineTypeComboBox.getItems().add(new ArrayList<>());
-		lineTypeComboBox.getItems().add(Arrays.asList(new Double[] { 12.0, 4.0, 5.0, 4.0 }));
-		lineTypeComboBox.getItems().add(Arrays.asList(new Double[] { 2.0, 2.0, 2.0, 2.0 }));
+		lineTypeComboBox.getItems().addAll(magicGraph.getSupportedLineTypes());
 		initLineTypeComboBox();
 
 		lineColorPicker = new ColorPicker(Color.BLACK);
 
 		lineWidthComboBox = new ComboBox<>();
-		lineWidthComboBox.getItems().addAll(0.5, 1.0, 2.0, 5.0);
+		lineWidthComboBox.getItems().addAll(magicGraph.getSupportedLineWidths());
 		initLineWidthComboBox();
 
 		textColorPicker = new ColorPicker(Color.BLACK);
@@ -342,18 +341,18 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 
 	private void initLineTypeComboBox() {
 		// show different line types in ComboBox
-		lineTypeComboBox.setCellFactory((ListView<List<Double>> lv) -> new LineListCell<List<Double>>() {
+		lineTypeComboBox.setCellFactory((ListView<MagicLineType> lv) -> new LineListCell<MagicLineType>() {
 			@Override
-			protected void defineLineStyle(Line line, List<Double> style) {
-				line.getStrokeDashArray().addAll(style);
+			protected void defineLineStyle(Line line, MagicLineType style) {
+				line.getStrokeDashArray().addAll(style.getDashArrayList());
 				line.setStroke(Color.WHITE);
 			}
 		});
 
-		lineTypeComboBox.setButtonCell(new LineListCell<List<Double>>() {
+		lineTypeComboBox.setButtonCell(new LineListCell<MagicLineType>() {
 			@Override
-			protected void defineLineStyle(Line line, List<Double> style) {
-				line.getStrokeDashArray().addAll(style);
+			protected void defineLineStyle(Line line, MagicLineType style) {
+				line.getStrokeDashArray().addAll(style.getDashArrayList());
 				line.setStroke(Color.rgb(55, 55, 60));
 			}
 		});
@@ -363,23 +362,23 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 
 	private void initLineWidthComboBox() {
 		// show different line thicknesses in ComboBox (not just double values)
-		lineWidthComboBox.setCellFactory((ListView<Double> lv) -> new LineListCell<Double>() {
+		lineWidthComboBox.setCellFactory((ListView<MagicLineWidth> lv) -> new LineListCell<MagicLineWidth>() {
 			@Override
-			protected void defineLineStyle(Line line, Double width) {
-				line.setStrokeWidth(width);
+			protected void defineLineStyle(Line line, MagicLineWidth width) {
+				line.setStrokeWidth(width.getWidth());
 				line.setStroke(Color.WHITE);
 			}
 		});
 
-		lineWidthComboBox.setButtonCell(new LineListCell<Double>() {
+		lineWidthComboBox.setButtonCell(new LineListCell<MagicLineWidth>() {
 			@Override
-			protected void defineLineStyle(Line line, Double width) {
-				line.setStrokeWidth(width);
+			protected void defineLineStyle(Line line, MagicLineWidth width) {
+				line.setStrokeWidth(width.getWidth());
 				line.setStroke(Color.rgb(55, 55, 60));
 			}
 		});
 
-		lineWidthComboBox.getSelectionModel().select(1.0);
+		lineWidthComboBox.getSelectionModel().select(MagicLineWidth.DEFAULT);
 	}
 	
 	protected abstract T getInstance(T component);
