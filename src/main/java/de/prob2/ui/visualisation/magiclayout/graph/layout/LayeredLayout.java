@@ -308,7 +308,7 @@ public class LayeredLayout implements Layout {
 			double x = 0;
 			for (Vertex vertex : layer.getValue()) {
 				vertex.relocate(x, y - vertex.getHeight() / 2);
-				x += vertex.getWidth() + 50;
+				x += vertex.getWidth() + 10;
 			}
 			y += 200;
 		}
@@ -335,7 +335,7 @@ public class LayeredLayout implements Layout {
 
 		while (deviationBefore - deviationAfter > 0.5) {
 			layers.values().forEach(layer -> {
-				Set<Set<Vertex>> regions = calculateRegions(layer);
+				Set<Set<Vertex>> regions = calculateRegions(layer, acyclicEdges);
 				regions.forEach(region -> {
 					double force = calculateForce(region, acyclicEdges);
 					region.forEach(vertex -> {
@@ -425,9 +425,10 @@ public class LayeredLayout implements Layout {
 	 * (Georg Sander, 'Graph layout for applications in compiler construction'.
 	 * Technical Report A/01/96, FB 14 Informatik, Universität des Saarlandes, 1996,
 	 * pp. 192-193.)
+	 * @param acyclicEdges 
 	 * 
 	 */
-	private Set<Set<Vertex>> calculateRegions(List<Vertex> layer) {
+	private Set<Set<Vertex>> calculateRegions(List<Vertex> layer, Set<Edge> acyclicEdges) {
 		Set<Set<Vertex>> regions = new HashSet<>();
 		Set<Vertex> region = new HashSet<>();
 
@@ -435,7 +436,8 @@ public class LayeredLayout implements Layout {
 		region.add(lastVertex);
 		for (int i = 1; i < layer.size(); i++) {
 			Vertex thisVertex = layer.get(i);
-			if (thisVertex.getLeftX() - lastVertex.getRightX() > 5) {
+			if (thisVertex.getLeftX() - lastVertex.getRightX() > 5
+					|| calculateForce(thisVertex, acyclicEdges) > calculateForce(lastVertex, acyclicEdges)) {
 				regions.add(region);
 				region = new HashSet<>();
 			}
