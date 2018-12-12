@@ -19,7 +19,6 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.operations.OperationsView;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -38,8 +37,6 @@ public class UIState {
 	private List<String> expandedTitledPanes;
 	private double[] statesViewColumnsWidth;
 	private String[] statesViewColumnsOrder;
-	private OperationsView.SortMode operationsSortMode;
-	private boolean operationsShowNotEnabled;
 	private double[] horizontalDividerPositions;
 	private double[] verticalDividerPositions;
 		
@@ -90,9 +87,6 @@ public class UIState {
 				if (configData.verticalDividerPositions != null) {
 					setVerticalDividerPositions(configData.verticalDividerPositions);
 				}
-				
-				setOperationsSortMode(configData.operationsSortMode);
-				setOperationsShowNotEnabled(configData.operationsShowNotEnabled);
 			}
 			
 			@Override
@@ -185,22 +179,6 @@ public class UIState {
 	
 	public String[] getStatesViewColumnsOrder() {
 		return statesViewColumnsOrder;
-	}
-	
-	public void setOperationsSortMode(OperationsView.SortMode mode) {
-		this.operationsSortMode = mode;
-	}
-	
-	public OperationsView.SortMode getOperationsSortMode() {
-		return operationsSortMode;
-	}
-	
-	public void setOperationsShowNotEnabled(boolean showNotEnabled) {
-		operationsShowNotEnabled = showNotEnabled;
-	}
-	
-	public boolean getOperationsShowNotEnabled() {
-		return operationsShowNotEnabled;
 	}
 	
 	public void setHorizontalDividerPositions(double[] pos) {

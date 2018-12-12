@@ -279,7 +279,11 @@ public final class OperationsView extends VBox {
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
-				// Sort mode and show not enabled state are restored in UIPersistence.open()
+				if (configData.operationsSortMode != null) {
+					setSortMode(configData.operationsSortMode);
+				}
+				
+				setShowDisabledOps(configData.operationsShowNotEnabled);
 			}
 			
 			@Override
@@ -516,19 +520,19 @@ public final class OperationsView extends VBox {
 	}
 	
 
-	public OperationsView.SortMode getSortMode() {
+	private OperationsView.SortMode getSortMode() {
 		return this.sortMode.get();
 	}
 
-	public void setSortMode(final OperationsView.SortMode sortMode) {
+	private void setSortMode(final OperationsView.SortMode sortMode) {
 		this.sortMode.set(sortMode);
 	}
 	
-	public boolean getShowDisabledOps() {
+	private boolean getShowDisabledOps() {
 		return this.showDisabledOps.get();
 	}
 
-	public void setShowDisabledOps(boolean showDisabledOps) {
+	private void setShowDisabledOps(boolean showDisabledOps) {
 		this.showDisabledOps.set(showDisabledOps);
 	}
 }

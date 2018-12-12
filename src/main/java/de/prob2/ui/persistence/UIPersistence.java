@@ -10,7 +10,6 @@ import de.prob2.ui.MainController;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.WindowMenu;
-import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.states.StatesView;
 
 import javafx.geometry.BoundingBox;
@@ -108,11 +107,5 @@ public final class UIPersistence {
 		if (uiState.getStatesViewColumnsWidth() != null) {
 			TablePersistenceHandler.setColumnsWidth(statesView.getTable(), statesView.getTable().getColumns(), uiState.getStatesViewColumnsWidth());
 		}
-		
-		final OperationsView operationsView = injector.getInstance(OperationsView.class);
-		if (uiState.getOperationsSortMode() != null) {
-			operationsView.setSortMode(uiState.getOperationsSortMode());
-		}
-		operationsView.setShowDisabledOps(uiState.getOperationsShowNotEnabled());
 	}
 }
