@@ -8,7 +8,9 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.persistence.TabPersistenceHandler;
@@ -54,7 +56,8 @@ public final class PreferencesStage extends AbstractPreferencesStage {
 	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 	private final UIState uiState;
-	private final TabPersistenceHandler tabPersistenceHandler;
+	private final Config config;
+	private TabPersistenceHandler tabPersistenceHandler;
 
 	@Inject
 	private PreferencesStage(
@@ -66,16 +69,17 @@ public final class PreferencesStage extends AbstractPreferencesStage {
 		final ResourceBundle bundle,
 		final CurrentProject currentProject,
 		final UIState uiState,
-		final PreferencesHandler preferencesHandler
+		final PreferencesHandler preferencesHandler,
+		final Config config
 	) {
 		super(globalProBPrefs, globalPreferences, preferencesHandler, machineLoader);
 		this.recentProjects = recentProjects;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.uiState = uiState;
+		this.config = config;
 
 		stageManager.loadFXML(this, "preferences_stage.fxml");
-		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 	}
 
 	@FXML
@@ -109,6 +113,21 @@ public final class PreferencesStage extends AbstractPreferencesStage {
 		localeOverrideBox.getItems().setAll(SUPPORTED_LOCALES);
 
 		this.globalPrefsView.setPreferences(this.globalProBPrefs);
+
+		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				if (configData.currentPreference != null) {
+					getTabPersistenceHandler().setCurrentTab(configData.currentPreference);
+				}
+			}
+			
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.currentPreference = getTabPersistenceHandler().getCurrentTab();
+			}
+		});
 	}
 
 	@FXML

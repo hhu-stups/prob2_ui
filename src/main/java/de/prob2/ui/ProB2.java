@@ -89,9 +89,6 @@ public class ProB2 extends Application {
 
 			System.setProperty("prob.stdlib", Main.getProBDirectory() + File.separator + "stdlib");
 
-			// Load config file
-			injector.getInstance(Config.class);
-
 			CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 			currentProject.addListener((observable, from, to) -> this.updateTitle());
 			currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle());

@@ -6,13 +6,15 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 @Singleton
 public final class BConsole extends Console {
 	@Inject
-	private BConsole(BInterpreter bInterpreter, ResourceBundle bundle, CurrentTrace currentTrace) {
+	private BConsole(BInterpreter bInterpreter, ResourceBundle bundle, CurrentTrace currentTrace, Config config) {
 		super(bundle, bundle.getString("consoles.b.header"), bundle.getString("consoles.b.prompt.classicalB"), bInterpreter);
 		
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
@@ -29,6 +31,18 @@ public final class BConsole extends Console {
 			this.insertText(this.getLineNumber(), 0, line);
 			this.moveTo(oldCaretPos + line.length());
 			this.requestFollowCaret();
+		});
+		
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final de.prob2.ui.config.ConfigData configData) {
+				applySettings(configData.bConsoleSettings);
+			}
+			
+			@Override
+			public void saveConfig(final de.prob2.ui.config.ConfigData configData) {
+				configData.bConsoleSettings = getSettings();
+			}
 		});
 	}
 }

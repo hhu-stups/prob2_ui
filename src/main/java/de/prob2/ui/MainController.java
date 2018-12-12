@@ -8,11 +8,15 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectView;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableIntegerValue;
@@ -38,13 +42,15 @@ public class MainController extends BorderPane {
 	private final StageManager stageManager;
 	private final UIState uiState;
 	private final ResourceBundle resourceBundle;
+	private final Config config;
 
 	@Inject
-	public MainController(Injector injector, StageManager stageManager, UIState uiState, ResourceBundle resourceBundle) {
+	public MainController(Injector injector, StageManager stageManager, UIState uiState, ResourceBundle resourceBundle, Config config) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.uiState = uiState;
 		this.resourceBundle = resourceBundle;
+		this.config = config;
 		refresh();
 	}
 
@@ -74,6 +80,19 @@ public class MainController extends BorderPane {
 				projectView.showMachines();
 			}
 		}));
+
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				// Divider positions are restored in UIPersistence.open()
+			}
+			
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.horizontalDividerPositions = getHorizontalDividerPositions();
+				configData.verticalDividerPositions = getVerticalDividerPositions();
+			}
+		});
 	}
 
 	public void refresh() {

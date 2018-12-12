@@ -1,8 +1,21 @@
 package de.prob2.ui.states;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.animator.command.GetMachineStructureCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
@@ -17,14 +30,19 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.persistence.TablePersistenceHandler;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -48,20 +66,9 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Singleton
 public final class StatesView extends StackPane {
@@ -102,6 +109,7 @@ public final class StatesView extends StackPane {
 	private final StatusBar statusBar;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
+	private final Config config;
 
 	private List<PrologASTNode> rootNodes;
 	private List<PrologASTNode> filteredRootNodes;
@@ -114,12 +122,13 @@ public final class StatesView extends StackPane {
 
 	@Inject
 	private StatesView(final Injector injector, final CurrentTrace currentTrace, final StatusBar statusBar,
-			final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions) {
+			final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final Config config) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.statusBar = statusBar;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
+		this.config = config;
 
 		this.rootNodes = null;
 		this.filteredRootNodes = null;
@@ -178,6 +187,19 @@ public final class StatesView extends StackPane {
 		});
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
+
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				// Columns width/order is restored in UIPersistence.open()
+			}
+			
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.statesViewColumnsWidth = TablePersistenceHandler.getColumnsWidth(getTable().getColumns());
+				configData.statesViewColumnsOrder = TablePersistenceHandler.getColumnsOrder(getTable().getColumns());
+			}
+		});
 	}
 
 	private TreeTableRow<StateItem<?>> initTableRow() {

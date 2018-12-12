@@ -96,14 +96,23 @@ public final class UIPersistence {
 		final StatesView statesView = injector.getInstance(StatesView.class);
 		statesView.expandConsole(uiState.getExpandedTitledPanes().contains("bconsole"));
 		
-		main.setHorizontalDividerPositions(uiState.getHorizontalDividerPositions());
-		main.setVerticalDividerPositions(uiState.getVerticalDividerPositions());
-		TablePersistenceHandler.setColumnsOrder(statesView.getTable().getColumns(), uiState.getStatesViewColumnsOrder());
-		TablePersistenceHandler.setColumnsWidth(statesView.getTable(), statesView.getTable().getColumns(), uiState.getStatesViewColumnsWidth());
+		if (uiState.getHorizontalDividerPositions() != null) {
+			main.setHorizontalDividerPositions(uiState.getHorizontalDividerPositions());
+		}
+		if (uiState.getVerticalDividerPositions() != null) {
+			main.setVerticalDividerPositions(uiState.getVerticalDividerPositions());
+		}
+		if (uiState.getStatesViewColumnsOrder() != null) {
+			TablePersistenceHandler.setColumnsOrder(statesView.getTable().getColumns(), uiState.getStatesViewColumnsOrder());
+		}
+		if (uiState.getStatesViewColumnsWidth() != null) {
+			TablePersistenceHandler.setColumnsWidth(statesView.getTable(), statesView.getTable().getColumns(), uiState.getStatesViewColumnsWidth());
+		}
 		
 		final OperationsView operationsView = injector.getInstance(OperationsView.class);
-		operationsView.setSortMode(uiState.getOperationsSortMode());
+		if (uiState.getOperationsSortMode() != null) {
+			operationsView.setSortMode(uiState.getOperationsSortMode());
+		}
 		operationsView.setShowDisabledOps(uiState.getOperationsShowNotEnabled());
-		
 	}
 }

@@ -1,11 +1,20 @@
 package de.prob2.ui.prob2fx;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
@@ -16,6 +25,7 @@ import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -31,11 +41,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -59,7 +64,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	@Inject
 	private CurrentProject(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
-							final CurrentTrace currentTrace) {
+							final CurrentTrace currentTrace, final Config config) {
 		this.stageManager = stageManager;
 		this.injector = injector;
 		this.animations = animations;
@@ -100,6 +105,22 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				to.resetStatus();
 			}
 			injector.getInstance(MachineTableView.class).refresh();
+		});
+
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				if (configData.defaultProjectLocation == null) {
+					setDefaultLocation(Paths.get(System.getProperty("user.home")));
+				} else {
+					setDefaultLocation(Paths.get(configData.defaultProjectLocation));
+				}
+			}
+			
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.defaultProjectLocation = getDefaultLocation().toString();
+			}
 		});
 	}
 
