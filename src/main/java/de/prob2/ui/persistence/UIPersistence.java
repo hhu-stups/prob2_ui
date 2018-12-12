@@ -94,12 +94,6 @@ public final class UIPersistence {
 		
 		final StatesView statesView = injector.getInstance(StatesView.class);
 		statesView.expandConsole(uiState.getExpandedTitledPanes().contains("bconsole"));
-		
-		if (uiState.getStatesViewColumnsOrder() != null) {
-			TablePersistenceHandler.setColumnsOrder(statesView.getTable().getColumns(), uiState.getStatesViewColumnsOrder());
-		}
-		if (uiState.getStatesViewColumnsWidth() != null) {
-			TablePersistenceHandler.setColumnsWidth(statesView.getTable(), statesView.getTable().getColumns(), uiState.getStatesViewColumnsWidth());
-		}
+		statesView.restoreColumnWidths();
 	}
 }

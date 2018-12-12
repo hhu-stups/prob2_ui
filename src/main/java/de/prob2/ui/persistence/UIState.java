@@ -35,8 +35,6 @@ public class UIState {
 	private final Map<String, BoundingBox> savedStageBoxes;
 	private final Map<String, Reference<Stage>> stages;
 	private List<String> expandedTitledPanes;
-	private double[] statesViewColumnsWidth;
-	private String[] statesViewColumnsOrder;
 	
 	@Inject
 	public UIState(final Config config) {
@@ -68,14 +66,6 @@ public class UIState {
 				
 				if (configData.expandedTitledPanes != null) {
 					getExpandedTitledPanes().addAll(configData.expandedTitledPanes);
-				}
-				
-				if (configData.statesViewColumnsWidth != null) {
-					setStatesViewColumnsWidth(configData.statesViewColumnsWidth);
-				}
-				
-				if (configData.statesViewColumnsOrder != null) {
-					setStatesViewColumnsOrder(configData.statesViewColumnsOrder);
 				}
 			}
 			
@@ -153,21 +143,5 @@ public class UIState {
 	
 	public List<String> getExpandedTitledPanes() {
 		return expandedTitledPanes;
-	}
-	
-	public void setStatesViewColumnsWidth(double[] width) {
-		this.statesViewColumnsWidth = width;
-	}
-	
-	public double[] getStatesViewColumnsWidth() {
-		return statesViewColumnsWidth;
-	}
-	
-	public void setStatesViewColumnsOrder(String[] order) {
-		this.statesViewColumnsOrder = order;
-	}
-	
-	public String[] getStatesViewColumnsOrder() {
-		return statesViewColumnsOrder;
 	}
 }

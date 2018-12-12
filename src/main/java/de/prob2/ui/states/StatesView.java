@@ -117,6 +117,7 @@ public final class StatesView extends StackPane {
 	private final Map<IEvalElement, AbstractEvalResult> currentValues;
 	private final Map<IEvalElement, AbstractEvalResult> previousValues;
 	private final ExecutorService updater;
+	private double[] columnWidthsToRestore;
 
 	private String filter = "";
 
@@ -191,15 +192,25 @@ public final class StatesView extends StackPane {
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
-				// Columns width/order is restored in UIPersistence.open()
+				if (configData.statesViewColumnsOrder != null) {
+					TablePersistenceHandler.setColumnsOrder(tv.getColumns(), configData.statesViewColumnsOrder);
+				}
+				
+				if (configData.statesViewColumnsWidth != null) {
+					columnWidthsToRestore = configData.statesViewColumnsWidth;
+				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.statesViewColumnsWidth = TablePersistenceHandler.getColumnsWidth(getTable().getColumns());
-				configData.statesViewColumnsOrder = TablePersistenceHandler.getColumnsOrder(getTable().getColumns());
+				configData.statesViewColumnsWidth = TablePersistenceHandler.getColumnsWidth(tv.getColumns());
+				configData.statesViewColumnsOrder = TablePersistenceHandler.getColumnsOrder(tv.getColumns());
 			}
 		});
+	}
+
+	public void restoreColumnWidths() {
+		TablePersistenceHandler.setColumnsWidth(tv, tv.getColumns(), columnWidthsToRestore);
 	}
 
 	private TreeTableRow<StateItem<?>> initTableRow() {
@@ -523,10 +534,6 @@ public final class StatesView extends StackPane {
 		stage.show();
 	}
 
-	public TreeTableView<StateItem<?>> getTable() {
-		return tv;
-	}
-	
 	public void expandConsole(boolean expanded) {
 		consolePane.setExpanded(expanded);
 	}
