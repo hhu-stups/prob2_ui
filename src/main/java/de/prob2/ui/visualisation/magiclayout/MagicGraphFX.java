@@ -95,6 +95,9 @@ public class MagicGraphFX implements MagicGraphI {
 
 	@Override
 	public void setGraphStyle(List<MagicNodegroup> magicNodes, List<MagicEdgegroup> magicEdges) {
+		graph.getModel().getVertices().forEach(vertex -> vertex.setStyle(new Vertex.Style()));
+		graph.getModel().getEdges().forEach(edge -> edge.setStyle(new Edge.Style()));
+		
 		magicNodes.forEach(node -> {
 			try {
 				AbstractEvalResult result = state.eval(node.getExpression(), FormulaExpand.EXPAND);
