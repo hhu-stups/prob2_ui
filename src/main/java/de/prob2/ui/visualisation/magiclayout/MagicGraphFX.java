@@ -138,7 +138,6 @@ public class MagicGraphFX implements MagicGraphI {
 			if (!magicEdge.getExpression().isEmpty()) {
 				try {
 					AbstractEvalResult result = state.eval(magicEdge.getExpression(), FormulaExpand.EXPAND);
-					System.out.println("blub2 " + magicEdge.getName());
 					if (!result.toString().equals("NOT-INITIALISED: ")) {
 						BObject bObject = Translator.translate(result.toString());
 						Model modelToStyle = transformModel(getModel(magicEdge.getExpression(), bObject),
