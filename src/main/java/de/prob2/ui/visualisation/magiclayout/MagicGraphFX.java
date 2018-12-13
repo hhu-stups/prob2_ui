@@ -240,7 +240,11 @@ public class MagicGraphFX implements MagicGraphI {
 	private Model getModel(String caption, BObject bObject) {
 		Model model = new Model();
 		if (!(bObject instanceof Collection<?>)) {
-			model.addEdge(new Edge(new Vertex(caption), new Vertex(bObject.toString()), ""));
+			if (caption.equals(bObject.toString())) {
+				model.addVertex(new Vertex(caption));
+			} else {
+				model.addEdge(new Edge(new Vertex(caption), new Vertex(bObject.toString()), ""));
+			}
 		} else if (bObject instanceof de.prob.translator.types.Tuple) {
 			de.prob.translator.types.Tuple tuple = (de.prob.translator.types.Tuple) bObject;
 			model.addEdge(new Edge(new Vertex(tuple.getFirst().toString()), new Vertex(tuple.getSecond().toString()),
