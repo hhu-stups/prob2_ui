@@ -183,6 +183,14 @@ public class MachinesTab extends Tab {
 			closeMachineView();
 			splitPane.getItems().add(0, new MachineDescriptionView(machine, stageManager, injector));
 		}
+
+		private boolean confirmSave() {
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+					"common.alerts.unsavedMachineChanges.header",
+					"common.alerts.unsavedMachineChanges.content");
+			Optional<ButtonType> result = alert.showAndWait();
+			return result.isPresent() && ButtonType.OK.equals(result.get());
+		}
 	}
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(MachinesTab.class);
@@ -298,13 +306,4 @@ public class MachinesTab extends Tab {
 			currentProject.startAnimation(machine, machine.getLastUsed());
 		}
 	}
-	
-	private boolean confirmSave() {
-		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-				"common.alerts.unsavedMachineChanges.header",
-				"common.alerts.unsavedMachineChanges.content");
-		Optional<ButtonType> result = alert.showAndWait();
-		return result.isPresent() && ButtonType.OK.equals(result.get());
-	}
-	
 }

@@ -21,14 +21,15 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -197,6 +198,7 @@ public final class OperationsView extends VBox {
 	private final ResourceBundle bundle;
 	private final StatusBar statusBar;
 	private final StageManager stageManager;
+	private final Config config;
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final ExecutorService updater;
 	private final ObjectProperty<Thread> randomExecutionThread;
@@ -204,7 +206,7 @@ public final class OperationsView extends VBox {
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
 						   final Injector injector, final ResourceBundle bundle, final StatusBar statusBar,
-						   final StopActions stopActions) {
+						   final StopActions stopActions, final Config config) {
 		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
 		this.sortMode = new SimpleObjectProperty<>(this, "sortMode", OperationsView.SortMode.MODEL_ORDER);
 		this.currentTrace = currentTrace;
@@ -213,6 +215,7 @@ public final class OperationsView extends VBox {
 		this.bundle = bundle;
 		this.statusBar = statusBar;
 		this.stageManager = stageManager;
+		this.config = config;
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
 		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
 		stopActions.add(this.updater::shutdownNow);
@@ -271,6 +274,23 @@ public final class OperationsView extends VBox {
 			
 			doSort();
 			opsListView.getItems().setAll(applyFilter(searchBar.getText()));
+		});
+
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				if (configData.operationsSortMode != null) {
+					setSortMode(configData.operationsSortMode);
+				}
+				
+				setShowDisabledOps(configData.operationsShowNotEnabled);
+			}
+			
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.operationsSortMode = getSortMode();
+				configData.operationsShowNotEnabled = getShowDisabledOps();
+			}
 		});
 	}
 
@@ -505,19 +525,19 @@ public final class OperationsView extends VBox {
 	}
 	
 
-	public OperationsView.SortMode getSortMode() {
+	private OperationsView.SortMode getSortMode() {
 		return this.sortMode.get();
 	}
 
-	public void setSortMode(final OperationsView.SortMode sortMode) {
+	private void setSortMode(final OperationsView.SortMode sortMode) {
 		this.sortMode.set(sortMode);
 	}
 	
-	public boolean getShowDisabledOps() {
+	private boolean getShowDisabledOps() {
 		return this.showDisabledOps.get();
 	}
 
-	public void setShowDisabledOps(boolean showDisabledOps) {
+	private void setShowDisabledOps(boolean showDisabledOps) {
 		this.showDisabledOps.set(showDisabledOps);
 	}
 }

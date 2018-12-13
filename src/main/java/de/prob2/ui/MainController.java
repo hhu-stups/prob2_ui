@@ -8,11 +8,15 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectView;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableIntegerValue;
@@ -38,13 +42,15 @@ public class MainController extends BorderPane {
 	private final StageManager stageManager;
 	private final UIState uiState;
 	private final ResourceBundle resourceBundle;
+	private final Config config;
 
 	@Inject
-	public MainController(Injector injector, StageManager stageManager, UIState uiState, ResourceBundle resourceBundle) {
+	public MainController(Injector injector, StageManager stageManager, UIState uiState, ResourceBundle resourceBundle, Config config) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.uiState = uiState;
 		this.resourceBundle = resourceBundle;
+		this.config = config;
 		refresh();
 	}
 
@@ -74,6 +80,25 @@ public class MainController extends BorderPane {
 				projectView.showMachines();
 			}
 		}));
+
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				if (configData.horizontalDividerPositions != null) {
+					horizontalSP.setDividerPositions(configData.horizontalDividerPositions);
+				}
+				
+				if (configData.verticalDividerPositions != null) {
+					verticalSP.setDividerPositions(configData.verticalDividerPositions);
+				}
+			}
+			
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.horizontalDividerPositions = horizontalSP.getDividerPositions();
+				configData.verticalDividerPositions = verticalSP.getDividerPositions();
+			}
+		});
 	}
 
 	public void refresh() {
@@ -82,32 +107,6 @@ public class MainController extends BorderPane {
 			guiState = uiState.getGuiState();
 		}
 		stageManager.loadFXML(this, guiState);
-	}
-
-	public double[] getHorizontalDividerPositions() {
-		if (horizontalSP != null) {
-			return horizontalSP.getDividerPositions();
-		}
-		return new double[] {};
-	}
-
-	public double[] getVerticalDividerPositions() {
-		if (verticalSP != null) {
-			return verticalSP.getDividerPositions();
-		}
-		return new double[] {};
-	}
-
-	public void setHorizontalDividerPositions(double[] pos) {
-		if (horizontalSP != null) {
-			horizontalSP.setDividerPositions(pos);
-		}
-	}
-
-	public void setVerticalDividerPositions(double[] pos) {
-		if (verticalSP != null) {
-			verticalSP.setDividerPositions(pos);
-		}
 	}
 
 	public List<Accordion> getAccordions() {

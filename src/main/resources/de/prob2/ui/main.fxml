@@ -19,7 +19,7 @@
 		 maxWidth="Infinity" minHeight="700.0" minWidth="1000.0"
 		 prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
-		<SplitPane fx:id="horizontalSP" dividerPositions="0.1,0.9">
+		<SplitPane fx:id="horizontalSP" dividerPositions="0.3,0.7">
 			<Accordion fx:id="leftAccordion" expandedPane="$operationsTP">
 				<panes>
 					<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP">

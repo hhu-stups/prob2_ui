@@ -284,7 +284,7 @@ public final class StageManager {
 	
 	public Alert makeAlert(final Alert.AlertType alertType, final String headerBundleKey, final String contentBundleKey,
 			final Object... contentParams) {
-		return makeAlert(alertType, new ArrayList<ButtonType>(), headerBundleKey, contentBundleKey, contentParams);
+		return makeAlert(alertType, new ArrayList<>(), headerBundleKey, contentBundleKey, contentParams);
 	}
 
 	public Alert makeExceptionAlert(final Throwable exc, final String contentBundleKey, final Object... contentParams) {

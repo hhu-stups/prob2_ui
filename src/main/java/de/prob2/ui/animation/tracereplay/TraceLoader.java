@@ -3,6 +3,7 @@ package de.prob2.ui.animation.tracereplay;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -16,7 +17,7 @@ import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.prob2fx.CurrentProject;
 
 public class TraceLoader {
-	private static final Charset PROJECT_CHARSET = Charset.forName("UTF-8");
+	private static final Charset PROJECT_CHARSET = StandardCharsets.UTF_8;
 
 	private final Gson gson;
 	private final CurrentProject currentProject;

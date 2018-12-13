@@ -1,8 +1,21 @@
 package de.prob2.ui.states;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.animator.command.GetMachineStructureCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
@@ -17,14 +30,19 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.persistence.TablePersistenceHandler;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -48,20 +66,9 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Singleton
 public final class StatesView extends StackPane {
@@ -102,6 +109,7 @@ public final class StatesView extends StackPane {
 	private final StatusBar statusBar;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
+	private final Config config;
 
 	private List<PrologASTNode> rootNodes;
 	private List<PrologASTNode> filteredRootNodes;
@@ -109,17 +117,19 @@ public final class StatesView extends StackPane {
 	private final Map<IEvalElement, AbstractEvalResult> currentValues;
 	private final Map<IEvalElement, AbstractEvalResult> previousValues;
 	private final ExecutorService updater;
+	private double[] columnWidthsToRestore;
 
 	private String filter = "";
 
 	@Inject
 	private StatesView(final Injector injector, final CurrentTrace currentTrace, final StatusBar statusBar,
-			final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions) {
+			final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final Config config) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.statusBar = statusBar;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
+		this.config = config;
 
 		this.rootNodes = null;
 		this.filteredRootNodes = null;
@@ -178,6 +188,31 @@ public final class StatesView extends StackPane {
 		});
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
+
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				if (configData.statesViewColumnsOrder != null) {
+					TablePersistenceHandler.setColumnsOrder(tv.getColumns(), configData.statesViewColumnsOrder);
+				}
+				
+				if (configData.statesViewColumnsWidth != null) {
+					// The table columns cannot be resized until the table view is shown on screen (before then, the resizing always fails).
+					// So we can't restore the column widths yet - that is done later using the restoreColumnWidths() method, which is called by the UI startup code once the main stage is visible.
+					columnWidthsToRestore = configData.statesViewColumnsWidth;
+				}
+			}
+			
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.statesViewColumnsWidth = TablePersistenceHandler.getColumnsWidth(tv.getColumns());
+				configData.statesViewColumnsOrder = TablePersistenceHandler.getColumnsOrder(tv.getColumns());
+			}
+		});
+	}
+
+	public void restoreColumnWidths() {
+		TablePersistenceHandler.setColumnsWidth(tv, tv.getColumns(), columnWidthsToRestore);
 	}
 
 	private TreeTableRow<StateItem<?>> initTableRow() {
@@ -501,10 +536,6 @@ public final class StatesView extends StackPane {
 		stage.show();
 	}
 
-	public TreeTableView<StateItem<?>> getTable() {
-		return tv;
-	}
-	
 	public void expandConsole(boolean expanded) {
 		consolePane.setExpanded(expanded);
 	}
