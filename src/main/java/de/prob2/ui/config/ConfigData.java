@@ -26,6 +26,7 @@ public final class ConfigData extends BasicConfigData {
 	public String currentMainTab;
 	public String currentVerificationTab;
 	public List<String> expandedTitledPanes;
+	public boolean bConsoleExpanded;
 	public String defaultProjectLocation;
 	public double[] horizontalDividerPositions;
 	public double[] verticalDividerPositions;

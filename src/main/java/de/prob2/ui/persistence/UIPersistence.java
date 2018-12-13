@@ -92,8 +92,6 @@ public final class UIPersistence {
 			acc.getPanes().stream().filter(tp -> uiState.getExpandedTitledPanes().contains(tp.getId())).forEach(acc::setExpandedPane)
 		);
 		
-		final StatesView statesView = injector.getInstance(StatesView.class);
-		statesView.expandConsole(uiState.getExpandedTitledPanes().contains("bconsole"));
-		statesView.restoreColumnWidths();
+		injector.getInstance(StatesView.class).restoreColumnWidths();
 	}
 }

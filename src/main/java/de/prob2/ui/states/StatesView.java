@@ -39,7 +39,6 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.persistence.TablePersistenceHandler;
-import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
 
@@ -146,20 +145,7 @@ public final class StatesView extends StackPane {
 	private void initialize() {
 		helpButton.setHelpContent(this.getClass());
 		
-		consolePane.expandedProperty().addListener((observable, from, to) -> {
-			List<String> expanded = injector.getInstance(UIState.class).getExpandedTitledPanes();
-			if(to) {
-				splitPane.setDividerPositions(0.5);
-				if(!expanded.contains("bconsole")) {
-					expanded.add("bconsole");
-				}
-			} else {
-				splitPane.setDividerPositions(0.8);
-				injector.getInstance(UIState.class).getExpandedTitledPanes().remove("bconsole");
-			}
-		});
-		
-		
+		consolePane.expandedProperty().addListener((observable, from, to) -> splitPane.setDividerPositions(to ? 0.5 : 0.8));
 		
 		tv.setRowFactory(view -> initTableRow());
 
@@ -192,6 +178,8 @@ public final class StatesView extends StackPane {
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
+				consolePane.setExpanded(configData.bConsoleExpanded);
+				
 				if (configData.statesViewColumnsOrder != null) {
 					TablePersistenceHandler.setColumnsOrder(tv.getColumns(), configData.statesViewColumnsOrder);
 				}
@@ -205,6 +193,7 @@ public final class StatesView extends StackPane {
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
+				configData.bConsoleExpanded = consolePane.isExpanded();
 				configData.statesViewColumnsWidth = TablePersistenceHandler.getColumnsWidth(tv.getColumns());
 				configData.statesViewColumnsOrder = TablePersistenceHandler.getColumnsOrder(tv.getColumns());
 			}
@@ -534,9 +523,5 @@ public final class StatesView extends StackPane {
 			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());
 		}
 		stage.show();
-	}
-
-	public void expandConsole(boolean expanded) {
-		consolePane.setExpanded(expanded);
 	}
 }
