@@ -7,7 +7,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 
@@ -24,10 +23,7 @@ import de.prob2.ui.verifications.ShouldExecuteValueFactory;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
@@ -40,28 +36,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.util.Callback;
 
 
 @Singleton
 public final class ModelcheckingView extends ScrollPane {
 	
-	private class ShowDetailsFactory implements Callback<TableColumn.CellDataFeatures<ModelCheckingItem, FontAwesomeIconView>, ObservableValue<FontAwesomeIconView>> {
-		
-		@Override
-		public ObservableValue<FontAwesomeIconView> call(TableColumn.CellDataFeatures<ModelCheckingItem, FontAwesomeIconView> param) {
-			FontAwesomeIconView showDetailsIcon = new FontAwesomeIconView(FontAwesomeIcon.INFO);
-			showDetailsIcon.setOnMouseClicked(e -> {
-				ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
-				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				modelcheckingStage.show(item.getOptions());
-			});
-			showDetailsIcon.setCursor(Cursor.HAND);
-			return new SimpleObjectProperty<>(showDetailsIcon);
-		}
-	}
-
-
 	@FXML
 	private AnchorPane statsPane;
 
@@ -82,9 +61,6 @@ public final class ModelcheckingView extends ScrollPane {
 	
 	@FXML
 	private TableColumn<ModelCheckingItem, String> strategyColumn;
-	
-	@FXML
-	private TableColumn<ModelCheckingItem, FontAwesomeIconView> showDetailsColumn;
 	
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
@@ -125,7 +101,6 @@ public final class ModelcheckingView extends ScrollPane {
 		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
-		showDetailsColumn.setCellValueFactory(new ShowDetailsFactory());
 		
 
 		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.MODELCHECKING, injector));
@@ -251,7 +226,7 @@ public final class ModelcheckingView extends ScrollPane {
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu)null)
-				.otherwise(new ContextMenu(showTraceToErrorItem, checkItem, showDetailsItem, searchForNewErrorsItem, removeItem))
+				.otherwise(new ContextMenu(showDetailsItem, showTraceToErrorItem, checkItem, searchForNewErrorsItem, removeItem))
 			);
 			return row;
 		});
