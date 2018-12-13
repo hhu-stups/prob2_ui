@@ -191,7 +191,7 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 			cell.setConverter(new StringConverter<T>() {
 
 				@Override
-				public String toString(MagicComponent component) {
+				public String toString(T component) {
 					return component.toString();
 				}
 

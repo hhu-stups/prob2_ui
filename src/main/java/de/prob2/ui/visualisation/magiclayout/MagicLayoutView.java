@@ -4,6 +4,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 
@@ -22,6 +23,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -29,6 +31,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 @Singleton
 public class MagicLayoutView extends Stage {
@@ -57,22 +60,26 @@ public class MagicLayoutView extends Stage {
 	private Button updateButton;
 	@FXML
 	private Button layoutButton;
+	@FXML
+	private ChoiceBox<MagicLayout> layoutChoiceBox;
 
 	private final StageManager stageManager;
 	private final MagicGraphI magicGraph;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final MagicLayoutSettingsManager settingsManager;
+	private final ResourceBundle bundle;
 
 	@Inject
 	public MagicLayoutView(final StageManager stageManager, final MagicGraphI magicGraph,
 			final CurrentTrace currentTrace, final CurrentProject currentProject,
-			final MagicLayoutSettingsManager settingsManager) {
+			final MagicLayoutSettingsManager settingsManager, final ResourceBundle bundle) {
 		this.stageManager = stageManager;
 		this.magicGraph = magicGraph;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.settingsManager = settingsManager;
+		this.bundle = bundle;
 		stageManager.loadFXML(this, "magic_layout_view.fxml");
 	}
 
@@ -109,6 +116,24 @@ public class MagicLayoutView extends Stage {
 		});
 		
 		disableButtons(true);
+		
+		layoutChoiceBox.getItems().setAll(magicGraph.getSupportedLayouts());
+		layoutChoiceBox.getSelectionModel().selectFirst();
+		layoutChoiceBox.setConverter(new StringConverter<MagicLayout>() {
+				@Override
+				public String toString(MagicLayout layout) {
+					return bundle.getString(layout.getBundleKey());
+				}
+
+				@Override
+				public MagicLayout fromString(String string) {
+					if (string.equals(bundle.getString(MagicLayout.RANDOM.getBundleKey()))) {
+						return MagicLayout.RANDOM;
+					} else {
+						return MagicLayout.LAYERED;
+					}
+				}
+			});
 	}
 
 	private void disableButtons(boolean disable) {
@@ -116,6 +141,7 @@ public class MagicLayoutView extends Stage {
 		zoomOutButton.setDisable(disable);
 		updateButton.setDisable(disable);
 		layoutButton.setDisable(disable);
+		layoutChoiceBox.setDisable(disable);
 	}
 
 	private void zoom(double zoomFactor) {
@@ -125,7 +151,7 @@ public class MagicLayoutView extends Stage {
 
 	@FXML
 	private void layoutGraph() {
-		magicGraphPane.getChildren().setAll(magicGraph.generateMagicGraph(currentTrace.getCurrentState()));
+		magicGraphPane.getChildren().setAll(magicGraph.generateMagicGraph(currentTrace.getCurrentState(), layoutChoiceBox.getSelectionModel().getSelectedItem()));
 		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodegroups(), magicLayoutEditEdges.getEdgegroups());
 	}
 

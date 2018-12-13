@@ -13,6 +13,7 @@
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.ChoiceBox?>
 
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1"
 	title="%visualisation.magicLayout.view.title">
@@ -76,6 +77,7 @@
 									<Button fx:id="layoutButton"
 										text="%visualisation.magicLayout.view.buttons.layout"
 										onAction="#layoutGraph" styleClass="button-blue" />
+									<ChoiceBox fx:id="layoutChoiceBox" />
 								</HBox>
 								<HBox alignment="CENTER_RIGHT">
 									<Button fx:id="zoomInButton">

@@ -23,6 +23,8 @@ import de.prob2.ui.visualisation.magiclayout.graph.Graph;
 import de.prob2.ui.visualisation.magiclayout.graph.Model;
 import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
 import de.prob2.ui.visualisation.magiclayout.graph.layout.LayeredLayout;
+import de.prob2.ui.visualisation.magiclayout.graph.layout.Layout;
+import de.prob2.ui.visualisation.magiclayout.graph.layout.RandomLayout;
 import javafx.scene.Node;
 
 public class MagicGraphFX implements MagicGraphI {
@@ -35,6 +37,12 @@ public class MagicGraphFX implements MagicGraphI {
 	@Inject
 	public MagicGraphFX(StageManager stageManager) {
 		this.stageManager = stageManager;
+	}
+
+	@Override
+	public List<MagicLayout> getSupportedLayouts() {
+		MagicLayout shapes[] = new MagicLayout[] { MagicLayout.LAYERED, MagicLayout.RANDOM };
+		return Arrays.asList(shapes);
 	}
 
 	@Override
@@ -65,7 +73,7 @@ public class MagicGraphFX implements MagicGraphI {
 	}
 
 	@Override
-	public Node generateMagicGraph(State state) {
+	public Node generateMagicGraph(State state, MagicLayout layout) {
 		this.state = state;
 		Model model = new Model();
 		if (state != null) {
@@ -73,8 +81,19 @@ public class MagicGraphFX implements MagicGraphI {
 		}
 
 		graph = new Graph(model);
-		graph.layout(new LayeredLayout());
+		graph.layout(getGraphLayout(layout));
 		return graph;
+	}
+
+	private Layout getGraphLayout(MagicLayout layout) {
+		switch (layout) {
+		case LAYERED:
+			return new LayeredLayout();
+		case RANDOM:
+			return new RandomLayout();
+		default:
+			return new LayeredLayout();
+		}
 	}
 
 	@Override
