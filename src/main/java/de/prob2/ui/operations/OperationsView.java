@@ -280,6 +280,11 @@ public final class OperationsView extends VBox {
 			&& item.getStatus() == OperationItem.Status.ENABLED
 			&& item.getTrace().equals(currentTrace.get())
 		) {
+			Trace forward = currentTrace.forward();
+			if(forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
+				currentTrace.set(currentTrace.forward());
+				return;
+			}
 			currentTrace.set(currentTrace.get().add(item.getTransition().getId()));
 		}
 	}
