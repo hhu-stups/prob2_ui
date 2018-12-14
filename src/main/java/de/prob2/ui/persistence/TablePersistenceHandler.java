@@ -1,9 +1,9 @@
 package de.prob2.ui.persistence;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TreeTableColumn;
@@ -26,32 +26,22 @@ public final class TablePersistenceHandler {
 		}
 	}
 
-	public static double[] getRelativeColumnWidths(List<? extends TableColumnBase<?, ?>> columns) {
-		double[] result = new double[columns.size()];
-		double sum = 0.0;
-		for (int i = 0; i < columns.size(); i++) {
-			result[i] = columns.get(i).getWidth();
-			sum += result[i];
-		}
-		for (int i = 0; i < result.length; i++) {
-			result[i] /= sum;
-		}
-		return result;
+	public static List<Double> getRelativeColumnWidths(List<? extends TableColumnBase<?, ?>> columns) {
+		final double sum = columns.stream().mapToDouble(TableColumnBase::getWidth).sum();
+		return columns.stream()
+			.map(col -> col.getWidth() / sum)
+			.collect(Collectors.toList());
 	}
 
-	public static <S> void setRelativeColumnWidths(TreeTableView<S> tableView, List<TreeTableColumn<S, ?>> columns, double[] widths) {
-		double sum = 0.0;
-		for (final TableColumnBase<?, ?> column : columns) {
-			sum += column.getWidth();
-		}
-
+	public static <S> void setRelativeColumnWidths(TreeTableView<S> tableView, List<TreeTableColumn<S, ?>> columns, List<Double> widths) {
+		final double sum = columns.stream().mapToDouble(TableColumnBase::getWidth).sum();
 		for (int i = 0; i < columns.size() - 1; i++) {
-			tableView.resizeColumn(columns.get(i), widths[i] * sum - columns.get(i).getWidth());
+			tableView.resizeColumn(columns.get(i), widths.get(i) * sum - columns.get(i).getWidth());
 		}
 	}
 
-	public static <S> void setColumnsOrder(ObservableList<TreeTableColumn<S, ?>> columns, final String[] order) {
-		ObservableList<TreeTableColumn<S, ?>> newColumns = FXCollections.observableArrayList();
+	public static <S> void setColumnsOrder(ObservableList<TreeTableColumn<S, ?>> columns, final List<String> order) {
+		final List<TreeTableColumn<S, ?>> newColumns = new ArrayList<>();
 		for (final String text : order) {
 			newColumns.addAll(columns.stream().filter(column -> column.getId().equals(text)).collect(Collectors.toList()));
 		}
@@ -60,11 +50,9 @@ public final class TablePersistenceHandler {
 		columns.setAll(newColumns);
 	}
 
-	public static String[] getColumnsOrder(List<? extends TableColumnBase<?, ?>> columns) {
-		String[] order = new String[columns.size()];
-		for (int i = 0; i < columns.size(); i++) {
-			order[i] = columns.get(i).getId();
-		}
-		return order;
+	public static List<String> getColumnsOrder(List<? extends TableColumnBase<?, ?>> columns) {
+		return columns.stream()
+			.map(TableColumnBase::getId)
+			.collect(Collectors.toList());
 	}
 }
