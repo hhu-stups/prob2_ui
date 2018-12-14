@@ -3,6 +3,7 @@ package de.prob2.ui;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -23,6 +24,7 @@ import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
@@ -56,19 +58,7 @@ public class MainController extends BorderPane {
 
 	@FXML
 	private void initialize() {
-		accordions.forEach(
-				acc -> acc.getPanes().stream().filter(tp -> tp != null && tp.getContent() != null).forEach(tp -> {
-					tp.getContent().setVisible(true);
-					
-					tp.expandedProperty().addListener((observable, from, to) -> {
-						if (to) {
-							for (TitledPane pane : acc.getPanes()) {
-								uiState.getExpandedTitledPanes().remove(pane.getId());
-							}
-							uiState.getExpandedTitledPanes().add(tp.getId());
-						}
-					});
-				}));
+		accordions.forEach(acc -> acc.getPanes().stream().filter(tp -> tp != null && tp.getContent() != null).forEach(tp -> tp.getContent().setVisible(true)));
 		final ObservableIntegerValue size = historyView.getObservableHistorySize();
 		final ObservableValue<Number> current = historyView.getCurrentHistoryPositionProperty();
 		this.historyTP.textProperty()
@@ -84,6 +74,14 @@ public class MainController extends BorderPane {
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
+				if (configData.expandedTitledPanes != null) {
+					getAccordions().forEach(acc ->
+						acc.getPanes().stream()
+							.filter(tp -> configData.expandedTitledPanes.contains(tp.getId()))
+							.forEach(acc::setExpandedPane)
+					);
+				}
+				
 				if (configData.horizontalDividerPositions != null) {
 					horizontalSP.setDividerPositions(configData.horizontalDividerPositions);
 				}
@@ -95,6 +93,10 @@ public class MainController extends BorderPane {
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
+				configData.expandedTitledPanes = getAccordions().stream()
+					.map(Accordion::getExpandedPane)
+					.map(Node::getId)
+					.collect(Collectors.toList());
 				configData.horizontalDividerPositions = horizontalSP.getDividerPositions();
 				configData.verticalDividerPositions = verticalSP.getDividerPositions();
 			}

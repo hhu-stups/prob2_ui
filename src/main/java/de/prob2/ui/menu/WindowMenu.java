@@ -140,7 +140,6 @@ public class WindowMenu extends Menu {
 
 	private void reset() {
 		injector.getInstance(UIState.class).clearDetachedStages();
-		injector.getInstance(UIState.class).getExpandedTitledPanes().clear();
 		injector.getInstance(DetachViewStageController.class).resetCheckboxes();
 		injector.getInstance(OperationsView.class).setVisible(true);
 		injector.getInstance(HistoryView.class).setVisible(true);

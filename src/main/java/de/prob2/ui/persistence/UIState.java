@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +33,6 @@ public class UIState {
 	private final Set<String> savedVisibleStages;
 	private final Map<String, BoundingBox> savedStageBoxes;
 	private final Map<String, Reference<Stage>> stages;
-	private List<String> expandedTitledPanes;
 	
 	@Inject
 	public UIState(final Config config) {
@@ -43,7 +41,6 @@ public class UIState {
 		this.savedVisibleStages = new LinkedHashSet<>();
 		this.savedStageBoxes = new LinkedHashMap<>();
 		this.stages = new LinkedHashMap<>();
-		this.expandedTitledPanes = new ArrayList<>();
 		
 		config.addListener(new ConfigListener() {
 			@Override
@@ -63,10 +60,6 @@ public class UIState {
 				if (configData.stageBoxes != null) {
 					getSavedStageBoxes().putAll(configData.stageBoxes);
 				}
-				
-				if (configData.expandedTitledPanes != null) {
-					getExpandedTitledPanes().addAll(configData.expandedTitledPanes);
-				}
 			}
 			
 			@Override
@@ -77,7 +70,6 @@ public class UIState {
 				configData.guiState = getGuiState();
 				configData.visibleStages = new ArrayList<>(getSavedVisibleStages());
 				configData.stageBoxes = new HashMap<>(getSavedStageBoxes());
-				configData.expandedTitledPanes = new ArrayList<>(getExpandedTitledPanes());
 			}
 		});
 	}
@@ -139,9 +131,5 @@ public class UIState {
 			}
 		}
 		stages.keySet().removeAll(DETACHED);
-	}
-	
-	public List<String> getExpandedTitledPanes() {
-		return expandedTitledPanes;
 	}
 }
