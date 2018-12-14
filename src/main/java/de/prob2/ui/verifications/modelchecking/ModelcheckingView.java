@@ -1,15 +1,10 @@
 package de.prob2.ui.verifications.modelchecking;
 
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
-
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -36,6 +31,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+
+import java.util.ResourceBundle;
 
 
 @Singleton
