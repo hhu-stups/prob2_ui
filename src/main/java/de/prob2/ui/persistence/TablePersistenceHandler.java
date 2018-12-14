@@ -14,7 +14,19 @@ public final class TablePersistenceHandler {
 		throw new AssertionError("Utility class");
 	}
 
-	public static double[] getColumnsWidth(List<? extends TableColumnBase<?, ?>> columns) {
+	public static List<Double> getAbsoluteColumnWidths(List<? extends TableColumnBase<?, ?>> columns) {
+		return columns.stream()
+			.map(TableColumnBase::getWidth)
+			.collect(Collectors.toList());
+	}
+	
+	public static <S> void setAbsoluteColumnWidths(TreeTableView<S> tableView, List<TreeTableColumn<S, ?>> columns, List<Double> widths) {
+		for (int i = 0; i < columns.size(); i++) {
+			tableView.resizeColumn(columns.get(i), widths.get(i) - columns.get(i).getWidth());
+		}
+	}
+
+	public static double[] getRelativeColumnWidths(List<? extends TableColumnBase<?, ?>> columns) {
 		double[] result = new double[columns.size()];
 		double sum = 0.0;
 		for (int i = 0; i < columns.size(); i++) {
@@ -27,7 +39,7 @@ public final class TablePersistenceHandler {
 		return result;
 	}
 
-	public static <S> void setColumnsWidth(TreeTableView<S> tableView, ObservableList<TreeTableColumn<S, ?>> columns, double[] widths) {
+	public static <S> void setRelativeColumnWidths(TreeTableView<S> tableView, List<TreeTableColumn<S, ?>> columns, double[] widths) {
 		double sum = 0.0;
 		for (final TableColumnBase<?, ?> column : columns) {
 			sum += column.getWidth();

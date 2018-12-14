@@ -116,7 +116,7 @@ public final class StatesView extends StackPane {
 	private final Map<IEvalElement, AbstractEvalResult> currentValues;
 	private final Map<IEvalElement, AbstractEvalResult> previousValues;
 	private final ExecutorService updater;
-	private double[] columnWidthsToRestore;
+	private List<Double> columnWidthsToRestore;
 
 	private String filter = "";
 
@@ -190,13 +190,15 @@ public final class StatesView extends StackPane {
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.bConsoleExpanded = consolePane.isExpanded();
-				configData.statesViewColumnsWidth = TablePersistenceHandler.getColumnsWidth(tv.getColumns());
+				configData.statesViewColumnsWidth = TablePersistenceHandler.getAbsoluteColumnWidths(tv.getColumns());
 			}
 		});
 	}
 
 	public void restoreColumnWidths() {
-		TablePersistenceHandler.setColumnsWidth(tv, tv.getColumns(), columnWidthsToRestore);
+		if (columnWidthsToRestore != null) {
+			TablePersistenceHandler.setAbsoluteColumnWidths(tv, tv.getColumns(), columnWidthsToRestore);
+		}
 	}
 
 	private TreeTableRow<StateItem<?>> initTableRow() {
