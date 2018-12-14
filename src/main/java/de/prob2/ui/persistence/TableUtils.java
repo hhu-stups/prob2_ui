@@ -9,8 +9,8 @@ import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
-public final class TablePersistenceHandler {
-	private TablePersistenceHandler() {
+public final class TableUtils {
+	private TableUtils() {
 		throw new AssertionError("Utility class");
 	}
 

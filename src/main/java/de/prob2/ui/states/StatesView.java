@@ -38,7 +38,7 @@ import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.persistence.TablePersistenceHandler;
+import de.prob2.ui.persistence.TableUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
 
@@ -190,14 +190,14 @@ public final class StatesView extends StackPane {
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.bConsoleExpanded = consolePane.isExpanded();
-				configData.statesViewColumnsWidth = TablePersistenceHandler.getAbsoluteColumnWidths(tv.getColumns());
+				configData.statesViewColumnsWidth = TableUtils.getAbsoluteColumnWidths(tv.getColumns());
 			}
 		});
 	}
 
 	public void restoreColumnWidths() {
 		if (columnWidthsToRestore != null) {
-			TablePersistenceHandler.setAbsoluteColumnWidths(tv, tv.getColumns(), columnWidthsToRestore);
+			TableUtils.setAbsoluteColumnWidths(tv, tv.getColumns(), columnWidthsToRestore);
 		}
 	}
 
