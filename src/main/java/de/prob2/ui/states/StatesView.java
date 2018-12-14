@@ -180,10 +180,6 @@ public final class StatesView extends StackPane {
 			public void loadConfig(final ConfigData configData) {
 				consolePane.setExpanded(configData.bConsoleExpanded);
 				
-				if (configData.statesViewColumnsOrder != null) {
-					TablePersistenceHandler.setColumnsOrder(tv.getColumns(), configData.statesViewColumnsOrder);
-				}
-				
 				if (configData.statesViewColumnsWidth != null) {
 					// The table columns cannot be resized until the table view is shown on screen (before then, the resizing always fails).
 					// So we can't restore the column widths yet - that is done later using the restoreColumnWidths() method, which is called by the UI startup code once the main stage is visible.
@@ -195,7 +191,6 @@ public final class StatesView extends StackPane {
 			public void saveConfig(final ConfigData configData) {
 				configData.bConsoleExpanded = consolePane.isExpanded();
 				configData.statesViewColumnsWidth = TablePersistenceHandler.getColumnsWidth(tv.getColumns());
-				configData.statesViewColumnsOrder = TablePersistenceHandler.getColumnsOrder(tv.getColumns());
 			}
 		});
 	}

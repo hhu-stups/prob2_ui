@@ -31,7 +31,6 @@ public final class ConfigData extends BasicConfigData {
 	public double[] horizontalDividerPositions;
 	public double[] verticalDividerPositions;
 	public double[] statesViewColumnsWidth;
-	public String[] statesViewColumnsOrder;
 	public OperationsView.SortMode operationsSortMode;
 	public boolean operationsShowNotEnabled;
 	public Map<String, String> globalPreferences;
