@@ -11,6 +11,7 @@ import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
+import de.prob2.ui.internal.FXMLInjected;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -21,6 +22,7 @@ import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
 
+@FXMLInjected
 @Singleton
 public class GroovyConsole extends Console {
 	private final GroovyInterpreter groovyInterpreter;
