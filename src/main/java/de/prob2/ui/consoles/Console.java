@@ -26,12 +26,6 @@ import org.fxmisc.wellbehaved.event.Nodes;
 
 
 public abstract class Console extends StyleClassedTextArea {
-	public static class ConfigData {
-		private List<String> instructions;
-		
-		protected ConfigData() {}
-	}
-	
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
 	
 	private static final String EMPTY_PROMPT = "> ";
@@ -418,22 +412,16 @@ public abstract class Console extends StyleClassedTextArea {
 		return this.getLine().substring(length);
 	}
 	
-	public Console.ConfigData getSettings() {
-		final Console.ConfigData configData = new Console.ConfigData();
-		configData.instructions = instructions.stream().map(ConsoleInstruction::getInstruction).collect(Collectors.toList());
-		return configData;
+	public List<String> saveInstructions() {
+		return instructions.stream().map(ConsoleInstruction::getInstruction).collect(Collectors.toList());
 	}
 	
-	public void applySettings(Console.ConfigData settings) {
-		if (settings == null) {
-			return;
+	public void loadInstructions(List<String> instructions) {
+		this.instructions.clear();
+		for (final String instruction : instructions) {
+			this.instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 		}
-		
-		instructions.clear();
-		for (final String instruction : settings.instructions) {
-			instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
-		}
-		posInList = instructions.size();
+		posInList = this.instructions.size();
 	}
 	
 	public int getCurrentPosInLine() {
