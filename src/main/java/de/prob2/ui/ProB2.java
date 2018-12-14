@@ -69,46 +69,43 @@ public class ProB2 extends Application {
 				Locale.setDefault(localeOverride);
 			}
 		}
-		ProB2Module module = new ProB2Module(runtimeOptions);
-		Platform.runLater(() -> {
-			injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
-			bundle = injector.getInstance(ResourceBundle.class);
-			injector.getInstance(StopActions.class)
-					.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
-			StageManager stageManager = injector.getInstance(StageManager.class);
-			Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
-				LOGGER.error("Uncaught exception on thread {}", thread, exc);
-				Platform.runLater(() -> {
-					try {
-						stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread).show();
-					} catch (Throwable t) {
-						LOGGER.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
-					}
-				});
-			});
 
-			System.setProperty("prob.stdlib", Main.getProBDirectory() + File.separator + "stdlib");
-
-			CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-			currentProject.addListener((observable, from, to) -> this.updateTitle());
-			currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle());
-			CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
-			currentTrace.addListener((observable, from, to) -> this.updateTitle());
-		});
-
+		System.setProperty("prob.stdlib", Main.getProBDirectory() + File.separator + "stdlib");
 	}
 
 	@Override
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
+
+		ProB2Module module = new ProB2Module(runtimeOptions);
+		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
+		bundle = injector.getInstance(ResourceBundle.class);
+		injector.getInstance(StopActions.class)
+			.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
+		StageManager stageManager = injector.getInstance(StageManager.class);
+		Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
+			LOGGER.error("Uncaught exception on thread {}", thread, exc);
+			Platform.runLater(() -> {
+				try {
+					stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread).show();
+				} catch (Throwable t) {
+					LOGGER.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
+				}
+			});
+		});
+
+		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
+		currentProject.addListener((observable, from, to) -> this.updateTitle());
+		currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle());
+		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
+		currentTrace.addListener((observable, from, to) -> this.updateTitle());
 		this.updateTitle();
+
 		Parent root = injector.getInstance(MainController.class);
 		Scene mainScene = new Scene(root, 1024, 768);
 		primaryStage.setScene(mainScene);
-		StageManager stageManager = injector.getInstance(StageManager.class);
 		stageManager.registerMainStage(primaryStage, this.getClass().getName());
 
-		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		primaryStage.setOnCloseRequest(event -> handleCloseRequest(event, currentProject, stageManager));
 
 		this.notifyPreloader(new Preloader.ProgressNotification(100));
