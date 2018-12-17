@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Heinzen
  * @since 14.09.17
  */
+@FXMLInjected
 @Singleton
 public class VisualisationController {
 

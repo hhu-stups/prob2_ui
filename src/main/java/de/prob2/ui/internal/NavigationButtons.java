@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
+@FXMLInjected
 public final class NavigationButtons extends HBox {
 	@FXML private Button backButton;
 	@FXML private Button fastBackButton;

@@ -6,10 +6,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
+import de.prob2.ui.internal.FXMLInjected;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -20,6 +22,7 @@ import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
 
+@FXMLInjected
 @Singleton
 public class GroovyConsole extends Console {
 	private final GroovyInterpreter groovyInterpreter;
@@ -34,13 +37,15 @@ public class GroovyConsole extends Console {
 		
 		config.addListener(new ConfigListener() {
 			@Override
-			public void loadConfig(final de.prob2.ui.config.ConfigData configData) {
-				applySettings(configData.groovyConsoleSettings);
+			public void loadConfig(final ConfigData configData) {
+				if (configData.groovyConsoleInstructions != null) {
+					loadInstructions(configData.groovyConsoleInstructions);
+				}
 			}
 			
 			@Override
-			public void saveConfig(final de.prob2.ui.config.ConfigData configData) {
-				configData.groovyConsoleSettings = getSettings();
+			public void saveConfig(final ConfigData configData) {
+				configData.groovyConsoleInstructions = saveInstructions();
 			}
 		});
 	}

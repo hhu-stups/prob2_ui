@@ -36,10 +36,10 @@ import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.persistence.TablePersistenceHandler;
-import de.prob2.ui.persistence.UIState;
+import de.prob2.ui.persistence.TableUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
 
@@ -70,6 +70,7 @@ import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@FXMLInjected
 @Singleton
 public final class StatesView extends StackPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StatesView.class);
@@ -117,7 +118,7 @@ public final class StatesView extends StackPane {
 	private final Map<IEvalElement, AbstractEvalResult> currentValues;
 	private final Map<IEvalElement, AbstractEvalResult> previousValues;
 	private final ExecutorService updater;
-	private double[] columnWidthsToRestore;
+	private List<Double> columnWidthsToRestore;
 
 	private String filter = "";
 
@@ -146,20 +147,7 @@ public final class StatesView extends StackPane {
 	private void initialize() {
 		helpButton.setHelpContent(this.getClass());
 		
-		consolePane.expandedProperty().addListener((observable, from, to) -> {
-			List<String> expanded = injector.getInstance(UIState.class).getExpandedTitledPanes();
-			if(to) {
-				splitPane.setDividerPositions(0.5);
-				if(!expanded.contains("bconsole")) {
-					expanded.add("bconsole");
-				}
-			} else {
-				splitPane.setDividerPositions(0.8);
-				injector.getInstance(UIState.class).getExpandedTitledPanes().remove("bconsole");
-			}
-		});
-		
-		
+		consolePane.expandedProperty().addListener((observable, from, to) -> splitPane.setDividerPositions(to ? 0.5 : 0.8));
 		
 		tv.setRowFactory(view -> initTableRow());
 
@@ -192,9 +180,7 @@ public final class StatesView extends StackPane {
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
-				if (configData.statesViewColumnsOrder != null) {
-					TablePersistenceHandler.setColumnsOrder(tv.getColumns(), configData.statesViewColumnsOrder);
-				}
+				consolePane.setExpanded(configData.bConsoleExpanded);
 				
 				if (configData.statesViewColumnsWidth != null) {
 					// The table columns cannot be resized until the table view is shown on screen (before then, the resizing always fails).
@@ -205,14 +191,16 @@ public final class StatesView extends StackPane {
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.statesViewColumnsWidth = TablePersistenceHandler.getColumnsWidth(tv.getColumns());
-				configData.statesViewColumnsOrder = TablePersistenceHandler.getColumnsOrder(tv.getColumns());
+				configData.bConsoleExpanded = consolePane.isExpanded();
+				configData.statesViewColumnsWidth = TableUtils.getAbsoluteColumnWidths(tv.getColumns());
 			}
 		});
 	}
 
 	public void restoreColumnWidths() {
-		TablePersistenceHandler.setColumnsWidth(tv, tv.getColumns(), columnWidthsToRestore);
+		if (columnWidthsToRestore != null) {
+			TableUtils.setAbsoluteColumnWidths(tv, tv.getColumns(), columnWidthsToRestore);
+		}
 	}
 
 	private TreeTableRow<StateItem<?>> initTableRow() {
@@ -534,9 +522,5 @@ public final class StatesView extends StackPane {
 			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());
 		}
 		stage.show();
-	}
-
-	public void expandConsole(boolean expanded) {
-		consolePane.setExpanded(expanded);
 	}
 }

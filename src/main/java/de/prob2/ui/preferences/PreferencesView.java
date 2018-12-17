@@ -10,6 +10,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ProBPreference;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.InvalidationListener;
@@ -27,6 +28,7 @@ import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@FXMLInjected
 @Singleton
 public final class PreferencesView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesView.class);

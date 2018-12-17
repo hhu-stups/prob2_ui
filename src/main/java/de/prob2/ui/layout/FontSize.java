@@ -6,10 +6,12 @@ import com.google.inject.Singleton;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
+import de.prob2.ui.internal.FXMLInjected;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
+@FXMLInjected
 @Singleton
 public final class FontSize {
 	public static final int DEFAULT_FONT_SIZE = 13;

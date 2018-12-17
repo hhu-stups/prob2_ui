@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
 
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -21,6 +22,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
+@FXMLInjected
 @Singleton
 public class StatusBar extends HBox {
 	public enum LoadingStatus {

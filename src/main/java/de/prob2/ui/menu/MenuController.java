@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
@@ -18,6 +19,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+@FXMLInjected
 @Singleton
 public final class MenuController extends MenuBar {
 	private final MenuToolkit menuToolkit;

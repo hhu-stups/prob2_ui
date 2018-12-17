@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.MainController;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.WindowMenu;
@@ -76,7 +75,6 @@ public final class UIPersistence {
 	
 	public void open() {
 		final WindowMenu windowMenu = injector.getInstance(WindowMenu.class);
-		final MainController main = injector.getInstance(MainController.class);
 		
 		for (final String id : new HashSet<>(uiState.getSavedVisibleStages())) {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
@@ -88,12 +86,6 @@ public final class UIPersistence {
 			windowMenu.loadPreset(uiState.getGuiState());
 		}
 		
-		main.getAccordions().forEach(acc ->
-			acc.getPanes().stream().filter(tp -> uiState.getExpandedTitledPanes().contains(tp.getId())).forEach(acc::setExpandedPane)
-		);
-		
-		final StatesView statesView = injector.getInstance(StatesView.class);
-		statesView.expandConsole(uiState.getExpandedTitledPanes().contains("bconsole"));
-		statesView.restoreColumnWidths();
+		injector.getInstance(StatesView.class).restoreColumnWidths();
 	}
 }

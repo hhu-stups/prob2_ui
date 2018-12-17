@@ -7,10 +7,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.consoles.Console;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+@FXMLInjected
 @Singleton
 public final class BConsole extends Console {
 	@Inject
@@ -35,13 +38,15 @@ public final class BConsole extends Console {
 		
 		config.addListener(new ConfigListener() {
 			@Override
-			public void loadConfig(final de.prob2.ui.config.ConfigData configData) {
-				applySettings(configData.bConsoleSettings);
+			public void loadConfig(final ConfigData configData) {
+				if (configData.bConsoleInstructions != null) {
+					loadInstructions(configData.bConsoleInstructions);
+				}
 			}
 			
 			@Override
-			public void saveConfig(final de.prob2.ui.config.ConfigData configData) {
-				configData.bConsoleSettings = getSettings();
+			public void saveConfig(final ConfigData configData) {
+				configData.bConsoleInstructions = saveInstructions();
 			}
 		});
 	}

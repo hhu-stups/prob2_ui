@@ -7,6 +7,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.ViewCodeStage;
@@ -48,6 +49,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@FXMLInjected
 @Singleton
 public class MachinesTab extends Tab {
 	private final class MachinesItem extends ListCell<Machine> {

@@ -26,6 +26,7 @@ import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob.animator.domainobjects.MachineFileInformation;
 import de.prob.model.eventb.EventBModel;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.menu.ExternalEditor;
@@ -49,6 +50,7 @@ import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@FXMLInjected
 @Singleton
 public class BEditorView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditorView.class);

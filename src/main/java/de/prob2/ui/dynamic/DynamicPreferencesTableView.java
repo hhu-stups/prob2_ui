@@ -3,6 +3,7 @@ package de.prob2.ui.dynamic;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PrefItem;
 import de.prob2.ui.preferences.ProBPreferences;
@@ -14,6 +15,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+@FXMLInjected
 public class DynamicPreferencesTableView extends TableView<PrefItem> {
 	
 	@FXML

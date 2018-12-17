@@ -1,13 +1,7 @@
 package de.prob2.ui.preferences;
 
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -17,17 +11,19 @@ import de.prob2.ui.persistence.TabPersistenceHandler;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
-
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.util.StringConverter;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 
 
@@ -46,10 +42,6 @@ public final class PreferencesStage extends AbstractPreferencesStage {
 	@FXML private TextField defaultLocationField;
 	@FXML private ChoiceBox<Locale> localeOverrideBox;
 	@FXML private PreferencesView globalPrefsView;
-	@FXML private Button undoButton;
-	@FXML private Button resetButton;
-	@FXML private Button applyButton;
-	@FXML private Label applyWarning;
 	@FXML private TabPane tabPane;
 
 	private final RecentProjects recentProjects;
@@ -82,6 +74,7 @@ public final class PreferencesStage extends AbstractPreferencesStage {
 		stageManager.loadFXML(this, "preferences_stage.fxml");
 	}
 
+	@Override
 	@FXML
 	public void initialize() {
 		super.initialize();

@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.plugin.PluginMenuStage;
 import de.prob2.ui.plugin.ProBPluginManager;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Christoph Heinzen on 27.07.17.
  */
+@FXMLInjected
 @Singleton
 public class AdvancedMenu extends Menu {
 
