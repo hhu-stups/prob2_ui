@@ -46,10 +46,11 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
 
 @FXMLInjected
 @Singleton
-public class LTLView extends ScrollPane {
+public class LTLView extends AnchorPane {
 	
 	@FXML 
 	private MenuButton addMenuButton;
