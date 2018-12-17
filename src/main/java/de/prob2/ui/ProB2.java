@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -56,6 +58,26 @@ public class ProB2 extends Application {
 
 	private Stage primaryStage;
 
+	private static boolean isJavaVersionOk(final String javaVersion) {
+		final Matcher javaVersionMatcher = Pattern.compile("(?:1\\.)?(\\d+).*_(\\d+).*").matcher(javaVersion);
+		if (javaVersionMatcher.matches()) {
+			final int majorVersion;
+			final int updateNumber;
+			try {
+				majorVersion = Integer.parseInt(javaVersionMatcher.group(1));
+				updateNumber = Integer.parseInt(javaVersionMatcher.group(2));
+			} catch (NumberFormatException e) {
+				LOGGER.warn("Failed to parse Java version; skipping version check", e);
+				return true;
+			}
+			
+			return majorVersion > 8 || (majorVersion == 8 && updateNumber >= 60);
+		} else {
+			LOGGER.info("Java version ({}) does not match pre-Java 9 format (this is not an error); skipping version check", javaVersion);
+			return true;
+		}
+	}
+
 	public static void main(String... args) {
 		Application.launch(args);
 	}
@@ -93,6 +115,17 @@ public class ProB2 extends Application {
 				}
 			});
 		});
+
+		final String javaVersion = System.getProperty("java.version");
+		if (!isJavaVersionOk(javaVersion)) {
+			stageManager.makeAlert(
+				Alert.AlertType.ERROR,
+				"internal.javaVersionTooOld.header",
+				"internal.javaVersionTooOld.content",
+				javaVersion
+			).showAndWait();
+			throw die("Java version too old: " + javaVersion, 1);
+		}
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		currentProject.addListener((observable, from, to) -> this.updateTitle());
