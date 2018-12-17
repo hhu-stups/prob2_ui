@@ -128,4 +128,5 @@ public final class HistoryView extends VBox {
 					currentProject.getCurrentMachine());
 		}
 	}
+
 }

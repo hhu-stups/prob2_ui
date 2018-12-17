@@ -108,7 +108,7 @@ public final class PreferencesView extends BorderPane {
 	}
 	
 	public void refresh() {
-		if (!this.getPreferences().hasStateSpace()) {
+		if (this.getPreferences() == null || !this.getPreferences().hasStateSpace()) {
 			this.tv.getRoot().getChildren().clear();
 			return;
 		}
