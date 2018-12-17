@@ -381,14 +381,10 @@ public final class OperationsView extends VBox {
 		}
 	}
 
-	private static String stripString(final String param) {
-		return param.replaceAll("\\{", "").replaceAll("\\}", "");
-	}
-
 	private int compareParams(final List<String> left, final List<String> right) {
 		int minSize = left.size() < right.size() ? left.size() : right.size();
 		for (int i = 0; i < minSize; i++) {
-			int cmp = alphanumericComparator.compare(stripString(left.get(i)), stripString(right.get(i)));
+			int cmp = alphanumericComparator.compare(left.get(i), right.get(i));
 			if (cmp != 0) {
 				return cmp;
 			}
