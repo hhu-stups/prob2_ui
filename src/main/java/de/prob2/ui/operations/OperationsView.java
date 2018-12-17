@@ -411,7 +411,13 @@ public final class OperationsView extends VBox {
 		if (left.getName().equals(right.getName())) {
 			return compareParams(left.getParameterValues(), right.getParameterValues());
 		} else {
-			return Integer.compare(opNames.indexOf(left.getName()), opNames.indexOf(right.getName()));
+			final int leftIndex = opNames.indexOf(left.getName());
+			final int rightIndex = opNames.indexOf(right.getName());
+			if (leftIndex == -1 && rightIndex == -1) {
+				return left.getName().compareTo(right.getName());
+			} else {
+				return Integer.compare(leftIndex, rightIndex);
+			}
 		}
 	}
 
