@@ -1,9 +1,5 @@
 package de.prob2.ui.verifications;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-
 import de.prob.check.IModelCheckingResult;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
@@ -11,6 +7,10 @@ import de.prob2.ui.internal.StageManager;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Region;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public abstract class AbstractResultHandler {
 	
@@ -40,6 +40,7 @@ public abstract class AbstractResultHandler {
 	protected ArrayList<Class<?>> counterExample;
 	protected ArrayList<Class<?>> error;
 	protected ArrayList<Class<?>> interrupted;
+	protected ArrayList<Class<?>> parseErrors;
 	
 	protected AbstractResultHandler(final StageManager stageManager, final ResourceBundle bundle) {
 		this.stageManager = stageManager;
@@ -48,6 +49,7 @@ public abstract class AbstractResultHandler {
 		counterExample = new ArrayList<>();
 		error = new ArrayList<>();
 		interrupted = new ArrayList<>();
+		parseErrors = new ArrayList<>();
 	}
 	
 	public void showResult(AbstractCheckableItem item) {
@@ -76,8 +78,8 @@ public abstract class AbstractResultHandler {
 		} else if(error.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.FAIL, "common.result.error.header",
 					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
-		} else if(result instanceof Throwable) {
-			resultItem = new CheckingResultItem(Checked.FAIL, "common.result.couldNotParseFormula.header",
+		} else if(result instanceof Throwable || parseErrors.contains(result.getClass())) {
+			resultItem = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header",
 					GENERAL_RESULT_MESSAGE, result);
 		} else if(interrupted.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
@@ -104,6 +106,8 @@ public abstract class AbstractResultHandler {
 			item.setCheckedFailed();
 		} else if(checked == Checked.INTERRUPTED || checked == Checked.TIMEOUT) {
 			item.setCheckInterrupted();
+		} else if(checked == Checked.PARSE_ERROR) {
+			item.setParseError();
 		}
 	}
 
