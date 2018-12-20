@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.ltl.formula;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.ClassicalBParser;
+import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.exception.ProBError;
@@ -14,7 +15,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import javafx.application.Platform;
@@ -75,28 +75,22 @@ public class LTLFormulaChecker {
 	private Object getResult(LtlParser parser, LTLFormulaItem item) {
 		State stateid = currentTrace.getCurrentState();
 		LTLParseListener parseListener = parseFormula(parser);
-		if(!parseListener.getErrorMarkers().isEmpty()) {
-			return getFailedResult(parseListener);
-		}
 		EvaluationCommand lcc = null;
+		LTL formula = null;
 		try {
-			LTL formula = new LTL(item.getCode(), new ClassicalBParser(), parser);
+			if(!parseListener.getErrorMarkers().isEmpty()) {
+				formula = new LTL(item.getCode(), new ClassicalBParser());
+			} else {
+				formula = new LTL(item.getCode(), new ClassicalBParser(), parser);
+			}
 			lcc = formula.getCommand(stateid);
 			currentTrace.getStateSpace().execute(lcc);
 			injector.getInstance(StatsView.class).update(currentTrace.get());
-		} catch (ProBError error) {
+		} catch (ProBError | LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
 			return error;
 		}
 		return lcc;
-	}
-	
-	private Object getFailedResult(LTLParseListener parseListener) {
-		StringBuilder msg = new StringBuilder();
-		for(LTLMarker error : parseListener.getErrorMarkers()) {
-			msg.append(error.getMsg()+"\n");
-		}
-		return new LTLParseError(msg.toString());
 	}
 	
 	private LTLParseListener parseFormula(LtlParser parser) {

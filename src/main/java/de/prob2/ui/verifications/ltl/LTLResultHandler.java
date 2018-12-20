@@ -2,6 +2,8 @@ package de.prob2.ui.verifications.ltl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
@@ -35,7 +37,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 		this.success.addAll(Arrays.asList(LTLOk.class));
 		this.counterExample.addAll(Arrays.asList(LTLCounterExample.class));
 		this.interrupted.addAll(Arrays.asList(LTLNotYetFinished.class));
-		this.parseErrors.addAll(Arrays.asList(LTLParseError.class, ProBError.class, LTLError.class));
+		this.parseErrors.addAll(Arrays.asList(LTLParseError.class, LtlParseException.class, ProBError.class, LTLError.class));
 	}
 	
 	public Checked handleFormulaResult(LTLFormulaItem item, Object result, State stateid) {
