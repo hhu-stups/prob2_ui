@@ -89,8 +89,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 	protected void openItem(SymbolicAnimationFormulaItem item) {
 		SymbolicAnimationFormulaInput formulaInput = injector.getInstance(SymbolicAnimationFormulaInput.class);
 		formulaInput.changeFormula(item, injector.getInstance(SymbolicAnimationView.class),
-				injector.getInstance(SymbolicAnimationResultHandler.class), injector.getInstance(SymbolicAnimationFormulaHandler.class),
-				injector.getInstance(SymbolicAnimationChoosingStage.class));
+				injector.getInstance(SymbolicAnimationResultHandler.class), injector.getInstance(SymbolicAnimationChoosingStage.class));
 	}
 		
 }

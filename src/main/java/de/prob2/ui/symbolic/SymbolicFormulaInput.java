@@ -145,11 +145,10 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		return false;
 	}
 	
-	public void changeFormula(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, 
-			SymbolicFormulaHandler<T> formulaHandler, SymbolicChoosingStage<T> stage) {
+	public void changeFormula(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, SymbolicChoosingStage<T> stage) {
 		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
 		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.changeAndCheck"));
-		setChangeListeners(item, view, resultHandler, formulaHandler, stage);
+		setChangeListeners(item, view, resultHandler, stage);
 		stage.select(item);
 		if(stage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			tfFormula.setText(item.getCode());
@@ -166,8 +165,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		stage.show();
 	}
 	
-	protected void setChangeListeners(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, 
-									SymbolicFormulaHandler<T> formulaHandler, SymbolicChoosingStage<T> stage) {
+	protected void setChangeListeners(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, SymbolicChoosingStage<T> stage) {
 		btAdd.setOnAction(e -> {
 			if(updateFormula(item, view, stage)) {
 				addFormula(false);

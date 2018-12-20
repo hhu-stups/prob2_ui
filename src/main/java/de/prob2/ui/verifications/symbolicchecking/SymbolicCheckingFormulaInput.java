@@ -89,15 +89,13 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 		SymbolicGUIType guiType = injector.getInstance(SymbolicCheckingChoosingStage.class).getGUIType();
 		switch(guiType) {
 			case CHOICE_BOX:
-				switch(checkingType) {
-					case INVARIANT:
-						String item = cbOperations.getSelectionModel().getSelectedItem();
-						symbolicCheckingFormulaHandler.addFormula(item, item, SymbolicExecutionType.INVARIANT, checking);
-						break;
-					default:
-						throw new AssertionError("Unhandled checking type: " + checkingType);
+				if (checkingType == SymbolicExecutionType.INVARIANT) {
+					String item = cbOperations.getSelectionModel().getSelectedItem();
+					symbolicCheckingFormulaHandler.addFormula(item, item, SymbolicExecutionType.INVARIANT, checking);
+					break;
+				} else {
+					throw new AssertionError("Unhandled checking type: " + checkingType);
 				}
-				break;
 			case TEXT_FIELD:
 				symbolicCheckingFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType, checking);
 				break;
