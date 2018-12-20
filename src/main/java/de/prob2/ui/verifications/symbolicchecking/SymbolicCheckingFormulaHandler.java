@@ -66,11 +66,11 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		}
 	}
 	
-	public void handleInvariant(String code, boolean checkAll) {
+	public void handleInvariant(String eventName, boolean checkAll) {
 		ArrayList<String> event = new ArrayList<>();
-		event.add(code);
+		event.add(eventName);
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
-		symbolicChecker.executeCheckingItem(checker, code, SymbolicExecutionType.INVARIANT, checkAll);
+		symbolicChecker.executeCheckingItem(checker, eventName, SymbolicExecutionType.INVARIANT, checkAll);
 	}
 		
 	public void handleRefinement(SymbolicCheckingFormulaItem item, boolean checkAll) {

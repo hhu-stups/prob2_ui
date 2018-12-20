@@ -1,11 +1,8 @@
 package de.prob2.ui.animation.symbolic;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -13,8 +10,9 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
 import de.prob2.ui.symbolic.SymbolicGUIType;
-
 import javafx.fxml.FXML;
+
+import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -35,11 +33,16 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 	
 	protected void setCheckListeners() {
 		btAdd.setOnAction(e -> addFormula(false));
-		btCheck.setOnAction(e -> {
-			SymbolicExecutionType animationType = injector.getInstance(SymbolicAnimationChoosingStage.class).getExecutionType();
-			SymbolicAnimationFormulaItem formulaItem = null;
-			addFormula(true);
-			switch (animationType) {
+		btCheck.setOnAction(e -> checkFormula());
+	}
+
+
+	@Override
+	public void checkFormula() {
+		SymbolicExecutionType animationType = injector.getInstance(SymbolicAnimationChoosingStage.class).getExecutionType();
+		SymbolicAnimationFormulaItem formulaItem = null;
+		addFormula(true);
+		switch (animationType) {
 			case SEQUENCE:
 				symbolicAnimationFormulaHandler.handleSequence(tfFormula.getText(), false);
 				break;
@@ -50,12 +53,12 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				break;
 			default:
 				break;
-			}
-			injector.getInstance(SymbolicAnimationChoosingStage.class).close();
-		});
+		}
+		injector.getInstance(SymbolicAnimationChoosingStage.class).close();
 	}
 
-	private void addFormula(boolean checking) {
+	@Override
+	protected void addFormula(boolean checking) {
 		SymbolicExecutionType checkingType = injector.getInstance(SymbolicAnimationChoosingStage.class).getExecutionType();
 		SymbolicGUIType guiType = injector.getInstance(SymbolicAnimationChoosingStage.class).getGUIType();
 		switch(guiType) {

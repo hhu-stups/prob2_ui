@@ -1,14 +1,8 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
@@ -36,6 +30,11 @@ import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+
 @Singleton
 public class SymbolicCheckingResultHandler extends AbstractResultHandler implements ISymbolicResultHandler {
 	
@@ -53,7 +52,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
 												RefinementCheckCounterExample.class));
-		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
+		this.error.addAll(Arrays.asList(CheckError.class));
 		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class));
 	}
 	

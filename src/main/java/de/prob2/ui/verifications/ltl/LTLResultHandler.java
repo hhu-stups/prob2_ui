@@ -1,19 +1,13 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.EvaluationCommand;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
 import de.prob.check.LTLOk;
+import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
@@ -23,6 +17,13 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.formula.LTLParseError;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 @Singleton
 public class LTLResultHandler extends AbstractResultHandler {
@@ -33,8 +34,8 @@ public class LTLResultHandler extends AbstractResultHandler {
 		this.type = CheckingType.LTL;
 		this.success.addAll(Arrays.asList(LTLOk.class));
 		this.counterExample.addAll(Arrays.asList(LTLCounterExample.class));
-		this.error.addAll(Arrays.asList(LTLError.class));
 		this.interrupted.addAll(Arrays.asList(LTLNotYetFinished.class));
+		this.parseErrors.addAll(Arrays.asList(LTLParseError.class, ProBError.class, LTLError.class));
 	}
 	
 	public Checked handleFormulaResult(LTLFormulaItem item, Object result, State stateid) {
@@ -49,7 +50,9 @@ public class LTLResultHandler extends AbstractResultHandler {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			handleItem(item, Checked.SUCCESS);
-		} else if(error.contains(clazz) || counterExample.contains(clazz) || result instanceof Throwable) {
+		} else if(parseErrors.contains(clazz)) {
+			handleItem(item, Checked.PARSE_ERROR);
+		} else if(error.contains(clazz) || counterExample.contains(clazz)) {
 			handleItem(item, Checked.FAIL);
 		} else {
 			handleItem(item, Checked.INTERRUPTED);
@@ -75,9 +78,9 @@ public class LTLResultHandler extends AbstractResultHandler {
 			item.setCheckedSuccessful();
 		} else {
 			final String msg = parseListener.getErrorMarkers().stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
-			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.couldNotParsePattern.header", 
+			resultItem = new CheckingResultItem(Checked.PARSE_ERROR, "verifications.result.couldNotParsePattern.header",
 					"common.result.message", msg);
-			item.setCheckedFailed();
+			item.setParseError();
 		}
 		item.setResultItem(resultItem);
 	}

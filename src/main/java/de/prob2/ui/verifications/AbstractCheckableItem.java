@@ -113,6 +113,11 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		status.setIcon(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
 		status.setFill(Color.YELLOW);
 	}
+
+	public void setParseError() {
+		status.setIcon(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
+		status.setFill(Color.ORANGE);
+	}
 	
 	public void setChecked(Checked checked) {
 		this.checked = checked;
