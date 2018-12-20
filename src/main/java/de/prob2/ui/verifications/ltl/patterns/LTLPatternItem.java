@@ -6,8 +6,8 @@ import java.util.Objects;
 
 public class LTLPatternItem extends AbstractCheckableItem {
 	
-	public LTLPatternItem(String name, String description, String code) {
-		super(name, description, code);
+	public LTLPatternItem(String code, String description) {
+		super(code, description, code);
 	}	
 		
 	@Override
@@ -24,7 +24,7 @@ public class LTLPatternItem extends AbstractCheckableItem {
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, description, code);
+		return Objects.hash(name);
 	}
 		
 }

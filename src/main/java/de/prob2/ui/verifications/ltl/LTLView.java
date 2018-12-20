@@ -67,7 +67,7 @@ public class LTLView extends AnchorPane {
 	@FXML
 	private TableColumn<LTLPatternItem, FontAwesomeIconView> patternStatusColumn;
 	@FXML
-	private TableColumn<LTLPatternItem, String> patternNameColumn;
+	private TableColumn<LTLPatternItem, String> patternColumn;
 	@FXML
 	private TableColumn<LTLPatternItem, String> patternDescriptionColumn;
 	@FXML
@@ -75,7 +75,7 @@ public class LTLView extends AnchorPane {
 	@FXML
 	private TableColumn<LTLFormulaItem, FontAwesomeIconView> formulaStatusColumn;
 	@FXML
-	private TableColumn<LTLFormulaItem, String> formulaNameColumn;
+	private TableColumn<LTLFormulaItem, String> formulaColumn;
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	@FXML
@@ -199,10 +199,10 @@ public class LTLView extends AnchorPane {
 
 	private void setBindings() {
 		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		patternNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		patternColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.LTL, injector));
 		
