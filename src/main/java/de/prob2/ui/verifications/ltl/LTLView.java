@@ -199,7 +199,7 @@ public class LTLView extends AnchorPane {
 
 	private void setBindings() {
 		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		patternColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
+		patternColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
