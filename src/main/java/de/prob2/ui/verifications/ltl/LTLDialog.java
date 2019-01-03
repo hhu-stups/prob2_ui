@@ -56,7 +56,7 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 		editor.call("setValue", text);
 	}
 		
-	public void setData(String name, String description, String code) {
+	public void setData(String description, String code) {
 		taDescription.setText(description);
 		setTextEditor(code);
 	}

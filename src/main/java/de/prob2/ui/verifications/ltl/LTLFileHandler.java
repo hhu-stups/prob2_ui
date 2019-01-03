@@ -82,10 +82,8 @@ public class LTLFileHandler {
                 gson.toJson(metadata, writer);
             } catch (FileNotFoundException exc) {
                 LOGGER.warn("Failed to create LTL file", exc);
-                return;
             } catch (IOException exc) {
                 LOGGER.warn("Failed to save LTL file", exc);
-                return;
             }
         }
     }
