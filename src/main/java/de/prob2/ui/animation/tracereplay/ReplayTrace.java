@@ -80,18 +80,16 @@ public class ReplayTrace implements IExecutableItem {
 		return errorMessageParams;
 	}
 	
-	@Override
-	public void setShouldExecute(boolean shouldExecute) {
-		this.shouldExecute.set(shouldExecute);
+	public void setSelected(boolean selected) {
+		this.shouldExecute.set(selected);
 	}
 	
 	@Override
-	public boolean shouldExecute() {
+	public boolean selected() {
 		return shouldExecute.get();
 	}
 	
-	@Override
-	public BooleanProperty shouldExecuteProperty() {
+	public BooleanProperty selectedProperty() {
 		return shouldExecute;
 	}
 	

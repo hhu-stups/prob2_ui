@@ -18,7 +18,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -156,12 +156,12 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	private void initTableColumns() {
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.REPLAY));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.REPLAY));
 		CheckBox selectAll = new CheckBox();
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
 			for(ReplayTrace item : traceTableView.getItems()) {
-				item.setShouldExecute(to);
+				item.setSelected(to);
 				traceTableView.refresh();
 			}
 		});
@@ -198,7 +198,7 @@ public class TraceReplayView extends ScrollPane {
 				if(to != null) {
 					replayTraceItem.disableProperty().bind(row.emptyProperty()
 							.or(traceChecker.currentJobThreadsProperty().emptyProperty().not())
-							.or(row.getItem().shouldExecuteProperty().not()));
+							.or(row.getItem().selectedProperty().not()));
 				}
 			});
 

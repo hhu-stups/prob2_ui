@@ -112,7 +112,7 @@ public class TraceChecker {
 	}
 
 	private void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		if(!replayTrace.shouldExecute()) {
+		if(!replayTrace.selected()) {
 			return;
 		}
 		PersistentTrace persistentTrace = getPersistentTrace(replayTrace);

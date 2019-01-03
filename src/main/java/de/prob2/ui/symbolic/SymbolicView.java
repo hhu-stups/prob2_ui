@@ -14,7 +14,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
-import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -48,7 +48,7 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 				if(to != null) {
 					checkItem.disableProperty().bind(row.emptyProperty()
 							.or(executor.currentJobThreadsProperty().emptyProperty().not())
-							.or(to.shouldExecuteProperty().not()));
+							.or(to.selectedProperty().not()));
 				}
 			});
 			MenuItem removeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.remove"));
@@ -158,12 +158,12 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.SYMBOLIC, injector));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.SYMBOLIC, injector));
 		CheckBox selectAll = new CheckBox();
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
 			for(IExecutableItem item : tvFormula.getItems()) {
-				item.setShouldExecute(to);
+				item.setSelected(to);
 				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
 				tvFormula.refresh();

@@ -75,7 +75,7 @@ public class Modelchecker implements IModelCheckListener {
 	}
 
 	public void checkItem(ModelCheckingItem item, boolean checkAll) {
-		if(!item.shouldExecute()) {
+		if(!item.selected()) {
 			return;
 		}
 		

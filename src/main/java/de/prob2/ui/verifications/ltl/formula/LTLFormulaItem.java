@@ -17,8 +17,8 @@ public class LTLFormulaItem extends AbstractCheckableItem {
 	}
 	
 	@Override
-	public void initializeStatus() {
-		super.initializeStatus();
+	public void initialize() {
+		super.initialize();
 		this.counterExample = new SimpleObjectProperty<>(null);
 	}
 			

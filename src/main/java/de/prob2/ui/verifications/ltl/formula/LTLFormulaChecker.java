@@ -63,7 +63,7 @@ public class LTLFormulaChecker {
 	}
 	
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
-		if(!item.shouldExecute()) {
+		if(!item.selected()) {
 			return Checked.NOT_CHECKED;
 		}
 		State stateid = currentTrace.getCurrentState();

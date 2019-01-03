@@ -15,32 +15,38 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	protected String name;
 	protected String description;
 	protected String code;
-	protected BooleanProperty shouldExecute;
+	protected BooleanProperty selected;
 	protected transient ObjectProperty<CheckingResultItem> resultItem;
 	
 	public AbstractCheckableItem(String name, String description, String code) {
-		initializeStatus();
+		initialize();
 		this.name = name;
 		this.description = description;
 		this.code = code;
-		this.shouldExecute = new SimpleBooleanProperty(true);
-		this.resultItem = new SimpleObjectProperty<>(null);
+		this.selected = new SimpleBooleanProperty(true);
 	}	
 	
 	public void setData(String name, String description, String code) {
-		initializeStatus();
+		initialize();
 		setName(name);
 		setDescription(description);
 		setCode(code);
 	}
 		
-	public void initializeStatus() {
+	public void initialize() {
+		replaceMissingWithDefaults();
 		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.status.setFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
 		this.resultItem = new SimpleObjectProperty<>(null);
 	}
-	
+
+	public void replaceMissingWithDefaults() {
+		if(selected == null) {
+			this.selected = new SimpleBooleanProperty(true);
+		}
+	}
+
 	public FontAwesomeIconView getStatus() {
 		return status;
 	}
@@ -49,18 +55,17 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		return name;
 	}
 	
-	@Override
-	public void setShouldExecute(boolean shouldExecute) {
-		this.shouldExecute.set(shouldExecute);
+	public void setSelected(boolean selected) {
+		this.selected.set(selected);
 	}
 	
 	@Override
-	public boolean shouldExecute() {
-		return shouldExecute.get();
+	public boolean selected() {
+		return selected.get();
 	}
 	
-	public BooleanProperty shouldExecuteProperty() {
-		return shouldExecute;
+	public BooleanProperty selectedProperty() {
+		return selected;
 	}
 
 	public String getDescription() {

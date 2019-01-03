@@ -11,6 +11,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +28,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class LTLFileHandler {
 
@@ -64,7 +68,13 @@ public class LTLFileHandler {
 
         if(file != null) {
             try (final Writer writer = Files.newBufferedWriter(file.toPath(), LTL_CHARSET)) {
-                gson.toJson(new LTLData(machine.getLTLFormulas(), machine.getLTLPatterns()), writer);
+                List<LTLFormulaItem> formulas = machine.getLTLFormulas().stream()
+                        .filter(LTLFormulaItem::selected)
+                        .collect(Collectors.toList());
+                List<LTLPatternItem> patterns = machine.getLTLPatterns().stream()
+                        .filter(LTLPatternItem::selected)
+                        .collect(Collectors.toList());
+                gson.toJson(new LTLData(formulas, patterns), writer);
                 JsonObject metadata = new JsonObject();
                 metadata.addProperty("Creation Date", ZonedDateTime.now().format(DateTimeFormatter.ofPattern("d MMM yyyy hh:mm:ssa O")));
                 metadata.addProperty("ProB 2.0 kernel Version", versionInfo.getKernelVersion());

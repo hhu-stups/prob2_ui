@@ -33,7 +33,7 @@ public class SymbolicCheckingFormulaItem extends SymbolicFormulaItem {
 	
 	@Override
 	public void reset() {
-		this.initializeStatus();
+		this.initialize();
 		this.counterExamples.clear();
 	}
 	

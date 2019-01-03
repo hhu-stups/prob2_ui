@@ -18,7 +18,7 @@ public abstract class SymbolicFormulaItem extends AbstractCheckableItem {
 	}
 	
 	public void reset() {
-		this.initializeStatus();
+		this.initialize();
 	}
 	
 	public void setType(SymbolicExecutionType type) {

@@ -10,18 +10,18 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 
-public class ShouldExecuteValueFactory implements Callback<TableColumn.CellDataFeatures<IExecutableItem, CheckBox>, ObservableValue<CheckBox>> {
+public class ItemSelectedFactory implements Callback<TableColumn.CellDataFeatures<IExecutableItem, CheckBox>, ObservableValue<CheckBox>> {
 	
 	private CheckingType type;
 	
 	private final Injector injector;
 	
-	public ShouldExecuteValueFactory(CheckingType type) {
+	public ItemSelectedFactory(CheckingType type) {
 		this.type = type;
 		this.injector = null;
 	}
 	
-	public ShouldExecuteValueFactory(CheckingType type, final Injector injector) {
+	public ItemSelectedFactory(CheckingType type, final Injector injector) {
 		this.injector = injector;
 		this.type = type;
 	}
@@ -30,9 +30,9 @@ public class ShouldExecuteValueFactory implements Callback<TableColumn.CellDataF
 	public ObservableValue<CheckBox> call(TableColumn.CellDataFeatures<IExecutableItem, CheckBox> param) {
 		IExecutableItem item = param.getValue();
 		CheckBox checkBox = new CheckBox();
-		checkBox.selectedProperty().setValue(item.shouldExecute());
+		checkBox.selectedProperty().setValue(item.selected());
 		checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			item.setShouldExecute(newValue);
+			item.setSelected(newValue);
 			if(type != CheckingType.REPLAY) {
 				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, type);

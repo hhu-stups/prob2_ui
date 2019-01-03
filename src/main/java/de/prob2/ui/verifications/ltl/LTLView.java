@@ -19,7 +19,7 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
-import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaDialog;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -80,13 +80,9 @@ public class LTLView extends AnchorPane {
 	@FXML
 	private TableView<LTLPatternItem> tvPattern;
 	@FXML
-	private TableColumn<LTLPatternItem, FontAwesomeIconView> patternStatusColumn;
-	@FXML
-	private TableColumn<LTLPatternItem, String> patternColumn;
-	@FXML
-	private TableColumn<LTLPatternItem, String> patternDescriptionColumn;
-	@FXML
 	private TableView<LTLFormulaItem> tvFormula;
+	@FXML
+	private TableColumn<IExecutableItem, CheckBox> formulaSelectedColumn;
 	@FXML
 	private TableColumn<LTLFormulaItem, FontAwesomeIconView> formulaStatusColumn;
 	@FXML
@@ -94,7 +90,13 @@ public class LTLView extends AnchorPane {
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	@FXML
-	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
+	private TableColumn<IExecutableItem, CheckBox> patternSelectedColumn;
+	@FXML
+	private TableColumn<LTLPatternItem, FontAwesomeIconView> patternStatusColumn;
+	@FXML
+	private TableColumn<LTLPatternItem, String> patternColumn;
+	@FXML
+	private TableColumn<LTLPatternItem, String> patternDescriptionColumn;
 
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -187,7 +189,7 @@ public class LTLView extends AnchorPane {
 				if(to != null) {
 					checkItem.disableProperty().bind(row.emptyProperty()
 							.or(currentJobThreads.emptyProperty().not())
-							.or(to.shouldExecuteProperty().not()));
+							.or(to.selectedProperty().not()));
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
 					showCounterExampleItem.disableProperty().bind(row.emptyProperty()
@@ -223,26 +225,39 @@ public class LTLView extends AnchorPane {
 	}
 
 	private void setBindings() {
-		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		patternColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		formulaSelectedColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.LTL, injector));
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.LTL, injector));
-		
-		CheckBox selectAll = new CheckBox();
-		selectAll.setSelected(true);
-		selectAll.selectedProperty().addListener((observable, from, to) -> {
+		patternSelectedColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.LTL, injector));
+		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		patternColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+
+		CheckBox formulaSelectAll = new CheckBox();
+		formulaSelectAll.setSelected(true);
+		formulaSelectAll.selectedProperty().addListener((observable, from, to) -> {
 			for(IExecutableItem item : tvFormula.getItems()) {
-				item.setShouldExecute(to);
+				item.setSelected(to);
 				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
 				tvFormula.refresh();
 			}
 		});
-		shouldExecuteColumn.setGraphic(selectAll);
-		
+
+		CheckBox patternSelectAll = new CheckBox();
+		patternSelectAll.setSelected(true);
+		patternSelectAll.selectedProperty().addListener((observable, from, to) -> {
+			for(IExecutableItem item : tvPattern.getItems()) {
+				item.setSelected(to);
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+				tvPattern.refresh();
+			}
+		});
+		formulaSelectedColumn.setGraphic(formulaSelectAll);
+		patternSelectedColumn.setGraphic(patternSelectAll);
+
 		addMenuButton.disableProperty().bind(currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(currentJobThreads.emptyProperty());
 		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
@@ -470,13 +485,13 @@ public class LTLView extends AnchorPane {
 		data.getFormulas().stream()
 				.filter(formula -> !machine.getLTLFormulas().contains(formula))
 				.forEach(formula -> {
-					formula.initializeStatus();
+					formula.initialize();
 					machine.addLTLFormula(formula);
 				});
 		data.getPatterns().stream()
 				.filter(pattern -> !machine.getLTLPatterns().contains(pattern))
 				.forEach(pattern -> {
-					pattern.initializeStatus();
+					pattern.initialize();
 					machine.addLTLPattern(pattern);
 					patternParser.parsePattern(pattern, machine);
 				});
