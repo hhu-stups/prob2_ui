@@ -1,21 +1,20 @@
 package de.prob2.ui.config;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-import javafx.stage.FileChooser;
-import javafx.stage.Window;
-
 @Singleton
 public class FileChooserManager {
 	public enum Kind {
-		PROJECTS_AND_MACHINES, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES
+		PROJECTS_AND_MACHINES, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, LTL
 	}
 
 	private final Map<Kind, Path> initialDirectories = new EnumMap<>(Kind.class);

@@ -1,5 +1,18 @@
 package de.prob2.ui.animation.tracereplay;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.inject.Inject;
+import de.prob.check.tracereplay.PersistentTrace;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,24 +24,6 @@ import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
-import com.google.inject.Inject;
-
-import de.prob.check.tracereplay.PersistentTrace;
-
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
-
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TraceSaver {
 	private static final Charset TRACE_CHARSET = StandardCharsets.UTF_8;
@@ -68,7 +63,7 @@ public class TraceSaver {
 			
 			try (final Writer writer = Files.newBufferedWriter(absolute, TRACE_CHARSET)) {
 				gson.toJson(trace, writer);
-				
+
 				JsonObject metadata = new JsonObject();
 				metadata.addProperty("Creation Date", ZonedDateTime.now().format(DateTimeFormatter.ofPattern("d MMM yyyy hh:mm:ssa O")));
 				metadata.addProperty("ProB 2.0 kernel Version", versionInfo.getKernelVersion());

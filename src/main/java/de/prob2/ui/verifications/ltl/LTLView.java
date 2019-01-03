@@ -4,8 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -42,13 +44,22 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.FileChooser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
 public class LTLView extends AnchorPane {
+
+	private static final String LTL_FILE_ENDING = "*.ltl";
+
+	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
 	
 	@FXML 
 	private MenuButton addMenuButton;
@@ -60,6 +71,10 @@ public class LTLView extends AnchorPane {
 	private Button checkMachineButton;
 	@FXML
 	private Button cancelButton;
+	@FXML
+	private Button saveLTLButton;
+	@FXML
+	private Button loadLTLButton;
 	@FXML
 	private HelpButton helpButton;
 	@FXML
@@ -80,7 +95,8 @@ public class LTLView extends AnchorPane {
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
-	
+
+	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
@@ -89,9 +105,16 @@ public class LTLView extends AnchorPane {
 	private final LTLPatternParser patternParser;
 	private final LTLResultHandler resultHandler;
 	private final ListProperty<Thread> currentJobThreads;
+	private final LTLFileHandler ltlFileHandler;
+	private final FileChooserManager fileChooserManager;
 				
 	@Inject
-	private LTLView(final StageManager stageManager, final ResourceBundle bundle, final Injector injector,final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLFormulaChecker checker, final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
+	private LTLView(final StageManager stageManager, final ResourceBundle bundle, final Injector injector,
+					final CurrentTrace currentTrace, final CurrentProject currentProject,
+					final LTLFormulaChecker checker, final LTLPatternParser patternParser,
+					final LTLResultHandler resultHandler, final LTLFileHandler ltlFileHandler,
+					final FileChooserManager fileChooserManager) {
+		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.injector = injector;
 		this.currentTrace = currentTrace;
@@ -100,6 +123,8 @@ public class LTLView extends AnchorPane {
 		this.patternParser = patternParser;
 		this.resultHandler = resultHandler;
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
+		this.ltlFileHandler = ltlFileHandler;
+		this.fileChooserManager = fileChooserManager;
 		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
@@ -221,11 +246,15 @@ public class LTLView extends AnchorPane {
 		addMenuButton.disableProperty().bind(currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(currentJobThreads.emptyProperty());
 		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
+		saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
+		loadLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
 				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(currentJobThreads.emptyProperty().not()));
+				saveLTLButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
 			} else {
 				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
+				saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 			}
 		});
 		
@@ -410,7 +439,48 @@ public class LTLView extends AnchorPane {
 	
 	private void parseMachine(Machine machine) {
 		patternParser.parseMachine(machine);
-	}		
+	}
+
+	@FXML
+	private void saveLTL() {
+		ltlFileHandler.saveLTL();
+	}
+
+	@FXML
+	private void loadLTL() {
+		Machine machine = currentProject.getCurrentMachine();
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(bundle.getString("verifications.ltl.ltlView.fileChooser.loadLTL.title"));
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
+		fileChooser.getExtensionFilters()
+				.add(new FileChooser.ExtensionFilter(
+						String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_ENDING),
+						LTL_FILE_ENDING));
+		Path ltlFile = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
+		if(ltlFile == null) {
+			return;
+		}
+		LTLData data = null;
+		try {
+			data = ltlFileHandler.loadLTL(ltlFile);
+		} catch (IOException | InvalidFileFormatException e) {
+			logger.error("Could not load LTL file: ", e);
+			return;
+		}
+		data.getFormulas().stream()
+				.filter(formula -> !machine.getLTLFormulas().contains(formula))
+				.forEach(formula -> {
+					formula.initializeStatus();
+					machine.addLTLFormula(formula);
+				});
+		data.getPatterns().stream()
+				.filter(pattern -> !machine.getLTLPatterns().contains(pattern))
+				.forEach(pattern -> {
+					pattern.initializeStatus();
+					machine.addLTLPattern(pattern);
+					patternParser.parsePattern(pattern, machine);
+				});
+	}
 
 	public ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
