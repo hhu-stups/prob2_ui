@@ -57,7 +57,7 @@ public class Modelchecker implements IModelCheckListener {
 	private final CurrentProject currentProject;
 	
 	private final Injector injector;
-	
+
 	private final Object lock = new Object();
 	
 	@Inject
@@ -86,7 +86,11 @@ public class Modelchecker implements IModelCheckListener {
 				currentJobThreads.remove(Thread.currentThread());
 			}
 		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
-		currentJobThreads.add(currentJobThread);
+		//Adding a new thread for model checking must be done before the thread is started, but it has to be
+		//synchronized with other threads accessing the list containing all threads
+		synchronized(lock) {
+			currentJobThreads.add(currentJobThread);
+		}
 		currentJobThread.start();
 	}
 	
@@ -98,7 +102,11 @@ public class Modelchecker implements IModelCheckListener {
 				currentJobThreads.remove(Thread.currentThread());
 			}
 		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
-		currentJobThreads.add(currentJobThread);
+		//Adding a new thread for model checking must be done before the thread is started, but it has to be
+		//synchronized with other threads accessing the list containing all threads
+		synchronized(lock) {
+			currentJobThreads.add(currentJobThread);
+		}
 		currentJobThread.start();
 	}
 	
@@ -108,7 +116,7 @@ public class Modelchecker implements IModelCheckListener {
 		if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
 			currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
 		} else {
-			modelcheckingItem = getItemIfAlreadyExists(modelcheckingItem);
+			//modelcheckingItem = getItemIfAlreadyExists(modelcheckingItem);
 		}
 		currentStats.updateItem(modelcheckingItem);
 		injector.getInstance(ModelcheckingView.class).selectLast();
