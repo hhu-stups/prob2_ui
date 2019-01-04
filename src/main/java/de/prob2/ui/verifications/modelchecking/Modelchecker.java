@@ -16,7 +16,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingStage.SearchStrategy;
 import javafx.application.Platform;
@@ -220,15 +219,6 @@ public class Modelchecker implements IModelCheckListener {
 		currentTrace.getStateSpace().sendInterrupt();
 		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);
-	}
-
-	private ModelCheckingItem getItemIfAlreadyExists(ModelCheckingItem item) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		int index = currentMachine.getModelcheckingItems().indexOf(item);
-		if(index > -1) {
-			item = currentMachine.getModelcheckingItems().get(index);
-		}
-		return item;
 	}
 
 	public void setCurrentStats(ModelCheckStats currentStats) {
