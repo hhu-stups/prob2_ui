@@ -115,8 +115,6 @@ public class Modelchecker implements IModelCheckListener {
 		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy));
 		if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
 			currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
-		} else {
-			//modelcheckingItem = getItemIfAlreadyExists(modelcheckingItem);
 		}
 		currentStats.updateItem(modelcheckingItem);
 		injector.getInstance(ModelcheckingView.class).selectLast();
