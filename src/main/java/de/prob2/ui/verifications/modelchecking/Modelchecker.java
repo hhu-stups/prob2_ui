@@ -58,7 +58,7 @@ public class Modelchecker implements IModelCheckListener {
 	
 	private final Injector injector;
 	
-	private Object lock = new Object();
+	private final Object lock = new Object();
 	
 	@Inject
 	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -83,8 +83,8 @@ public class Modelchecker implements IModelCheckListener {
 			synchronized(lock) {
 				updateCurrentValues(item.getOptions(), currentTrace.getStateSpace(), item);
 				startModelchecking(checkAll);
+				currentJobThreads.remove(Thread.currentThread());
 			}
-			currentJobThreads.remove(Thread.currentThread());
 		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
 		currentJobThreads.add(currentJobThread);
 		currentJobThread.start();
