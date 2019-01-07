@@ -458,7 +458,7 @@ public class LTLView extends AnchorPane {
 
 	@FXML
 	private void saveLTL() {
-		ltlFileHandler.saveLTL();
+		ltlFileHandler.save();
 	}
 
 	@FXML
@@ -477,7 +477,7 @@ public class LTLView extends AnchorPane {
 		}
 		LTLData data = null;
 		try {
-			data = ltlFileHandler.loadLTL(ltlFile);
+			data = ltlFileHandler.load(ltlFile);
 		} catch (IOException | InvalidFileFormatException e) {
 			logger.error("Could not load LTL file: ", e);
 			return;

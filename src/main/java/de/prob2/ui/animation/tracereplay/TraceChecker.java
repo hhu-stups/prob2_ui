@@ -53,7 +53,7 @@ public class TraceChecker {
 
 	private static final String TRACE_REPLAY_ALERT_HEADER = "animation.tracereplay.alerts.traceReplayError.header";
 	
-	private final TraceLoader traceLoader;
+	private final TraceFileHandler traceFileHandler;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
@@ -63,10 +63,10 @@ public class TraceChecker {
 
 	@Inject
 	private TraceChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
-			final TraceLoader traceLoader, final StageManager stageManager) {
+			final TraceFileHandler traceFileHandler, final StageManager stageManager) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.traceLoader = traceLoader;
+		this.traceFileHandler = traceFileHandler;
 		this.stageManager = stageManager;
 	}
 
@@ -172,7 +172,7 @@ public class TraceChecker {
 
 	private PersistentTrace getPersistentTrace(ReplayTrace replayTrace) {
 		try {
-			return traceLoader.loadTrace(replayTrace.getLocation());
+			return traceFileHandler.load(replayTrace.getLocation());
 		} catch (FileNotFoundException | NoSuchFileException e) {
 			LOGGER.warn("Trace file not found", e);
 			failedTraceReplays.put(replayTrace, e);
